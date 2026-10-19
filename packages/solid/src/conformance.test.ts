@@ -415,6 +415,23 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       scheduler: `${SM_NS}sm2`,
     },
   },
+  // Written through its descriptor, the state is stamped with the
+  // scheduler the shape fixes, solid-memo:fsrs6.
+  fsrsReviewState: {
+    1: {
+      reviewOf: "https://pod.example/d.ttl#it",
+      direction: `${SM_NS}backToFront`,
+      stability: 6.2,
+      difficulty: 4.93,
+      due: "2026-09-27",
+      firstReviewedAt: "2026-09-20T10:00:00.000Z",
+      lastReviewedAt: "2026-09-21T10:00:00.000Z",
+      previousStability: 2.31,
+      previousDifficulty: 5.1,
+      previousDue: "2026-09-21",
+      previousLastReviewedAt: "2026-09-20T10:00:00.000Z",
+    },
+  },
   preferences: {
     1: { newCardsPerDay: 20 },
     2: {

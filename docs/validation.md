@@ -78,7 +78,9 @@ flowchart LR
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
   fetches the document, converts it to an RDF/JS dataset
   (`toRdfJsDataset`) and, for every subject, picks the shape by class
-  and stored version exactly as the mappers do (`pickShape`); a subject
+  and stored version exactly as the mappers do (`pickShape`), and by
+  the values a shape fixes (an FSRS-6 review state's `sm:scheduler`,
+  [shapes.md](shapes.md#conventions)); a subject
   with a Solid Memo class is checked against that class's shapes only,
   so a deck group, also a `dcat:Catalog`, is never checked as the
   catalog. A subject
@@ -335,9 +337,11 @@ groups), to DCAT-AP, and the vocabulary's concept schemes to
 SkoHub's SKOS shapes, best practice included. It also holds a release
 published in a pod (the library deck 6 fixtures, which describe their
 series and publisher themselves) to DCAT-AP with no index beside it, and
-that release and the draft fixtures (draft deck, chapter and step 1) to
-Solid Memo's own shapes: the script picks each subject's shape by class,
-format version and context as `pickShape` does, and targets it with
+that release, the draft fixtures (draft deck, chapter and step 1) and
+the review-state fixtures (review state 2 and FSRS review state 1, side
+by side in one reviews document) to Solid Memo's own shapes: the script
+picks each subject's shape by class, format version, context and the
+values a shape fixes as `pickShape` does, and targets it with
 `sh:targetNode`. Each version is checked beside the index, but only for
 the subjects it states something about, targeted the same way: DCAT-AP
 asks a node only about its own statements and the class of what they

@@ -67,6 +67,7 @@ describe("parseShapes", () => {
       targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Thing",
       additionalTypes: ["http://www.w3.org/ns/dcat#Dataset"],
       absent: ["https://solid-memo.com/ns/vocab/v1.ttl#gone"],
+      fixedValues: [],
       shapeIri: "https://solid-memo.com/ns/shapes/thing/v1.ttl#shape",
       shapeDocument: "thing/v1.ttl",
       context: "any",
@@ -147,6 +148,34 @@ describe("parseShapes", () => {
         },
       ],
     });
+  });
+
+  it("reads a value the shape fixes apart from the fields, and an sh:hasValue on a repeating field as the field", () => {
+    const [model] = parseShapes(
+      files([
+        "thing/v1.ttl",
+        `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#scheduler>, <#themes> . ${V1_VERSION}
+<#scheduler> a sh:PropertyShape ; sh:path sm:scheduler ; sh:hasValue sm:fsrs6 ; sh:maxCount 1 .
+<#themes> a sh:PropertyShape ; sh:path dcat:theme ; sh:nodeKind sh:IRI ; sh:hasValue sm:educ .`,
+      ]),
+    );
+    expect(model.fixedValues).toEqual([
+      {
+        predicate: "https://solid-memo.com/ns/vocab/v1.ttl#scheduler",
+        value: "https://solid-memo.com/ns/vocab/v1.ttl#fsrs6",
+      },
+    ]);
+    expect(model.fields).toEqual([
+      {
+        name: "theme",
+        predicate: "http://www.w3.org/ns/dcat#theme",
+        kind: "iri",
+        cardinality: "many",
+      },
+    ]);
+    expect(renderDescriptors([model])).toContain(
+      `  fixedValues: [{"predicate":"https://solid-memo.com/ns/vocab/v1.ttl#scheduler","value":"https://solid-memo.com/ns/vocab/v1.ttl#fsrs6"}],`,
+    );
   });
 
   it("takes a shape's class from DCAT or FOAF too", () => {
@@ -265,6 +294,11 @@ describe("parseShapes", () => {
       "thing/v1.ttl",
       typed('sh:hasValue "Dataset"'),
       "constrains rdf:type without an sh:hasValue class.",
+    );
+    rejects(
+      "thing/v1.ttl",
+      shape('sh:hasValue "fsrs6" ; sh:maxCount 1'),
+      "<https://solid-memo.com/ns/shapes/thing/v1.ttl#p> fixes a value that is not an IRI; only IRIs may be fixed.",
     );
     rejects(
       "thing/v1.ttl",
@@ -467,6 +501,7 @@ export type LatestRecord = {
   targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Thing",
   additionalTypes: ["http://www.w3.org/ns/dcat#Dataset"],
   absent: ["https://solid-memo.com/ns/vocab/v1.ttl#gone"],
+  fixedValues: [],
   shapeIri: "https://solid-memo.com/ns/shapes/thing/v1.ttl#shape",
   shapeDocument: "thing/v1.ttl",
   context: "any",

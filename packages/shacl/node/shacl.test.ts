@@ -250,6 +250,39 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}due`,
     message: 'The due day is a plain "YYYY-MM-DD" string.',
   },
+  "fsrs-review-state/v1/invalid/missing-stability.ttl": {
+    path: `${SM}stability`,
+    message: "An FSRS-6 review state's stability is one decimal number of days, greater than 0.",
+  },
+  "fsrs-review-state/v1/invalid/stability-not-positive.ttl": {
+    path: `${SM}stability`,
+    message: "An FSRS-6 review state's stability is one decimal number of days, greater than 0.",
+  },
+  "fsrs-review-state/v1/invalid/difficulty-out-of-range.ttl": {
+    path: `${SM}difficulty`,
+    message: "An FSRS-6 review state's difficulty is one decimal number from 1 to 10.",
+  },
+  "fsrs-review-state/v1/invalid/partial-snapshot.ttl": {
+    message:
+      "An FSRS-6 review state's previous* snapshot is all four triples (previousStability, previousDifficulty, previousDue, previousLastReviewedAt) or none.",
+  },
+  "fsrs-review-state/v1/invalid/both-ways.ttl": {
+    path: `${SM}reviewDirection`,
+    message:
+      "An FSRS-6 review state's direction is exactly one of solid-memo:frontToBack or solid-memo:backToFront.",
+  },
+  "fsrs-review-state/v1/invalid/missing-card.ttl": {
+    path: `${SM}reviewOf`,
+    message: "An FSRS-6 review state names exactly one card",
+  },
+  "fsrs-review-state/v1/invalid/two-schedulers.ttl": {
+    path: `${SM}scheduler`,
+    message: "An FSRS-6 review state names its scheduler, solid-memo:fsrs6, and no other.",
+  },
+  "fsrs-review-state/v1/invalid/unstamped.ttl": {
+    path: `${SM}formatVersion`,
+    message: "FSRS review-state format 1 states its format version, 1.",
+  },
   "preferences/v1/invalid/bad-answer-scale.ttl": {
     path: `${SM}answerScale`,
     message: "The answer scale is sm2 or minimal.",

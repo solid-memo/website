@@ -1,0 +1,14 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+<#card-1@fsrs6>
+    a solid-memo:ReviewState ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:scheduler solid-memo:fsrs6 ;
+    solid-memo:reviewOf <https://pod.example/decks/deck-1.ttl#card-1> ;
+    solid-memo:reviewDirection solid-memo:frontToBack ;
+    solid-memo:stability 6.2 ;
+    solid-memo:difficulty 11 ;
+    solid-memo:due "2026-09-28" ;
+    solid-memo:firstReviewedAt "2026-09-20T10:00:00Z"^^xsd:dateTime ;
+    solid-memo:lastReviewedAt "2026-09-22T10:00:00Z"^^xsd:dateTime .

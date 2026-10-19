@@ -23,6 +23,7 @@ import { toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { courseDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft";
+import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import type { ShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
@@ -783,6 +784,37 @@ describe("validateRelease", () => {
       constraint: "Class",
       builtIn: true,
     });
+  }, 60_000);
+
+  it("checks a review state in a release against the shape its scheduler picks, an IRI only", async () => {
+    const base = courseDraft();
+    const state = (name: string, scheduler: ReleaseTerm) => [
+      {
+        subject: of(name),
+        predicate: RDF.type,
+        object: { kind: "iri" as const, value: SM.ReviewState },
+      },
+      { subject: of(name), predicate: SM.scheduler, object: scheduler },
+    ];
+    const draft = {
+      ...base,
+      triples: [
+        ...base.triples,
+        ...state("fsrs", { kind: "iri", value: SM.fsrs6 }),
+        ...state("text", {
+          kind: "literal",
+          value: SM.fsrs6,
+          language: "",
+          datatype: "http://www.w3.org/2001/XMLSchema#string",
+        }),
+      ],
+    };
+    const found = await validator.validateRelease(draft, AT);
+    const fields = (name: string) =>
+      found.filter((p) => p.subject === of(name)).map((p) => p.field);
+    expect(fields("fsrs")).toContain(SM.stability);
+    expect(fields("text")).not.toContain(SM.stability);
+    expect(fields("text")).toContain(SM.easeFactor);
   }, 60_000);
 
   it("checks a release for a library with its index beside it, the series it names a version of it, described when the index has it not", async () => {

@@ -21,6 +21,7 @@ library-deck/v5.ttl, v6.ttl   …/library-deck/v5.ttl#inLibrary  (library deck 5
 deck-series/v1.ttl … v3.ttl
 card/v1.ttl … v6.ttl
 review-state/v1.ttl, v2.ttl
+fsrs-review-state/v1.ttl      …/fsrs-review-state/v1.ttl#shape  (an FSRS-6 review state)
 preferences/v1.ttl … v4.ttl
 document-receipt/v1.ttl, deck-schedule/v1.ttl   (the digest)
 deck-group/v1.ttl             …/deck-group/v1.ttl#inPod  (the arranged deck list)
@@ -64,6 +65,19 @@ checked by the shapes every place shares (`<#shape>`).
   A subject with a Solid Memo class is checked against that class's
   shapes only: a deck group is a `dcat:Catalog` too, but is never
   checked as `CatalogV1`.
+- **Fixed values tell shapes of one class apart.** A property shape
+  with `sh:hasValue` and `sh:maxCount 1` on a predicate other than
+  `rdf:type` fixes that predicate's one value: an FSRS-6 review state
+  says `sm:scheduler sm:fsrs6` (FSRS review-state format 1). The
+  generator puts it in the descriptor's `fixedValues`, not in the
+  record; the writer sets it, and `pickShape` checks a subject against a
+  shape with fixed values only when the subject has them all, and then
+  never against its class's shapes without. So an SM-2 state is checked
+  as review state 1 or 2 and an FSRS-6 state, also an `sm:ReviewState`,
+  as FSRS review state 1, both stamped with versions of their own. An
+  `sh:hasValue` on a predicate that may repeat (a release's theme
+  `EDUC` among its `dcat:theme`s) is a constraint on that field, not a
+  fixed value.
 - **Further types are stated.** A subject that is also, say, a
   `dcat:Dataset` says so with `sh:property [ sh:path rdf:type ;
   sh:hasValue dcat:Dataset ]`; the shape is still picked by its
@@ -89,7 +103,8 @@ checked by the shapes every place shares (`<#shape>`).
   the reader's language by its constraint (`validation.constraint.*` in
   the message catalogs), more generally.
 - **Rules a record cannot carry** — a card side has text or a picture
-  (`sh:or`), the review snapshot is all five triples or none (`sh:xone`),
+  (`sh:or`), the review snapshot is all five triples or none (`sh:xone`;
+  an FSRS-6 state's, all four or none),
   a review state names its card with `sm:reviewOf` or is named
   `#<cardId>` or `#<cardId>@back-to-front` (a node-level `sh:or` of a
   `sh:pattern` and the property) — are enforced by the record → model
@@ -110,6 +125,7 @@ checked by the shapes every place shares (`<#shape>`).
 | Card 6 | Card 5 and `sm:frontLabel`, a caption above the front's text saying what kind of thing the front is, shown with the front whichever way the card is studied: optional, language-tagged text in any language, at most one value per language (`sh:uniqueLang`), as `sm:backLabel` is (vocabulary 1.20). The step from card 5 changes nothing: every format-5 card is a format-6 card. A format-5 reader meets a format-6 card as newer than it writes, reads it with the latest shape it knows and writes nothing over it ([migrations.md](migrations.md#versions)) |
 | Review state 1 | `sm:easeFactor` decimal, `sm:intervalDays`, `sm:repetitions` integer, `sm:due` `YYYY-MM-DD`, `sm:firstReviewedAt`, `sm:lastReviewedAt` dateTime, all 1..1; the five `sm:previous*` 0..1 each (unversioned pods already hold snapshots); subject named per direction, or any subject for a state that names its card with `sm:reviewOf` (since vocabulary 1.16: another app may write an unstamped state so) |
 | Review state 2 | Review state 1 with the snapshot all or nothing. Added without a version bump in vocabulary 1.16: `sm:reviewOf` 0..1 IRI, the card; `sm:reviewDirection` 0..1, `sm:frontToBack` or `sm:backToFront` (an `iriEnum`); `sm:scheduler` 0..1 IRI, a concept of `sm:Schedulers`, with no `sh:in`, so another scheduler's concept is no violation (the app leaves such a state alone, [data-model.md](data-model.md#decks-and-cards)). The app writes all three on every state; a reader that ignores them names the card and direction by the subject, which the app names so for every state it adds, but writes a state it read back at the subject it was read from, however another app named it |
+| FSRS review state 1 | An FSRS-6 review state (vocabulary 1.21), a `sm:ReviewState` told apart by `sm:scheduler sm:fsrs6`, which the shape fixes (`sh:hasValue`, at most one scheduler). Its version is stated, `sm:formatVersion 1`. `sm:reviewOf` 1..1 IRI and `sm:reviewDirection` 1..1, `sm:frontToBack` or `sm:backToFront`, so its subject follows no naming rule (the app names it `#<cardId>@fsrs6` or `#<cardId>@back-to-front@fsrs6`); `sm:stability` 1..1 decimal > 0 (days), `sm:difficulty` 1..1 decimal from 1 to 10; `sm:due` `YYYY-MM-DD`, `sm:firstReviewedAt`, `sm:lastReviewedAt` dateTime, 1..1; the snapshot `sm:previousStability`, `sm:previousDifficulty`, `sm:previousDue`, `sm:previousLastReviewedAt` all four or none. An app from before 1.21 takes it for another scheduler's state, checks it against review state 1 with warnings only and leaves it alone ([migrations.md](migrations.md#versions)) |
 | Preferences 1 | `sm:newCardsPerDay`, `sm:maxReviewsPerDay`, `sm:dayBoundaryHour` (0–23) integer 0..1; `sm:answerScale` 0..1, `sm2` or `minimal`; `sm:developerMode` 0..1 boolean |
 | Preferences 2 | Preferences 1 with every field 1..1 |
 | Deck 3 | A `dcat:Dataset` too. `dcterms:title` and `dcterms:description` 1..1; `dcterms:created`, `dcterms:modified` 0..1; `dcterms:creator` 0..n IRIs (foaf:Agent nodes); `dcterms:license` 0..1; `sm:studyDirection` 1..1, a concept of `sm:StudyDirections` (`sm:direction` forbidden); `dcat:theme` 0..n IRIs, `dcat:keyword` 0..n; `dcterms:source` forbidden. In a pod also `dcat:distribution` 0..n, the two document links, `prov:wasDerivedFrom` 0..1 (the library release it came from), and the deck's own study caps `sm:deckNewCardsPerDay` and `sm:deckMaxReviewsPerDay`, integers ≥ 0, 0..1 each (added without a version bump: an older reader ignores them). In the library, one release: `dcterms:publisher`, `dcat:version` (1, 2, …), `dcat:inSeries`, `dcat:isVersionOf` 1..1; `dcat:prev`, `dcat:previousVersion`, `adms:versionNotes`, `dcterms:issued` 0..1; `dcat:theme` including the EU theme EDUC; `dcterms:language` 0..n; `dcat:distribution` 1..n; `prov:wasDerivedFrom` 0..n; no document links and no study caps |

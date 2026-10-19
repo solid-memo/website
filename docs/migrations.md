@@ -26,6 +26,7 @@ app writes today; `DECK_FORMAT_VERSION` and friends are aliases of it.
 | Deck | title, document links, provenance | `sm:direction`, stated | A format-1 reader would study a bidirectional deck one way only and count the other way's review subjects against the day's budgets without matching them to any card. |
 | Card | `sm:front` and `sm:back`, both required | a side may be a picture (`sm:frontImage` / `sm:backImage`, an IRI), text, or both | A format-1 reader treats a card without `sm:front` as malformed and drops it, so picture-only cards must not be mistaken for format 1. |
 | Review state | the SM-2 fields; a snapshot and per-direction subjects were added without a bump, so format 1 admits them | the same fields; the snapshot is all five triples or none; the subject naming (`#<cardId>`, `#<cardId>@back-to-front`) is part of the contract | Stamping begins: a format-1 reader meeting a format-2 state would silently ignore the snapshot and the other direction, which is what a version is meant to flag. |
+| FSRS review state | an FSRS-6 state (vocabulary 1.21): stability, difficulty, due day, first and last review, the card and direction it is of, and a snapshot all four or none; `sm:scheduler sm:fsrs6` fixed | | A new shape of `sm:ReviewState`, not a review-state version: see below. |
 | Preferences | whatever the unversioned era wrote: every field optional, a missing one meaning its default | every field stated | The document is rewritten on every save, so stamping costs nothing; format 2 is the complete record. |
 
 Deck format 4 (and library deck series format 2, its summary in the
@@ -259,6 +260,39 @@ needs no migration and moved no format version:
   its next opening. Every answer written before meets the new
   constraints, which only bound the new terms.
 
+FSRS-6 review states (vocabulary 1.21, see
+[vocab.md](vocab.md#fsrs-6)) need no migration, and the review-state
+format did not move:
+
+- **A new shape, not review-state format 3.** An FSRS-6 state is an
+  `sm:ReviewState` stamped with FSRS review-state format 1
+  (`fsrs-review-state/v1.ttl`) and told apart by `sm:scheduler
+  sm:fsrs6`, a value its shape fixes. `pickShape` checks a review state
+  against it only when the state names that scheduler, and then never
+  against review state 1 or 2, so every SM-2 state is checked as
+  before. A review-state format 3 would have moved every SM-2 state
+  with it: each pod would need the format update, and every tab opened
+  before the deploy would refuse to save a review.
+- **Nothing old is in its format**, as with any new kind, so it has no
+  step, and its chain starts at 1.
+- **An older app takes an FSRS-6 state for another scheduler's**: any
+  value of `sm:scheduler` but `sm:sm2` counts. Its check gives warnings
+  only (against review state 1, the version the state is stamped
+  with), and it never reads, writes over or removes the state, not even
+  with its card. So a state an older tab leaves behind may be stale,
+  when that tab graded the card or reset the day by SM-2 alone, or
+  orphaned, when it removed the card; a newer app tells both from the
+  SM-2 state of the same prompt.
+- **The other terms of 1.21**, `sm:studyScheduler`,
+  `sm:desiredRetention` and `sm:scheduledWith`, are declared for
+  preferences format 5 and deck schedule format 2, the next versions of
+  those shapes.
+- **One full re-check.** A new shape file joined the rules, so the
+  rules' hash changed: every instance is checked in full once on its
+  next opening, and its documents get new receipts. No pod holds an
+  FSRS-6 state before the app writes one, so the check finds nothing
+  new.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -281,7 +315,8 @@ Rules that hold across versions:
   position or completed chapter, a deck group's removal, the catalog's
   links, a repair, and the removal of a card, a distractor, a review
   state, a deck entry or a day's answers): a subject stamped above every
-  version this app writes for its class. This is what keeps a tab opened before a
+  version this app writes for its class, or, where a shape fixes values
+  the subject has (an FSRS-6 review state), for that shape's kind. This is what keeps a tab opened before a
   deploy from writing older formats over what the update wrote in
   place; a tab of a version from before this rule has no such guard.
   The library import refuses newer data too, with a clear message.

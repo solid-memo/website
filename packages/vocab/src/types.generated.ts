@@ -17,7 +17,7 @@ export type LangText = Readonly<Record<string, string>>;
 export type LangTexts = Readonly<Record<string, readonly string[]>>;
 
 /** The record kinds the shapes describe (see docs/shapes.md). */
-export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "draftChapter" | "draftDeck" | "draftStep" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState" | "step";
+export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "draftChapter" | "draftDeck" | "draftStep" | "fsrsReviewState" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState" | "step";
 
 /** The shape version this app writes for each kind. */
 export const LATEST_VERSION = {
@@ -35,6 +35,7 @@ export const LATEST_VERSION = {
   draftChapter: 1,
   draftDeck: 1,
   draftStep: 1,
+  fsrsReviewState: 1,
   instance: 2,
   libraryDeck: 6,
   libraryDeckSeries: 3,
@@ -363,6 +364,21 @@ export interface DraftStepV1 {
   readonly textFormat?: string;
 }
 
+/** FSRS review-state format 1: an FSRS-6 state of one card in one direction, both named, with its stability, difficulty, due day, first and last review, and an all-or-nothing previous* snapshot. */
+export interface FsrsReviewStateV1 {
+  readonly reviewOf: string;
+  readonly direction: "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack" | "https://solid-memo.com/ns/vocab/v1.ttl#backToFront";
+  readonly stability: number;
+  readonly difficulty: number;
+  readonly due: string;
+  readonly firstReviewedAt: string;
+  readonly lastReviewedAt: string;
+  readonly previousStability?: number;
+  readonly previousDifficulty?: number;
+  readonly previousDue?: string;
+  readonly previousLastReviewedAt?: string;
+}
+
 /** Instance format 1: a title and a creation time. */
 export interface InstanceV1 {
   readonly title: string;
@@ -630,6 +646,7 @@ export type DocumentReceiptRecord = { version: 1; data: DocumentReceiptV1 };
 export type DraftChapterRecord = { version: 1; data: DraftChapterV1 };
 export type DraftDeckRecord = { version: 1; data: DraftDeckV1 };
 export type DraftStepRecord = { version: 1; data: DraftStepV1 };
+export type FsrsReviewStateRecord = { version: 1; data: FsrsReviewStateV1 };
 export type InstanceRecord = { version: 1; data: InstanceV1 } | { version: 2; data: InstanceV2 };
 export type LibraryDeckRecord = { version: 1; data: LibraryDeckV1 } | { version: 2; data: LibraryDeckV2 } | { version: 3; data: LibraryDeckV3 } | { version: 4; data: LibraryDeckV4 } | { version: 5; data: LibraryDeckV5 } | { version: 6; data: LibraryDeckV6 };
 export type LibraryDeckSeriesRecord = { version: 1; data: LibraryDeckSeriesV1 } | { version: 2; data: LibraryDeckSeriesV2 } | { version: 3; data: LibraryDeckSeriesV3 };
@@ -653,6 +670,7 @@ export type VersionedRecord = {
   draftChapter: DraftChapterRecord;
   draftDeck: DraftDeckRecord;
   draftStep: DraftStepRecord;
+  fsrsReviewState: FsrsReviewStateRecord;
   instance: InstanceRecord;
   libraryDeck: LibraryDeckRecord;
   libraryDeckSeries: LibraryDeckSeriesRecord;
@@ -677,6 +695,7 @@ export type LatestRecord = {
   draftChapter: DraftChapterV1;
   draftDeck: DraftDeckV1;
   draftStep: DraftStepV1;
+  fsrsReviewState: FsrsReviewStateV1;
   instance: InstanceV2;
   libraryDeck: LibraryDeckV6;
   libraryDeckSeries: LibraryDeckSeriesV3;

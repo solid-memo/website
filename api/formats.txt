@@ -26,6 +26,8 @@ draftDeck: read from format 1
 draftDeck: written in format 1
 draftStep: read from format 1
 draftStep: written in format 1
+fsrsReviewState: read from format 1
+fsrsReviewState: written in format 1
 instance: read from format 1
 instance: written in format 2
 libraryDeck: read from format 1

@@ -56,6 +56,12 @@ export interface ShapeField {
   values?: string[];
 }
 
+/** A predicate whose one value is fixed by the shape (sh:hasValue, sh:maxCount 1). */
+export interface FixedValue {
+  predicate: string;
+  value: string;
+}
+
 export interface ShapeModel {
   /** sh:name, e.g. "LibraryDeckV2". */
   name: string;
@@ -67,6 +73,8 @@ export interface ShapeModel {
   additionalTypes: string[];
   /** Predicates a conforming subject never has (sh:maxCount 0). */
   absent: string[];
+  /** Values a conforming subject has, by which the shape is told from others of its class. */
+  fixedValues: FixedValue[];
   shapeIri: string;
   /** Path under ns/shapes/ (and SHAPES_BASE), e.g. "deck/v2.ttl". */
   shapeDocument: string;
@@ -143,6 +151,7 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
       const fields: ShapeField[] = [];
       const additionalTypes: string[] = [];
       const absent: string[] = [];
+      const fixedValues: FixedValue[] = [];
       let versionAsserted = false;
       for (const property of objectsOf(quads, iri, `${SH}property`)) {
         const field = parseProperty(quads, property.value, version, fail);
@@ -158,6 +167,10 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
           absent.push(field.absent);
           continue;
         }
+        if ("fixed" in field) {
+          fixedValues.push(field.fixed);
+          continue;
+        }
         if (fields.some((f) => f.name === field.name)) {
           fail(`"${name}" has two fields named "${field.name}".`);
         }
@@ -171,6 +184,7 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
         targetClass: targetClass!.value,
         additionalTypes,
         absent,
+        fixedValues,
         shapeIri: iri,
         shapeDocument: file.path,
         context,
@@ -185,14 +199,18 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
  * must not have (sh:maxCount 0), which the writer removes;
  * "formatVersion" for the version assertion (checked, not a field); and
  * `{ type }` for an rdf:type the subject must also have (sh:hasValue),
- * which the writer adds.
+ * which the writer adds; and `{ fixed }` for another predicate whose one
+ * value the shape fixes (sh:hasValue with sh:maxCount 1), which the
+ * writer adds and by which the shape is picked. An sh:hasValue on a
+ * predicate that may have more values (a release's theme EDUC) is a
+ * constraint on a field, not a fixed value.
  */
 function parseProperty(
   quads: readonly Quad[],
   shape: string,
   version: number,
   fail: (message: string) => never,
-): ShapeField | "formatVersion" | { type: string } | { absent: string } {
+): ShapeField | "formatVersion" | { type: string } | { absent: string } | { fixed: FixedValue } {
   const of = (predicate: string) => objectsOf(quads, shape, `${SH}${predicate}`);
   const path = of("path")[0];
   if (path === undefined || path.termType !== "NamedNode") {
@@ -225,6 +243,13 @@ function parseProperty(
     return { type: type!.value };
   }
   if (maxCount === 0) return { absent: predicate };
+  const fixed = of("hasValue")[0];
+  if (fixed !== undefined && maxCount === 1) {
+    if (fixed.termType !== "NamedNode") {
+      fail(`<${shape}> fixes a value that is not an IRI; only IRIs may be fixed.`);
+    }
+    return { fixed: { predicate, value: fixed.value } };
+  }
   const datatype = of("datatype")[0]?.value;
   const nodeKind = of("nodeKind")[0]?.value;
   const alternatives = of("or")[0];
@@ -413,6 +438,7 @@ export function renderDescriptors(models: readonly ShapeModel[]): string {
     lines.push(`  targetClass: ${JSON.stringify(model.targetClass)},`);
     lines.push(`  additionalTypes: ${JSON.stringify(model.additionalTypes)},`);
     lines.push(`  absent: ${JSON.stringify(model.absent)},`);
+    lines.push(`  fixedValues: ${JSON.stringify(model.fixedValues)},`);
     lines.push(`  shapeIri: ${JSON.stringify(model.shapeIri)},`);
     lines.push(`  shapeDocument: ${JSON.stringify(model.shapeDocument)},`);
     lines.push(`  context: ${JSON.stringify(model.context)},`);

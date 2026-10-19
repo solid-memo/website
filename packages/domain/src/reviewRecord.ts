@@ -5,7 +5,7 @@
 import type { ReviewKey, ReviewSnapshot, ReviewState } from "./review";
 import type { ReviewStateV2 } from "@solid-memo/vocab/types.generated";
 import { SCHEDULERS, STUDY_DIRECTIONS } from "@solid-memo/vocab/concepts.generated";
-import { conceptByIri, conceptOfDirection } from "./concepts";
+import { conceptByIri, conceptByNotation, conceptOfDirection } from "./concepts";
 import type { Deck } from "./deck";
 import { isCardsDocumentOf } from "./deckUpgrade";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
@@ -36,8 +36,11 @@ export function reviewKeyOf(fragment: string): ReviewKey {
     : { cardId: fragment, direction: "front-to-back" };
 }
 
-/** The scheduler this app's states belong to, SM-2: a state that names none is SM-2's too. */
-export const SM2_SCHEDULER = SCHEDULERS.concepts[0].iri;
+/**
+ * The scheduler this app's SM-2 states belong to: a state that names none
+ * is SM-2's too. Looked up by notation, not by its place in the scheme.
+ */
+export const SM2_SCHEDULER = conceptByNotation(SCHEDULERS, "sm2")!.iri;
 
 /** What a stored review state says of what it is of, each absent when it does not say. */
 export interface ReviewLinks {

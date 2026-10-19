@@ -68,6 +68,14 @@ export interface ShapeDescriptor<T = unknown> {
   additionalTypes: readonly string[];
   /** Predicates a conforming subject never has, which the writer removes. */
   absent: readonly string[];
+  /**
+   * Values a conforming subject has (sh:hasValue with sh:maxCount 1 on
+   * a predicate other than rdf:type), which the writer adds. They tell
+   * the shape from others of its class: a subject is checked against a
+   * shape with fixed values only when it has them all, and then never
+   * against one without (an FSRS-6 review state by its sm:scheduler).
+   */
+  fixedValues: readonly { readonly predicate: string; readonly value: string }[];
   /** Absolute IRI of the sh:NodeShape. */
   shapeIri: string;
   /** Path of the shape document under the published shapes/ folder. */
