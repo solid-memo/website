@@ -6,7 +6,8 @@ The adapters for Solid pods, over Inrupt's
 repositories of decks, cards, review state and preferences, the type
 index, the instance copier, the write fence, the shape validator, the
 deck archive (decks as Turtle or JSON-LD files), the drafts and the
-publishing of releases, and the guest's pod kept in the browser.
+publishing of releases, an instance's documents read for its graph,
+and the guest's pod kept in the browser.
 
 ## Exports
 

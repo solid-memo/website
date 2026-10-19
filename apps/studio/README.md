@@ -1,8 +1,8 @@
 # @solid-memo/studio
 
 Solid Memo Studio, the second app: managing an instance's decks and
-cards in bulk, and writing decks and courses as drafts, checking,
-trying, comparing and publishing them
+cards in bulk, drawing its data as a graph, and writing decks and
+courses as drafts, checking, trying, comparing and publishing them
 ([studio.md](../../docs/studio.md)). It is served in Solid Memo's own
 page, at the hashes under `#/studio`.
 

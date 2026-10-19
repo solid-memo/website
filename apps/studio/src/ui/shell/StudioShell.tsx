@@ -17,6 +17,7 @@ import { HiddenColumns } from "./DataTable";
 import { KeyHelp, Keys } from "./KeyHelp";
 import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs, type WorkItem } from "./prefs";
 import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
+import { RevealAside } from "./revealAside";
 import { ASIDE_WIDTH, DETAIL_WIDTH } from "./splitter";
 import { Splitter } from "./Splitter";
 import { ScreenCommands, useCommandRegistry } from "./useScreenCommands";
@@ -67,7 +68,7 @@ export interface AsidePane {
  * over the page instead, closed until asked for, and closed again once
  * a link in it is followed, on a press outside it, on Escape, or by its
  * Close; so is the aside, at the page's right, on a screen not wide
- * (MEDIUM).
+ * (MEDIUM), which a screen may also open (RevealAside).
  *
  * It listens for the Studio's keys (useShortcuts, docs/studio.md):
  * Ctrl+K (or Cmd+K) opens the palette, with the screen's own commands
@@ -174,6 +175,11 @@ export function StudioShell({
     if (narrow) setDrawer(!drawer);
     else choose({ ...prefs, sidebar: !prefs.sidebar });
   }
+
+  // A drawer opened by the screen: what it selected is shown in it.
+  const revealAside = useCallback(() => {
+    if (medium) setAsideDrawer(true);
+  }, [medium]);
 
   function toggleAside() {
     if (detail !== undefined) return detail.onClose();
@@ -443,7 +449,9 @@ export function StudioShell({
         <main id={MAIN_ID} tabIndex={-1} class="workspace" data-region>
           <ScreenKeys.Provider value={register}>
             <ScreenCommands.Provider value={screenCommands.register}>
-              <HiddenColumns.Provider value={hiddenColumns}>{children}</HiddenColumns.Provider>
+              <HiddenColumns.Provider value={hiddenColumns}>
+                <RevealAside.Provider value={revealAside}>{children}</RevealAside.Provider>
+              </HiddenColumns.Provider>
             </ScreenCommands.Provider>
           </ScreenKeys.Provider>
         </main>

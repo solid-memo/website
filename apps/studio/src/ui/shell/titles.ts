@@ -87,6 +87,8 @@ export function crumbsOf(
       return [instances, decks, { label: t("studio.drafts.crumb"), route }];
     case "releases":
       return [instances, decks, { label: t("studio.releases.crumb"), route }];
+    case "graph":
+      return [instances, decks, { label: t("studio.graph.crumb"), route }];
     case "health": {
       const health: Crumb<StudioRoute> = {
         label: t("studio.health.crumb"),

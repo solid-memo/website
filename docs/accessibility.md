@@ -101,6 +101,17 @@ and an issue for one is welcome ([below](#report-a-barrier)).
   differ between engines run in Firefox, WebKit and on a phone
   ([testing.md](testing.md#browsers)), so axe sees the other screens
   in Chromium alone.
+- **The graph**: the Studio's graph of an instance is drawn as one
+  image, its nodes reached one by one with the arrow keys, by where
+  they are drawn, not along their links; the edges to vocabulary
+  terms are drawn only for the node selected, pointed at or gone to
+  with the keys, and the links bundled along its tree paler than 3:1
+  on the background but for that node's, for thousands of them not to
+  cover the rest. Its
+  tables, and the aside's links from and to the node selected, say
+  the same in text, those edges too
+  ([studio.md](studio.md#graph)); no pass with a screen reader has
+  checked that they are enough.
 - **What axe sees**: it checks the screen each journey step ends on,
   not every state in between, and only what the journeys visit. It
   finds a part of all possible problems.

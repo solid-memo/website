@@ -1940,6 +1940,7 @@
         "groups": "Grupos",
         "drafts": "Borradores",
         "releases": "Publicaciones",
+        "graph": "Grafo",
         "health": "Diagnóstico",
         "library": "Copias de la biblioteca",
         "transfer": "Importar y exportar",
@@ -3480,6 +3481,111 @@
       "startNextOf": "Empezar la siguiente versión de {release}",
       "starting": "Empezando la siguiente versión…",
       "drafts": "Borradores de publicaciones"
+    },
+    "graph": {
+      "crumb": "Grafo",
+      "loading": "Leyendo la instancia…",
+      "reading": {
+        "one": "Leyendo la instancia: {read} de {count} documento…",
+        "many": "Leyendo la instancia: {read} de {count} de documentos…",
+        "other": "Leyendo la instancia: {read} de {count} documentos…"
+      },
+      "heading": "Grafo de {instance}",
+      "intro": "Todo lo que Solid Memo guarda en esta instancia, como un grafo: cada carpeta, documento y recurso es un nodo, y cada enlace entre ellos, una arista. Un enlace a cualquier otra cosa termina en una hoja, que nunca se lee.",
+      "search": "Buscar un nodo",
+      "group": {
+        "vocabulary": "Términos de vocabulario",
+        "cards": "Tarjetas",
+        "distractors": "Opciones incorrectas",
+        "reviewStates": "Estados de repaso",
+        "answers": "Respuestas",
+        "leaves": "Hojas"
+      },
+      "neighborsOnly": "Solo vecinos",
+      "neighborsHint": "Elige un nodo para ver solo ese nodo y sus vecinos.",
+      "table": "Mostrar como tabla",
+      "found": {
+        "one": "{count} nodo encontrado",
+        "many": "{count} de nodos encontrados",
+        "other": "{count} nodos encontrados"
+      },
+      "moreFound": {
+        "one": "y {count} más: escribe más para acotarlos",
+        "many": "y {count} más: escribe más para acotarlos",
+        "other": "y {count} más: escribe más para acotarlos"
+      },
+      "noMatch": "Ningún nodo mostrado coincide con «{text}».",
+      "counts": "{nodes} y {edges} mostrados",
+      "nodesShown": {
+        "one": "{shown} de {count} nodo",
+        "many": "{shown} de {count} de nodos",
+        "other": "{shown} de {count} nodos"
+      },
+      "edgesShown": {
+        "one": "{shown} de {count} arista",
+        "many": "{shown} de {count} de aristas",
+        "other": "{shown} de {count} aristas"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} arista hacia un término de vocabulario solo se dibuja para el nodo seleccionado o señalado.",
+        "many": "{count} de aristas hacia términos de vocabulario solo se dibujan para el nodo seleccionado o señalado.",
+        "other": "{count} aristas hacia términos de vocabulario solo se dibujan para el nodo seleccionado o señalado."
+      },
+      "tooLarge": "Esto dibujaría {nodes} nodos y {edges} aristas, más de lo que la página dibuja con fluidez. Oculta algunos con los filtros, muéstralo como tabla o dibújalo de todos modos.",
+      "drawAnyway": "Dibujar de todos modos",
+      "placing": "Colocando los nodos",
+      "prompt": "Señala un nodo, o usa las flechas, para ver qué es; Intro o un clic lo abre, y un clic en el fondo lo deselecciona. +, − y 0 acercan, alejan y muestran el grafo entero, y arrastrar lo mueve.",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "zoomFit": "Grafo entero",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "carpeta",
+        "document": "documento",
+        "absent": "documento que no existe",
+        "unreadable": "documento que no se pudo leer",
+        "resource": "recurso",
+        "missing": "no está en ningún documento",
+        "podLeaf": "en tu Pod, sin leer",
+        "outsideLeaf": "fuera de tu Pod, sin leer",
+        "vocabularyLeaf": "término de vocabulario"
+      },
+      "defines": "define",
+      "nodes": {
+        "caption": "Nodos del grafo",
+        "label": "Nodo",
+        "kind": "Tipo",
+        "document": "Definido en",
+        "types": "Clases",
+        "pages": "Páginas de nodos"
+      },
+      "edges": {
+        "caption": "Aristas del grafo",
+        "from": "Desde",
+        "predicate": "Enlace",
+        "to": "Hasta",
+        "pages": "Páginas de aristas"
+      },
+      "node": {
+        "label": "Nodo",
+        "none": "Elige un nodo del grafo para ver lo que dice.",
+        "outside": "No se ha leído: está fuera de tu Pod.",
+        "inPod": "No se ha leído: está en tu Pod, pero no son datos de Solid Memo.",
+        "vocabulary": "No se ha leído: es un término de vocabulario.",
+        "missing": "Se nombra aquí, pero no está en ningún documento.",
+        "absent": "Este documento no existe.",
+        "unreadable": "Este documento no se pudo leer.",
+        "values": "Valores",
+        "statedIn": "indicado en {document}",
+        "outgoing": "Enlaces desde aquí",
+        "incoming": "Enlaces hacia aquí",
+        "noLinks": "Ninguno.",
+        "showAll": {
+          "one": "Mostrar el {count} enlace",
+          "many": "Mostrar los {count} de enlaces",
+          "other": "Mostrar los {count} enlaces"
+        }
+      }
     },
     "inline": {
       "field": "{column} de {row}",

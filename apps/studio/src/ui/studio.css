@@ -1770,3 +1770,310 @@
   border: 1px solid var(--warning-border);
   border-radius: var(--radius-sm);
 }
+
+/*
+ * The instance graph (graph/GraphView.tsx): the drawing in a frame as
+ * wide as the page and most of the window high, dragged to move it; on
+ * a small or short screen, low enough that the page around it is still
+ * scrolled to. Each kind of node has its own shape, and its own fill and
+ * line. Each kind of edge has its own color, at 3:1 or more on the
+ * surface, and is told apart by more than it: by the shapes at its ends
+ * (a folder's or a document's own, a vocabulary term's small square)
+ * and in the table of edges; the node selected's keep their colors,
+ * wider and dashed. The edges are solid: thousands of dashed
+ * lines are slow to draw at every move. Lines stay a pixel wide at any
+ * zoom, and the nodes and their rings as large: --graph-shape, set on
+ * the drawing as a zoom settles, scales each about its own middle, and
+ * --graph-line is how wide a pixel is.
+ */
+:root[data-surface="studio"] .graph {
+  margin: 0;
+}
+
+:root[data-surface="studio"] .graph-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+:root[data-surface="studio"] .graph-plot {
+  display: block;
+  width: 100%;
+  height: min(70vh, 44rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+:root[data-surface="studio"] .graph-plot:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+:root[data-surface="studio"]
+  .graph-plot
+  :is(.graph-node, .graph-selected, .graph-pointed, .graph-hovered) {
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/*
+ * The edges a pixel wide as a zoom settles (--graph-line, the drawing's
+ * units a pixel is then, GraphView), not by non-scaling-stroke: thousands
+ * of curves drawn so are slow at every frame of a move in some browsers.
+ */
+/* The edges select nothing: the pointer goes through them, to the node under them or the background. */
+:root[data-surface="studio"] .graph-plot .graph-edges {
+  stroke-width: var(--graph-line, 1);
+  pointer-events: none;
+}
+
+:root[data-surface="studio"]
+  .graph-plot
+  :is(.graph-node, .graph-selected, .graph-pointed, .graph-hovered) {
+  transform: scale(var(--graph-shape, 1));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+:root[data-surface="studio"] .graph-edges {
+  fill: none;
+}
+
+:root[data-surface="studio"] .edges-link {
+  stroke: var(--primary);
+}
+
+:root[data-surface="studio"] .edges-containment {
+  stroke: var(--text-muted);
+}
+
+:root[data-surface="studio"] .edges-vocabulary {
+  stroke: var(--warning-text);
+}
+
+/*
+ * The edges bundled along the tree, not its own (graph/layout.ts): drawn
+ * always in a mix of their color and the background's, the paler the
+ * further in (--graph-bundle-ink, GraphView), for many side by side to
+ * read as one, and what is zoomed in on to show over them. A mix, not an
+ * opacity: lines over each other stay as pale. Those of the node
+ * selected, or pointed at, are drawn again over them in full.
+ */
+:root[data-surface="studio"] .graph-always .edges-bundled.edges-containment {
+  stroke: color-mix(
+    in srgb,
+    var(--text-muted) calc(var(--graph-bundle-ink, 1) * 100%),
+    var(--surface)
+  );
+}
+
+:root[data-surface="studio"] .graph-always .edges-bundled.edges-link {
+  stroke: color-mix(
+    in srgb,
+    var(--primary) calc(var(--graph-bundle-ink, 1) * 100%),
+    var(--surface)
+  );
+}
+
+/* A part of the bundles drawn for many edges, as wide as a rope of them is (ROPES, GraphView). */
+:root[data-surface="studio"] .graph-plot .graph-always .edges-rope1 {
+  stroke-width: calc(2 * var(--graph-line, 1));
+}
+
+:root[data-surface="studio"] .graph-plot .graph-always .edges-rope2 {
+  stroke-width: calc(4 * var(--graph-line, 1));
+}
+
+/* The node selected's few edges, each kind in its color: wider, and dashed, as no other edge is. */
+:root[data-surface="studio"] .graph-plot .graph-focus .graph-edges {
+  stroke-width: calc(2 * var(--graph-line, 1));
+  stroke-dasharray: calc(4 * var(--graph-line, 1)) calc(2 * var(--graph-line, 1));
+}
+
+/*
+ * A vocabulary term's own, thousands perhaps, under the nodes: solid and
+ * a pixel wide, as dashes would be slow, and the paler the more there
+ * are (--graph-hub-ink, GraphView), for the nodes to show over them. A
+ * mix, not an opacity: lines over each other stay as pale.
+ */
+:root[data-surface="studio"] .graph-plot .graph-focus.graph-hub .graph-edges {
+  stroke: color-mix(
+    in srgb,
+    var(--warning-text) calc(var(--graph-hub-ink, 1) * 100%),
+    var(--surface)
+  );
+  stroke-width: var(--graph-line, 1);
+  stroke-dasharray: none;
+}
+
+/* The whole shape takes the pointer, a hollow one's inside too (fill: none): a click in it selects it, not lets go. */
+:root[data-surface="studio"] .graph-plot .graph-node {
+  pointer-events: visible;
+}
+
+:root[data-surface="studio"] .graph-node {
+  cursor: pointer;
+  fill: var(--primary);
+  stroke: var(--surface);
+}
+
+:root[data-surface="studio"] .graph-node:is(.kind-container, .kind-document) {
+  fill: var(--surface-sunken);
+  stroke: var(--text);
+}
+
+:root[data-surface="studio"] .graph-node.absent,
+:root[data-surface="studio"] .graph-node.kind-outsideLeaf {
+  fill: none;
+  stroke: var(--text);
+  stroke-dasharray: 2 2;
+}
+
+:root[data-surface="studio"] .graph-node.kind-vocabularyLeaf {
+  fill: var(--text-muted);
+  stroke: none;
+}
+
+:root[data-surface="studio"] .graph-node.kind-podLeaf {
+  fill: var(--accent-yellow);
+  stroke: var(--text);
+}
+
+:root[data-surface="studio"] .graph-node.kind-missing {
+  fill: none;
+  stroke: var(--danger);
+}
+
+/* A name drawn over the edges is ringed in the background's color, to read: as wide as a quarter of its size (GraphView). */
+:root[data-surface="studio"] .graph-labels {
+  fill: var(--text);
+  stroke: var(--surface);
+  stroke-linejoin: round;
+  paint-order: stroke;
+  pointer-events: none;
+}
+
+:root[data-surface="studio"] :is(.graph-selected, .graph-pointed, .graph-hovered) {
+  fill: none;
+  stroke: var(--text);
+  pointer-events: none;
+}
+
+:root[data-surface="studio"] :is(.graph-pointed, .graph-hovered) {
+  stroke-dasharray: 3 2;
+}
+
+/* Below the main content's own height on a small or short screen, so a swipe or the wheel beside it still scrolls the page. */
+@media (max-width: 64rem), (max-height: 40rem) {
+  :root[data-surface="studio"] .graph-plot {
+    height: clamp(10rem, 100dvh - 22rem, 44rem);
+  }
+}
+
+:root[data-surface="studio"] .graph-placing progress {
+  vertical-align: middle;
+}
+
+:root[data-surface="studio"] .graph-large {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-sm);
+}
+
+:root[data-surface="studio"] .graph-found ul,
+:root[data-surface="studio"] .graph-links {
+  padding: 0;
+  list-style: none;
+}
+
+:root[data-surface="studio"] :is(.graph-found, .graph-links) li {
+  min-height: 1.5rem;
+  overflow-wrap: anywhere;
+}
+
+/* A button that selects a node, worded as a link is. */
+:root[data-surface="studio"] .graph-link {
+  min-height: 1.5rem;
+  margin: 0 0.5rem 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  text-align: start;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+:root[data-surface="studio"] .graph-iri {
+  overflow-wrap: anywhere;
+}
+
+:root[data-surface="studio"] .graph-node-pane dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.75rem;
+  margin: 0.5rem 0;
+}
+
+:root[data-surface="studio"] .graph-node-pane dl > div {
+  display: contents;
+}
+
+:root[data-surface="studio"] .graph-node-pane dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* In forced colors, the system's: the shapes and dashes still tell the kinds apart. */
+@media (forced-colors: active) {
+  :root[data-surface="studio"] .graph-plot {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  :root[data-surface="studio"] .graph-edges {
+    stroke: GrayText;
+  }
+
+  :root[data-surface="studio"] .graph-node,
+  :root[data-surface="studio"] .graph-node:is(.kind-container, .kind-document, .kind-podLeaf) {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+
+  :root[data-surface="studio"] .graph-node:is(.kind-resource, .kind-vocabularyLeaf) {
+    fill: CanvasText;
+  }
+
+  :root[data-surface="studio"] .graph-node:is(.absent, .kind-outsideLeaf, .kind-missing) {
+    fill: none;
+    stroke: CanvasText;
+  }
+
+  :root[data-surface="studio"] .graph-labels {
+    fill: CanvasText;
+    stroke: Canvas;
+  }
+
+  :root[data-surface="studio"]
+    :is(.graph-focus .graph-edges, .graph-selected, .graph-pointed, .graph-hovered) {
+    stroke: Highlight;
+  }
+
+  /* As specific as the mixes it stands for, to win over them. */
+  :root[data-surface="studio"] .graph-always .edges-bundled:is(.edges-link, .edges-containment) {
+    stroke: GrayText;
+  }
+
+  /* Under the nodes, a term's own edges need not be pale, and are clearer in full. */
+  :root[data-surface="studio"] .graph-plot .graph-focus.graph-hub .graph-edges {
+    stroke: Highlight;
+  }
+}

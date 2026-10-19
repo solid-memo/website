@@ -402,6 +402,18 @@ instance, "Choose a file…" under Import reads that file and says what
 it holds. Leave "Import the progress too" checked and press "Import
 into", and the file becomes a new deck, with your progress.
 
+Its **Graph** draws what Solid Memo keeps in the instance: its folders,
+documents, decks, cards, answers and drafts, each a node, and the links
+between them ([studio.md](studio.md#graph)). Drag to move it, and use
+the wheel or "Zoom in" and "Zoom out" to zoom; click a node, or reach
+it with the arrow keys and press Enter, to see what it says and what it
+links to, beside the graph; click an empty place to let go of it. A
+link out of the instance, to a library release, a license or your
+WebID, ends in a leaf, which is never read. Uncheck "Answers" to see
+less, check "Vocabulary terms", last of the row, to see the classes and
+concepts the data uses too, or check "Show as a table" to read it all
+as two tables.
+
 ## The journeys
 
 Each [user journey](testing.md#user-journeys) is a test that clicks

@@ -681,6 +681,16 @@ export interface AnswerLog {
 }
 
 /**
+ * Driven port: an instance's documents as their statements, for the
+ * Studio's graph of it (instanceGraph.ts). Read-only, and only the
+ * document it is handed: it follows no link the document states.
+ */
+export interface InstanceGraphReader {
+  /** The document's statements, a blank node as `_:<label>`; null when there is none (404). */
+  readDocument(url: string): Promise<DraftTriple[] | null>;
+}
+
+/**
  * Where a document checked is: an instance's own ("pod"), a release's
  * draft ("draft"), whose deck, chapters and steps the draft shapes check,
  * or a release ("library"), which the library shapes check, as a release

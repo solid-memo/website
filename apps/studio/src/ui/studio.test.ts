@@ -69,6 +69,20 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(PAGE, "thead th").position).not.toBe("sticky");
   });
 
+  it("gives the graph's pointer to its nodes, hollow ones whole, never to its edges", () => {
+    root.setAttribute("data-surface", "studio");
+    const plot = (inner: string) => `<svg class="graph-plot">${inner}</svg>`;
+    expect(
+      styleOf(plot('<g class="graph-focus"><path class="graph-edges"/></g>'), "path").pointerEvents,
+    ).toBe("none");
+    expect(
+      styleOf(plot('<rect class="graph-node kind-document absent"/>'), "rect").pointerEvents,
+    ).toBe("visible");
+    expect(styleOf(plot('<circle class="graph-node kind-missing"/>'), "circle").pointerEvents).toBe(
+      "visible",
+    );
+  });
+
   // The test DOM knows no dvh, so not the grid's height.
   it("lays the Studio out as a grid the window's width, its main content scrolling on its own", () => {
     root.setAttribute("data-surface", "studio");
@@ -310,7 +324,22 @@ describe("the Studio's contrast", () => {
     createRequire(import.meta.url).resolve("@solid-memo/ui/style.css"),
     "utf8",
   );
-  const studio = readFileSync(join(import.meta.dirname, "studio.css"), "utf8");
+  const sheet = readFileSync(join(import.meta.dirname, "studio.css"), "utf8").replace(
+    /\/\*[\s\S]*?\*\//g,
+    "",
+  );
+  /** The rules for forced colors, kept apart: they draw with the system's colors, not the site's. */
+  const forcedStart = sheet.indexOf("@media (forced-colors: active) {");
+  const forcedEnd = (() => {
+    let depth = 0;
+    for (let at = sheet.indexOf("{", forcedStart); at < sheet.length; at++) {
+      if (sheet[at] === "{") depth++;
+      if (sheet[at] === "}" && --depth === 0) return at + 1;
+    }
+    return sheet.length;
+  })();
+  const studio = sheet.slice(0, forcedStart) + sheet.slice(forcedEnd);
+  const forced = sheet.slice(forcedStart, forcedEnd);
 
   /** The #rrggbb custom properties the block `selector` in style.css declares, by name. */
   const tokens = (selector: string): Record<string, string> => {
@@ -323,10 +352,14 @@ describe("the Studio's contrast", () => {
   const light = tokens(":root");
   const themes = { light, dark: { ...light, ...tokens(':root[data-theme="dark"]') } };
 
-  /** studio.css's rules, as each selector and the declarations it sets, the comments left out. */
-  const rules = [...studio.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(
-    (m) => ({ selector: m[1]!.replace(/\s+/g, " ").trim(), body: m[2]! }),
-  );
+  /** A stylesheet's rules, as each selector and the declarations it sets. */
+  const rulesOf = (css: string) =>
+    [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
+      selector: m[1]!.replace(/\s+/g, " ").trim(),
+      body: m[2]!,
+    }));
+  /** studio.css's rules but those for forced colors, the comments left out. */
+  const rules = rulesOf(studio);
   /** The tokens the rules give `property` (color, background), each once. */
   const used = (property: string) => [
     ...new Set(
@@ -357,14 +390,100 @@ describe("the Studio's contrast", () => {
     return (high! + 0.05) / (low! + 0.05);
   };
 
-  it("draws only with the site's tokens", () => {
+  /** The values `body` gives the properties that color: text, backgrounds, and an SVG shape's fill and line. */
+  const colorsOf = (body: string) =>
+    [...body.matchAll(/(?:^|[;\s])(?:color|background(?:-color)?|fill|stroke):\s*([^;]+);/g)].map(
+      (m) => m[1]!,
+    );
+
+  it("draws only with the site's tokens, or a mix of two", () => {
+    const token = String.raw`var\(--[\w-]+\)`;
+    const mix = String.raw`color-mix\(\s*in srgb,\s*${token}\s+calc\(var\(--[\w-]+, 1\) \* 100%\),\s*${token}\s*\)`;
     for (const { body } of rules) {
-      for (const [, value] of body.matchAll(
-        /(?:^|[;\s])(?:color|background(?:-color)?):\s*([^;]+);/g,
-      ))
-        expect(value).toMatch(/^(var\(--[\w-]+\)|inherit|none|transparent)$/);
+      for (const value of colorsOf(body))
+        expect(value).toMatch(new RegExp(`^(${token}|${mix}|inherit|none|transparent)$`));
     }
   });
+
+  it("mixes paler only the edges drawn by the thousand: a term's own, and those bundled along the tree", () => {
+    const mixed = rules.filter(({ body }) =>
+      colorsOf(body).some((value) => value.startsWith("color-mix(")),
+    );
+    expect(mixed.map(({ selector }) => selector)).toEqual([
+      ':root[data-surface="studio"] .graph-always .edges-bundled.edges-containment',
+      ':root[data-surface="studio"] .graph-always .edges-bundled.edges-link',
+      ':root[data-surface="studio"] .graph-plot .graph-focus.graph-hub .graph-edges',
+    ]);
+  });
+
+  it("draws in forced colors only with the system's colors", () => {
+    const forcedRules = rulesOf(forced);
+    expect(forcedRules.length).toBeGreaterThan(0);
+    for (const { body } of forcedRules) {
+      for (const value of colorsOf(body))
+        expect(value).toMatch(/^(Canvas|CanvasText|GrayText|Highlight|none)$/);
+    }
+  });
+
+  /** A selector's specificity, as one number: its ids a million each, its classes, attributes and pseudo-classes a thousand, its elements one; an :is() as its most specific. */
+  const specificity = (selector: string): number => {
+    let inner = 0;
+    const rest = selector.replace(/:is\(([^()]*)\)/g, (_, list: string) => {
+      inner += Math.max(...list.split(",").map(specificity));
+      return "";
+    });
+    const ids = rest.match(/#[\w-]+/g)?.length ?? 0;
+    const classes = rest.match(/\.[\w-]+|\[[^\]]*\]|:(?!:)[\w-]+/g)?.length ?? 0;
+    const elements =
+      rest.replace(/\[[^\]]*\]/g, "").match(/(?:^|[\s>+~])[a-z][\w-]*/g)?.length ?? 0;
+    return inner + ids * 1e6 + classes * 1e3 + elements;
+  };
+
+  it("lets the system's colors win over each color mixed paler, in forced colors", () => {
+    expect(specificity(':root[data-surface="studio"] .a:is(.b, #c) svg')).toBe(1e6 + 3e3 + 1);
+    const classes = (selector: string) => selector.match(/\.[\w-]+/g)!;
+    const forcedRules = rulesOf(forced).filter(({ body }) => colorsOf(body).length > 0);
+    const mixed = rules.filter(({ body }) =>
+      colorsOf(body).some((value) => value.startsWith("color-mix(")),
+    );
+    expect(mixed.length).toBeGreaterThan(0);
+    for (const { selector } of mixed) {
+      const winner = forcedRules.find(
+        (rule) =>
+          classes(selector).every((name) => rule.selector.includes(name)) &&
+          specificity(rule.selector) >= specificity(selector),
+      );
+      expect(winner, selector).toBeDefined();
+    }
+  });
+
+  it.each(Object.entries(themes))(
+    "keeps every line and shape the graph draws at 3:1 or more on its surface in the %s theme",
+    (_, theme) => {
+      // A fill an outline in --text bounds, and the gap a node's own line leaves about it (--surface), need none.
+      // A term's own edges mixed paler (a mix, unmatched here) are so only by the thousand, an area more than lines; fewer are --warning-text.
+      // So are the edges bundled along the tree, drawn again in full, in these, as their node is selected or pointed at.
+      const outlined = new Set(["--surface", "--surface-sunken", "--accent-yellow"]);
+      const drawn = new Set(
+        rules
+          .filter(({ selector }) => selector.includes(".graph-") || selector.includes(".edges-"))
+          .flatMap(({ body }) => [
+            ...body.matchAll(/(?:^|[;\s])(?:fill|stroke):\s*var\((--[\w-]+)\)/g),
+          ])
+          .map((m) => m[1]!)
+          .filter((token) => !outlined.has(token)),
+      );
+      expect([...drawn]).toEqual(
+        expect.arrayContaining(["--primary", "--text-muted", "--warning-text"]),
+      );
+      for (const token of drawn) {
+        expect({ token, enough: contrast(theme[token]!, theme["--surface"]!) >= 3 }).toEqual({
+          token,
+          enough: true,
+        });
+      }
+    },
+  );
 
   it("puts no text on the surfaces that hold none", () => {
     for (const [surface, selector] of Object.entries(TEXTLESS)) {

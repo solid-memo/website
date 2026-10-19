@@ -82,6 +82,7 @@ describe("the palette's entries", () => {
       ["sections", "Groups", hash({ screen: "groups", instanceUrl: instanceA.url }), "g g"],
       ["sections", "Drafts", hash({ screen: "drafts", instanceUrl: instanceA.url }), "g r"],
       ["sections", "Releases", hash({ screen: "releases", instanceUrl: instanceA.url }), "g p"],
+      ["sections", "Graph", hash({ screen: "graph", instanceUrl: instanceA.url }), ""],
       ["sections", "Health", hash({ screen: "health", instanceUrl: instanceA.url }), "g h"],
       [
         "sections",

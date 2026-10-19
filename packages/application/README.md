@@ -11,9 +11,9 @@ interfaces; the adapters conform to them.
 - `ports`: the driven ports, such as the session gateway, the
   repositories, the release publisher and the file exchange.
 - `useCases`: the `UseCases` the UI receives, built over the ports.
-- `releaseDrafts`, `releasePublishing` and `trial`: the Studio's drafts,
-  publishing a release, and test-playing a draft
-  ([studio.md](../../docs/studio.md)).
+- `releaseDrafts`, `releasePublishing`, `trial` and `instanceGraph`: the
+  Studio's drafts, publishing a release, test-playing a draft, and an
+  instance read as a graph ([studio.md](../../docs/studio.md)).
 
 ## Boundaries
 

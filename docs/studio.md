@@ -14,7 +14,9 @@ instance. It lists the decks copied from the library or added from a
 link, and upgrades them to newer releases. It exports decks as Turtle
 or JSON-LD files, and imports them. It edits what a deck says of itself
 (its authors and license among it), a course's progress, and the
-instance's name and catalog.
+instance's name and catalog. It draws what Solid Memo keeps in the
+instance as a graph: its folders, documents and resources, and the
+links between them and out of it.
 
 To create, it keeps the drafts of releases a creator writes in the
 instance. A draft is started from nothing, from a deck, as the next
@@ -50,8 +52,8 @@ router. It sits on the same layers as Solid Memo's app
   containers over use cases and screens over props, as in `ui`. They
   reuse `ui`'s components, such as `InstancePickerContainer`,
   `Breadcrumbs` and `ReaderText`.
-- Its text is in `ui`'s message files, under `studio.*`, in English,
-  Swedish and Korean ([i18n.md](i18n.md)).
+- Its text is in `ui`'s message files, under `studio.*`, in each of
+  Solid Memo's languages ([i18n.md](i18n.md)).
 
 Both apps are one page. So they share one session and one login
 ([authentication.md](authentication.md#session-restore)): a link from
@@ -92,8 +94,8 @@ It takes the whole window, and the window does not scroll:
 - **The sidebar**, beside the main content while an instance is open
   ([`shell/StudioSidebar.tsx`](../apps/studio/src/ui/shell/StudioSidebar.tsx),
   a navigation named Studio), links to the instance's sections: Decks
-  (Home), Groups, Drafts, Releases, Health, Library copies, Import and
-  export, and Name and catalog. The one shown is marked
+  (Home), Groups, Drafts, Releases, Graph, Health, Library copies,
+  Import and export, and Name and catalog. The one shown is marked
   (`aria-current`); beside Health, the number of problems the instance's
   check found, once a screen has made it (the sidebar makes none). Under
   them, the instance's decks, each at its cards, and its drafts, each at
@@ -197,6 +199,7 @@ not.
 | Home | Decks | none (its views are its own) | the deck at the table's cursor (Deck) | none |
 | the library copies | Library copies | none | the upgrade of the copy at the table's cursor (Upgrade) | none |
 | groups, drafts, releases, the instance's health, import and export, name and catalog | that section | none | none | none |
+| the graph | Graph | none | the node selected (Node) | none |
 | a deck's cards, schedule, health and about screen | the deck | the deck's | none | what the deck's health found |
 | a card | the deck | the deck's, Cards marked as the card's | on a wide screen, the card (Card), the deck's cards in the main content; else the card is the main content | what the deck's health found |
 | a draft's overview | the draft | the draft's | none | its release check's |
@@ -249,12 +252,12 @@ The key help lists them by their scope:
 | --- | --- | --- |
 | Ctrl+K, Cmd+K | anywhere, a field too | search, go to or run a command, in the palette ([below](#quick-open-and-commands)); **Search or run…** in the header does too |
 | `?` | anywhere | list every key, in a dialog; **? Keys** in the status bar does too |
-| `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards', the releases' |
+| `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards', the releases', the graph's |
 | F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the sidebar, the main content, the aside, the dock (each while it is shown), the status bar |
 | `g d`, `g g`, `g r`, `g p`, `g h`, `g l`, `g t` | with an instance open | go to its decks (Home), groups, drafts, releases, health, library copies, or import and export |
 | `g i` | anywhere | go to the instances |
 | Ctrl+B | with an instance open | show or hide the sidebar; on a narrow screen, open or close the drawer |
-| Ctrl+\ | Home, the library copies, a course draft's screens but its overview; a card beside its deck's cards | show or hide the aside (the deck, the copy's upgrade, the outline); on a screen not wide, open or close its drawer; close the card, going to the deck's cards |
+| Ctrl+\ | Home, the library copies, the graph, a course draft's screens but its overview; a card beside its deck's cards | show or hide the aside (the deck, the copy's upgrade, the node, the outline); on a screen not wide, open or close its drawer; close the card, going to the deck's cards |
 | Ctrl+J | with an instance open | show or hide the dock |
 | F8, Shift+F8 | a deck's or a draft's screens, a field too | go to the field of the next problem in the dock's list, or the one before, round from either end ([below](#the-dock)) |
 | `]`, `[` | a deck's or a draft's screens | go to the next tab, or the one before, round from either end |
@@ -442,8 +445,8 @@ with **Search or run…** in the header. It finds, as the user types:
 - the **commands** of the screen shown, and the Studio's own (show the
   keys, show or hide the sidebar, the aside or the dock);
 - the **tabs** of the deck or draft shown, each with its number;
-- the open instance's **sections**, each with its `g` chord, and All
-  instances;
+- the open instance's **sections**, each with its `g` chord (Graph and
+  Name and catalog have none), and All instances;
 - the user's **instances**, each at its decks;
 - the open instance's **decks**, each at its cards, and its **drafts**
   (those that can be read), each at its overview;
@@ -524,13 +527,15 @@ others.
 | `#/studio/diff?draft=…` | a draft against the release it follows ([below](#the-release-diff)): what it changes, and what learners' copies would get. |
 | `#/studio/release?draft=…[&field=…]` | what a draft's release says of itself beyond its listing, how it was made and from what ([below](#the-releases-metadata-and-provenance)), then its publishing and its download ([below](#publishing-a-release)). |
 | `#/studio/releases?instance=…` | the releases the instance published ([below](#releases)). |
+| `#/studio/graph?instance=…[&node=…]` | the instance's Solid Memo data as a graph ([below](#graph)). `node` is the node selected, by its IRI, shown in the aside. |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
 the picker, an unknown deck to its instance's Home, and an unknown card
 (one removed, say) to its deck's cards. A chapter, step or card a draft
-does not have (one deleted, say) falls back to the draft's overview.
+does not have (one deleted, say) falls back to the draft's overview. A
+`node` the graph does not have counts as none.
 `field` opens a draft's screen at one of its fields, where the release
 check links: the overview's `title`, `description` or `outline`; a
 chapter's `title`, `description`, `steps` or `review`; a step's
@@ -542,8 +547,9 @@ not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
 Changing Home's filter, sort or view, the deck beside its table, the
-workbench's query, the inspector's tab, the decks checked to export, or
-the view of a draft's cards, replaces the history entry: it is the
+workbench's query, the inspector's tab, the decks checked to export,
+the view of a draft's cards, or the node selected in the graph, replaces
+the history entry: it is the
 same screen, looked at another way, so Back leaves it. So does going
 from card to card beside the deck's cards (`j` and `k`, Previous and
 Next); opening a card from the list is a Back stop, as is opening a
@@ -559,7 +565,7 @@ inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *dec
 catalog on the instance's screen, › Health on the instance's health,
 › Health › *deck* on a deck's, › Library copies on the library
 copies, › Import and export on import and export, › Drafts on the
-drafts, and › Releases on the releases. A draft's screens go on from › Drafts: › *draft* on its
+drafts, › Releases on the releases, and › Graph on the graph. A draft's screens go on from › Drafts: › *draft* on its
 overview, › *draft* › *chapter* on a chapter, › *draft* › *chapter* ›
 Step 2 on a step, › *draft* › Cards on its cards, › *draft* › Cards
 › *card* on a question, › *draft* › Release check on its check,
@@ -2196,6 +2202,214 @@ keeps the releases whose name or address holds its text, case and
 accents aside. The sidebar and the drafts screen link to it
 ("Published releases" there). A learner adds a release in Solid Memo by
 the link copied here ([deck-library.md](deck-library.md#from-a-link)).
+
+## Graph
+
+The graph ([`graph/GraphContainer.tsx`](../apps/studio/src/ui/graph/GraphContainer.tsx),
+`readInstanceGraph`) draws what Solid Memo keeps in the instance: every
+folder, document and resource is a node, and every link between them an
+edge. It reads the documents the instance check reads
+([validation.md](validation.md)): the instance's meta, preferences and
+catalog, each deck's cards and reviews in the instance, the digest, the
+answer log's months, the instance's drafts' documents and the releases
+published in it. Besides them, it reads only the user's WebID profile,
+to find their storages as logging in does, which tell the leaves in
+their pod apart; when it cannot, none are. While it reads the
+documents, it says how many it has read of how many. A document the
+catalog names outside the instance is not read, nor one whose address
+climbs out of it (`..`, `%2e%2e`), nor a folder. A document that cannot
+be read (refused, say, or not Turtle) is drawn as such, and the rest as
+read: a broken instance is where the graph helps most.
+
+Its nodes, each drawn in a shape of its own, its color only helping:
+
+| Node | What it is | Drawn as |
+| --- | --- | --- |
+| folder | the instance's folder, or a folder in it that holds a document read | a rounded square |
+| document | a document read; one that was not there, or could not be read, too | a square, dashed when it was not there or could not be read |
+| resource | a subject a document defines: the catalog, a group, a deck, its distribution and its authors, a card, a wrong option, a review state, an answer, a receipt or schedule of the digest, a draft, a chapter, a step, a release | a dot |
+| vocabulary term | a class (`sm:Card`), a concept (`sm:frontToBack`), a license, a topic or theme, a media type, an EU authority table: one node for each, however many link to it | a small square |
+| in your Pod | an address in one of the user's storages that is not Solid Memo data: the WebID profile on many servers, a release published to another folder | a diamond |
+| outside your Pod | any other address: a library release a copy came from, a picture, a source, a `mailto:` address | a hollow dashed ring |
+| found in no document | an address in the instance a link names and no document read defines: an answer to a card since removed, say | a crossed ring |
+
+The last four are leaves, and **a leaf is never fetched**, in the pod or
+out of it: the catalog and every link are data anyone may have written,
+and what they point to is not the Studio's to read
+([privacy.md](privacy.md)). Which folder holds a document, and which
+document defines a subject, is worked out from their addresses, with no
+request of its own; a link between documents is drawn as the
+statements say. The edges are drawn in three kinds, each in a color of
+its own at 3:1 or more on the drawing's background: links green, a
+folder's or a document's own gray, and those to a vocabulary term
+amber; those bundled along the layout's tree are paler (**Drawing
+it**, below). Color is not all that tells them apart: a folder's or a
+document's own edges start at its square, those to a term end at a
+small square, and the table of edges names each. They are solid, since
+thousands of dashed lines are slow to draw at every move; the node
+selected's own keep their colors, wider, and dashed, and its links to
+the nodes in its own column of the band (a card's wrong options, review
+state and answers) are drawn bowed aside, each a curve of its own, not
+all along one line. The edges to
+vocabulary terms are not drawn all together: there are thousands, to a
+few terms, and they would cover the drawing. Those of the node selected
+are drawn, and all the edges of the node pointed at or gone to by a key,
+unless it is a term itself; a term selected has all of its own drawn, in one
+path, solid and a pixel wide, under the nodes (it may have ten
+thousand), and the paler the more it has past 300, for the nodes to
+show over them. An edge to a term goes up the layout's tree from its
+node to the document, or to the blocks of one as wide as half the
+drawing, and on to the term, so that a document's thousand meet in a
+few curves. The node pointed at is ringed, dashed, as the one gone
+to is. The aside and the table of edges list them all.
+
+Above the graph, a row of filters: **Find a node** (by its name or its
+address, among the nodes the filters show, those beyond the neighbors
+too, ten listed at most, Enter selecting the first; the focus stays in
+the search, a node picked from the list too), then **Cards**, **Wrong
+options**, **Review states**, **Answers** and **Leaves** (in your Pod,
+outside it, and found in no document), each shown or hidden, all shown
+at first; **Neighbors only**, the node selected and those an edge joins
+it to (the node selected even when its group is hidden); **Show as a
+table**; and last **Vocabulary terms**, hidden at first: their
+thousands of edges go to a few terms and say little until asked for,
+so the search finds no term, and the tables list none, until it is
+checked. Checked, the terms take their places round the rim (**Drawing
+it**, below), which the layout gives them either way. Then how many
+nodes and edges are shown of all, and, in the drawing, while the terms
+are shown, how many of those edges go to them, drawn only for the node
+selected or pointed at. The filters are kept for the page's life, for
+each instance, never on the device.
+
+A node is named by its address, never by its text: the instance's
+folder by the instance's name, a folder or document by its path in the
+instance, a vocabulary term in short (`sm:Card`), a blank node by its
+label, any other by its fragment, else the last part of its path. Two
+nodes of documents named the same are told apart by their documents: by
+the file (`korean-verbs#card-7`), else by its path in the instance
+(`decks/capitals#sweden`, `reviews/capitals#sweden`), with no
+extension. Each is drawn cut at 24 characters, in the middle, for its
+end to show. The nodes in sight are named once the part in sight is
+800 units wide or less and holds 400 nodes at most, as a move or a zoom
+settles; more would slow every zoom. Past that, the folders and
+documents in sight are still named, as they are few. The node selected
+and its neighbors are named first, however far out it is zoomed, then
+folders and documents, then decks, then the rest; a name that would
+overlap one already drawn, or come right up to it, is left out. How
+wide a name is, is counted from its characters, never measured. Each
+is ringed in the drawing's background, to be read over the edges.
+
+**Drawing it.** The layout is a radial tree, its links bundled along
+it (hierarchical edge bundling), in
+[`graph/layout.ts`](../apps/studio/src/ui/graph/layout.ts), plain
+arithmetic with no library. Every node hangs in one tree: under what
+holds it (a folder its documents, a document its resources), or under
+what it is about when it says so, by the first of these it has: a
+document part of a deck, a review state, an answer, a receipt or a
+schedule by what it is of, a cards or reviews document by its deck, a
+wrong option by its card, a distribution or a deck by what lists it. A
+leaf hangs by the first node that links to it. A choice that would make
+a cycle falls back, at the first node of the cycle (by address) that
+can, to what holds it, else to the first node that links to it; if none
+can, that first node goes under the middle. Where the cycle is broken
+does not depend on nodes unrelated to it.
+
+The instance's folder is in the middle. The cards, each with its review
+states, answers and wrong options beside it, fill a band of rows round
+the outside, a column at a time, each deck's in a slice of it as wide as
+they need; the folders and documents are on rings inside it, each in the
+middle of the slice of what it holds, and one holding half the drawing
+or more near the middle. The instance's documents that hold next to
+nothing once their resources hang elsewhere (the meta, the preferences,
+the answer log's months, the digest, and the folders whose documents
+went with their decks) are spread round a ring of their own about the
+middle, and the vocabulary terms round a rim outside the band, each as
+near as there is room for to what links to it.
+
+An edge of the tree is drawn along it, a curve a step, those to a
+document's cards meeting in the same few curves through a routing point
+for each column and each block of six columns; a document of more than
+twelve blocks gathers them under rings of fewer further in, for a few
+trunks to leave it. Any other is bundled: drawn up the tree from each
+end to its block or hub, as the tree's edges are, and between those as
+a curve bent toward the tree, the same curve for all the links between
+the same two, so that the links between the same parts run together;
+never through the middle nor a hub as wide as half the drawing, nor
+through one it would turn back at. A curve of 8 links or more is drawn
+two pixels wide, of 64 or more four, as a rope of them. The bundled
+ones are drawn under the tree's, mixed with the background: the paler
+the further in, in steps of 0.04, as they spread apart, and the more of
+them there are past 5,000; those of the node selected, pointed at or
+gone to are drawn over them in full.
+The same graph is laid out the same way every time, every node at a
+point of its own. It runs in steps, the paths worked out in it 4,000
+edges a step, in batches of up to 12 ms, the page drawing between them,
+under a bar that says how far it is (**Placing the nodes**). A layout
+done is kept for the page's life: coming back to the same graph draws it
+at once. An instance of the library's ten largest decks with a hundred
+answers each (about 14,500 nodes and 50,000 edges) is laid out and
+routed in about a tenth of a second.
+
+It is drawn in SVG, moved and zoomed by hand: dragging moves it, the
+wheel zooms about the pointer, and **Zoom in**, **Zoom out** and
+**Whole graph** beside it do too. Either changes one transform, and the
+width the edges are drawn at (one CSS property on their groups, for
+them to stay a pixel wide), and draws no node again. A click on a node
+selects it, anywhere in its shape, a hollow one's inside too; one on
+the background (an edge, or a name, which the pointer goes through)
+lets go of the node selected, taking it out of the address as
+selecting one puts it there, with no Back stop. The pointer is held
+only once a press has moved 3 pixels, a drag: the click that ends a
+drag, and a zoom, let go of nothing. On a screen not wide, the aside's
+drawer is already closed by then, as any press outside it closes it.
+The nodes, their rings and their names stay the
+same size on the screen at any zoom, zooming in spreading them apart:
+as a move or a zoom settles (after 120 ms), one CSS property on the
+drawing scales every shape about its own middle, and the names are
+drawn again at their size; while a wheel zoom goes on, they lag
+behind it. The drawing resized (the window, say) is measured again
+once it has been still as long. Selecting a node looks its edges up,
+never searching all of them. Past 20,000 nodes or 60,000 edges shown, it is not
+drawn until asked: the screen says how many there would be, and offers
+**Draw anyway**, the filters and the tables. No node is ever left out
+unsaid.
+
+**Keys.** The drawing is one tab stop, as a chart is
+([statistics.md](statistics.md)):
+
+| Keys | What they do |
+| --- | --- |
+| Arrows | go to the nearest node that way (within 45 degrees of it); the first, from none |
+| Home, End | go to the first node, or the last |
+| Enter | select the node, and open it in the aside; on a screen not wide, its drawer opens, with the focus in it |
+| Escape | let go of the node gone to |
+| `+` (`=`), `-`, `0` | zoom in, out, or to the whole graph |
+
+The line under the drawing says what the node pointed at or gone to is
+("catalog, resource"), and a node gone to by a key is read out in a
+status line, and brought into sight.
+
+**The aside** (Node) shows the node selected: its address, its kind,
+the document that defines it, its classes, the values the documents
+state of it (each in its language, with its language tag after it as
+BCP 47 writes it, `@en`, `@sv` or `@en-GB`, though the data is read in
+lower case, or else its datatype, `xsd:date`, and the
+document it is stated in when not its own), and its links from it and to it,
+each a button that selects the node at its other end, the focus going
+to that node's heading, so the graph can be walked link by link; 50 at
+first and all on asking, the focus going to the first link that shows.
+A leaf says why it was not read; a document that was not there, or
+could not be read, so. A node selected by a click, Enter, the search or
+a table opens the aside's drawer on a screen not wide. It reads nothing
+itself: it shares the screen's query.
+
+**Show as a table** shows the nodes and the edges as two tables in
+place of the drawing ([`DataTable`](#card-workbench)s, 100 rows a
+page), as the filters show them: a node by its name and address, its
+kind, the document that defines it and its classes; an edge by where
+it is from, its link and where it goes. A name selects its node, as
+Enter on its row does. They say all the drawing does, for a screen
+reader or a graph too large to draw.
 
 ## Data set aside
 

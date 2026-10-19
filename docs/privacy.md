@@ -20,6 +20,14 @@ drafts and a digest that makes the next visit faster.
 and writes them from your browser, straight to your pod's server. It
 keeps no copy anywhere else.
 
+Drawing an instance as a graph in the [Studio](studio.md) reads those
+documents, and your WebID profile to find your storages, as logging in
+does, so that it can tell which addresses are in your pod
+([`instanceGraph.ts`](../packages/application/src/instanceGraph.ts)).
+The addresses the documents name, such as your WebID, a library release
+or a card's picture, are drawn as they are and never fetched, whether
+they are in your pod or not.
+
 Your pod's server decides who else may read them. Solid Memo registers
 the review states, the answers and the drafts only in your **private**
 type index, since they say what you studied and how well

@@ -40,6 +40,13 @@ describe("paginate", () => {
 });
 
 describe("Pager", () => {
+  it("names what it pages: cards, unless told", () => {
+    const { rerender } = render(<Pager page={1} pageCount={2} onPageChange={vi.fn()} />);
+    expect(screen.getByRole("navigation", { name: "Card pages" })).toBeInTheDocument();
+    rerender(<Pager page={1} pageCount={2} onPageChange={vi.fn()} label="Pages of nodes" />);
+    expect(screen.getByRole("navigation", { name: "Pages of nodes" })).toBeInTheDocument();
+  });
+
   it("steps to the previous and next page", () => {
     const onPageChange = vi.fn();
     render(<Pager page={2} pageCount={3} onPageChange={onPageChange} />);

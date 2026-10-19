@@ -99,6 +99,8 @@ const ROUTES: StudioRoute[] = [
   { screen: "transfer", instanceUrl: INSTANCE, deckUrls: [DECK, OTHER_DECK] },
   { screen: "drafts", instanceUrl: INSTANCE },
   { screen: "releases", instanceUrl: INSTANCE },
+  { screen: "graph", instanceUrl: INSTANCE },
+  { screen: "graph", instanceUrl: INSTANCE, node: `${DECK}` },
   { screen: "draft", draftUrl: DRAFT },
   ...(["title", "description", "outline"] as const).map(
     (field): StudioRoute => ({ screen: "draft", draftUrl: DRAFT, field }),

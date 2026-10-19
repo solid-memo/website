@@ -36,6 +36,7 @@ describe("the sidebar's sections", () => {
       { screen: "groups", instanceUrl },
       { screen: "drafts", instanceUrl },
       { screen: "releases", instanceUrl },
+      { screen: "graph", instanceUrl },
       { screen: "health", instanceUrl },
       { screen: "library", instanceUrl },
       { screen: "transfer", instanceUrl },
@@ -49,6 +50,7 @@ describe("the sidebar's sections", () => {
     [{ screen: "groups", instanceUrl }, "groups"],
     [{ screen: "drafts", instanceUrl }, "drafts"],
     [{ screen: "releases", instanceUrl }, "releases"],
+    [{ screen: "graph", instanceUrl, node: deckUrl }, "graph"],
     [{ screen: "health", instanceUrl }, "health"],
     [{ screen: "health", instanceUrl, deckUrl }, null],
     [{ screen: "library", instanceUrl }, "library"],
@@ -235,9 +237,10 @@ describe("asideOf", () => {
     expect(asideOf(route, draft)).toBe(aside);
   });
 
-  it("shows the deck at Home's cursor, and the plan of the library copy at theirs", () => {
+  it("shows the deck at Home's cursor, the plan of the library copy at theirs, and the graph's node selected", () => {
     expect(asideOf({ screen: "home", instanceUrl, deckUrl }, null)).toBe("peek");
     expect(asideOf({ screen: "library", instanceUrl }, null)).toBe("plan");
+    expect(asideOf({ screen: "graph", instanceUrl }, null)).toBe("node");
   });
 
   it("shows nothing for a deck's draft, nor on another screen", () => {

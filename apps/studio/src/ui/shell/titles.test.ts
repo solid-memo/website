@@ -72,6 +72,11 @@ describe("crumbsOf", () => {
       [instances, decks, here("Releases", { screen: "releases", instanceUrl })],
     ],
     [
+      "the graph",
+      { screen: "graph", instanceUrl, node: instanceUrl },
+      [instances, decks, here("Graph", { screen: "graph", instanceUrl, node: instanceUrl })],
+    ],
+    [
       "the instance's health",
       { screen: "health", instanceUrl },
       [instances, decks, here("Health", { screen: "health", instanceUrl })],

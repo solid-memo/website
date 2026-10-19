@@ -109,6 +109,25 @@ describe("createAppUseCases", () => {
     });
   });
 
+  it("reads a guest's instance as a graph from this browser, fetching nothing it names", {
+    timeout: 30_000,
+  }, async () => {
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const library = await useCases.listLibraryDecks();
+    const capitals = library.find((deck) => deck.url.includes("/capitals-of-the-world/"))!;
+    await useCases.importLibraryDeck(instance!.url, capitals);
+    requests = [];
+    const graph = await useCases.readInstanceGraph(instance!.url, GUEST_SESSION.webId);
+    expect(graph.nodes.find((node) => node.id === `${instance!.url}catalog.ttl`)).toMatchObject({
+      kind: "document",
+      found: true,
+    });
+    expect(graph.nodes.some((node) => node.kind === "outsideLeaf")).toBe(true);
+    expect(requests).toEqual([]);
+  });
+
   it("keeps a guest's study in IndexedDB, where the browser has it", {
     timeout: 30_000,
   }, async () => {
