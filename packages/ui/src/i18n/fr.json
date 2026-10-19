@@ -575,6 +575,12 @@
     "start": "Commencer le cours",
     "about": "À propos de ce cours"
   },
+  "schedulerInvitation": {
+    "title": "Essayez FSRS-6, le planificateur recommandé",
+    "pitch": "Avec FSRS-6, chaque réponse donne un intervalle nettement différent, et il s’adapte au retard de vos révisions. Au changement, chaque carte reste à réviser le jour prévu, et vous pouvez revenir à SM-2 à tout moment dans les préférences d’étude.",
+    "switch": "Passer à FSRS-6",
+    "notNow": "Pas maintenant"
+  },
   "deckPreferences": {
     "loading": "Chargement des préférences…",
     "heading": "Préférences : {deck}",
@@ -1159,12 +1165,13 @@
       "hint": "La méthode qui décide quand chaque carte revient. SM-2 est tenu à jour à chaque révision : vous pouvez y revenir à tout moment ; repasser à FSRS-6 recalcule chaque carte.",
       "sm2": {
         "label": "SM-2",
-        "hint": "SuperMemo-2 : chaque bonne réponse multiplie l’intervalle de la carte par sa facilité. Le choix par défaut."
+        "hint": "SuperMemo-2 : chaque bonne réponse multiplie l’intervalle de la carte par sa facilité."
       },
       "fsrs6": {
         "label": "FSRS-6",
-        "hint": "Le Free Spaced Repetition Scheduler, version 6 : il suit la stabilité de chaque souvenir et ramène la carte quand votre probabilité de vous en souvenir tombe à la rétention choisie. Au changement, le souvenir de chaque carte est calculé à partir de vos réponses jusqu’ici."
-      }
+        "hint": "Le Free Spaced Repetition Scheduler, version 6 : il suit la stabilité de chaque souvenir et ramène la carte quand votre probabilité de vous en souvenir tombe à la rétention choisie. Au changement, le souvenir de chaque carte est calculé à partir de vos réponses jusqu’ici. Recommandé : chaque réponse donne un intervalle nettement différent, et une révision en retard compte selon son retard."
+      },
+      "recommended": "Recommandé"
     },
     "desiredRetention": "Rétention souhaitée (%)",
     "desiredRetentionHint": "Avec FSRS-6 : la probabilité de vous souvenir d’une carte quand elle revient, de 70 à 97. Plus elle est haute, plus les intervalles sont courts et les révisions nombreuses. Par défaut : 90.",

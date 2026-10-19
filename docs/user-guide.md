@@ -114,6 +114,15 @@ The deck list is home. From the top:
 - **Your courses**: each course you have started and not finished, how
   many of its chapters are done, and a button to go on where you left
   off ([courses.md](courses.md#the-learners-flow)).
+- **Try FSRS-6**: while your instance schedules with SM-2, an
+  invitation to switch to FSRS-6, the recommended scheduler: its
+  intervals differ clearly by your answer, and it adapts to how late you
+  review. **Switch to FSRS-6** switches at once, deck by deck, and says
+  how it went; every card stays due on the day it was due, and you can
+  switch back in the preferences at any time. **Not now** puts it away
+  for good, on every device, as your preferences in the Pod keep it
+  ([srs.md](srs.md#the-invitation-to-switch)). A new instance starts on
+  FSRS-6, so it is not invited.
 - **Decks**: each deck with a **Study** button when cards are waiting
   for you today, or "Done for today". Click a deck's name to open its
   page. A deck copied from the library says "New release" after its
@@ -171,9 +180,9 @@ A card you answer with **0 — Blackout** or **1 — Wrong**, or with
 it is due again the next day you study. **Hard**, on the four buttons,
 counts as remembered. The better you remember a card, the longer it
 waits before it comes back: a day, then a few days, then weeks. That is
-spaced repetition, and Solid Memo schedules it with the SM-2 method,
-or with FSRS-6 when you choose it in the preferences
-([srs.md](srs.md)). When the session is over it says so; "End session"
+spaced repetition, and Solid Memo schedules it with FSRS-6, which a new
+instance starts on, or with the SM-2 method when you choose it in the
+preferences ([srs.md](srs.md)). When the session is over it says so; "End session"
 takes you back to your decks at any time, and nothing you answered is
 lost.
 
@@ -324,7 +333,7 @@ of your answers, and nothing turns them off
 | New cards per day | How many new cards a day brings, 5 to start with. Every new card comes back for reviews in the days after, so it is better to start small. |
 | Max reviews per day | A cap on the reviews of one day, 200 to start with. |
 | Day starts at | The hour a new study day begins, 4 in the morning to start with, so studying late at night still counts for that day. |
-| Scheduler | SM-2 (to start with) or FSRS-6: how each card's next day is worked out ([srs.md](srs.md#switching-the-scheduler)). Switching to FSRS-6 works out each card's memory from your answers so far, deck by deck, and says how it went; every card stays due on the day it was due. SM-2 is kept up to date on every review, so you can switch back to it at any time; switching to FSRS-6 again works each card out anew. |
+| Scheduler | FSRS-6, listed first and marked Recommended, or SM-2: how each card's next day is worked out ([srs.md](srs.md#switching-the-scheduler)). A new instance starts on FSRS-6; one made before it could choose, or with no preferences saved, is on SM-2 until you switch. Switching to FSRS-6 works out each card's memory from your answers so far, deck by deck, and says how it went; every card stays due on the day it was due. SM-2 is kept up to date on every review, so you can switch back to it at any time; switching to FSRS-6 again works each card out anew. |
 | Desired retention | With FSRS-6: how likely you are to remember a card when it comes back, from 70% to 97%, 90% to start with. Higher means more reviews. |
 | Answer buttons | 0 to 5, or Again · Hard · Good · Easy. FSRS-6 always uses the four; your choice is kept for SM-2. |
 | When data does not conform | What to do when data in your Pod is not in the form Solid Memo expects: block the instance, set the faulty deck aside (the default), or only warn ([validation.md](validation.md)). |
@@ -403,7 +412,8 @@ screenshot of each.
 | You want to see | Journey | Steps |
 |---|---|---|
 | Logging in with a WebID and out | [smoke.journey.ts](../e2e/journeys/journeys/smoke.journey.ts) | 01–03 |
-| Preferences: new cards per day, answer buttons, developer mode | [full-learner.journey.ts](../e2e/journeys/journeys/full-learner.journey.ts) | 03, 12, 14 |
+| Preferences: new cards per day, the scheduler, answer buttons, developer mode | [full-learner.journey.ts](../e2e/journeys/journeys/full-learner.journey.ts) | 03, 12, 14 |
+| The invitation to switch to FSRS-6, answered Not now, and kept so | full-learner | 03b, 14 |
 | Creating decks and adding cards | full-learner | 04–05, 07–08 |
 | Studying | full-learner | 06, 13 |
 | Grouping decks | full-learner | 09–11 |
@@ -423,7 +433,7 @@ screenshot of each.
 | The dark theme, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–04, 08–10 |
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts, first journey | 21–23 |
-| Switching the scheduler to FSRS-6, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 06–09 |
+| Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |
 | Reviewing on a later study day, forgetting cards, and the hardest cards | later-day | 07–12 |
 | Updating a library deck to its new release, its progress kept | [library-upgrade.journey.ts](../e2e/journeys/journeys/library-upgrade.journey.ts) | 04–10 |
 | Undoing an answer, and resetting today's study | [reset-day.journey.ts](../e2e/journeys/journeys/reset-day.journey.ts) | 07–12 |

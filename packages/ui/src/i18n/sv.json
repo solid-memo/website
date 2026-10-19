@@ -554,6 +554,12 @@
     "start": "Börja kursen",
     "about": "Om kursen"
   },
+  "schedulerInvitation": {
+    "title": "Prova FSRS-6, den rekommenderade schemaläggaren",
+    "pitch": "FSRS-6 ger varje svar ett tydligt olika intervall och tar hänsyn till hur sent du repeterar. Vid bytet ska varje kort fortfarande repeteras den dag det skulle, och du kan byta tillbaka till SM-2 när du vill i studieinställningarna.",
+    "switch": "Byt till FSRS-6",
+    "notNow": "Inte nu"
+  },
   "deckPreferences": {
     "loading": "Läser in inställningar…",
     "heading": "Inställningar: {deck}",
@@ -1100,12 +1106,13 @@
       "hint": "Metoden som avgör när varje kort kommer tillbaka. SM-2 hålls uppdaterad vid varje repetition, så du kan byta tillbaka till den när du vill; byter du till FSRS-6 igen räknas varje kort ut på nytt.",
       "sm2": {
         "label": "SM-2",
-        "hint": "SuperMemo-2: varje rätt svar multiplicerar kortets intervall med dess lätthet. Standard."
+        "hint": "SuperMemo-2: varje rätt svar multiplicerar kortets intervall med dess lätthet."
       },
       "fsrs6": {
         "label": "FSRS-6",
-        "hint": "Free Spaced Repetition Scheduler, version 6: den följer hur stabilt varje minne är och tar fram kortet igen när chansen att du minns det sjunkit till den retention du väljer. Vid bytet räknas varje korts minne ut från dina svar hittills."
-      }
+        "hint": "Free Spaced Repetition Scheduler, version 6: den följer hur stabilt varje minne är och tar fram kortet igen när chansen att du minns det sjunkit till den retention du väljer. Vid bytet räknas varje korts minne ut från dina svar hittills. Rekommenderas: varje svar ger ett tydligt olika intervall, och en sen repetition räknas efter hur sen den är."
+      },
+      "recommended": "Rekommenderas"
     },
     "desiredRetention": "Önskad retention (%)",
     "desiredRetentionHint": "Med FSRS-6: chansen att du minns ett kort när det kommer tillbaka, från 70 till 97. Högre ger kortare intervall och fler repetitioner. Standard är 90.",

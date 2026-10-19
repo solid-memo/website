@@ -347,6 +347,7 @@ describe("migrate", () => {
       ...v4,
       scheduler: `${SM}sm2`,
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     });
   });
 

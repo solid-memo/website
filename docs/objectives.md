@@ -14,10 +14,10 @@ not with the app.
 
 Each goal, and the pages and code that carry it out:
 
-1. **Learn for the long term.** Cards are scheduled by SM-2, spaced
-   repetition's best-known algorithm, or by FSRS-6 when the learner
-   chooses it, so each comes back at a longer interval the better it
-   is known.
+1. **Learn for the long term.** Cards are scheduled by FSRS-6, which
+   a new instance starts on, or by SM-2, spaced repetition's
+   best-known algorithm, when the learner chooses it, so each comes
+   back at a longer interval the better it is known.
    [srs.md](srs.md), [`sm2.ts`](../packages/domain/src/sm2.ts),
    [`fsrs.ts`](../packages/domain/src/fsrs.ts),
    [`scheduling.ts`](../packages/domain/src/scheduling.ts).

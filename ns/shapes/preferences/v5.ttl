@@ -8,13 +8,14 @@
 
 # Preferences format 5 (vocabulary 1.21): format 4 plus the scheduler
 # that sets the due days, a concept of solid-memo:Schedulers, and the
-# retention FSRS-6 aims at, a share from 0.7 to 0.97. Both are stated
+# retention FSRS-6 aims at, a share from 0.7 to 0.97, and whether the
+# learner declined the invitation to switch to FSRS-6. All are stated
 # whichever scheduler is in use, so switching back and forth keeps the
 # retention chosen.
 <#shape>
     a sh:NodeShape ;
     sh:name "PreferencesV5" ;
-    rdfs:comment "Preferences format 5: every field required, the scheduler and the desired retention among them." ;
+    rdfs:comment "Preferences format 5: every field required, the scheduler, the desired retention and the dismissed scheduler invitation among them." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:Preferences ;
     sh:property <#formatVersion> ,
@@ -26,7 +27,8 @@
                 <#invalidDataPolicy> ,
                 <#theme> ,
                 <#scheduler> ,
-                <#desiredRetention> .
+                <#desiredRetention> ,
+                <#schedulerInvitationDismissed> .
 
 <#formatVersion>
     a sh:PropertyShape ;
@@ -123,3 +125,12 @@
     sh:maxCount 1 ;
     sh:message "The desired retention is one decimal share from 0.7 to 0.97."@en ,
                "Önskad retention är en decimal andel från 0,7 till 0,97."@sv .
+
+<#schedulerInvitationDismissed>
+    a sh:PropertyShape ;
+    sh:path solid-memo:schedulerInvitationDismissed ;
+    sh:datatype xsd:boolean ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Preferences state whether the invitation to switch to FSRS-6 was dismissed: true or false."@en ,
+               "Inställningarna anger om inbjudan att byta till FSRS-6 har avböjts: true eller false."@sv .

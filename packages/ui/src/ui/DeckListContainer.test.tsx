@@ -216,6 +216,32 @@ describe("DeckListContainer", () => {
     expect(useCases.getCourse).not.toHaveBeenCalled();
   });
 
+  it("invites a learner on SM-2 to FSRS-6 above the list", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
+    renderContainer(useCases);
+    const invitation = await screen.findByRole("complementary", {
+      name: "Try FSRS-6, the recommended scheduler",
+    });
+    const heading = screen.getByRole("heading", { name: "Decks" });
+    // Above the list's heading, as the strip of courses is.
+    expect(
+      invitation.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("invites nobody on FSRS-6", async () => {
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck]),
+      getPreferences: vi.fn(async () => ({ ...QUEUE_DEFAULTS.prefs, scheduler: "fsrs6" as const })),
+    });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kanji N5" });
+    await waitFor(() => expect(useCases.getPreferences).toHaveBeenCalled());
+    expect(
+      screen.queryByRole("complementary", { name: "Try FSRS-6, the recommended scheduler" }),
+    ).toBeNull();
+  });
+
   it("says where a copy of a release added from a link came from, its own release saying whether it is a course", async () => {
     const linkedCourse = {
       ...deck,

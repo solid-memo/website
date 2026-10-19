@@ -468,6 +468,7 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       theme: `${SM_NS}darkTheme`,
       scheduler: `${SM_NS}fsrs6`,
       desiredRetention: 0.85,
+      schedulerInvitationDismissed: false,
     },
   },
   documentReceipt: {

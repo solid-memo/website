@@ -37,18 +37,25 @@ function answerScaleOptions(t: I18n["t"]): {
   ];
 }
 
-/** The schedulers on offer, each with its label and meaning. */
-function schedulerOptions(t: I18n["t"]): { value: Scheduler; label: string; hint: string }[] {
+/**
+ * The schedulers on offer, each with its label and meaning: FSRS-6
+ * first, as the recommended one, its hint saying why.
+ */
+function schedulerOptions(
+  t: I18n["t"],
+): { value: Scheduler; label: string; hint: string; recommended: boolean }[] {
   return [
-    {
-      value: "sm2",
-      label: t("preferences.scheduler.sm2.label"),
-      hint: t("preferences.scheduler.sm2.hint"),
-    },
     {
       value: "fsrs6",
       label: t("preferences.scheduler.fsrs6.label"),
       hint: t("preferences.scheduler.fsrs6.hint"),
+      recommended: true,
+    },
+    {
+      value: "sm2",
+      label: t("preferences.scheduler.sm2.label"),
+      hint: t("preferences.scheduler.sm2.hint"),
+      recommended: false,
     },
   ];
 }
@@ -135,6 +142,7 @@ export function PreferencesScreen({
       // The field is disabled, so unchecked, while SM-2 is chosen: what
       // it holds then is not the learner's to save.
       desiredRetention: fsrs ? Number(retention) / 100 : preferences.desiredRetention,
+      schedulerInvitationDismissed: preferences.schedulerInvitationDismissed,
     });
   }
 
@@ -233,6 +241,9 @@ export function PreferencesScreen({
                 disabled={busy}
               />
               {option.label}
+              {option.recommended && (
+                <span class="recommended-tag">{t("preferences.scheduler.recommended")}</span>
+              )}
               <span class="hint">{option.hint}</span>
             </label>
           ))}

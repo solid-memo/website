@@ -139,7 +139,7 @@ checked by the shapes every place shares (`<#shape>`).
 | Draft step 1 | In a draft (`DraftStepV1`): step 1, but `sm:theory` 0..n language-tagged text in any language, one per language, `sm:checkedBy` 0..n, and `schema:isPartOf` and `schema:position` 0..1 |
 | Preferences 3 | Preferences 2 + `sm:invalidDataPolicy` 1..1, a concept of `sm:InvalidDataPolicies` |
 | Preferences 4 | Preferences 3 + `sm:theme` 1..1, a concept of `sm:Themes` (see [theme.md](theme.md)) |
-| Preferences 5 | Preferences 4 + `sm:studyScheduler` 1..1, `sm:sm2` or `sm:fsrs6`, and `sm:desiredRetention` 1..1 decimal, 0.7 to 0.97 |
+| Preferences 5 | Preferences 4 + `sm:studyScheduler` 1..1, `sm:sm2` or `sm:fsrs6`, `sm:desiredRetention` 1..1 decimal, 0.7 to 0.97, and `sm:schedulerInvitationDismissed` 1..1 boolean |
 | Library deck series 1 | The deck across its releases in the library index: a `dcat:DatasetSeries` and `dcat:Dataset`; title, description, publisher 1..1; `dcat:first`, `dcat:last`, `dcat:hasCurrentVersion` 1..1; `dcat:hasVersion` 1..n; themes and keywords 0..n |
 | Library deck series 2 | Library deck series 1 with the version stated (`sh:hasValue 2`) and the title and description as language-tagged text, as in deck format 4 |
 | Library deck series 3 | Library deck series 2, but the keywords, copied from the current release, are language-tagged text, several per language, or untagged as a library deck 4 release has them |

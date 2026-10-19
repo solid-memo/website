@@ -290,6 +290,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       estimated: 0,
       failed: [],
     })),
+    dismissSchedulerInvitation: vi.fn(async () => undefined),
     renameInstance: vi.fn(async (_session, instance, name) => ({ ...instance, name: name.trim() })),
     readCatalog: vi.fn(async (instanceUrl) => ({
       title: "Main",

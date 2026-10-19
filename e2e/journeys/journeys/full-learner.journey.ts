@@ -9,7 +9,9 @@ import type { StudyResult } from "../pages/Study.ts";
 
 /**
  * A learner's whole first day, as the journey's spec numbers it: log in,
- * keep new cards to one a day, make two decks of two cards and study,
+ * keep new cards to one a day on SM-2 and its 0 to 5 scale, a new
+ * instance being on FSRS-6, decline the deck list's invitation to switch
+ * back, which stays declined, make two decks of two cards and study,
  * group the decks, reorder and ungroup them, allow two new cards a day on
  * four answer buttons and study again, read the statistics and a card's
  * history, preview,
@@ -43,11 +45,26 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
     logInAndCreateInstance(app, account, `Journey ${runId}`),
   );
 
-  await app.step("03 · Set new cards per day to 1 in Preferences", async () => {
-    await app.preferences.open();
-    await app.preferences.setNewCardsPerDay(1);
-    await app.preferences.save();
-  });
+  await app.step(
+    "03 · Set new cards per day to 1 and the scheduler to SM-2 in Preferences",
+    async () => {
+      await app.preferences.open();
+      // A new instance studies by FSRS-6, the recommended scheduler.
+      await app.preferences.expectScheduler("fsrs6");
+      await app.preferences.expectFsrsRecommended();
+      await app.preferences.setNewCardsPerDay(1);
+      await app.preferences.setScheduler("sm2");
+      await app.preferences.save();
+    },
+  );
+
+  await app.step(
+    "03b · The deck list invites a learner on SM-2 to FSRS-6: answer Not now",
+    async () => {
+      await app.decks.expectSchedulerInvitation(true);
+      await app.decks.declineSchedulerInvitation();
+    },
+  );
 
   await app.step("04 · Create a deck", async () => {
     await app.decks.openDeckCreator();
@@ -164,6 +181,8 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
     await app.preferences.setDeveloperMode(true);
     await app.preferences.save();
     await expect(app.chrome.developerTools).toBeVisible();
+    // Not now is kept in the pod's preferences, through every save of them.
+    await app.decks.expectSchedulerInvitation(false);
   });
 
   await app.step("15 · Check the statistics, tab by tab, of all time and of one deck", async () => {

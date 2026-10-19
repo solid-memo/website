@@ -123,10 +123,13 @@ domain layer too, as pure functions:
 [fsrs.ts](../packages/domain/src/fsrs.ts) has the formulas, and
 `gradePrompt` in [grading.ts](../packages/domain/src/grading.ts)
 applies a grade to both schedulers. The preferences name the scheduler
-that sets the due days (`sm:studyScheduler`, preferences format 5);
-SM-2 is the default, and SM-2's state is updated on every review either
-way. The learner switches in the preferences
-([Switching the scheduler](#switching-the-scheduler)).
+that sets the due days (`sm:studyScheduler`, preferences format 5),
+and SM-2's state is updated on every review either way. FSRS-6 is the
+recommended one: its intervals differ clearly by the answer, and a late
+review counts for how late it is. A new instance starts on it
+([Which scheduler an instance is on](#which-scheduler-an-instance-is-on)).
+The learner switches in the preferences, or from the deck list's
+invitation ([Switching the scheduler](#switching-the-scheduler)).
 
 **Reference.** FSRS is by Jarrett Ye and the Open Spaced Repetition
 project, described in
@@ -263,10 +266,44 @@ read in the same read of the document.
   the due day ([data-model.md](data-model.md#the-answer-log)); the
   grade stays SM-2's.
 
+#### Which scheduler an instance is on
+
+The scheduler is the preferences' own, never a default's, so a change
+of default never changes anyone's scheduler behind their back:
+
+- **A new instance** is made with its preferences stated
+  (`NEW_INSTANCE_PREFERENCES`, [preferences.ts](../packages/domain/src/preferences.ts)):
+  FSRS-6, as there is no SM-2 history to replay, and the theme the
+  device shows. A guest's instance and a trial's sandbox are made the
+  same way (`createInstance`), so a guest starts on FSRS-6 and a trial
+  then takes the user's scheduler.
+- **An instance with no preferences stored** was made before an
+  instance stated its own, and its review states are SM-2's: it reads
+  as SM-2 (`DEFAULT_PREFERENCES`), and so does a format 1 to 4 document
+  (the step to format 5 fills in SM-2). Its learner is invited to switch.
+- **An instance attached by its address**, or a guest's study moved into
+  a pod, keeps the preferences it has.
+
+#### The invitation to switch
+
+A learner whose instance is on SM-2 is invited above the deck list to
+switch to FSRS-6 (`SchedulerInvitationContainer`,
+[SchedulerInvitation.tsx](../packages/ui/src/ui/SchedulerInvitation.tsx);
+`invitesToFsrs`), a guest among them: what FSRS-6 gives, a button that
+switches and "Not now". The switch is `switchScheduler`'s, with the
+preferences as they are but for the scheduler, its progress and its
+result where the invitation was, as on the preferences screen. "Not
+now" is kept in the preferences (`sm:schedulerInvitationDismissed`,
+`dismissSchedulerInvitation`), so the invitation does not come back, on
+any device, and a save of the preferences keeps it. It is not shown
+while FSRS-6 sets the due days. A learner who switches back to SM-2 in
+the preferences and has not answered "Not now" is invited once more.
+
 #### Switching the scheduler
 
-The preferences screen saves a change of scheduler through
-`switchScheduler` ([useCases.ts](../packages/application/src/useCases.ts));
+The preferences screen, where FSRS-6 is listed first and marked
+Recommended, and the deck list's invitation save a change of scheduler
+through `switchScheduler` ([useCases.ts](../packages/application/src/useCases.ts));
 a plain save of the preferences (`savePreferences`) keeps the scheduler
 stored, so FSRS-6 is never turned on without its states.
 

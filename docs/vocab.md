@@ -146,8 +146,8 @@ string, so other applications can look up what it means:
   ([Card labels](#card-labels)). 1.21's `sm:stability`, `sm:difficulty`,
   `sm:previousStability` and `sm:previousDifficulty` joined a new
   shape, FSRS review-state format 1, beside the concept `sm:fsrs6`; its
-  `sm:studyScheduler` and `sm:desiredRetention` joined preferences
-  format 5, and `sm:scheduledWith` deck schedule format 2, the next
+  `sm:studyScheduler`, `sm:desiredRetention` and
+  `sm:schedulerInvitationDismissed` joined preferences format 5, and `sm:scheduledWith` deck schedule format 2, the next
   versions of those shapes ([FSRS-6](#fsrs-6)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
@@ -354,6 +354,7 @@ SM-2 ones ([#191](https://github.com/solid-memo/website/issues/191)):
 | `sm:previousDifficulty` | datatype property | ReviewState → `xsd:decimal` |
 | `sm:studyScheduler` | object property | Preferences → a concept of `sm:Schedulers` |
 | `sm:desiredRetention` | datatype property | Preferences → `xsd:decimal` (a share: 0.9 is 90%) |
+| `sm:schedulerInvitationDismissed` | datatype property | Preferences → `xsd:boolean` (the learner answered "Not now" to the invitation to switch to FSRS-6) |
 | `sm:scheduledWith` | object property | DeckSchedule → a concept of `sm:Schedulers` |
 
 - **An FSRS-6 state is a review state.** The frozen domains of

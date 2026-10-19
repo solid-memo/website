@@ -35,7 +35,7 @@ https://solid-memo.com/ns/shapes/preferences/v1.ttl sha256:2b2d7e093f5b98083f3cc
 https://solid-memo.com/ns/shapes/preferences/v2.ttl sha256:d7089233c185697fa3de86318b44115add50600084fb3d0e425d2bf4cf76a64b
 https://solid-memo.com/ns/shapes/preferences/v3.ttl sha256:2f8baf87eaf0925b760f403acc2d457449a8fff748953c7986f42f8fd63f0a17
 https://solid-memo.com/ns/shapes/preferences/v4.ttl sha256:f5f9c6f1a87c0c2efe7f9c3c1f4c48eb8d3b099af636e2873c3b719b662850ea
-https://solid-memo.com/ns/shapes/preferences/v5.ttl sha256:8424a21a79baaab98bb45f0539d93b1452fe7dd0d355f8541601e59e7db60598
+https://solid-memo.com/ns/shapes/preferences/v5.ttl sha256:cb2397c0e787aa68534a46756c264c28d06a77cdeab2037e2da0b07617fd13b1
 https://solid-memo.com/ns/shapes/review-state/v1.ttl sha256:8e55abf1325dd457a71be5b4107ef5c667bc295357b93d39dcb2ff6de587cd95
 https://solid-memo.com/ns/shapes/review-state/v2.ttl sha256:ef73bebe0c5f20fb709598a8fdbd3789ae8eb2fd22308f543dd731fc9f716c87
 https://solid-memo.com/ns/shapes/step/v1.ttl sha256:39b2565294fc4bb428ddda6b4dd7a35e7324daecc4271c2ac21ee27ee2d819de

@@ -29,6 +29,7 @@ export function preferencesFromRecord(data: PreferencesV5): StudyPreferences {
     theme: themeOfConcept(data.theme)!,
     scheduler: schedulerOfConcept(data.scheduler)!,
     desiredRetention: data.desiredRetention,
+    schedulerInvitationDismissed: data.schedulerInvitationDismissed,
   };
 }
 
@@ -43,5 +44,6 @@ export function preferencesToRecord(preferences: StudyPreferences): PreferencesV
     theme: conceptOfTheme(preferences.theme),
     scheduler: conceptOfScheduler(preferences.scheduler),
     desiredRetention: preferences.desiredRetention,
+    schedulerInvitationDismissed: preferences.schedulerInvitationDismissed,
   };
 }

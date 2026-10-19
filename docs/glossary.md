@@ -161,10 +161,11 @@ it most. The specifications' versions and status are in
 - **Ease factor**: SM-2's measure of how easy a card is; the interval
   grows by it. It starts at 2.5 and never goes below 1.3.
   [srs.md](srs.md#the-sm-2-transition).
-- **FSRS-6** (Free Spaced Repetition Scheduler, version 6): the second
-  scheduling algorithm Solid Memo offers, by Jarrett Ye and the Open
-  Spaced Repetition project; it schedules each review for when the
-  chance of recall falls to the desired retention.
+- **FSRS-6** (Free Spaced Repetition Scheduler, version 6): the
+  scheduling algorithm Solid Memo recommends, and a new instance starts
+  on, by Jarrett Ye and the Open Spaced Repetition project; it
+  schedules each review for when the chance of recall falls to the
+  desired retention.
   [The Algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm);
   [srs.md](srs.md#fsrs-6), [policy.md](policy.md#fsrs-6).
 - **Grade** (quality): how well you knew an answer, from 0 (blackout)
@@ -187,10 +188,15 @@ it most. The specifications' versions and status are in
   ease factor, interval, repetitions and due day; under FSRS-6, also
   its stability and difficulty, in a state of its own.
   [srs.md](srs.md#review-state).
-- **Scheduler**: the algorithm that sets the due days, SM-2 or FSRS-6,
-  chosen in the preferences. [srs.md](srs.md#switching-the-scheduler).
-- **SM-2** (SuperMemo 2): the scheduling algorithm Solid Memo uses by default,
-  published by Piotr Woźniak in 1990.
+- **Scheduler**: the algorithm that sets the due days, FSRS-6 or SM-2,
+  chosen in the preferences or from the deck list's invitation to
+  switch. [srs.md](srs.md#switching-the-scheduler).
+- **Scheduler invitation**: the deck list's offer, to a learner on SM-2,
+  to switch to FSRS-6; "Not now" is kept in the preferences.
+  [srs.md](srs.md#the-invitation-to-switch).
+- **SM-2** (SuperMemo 2): the scheduling algorithm Solid Memo used
+  alone before FSRS-6, and still uses for an instance made before then
+  until its learner switches, published by Piotr Woźniak in 1990.
   [Description](https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method);
   [srs.md](srs.md), [policy.md](policy.md#sm-2).
 - **Stability**: FSRS-6's measure of how long a card's memory lasts:

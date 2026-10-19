@@ -107,6 +107,7 @@ sm:scheduledDirection: property, range skos:Concept, domain sm:DeckSchedule
 sm:scheduledOn: property, range xsd:string, domain sm:DeckSchedule
 sm:scheduledWith: property, range skos:Concept, domain sm:DeckSchedule
 sm:scheduler: property, range skos:Concept, domain sm:ReviewState
+sm:schedulerInvitationDismissed: property, range xsd:boolean, domain sm:Preferences
 sm:sm2: concept
 sm:stability: property, range xsd:decimal, domain sm:ReviewState
 sm:studyDirection: property, range skos:Concept, domain sm:Deck

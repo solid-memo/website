@@ -126,6 +126,8 @@ export const SM = {
   studyScheduler: `${SM_NS}studyScheduler`,
   /** The chance of recalling a card on the day it falls due that FSRS-6 schedules for, as a share: 0.9 is 90%. (Added in 1.21 for preferences format 5.) */
   desiredRetention: `${SM_NS}desiredRetention`,
+  /** Whether the learner answered Not now to the deck list's invitation to switch from SM-2 to FSRS-6, so it is not shown again. (Added in 1.21 for preferences format 5.) */
+  schedulerInvitationDismissed: `${SM_NS}schedulerInvitationDismissed`,
   /** The document a receipt is about. (Added in 1.9.) */
   receiptOf: `${SM_NS}receiptOf`,
   /** The version of the document a receipt is about: its ETag, as the pod gave it. (Added in 1.9.) */

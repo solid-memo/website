@@ -1039,6 +1039,7 @@ export const PREFERENCES_V5: ShapeDescriptor<PreferencesV5> = {
     { name: "theme", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#theme", kind: "iriEnum", cardinality: "one", values: ["https://solid-memo.com/ns/vocab/v1.ttl#systemTheme","https://solid-memo.com/ns/vocab/v1.ttl#lightTheme","https://solid-memo.com/ns/vocab/v1.ttl#darkTheme"] },
     { name: "scheduler", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#studyScheduler", kind: "iriEnum", cardinality: "one", values: ["https://solid-memo.com/ns/vocab/v1.ttl#sm2","https://solid-memo.com/ns/vocab/v1.ttl#fsrs6"] },
     { name: "desiredRetention", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#desiredRetention", kind: "decimal", cardinality: "one" },
+    { name: "schedulerInvitationDismissed", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#schedulerInvitationDismissed", kind: "boolean", cardinality: "one" },
   ],
 };
 

@@ -4,7 +4,8 @@ Trying Solid Memo before logging in. A guest studies in a pod kept in
 their browser. Once they log in with a real WebID they can move what they
 studied into their own Pod. Everything else in the app works the same
 for a guest: the deck library, studying, statistics, preferences and the
-data check.
+data check. A guest's instance is made as any new one is, so it studies
+by FSRS-6 ([srs.md](srs.md#which-scheduler-an-instance-is-on)).
 
 ## A pod in the browser
 

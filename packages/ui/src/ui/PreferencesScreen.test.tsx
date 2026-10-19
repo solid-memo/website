@@ -104,6 +104,7 @@ describe("PreferencesScreen", () => {
         theme: "system",
         scheduler: "sm2",
         desiredRetention: 0.9,
+        schedulerInvitationDismissed: false,
       },
     });
     expect(screen.getByLabelText("New cards per day")).toHaveValue(10);
@@ -125,6 +126,18 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText("Desired retention (%)")).toHaveValue(90);
     expect(screen.getByLabelText(/0 to 5 scale/)).toBeEnabled();
     expect(screen.getByRole("group", { name: "Answer buttons" })).not.toHaveAccessibleDescription();
+  });
+
+  it("lists FSRS-6 first, marked as recommended, its hint saying why", () => {
+    renderScreen();
+    const radios = screen.getAllByRole("radio", { name: /^(FSRS-6|SM-2)/ });
+    expect(radios.map((radio) => radio.getAttribute("value"))).toEqual(["fsrs6", "sm2"]);
+    const fsrs = screen.getByLabelText(/^FSRS-6/);
+    expect(fsrs).toHaveAccessibleName(/^FSRS-6 Recommended /);
+    expect(fsrs.closest("label")).toHaveTextContent(
+      "Recommended: each answer sets a clearly different interval, and a late review counts for how late it is.",
+    );
+    expect(screen.getByLabelText(/^SM-2/).closest("label")).not.toHaveTextContent("Recommended");
   });
 
   it("chooses FSRS-6 with a retention in percent, the answer buttons kept but disabled, saying why", () => {
@@ -257,6 +270,7 @@ describe("PreferencesScreen", () => {
       theme: "system",
       scheduler: "sm2",
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     });
   });
 

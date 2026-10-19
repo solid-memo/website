@@ -17,4 +17,5 @@
     solid-memo:invalidDataPolicy solid-memo:blockSubject ;
     solid-memo:theme solid-memo:darkTheme ;
     solid-memo:studyScheduler solid-memo:darkTheme ;
-    solid-memo:desiredRetention 0.9 .
+    solid-memo:desiredRetention 0.9 ;
+    solid-memo:schedulerInvitationDismissed false .

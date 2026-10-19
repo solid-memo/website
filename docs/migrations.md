@@ -297,8 +297,9 @@ format did not move:
   its due day goes on setting the card's, as if the date had not been
   set, until the card's next review.
 - **The other terms of 1.21**, `sm:studyScheduler`,
-  `sm:desiredRetention` and `sm:scheduledWith`, are in preferences
-  format 5 and deck schedule format 2 (below).
+  `sm:desiredRetention`, `sm:schedulerInvitationDismissed` and
+  `sm:scheduledWith`, are in preferences format 5 and deck schedule
+  format 2 (below).
 - **One full re-check.** A new shape file joined the rules, so the
   rules' hash changed: every instance is checked in full once on its
   next opening, and its documents get new receipts. No pod holds an
@@ -309,12 +310,21 @@ Preferences format 5 and deck schedule format 2 (vocabulary 1.21) say
 which scheduler sets the due days:
 
 - **Preferences format 5** states `sm:studyScheduler`, `sm:sm2` or
-  `sm:fsrs6`, and `sm:desiredRetention`, the chance of recall FSRS-6
-  aims at, a share from 0.7 to 0.97. Both are stated whichever
-  scheduler is in use, so a switch back keeps the retention chosen.
+  `sm:fsrs6`, `sm:desiredRetention`, the chance of recall FSRS-6
+  aims at, a share from 0.7 to 0.97, and
+  `sm:schedulerInvitationDismissed`, whether the learner answered "Not
+  now" to the deck list's invitation to switch to FSRS-6. All are
+  stated whichever scheduler is in use, so a switch back keeps the
+  retention chosen, as every field of preferences is since format 2.
   The step from format 4 (`preferences/4-to-5`) fills in SM-2, the only
-  scheduler there was, and 0.9, FSRS-6's default. The format update
-  offers it, as it offered the theme.
+  scheduler there was, 0.9, FSRS-6's default, and false: the invitation
+  is new. The format update offers it, as it offered the theme.
+- **Defaults never change a scheduler.** A new instance is made with
+  its preferences, FSRS-6 their scheduler; one with no preferences
+  document, made before, reads as SM-2, as it always did
+  ([srs.md](srs.md#which-scheduler-an-instance-is-on)). No step turns
+  FSRS-6 on: only `switchScheduler` does, once each deck's FSRS-6
+  states are written.
 - **Deck schedule format 2** states `sm:scheduledWith`, the scheduler
   whose due days the digest's counts are. A schedule holds only while
   it names the scheduler in use (`freshSchedule`, `studyCountsOf`), as

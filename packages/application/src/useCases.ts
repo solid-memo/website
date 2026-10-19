@@ -124,6 +124,7 @@ import {
 } from "@solid-memo/domain/studyDigest";
 import {
   DEFAULT_PREFERENCES,
+  NEW_INSTANCE_PREFERENCES,
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
@@ -407,6 +408,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   addManualStorage(url: string): Promise<Storage>;
   listInstances(session: Session): Promise<Instance[]>;
   getRegistrationOptions(session: Session): Promise<RegistrationOptions>;
+  /**
+   * Make an instance: its meta document and registrations, its catalog,
+   * and its preferences, new ones (NEW_INSTANCE_PREFERENCES) with the
+   * theme this device shows, so it studies by FSRS-6.
+   */
   createInstance(
     session: Session,
     args: {
@@ -766,7 +772,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   findInterruptedGuestMove(instance: Instance): Promise<string | null>;
   /** Delete the partial copy an interrupted move left behind, and forget it. */
   removeInterruptedGuestMove(instance: Instance): Promise<void>;
-  /** Stored preferences overlaid on the defaults. */
+  /**
+   * The stored preferences; the defaults when none are stored, SM-2's
+   * among them (DEFAULT_PREFERENCES): an instance with none was made
+   * before a new one stated its own, and studies by SM-2.
+   */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
   /**
    * Give an instance a new name (instanceName: trimmed, not empty)
@@ -791,7 +801,9 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   /**
    * Save the preferences, but for the scheduler: the stored one stays
    * (SM-2 when none is stored), as only switchScheduler can change it,
-   * with what changing it takes.
+   * with what changing it takes. A stored "Not now" to the invitation
+   * to switch to FSRS-6 stays too, though the preferences given were
+   * read before it.
    */
   savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
   /**
@@ -805,7 +817,8 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * history, else estimated from its SM-2 state (switchedStates), each
    * due when SM-2 has it due. A deck that cannot be written now is left
    * as it is, named with why, and the others go on. Only once every deck
-   * is written are the preferences saved, so until then SM-2 sets the due
+   * is written are the preferences saved (a stored "Not now" to the
+   * invitation kept, as savePreferences keeps it), so until then SM-2 sets the due
    * days and the switch can be run again; then each deck's schedule in
    * the digest is brought up to date (a failure there leaves the switch
    * done).
@@ -815,6 +828,13 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     preferences: StudyPreferences,
     onProgress?: (progress: SwitchProgress) => void,
   ): Promise<SwitchOutcome>;
+  /**
+   * Remember in the preferences that the learner answered "Not now" to
+   * the invitation to switch to FSRS-6, so the deck list does not show
+   * it again. The rest stays as stored; with none stored, the defaults
+   * with the theme this device shows are saved with it.
+   */
+  dismissSchedulerInvitation(instanceUrl: string): Promise<void>;
   /**
    * Today's due and new cards for a deck, respecting the daily caps, with
    * what grading them takes and their states (StudySessionQueue).
@@ -1481,6 +1501,24 @@ function promptDueOf(
  * What the instance grades and schedules with: the scheduler its
  * preferences name, the retention FSRS-6 aims at and the day boundary.
  */
+/**
+ * The preferences to save, but for the answer to the invitation to
+ * switch to FSRS-6: "Not now", once stored, holds for good, though the
+ * screen that saves them read them before it was answered (in another
+ * tab, or on another device). No form asks it, so it is not a form's to
+ * take back.
+ */
+function withInvitationAnswer(
+  preferences: StudyPreferences,
+  stored: StudyPreferences,
+): StudyPreferences {
+  return {
+    ...preferences,
+    schedulerInvitationDismissed:
+      stored.schedulerInvitationDismissed || preferences.schedulerInvitationDismissed,
+  };
+}
+
 function schedulingOf(prefs: StudyPreferences): Scheduling {
   return {
     scheduler: prefs.scheduler,
@@ -2583,6 +2621,11 @@ export function createUseCases({
       registrationTarget,
     });
     await deckRepository.saveCatalog(instance.url, await catalogOf(session, instance.name));
+    // Stated, so FSRS-6 is this instance's own choice, not a default: one with none stored studies by SM-2.
+    await preferencesRepository.savePreferences(instance.url, {
+      ...NEW_INSTANCE_PREFERENCES,
+      theme: themePreference.chosen(),
+    });
     return instance;
   }
 
@@ -3462,8 +3505,11 @@ export function createUseCases({
     },
     async savePreferences(instanceUrl, preferences) {
       themePreference.choose(preferences.theme);
-      const { scheduler } = await getPreferences(instanceUrl);
-      await preferencesRepository.savePreferences(instanceUrl, { ...preferences, scheduler });
+      const stored = await getPreferences(instanceUrl);
+      await preferencesRepository.savePreferences(instanceUrl, {
+        ...withInvitationAnswer(preferences, stored),
+        scheduler: stored.scheduler,
+      });
     },
     async switchScheduler(instanceUrl, preferences, onProgress = () => undefined) {
       const progress = stepReporter<SwitchStep>("read", SWITCH_STEPS.length, onProgress);
@@ -3503,7 +3549,10 @@ export function createUseCases({
       // Saved last, and only once every deck is written: until then SM-2 sets the due days.
       if (outcome.failed.length === 0) {
         themePreference.choose(preferences.theme);
-        await preferencesRepository.savePreferences(instanceUrl, preferences);
+        await preferencesRepository.savePreferences(
+          instanceUrl,
+          withInvitationAnswer(preferences, await getPreferences(instanceUrl)),
+        );
         outcome.switched = true;
         await Promise.all(
           listed.map((deck) => refreshStudyDigest(instanceUrl, deck).catch(() => undefined)),
@@ -3511,6 +3560,18 @@ export function createUseCases({
       }
       progress.finished();
       return outcome;
+    },
+    async dismissSchedulerInvitation(instanceUrl) {
+      const stored = await preferencesRepository.getPreferences(instanceUrl);
+      const preferences = stored?.preferences ?? {
+        ...DEFAULT_PREFERENCES,
+        theme: themePreference.chosen(),
+      };
+      if (preferences.schedulerInvitationDismissed) return;
+      await preferencesRepository.savePreferences(instanceUrl, {
+        ...preferences,
+        schedulerInvitationDismissed: true,
+      });
     },
     async getStudyQueue(instanceUrl, deck, now) {
       const [cards, reviews, prefs] = await Promise.all([

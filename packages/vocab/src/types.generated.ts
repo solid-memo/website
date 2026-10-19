@@ -604,7 +604,7 @@ export interface PreferencesV4 {
   readonly theme: "https://solid-memo.com/ns/vocab/v1.ttl#systemTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#lightTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#darkTheme";
 }
 
-/** Preferences format 5: every field required, the scheduler and the desired retention among them. */
+/** Preferences format 5: every field required, the scheduler, the desired retention and the dismissed scheduler invitation among them. */
 export interface PreferencesV5 {
   readonly newCardsPerDay: number;
   readonly maxReviewsPerDay: number;
@@ -615,6 +615,7 @@ export interface PreferencesV5 {
   readonly theme: "https://solid-memo.com/ns/vocab/v1.ttl#systemTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#lightTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#darkTheme";
   readonly scheduler: "https://solid-memo.com/ns/vocab/v1.ttl#sm2" | "https://solid-memo.com/ns/vocab/v1.ttl#fsrs6";
   readonly desiredRetention: number;
+  readonly schedulerInvitationDismissed: boolean;
 }
 
 /** Review-state format 1: the SM-2 fields; the previous* snapshot is admitted. */

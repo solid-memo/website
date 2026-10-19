@@ -17,6 +17,7 @@ describe("preferences records", () => {
       theme: "dark" as const,
       scheduler: "fsrs6" as const,
       desiredRetention: 0.85,
+      schedulerInvitationDismissed: true,
     };
     expect(preferencesToRecord(preferences)).toEqual({
       ...preferences,

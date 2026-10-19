@@ -19,6 +19,7 @@ const FULL = {
   theme: "system" as const,
   scheduler: "sm2" as const,
   desiredRetention: 0.9,
+  schedulerInvitationDismissed: false,
 };
 
 describe("toPreferences", () => {
@@ -52,6 +53,7 @@ describe("toPreferences", () => {
         theme: "system" as const,
         scheduler: "sm2" as const,
         desiredRetention: 0.9,
+        schedulerInvitationDismissed: false,
       },
       formatVersion: 1,
     });
@@ -68,6 +70,7 @@ describe("toPreferences", () => {
       theme: "system" as const,
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     });
   });
 

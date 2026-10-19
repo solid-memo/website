@@ -50,7 +50,7 @@ import {
 } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
-import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { DEFAULT_PREFERENCES, NEW_INSTANCE_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { fsrsInterval, fsrsReview, memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
 import type { SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
@@ -1094,6 +1094,63 @@ describe("createUseCases", () => {
       description: `Flashcard decks of the Solid Memo instance ${instance.name}.`,
       publisher: { webId: session.webId, name: session.webId },
     });
+  });
+
+  it("createInstance states new preferences, FSRS-6 with the theme this device shows", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases({
+      ...deps,
+      themePreference: { chosen: () => "dark", choose: vi.fn() },
+    });
+    await useCases.createInstance(session, {
+      containerUrl: "https://alice.example/solid-memo/main/",
+      name: "Main",
+      registrationTarget: "private",
+    });
+    expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, {
+      ...NEW_INSTANCE_PREFERENCES,
+      theme: "dark",
+    });
+    expect(NEW_INSTANCE_PREFERENCES.scheduler).toBe("fsrs6");
+  });
+
+  it("dismissSchedulerInvitation keeps the stored preferences, but for the invitation", async () => {
+    const deps = makeDeps();
+    const stored = { ...DEFAULT_PREFERENCES, newCardsPerDay: 9, theme: "light" as const };
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: stored,
+      formatVersion: 4,
+    });
+    const useCases = createUseCases(deps);
+    await useCases.dismissSchedulerInvitation(instance.url);
+    expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, {
+      ...stored,
+      schedulerInvitationDismissed: true,
+    });
+  });
+
+  it("dismissSchedulerInvitation saves the defaults, SM-2's, with this device's theme when none are stored", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases({
+      ...deps,
+      themePreference: { chosen: () => "dark", choose: vi.fn() },
+    });
+    await useCases.dismissSchedulerInvitation(instance.url);
+    expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, {
+      ...DEFAULT_PREFERENCES,
+      theme: "dark",
+      schedulerInvitationDismissed: true,
+    });
+  });
+
+  it("dismissSchedulerInvitation writes nothing when it was dismissed already", async () => {
+    const deps = makeDeps();
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: { ...DEFAULT_PREFERENCES, schedulerInvitationDismissed: true },
+      formatVersion: 5,
+    });
+    await createUseCases(deps).dismissSchedulerInvitation(instance.url);
+    expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
   });
 
   it("attachInstanceByUrl trims the URL and passes the WebID", async () => {
@@ -2622,6 +2679,7 @@ describe("createUseCases", () => {
       theme: "system" as const,
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     });
   });
 
@@ -2667,6 +2725,7 @@ describe("createUseCases", () => {
       theme: "system" as const,
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     };
     vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
       preferences: stored,
@@ -2689,6 +2748,7 @@ describe("createUseCases", () => {
       theme: "system" as const,
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     };
     await useCases.savePreferences(instance.url, preferences);
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
@@ -3066,6 +3126,7 @@ describe("createUseCases", () => {
           theme: "system" as const,
           scheduler: "sm2" as const,
           desiredRetention: 0.9,
+          schedulerInvitationDismissed: false,
         },
         formatVersion: 2,
       });
@@ -4178,6 +4239,25 @@ describe("the answer log", () => {
       expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
         ...DEFAULT_PREFERENCES,
         scheduler: "fsrs6",
+      });
+    });
+
+    it("keeps a stored Not now through a save or a switch made from preferences read before it", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+        preferences: { ...DEFAULT_PREFERENCES, schedulerInvitationDismissed: true },
+        formatVersion: 5,
+      });
+      const read = { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 };
+      await useCases.savePreferences(instance.url, read);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
+        ...read,
+        schedulerInvitationDismissed: true,
+      });
+      await useCases.switchScheduler(instance.url, read);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
+        ...read,
+        schedulerInvitationDismissed: true,
       });
     });
   });

@@ -575,6 +575,12 @@
     "start": "Empezar el curso",
     "about": "Sobre este curso"
   },
+  "schedulerInvitation": {
+    "title": "Prueba FSRS-6, el planificador recomendado",
+    "pitch": "Con FSRS-6 cada respuesta da un intervalo claramente distinto, y se adapta a lo tarde que repases. Al cambiar, cada tarjeta sigue tocando el día que le tocaba, y puedes volver a SM-2 cuando quieras en las preferencias de estudio.",
+    "switch": "Cambiar a FSRS-6",
+    "notNow": "Ahora no"
+  },
   "deckPreferences": {
     "loading": "Cargando preferencias…",
     "heading": "Preferencias: {deck}",
@@ -1159,12 +1165,13 @@
       "hint": "El método que decide cuándo vuelve cada tarjeta. SM-2 se mantiene al día en cada repaso, así que puedes volver a él cuando quieras; si cambias de nuevo a FSRS-6, cada tarjeta se calcula otra vez.",
       "sm2": {
         "label": "SM-2",
-        "hint": "SuperMemo-2: cada respuesta correcta multiplica el intervalo de la tarjeta por su facilidad. La opción predeterminada."
+        "hint": "SuperMemo-2: cada respuesta correcta multiplica el intervalo de la tarjeta por su facilidad."
       },
       "fsrs6": {
         "label": "FSRS-6",
-        "hint": "El Free Spaced Repetition Scheduler, versión 6: sigue lo estable que es cada recuerdo y vuelve a mostrar la tarjeta cuando la probabilidad de que la recuerdes baja a la retención que elijas. Al cambiar, calcula el recuerdo de cada tarjeta a partir de tus respuestas hasta ahora."
-      }
+        "hint": "El Free Spaced Repetition Scheduler, versión 6: sigue lo estable que es cada recuerdo y vuelve a mostrar la tarjeta cuando la probabilidad de que la recuerdes baja a la retención que elijas. Al cambiar, calcula el recuerdo de cada tarjeta a partir de tus respuestas hasta ahora. Recomendado: cada respuesta da un intervalo claramente distinto, y un repaso con retraso se tiene en cuenta según cuánto se retrasó."
+      },
+      "recommended": "Recomendado"
     },
     "desiredRetention": "Retención deseada (%)",
     "desiredRetentionHint": "Con FSRS-6: la probabilidad de recordar una tarjeta cuando vuelve, de 70 a 97. Más alta significa intervalos más cortos y más repasos. La predeterminada es 90.",

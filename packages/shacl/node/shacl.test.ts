@@ -327,6 +327,14 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}desiredRetention`,
     message: "The desired retention is one decimal share from 0.7 to 0.97.",
   },
+  "preferences/v5/invalid/missing-scheduler-invitation.ttl": {
+    path: `${SM}schedulerInvitationDismissed`,
+    message: "Preferences state whether the invitation to switch to FSRS-6 was dismissed",
+  },
+  "preferences/v5/invalid/scheduler-invitation-not-boolean.ttl": {
+    path: `${SM}schedulerInvitationDismissed`,
+    message: "Preferences state whether the invitation to switch to FSRS-6 was dismissed",
+  },
   "deck/v3/invalid/pod-with-old-direction.ttl": {
     path: `${SM}direction`,
     message: "Format 3 states the study direction with solid-memo:studyDirection",

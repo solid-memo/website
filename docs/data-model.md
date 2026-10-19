@@ -239,11 +239,15 @@ data.
 │                        update made, dcterms:replaces and
 │                        dcterms:modified, ignored and kept;
 │                        sm:formatVersion 2
-├── preferences.ttl #it: a sm:Preferences (created on first explicit save):
-│                        study caps, sm:answerScale, sm:developerMode,
-│                        sm:invalidDataPolicy, sm:theme,
+├── preferences.ttl #it: a sm:Preferences (created with the instance,
+│                        FSRS-6 its scheduler; an instance made before
+│                        has none until its first save, and reads as
+│                        SM-2): study caps, sm:answerScale,
+│                        sm:developerMode, sm:invalidDataPolicy, sm:theme,
 │                        sm:studyScheduler (sm:sm2 or sm:fsrs6),
-│                        sm:desiredRetention, sm:formatVersion 5
+│                        sm:desiredRetention,
+│                        sm:schedulerInvitationDismissed,
+│                        sm:formatVersion 5
 ├── catalog.ttl     one subject per deck (titles live ONLY here), a
 │                        sm:Deck and dcat:Dataset: sm:formatVersion 6,
 │                        dcterms:description, sm:studyDirection, optional
@@ -1171,7 +1175,10 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
     (`editCards`, [studio.md](studio.md#bulk-edits)) are always one PUT
     (`saveDataset`'s `whole`): Community Solid Server's in-memory store
     cuts a document short after a PATCH holding text beyond ASCII, and
-    such a bulk edit is all text;
+    such a bulk edit is all text. A save of the preferences is always
+    one PUT too: node-solid-server stores a boolean a PATCH inserts as
+    false, and they hold two, the developer settings and "Not now" to
+    switching to FSRS-6;
   - a creation is sent with `If-None-Match: *` (by
     `@inrupt/solid-client` for datasets and containers, by the copier for
     files); had something appeared there meanwhile, 412;

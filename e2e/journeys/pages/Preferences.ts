@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, type Locator } from "@playwright/test";
+import { escapeRegExp } from "../harness/strings.ts";
 import type { Theme } from "./Chrome.ts";
 import { Screen } from "./Screen.ts";
 
@@ -12,16 +13,19 @@ import { Screen } from "./Screen.ts";
  */
 export type AnswerScale = "sm2" | "minimal";
 
-/** The schedulers on offer (preferences.scheduler.<scheduler> in the i18n files): SM-2 (the default) or FSRS-6. */
+/**
+ * The schedulers on offer (preferences.scheduler.<scheduler> in the i18n
+ * files): FSRS-6, listed first and recommended, a new instance's, or SM-2.
+ */
 export type Scheduler = "sm2" | "fsrs6";
 
 /**
  * "Study preferences": the appearance (the theme), how many new cards a
  * day, the scheduler and its desired retention, the answer buttons,
  * developer mode. Nothing is kept until save(), which goes back to
- * Decks, or saveSwitching(), for a switch to FSRS-6, which says how it
- * went first; reopening (open()) reads what the pod has, for the
- * expect* readbacks.
+ * Decks (a switch to FSRS-6 is made from the deck list's invitation,
+ * DeckList.switchFromSchedulerInvitation); reopening (open()) reads what
+ * the pod has, for the expect* readbacks.
  */
 export class Preferences extends Screen {
   private get form(): Locator {
@@ -92,46 +96,18 @@ export class Preferences extends Screen {
     );
   }
 
-  /** Sets FSRS-6's desired retention, a percent; FSRS-6 must be chosen. */
-  async setDesiredRetention(percent: number): Promise<void> {
-    await this.intent(`Set the desired retention to ${percent}%`, async () => {
-      await this.desiredRetention.fill(String(percent));
-      await expect(this.desiredRetention).toHaveValue(String(percent));
-    });
-  }
-
-  /**
-   * Saves a switch to FSRS-6: its progress, then how it went, the cards
-   * worked out from their answers (`replayed`) and estimated from SM-2
-   * (`estimated`), each said only when there are some; Done goes back to
-   * Decks.
-   */
-  async saveSwitching({
-    replayed,
-    estimated,
-  }: {
-    replayed: number;
-    estimated: number;
-  }): Promise<void> {
-    await this.intent("Save the preferences, switching to FSRS-6", async () => {
-      await this.form
-        .getByRole("button", { name: this.t("preferences.save"), exact: true })
-        .click();
-      const result = this.page.getByRole("region", {
-        name: this.t("schedulerSwitch.doneRegion"),
-      });
-      await expect(result).toBeVisible();
-      await expect(result).toBeFocused();
-      await expect(result).toContainText(this.t("schedulerSwitch.done"));
-      for (const [key, count] of [
-        ["schedulerSwitch.replayed", replayed],
-        ["schedulerSwitch.estimated", estimated],
-      ] as const) {
-        if (count > 0) await expect(result).toContainText(this.t(key, { count }));
-      }
-      await expect(result).toContainText(this.t("schedulerSwitch.dueKept"));
-      await result.getByRole("button", { name: this.t("schedulerSwitch.continue") }).click();
-      await this.app.decks.expectShown();
+  /** FSRS-6 is listed first and marked Recommended; SM-2 is not. */
+  async expectFsrsRecommended(): Promise<void> {
+    await this.intent("Check that FSRS-6 is listed first, recommended", async () => {
+      const group = this.form.getByRole("group", { name: this.t("preferences.scheduler.legend") });
+      await expect(group.getByRole("radio").first()).toHaveAccessibleName(
+        new RegExp(
+          `^${escapeRegExp(`${this.t("preferences.scheduler.fsrs6.label")} ${this.t("preferences.scheduler.recommended")}`)} `,
+        ),
+      );
+      await expect(
+        group.getByText(this.t("preferences.scheduler.recommended"), { exact: true }),
+      ).toHaveCount(1);
     });
   }
 

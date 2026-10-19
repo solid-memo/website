@@ -76,6 +76,7 @@ describe("PreferencesContainer", () => {
       theme: "system",
       scheduler: "sm2",
       desiredRetention: 0.9,
+      schedulerInvitationDismissed: false,
     });
   });
 

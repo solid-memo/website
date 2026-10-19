@@ -11,7 +11,9 @@ import { Screen } from "./Screen.ts";
  * groups, each row a link to the deck's page, what it offers today ("Study
  * {deck}" or "Done for today") and its actions menu (DeckGroups); under
  * them, Create deck and Deck library (Library.open). With no decks yet,
- * the library's course for newcomers is offered under the heading.
+ * the library's course for newcomers is offered under the heading. A
+ * learner on SM-2 is invited above the list to switch to FSRS-6, until
+ * they switch or answer Not now.
  */
 export class DeckList extends Screen {
   get heading(): Locator {
@@ -108,6 +110,79 @@ export class DeckList extends Screen {
       ).toBeVisible();
       await this.courseStrip.getByRole("link", { name: title, exact: true }).click();
       await this.app.course.expectShown(title);
+    });
+  }
+
+  /** The invitation to switch to FSRS-6, above the list: the landmark named by its title. */
+  get schedulerInvitation(): Locator {
+    return this.page.getByRole("complementary", {
+      name: this.t("schedulerInvitation.title"),
+      exact: true,
+    });
+  }
+
+  /** The list shows the invitation to switch to FSRS-6 (`shown`), or does not. */
+  async expectSchedulerInvitation(shown: boolean): Promise<void> {
+    await this.intent(
+      `Check the deck list ${shown ? "invites" : "does not invite"} to switch to FSRS-6`,
+      async () => {
+        await this.expectShown();
+        if (!shown) {
+          await expect(this.schedulerInvitation).toHaveCount(0);
+          return;
+        }
+        await expect(this.schedulerInvitation).toBeVisible();
+        await expect(this.schedulerInvitation).toContainText(this.t("schedulerInvitation.pitch"));
+      },
+    );
+  }
+
+  /** Answers the invitation to switch to FSRS-6 Not now: it is gone, and the pod keeps the answer. */
+  async declineSchedulerInvitation(): Promise<void> {
+    await this.intent("Answer Not now to the invitation to switch to FSRS-6", async () => {
+      await this.schedulerInvitation
+        .getByRole("button", { name: this.t("schedulerInvitation.notNow"), exact: true })
+        .click();
+      await expect(this.schedulerInvitation).toHaveCount(0);
+    });
+  }
+
+  /**
+   * Switches to FSRS-6 from the invitation: its progress, then how it
+   * went, the cards worked out from their answers (`replayed`) and
+   * estimated from SM-2 (`estimated`), each said only when there are
+   * some; Done closes it, the invitation is gone, and the Decks heading
+   * has the focus.
+   */
+  async switchFromSchedulerInvitation({
+    replayed,
+    estimated,
+  }: {
+    replayed: number;
+    estimated: number;
+  }): Promise<void> {
+    await this.intent("Switch to FSRS-6 from the deck list's invitation", async () => {
+      await this.schedulerInvitation
+        .getByRole("button", { name: this.t("schedulerInvitation.switch"), exact: true })
+        .click();
+      const result = this.page.getByRole("region", {
+        name: this.t("schedulerSwitch.doneRegion"),
+      });
+      await expect(result).toBeVisible();
+      await expect(result).toBeFocused();
+      await expect(result).toContainText(this.t("schedulerSwitch.done"));
+      for (const [key, count] of [
+        ["schedulerSwitch.replayed", replayed],
+        ["schedulerSwitch.estimated", estimated],
+      ] as const) {
+        if (count > 0) await expect(result).toContainText(this.t(key, { count }));
+      }
+      await expect(result).toContainText(this.t("schedulerSwitch.dueKept"));
+      await result.getByRole("button", { name: this.t("schedulerSwitch.continue") }).click();
+      await expect(result).toHaveCount(0);
+      await expect(this.schedulerInvitation).toHaveCount(0);
+      // Focus goes on in the screen, at its heading, not back to the page's top.
+      await expect(this.heading).toBeFocused();
     });
   }
 

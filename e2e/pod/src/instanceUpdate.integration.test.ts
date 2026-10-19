@@ -194,7 +194,7 @@ async function seedOldPod(server: string, format: 4 | 5): Promise<Pod> {
     `${PREFIXES}<#it> a sm:Preferences ; sm:formatVersion 5 ; sm:newCardsPerDay 20 ; sm:maxReviewsPerDay 200 ;
     sm:dayBoundaryHour 4 ; sm:answerScale "sm2" ; sm:developerMode false ;
     sm:invalidDataPolicy sm:warnOnly ; sm:theme sm:darkTheme ;
-    sm:studyScheduler sm:sm2 ; sm:desiredRetention 0.9 .`,
+    sm:studyScheduler sm:sm2 ; sm:desiredRetention 0.9 ; sm:schedulerInvitationDismissed false .`,
   );
   await put(
     `${source}catalog.ttl`,
@@ -951,14 +951,10 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     let interfered = false;
     const { useCases } = app(pod, {
       onRequest: async (request) => {
-        if (
-          interfered ||
-          request.method !== "PATCH" ||
-          request.url !== `${pod.source}preferences.ttl`
-        )
+        if (interfered || !isWrite(request) || request.url !== `${pod.source}preferences.ttl`)
           return;
         interfered = true;
-        // Another tab saves the preferences first.
+        // Another tab saves the preferences first, just before the save's write (a PUT of the document).
         await changeElsewhere(
           `${pod.source}preferences.ttl`,
           `<#it> <https://solid-memo.com/ns/vocab/v1.ttl#note> "saved in another tab" .`,

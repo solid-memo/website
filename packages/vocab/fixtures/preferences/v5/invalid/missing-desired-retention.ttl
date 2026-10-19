@@ -16,4 +16,5 @@
     solid-memo:developerMode true ;
     solid-memo:invalidDataPolicy solid-memo:blockSubject ;
     solid-memo:theme solid-memo:darkTheme ;
-    solid-memo:studyScheduler solid-memo:fsrs6 .
+    solid-memo:studyScheduler solid-memo:fsrs6 ;
+    solid-memo:schedulerInvitationDismissed false .

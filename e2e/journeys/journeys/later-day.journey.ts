@@ -7,9 +7,10 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
 import { fixedOffsetZone, offsetWhereItIs } from "../harness/timezone.ts";
 
 /**
- * A later study day, as the journey's spec numbers it: study a deck of
- * four cards, switch the scheduler to FSRS-6, come back the next study
- * day, review them, forgetting two,
+ * A later study day, as the journey's spec numbers it: on SM-2, which a
+ * new instance is not on (it starts on FSRS-6), study a deck of four
+ * cards, switch the scheduler to FSRS-6 from the deck list's invitation,
+ * come back the next study day, review them, forgetting two,
  * and read what that did to the statistics and the deck's hardest cards;
  * then reload, and the deck list still agrees. It catches the review
  * path (cards met before, due again, answered Again) and the deck list's
@@ -50,11 +51,17 @@ test("a later study day @review", async ({ app, account, runId }) => {
     logInAndCreateInstance(app, account, `Journey ${runId}`),
   );
 
-  await app.step("03 · Set the answer buttons to Again · Hard · Good · Easy", async () => {
-    await app.preferences.open();
-    await app.preferences.setAnswerButtons("minimal");
-    await app.preferences.save();
-  });
+  await app.step(
+    "03 · Choose SM-2 with the answer buttons Again · Hard · Good · Easy: the deck list invites to FSRS-6",
+    async () => {
+      await app.preferences.open();
+      await app.preferences.expectScheduler("fsrs6");
+      await app.preferences.setScheduler("sm2");
+      await app.preferences.setAnswerButtons("minimal");
+      await app.preferences.save();
+      await app.decks.expectSchedulerInvitation(true);
+    },
+  );
 
   await app.step("04 · Create a deck of four flashcards", async () => {
     await app.decks.openDeckCreator();
@@ -86,18 +93,17 @@ test("a later study day @review", async ({ app, account, runId }) => {
   });
 
   await app.step(
-    "06 · Switch the scheduler to FSRS-6: each card is worked out from its answer",
+    "06 · Switch to FSRS-6 from the deck list's invitation: each card is worked out from its answer",
     async () => {
-      await app.preferences.open();
-      await app.preferences.setScheduler("fsrs6");
-      await app.preferences.setDesiredRetention(90);
       // Each card's whole history is in the log: its one answer, which introduced it.
-      await app.preferences.saveSwitching({ replayed: cards, estimated: 0 });
+      await app.decks.switchFromSchedulerInvitation({ replayed: cards, estimated: 0 });
       // The switch keeps each card due when SM-2 had it due: none today.
       await app.decks.expectDoneForToday(deck);
       await app.preferences.open();
       await app.preferences.expectScheduler("fsrs6");
+      await app.preferences.expectDesiredRetention(90);
       await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.expectSchedulerInvitation(false);
     },
   );
 
