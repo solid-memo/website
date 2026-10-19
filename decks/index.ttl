@@ -106,6 +106,7 @@
                  <#sweden-counties-and-provinces> ,
                  <#swedish-adjectives> ,
                  <#swedish-basics> ,
+                 <#swedish-driving-theory> ,
                  <#swedish-labour-market-taxonomy-occupation-names> ,
                  <#swedish-literature> ,
                  <#swedish-monarchs> ,
@@ -16269,6 +16270,249 @@
     dcat:downloadURL <https://solid-memo.com/decks/swedish-basics/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#swedish-driving-theory>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Körkort B: teori"@sv ,
+                  "Swedish Driving License B: Theory"@en ,
+                  "Schwedischer Führerschein B: Theorie"@de ,
+                  "Permiso de conducir sueco B: teoría"@es ,
+                  "Permis de conduire suédois B : théorie"@fr ,
+                  "스웨덴 운전면허 B: 이론"@ko ;
+    dcterms:description "Trafikregler och vägmärken för körkort B i 16 kapitel, från grunderna och vägmärkenas språk till vad du gör vid en trafikolycka. Skrivna med egna ord utifrån trafikförordningen, vägmärkesförordningen och andra författningar, i lydelse t.o.m. SFS 2026:1052 respektive 2025:268. Inofficiell; ersätter inte Transportstyrelsens eller Trafikverkets material."@sv ,
+                        "Traffic rules and road signs for the Swedish B license in 16 chapters, from the basics and the language of road signs to what to do at a traffic accident. Written in our own words from the Traffic Ordinance, the Road Signs Ordinance and other statutes, as amended up to SFS 2026:1052 and 2025:268. Unofficial; it does not replace the material of Transportstyrelsen or Trafikverket."@en ,
+                        "Verkehrsregeln und Verkehrszeichen für den schwedischen Führerschein der Klasse B in 16 Kapiteln, von den Grundlagen und der Sprache der Verkehrszeichen bis zum Verhalten bei einem Verkehrsunfall. In eigenen Worten nach der Straßenverkehrsverordnung (trafikförordningen), der Verkehrszeichenverordnung (vägmärkesförordningen) und weiteren Vorschriften, in der Fassung bis SFS 2026:1052 bzw. 2025:268. Inoffiziell; ersetzt nicht das Material von Transportstyrelsen oder Trafikverket."@de ,
+                        "Normas de tráfico y señales viales para el permiso de conducir sueco de clase B en 16 capítulos, desde lo básico y el lenguaje de las señales hasta qué hacer en un accidente de tráfico. Escritas con nuestras propias palabras a partir de la ordenanza de tráfico (trafikförordningen), la ordenanza de señales viales (vägmärkesförordningen) y otras normas, en su redacción hasta SFS 2026:1052 y 2025:268. No oficial; no sustituye el material de Transportstyrelsen ni de Trafikverket."@es ,
+                        "Règles de circulation et panneaux routiers pour le permis de conduire suédois de catégorie B en 16 chapitres, des bases et du langage des panneaux jusqu'à la conduite à tenir lors d'un accident de la route. Rédigés avec nos propres mots à partir de l'ordonnance sur la circulation (trafikförordningen), de l'ordonnance sur la signalisation routière (vägmärkesförordningen) et d'autres textes, dans leur version jusqu'à SFS 2026:1052 et 2025:268. Non officiel ; ne remplace pas les documents de Transportstyrelsen ou de Trafikverket."@fr ,
+                        "스웨덴 B종 운전면허를 위한 교통 규칙과 도로 표지판을 16개 장으로 다룹니다. 기본 원칙과 도로 표지판의 언어부터 교통사고가 났을 때 할 일까지 담았습니다. 교통령(trafikförordningen), 도로표지령(vägmärkesförordningen) 등 법령의 SFS 2026:1052 및 2025:268 개정까지의 내용을 바탕으로 직접 쓴 글입니다. 비공식 자료이며 Transportstyrelsen이나 Trafikverket의 자료를 대신하지 않습니다."@ko ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+    dcat:keyword "körkort"@sv ,
+                 "trafikregler"@sv ,
+                 "vägmärken"@sv ,
+                 "kunskapsprov"@sv ,
+                 "driving license"@en ,
+                 "traffic rules"@en ,
+                 "road signs"@en ,
+                 "Sweden"@en ,
+                 "Führerschein"@de ,
+                 "Verkehrsregeln"@de ,
+                 "Verkehrszeichen"@de ,
+                 "Schweden"@de ,
+                 "permiso de conducir"@es ,
+                 "normas de tráfico"@es ,
+                 "señales viales"@es ,
+                 "Suecia"@es ,
+                 "permis de conduire"@fr ,
+                 "code de la route"@fr ,
+                 "panneaux routiers"@fr ,
+                 "Suède"@fr ,
+                 "운전면허"@ko ,
+                 "교통 규칙"@ko ,
+                 "도로 표지판"@ko ,
+                 "스웨덴"@ko ;
+    dcat:first <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> .
+
+<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "Körkort B: teori"@sv ,
+                  "Swedish Driving License B: Theory"@en ,
+                  "Schwedischer Führerschein B: Theorie"@de ,
+                  "Permiso de conducir sueco B: teoría"@es ,
+                  "Permis de conduire suédois B : théorie"@fr ,
+                  "스웨덴 운전면허 B: 이론"@ko ;
+    dcterms:creator <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Trafikregler och vägmärken för körkort B i 16 kapitel, från grunderna och vägmärkenas språk till vad du gör vid en trafikolycka. Skrivna med egna ord utifrån trafikförordningen, vägmärkesförordningen och andra författningar, i lydelse t.o.m. SFS 2026:1052 respektive 2025:268. Inofficiell; ersätter inte Transportstyrelsens eller Trafikverkets material."@sv ,
+                        "Traffic rules and road signs for the Swedish B license in 16 chapters, from the basics and the language of road signs to what to do at a traffic accident. Written in our own words from the Traffic Ordinance, the Road Signs Ordinance and other statutes, as amended up to SFS 2026:1052 and 2025:268. Unofficial; it does not replace the material of Transportstyrelsen or Trafikverket."@en ,
+                        "Verkehrsregeln und Verkehrszeichen für den schwedischen Führerschein der Klasse B in 16 Kapiteln, von den Grundlagen und der Sprache der Verkehrszeichen bis zum Verhalten bei einem Verkehrsunfall. In eigenen Worten nach der Straßenverkehrsverordnung (trafikförordningen), der Verkehrszeichenverordnung (vägmärkesförordningen) und weiteren Vorschriften, in der Fassung bis SFS 2026:1052 bzw. 2025:268. Inoffiziell; ersetzt nicht das Material von Transportstyrelsen oder Trafikverket."@de ,
+                        "Normas de tráfico y señales viales para el permiso de conducir sueco de clase B en 16 capítulos, desde lo básico y el lenguaje de las señales hasta qué hacer en un accidente de tráfico. Escritas con nuestras propias palabras a partir de la ordenanza de tráfico (trafikförordningen), la ordenanza de señales viales (vägmärkesförordningen) y otras normas, en su redacción hasta SFS 2026:1052 y 2025:268. No oficial; no sustituye el material de Transportstyrelsen ni de Trafikverket."@es ,
+                        "Règles de circulation et panneaux routiers pour le permis de conduire suédois de catégorie B en 16 chapitres, des bases et du langage des panneaux jusqu'à la conduite à tenir lors d'un accident de la route. Rédigés avec nos propres mots à partir de l'ordonnance sur la circulation (trafikförordningen), de l'ordonnance sur la signalisation routière (vägmärkesförordningen) et d'autres textes, dans leur version jusqu'à SFS 2026:1052 et 2025:268. Non officiel ; ne remplace pas les documents de Transportstyrelsen ou de Trafikverket."@fr ,
+                        "스웨덴 B종 운전면허를 위한 교통 규칙과 도로 표지판을 16개 장으로 다룹니다. 기본 원칙과 도로 표지판의 언어부터 교통사고가 났을 때 할 일까지 담았습니다. 교통령(trafikförordningen), 도로표지령(vägmärkesförordningen) 등 법령의 SFS 2026:1052 및 2025:268 개정까지의 내용을 바탕으로 직접 쓴 글입니다. 비공식 자료이며 Transportstyrelsen이나 Trafikverket의 자료를 대신하지 않습니다."@ko ;
+    prov:wasDerivedFrom <https://data.riksdagen.se/dokument/sfs-1998-1276.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-2007-90.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-1951-649.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-1998-488.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-1998-980.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-2003-778.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-1975-1410.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-2011-318.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-1987-905.text> ,
+                        <https://data.riksdagen.se/dokument/sfs-2001-559.text> ,
+                        <https://www.transportstyrelsen.se/TSFS/TSFS%202009_19k.pdf> ,
+                        <https://www.transportstyrelsen.se/TSFS/TSFS%202010_125k.pdf> ,
+                        <https://www.transportstyrelsen.se/TSFS/TSFS%202011_20.pdf> ,
+                        <https://www.transportstyrelsen.se/TSFS/TSFS%202012_40k.pdf> ,
+                        <https://www.transportstyrelsen.se/TSFS/TSFS%202012_43k.pdf> ,
+                        <https://road-safety.transport.ec.europa.eu/document/download/9826c063-bc55-423e-84a3-24200dca3547_en?filename=ERSO-TR-speed_2026.pdf> ,
+                        <https://road-safety.transport.ec.europa.eu/document/download/c1bc212c-170f-4c68-a5a4-cad17035befb_en?filename=ERSO-TR-alcohol_drugs_2026.pdf> ,
+                        <https://road-safety.transport.ec.europa.eu/european-road-safety-observatory/statistics-and-analysis-archive/post-impact-care/first-link-chain-help_en> ,
+                        <https://www.eea.europa.eu/en/analysis/publications/explaining-road-transport-emissions> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#compilation> ;
+    dcterms:created "2026-10-19T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+    dcat:keyword "körkort"@sv ,
+                 "trafikregler"@sv ,
+                 "vägmärken"@sv ,
+                 "kunskapsprov"@sv ,
+                 "driving license"@en ,
+                 "traffic rules"@en ,
+                 "road signs"@en ,
+                 "Sweden"@en ,
+                 "Führerschein"@de ,
+                 "Verkehrsregeln"@de ,
+                 "Verkehrszeichen"@de ,
+                 "Schweden"@de ,
+                 "permiso de conducir"@es ,
+                 "normas de tráfico"@es ,
+                 "señales viales"@es ,
+                 "Suecia"@es ,
+                 "permis de conduire"@fr ,
+                 "code de la route"@fr ,
+                 "panneaux routiers"@fr ,
+                 "Suède"@fr ,
+                 "운전면허"@ko ,
+                 "교통 규칙"@ko ,
+                 "도로 표지판"@ko ,
+                 "스웨덴"@ko ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/ENG> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#swedish-driving-theory> ;
+    dcat:isVersionOf <#swedish-driving-theory> ;
+    dcat:contactPoint <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#turtle> ;
+    solid-memo:cardCount 301 .
+
+<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://data.riksdagen.se/dokument/sfs-1998-1276.text>
+    dcterms:title "Trafikförordning (1998:1276)" ;
+    dcterms:creator "Sveriges regering" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-2007-90.text>
+    dcterms:title "Vägmärkesförordning (2007:90)" ;
+    dcterms:creator "Sveriges regering" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-1951-649.text>
+    dcterms:title "Lag (1951:649) om straff för vissa trafikbrott" ;
+    dcterms:creator "Sveriges riksdag" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-1998-488.text>
+    dcterms:title "Körkortslag (1998:488)" ;
+    dcterms:creator "Sveriges riksdag" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-1998-980.text>
+    dcterms:title "Körkortsförordning (1998:980)" ;
+    dcterms:creator "Sveriges regering" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-2003-778.text>
+    dcterms:title "Lag (2003:778) om skydd mot olyckor" ;
+    dcterms:creator "Sveriges riksdag" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-1975-1410.text>
+    dcterms:title "Trafikskadelag (1975:1410)" ;
+    dcterms:creator "Sveriges riksdag" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-2011-318.text>
+    dcterms:title "Avgasreningslag (2011:318)" ;
+    dcterms:creator "Sveriges riksdag" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-1987-905.text>
+    dcterms:title "Jaktförordning (1987:905)" ;
+    dcterms:creator "Sveriges regering" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://data.riksdagen.se/dokument/sfs-2001-559.text>
+    dcterms:title "Lag (2001:559) om vägtrafikdefinitioner" ;
+    dcterms:creator "Sveriges riksdag" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.transportstyrelsen.se/TSFS/TSFS%202009_19k.pdf>
+    dcterms:title "TSFS 2009:19, Transportstyrelsens föreskrifter och allmänna råd om användning av däck m.m. avsedda för bilar och släpvagnar som dras av bilar" ;
+    dcterms:creator "Transportstyrelsen" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.transportstyrelsen.se/TSFS/TSFS%202010_125k.pdf>
+    dcterms:title "TSFS 2010:125, Transportstyrelsens föreskrifter och allmänna råd om medicinska krav för innehav av körkort m.m." ;
+    dcterms:creator "Transportstyrelsen" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.transportstyrelsen.se/TSFS/TSFS%202011_20.pdf>
+    dcterms:title "TSFS 2011:20, Transportstyrelsens föreskrifter om kursplan, behörighet B" ;
+    dcterms:creator "Transportstyrelsen" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.transportstyrelsen.se/TSFS/TSFS%202012_40k.pdf>
+    dcterms:title "TSFS 2012:40, Transportstyrelsens föreskrifter om riskutbildning" ;
+    dcterms:creator "Transportstyrelsen" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.transportstyrelsen.se/TSFS/TSFS%202012_43k.pdf>
+    dcterms:title "TSFS 2012:43, Transportstyrelsens föreskrifter om förarprov, behörighet B" ;
+    dcterms:creator "Transportstyrelsen" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://road-safety.transport.ec.europa.eu/document/download/9826c063-bc55-423e-84a3-24200dca3547_en?filename=ERSO-TR-speed_2026.pdf>
+    dcterms:title "Road safety thematic report – Speed and speeding" ;
+    dcterms:creator "European Commission, European Road Safety Observatory" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://road-safety.transport.ec.europa.eu/document/download/c1bc212c-170f-4c68-a5a4-cad17035befb_en?filename=ERSO-TR-alcohol_drugs_2026.pdf>
+    dcterms:title "Road safety thematic report – Alcohol and drugs" ;
+    dcterms:creator "European Commission, European Road Safety Observatory" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://road-safety.transport.ec.europa.eu/european-road-safety-observatory/statistics-and-analysis-archive/post-impact-care/first-link-chain-help_en>
+    dcterms:title "Post-impact care: the first link in the chain of help" ;
+    dcterms:creator "European Commission, European Road Safety Observatory" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://www.eea.europa.eu/en/analysis/publications/explaining-road-transport-emissions>
+    dcterms:title "Explaining road transport emissions – A non-technical guide (EEA Report 1/2016)" ;
+    dcterms:creator "European Environment Agency" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://commons.wikimedia.org/wiki/Template:PD-Transportstyrelsen>
+    dcterms:title "Wikimedia Commons: Swedish road signs tagged PD-Transportstyrelsen" ;
+    dcterms:creator "Transportstyrelsen" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
 <#swedish-labour-market-taxonomy-occupation-names>
     a dcat:DatasetSeries ,

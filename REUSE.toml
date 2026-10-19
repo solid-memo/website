@@ -128,6 +128,7 @@ path = [
     "decks/standard-for-public-code/*.ttl",
     "decks/sweden-counties-and-provinces/*.ttl",
     "decks/swedish-basics/*.ttl",
+    "decks/swedish-driving-theory/*.ttl",
     "decks/swedish-labour-market-taxonomy-occupation-names/*.ttl",
     "decks/swedish-literature/*.ttl",
     "decks/swedish-monarchs/*.ttl",
