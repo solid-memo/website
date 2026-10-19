@@ -6,6 +6,7 @@ import { activeCards, promptsOf, type Card, type DeckDirection, type Prompt } fr
 import type { StudyPreferences } from "./preferences";
 import {
   reviewKeyOf,
+  type DueState,
   type ReviewKey,
   type ReviewQuality,
   type ReviewSnapshot,
@@ -54,7 +55,8 @@ export function buildStudyQueue(args: {
   cards: Card[];
   /** The deck's direction: which prompts its cards make. */
   direction: DeckDirection;
-  reviews: ReviewState[];
+  /** What sets each prompt's due day: its review states, or effectiveStates'. */
+  reviews: readonly DueState[];
   prefs: StudyPreferences;
   now: Date;
   /** Uniform [0, 1) source deciding which new prompts are introduced. */

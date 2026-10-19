@@ -111,6 +111,165 @@ header and its three number columns as they are.
 | 2.2, 30, 5 | 2 | 2.2, 1, 0 | A lapse: back to 1 day, the ease kept. |
 | 2.2, 30, 5 | 0 | 2.2, 1, 0 | Grades 0, 1 and 2 schedule alike. |
 
+## FSRS-6
+
+FSRS-6, the Free Spaced Repetition Scheduler, version 6, is a second
+scheduler beside SM-2. It keeps two numbers for each prompt, how long
+its memory lasts (*stability*) and how hard it is (*difficulty*), and
+picks the due day on which the chance of remembering the card falls to
+the *desired retention*, 90% by default. It is implemented in the
+domain layer too, as pure functions:
+[fsrs.ts](../packages/domain/src/fsrs.ts) has the formulas, and
+`gradePrompt` in [grading.ts](../packages/domain/src/grading.ts)
+applies a grade to both schedulers. SM-2 sets the due days until the
+preferences name a scheduler.
+
+**Reference.** FSRS is by Jarrett Ye and the Open Spaced Repetition
+project, described in
+[The Algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm).
+Solid Memo reimplements FSRS-6's formulas and default parameters as
+the reference implementation
+[fsrs-rs v6.6.2](https://github.com/open-spaced-repetition/fsrs-rs/blob/v6.6.2/src/model.rs)
+(BSD-3-Clause) gives them; no code is copied from it. Where Solid Memo
+fixes what FSRS leaves to the app, [Decisions fixed in code](#decisions-fixed-in-code-fsrs-6)
+says so.
+
+### FSRS-6 state
+
+A prompt scheduled with FSRS-6 has an `FsrsState`
+([review.ts](../packages/domain/src/review.ts)) beside its SM-2
+`ReviewState`, a subject of its own in the reviews document:
+
+| Field | Meaning |
+|---|---|
+| `stability` | Days until the chance of recall falls to 90% (above 0) |
+| `difficulty` | From 1 (easiest) to 10 (hardest) |
+| `due` | Study day ("YYYY-MM-DD") the card is next due |
+| `firstReviewedAt` | Introduction timestamp, the SM-2 state's |
+| `lastReviewedAt` | Latest review timestamp |
+| `previous` | The snapshot a reset of the day restores: stability, difficulty, due, last review |
+
+SM-2 is applied on every review, whichever scheduler sets the due days,
+so switching back finds its states current. An FSRS-6 state counts only
+while it is **fresh**: while the SM-2 state of its prompt has the same
+last review (`isFresh`). A review the FSRS-6 state did not see (an older
+app graded SM-2 only, the day was reset, or the card forgotten) leaves
+it stale. A stale or missing state counts for nothing, and the next
+review estimates one from the SM-2 state. What sets a prompt's due day,
+whichever scheduler does, is a `DueState`: its due day, the interval that
+led there and its reviews. Under FSRS-6, `effectiveStates` takes each
+prompt's fresh FSRS-6 due day, with the study days from its last review
+to that day as its interval, and the SM-2 state's where there is none.
+
+### The FSRS-6 transition
+
+A rating `G` is 1 (Again), 2 (Hard), 3 (Good) or 4 (Easy), and `t` is
+the whole study days since the prompt's last review. With the default
+parameters `w0` to `w20` and the forgetting curve's decay `w20`:
+
+```text
+factor = 0.9^(−1/w20) − 1
+R(t, S) = (1 + factor · t / S)^(−w20)            chance of recall; R(S, S) = 0.9
+I(S, r) = S / factor · (r^(−1/w20) − 1)          days until R falls to r; I(S, 0.9) = S
+
+first rating:  S = w[G−1]
+               D = clamp(w4 − e^(w5·(G−1)) + 1, 1, 10)
+
+a later one:   S, D kept to 0.001–36,500 and 1–10 first; R = R(t, S)
+  Again:       S' = min(w11 · D^(−w12) · ((S+1)^w13 − 1) · e^((1−R)·w14),  S / e^(w17·w18))
+  Hard..Easy:  S' = S · (1 + e^w8 · (11 − D) · S^(−w9) · (e^((1−R)·w10) − 1) · h · b)
+               h = w15 for Hard, else 1;  b = w16 for Easy, else 1
+  same day:    S' = S · e^(w17·(G − 3 + w18)) · S^(−w19), at least S unless Again
+               (t = 0 replaces both above)
+  difficulty:  D' = D − w6·(G − 3) · (10 − D) / 9
+               D'' = clamp(w7 · D0(4) + (1 − w7) · D', 1, 10),  D0(4) = w4 − e^(3·w5) + 1
+  S' is kept from 0.001 to 36,500.
+
+interval = clamp(round(I(S', desired retention)), 1, 36500)
+due = today + interval
+```
+
+| Parameters | Default | Used for |
+|---|---|---|
+| `w0`–`w3` | 0.212, 1.2931, 2.3065, 8.2956 | first stability, by rating |
+| `w4`–`w7` | 6.4133, 0.8334, 3.0194, 0.001 | first difficulty, its step, mean reversion |
+| `w8`–`w10` | 1.8722, 0.1666, 0.796 | stability after a recall |
+| `w11`–`w14` | 1.4835, 0.0614, 0.2629, 1.6483 | stability after a lapse |
+| `w15`, `w16` | 0.6014, 1.8729 | Hard penalty, Easy bonus |
+| `w17`–`w19` | 0.5425, 0.0912, 0.0658 | same-day reviews |
+| `w20` | 0.1542 | the forgetting curve's decay |
+
+**Estimate from SM-2.** A prompt reviewed with SM-2 only gets its
+FSRS-6 memory from its SM-2 state (`memoryFromSm2`, as fsrs-rs's
+`memory_state_from_sm2` at a retention of 90%): the stability is the
+SM-2 interval, and the difficulty the one at which a Good review on the
+due day multiplies the stability by the ease factor:
+
+```text
+S = max(interval, 0.001)
+D = clamp(11 − (ease − 1) / (e^w8 · S^(−w9) · (e^(0.1·w10) − 1)), 1, 10)
+```
+
+#### Decisions fixed in code (FSRS-6)
+
+- **Default parameters**, not ones trained on the learner's answers,
+  computed in 64-bit floating point.
+- **Whole study days.** `t` is the study days between the last review's
+  day and today, by the instance's day boundary, as SM-2's due days are.
+  A second review the same study day has `t = 0` and takes the same-day
+  formula, Again included.
+- **No fuzz.** The interval is rounded to whole days, from 1 to 36,500,
+  so the same answers always give the same due days.
+- **Ratings.** A grade maps to a rating by its button (`ratingOfGrade`,
+  `gradeGroupOf`): 0 to 2 Again, 3 Hard, 4 Good, 5 Easy. A course's
+  multiple-choice answer is Good when right and Again when wrong
+  (`ratingOfChoice`); its SM-2 grade stays 3 or 1, and the answer is
+  read back as Good or Again by its mode.
+- **Where the memory starts.** A review builds on the fresh FSRS-6
+  state, else on the estimate from the SM-2 state before the review,
+  else, for a new prompt, on the rating alone.
+- **The snapshot.** The first review of a study day snapshots a fresh
+  FSRS-6 state, and later ones that day keep that snapshot. A state
+  estimated from SM-2, or a new one, has none: nothing FSRS-6 wrote is
+  there to restore.
+- **The same first review.** An FSRS-6 state's `firstReviewedAt` is its
+  SM-2 state's, so both schedulers count the prompt as introduced on
+  the same day.
+
+### FSRS-6 worked examples
+
+Each row is one answer: the memory before it (a new prompt, a
+stability and difficulty, or an SM-2 state's ease and interval to
+estimate from), the rating, the study days since the last review, the
+memory after it and the interval at a desired retention of 90%.
+[fsrs.test.ts](../packages/domain/src/fsrs.test.ts) reads this table
+and checks that the code gives every row to within 0.0001 of each
+value, as the table rounds them to 4 decimals, so a change to the formulas, or to a row, that leaves the two
+apart fails the tests. Keep its header and its five number columns as
+they are.
+
+| Before: stability, difficulty | Rating | Days | After: stability, difficulty | Interval | Why |
+|---|---|---|---|---|---|
+| (new) | 1 Again | 0 | 0.212, 6.4133 | 1 | A first Again: the stability is `w0`, and the interval at least 1 day. |
+| (new) | 2 Hard | 0 | 1.2931, 5.1122 | 1 | A first Hard: `w1`. |
+| (new) | 3 Good | 0 | 2.3065, 2.1181 | 2 | A first Good: `w2`. |
+| (new) | 4 Easy | 0 | 8.2956, 1 | 8 | A first Easy: `w3`; the difficulty would be below 1, so it is 1. |
+| 2.3065, 2.1181 | 3 Good | 2 | 10.9643, 2.1112 | 11 | Good on the due day: the stability grows almost fivefold. |
+| 10.9643, 2.1112 | 3 Good | 11 | 46.2802, 2.1043 | 46 | And again on the due day. |
+| 46.2802, 2.1043 | 3 Good | 46 | 162.8626, 2.0974 | 163 | An easy card's stability grows by less each time. |
+| 46.2802, 2.1043 | 3 Good | 20 | 107.1892, 2.0974 | 107 | Reviewed early: the chance of recall was still high, so the stability grows less. |
+| 10.9643, 2.1112 | 1 Again | 11 | 1.5383, 7.3922 | 2 | A lapse: the stability falls, and the difficulty rises. |
+| 1.5383, 7.3922 | 3 Good | 2 | 4.8763, 7.38 | 5 | Good after a lapse: a harder card grows more slowly. |
+| 2.3065, 2.1181 | 3 Good | 0 | 2.3065, 2.1112 | 2 | Good again the same day: the same-day formula never lowers the stability. |
+| 0.212, 6.4133 | 3 Good | 0 | 0.2467, 6.4021 | 1 | Good the same day after an Again, as when a failed card comes back in the session. |
+| 5, 5 | 1 Again | 0 | 1.5968, 8.3418 | 2 | Again the same day lowers the stability by the same-day formula. |
+| 0.212, 6.4133 | 1 Again | 1 | 0.1009, 8.8063 | 1 | Again the next day. |
+| 8.2956, 1 | 4 Easy | 8 | 65.6242, 1 | 66 | The Easy bonus, `w16`. |
+| 1.2931, 5.1122 | 2 Hard | 1 | 3.2494, 6.7405 | 3 | The Hard penalty, `w15`. |
+| SM-2: 2.5, 10 | 3 Good | 10 | 25, 6.9024 | 25 | Estimated from SM-2 (stability 10, difficulty 6.9141): Good on the due day multiplies the stability by the ease, 2.5. |
+| SM-2: 1.3, 20 | 3 Good | 20 | 26.5415, 9.9852 | 27 | The lowest ease, 1.3, would need a difficulty above 10, so it is 10 and the stability grows a little more. |
+| SM-2: 2.5, 10 | 1 Again | 10 | 1.3646, 8.9709 | 1 | A lapse after an estimate. |
+
 ## Answer scales
 
 Sessions grade with one of two button sets, chosen per instance in the
@@ -140,11 +299,13 @@ the learner, and `gradeOfChoice` in
 | right | 3 | The lowest passing grade: a choice says that the answer was known, not how well. |
 | wrong | 1 | A lapse. |
 
-That function is the only place a choice becomes a grade, so another
-scheduler (FSRS) replaces this map alone. The grade then goes through
-the same transition as a study review (`applyGrade` in
-[useCases.ts](../packages/application/src/useCases.ts), which
-`recordReview` uses too). Course answers are front→back.
+That function is the only place a choice becomes a grade; FSRS-6
+rates the same answer with `ratingOfChoice`, Good when right and Again
+when wrong ([FSRS-6](#fsrs-6)). The grade then goes through the same
+transition as a study review (`gradePrompt` in
+[grading.ts](../packages/domain/src/grading.ts), which `applyGrade` in
+[useCases.ts](../packages/application/src/useCases.ts) applies, as
+`recordReview` does). Course answers are front→back.
 
 Whether an answer is graded at all depends on the card's state
 (`courseAnswerEffect`):

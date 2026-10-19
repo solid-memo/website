@@ -5,6 +5,7 @@
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
 import type { Answer } from "./answer";
 import { chainIndexOf } from "./answerChain";
+import type { FsrsRating } from "./fsrs";
 import { activeCards, type CardContent } from "./deck";
 import { sameText, type LangText } from "./langText";
 import type { ReviewQuality, ReviewState } from "./review";
@@ -359,11 +360,20 @@ export function finalReviewQueue(chapter: CourseChapter, random: () => number): 
 
 /**
  * The SM-2 grade of a multiple-choice answer: 3, the lowest passing
- * grade, when right; 1 when wrong. The one place answers chosen among
- * options become grades, so a scheduler other than SM-2 (FSRS) replaces
- * this map alone.
+ * grade, when right; 1 when wrong. With ratingOfChoice, the one place
+ * answers chosen among options become grades.
  */
 export function gradeOfChoice(correct: boolean): ReviewQuality {
+  return correct ? 3 : 1;
+}
+
+/**
+ * The FSRS-6 rating of a multiple-choice answer: Good when right, Again
+ * when wrong. Its SM-2 grade stays gradeOfChoice's, and the answer log
+ * records that grade, so a right one (3, which ratingOfGrade reads as
+ * Hard) is read back as Good by its mode.
+ */
+export function ratingOfChoice(correct: boolean): FsrsRating {
   return correct ? 3 : 1;
 }
 

@@ -91,7 +91,7 @@ checked by code, not left to good intentions:
 | Every library deck says how it may be reused | [deck-library.md](deck-library.md#checks) | the `noLicense` rule in [`libraryRules.ts`](../packages/domain/src/release/libraryRules.ts), run by `npm run library:check` |
 | Data from a pod cannot run code | [markdown.md](markdown.md#safety) | the Content Security Policy, checked by [`build.test.ts`](../apps/web/src/build.test.ts) |
 | Every language has every message | [i18n.md](i18n.md) | [`i18n.test.tsx`](../packages/ui/src/ui/i18n.test.tsx) |
-| The scheduler does what its guide says | [srs.md](srs.md#worked-examples) | [`sm2.test.ts`](../packages/domain/src/sm2.test.ts) |
+| The schedulers do what their guide says | [srs.md](srs.md#worked-examples) (SM-2 and [FSRS-6](srs.md#fsrs-6-worked-examples)) | [`sm2.test.ts`](../packages/domain/src/sm2.test.ts), [`fsrs.test.ts`](../packages/domain/src/fsrs.test.ts) |
 | It works with real Solid servers | [testing.md](testing.md) | the end-to-end tests against several servers, in CI |
 | Turtle is written one way | [architecture.md](architecture.md) | `npm run format:turtle:check` |
 | The docs and the English messages use one spelling, American | [style.md](style.md#language) | [`cspell.config.yaml`](../cspell.config.yaml), `npm run lint:spelling`, in `npm run check` |

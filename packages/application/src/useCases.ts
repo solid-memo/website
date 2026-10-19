@@ -127,12 +127,7 @@ import {
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
-import {
-  REVIEW_STATE_FORMAT_VERSION,
-  type ReviewKey,
-  type ReviewQuality,
-  type ReviewState,
-} from "@solid-memo/domain/review";
+import type { ReviewKey, ReviewQuality, ReviewState } from "@solid-memo/domain/review";
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
 import {
   planCardTransfer,
@@ -151,12 +146,12 @@ import {
 } from "@solid-memo/domain/deckFile";
 import {
   buildStudyQueue,
-  nextDueDate,
   resetStudyDay,
-  snapshotBeforeReview,
   studyDayOf,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
+import { DEFAULT_DESIRED_RETENTION, effectiveStates } from "@solid-memo/domain/fsrs";
+import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
 import {
   answerIdOf,
   monthOfStudyDay,
@@ -206,7 +201,6 @@ import {
 } from "@solid-memo/domain/scheduleInsight";
 import { cardProgressOf, type CardProgress } from "@solid-memo/domain/cardProgress";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
-import { applySm2, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import type { Storage } from "@solid-memo/domain/storage";
 import { isSecureUrl, validateWebId } from "@solid-memo/domain/webId";
 import {
@@ -1407,6 +1401,19 @@ interface UpdateItem {
   writes: (() => Promise<boolean>)[];
 }
 
+/**
+ * What the instance grades and schedules with: SM-2, which sets the due
+ * days until the preferences can name another scheduler, and its day
+ * boundary.
+ */
+function schedulingOf(prefs: StudyPreferences): Scheduling {
+  return {
+    scheduler: "sm2",
+    desiredRetention: DEFAULT_DESIRED_RETENTION,
+    dayBoundaryHour: prefs.dayBoundaryHour,
+  };
+}
+
 export function createUseCases({
   sessionGateway,
   random = Math.random,
@@ -1958,7 +1965,12 @@ export function createUseCases({
     const queue = buildStudyQueue({
       cards: cards.value,
       direction: deck.direction,
-      reviews: reviews.value,
+      reviews: effectiveStates(
+        reviews.value,
+        [],
+        schedulingOf(prefs).scheduler,
+        prefs.dayBoundaryHour,
+      ),
       prefs: studyPrefs,
       now,
       random,
@@ -2261,10 +2273,10 @@ export function createUseCases({
 
   /**
    * Apply one grade to a prompt of the deck: transition its state (or the
-   * initial one) by SM-2, persist it, and queue its answer for the log,
-   * saying how it was given (`how`; a study session says nothing: recall)
-   * and how long it took (`times`), the day it was due and the device's
-   * offset from UTC. The grade is applied to the prompt's state as the
+   * initial one) by SM-2 (gradePrompt), persist it, and queue its answer
+   * for the log, saying how it was given (`how`; a study session says
+   * nothing: recall) and how long it took (`times`), the day it was due
+   * and the device's offset from UTC. The grade is applied to the prompt's state as the
    * reviews document holds it when written (gradeReviewState), so it
    * builds on a grade made elsewhere meanwhile; the instance's preferences
    * are read unless `known` brings them. Resolves to the new state, with
@@ -2284,19 +2296,14 @@ export function createUseCases({
     const { state, current } = await reviewStateRepository.gradeReviewState(
       deck,
       key,
-      (current) => {
-        const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
-        const previous = snapshotBeforeReview(current, now, prefs.dayBoundaryHour);
-        return {
-          ...key,
-          ...next,
-          due: nextDueDate(now, next.intervalDays, prefs.dayBoundaryHour),
-          firstReviewedAt: current?.firstReviewedAt ?? now.toISOString(),
-          lastReviewedAt: now.toISOString(),
-          formatVersion: REVIEW_STATE_FORMAT_VERSION,
-          ...(previous === undefined ? {} : { previous }),
-        };
-      },
+      (current) =>
+        gradePrompt(
+          key,
+          { sm2: current, fsrs: null },
+          { grade: quality, ...(how.mode === undefined ? {} : { mode: how.mode }) },
+          now,
+          schedulingOf(prefs),
+        ).sm2,
     );
     const id = answerIdOf(state.lastReviewedAt, newId().slice(0, 8));
     const studyDay = studyDayOf(now, prefs.dayBoundaryHour);
@@ -3347,7 +3354,7 @@ export function createUseCases({
       const queue = buildStudyQueue({
         cards,
         direction: deck.direction,
-        reviews,
+        reviews: effectiveStates(reviews, [], schedulingOf(prefs).scheduler, prefs.dayBoundaryHour),
         prefs: deckPreferences(prefs, deck),
         now,
         random,

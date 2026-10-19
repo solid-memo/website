@@ -13,6 +13,7 @@ import {
   editCompletedChapters,
   finalReviewQueue,
   gradeOfChoice,
+  ratingOfChoice,
   sameOutline,
   type CourseOutline,
 } from "./course";
@@ -425,6 +426,11 @@ describe("multiple-choice questions", () => {
   it("grade a right choice 3 and a wrong one 1", () => {
     expect(gradeOfChoice(true)).toBe(3);
     expect(gradeOfChoice(false)).toBe(1);
+  });
+
+  it("rate a right choice Good and a wrong one Again under FSRS-6", () => {
+    expect(ratingOfChoice(true)).toBe(3);
+    expect(ratingOfChoice(false)).toBe(1);
   });
 });
 

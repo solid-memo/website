@@ -22,6 +22,7 @@ the departures listed. The formats Solid Memo reads and writes are in
 | Rule | Version | Published at | Implemented in | Checked by |
 |---|---|---|---|---|
 | SM-2, the SuperMemo 2 scheduling algorithm | 1990 | [SuperMemo](https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method) | [`sm2.ts`](../packages/domain/src/sm2.ts) ([srs.md](srs.md)) | [`sm2.test.ts`](../packages/domain/src/sm2.test.ts), row by row against [srs.md's worked examples](srs.md#worked-examples) |
+| FSRS-6, the Free Spaced Repetition Scheduler | 6, as fsrs-rs v6.6.2 | [Open Spaced Repetition](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) | [`fsrs.ts`](../packages/domain/src/fsrs.ts) ([srs.md](srs.md#fsrs-6)) | [`fsrs.test.ts`](../packages/domain/src/fsrs.test.ts), row by row against [srs.md's FSRS-6 worked examples](srs.md#fsrs-6-worked-examples), and against fsrs-rs's published test vectors |
 | Unicode CLDR plural rules | the browser's CLDR | [Unicode CLDR](https://cldr.unicode.org/index/cldr-spec/plural-rules) | `Intl.PluralRules` in [`i18n.tsx`](../packages/ui/src/ui/i18n.tsx) ([i18n.md](i18n.md)) | [`i18n.test.tsx`](../packages/ui/src/ui/i18n.test.tsx): every plural message gives exactly its language's categories |
 | BCP 47 language tags | RFC 5646, RFC 4647 | [IETF](https://www.rfc-editor.org/info/bcp47) | [`languageTag.ts`](../packages/domain/src/languageTag.ts), [`locale.ts`](../packages/domain/src/locale.ts) ([vocab.md](vocab.md#the-language-of-text)) | [`languageTag.test.ts`](../packages/domain/src/languageTag.test.ts), [`locale.test.ts`](../packages/domain/src/locale.test.ts) |
 | Unicode normalization form C | UAX #15 | [Unicode](https://unicode.org/reports/tr15/) | the deck library check and search ([deck-library.md](deck-library.md#checks), [`search.ts`](../packages/domain/src/search.ts)) | [`deckLibrary.test.ts`](../packages/shacl/node/deckLibrary.test.ts), [`search.test.ts`](../packages/domain/src/search.test.ts) |
@@ -50,6 +51,25 @@ its ease factor. It departs from the description in two recorded ways:
 
 The answer scales and a course's multiple-choice answers map onto the
 same grades; they do not change the algorithm ([srs.md](srs.md#answer-scales)).
+
+### FSRS-6
+
+FSRS-6 is the sixth version of the Free Spaced Repetition Scheduler, by
+Jarrett Ye and the Open Spaced Repetition project, described in
+[The Algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm).
+Solid Memo reimplements its formulas and its 21 default parameters as
+the reference implementation,
+[fsrs-rs v6.6.2](https://github.com/open-spaced-repetition/fsrs-rs/tree/v6.6.2)
+(BSD-3-Clause), gives them; no code is copied from it. It fixes what
+FSRS-6 leaves to the app ([srs.md](srs.md#decisions-fixed-in-code-fsrs-6)):
+
+- The parameters are the defaults, not trained on the learner's answers.
+- Days are whole study days, and a second review the same study day
+  takes FSRS-6's same-day formula.
+- Intervals are rounded, from 1 day to 36,500, without fuzz.
+- A prompt without a current FSRS-6 state has one estimated from its
+  SM-2 state, as fsrs-rs's `memory_state_from_sm2` does at a retention
+  of 90%.
 
 ### CLDR plural rules
 
