@@ -8,7 +8,8 @@ import { fixedOffsetZone, offsetWhereItIs } from "../harness/timezone.ts";
 
 /**
  * A later study day, as the journey's spec numbers it: study a deck of
- * four cards, come back the next study day, review them, forgetting two,
+ * four cards, switch the scheduler to FSRS-6, come back the next study
+ * day, review them, forgetting two,
  * and read what that did to the statistics and the deck's hardest cards;
  * then reload, and the deck list still agrees. It catches the review
  * path (cards met before, due again, answered Again) and the deck list's
@@ -85,29 +86,48 @@ test("a later study day @review", async ({ app, account, runId }) => {
   });
 
   await app.step(
-    "06 · At 5 a.m., the next study day, open Solid Memo again: every card is due",
+    "06 · Switch the scheduler to FSRS-6: each card is worked out from its answer",
+    async () => {
+      await app.preferences.open();
+      await app.preferences.setScheduler("fsrs6");
+      await app.preferences.setDesiredRetention(90);
+      // Each card's whole history is in the log: its one answer, which introduced it.
+      await app.preferences.saveSwitching({ replayed: cards, estimated: 0 });
+      // The switch keeps each card due when SM-2 had it due: none today.
+      await app.decks.expectDoneForToday(deck);
+      await app.preferences.open();
+      await app.preferences.expectScheduler("fsrs6");
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+  );
+
+  await app.step(
+    "07 · At 5 a.m., the next study day, open Solid Memo again: every card is due",
     async () => {
       await app.setTimeZone(fixedOffsetZone(night + 3 * 60));
       await app.chrome.reload();
-      // A good answer to a new card gives it a day: all four are due today.
+      // A good answer to a new card gave it a day, which the switch kept:
+      // all four are due today.
       await app.decks.expectToReview(deck, cards);
     },
   );
 
   await app.step(
-    "07 · Review the deck from its page: answer two cards Again, and end the session",
+    "08 · Review the deck from its page: answer two cards Again, and end the session",
     async () => {
       await app.decks.openDeck(deck);
       await app.deckDetail.expectCardCount(cards);
       await app.deckDetail.study();
       await app.study.expectStudying(deck);
       await app.study.expectPosition(1, cards);
+      // FSRS-6 asks on the four answer buttons, each with the interval it gives.
+      await app.study.reveal();
+      await app.study.expectScale("minimal");
+      await app.study.again();
+      await app.study.reveal();
+      await app.study.again();
       // Each Again puts its card back, never as the very next one: the
       // second card is another, and the session grows to six.
-      for (let i = 0; i < 2; i++) {
-        await app.study.reveal();
-        await app.study.again();
-      }
       await app.study.endSession();
       // A card forgotten is due the next study day; the other two today.
       await app.decks.expectToReview(deck, 2);
@@ -115,7 +135,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
     },
   );
 
-  await app.step("08 · Study the deck's other two cards, both Good", async () => {
+  await app.step("09 · Study the deck's other two cards, both Good", async () => {
     await app.decks.study(deck);
     await app.study.expectPosition(1, 2);
     await app.study.answer("good");
@@ -127,7 +147,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
   });
 
   await app.step(
-    "09 · The statistics show recall, lapses and relearning, and no leech yet",
+    "10 · The statistics show recall, lapses and relearning, and no leech yet",
     async () => {
       // Yesterday's four first answers, and today's four reviews: two
       // Again and two Good.
@@ -169,7 +189,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
           },
         ],
         // The two forgotten, not remembered since, are relearning, due
-        // tomorrow; the two remembered are young, due in six days.
+        // tomorrow; the two remembered are young, due in a week or so.
         maturity: { new: 0, relearning: 2, young: 2, mature: 0 },
         overdue: 0,
         maturityByDeck: [{ name: deck, new: 0, relearning: 2, young: 2, mature: 0 }],
@@ -183,7 +203,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
     },
   );
 
-  await app.step("10 · The deck's page lists the two cards forgotten as its hardest", async () => {
+  await app.step("11 · The deck's page lists the two cards forgotten as its hardest", async () => {
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.decks.openDeck(deck);
     await app.deckDetail.expectHardestCards([
@@ -192,7 +212,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
     ]);
   });
 
-  await app.step("11 · Reload: the deck list's counts still agree", async () => {
+  await app.step("12 · Reload: the deck list's counts still agree", async () => {
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.chrome.reload();
     await app.decks.expectDoneForToday(deck);

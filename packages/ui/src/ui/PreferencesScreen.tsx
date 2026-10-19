@@ -9,6 +9,7 @@ import {
   type InvalidDataPolicy,
 } from "@solid-memo/domain/invalidDataPolicy";
 import { LOCALES } from "@solid-memo/domain/locale";
+import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import { THEME_CHOICES } from "@solid-memo/domain/theme";
 import { ErrorMessage } from "./ErrorMessage";
@@ -34,6 +35,27 @@ function answerScaleOptions(t: I18n["t"]): {
       hint: t("preferences.answerScale.minimal.hint"),
     },
   ];
+}
+
+/** The schedulers on offer, each with its label and meaning. */
+function schedulerOptions(t: I18n["t"]): { value: Scheduler; label: string; hint: string }[] {
+  return [
+    {
+      value: "sm2",
+      label: t("preferences.scheduler.sm2.label"),
+      hint: t("preferences.scheduler.sm2.hint"),
+    },
+    {
+      value: "fsrs6",
+      label: t("preferences.scheduler.fsrs6.label"),
+      hint: t("preferences.scheduler.fsrs6.hint"),
+    },
+  ];
+}
+
+/** The desired retention as the field shows it: a whole percent. */
+function percentOf(share: number): string {
+  return String(Math.round(share * 100));
 }
 
 /**
@@ -66,6 +88,13 @@ function policyOption(
   }
 }
 
+/**
+ * The study preferences, saved together. The scheduler is one of them:
+ * the caller decides what saving a change of it takes (switchScheduler).
+ * The desired retention, a percent from 70 to 97, can be set only while
+ * FSRS-6 is chosen, and the answer buttons only while SM-2 is, as FSRS-6
+ * always uses the four; each keeps its value meanwhile.
+ */
 export function PreferencesScreen({
   preferences,
   busy,
@@ -83,7 +112,10 @@ export function PreferencesScreen({
   const [maxReviewsPerDay, setMaxReviewsPerDay] = useState(String(preferences.maxReviewsPerDay));
   const [dayBoundaryHour, setDayBoundaryHour] = useState(String(preferences.dayBoundaryHour));
 
+  const [scheduler, setScheduler] = useState<Scheduler>(preferences.scheduler);
+  const [retention, setRetention] = useState(percentOf(preferences.desiredRetention));
   const [answerScale, setAnswerScale] = useState<AnswerScale>(preferences.answerScale);
+  const fsrs = scheduler === "fsrs6";
   const [developerMode, setDeveloperMode] = useState(preferences.developerMode);
   const [invalidDataPolicy, setInvalidDataPolicy] = useState<InvalidDataPolicy>(
     preferences.invalidDataPolicy,
@@ -99,9 +131,10 @@ export function PreferencesScreen({
       developerMode,
       invalidDataPolicy,
       theme: themeChoice,
-      // Not on this screen: kept as they are.
-      scheduler: preferences.scheduler,
-      desiredRetention: preferences.desiredRetention,
+      scheduler,
+      // The field is disabled, so unchecked, while SM-2 is chosen: what
+      // it holds then is not the learner's to save.
+      desiredRetention: fsrs ? Number(retention) / 100 : preferences.desiredRetention,
     });
   }
 
@@ -187,7 +220,44 @@ export function PreferencesScreen({
         <p id="pref-boundary-hint" class="hint">
           {t("preferences.dayBoundaryHint")}
         </p>
-        <fieldset>
+        <fieldset aria-describedby="pref-scheduler-hint">
+          <legend>{t("preferences.scheduler.legend")}</legend>
+          {schedulerOptions(t).map((option) => (
+            <label key={option.value} class="radio-option">
+              <input
+                type="radio"
+                name="scheduler"
+                value={option.value}
+                checked={scheduler === option.value}
+                onChange={() => setScheduler(option.value)}
+                disabled={busy}
+              />
+              {option.label}
+              <span class="hint">{option.hint}</span>
+            </label>
+          ))}
+          <p id="pref-scheduler-hint" class="hint">
+            {t("preferences.scheduler.hint")}
+          </p>
+        </fieldset>
+        <label for="pref-retention">{t("preferences.desiredRetention")}</label>
+        <input
+          id="pref-retention"
+          type="number"
+          min="70"
+          max="97"
+          step="1"
+          value={retention}
+          onInput={(e) => setRetention(e.currentTarget.value)}
+          aria-describedby="pref-retention-hint"
+          required
+          disabled={busy || !fsrs}
+        />
+        <p id="pref-retention-hint" class="hint">
+          {t("preferences.desiredRetentionHint")}
+        </p>
+        {/* Under FSRS-6 the whole group is disabled, its hint saying why. */}
+        <fieldset disabled={fsrs} aria-describedby={fsrs ? "pref-answer-scale-hint" : undefined}>
           <legend>{t("preferences.answerScale.legend")}</legend>
           {answerScaleOptions(t).map((option) => (
             <label key={option.value} class="radio-option">
@@ -203,6 +273,11 @@ export function PreferencesScreen({
               <span class="hint">{option.hint}</span>
             </label>
           ))}
+          {fsrs && (
+            <p id="pref-answer-scale-hint" class="hint">
+              {t("preferences.answerScale.fsrs6Hint")}
+            </p>
+          )}
         </fieldset>
         <fieldset>
           <legend>{t("preferences.policy.legend")}</legend>

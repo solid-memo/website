@@ -727,6 +727,51 @@
     "close": "Cerrar",
     "done": "Tus datos están actualizados."
   },
+  "schedulerSwitch": {
+    "progressRegion": "Cambiando a FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Progreso del cambio",
+    "keepOpen": "Mantén esta página abierta hasta que termine el cambio. Si se interrumpe, SM-2 sigue programando tus repasos y puedes volver a cambiar.",
+    "step": {
+      "read": "Leyendo tus respuestas y mazos",
+      "decks": "Calculando el recuerdo de cada tarjeta",
+      "preferences": "Guardando tus preferencias"
+    },
+    "count": {
+      "one": "{done} de {count} mazo",
+      "many": "{done} de {count} de mazos",
+      "other": "{done} de {count} mazos"
+    },
+    "doneRegion": "Cambiado a FSRS-6",
+    "done": "Ahora FSRS-6 programa tus repasos.",
+    "replayed": {
+      "one": "{count} tarjeta se calculó a partir de todas tus respuestas.",
+      "many": "{count} de tarjetas se calcularon a partir de todas tus respuestas.",
+      "other": "{count} tarjetas se calcularon a partir de todas tus respuestas."
+    },
+    "estimated": {
+      "one": "{count} tarjeta, cuyas respuestas no están todas en tu historial, se estimó a partir de SM-2.",
+      "many": "{count} de tarjetas, cuyas respuestas no están todas en tu historial, se estimaron a partir de SM-2.",
+      "other": "{count} tarjetas, cuyas respuestas no están todas en tu historial, se estimaron a partir de SM-2."
+    },
+    "decks": {
+      "one": "Se cambió {count} mazo.",
+      "many": "Se cambiaron {count} de mazos.",
+      "other": "Se cambiaron {count} mazos."
+    },
+    "dueKept": "Cada tarjeta sigue tocando el día que le tocaba.",
+    "continue": "Hecho",
+    "failedRegion": "Cambio sin terminar",
+    "notFinished": {
+      "one": "{count} mazo no se pudo cambiar ahora:",
+      "many": "{count} de mazos no se pudieron cambiar ahora:",
+      "other": "{count} mazos no se pudieron cambiar ahora:"
+    },
+    "failedItem": "{deck}: {reason}",
+    "retryHint": "SM-2 sigue programando tus repasos. Si lo intentas de nuevo, se cambian todos los mazos.",
+    "tryAgain": "Reintentar",
+    "close": "Cerrar"
+  },
   "library": {
     "heading": "Biblioteca de mazos",
     "deckCount": {
@@ -1109,16 +1154,31 @@
     "maxReviewsPerDay": "Máx. de repasos por día",
     "dayBoundaryHour": "El día empieza a las (hora)",
     "dayBoundaryHint": "Una hora de 0 a 23 en formato de 24 horas: a esa hora empieza un nuevo día de estudio, con tarjetas nuevas y repasos.",
+    "scheduler": {
+      "legend": "Planificador",
+      "hint": "El método que decide cuándo vuelve cada tarjeta. SM-2 se mantiene al día en cada repaso, así que puedes volver a él cuando quieras; si cambias de nuevo a FSRS-6, cada tarjeta se calcula otra vez.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2: cada respuesta correcta multiplica el intervalo de la tarjeta por su facilidad. La opción predeterminada."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "El Free Spaced Repetition Scheduler, versión 6: sigue lo estable que es cada recuerdo y vuelve a mostrar la tarjeta cuando la probabilidad de que la recuerdes baja a la retención que elijas. Al cambiar, calcula el recuerdo de cada tarjeta a partir de tus respuestas hasta ahora."
+      }
+    },
+    "desiredRetention": "Retención deseada (%)",
+    "desiredRetentionHint": "Con FSRS-6: la probabilidad de recordar una tarjeta cuando vuelve, de 70 a 97. Más alta significa intervalos más cortos y más repasos. La predeterminada es 90.",
     "answerScale": {
       "legend": "Botones de respuesta",
       "sm2": {
         "label": "Escala de 0 a 5",
-        "hint": "Todas las calificaciones de SuperMemo-2 (SM-2), el método que programa tus repasos: de 0 (no recuerdas nada) a 5 (fácil)."
+        "hint": "Todas las calificaciones de SuperMemo-2 (SM-2): de 0 (no recuerdas nada) a 5 (fácil)."
       },
       "minimal": {
         "label": "Otra vez · Difícil · Bien · Fácil",
         "hint": "Cuatro botones. «Otra vez» repite la tarjeta más adelante en la sesión."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 siempre usa los cuatro botones Otra vez, Difícil, Bien y Fácil. Lo que elijas aquí se guarda para cuando vuelvas a SM-2."
     },
     "policy": {
       "legend": "Cuando los datos no se ajustan",

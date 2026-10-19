@@ -44,9 +44,10 @@ export function statisticsReportOf(
  * What a study queue comes with besides its prompts, when a test has
  * nothing to say of it: the default preferences, and no states.
  */
-export const QUEUE_DEFAULTS: Pick<StudySessionQueue, "prefs" | "states"> = {
+export const QUEUE_DEFAULTS: Pick<StudySessionQueue, "prefs" | "states" | "fsrsStates"> = {
   prefs: DEFAULT_PREFERENCES,
   states: [],
+  fsrsStates: [],
 };
 
 /** A complete UseCases fake; override the methods a test cares about. */
@@ -282,6 +283,13 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     removeInterruptedGuestMove: vi.fn(async () => undefined),
     getPreferences: vi.fn(async () => DEFAULT_PREFERENCES),
     savePreferences: vi.fn(async () => undefined),
+    switchScheduler: vi.fn(async () => ({
+      switched: true,
+      decks: 0,
+      replayed: 0,
+      estimated: 0,
+      failed: [],
+    })),
     renameInstance: vi.fn(async (_session, instance, name) => ({ ...instance, name: name.trim() })),
     readCatalog: vi.fn(async (instanceUrl) => ({
       title: "Main",

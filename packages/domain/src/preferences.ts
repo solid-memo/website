@@ -70,3 +70,14 @@ export const DEFAULT_PREFERENCES: StudyPreferences = {
   scheduler: "sm2",
   desiredRetention: DEFAULT_DESIRED_RETENTION,
 };
+
+/**
+ * The grading buttons a session shows: the stored answer scale under
+ * SM-2; under FSRS-6 always Again, Hard, Good and Easy, the four ratings
+ * it knows. The stored scale is kept for switching back.
+ */
+export function effectiveAnswerScale(
+  prefs: Pick<StudyPreferences, "answerScale" | "scheduler">,
+): AnswerScale {
+  return prefs.scheduler === "fsrs6" ? "minimal" : prefs.answerScale;
+}

@@ -587,6 +587,17 @@ export interface ReviewStateRepository {
     },
   ): Promise<void>;
   /**
+   * Write the FSRS-6 states `edit` makes of the deck's states as its
+   * reviews document holds them now, in ONE edit made only if it is
+   * still as read (If-Match); had it changed meanwhile (a grade on
+   * another device), it is read and the states made again, three times
+   * in all. Each is written over this app's FSRS-6 state of its prompt,
+   * else at the subject named for it. Nothing is written when there is
+   * no document or `edit` gives no state. For switching to FSRS-6, whose
+   * states are made of the SM-2 states as they are when written.
+   */
+  writeFsrsStates(deck: Deck, edit: (states: ReviewStates) => FsrsState[]): Promise<void>;
+  /**
    * For the format update: bring every review state of the deck in its
    * reviews document stored in an older format up to this app's, in ONE
    * save of the document made only if it is still as it was read

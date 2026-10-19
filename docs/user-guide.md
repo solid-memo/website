@@ -158,8 +158,9 @@ ones, mixed in among them ([srs.md](srs.md#study-sessions)).
 3. Say how well you remembered it, with the buttons or the number keys.
    The buttons are either a scale from 0 (no memory at all) to 5
    (easy), or Again · Hard · Good · Easy, as you choose in the
-   preferences. Under each button is how long the card would wait
-   before it comes back if you choose it.
+   preferences; with FSRS-6 they are always the four. Under each button
+   is how long the card would wait before it comes back if you choose
+   it.
 
 Pressed the wrong button? **Undo last answer** (or U) takes your last
 answer back and shows that card again, as long as the session is open.
@@ -170,7 +171,8 @@ A card you answer with **0 — Blackout** or **1 — Wrong**, or with
 it is due again the next day you study. **Hard**, on the four buttons,
 counts as remembered. The better you remember a card, the longer it
 waits before it comes back: a day, then a few days, then weeks. That is
-spaced repetition, and Solid Memo schedules it with the SM-2 method
+spaced repetition, and Solid Memo schedules it with the SM-2 method,
+or with FSRS-6 when you choose it in the preferences
 ([srs.md](srs.md)). When the session is over it says so; "End session"
 takes you back to your decks at any time, and nothing you answered is
 lost.
@@ -322,7 +324,9 @@ of your answers, and nothing turns them off
 | New cards per day | How many new cards a day brings, 5 to start with. Every new card comes back for reviews in the days after, so it is better to start small. |
 | Max reviews per day | A cap on the reviews of one day, 200 to start with. |
 | Day starts at | The hour a new study day begins, 4 in the morning to start with, so studying late at night still counts for that day. |
-| Answer buttons | 0 to 5, or Again · Hard · Good · Easy. |
+| Scheduler | SM-2 (to start with) or FSRS-6: how each card's next day is worked out ([srs.md](srs.md#switching-the-scheduler)). Switching to FSRS-6 works out each card's memory from your answers so far, deck by deck, and says how it went; every card stays due on the day it was due. SM-2 is kept up to date on every review, so you can switch back to it at any time; switching to FSRS-6 again works each card out anew. |
+| Desired retention | With FSRS-6: how likely you are to remember a card when it comes back, from 70% to 97%, 90% to start with. Higher means more reviews. |
+| Answer buttons | 0 to 5, or Again · Hard · Good · Easy. FSRS-6 always uses the four; your choice is kept for SM-2. |
 | When data does not conform | What to do when data in your Pod is not in the form Solid Memo expects: block the instance, set the faulty deck aside (the default), or only warn ([validation.md](validation.md)). |
 | Developer mode | Shows developer tools: your WebID document, and a check of the instance against Solid Memo's data shapes. |
 
@@ -419,7 +423,8 @@ screenshot of each.
 | The dark theme, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–04, 08–10 |
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts, first journey | 21–23 |
-| Reviewing on a later study day, forgetting cards, and the hardest cards | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 06–11 |
+| Switching the scheduler to FSRS-6, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 06–09 |
+| Reviewing on a later study day, forgetting cards, and the hardest cards | later-day | 07–12 |
 | Updating a library deck to its new release, its progress kept | [library-upgrade.journey.ts](../e2e/journeys/journeys/library-upgrade.journey.ts) | 04–10 |
 | Undoing an answer, and resetting today's study | [reset-day.journey.ts](../e2e/journeys/journeys/reset-day.journey.ts) | 07–12 |
 | Reloading in the middle of a study session | [study-reload.journey.ts](../e2e/journeys/journeys/study-reload.journey.ts) | 05–10 |

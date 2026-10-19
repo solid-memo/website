@@ -161,6 +161,13 @@ import {
 import { effectiveStates } from "@solid-memo/domain/fsrs";
 import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
 import {
+  SWITCH_STEPS,
+  switchedStates,
+  type SwitchOutcome,
+  type SwitchProgress,
+  type SwitchStep,
+} from "@solid-memo/domain/schedulerSwitch";
+import {
   answerIdOf,
   monthOfStudyDay,
   recordedResponseTimes,
@@ -781,7 +788,33 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * the instance has no catalog. The catalog as written.
    */
   describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
+  /**
+   * Save the preferences, but for the scheduler: the stored one stays
+   * (SM-2 when none is stored), as only switchScheduler can change it,
+   * with what changing it takes.
+   */
   savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
+  /**
+   * Save the preferences with the scheduler they name (docs/srs.md,
+   * "Switching the scheduler"). To SM-2 the preferences are all there is
+   * to save: SM-2's states are kept up to date whichever scheduler sets
+   * the due days. To FSRS-6, first the answer log is read whole, once,
+   * and each deck's FSRS-6 states written (writeFsrsStates), one deck
+   * after another, each in ONE write made of its states as they are
+   * then: replayed from a prompt's answers when the log holds its whole
+   * history, else estimated from its SM-2 state (switchedStates), each
+   * due when SM-2 has it due. A deck that cannot be written now is left
+   * as it is, named with why, and the others go on. Only once every deck
+   * is written are the preferences saved, so until then SM-2 sets the due
+   * days and the switch can be run again; then each deck's schedule in
+   * the digest is brought up to date (a failure there leaves the switch
+   * done).
+   */
+  switchScheduler(
+    instanceUrl: string,
+    preferences: StudyPreferences,
+    onProgress?: (progress: SwitchProgress) => void,
+  ): Promise<SwitchOutcome>;
   /**
    * Today's due and new cards for a deck, respecting the daily caps, with
    * what grading them takes and their states (StudySessionQueue).
@@ -974,11 +1007,13 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
  * Today's queue of a deck (UseCases.getStudyQueue), with the instance's
  * preferences it was built with, which a session grades its prompts by
  * (GradeBasis), and the deck's review states it was built from, which a
- * session shows each grade's interval from.
+ * session shows each grade's interval from (previewIntervals): SM-2's,
+ * and the FSRS-6 states beside them.
  */
 export interface StudySessionQueue extends StudyQueue {
   prefs: StudyPreferences;
   states: ReviewState[];
+  fsrsStates: FsrsState[];
 }
 
 /** What a grade is made with besides the prompt's state, which is the reviews document's: the instance's preferences. */
@@ -3425,9 +3460,57 @@ export function createUseCases({
         return described;
       });
     },
-    savePreferences(instanceUrl, preferences) {
+    async savePreferences(instanceUrl, preferences) {
       themePreference.choose(preferences.theme);
-      return preferencesRepository.savePreferences(instanceUrl, preferences);
+      const { scheduler } = await getPreferences(instanceUrl);
+      await preferencesRepository.savePreferences(instanceUrl, { ...preferences, scheduler });
+    },
+    async switchScheduler(instanceUrl, preferences, onProgress = () => undefined) {
+      const progress = stepReporter<SwitchStep>("read", SWITCH_STEPS.length, onProgress);
+      progress.start();
+      // Switching to SM-2 writes no deck: its states are up to date already.
+      const [answers, listed] =
+        preferences.scheduler === "fsrs6"
+          ? await Promise.all([loadAnswerLog(instanceUrl), deckRepository.listDecks(instanceUrl)])
+          : [[], []];
+      progress.finished("decks", listed.length > 0 ? listed.length : undefined);
+      const outcome: SwitchOutcome = {
+        switched: false,
+        decks: 0,
+        replayed: 0,
+        estimated: 0,
+        failed: [],
+      };
+      for (const deck of listed) {
+        // Each deck on its own: one that cannot be written now is left as it is, and the others go on.
+        try {
+          // Made of the states as written, again when the document changed meanwhile: the last one counts.
+          let made = { replayed: 0, estimated: 0 };
+          await reviewStateRepository.writeFsrsStates(deck, ({ sm2 }) => {
+            const switched = switchedStates(deck.url, sm2, answers);
+            made = switched;
+            return switched.fsrs;
+          });
+          outcome.decks += 1;
+          outcome.replayed += made.replayed;
+          outcome.estimated += made.estimated;
+        } catch (error) {
+          outcome.failed.push({ url: deck.url, title: deck.title, error });
+        }
+        progress.stepped();
+      }
+      progress.finished("preferences");
+      // Saved last, and only once every deck is written: until then SM-2 sets the due days.
+      if (outcome.failed.length === 0) {
+        themePreference.choose(preferences.theme);
+        await preferencesRepository.savePreferences(instanceUrl, preferences);
+        outcome.switched = true;
+        await Promise.all(
+          listed.map((deck) => refreshStudyDigest(instanceUrl, deck).catch(() => undefined)),
+        );
+      }
+      progress.finished();
+      return outcome;
     },
     async getStudyQueue(instanceUrl, deck, now) {
       const [cards, reviews, prefs] = await Promise.all([
@@ -3443,7 +3526,7 @@ export function createUseCases({
         now,
         random,
       });
-      return { ...queue, prefs, states: reviews.sm2 };
+      return { ...queue, prefs, states: reviews.sm2, fsrsStates: reviews.fsrs };
     },
     getStudyCounts(instanceUrl, deck, now) {
       return studyCountsAndSchedule(instanceUrl, deck, now);

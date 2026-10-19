@@ -696,6 +696,46 @@
     "close": "Close",
     "done": "Your data is up to date."
   },
+  "schedulerSwitch": {
+    "progressRegion": "Switching to FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Switch progress",
+    "keepOpen": "Keep this page open until the switch is done. Should it be cut off, SM-2 goes on scheduling your reviews, and you can switch again.",
+    "step": {
+      "read": "Reading your answers and decks",
+      "decks": "Working out each card's memory",
+      "preferences": "Saving your preferences"
+    },
+    "count": {
+      "one": "{done} of {count} deck",
+      "other": "{done} of {count} decks"
+    },
+    "doneRegion": "Switched to FSRS-6",
+    "done": "FSRS-6 now schedules your reviews.",
+    "replayed": {
+      "one": "{count} card was worked out from all your answers to it.",
+      "other": "{count} cards were worked out from all your answers to them."
+    },
+    "estimated": {
+      "one": "{count} card, whose answers are not all in your history, was estimated from SM-2.",
+      "other": "{count} cards, whose answers are not all in your history, were estimated from SM-2."
+    },
+    "decks": {
+      "one": "{count} deck was switched.",
+      "other": "{count} decks were switched."
+    },
+    "dueKept": "Every card stays due on the day it was due.",
+    "continue": "Done",
+    "failedRegion": "Switch not finished",
+    "notFinished": {
+      "one": "{count} deck could not be switched now:",
+      "other": "{count} decks could not be switched now:"
+    },
+    "failedItem": "{deck}: {reason}",
+    "retryHint": "SM-2 still schedules your reviews. Trying again switches every deck.",
+    "tryAgain": "Try again",
+    "close": "Close"
+  },
   "library": {
     "heading": "Deck library",
     "deckCount": {
@@ -1055,16 +1095,31 @@
     "maxReviewsPerDay": "Max reviews per day",
     "dayBoundaryHour": "Day starts at (hour)",
     "dayBoundaryHint": "An hour from 0 to 23 on the 24-hour clock: a new study day, with new cards and reviews, starts then.",
+    "scheduler": {
+      "legend": "Scheduler",
+      "hint": "The method that decides when each card comes back. SM-2 is kept up to date on every review, so you can switch back to it at any time; switching to FSRS-6 again works each card out anew.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2: each right answer multiplies the card's interval by its ease. The default."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "The Free Spaced Repetition Scheduler, version 6: it tracks how stable each memory is and brings the card back when your chance of recalling it falls to the retention you choose. Switching works out each card's memory from your answers so far."
+      }
+    },
+    "desiredRetention": "Desired retention (%)",
+    "desiredRetentionHint": "With FSRS-6: the chance of recalling a card when it comes back, from 70 to 97. Higher means shorter intervals and more reviews. The default is 90.",
     "answerScale": {
       "legend": "Answer buttons",
       "sm2": {
         "label": "0 to 5 scale",
-        "hint": "The full grades of SuperMemo-2 (SM-2), the method that schedules your reviews: from 0 (no memory at all) to 5 (easy)."
+        "hint": "The full grades of SuperMemo-2 (SM-2): from 0 (no memory at all) to 5 (easy)."
       },
       "minimal": {
         "label": "Again · Hard · Good · Easy",
         "hint": "Four buttons. Again repeats the card later in the session."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 always uses the four buttons Again, Hard, Good and Easy. Your choice here is kept for when you switch back to SM-2."
     },
     "policy": {
       "legend": "When data does not conform",

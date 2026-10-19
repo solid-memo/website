@@ -424,7 +424,7 @@ describe("StudyScreen", () => {
   it("shows under each grade the interval it gives, as the grade's description, its name unchanged", () => {
     renderScreen({
       answerScale: "minimal",
-      state: { easeFactor: 2.5, intervalDays: 6, repetitions: 2 },
+      intervals: { 0: 1, 1: 1, 2: 1, 3: 14, 4: 15, 5: 16 },
     });
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(
@@ -434,11 +434,11 @@ describe("StudyScreen", () => {
     ).toEqual(["1 day", "14 days", "15 days", "16 days"]);
   });
 
-  it("shows a new prompt's intervals from the start, and none while its state is unknown", () => {
-    const { rerender, props } = renderScreen({ state: null });
+  it("shows the intervals given, and none while they are unknown", () => {
+    const { rerender, props } = renderScreen({ intervals: { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 } });
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(screen.getByRole("button", { name: "5 — Easy" })).toHaveAccessibleDescription("1 day");
-    rerender(<StudyScreen {...props} state={undefined} />);
+    rerender(<StudyScreen {...props} intervals={undefined} />);
     expect(screen.getByRole("button", { name: "5 — Easy" })).not.toHaveAccessibleDescription();
     expect(document.querySelector(".grade-interval")).toBeNull();
   });

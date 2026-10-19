@@ -1,14 +1,15 @@
-# Spaced repetition (SM-2)
+# Spaced repetition (SM-2 and FSRS-6)
 
 Spaced repetition shows a card again just before you
 would forget it: soon after you learn it, then at longer and longer
-intervals. Solid Memo uses the SM-2 method to pick each card's next day
-from how well you remembered it. This page says how that schedule is
-worked out, how a day's study session is built, and where the cards
-stand.
+intervals. Solid Memo picks each card's next day from how well you
+remembered it, by the SM-2 method or, when the preferences name it, by
+FSRS-6 ([FSRS-6](#fsrs-6)). This page says how that schedule is worked
+out, how a day's study session is built, and where the cards stand.
 
 How Solid Memo schedules cards. Implemented entirely in the domain layer
-([sm2.ts](../packages/domain/src/sm2.ts), [scheduling.ts](../packages/domain/src/scheduling.ts))
+([sm2.ts](../packages/domain/src/sm2.ts), [fsrs.ts](../packages/domain/src/fsrs.ts),
+[scheduling.ts](../packages/domain/src/scheduling.ts))
 as pure functions.
 
 **Reference.** SM-2 is the algorithm of SuperMemo 2, first described in
@@ -124,7 +125,8 @@ domain layer too, as pure functions:
 applies a grade to both schedulers. The preferences name the scheduler
 that sets the due days (`sm:studyScheduler`, preferences format 5);
 SM-2 is the default, and SM-2's state is updated on every review either
-way.
+way. The learner switches in the preferences
+([Switching the scheduler](#switching-the-scheduler)).
 
 **Reference.** FSRS is by Jarrett Ye and the Open Spaced Repetition
 project, described in
@@ -261,6 +263,48 @@ read in the same read of the document.
   the due day ([data-model.md](data-model.md#the-answer-log)); the
   grade stays SM-2's.
 
+#### Switching the scheduler
+
+The preferences screen saves a change of scheduler through
+`switchScheduler` ([useCases.ts](../packages/application/src/useCases.ts));
+a plain save of the preferences (`savePreferences`) keeps the scheduler
+stored, so FSRS-6 is never turned on without its states.
+
+- **To FSRS-6.** The answer log is read whole, once, and each deck's
+  reviews document gets an FSRS-6 state for every SM-2 state
+  (`switchedStates`, [schedulerSwitch.ts](../packages/domain/src/schedulerSwitch.ts)),
+  in one write per deck made of the document as it is then, again from
+  a fresh read when it changed meanwhile (`writeFsrsStates`, 412).
+  - **Replayed** when the log holds the prompt's whole history: its
+    answers since its last introduction start with the one at the SM-2
+    state's `firstReviewedAt` and end with the one at its
+    `lastReviewedAt`. The first answer starts the memory from its
+    rating, and each later one steps it by the study days since the one
+    before (0 the same study day). A multiple-choice answer is read as
+    Good or Again by whether it was right, any other by its grade.
+  - **Estimated from SM-2** otherwise (`memoryFromSm2`): a card moved
+    in with its progress, whose answers stay with the deck it came
+    from; a guest's study whose answers were not all kept; or a state an
+    older app wrote.
+  - Each keeps the SM-2 state's due day and reviews, and has no
+    snapshot, so nothing falls due earlier or later on the day of the
+    switch. An FSRS-6 state already there is made again, at the same
+    subject, so a switch run twice gives the same states.
+  - Progress is said per deck. A deck that cannot be written now is
+    named with why, and the others go on. The preferences are saved
+    last, and only once every deck is written: until then SM-2 sets the
+    due days, and the switch can simply be run again. Then each deck's
+    schedule in the digest is brought up to date. A switch that fails,
+    or one closed before every deck is written, goes back to the form
+    as the learner last saved it, FSRS-6 still chosen.
+- **To SM-2.** Only the preferences are saved: SM-2's states are kept
+  up to date on every review, so they are current. The digest's
+  schedules name the scheduler their due days are of, so the deck
+  list counts from the documents again.
+- **The desired retention** (70% to 97%, stored as a share) is saved
+  like any preference. It sets the interval of each review from then
+  on; the due days already set stay.
+
 ### FSRS-6 worked examples
 
 Each row is one answer: the memory before it (a new prompt, a
@@ -298,7 +342,10 @@ they are.
 ## Answer scales
 
 Sessions grade with one of two button sets, chosen per instance in the
-preferences (`sm:answerScale`, default `sm2`):
+preferences (`sm:answerScale`, default `sm2`). Under FSRS-6 the minimal
+scale is always used, as FSRS-6 knows the four ratings alone
+(`effectiveAnswerScale` in [preferences.ts](../packages/domain/src/preferences.ts));
+the stored scale stays, for switching back to SM-2:
 
 | Scale | Buttons | Records |
 |---|---|---|
@@ -428,19 +475,26 @@ the only card left, in which case it simply repeats until it passes. The
 `recordReview` use case
 ([useCases.ts](../packages/application/src/useCases.ts)): take the card's
 state as `reviews/<deckId>.ttl` holds it when written (or start from the
-initial SM-2 state), apply the transition, compute the next due day,
+initial SM-2 state), apply the transition (`gradePrompt`: SM-2's, and
+FSRS-6's too while it sets the due days), compute the next due day,
 persist it there, and return the new state. The preferences are not read
 for it: the queue comes with the instance's (`StudySessionQueue`), which
 the session grades with (`GradeBasis`, recordReview's `known`). A failed save keeps the card in place with an error; the queue only
 advances on success. Ending the session invalidates the review caches so
 other screens see fresh state.
 
-Under each grade button is the interval that grade would give (`applySm2`
-from the prompt's state, or the initial state for a new prompt): "1 day",
-"6 days", "15 days". The grade's label stays the button's name; the
-interval is its description. The states come with the session's queue,
-as `getStudyQueue` read them to build it, with no read of their own; the
-session keeps each answer's new state, so a card put back shows the
+Under each grade button is the interval that grade would give
+(`previewIntervals` in [grading.ts](../packages/domain/src/grading.ts),
+the grade applied to the prompt's states as `gradePrompt` would apply
+it, a new prompt's from nothing): "1 day", "6 days", "15 days". Under
+SM-2 it is SM-2's interval; under FSRS-6 the FSRS-6 interval at the
+desired retention, which depends on the days since the last review, so
+on the time the card is shown. The screen is handed the numbers. The
+grade's label stays the button's name; the interval is its description.
+The states, SM-2's and FSRS-6's, come with the session's queue, as
+`getStudyQueue` read them to build it, with no read of their own, and
+so do the preferences, which pick the scheduler and the buttons; the
+session keeps each answer's new states, so a card put back shows the
 intervals its first answer left it with.
 
 ### What a grade costs

@@ -727,6 +727,51 @@
     "close": "Fermer",
     "done": "Vos données sont à jour."
   },
+  "schedulerSwitch": {
+    "progressRegion": "Passage à FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Avancement du changement",
+    "keepOpen": "Gardez cette page ouverte jusqu’à la fin du changement. S’il est interrompu, SM-2 continue de planifier vos révisions, et vous pourrez recommencer.",
+    "step": {
+      "read": "Lecture de vos réponses et de vos paquets",
+      "decks": "Calcul du souvenir de chaque carte",
+      "preferences": "Enregistrement de vos préférences"
+    },
+    "count": {
+      "one": "Paquets : {done} sur {count}",
+      "many": "Paquets : {done} sur {count}",
+      "other": "Paquets : {done} sur {count}"
+    },
+    "doneRegion": "Passé à FSRS-6",
+    "done": "FSRS-6 planifie désormais vos révisions.",
+    "replayed": {
+      "one": "{count} carte a été calculée à partir de toutes vos réponses.",
+      "many": "{count} de cartes ont été calculées à partir de toutes vos réponses.",
+      "other": "{count} cartes ont été calculées à partir de toutes vos réponses."
+    },
+    "estimated": {
+      "one": "{count} carte, dont les réponses ne sont pas toutes dans votre historique, a été estimée à partir de SM-2.",
+      "many": "{count} de cartes, dont les réponses ne sont pas toutes dans votre historique, ont été estimées à partir de SM-2.",
+      "other": "{count} cartes, dont les réponses ne sont pas toutes dans votre historique, ont été estimées à partir de SM-2."
+    },
+    "decks": {
+      "one": "{count} paquet a été changé.",
+      "many": "{count} de paquets ont été changés.",
+      "other": "{count} paquets ont été changés."
+    },
+    "dueKept": "Chaque carte reste à réviser le jour prévu.",
+    "continue": "Terminé",
+    "failedRegion": "Changement inachevé",
+    "notFinished": {
+      "one": "{count} paquet n’a pas pu être changé pour l’instant :",
+      "many": "{count} de paquets n’ont pas pu être changés pour l’instant :",
+      "other": "{count} paquets n’ont pas pu être changés pour l’instant :"
+    },
+    "failedItem": "{deck} : {reason}",
+    "retryHint": "SM-2 planifie toujours vos révisions. Si vous réessayez, chaque paquet sera changé.",
+    "tryAgain": "Réessayer",
+    "close": "Fermer"
+  },
   "library": {
     "heading": "Bibliothèque de paquets",
     "deckCount": {
@@ -1109,16 +1154,31 @@
     "maxReviewsPerDay": "Révisions maximum par jour",
     "dayBoundaryHour": "Début de la journée (heure)",
     "dayBoundaryHint": "Une heure de 0 à 23, au format 24 heures : un nouveau jour d’étude, avec de nouvelles cartes et révisions, commence à cette heure-là.",
+    "scheduler": {
+      "legend": "Planificateur",
+      "hint": "La méthode qui décide quand chaque carte revient. SM-2 est tenu à jour à chaque révision : vous pouvez y revenir à tout moment ; repasser à FSRS-6 recalcule chaque carte.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2 : chaque bonne réponse multiplie l’intervalle de la carte par sa facilité. Le choix par défaut."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "Le Free Spaced Repetition Scheduler, version 6 : il suit la stabilité de chaque souvenir et ramène la carte quand votre probabilité de vous en souvenir tombe à la rétention choisie. Au changement, le souvenir de chaque carte est calculé à partir de vos réponses jusqu’ici."
+      }
+    },
+    "desiredRetention": "Rétention souhaitée (%)",
+    "desiredRetentionHint": "Avec FSRS-6 : la probabilité de vous souvenir d’une carte quand elle revient, de 70 à 97. Plus elle est haute, plus les intervalles sont courts et les révisions nombreuses. Par défaut : 90.",
     "answerScale": {
       "legend": "Boutons de réponse",
       "sm2": {
         "label": "Échelle de 0 à 5",
-        "hint": "Toutes les notes de SuperMemo-2 (SM-2), la méthode qui planifie vos révisions : de 0 (trou de mémoire complet) à 5 (facile)."
+        "hint": "Toutes les notes de SuperMemo-2 (SM-2) : de 0 (trou de mémoire complet) à 5 (facile)."
       },
       "minimal": {
         "label": "À revoir · Difficile · Correct · Facile",
         "hint": "Quatre boutons. « À revoir » présente de nouveau la carte plus tard dans la séance."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 utilise toujours les quatre boutons À revoir, Difficile, Correct et Facile. Votre choix ici est conservé pour le jour où vous reviendrez à SM-2."
     },
     "policy": {
       "legend": "Quand des données ne sont pas conformes",

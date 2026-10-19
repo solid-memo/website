@@ -779,3 +779,72 @@ describe("upgradeReviewStates", () => {
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 });
+
+describe("writeFsrsStates", () => {
+  const fsrsAt = `${deck.reviewsDocumentUrl}#card-1@fsrs6`;
+  /** Each state made of the document's SM-2 states, as a switch makes them. */
+  const fromSm2 = vi.fn(({ sm2 }: { sm2: ReviewState[] }) =>
+    sm2.map((each): FsrsState => ({ ...fsrs, cardId: each.cardId, due: each.due })),
+  );
+
+  beforeEach(() => {
+    fromSm2.mockClear();
+  });
+
+  it("writes the states made of the document as read, over the app's own, in one checked save", async () => {
+    // A snapshot stays only when the state written has one.
+    const { stability, difficulty, due } = fsrs;
+    const snapshot = { stability, difficulty, due, lastReviewedAt: state.firstReviewedAt };
+    const stale: FsrsState = { ...fsrs, stability: 1, previous: snapshot };
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), namedFsrs(stale)));
+    const checkWrite = vi.fn(async () => undefined);
+
+    await makeRepository(checkWrite).writeFsrsStates(deck, fromSm2);
+
+    expect(fromSm2).toHaveBeenCalledWith({ sm2: [state], fsrs: [stale] });
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const saved = savedDataset();
+    expect(toFsrsState(getThing(saved, fsrsAt)!, deck)).toEqual({ ...fsrs, due: state.due });
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
+      state,
+    );
+    expect(checkWrite).toHaveBeenCalledWith(saved, [fsrsAt], "pod");
+  });
+
+  it("reads and makes the states again when the document changed meanwhile (412), three times in all", async () => {
+    const theirs: ReviewState = { ...state, due: "2026-10-01" };
+    vi.mocked(getSolidDatasetOrNull)
+      .mockResolvedValueOnce(documentOf(named(state)))
+      .mockResolvedValue(documentOf(named(theirs)));
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
+
+    await makeRepository().writeFsrsStates(deck, fromSm2);
+
+    expect(fromSm2).toHaveBeenCalledTimes(2);
+    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    expect(toFsrsState(getThing(saved as SolidDataset, fsrsAt)!, deck)?.due).toBe("2026-10-01");
+
+    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValue({ statusCode: 412 });
+    await expect(makeRepository().writeFsrsStates(deck, fromSm2)).rejects.toThrow();
+    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
+  });
+
+  it("passes on another failure at once", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state)));
+    vi.mocked(saveSolidDatasetAt).mockRejectedValue({ statusCode: 500 });
+    await expect(makeRepository().writeFsrsStates(deck, fromSm2)).rejects.toEqual({
+      statusCode: 500,
+    });
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+  });
+
+  it("writes nothing when there is no document, or no state to write", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().writeFsrsStates(deck, fromSm2);
+    expect(fromSm2).not.toHaveBeenCalled();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf());
+    await makeRepository().writeFsrsStates(deck, fromSm2);
+    expect(fromSm2).toHaveBeenCalledOnce();
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+});

@@ -696,6 +696,46 @@
     "close": "Stäng",
     "done": "Dina data är uppdaterade."
   },
+  "schedulerSwitch": {
+    "progressRegion": "Byter till FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Bytets förlopp",
+    "keepOpen": "Håll sidan öppen tills bytet är klart. Skulle det avbrytas fortsätter SM-2 att schemalägga dina repetitioner, och du kan byta igen.",
+    "step": {
+      "read": "Läser dina svar och kortlekar",
+      "decks": "Räknar ut varje korts minne",
+      "preferences": "Sparar dina inställningar"
+    },
+    "count": {
+      "one": "{done} av {count} kortlek",
+      "other": "{done} av {count} kortlekar"
+    },
+    "doneRegion": "Bytt till FSRS-6",
+    "done": "Nu schemalägger FSRS-6 dina repetitioner.",
+    "replayed": {
+      "one": "{count} kort räknades ut från alla dina svar på det.",
+      "other": "{count} kort räknades ut från alla dina svar på dem."
+    },
+    "estimated": {
+      "one": "{count} kort, vars svar inte alla finns i din historik, uppskattades utifrån SM-2.",
+      "other": "{count} kort, vars svar inte alla finns i din historik, uppskattades utifrån SM-2."
+    },
+    "decks": {
+      "one": "{count} kortlek har bytts.",
+      "other": "{count} kortlekar har bytts."
+    },
+    "dueKept": "Varje kort ska fortfarande repeteras den dag det skulle.",
+    "continue": "Klar",
+    "failedRegion": "Bytet blev inte klart",
+    "notFinished": {
+      "one": "{count} kortlek kunde inte bytas nu:",
+      "other": "{count} kortlekar kunde inte bytas nu:"
+    },
+    "failedItem": "{deck}: {reason}",
+    "retryHint": "SM-2 schemalägger fortfarande dina repetitioner. Om du försöker igen byts varje kortlek.",
+    "tryAgain": "Försök igen",
+    "close": "Stäng"
+  },
   "library": {
     "heading": "Kortleksbiblioteket",
     "deckCount": {
@@ -1055,16 +1095,31 @@
     "maxReviewsPerDay": "Högst antal repetitioner per dag",
     "dayBoundaryHour": "Dagen börjar (timme)",
     "dayBoundaryHint": "En timme från 0 till 23 enligt 24-timmarsklockan: då börjar en ny studiedag, med nya kort och repetitioner.",
+    "scheduler": {
+      "legend": "Schemaläggare",
+      "hint": "Metoden som avgör när varje kort kommer tillbaka. SM-2 hålls uppdaterad vid varje repetition, så du kan byta tillbaka till den när du vill; byter du till FSRS-6 igen räknas varje kort ut på nytt.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2: varje rätt svar multiplicerar kortets intervall med dess lätthet. Standard."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "Free Spaced Repetition Scheduler, version 6: den följer hur stabilt varje minne är och tar fram kortet igen när chansen att du minns det sjunkit till den retention du väljer. Vid bytet räknas varje korts minne ut från dina svar hittills."
+      }
+    },
+    "desiredRetention": "Önskad retention (%)",
+    "desiredRetentionHint": "Med FSRS-6: chansen att du minns ett kort när det kommer tillbaka, från 70 till 97. Högre ger kortare intervall och fler repetitioner. Standard är 90.",
     "answerScale": {
       "legend": "Svarsknappar",
       "sm2": {
         "label": "Skala 0 till 5",
-        "hint": "Alla betyg i SuperMemo-2 (SM-2), metoden som schemalägger dina repetitioner: från 0 (inget minne alls) till 5 (lätt)."
+        "hint": "Alla betyg i SuperMemo-2 (SM-2): från 0 (inget minne alls) till 5 (lätt)."
       },
       "minimal": {
         "label": "Igen · Svårt · Bra · Lätt",
         "hint": "Fyra knappar. Igen visar kortet på nytt senare i studiepasset."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 använder alltid de fyra knapparna Igen, Svårt, Bra och Lätt. Ditt val här sparas till när du byter tillbaka till SM-2."
     },
     "policy": {
       "legend": "När data inte uppfyller formerna",

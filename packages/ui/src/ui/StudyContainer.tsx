@@ -4,11 +4,17 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { GradeBasis, ReviewUndo, UseCases } from "@solid-memo/application/useCases";
+import type {
+  GradeBasis,
+  ReviewUndo,
+  StudySessionQueue,
+  UseCases,
+} from "@solid-memo/application/useCases";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
-import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { effectiveAnswerScale } from "@solid-memo/domain/preferences";
+import { previewIntervals, type PromptStates } from "@solid-memo/domain/grading";
 import {
   reviewKeyOf,
   type ReviewKey,
@@ -32,8 +38,8 @@ interface Session {
   putBack: boolean;
   /** The last answer was just undone. */
   undone: boolean;
-  /** The states the session's answers and undos left its prompts in, by review key (reviewKeyOf). */
-  states: ReadonlyMap<string, ReviewState | null>;
+  /** The states the session's answers left its prompts in, by review key (reviewKeyOf); an undo goes back to the session before. */
+  states: ReadonlyMap<string, PromptStates>;
   /** What undoing the last answer takes, and the session as it was before it; null: nothing to undo. */
   last: { undo: ReviewUndo; before: Session } | null;
 }
@@ -57,8 +63,11 @@ interface Session {
  * its prompt's state and its answer in the log go (useCases.undoReview),
  * and the session is as it was before it, its card up again and a copy
  * a low grade put back gone. Each grade shows the interval it gives,
- * from the prompt's state: as the queue brought the deck's states when
- * the session began, then as its answers and undos left it.
+ * by the scheduler the queue's preferences name (previewIntervals), from
+ * the prompt's states: as the queue brought the deck's states when the
+ * session began, then as its answers and undos left them. The answer
+ * buttons are the ones those preferences ask for, the four under FSRS-6
+ * (effectiveAnswerScale).
  */
 export function StudyContainer({
   useCases,
@@ -87,12 +96,6 @@ export function StudyContainer({
     refetchOnWindowFocus: false,
     refetchOnMount: "always",
   });
-
-  const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
-  const answerScale = preferencesQuery.data?.answerScale ?? DEFAULT_PREFERENCES.answerScale;
 
   // Where a mistake in the deck's release is reported, and which cards are the release's:
   // read once, as a release never changes. A card the learner added is theirs to fix.
@@ -165,13 +168,17 @@ export function StudyContainer({
         args.known,
       ),
     onMutate: (): void => undoMutation.reset(),
-    onSuccess: ({ state, undo }, { prompt, quality }) => {
+    onSuccess: ({ state, fsrs, undo }, { prompt, quality }) => {
       answered.current++;
       keepState(state, state);
       setSession((current) => {
         const before = { ...current!, last: null };
         const next = current!.position + 1;
-        const states = new Map(current!.states).set(reviewKeyOf(state), state);
+        // An answer under SM-2 writes no FSRS-6 state, and the previews under SM-2 need none.
+        const states = new Map(current!.states).set(reviewKeyOf(state), {
+          sm2: state,
+          fsrs: fsrs ?? null,
+        });
         const last = { undo, before };
         if (!repeatsInSession(quality)) {
           return { ...before, position: next, putBack: false, undone: false, states, last };
@@ -231,8 +238,7 @@ export function StudyContainer({
 
   const { prompts, position, putBack, undone, states, last } = session;
   const prompt = position < prompts.length ? prompts[position] : null;
-  const key =
-    prompt === null ? "" : reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction });
+  const queue = queueQuery.data!;
   const busy = answerMutation.isPending || undoMutation.isPending;
   return (
     <StudyScreen
@@ -241,16 +247,12 @@ export function StudyContainer({
       deckHref={deckLink}
       report={report}
       prompt={prompt}
-      state={
-        states.has(key)
-          ? states.get(key)
-          : (queueQuery.data!.states.find((state) => reviewKeyOf(state) === key) ?? null)
-      }
+      intervals={prompt === null ? undefined : intervalsOf(prompt, queue, states, now())}
       position={position + 1}
       total={prompts.length}
       putBack={putBack}
       undone={undone}
-      answerScale={answerScale}
+      answerScale={effectiveAnswerScale(queue.prefs)}
       busy={busy}
       error={errorText(answerMutation.error ?? undoMutation.error)}
       onAnswer={(quality, times) =>
@@ -258,11 +260,33 @@ export function StudyContainer({
           prompt: prompt!,
           quality,
           times,
-          known: { prefs: queueQuery.data!.prefs },
+          known: { prefs: queue.prefs },
         })
       }
       onUndo={last === null ? undefined : () => undoMutation.mutate(last.undo)}
       onExit={() => void handleExit()}
     />
   );
+}
+
+/**
+ * The interval each grade would give a prompt `now` (previewIntervals),
+ * from its states as the session's answers left them, else as the queue
+ * brought them, by the preferences the queue was built with.
+ */
+function intervalsOf(
+  prompt: Prompt,
+  queue: StudySessionQueue,
+  states: ReadonlyMap<string, PromptStates>,
+  now: Date,
+) {
+  const key = { cardId: prompt.card.id, direction: prompt.direction };
+  const of = <T extends ReviewKey>(list: readonly T[]) =>
+    list.find((state) => reviewKeyOf(state) === reviewKeyOf(key)) ?? null;
+  const current = states.get(reviewKeyOf(key)) ?? {
+    sm2: of(queue.states),
+    fsrs: of(queue.fsrsStates),
+  };
+  const { scheduler, desiredRetention, dayBoundaryHour } = queue.prefs;
+  return previewIntervals(key, current, now, { scheduler, desiredRetention, dayBoundaryHour });
 }

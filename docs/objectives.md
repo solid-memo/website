@@ -15,9 +15,11 @@ not with the app.
 Each goal, and the pages and code that carry it out:
 
 1. **Learn for the long term.** Cards are scheduled by SM-2, spaced
-   repetition's best-known algorithm, so each comes back at a longer
-   interval the better it is known.
+   repetition's best-known algorithm, or by FSRS-6 when the learner
+   chooses it, so each comes back at a longer interval the better it
+   is known.
    [srs.md](srs.md), [`sm2.ts`](../packages/domain/src/sm2.ts),
+   [`fsrs.ts`](../packages/domain/src/fsrs.ts),
    [`scheduling.ts`](../packages/domain/src/scheduling.ts).
 2. **Keep your data in your own pod.** Everything you study is stored
    in your Solid pod, read and written from your browser. Solid Memo

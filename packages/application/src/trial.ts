@@ -59,7 +59,8 @@ export async function startTrial(
     name: "Trial",
     registrationTarget: "private",
   });
-  await useCases.savePreferences(instance.url, {
+  // Through switchScheduler, as only it sets the scheduler: the sandbox has no deck to switch yet.
+  await useCases.switchScheduler(instance.url, {
     ...DEFAULT_PREFERENCES,
     answerScale: prefs.answerScale,
     dayBoundaryHour: prefs.dayBoundaryHour,

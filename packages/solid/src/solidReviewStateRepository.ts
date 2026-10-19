@@ -34,6 +34,9 @@ export interface SolidReviewStateRepositoryDeps {
 /** The states of a deck without a reviews document: none. */
 const none = (): ReviewStates => ({ sm2: [], fsrs: [] });
 
+/** How many times writeFsrsStates reads and writes a document that keeps changing meanwhile. */
+const WRITE_ATTEMPTS = 3;
+
 /** No FSRS-6 state to save or remove. */
 const NO_FSRS = { save: [], remove: [] };
 
@@ -106,6 +109,25 @@ export function createSolidReviewStateRepository({
       const written = withReviewStates(without, deck, { sm2: save, fsrs: fsrs.save }, randomId);
       await checkWrite(written.dataset, written.subjects, "pod");
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+    },
+
+    async writeFsrsStates(deck, edit): Promise<void> {
+      for (let attempt = 1; ; attempt++) {
+        const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
+        if (dataset === null) return;
+        const fsrs = edit(toReviewStates(dataset, deck));
+        if (fsrs.length === 0) return;
+        const written = withReviewStates(dataset, deck, { sm2: [], fsrs }, randomId);
+        await checkWrite(written.dataset, written.subjects, "pod");
+        try {
+          // If-Match the read above.
+          await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+          return;
+        } catch (error) {
+          if (!(error instanceof PreconditionFailedError) || attempt === WRITE_ATTEMPTS)
+            throw error;
+        }
+      }
     },
 
     async upgradeReviewStates(deck): Promise<boolean> {

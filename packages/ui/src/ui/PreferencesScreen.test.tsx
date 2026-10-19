@@ -114,13 +114,61 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText(/Block the instance/)).toBeChecked();
   });
 
-  it("keeps the scheduler and the desired retention, which it does not show", () => {
+  it("offers the schedulers, SM-2 by default, with the retention and the answer buttons each one uses", () => {
+    renderScreen();
+    const group = screen.getByRole("group", { name: "Scheduler" });
+    expect(group).toHaveAccessibleDescription(/^The method that decides when each card comes back/);
+    expect(screen.getByLabelText(/^SM-2/)).toBeChecked();
+    expect(group).toHaveTextContent(/The Free Spaced Repetition Scheduler, version 6/);
+    // The retention is FSRS-6's alone; the answer buttons SM-2's.
+    expect(screen.getByLabelText("Desired retention (%)")).toBeDisabled();
+    expect(screen.getByLabelText("Desired retention (%)")).toHaveValue(90);
+    expect(screen.getByLabelText(/0 to 5 scale/)).toBeEnabled();
+    expect(screen.getByRole("group", { name: "Answer buttons" })).not.toHaveAccessibleDescription();
+  });
+
+  it("chooses FSRS-6 with a retention in percent, the answer buttons kept but disabled, saying why", () => {
+    const { props, container } = renderScreen({
+      preferences: { ...DEFAULT_PREFERENCES, answerScale: "sm2" },
+    });
+    fireEvent.click(screen.getByLabelText(/^FSRS-6/));
+    const retention = screen.getByLabelText("Desired retention (%)");
+    expect(retention).toBeEnabled();
+    expect(retention).toHaveAccessibleDescription(/^With FSRS-6: the chance of recalling a card/);
+    expect(retention).toHaveAttribute("min", "70");
+    expect(retention).toHaveAttribute("max", "97");
+    fireEvent.input(retention, { target: { value: "85" } });
+    const answers = screen.getByRole("group", { name: "Answer buttons" });
+    expect(answers).toBeDisabled();
+    expect(answers).toHaveAccessibleDescription(/^FSRS-6 always uses the four buttons/);
+    expect(screen.getByLabelText(/0 to 5 scale/)).toBeChecked();
+
+    fireEvent.submit(container.querySelector("form")!);
+    expect(props.onSave).toHaveBeenCalledWith({
+      ...DEFAULT_PREFERENCES,
+      scheduler: "fsrs6",
+      desiredRetention: 0.85,
+    });
+  });
+
+  it("keeps the stored retention when SM-2 is chosen again after the field was changed", () => {
+    const { props, container } = renderScreen();
+    fireEvent.click(screen.getByLabelText(/^FSRS-6/));
+    fireEvent.input(screen.getByLabelText("Desired retention (%)"), { target: { value: "50" } });
+    fireEvent.click(screen.getByLabelText(/^SM-2/));
+    fireEvent.submit(container.querySelector("form")!);
+    expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES);
+  });
+
+  it("prefills FSRS-6 and its retention, and keeps them as they are", () => {
     const preferences = {
       ...DEFAULT_PREFERENCES,
       scheduler: "fsrs6" as const,
-      desiredRetention: 0.85,
+      desiredRetention: 0.97,
     };
     const { props, container } = renderScreen({ preferences });
+    expect(screen.getByLabelText(/^FSRS-6/)).toBeChecked();
+    expect(screen.getByLabelText("Desired retention (%)")).toHaveValue(97);
     fireEvent.submit(container.querySelector("form")!);
     expect(props.onSave).toHaveBeenCalledWith(preferences);
   });
@@ -153,9 +201,7 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText(/0 to 5 scale/)).toBeChecked();
     // SM-2 is spelled out where it is offered.
     expect(
-      screen.getByText(
-        /^The full grades of SuperMemo-2 \(SM-2\), the method that schedules your reviews/,
-      ),
+      screen.getByText(/^The full grades of SuperMemo-2 \(SM-2\): from 0/),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText(/Again · Hard · Good · Easy/));

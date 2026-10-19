@@ -52,7 +52,8 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
-import { fsrsInterval, fsrsReview } from "@solid-memo/domain/fsrs";
+import { fsrsInterval, fsrsReview, memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
+import type { SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
 import type { PromptStates } from "@solid-memo/domain/grading";
 import type { FsrsState, ReviewState, ReviewStates } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
@@ -244,6 +245,10 @@ function makeDeps() {
     createReviewStates: vi.fn(async () => undefined),
     applyReviewChanges: vi.fn(async () => undefined),
     upgradeReviewStates: vi.fn(async () => true),
+    // As the real one does: the states made of those stored, which listReviewStates gives.
+    writeFsrsStates: vi.fn(async (d, edit) => {
+      edit(await reviewStateRepository.listReviewStates(d));
+    }),
     readReviewStatesSince: vi.fn(async (d) => ({
       unchanged: false as const,
       value: await reviewStateRepository.listReviewStates(d),
@@ -2785,6 +2790,7 @@ describe("createUseCases", () => {
     const queue = await useCases.getStudyQueue(instance.url, deck, at);
     expect(queue.due).toEqual([]);
     expect(queue.states).toEqual([sm2]);
+    expect(queue.fsrsStates).toEqual([fsrs]);
   });
 
   it("recordReview starts fresh for a never-reviewed card", async () => {
@@ -4016,6 +4022,163 @@ describe("the answer log", () => {
       );
       expect(recorded).not.toHaveProperty("fsrs");
       expect(recorded.undo).not.toHaveProperty("fsrs");
+    });
+  });
+
+  describe("switchScheduler", () => {
+    const second: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`,
+    };
+    const moved: ReviewState = {
+      cardId: "card-9",
+      direction: "front-to-back",
+      easeFactor: 2.36,
+      intervalDays: 14,
+      repetitions: 3,
+      due: "2026-10-01",
+      firstReviewedAt: "2026-08-01T10:00:00.000Z",
+      lastReviewedAt: "2026-09-17T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const fsrsPrefs = {
+      ...DEFAULT_PREFERENCES,
+      scheduler: "fsrs6" as const,
+      theme: "dark" as const,
+    };
+
+    /** card-1 studied once at noon, its answer still to be logged; card-9 moved in with its progress, without answers. */
+    async function studied() {
+      const made = setup();
+      const { state } = await made.useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+      );
+      vi.mocked(made.deps.deckRepository.listDecks).mockResolvedValue([deck, second]);
+      vi.mocked(made.deps.reviewStateRepository.listReviewStates).mockImplementation(async (of) =>
+        sm2s(of.url === deck.url ? [state, moved] : []),
+      );
+      vi.mocked(made.deps.reviewStateRepository.writeFsrsStates).mockClear();
+      return { ...made, state };
+    }
+
+    it("to FSRS-6 replays or estimates each deck's states in one write each, then saves the preferences and the schedules", async () => {
+      const { deps, useCases, state } = await studied();
+      const progress: SwitchProgress[] = [];
+      const outcome = await useCases.switchScheduler(instance.url, fsrsPrefs, (p) =>
+        progress.push(p),
+      );
+
+      expect(outcome).toEqual({ switched: true, decks: 2, replayed: 1, estimated: 1, failed: [] });
+      const writes = vi.mocked(deps.reviewStateRepository.writeFsrsStates).mock.calls;
+      expect(writes.map(([written]) => written)).toEqual([deck, second]);
+      const made = writes[0]![1](sm2s([state, moved]));
+      expect(made).toEqual([
+        expect.objectContaining({
+          cardId: card.id,
+          due: state.due,
+          lastReviewedAt: state.lastReviewedAt,
+        }),
+        expect.objectContaining({ ...memoryFromSm2(moved), cardId: "card-9", due: moved.due }),
+      ]);
+      // The answer given at noon replays: a Good first rating.
+      expect(made[0]!.stability).toBe(nextMemory(null, 3, 0).stability);
+      // The preferences last, then each deck's schedule from its documents.
+      const saved = vi.mocked(deps.preferencesRepository.savePreferences);
+      expect(saved).toHaveBeenCalledExactlyOnceWith(instance.url, fsrsPrefs);
+      const savedAt = saved.mock.invocationCallOrder[0]!;
+      for (const order of vi.mocked(deps.reviewStateRepository.writeFsrsStates).mock
+        .invocationCallOrder)
+        expect(order).toBeLessThan(savedAt);
+      const refreshed = vi.mocked(deps.reviewStateRepository.readReviewStatesSince);
+      expect(refreshed.mock.calls.map(([of]) => of)).toEqual([deck, second]);
+      expect(refreshed.mock.invocationCallOrder[0]).toBeGreaterThan(savedAt);
+      expect(progress.map(({ step, done, part }) => [step, done, part])).toEqual([
+        ["read", 0, undefined],
+        ["decks", 1, { done: 0, total: 2 }],
+        ["decks", 1, { done: 1, total: 2 }],
+        ["preferences", 2, undefined],
+        ["preferences", 3, undefined],
+      ]);
+    });
+
+    it("to FSRS-6 leaves SM-2 in charge when a deck cannot be written, naming it, and goes on with the others", async () => {
+      const { deps, useCases } = await studied();
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([second, deck]);
+      const offline = new Error("offline");
+      vi.mocked(deps.reviewStateRepository.writeFsrsStates).mockRejectedValueOnce(offline);
+
+      const outcome = await useCases.switchScheduler(instance.url, fsrsPrefs);
+
+      expect(outcome).toEqual({
+        switched: false,
+        decks: 1,
+        replayed: 1,
+        estimated: 1,
+        failed: [{ url: second.url, title: second.title, error: offline }],
+      });
+      expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+    });
+
+    it("to FSRS-6 is done though a deck's schedule cannot be brought up to date", async () => {
+      const { deps, useCases } = await studied();
+      vi.mocked(deps.deckRepository.readCardsSince).mockRejectedValue(new Error("offline"));
+      await expect(useCases.switchScheduler(instance.url, fsrsPrefs)).resolves.toMatchObject({
+        switched: true,
+        failed: [],
+      });
+    });
+
+    it("to FSRS-6 with no decks only saves the preferences", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([]);
+      const progress: SwitchProgress[] = [];
+      await expect(
+        useCases.switchScheduler(instance.url, fsrsPrefs, (p) => progress.push(p)),
+      ).resolves.toMatchObject({ switched: true, decks: 0 });
+      expect(progress.map(({ part }) => part)).toEqual([
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      ]);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledOnce();
+    });
+
+    it("to SM-2 saves the preferences alone: SM-2's states are up to date", async () => {
+      const { deps, log, useCases } = await studied();
+      vi.mocked(log.months).mockClear();
+      const outcome = await useCases.switchScheduler(instance.url, DEFAULT_PREFERENCES);
+      expect(outcome).toEqual({ switched: true, decks: 0, replayed: 0, estimated: 0, failed: [] });
+      expect(deps.reviewStateRepository.writeFsrsStates).not.toHaveBeenCalled();
+      expect(log.months).not.toHaveBeenCalled();
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
+        instance.url,
+        DEFAULT_PREFERENCES,
+      );
+    });
+
+    it("savePreferences keeps the stored scheduler, SM-2 when none is stored", async () => {
+      const { deps, useCases } = setup();
+      await useCases.savePreferences(instance.url, fsrsPrefs);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
+        ...fsrsPrefs,
+        scheduler: "sm2",
+      });
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+        preferences: fsrsPrefs,
+        formatVersion: 5,
+      });
+      await useCases.savePreferences(instance.url, DEFAULT_PREFERENCES);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
+        ...DEFAULT_PREFERENCES,
+        scheduler: "fsrs6",
+      });
     });
   });
 
@@ -7317,7 +7480,7 @@ describe("openTrial", () => {
   function sandbox() {
     const trialUseCases = {
       createInstance: vi.fn(async () => trialInstance),
-      savePreferences: vi.fn(async () => undefined),
+      switchScheduler: vi.fn(async () => undefined),
       startCourse: vi.fn(async () => deck),
       importLibraryDeck: vi.fn(async () => deck),
     };
@@ -7357,7 +7520,7 @@ describe("openTrial", () => {
       name: "Trial",
       registrationTarget: "private",
     });
-    expect(made.trialUseCases.savePreferences).toHaveBeenCalledWith(TRIAL_INSTANCE_URL, {
+    expect(made.trialUseCases.switchScheduler).toHaveBeenCalledWith(TRIAL_INSTANCE_URL, {
       ...DEFAULT_PREFERENCES,
       answerScale: "minimal",
       dayBoundaryHour: 2,

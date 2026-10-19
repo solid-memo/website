@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { fsrsReview } from "./fsrs";
-import { gradePrompt, type Scheduling } from "./grading";
+import { fsrsInterval, fsrsReview } from "./fsrs";
+import { gradePrompt, previewIntervals, ratingOfAnswer, type Scheduling } from "./grading";
 import type { FsrsState, ReviewState } from "./review";
 
 const key = { cardId: "c", direction: "front-to-back" } as const;
@@ -96,5 +96,43 @@ describe("gradePrompt", () => {
       desiredRetention: 0.8,
     });
     expect(graded.fsrs).toEqual(fsrsReview(key, current, 3, now, 0.8, 4));
+  });
+});
+
+describe("ratingOfAnswer", () => {
+  it("rates a multiple-choice answer by whether it was right, any other by its grade", () => {
+    expect(ratingOfAnswer({ grade: 3, mode: "multiple-choice" })).toBe(3);
+    expect(ratingOfAnswer({ grade: 1, mode: "multiple-choice" })).toBe(1);
+    expect(ratingOfAnswer({ grade: 3, mode: "recall" })).toBe(2);
+    expect(ratingOfAnswer({ grade: 5 })).toBe(4);
+  });
+});
+
+describe("previewIntervals", () => {
+  it("gives SM-2's interval of each grade under SM-2", () => {
+    expect(previewIntervals(key, { sm2: before, fsrs: fresh }, now, sm2)).toEqual({
+      0: 1,
+      1: 1,
+      2: 1,
+      3: 14,
+      4: 15,
+      5: 16,
+    });
+    expect(previewIntervals(key, { sm2: null, fsrs: null }, now, sm2)[4]).toBe(1);
+  });
+
+  it("gives FSRS-6's interval of each grade under FSRS-6, at the desired retention", () => {
+    const current = { sm2: before, fsrs: fresh };
+    const intervals = previewIntervals(key, current, now, fsrs6);
+    for (const grade of [0, 1, 2, 3, 4, 5] as const) {
+      const graded = gradePrompt(key, current, { grade }, now, fsrs6).fsrs!;
+      expect(intervals[grade]).toBe(fsrsInterval(graded.stability, 0.9));
+    }
+    expect(intervals[1]).toBeLessThan(intervals[3]);
+    expect(intervals[3]).toBeLessThan(intervals[4]);
+    expect(intervals[4]).toBeLessThan(intervals[5]);
+    // A lower retention waits longer.
+    const lower = previewIntervals(key, current, now, { ...fsrs6, desiredRetention: 0.8 });
+    expect(lower[4]).toBeGreaterThan(intervals[4]);
   });
 });

@@ -696,6 +696,46 @@
     "close": "Schließen",
     "done": "Deine Daten sind auf dem neuesten Stand."
   },
+  "schedulerSwitch": {
+    "progressRegion": "Wechsel zu FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Fortschritt des Wechsels",
+    "keepOpen": "Lass diese Seite geöffnet, bis der Wechsel fertig ist. Falls er abbricht, plant SM-2 deine Wiederholungen weiter, und du kannst erneut wechseln.",
+    "step": {
+      "read": "Deine Antworten und Stapel werden gelesen",
+      "decks": "Die Erinnerung jeder Karte wird berechnet",
+      "preferences": "Deine Einstellungen werden gespeichert"
+    },
+    "count": {
+      "one": "{done} von {count} Stapel",
+      "other": "{done} von {count} Stapeln"
+    },
+    "doneRegion": "Zu FSRS-6 gewechselt",
+    "done": "FSRS-6 plant jetzt deine Wiederholungen.",
+    "replayed": {
+      "one": "{count} Karte wurde aus all deinen Antworten darauf berechnet.",
+      "other": "{count} Karten wurden aus all deinen Antworten darauf berechnet."
+    },
+    "estimated": {
+      "one": "{count} Karte, deren Antworten nicht alle in deinem Verlauf sind, wurde aus SM-2 geschätzt.",
+      "other": "{count} Karten, deren Antworten nicht alle in deinem Verlauf sind, wurden aus SM-2 geschätzt."
+    },
+    "decks": {
+      "one": "{count} Stapel wurde gewechselt.",
+      "other": "{count} Stapel wurden gewechselt."
+    },
+    "dueKept": "Jede Karte bleibt an dem Tag fällig, an dem sie fällig war.",
+    "continue": "Fertig",
+    "failedRegion": "Wechsel nicht abgeschlossen",
+    "notFinished": {
+      "one": "{count} Stapel konnte jetzt nicht gewechselt werden:",
+      "other": "{count} Stapel konnten jetzt nicht gewechselt werden:"
+    },
+    "failedItem": "{deck}: {reason}",
+    "retryHint": "SM-2 plant weiterhin deine Wiederholungen. Ein erneuter Versuch wechselt jeden Stapel.",
+    "tryAgain": "Erneut versuchen",
+    "close": "Schließen"
+  },
   "library": {
     "heading": "Stapelbibliothek",
     "deckCount": {
@@ -1055,16 +1095,31 @@
     "maxReviewsPerDay": "Max. Wiederholungen pro Tag",
     "dayBoundaryHour": "Der Tag beginnt um (Uhr)",
     "dayBoundaryHint": "Eine Stunde von 0 bis 23 im 24-Stunden-Format: Dann beginnt ein neuer Lerntag mit neuen Karten und Wiederholungen.",
+    "scheduler": {
+      "legend": "Planungsverfahren",
+      "hint": "Das Verfahren, das entscheidet, wann jede Karte wiederkommt. SM-2 wird bei jeder Wiederholung auf dem neuesten Stand gehalten, du kannst also jederzeit dorthin zurückwechseln; wechselst du erneut zu FSRS-6, wird jede Karte neu berechnet.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2: Jede richtige Antwort multipliziert das Intervall der Karte mit ihrer Leichtigkeit. Die Voreinstellung."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "Der Free Spaced Repetition Scheduler, Version 6: Er verfolgt, wie stabil jede Erinnerung ist, und bringt die Karte wieder, wenn deine Chance, dich zu erinnern, auf die gewählte Behaltensquote sinkt. Beim Wechsel wird die Erinnerung jeder Karte aus deinen bisherigen Antworten berechnet."
+      }
+    },
+    "desiredRetention": "Gewünschte Behaltensquote (%)",
+    "desiredRetentionHint": "Mit FSRS-6: die Chance, dich an eine Karte zu erinnern, wenn sie wiederkommt, von 70 bis 97. Höher heißt kürzere Intervalle und mehr Wiederholungen. Voreingestellt ist 90.",
     "answerScale": {
       "legend": "Antwortschaltflächen",
       "sm2": {
         "label": "Skala von 0 bis 5",
-        "hint": "Alle Bewertungsstufen von SuperMemo-2 (SM-2), der Methode, die deine Wiederholungen plant: von 0 (komplett vergessen) bis 5 (einfach)."
+        "hint": "Alle Bewertungsstufen von SuperMemo-2 (SM-2): von 0 (komplett vergessen) bis 5 (einfach)."
       },
       "minimal": {
         "label": "Nochmal · Schwer · Gut · Einfach",
         "hint": "Vier Schaltflächen. Mit „Nochmal“ kommt die Karte später in der Lerneinheit noch einmal."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 nutzt immer die vier Schaltflächen Nochmal, Schwer, Gut und Einfach. Deine Wahl hier bleibt erhalten, falls du zu SM-2 zurückwechselst."
     },
     "policy": {
       "legend": "Wenn Daten nicht den Formen entsprechen",

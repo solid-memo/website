@@ -15,6 +15,7 @@ import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { previewIntervals } from "@solid-memo/domain/grading";
 import { makeUseCasesFake, statisticsReportOf, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { RepoUrl } from "./ReportMistake";
 
@@ -568,17 +569,14 @@ describe("StudyContainer", () => {
     ]);
   });
 
-  it("shows the answer buttons the preferences ask for", async () => {
+  it("shows the answer buttons the queue's preferences ask for", async () => {
     const useCases = makeUseCasesFake({
       getStudyQueue: vi.fn(async () => ({
         due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
         newPrompts: [],
         studiedToday: 0,
         ...QUEUE_DEFAULTS,
-      })),
-      getPreferences: vi.fn(async () => ({
-        ...DEFAULT_PREFERENCES,
-        answerScale: "minimal" as const,
+        prefs: { ...DEFAULT_PREFERENCES, answerScale: "minimal" as const },
       })),
     });
     renderContainer(useCases);
@@ -603,22 +601,55 @@ describe("StudyContainer", () => {
     );
   });
 
-  it("falls back to the default answer buttons when preferences are unreadable", async () => {
+  it("under FSRS-6 shows the four buttons whatever the stored scale, each with FSRS-6's interval", async () => {
+    const sm2 = {
+      cardId: "card-a",
+      direction: "front-to-back" as const,
+      easeFactor: 2.5,
+      intervalDays: 6,
+      repetitions: 2,
+      due: "2026-09-21",
+      firstReviewedAt: "2026-09-01T10:00:00.000Z",
+      lastReviewedAt: "2026-09-15T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const fsrs = {
+      cardId: "card-a",
+      direction: "front-to-back" as const,
+      stability: 40,
+      difficulty: 3,
+      due: "2026-09-21",
+      firstReviewedAt: sm2.firstReviewedAt,
+      lastReviewedAt: sm2.lastReviewedAt,
+      formatVersion: 1,
+    };
+    const prefs = { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" as const };
     const useCases = makeUseCasesFake({
-      getPreferences: vi.fn(async () => {
-        throw new Error("no prefs");
-      }),
       getStudyQueue: vi.fn(async () => ({
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
         ...QUEUE_DEFAULTS,
+        prefs,
+        states: [sm2],
+        fsrsStates: [fsrs],
       })),
     });
     renderContainer(useCases);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
-    expect(screen.getByRole("button", { name: "0 — Blackout" })).toBeInTheDocument();
+    await screen.findByText("front-a");
+    await reveal();
+    expect(screen.queryByRole("button", { name: "4 — Good" })).toBeNull();
+    const expected = previewIntervals(sm2, { sm2, fsrs }, new Date(), {
+      scheduler: "fsrs6",
+      desiredRetention: 0.9,
+      dayBoundaryHour: prefs.dayBoundaryHour,
+    });
+    expect(screen.getByRole("button", { name: "Good" })).toHaveAccessibleDescription(
+      `${expected[4]} days`,
+    );
+    // Not SM-2's 15 days.
+    expect(expected[4]).not.toBe(15);
   });
 
   it("exits when the session ends", async () => {

@@ -4,15 +4,17 @@
 
 import { isRecalled, type Answer } from "./answer";
 import { ratingOfChoice } from "./course";
-import { fsrsReview, ratingOfGrade, type FsrsRating, type Scheduler } from "./fsrs";
+import { fsrsInterval, fsrsReview, ratingOfGrade, type FsrsRating, type Scheduler } from "./fsrs";
 import {
   REVIEW_STATE_FORMAT_VERSION,
   type FsrsState,
   type ReviewKey,
+  type ReviewQuality,
   type ReviewState,
 } from "./review";
 import { nextDueDate, snapshotBeforeReview } from "./scheduling";
 import { applySm2, INITIAL_SM2_STATE } from "./sm2";
+import { SM2_QUALITIES } from "./answerScale";
 
 /**
  * One grade applied to one prompt: what each scheduler's state becomes
@@ -45,7 +47,7 @@ export interface Scheduling {
  * The FSRS rating of an answer: a multiple-choice answer's by whether
  * it was right (ratingOfChoice), any other by its grade (ratingOfGrade).
  */
-function ratingOfAnswer(answer: Pick<Answer, "grade" | "mode">): FsrsRating {
+export function ratingOfAnswer(answer: Pick<Answer, "grade" | "mode">): FsrsRating {
   return answer.mode === "multiple-choice"
     ? ratingOfChoice(isRecalled(answer))
     : ratingOfGrade(answer.grade);
@@ -88,4 +90,27 @@ export function gradePrompt(
     scheduling.dayBoundaryHour,
   );
   return { sm2, fsrs };
+}
+
+/**
+ * The interval each grade would give a prompt `now`, in days, by the
+ * scheduler that sets the due days: what a study session shows under
+ * each grade button. Under FSRS-6 it depends on the days since the last
+ * review, so on `now`, as an SM-2 interval never does.
+ */
+export function previewIntervals(
+  key: ReviewKey,
+  current: PromptStates,
+  now: Date,
+  scheduling: Scheduling,
+): Record<ReviewQuality, number> {
+  const intervals = {} as Record<ReviewQuality, number>;
+  for (const grade of SM2_QUALITIES) {
+    const { sm2, fsrs } = gradePrompt(key, current, { grade }, now, scheduling);
+    intervals[grade] =
+      fsrs === undefined
+        ? sm2.intervalDays
+        : fsrsInterval(fsrs.stability, scheduling.desiredRetention);
+  }
+  return intervals;
 }

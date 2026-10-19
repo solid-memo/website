@@ -665,6 +665,41 @@
     "close": "닫기",
     "done": "데이터가 최신 상태예요."
   },
+  "schedulerSwitch": {
+    "progressRegion": "FSRS-6으로 바꾸는 중",
+    "running": "{step}…",
+    "progressLabel": "전환 진행 상황",
+    "keepOpen": "전환이 끝날 때까지 이 페이지를 열어 두세요. 중간에 끊기더라도 SM-2가 계속 복습 일정을 정하고, 다시 바꿀 수 있어요.",
+    "step": {
+      "read": "답변과 덱을 읽는 중",
+      "decks": "카드마다 기억을 계산하는 중",
+      "preferences": "환경설정을 저장하는 중"
+    },
+    "count": {
+      "other": "덱 {count}개 중 {done}개"
+    },
+    "doneRegion": "FSRS-6으로 바꿨어요",
+    "done": "이제 FSRS-6이 복습 일정을 정해요.",
+    "replayed": {
+      "other": "카드 {count}개는 모든 답변으로 계산했어요."
+    },
+    "estimated": {
+      "other": "답변이 기록에 다 남아 있지 않은 카드 {count}개는 SM-2로 추정했어요."
+    },
+    "decks": {
+      "other": "덱 {count}개를 바꿨어요."
+    },
+    "dueKept": "모든 카드는 원래 복습할 날에 그대로 나와요.",
+    "continue": "완료",
+    "failedRegion": "전환이 끝나지 않았어요",
+    "notFinished": {
+      "other": "지금 바꾸지 못한 덱이 {count}개 있어요."
+    },
+    "failedItem": "{deck}: {reason}",
+    "retryHint": "아직 SM-2가 복습 일정을 정해요. 다시 시도하면 모든 덱을 바꿔요.",
+    "tryAgain": "다시 시도",
+    "close": "닫기"
+  },
   "library": {
     "heading": "덱 라이브러리",
     "deckCount": {
@@ -1001,16 +1036,31 @@
     "maxReviewsPerDay": "하루 최대 복습 수",
     "dayBoundaryHour": "하루 시작 시각(시)",
     "dayBoundaryHint": "24시간제로 0부터 23까지의 시각이에요. 이 시각에 새 카드와 복습이 있는 새 학습일이 시작돼요.",
+    "scheduler": {
+      "legend": "스케줄러",
+      "hint": "카드마다 언제 다시 나올지 정하는 방법이에요. SM-2는 복습할 때마다 최신으로 유지되니 언제든 SM-2로 돌아갈 수 있어요. FSRS-6으로 다시 바꾸면 카드마다 새로 계산해요.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2예요. 맞힐 때마다 카드의 간격에 쉬움 정도를 곱해요. 기본값이에요."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "Free Spaced Repetition Scheduler 버전 6이에요. 기억이 얼마나 안정적인지 추적해서, 카드를 기억할 확률이 선택한 유지율까지 떨어질 때 다시 보여 줘요. 바꾸면 지금까지의 답변으로 카드마다 기억을 계산해요."
+      }
+    },
+    "desiredRetention": "목표 유지율(%)",
+    "desiredRetentionHint": "FSRS-6에서 카드가 다시 나올 때 기억하고 있을 확률이에요. 70부터 97까지 정할 수 있어요. 높을수록 간격이 짧아지고 복습이 많아져요. 기본값은 90이에요.",
     "answerScale": {
       "legend": "답변 버튼",
       "sm2": {
         "label": "0~5 척도",
-        "hint": "복습 일정을 정하는 방법인 SuperMemo-2(SM-2)의 전체 등급이에요. 0(완전히 잊음)부터 5(쉬움)까지예요."
+        "hint": "SuperMemo-2(SM-2)의 전체 등급이에요. 0(완전히 잊음)부터 5(쉬움)까지예요."
       },
       "minimal": {
         "label": "다시 · 어려움 · 알맞음 · 쉬움",
         "hint": "버튼 네 개예요. ‘다시’를 누르면 이번 세션에서 잠시 뒤에 카드가 다시 나와요."
-      }
+      },
+      "fsrs6Hint": "FSRS-6은 항상 다시, 어려움, 알맞음, 쉬움 네 버튼을 써요. 여기서 고른 것은 SM-2로 돌아갈 때를 위해 저장돼요."
     },
     "policy": {
       "legend": "데이터가 형식에 맞지 않을 때",
