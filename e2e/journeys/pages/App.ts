@@ -133,7 +133,8 @@ export class App {
    * One step of a journey, as the journey's spec names it ("03 · Set new
    * cards per day to 1"): a group in the report and the trace, with a
    * screenshot of where it left the app, and that screen checked for
-   * accessibility.
+   * accessibility, in a step of its own, "Accessibility", so the report
+   * says how long the check took apart from the step's own work.
    */
   async step(title: string, body: () => Promise<void>): Promise<void> {
     await test.step(title, async () => {
@@ -144,7 +145,7 @@ export class App {
         body: await this.page.screenshot(),
         contentType: "image/png",
       });
-      await this.checkAccessibility(title);
+      await test.step("Accessibility", () => this.checkAccessibility(title));
     });
   }
 
