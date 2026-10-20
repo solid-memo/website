@@ -31,6 +31,7 @@ import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
+import { createPodFence } from "@solid-memo/solid/podFence";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
@@ -42,8 +43,14 @@ const NO_MARKDOWN_PROBLEMS = { problems: () => [], chunks: () => ({ chunks: 1, e
 const SERVERS = inject("solidServers");
 const STARS = `${SITE}decks/brightest-stars/v1.ttl`;
 
-/** A page of the app as createAppUseCases wires it, every pod request through `fetch`, the library read from this repository. */
-function page(fetch: typeof globalThis.fetch = globalThis.fetch) {
+/**
+ * A page of the app as createAppUseCases wires it, every pod request
+ * through `network` behind the pod fence (its access control written
+ * by the release publisher alone), the library read from this
+ * repository.
+ */
+function page(network: typeof globalThis.fetch = globalThis.fetch) {
+  const fetch = createPodFence(network);
   const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
   const checkWrite = shapeValidator.checkSubjects;
   const deps = { fetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
@@ -69,13 +76,17 @@ function page(fetch: typeof globalThis.fetch = globalThis.fetch) {
       releaseFetch: routedFetch({ origin: SITE, local: shapesFetch, remote: fetch }),
       checkWrite,
     }),
-    releasePublisher: publisherOver(fetch),
+    releasePublisher: publisherOver(network),
   });
 }
 
-/** The release publisher as createAppUseCases wires it, every request through `network`. */
+/** The release publisher as createAppUseCases wires it, every request through `network`, its writes behind the pod fences. */
 function publisherOver(network: typeof globalThis.fetch) {
-  return createSolidReleasePublisher({ fetch: network, publicFetch: network });
+  return createSolidReleasePublisher({
+    fetch: createPodFence(network),
+    shareFetch: createPodFence(network, { accessControl: true }),
+    publicFetch: network,
+  });
 }
 
 /**

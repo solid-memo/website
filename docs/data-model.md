@@ -1303,6 +1303,13 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
 
 ## Write discipline
 
+- **Writes go only where Solid Memo writes.** Every pod write passes
+  the pod fence ([boundaries.md](boundaries.md#the-pod-fence)), which
+  refuses, before it is sent, one to an address in another form than a
+  request sends it, with a dot or empty segment or an encoded slash,
+  backslash or percent sign, or to an access control or metadata
+  resource (`.acl`, `.acr`, `.meta`). Only the release publisher writes
+  an access control, a release's own.
 - Mutations always follow read → modify → save
   ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`), which issues a PATCH of the

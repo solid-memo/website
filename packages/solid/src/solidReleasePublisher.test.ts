@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink } from "./catalogLinks";
+import { createPodFence } from "./podFence";
 import { accessFetch, anonymousFetch, createSolidReleasePublisher } from "./solidReleasePublisher";
 
 const RELEASE = `${INSTANCE}releases/solid/v1.ttl`;
@@ -56,7 +57,12 @@ async function publisherPod({
     async (input: RequestInfo | URL) =>
       new Response(null, { status: String(input) === RELEASE ? 200 : 401 }),
   );
-  const publisher = createSolidReleasePublisher({ fetch, publicFetch });
+  // Behind the pod fences, as the app wires it (appUseCases.ts).
+  const publisher = createSolidReleasePublisher({
+    fetch: createPodFence(fetch),
+    shareFetch: createPodFence(fetch, { accessControl: true }),
+    publicFetch,
+  });
   /** The writes made since `from`, as method and URL, with If-None-Match: * when it was sent. */
   const writes = (from = 0) =>
     pod.requests

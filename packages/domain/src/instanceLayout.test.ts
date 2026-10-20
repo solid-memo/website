@@ -26,6 +26,7 @@ import {
   isInstanceAddress,
   isPlainHttpUrl,
   isSafeDocumentUrl,
+  isSafeWriteUrl,
   isSameUrl,
   monthOfHistoryUrl,
   ownsDocument,
@@ -339,6 +340,47 @@ describe("where an instance's documents are", () => {
         }),
         instance,
       ).toBe(true);
+    }
+  });
+
+  it("lets a write go only to an address in canonical form a server cannot read as another resource", () => {
+    for (const url of [
+      `${DECKS}deck-1.ttl`,
+      DECKS,
+      "https://pod.example/",
+      "https://pod.example/profile/card",
+      "https://pod.example/caf%C3%A9/x.ttl",
+    ]) {
+      expect(isSafeWriteUrl(url), url).toBe(true);
+    }
+    for (const url of [
+      `${DECKS}../../../profile/card`,
+      `${DECKS}%2e%2e/%2e%2e/private/diary.ttl`,
+      `${DECKS}..%2f..%2fprofile/card`,
+      `${DECKS}..%5c..%5cprofile`,
+      `${DECKS}..;/profile/card`,
+      `${DECKS}%252e%252e/x.ttl`,
+      `${DECKS}%c0%ae%c0%ae/x.ttl`,
+      `${DECKS}%u002e%u002e/x.ttl`,
+      `${DECKS}x.ttl%00`,
+      `${DECKS}.hidden`,
+      `${DECKS}old//deck-1.ttl`,
+      `${DECKS}deck-1.ttl?x`,
+      `${DECKS}deck-1.ttl#card-1`,
+      `${DECKS}deck-1.ttl.acl`,
+      `${DECKS}deck-1.ttl.ACR`,
+      `${DECKS}deck-1.ttl.Meta`,
+      `${DECKS}.acl`,
+      `${DECKS}deck-1.ttl.ac%6C`,
+      `${DECKS}%7Edeck.ttl`,
+      `${DECKS}deck%2D1.ttl`,
+      "https://POD.example/x.ttl",
+      "https://pod.example:443/x.ttl",
+      "ftp://pod.example/x.ttl",
+      "not an address",
+      "decks/deck-1.ttl",
+    ]) {
+      expect(isSafeWriteUrl(url), url).toBe(false);
     }
   });
 

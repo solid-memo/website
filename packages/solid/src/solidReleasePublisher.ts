@@ -36,14 +36,19 @@ import { RDF, SM } from "./vocab";
  * folder; another document's, or one in another pod, is not the
  * release's to change, whatever a server says.
  *
+ * The access control is written with `shareFetch`, the user's fetch
+ * that the pod fence lets write a document's own access control
+ * (podFence.ts), which `fetch` never does; it is used for nothing else.
  * Whether a release is public is asked as someone with no login would
  * ask: with `publicFetch`, which sends no credentials.
  */
 export function createSolidReleasePublisher({
   fetch,
+  shareFetch,
   publicFetch,
 }: {
   fetch: typeof globalThis.fetch;
+  shareFetch: typeof globalThis.fetch;
   publicFetch: typeof globalThis.fetch;
 }): ReleasePublisher {
   /**
@@ -55,7 +60,7 @@ export function createSolidReleasePublisher({
       const access = await universalAccess.setPublicAccess(
         url,
         { read: true },
-        { fetch: accessFetch(accessControlFetch(fetch, url)) },
+        { fetch: accessFetch(accessControlFetch(shareFetch, url)) },
       );
       return access?.read === true;
     } catch {

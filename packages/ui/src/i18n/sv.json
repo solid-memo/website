@@ -1416,6 +1416,7 @@
     "instanceChangedDuringCopy": "Dina studier i den här webbläsaren ändrades medan de kopierades, kanske i en annan flik, så de finns kvar här. Försök igen.",
     "resourceChangedDuringCopy": "En del av dina studier i den här webbläsaren ändrades medan de kopierades, kanske i en annan flik, så de finns kvar här. Försök igen.",
     "guestStudyBeingMoved": "Solid Memo flyttar dina studier i den här webbläsaren till din Pod och sparar inget i dem förrän det är klart. Vänta tills det är klart och försök sedan igen.",
+    "writeRefused": "Solid Memo stoppade en ändring i din Pod av säkerhetsskäl: den skulle ha sparats på en adress där Solid Memo aldrig sparar något. Inget ändrades.",
     "deckChangedSinceOffer": "Kortleken ändrades efter att uppdateringen erbjöds, kanske i en annan flik eller app, så inget ändrades. Titta på erbjudandet igen.",
     "deckChangedDuringUpgrade": "Kortleken ändrades medan den uppdaterades, kanske i en annan flik eller app. Försök igen.",
     "changedElsewhere": "Det här ändrades någon annanstans, kanske i en annan flik eller app, efter att Solid Memo läste det, så inget sparades. Läs in sidan igen och försök på nytt.",

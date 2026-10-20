@@ -140,9 +140,46 @@ control is changed.
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`):
 outside tests, only that file may import `@inrupt/solid-client`'s access
 control (`universalAccess`, the `acp_*` modules, the ACL functions), or
-all of the library at once (`import * as`). That no module writes an
-ACL or an ACR with a plain request is for review: the check sees
-imports alone.
+all of the library at once (`import * as`). That no other module
+writes an ACL or an ACR with a plain request, the pod fence holds
+while the app runs (below).
+
+## The pod fence
+
+Every pod adapter is given one fetch
+([appUseCases.ts](../packages/composition/src/appUseCases.ts)), and it
+passes two fences before it reaches the guest's pod or the network:
+
+- **The pod fence**
+  ([podFence.ts](../packages/solid/src/podFence.ts), `createPodFence`)
+  lets every read (GET, HEAD, OPTIONS) through. A request of any other
+  method is refused before it is sent (`writeRefused`) unless its
+  address is one Solid Memo may write to (`isSafeWriteUrl` in
+  [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)):
+  in the form a request sends it, http(s) with no query or fragment,
+  with no dot segment, no empty segment (`//`), nothing encoded a
+  server might read as a step elsewhere or as another name (an encoded
+  slash, backslash or percent sign, an overlong byte, a letter or digit
+  encoded), and not an access control or metadata resource (`.acl`,
+  `.acr`, `.meta`, in any case). Addresses come from pod data anyone
+  may have written, so the fence holds whichever code sends the write.
+  Which documents an instance's code may write is still the adapters'
+  to check, where the instance is known
+  ([data-model.md](data-model.md#where-an-instances-documents-are)):
+  the type index, the profile link, registrations, releases and copies
+  are written outside instances too.
+- **The write fence**
+  ([writeFence.ts](../packages/solid/src/writeFence.ts)) keeps an
+  instance being moved or copied read-only
+  ([guest-mode.md](guest-mode.md)).
+
+The release publisher alone gets a second fetch for the access control
+it writes: the same fences, its pod fence letting a document's own ACL
+or ACR (`<document>.acl`, `<document>.acr`) through, never a folder's.
+It uses it only inside its own check, which allows the release's two
+([Access control](#access-control)). A Studio trial never writes a
+pod: its fetch refuses every method but GET and HEAD
+([studio.md](studio.md#the-trial)).
 
 ## Further rules
 

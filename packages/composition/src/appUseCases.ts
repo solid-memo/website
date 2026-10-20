@@ -4,6 +4,7 @@
 
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { authFetch } from "@solid-memo/solid/authFetch";
+import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -81,14 +82,19 @@ export function createAppUseCases({
   });
 
   /**
-   * Every pod request goes through the fence, so a guest's study being
-   * moved cannot be written (docs/guest-mode.md); then to the guest's pod
-   * or, as the logged-in user, to any other.
+   * Every pod request goes through two fences (docs/boundaries.md): the
+   * pod fence, which refuses a write to an address Solid Memo never
+   * writes to, an access control's among them (podFence.ts), and the
+   * write fence, so a guest's study being moved cannot be written
+   * (docs/guest-mode.md); then to the guest's pod or, as the logged-in
+   * user, to any other.
    */
   const writeFence = createWriteFence(
     routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }),
   );
-  const podFetch = writeFence.fetch;
+  const podFetch = createPodFence(writeFence.fetch);
+  /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
+  const shareFetch = createPodFence(writeFence.fetch, { accessControl: true });
   const siteFetch = createSiteFetch(servedSite);
 
   const shapeValidator = createShaclShapeValidator({
@@ -131,7 +137,8 @@ export function createAppUseCases({
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
     ruleset,
-    guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
+    // Its profile is written through the fences too, as every pod write is.
+    guestPod: createLocalGuestPod({ fetch: podFetch, store: guestStore }),
     deckArchive: createSolidDeckArchive({ fetch: podFetch }),
     fileExchange: createBrowserFileExchange(),
     releaseDraftRepository: createSolidReleaseDraftRepository({
@@ -142,8 +149,12 @@ export function createAppUseCases({
       publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: anonymousFetch }),
       checkWrite,
     }),
-    // A release is written as the user; whether it is public, asked as no one.
-    releasePublisher: createSolidReleasePublisher({ fetch: podFetch, publicFetch: anonymousFetch }),
+    // A release is written as the user, its access control too; whether it is public, asked as no one.
+    releasePublisher: createSolidReleasePublisher({
+      fetch: podFetch,
+      shareFetch,
+      publicFetch: anonymousFetch,
+    }),
     // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.
     trialSandbox: (draft) => createTrialUseCases(draft, { podFetch, shapeValidator, ruleset }),
     // Read as every pod read is: a guest's from this browser, a document read already with its version.

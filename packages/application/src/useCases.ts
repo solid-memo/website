@@ -1878,8 +1878,8 @@ export function createUseCases({
    * (412, the document changed or was created elsewhere), or this app did
    * before sending it (the data would not conform, a newer version of the
    * app wrote it, a deck's entry no longer as the upgrade read it, a deck's
-   * document not yet said to be the deck's or a deck that cannot be used,
-   * say).
+   * document not yet said to be the deck's, a deck that cannot be used or an
+   * address the pod fence refuses, say).
    * Any other failure, an answer lost on the way, may follow a write the
    * pod made.
    */
@@ -1892,6 +1892,7 @@ export function createUseCases({
         "writtenByNewerApp",
         "dataNotConforming",
         "guestStudyBeingMoved",
+        "writeRefused",
         "deckChangedDuringUpgrade",
         "deckDocumentUnclaimed",
         "deckGone",

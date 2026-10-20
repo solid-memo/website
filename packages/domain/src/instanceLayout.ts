@@ -167,6 +167,30 @@ export function isSafeDocumentUrl(url: string): boolean {
 }
 
 /**
+ * A percent-encoded character that needs no encoding (a letter, a digit,
+ * `-`, `.`, `_`, `~`), which a request leaves as it is and a server may
+ * decode: `x.ac%6C` is another spelling of `x.acl`.
+ */
+const ENCODED_UNRESERVED = /%(?:3[0-9]|4[1-9a-f]|5[0-9a]|6[1-9a-f]|7[0-9a]|2d|2e|5f|7e)/i;
+
+/**
+ * Whether the pod fence lets a request that writes (any method but GET,
+ * HEAD and OPTIONS) go to `url` (docs/boundaries.md, "The pod fence"):
+ * an http(s) address with no query or fragment, written as a request
+ * sends it (isCanonicalUrl), with no dot segment (hasDotSegment),
+ * nothing in its path a server might read as a step elsewhere
+ * (UNSAFE_PATH), no character encoded that needs no encoding, and not
+ * another resource's access control or metadata (`.acl`, `.acr`,
+ * `.meta`, in any case). A folder may be written; which documents may
+ * be is the adapters' to say.
+ */
+export function isSafeWriteUrl(url: string): boolean {
+  if (!isCanonicalUrl(url) || !isPlainHttpUrl(url) || hasDotSegment(url)) return false;
+  const path = new URL(url).pathname;
+  return !UNSAFE_PATH.test(path) && !ENCODED_UNRESERVED.test(path) && !AUXILIARY.test(path);
+}
+
+/**
  * Whether `url` is one of the instance's own documents, which no deck's
  * may be: its meta, preferences, catalog and digest documents, and any
  * in its `history/`, `drafts/` or `releases/`.

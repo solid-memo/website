@@ -5186,8 +5186,8 @@ describe("library deck upgrade", () => {
     });
   });
 
-  it("says nothing changed when the deck's documents are refused before anything is sent: unclaimed, or a deck that cannot be used", async () => {
-    for (const code of ["deckDocumentUnclaimed", "deckGone"] as const) {
+  it("says nothing changed when the deck's documents are refused before anything is sent: unclaimed, a deck that cannot be used, or an address the pod fence refuses", async () => {
+    for (const code of ["deckDocumentUnclaimed", "deckGone", "writeRefused"] as const) {
       const { deps, copy, plan, useCases } = await world();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
         new AppError(code, { deck: copy.title }),

@@ -339,6 +339,9 @@ it most. The specifications' versions and status are in
 - **Instance**: one Solid Memo folder in a pod, with its own decks,
   reviews and preferences. A pod may hold several.
   [data-model.md](data-model.md#instance-layout).
+- **Pod fence**: what refuses, before it is sent, a write to an address
+  Solid Memo never writes to, such as another resource's access
+  control. [boundaries.md](boundaries.md#the-pod-fence).
 - **Receipt**: a note in the digest that a document, at one version,
   conformed to the shapes, so it need not be checked again.
   [data-model.md](data-model.md#the-digest).

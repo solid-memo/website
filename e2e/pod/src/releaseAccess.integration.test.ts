@@ -15,6 +15,7 @@
  */
 import { describe, expect, inject, it } from "vitest";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
+import { createPodFence } from "@solid-memo/solid/podFence";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 
 const SERVERS = inject("solidServers");
@@ -113,8 +114,10 @@ describe.each(SERVERS)("making a release public on $name", ({ url: server }) => 
         sent.push(`${method} ${url}`);
         return fetch(input, init);
       }) as typeof globalThis.fetch;
+      // Behind the pod fences, as createAppUseCases wires it.
       const releasePublisher = createSolidReleasePublisher({
-        fetch: userFetch,
+        fetch: createPodFence(userFetch),
+        shareFetch: createPodFence(userFetch, { accessControl: true }),
         publicFetch: fetch,
       });
       if (how === "publish") {
