@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   decide,
   defaultIo,
-  ENGINES_BLOB,
+  JOURNEYS_BLOBS,
   type GateIo,
   isRelease,
   main,
@@ -92,14 +92,21 @@ describe("decide", () => {
     });
   });
 
-  it("runs every job on main when the queue run's report of the engines has expired", async () => {
-    const kept = vi.fn(async () => false);
+  it("runs every job on main when the queue run's journeys' blobs have expired", async () => {
+    const kept = vi.fn(async (_run: number, blob: string) => blob === "journeys-blob-chromium");
     const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept });
     expect(await decide(io)).toEqual({
       jobs: "all",
-      why: "aaaaaaaa passed the merge queue in run 9, but its journeys-blob-engines has expired: every job runs, so the journeys' report has the engines'.",
+      why: "aaaaaaaa passed the merge queue in run 9, but its journeys-blob-engines expired: every job runs, so the journeys' report is whole.",
     });
-    expect(kept).toHaveBeenCalledWith(9, ENGINES_BLOB);
+    expect(kept.mock.calls).toEqual(JOURNEYS_BLOBS.map((blob) => [9, blob]));
+  });
+
+  it("names every blob that expired", async () => {
+    const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept: async () => false });
+    expect((await decide(io)).why).toContain(
+      "journeys-blob-chromium and journeys-blob-engines expired",
+    );
   });
 
   it("runs every job on main when the commit skipped the merge queue", async () => {

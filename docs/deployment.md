@@ -18,7 +18,7 @@ is made:
 flowchart LR
     accTitle: When a version is deployed
     accDescr: A push to main, or a run by hand, deploys only the newest version, from its release commit and with its GitHub release, after the build, each release's docs and the guard.
-    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL,<br/>journeys, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
+    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
     tag -->|no| skip["not deployed"]
     tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
     release -->|no| skip

@@ -254,24 +254,24 @@ version's files: the five that `release.config.mjs` lists (`assets`):
 `CHANGELOG.md`, `CITATION.cff`, `package.json`, `package-lock.json`
 and `publiccode.yml`. Its code is its parent's, which CI passed on
 `main` before the release was made. So its run runs the deterministic
-jobs, the build and the journeys in Chromium among them, and the gate
-fails it if the commit changes any other file, or has more than one
-parent. The timing-dependent jobs are skipped, and cannot hold up the
-deploy. Should CI not have passed its parent on `main` (a release
+jobs, the build among them, and the gate fails it if the commit changes
+any other file, or has more than one parent. The timing-dependent jobs,
+the user journeys in every browser among them, are skipped, and cannot
+hold up the deploy. Should CI not have passed its parent on `main` (a release
 commit pushed by hand), every job runs.
 
 The report of the journeys the site publishes at `/journeys/`
 ([deployment.md](deployment.md)) still has every browser's: the release
-commit's run takes the engines' journeys from the run that ran them on
-its code, which the gate names (`tested-by`). That is its parent's
-merge queue run, which keeps the engines' traces and report for this,
-or, for a parent that skipped the queue, the parent's own push run.
-GitHub keeps that run's report of them for 7 days; once it has expired,
-as for a release made late by hand, the gate runs every job instead.
+commit's run takes the journeys from the run that ran them on its code,
+which the gate names (`tested-by`). That is its parent's merge queue
+run, which keeps the journeys' traces and reports for this, or, for a
+parent that skipped the queue, the parent's own push run. GitHub keeps
+that run's reports for 7 days; once one has expired, as for a release
+made late by hand, the gate runs every job instead.
 
 What a skipped job would have saved on `main`, the caches every pull
 request reads, CI's `warm` jobs save instead: `warm` looks up each
-server's images and the engines' browsers, and `warm-images` and
+server's images, the journeys' server's, and the journeys' browsers, and `warm-images` and
 `warm-browsers` pull, build or download only what is missing, and save
 it ([testing.md](testing.md#continuous-integration)).
 

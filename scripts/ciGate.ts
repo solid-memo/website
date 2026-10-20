@@ -6,8 +6,8 @@
  * `npm run ci:gate`: which of CI's jobs this run runs
  * (docs/releasing.md#what-each-stage-checks): every job, or only the
  * deterministic ones, the timing-dependent ones (real servers, the
- * journeys in Firefox, WebKit and on a phone) skipped where the same
- * tree already passed them. Every job that runs blocks.
+ * user journeys in every browser) skipped where the same tree already
+ * passed them. Every job that runs blocks.
  *
  * - A pull request, the merge queue and a run by hand: every job. The
  *   merge queue is where a tree is tested at full strength before it
@@ -24,8 +24,8 @@
  *
  * It writes `jobs=all` or `jobs=deterministic` to GITHUB_OUTPUT, and with
  * the latter `tested-by=<run id>`: the CI run that ran the timing-dependent
- * jobs on this tree, whose engines' journeys the report on main takes in.
- * When that run's report of them has expired (GitHub keeps it 7 days, as
+ * jobs on this tree, whose journeys the report on main takes in. When
+ * that run's blobs of them have expired (GitHub keeps them 7 days, as
  * after a release made late by hand), every job runs instead, so the
  * report is never short of them.
  */
@@ -47,8 +47,8 @@ export type Gate =
   | { jobs: "deterministic"; testedBy: number; why: string };
 
 const MAIN = "refs/heads/main";
-/** The artifact of the engines' journeys that main's report takes from the run that ran them. */
-export const ENGINES_BLOB = "journeys-blob-engines";
+/** The journeys jobs' blobs, which main's report takes from the run that ran them. */
+export const JOURNEYS_BLOBS = ["journeys-blob-chromium", "journeys-blob-engines"];
 const RELEASE = "chore(release): ";
 
 /** Whether a commit is a release commit, as ci.yml's concurrency group tells them apart. */
@@ -78,14 +78,16 @@ export interface GateIo {
   log(message: string): void;
 }
 
-/** The deterministic jobs, the others having run in `testedBy`, while its engines' report is kept. */
+/** The deterministic jobs, the others having run in `testedBy`, while it keeps its journeys' blobs. */
 async function testedIn(io: GateIo, testedBy: number, why: string): Promise<Gate> {
-  if (await io.kept(testedBy, ENGINES_BLOB)) {
+  const gone = [];
+  for (const blob of JOURNEYS_BLOBS) if (!(await io.kept(testedBy, blob))) gone.push(blob);
+  if (gone.length === 0) {
     return { jobs: "deterministic", testedBy, why: `${why}: the deterministic jobs run.` };
   }
   return {
     jobs: "all",
-    why: `${why}, but its ${ENGINES_BLOB} has expired: every job runs, so the journeys' report has the engines'.`,
+    why: `${why}, but its ${gone.join(" and ")} expired: every job runs, so the journeys' report is whole.`,
   };
 }
 
