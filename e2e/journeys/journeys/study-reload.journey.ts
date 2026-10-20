@@ -12,7 +12,8 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
  * deck list, the statistics and each card's history count every answer
  * once (docs/srs.md#study-sessions). Catches answers kept only in the
  * page, a session that starts over with the cards already answered, and
- * a reload that loses the route. Then the learner logs out: in the other
+ * a reload that loses the route. The statistics and each card's history
+ * are checked in Chromium. Then the learner logs out: in the other
  * engines, which run no smoke journey, this is the one that does.
  *
  * Four new cards, all within the five new cards a day: two answered
@@ -90,30 +91,39 @@ test("reload in the middle of a study session @reload", async ({ app, account, r
     await app.decks.expectAnsweredToday(cards);
   });
 
-  await app.step("09 · The statistics count each answer once", async () => {
-    await app.statistics.open();
-    await app.statistics.expectStatistics({
-      answers: cards,
-      studyDays: 1,
-      cards,
-      // Four new cards, each answered once, Good: no review, no repeat.
-      today: { answers: cards, introduced: cards, remembered: 0, lapses: 0, repeats: 0 },
-      decks: [{ name: deck, answers: cards, introduced: cards, lapses: 0, lastStudied: "today" }],
-      maturity: { new: 0, relearning: 0, young: cards, mature: 0 },
-    });
-  });
+  // The statistics and the history are the app's logic: Chromium checks them.
+  await app.step(
+    "09 · The statistics count each answer once",
+    async () => {
+      await app.statistics.open();
+      await app.statistics.expectStatistics({
+        answers: cards,
+        studyDays: 1,
+        cards,
+        // Four new cards, each answered once, Good: no review, no repeat.
+        today: { answers: cards, introduced: cards, remembered: 0, lapses: 0, repeats: 0 },
+        decks: [{ name: deck, answers: cards, introduced: cards, lapses: 0, lastStudied: "today" }],
+        maturity: { new: 0, relearning: 0, young: cards, mature: 0 },
+      });
+    },
+    { in: ["chromium"] },
+  );
 
-  await app.step("10 · Each card's history holds one answer", async () => {
-    for (const front of fronts) {
-      await app.chrome.breadcrumb("breadcrumbs.decks");
-      await app.deckBrowser.openFor(deck);
-      await app.cardEditor.open(front);
-      // The history names an answer by the four buttons' words, whichever scale gave it.
-      expect(await app.cardEditor.history(), front).toEqual([
-        { kind: app.t("card.historyFirst"), answer: app.t("study.minimal.good") },
-      ]);
-    }
-  });
+  await app.step(
+    "10 · Each card's history holds one answer",
+    async () => {
+      for (const front of fronts) {
+        await app.chrome.breadcrumb("breadcrumbs.decks");
+        await app.deckBrowser.openFor(deck);
+        await app.cardEditor.open(front);
+        // The history names an answer by the four buttons' words, whichever scale gave it.
+        expect(await app.cardEditor.history(), front).toEqual([
+          { kind: app.t("card.historyFirst"), answer: app.t("study.minimal.good") },
+        ]);
+      }
+    },
+    { in: ["chromium"] },
+  );
 
   // The other engines run no smoke journey: this one logs out for it.
   await app.step("11 · Log out", async () => {

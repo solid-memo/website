@@ -369,7 +369,11 @@ reload, and a page narrow enough to lay out for a phone. The other
 journeys test the app's logic, which is the same in every engine, so
 running them all in each would about triple the time for little gain. A
 journey tagged with one of the two runs in every browser; tag another
-only when what it tests differs between engines. CI runs them in five
+only when what it tests differs between engines. A step of such a
+journey that tests the app's logic again names the projects it runs in
+(`app.step(title, body, { in: ["chromium"] })`), and the report shows
+it skipped in the others, as the reload journey's statistics and the
+shared link's import are. CI runs them in five
 jobs side by side: Chromium's journeys in two shards
 (`npx playwright test --shard`), `journeys (chromium-1)` and
 `journeys (chromium-2)`, and each other project's in a job of its own,

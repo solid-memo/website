@@ -137,8 +137,22 @@ export class App {
    * says how long the check took apart from the step's own work. A
    * project whose metadata says `accessibility: false` leaves the check
    * out (playwright.config.ts).
+   *
+   * `in` names the projects the step runs in; elsewhere it is skipped,
+   * and the report says so. It is for a step that tests the app's logic,
+   * the same in every engine, in a journey the other engines run for
+   * what differs between them (docs/testing.md#browsers).
    */
-  async step(title: string, body: () => Promise<void>): Promise<void> {
+  async step(
+    title: string,
+    body: () => Promise<void>,
+    { in: projects }: { in?: readonly string[] } = {},
+  ): Promise<void> {
+    if (projects !== undefined && !projects.includes(this.testInfo.project.name)) {
+      await test.step
+        .skip(title, async () => {});
+      return;
+    }
     await test.step(title, async () => {
       await body();
       const unmet = this.expectedDialogs.splice(0).map(String);
