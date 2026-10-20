@@ -10,15 +10,21 @@ import {
   conceptByIri,
   conceptByNotation,
   conceptOfDirection,
+  conceptOfPalette,
   conceptOfPolicy,
   conceptOfScheduler,
+  conceptOfTextSize,
   conceptOfTheme,
   directionOfConcept,
+  paletteOfConcept,
   policyOfConcept,
   schedulerOfConcept,
+  textSizeOfConcept,
   themeOfConcept,
 } from "./concepts";
 import { INVALID_DATA_POLICIES } from "./invalidDataPolicy";
+import { PALETTES } from "./palette";
+import { TEXT_SIZES } from "./textSize";
 import { THEME_CHOICES } from "./theme";
 import { DECK_DIRECTIONS } from "./deck";
 
@@ -87,6 +93,24 @@ describe("theme choices as concepts", () => {
     }
     expect(conceptOfTheme("system")).toBe(`${SM}systemTheme`);
     expect(themeOfConcept(`${SM}warnOnly`)).toBeUndefined();
+  });
+});
+
+describe("palettes and text sizes as concepts", () => {
+  it("map every palette and every size to its concept and back", () => {
+    for (const palette of PALETTES) {
+      expect(paletteOfConcept(conceptOfPalette(palette))).toBe(palette);
+    }
+    for (const size of TEXT_SIZES) {
+      expect(textSizeOfConcept(conceptOfTextSize(size))).toBe(size);
+    }
+    expect(conceptOfPalette("high-contrast")).toBe(`${SM}highContrastPalette`);
+    expect(conceptOfTextSize("largest")).toBe(`${SM}largestTextSize`);
+  });
+
+  it("name no palette for an IRI of none, a later version's or the user's own", () => {
+    expect(paletteOfConcept("https://pod.example/solid-memo/a/palettes.ttl#mine")).toBeUndefined();
+    expect(textSizeOfConcept(`${SM}darkTheme`)).toBeUndefined();
   });
 });
 

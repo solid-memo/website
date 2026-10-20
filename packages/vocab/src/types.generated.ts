@@ -39,7 +39,7 @@ export const LATEST_VERSION = {
   instance: 2,
   libraryDeck: 6,
   libraryDeckSeries: 3,
-  preferences: 5,
+  preferences: 6,
   reviewState: 2,
   step: 1,
 } as const;
@@ -618,6 +618,22 @@ export interface PreferencesV5 {
   readonly schedulerInvitationDismissed: boolean;
 }
 
+/** Preferences format 6: every field required, the palette and the text size among them. */
+export interface PreferencesV6 {
+  readonly newCardsPerDay: number;
+  readonly maxReviewsPerDay: number;
+  readonly dayBoundaryHour: number;
+  readonly answerScale: "sm2" | "minimal";
+  readonly developerMode: boolean;
+  readonly invalidDataPolicy: "https://solid-memo.com/ns/vocab/v1.ttl#blockInstance" | "https://solid-memo.com/ns/vocab/v1.ttl#blockSubject" | "https://solid-memo.com/ns/vocab/v1.ttl#warnOnly";
+  readonly theme: "https://solid-memo.com/ns/vocab/v1.ttl#systemTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#lightTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#darkTheme";
+  readonly scheduler: "https://solid-memo.com/ns/vocab/v1.ttl#sm2" | "https://solid-memo.com/ns/vocab/v1.ttl#fsrs6";
+  readonly desiredRetention: number;
+  readonly schedulerInvitationDismissed: boolean;
+  readonly palette: string;
+  readonly textSize: "https://solid-memo.com/ns/vocab/v1.ttl#defaultTextSize" | "https://solid-memo.com/ns/vocab/v1.ttl#largeTextSize" | "https://solid-memo.com/ns/vocab/v1.ttl#largerTextSize" | "https://solid-memo.com/ns/vocab/v1.ttl#largestTextSize";
+}
+
 /** Review-state format 1: the SM-2 fields; the previous* snapshot is admitted. */
 export interface ReviewStateV1 {
   readonly easeFactor: number;
@@ -679,7 +695,7 @@ export type FsrsReviewStateRecord = { version: 1; data: FsrsReviewStateV1 };
 export type InstanceRecord = { version: 1; data: InstanceV1 } | { version: 2; data: InstanceV2 };
 export type LibraryDeckRecord = { version: 1; data: LibraryDeckV1 } | { version: 2; data: LibraryDeckV2 } | { version: 3; data: LibraryDeckV3 } | { version: 4; data: LibraryDeckV4 } | { version: 5; data: LibraryDeckV5 } | { version: 6; data: LibraryDeckV6 };
 export type LibraryDeckSeriesRecord = { version: 1; data: LibraryDeckSeriesV1 } | { version: 2; data: LibraryDeckSeriesV2 } | { version: 3; data: LibraryDeckSeriesV3 };
-export type PreferencesRecord = { version: 1; data: PreferencesV1 } | { version: 2; data: PreferencesV2 } | { version: 3; data: PreferencesV3 } | { version: 4; data: PreferencesV4 } | { version: 5; data: PreferencesV5 };
+export type PreferencesRecord = { version: 1; data: PreferencesV1 } | { version: 2; data: PreferencesV2 } | { version: 3; data: PreferencesV3 } | { version: 4; data: PreferencesV4 } | { version: 5; data: PreferencesV5 } | { version: 6; data: PreferencesV6 };
 export type ReviewStateRecord = { version: 1; data: ReviewStateV1 } | { version: 2; data: ReviewStateV2 };
 export type StepRecord = { version: 1; data: StepV1 };
 
@@ -728,7 +744,7 @@ export type LatestRecord = {
   instance: InstanceV2;
   libraryDeck: LibraryDeckV6;
   libraryDeckSeries: LibraryDeckSeriesV3;
-  preferences: PreferencesV5;
+  preferences: PreferencesV6;
   reviewState: ReviewStateV2;
   step: StepV1;
 };

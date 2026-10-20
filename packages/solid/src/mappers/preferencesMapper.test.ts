@@ -3,7 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createThing, getInteger, getStringNoLocale } from "@inrupt/solid-client";
+import {
+  buildThing,
+  createThing,
+  getInteger,
+  getStringNoLocale,
+  getUrl,
+} from "@inrupt/solid-client";
 import { toPreferences, toPreferencesThing } from "./preferencesMapper";
 import { RDF, SM } from "../vocab";
 
@@ -20,6 +26,8 @@ const FULL = {
   scheduler: "sm2" as const,
   desiredRetention: 0.9,
   schedulerInvitationDismissed: false,
+  palette: SM.standardPalette,
+  textSize: "default" as const,
 };
 
 describe("toPreferences", () => {
@@ -54,6 +62,8 @@ describe("toPreferences", () => {
         scheduler: "sm2" as const,
         desiredRetention: 0.9,
         schedulerInvitationDismissed: false,
+        palette: SM.standardPalette,
+        textSize: "default" as const,
       },
       formatVersion: 1,
     });
@@ -71,6 +81,8 @@ describe("toPreferences", () => {
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: SM.standardPalette,
+      textSize: "default" as const,
     });
   });
 
@@ -91,8 +103,8 @@ describe("toPreferences", () => {
 describe("toPreferencesThing", () => {
   it("writes the current format, in place when the subject exists", () => {
     const fresh = toPreferencesThing(SUBJECT, FULL, null);
-    expect(getInteger(fresh, SM.formatVersion)).toBe(5);
-    expect(toPreferences(fresh)).toEqual({ preferences: FULL, formatVersion: 5 });
+    expect(getInteger(fresh, SM.formatVersion)).toBe(6);
+    expect(toPreferences(fresh)).toEqual({ preferences: FULL, formatVersion: 6 });
     const existing = buildThing(createThing({ url: SUBJECT }))
       .addInteger(SM.newCardsPerDay, 99)
       .addStringNoLocale("https://other.example/#note", "kept")
@@ -100,5 +112,17 @@ describe("toPreferencesThing", () => {
     const rewritten = toPreferencesThing(SUBJECT, FULL, existing);
     expect(getInteger(rewritten, SM.newCardsPerDay)).toBe(10);
     expect(getStringNoLocale(rewritten, "https://other.example/#note")).toBe("kept");
+  });
+
+  it("writes a palette this version does not know as it was read", () => {
+    const own = "https://pod.example/solid-memo/a/palettes.ttl#mine";
+    const thing = toPreferencesThing(SUBJECT, { ...FULL, palette: own, textSize: "larger" }, null);
+    expect(getUrl(thing, SM.palette)).toBe(own);
+    expect(getUrl(thing, SM.textSize)).toBe(SM.largerTextSize);
+    expect(toPreferences(thing)?.preferences).toEqual({
+      ...FULL,
+      palette: own,
+      textSize: "larger",
+    });
   });
 });

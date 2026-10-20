@@ -9,7 +9,7 @@ import { logInAndCreateInstance, logInToInstance } from "../flows/logIn.ts";
 /**
  * A learner who comes back, as the journey's spec numbers it: log in,
  * choose the dark theme and save the preferences, choose High contrast
- * and Larger text, kept on the device through a reload, log out and log back
+ * and Larger text, kept through a reload, log out and log back
  * in, the form refusing an http WebID first, then log in on a second
  * device (a browser context of its own), refusing Solid Memo the Pod at
  * the Solid server's consent first. How journeys are run, read when they
@@ -19,9 +19,11 @@ import { logInAndCreateInstance, logInToInstance } from "../flows/logIn.ts";
  * server's session cookie, which skips its login page (consent is asked
  * again, each login registering Solid Memo afresh), and an account that
  * has an instance, which the app must find and open, not offer to create.
- * The theme is kept in the pod's preferences once they are saved
- * (docs/theme.md), so the second device, which starts in the browser's
- * light theme, turns dark when the instance opens.
+ * The theme, the colors and the text size are kept in the pod's
+ * preferences once they are saved (docs/theme.md), so the second device,
+ * which starts in the browser's light theme, the standard colors and the
+ * browser's text size, takes on the first device's when the instance
+ * opens.
  */
 test("a returning learner @returning", async ({ app, account, runId, newDevice }) => {
   const instance = `Journey ${runId}`;
@@ -40,15 +42,17 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   });
 
   await app.step(
-    "05 · Choose High contrast and Larger text, which this device keeps through a reload",
+    "05 · Choose High contrast and Larger text, which the Pod keeps, through a reload",
     async () => {
       await app.preferences.open();
       await app.preferences.setPalette("high-contrast");
       await app.preferences.setTextSize("larger");
+      // Saved once both are written; back to Decks, where the next login opens.
+      await app.preferences.save();
       await app.chrome.reload();
+      await app.preferences.open();
       await app.preferences.expectPalette("high-contrast");
       await app.preferences.expectTextSize("larger");
-      // Back to Decks, where the next login opens.
       await app.preferences.save();
     },
   );
@@ -75,7 +79,7 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   await device.step("09 · On a second device, visit Solid Memo", async () => {
     await device.onboarding.visit();
     await device.chrome.expectTheme("light");
-    // The colors and the text size are the first device's alone, until the pod keeps them too.
+    // Nothing on this device yet: the colors and the text size come with the instance.
     await expect(device.page.locator("html")).not.toHaveAttribute("data-palette");
     await expect(device.page.locator("html")).not.toHaveAttribute("data-text-size");
   });
@@ -89,12 +93,14 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   });
 
   await device.step(
-    "11 · Log in again and let Solid Memo use the Pod: the instance opens, in the dark theme",
+    "11 · Log in again and let Solid Memo use the Pod: the instance opens, in the dark theme, High contrast and Larger text",
     async () => {
       await logInToInstance(device, account, instance, { knownToServer: true });
       await device.chrome.expectTheme("dark");
       await device.preferences.open();
       await device.preferences.expectTheme("dark");
+      await device.preferences.expectPalette("high-contrast");
+      await device.preferences.expectTextSize("larger");
     },
   );
 });

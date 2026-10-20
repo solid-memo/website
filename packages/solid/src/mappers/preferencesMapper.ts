@@ -6,7 +6,7 @@ import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
 import { preferencesFromRecord, preferencesToRecord } from "@solid-memo/domain/preferencesRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { PREFERENCES_V5 } from "@solid-memo/vocab/descriptors.generated";
+import { PREFERENCES_V6 } from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 
 /**
@@ -31,5 +31,5 @@ export function toPreferencesThing(
   preferences: StudyPreferences,
   existing: ThingPersisted | null,
 ): ThingPersisted {
-  return recordThing(url, PREFERENCES_V5, preferencesToRecord(preferences), existing);
+  return recordThing(url, PREFERENCES_V6, preferencesToRecord(preferences), existing);
 }

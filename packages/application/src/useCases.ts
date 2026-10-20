@@ -25,6 +25,7 @@ import {
   type LibraryCopy,
 } from "@solid-memo/domain/library";
 import { pickLocale, type Locale } from "@solid-memo/domain/locale";
+import { conceptOfPalette } from "@solid-memo/domain/concepts";
 import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
@@ -130,7 +131,9 @@ import {
 } from "@solid-memo/domain/studyDigest";
 import {
   DEFAULT_PREFERENCES,
+  keptPalette,
   NEW_INSTANCE_PREFERENCES,
+  shownPalette,
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
@@ -383,12 +386,32 @@ export interface UseCases
   chooseTheme(choice: ThemeChoice, instanceUrl: string | null): Promise<void>;
   /** The palette chosen on this device; "standard" when none was. */
   paletteChoice(): Palette;
-  /** Show the app in this palette from now on, on this device. */
-  choosePalette(palette: Palette): void;
+  /**
+   * The palette an instance's preferences are shown in (Standard for one
+   * this version does not know), kept on this device too for the next
+   * visit's first paint; null when the instance has no preferences yet.
+   */
+  instancePalette(instanceUrl: string): Promise<Palette | null>;
+  /**
+   * Show the app in this palette from now on: on this device, and in the
+   * instance's preferences as chooseTheme keeps a theme. Preferences
+   * whose palette this version does not know keep it while Standard is
+   * shown.
+   */
+  choosePalette(palette: Palette, instanceUrl: string | null): Promise<void>;
   /** The text size chosen on this device; "default" when none was. */
   textSizeChoice(): TextSize;
-  /** Show the text at this size from now on, on this device. */
-  chooseTextSize(size: TextSize): void;
+  /**
+   * The text size an instance's preferences hold, kept on this device
+   * too for the next visit's first paint; null when the instance has no
+   * preferences yet.
+   */
+  instanceTextSize(instanceUrl: string): Promise<TextSize | null>;
+  /**
+   * Show the text at this size from now on: on this device, and in the
+   * instance's preferences as chooseTheme keeps a theme.
+   */
+  chooseTextSize(size: TextSize, instanceUrl: string | null): Promise<void>;
   /**
    * The account behind a session: its Pod, discovered through the WebID
    * profile's storage link, its identity provider and its foaf:name.
@@ -441,7 +464,8 @@ export interface UseCases
   /**
    * Make an instance: its meta document and registrations, its catalog,
    * and its preferences, new ones (NEW_INSTANCE_PREFERENCES) with the
-   * theme this device shows, so it studies by FSRS-6.
+   * theme, the palette and the text size this device shows, so it
+   * studies by FSRS-6.
    */
   createInstance(
     session: Session,
@@ -834,7 +858,11 @@ export interface UseCases
    * (SM-2 when none is stored), as only switchScheduler can change it,
    * with what changing it takes. A stored "Not now" to the invitation
    * to switch to FSRS-6 stays too, though the preferences given were
-   * read before it.
+   * read before it, and so does a stored palette this version does not
+   * know while the preferences given show Standard. The theme, the
+   * palette and the text size are kept on this device too. The save
+   * waits for a choice of theme, palette or text size still being
+   * written to the instance.
    */
   savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
   /**
@@ -849,7 +877,8 @@ export interface UseCases
    * due when SM-2 has it due. A deck that cannot be written now is left
    * as it is, named with why, and the others go on. Only once every deck
    * is written are the preferences saved (a stored "Not now" to the
-   * invitation kept, as savePreferences keeps it), so until then SM-2 sets the due
+   * invitation and a palette this version does not know kept, as
+   * savePreferences keeps them), so until then SM-2 sets the due
    * days and the switch can be run again; then each deck's schedule in
    * the digest is brought up to date (a failure there leaves the switch
    * done).
@@ -863,7 +892,8 @@ export interface UseCases
    * Remember in the preferences that the learner answered "Not now" to
    * the invitation to switch to FSRS-6, so the deck list does not show
    * it again. The rest stays as stored; with none stored, the defaults
-   * with the theme this device shows are saved with it.
+   * with the theme, the palette and the text size this device shows are
+   * saved with it.
    */
   dismissSchedulerInvitation(instanceUrl: string): Promise<void>;
   /**
@@ -1802,8 +1832,56 @@ export function createUseCases({
     );
   }
 
-  /** Each instance's theme writes, one after another, so a later choice is never overwritten by an earlier. */
-  const themeWrites = new Map<string, Promise<void>>();
+  /**
+   * Each instance's writes of a theme, a palette or a text size, one
+   * after another, so a later choice is never overwritten by an earlier,
+   * nor refused for a version an earlier one changed.
+   */
+  const appearanceWrites = new Map<string, Promise<void>>();
+
+  /**
+   * Write a choice of how the app is shown into an instance's
+   * preferences, once the earlier ones are written: `changed` gives the
+   * preferences with the choice in them, or null when they already hold
+   * it. Nothing is written while the instance has no preferences.
+   */
+  function writeAppearance(
+    instanceUrl: string,
+    changed: (preferences: StudyPreferences) => StudyPreferences | null,
+  ): Promise<void> {
+    const previous = appearanceWrites.get(instanceUrl) ?? Promise.resolve();
+    const write = previous
+      .catch(() => undefined)
+      .then(async () => {
+        const stored = await preferencesRepository.getPreferences(instanceUrl);
+        const next = stored === null ? null : changed(stored.preferences);
+        if (next !== null) await preferencesRepository.savePreferences(instanceUrl, next);
+      });
+    appearanceWrites.set(instanceUrl, write);
+    return write;
+  }
+
+  /** Once the appearance writes made so far are done, failed ones too: what a save of all the preferences waits for. */
+  function afterAppearanceWrites(instanceUrl: string): Promise<void> {
+    return (appearanceWrites.get(instanceUrl) ?? Promise.resolve()).catch(() => undefined);
+  }
+
+  /** Keep on this device how saved preferences show the app, for the next visit's first paint. */
+  function keepAppearance(preferences: StudyPreferences) {
+    themePreference.choose(preferences.theme);
+    palettePreference.choose(shownPalette(preferences));
+    textSizePreference.choose(preferences.textSize);
+  }
+
+  /** The preferences of an instance made now, or saved for the first time: shown as this device shows the app. */
+  function withDeviceAppearance(preferences: StudyPreferences): StudyPreferences {
+    return {
+      ...preferences,
+      theme: themePreference.chosen(),
+      palette: conceptOfPalette(palettePreference.chosen()),
+      textSize: textSizePreference.chosen(),
+    };
+  }
 
   /**
    * What bringing the instance up to this app's formats would touch: its
@@ -2710,10 +2788,10 @@ export function createUseCases({
     });
     await deckRepository.saveCatalog(instance.url, await catalogOf(session, instance.name));
     // Stated, so FSRS-6 is this instance's own choice, not a default: one with none stored studies by SM-2.
-    await preferencesRepository.savePreferences(instance.url, {
-      ...NEW_INSTANCE_PREFERENCES,
-      theme: themePreference.chosen(),
-    });
+    await preferencesRepository.savePreferences(
+      instance.url,
+      withDeviceAppearance(NEW_INSTANCE_PREFERENCES),
+    );
     return instance;
   }
 
@@ -3081,31 +3159,43 @@ export function createUseCases({
     chooseTheme(choice, instanceUrl) {
       themePreference.choose(choice);
       if (instanceUrl === null) return Promise.resolve();
-      const previous = themeWrites.get(instanceUrl) ?? Promise.resolve();
-      const write = previous
-        .catch(() => undefined)
-        .then(async () => {
-          const stored = await preferencesRepository.getPreferences(instanceUrl);
-          if (stored === null || stored.preferences.theme === choice) return;
-          await preferencesRepository.savePreferences(instanceUrl, {
-            ...stored.preferences,
-            theme: choice,
-          });
-        });
-      themeWrites.set(instanceUrl, write);
-      return write;
+      return writeAppearance(instanceUrl, (preferences) =>
+        preferences.theme === choice ? null : { ...preferences, theme: choice },
+      );
     },
     paletteChoice() {
       return palettePreference.chosen();
     },
-    choosePalette(palette) {
+    async instancePalette(instanceUrl) {
+      const stored = await readStoredPreferences(instanceUrl);
+      if (stored === null) return null;
+      const palette = shownPalette(stored.preferences);
       palettePreference.choose(palette);
+      return palette;
+    },
+    choosePalette(palette, instanceUrl) {
+      palettePreference.choose(palette);
+      if (instanceUrl === null) return Promise.resolve();
+      return writeAppearance(instanceUrl, (preferences) => {
+        const kept = keptPalette(preferences, palette);
+        return kept === preferences.palette ? null : { ...preferences, palette: kept };
+      });
     },
     textSizeChoice() {
       return textSizePreference.chosen();
     },
-    chooseTextSize(size) {
+    async instanceTextSize(instanceUrl) {
+      const stored = await readStoredPreferences(instanceUrl);
+      if (stored === null) return null;
+      textSizePreference.choose(stored.preferences.textSize);
+      return stored.preferences.textSize;
+    },
+    chooseTextSize(size, instanceUrl) {
       textSizePreference.choose(size);
+      if (instanceUrl === null) return Promise.resolve();
+      return writeAppearance(instanceUrl, (preferences) =>
+        preferences.textSize === size ? null : { ...preferences, textSize: size },
+      );
     },
     async loginWithWebId(webId) {
       const validation = validateWebId(webId);
@@ -3631,11 +3721,14 @@ export function createUseCases({
       });
     },
     async savePreferences(instanceUrl, preferences) {
-      themePreference.choose(preferences.theme);
+      keepAppearance(preferences);
+      // Read after a choice still being written, so the save is not refused for the version it made.
+      await afterAppearanceWrites(instanceUrl);
       const stored = await getPreferences(instanceUrl);
       await preferencesRepository.savePreferences(instanceUrl, {
         ...withInvitationAnswer(preferences, stored),
         scheduler: stored.scheduler,
+        palette: keptPalette(stored, shownPalette(preferences)),
       });
     },
     async switchScheduler(instanceUrl, preferences, onProgress = () => undefined) {
@@ -3675,11 +3768,13 @@ export function createUseCases({
       progress.finished("preferences");
       // Saved last, and only once every deck is written: until then SM-2 sets the due days.
       if (outcome.failed.length === 0) {
-        themePreference.choose(preferences.theme);
-        await preferencesRepository.savePreferences(
-          instanceUrl,
-          withInvitationAnswer(preferences, await getPreferences(instanceUrl)),
-        );
+        keepAppearance(preferences);
+        await afterAppearanceWrites(instanceUrl);
+        const stored = await getPreferences(instanceUrl);
+        await preferencesRepository.savePreferences(instanceUrl, {
+          ...withInvitationAnswer(preferences, stored),
+          palette: keptPalette(stored, shownPalette(preferences)),
+        });
         outcome.switched = true;
         await Promise.all(
           listed.map((deck) => refreshStudyDigest(instanceUrl, deck).catch(() => undefined)),
@@ -3689,11 +3784,9 @@ export function createUseCases({
       return outcome;
     },
     async dismissSchedulerInvitation(instanceUrl) {
+      await afterAppearanceWrites(instanceUrl);
       const stored = await preferencesRepository.getPreferences(instanceUrl);
-      const preferences = stored?.preferences ?? {
-        ...DEFAULT_PREFERENCES,
-        theme: themePreference.chosen(),
-      };
+      const preferences = stored?.preferences ?? withDeviceAppearance(DEFAULT_PREFERENCES);
       if (preferences.schedulerInvitationDismissed) return;
       await preferencesRepository.savePreferences(instanceUrl, {
         ...preferences,

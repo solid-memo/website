@@ -272,8 +272,9 @@ data.
 │                        sm:developerMode, sm:invalidDataPolicy, sm:theme,
 │                        sm:studyScheduler (sm:sm2 or sm:fsrs6),
 │                        sm:desiredRetention,
-│                        sm:schedulerInvitationDismissed,
-│                        sm:formatVersion 5
+│                        sm:schedulerInvitationDismissed, sm:palette
+│                        (a concept of sm:Palettes, or another IRI,
+│                        kept), sm:textSize, sm:formatVersion 6
 ├── catalog.ttl     one subject per deck (titles live ONLY here), a
 │                        sm:Deck and dcat:Dataset: sm:formatVersion 6,
 │                        dcterms:description, sm:studyDirection, optional
@@ -559,8 +560,8 @@ graph LR
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, saying which version of its class's
   [shape](shapes.md) it conforms to: instance 1, decks 3 (DCAT),
-  cards 2 (pictures), review states 2, preferences 5 (the scheduler),
-  deck schedules 2 (the scheduler); the catalog, agent and distribution
+  cards 2 (pictures), review states 2, preferences 6 (the palette and
+  the text size), deck schedules 2 (the scheduler); the catalog, agent and distribution
   nodes 1. Readers treat a
   missing version as 1 — data written before the field existed — read
   older versions as they are, and pass a newer stored version through

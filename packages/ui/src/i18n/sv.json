@@ -981,7 +981,7 @@
     "countIn": "{what} i {decks}",
     "instanceFormat": "instansformat {version}",
     "catalogueFormat": "en katalog över varje instans kortlekar, som andra appar läser som en DCAT-katalog",
-    "preferencesFormat": "inställningsformat {version}, som sparar svarsskalan, utvecklarläget, vad som ska hända med ogiltiga data, temat och schemaläggaren",
+    "preferencesFormat": "inställningsformat {version}, som sparar svarsskalan, utvecklarläget, vad som ska hända med ogiltiga data, temat, schemaläggaren, färgerna och textstorleken",
     "deckFormat": "kortleksformat {version}, som beskriver kortlekar med standarderna DCAT och SKOS, ger varje kortlek en beskrivning och låter en kortleks titel, beskrivning och nyckelord vara på valfritt språk som du anger",
     "cardFormat": "kortformat {version}, som lägger till bilder på kort, låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder, låter ett korts text vara på valfritt språk som du anger och lägger till en etikett ovanför ett korts framsida",
     "reviewFormat": "repetitionstillståndsformat {version}, som sparar varje studieriktnings tillstånd och dagens ångra-ögonblicksbild",
@@ -1136,12 +1136,12 @@
     },
     "palette": {
       "legend": "Färger",
-      "hint": "Gäller direkt, i ljust och mörkt tema, och sparas på den här enheten.",
+      "hint": "Gäller direkt, i ljust och mörkt tema. När inställningarna har sparats sparas den i din Pod, liksom temat.",
       "moreContrast": "Din enhet ber om mer kontrast: Hög kontrast kan passa dig."
     },
     "textSize": {
       "legend": "Textstorlek",
-      "hint": "Gäller direkt och sparas på den här enheten. Den förstorar webbläsarens egen textstorlek.",
+      "hint": "Gäller direkt och förstorar webbläsarens egen textstorlek. När inställningarna har sparats sparas den i din Pod, liksom temat.",
       "sample": "Ett kort i taget, lite varje dag."
     },
     "heading": "Studieinställningar",

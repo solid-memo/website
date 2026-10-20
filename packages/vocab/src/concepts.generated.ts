@@ -100,6 +100,70 @@ export const THEMES = {
   ],
 } as const satisfies ConceptScheme;
 
+/** The sets of colors the app is shown in, each for what it does for the reader, each in the light theme and the dark. */
+export const PALETTES = {
+  iri: "https://solid-memo.com/ns/vocab/v1.ttl#Palettes",
+  title: "Palettes",
+  concepts: [
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      label: { en: "Standard" },
+      definition: { en: "The app's own colors, the answer buttons from red to green. The default." },
+      notation: "standard",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#highContrastPalette",
+      label: { en: "High contrast" },
+      definition: { en: "Black on white, or white on black: text at a contrast of 7:1 or more, and the edges of fields at 4.5:1 or more." },
+      notation: "high-contrast",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#colorVisionPalette",
+      label: { en: "Color-blind friendly" },
+      definition: { en: "The standard surfaces, with meaning moved off red and green onto blue, orange and vermilion, for readers who tell red from green poorly." },
+      notation: "color-vision",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#parchmentPalette",
+      label: { en: "Parchment (low glare)" },
+      definition: { en: "Warm surfaces darker than white in the light theme, and warm browns in the dark, for readers whom a bright page dazzles." },
+      notation: "parchment",
+    },
+  ],
+} as const satisfies ConceptScheme;
+
+/** How large the app shows its text, from the browser's own text size up. */
+export const TEXT_SIZES = {
+  iri: "https://solid-memo.com/ns/vocab/v1.ttl#TextSizes",
+  title: "Text sizes",
+  concepts: [
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#defaultTextSize",
+      label: { en: "Default" },
+      definition: { en: "The text at the browser's own size. The default." },
+      notation: "default",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#largeTextSize",
+      label: { en: "Large" },
+      definition: { en: "The text at 112.5% of the browser's own size." },
+      notation: "large",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#largerTextSize",
+      label: { en: "Larger" },
+      definition: { en: "The text at 125% of the browser's own size." },
+      notation: "larger",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#largestTextSize",
+      label: { en: "Largest" },
+      definition: { en: "The text at 150% of the browser's own size." },
+      notation: "largest",
+    },
+  ],
+} as const satisfies ConceptScheme;
+
 /** How a prompt is answered during study. */
 export const ANSWER_MODES = {
   iri: "https://solid-memo.com/ns/vocab/v1.ttl#AnswerModes",

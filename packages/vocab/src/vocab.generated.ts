@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.21 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.22 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -128,6 +128,10 @@ export const SM = {
   desiredRetention: `${SM_NS}desiredRetention`,
   /** Whether the learner answered Not now to the deck list's invitation to switch from SM-2 to FSRS-6, so it is not shown again. (Added in 1.21 for preferences format 5.) */
   schedulerInvitationDismissed: `${SM_NS}schedulerInvitationDismissed`,
+  /** The colors the app is shown in, in the light theme and the dark: a concept of solid-memo:Palettes. A palette this reader does not know is kept as it is and shown in the app's standard colors. (Added in 1.22 for preferences format 6.) */
+  palette: `${SM_NS}palette`,
+  /** How large the app shows its text, against the browser's own text size: a concept of solid-memo:TextSizes. (Added in 1.22 for preferences format 6.) */
+  textSize: `${SM_NS}textSize`,
   /** The document a receipt is about. (Added in 1.9.) */
   receiptOf: `${SM_NS}receiptOf`,
   /** The version of the document a receipt is about: its ETag, as the pod gave it. (Added in 1.9.) */
@@ -228,6 +232,26 @@ export const SM = {
   lightTheme: `${SM_NS}lightTheme`,
   /** The app is shown dark, whatever the browser prefers. (Added in 1.11.) */
   darkTheme: `${SM_NS}darkTheme`,
+  /** The sets of colors the app is shown in, each for what it does for the reader, each in the light theme and the dark. (Added in 1.22.) */
+  Palettes: `${SM_NS}Palettes`,
+  /** The app's own colors, the answer buttons from red to green. The default. (Added in 1.22.) */
+  standardPalette: `${SM_NS}standardPalette`,
+  /** Black on white, or white on black: text at a contrast of 7:1 or more, and the edges of fields at 4.5:1 or more. (Added in 1.22.) */
+  highContrastPalette: `${SM_NS}highContrastPalette`,
+  /** The standard surfaces, with meaning moved off red and green onto blue, orange and vermilion, for readers who tell red from green poorly. (Added in 1.22.) */
+  colorVisionPalette: `${SM_NS}colorVisionPalette`,
+  /** Warm surfaces darker than white in the light theme, and warm browns in the dark, for readers whom a bright page dazzles. (Added in 1.22.) */
+  parchmentPalette: `${SM_NS}parchmentPalette`,
+  /** How large the app shows its text, from the browser's own text size up. (Added in 1.22.) */
+  TextSizes: `${SM_NS}TextSizes`,
+  /** The text at the browser's own size. The default. (Added in 1.22.) */
+  defaultTextSize: `${SM_NS}defaultTextSize`,
+  /** The text at 112.5% of the browser's own size. (Added in 1.22.) */
+  largeTextSize: `${SM_NS}largeTextSize`,
+  /** The text at 125% of the browser's own size. (Added in 1.22.) */
+  largerTextSize: `${SM_NS}largerTextSize`,
+  /** The text at 150% of the browser's own size. (Added in 1.22.) */
+  largestTextSize: `${SM_NS}largestTextSize`,
   /** How a prompt is answered during study. (Added in 1.14.) */
   AnswerModes: `${SM_NS}AnswerModes`,
   /** The learner recalls the answer, sees it, and grades how well they knew it. (Added in 1.14.) */

@@ -10,7 +10,7 @@ import {
 } from "@solid-memo/domain/invalidDataPolicy";
 import { LOCALES } from "@solid-memo/domain/locale";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
-import type { StudyPreferences } from "@solid-memo/domain/preferences";
+import { keptPalette, type StudyPreferences } from "@solid-memo/domain/preferences";
 import { PALETTES, type Palette } from "@solid-memo/domain/palette";
 import { TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { THEME_CHOICES } from "@solid-memo/domain/theme";
@@ -173,6 +173,9 @@ export function PreferencesScreen({
       // it holds then is not the learner's to save.
       desiredRetention: fsrs ? Number(retention) / 100 : preferences.desiredRetention,
       schedulerInvitationDismissed: preferences.schedulerInvitationDismissed,
+      // As shown, but one this version does not know stays while Standard is shown.
+      palette: keptPalette(preferences, palette),
+      textSize,
     });
   }
 

@@ -14,7 +14,7 @@ import { Loading } from "./Loading";
 import { PreferencesScreen } from "./PreferencesScreen";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useI18n } from "./i18n";
-import { instanceThemeKey } from "./theme";
+import { instanceAppearanceKey } from "./theme";
 
 /**
  * Owns the preferences query/mutation for one instance. Saved with the
@@ -73,8 +73,8 @@ export function PreferencesContainer({
       if (outcome !== null) await queryClient.invalidateQueries();
       else {
         await queryClient.invalidateQueries({ queryKey: ["preferences", instance.url] });
-        // The first save puts the theme into the instance's preferences.
-        await queryClient.invalidateQueries({ queryKey: instanceThemeKey(instance.url) });
+        // The first save puts the theme, the palette and the text size into the instance's preferences.
+        await queryClient.invalidateQueries({ queryKey: instanceAppearanceKey(instance.url) });
       }
       queryClient.removeQueries({ queryKey: ["studyQueue"] });
       setProgress(null);

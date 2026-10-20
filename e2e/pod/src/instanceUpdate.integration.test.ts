@@ -191,10 +191,11 @@ async function seedOldPod(server: string, format: 4 | 5): Promise<Pod> {
   );
   await put(
     `${source}preferences.ttl`,
-    `${PREFIXES}<#it> a sm:Preferences ; sm:formatVersion 5 ; sm:newCardsPerDay 20 ; sm:maxReviewsPerDay 200 ;
+    `${PREFIXES}<#it> a sm:Preferences ; sm:formatVersion 6 ; sm:newCardsPerDay 20 ; sm:maxReviewsPerDay 200 ;
     sm:dayBoundaryHour 4 ; sm:answerScale "sm2" ; sm:developerMode false ;
     sm:invalidDataPolicy sm:warnOnly ; sm:theme sm:darkTheme ;
-    sm:studyScheduler sm:sm2 ; sm:desiredRetention 0.9 ; sm:schedulerInvitationDismissed false .`,
+    sm:studyScheduler sm:sm2 ; sm:desiredRetention 0.9 ; sm:schedulerInvitationDismissed false ;
+    sm:palette sm:standardPalette ; sm:textSize sm:defaultTextSize .`,
   );
   await put(
     `${source}catalog.ttl`,

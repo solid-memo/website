@@ -30,7 +30,7 @@ import {
   applyTheme,
   browserTheme,
   DARK_QUERY,
-  instanceThemeKey,
+  instanceAppearanceKey,
   ThemeProvider,
 } from "./theme";
 import { ThemeToggle } from "./ThemeToggle";
@@ -140,11 +140,6 @@ export function AppShell({
     applyTheme(theme);
   }, [palette, theme]);
 
-  function choosePalette(chosen: Palette) {
-    useCases.choosePalette(chosen);
-    setPalette(chosen);
-  }
-
   // The browser's theme as it changes (the OS going dark at dusk), shown while the choice is "system".
   useEffect(() => {
     const query = matchMedia(DARK_QUERY);
@@ -159,32 +154,41 @@ export function AppShell({
     applyTextSize(textSize);
   }, [textSize]);
 
-  function chooseTextSize(chosen: TextSize) {
-    useCases.chooseTextSize(chosen);
-    setTextSize(chosen);
-  }
-
-  // The open instance, whose preferences keep the choice once it has them.
+  // The open instance, whose preferences keep the choices once it has them.
   const themeInstance = useRef<string | null>(null);
-  const themeChoices = useRef(0);
+  const appearanceChoices = useRef(0);
 
-  function chooseTheme(chosen: ThemeChoice) {
-    setThemeChoice(chosen);
+  /** Keep a choice of theme, palette or text size: on the device, and in the open instance's preferences. */
+  function keepChoice(write: (instanceUrl: string | null) => Promise<void>) {
     const instanceUrl = themeInstance.current;
-    const count = ++themeChoices.current;
-    void useCases
-      .chooseTheme(chosen, instanceUrl)
+    const count = ++appearanceChoices.current;
+    void write(instanceUrl)
       .catch(() => undefined)
       .finally(() => {
         // Read back what the pod holds (which undoes a failed write), unless another choice is on its way.
-        if (instanceUrl === null || count !== themeChoices.current) return;
+        if (instanceUrl === null || count !== appearanceChoices.current) return;
         void queryClient.invalidateQueries({
-          queryKey: instanceThemeKey(instanceUrl),
+          queryKey: instanceAppearanceKey(instanceUrl),
         });
         void queryClient.invalidateQueries({
           queryKey: ["preferences", instanceUrl],
         });
       });
+  }
+
+  function chooseTheme(chosen: ThemeChoice) {
+    setThemeChoice(chosen);
+    keepChoice((instanceUrl) => useCases.chooseTheme(chosen, instanceUrl));
+  }
+
+  function choosePalette(chosen: Palette) {
+    setPalette(chosen);
+    keepChoice((instanceUrl) => useCases.choosePalette(chosen, instanceUrl));
+  }
+
+  function chooseTextSize(chosen: TextSize) {
+    setTextSize(chosen);
+    keepChoice((instanceUrl) => useCases.chooseTextSize(chosen, instanceUrl));
   }
 
   return (
@@ -199,8 +203,10 @@ export function AppShell({
         onAdopt={setThemeChoice}
         palette={palette}
         onChoosePalette={choosePalette}
+        onAdoptPalette={setPalette}
         textSize={textSize}
         onChooseTextSize={chooseTextSize}
+        onAdoptTextSize={setTextSize}
       >
         <AppName.Provider value={identity.name}>
           <RepoUrl.Provider value={source.repoUrl}>

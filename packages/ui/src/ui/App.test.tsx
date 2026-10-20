@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ComponentType } from "preact";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -17,7 +18,7 @@ import { PALETTES } from "@solid-memo/domain/palette";
 import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
-import { useTheme } from "./theme";
+import { useInstanceTheme, useTheme } from "./theme";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const restored: EstablishedSession = { session, origin: "restored" };
@@ -213,6 +214,8 @@ describe("AppShell", () => {
       delete document.documentElement.dataset.textSize;
     });
 
+    const INSTANCE_URL = "https://pod.example/solid-memo/main/";
+
     /** A workspace with a button for each palette and each text size, as the preferences have a choice for each. */
     function AppearanceWorkspace() {
       const { palette, choosePalette, textSize, chooseTextSize } = useTheme();
@@ -233,7 +236,16 @@ describe("AppShell", () => {
       );
     }
 
-    function renderAppearance(overrides: Partial<UseCases>) {
+    /** The same, in an open instance, whose preferences keep the choices. */
+    function InstanceAppearanceWorkspace({ useCases }: WorkspaceProps) {
+      useInstanceTheme(useCases, INSTANCE_URL);
+      return <AppearanceWorkspace />;
+    }
+
+    function renderAppearance(
+      overrides: Partial<UseCases>,
+      workspace: ComponentType<WorkspaceProps> = AppearanceWorkspace,
+    ) {
       const useCases = makeUseCases({
         restoreSession: vi.fn(async () => ({
           session: { webId: "https://guest.invalid/profile#me", guest: true as const },
@@ -249,7 +261,7 @@ describe("AppShell", () => {
             source={source}
             providers={POD_PROVIDERS}
             identity={SOLID_MEMO}
-            workspace={AppearanceWorkspace}
+            workspace={workspace}
           />
         </QueryClientProvider>,
       );
@@ -273,7 +285,7 @@ describe("AppShell", () => {
       expect(meta.content).toBe("#000000");
       // Standard is no attribute at all, as index.html leaves it.
       fireEvent.click(screen.getByRole("button", { name: "standard" }));
-      expect(useCases.choosePalette).toHaveBeenCalledWith("standard");
+      expect(useCases.choosePalette).toHaveBeenCalledWith("standard", null);
       expect(document.documentElement.dataset.palette).toBeUndefined();
       expect(meta.content).toBe("#11171e");
       meta.remove();
@@ -286,12 +298,52 @@ describe("AppShell", () => {
       expect(await screen.findByText(/text size: larger$/)).toBeInTheDocument();
       expect(document.documentElement.dataset.textSize).toBe("larger");
       fireEvent.click(screen.getByRole("button", { name: "largest" }));
-      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest");
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", null);
       expect(document.documentElement.dataset.textSize).toBe("largest");
       // The default size is no attribute at all, as index.html leaves it.
       fireEvent.click(screen.getByRole("button", { name: "default" }));
       expect(screen.getByText(/text size: default$/)).toBeInTheDocument();
       expect(document.documentElement.dataset.textSize).toBeUndefined();
+    });
+
+    it("shows the palette and the text size the open instance's preferences hold, and keeps a new choice there", async () => {
+      const useCases = renderAppearance(
+        {
+          instancePalette: vi.fn(async () => "parchment" as const),
+          instanceTextSize: vi.fn(async () => "large" as const),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
+      await waitFor(() => expect(document.documentElement.dataset.palette).toBe("parchment"));
+      expect(document.documentElement.dataset.textSize).toBe("large");
+      vi.mocked(useCases.instancePalette).mockResolvedValue("high-contrast");
+      fireEvent.click(screen.getByRole("button", { name: "high-contrast" }));
+      expect(useCases.choosePalette).toHaveBeenCalledWith("high-contrast", INSTANCE_URL);
+      // Read back from the pod once written.
+      await waitFor(() => expect(useCases.instancePalette).toHaveBeenCalledTimes(2));
+      vi.mocked(useCases.instanceTextSize).mockResolvedValue("largest");
+      fireEvent.click(screen.getByRole("button", { name: "largest" }));
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", INSTANCE_URL);
+      await waitFor(() => expect(useCases.instanceTextSize).toHaveBeenCalledTimes(3));
+      expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
+    });
+
+    it("puts back the pod's palette and text size when a choice cannot be written there", async () => {
+      renderAppearance(
+        {
+          instancePalette: vi.fn(async () => "parchment" as const),
+          instanceTextSize: vi.fn(async () => "large" as const),
+          choosePalette: vi.fn(async () => Promise.reject(new Error("412"))),
+          chooseTextSize: vi.fn(async () => Promise.reject(new Error("412"))),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "color-vision" }));
+      fireEvent.click(screen.getByRole("button", { name: "default" }));
+      expect(screen.getByText("Palette: color-vision, text size: default")).toBeInTheDocument();
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
     });
   });
 

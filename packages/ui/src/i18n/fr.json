@@ -1036,7 +1036,7 @@
     "countIn": "{what} dans {decks}",
     "instanceFormat": "le format d’instance {version}",
     "catalogueFormat": "un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT",
-    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence et l’algorithme de planification",
+    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence, l’algorithme de planification, les couleurs et la taille du texte",
     "deckFormat": "le format de paquet {version}, qui décrit les paquets avec les normes DCAT et SKOS, donne une description à chaque paquet et permet d’écrire le titre, la description et les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez",
     "cardFormat": "le format de carte {version}, qui ajoute les images sur les cartes, permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus, permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez et ajoute une étiquette au-dessus du recto d’une carte",
     "reviewFormat": "le format d’état de révision {version}, qui conserve l’état de chaque sens d’étude et l’instantané d’annulation du jour",
@@ -1196,12 +1196,12 @@
     },
     "palette": {
       "legend": "Couleurs",
-      "hint": "S’applique immédiatement, en mode clair comme en mode sombre, et est conservé sur cet appareil.",
+      "hint": "S’applique immédiatement, en mode clair comme en mode sombre. Une fois ces préférences enregistrées, ce choix est conservé dans votre Pod, comme l’apparence.",
       "moreContrast": "Votre appareil demande plus de contraste : Contraste élevé pourrait vous convenir."
     },
     "textSize": {
       "legend": "Taille du texte",
-      "hint": "S’applique immédiatement et est conservée sur cet appareil. Elle agrandit la taille de texte de votre navigateur.",
+      "hint": "S’applique immédiatement et agrandit la taille de texte de votre navigateur. Une fois ces préférences enregistrées, elle est conservée dans votre Pod, comme l’apparence.",
       "sample": "Une carte à la fois, un peu chaque jour."
     },
     "heading": "Préférences d’étude",

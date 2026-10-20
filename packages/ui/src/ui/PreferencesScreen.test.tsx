@@ -151,7 +151,7 @@ describe("PreferencesScreen", () => {
       const { container, choosePalette, onSave } = renderAppearance();
       const group = screen.getByRole("group", { name: "Colors" });
       expect(group).toHaveAccessibleDescription(
-        /^Takes effect right away, in the light theme and the dark/,
+        /^Takes effect right away, in the light theme and the dark\. Once these preferences are saved it is kept in your Pod/,
       );
       expect(
         within(group)
@@ -190,6 +190,32 @@ describe("PreferencesScreen", () => {
       await waitFor(() => expect(contrast.listeners.size).toBe(0));
     });
 
+    it("saves the palette and the text size shown with the preferences", () => {
+      const { container, onSave } = renderAppearance();
+      fireEvent.submit(container.querySelector("form")!);
+      expect(onSave).toHaveBeenCalledWith({
+        ...DEFAULT_PREFERENCES,
+        palette: "https://solid-memo.com/ns/vocab/v1.ttl#colorVisionPalette",
+        textSize: "larger",
+      });
+    });
+
+    it("keeps a palette this version does not know while Standard is shown", () => {
+      const onSave = vi.fn();
+      const preferences = {
+        ...DEFAULT_PREFERENCES,
+        palette: "https://pod.example/solid-memo/main/palettes.ttl#mine",
+      };
+      const { container } = render(
+        <ThemeProvider choice="system" onChoose={() => undefined}>
+          <PreferencesScreen preferences={preferences} busy={false} error={null} onSave={onSave} />
+        </ThemeProvider>,
+      );
+      expect(screen.getByRole("radio", { name: /^Standard/ })).toBeChecked();
+      fireEvent.submit(container.querySelector("form")!);
+      expect(onSave).toHaveBeenCalledWith(preferences);
+    });
+
     it("says nothing of it otherwise", () => {
       renderAppearance();
       expect(screen.queryByText(/asks for more contrast/)).toBeNull();
@@ -214,7 +240,7 @@ describe("PreferencesScreen", () => {
       const { container, chooseTextSize, onSave } = renderAppearance();
       const group = screen.getByRole("group", { name: "Text size" });
       expect(group).toHaveAccessibleDescription(
-        /^Takes effect right away, and is kept on this device/,
+        /^Takes effect right away, and enlarges your browser's own text size\. Once these preferences are saved it is kept in your Pod/,
       );
       expect(screen.getByRole("radio", { name: "Larger" })).toBeChecked();
       expect(
@@ -241,6 +267,8 @@ describe("PreferencesScreen", () => {
         scheduler: "sm2",
         desiredRetention: 0.9,
         schedulerInvitationDismissed: false,
+        palette: DEFAULT_PREFERENCES.palette,
+        textSize: "default",
       },
     });
     expect(screen.getByLabelText("New cards per day")).toHaveValue(10);
@@ -407,6 +435,8 @@ describe("PreferencesScreen", () => {
       scheduler: "sm2",
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      textSize: "default",
     });
   });
 

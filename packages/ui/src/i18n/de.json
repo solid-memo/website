@@ -981,7 +981,7 @@
     "countIn": "{what} in {decks}",
     "instanceFormat": "das Instanzformat {version}",
     "catalogueFormat": "einen Katalog der Stapel jeder Instanz, den andere Apps als DCAT-Katalog lesen",
-    "preferencesFormat": "das Einstellungsformat {version}, das die Antwortskala, den Entwicklermodus, den Umgang mit ungültigen Daten, das Erscheinungsbild und den Planungsalgorithmus speichert",
+    "preferencesFormat": "das Einstellungsformat {version}, das die Antwortskala, den Entwicklermodus, den Umgang mit ungültigen Daten, das Erscheinungsbild, den Planungsalgorithmus, die Farben und die Textgröße speichert",
     "deckFormat": "das Stapelformat {version}, das Stapel mit den Standards DCAT und SKOS beschreibt, jedem Stapel eine Beschreibung gibt und Titel, Beschreibung und Schlagwörter eines Stapels in jeder Sprache erlaubt, die du angibst",
     "cardFormat": "das Kartenformat {version}, das Bilder auf Karten ermöglicht, einem Bibliotheksstapel erlaubt, eine nicht mehr genutzte Karte auszumustern, den Text einer Karte in jeder Sprache erlaubt, die du angibst, und eine Beschriftung über der Vorderseite einer Karte hinzufügt",
     "reviewFormat": "das Format {version} für Wiederholungsstände, das den Stand jeder Lernrichtung und den Rückgängig-Schnappschuss des Tages speichert",
@@ -1136,12 +1136,12 @@
     },
     "palette": {
       "legend": "Farben",
-      "hint": "Wirkt sofort, im hellen wie im dunklen Modus, und wird auf diesem Gerät gespeichert.",
+      "hint": "Wirkt sofort, im hellen wie im dunklen Modus. Sobald diese Einstellungen gespeichert sind, liegen sie wie das Erscheinungsbild in deinem Pod.",
       "moreContrast": "Dein Gerät wünscht mehr Kontrast: Hoher Kontrast könnte dir liegen."
     },
     "textSize": {
       "legend": "Textgröße",
-      "hint": "Wirkt sofort und wird auf diesem Gerät gespeichert. Sie vergrößert die Textgröße deines Browsers.",
+      "hint": "Wirkt sofort und vergrößert die Textgröße deines Browsers. Sobald diese Einstellungen gespeichert sind, liegt sie wie das Erscheinungsbild in deinem Pod.",
       "sample": "Eine Karte nach der anderen, jeden Tag ein wenig."
     },
     "heading": "Lerneinstellungen",

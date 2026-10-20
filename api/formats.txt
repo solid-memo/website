@@ -35,7 +35,7 @@ libraryDeck: written in format 6
 libraryDeckSeries: read from format 1
 libraryDeckSeries: written in format 3
 preferences: read from format 1
-preferences: written in format 5
+preferences: written in format 6
 reviewState: read from format 1
 reviewState: written in format 2
 step: read from format 1

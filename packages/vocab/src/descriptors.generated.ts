@@ -44,6 +44,7 @@ import type {
   PreferencesV3,
   PreferencesV4,
   PreferencesV5,
+  PreferencesV6,
   ReviewStateV1,
   ReviewStateV2,
   StepV1,
@@ -1043,6 +1044,32 @@ export const PREFERENCES_V5: ShapeDescriptor<PreferencesV5> = {
   ],
 };
 
+export const PREFERENCES_V6: ShapeDescriptor<PreferencesV6> = {
+  shape: "preferences",
+  version: 6,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Preferences",
+  additionalTypes: [],
+  absent: [],
+  fixedValues: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/preferences/v6.ttl#shape",
+  shapeDocument: "preferences/v6.ttl",
+  context: "any",
+  fields: [
+    { name: "newCardsPerDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#newCardsPerDay", kind: "integer", cardinality: "one" },
+    { name: "maxReviewsPerDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#maxReviewsPerDay", kind: "integer", cardinality: "one" },
+    { name: "dayBoundaryHour", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#dayBoundaryHour", kind: "integer", cardinality: "one" },
+    { name: "answerScale", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#answerScale", kind: "enum", cardinality: "one", values: ["sm2","minimal"] },
+    { name: "developerMode", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#developerMode", kind: "boolean", cardinality: "one" },
+    { name: "invalidDataPolicy", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#invalidDataPolicy", kind: "iriEnum", cardinality: "one", values: ["https://solid-memo.com/ns/vocab/v1.ttl#blockInstance","https://solid-memo.com/ns/vocab/v1.ttl#blockSubject","https://solid-memo.com/ns/vocab/v1.ttl#warnOnly"] },
+    { name: "theme", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#theme", kind: "iriEnum", cardinality: "one", values: ["https://solid-memo.com/ns/vocab/v1.ttl#systemTheme","https://solid-memo.com/ns/vocab/v1.ttl#lightTheme","https://solid-memo.com/ns/vocab/v1.ttl#darkTheme"] },
+    { name: "scheduler", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#studyScheduler", kind: "iriEnum", cardinality: "one", values: ["https://solid-memo.com/ns/vocab/v1.ttl#sm2","https://solid-memo.com/ns/vocab/v1.ttl#fsrs6"] },
+    { name: "desiredRetention", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#desiredRetention", kind: "decimal", cardinality: "one" },
+    { name: "schedulerInvitationDismissed", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#schedulerInvitationDismissed", kind: "boolean", cardinality: "one" },
+    { name: "palette", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#palette", kind: "iri", cardinality: "one" },
+    { name: "textSize", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#textSize", kind: "iriEnum", cardinality: "one", values: ["https://solid-memo.com/ns/vocab/v1.ttl#defaultTextSize","https://solid-memo.com/ns/vocab/v1.ttl#largeTextSize","https://solid-memo.com/ns/vocab/v1.ttl#largerTextSize","https://solid-memo.com/ns/vocab/v1.ttl#largestTextSize"] },
+  ],
+};
+
 export const REVIEW_STATE_V1: ShapeDescriptor<ReviewStateV1> = {
   shape: "reviewState",
   version: 1,
@@ -1136,7 +1163,7 @@ export const SHAPES = {
   instance: { 1: INSTANCE_V1, 2: INSTANCE_V2 },
   libraryDeck: { 1: LIBRARY_DECK_V1, 2: LIBRARY_DECK_V2, 3: LIBRARY_DECK_V3, 4: LIBRARY_DECK_V4, 5: LIBRARY_DECK_V5, 6: LIBRARY_DECK_V6 },
   libraryDeckSeries: { 1: LIBRARY_DECK_SERIES_V1, 2: LIBRARY_DECK_SERIES_V2, 3: LIBRARY_DECK_SERIES_V3 },
-  preferences: { 1: PREFERENCES_V1, 2: PREFERENCES_V2, 3: PREFERENCES_V3, 4: PREFERENCES_V4, 5: PREFERENCES_V5 },
+  preferences: { 1: PREFERENCES_V1, 2: PREFERENCES_V2, 3: PREFERENCES_V3, 4: PREFERENCES_V4, 5: PREFERENCES_V5, 6: PREFERENCES_V6 },
   reviewState: { 1: REVIEW_STATE_V1, 2: REVIEW_STATE_V2 },
   step: { 1: STEP_V1 },
 } as const;
@@ -1185,6 +1212,7 @@ export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   PREFERENCES_V3,
   PREFERENCES_V4,
   PREFERENCES_V5,
+  PREFERENCES_V6,
   REVIEW_STATE_V1,
   REVIEW_STATE_V2,
   STEP_V1,

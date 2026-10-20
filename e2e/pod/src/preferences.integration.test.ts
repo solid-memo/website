@@ -9,7 +9,8 @@
  * new instance's are stated, FSRS-6 their scheduler, and every value a
  * save or "Not now" to the invitation to switch to FSRS-6 writes is read
  * back as written, true among them, which node-solid-server stores as
- * false when a PATCH inserts it.
+ * false when a PATCH inserts it. The palette and the text size chosen are
+ * kept there, and a palette this version does not know outlives a save.
  */
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
@@ -63,6 +64,12 @@ function page() {
   });
 }
 
+/** The preferences as the repository writes them, whatever palette they name. */
+function laterVersion() {
+  const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
+  return createSolidPreferencesRepository({ fetch, checkWrite: shapeValidator.checkSubjects });
+}
+
 /** A new instance in a pod of its own, as a learner makes one. */
 async function seed(server: string): Promise<string> {
   const base = new URL(`preferences-${crypto.randomUUID()}/`, server).href;
@@ -110,6 +117,35 @@ describe.each(SERVERS)("preferences on $name", ({ url: server }) => {
     expect(await page().getPreferences(instanceUrl)).toEqual({
       ...saved,
       schedulerInvitationDismissed: true,
+    });
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+  });
+
+  it("keeps the palette and the text size chosen, and a palette this version does not know through a save", async () => {
+    const instanceUrl = await seed(server);
+    await page().choosePalette("high-contrast", instanceUrl);
+    await page().chooseTextSize("larger", instanceUrl);
+    expect(await page().getPreferences(instanceUrl)).toMatchObject({
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#highContrastPalette",
+      textSize: "larger",
+    });
+    expect(await page().instancePalette(instanceUrl)).toBe("high-contrast");
+    expect(await page().instanceTextSize(instanceUrl)).toBe("larger");
+
+    // A palette of the user's own, as a later version writes it: straight to the pod.
+    const own = `${instanceUrl}palettes.ttl#mine`;
+    const stored = await page().getPreferences(instanceUrl);
+    await laterVersion().savePreferences(instanceUrl, { ...stored, palette: own });
+    expect(await page().instancePalette(instanceUrl)).toBe("standard");
+    // Saved again as shown, in Standard, the palette is kept as it was.
+    await page().savePreferences(instanceUrl, {
+      ...stored,
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      newCardsPerDay: 3,
+    });
+    expect(await page().getPreferences(instanceUrl)).toMatchObject({
+      palette: own,
+      newCardsPerDay: 3,
     });
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });

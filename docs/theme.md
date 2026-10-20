@@ -9,34 +9,60 @@ is what the app does. Beside it, the preferences choose the
 
 ## Where the choice is kept
 
+The theme, the [palette](#palettes) and the [text size](#text-size)
+are each kept the same way.
+
 ```mermaid
 flowchart LR
-  accTitle: Where the theme is kept
-  accDescr: A theme choice is kept on this device, and in the instance's preferences when one is open, which set the device's choice when the instance is opened.
-  choose["A choice"] --> device["This device<br/>localStorage solid-memo:theme"]
-  choose -->|"an instance is open<br/>and has preferences"| pod["preferences.ttl<br/>sm:theme"]
+  accTitle: Where the theme, the palette and the text size are kept
+  accDescr: A choice of theme, palette or text size is kept on this device, and in the instance's preferences when one is open, which set the device's choices when the instance is opened.
+  choose["A choice"] --> device["This device<br/>localStorage solid-memo:theme,<br/>solid-memo:palette, solid-memo:textSize"]
+  choose -->|"an instance is open<br/>and has preferences"| pod["preferences.ttl<br/>sm:theme, sm:palette, sm:textSize"]
   pod -->|"the instance is opened"| device
 ```
 
-- **In the pod**, as `sm:theme` in the instance's preferences
-  ([preferences format 4](shapes.md)): a concept of `sm:Themes`
-  (`sm:systemTheme`, `sm:lightTheme`, `sm:darkTheme`). This is the
-  choice that counts, and it follows the user to every device. It is
+- **In the pod**, in the instance's preferences
+  ([preferences format 6](shapes.md)): `sm:theme`, a concept of
+  `sm:Themes` (`sm:systemTheme`, `sm:lightTheme`, `sm:darkTheme`);
+  `sm:palette`, a concept of `sm:Palettes` (`sm:standardPalette`,
+  `sm:highContrastPalette`, `sm:colorVisionPalette`,
+  `sm:parchmentPalette`); and `sm:textSize`, a concept of
+  `sm:TextSizes` (`sm:defaultTextSize`, `sm:largeTextSize`,
+  `sm:largerTextSize`, `sm:largestTextSize`). These are the choices
+  that count, and they follow the user to every device. They are
   written once the instance has preferences: a new instance is made
-  with them, the theme shown at the time among them; an instance made
-  before has them after the user's first save of the study preferences
-  (which saves the theme shown at the time), and until then a choice is
-  kept on the device alone.
-- **On the device**, by the `ThemePreference` port
+  with them, the theme, palette and text size shown at the time among
+  them; an instance made before has them after the user's first save of
+  the study preferences (which saves what is shown at the time), and
+  until then a choice is kept on the device alone.
+- **On the device**, by the `ThemePreference`, `PalettePreference` and
+  `TextSizePreference` ports
   ([localStorageThemePreference.ts](../packages/browser/src/localStorageThemePreference.ts),
-  key `solid-memo:theme`; "As my browser" is no key at all). It is what
-  the sign-in screens and the first paint have, before any pod is
-  reached. Opening an instance whose preferences say otherwise copies
-  their choice here (`instanceTheme`).
+  key `solid-memo:theme`, "As my browser" no key at all; the palette's
+  and the text size's below). They are what the sign-in screens and the
+  first paint have, before any pod is reached. Opening an instance
+  whose preferences say otherwise copies their choices here
+  (`instanceTheme`, `instancePalette`, `instanceTextSize`).
 
-A write to the pod that fails (another device saved the preferences
-meanwhile, say) is undone: the app reads the preferences back and shows
-what they hold.
+The writes to an instance's preferences go one after another, the theme's,
+the palette's and the text size's alike, so a later choice is never
+overwritten by an earlier one. A save of the study preferences, a
+switch of scheduler and "Not now" to the invitation to FSRS-6 wait for
+them, so none is refused for the version a choice made. A write that
+fails (another device saved the preferences meanwhile, say) is undone:
+the app reads the preferences back and shows what they hold. A page
+reloaded before a write is done opens the instance with the choice its
+preferences held before, and shows that one: the choice made just
+before the reload is lost, the theme's as much as the palette's or the
+text size's.
+
+The palette's shape lists no concepts, as `sm:textFormat`'s lists none
+([vocab.md](vocab.md#versioning-policy)): a palette of a later version,
+or one of the user's own, needs no new format. This version shows a
+palette it does not know as Standard, and keeps it: a save of the
+preferences, or a switch of scheduler, writes it back as it was while
+Standard is shown, and only choosing another palette replaces it. The
+text size's shape lists its four, as the theme's lists its three.
 
 ## Showing it
 
@@ -65,14 +91,15 @@ the preferences suggest High contrast. A choice takes effect at once:
 | Color-blind friendly | `color-vision` | Standard's surfaces, with meaning moved off red and green: blue for the primary color and links, orange for warnings, vermilion for danger, and the answer buttons from vermilion through orange, yellow and sky blue to blue. |
 | Parchment (low glare) | `parchment` | Warm surfaces darker than white in the light theme, warm browns in the dark, for readers whom a bright page dazzles, the dimmer text raised to 4.5:1. |
 
-The choice is kept on the device, by the `PalettePreference` port
+The choice is kept in the instance's preferences and on the device, as
+the theme is ([Where the choice is kept](#where-the-choice-is-kept)):
+on the device by the `PalettePreference` port
 ([localStoragePalettePreference.ts](../packages/browser/src/localStoragePalettePreference.ts),
-key `solid-memo:palette`; Standard is no key at all), and shown as
+key `solid-memo:palette`; Standard is no key at all). It is shown as
 `<html data-palette>`: the script in `apps/web/index.html` sets it
 before the first paint, and `theme.tsx` from there, before it sets the
 `theme-color` meta tags from the palette's background; Standard goes
-without. Unlike the theme, neither the palette nor the text size is
-kept in the pod yet: each device has its own. The script takes any value of the form an id has (lowercase
+without. The script takes any value of the form an id has (lowercase
 letters and hyphens, at most 32), so a later palette needs no new
 script, and one this version does not have shows as Standard.
 
@@ -177,10 +204,11 @@ taken, and no file of theirs is copied:
 The text comes in four sizes: Default, the browser's own, then Large,
 Larger and Largest, at 112.5%, 125% and 150% of it. The user chooses
 under Text size in the study preferences, each size with a sample line
-at that size, and the choice takes effect at once. It is kept
-on the device, by the `TextSizePreference` port
+at that size, and the choice takes effect at once. It is kept in the
+instance's preferences and on the device, as the theme is: on the
+device by the `TextSizePreference` port
 ([localStorageTextSizePreference.ts](../packages/browser/src/localStorageTextSizePreference.ts),
-key `solid-memo:textSize`; Default is no key at all), and shown as
+key `solid-memo:textSize`; Default is no key at all). It is shown as
 `<html data-text-size>`: the script in `apps/web/index.html` sets it
 before the first paint, and `theme.tsx` from there; Default goes
 without. Each size sets the root's font size as a percentage, so the

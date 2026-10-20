@@ -339,48 +339,263 @@ describe("createUseCases", () => {
   });
 
   describe("palette", () => {
-    it("shows the chosen palette, and keeps a new choice on this device", () => {
-      let chosen: Palette = "high-contrast";
-      const palettePreference = {
+    const INSTANCE = "https://pod.example/solid-memo/main/";
+    const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+    /** A palette this version does not know: one of the user's own. */
+    const OWN_PALETTE = "https://pod.example/solid-memo/main/palettes.ttl#mine";
+
+    function devicePreference(initial: Palette = "standard") {
+      let chosen = initial;
+      return {
         chosen: () => chosen,
         choose: vi.fn((palette: Palette) => {
           chosen = palette;
         }),
       };
-      const useCases = createUseCases({ ...makeDeps(), palettePreference });
+    }
+
+    function stored(palette: string) {
+      return { preferences: { ...DEFAULT_PREFERENCES, palette }, formatVersion: 6 };
+    }
+
+    it("shows the chosen palette, and keeps a new choice on this device", async () => {
+      const palettePreference = devicePreference("high-contrast");
+      const deps = makeDeps();
+      const useCases = createUseCases({ ...deps, palettePreference });
       expect(useCases.paletteChoice()).toBe("high-contrast");
-      useCases.choosePalette("standard");
+      await useCases.choosePalette("standard", null);
       expect(palettePreference.choose).toHaveBeenCalledWith("standard");
+      expect(useCases.paletteChoice()).toBe("standard");
+      expect(deps.preferencesRepository.getPreferences).not.toHaveBeenCalled();
+    });
+
+    it("shows the standard palette when none is kept", async () => {
+      const useCases = createUseCases(makeDeps());
+      await useCases.choosePalette("high-contrast", null);
       expect(useCases.paletteChoice()).toBe("standard");
     });
 
-    it("shows the standard palette when none is kept", () => {
-      const useCases = createUseCases(makeDeps());
-      useCases.choosePalette("high-contrast");
+    it("reads an instance's palette, and keeps it on this device for the first paint", async () => {
+      const palettePreference = devicePreference();
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(
+        stored(`${SM}parchmentPalette`),
+      );
+      const useCases = createUseCases({ ...deps, palettePreference });
+      await expect(useCases.instancePalette(INSTANCE)).resolves.toBe("parchment");
+      expect(useCases.paletteChoice()).toBe("parchment");
+    });
+
+    it("shows an instance's palette this version does not know as Standard", async () => {
+      const palettePreference = devicePreference("high-contrast");
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(OWN_PALETTE));
+      const useCases = createUseCases({ ...deps, palettePreference });
+      await expect(useCases.instancePalette(INSTANCE)).resolves.toBe("standard");
       expect(useCases.paletteChoice()).toBe("standard");
+    });
+
+    it("has no instance palette before the instance's first preferences, and leaves the device's", async () => {
+      const palettePreference = devicePreference("parchment");
+      const useCases = createUseCases({ ...makeDeps(), palettePreference });
+      await expect(useCases.instancePalette(INSTANCE)).resolves.toBeNull();
+      expect(palettePreference.choose).not.toHaveBeenCalled();
+    });
+
+    it("keeps a choice in the instance's preferences once it has them", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(
+        stored(`${SM}standardPalette`),
+      );
+      const useCases = createUseCases(deps);
+      await useCases.choosePalette("color-vision", INSTANCE);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledExactlyOnceWith(INSTANCE, {
+        ...DEFAULT_PREFERENCES,
+        palette: `${SM}colorVisionPalette`,
+      });
+    });
+
+    it("writes nothing before the instance's first preferences, when they already say it, or for Standard over a palette this version does not know", async () => {
+      const deps = makeDeps();
+      const useCases = createUseCases(deps);
+      await useCases.choosePalette("parchment", INSTANCE);
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(
+        stored(`${SM}parchmentPalette`),
+      );
+      await useCases.choosePalette("parchment", INSTANCE);
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(OWN_PALETTE));
+      await useCases.choosePalette("standard", INSTANCE);
+      expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+    });
+
+    it("writes one choice after another, a theme's among them", async () => {
+      const deps = makeDeps();
+      let preferences = { ...DEFAULT_PREFERENCES };
+      vi.mocked(deps.preferencesRepository.getPreferences).mockImplementation(async () => ({
+        preferences,
+        formatVersion: 6,
+      }));
+      vi.mocked(deps.preferencesRepository.savePreferences).mockImplementation(async (_, saved) => {
+        preferences = saved;
+      });
+      const useCases = createUseCases(deps);
+      await Promise.all([
+        useCases.chooseTheme("dark", INSTANCE),
+        useCases.choosePalette("high-contrast", INSTANCE),
+        useCases.chooseTextSize("largest", INSTANCE),
+      ]);
+      expect(preferences).toEqual({
+        ...DEFAULT_PREFERENCES,
+        theme: "dark",
+        palette: `${SM}highContrastPalette`,
+        textSize: "largest",
+      });
+    });
+
+    it("keeps the palette of saved preferences on this device, and a stored one this version does not know while Standard is shown", async () => {
+      const palettePreference = devicePreference("parchment");
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(OWN_PALETTE));
+      const useCases = createUseCases({ ...deps, palettePreference });
+      await useCases.savePreferences(INSTANCE, {
+        ...DEFAULT_PREFERENCES,
+        palette: `${SM}standardPalette`,
+      });
+      expect(useCases.paletteChoice()).toBe("standard");
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
+        ...DEFAULT_PREFERENCES,
+        palette: OWN_PALETTE,
+      });
+      await useCases.savePreferences(INSTANCE, {
+        ...DEFAULT_PREFERENCES,
+        palette: `${SM}highContrastPalette`,
+      });
+      expect(useCases.paletteChoice()).toBe("high-contrast");
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
+        ...DEFAULT_PREFERENCES,
+        palette: `${SM}highContrastPalette`,
+      });
     });
   });
 
+  it("saves the preferences once a choice of how the app is shown is written, failed or not", async () => {
+    const INSTANCE = "https://pod.example/solid-memo/main/";
+    const deps = makeDeps();
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: DEFAULT_PREFERENCES,
+      formatVersion: 6,
+    });
+    let fail: (error: Error) => void = () => undefined;
+    vi.mocked(deps.preferencesRepository.savePreferences).mockImplementationOnce(
+      () => new Promise((_, reject) => (fail = reject)),
+    );
+    const useCases = createUseCases(deps);
+    const chosen = useCases.chooseTextSize("large", INSTANCE);
+    const saved = useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, newCardsPerDay: 9 });
+    await vi.waitFor(() =>
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledOnce(),
+    );
+    fail(new Error("412"));
+    await expect(chosen).rejects.toThrow("412");
+    await saved;
+    expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
+      ...DEFAULT_PREFERENCES,
+      newCardsPerDay: 9,
+    });
+  });
+
+  it("switches the scheduler and dismisses the invitation once a choice of how the app is shown is written", async () => {
+    const INSTANCE = "https://pod.example/solid-memo/main/";
+    const deps = makeDeps();
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: DEFAULT_PREFERENCES,
+      formatVersion: 6,
+    });
+    let written: () => void = () => undefined;
+    vi.mocked(deps.preferencesRepository.savePreferences).mockImplementationOnce(
+      () => new Promise<void>((resolve) => (written = resolve)),
+    );
+    const useCases = createUseCases(deps);
+    const chosen = useCases.chooseTextSize("large", INSTANCE);
+    const switched = useCases.switchScheduler(INSTANCE, DEFAULT_PREFERENCES);
+    const dismissed = useCases.dismissSchedulerInvitation(INSTANCE);
+    await vi.waitFor(() =>
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledOnce(),
+    );
+    // Neither has read the preferences it would save over before the choice is written.
+    expect(deps.preferencesRepository.getPreferences).toHaveBeenCalledOnce();
+    written();
+    await Promise.all([chosen, switched, dismissed]);
+    expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledTimes(3);
+  });
+
   describe("text size", () => {
-    it("shows the chosen size, and keeps a new choice on this device", () => {
-      let chosen: TextSize = "large";
-      const textSizePreference = {
+    const INSTANCE = "https://pod.example/solid-memo/main/";
+
+    function devicePreference(initial: TextSize = "default") {
+      let chosen = initial;
+      return {
         chosen: () => chosen,
         choose: vi.fn((size: TextSize) => {
           chosen = size;
         }),
       };
-      const useCases = createUseCases({ ...makeDeps(), textSizePreference });
+    }
+
+    function stored(textSize: TextSize) {
+      return { preferences: { ...DEFAULT_PREFERENCES, textSize }, formatVersion: 6 };
+    }
+
+    it("shows the chosen size, and keeps a new choice on this device", async () => {
+      const textSizePreference = devicePreference("large");
+      const deps = makeDeps();
+      const useCases = createUseCases({ ...deps, textSizePreference });
       expect(useCases.textSizeChoice()).toBe("large");
-      useCases.chooseTextSize("largest");
+      await useCases.chooseTextSize("largest", null);
       expect(textSizePreference.choose).toHaveBeenCalledWith("largest");
       expect(useCases.textSizeChoice()).toBe("largest");
+      expect(deps.preferencesRepository.getPreferences).not.toHaveBeenCalled();
     });
 
-    it("shows the browser's own size when none is kept", () => {
+    it("shows the browser's own size when none is kept", async () => {
       const useCases = createUseCases(makeDeps());
-      useCases.chooseTextSize("larger");
+      await useCases.chooseTextSize("larger", null);
       expect(useCases.textSizeChoice()).toBe("default");
+    });
+
+    it("reads an instance's text size, and keeps it on this device for the first paint", async () => {
+      const textSizePreference = devicePreference();
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored("larger"));
+      const useCases = createUseCases({ ...deps, textSizePreference });
+      await expect(useCases.instanceTextSize(INSTANCE)).resolves.toBe("larger");
+      expect(useCases.textSizeChoice()).toBe("larger");
+    });
+
+    it("has no instance text size before the instance's first preferences, and leaves the device's", async () => {
+      const textSizePreference = devicePreference("large");
+      const useCases = createUseCases({ ...makeDeps(), textSizePreference });
+      await expect(useCases.instanceTextSize(INSTANCE)).resolves.toBeNull();
+      expect(textSizePreference.choose).not.toHaveBeenCalled();
+    });
+
+    it("keeps a choice in the instance's preferences once it has them, and writes nothing when they already say it", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored("default"));
+      const useCases = createUseCases(deps);
+      await useCases.chooseTextSize("large", INSTANCE);
+      await useCases.chooseTextSize("default", INSTANCE);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledExactlyOnceWith(INSTANCE, {
+        ...DEFAULT_PREFERENCES,
+        textSize: "large",
+      });
+    });
+
+    it("keeps the text size of saved preferences on this device too", async () => {
+      const textSizePreference = devicePreference();
+      const useCases = createUseCases({ ...makeDeps(), textSizePreference });
+      await useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, textSize: "largest" });
+      expect(useCases.textSizeChoice()).toBe("largest");
     });
   });
 
@@ -1150,11 +1365,13 @@ describe("createUseCases", () => {
     });
   });
 
-  it("createInstance states new preferences, FSRS-6 with the theme this device shows", async () => {
+  it("createInstance states new preferences, FSRS-6 with the theme, the palette and the text size this device shows", async () => {
     const deps = makeDeps();
     const useCases = createUseCases({
       ...deps,
       themePreference: { chosen: () => "dark", choose: vi.fn() },
+      palettePreference: { chosen: () => "high-contrast", choose: vi.fn() },
+      textSizePreference: { chosen: () => "larger", choose: vi.fn() },
     });
     await useCases.createInstance(session, {
       containerUrl: "https://alice.example/solid-memo/main/",
@@ -1164,6 +1381,8 @@ describe("createUseCases", () => {
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, {
       ...NEW_INSTANCE_PREFERENCES,
       theme: "dark",
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#highContrastPalette",
+      textSize: "larger",
     });
     expect(NEW_INSTANCE_PREFERENCES.scheduler).toBe("fsrs6");
   });
@@ -1183,16 +1402,20 @@ describe("createUseCases", () => {
     });
   });
 
-  it("dismissSchedulerInvitation saves the defaults, SM-2's, with this device's theme when none are stored", async () => {
+  it("dismissSchedulerInvitation saves the defaults, SM-2's, with this device's appearance when none are stored", async () => {
     const deps = makeDeps();
     const useCases = createUseCases({
       ...deps,
       themePreference: { chosen: () => "dark", choose: vi.fn() },
+      palettePreference: { chosen: () => "parchment", choose: vi.fn() },
+      textSizePreference: { chosen: () => "large", choose: vi.fn() },
     });
     await useCases.dismissSchedulerInvitation(instance.url);
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, {
       ...DEFAULT_PREFERENCES,
       theme: "dark",
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#parchmentPalette",
+      textSize: "large",
       schedulerInvitationDismissed: true,
     });
   });
@@ -2004,7 +2227,7 @@ describe("createUseCases", () => {
       });
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
         preferences: DEFAULT_PREFERENCES,
-        formatVersion: 5,
+        formatVersion: 6,
       });
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([
         deck,
@@ -2736,6 +2959,8 @@ describe("createUseCases", () => {
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      textSize: "default" as const,
     });
   });
 
@@ -2782,6 +3007,8 @@ describe("createUseCases", () => {
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: DEFAULT_PREFERENCES.palette,
+      textSize: "default" as const,
     };
     vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
       preferences: stored,
@@ -2805,6 +3032,8 @@ describe("createUseCases", () => {
       scheduler: "sm2" as const,
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: DEFAULT_PREFERENCES.palette,
+      textSize: "default" as const,
     };
     await useCases.savePreferences(instance.url, preferences);
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
@@ -3183,6 +3412,8 @@ describe("createUseCases", () => {
           scheduler: "sm2" as const,
           desiredRetention: 0.9,
           schedulerInvitationDismissed: false,
+          palette: DEFAULT_PREFERENCES.palette,
+          textSize: "default" as const,
         },
         formatVersion: 2,
       });
@@ -4358,6 +4589,20 @@ describe("the answer log", () => {
       expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
         ...read,
         schedulerInvitationDismissed: true,
+      });
+    });
+
+    it("keeps a stored palette this version does not know through a switch that shows Standard", async () => {
+      const { deps, useCases } = setup();
+      const own = "https://pod.example/solid-memo/main/palettes.ttl#mine";
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+        preferences: { ...DEFAULT_PREFERENCES, palette: own },
+        formatVersion: 6,
+      });
+      await useCases.switchScheduler(instance.url, DEFAULT_PREFERENCES);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
+        ...DEFAULT_PREFERENCES,
+        palette: own,
       });
     });
   });

@@ -335,6 +335,22 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}schedulerInvitationDismissed`,
     message: "Preferences state whether the invitation to switch to FSRS-6 was dismissed",
   },
+  "preferences/v6/invalid/missing-palette.ttl": {
+    path: `${SM}palette`,
+    message: "Preferences state the palette",
+  },
+  "preferences/v6/invalid/palette-not-iri.ttl": {
+    path: `${SM}palette`,
+    message: "Preferences state the palette",
+  },
+  "preferences/v6/invalid/missing-text-size.ttl": {
+    path: `${SM}textSize`,
+    message: "Preferences state the text size",
+  },
+  "preferences/v6/invalid/unknown-text-size.ttl": {
+    path: `${SM}textSize`,
+    message: "Preferences state the text size",
+  },
   "deck/v3/invalid/pod-with-old-direction.ttl": {
     path: `${SM}direction`,
     message: "Format 3 states the study direction with solid-memo:studyDirection",

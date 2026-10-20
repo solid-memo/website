@@ -56,9 +56,12 @@ export function applyTextSize(size: TextSize) {
   else root.dataset.textSize = size;
 }
 
-/** The query key of an instance's theme, to refetch it after a write. */
-export function instanceThemeKey(instanceUrl: string) {
-  return ["instanceTheme", instanceUrl];
+/**
+ * The query key of how an instance's preferences show the app, its
+ * theme, palette and text size, to refetch them after a write.
+ */
+export function instanceAppearanceKey(instanceUrl: string) {
+  return ["instanceAppearance", instanceUrl];
 }
 
 interface ThemeState {
@@ -76,10 +79,14 @@ interface ThemeState {
   palette: Palette;
   /** Show the page in another palette from now on. */
   choosePalette(palette: Palette): void;
+  /** Show the palette an instance's preferences are shown in. */
+  adoptPalette(palette: Palette): void;
   /** The text size chosen. */
   textSize: TextSize;
   /** Show the text at another size from now on. */
   chooseTextSize(size: TextSize): void;
+  /** Show the text at the size an instance's preferences hold. */
+  adoptTextSize(size: TextSize): void;
 }
 
 /** What a theme state does with what it is not asked to keep. */
@@ -93,8 +100,10 @@ const ThemeContext = createContext<ThemeState>({
   adoptTheme: ignore,
   palette: DEFAULT_PALETTE,
   choosePalette: ignore,
+  adoptPalette: ignore,
   textSize: DEFAULT_TEXT_SIZE,
   chooseTextSize: ignore,
+  adoptTextSize: ignore,
 });
 
 /** The theme the screens below are shown in, and how to choose another. */
@@ -106,8 +115,10 @@ export function ThemeProvider({
   onAdopt = ignore,
   palette = DEFAULT_PALETTE,
   onChoosePalette = ignore,
+  onAdoptPalette = ignore,
   textSize = DEFAULT_TEXT_SIZE,
   onChooseTextSize = ignore,
+  onAdoptTextSize = ignore,
   children,
 }: {
   choice: ThemeChoice;
@@ -118,8 +129,10 @@ export function ThemeProvider({
   onAdopt?: (choice: ThemeChoice) => void;
   palette?: Palette;
   onChoosePalette?: (palette: Palette) => void;
+  onAdoptPalette?: (palette: Palette) => void;
   textSize?: TextSize;
   onChooseTextSize?: (size: TextSize) => void;
+  onAdoptTextSize?: (size: TextSize) => void;
   children: ComponentChildren;
 }) {
   return (
@@ -132,8 +145,10 @@ export function ThemeProvider({
         adoptTheme: onAdopt,
         palette,
         choosePalette: onChoosePalette,
+        adoptPalette: onAdoptPalette,
         textSize,
         chooseTextSize: onChooseTextSize,
+        adoptTextSize: onAdoptTextSize,
       }}
     >
       {children}
@@ -147,23 +162,42 @@ export function useTheme(): ThemeState {
 }
 
 /**
- * Ties the theme to the open instance: shows the choice its preferences
- * hold, and has a new choice kept there (once it has preferences).
+ * Ties the theme, the palette and the text size to the open instance:
+ * shows the choices its preferences hold, and has a new choice kept
+ * there (once it has preferences).
  */
 export function useInstanceTheme(useCases: UseCases, instanceUrl: string | null) {
-  const { followInstance, adoptTheme } = useTheme();
+  const { followInstance, adoptTheme, adoptPalette, adoptTextSize } = useTheme();
   // A layout effect, so the instance is let go of as the screen goes (Preact 11 runs a plain effect's cleanup a frame late).
   useLayoutEffect(() => {
     followInstance(instanceUrl);
     return () => followInstance(null);
   }, [instanceUrl]);
-  const query = useQuery({
-    queryKey: instanceThemeKey(instanceUrl ?? ""),
+  const key = instanceAppearanceKey(instanceUrl ?? "");
+  const enabled = instanceUrl !== null;
+  const theme = useQuery({
+    queryKey: [...key, "theme"],
     queryFn: () => useCases.instanceTheme(instanceUrl!),
-    enabled: instanceUrl !== null,
+    enabled,
+  });
+  const palette = useQuery({
+    queryKey: [...key, "palette"],
+    queryFn: () => useCases.instancePalette(instanceUrl!),
+    enabled,
+  });
+  const textSize = useQuery({
+    queryKey: [...key, "textSize"],
+    queryFn: () => useCases.instanceTextSize(instanceUrl!),
+    enabled,
   });
   // Every read counts, an unchanged one too: after a failed write it puts back what the pod holds.
   useEffect(() => {
-    if (query.data !== undefined && query.data !== null) adoptTheme(query.data);
-  }, [query.data, query.dataUpdatedAt]);
+    if (theme.data !== undefined && theme.data !== null) adoptTheme(theme.data);
+  }, [theme.data, theme.dataUpdatedAt]);
+  useEffect(() => {
+    if (palette.data !== undefined && palette.data !== null) adoptPalette(palette.data);
+  }, [palette.data, palette.dataUpdatedAt]);
+  useEffect(() => {
+    if (textSize.data !== undefined && textSize.data !== null) adoptTextSize(textSize.data);
+  }, [textSize.data, textSize.dataUpdatedAt]);
 }

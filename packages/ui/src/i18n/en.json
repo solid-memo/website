@@ -981,7 +981,7 @@
     "countIn": "{what} in {decks}",
     "instanceFormat": "instance format {version}",
     "catalogueFormat": "a catalog of each instance's decks, which other apps read as a DCAT catalog",
-    "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data, the theme and the scheduler",
+    "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data, the theme, the scheduler, the colors and the text size",
     "deckFormat": "deck format {version}, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state",
     "cardFormat": "card format {version}, which adds pictures on cards, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state and adds a label above a card's front",
     "reviewFormat": "review-state format {version}, which keeps each study direction's state and the day's undo snapshot",
@@ -1136,12 +1136,12 @@
     },
     "palette": {
       "legend": "Colors",
-      "hint": "Takes effect right away, in the light theme and the dark, and is kept on this device.",
+      "hint": "Takes effect right away, in the light theme and the dark. Once these preferences are saved it is kept in your Pod, as the theme is.",
       "moreContrast": "Your device asks for more contrast: High contrast may suit you."
     },
     "textSize": {
       "legend": "Text size",
-      "hint": "Takes effect right away, and is kept on this device. It enlarges your browser's own text size.",
+      "hint": "Takes effect right away, and enlarges your browser's own text size. Once these preferences are saved it is kept in your Pod, as the theme is.",
       "sample": "One card at a time, a little every day."
     },
     "heading": "Study preferences",

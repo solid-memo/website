@@ -331,8 +331,8 @@ of your answers, and nothing turns them off
 |---|---|
 | Language | The app's language. Kept on this device. |
 | Appearance | Light, dark, or as your browser says. Once saved, kept in your Pod, so every device looks the same ([theme.md](theme.md)). |
-| Colors | Standard, High contrast, Color-blind friendly or Parchment (low glare), each shown with a swatch in its own colors, in the light theme and the dark. When your device asks for more contrast, the preferences suggest High contrast. Takes effect right away, and is kept on this device ([theme.md](theme.md#palettes)). |
-| Text size | Default, Large, Larger or Largest: up to one and a half times your browser's own text size, which it multiplies. Each has a sample line at its size. Takes effect right away, and is kept on this device ([theme.md](theme.md#text-size)). |
+| Colors | Standard, High contrast, Color-blind friendly or Parchment (low glare), each shown with a swatch in its own colors, in the light theme and the dark. When your device asks for more contrast, the preferences suggest High contrast. Takes effect right away. Once saved, kept in your Pod, as the appearance is ([theme.md](theme.md#palettes)). |
+| Text size | Default, Large, Larger or Largest: up to one and a half times your browser's own text size, which it multiplies. Each has a sample line at its size. Takes effect right away. Once saved, kept in your Pod, as the appearance is ([theme.md](theme.md#text-size)). |
 | New cards per day | How many new cards a day brings, 5 to start with. Every new card comes back for reviews in the days after, so it is better to start small. |
 | Max reviews per day | A cap on the reviews of one day, 200 to start with. |
 | Day starts at | The hour a new study day begins, 4 in the morning to start with, so studying late at night still counts for that day. |
@@ -379,9 +379,9 @@ then press Save in the preferences. Log in on another device, and Solid
 Memo opens in dark there too, since the choice is kept in your Pod.
 
 Colors and Text size, under Appearance, change the palette and the
-size of the text, in light and in dark alike. For example: choose High
-contrast and Larger, and reload the page; Solid Memo still shows them,
-on this device.
+size of the text, in light and in dark alike, and are kept in your Pod
+as the theme is. For example: choose High contrast and Larger, then log
+in on another device; Solid Memo opens in them there too.
 
 ## More than one instance
 
@@ -469,7 +469,7 @@ screenshot of each.
 | Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
 | Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
 | A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |
-| The dark theme, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–04, 08–10 |
+| The dark theme, High contrast and Larger text, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–05, 08–11 |
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts | 21–23 |
 | Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |

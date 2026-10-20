@@ -347,6 +347,28 @@ which scheduler sets the due days:
   hash changed: every instance is checked in full once on its next
   opening.
 
+Preferences format 6 (vocabulary 1.22) keeps the colors and the text
+size in the pod, as format 4 keeps the theme ([theme.md](theme.md#where-the-choice-is-kept)):
+
+- **Preferences format 6** states `sm:palette`, any IRI, a concept of
+  `sm:Palettes` among them, and `sm:textSize`, a concept of
+  `sm:TextSizes`. The palette lists no concepts, so a later palette,
+  or one of the user's own, needs no format 7; a palette this version
+  does not know is shown as Standard and kept through a save. The step
+  from format 5 (`preferences/5-to-6`) fills in Standard and the
+  browser's text size, which is what every instance was shown in
+  before. The format update offers it, as it offered the theme.
+- **Why the version moved.** A published shape is never edited, so the
+  two terms need a new version, which is written from now on: this is
+  a breaking change. An older tab reads format-6 preferences with
+  format 5's shape, without the palette and the text size, and refuses
+  to save over them (`writtenByNewerApp`), so it cannot save the
+  preferences, the theme, or "Not now" to the invitation to FSRS-6
+  until it is reloaded.
+- **One full re-check.** A new shape file joined the rules, so the
+  rules' hash changed: every instance is checked in full once on its
+  next opening.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -402,6 +424,7 @@ flowchart LR
     p2 -->|preferences/2-to-3<br/>the default invalid data policy:<br/>set invalid data aside| p3["PreferencesV3"]
     p3 -->|preferences/3-to-4<br/>theme as the browser prefers| p4["PreferencesV4"]
     p4 -->|preferences/4-to-5<br/>SM-2, desired retention 0.9| p5["PreferencesV5"]
+    p5 -->|preferences/5-to-6<br/>Standard colors, the browser's text size| p6["PreferencesV6"]
     ds1["DeckScheduleV1"] -->|deckSchedule/1-to-2<br/>SM-2's due days| ds2["DeckScheduleV2"]
 ```
 

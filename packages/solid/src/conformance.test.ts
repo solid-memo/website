@@ -470,6 +470,20 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       desiredRetention: 0.85,
       schedulerInvitationDismissed: false,
     },
+    6: {
+      newCardsPerDay: 20,
+      maxReviewsPerDay: 200,
+      dayBoundaryHour: 4,
+      answerScale: "sm2",
+      developerMode: false,
+      invalidDataPolicy: `${SM_NS}warnOnly`,
+      theme: `${SM_NS}darkTheme`,
+      scheduler: `${SM_NS}fsrs6`,
+      desiredRetention: 0.85,
+      schedulerInvitationDismissed: true,
+      palette: `${SM_NS}highContrastPalette`,
+      textSize: `${SM_NS}largerTextSize`,
+    },
   },
   documentReceipt: {
     1: {
