@@ -418,7 +418,9 @@ on with [axe](https://github.com/dequelabs/axe-core), in the light and
 the dark theme, against WCAG 2.0, 2.1 and 2.2 at levels A and AA
 (`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)),
 in a step of its own, "Accessibility", within the journey's step, so the
-report shows how long the check took. A violation fails the journey, which goes on to its end so that every
+report shows how long the check took. Chromium and the phone run it;
+desktop Firefox and WebKit leave it out, as their projects' metadata
+says (`accessibility: false`, [accessibility.md](accessibility.md)). A violation fails the journey, which goes on to its end so that every
 screen is checked. A violation let pass is listed in that file's
 `KNOWN_EXCEPTIONS`, with its reason. The Solid server's own pages, its
 login, are not checked. What the app aims for, and what else is

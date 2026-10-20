@@ -134,7 +134,9 @@ export class App {
    * cards per day to 1"): a group in the report and the trace, with a
    * screenshot of where it left the app, and that screen checked for
    * accessibility, in a step of its own, "Accessibility", so the report
-   * says how long the check took apart from the step's own work.
+   * says how long the check took apart from the step's own work. A
+   * project whose metadata says `accessibility: false` leaves the check
+   * out (playwright.config.ts).
    */
   async step(title: string, body: () => Promise<void>): Promise<void> {
     await test.step(title, async () => {
@@ -145,7 +147,9 @@ export class App {
         body: await this.page.screenshot(),
         contentType: "image/png",
       });
-      await test.step("Accessibility", () => this.checkAccessibility(title));
+      if (this.testInfo.project.metadata.accessibility !== false) {
+        await test.step("Accessibility", () => this.checkAccessibility(title));
+      }
     });
   }
 

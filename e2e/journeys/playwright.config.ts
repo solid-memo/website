@@ -64,10 +64,24 @@ export default defineConfig({
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },
+  // Axe checks each step's screen in Chromium and on the phone, which is
+  // WebKit too; desktop Firefox and WebKit leave it out
+  // (docs/accessibility.md): it takes about 40% of a journey's time, and
+  // the same screens are checked in Chromium.
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] }, grep: ENGINE_JOURNEYS },
-    { name: "webkit", use: { ...devices["Desktop Safari"] }, grep: ENGINE_JOURNEYS },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+      grep: ENGINE_JOURNEYS,
+      metadata: { accessibility: false },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+      grep: ENGINE_JOURNEYS,
+      metadata: { accessibility: false },
+    },
     // Safari on an iPhone: a phone's viewport, touch, and WebKit.
     { name: "phone", use: { ...devices["iPhone 14"] }, grep: ENGINE_JOURNEYS },
   ],
