@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [4.1.2](https://github.com/solid-memo/website/compare/v4.1.1...v4.1.2) (2026-10-20)
+
+### Bug Fixes
+
+* **ui:** take the landing page's logo back to the first step ([7ebfcca](https://github.com/solid-memo/website/commit/7ebfccacae755f59750f8cad1dc7ba74ce6d7d8d)), closes [#205](https://github.com/solid-memo/website/issues/205)
+
 ## [4.1.1](https://github.com/solid-memo/website/compare/v4.1.0...v4.1.1) (2026-10-20)
 
 ### Bug Fixes
