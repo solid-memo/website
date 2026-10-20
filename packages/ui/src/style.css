@@ -16,6 +16,13 @@
   --radius: 12px;
   --radius-lg: 18px;
 
+  /*
+   * How much larger than the browser's own the text is: 1 here. What is
+   * sized by the window (vw) rather than in rem is multiplied by it, so
+   * it grows with the rest of the text.
+   */
+  --text-scale: 1;
+
   --font-mono:
     ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas", "Liberation Mono",
     monospace;
@@ -1707,21 +1714,21 @@ html.drag-active {
   background: var(--primary);
 }
 
+/* The group's name wraps above the line rather than being cut short,
+   however large the text. */
 .drop-line[data-label]::after {
   content: attr(data-label);
   position: absolute;
   inset-inline-end: 0;
   bottom: 5px;
   max-width: 80%;
-  overflow: hidden;
   padding: 0 0.45rem;
   border-radius: var(--radius-sm);
   background: var(--primary);
   color: var(--on-primary);
   font-size: 0.75rem;
   line-height: 1.5;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* While a row is lifted, each open group ends in room enough to aim
@@ -2367,7 +2374,7 @@ form.card-edit {
   /* Full size up to 12 characters, then a little smaller per character, down
      to 0.6 of it at 52; never under 1.5rem, so it stays above the answer. */
   --fit: clamp(0.6, 1 - (var(--text-length, 0) - 12) / 100, 1);
-  font-size: max(1.5rem, clamp(2rem, 9vw, 3.25rem) * var(--fit));
+  font-size: max(1.5rem, clamp(2rem, 9vw * var(--text-scale), 3.25rem) * var(--fit));
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -2379,7 +2386,7 @@ form.card-edit {
 }
 
 .card-answer > p {
-  font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+  font-size: clamp(1.4rem, 5.5vw * var(--text-scale), 1.8rem);
 }
 
 .card-face > p.hint {
@@ -2605,7 +2612,7 @@ form.card-edit {
   margin: 0;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 30rem) {
   .quality-buttons.minimal {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -4231,8 +4238,7 @@ p[role="status"]:not(.loading) {
   flex: 1;
   min-width: 0;
   text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* The answer buttons pressed: a bar a kind of answer, its name beside

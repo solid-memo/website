@@ -108,6 +108,32 @@ Some colors stay fixed on purpose, whatever the palette:
 - forced colors (Windows High Contrast and the like), whose rules
   draw with the system's colors over every palette.
 
+## Text size
+
+The text is sized in `rem`, its line heights without a unit and its
+letter spacing in `em`, so the root's font size scales nearly all of
+it: the browser's own text size does today, and a text size the user
+chooses can set the root's font size the same way. What does not
+follow the root's font size is kept to a few places, and made to:
+
+- **What the window sizes**: the card's question and answer are sized
+  by the window's width (`vw`), within bounds in `rem`. The `vw` term
+  is multiplied by `--text-scale`, 1 by default, which a larger text
+  size raises.
+- **Breakpoints** are in `rem`. A media query reads `rem` as the
+  browser's own font size, not the root's, so a breakpoint follows the
+  browser's text size but not the page's.
+- **Text that could be cut short** wraps instead: the name of the
+  group a dragged deck would land in, a bar chart's names under its
+  bars, and the Studio's instance switcher. Who is signed in, which the
+  Studio's header still cuts short to keep it one row, has the whole
+  line as its title.
+
+`style.test.ts` and `studio.test.ts` fail on a font size in `px` other
+than the focus proxy's 16px (with less, a phone would zoom the page as
+the proxy takes the focus), on a breakpoint in `px`, and on a `vw` font
+size without `--text-scale`.
+
 ## Korean text
 
 Korean, on a Korean page or in card text marked `lang="ko"` on another,

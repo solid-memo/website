@@ -386,6 +386,15 @@ describe("the Studio's contrast", () => {
       (m) => m[1]!,
     );
 
+  // Larger text scales what is in rem (docs/theme.md, Text size), not what is in px.
+  it("sizes no text in px or by the window alone, and breaks no layout at a width in px", () => {
+    expect(sheet).not.toMatch(/(?:^|[;\s{])font-size:[^;]*\dpx/);
+    expect(sheet).not.toMatch(/(?:^|[;\s{])font-size:[^;]*\dvw(?! \* var\(--text-scale\))/);
+    const queries = [...sheet.matchAll(/@media([^{]*)\{/g)].map((m) => m[1]!.trim());
+    expect(queries.length).toBeGreaterThan(0);
+    for (const query of queries) expect(query).not.toMatch(/\dpx/);
+  });
+
   it("writes out no color of its own", () => {
     expect(literalColors(sheet)).toEqual([]);
   });

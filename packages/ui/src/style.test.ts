@@ -13,6 +13,7 @@ import {
   over,
   paletteBlocks,
   type PaletteBlock,
+  uncommented,
 } from "@solid-memo/domain/testing/contrast";
 
 const read = (name: string) => readFileSync(join(import.meta.dirname, name), "utf8");
@@ -355,6 +356,47 @@ describe("reflow", () => {
 const BLOCKS = paletteBlocks(PALETTES);
 /** Standard's light block, whose roles every block sets. */
 const STANDARD = BLOCKS[0]!;
+
+/*
+ * Larger text (docs/theme.md, Text size): the text is sized in rem, so
+ * the root's font size scales it all, and what the window sizes (vw)
+ * grows with --text-scale. A font size in px would stay as it is, and a
+ * breakpoint in px would not follow the browser's own text size.
+ */
+describe("text size", () => {
+  const css = uncommented(read("style.css"));
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
+    selector: m[1]!.replace(/\s+/g, " ").trim(),
+    body: m[2]!,
+  }));
+
+  it("sizes no text in px but the focus proxy's, which must be 16px", () => {
+    expect(
+      rules
+        .filter(({ body }) => /(?:^|[;\s])font-size:[^;]*\dpx/.test(body))
+        .map(({ selector }) => selector),
+    ).toEqual([".focus-proxy"]);
+  });
+
+  it("breaks no layout at a width in px", () => {
+    const queries = [...css.matchAll(/@media([^{]*)\{/g)].map((m) => m[1]!.trim());
+    expect(queries.length).toBeGreaterThan(0);
+    for (const query of queries) expect(query).not.toMatch(/\dpx/);
+  });
+
+  it("grows the text the window sizes with --text-scale, 1 by default", () => {
+    expect(getComputedStyle(document.documentElement).getPropertyValue("--text-scale").trim()).toBe(
+      "1",
+    );
+    const sized = rules.flatMap(({ body }) =>
+      [...body.matchAll(/(?:^|[;\s])font-size:([^;]*vw[^;]*)/g)].map((m) => m[1]!.trim()),
+    );
+    expect(sized.length).toBeGreaterThan(0);
+    for (const value of sized)
+      for (const term of value.match(/[\d.]+vw(?: \* var\(--text-scale\))?/g)!)
+        expect(term).toMatch(/\* var\(--text-scale\)$/);
+  });
+});
 
 describe("palettes", () => {
   it("starts with Standard, light then dark, and gives every palette both", () => {

@@ -420,10 +420,20 @@ function AppContent({
             <span class="wordmark">{t(identity.name)}</span>
           </a>
         </h1>
+        {/* Its title the whole line, once it is known, for where it is cut short (the Studio's header). */}
         {session.guest === true ? (
-          <p class="session-line">{t("app.guestLine")}</p>
+          <p class="session-line" title={t("app.guestLine")}>
+            {t("app.guestLine")}
+          </p>
         ) : (
-          <p class="session-line">
+          <p
+            class="session-line"
+            title={
+              accountQuery.data?.name === undefined
+                ? undefined
+                : t("app.loggedInAs", { name: accountQuery.data.name })
+            }
+          >
             {tx("app.loggedInAs", {
               name: <ExternalLink url={session.webId}>{accountQuery.data?.name}</ExternalLink>,
             })}

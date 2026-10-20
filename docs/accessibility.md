@@ -67,6 +67,9 @@ but the journeys:
   text color the Studio's stylesheet uses on every surface it uses, in
   both themes, the surfaces that hold no text left out by name
   ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)).
+- **Text size**: unit tests fail on a font size or a breakpoint in
+  pixels, which larger text would leave as they are
+  ([theme.md](theme.md#text-size)).
 - **Names and roles**: the journeys and the component tests find
   elements by their role and accessible name, as assistive technology
   does, so a button that loses its name fails a test

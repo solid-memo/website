@@ -635,6 +635,8 @@ describe("AppShell", () => {
       fireEvent.click(screen.getByRole("button", { name: "Continue" }));
       expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
       expect(screen.getByText(/Logged in as/)).toHaveTextContent("Logged in as Alice");
+      // Whole in its title, where the Studio's header cuts it short.
+      expect(screen.getByText(/Logged in as/)).toHaveAttribute("title", "Logged in as Alice");
       expect(screen.getByRole("link", { name: "Alice (opens in a new tab)" })).toHaveAttribute(
         "href",
         session.webId,
@@ -738,7 +740,10 @@ describe("AppShell", () => {
       const useCases = makeUseCases();
       renderApp(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Try it without logging in" }));
-      expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toBeInTheDocument();
+      expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toHaveAttribute(
+        "title",
+        expect.stringMatching(/^You are trying Solid Memo as a guest/),
+      );
       expect(useCases.startGuest).toHaveBeenCalledWith("My study");
       expect(screen.queryByRole("button", { name: "Log out" })).toBeNull();
       expect(useCases.findGuestStudy).not.toHaveBeenCalled();
