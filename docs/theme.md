@@ -55,8 +55,9 @@ it does for the reader, and each in the light theme and in the dark:
 | Palette | Id | What it does |
 |---|---|---|
 | Standard | `standard` | The app's own colors, the answer buttons from red (Again) to green (Easy). |
-| Color-blind friendly | `color-vision` | Standard's surfaces, with meaning moved off red and green: blue for the primary color and links, orange for warnings, vermilion for danger, and the answer buttons from vermilion through orange, yellow and sky blue to blue. |
 | High contrast | `high-contrast` | Black on white, or white on black: text at 7:1 or more, fields' edges at 4.5:1 or more, no page discs or glint, edges in place of soft shadows, and a solid focus ring. |
+| Color-blind friendly | `color-vision` | Standard's surfaces, with meaning moved off red and green: blue for the primary color and links, orange for warnings, vermilion for danger, and the answer buttons from vermilion through orange, yellow and sky blue to blue. |
+| Parchment (low glare) | `parchment` | Warm surfaces darker than white in the light theme, warm browns in the dark, for readers whom a bright page dazzles, the dimmer text raised to 4.5:1. |
 
 The choice is kept on the device, by the `PalettePreference` port
 ([localStoragePalettePreference.ts](../packages/browser/src/localStoragePalettePreference.ts),
@@ -152,6 +153,12 @@ taken, and no file of theirs is copied:
   Design, [Color Universal Design](https://jfly.uni-koeln.de/color/),
   darkened where they are text. The palette is not certified, and
   does not carry the CUD mark.
+- **Parchment**: the surfaces, the text and the accents are derived
+  from Jan Warchoł's [Selenized](https://github.com/jan-warchol/selenized),
+  under the MIT license (copyright 2021 Jan Warchoł), which
+  `palettes.css` credits in its header; its dim text is darkened to
+  4.5:1, and the dark theme's surfaces are warm browns of ours in
+  place of Selenized's teal.
 - **High contrast**: the blue, yellow and red accents (`#004488`,
   `#ddaa33`, `#bb5566`) are Paul Tol's high-contrast scheme, from his
   technical note SRON/EPS/TN/09-002 and

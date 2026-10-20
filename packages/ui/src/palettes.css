@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+ * SPDX-FileCopyrightText: 2021 Jan Warchoł
  *
  * SPDX-License-Identifier: MIT
  */
@@ -462,6 +463,158 @@
   --masthead-link-hover-border: #8d96a2;
   --masthead-button-text: #16202a;
   --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: var(--masthead-blue);
+  --toggle-bg: var(--masthead-bg);
+  --toggle-edge: var(--masthead-border);
+  --toggle-hover-edge: var(--masthead-blue);
+
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow: 0 1px 2px #0000004d, 0 10px 28px -14px #00000099;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #000000e0;
+}
+
+/*
+ * Parchment (low glare), light: warm surfaces darker than white, and
+ * text in a dark slate, raised where Selenized's dimmer text is under
+ * 4.5:1. Its surfaces, text and accents are derived from Jan Warchoł's
+ * Selenized (docs/theme.md, Palette sources).
+ */
+:root[data-palette="parchment"] {
+  --bg: #ece3cc;
+  --surface: #fbf3db;
+  --surface-sunken: #f4ebd3;
+  --surface-hover: #e4dbc2;
+  --text: #2c3d43;
+  --text-muted: #43555b;
+  --border: #d5cdb6;
+  --border-strong: #bdb49b;
+  --control-border: #7d745e;
+
+  --primary: #3b6600;
+  --primary-fill: #3b6600;
+  --primary-hover: #2e5000;
+  --primary-soft: #e0e3c4;
+  --on-primary: #fbf3db;
+  --primary-bevel: inset 0 1px 0 #fbf3db2e, 0 1px 2px #2c3d4333;
+  --link: #376000;
+  --link-hover-bg: #dcd3ba;
+  --link-hover-border: #909995;
+
+  --accent-blue: #b2c6d2;
+  --accent-yellow: #ad8900;
+  --accent-red: #d2212d;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ad1a25;
+  --danger-soft: #f5e2cc;
+  --danger-border: #e2b4a2;
+  --warning-text: #6e5600;
+  --warning-soft: #f3e7c2;
+  --warning-border: #d6bf75;
+
+  --grade-0: #d2212d;
+  --grade-1: #c25d1e;
+  --grade-2: #b8750f;
+  --grade-3: #ad8900;
+  --grade-4: #7b8f00;
+  --grade-5: #489100;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #b2c6d266;
+  --paper-yellow: #ad89001f;
+  --shine: #fbf3db8c;
+
+  --masthead-bg: #2c3d43;
+  --masthead-text: #fbf3db;
+  --masthead-border: transparent;
+  --masthead-blue: #8fb0c4;
+  --masthead-link-hover-bg: #4a5c62;
+  --masthead-link-hover-border: #909995;
+  --masthead-button-text: #2c3d43;
+  --masthead-button-hover: #fffaeb;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
+  --toggle-bg: var(--paper-yellow);
+  --toggle-edge: var(--border-strong);
+  --toggle-hover-edge: var(--accent-yellow);
+
+  --shadow-sm: 0 1px 2px #2c3d430f;
+  --shadow: 0 1px 2px #2c3d430d, 0 8px 24px -12px #2c3d432e;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #2c3d43d9;
+}
+
+/*
+ * Parchment (low glare), dark: warm brown surfaces under parchment
+ * text, with Selenized's dark accents and light fills under dark text.
+ */
+:root[data-palette="parchment"][data-theme="dark"] {
+  --bg: #1d1a15;
+  --surface: #26221b;
+  --surface-sunken: #221e18;
+  --surface-hover: #312c23;
+  --text: #ece3cc;
+  --text-muted: #c2b9a3;
+  --border: #3b3529;
+  --border-strong: #4d4535;
+  --control-border: #857b66;
+
+  --primary: #84c747;
+  --primary-fill: #84c747;
+  --primary-hover: #97d35f;
+  --primary-soft: #28311b;
+  --on-primary: #1d1a15;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #00000033;
+  --link: #9bd466;
+  --link-hover-bg: #403a2e;
+  --link-hover-border: #8f8571;
+
+  --accent-blue: #4695f7;
+  --accent-yellow: #dbb32d;
+  --accent-red: #fa5750;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ff7b6e;
+  --danger-soft: #3a201a;
+  --danger-border: #6b3028;
+  --warning-text: #e3bf45;
+  --warning-soft: #33290f;
+  --warning-border: #5e4b17;
+
+  --grade-0: #fa5750;
+  --grade-1: #ed8649;
+  --grade-2: #e39d3a;
+  --grade-3: #dbb32d;
+  --grade-4: #a8b934;
+  --grade-5: #75b938;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #4695f70d;
+  --paper-yellow: #dbb32d0a;
+  --shine: #ece3cc14;
+
+  --masthead-bg: #2b261e;
+  --masthead-text: #ece3cc;
+  --masthead-border: #3b3529;
+  --masthead-blue: #5f88aa;
+  --masthead-link-hover-bg: #4a4234;
+  --masthead-link-hover-border: #8f8571;
+  --masthead-button-text: #1d1a15;
+  --masthead-button-hover: #fbf3db;
   --masthead-button-shadow: 0 1px 3px #0000004d;
   --logo-shadow: 0 3px 10px #00000059;
 
