@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [4.2.0](https://github.com/solid-memo/website/compare/v4.1.3...v4.2.0) (2026-10-20)
+
+### Features
+
+* **ui:** shrink a card's question text as it gets longer ([31c5bfb](https://github.com/solid-memo/website/commit/31c5bfbae18630acc355092fe65e9269e1fae484)), closes [#209](https://github.com/solid-memo/website/issues/209)
+
 ## [4.1.3](https://github.com/solid-memo/website/compare/v4.1.2...v4.1.3) (2026-10-20)
 
 ### Bug Fixes
