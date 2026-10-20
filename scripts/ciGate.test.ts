@@ -93,20 +93,13 @@ describe("decide", () => {
   });
 
   it("runs every job on main when the queue run's journeys' blobs have expired", async () => {
-    const kept = vi.fn(async (_run: number, blob: string) => blob === "journeys-blob-chromium");
+    const kept = vi.fn(async () => false);
     const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept });
     expect(await decide(io)).toEqual({
       jobs: "all",
-      why: "aaaaaaaa passed the merge queue in run 9, but its journeys-blob-engines expired: every job runs, so the journeys' report is whole.",
+      why: "aaaaaaaa passed the merge queue in run 9, but it keeps no journeys-blob-* blobs, or they expired: every job runs, so the journeys' report is whole.",
     });
-    expect(kept.mock.calls).toEqual(JOURNEYS_BLOBS.map((blob) => [9, blob]));
-  });
-
-  it("names every blob that expired", async () => {
-    const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept: async () => false });
-    expect((await decide(io)).why).toContain(
-      "journeys-blob-chromium and journeys-blob-engines expired",
-    );
+    expect(kept).toHaveBeenCalledWith(9, JOURNEYS_BLOBS);
   });
 
   it("runs every job on main when the commit skipped the merge queue", async () => {
@@ -235,19 +228,26 @@ describe("defaultIo", () => {
     expect(init.headers).toMatchObject({ authorization: "Bearer t" });
   });
 
-  it("asks GitHub whether a run keeps an artifact, expired ones aside", async () => {
+  it("asks GitHub whether a run keeps its artifacts of a prefix, none expired", async () => {
+    const blob = (name: string, expired = false) => ({ name, expired });
     const answers = [
-      { artifacts: [{ expired: true }, { expired: false }] },
-      { artifacts: [{ expired: true }] },
-      { artifacts: [] },
+      {
+        artifacts: [
+          blob("journeys-blob-chromium-1"),
+          blob("journeys-blob-engines-2"),
+          blob("x", true),
+        ],
+      },
+      { artifacts: [blob("journeys-blob-chromium-1"), blob("journeys-blob-engines-2", true)] },
+      { artifacts: [blob("journeys-report")] },
     ];
     const fetch = vi.fn(async () => Response.json(answers.shift()));
     const io = defaultIo(repo, { GITHUB_REPOSITORY: "owner/repo" }, fetch);
-    expect(await io.kept(9, "journeys-blob-engines")).toBe(true);
-    expect(await io.kept(9, "journeys-blob-engines")).toBe(false);
-    expect(await io.kept(9, "journeys-blob-engines")).toBe(false);
+    expect(await io.kept(9, "journeys-blob-")).toBe(true);
+    expect(await io.kept(9, "journeys-blob-")).toBe(false);
+    expect(await io.kept(9, "journeys-blob-")).toBe(false);
     expect(String((fetch.mock.calls[0] as unknown as [URL])[0])).toBe(
-      "https://api.github.com/repos/owner/repo/actions/runs/9/artifacts?name=journeys-blob-engines",
+      "https://api.github.com/repos/owner/repo/actions/runs/9/artifacts?per_page=100",
     );
   });
 

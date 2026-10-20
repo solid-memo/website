@@ -47,8 +47,11 @@ export type Gate =
   | { jobs: "deterministic"; testedBy: number; why: string };
 
 const MAIN = "refs/heads/main";
-/** The journeys jobs' blobs, which main's report takes from the run that ran them. */
-export const JOURNEYS_BLOBS = ["journeys-blob-chromium", "journeys-blob-engines"];
+/**
+ * What the journeys jobs' blobs are named by (journeys-blob-<browsers>-<shard>),
+ * which main's report takes from the run that ran them.
+ */
+export const JOURNEYS_BLOBS = "journeys-blob-";
 const RELEASE = "chore(release): ";
 
 /** Whether a commit is a release commit, as ci.yml's concurrency group tells them apart. */
@@ -72,22 +75,20 @@ export interface GateIo {
   changed(sha: string): string[];
   /** The id of a CI run for `event` that passed on the commit, if there is one. */
   passed(sha: string, event: "merge_group" | "push"): Promise<number | undefined>;
-  /** Whether a run still has an artifact of that name, not expired. */
-  kept(run: number, artifact: string): Promise<boolean>;
+  /** Whether a run has artifacts named with that prefix, and none of them expired. */
+  kept(run: number, prefix: string): Promise<boolean>;
   output(name: string, value: string): void;
   log(message: string): void;
 }
 
 /** The deterministic jobs, the others having run in `testedBy`, while it keeps its journeys' blobs. */
 async function testedIn(io: GateIo, testedBy: number, why: string): Promise<Gate> {
-  const gone = [];
-  for (const blob of JOURNEYS_BLOBS) if (!(await io.kept(testedBy, blob))) gone.push(blob);
-  if (gone.length === 0) {
+  if (await io.kept(testedBy, JOURNEYS_BLOBS)) {
     return { jobs: "deterministic", testedBy, why: `${why}: the deterministic jobs run.` };
   }
   return {
     jobs: "all",
-    why: `${why}, but its ${gone.join(" and ")} expired: every job runs, so the journeys' report is whole.`,
+    why: `${why}, but it keeps no ${JOURNEYS_BLOBS}* blobs, or they expired: every job runs, so the journeys' report is whole.`,
   };
 }
 
@@ -203,12 +204,13 @@ export function defaultIo(repo: string, env: GateEnv, fetch: typeof globalThis.f
           per_page: "1",
         })) as { workflow_runs: { id: number }[] }
       ).workflow_runs[0]?.id,
-    kept: async (run, artifact) =>
-      (
-        (await api(`actions/runs/${run}/artifacts`, { name: artifact })) as {
-          artifacts: { expired: boolean }[];
-        }
-      ).artifacts.some(({ expired }) => !expired),
+    kept: async (run, prefix) => {
+      const { artifacts } = (await api(`actions/runs/${run}/artifacts`, { per_page: "100" })) as {
+        artifacts: { name: string; expired: boolean }[];
+      };
+      const named = artifacts.filter(({ name }) => name.startsWith(prefix));
+      return named.length > 0 && named.every(({ expired }) => !expired);
+    },
     output: (name, value) => {
       if (env.GITHUB_OUTPUT !== undefined) appendFileSync(env.GITHUB_OUTPUT, `${name}=${value}\n`);
     },

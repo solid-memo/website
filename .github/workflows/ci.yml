@@ -367,10 +367,13 @@ jobs:
   # The user journeys (e2e/journeys, docs/testing.md): the built app in
   # Chromium, logging in to a Community Solid Server 7 behind TLS that the
   # harness starts in Docker, each journey with an account and pod of its
-  # own. The other engines and the phone run a few of them, in a job of
-  # their own so neither job takes longer than one did
-  # (docs/testing.md#browsers). When one fails, the job's summary names the
-  # step it failed in, and its artifact holds the trace to replay it step
+  # own. The other engines and the phone run a few of them
+  # (docs/testing.md#browsers). Each browser's journeys are split in
+  # SHARDS jobs (npx playwright --shard), side by side, so the run waits
+  # for one shard's share of them, not for all: each shard pays the
+  # setup again (about a minute), for a shorter wall time. When one
+  # fails, the job's summary names the step it failed in, and its
+  # artifact holds the trace to replay it step
   # by step (`npx playwright show-trace`), the report, a video, and the
   # server's log. On main and in the merge queue the traces are kept
   # always, and each job keeps its run as a blob, for journeys-report to
@@ -380,7 +383,7 @@ jobs:
   # on a shared runner. Their waits are fixed where they flake, not
   # retried (retries: 0, playwright.config.ts).
   journeys:
-    name: journeys (${{ matrix.name }})
+    name: journeys (${{ matrix.name }}, ${{ matrix.shard }}/2)
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
@@ -388,6 +391,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        name: [chromium, engines]
+        # 1 to SHARDS, which journeys-report's env and the name above
+        # repeat.
+        shard: [1, 2]
         include:
           - name: chromium
             projects: --project=chromium
@@ -400,8 +407,9 @@ jobs:
       JOURNEY_TRACE: >-
         ${{ (inputs.trace || github.ref == 'refs/heads/main' ||
         github.event_name == 'merge_group') && 'on' || '' }}
-      # The blob's name, so the two jobs' blobs sit side by side when merged.
-      PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.name }}.zip
+      SHARDS: 2
+      # The blob's name, so the jobs' blobs sit side by side when merged.
+      PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.name }}-${{ matrix.shard }}.zip
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -439,14 +447,14 @@ jobs:
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
-      - run: npm run journeys -- ${{ matrix.projects }}
+      - run: npm run journeys -- ${{ matrix.projects }} --shard="${{ matrix.shard }}/$SHARDS"
       - if: always()
-        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ github.run_attempt }}
+        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ matrix.shard }}-${{ github.run_attempt }}
       # In the queue, the blob below holds the traces; this, only on a failure.
       - if: failure() || (env.JOURNEY_TRACE == 'on' && github.event_name != 'merge_group')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-${{ matrix.name }}-${{ github.run_attempt }}
+          name: journeys-${{ matrix.name }}-${{ matrix.shard }}-${{ github.run_attempt }}
           path: |
             e2e/journeys/playwright-report/
             e2e/journeys/test-results/
@@ -458,21 +466,21 @@ jobs:
       - if: always() && (github.ref == 'refs/heads/main' || github.event_name == 'merge_group')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-blob-${{ matrix.name }}
+          name: journeys-blob-${{ matrix.name }}-${{ matrix.shard }}
           path: e2e/journeys/blob-report/
           retention-days: 7
           overwrite: true
 
-  # On main, the two journeys jobs' runs merged into one report, every
+  # On main, the journeys jobs' runs merged into one report, every
   # browser's journeys and their traces in it, even when a journey failed:
   # the deploy publishes it at /journeys/ (docs/deployment.md). When this
   # run skipped the journeys, their blobs come from the run gate names,
   # which ran them on this tree: the merge queue's, or a release commit's
-  # parent's. When the journeys passed, or ran there, both blobs must be
-  # there, so a run the deploy may publish never has a report missing a
-  # browser. ci-ok
-  # doesn't need it, as it runs on main alone; its failure still fails the
-  # run, and so holds back release and deploy. Deterministic.
+  # parent's. When the journeys passed, or ran there, every shard's blob
+  # must be there, so a run the deploy may publish never has a report
+  # missing a browser. ci-ok doesn't need it, as it runs on main alone;
+  # its failure still fails the run, and so holds back release and
+  # deploy. Deterministic.
   journeys-report:
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     needs: [gate, journeys]
@@ -509,10 +517,15 @@ jobs:
         env:
           JOURNEYS: ${{ needs.journeys.result }}
           JOBS: ${{ needs.gate.outputs.jobs }}
+          # As journeys' matrix has them.
+          SHARDS: 2
         run: |
           if [ "$JOURNEYS" = success ] || [ "$JOBS" = deterministic ]; then
-            test -f blob-reports/report-chromium.zip
-            test -f blob-reports/report-engines.zip
+            for name in chromium engines; do
+              for shard in $(seq "$SHARDS"); do
+                test -f "blob-reports/report-$name-$shard.zip"
+              done
+            done
           fi
           if compgen -G 'blob-reports/*.zip' > /dev/null; then
             npx playwright merge-reports --reporter html blob-reports
