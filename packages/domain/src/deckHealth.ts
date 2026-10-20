@@ -18,7 +18,7 @@ import type { FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
 import { reviewKeyOf } from "./reviewRecord";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
-import { summarize, type ValidationReport } from "./validation";
+import { summarize, withUnclaimed, type ValidationReport } from "./validation";
 
 /**
  * Everything wrong with one deck, for the Studio's health screen
@@ -111,7 +111,10 @@ export function deckReport(report: ValidationReport, deck: Deck): ValidationRepo
         ? [document]
         : [],
   );
-  return summarize(report.instanceUrl, documents);
+  return withUnclaimed(
+    summarize(report.instanceUrl, documents),
+    (report.unclaimed ?? []).filter((one) => one.deckUrl === deck.url),
+  );
 }
 
 /** The deck's subjects in the catalog: its entry, its distribution and its authors' agent nodes. */
@@ -155,10 +158,16 @@ export function withDeckReport(
     };
   });
   const known = new Set(report.documents.map((document) => document.url));
-  return summarize(report.instanceUrl, [
-    ...documents,
-    ...part.documents.filter((document) => !known.has(document.url)),
-  ]);
+  return withUnclaimed(
+    summarize(report.instanceUrl, [
+      ...documents,
+      ...part.documents.filter((document) => !known.has(document.url)),
+    ]),
+    [
+      ...(report.unclaimed ?? []).filter((one) => one.deckUrl !== deck.url),
+      ...(part.unclaimed ?? []).filter((one) => one.deckUrl === deck.url),
+    ],
+  );
 }
 
 /**

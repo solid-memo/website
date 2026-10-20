@@ -32,6 +32,7 @@ function renderContainer(useCases: UseCases, draft: ReleaseDraft = courseDraft()
     >
       <ReleasePublishContainer
         useCases={useCases}
+        webId="https://alice.example/profile/card#me"
         editor={editor}
         links={links}
         onStarted={vi.fn()}

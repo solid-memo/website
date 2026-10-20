@@ -9,16 +9,23 @@ import {
   getUrlAll,
   toRdfJsDataset,
   type SolidDataset,
+  type Thing,
 } from "@inrupt/solid-client";
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import type { DocumentContext, ShapeValidator } from "@solid-memo/application/ports";
 import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domain/validation";
+import {
+  instanceUrlOfDeck,
+  isDeckDocumentAddress,
+  isSameUrl,
+} from "@solid-memo/domain/instanceLayout";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
 import { storedVersionOf } from "./records";
 import type { WriteCheck, WriteContext } from "./writeCheck";
-import { foreignSubjects } from "./ownership";
-import { RDF, SM_NS } from "./vocab";
+import { foreignSubjects, isDeckBackLink } from "./ownership";
+import { RDF, SM, SM_NS } from "./vocab";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { coreOnly } from "@solid-memo/shacl/profiles";
 import { pickShape } from "@solid-memo/shacl/registry";
@@ -132,6 +139,41 @@ function isForeignMember(
     )
   );
 }
+
+/**
+ * What a deck entry of the catalog at `documentUrl` says that makes it
+ * a deck Solid Memo cannot use (isDeckInPlace): an entry that is another
+ * document's subject, a cards or reviews document at an address no
+ * deck's may be (isDeckDocumentAddress: one a request or a server would
+ * take elsewhere, another resource's access control or metadata, one of
+ * the instance's own documents). Where the documents are is otherwise
+ * free. The app leaves such a deck out (mappers/deckMapper.ts toDecks),
+ * so the check names it, and a repair may remove the entry, and nothing
+ * else.
+ */
+function placeViolations(thing: Thing, documentUrl: string): Violation[] {
+  const instance = instanceUrlOfDeck(documentUrl);
+  const misplaced = (value: string, path?: string): Violation => ({
+    ...(path === undefined ? {} : { path }),
+    message: { en: DECK_PLACE },
+    builtIn: true,
+    value,
+    severity: "violation",
+    constraint: "DeckPlace",
+  });
+  const subject = asUrl(thing);
+  return [
+    ...(isSameUrl(documentUrlOf(subject), documentUrl) ? [] : [misplaced(subject)]),
+    ...[SM.cardsDocument, SM.reviewsDocument].flatMap((path) =>
+      getUrlAll(thing, path)
+        .filter((url) => !isDeckDocumentAddress(instance, url))
+        .map((url) => misplaced(url, path)),
+    ),
+  ];
+}
+
+const DECK_PLACE =
+  "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it.";
 
 /**
  * What is wrong with another app's data is reported, never acted on: a
@@ -298,7 +340,8 @@ export function createShaclShapeValidator({
         getUrlAll(thing, predicate),
       );
       if (pick.kind === "untyped") {
-        subjects.push({ url: subject, status: "untyped" });
+        // The document saying it is a deck's is Solid Memo's, and no stray.
+        if (!isDeckBackLink(dataset, thing)) subjects.push({ url: subject, status: "untyped" });
         continue;
       }
       if (pick.kind === "unknown-version") {
@@ -312,7 +355,12 @@ export function createShaclShapeValidator({
         continue;
       }
       const engine = await engineFor(pick.descriptor);
-      const violations = await engine.validateNode(data, subject, pick.descriptor.shapeIri);
+      const violations = [
+        ...(await engine.validateNode(data, subject, pick.descriptor.shapeIri)),
+        ...(context === "pod" && pick.descriptor.shape === "deck"
+          ? placeViolations(thing, url)
+          : []),
+      ];
       subjects.push({
         url: subject,
         status: "checked",

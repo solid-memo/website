@@ -26,12 +26,12 @@ export function publicKey(url: string): readonly unknown[] {
   return ["releasePublic", url];
 }
 
-/** Make a release public again; then it, and the instance's releases, are asked afresh. */
-export function useMakePublic(useCases: UseCases, instanceUrl: string) {
+/** Make a release public again, as `webId`; then it, and the instance's releases, are asked afresh. */
+export function useMakePublic(useCases: UseCases, instanceUrl: string, webId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (url: string) => {
-      await useCases.makeReleasePublic(url);
+      await useCases.makeReleasePublic(instanceUrl, url, webId);
       return url;
     },
     onSettled: (_done, _error, url) =>

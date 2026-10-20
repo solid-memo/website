@@ -16,6 +16,7 @@ import type {
   DataClassRegistrations,
   Instance,
   InstanceDeletion,
+  KeptDocuments,
   InstanceMeta,
   RegistrationOptions,
   RegistrationTarget,
@@ -216,15 +217,18 @@ export interface DeckRepository {
   saveDecks(decks: readonly Deck[]): Promise<Deck[]>;
   /**
    * Removes the deck's catalog entry, cards document and reviews
-   * document, and the deck from its group, in the same write.
+   * document, and the deck from its group, in the same write. Of a
+   * document that also holds another app's data, only the deck's cards
+   * and review states are removed, and the document is kept, which the
+   * result names.
    */
-  removeDeck(deck: Deck): Promise<void>;
+  removeDeck(deck: Deck): Promise<KeptDocuments>;
   /**
    * Removes several decks as removeDeck does: their cards and reviews
    * documents, then their catalog entries in ONE write of their catalog
    * document.
    */
-  removeDecks(decks: readonly Deck[]): Promise<void>;
+  removeDecks(decks: readonly Deck[]): Promise<KeptDocuments>;
   /**
    * The instance's decks as the user arranged them into groups
    * (domain/deckTree.ts buildTree); an empty tree when it has no catalog
@@ -325,11 +329,27 @@ export interface DeckRepository {
    */
   upgradeDeckEntry(current: Deck, next: Deck): Promise<Deck>;
   /**
-   * Delete a document no deck names, as one a guest's deck being added
-   * wrote before its catalog entry failed; one that is gone counts as
-   * deleted.
+   * The deck's cards and reviews documents that do not say they are the
+   * deck's (`<> dcterms:isPartOf` its entry) and that Solid Memo may not
+   * mark as its own by itself, being outside the instance's own folder
+   * (docs/data-model.md, "Where an instance's documents are"): read, never
+   * written to or deleted, until the user claims them. Writes nothing.
    */
-  deleteDocument(url: string): Promise<void>;
+  unclaimedDocuments(deck: Deck): Promise<string[]>;
+  /**
+   * Claim the deck's unclaimed documents, as the user confirmed: each is
+   * marked as the deck's, in one write made only while it is as read;
+   * nothing else in it changes.
+   */
+  claimDocuments(deck: Deck): Promise<void>;
+  /**
+   * Delete a document of the deck that its entry does not name yet, as
+   * one a guest's deck being added wrote before its catalog entry
+   * failed: the deck's cards and review states are removed from it, and
+   * it is deleted when nothing else is left in it; one that is gone
+   * counts as deleted.
+   */
+  deleteDocument(deck: Deck, url: string): Promise<void>;
   /**
    * Note a course chapter completed: add `sm:completedChapter
    * <chapterUrl>` to the deck's catalog entry, as it is now, in ONE save
@@ -434,14 +454,18 @@ export interface ReleaseDraftRepository {
    * createdElsewhere naming it, with nothing written. Any later failure
    * deletes the documents written, and their containers left empty,
    * before it is thrown: no draft is left that the catalog does not
-   * link. Throws noCatalogToUpdate when the instance has no catalog.
+   * link. Throws noCatalogToUpdate when the instance has no catalog, and
+   * draftIdUnsupported, with nothing written, for a draft with an id no
+   * draft can have (DRAFT_ID).
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
    * The draft as its documents say now, with the version they are at
    * together (opaque: it changes when any of them does, or one comes or
    * goes). Nothing it published before is known here: `published` is
-   * empty. Throws draftGone when it has no release document.
+   * empty. Throws draftGone when it has no release document, and
+   * draftIdUnsupported when it names a subject by an id no draft can
+   * have (DRAFT_ID): a chapter's document is named after its id.
    */
   read(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }>;
   /**
@@ -451,7 +475,8 @@ export interface ReleaseDraftRepository {
    * changedElsewhere), a new chapter's only if none is there yet. A
    * chapter's document nothing is left in is deleted, as it was read.
    * changedElsewhere too when the draft was read since at another
-   * version, or not by this repository.
+   * version, or not by this repository; draftIdUnsupported, with nothing
+   * written, when `after` has an id no draft can have (DRAFT_ID).
    */
   applyChanges(before: ReleaseDraft, after: ReleaseDraft, version: string): Promise<void>;
   /**
@@ -486,11 +511,13 @@ export interface ReleaseDraftRepository {
    */
   parseRelease(text: string, format: DeckFileFormat): Promise<ReleaseDraft>;
   /**
-   * Delete a draft: its documents (those of a draft's, nothing else in
-   * its container), its container and the ones above it when they are
-   * then empty, then its link from the catalog.
+   * Delete a draft: the draft's subjects from its documents (those of a
+   * draft's, nothing else in its container), each document deleted when
+   * nothing else is left in it, its container and the ones above it when
+   * they are then empty, then its link from the catalog. Returns the
+   * documents kept for another app's data in them.
    */
-  delete(draft: ReleaseDraftSummary): Promise<void>;
+  delete(draft: ReleaseDraftSummary): Promise<KeptDocuments>;
 }
 
 /**
@@ -514,11 +541,19 @@ export interface ReleasePublisher {
    * all the same, readable by its owner alone, until makePublic.
    */
   publish(instanceUrl: string, turtle: string, targetUrl: string): Promise<{ public: boolean }>;
-  /** Make the release readable by everyone, again; publicAccessRefused when the pod will not. */
-  makePublic(url: string): Promise<void>;
+  /**
+   * Make the release readable by everyone, again; publicAccessRefused
+   * when the pod will not, and when it is not a release the instance's
+   * catalog lists (listPublished) whose document is a release.
+   */
+  makePublic(instanceUrl: string, url: string): Promise<void>;
   /** Whether someone with no login can read the release at `url`. */
   isPublic(url: string): Promise<boolean>;
-  /** The releases the instance's catalog says it published, in the order it names them. */
+  /**
+   * The releases the instance's catalog says it published, in the order
+   * it names them: those at an address a release may have
+   * (isPublishedReleaseUrl).
+   */
   listPublished(instanceUrl: string): Promise<string[]>;
 }
 

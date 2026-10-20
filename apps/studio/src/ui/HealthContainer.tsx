@@ -15,6 +15,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { useRepairMutation } from "@solid-memo/ui/RepairContainer";
+import { UnclaimedDecksNotice } from "@solid-memo/ui/UnclaimedDecksNotice";
 import { deckHealthQuery, HealthBadge } from "./HealthBadge";
 import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./HealthScreen";
 import { useConfirm } from "./shell/ConfirmDialog";
@@ -33,7 +34,9 @@ import { useConfirm } from "./shell/ConfirmDialog";
  * forms, which change nothing until then. What the deck's check finds
  * (as the screen opens, after a repair, or on "Check again") is put in
  * the instance's check (deckHealthQuery), so a deck mended, here or in
- * the pod by other means, is let go.
+ * the pod by other means, is let go. A deck whose documents are
+ * unclaimed is named above, with the claim that lets Solid Memo change
+ * them (UnclaimedDecksNotice).
  */
 export function HealthContainer({
   useCases,
@@ -137,6 +140,11 @@ function DeckHealthContainer({
     return <Loading label={t("studio.health.loading")} />;
   return (
     <>
+      <UnclaimedDecksNotice
+        useCases={useCases}
+        instanceUrl={instance.url}
+        decks={healthQuery.data.report.unclaimed ?? []}
+      />
       <DeckHealthScreen
         deck={deck}
         health={healthQuery.data}
@@ -181,6 +189,11 @@ function InstanceHealthContainer({
     return <Loading label={t("studio.health.loading")} />;
   return (
     <>
+      <UnclaimedDecksNotice
+        useCases={useCases}
+        instanceUrl={instance.url}
+        decks={reportQuery.data.unclaimed ?? []}
+      />
       <InstanceHealthScreen
         instance={instance}
         report={reportQuery.data}

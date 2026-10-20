@@ -17,7 +17,8 @@ import { Screen } from "./Screen.ts";
  * its listing preview shows it as the library will. A next version is
  * compared with the release it follows. Its release screen says who
  * compiled it and how, under what license, and from what sources, and
- * publishes it in the pod, public.
+ * publishes it in the pod, public, or says when the pod did not make it
+ * public. A draft Solid Memo does not open says why.
  */
 export class DraftEditor extends Screen {
   /** The draft's outline, as the overview shows it: its chapters, each a list of its steps. */
@@ -93,6 +94,37 @@ export class DraftEditor extends Screen {
     });
   }
 
+  /** The release screen's part that publishes it. */
+  private get publishPart(): Locator {
+    return this.page.getByRole("region", { name: this.t("studio.publish.heading"), exact: true });
+  }
+
+  /**
+   * Publishes the draft from its release screen, in the instance's
+   * releases folder, once the user says it will be public: the screen
+   * then shows it released, at the address it said. Its address.
+   */
+  private async release(): Promise<string> {
+    const part = this.publishPart;
+    await expect(part.getByText(this.t("studio.publish.noErrors"))).toBeVisible({
+      timeout: 30_000,
+    });
+    const [before, after] = this.t("studio.publish.address", { url: "\u0000" }).split("\u0000") as [
+      string,
+      string,
+    ];
+    const said = (await part.getByText(new RegExp(`^${escapeRegExp(before)}`)).textContent())!;
+    const url = said.slice(before.length, said.length - after.length);
+    const publish = part.getByRole("button", { name: this.t("studio.publish.publish") });
+    await expect(publish).toBeDisabled();
+    await part.getByRole("checkbox", { name: this.t("studio.publish.confirm") }).check();
+    await publish.click();
+    await expect(part.getByRole("link", { name: url, exact: true })).toHaveAttribute("href", url, {
+      timeout: 60_000,
+    });
+    return url;
+  }
+
   /**
    * Publishes the draft from its release screen, in the instance's
    * releases folder, once the user says it will be public: the screen
@@ -101,33 +133,49 @@ export class DraftEditor extends Screen {
    */
   async publish(): Promise<string> {
     return this.intent("Publish the release to the pod, saying it will be public", async () => {
-      const part = this.page.getByRole("region", {
-        name: this.t("studio.publish.heading"),
-        exact: true,
-      });
-      await expect(part.getByText(this.t("studio.publish.noErrors"))).toBeVisible({
-        timeout: 30_000,
-      });
-      const [before, after] = this.t("studio.publish.address", { url: "\u0000" }).split(
-        "\u0000",
-      ) as [string, string];
-      const said = (await part.getByText(new RegExp(`^${escapeRegExp(before)}`)).textContent())!;
-      const url = said.slice(before.length, said.length - after.length);
-      const publish = part.getByRole("button", { name: this.t("studio.publish.publish") });
-      await expect(publish).toBeDisabled();
-      await part.getByRole("checkbox", { name: this.t("studio.publish.confirm") }).check();
-      await publish.click();
-      await expect(part.getByRole("link", { name: url, exact: true })).toHaveAttribute(
-        "href",
-        url,
-        { timeout: 60_000 },
-      );
-      await expect(part.getByText(this.t("studio.publish.public"))).toBeVisible();
+      const url = await this.release();
+      await expect(this.publishPart.getByText(this.t("studio.publish.public"))).toBeVisible();
       // Frozen: the metadata above it changes no more.
       await expect(
         this.page.getByRole("combobox", { name: this.t("studio.license.label") }),
       ).toBeDisabled();
       return url;
+    });
+  }
+
+  /**
+   * Publishes the draft as `publish` does, but the pod does not make it
+   * public: the screen says only the user can read it, and offers to
+   * make it public. Its address.
+   */
+  async publishNotPublic(): Promise<string> {
+    return this.intent("Publish the release to the pod; it is not made public", async () => {
+      const url = await this.release();
+      await expect(this.publishPart.getByText(this.t("studio.publish.private"))).toBeVisible();
+      return url;
+    });
+  }
+
+  /** Asks again to make the release at `url` public, from its release screen: the pod does not, and the screen says so. */
+  async makePublicRefused(url: string): Promise<void> {
+    await this.intent("Make the release public; the pod does not", async () => {
+      await this.publishPart
+        .getByRole("button", { name: this.t("studio.publish.makePublic"), exact: true })
+        .click();
+      await expect(
+        this.publishPart
+          .getByRole("alert")
+          .filter({ hasText: this.t("errors.publicAccessRefused", { url }) }),
+      ).toBeVisible();
+      await expect(this.publishPart.getByText(this.t("studio.publish.private"))).toBeVisible();
+    });
+  }
+
+  /** Follows a draft's link in the drafts screen's table: it is not opened, and the screen says why. */
+  async openRefused(name: string, message: string): Promise<void> {
+    await this.intent(`Open the draft ${name}, which is refused`, async () => {
+      await this.page.getByRole("table").getByRole("link", { name, exact: true }).click();
+      await expect(this.page.getByRole("alert").filter({ hasText: message })).toBeVisible();
     });
   }
 

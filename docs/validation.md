@@ -86,11 +86,36 @@ flowchart LR
   catalog. A subject
   is then `checked` (with its violations), `newer` (a format this app
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
-  listed so strays are visible; a cards document's own subject, which
-  only says which deck the document is part of, is one). A document that does not exist is
+  listed so strays are visible). A deck's document's own subject, when
+  all it says is which deck the document is part of (`isDeckBackLink` in
+  [ownership.ts](../packages/solid/src/ownership.ts)), is Solid Memo's
+  and not listed. A document that does not exist is
   `missing`, which is normal, not a problem. A subject another app
   wrote is marked `foreign` and its results are warnings
   ([below](#data-another-app-wrote)).
+- **Where a deck is** is checked beside its shape, in an instance's
+  catalog: an entry that is another document's subject, or a cards or
+  reviews document at an address no deck's document may have (one a
+  request or a server would take elsewhere, another resource's access
+  control or metadata, one of the instance's own documents;
+  [data-model.md](data-model.md#where-an-instances-documents-are)), is
+  a violation of the entry (`DeckPlace`, `placeViolations` in
+  [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)).
+  Which folder the documents are in, and their names, are free. The app
+  does not use such a deck at all, so it is never set aside: the notice
+  names the problem, and removing the entry is all that is offered. A
+  draft's deck is a draft's, and not held to it.
+- **A deck whose documents are unclaimed** (they do not say they are
+  the deck's, and are outside the instance's own folder:
+  [data-model.md](data-model.md#where-an-instances-documents-are)) is
+  named in the report's `unclaimed` (`DeckRepository.unclaimedDocuments`),
+  with the documents' addresses. It is no violation: it blocks and sets
+  aside nothing, and the deck is read and studied from. Those documents
+  are not checked, as a repair of what a check finds writes to the
+  document. Solid Memo's data check and the Studio's Health screen show
+  them (`UnclaimedDecksNotice`) with "These are this deck's documents",
+  which, once the user confirms, claims them (`claimDeckDocuments`); the
+  next check checks them.
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled: they
   are published with the site anyway, and the document the browser
@@ -241,6 +266,14 @@ instance, and the document holding it still conforms (and gets its
 which is about violations, does not, and the repair offers nothing for
 it: a warning is no problem. A subject another app wrote with a Solid
 Memo class is held to that class's shape, as Solid Memo's own are.
+The same rule says what a removal takes out of a document: deleting an
+instance, a deck or a draft removes from each document only Solid
+Memo's subjects of that document's kind, and deletes the document only
+when nothing else is left in it ([data-model.md](data-model.md#write-discipline)).
+A subject of Solid Memo's class that does not conform to its shape is
+removed with the rest; another app's subject, and anything whose owner
+is unclear, is kept, and the document with it, which the result names
+as kept.
 
 A catalog's or deck group's link to a member another app wrote is
 that app's data too. When the member is a subject of the same document

@@ -402,6 +402,17 @@
     "preferences": "Preferencias",
     "repair": "Reparar"
   },
+  "unclaimedDecks": {
+    "region": "Mazos por confirmar",
+    "heading": "Solid Memo no cambia nada en los documentos de estos mazos hasta que confirmes que son de los mazos.",
+    "hint": "Los documentos de un mazo aquí no indican que le pertenecen y están fuera de la carpeta propia de la instancia, donde podrían figurar datos de otra persona. Solid Memo los lee y estudia con ellos, pero no guarda allí respuestas ni cambios, y al quitar el mazo solo se quita su entrada. Confirma solo los documentos que sepas que son del mazo.",
+    "deck": "{deck}: sus documentos no indican que pertenecen a este mazo.",
+    "claim": "Estos son los documentos de este mazo",
+    "confirm": "Solid Memo marcará estos documentos como documentos de {deck} y, a partir de entonces, los cambiará y eliminará con el mazo:",
+    "confirmButton": "Marcarlos como del mazo",
+    "cancel": "Cancelar",
+    "claiming": "Marcando…"
+  },
   "deckAbout": {
     "label": "Acerca de este mazo",
     "topicsLine": "Temas: {topics}",
@@ -687,7 +698,12 @@
   "keptFolder": {
     "text": "Solid Memo eliminó sus propios datos y conservó {link}: otra aplicación guardó archivos allí.",
     "releases": "Solid Memo eliminó sus propios datos y conservó {link}: allí están las publicaciones hechas desde ella, que otras personas pueden estar leyendo. También se conserva todo lo que otra aplicación guardó allí.",
-    "folder": "la carpeta de tu Pod"
+    "folder": "la carpeta de tu Pod",
+    "documents": {
+      "one": "Se conservó {count} documento porque también contiene datos de otra aplicación.",
+      "many": "Se conservaron {count} de documentos porque también contienen datos de otras aplicaciones.",
+      "other": "Se conservaron {count} documentos porque también contienen datos de otras aplicaciones."
+    }
   },
   "instanceUpdate": {
     "confirmRegion": "Iniciar la actualización",
@@ -1384,7 +1400,8 @@
       "MaxInclusive": "El valor es demasiado grande.",
       "MinLength": "El texto es demasiado corto.",
       "MaxLength": "El texto es demasiado largo.",
-      "Closed": "La propiedad no está permitida aquí."
+      "Closed": "La propiedad no está permitida aquí.",
+      "DeckPlace": "La entrada del mazo no está en el catálogo de su instancia, o indica un documento en una dirección que ningún documento de un mazo puede tener, como el control de acceso de otro recurso o uno de los documentos propios de la instancia. Solid Memo no lo usa."
     }
   },
   "webIdDocument": {
@@ -1467,6 +1484,7 @@
     "instanceChangedDuringCopy": "Tus datos de estudio en este navegador cambiaron mientras se copiaban, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",
     "resourceChangedDuringCopy": "Parte de tus datos de estudio en este navegador cambió mientras se copiaba, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",
     "guestStudyBeingMoved": "Solid Memo está trasladando a tu Pod tus datos de estudio de este navegador y no guarda nada en ellos hasta que termine. Espera a que acabe e inténtalo de nuevo.",
+    "writeRefused": "Solid Memo detuvo un cambio en tu Pod por seguridad: se habría guardado en una dirección en la que Solid Memo nunca guarda nada. No se cambió nada.",
     "deckChangedSinceOffer": "El mazo cambió después de que se ofreciera la actualización, quizá en otra pestaña o aplicación, así que no se cambió nada. Vuelve a mirar la oferta.",
     "deckChangedDuringUpgrade": "El mazo cambió mientras se actualizaba, quizá en otra pestaña o aplicación. Inténtalo de nuevo.",
     "changedElsewhere": "Esto se cambió en otro lugar, quizá en otra pestaña o aplicación, después de que Solid Memo lo leyera, así que no se guardó nada. Vuelve a cargar la página e inténtalo de nuevo.",
@@ -1479,6 +1497,7 @@
     "dataNotConforming": "Solid Memo no guardó esto: no está en el formato que espera Solid Memo. No se cambió nada. Vuelve a cargar la página e inténtalo de nuevo.",
     "deckGone": "El mazo «{deck}» ya no existe. Quizá se eliminó en otra pestaña o aplicación.",
     "cardsDocumentGone": "Ya no se encuentran las tarjetas de «{deck}». Vuelve a cargar la página e inténtalo de nuevo.",
+    "deckDocumentUnclaimed": "Solid Memo no modificó «{deck}»: sus documentos no indican que pertenecen a este mazo. No se cambió nada. Donde la comprobación de datos muestra el mazo, confirma que son sus documentos y vuelve a intentarlo.",
     "cardGone": "Esa tarjeta ya no existe. Quizá se eliminó en otra pestaña o aplicación. Vuelve a cargar la página.",
     "notADeck": "Eso no es un mazo de Solid Memo, así que no se puede añadir. Elige otro mazo.",
     "libraryDeckTooNew": "Este mazo está en un formato más reciente del que puede leer esta versión de Solid Memo. Vuelve a cargar la página para obtener la última versión.",
@@ -1493,6 +1512,7 @@
     "draftGone": "Ese borrador ya no existe. Quizá se eliminó en otra pestaña o aplicación.",
     "releaseUnreadable": "Solid Memo no puede leer ninguna publicación en {url}. Comprueba la dirección y que la publicación esté disponible allí.",
     "notAReleaseFile": "Ese archivo no contiene una única publicación de un mazo o un curso. Elige una publicación guardada como Turtle o JSON-LD.",
+    "draftIdUnsupported": "Este borrador llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. Solid Memo no lo abre ni lo cambia.",
     "releaseIdUnsupported": "Esta publicación llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. No se puede convertir en borrador.",
     "releaseTaken": "Ya hay una publicación en {url}, y una publicación nunca se sobrescribe. Publica la siguiente versión o elige otra carpeta.",
     "releaseHasErrors": {

@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  isPublishedReleaseUrl,
   isReleaseContainer,
   releaseFileName,
   releasePlaceOf,
@@ -48,5 +49,26 @@ describe("where a release is published", () => {
 
   it("saves a release as a file named after it", () => {
     expect(releaseFileName("capitals", 3)).toBe("capitals-v3.ttl");
+  });
+});
+
+describe("isPublishedReleaseUrl", () => {
+  it("is an http(s) address named as a release is, as a request sends it", () => {
+    expect(isPublishedReleaseUrl("https://pod.example/solid-memo/main/releases/solid/v1.ttl")).toBe(
+      true,
+    );
+    expect(isPublishedReleaseUrl("http://pod.example/shared/capitals/v12.ttl")).toBe(true);
+    for (const url of [
+      "https://pod.example/solid-memo/main/releases/../../../profile/v1.ttl",
+      "https://pod.example/solid-memo/main/%2e%2e/solid/v1.ttl",
+      "HTTPS://POD.EXAMPLE/solid/v1.ttl",
+      "https://pod.example:443/solid/v1.ttl",
+      "https://pod.example/solid/v1.ttl?x",
+      "https://pod.example/solid/v1.ttl#x",
+      "https://pod.example/profile/card",
+      "urn:x:solid/v1.ttl",
+    ]) {
+      expect(isPublishedReleaseUrl(url), url).toBe(false);
+    }
   });
 });

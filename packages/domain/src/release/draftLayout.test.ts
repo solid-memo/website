@@ -34,6 +34,24 @@ describe("where a draft is kept", () => {
     expect(draftPlaceOf(`${INSTANCE}drafts/solid/v0/release.ttl`)).toBeNull();
   });
 
+  it("is no draft at an address a request would send elsewhere", () => {
+    for (const name of [".", "..", "%2e", "%2e%2e", "%2E%2E", ".%2E", "%2e.", "a%2Fb", "a%5cb"]) {
+      expect(draftPlaceOf(`${INSTANCE}drafts/${name}/v1/release.ttl`), name).toBeNull();
+    }
+    expect(draftPlaceOf(`${INSTANCE}x/../drafts/solid/v1/release.ttl`)).toBeNull();
+    expect(draftPlaceOf(`${INSTANCE}drafts/a?b/v1/release.ttl`)).toBeNull();
+    expect(draftPlaceOf(`${INSTANCE}drafts/..;/v1/release.ttl`)).toBeNull();
+    // Another spelling of the instance's address is its, as written.
+    expect(draftPlaceOf("https://pod.example/kortlekar-å/drafts/solid/v1/release.ttl")).toEqual({
+      instanceUrl: "https://pod.example/kortlekar-å/",
+      name: "solid",
+      version: 1,
+    });
+    expect(
+      draftPlaceOf("HTTPS://Pod.example:443/solid-memo/main/drafts/solid/v1/release.ttl"),
+    ).toMatchObject({ name: "solid", version: 1 });
+  });
+
   it("has a release document, a cards document and one per chapter", () => {
     expect(chapterDocumentOf(DRAFT, "ch-a")).toBe(`${CONTAINER}chapter-ch-a.ttl`);
     expect(cardsDocumentOf(DRAFT)).toBe(`${CONTAINER}cards.ttl`);

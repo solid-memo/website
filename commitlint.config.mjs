@@ -29,22 +29,33 @@
  * ends with the line that RENOVATE_WHY starts (commitBody in renovate.json5)
  * instead, and its merge commit names the pull request. Every other rule
  * still holds for it, so the release reads its header.
+ *
+ * A security fix is made in private (SECURITY.md) before any public
+ * issue may describe what it fixes, so it names its GitHub security
+ * advisory instead (`Refs: GHSA-xxxx-xxxx-xxxx`), which is published
+ * once the fix is deployed.
  */
 
 /** The start of the line commitBody in renovate.json5 ends each Renovate commit with. */
 export const RENOVATE_WHY = "Why: renovate.json5 keeps every dependency current";
 
 /**
- * The parser reads Renovate's `Why:` line as a footer, so the whole
- * message is searched.
+ * A GitHub security advisory's id: `GHSA-` and three groups of four
+ * characters from the alphabet GitHub draws them from.
+ */
+export const ADVISORY = /\bGHSA(?:-[23456789cfghjmpqrvwx]{4}){3}\b/;
+
+/**
+ * The parser reads Renovate's `Why:` line as a footer, and knows no
+ * advisory id, so the whole message is searched.
  *
  * @param {{ references: unknown[], raw: string }} commit
  */
 function referencesOrRenovate({ references, raw }) {
   const renovate = raw.split("\n").some((line) => line.startsWith(RENOVATE_WHY));
   return [
-    references.length > 0 || renovate,
-    "the message must name its issue, pull request or discussion, such as `Closes: #42` (CONTRIBUTING.md#commit-messages)",
+    references.length > 0 || renovate || ADVISORY.test(raw),
+    "the message must name its issue, pull request or discussion, such as `Closes: #42`, or a security fix its advisory, such as `Refs: GHSA-xxxx-xxxx-xxxx` (CONTRIBUTING.md#commit-messages)",
   ];
 }
 

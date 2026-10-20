@@ -76,7 +76,7 @@ function setUp({
     readRelease: vi.fn(async () => v1),
     readLinked: vi.fn(async (): Promise<DraftTriple[]> => []),
     parseRelease: vi.fn(async () => v1),
-    delete: vi.fn(async () => undefined),
+    delete: vi.fn(async () => ({ keptDocuments: [] })),
   } satisfies ReleaseDraftRepository;
   const deckRepository = { listCards: vi.fn(async () => cards) } as unknown as DeckRepository;
   const fileExchange: FileExchange = {

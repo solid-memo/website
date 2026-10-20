@@ -34,6 +34,7 @@ import { InstanceCreator } from "./InstanceCreator";
 import { InstancePickerContainer } from "./InstancePickerContainer";
 import { FindableContainer } from "./FindableContainer";
 import { DataCheckNotice } from "./DataCheckNotice";
+import { UnclaimedDecksNotice } from "./UnclaimedDecksNotice";
 import { useDataCheck } from "./dataCheck";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
 import { LibraryCardScreen } from "./LibraryCardScreen";
@@ -942,6 +943,11 @@ export function Workspace({
                 arrangementSetAside={arrangementIsSetAside}
               />
             )}
+            <UnclaimedDecksNotice
+              useCases={useCases}
+              instanceUrl={activeInstance.url}
+              decks={check.unclaimed}
+            />
           </>
         )}
         {waiting === null && <Breadcrumbs crumbs={crumbs} />}

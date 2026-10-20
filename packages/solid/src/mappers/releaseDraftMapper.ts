@@ -12,6 +12,7 @@ import {
   type Thing,
 } from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
+import { AppError } from "@solid-memo/domain/appError";
 import {
   draftDocuments,
   draftDocumentUrl,
@@ -26,6 +27,7 @@ import {
   type DraftNode,
   type DraftTriple,
   type ReleaseDraft,
+  unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
@@ -243,9 +245,14 @@ export interface DraftEntry {
 /**
  * Every subject of the draft, by its IRI in the draft, as the pod keeps
  * it: in the document draftDocuments puts it in, at that document's IRI,
- * with every IRI it names mapped the same way.
+ * with every IRI it names mapped the same way. A chapter's document is
+ * named after its id, so a draft with an id no draft can have (DRAFT_ID)
+ * is refused (draftIdUnsupported): its documents might not be in its
+ * container.
  */
 export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
+  const unsupported = unsupportedIdOf(draft);
+  if (unsupported !== null) throw new AppError("draftIdUnsupported", { id: unsupported });
   const places = draftDocuments(draft);
   const documentOf = (iri: string) =>
     draftDocumentUrl(draft.url, places.get(iri) ?? { kind: "release" });

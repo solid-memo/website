@@ -10,8 +10,10 @@ import { Screen } from "./Screen.ts";
  * that opens it, a link to its folder ("Open in your Pod") and
  * "Delete instance {name}"; under them, New instance… and attaching one
  * by URL. Reached from the instance bar's "Switch instance", or on
- * arriving with more than one instance. A deletion that kept the
- * instance's folder says so, and why, in a notice that links the folder.
+ * arriving with more than one instance. An instance is attached by its
+ * address. A deletion that kept the instance's folder says so, and why,
+ * in a notice that links the folder, and says how many documents it kept
+ * because they also hold another app's data.
  */
 export class InstancePicker extends Screen {
   get heading(): Locator {
@@ -72,6 +74,23 @@ export class InstancePicker extends Screen {
   }
 
   /**
+   * Attaches the instance at `url` by its address ("Attach an existing
+   * instance by URL"), registered privately: it opens, by its name.
+   */
+  async attach(url: string, name: string): Promise<void> {
+    await this.intent(`Attach the instance at ${url}`, async () => {
+      const main = this.page.getByRole("main");
+      await main.getByText(this.t("instancePicker.attachSummary"), { exact: true }).click();
+      await main.getByRole("textbox", { name: this.t("instancePicker.attachUrl") }).fill(url);
+      await main
+        .getByRole("button", { name: this.t("instancePicker.attach"), exact: true })
+        .click();
+      await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
+      await this.app.chrome.expectInstance(name);
+    });
+  }
+
+  /**
    * Deletes the instance named `name`, confirmed when the app asks: its
    * row goes, and the status line says it is gone.
    */
@@ -101,6 +120,18 @@ export class InstancePicker extends Screen {
       // The reason around the link, whatever the link's own text.
       await expect(notice).toHaveText(this.tp("keptFolder.text"));
       await expect(notice.getByRole("link")).toHaveAttribute("href", folder);
+    });
+  }
+
+  /** The notice of the last deletion says it kept `count` documents, as they also hold another app's data. */
+  async expectKeptDocuments(count: number): Promise<void> {
+    await this.intent(`Check that ${count} documents were kept, and why`, async () => {
+      await expect(
+        this.page
+          .getByRole("main")
+          .getByRole("status")
+          .filter({ hasText: this.t("keptFolder.documents", { count }) }),
+      ).toBeVisible();
     });
   }
 }

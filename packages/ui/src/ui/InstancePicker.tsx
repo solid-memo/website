@@ -37,6 +37,7 @@ export function InstancePicker({
   onDelete,
   keptFolder = null,
   keptReleases = false,
+  keptDocuments = 0,
 }: {
   instances: Instance[];
   /** What the instance is picked for, said under the heading; none when it is to open it. */
@@ -53,6 +54,8 @@ export function InstancePicker({
   keptFolder?: string | null;
   /** Whether the kept folder holds the releases published from the instance, which are why it is kept, or part of why. */
   keptReleases?: boolean;
+  /** How many documents the last deletion kept, as they also hold another app's data. */
+  keptDocuments?: number;
 }) {
   const { t } = useI18n();
   const askFirst = useAskFirst();
@@ -157,7 +160,7 @@ export function InstancePicker({
       <p class="visually-hidden" role="status">
         {deleted}
       </p>
-      <KeptFolderNotice url={keptFolder} releases={keptReleases} />
+      <KeptFolderNotice url={keptFolder} releases={keptReleases} documents={keptDocuments} />
       <ErrorMessage error={error} />
     </section>
   );

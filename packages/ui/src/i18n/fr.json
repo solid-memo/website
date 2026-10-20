@@ -402,6 +402,17 @@
     "preferences": "Préférences",
     "repair": "Réparer"
   },
+  "unclaimedDecks": {
+    "region": "Paquets à confirmer",
+    "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant que vous n’avez pas confirmé qu’ils sont ceux des paquets.",
+    "hint": "Les documents d’un paquet ici n’indiquent pas qu’ils lui appartiennent, et ils se trouvent hors du dossier propre de l’instance, où les données de quelqu’un d’autre pourraient être désignées. Solid Memo les lit et vous permet d’en étudier, mais n’y enregistre ni réponse ni modification, et retirer le paquet ne retire que son entrée. Ne confirmez que des documents dont vous savez qu’ils sont ceux du paquet.",
+    "deck": "{deck} : ses documents n’indiquent pas qu’ils appartiennent à ce paquet.",
+    "claim": "Ce sont les documents de ce paquet",
+    "confirm": "Solid Memo marquera ces documents comme ceux de {deck}, puis les modifiera et les supprimera avec le paquet :",
+    "confirmButton": "Les marquer comme ceux du paquet",
+    "cancel": "Annuler",
+    "claiming": "Marquage…"
+  },
   "deckAbout": {
     "label": "À propos de ce paquet",
     "topicsLine": "Thèmes : {topics}",
@@ -687,7 +698,12 @@
   "keptFolder": {
     "text": "Solid Memo a supprimé ses propres données et a conservé {link} : une autre application y a placé des fichiers.",
     "releases": "Solid Memo a supprimé ses propres données et a conservé {link} : vos publications s’y trouvent, et d’autres personnes les lisent peut-être. Ce qu’une autre application y a placé est conservé aussi.",
-    "folder": "le dossier dans votre Pod"
+    "folder": "le dossier dans votre Pod",
+    "documents": {
+      "one": "{count} document a été conservé, car il contient aussi les données d’une autre application.",
+      "many": "{count} de documents ont été conservés, car ils contiennent aussi les données d’autres applications.",
+      "other": "{count} documents ont été conservés, car ils contiennent aussi les données d’autres applications."
+    }
   },
   "instanceUpdate": {
     "confirmRegion": "Lancer la mise à jour",
@@ -1384,7 +1400,8 @@
       "MaxInclusive": "La valeur est trop grande.",
       "MinLength": "Le texte est trop court.",
       "MaxLength": "Le texte est trop long.",
-      "Closed": "La propriété n’est pas autorisée ici."
+      "Closed": "La propriété n’est pas autorisée ici.",
+      "DeckPlace": "L’entrée du paquet n’est pas dans le catalogue de son instance, ou elle désigne un document à une adresse qu’aucun document de paquet ne peut avoir, comme le contrôle d’accès d’une autre ressource ou l’un des documents propres de l’instance. Solid Memo ne l’utilise pas."
     }
   },
   "webIdDocument": {
@@ -1467,6 +1484,7 @@
     "instanceChangedDuringCopy": "Votre travail dans ce navigateur a changé pendant sa copie, peut-être dans un autre onglet, il est donc conservé ici. Réessayez.",
     "resourceChangedDuringCopy": "Une partie de votre travail dans ce navigateur a changé pendant sa copie, peut-être dans un autre onglet, elle est donc conservée ici. Réessayez.",
     "guestStudyBeingMoved": "Solid Memo déplace votre travail de ce navigateur vers votre Pod et n’y enregistre rien d’ici là. Attendez la fin, puis réessayez.",
+    "writeRefused": "Solid Memo a arrêté une modification de votre Pod par sécurité : elle aurait été enregistrée à une adresse où Solid Memo n’enregistre jamais rien. Rien n’a été modifié.",
     "deckChangedSinceOffer": "Le paquet a changé depuis que la mise à jour a été proposée, peut-être dans un autre onglet ou une autre application, rien n’a donc été modifié. Consultez de nouveau la proposition.",
     "deckChangedDuringUpgrade": "Le paquet a changé pendant sa mise à jour, peut-être dans un autre onglet ou une autre application. Réessayez.",
     "changedElsewhere": "Cet élément a été modifié ailleurs depuis que Solid Memo l’a lu, peut-être dans un autre onglet ou une autre application, rien n’a donc été enregistré. Rechargez la page et réessayez.",
@@ -1479,6 +1497,7 @@
     "dataNotConforming": "Solid Memo n’a pas enregistré ceci : ce n’est pas au format attendu par Solid Memo. Rien n’a été modifié. Rechargez la page et réessayez.",
     "deckGone": "Le paquet « {deck} » n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "cardsDocumentGone": "Les cartes de « {deck} » sont désormais introuvables. Rechargez la page et réessayez.",
+    "deckDocumentUnclaimed": "Solid Memo n’a pas modifié « {deck} » : ses documents n’indiquent pas qu’ils appartiennent à ce paquet. Rien n’a été modifié. Là où la vérification des données liste le paquet, confirmez qu’il s’agit de ses documents, puis réessayez.",
     "cardGone": "Cette carte n’existe plus. Elle a peut-être été supprimée dans un autre onglet ou une autre application. Rechargez la page.",
     "notADeck": "Ce n’est pas un paquet Solid Memo, il ne peut donc pas être ajouté. Choisissez un autre paquet.",
     "libraryDeckTooNew": "Ce paquet est dans un format plus récent que celui que cette version de Solid Memo sait lire. Rechargez la page pour obtenir la dernière version.",
@@ -1493,6 +1512,7 @@
     "draftGone": "Ce brouillon n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "releaseUnreadable": "Solid Memo ne peut pas lire de publication à l’adresse {url}. Vérifiez l’adresse et assurez-vous que la publication y est bien publiée.",
     "notAReleaseFile": "Ce fichier ne contient pas exactement une publication de paquet ou de cours. Choisissez une publication enregistrée en Turtle ou en JSON-LD.",
+    "draftIdUnsupported": "Ce brouillon nomme l’une de ses parties « #{id} », ce qu’un brouillon ne peut pas conserver : l’identifiant d’un brouillon se compose de lettres de A à Z, de chiffres, de « . », « _ » et « - », et commence par une lettre ou un chiffre. Solid Memo ne l’ouvre pas et ne le modifie pas.",
     "releaseIdUnsupported": "Cette publication nomme l’une de ses parties « #{id} », ce qu’un brouillon ne peut pas conserver : l’identifiant d’un brouillon se compose de lettres de A à Z, de chiffres, de « . », « _ » et « - », et commence par une lettre ou un chiffre. Elle ne peut pas devenir un brouillon.",
     "releaseTaken": "Une publication existe déjà à l’adresse {url}, et une publication n’est jamais écrasée. Publiez la version suivante ou choisissez un autre dossier.",
     "releaseHasErrors": {

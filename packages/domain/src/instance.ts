@@ -48,12 +48,24 @@ export interface RegistrationOptions {
 }
 
 /**
+ * What a removal of Solid Memo's data kept of the documents it went
+ * through (docs/data-model.md "Write discipline"): only what Solid Memo
+ * wrote is removed from each, so one that also holds another app's data
+ * is kept with that.
+ */
+export interface KeptDocuments {
+  /** The documents kept for another app's data in them, by URL; empty when none was. */
+  keptDocuments: string[];
+}
+
+/**
  * What deleting an instance's data left (docs/data-model.md "Deleting an
  * instance"): only what Solid Memo wrote is deleted, so a folder that
  * also holds what another app put there is kept, and so is one that
- * holds the releases published from the instance.
+ * holds the releases published from the instance, and a document that
+ * also holds another app's data (KeptDocuments).
  */
-export interface InstanceDeletion {
+export interface InstanceDeletion extends KeptDocuments {
   /** The instance's folder, when it was kept for what else it holds; null when it is gone. */
   keptFolder: string | null;
   /** Whether what the kept folder holds includes the releases published from the instance (`releases/`), which are kept. */

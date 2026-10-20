@@ -110,6 +110,16 @@ describe("verdict", () => {
     });
   });
 
+  it("passes a security fix whose commit names its advisory", () => {
+    const fix = [commit("fix: keep it\n\nWhy.\n\nRefs: GHSA-fhp3-h74x-mhrr", "0123456789abcdef")];
+    expect(verdict(undefined, fix)).toEqual({
+      note: "01234567 fix: keep it names its security advisory, which closes no issue.",
+    });
+    expect(
+      verdict(undefined, [commit("fix: keep it\n\nWhy.\n\nRefs: GHSA-1234")]).problem,
+    ).toBeDefined();
+  });
+
   it("fails a pull request that only refers to its issue", () => {
     const { problem } = verdict("Refs: #95", plain);
     expect(problem).toMatch(/^Neither the pull request's body nor any commit closes an issue\./);

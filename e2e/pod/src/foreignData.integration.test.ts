@@ -8,7 +8,8 @@
  * What another app wrote, against a real Solid server (docs/data-model.md
  * "Deleting an instance" and "The catalog"): deleting an instance
  * deletes only what Solid Memo wrote, keeping another app's files in its
- * folder and the folder with them, and deletes the whole folder, access
+ * folder and the folder with them, and another app's subjects in a
+ * document Solid Memo wrote, the document with them, and deletes the whole folder, access
  * rules and all, when nothing else is in it; a dataset another app listed
  * in the catalog stays listed through every deck save, and the instance
  * stays valid; what is wrong with another app's subjects is only
@@ -158,6 +159,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
       keptFolder: instance.url,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     // Another app's files, byte for byte, and the containers on their path.
@@ -198,10 +200,41 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     expect(await status(instance.url)).toBe(404);
     expect(await status(folderAcl)).toBe(404);
+  }, 60_000);
+
+  it("keeps a document that also holds another app's subject when an instance is deleted, with that subject only, and names it", async () => {
+    const { session, instance, decks, useCases } = await seed(server);
+    const cards = decks[0]!.cardsDocumentUrl;
+    const recipe = `<${cards}#recipe> <https://other.example/says> "mine" .`;
+    const patch = await fetch(cards, {
+      method: "PATCH",
+      headers: { "content-type": "application/sparql-update" },
+      body: `INSERT DATA { ${recipe} }`,
+    });
+    expect(patch.ok, `PATCH ${cards}: ${patch.status}`).toBe(true);
+
+    await expect(useCases.deleteInstance(session, instance)).resolves.toMatchObject({
+      keptFolder: instance.url,
+      keptDocuments: [cards],
+    });
+
+    const left = await triples(cards);
+    expect(left).toContain(recipe);
+    expect(left).not.toContain(SM);
+    expect(left).not.toContain("http://purl.org/dc/terms/isPartOf");
+    for (const url of [
+      `${instance.url}meta.ttl`,
+      `${instance.url}catalog.ttl`,
+      decks[1]!.cardsDocumentUrl,
+    ]) {
+      // Asked by GET: Solid-Nextcloud answers a HEAD of what is not there with 204.
+      expect((await fetch(url)).status, url).toBe(404);
+    }
   }, 60_000);
 
   it("stays listed in the catalog through every deck save and removal, and the instance stays valid", async () => {

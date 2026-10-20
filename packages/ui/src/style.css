@@ -389,6 +389,14 @@ main.workspace {
   gap: 0.5rem 1rem;
 }
 
+/* The documents of a deck to confirm as its own (UnclaimedDecksNotice), one link each, its
+   address: each a target 24px high at least (WCAG 2.5.8), wrapping on a narrow screen. */
+.unclaimed-documents a {
+  display: inline-block;
+  min-height: 24px;
+  overflow-wrap: anywhere;
+}
+
 /* The theme and language choices above every screen: a sun or a moon, then the language list. */
 .top-bar {
   display: flex;

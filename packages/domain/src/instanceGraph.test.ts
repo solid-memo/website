@@ -6,7 +6,6 @@ import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   instanceGraphOf,
-  isInstanceDocumentUrl,
   LDP_CONTAINS,
   type GraphDocument,
   type GraphNode,
@@ -370,13 +369,6 @@ describe("instanceGraphOf", () => {
       [CARDS]: "document",
     });
     expect(of.edges.every((each) => each.from !== each.to)).toBe(true);
-  });
-
-  it("tells a document of the instance by its address as a request resolves it", () => {
-    expect(isInstanceDocumentUrl(CATALOG, INSTANCE)).toBe(true);
-    expect(isInstanceDocumentUrl(`${INSTANCE}decks/./capitals.ttl`, INSTANCE)).toBe(false);
-    expect(isInstanceDocumentUrl(`${STORAGE}other/catalog.ttl`, INSTANCE)).toBe(false);
-    expect(isInstanceDocumentUrl("not an address", INSTANCE)).toBe(false);
   });
 
   it("takes the instance's address without its trailing slash", () => {

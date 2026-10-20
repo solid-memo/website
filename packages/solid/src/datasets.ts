@@ -4,9 +4,11 @@
 
 import {
   createSolidDataset,
-  deleteFile,
   deleteSolidDataset,
+  getThing,
   type getSolidDataset,
+  removeThing,
+  removeUrl,
   saveSolidDatasetAt,
   setThing,
   solidDatasetAsTurtle,
@@ -18,7 +20,8 @@ import {
 } from "@inrupt/solid-client";
 
 import type { Literal, Quad } from "@rdfjs/types";
-import { getSolidDatasetLinear } from "./linearDataset";
+import { getSolidDatasetLinear, graphsOf } from "./linearDataset";
+import { unlessNewer } from "./records";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 
@@ -35,7 +38,8 @@ type Dataset = Awaited<ReturnType<typeof getSolidDataset>>;
  *   answers 412 and nothing is written;
  * - saving a new dataset is a creation, which @inrupt/solid-client sends
  *   with `If-None-Match: *`: had the document appeared meanwhile, 412;
- * - deleting a document read before sends `If-Match` too.
+ * - deleting a document read before sends `If-Match` too, and so does
+ *   removing what Solid Memo owns of one (removeOwned).
  *
  * An edit's PATCH body is written here (patchBody), not by
  * @inrupt/solid-client: node-solid-server's parser fails on a triple whose
@@ -308,6 +312,11 @@ function withWrittenETag(
   };
 }
 
+/** Whether `dataset` was read from (or last saved to) `url`: a save of it is an edit there, If-Match its version. */
+export function isReadFrom(dataset: object, url: string): boolean {
+  return resourceInfoOf(dataset)?.sourceIri === url;
+}
+
 /** Delete a document read before, only if it is unchanged since (If-Match). */
 export async function deleteDataset(
   url: string,
@@ -325,21 +334,171 @@ export async function deleteDataset(
   }
 }
 
+/** One statement of a document: its subject, predicate and object, an IRI each. */
+export type Statement = readonly [subject: string, predicate: string, object: string];
+
 /**
- * Delete a resource without reading it whole; one that is gone counts as
- * deleted. For removing documents Solid Memo wrote whole, where no edit
- * made since is to be kept: an instance being deleted (instanceData.ts).
- * Whether it is there is asked first (HEAD): node-solid-server answers a
- * DELETE of what is not there with 401, not 404.
+ * What of a document is Solid Memo's to remove (removeOwned): subjects,
+ * each with all it states, or those and single statements of a subject
+ * that otherwise stays.
  */
-export async function deleteIfPresent(url: string, fetch: typeof globalThis.fetch): Promise<void> {
-  forgetRead(url, fetch);
-  if ((await fetch(url, { method: "HEAD" })).status === 404) return;
+export type Owned =
+  | ReadonlySet<string>
+  | { readonly subjects: ReadonlySet<string>; readonly statements: readonly Statement[] };
+
+/** What removeOwned did to a document: there was none, it is gone, or it is kept with what is not Solid Memo's. */
+export type Removal = "absent" | "deleted" | "kept";
+
+/**
+ * Remove from a document what Solid Memo owns of it, and the document
+ * itself only when nothing else is left in it (docs/data-model.md
+ * "Write discipline"):
+ *
+ * 1. it is read afresh; none there is "absent", and one that is not RDF
+ *    is never Solid Memo's: "kept", nothing sent;
+ * 2. `owns` names the subjects of it that are Solid Memo's to remove
+ *    (ownership.ts), less any a newer version of the app wrote
+ *    (unlessNewer), and any single statements of another subject that
+ *    are (Owned); a blank node goes with them when only they name it;
+ * 3. nothing else left: the document is deleted, If-Match its read
+ *    (where the pod gave a strong ETag: on a pod that gives none, an
+ *    edit made meanwhile is deleted too, as it is written over by every
+ *    other write there);
+ * 4. something else left: the removed subjects are taken out of it, a
+ *    PATCH of `DELETE DATA` (If-Match where the pod gave a strong ETag),
+ *    or, where a blank node goes, one PUT of what is left, If-Match: a
+ *    pod that gives no strong ETag gets neither, nor one PATCH too large
+ *    for a PATCH (MAX_PATCH_BYTES), which would be a PUT written over
+ *    whatever changed meanwhile; then the document is kept as it is.
+ *
+ * A document changed meanwhile (412) is read again and the removal made
+ * once more; a second 412 is a PreconditionFailedError.
+ */
+export async function removeOwned(
+  url: string,
+  owns: (dataset: SolidDataset) => Owned,
+  fetch: typeof globalThis.fetch,
+): Promise<Removal> {
   try {
-    await deleteFile(url, { fetch });
+    return await removeOwnedOnce(url, owns, fetch);
   } catch (error) {
-    if (statusOf(error) !== 404) throw error;
+    if (!(error instanceof PreconditionFailedError)) throw error;
+    return removeOwnedOnce(url, owns, fetch);
   }
+}
+
+async function removeOwnedOnce(
+  url: string,
+  owns: (dataset: SolidDataset) => Owned,
+  fetch: typeof globalThis.fetch,
+): Promise<Removal> {
+  let served = false;
+  // A fetch of its own, so the read is made afresh, never one remembered from before.
+  const noting = (async (input, init) => {
+    const response = await fetch(input, init);
+    served = response.ok;
+    return response;
+  }) as typeof globalThis.fetch;
+  let dataset: Dataset | null;
+  try {
+    dataset = await getSolidDatasetOrNull(url, noting);
+  } catch (error) {
+    if (served) return "kept";
+    throw error;
+  }
+  if (dataset === null) return "absent";
+  const quads = [...toRdfJsDataset(dataset)];
+  const found = owns(dataset);
+  const { subjects, statements } =
+    "subjects" in found ? found : { subjects: found, statements: [] };
+  const owned = [...subjects].filter((subject) => !isNewer(dataset, subject));
+  const removed = withOnlyTheirBlankNodes(quads, owned);
+  const isGone = (quad: Quad) =>
+    removed.has(termKey(quad.subject)) ||
+    statements.some(
+      ([subject, predicate, object]) =>
+        quad.subject.value === subject &&
+        quad.predicate.value === predicate &&
+        quad.object.value === object,
+    );
+  const left = quads.filter((quad) => !isGone(quad));
+  if (left.length === 0) {
+    try {
+      await deleteDataset(url, dataset, fetch);
+    } catch (error) {
+      // Gone since it was read: what was to be deleted is.
+      if (statusOf(error) !== 404) throw error;
+    }
+    return "deleted";
+  }
+  const gone = quads.filter(isGone);
+  if (gone.length === 0) return "kept";
+  const etag = strong(ETAGS.get(resourceInfoOf(dataset)!));
+  if (
+    gone.some(
+      (quad) => quad.subject.termType === "BlankNode" || quad.object.termType === "BlankNode",
+    )
+  ) {
+    if (etag === undefined) return "kept";
+    const rest = Object.freeze({
+      ...dataset,
+      graphs: graphsOf(left),
+      internal_changeLog: { additions: [], deletions: [] },
+    }) as Dataset;
+    await saveDataset(url, rest, fetch, { whole: true });
+    return "kept";
+  }
+  const edited = statements.reduce(
+    (current, [subject, predicate, object]) =>
+      setThing(current, removeUrl(getThing(current, subject)!, predicate, object)),
+    owned.reduce((current, subject) => removeThing(current, subject), dataset),
+  );
+  const body = patchBody(edited)!;
+  if (etag === undefined && new TextEncoder().encode(body).length > MAX_PATCH_BYTES) return "kept";
+  await saveDataset(url, edited, fetch);
+  return "kept";
+}
+
+/** Whether a newer version of the app wrote the subject (unlessNewer): it is never removed. */
+function isNewer(dataset: SolidDataset, subject: string): boolean {
+  const thing = getThing(dataset, subject);
+  try {
+    if (thing !== null) unlessNewer(thing);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * The subjects, and the blank nodes only they name, and those only these
+ * name, on: what goes with them. A blank node something else names stays.
+ */
+function withOnlyTheirBlankNodes(quads: readonly Quad[], subjects: readonly string[]): Set<string> {
+  const namedBy = new Map<string, string[]>();
+  const names = new Map<string, string[]>();
+  for (const quad of quads) {
+    if (quad.object.termType !== "BlankNode") continue;
+    const from = termKey(quad.subject);
+    const blank = termKey(quad.object);
+    namedBy.set(blank, [...(namedBy.get(blank) ?? []), from]);
+    names.set(from, [...(names.get(from) ?? []), blank]);
+  }
+  const removed = new Set(subjects);
+  const pending = [...subjects];
+  for (let key = pending.pop(); key !== undefined; key = pending.pop()) {
+    for (const blank of names.get(key) ?? []) {
+      if (removed.has(blank) || !namedBy.get(blank)!.every((from) => removed.has(from))) continue;
+      removed.add(blank);
+      pending.push(blank);
+    }
+  }
+  return removed;
+}
+
+/** A subject or object as a dataset keys it: a blank node `_:` and its label. */
+function termKey(term: { termType: string; value: string }): string {
+  return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
 /** The fetch, with `If-Match` added to the request that writes (the only one @inrupt/solid-client makes for it). */

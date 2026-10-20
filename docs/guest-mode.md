@@ -13,14 +13,15 @@ A guest gets a small Solid pod of their own, served by
 [localPod.ts](../packages/solid/src/localPod.ts) as a `fetch`, so the
 app's Solid adapters read and write it exactly as they do a server. A
 router ([routedFetch.ts](../packages/solid/src/routedFetch.ts)) sends
-each request to the guest's pod or to the network, by URL.
+each request to the guest's pod or to the network, by URL, after the
+pod fence and the write fence ([boundaries.md](boundaries.md#the-pod-fence)).
 
 ```mermaid
 graph LR
   accTitle: Routing a guest's requests
-  accDescr: Requests to the guest pod's address go to the local pod in IndexedDB, and every other URL goes through the authenticated fetch.
+  accDescr: Requests pass the pod fence and the write fence; those to the guest pod's address go to the local pod in IndexedDB, and every other URL goes through the authenticated fetch.
   UI --> UseCases --> Adapters["Solid adapters"]
-  Adapters --> Fence[writeFence] --> Router[routedFetch]
+  Adapters --> PodFence[podFence] --> Fence[writeFence] --> Router[routedFetch]
   Router -- "guest.solid-memo.invalid" --> LocalPod[localPod] --> Store[(IndexedDB)]
   Router -- every other URL --> authFetch --> Pod[(the user's pod)]
 ```

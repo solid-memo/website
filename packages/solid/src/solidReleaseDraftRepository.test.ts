@@ -74,6 +74,17 @@ function writes(pod: Awaited<ReturnType<typeof draftPod>>, from = 0) {
     );
 }
 
+/** The draft with its chapter `ch-a` named `id` instead, as no draft can name one. */
+function chapterNamed(draft: ReleaseDraft, id: string): ReleaseDraft {
+  return {
+    ...draft,
+    chapters: draft.chapters.map((node) => (node.id === "ch-a" ? { ...node, id } : node)),
+  };
+}
+
+/** An id that names, as a chapter's document, one outside the draft's container. */
+const ESCAPING_ID = "a/../../../../../../elsewhere/x";
+
 describe("create", () => {
   it("writes each document only where none is, the release document first, then links the draft from the catalog", async () => {
     const pod = await draftPod({ checked: true });
@@ -111,6 +122,14 @@ describe("create", () => {
     expect(await pod.text(CHAPTER_A)).toContain(`<${CHAPTER_A}#q-a-1a-d2>`);
     expect(await pod.text(CARDS)).toContain(`<${CARDS}#q-loose>`);
     expect(await pod.text(CHAPTER_A)).toContain(`<${DRAFT}>`);
+  });
+
+  it("refuses a draft with an id no draft can have, writing nothing", async () => {
+    const pod = await draftPod();
+    await expect(
+      pod.repository.create(INSTANCE, chapterNamed(course(), ESCAPING_ID)),
+    ).rejects.toMatchObject({ code: "draftIdUnsupported", vars: { id: ESCAPING_ID } });
+    expect(writes(pod)).toEqual([]);
   });
 
   it("refuses an instance with no catalog, writing nothing", async () => {
@@ -166,8 +185,9 @@ describe("create", () => {
       `PUT ${DRAFT} If-None-Match`,
       `PUT ${CHAPTER_A} If-None-Match`,
       `PUT ${CHAPTER_B} If-None-Match`,
-      `DELETE ${CHAPTER_A}`,
-      `DELETE ${DRAFT}`,
+      // Each read first, then deleted only as it was read.
+      `DELETE ${CHAPTER_A} If-Match`,
+      `DELETE ${DRAFT} If-Match`,
     ]);
     expect(await pod.text(CHAPTER_B)).toContain(`<${SM}y>`);
   });
@@ -275,6 +295,22 @@ describe("read", () => {
     await expect(pod.repository.read(DRAFT)).rejects.toMatchObject({ code: "draftGone" });
   });
 
+  it("refuses a draft whose documents name a subject by an id no draft can have", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    for (const url of [DRAFT, CHAPTER_A, CHAPTER_B, CARDS])
+      await pod.put(
+        url,
+        (await pod.text(url)).replaceAll(`${CHAPTER_A}#ch-a>`, `${CHAPTER_A}#${ESCAPING_ID}>`),
+      );
+    const from = pod.requests.length;
+    await expect(pod.repository.read(DRAFT)).rejects.toMatchObject({
+      code: "draftIdUnsupported",
+      vars: { id: ESCAPING_ID },
+    });
+    expect(writes(pod, from)).toEqual([]);
+  });
+
   it("tells blank nodes of one document from another's", async () => {
     const pod = await draftPod();
     await pod.repository.create(INSTANCE, course());
@@ -299,6 +335,14 @@ describe("applyChanges", () => {
     const { draft, version } = await pod.repository.read(DRAFT);
     return { pod, draft, version, from: pod.requests.length };
   }
+
+  it("refuses a change to an id no draft can have, writing nothing", async () => {
+    const { pod, draft, version, from } = await opened();
+    await expect(
+      pod.repository.applyChanges(draft, chapterNamed(draft, ESCAPING_ID), version),
+    ).rejects.toMatchObject({ code: "draftIdUnsupported", vars: { id: ESCAPING_ID } });
+    expect(writes(pod, from)).toEqual([]);
+  });
 
   it("writes one document for a change in it, whole, only if it is as it was read", async () => {
     const { pod, draft, version, from } = await opened({ checked: true });
@@ -852,7 +896,7 @@ describe("delete", () => {
     await pod.repository.create(INSTANCE, course());
     const before = await pod.urls();
     const summary = (await pod.repository.list(INSTANCE))[0]!;
-    await pod.repository.delete(summary);
+    await expect(pod.repository.delete(summary)).resolves.toEqual({ keptDocuments: [] });
     await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
     expect((await pod.urls()).filter((url) => !before.includes(url))).toEqual([]);
     expect((await pod.urls()).some((url) => url.includes("/drafts/"))).toBe(false);
@@ -870,6 +914,19 @@ describe("delete", () => {
       `${CONTAINER}notes.ttl`,
     ]);
     await expect(draftDocumentsIn(DRAFT, pod.fetch)).resolves.toEqual([]);
+  });
+
+  it("keeps a document of the draft that also holds another app's subject, with that subject only, and says so", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    const text = await pod.text(DRAFT);
+    await pod.put(DRAFT, `${text}\n<#elsewhere> <https://other.example/says> "kept" .`);
+    const summary = (await pod.repository.list(INSTANCE))[0]!;
+    await expect(pod.repository.delete(summary)).resolves.toEqual({ keptDocuments: [DRAFT] });
+    const left = await pod.text(DRAFT);
+    expect(left).toContain("https://other.example/says");
+    expect(left).not.toContain(SM);
+    await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
   });
 
   it("deletes a draft the catalog no longer links, or that has no catalog", async () => {

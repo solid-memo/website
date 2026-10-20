@@ -257,6 +257,29 @@ describe("HealthContainer", () => {
     await waitFor(() => expect(useCases.checkInstance).toHaveBeenCalledTimes(2));
   });
 
+  it("offers to claim a deck's unclaimed documents, on the instance's health and the deck's", async () => {
+    const unclaimed = [
+      { deckUrl: deck.url, title: deck.title, documents: [deck.reviewsDocumentUrl] },
+    ];
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck]),
+      checkInstance: vi.fn(async () => ({ ...conforming, unclaimed })),
+      checkDeck: vi.fn(async () =>
+        deckHealth(deck, { ...conforming, unclaimed }, [], [], deckTextCheck()),
+      ) as UseCases["checkDeck"],
+    });
+    renderContainer(useCases, null);
+    fireEvent.click(await screen.findByRole("button", { name: "These are this deck's documents" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mark them as the deck's" }));
+    await waitFor(() =>
+      expect(useCases.claimDeckDocuments).toHaveBeenCalledWith(instanceA.url, deck.url),
+    );
+    renderContainer(useCases, deck);
+    expect(
+      (await screen.findAllByRole("region", { name: "Decks to confirm" })).length,
+    ).toBeGreaterThan(0);
+  });
+
   it("says why the instance could not be checked", async () => {
     renderContainer(
       makeUseCasesFake({ checkInstance: vi.fn(async () => Promise.reject(new Error("offline"))) }),

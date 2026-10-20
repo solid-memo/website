@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { ensureTrailingSlash } from "../instanceLayout.ts";
+import { ensureTrailingSlash, hasDotSegment, isDocumentIn } from "../instanceLayout.ts";
 import type { LangText } from "../langText.ts";
 import { canonical, idIn, iriIn, type ReleaseDraft } from "./releaseDraft.ts";
 
@@ -42,12 +42,21 @@ export function draftContainerOf(draftUrl: string): string {
   return draftUrl.slice(0, draftUrl.lastIndexOf("/") + 1);
 }
 
-/** The draft a release document is of: its instance, name and version; null for a URL no draft has. */
+/**
+ * The draft a release document is of: its instance, name and version;
+ * null for a URL no draft has. The catalog that links a draft is data
+ * anyone may have written, so the address is taken only in the
+ * instance's `drafts/` as a request would send it (isDocumentIn), and
+ * with no dot segment (`..`, `%2e%2E`; hasDotSegment), which would lead
+ * elsewhere than its name and instance say.
+ */
 export function draftPlaceOf(
   draftUrl: string,
 ): { instanceUrl: string; name: string; version: number } | null {
   const match = /^(.*\/)drafts\/([^/]+)\/v([1-9][0-9]*)\/release\.ttl$/.exec(draftUrl);
-  return match === null
+  return match === null ||
+    hasDotSegment(draftUrl) ||
+    !isDocumentIn(draftUrl, draftsContainerOf(match[1]!))
     ? null
     : { instanceUrl: match[1]!, name: match[2]!, version: Number(match[3]) };
 }

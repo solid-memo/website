@@ -49,6 +49,26 @@ describe("commitlint.config.mjs", () => {
     expect(await errors(`fix: keep the deck's title\n\n${why} Found in #12.`)).toEqual([]);
   });
 
+  it("passes a security fix that names its advisory instead of an issue", async () => {
+    for (const footer of ["Refs: GHSA-fhp3-h74x-mhrr", "Fixes GHSA-2345-6789-cfgh"]) {
+      expect(
+        await errors(`fix(solid): keep a deck's documents its own\n\n${why}\n\n${footer}`),
+      ).toEqual([]);
+    }
+  });
+
+  it("takes only a well-formed advisory id for one", async () => {
+    for (const footer of [
+      "Refs: GHSA-1234",
+      "Refs: GHSA-abcd-efgh-ijkl",
+      "Refs: XGHSA-fhp3-h74x-mhrr",
+    ]) {
+      expect(await errors(`fix: keep the deck's title\n\n${why}\n\n${footer}`)).toEqual([
+        "references-or-renovate",
+      ]);
+    }
+  });
+
   it("fails a commit with no body", async () => {
     expect(await errors("fix: keep the deck's title")).toContain("body-empty");
     expect(await errors("fix: keep the deck's title\n\nRefs: #72")).toContain("body-empty");

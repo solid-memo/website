@@ -111,7 +111,11 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       url: "https://pod.example/solid-memo/main/",
       name: "Main",
     })),
-    deleteInstance: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
+    deleteInstance: vi.fn(async () => ({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    })),
     dataClassRegistrations: vi.fn(async () => ({
       registrations: (
         ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const
@@ -156,8 +160,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     setDecksPace: vi.fn(async (decks: readonly Deck[], pace) =>
       decks.map((deck) => ({ ...deck, ...pace })),
     ),
-    removeDeck: vi.fn(async () => undefined),
-    removeDecks: vi.fn(async () => undefined),
+    removeDeck: vi.fn(async () => ({ keptDocuments: [] })),
+    removeDecks: vi.fn(async () => ({ keptDocuments: [] })),
     listLibraryDecks: vi.fn(async () => []),
     importLibraryDeck: vi.fn(async () => {
       throw new Error("importLibraryDeck fake not configured");
@@ -238,7 +242,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     editReleaseDraft: vi.fn(async () => {
       throw new Error("editReleaseDraft fake not configured");
     }),
-    deleteReleaseDraft: vi.fn(async () => undefined),
+    deleteReleaseDraft: vi.fn(async () => ({ keptDocuments: [] })),
     checkReleaseDraft: vi.fn(async (_draft, _check, _policy, options) => ({
       rules: [],
       library: [],
@@ -333,6 +337,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
     }),
     checkInstance: vi.fn((instanceUrl) => fake.validateInstance(instanceUrl)),
+    claimDeckDocuments: vi.fn(async () => undefined),
     // A deck's health, of the instance's check, its cards, and no release.
     checkDeck: vi.fn(async (instanceUrl, deck, text) =>
       deckHealth(deck, await fake.checkInstance(instanceUrl), await fake.listCards(deck), [], text),

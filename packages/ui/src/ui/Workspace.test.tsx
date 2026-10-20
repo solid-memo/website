@@ -621,7 +621,7 @@ describe("Workspace", () => {
       listInstances: vi.fn(async () => (deleted ? [instanceA] : [instanceA, instanceB])),
       deleteInstance: vi.fn(async () => {
         deleted = true;
-        return { keptFolder: null, keptReleases: false };
+        return { keptFolder: null, keptReleases: false, keptDocuments: [] };
       }),
     });
     renderWorkspace(useCases);
@@ -647,7 +647,7 @@ describe("Workspace", () => {
       listInstances: vi.fn(async () => (deleted ? [instanceA] : [instanceA, instanceB])),
       deleteInstance: vi.fn(async () => {
         deleted = true;
-        return { keptFolder: instanceB.url, keptReleases: false };
+        return { keptFolder: instanceB.url, keptReleases: false, keptDocuments: [] };
       }),
     });
     renderWorkspace(useCases);
@@ -668,7 +668,11 @@ describe("Workspace", () => {
     );
     const useCases = makeUseCases({
       listInstances: vi.fn(async () => [instanceA, instanceB]),
-      deleteInstance: vi.fn(async () => ({ keptFolder: instanceB.url, keptReleases: true })),
+      deleteInstance: vi.fn(async () => ({
+        keptFolder: instanceB.url,
+        keptReleases: true,
+        keptDocuments: [`${instanceB.url}catalog.ttl`, `${instanceB.url}decks/a.ttl`],
+      })),
     });
     renderWorkspace(useCases);
 
@@ -677,6 +681,9 @@ describe("Workspace", () => {
     const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
     expect(notice).toHaveTextContent(
       "the releases published from it are there, which others may be reading.",
+    );
+    expect(notice).toHaveTextContent(
+      "2 documents were kept because they also hold other apps' data.",
     );
   });
 
@@ -1772,6 +1779,7 @@ describe("Workspace", () => {
       listDecks: vi.fn(async () => (removed ? [] : [deck])),
       removeDeck: vi.fn(async () => {
         removed = true;
+        return { keptDocuments: [] };
       }),
     });
     renderWorkspace(useCases);

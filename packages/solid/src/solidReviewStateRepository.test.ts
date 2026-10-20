@@ -77,6 +77,11 @@ const fsrs: FsrsState = {
   formatVersion: 1,
 };
 
+/** The subjects of a saved reviews document but the document's own, which says whose it is. */
+function statesOf(dataset: SolidDataset) {
+  return getThingAll(dataset).filter((thing) => thing.url !== deck.reviewsDocumentUrl);
+}
+
 /** The deck's states, SM-2's alone. */
 const sm2s = (sm2: ReviewState[]) => ({ sm2, fsrs: [] });
 
@@ -90,7 +95,8 @@ function makeRepository(
   randomId: (() => string) | null = () => "r1",
 ) {
   return createSolidReviewStateRepository({
-    fetch: vi.fn() as unknown as typeof globalThis.fetch,
+    // The instance's folder, asked whether it is its own: it is.
+    fetch: vi.fn(async () => new Response(null)) as unknown as typeof globalThis.fetch,
     ...(checkWrite === undefined ? {} : { checkWrite }),
     ...(randomId === null ? {} : { randomId }),
   });
@@ -487,7 +493,7 @@ describe("states that name their card", () => {
       save: [],
       remove: [{ cardId: "card-1", direction: "front-to-back" }],
     });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1`,
     ]);
   });
@@ -514,7 +520,7 @@ describe("states that name their card", () => {
     const broken = buildThing(stateAt("card-1")).removeAll(SM.easeFactor).build();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(broken));
     await writeState(makeRepository(), deck, state);
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1`,
     ]);
   });
@@ -534,7 +540,7 @@ describe("states that name their card", () => {
       save: [],
       remove: [{ cardId: "card-1", direction: "front-to-back" }],
     });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#rs-1`,
       `${deck.reviewsDocumentUrl}#rs-2`,
       `${deck.reviewsDocumentUrl}#card-2`,
@@ -558,7 +564,7 @@ describe("states that name their card", () => {
       remove: [{ cardId: "card-1", direction: "front-to-back" }],
       every: true,
     });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#rs-2`,
       `${deck.reviewsDocumentUrl}#fsrs-1`,
       `${deck.reviewsDocumentUrl}#card-2`,
@@ -575,7 +581,7 @@ describe("states that name their card", () => {
     await writeState(repository, upgraded, updated);
     const thing = getThing(savedDataset(), `${deck.reviewsDocumentUrl}#rs-7`)!;
     expect(getUrl(thing, SM.reviewOf)).toBe(`${upgraded.cardsDocumentUrl}#card-1`);
-    expect(getThingAll(savedDataset())).toHaveLength(1);
+    expect(statesOf(savedDataset())).toHaveLength(1);
   });
 
   it("write many states in one save, each onto its own subject", async () => {
@@ -591,7 +597,7 @@ describe("states that name their card", () => {
       remove: [],
     });
     const saved = savedDataset();
-    expect(getThingAll(saved)).toHaveLength(300);
+    expect(statesOf(saved)).toHaveLength(300);
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#rs-7`)!, deck)).toMatchObject({
       cardId: "card-7",
       repetitions: 3,
@@ -665,7 +671,7 @@ describe("FSRS-6 states, this app's own", () => {
       remove: [],
       fsrs: { save: [graded], remove: [] },
     });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1`,
       `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
     ]);
@@ -693,7 +699,7 @@ describe("FSRS-6 states, this app's own", () => {
       fsrs: { save: [{ ...other, due: "2026-09-29" }], remove: [key] },
     });
     const saved = savedDataset();
-    expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
+    expect(statesOf(saved).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1`,
       `${deck.reviewsDocumentUrl}#x`,
       `${deck.reviewsDocumentUrl}#card-2@fsrs6`,
@@ -705,7 +711,7 @@ describe("FSRS-6 states, this app's own", () => {
 
   it("are created with SM-2's in a new document", async () => {
     await makeRepository().createReviewStates(deck, { sm2: [state], fsrs: [fsrs] });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1`,
       `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
     ]);
@@ -718,7 +724,7 @@ describe("FSRS-6 states, this app's own", () => {
       remove: [],
       fsrs: { save: [fsrs], remove: [] },
     });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
     ]);
   });
@@ -734,7 +740,7 @@ describe("FSRS-6 states, this app's own", () => {
       ),
     );
     await makeRepository().applyReviewChanges(deck, { save: [], remove: [key], every: true });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#other-1`,
       `${deck.reviewsDocumentUrl}#card-2@fsrs6`,
     ]);
@@ -743,7 +749,7 @@ describe("FSRS-6 states, this app's own", () => {
   it("stay when only the SM-2 state read is removed, without every", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), namedFsrs(fsrs)));
     await makeRepository().applyReviewChanges(deck, { save: [], remove: [key] });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+    expect(statesOf(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
     ]);
   });

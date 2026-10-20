@@ -55,7 +55,7 @@ export function toStoredLayout(dataset: SolidDataset, catalogUrl: string): Store
     const url = asUrl(thing);
     groups.push(deckGroupFromRecord(url, migrate("deckGroup", read.record, { subject: url })));
   }
-  const decks = toDecks(dataset);
+  const decks = toDecks(dataset, catalogUrl);
   const deckPositions = new Map<string, number>();
   for (const deck of decks) {
     const position = getInteger(getThing(dataset, deck.url)!, SM.position);

@@ -34,6 +34,7 @@ import {
   catalogNodeUrlOf,
   catalogUrlOf,
   historyContainerOf,
+  isInstanceAddress,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
@@ -223,7 +224,12 @@ export interface InstanceRegistration {
   title: string | null;
 }
 
-/** All sm:Instance registrations in a type index document. */
+/**
+ * All sm:Instance registrations in a type index document: those naming
+ * an http(s) address with no query, fragment or dot segment
+ * (isInstanceAddress), as written. A registration is data any app may
+ * have written, and every address of the instance is made from it.
+ */
 export async function readInstanceRegistrations(
   indexUrl: string,
   fetch: Fetch,
@@ -235,7 +241,7 @@ export async function readInstanceRegistrations(
     if (!types.includes(SOLID.TypeRegistration)) continue;
     if (!getUrlAll(thing, SOLID.forClass).includes(SM.Instance)) continue;
     const containerUrl = getUrl(thing, SOLID.instanceContainer) ?? getUrl(thing, SOLID.instance);
-    if (containerUrl === null) continue;
+    if (containerUrl === null || !isInstanceAddress(containerUrl)) continue;
     registrations.push({
       containerUrl,
       title: getStringNoLocale(thing, DCTERMS.title),

@@ -95,6 +95,8 @@ export const ERROR_TEMPLATES = {
     "Part of your study in this browser changed while it was being copied, perhaps in another tab, so it is kept here. Try again.",
   guestStudyBeingMoved:
     "Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.",
+  writeRefused:
+    "Solid Memo stopped a change to your Pod for safety: it would have been saved at an address Solid Memo never saves to. Nothing was changed.",
   deckChangedSinceOffer:
     "The deck changed since the update was offered, perhaps in another tab or app, so nothing was changed. Look at the offer again.",
   deckChangedDuringUpgrade:
@@ -115,6 +117,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo did not save this: it is not in the format Solid Memo expects. Nothing was changed. Reload the page and try again.",
   deckGone: "The deck “{deck}” no longer exists. Perhaps it was removed in another tab or app.",
   cardsDocumentGone: "The cards of “{deck}” can no longer be found. Reload the page and try again.",
+  deckDocumentUnclaimed:
+    "Solid Memo did not change “{deck}”: its documents do not say they belong to this deck. Nothing was changed. Where the data check lists the deck, confirm that they are its documents, then try again.",
   cardGone:
     "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
   notADeck: "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
@@ -139,6 +143,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
   notAReleaseFile:
     "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
+  draftIdUnsupported:
+    "This draft names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. Solid Memo does not open or change it.",
   releaseIdUnsupported:
     "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
   releaseTaken:

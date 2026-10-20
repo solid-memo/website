@@ -35,6 +35,7 @@ import {
   RDF_TYPE,
   type DraftTriple,
   type ReleaseDraft,
+  unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
@@ -42,8 +43,8 @@ import { addCatalogLink, catalogLinks, removeCatalogLink } from "./catalogLinks"
 import { deleteContainerIfEmpty } from "./containers";
 import {
   deleteDataset,
-  deleteIfPresent,
   getSolidDatasetOrNull,
+  removeOwned,
   readDataset,
   saveDataset,
   versionOf,
@@ -63,6 +64,7 @@ import {
   tripleKey,
   type DraftEntry,
 } from "./mappers/releaseDraftMapper";
+import { draftSubjects } from "./ownership";
 import { recordThing, removeUnlessNewer, storedVersionOf } from "./records";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
 import { turtleOf } from "./turtleWriter";
@@ -154,6 +156,9 @@ export function createSolidReleaseDraftRepository({
     );
     const draft = draftFromQuads(quads, draftUrl);
     if (draft === null) throw new AppError("draftGone");
+    // Its documents are anyone's to write: an id no draft has could name a chapter's document outside its container.
+    const unsupported = unsupportedIdOf(draft);
+    if (unsupported !== null) throw new AppError("draftIdUnsupported", { id: unsupported });
     const version = versionOfDocuments(urls, datasets);
     reads.set(draftUrl, {
       version,
@@ -430,9 +435,10 @@ export function createSolidReleaseDraftRepository({
     },
 
     async delete(draft) {
-      await deleteDraftResources(draft.url, fetch);
+      const keptDocuments = await deleteDraftResources(draft.url, fetch);
       reads.delete(draft.url);
       await removeCatalogLink(draft.instanceUrl, SM.releaseDraft, draft.url, fetch);
+      return { keptDocuments };
     },
   };
 }
@@ -500,29 +506,39 @@ export async function draftDocumentsIn(
  * release document last, so a delete cut short still finds the draft;
  * then its container, the one named after it, and the instance's
  * `drafts/`, each only if it is then empty. Anything else in them,
- * another app's, is kept, and so is the container holding it.
+ * another app's, is kept, and so is the container holding it. Returns
+ * the documents kept for another app's data in them.
  */
 export async function deleteDraftResources(
   draftUrl: string,
   fetch: typeof globalThis.fetch,
-): Promise<void> {
+): Promise<string[]> {
   const urls = await draftDocumentsIn(draftUrl, fetch);
-  await deleteDocuments(draftUrl, [...urls.filter((one) => one !== draftUrl), draftUrl], fetch);
+  return deleteDocuments(draftUrl, [...urls.filter((one) => one !== draftUrl), draftUrl], fetch);
 }
 
-/** Delete the documents, in order, then the draft's containers, each only if it is then empty. */
+/**
+ * Remove the draft's subjects from the documents, in order, each
+ * deleted when nothing else is left in it (removeOwned, draftSubjects),
+ * then the draft's containers, each only if it is then empty. Returns
+ * the documents kept for what else they hold.
+ */
 async function deleteDocuments(
   draftUrl: string,
   urls: readonly string[],
   fetch: typeof globalThis.fetch,
-): Promise<void> {
-  for (const url of urls) await deleteIfPresent(url, fetch);
+): Promise<string[]> {
+  const kept: string[] = [];
+  for (const url of urls) {
+    if ((await removeOwned(url, draftSubjects, fetch)) === "kept") kept.push(url);
+  }
   const container = draftContainerOf(draftUrl);
   const named = container.slice(0, container.slice(0, -1).lastIndexOf("/") + 1);
   const drafts = named.slice(0, named.slice(0, -1).lastIndexOf("/") + 1);
   for (const one of [container, named, drafts]) {
-    if (!(await deleteContainerIfEmpty(one, fetch))) return;
+    if (!(await deleteContainerIfEmpty(one, fetch))) break;
   }
+  return kept;
 }
 
 /** The subjects of entries their shapes describe: what the write check checks. */

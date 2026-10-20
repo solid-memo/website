@@ -77,7 +77,10 @@ function makeRepository(
   checkWrite?: Parameters<typeof createSolidDeckRepository>[0]["checkWrite"],
 ) {
   return createSolidDeckRepository({
-    fetch: vi.fn() as unknown as typeof globalThis.fetch,
+    // The instance's folder, asked whether it is its own: it is; a document, read to remove from: it is empty.
+    fetch: vi.fn(
+      async () => new Response("", { headers: { "Content-Type": "text/turtle" } }),
+    ) as unknown as typeof globalThis.fetch,
     now: () => new Date("2026-09-21T10:00:00.000Z"),
     randomId: () => "fixed",
     ...(checkWrite === undefined ? {} : { checkWrite }),
@@ -1646,20 +1649,35 @@ describe("library upgrade writes", () => {
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 
-  it("deleteDocument deletes a document there is, and nothing when it is gone", async () => {
+  it("deleteDocument deletes a document of the deck there is, and nothing when it is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(STAGED));
-    await makeRepository().deleteDocument(STAGED);
+    await makeRepository().deleteDocument(deck, STAGED);
     expect(deleteSolidDataset).toHaveBeenCalledWith(STAGED, expect.anything());
     vi.mocked(deleteSolidDataset).mockReset();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await makeRepository().deleteDocument(STAGED);
+    await makeRepository().deleteDocument(deck, STAGED);
     expect(deleteSolidDataset).not.toHaveBeenCalled();
   });
 });
 
 describe("the cards document itself", () => {
+  it("is never taken for the deck's when it says it is another deck's", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: deck.cardsDocumentUrl }))
+          .addUrl(DCTERMS.isPartOf, `${CATALOG}#deck-2`)
+          .build(),
+      ) as never,
+    );
+    await expect(
+      makeRepository().addCard(deck, { front: { "": "火" }, back: { "": "fire" } }),
+    ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
   it("is part of the deck once, keeping what else it is part of, through every write", async () => {
-    const other = `${CATALOG}#deck-2`;
+    const other = "https://other.example/collections/japanese";
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
         mockSolidDatasetFrom(deck.cardsDocumentUrl),
