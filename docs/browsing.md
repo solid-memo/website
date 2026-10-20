@@ -150,4 +150,4 @@ added from a link has none of them: it is read only to be added
   `CardCreator.ts`, `CardEditor.ts` and `LibraryPreview.ts` in
   [e2e/journeys/pages/](../e2e/journeys/pages/). The steps and
   screenshots of CI's run on the version the site runs are online at
-  <https://solid-memo.com/journeys/>.
+  <https://journeys.solid-memo.com/>.

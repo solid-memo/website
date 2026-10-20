@@ -48,8 +48,8 @@ export default defineConfig({
     // For the CI job's summary (harness/summary.ts).
     ["json", { outputFile: "test-results/results.json" }],
     // In CI, also each job's run as a blob, to merge into one report of
-    // every browser's journeys: the one published at /journeys/
-    // (docs/testing.md#user-journeys).
+    // every browser's journeys: the one published at journeys.solid-memo.com
+    // (docs/deployment.md#the-journeys-report).
     ...(CI ? ([["github"], ["blob"]] as const) : []),
   ],
   use: {

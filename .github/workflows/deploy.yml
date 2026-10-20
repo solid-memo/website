@@ -158,7 +158,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
       attestations: read
       # To set up GitHub Pages, before the artifact is uploaded.
       pages: write
@@ -201,17 +200,8 @@ jobs:
       # The artifact is the whole site: the app, and beside it what the
       # build writes: ns/, decks/, the vendored shapes, robots.txt, the
       # sitemap and the docs; then every release's docs under docs/X.Y.Z/
-      # (docs/deployment.md).
-      # The user journeys' report of the CI run deployed from, its traces
-      # viewable step by step, at /journeys/ (docs/deployment.md). A run by
-      # hand has no CI run, so no report.
-      - if: github.event_name == 'workflow_run'
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: journeys-report
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ github.token }}
-          path: apps/web/dist/journeys
+      # (docs/deployment.md). The user journeys' report is not in it: the
+      # journeys job publishes it on a site of its own.
       # robots.txt always, and the sitemap whenever CNAME names a domain
       # (docs/deployment.md#custom-domain-optional); the docs, with their
       # diagrams drawn and the font's license beside them (docs/markdown.md),
@@ -270,3 +260,103 @@ jobs:
           fi
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # The user journeys' report of the CI run deployed from, its traces
+  # viewable step by step, published at journeys.solid-memo.com from the
+  # repository solid-memo/journeys (docs/deployment.md#the-journeys-report):
+  # a site of its own, so the report's scripts do not run on the app's
+  # origin. Each release replaces that repository's main with one commit,
+  # so it keeps only the newest report. A run by hand has no CI run, so no
+  # report.
+  journeys:
+    needs: [version, deploy]
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    # To download the report from the CI run.
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 15
+    # Its secret is the journeys repository's deploy key, with write
+    # access; the environment admits only main.
+    environment:
+      name: journeys
+      url: https://journeys.solid-memo.com/
+    env:
+      JOURNEYS_REPO: solid-memo/journeys
+      JOURNEYS_HOST: journeys.solid-memo.com
+    steps:
+      # A copy without the key, such as a fork, publishes no report, and
+      # says so.
+      - name: The deploy key is set
+        id: key
+        env:
+          KEY: ${{ secrets.JOURNEYS_DEPLOY_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::notice::No JOURNEYS_DEPLOY_KEY secret (in the journeys environment), so the journeys' report is not published (docs/deployment.md#the-journeys-report)."
+            echo "set=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "set=true" >> "$GITHUB_OUTPUT"
+          fi
+      # As in the deploy job: re-running this job alone of an older run
+      # must not put an older version's report back.
+      - if: steps.key.outputs.set == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: .github
+          persist-credentials: false
+      - name: The tag is still the newest version
+        if: steps.key.outputs.set == 'true'
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          newest=$(git tag --merged origin/main --list 'v[0-9]*' --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+          if [ "$TAG" != "$newest" ]; then
+            echo "::error::$TAG is no longer the newest version on main ($newest is), so its journeys' report is not published (docs/deployment.md)."
+            exit 1
+          fi
+      - if: steps.key.outputs.set == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: journeys-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/journeys
+      # The report, with the files Pages needs beside it: CNAME, which
+      # keeps the custom domain, .nojekyll, so Pages serves the files as
+      # they are, and robots.txt, which keeps search engines out. One
+      # commit with no parent, force-pushed over main. The key is written
+      # to a file for this step alone, which git's ssh reads, as in
+      # release.yml; GitHub's host keys come from its API.
+      - name: Publish the report to the journeys repository
+        if: steps.key.outputs.set == 'true'
+        env:
+          KEY: ${{ secrets.JOURNEYS_DEPLOY_KEY }}
+          TAG: ${{ needs.version.outputs.tag }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ssh="$(mktemp -d "$RUNNER_TEMP/journeys-ssh.XXXXXX")"
+          trap 'rm -rf "$ssh"' EXIT
+          (umask 077 && printf '%s\n' "$KEY" > "$ssh/key")
+          unset KEY
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
+          cd "$RUNNER_TEMP/journeys"
+          test -f index.html
+          echo "$JOURNEYS_HOST" > CNAME
+          touch .nojekyll
+          printf 'User-agent: *\nDisallow: /\n' > robots.txt
+          git init --quiet -b main
+          git add -A
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet \
+            -m "chore: publish the journeys report of $TAG" \
+            -m "The user journeys' report of the CI run on $TAG in $GITHUB_REPOSITORY ($RUN_URL). Each release replaces main with one commit, so this repository keeps only the newest report."
+          git push --force "git@github.com:$JOURNEYS_REPO.git" main
+          echo "Published the journeys' report of $TAG at https://$JOURNEYS_HOST/."

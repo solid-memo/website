@@ -260,8 +260,8 @@ the user journeys in every browser among them, are skipped, and cannot
 hold up the deploy. Should CI not have passed its parent on `main` (a release
 commit pushed by hand), every job runs.
 
-The report of the journeys the site publishes at `/journeys/`
-([deployment.md](deployment.md)) still has every browser's: the release
+The report of the journeys the deploy publishes at `journeys.solid-memo.com`
+([deployment.md](deployment.md#the-journeys-report)) still has every browser's: the release
 commit's run takes the journeys from the run that ran them on its code,
 which the gate names (`tested-by`). That is its parent's merge queue
 run, which keeps the journeys' traces and reports for this, or, for a

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- The user journeys' report's old address (docs/deployment.md#the-journeys-report).
+       It is now a site of its own, so this sends /journeys/#x on to
+       https://journeys.solid-memo.com/#x. The one script it lets run is the
+       one below, by its hash (src/journeysRedirect.test.ts checks it still
+       matches). -->
+  <meta http-equiv="Content-Security-Policy"
+    content="script-src 'sha256-E5TjoEdOnCKfed/0Gf3AmDP3Yfn4FfcR5xSl3nhMzMg='; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Solid Memo's user journeys</title>
+  <script>
+    location.replace("https://journeys.solid-memo.com/" + location.hash);
+  </script>
+</head>
+
+<body>
+  <p><a href="https://journeys.solid-memo.com/">Solid Memo's user journeys</a></p>
+</body>
+
+</html>

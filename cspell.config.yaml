@@ -175,6 +175,7 @@ words:
   - beforeunload
   - bookmarkable
   - crawlable
+  - nojekyll
   # Mermaid's accDescr, a diagram's description for screen readers
   - Descr
   - distractor

@@ -12,7 +12,8 @@ explains how that part works. The [user journeys](testing.md#user-journeys)
 are the same walk-through as automated tests: they click through the
 real app in a browser on every change. The report of CI's run on the
 version the site runs, with a screenshot of every step, is online at
-<https://solid-memo.com/journeys/> (none after a deploy by hand).
+<https://journeys.solid-memo.com/> (after a deploy by hand, still the
+last release's).
 The table at the [end](#the-journeys) says which journey shows which
 part.
 
@@ -436,7 +437,7 @@ as two tables.
 
 Each [user journey](testing.md#user-journeys) is a test that clicks
 through the app as a learner would. Its numbered steps are the ones in
-the [online report](https://solid-memo.com/journeys/), with a
+the [online report](https://journeys.solid-memo.com/), with a
 screenshot of each.
 
 | You want to see | Journey | Steps |
