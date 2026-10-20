@@ -34,6 +34,7 @@ import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleas
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
+import { etagMarksEveryEdit } from "./serverTraits";
 
 /** A Markdown check that finds nothing, each text one chunk: what these tests publish is plain text. */
 const NO_MARKDOWN_PROBLEMS = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
@@ -68,8 +69,13 @@ function page(fetch: typeof globalThis.fetch = globalThis.fetch) {
       releaseFetch: routedFetch({ origin: SITE, local: shapesFetch, remote: fetch }),
       checkWrite,
     }),
-    releasePublisher: createSolidReleasePublisher({ fetch, publicFetch: fetch }),
+    releasePublisher: publisherOver(fetch),
   });
+}
+
+/** The release publisher as createAppUseCases wires it, every request through `network`. */
+function publisherOver(network: typeof globalThis.fetch) {
+  return createSolidReleasePublisher({ fetch: network, publicFetch: network });
 }
 
 /**
@@ -218,7 +224,7 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     const creator = await seed(server);
     const learner = await seed(server);
     const useCases = page();
-    const publisher = createSolidReleasePublisher({ fetch, publicFetch: fetch });
+    const publisher = publisherOver(fetch);
     const v1 = releaseUrlIn(releasesContainerOf(creator.url), "capitals", 1);
     const v2 = releaseUrlIn(releasesContainerOf(creator.url), "capitals", 2);
     await publisher.publish(creator.url, capitals(v1, 1), v1);
@@ -238,8 +244,8 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     expect((await useCases.listCards(copy)).map((card) => card.id)).toEqual(["se"]);
 
     // The creator's catalog, readable here, lists what its instance published: none newer yet, then version 2.
-    const listed = async () =>
-      (await useCases.listLibraryUpdates(learner.url)).map(
+    const listed = async (reader = useCases) =>
+      (await reader.listLibraryUpdates(learner.url)).map(
         ({ series, version, newer, fromLink }) => ({
           series: series?.url,
           version,
@@ -249,8 +255,12 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
       );
     expect(await listed()).toEqual([{ series: v1, version: "1", newer: false, fromLink: true }]);
     await publisher.publish(creator.url, capitals(v1, 2), v2);
-    expect(await listed()).toEqual([{ series: v2, version: "1", newer: true, fromLink: true }]);
-    await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({
+    // A server whose ETag an edit in the same second keeps answers this page's reads as unchanged: a later visit reads it.
+    const reader = (await etagMarksEveryEdit(server)) ? useCases : page();
+    expect(await listed(reader)).toEqual([
+      { series: v2, version: "1", newer: true, fromLink: true },
+    ]);
+    await expect(reader.planLibraryUpgrade(copy)).resolves.toMatchObject({
       fromVersion: "1",
       toVersion: "2",
       releaseUrl: v2,
@@ -300,6 +310,7 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     await expect(useCases.deleteInstance({ webId }, instance)).resolves.toEqual({
       keptFolder: instance.url,
       keptReleases: true,
+      keptDocuments: [],
     });
     expect((await fetch(target, { headers: { accept: "text/turtle" } })).status).toBe(200);
   });

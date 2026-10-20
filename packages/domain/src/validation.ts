@@ -68,9 +68,24 @@ export interface DocumentReport {
   subjects: SubjectReport[];
 }
 
+/**
+ * A deck whose documents do not say they are its own, outside the
+ * instance's own folder (docs/data-model.md, "Where an instance's
+ * documents are"): read and studied from, never written to or deleted,
+ * until the user claims them. They are not checked until then.
+ */
+export interface UnclaimedDeck {
+  deckUrl: string;
+  title: LangText;
+  /** The documents that do not say so, as the catalog names them. */
+  documents: string[];
+}
+
 export interface ValidationReport {
   instanceUrl: string;
   documents: DocumentReport[];
+  /** The decks whose documents are unclaimed, when there are any; not a violation: they block nothing. */
+  unclaimed?: UnclaimedDeck[];
   /** Results of severity "violation" across every document. */
   violationCount: number;
   conforms: boolean;
@@ -84,6 +99,15 @@ export function summarize(instanceUrl: string, documents: DocumentReport[]): Val
     )
     .filter((violation) => violation.severity === "violation").length;
   return { instanceUrl, documents, violationCount, conforms: violationCount === 0 };
+}
+
+/** The report, naming the decks whose documents are unclaimed when there are any (`unclaimed`), else none. */
+export function withUnclaimed(
+  report: ValidationReport,
+  unclaimed: readonly UnclaimedDeck[],
+): ValidationReport {
+  const { unclaimed: _, ...rest } = report;
+  return unclaimed.length === 0 ? rest : { ...rest, unclaimed: [...unclaimed] };
 }
 
 function failing(subject: SubjectReport): boolean {

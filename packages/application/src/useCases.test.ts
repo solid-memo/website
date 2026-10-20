@@ -160,7 +160,11 @@ function makeDeps() {
     })),
     createInstance: vi.fn(async () => instance),
     attachInstance: vi.fn(async () => instance),
-    deleteInstance: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
+    deleteInstance: vi.fn(async () => ({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    })),
     readMeta: vi.fn(async () => null),
     saveMeta: vi.fn(async () => undefined),
     renameRegistrations: vi.fn(async () => undefined),
@@ -180,8 +184,8 @@ function makeDeps() {
     renameDeck: vi.fn(async () => deck),
     saveDeck: vi.fn(async (saved) => saved),
     saveDecks: vi.fn(async (saved) => [...saved]),
-    removeDeck: vi.fn(async () => undefined),
-    removeDecks: vi.fn(async () => undefined),
+    removeDeck: vi.fn(async () => ({ keptDocuments: [] })),
+    removeDecks: vi.fn(async () => ({ keptDocuments: [] })),
     readDeckTree: vi.fn(async () => ({
       children: [{ kind: "deck" as const, deck }],
       readOnly: false,
@@ -208,6 +212,8 @@ function makeDeps() {
     upgradeDecks: vi.fn(async () => true),
     upgradeDeckEntry: vi.fn(async (_current, next) => next),
     deleteDocument: vi.fn(async () => undefined),
+    unclaimedDocuments: vi.fn(async () => []),
+    claimDocuments: vi.fn(async () => undefined),
     completeChapter: vi.fn(async (completed, chapterUrl) => ({
       ...completed,
       completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
@@ -1173,11 +1179,13 @@ describe("createUseCases", () => {
     vi.mocked(deps.instanceRepository.deleteInstance).mockResolvedValue({
       keptFolder: instance.url,
       keptReleases: false,
+      keptDocuments: [`${instance.url}catalog.ttl`],
     });
     const useCases = createUseCases(deps);
     await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
       keptFolder: instance.url,
       keptReleases: false,
+      keptDocuments: [`${instance.url}catalog.ttl`],
     });
     expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
       webId: session.webId,
@@ -3516,6 +3524,42 @@ describe("the instance digest", () => {
     );
   });
 
+  it("names the decks whose documents are unclaimed, and checks those documents not, in every check", async () => {
+    const { deps, useCases } = setup();
+    deps.deckRepository.unclaimedDocuments = vi.fn(async () => [deck.reviewsDocumentUrl]);
+    const unclaimed = [
+      { deckUrl: deck.url, title: deck.title, documents: [deck.reviewsDocumentUrl] },
+    ];
+    const quick = await useCases.checkInstance(instance.url);
+    expect(quick.unclaimed).toEqual(unclaimed);
+    expect(quick.documents.map((document) => document.url)).toContain(deck.cardsDocumentUrl);
+    expect(quick.documents.map((document) => document.url)).not.toContain(deck.reviewsDocumentUrl);
+    const full = await useCases.validateInstance(instance.url);
+    expect(full.unclaimed).toEqual(unclaimed);
+    expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalledWith(
+      deck.reviewsDocumentUrl,
+      "pod",
+    );
+    const health = await useCases.checkDeck(instance.url, deck, {
+      plain: (value) => value,
+      check: () => [],
+    });
+    expect(health.report.unclaimed).toEqual(unclaimed);
+    expect(
+      vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
+    ).not.toContain(deck.reviewsDocumentUrl);
+  });
+
+  it("claims a deck's documents as the user confirmed, a deck of the instance only", async () => {
+    const { deps, useCases } = setup();
+    await useCases.claimDeckDocuments(instance.url, deck.url);
+    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck);
+    await expect(
+      useCases.claimDeckDocuments(instance.url, `${instance.url}catalog.ttl#deck-other`),
+    ).rejects.toMatchObject({ code: "deckGone" });
+    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps no drafts without a repository of them", async () => {
     const useCases = createUseCases(makeDeps());
     await expect(useCases.listReleaseDrafts(instance.url)).resolves.toEqual([]);
@@ -3523,9 +3567,9 @@ describe("the instance digest", () => {
       useCases.getReleaseDraft(`${instance.url}drafts/a/v1/release.ttl`),
     ).rejects.toThrow("This app keeps no drafts.");
     await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([]);
-    await expect(useCases.makeReleasePublic(`${instance.url}releases/a/v1.ttl`)).rejects.toThrow(
-      "This app keeps no drafts.",
-    );
+    await expect(
+      useCases.makeReleasePublic(instance.url, `${instance.url}releases/a/v1.ttl`, session.webId),
+    ).rejects.toThrow("This app keeps no drafts.");
   });
 
   it("reads no document of an instance as a graph without a reader of them", async () => {
@@ -5142,6 +5186,22 @@ describe("library deck upgrade", () => {
     });
   });
 
+  it("says nothing changed when the deck's documents are refused before anything is sent: unclaimed, or a deck that cannot be used", async () => {
+    for (const code of ["deckDocumentUnclaimed", "deckGone"] as const) {
+      const { deps, copy, plan, useCases } = await world();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+        new AppError(code, { deck: copy.title }),
+      );
+      await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toEqual({
+        ok: false,
+        step: "cards",
+        error: new AppError(code, { deck: copy.title }),
+        changed: false,
+      });
+      expect(deps.deckRepository.upgradeDeckEntry).not.toHaveBeenCalled();
+    }
+  });
+
   it("stops where a write fails, nothing put back, and offered again it finishes, no card it wrote taken for the user's", async () => {
     const { deps, pod, copy, plan, useCases, v2 } = await world();
     vi.mocked(deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(
@@ -5597,11 +5657,21 @@ describe("library deck upgrade", () => {
       expect(deps.updateJournal.end).not.toHaveBeenCalled();
     });
 
+    it("transferGuestStudy moves the study to the target as a request sends its address", async () => {
+      const { deps } = guestDeps();
+      const typed = TARGET.replace("https://", "HTTPS://").replace(/\/$/, "");
+      await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: ` ${typed} `,
+        registrationTarget: "public",
+      });
+      expect(deps.instanceCopier.ensureAbsent).toHaveBeenCalledWith(TARGET);
+    });
+
     it("transferGuestStudy deletes the whole guest pod with its last instance", async () => {
       const { deps, guestPod } = guestDeps();
       vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
         vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
-        return { keptFolder: null, keptReleases: false };
+        return { keptFolder: null, keptReleases: false, keptDocuments: [] };
       });
       await createUseCases(deps).transferGuestStudy(session, guestInstance, {
         containerUrl: TARGET,
@@ -6142,7 +6212,7 @@ describe("library deck upgrade", () => {
         });
         vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
           vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
-          return { keptFolder: null, keptReleases: false };
+          return { keptFolder: null, keptReleases: false, keptDocuments: [] };
         });
         const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, {
           skip: [course.url],
@@ -6561,8 +6631,14 @@ describe("library deck upgrade", () => {
         // The entry was not written after all: the documents nothing names go.
         expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(`${TARGET}catalog.ttl#deck-n2`);
         expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
-          [`${TARGET}decks/deck-n2.ttl`],
-          [`${TARGET}reviews/deck-n2.ttl`],
+          [
+            expect.objectContaining({ url: `${TARGET}catalog.ttl#deck-n2` }),
+            `${TARGET}decks/deck-n2.ttl`,
+          ],
+          [
+            expect.objectContaining({ url: `${TARGET}catalog.ttl#deck-n2` }),
+            `${TARGET}reviews/deck-n2.ttl`,
+          ],
         ]);
         expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
         expect(journal.size).toBe(1);
@@ -6580,7 +6656,10 @@ describe("library deck upgrade", () => {
         expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
         // The cards document it wrote goes; the reviews document someone else created stays.
         expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
-          [`${TARGET}decks/deck-n1.ttl`],
+          [
+            expect.objectContaining({ url: `${TARGET}catalog.ttl#deck-n1` }),
+            `${TARGET}decks/deck-n1.ttl`,
+          ],
         ]);
 
         const lost = mergeDeps();
@@ -6607,7 +6686,10 @@ describe("library deck upgrade", () => {
         ).toMatchObject({ ok: false, step: "decks" });
         // A write whose answer was lost may have been made: its document goes, as nothing names it.
         expect(vi.mocked(unknown.deps.deckRepository.deleteDocument).mock.calls).toEqual([
-          [`${TARGET}decks/deck-n1.ttl`],
+          [
+            expect.objectContaining({ url: `${TARGET}catalog.ttl#deck-n1` }),
+            `${TARGET}decks/deck-n1.ttl`,
+          ],
         ]);
       });
 

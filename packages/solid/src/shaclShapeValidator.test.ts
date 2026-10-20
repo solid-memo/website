@@ -178,6 +178,86 @@ describe("createShaclShapeValidator", () => {
     expect(validate).not.toHaveBeenCalled();
   });
 
+  it("names a deck whose entry or documents no deck's may have, and only it", async () => {
+    const instance = "https://pod.example/solid-memo/a/";
+    const entry = (url: string, cards: string, reviews: string) =>
+      buildThing(createThing({ url }))
+        .addIri(RDF.type, SM.Deck)
+        .addInteger(SM.formatVersion, 6)
+        .addIri(SM.cardsDocument, cards)
+        .addIri(SM.reviewsDocument, reviews)
+        .build();
+    const elsewhere = "https://pod.example/profile/card";
+    const climbing = `${instance}reviews/%2e%2e/%2e%2e/private/diary.ttl`;
+    const other = "https://pod.example/solid-memo/b/catalog.ttl#deck-4";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      [
+        entry(`${DOC}#deck-1`, `${instance}decks/deck-1.ttl`, `${instance}reviews/deck-1.ttl`),
+        entry(`${DOC}#deck-2`, elsewhere, `${instance}reviews/deck-2.ttl`),
+        entry(`${DOC}#deck-3`, `${instance}decks/deck-3.ttl`, climbing),
+        entry(`${DOC}#deck-5`, `${instance}decks/deck-5.ttl.acl`, `${instance}meta.ttl`),
+        entry(
+          other,
+          "https://pod.example/solid-memo/b/decks/deck-4.ttl",
+          `${instance}reviews/x.ttl`,
+        ),
+      ].reduce(setThing, mockSolidDatasetFrom(DOC)),
+    );
+    const { validator } = makeValidator();
+    const report = await validator.validateDocument(DOC);
+    const placed = Object.fromEntries(
+      report.subjects.map((subject) => [
+        subject.url,
+        subject.status === "checked"
+          ? subject.violations
+              .filter((v) => v.constraint === "DeckPlace")
+              .map((v) => [v.path ?? null, v.value, v.severity, v.builtIn])
+          : [],
+      ]),
+    );
+    expect(placed).toEqual({
+      [`${DOC}#deck-1`]: [],
+      // Read wherever it is: whether it may be written is what the document says.
+      [`${DOC}#deck-2`]: [],
+      [`${DOC}#deck-3`]: [[SM.reviewsDocument, climbing, "violation", true]],
+      [`${DOC}#deck-5`]: [
+        [SM.cardsDocument, `${instance}decks/deck-5.ttl.acl`, "violation", true],
+        [SM.reviewsDocument, `${instance}meta.ttl`, "violation", true],
+      ],
+      [other]: [[null, other, "violation", true]],
+    });
+    // A draft's deck is a draft's: where its documents are is the draft's layout.
+    const draft = await validator.validateDocument(DOC, "draft");
+    expect(
+      draft.subjects.flatMap((subject) =>
+        subject.status === "checked" ? subject.violations.map((v) => v.constraint) : [],
+      ),
+    ).not.toContain("DeckPlace");
+  });
+
+  it("names no deck of an instance whose address is spelled otherwise than a request sends it", async () => {
+    const instance = "https://Pod.example/kortlekar-å/";
+    const doc = `${instance}catalog.ttl`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(doc),
+        buildThing(createThing({ url: "https://pod.example/kortlekar-%C3%A5/catalog.ttl#deck-1" }))
+          .addIri(RDF.type, SM.Deck)
+          .addInteger(SM.formatVersion, 6)
+          .addIri(SM.cardsDocument, `${instance}decks/deck-1.ttl`)
+          .addIri(SM.reviewsDocument, "https://pod.example/kortlekar-%C3%A5/reviews/deck-1.ttl")
+          .build(),
+      ),
+    );
+    const { validator } = makeValidator();
+    const report = await validator.validateDocument(doc);
+    expect(
+      report.subjects.flatMap((subject) =>
+        subject.status === "checked" ? subject.violations.map((v) => v.constraint) : [],
+      ),
+    ).not.toContain("DeckPlace");
+  });
+
   it("reports a missing document as missing, without loading anything", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     const { validator, loader } = makeValidator();
@@ -507,10 +587,8 @@ describe("createShaclShapeValidator", () => {
       ...SHAPE_SOURCES,
     });
     const cardsReport = await validator.validateDocument(CARDS);
-    expect(cardsReport.subjects.find((subject) => subject.url === CARDS)).toEqual({
-      url: CARDS,
-      status: "untyped",
-    });
+    // The document saying it is the deck's is Solid Memo's, and listed as no stray.
+    expect(cardsReport.subjects.find((subject) => subject.url === CARDS)).toBeUndefined();
     expect(
       cardsReport.subjects.flatMap((subject) =>
         "violations" in subject ? subject.violations : [],

@@ -73,6 +73,7 @@ export function InstancePickerContainer({
       onDelete={(instance) => deleteInstanceMutation.mutate(instance)}
       keptFolder={deleteInstanceMutation.data?.keptFolder ?? null}
       keptReleases={deleteInstanceMutation.data?.keptReleases ?? false}
+      keptDocuments={deleteInstanceMutation.data?.keptDocuments.length ?? 0}
     />
   );
 }

@@ -4,7 +4,6 @@
 
 import {
   instanceGraphOf,
-  isInstanceDocumentUrl,
   type GraphDocument,
   type InstanceGraph,
 } from "@solid-memo/domain/instanceGraph";
@@ -13,6 +12,7 @@ import {
   ensureTrailingSlash,
   historyUrlOf,
   instanceDocumentUrls,
+  isDocumentIn,
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type {
@@ -87,7 +87,7 @@ export function createInstanceGraphUseCases({
       ...releases,
     ];
     // As deleting an instance's data does: a deck's document by its address, never a folder.
-    return [...new Set(urls.map(documentUrlOf))].filter((url) => isInstanceDocumentUrl(url, root));
+    return [...new Set(urls.map(documentUrlOf))].filter((url) => isDocumentIn(url, root));
   }
 
   return {

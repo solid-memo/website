@@ -65,9 +65,21 @@ flowchart LR
 - **Instances**: one `solid:TypeRegistration` per instance, `solid:forClass
   sm:Instance`, in the private type index by default. `dcterms:title` on the
   registration names the instance (harmless extra triples). Reading accepts
-  both `solid:instanceContainer` and `solid:instance`. This is how
-  Solid Memo finds its instances, and the only registration it reads to
-  do so.
+  both `solid:instanceContainer` and `solid:instance`, naming an http(s)
+  address with no query, fragment or dot segment (`..`, `%2e%2e` in any
+  case), which would make it seem another folder than the one it leads
+  to (`isInstanceAddress` in
+  [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). It is
+  taken as written: another spelling of a folder (its host's case, a
+  name outside ASCII) is that folder
+  ([below](#where-an-instances-documents-are)). This is how Solid Memo
+  finds its instances, and the only registration it reads to do so. An
+  instance created, attached by URL or moved to from a guest's pod is
+  registered at its address as a request sends it
+  (`HTTPS://Pod.example:443/kortlekar-å` is
+  `https://pod.example/kortlekar-%C3%A5/`, `instanceAddressOf`); text
+  that is no http(s) address is not an instance to attach
+  (`notAnInstanceNoMeta`).
 - **Each class of an instance's data** has a registration of its own,
   so another app finds the kind of data it knows by its class, without
   knowing Solid Memo's layout ([examples below](#registrations)):
@@ -132,9 +144,10 @@ flowchart LR
   [instanceData.ts](../packages/solid/src/instanceData.ts)), then removes
   its registrations, of every class, from both type indexes (below).
   What it wrote: every deck's cards and reviews documents as the
-  catalog names them (only those
-  below the container: the catalog is data, and one naming a document
-  elsewhere must not lead a delete there), the answer log's months
+  catalog names them (only those that are the deck's: ones that say
+  so, or that are in the instance's own folder; the catalog is data,
+  and one naming another's document must not lead a delete there,
+  [below](#where-an-instances-documents-are)), the answer log's months
   (`history/<YYYY-MM>.ttl`), the drafts the catalog links, those in
   the instance's `drafts/` only, as deleting a draft deletes them
   ([Drafts and releases](#drafts-and-releases)), then `preferences.ttl`,
@@ -146,15 +159,28 @@ flowchart LR
   `decks/`, `reviews/`, `history/` and `drafts/`, each only if it is then empty;
   then `meta.ttl`, last of the documents, so a half-deleted instance
   still attaches by URL; and the container itself only if it is then
-  empty. A document's access control goes with it: the Solid Protocol
-  has the server delete a resource's ACL with it. Whether each document
-  is there is asked first (HEAD), since node-solid-server answers a
-  DELETE of what is not there with 401; what is gone counts as deleted.
+  empty. From each document only what is Solid Memo's of its kind is
+  removed ([Write discipline](#write-discipline), `removeOwned`): a
+  deck's cards, their distractors, its review states and the
+  document's saying it is the deck's; the answers of a month
+  (`sm:Answer`); the preferences (`sm:Preferences`); the digest's
+  receipts and schedules; the catalog's subjects (the catalog, its
+  decks, groups, agents and distributions); the instance's `#it`; a
+  draft's subjects and what they lead to. A document is deleted only
+  when nothing else is left in it; one that also holds another app's
+  subjects is kept with those alone, and the result names it
+  (`keptDocuments`). This holds for an instance registered at the pod's
+  root too: it never takes other data with it. A document's access
+  control goes with it: the Solid Protocol has the server delete a
+  resource's ACL with it. Each document is read first, and one that is
+  not there, or goes before the delete, counts as deleted; one that is
+  not RDF is never Solid Memo's, and is kept.
   Anything else in the folder, which another app put there, is kept, as
   are the releases published from the instance (`releases/`), which
   others may have added by their address; so is every container on its
   path: the user is told the folder was kept, and why (another app's
-  files, or the releases, `keptReleases`), with a link to it
+  files, or the releases, `keptReleases`), with a link to it, and how
+  many documents were kept for another app's data in them
   (`KeptFolderNotice`). The delete's confirmation says both are kept. Data goes
   before registration so a failure leaves the instance listed and the
   delete retryable. Every blocking server the end-to-end tests start
@@ -289,7 +315,8 @@ data.
 │                        sm:scheduler sm:fsrs6, #<cardId>@fsrs6 or
 │                        #<cardId>@back-to-front@fsrs6, stability,
 │                        difficulty, due day, its own snapshot;
-│                        sm:formatVersion 1
+│                        sm:formatVersion 1; the document itself (<>)
+│                        dcterms:isPartOf the deck's entry
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
@@ -316,6 +343,112 @@ upgrade by an earlier version of the app moved them to
 `decks/<deckId>-<uuid>.ttl` and `reviews/<deckId>-<uuid>.ttl`. This
 app's upgrade writes them where they are
 ([migrations](migrations.md#how-an-upgrade-is-applied)).
+
+### Where an instance's documents are
+
+A catalog, a type index and every link in them are data, which anyone
+who may write them may have written ([markdown.md](markdown.md#safety):
+pods are untrusted). So an address they name is used only where Solid Memo
+keeps such documents, or, for a deck's documents, only as they allow
+(below), compared as a request would send it: both the
+address and the folder are first taken as a request sends them
+(`new URL(…).href`, `canonicalUrlOf`), which resolves a dot segment
+(`..`, `%2e%2e` in any case) and spells the host and any character
+outside ASCII one way, and only then is the address checked to be in
+the folder (`isDocumentIn` in
+[instanceLayout.ts](../packages/domain/src/instanceLayout.ts); the
+[graph](studio.md#graph) holds to the same rule). So an instance whose
+address is written otherwise, `https://Pod.example/kortlekar-å/`, keeps
+its decks, and a link that climbs out of it does not lead there. After
+the folder, an address may have nothing a server might still read as a
+step out of it, though a request leaves it as it is: a query, a
+fragment, a `;`, an encoded slash, backslash or percent sign (`%2F`,
+`%5C`, `%25`), a NUL, an overlong UTF-8 byte (`%C0`, `%C1`), a `%u`
+escape, a segment that begins with a dot, or an empty one (`//`, which
+a client may merge into one slash). No document Solid Memo names has
+any.
+
+- **A deck's documents are read wherever its entry names them.** Their
+  folders and names are free: a user, or a tool that lays a pod out
+  anew and changes the links, may rename `decks/` and `reviews/`, move
+  the documents elsewhere in the pod, or lay the pod out flat, the
+  instance registered at the pod's root. A deck can be used when its
+  entry is a subject of the instance's `catalog.ttl` and each document
+  is at an address a deck's may be (`isDeckInPlace`,
+  `isDeckDocumentAddress`): plain http(s), no dot segment, nothing after
+  the origin a server might read as a step elsewhere (as above), not a
+  folder, not another resource's access control or metadata (`.acl`,
+  `.acr`, `.meta`), and not one of the instance's own documents (its
+  meta, preferences, catalog and digest, `history/`, `drafts/`,
+  `releases/`). New decks are still made in `decks/` and `reviews/`.
+- **A deck's document is written to, or deleted, only when it says it
+  is the deck's**: the document itself states `<> dcterms:isPartOf
+  <catalog.ttl#deck-X>`, naming this deck's entry (`ownsDocument`;
+  [below](#decks-and-cards)). Only someone who may write the document can
+  state it, so another person's catalog can never make the app change
+  the user's documents. Every write the app makes to a deck's cards or
+  reviews document states it, once.
+- **An older document that does not say so** (one a version before
+  this one, a repair or a copy left as it was) is the deck's when it is
+  in the instance's own folder: one that is not the root of a pod or of
+  a storage (the Solid Protocol's `pim:Storage` type on the folder),
+  which holds the user's other data too. There the next write states it.
+  One that says it is another deck's (a `dcterms:isPartOf` naming any
+  other catalog's entry, such as an instance's nested in this one's
+  folder) is not: the app never adds a second owner by itself, and a
+  write is refused (`deckDocumentUnclaimed`). The data check does not
+  read a document in the instance's own folder to list it as unclaimed,
+  so that checking an unchanged instance downloads nothing.
+  The folder is asked once a session; a pod that does not answer the
+  question (an error or a refusal, `cannotCheck`) is asked again, so the
+  write fails and can be tried again rather than the document taken for
+  unclaimed. A refusal before anything is sent, `deckDocumentUnclaimed`
+  among them, leaves a library upgrade saying nothing was changed.
+  A document not yet made is made only in the instance's folder.
+  Anywhere else the app never states it by itself: the document is
+  **unclaimed**. The deck is read and studied from, but no answer, edit
+  or removal touches the document, which is refused with
+  `deckDocumentUnclaimed` before anything is sent, and removing the deck
+  removes only its entry. The [instance check](validation.md#flow)
+  names such a deck with the documents' addresses, on Solid Memo's data
+  check and the Studio's [Health](studio.md#health) screen, with "These
+  are this deck's documents": once the user confirms, each document
+  says it is the deck's, in one write made only while it is as read
+  (`If-Match`), or one made only where there is none (`claimDeckDocuments`;
+  `createDeckDocumentGuard` in
+  [deckPlace.ts](../packages/solid/src/deckPlace.ts)). Deleting an
+  instance deletes a deck's document only when it is the deck's this
+  way ([instanceData.ts](../packages/solid/src/instanceData.ts)).
+  Removing a deck, or deleting its instance, takes out the document's
+  cards and review states only when every deck it names is leaving;
+  when it says it is another deck's too, only the leaving deck's
+  `dcterms:isPartOf` goes, and the rest stays that deck's
+  (`deckDocumentSubjects` in
+  [ownership.ts](../packages/solid/src/ownership.ts)).
+- **Any other deck is left alone.** It is not listed
+  (`toDecks` in [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)),
+  so nothing reads, writes or deletes through it, whatever the
+  [invalid data policy](validation.md#the-invalid-data-policy). The
+  instance check reports its entry as not conforming (`DeckPlace`,
+  [validation.md](validation.md#flow)), and it can be removed there like
+  any problem with no repair: that removes the entry from the catalog,
+  and no document it names. A deck handed to the adapters from
+  anywhere else is held to the same rule: a write through it is
+  `deckGone`, with nothing written, and removing it removes only its
+  entry (`removeDecks` in
+  [solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts)).
+- **A draft** the catalog links (`sm:releaseDraft`) is one only at
+  `<instance>drafts/<name>/v<N>/release.ttl`, in the instance's
+  `drafts/` as a request sends it and with no dot segment
+  (`draftPlaceOf`): a name that is a dot segment is no draft's.
+- **A release** the catalog links (`sm:publishedRelease`) is listed
+  only at an http(s) address named as a release is, `…/<name>/v<N>.ttl`,
+  written as a request sends it, as the folder it is published in is
+  ([studio.md](studio.md#publishing-a-release)). It is made public again
+  only when the catalog lists it, its document is a release, and it is
+  in the instance or in a storage of the user's that the instance is in
+  too: an instance attached from someone else's pod may list a release
+  of the user's own.
 
 ## Decks and cards
 
@@ -529,19 +662,30 @@ graph LR
   forgotten loses every state it has, SM-2's and FSRS-6's, read or not
   (`applyReviewChanges` with `every`), where a day reset removes only
   the one it read.
-- **The cards document says whose it is.** Every write of a deck's cards
-  document by the deck's own operations (import, adding, editing or
-  removing a card, stating its languages, a course's question joining
-  the deck, the format update's rewrite of outdated cards, a library
-  upgrade's write of the cards, a guest's deck added to an instance) adds `<> dcterms:isPartOf
-  <catalog.ttl#deck-X>` once, on the document itself, so an app that
-  finds a cards document finds its deck. A [repair](validation.md#repair)
-  from the data check and a copy of the instance (a guest's study moved
-  into a new instance) leave the document as it was, so one
-  untouched since vocabulary 1.16 does not say it yet. Another
-  `dcterms:isPartOf` there stays: another app may point two decks at one
-  document. The subject has no class, so no shape checks it, and the
-  [data check](validation.md#flow) lists it as not a Solid Memo subject.
+- **The cards and reviews documents say whose they are.** Every write
+  of a deck's cards or reviews document by the deck's own operations
+  (import, adding, editing or removing a card, stating its languages, an
+  answer, a day reset, a course's question joining the deck, the format
+  update's rewrite of outdated cards and states, a library upgrade's
+  write of the cards and states, a guest's deck added to an instance)
+  adds `<> dcterms:isPartOf <catalog.ttl#deck-X>` once, on the document
+  itself, so an app that finds the document finds its deck, and Solid
+  Memo knows it may change it
+  ([above](#where-an-instances-documents-are)). It is one statement on
+  the document's own subject, never on a card or a review state, so an
+  import or a library upgrade reads and writes the cards and states as
+  without it, and a release is never written. A
+  [repair](validation.md#repair) from the data check and a copy of the
+  instance (a guest's study moved into a new instance) leave the
+  document as it was, so one untouched since vocabulary 1.16 (a reviews
+  document, since this version) does not say it yet. Another
+  `dcterms:isPartOf` there stays: another app may point two decks at
+  one document. One naming another deck's entry is only added to when
+  the user claims the document for this deck too
+  ([above](#where-an-instances-documents-are)). The subject has no class, so no shape checks it; when
+  it says no more than that, it is Solid Memo's (`isDeckBackLink` in
+  [ownership.ts](../packages/solid/src/ownership.ts)), and the
+  [data check](validation.md#flow) does not list it as a stray.
 
 An instance's URL is permanent, and so is every document's and
 subject's in it: the [format update](migrations.md#the-pod-migration)
@@ -697,8 +841,12 @@ applies it to `catalog.ttl` as the pod holds it then:
 write of `catalog.ttl` ([studio.md](studio.md)). A move into a group is
 one `gather` edit, which leaves a deck already in the group where it is,
 so a retry changes nothing. A pace or a direction is one save of every
-entry (`saveDecks`). Removing decks deletes their cards and reviews
-documents first, then their entries in one save (`removeDecks`).
+entry (`saveDecks`). Removing decks removes their cards and review
+states from their cards and reviews documents first, deleting each
+document that then holds nothing else, then their entries in one save
+(`removeDecks`); a document that also holds another app's data is kept
+with that, and the result names it (`keptDocuments`,
+[Write discipline](#write-discipline)).
 
 ## Wrong options
 
@@ -806,7 +954,11 @@ own pod, as a draft, before publishing it
   chapter's document left with nothing in it is deleted. Anything else in
   the container (`isDraftDocumentName` in
   [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) is
-  another app's, and left alone.
+  another app's, and left alone. Every id of a draft is letters,
+  digits, `.`, `_` and `-`, starting with a letter or digit
+  (`DRAFT_ID`), so a chapter's document is always one in the draft's
+  container: a draft whose documents name a subject otherwise is not
+  opened, nor written (`draftIdUnsupported`).
 - **Links on the catalog.** `sm:releaseDraft` names a draft's release
   document, `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's, they belong to no
@@ -849,9 +1001,13 @@ own pod, as a draft, before publishing it
   stores a boolean a PATCH inserts as false. A server with no strong
   ETag gets no `If-Match`, so there an edit made elsewhere meanwhile is
   written over. Deleting a
-  draft deletes its documents, the release document last, then its
-  container and the ones above it (`drafts/<name>/`, `drafts/`) where
-  they are then empty, then the link.
+  draft removes its subjects from its documents, the release document
+  last, deleting each document that then holds nothing else (a
+  document's subjects that nothing of the draft leads to are another
+  app's, and kept, the document with them, which the result names:
+  `keptDocuments`), then its container and the ones above it
+  (`drafts/<name>/`, `drafts/`) where they are then empty, then the
+  link.
 - **A release is frozen.** It is written once, at library deck format 6,
   and describes its series and publisher itself
   ([deck-library.md](deck-library.md#a-release-outside-the-library)).
@@ -869,9 +1025,10 @@ own pod, as a draft, before publishing it
   another draft of the instance names it as its release). Then the release alone is made
   readable by everyone: its own ACL, or its ACR
   ([glossary](glossary.md#solid-and-the-web)), gets public read and
-  nothing else, and no folder's access control is changed (a server that
-  names the folder's as the document's is left as it is, the release
-  private). Then the catalog links it (`sm:publishedRelease`, If-Match,
+  nothing else, and no other access control is changed: only
+  `<release>.acl` or `<release>.acr`, on the release's origin, is
+  written (a server that names another as the document's, such as the
+  folder's, is left as it is, the release private). Then the catalog links it (`sm:publishedRelease`, If-Match,
   read and made again on a 412), and the draft names it
   (`sm:releasedAs`), If-Match on the version the draft was checked and
   assembled at, never on a later one (`changedElsewhere`). A failure
@@ -1182,10 +1339,30 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   - a creation is sent with `If-None-Match: *` (by
     `@inrupt/solid-client` for datasets and containers, by the copier for
     files); had something appeared there meanwhile, 412;
-  - deleting a document read before sends `If-Match` too. Deleting an
-    instance sends none: its documents go whatever they hold. A deck
-    another tab adds meanwhile is missed, and its documents keep the
-    folder in place, as another app's file would.
+  - deleting a document read before sends `If-Match` too. Every removal
+    of Solid Memo's data from a document (deleting an instance, a deck,
+    a draft, or taking back what a failed creation wrote) goes through
+    one helper, `removeOwned` in
+    [datasets.ts](../packages/solid/src/datasets.ts), with a rule for
+    what of that kind of document is Solid Memo's
+    ([ownership.ts](../packages/solid/src/ownership.ts)). It reads the
+    document afresh; takes out the subjects that are Solid Memo's of
+    that kind, less any a newer version of the app wrote, and the blank
+    nodes only they name; and deletes the document only when nothing
+    else is left in it, `If-Match` its read. When something is left, it
+    writes back what is left: a PATCH of `DELETE DATA`, or, where a
+    blank node goes, one PUT of the rest, each `If-Match` its read. A
+    document that is not RDF, or holds nothing of Solid Memo's, is kept
+    and nothing is sent. On a 412 it reads the document again and
+    removes again, once; a second 412 is `changedElsewhere`. Where the
+    pod gives no strong ETag, the delete and the PATCH go without
+    `If-Match`, as every other write there; a PUT, or a PATCH too large
+    to be sent as one, would write over what changed meanwhile, so the
+    document is kept as it is instead. A deck's cards or reviews
+    document is removed from only when it is the deck's
+    ([below](#where-an-instances-documents-are)). A deck another tab
+    adds meanwhile is missed, and its documents keep the folder in
+    place, as another app's file would.
 
   A 412 surfaces as a `PreconditionFailedError` naming the document
   ("changed elsewhere … Reload and try again"); nothing retries on its

@@ -10,6 +10,7 @@ import { problem } from "@solid-memo/domain/release/problems";
 import type { ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { courseDraft, DRAFT, NOW } from "@solid-memo/domain/testing/releaseDraft";
+import type { Storage } from "@solid-memo/domain/storage";
 import type { DeckLibrary, FileExchange, ReleaseDraftRepository, ReleasePublisher } from "./ports";
 import { createReleasePublishingUseCases } from "./releasePublishing";
 
@@ -21,7 +22,19 @@ const markdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0
 
 const clean: ReleaseCheck = { rules: [], library: [], drops: [], markdown: [], shapes: [] };
 
-function setUp({ stored = courseDraft() as ReleaseDraft, check = clean, shared = true } = {}) {
+const WEBID = "https://pod.example/profile/card#me";
+
+function setUp({
+  stored = courseDraft() as ReleaseDraft,
+  check = clean,
+  shared = true,
+  storages = [{ url: "https://pod.example/" }],
+}: {
+  stored?: ReleaseDraft;
+  check?: ReleaseCheck;
+  shared?: boolean;
+  storages?: { url: string }[] | Error;
+} = {}) {
   const drafts = {
     readReleaseDraft: vi.fn(async () => ({ draft: stored, version: "v1" })),
     checkReleaseDraft: vi.fn(async () => check),
@@ -49,6 +62,12 @@ function setUp({ stored = courseDraft() as ReleaseDraft, check = clean, shared =
     releasePublisher: publisher,
     deckLibrary,
     fileExchange,
+    storageGateway: {
+      discoverStorages: vi.fn(async () => {
+        if (storages instanceof Error) throw storages;
+        return storages as Storage[];
+      }),
+    },
     now: () => new Date(NOW),
   });
   return { drafts, repository, publisher, fileExchange, useCases };
@@ -171,14 +190,46 @@ describe("publishRelease", () => {
 describe("makeReleasePublic, isReleasePublic and listPublishedReleases", () => {
   it("are the publisher's, each release listed with whether it is public", async () => {
     const { useCases, publisher } = setUp();
-    await useCases.makeReleasePublic(TARGET);
-    expect(publisher.makePublic).toHaveBeenCalledWith(TARGET);
+    await useCases.makeReleasePublic(INSTANCE, TARGET, WEBID);
+    expect(publisher.makePublic).toHaveBeenCalledWith(INSTANCE, TARGET);
     await expect(useCases.isReleasePublic(TARGET)).resolves.toBe(true);
     await expect(useCases.listPublishedReleases(INSTANCE)).resolves.toEqual([
       { url: TARGET, public: true },
       { url: `${INSTANCE}releases/old/v1.ttl`, public: false },
     ]);
     expect(publisher.listPublished).toHaveBeenCalledWith(INSTANCE);
+  });
+});
+
+describe("makeReleasePublic, of a release elsewhere", () => {
+  const ELSEWHERE = "https://pod.example/shared/solid/v2.ttl";
+
+  it("makes public a release in a folder of the user's storage the instance is in", async () => {
+    const { useCases, publisher } = setUp();
+    await useCases.makeReleasePublic(INSTANCE, ELSEWHERE, WEBID);
+    expect(publisher.makePublic).toHaveBeenCalledWith(INSTANCE, ELSEWHERE);
+  });
+
+  it("refuses a release outside the instance in no storage of the user's that holds the instance", async () => {
+    const cases: [string, { url: string }[] | Error][] = [
+      // An instance attached from someone else's pod, listing the user's own release.
+      [ELSEWHERE, [{ url: "https://pod.example/shared/" }]],
+      // The release in another storage of the user's than the instance's.
+      [
+        "https://other.example/solid/v2.ttl",
+        [{ url: "https://pod.example/" }, { url: "https://other.example/" }],
+      ],
+      [ELSEWHERE, []],
+      [ELSEWHERE, new Error("no profile")],
+    ];
+    for (const [url, storages] of cases) {
+      const { useCases, publisher } = setUp({ storages });
+      await expect(useCases.makeReleasePublic(INSTANCE, url, WEBID)).rejects.toMatchObject({
+        code: "publicAccessRefused",
+        vars: { url },
+      });
+      expect(publisher.makePublic).not.toHaveBeenCalled();
+    }
   });
 });
 

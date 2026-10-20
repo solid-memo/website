@@ -130,8 +130,12 @@ the `ReleasePublisher` port's adapter,
 which calls `@inrupt/solid-client`'s `universalAccess.setPublicAccess`
 for the release's document alone, asking read and nothing else. The
 library writes that document's own ACL (Web Access Control) or ACR
-(Access Control Policies). No other module imports `universalAccess`,
-or writes an ACL or an ACR; no folder's access control is changed.
+(Access Control Policies). The fetch it is given takes only that one:
+a request to another origin, or a write of anything but
+`<release>.acl` or `<release>.acr`, is refused, whatever the server
+names as the release's access control. No other module imports
+`universalAccess`, or writes an ACL or an ACR; no folder's access
+control is changed.
 `npm run check:boundaries` enforces the imports
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`):
 outside tests, only that file may import `@inrupt/solid-client`'s access

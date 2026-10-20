@@ -18,7 +18,7 @@ import {
   withDeckReport,
   type DeckTextCheck,
 } from "./deckHealth";
-import { summarize, type DocumentReport, type Violation } from "./validation";
+import { summarize, withUnclaimed, type DocumentReport, type Violation } from "./validation";
 
 const CATALOG = "https://pod.example/a/catalog.ttl";
 const CARDS = "https://pod.example/a/decks/d.ttl";
@@ -153,6 +153,31 @@ describe("withDeckReport", () => {
     expect(merged.documents.map((each) => each.url)).toEqual([CATALOG, CARDS, REVIEWS, OTHER, NEW]);
     expect(merged.documents[0]).toEqual(report.documents[0]);
     expect(merged.violationCount).toBe(report.violationCount + 1);
+  });
+});
+
+describe("a deck whose documents are unclaimed", () => {
+  const other = {
+    deckUrl: `${CATALOG}#deck-2`,
+    title: { en: "Other" },
+    documents: ["https://pod.example/other.ttl"],
+  };
+  const own = { deckUrl: deck.url, title: deck.title, documents: [REVIEWS] };
+
+  it("is named in the deck's part of the report, and in the instance's after a later check of the deck", () => {
+    const report = withUnclaimed(summarize("https://pod.example/a/", []), [own, other]);
+    expect(deckReport(report, deck).unclaimed).toEqual([own]);
+    expect(deckReport(withUnclaimed(report, [other]), deck).unclaimed).toBeUndefined();
+    // Claimed since: the later check names it no more; another deck stays named.
+    const claimed = withDeckReport(report, deck, summarize("https://pod.example/a/", []));
+    expect(claimed.unclaimed).toEqual([other]);
+    const again = withDeckReport(
+      withUnclaimed(report, [other]),
+      deck,
+      withUnclaimed(summarize("https://pod.example/a/", []), [own]),
+    );
+    expect(again.unclaimed).toEqual([other, own]);
+    expect(withUnclaimed(report, []).unclaimed).toBeUndefined();
   });
 });
 

@@ -94,6 +94,7 @@ function Probe({ useCases, instanceUrl }: { useCases: UseCases; instanceUrl: str
         `good ${check.readOnly(good) ?? "open"}`,
         `arrangement ${check.arrangementSetAside ? "aside" : "open"}`,
         `error ${check.error === null ? "none" : check.error.message}`,
+        `unclaimed ${check.unclaimed.length}`,
       ].join(", ")}
     </p>
   );
@@ -129,9 +130,25 @@ describe("useDataCheck", () => {
     renderProbe({ checkInstance: vi.fn(async () => invalid()) });
     expect(
       await screen.findByText(
-        "policy block-subject, instance open, bad setAside, good open, arrangement open, error none",
+        "policy block-subject, instance open, bad setAside, good open, arrangement open, error none, unclaimed 0",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("names the decks whose documents are unclaimed, though the data conforms", async () => {
+    const unclaimed = [
+      { deckUrl: good.url, title: good.title, documents: [good.cardsDocumentUrl] },
+    ];
+    renderProbe({
+      checkInstance: vi.fn(async () => ({
+        instanceUrl: INSTANCE,
+        documents: [],
+        violationCount: 0,
+        conforms: true,
+        unclaimed,
+      })),
+    });
+    expect(await screen.findByText(/instance open, .*unclaimed 1/)).toBeInTheDocument();
   });
 
   it("sets the arrangement aside when the catalog is invalid", async () => {

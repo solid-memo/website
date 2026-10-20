@@ -8,7 +8,14 @@ import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
 import type { MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { checkProblems, libraryReleaseUrl } from "@solid-memo/domain/release/releaseCheck";
 import { releaseFileName } from "@solid-memo/domain/release/releasePlace";
-import type { DeckLibrary, FileExchange, ReleaseDraftRepository, ReleasePublisher } from "./ports";
+import { catalogUrlOf, isDocumentIn } from "@solid-memo/domain/instanceLayout";
+import type {
+  DeckLibrary,
+  FileExchange,
+  ReleaseDraftRepository,
+  ReleasePublisher,
+  StorageGateway,
+} from "./ports";
 import type { ReleaseDraftUseCases } from "./releaseDrafts";
 
 /**
@@ -55,8 +62,15 @@ export interface ReleasePublishingUseCases {
     targetUrl: string,
     markdownCheck: MarkdownCheck,
   ): Promise<PublishedRelease>;
-  /** Make a release readable by everyone, again; publicAccessRefused when the pod will not. */
-  makeReleasePublic(url: string): Promise<void>;
+  /**
+   * Make a release the instance published readable by everyone, again;
+   * publicAccessRefused when the pod will not, when it is not one the
+   * instance's catalog lists, and when it is neither in the instance nor
+   * in a storage of the user's (those of `webId`) that the instance is
+   * in: an instance attached from someone else's pod may list a release
+   * of the user's own that was kept from everyone.
+   */
+  makeReleasePublic(instanceUrl: string, url: string, webId: string): Promise<void>;
   /** Whether someone with no login can read the release at `url`. */
   isReleasePublic(url: string): Promise<boolean>;
   /**
@@ -76,6 +90,7 @@ export function createReleasePublishingUseCases({
   releasePublisher,
   deckLibrary,
   fileExchange,
+  storageGateway,
   now,
 }: {
   drafts: Pick<ReleaseDraftUseCases, "readReleaseDraft" | "checkReleaseDraft">;
@@ -83,8 +98,24 @@ export function createReleasePublishingUseCases({
   releasePublisher: ReleasePublisher;
   deckLibrary: DeckLibrary;
   fileExchange: FileExchange;
+  storageGateway: Pick<StorageGateway, "discoverStorages">;
   now: () => Date;
 }): ReleasePublishingUseCases {
+  /**
+   * Whether the release at `url` is the instance's to make public: in
+   * the instance, or in one of the user's storages the instance is in
+   * too, each as a request sends the address. None, when they cannot be
+   * found.
+   */
+  async function isInInstancePod(instanceUrl: string, url: string, webId: string) {
+    if (isDocumentIn(url, instanceUrl)) return true;
+    const storages = await storageGateway.discoverStorages(webId).catch(() => []);
+    return storages.some(
+      (storage) =>
+        isDocumentIn(url, storage.url) && isDocumentIn(catalogUrlOf(instanceUrl), storage.url),
+    );
+  }
+
   return {
     async publishRelease(draftUrl, targetUrl, markdownCheck) {
       if (isGuestUrl(draftUrl)) throw new AppError("guestCannotPublish");
@@ -117,8 +148,10 @@ export function createReleasePublishingUseCases({
       return { url: targetUrl, public: shared };
     },
 
-    makeReleasePublic(url) {
-      return releasePublisher.makePublic(url);
+    async makeReleasePublic(instanceUrl, url, webId) {
+      if (!(await isInInstancePod(instanceUrl, url, webId)))
+        throw new AppError("publicAccessRefused", { url });
+      return releasePublisher.makePublic(instanceUrl, url);
     },
 
     isReleasePublic(url) {

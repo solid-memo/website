@@ -289,6 +289,7 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
     expect((await fetch(instance.url, { method: "HEAD" })).status).toBe(404);
   });

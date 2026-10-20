@@ -52,6 +52,7 @@ import {
   type DataClassRegistrations,
   type Instance,
   type InstanceDeletion,
+  type KeptDocuments,
   type RegistrationOptions,
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
@@ -100,13 +101,16 @@ import {
   digestUrlOf,
   ensureTrailingSlash,
   historyUrlOf,
+  instanceAddressOf,
   instanceDocumentUrls,
   metaUrlOf,
   preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
 import {
   summarize,
+  withUnclaimed,
   type DocumentReport,
+  type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
 import { deckHealth, type DeckHealth, type DeckTextCheck } from "@solid-memo/domain/deckHealth";
@@ -286,6 +290,7 @@ import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { trialProblems } from "@solid-memo/domain/release/trial";
 import { AppError } from "@solid-memo/domain/appError";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 
 export interface UseCases
   extends ReleaseDraftUseCases,
@@ -389,6 +394,14 @@ export interface UseCases
    * is not checked (nor downloaded) again.
    */
   checkInstance(instanceUrl: string): Promise<ValidationReport>;
+  /**
+   * Mark a deck's unclaimed documents (the report's `unclaimed`) as the
+   * deck's, once the user has confirmed they are: from then on they are
+   * written to and deleted as the deck's. Each in one write made only
+   * while it is as read; nothing else in it changes. deckGone when the
+   * instance has no such deck.
+   */
+  claimDeckDocuments(instanceUrl: string, deckUrl: string): Promise<void>;
   /**
    * Everything wrong with one deck of the instance (domain/deckHealth.ts):
    * the check of its entry in the catalog and of its cards and reviews
@@ -515,9 +528,10 @@ export interface UseCases
    * whole number is refused before any write.
    */
   setDecksPace(decks: readonly Deck[], pace: DeckPace): Promise<Deck[]>;
-  removeDeck(deck: Deck): Promise<void>;
+  /** Remove a deck and its cards; the result names the documents kept for another app's data in them. */
+  removeDeck(deck: Deck): Promise<KeptDocuments>;
   /** Remove several decks of an instance and their cards, their entries in one write of their catalog. */
-  removeDecks(decks: readonly Deck[]): Promise<void>;
+  removeDecks(decks: readonly Deck[]): Promise<KeptDocuments>;
   /** The ready-made decks the app offers for import. */
   listLibraryDecks(): Promise<LibraryDeck[]>;
   /** Copy a library deck, cards included, into an instance as a new deck. */
@@ -1863,7 +1877,9 @@ export function createUseCases({
    * Whether a write's failure says it was never made: the pod refused it
    * (412, the document changed or was created elsewhere), or this app did
    * before sending it (the data would not conform, a newer version of the
-   * app wrote it, a deck's entry no longer as the upgrade read it, say).
+   * app wrote it, a deck's entry no longer as the upgrade read it, a deck's
+   * document not yet said to be the deck's or a deck that cannot be used,
+   * say).
    * Any other failure, an answer lost on the way, may follow a write the
    * pod made.
    */
@@ -1877,6 +1893,8 @@ export function createUseCases({
         "dataNotConforming",
         "guestStudyBeingMoved",
         "deckChangedDuringUpgrade",
+        "deckDocumentUnclaimed",
+        "deckGone",
       ].includes(error.code)
     );
   }
@@ -2212,17 +2230,45 @@ export function createUseCases({
       releaseDraftRepository.documents(instanceUrl),
       digestOf(instanceUrl),
     ]);
-    return checkDocuments(instanceUrl, documentsToCheck(instanceUrl, decks, drafts), digest);
+    const unclaimed = await unclaimedDecksOf(decks);
+    return withUnclaimed(
+      await checkDocuments(
+        instanceUrl,
+        documentsToCheck(instanceUrl, decks, drafts, unclaimed),
+        digest,
+      ),
+      unclaimed,
+    );
   }
 
-  /** The instance's documents, then its drafts': each with where it is, which picks its shapes. */
+  /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments). */
+  async function unclaimedDecksOf(decks: readonly Deck[]): Promise<UnclaimedDeck[]> {
+    const found = await Promise.all(
+      decks.map(async (deck) => ({
+        deckUrl: deck.url,
+        title: deck.title,
+        documents: await deckRepository.unclaimedDocuments(deck),
+      })),
+    );
+    return found.filter((deck) => deck.documents.length > 0);
+  }
+
+  /**
+   * The instance's documents, then its drafts': each with where it is,
+   * which picks its shapes. An unclaimed document is not checked: it may
+   * be anyone's, and a repair of what the check finds writes to it.
+   */
   function documentsToCheck(
     instanceUrl: string,
     decks: readonly Deck[],
     drafts: readonly string[],
+    unclaimed: readonly UnclaimedDeck[],
   ): { url: string; context: DocumentContext }[] {
+    const skipped = new Set(unclaimed.flatMap((deck) => deck.documents.map(documentUrlOf)));
     return [
-      ...instanceDocumentUrls(instanceUrl, decks).map((url) => ({ url, context: "pod" as const })),
+      ...instanceDocumentUrls(instanceUrl, decks)
+        .filter((url) => !skipped.has(url))
+        .map((url) => ({ url, context: "pod" as const })),
       ...drafts.map((url) => ({ url, context: "draft" as const })),
     ];
   }
@@ -2261,8 +2307,9 @@ export function createUseCases({
       answerLog.months(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
     ]);
+    const unclaimed = await unclaimedDecksOf(decks);
     const urls = [
-      ...documentsToCheck(instanceUrl, decks, drafts),
+      ...documentsToCheck(instanceUrl, decks, drafts, unclaimed),
       ...months.map((month) => ({
         url: historyUrlOf(instanceUrl, month),
         context: "pod" as const,
@@ -2277,7 +2324,7 @@ export function createUseCases({
         return document;
       }),
     );
-    return summarize(instanceUrl, documents);
+    return withUnclaimed(summarize(instanceUrl, documents), unclaimed);
   }
 
   /**
@@ -2614,7 +2661,8 @@ export function createUseCases({
         ? null
         : await deckRepository.readDeck(deck.url).catch(() => null);
       if (entry !== null) return entry;
-      for (const url of written) await deckRepository.deleteDocument(url).catch(() => undefined);
+      for (const url of written)
+        await deckRepository.deleteDocument(deck, url).catch(() => undefined);
       throw error;
     }
   }
@@ -2673,6 +2721,7 @@ export function createUseCases({
       releasePublisher,
       deckLibrary,
       fileExchange,
+      storageGateway,
       now,
     }),
     ...createInstanceGraphUseCases({
@@ -2721,7 +2770,8 @@ export function createUseCases({
       onProgress = () => undefined,
     ) {
       const source = ensureTrailingSlash(guestInstance.url);
-      const target = ensureTrailingSlash(containerUrl.trim());
+      // As a request would send it, as a created instance's address is.
+      const target = instanceAddressOf(containerUrl.trim());
       if (session.guest === true || !isGuestUrl(source) || isGuestUrl(target)) {
         throw new Error(
           "A guest's study moves from the guest's pod into the pod of a user who logged in.",
@@ -3059,16 +3109,33 @@ export function createUseCases({
     },
     validateInstance: (instanceUrl) => validateInstance(instanceUrl),
     checkInstance,
+    async claimDeckDocuments(instanceUrl, deckUrl) {
+      const deck = (await deckRepository.listDecks(instanceUrl)).find(
+        (listed) => listed.url === deckUrl,
+      );
+      if (deck === undefined) throw new AppError("deckGone", { deck: deckUrl });
+      await deckRepository.claimDocuments(deck);
+    },
     async checkDeck(instanceUrl, deck, text) {
       const [report, cards, release] = await Promise.all([
-        digestOf(instanceUrl).then((digest) =>
-          checkDocuments(
-            instanceUrl,
-            [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map(
-              (url) => ({ url, context: "pod" as const }),
-            ),
-            digest,
-          ),
+        Promise.all([digestOf(instanceUrl), unclaimedDecksOf([deck])]).then(
+          async ([digest, unclaimed]) => {
+            const skipped = new Set(unclaimed.flatMap((one) => one.documents));
+            const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
+              (url) => !skipped.has(url),
+            );
+            return withUnclaimed(
+              await checkDocuments(
+                instanceUrl,
+                [catalogUrlOf(instanceUrl), ...urls].map((url) => ({
+                  url,
+                  context: "pod" as const,
+                })),
+                digest,
+              ),
+              unclaimed,
+            );
+          },
         ),
         deckRepository.listCards(deck),
         // A release that cannot be read leaves the sides to settle unknown, not the rest of the check.

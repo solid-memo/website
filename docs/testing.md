@@ -238,7 +238,12 @@ and says so (`keptReleases`). node-solid-server refuses the PATCH
 Server answers an ACR not written yet with 404; the publisher takes
 both in its stride (`accessFetch`). Solid-Nextcloud names a folder's
 ACL as each of its documents', so the release stays private there
-(its `expected-failures.json`).
+(its `expected-failures.json`). A release on another origin whose
+server names an access control on the real server as its own
+([releaseAccess.integration.test.ts](../e2e/pod/src/releaseAccess.integration.test.ts))
+leads no request there, by publishing or by **Make it public**. On
+`css-6`, whose ETags are whole seconds, the learner reads the second
+release's catalog as a later visit would.
 
 solid-server 6.0.0 is packaged with faults its image works around: it
 lacks the root ACL template it copies on first start (so the image has

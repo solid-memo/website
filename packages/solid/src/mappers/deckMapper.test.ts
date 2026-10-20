@@ -94,7 +94,7 @@ describe("toDeck", () => {
       title: { en: "Solid, renamed" },
     });
     expect(getUrlAll(getThing(rewritten, deck.url)!, SM.completedChapter)).toEqual(chapters);
-    expect(toDecks(rewritten)[0]).toMatchObject({
+    expect(toDecks(rewritten, CATALOG)[0]).toMatchObject({
       title: { en: "Solid, renamed" },
       completedChapters: chapters,
     });
@@ -147,7 +147,7 @@ describe("toDeck", () => {
       .addIri("http://xmlns.com/foaf/0.1/mbox", "mailto:anton@example.com")
       .build();
     const catalog = setThing(setThing(mockSolidDatasetFrom(CATALOG), deck), agent);
-    expect(toDecks(catalog)).toEqual([
+    expect(toDecks(catalog, CATALOG)).toEqual([
       expect.objectContaining({
         direction: "back-to-front",
         authors: ["Anton <anton@example.com>", `${CATALOG}#agent-gone`],
@@ -174,14 +174,46 @@ describe("toDeck", () => {
       .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
       .addStringNoLocale("http://xmlns.com/foaf/0.1/name", "김민수")
       .build();
-    const [read] = toDecks(setThing(setThing(mockSolidDatasetFrom(CATALOG), deck), agent));
+    const [read] = toDecks(setThing(setThing(mockSolidDatasetFrom(CATALOG), deck), agent), CATALOG);
     expect(read!.authors).toEqual(["김민수"]);
     const rewritten = withDeck(setThing(setThing(mockSolidDatasetFrom(CATALOG), deck), agent), {
       ...read!,
       authors: ["김민수", "이지은"],
     });
     expect(getThing(rewritten, `${CATALOG}#agent-unnamed`)).toBeNull();
-    expect(toDecks(rewritten)[0]!.authors).toEqual(["김민수", "이지은"]);
+    expect(toDecks(rewritten, CATALOG)[0]!.authors).toEqual(["김민수", "이지은"]);
+  });
+
+  it("lists the decks of this catalog whose documents are at an address a deck's may be, wherever it is", () => {
+    const B = "https://pod.example/solid-memo/b/";
+    const entry = (url: string, cards: string, reviews: string) =>
+      buildThing(createThing({ url }))
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, url)
+        .addIri(SM.cardsDocument, cards)
+        .addIri(SM.reviewsDocument, reviews)
+        .build();
+    const catalog = [
+      entry(`${CATALOG}#deck-1`, CARDS_DOC, REVIEWS_DOC),
+      // Another folder of the pod, and each kind in the other's folder: read wherever they are.
+      entry(`${CATALOG}#deck-2`, "https://pod.example/profile/card", REVIEWS_DOC),
+      entry(`${CATALOG}#deck-4`, REVIEWS_DOC, CARDS_DOC),
+      // A dot segment, another resource's access control, one of the instance's own documents.
+      entry(
+        `${CATALOG}#deck-3`,
+        CARDS_DOC,
+        "https://pod.example/solid-memo/a/reviews/../../../private/diary.ttl",
+      ),
+      entry(`${CATALOG}#deck-6`, `${CARDS_DOC}.acl`, REVIEWS_DOC),
+      entry(`${CATALOG}#deck-7`, CARDS_DOC, "https://pod.example/solid-memo/a/meta.ttl"),
+      // An entry the catalog states of another instance's catalog.
+      entry(`${B}catalog.ttl#deck-5`, `${B}decks/deck-5.ttl`, `${B}reviews/deck-5.ttl`),
+    ].reduce(setThing, mockSolidDatasetFrom(CATALOG));
+    expect(toDecks(catalog, CATALOG).map((deck) => deck.url)).toEqual([
+      `${CATALOG}#deck-1`,
+      `${CATALOG}#deck-2`,
+      `${CATALOG}#deck-4`,
+    ]);
   });
 
   it("reads a newer format version with the latest shape it knows, keeping the stored version", () => {

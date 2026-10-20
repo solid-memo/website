@@ -7,9 +7,10 @@ import type { Quad, Term } from "@rdfjs/types";
 import type { ReleasePublisher } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { addCatalogLink, catalogLinks } from "./catalogLinks";
 import { parseDeckFile } from "./solidDeckArchive";
-import { SM } from "./vocab";
+import { RDF, SM } from "./vocab";
 
 /**
  * The ReleasePublisher over the pod (docs/studio.md, Publishing a
@@ -28,9 +29,12 @@ import { SM } from "./vocab";
  * alone: read for everyone, nothing else, and nothing for its folder or
  * any other document. A pod that will not (it has neither, or refuses
  * the write) leaves the release readable by its owner alone. So does a
- * pod that names the folder's access control as the release's
- * (`rel="acl"`): writing it would change who may use the whole folder,
- * so it is not written.
+ * server that names any other access control as the release's
+ * (`rel="acl"`): only the release's own, beside it (`<release>.acl` or
+ * `<release>.acr`), is written, and nothing is asked of another origin
+ * (accessControlFetch). The folder's would change who may use the whole
+ * folder; another document's, or one in another pod, is not the
+ * release's to change, whatever a server says.
  *
  * Whether a release is public is asked as someone with no login would
  * ask: with `publicFetch`, which sends no credentials.
@@ -42,26 +46,16 @@ export function createSolidReleasePublisher({
   fetch: typeof globalThis.fetch;
   publicFetch: typeof globalThis.fetch;
 }): ReleasePublisher {
-  /** The access control a resource's server names for it (`rel="acl"`), by its URL; null when it names none. */
-  async function accessControlOf(url: string): Promise<string | null> {
-    const link = (await fetch(url, { method: "HEAD" })).headers.get("Link") ?? "";
-    const named = /<([^>]*)>\s*;\s*rel="acl"/.exec(link)?.[1];
-    return named === undefined ? null : new URL(named, url).href;
-  }
-
   /**
    * Make the release readable by everyone: whether the pod says it now
-   * is. Not when its access control is its folder's, which the write
-   * would change for every document in it.
+   * is. Only its own access control is written (accessControlFetch).
    */
   async function share(url: string): Promise<boolean> {
     try {
-      const own = await accessControlOf(url);
-      if (own !== null && own === (await accessControlOf(new URL(".", url).href))) return false;
       const access = await universalAccess.setPublicAccess(
         url,
         { read: true },
-        { fetch: accessFetch(fetch) },
+        { fetch: accessFetch(accessControlFetch(fetch, url)) },
       );
       return access?.read === true;
     } catch {
@@ -84,6 +78,29 @@ export function createSolidReleasePublisher({
     }
   }
 
+  /** The releases the catalog links (`sm:publishedRelease`) at an address a release may have (isPublishedReleaseUrl). */
+  async function listPublished(instanceUrl: string): Promise<string[]> {
+    return (await catalogLinks(instanceUrl, SM.publishedRelease, fetch)).filter(
+      isPublishedReleaseUrl,
+    );
+  }
+
+  /** Whether the document at `url` is a release: its own subject a deck (`<> a sm:Deck`); not when it cannot be read. */
+  async function isRelease(url: string): Promise<boolean> {
+    try {
+      const response = await fetch(url, { headers: { Accept: "text/turtle" } });
+      if (!response.ok) return false;
+      return (await parseDeckFile(await response.text(), "turtle", url)).some(
+        (quad) =>
+          quad.subject.value === url &&
+          quad.predicate.value === RDF.type &&
+          quad.object.value === SM.Deck,
+      );
+    } catch {
+      return false;
+    }
+  }
+
   return {
     async publish(instanceUrl, turtle, targetUrl) {
       const response = await fetch(targetUrl, {
@@ -101,8 +118,14 @@ export function createSolidReleasePublisher({
       return { public: shared };
     },
 
-    async makePublic(url) {
-      if (!(await share(url))) throw new AppError("publicAccessRefused", { url });
+    async makePublic(instanceUrl, url) {
+      // Only a release the instance's catalog lists, whose document is one: a link anyone may have written leads nothing else to everyone.
+      if (
+        !(await listPublished(instanceUrl)).includes(url) ||
+        !(await isRelease(url)) ||
+        !(await share(url))
+      )
+        throw new AppError("publicAccessRefused", { url });
     },
 
     async isPublic(url) {
@@ -113,9 +136,7 @@ export function createSolidReleasePublisher({
       }
     },
 
-    listPublished(instanceUrl) {
-      return catalogLinks(instanceUrl, SM.publishedRelease, fetch);
-    },
+    listPublished,
   };
 }
 
@@ -138,6 +159,38 @@ function statementsOf(quads: readonly Quad[], url: string): string {
     .map((quad) => `${term(quad.subject)} ${term(quad.predicate)} ${term(quad.object)}`)
     .sort()
     .join("\n");
+}
+
+/**
+ * The fetch that makes the release at `release` public, kept to what
+ * that may touch, whatever the servers' answers name (`rel="acl"`, a
+ * redirect): a request to another origin than the release's is refused,
+ * and so is any but a read (GET, HEAD) of another resource than the
+ * release's own access control, beside it (`<release>.acl`, its ACL; or
+ * `<release>.acr`, its ACR), which every Solid server tested names. A
+ * write is not followed to another address (`redirect: "error"`), and a
+ * read answered from another origin is refused. Each check is of the
+ * request itself, so an answer that names one access control first and
+ * another after leads to no other write.
+ */
+function accessControlFetch(
+  fetch: typeof globalThis.fetch,
+  release: string,
+): typeof globalThis.fetch {
+  const { origin } = new URL(release);
+  const own = new Set([`${release}.acl`, `${release}.acr`]);
+  return async (input, init) => {
+    // The library asks by URL, never with a Request.
+    const url = new URL(String(input));
+    const method = (init?.method ?? "GET").toUpperCase();
+    const read = method === "GET" || method === "HEAD";
+    if (url.origin !== origin || (!read && !own.has(url.href)))
+      throw new TypeError(`Not the release's to change: ${method} ${url.href}`);
+    const response = await fetch(input, read ? init : { ...init, redirect: "error" });
+    if (response.url !== "" && new URL(response.url).origin !== origin)
+      throw new TypeError(`Answered from another origin: ${response.url}`);
+    return response;
+  };
 }
 
 const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlResource";

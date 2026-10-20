@@ -11,6 +11,8 @@ import {
   digestUrlOf,
   ensureTrailingSlash,
   historyContainerOf,
+  isDeckInPlace,
+  isSameUrl,
   metaUrlOf,
   monthOfHistoryUrl,
   preferencesUrlOf,
@@ -20,7 +22,9 @@ import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draf
 import { releasesContainerOf } from "@solid-memo/domain/release/releasePlace";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainerTree } from "./containers";
-import { deleteIfPresent, getSolidDatasetOrNull } from "./datasets";
+import { getSolidDatasetOrNull, type Owned, removeOwned } from "./datasets";
+import { createDeckDocumentGuard } from "./deckPlace";
+import { deckDocumentSubjects, solidMemoSubjects, subjectsOfClasses } from "./ownership";
 import { deleteDraftResources } from "./solidReleaseDraftRepository";
 import { RDF, SM } from "./vocab";
 
@@ -31,9 +35,10 @@ import { RDF, SM } from "./vocab";
  * delete. What Solid Memo knows it wrote:
  *
  * 1. every deck's cards and reviews documents, as the catalog names
- *    them (`sm:cardsDocument`, `sm:reviewsDocument`), those below the
- *    container only: the catalog is data, and one naming a document
- *    elsewhere must not lead a delete there;
+ *    them (`sm:cardsDocument`, `sm:reviewsDocument`), those that are the
+ *    deck's to delete only (deckPlace.ts): ones that say they are the
+ *    deck's, or are in the instance's own folder. The catalog is data,
+ *    and one naming a document elsewhere must not lead a delete there;
  * 2. the answer log's months, `history/<YYYY-MM>.ttl`;
  * 3. the drafts the catalog links (`sm:releaseDraft`), those in the
  *    instance's `drafts/` only: each draft's documents and its folders,
@@ -49,12 +54,18 @@ import { RDF, SM } from "./vocab";
  *    attaches by URL;
  * 7. the instance's container, only if it is then empty.
  *
- * A document's access control (its `.acl`) goes with it: the Solid
- * Protocol has the server delete a resource's auxiliary resources with
- * it. A resource already gone counts as deleted. What is left is kept,
- * and so is the container holding it, which the result names, with
- * whether the releases published from the instance (`releases/`, never
- * deleted) are among it.
+ * From each document only what is Solid Memo's of its kind is removed
+ * (datasets.ts removeOwned, ownership.ts): a deck's cards, distractors
+ * and review states, the answers, the preferences, the digest's
+ * receipts and schedules, the catalog's subjects, the instance's
+ * `#it`; a document is deleted only when nothing else is left in it,
+ * and one that also holds another app's data is kept with that, which
+ * the result names (`keptDocuments`). A document's access control (its
+ * `.acl`) goes with it: the Solid Protocol has the server delete a
+ * resource's auxiliary resources with it. A resource already gone
+ * counts as deleted. What is left is kept, and so is the container
+ * holding it, which the result names, with whether the releases
+ * published from the instance (`releases/`, never deleted) are among it.
  */
 export async function deleteInstanceData(
   instanceUrl: string,
@@ -64,29 +75,29 @@ export async function deleteInstanceData(
   const meta = metaUrlOf(container);
   const catalogUrl = catalogUrlOf(container);
   const catalog = await readCatalog(catalogUrl, fetch);
-  const deckDocuments = (
-    catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog)
-  ).filter(
-    (url) => url.startsWith(container) && !url.endsWith("/") && url !== meta && url !== catalogUrl,
-  );
+  const named =
+    catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog, catalogUrl);
+  const deckDocuments = await deletableDeckDocuments(named, fetch);
   const history = historyContainerOf(container);
   const months = (await listContainerTree(history, fetch)).filter(
     (url) => monthOfHistoryUrl(container, url) !== null,
   );
-  for (const url of [...new Set(deckDocuments), ...months]) await deleteIfPresent(url, fetch);
+  const kept: string[] = [];
+  const remove = async (url: string, owns: (dataset: SolidDataset) => Owned) => {
+    if ((await removeOwned(url, owns, fetch)) === "kept") kept.push(url);
+  };
+  const deckSubjects = deckDocumentSubjects(named.map(({ entry }) => entry));
+  for (const url of deckDocuments) await remove(url, deckSubjects);
+  for (const url of months) await remove(url, subjectsOfClasses(SM.Answer));
   for (const draft of catalog === UNREADABLE || catalog === null
     ? []
     : draftsOf(catalog, container)) {
-    await deleteDraftResources(draft, fetch);
+    kept.push(...(await deleteDraftResources(draft, fetch)));
   }
-  for (const url of [
-    preferencesUrlOf(container),
-    digestUrlOf(container),
-    // A catalog that cannot be read is the one record of the decks' documents, which are kept: so is it.
-    ...(catalog === UNREADABLE ? [] : [catalogUrl]),
-  ]) {
-    await deleteIfPresent(url, fetch);
-  }
+  await remove(preferencesUrlOf(container), subjectsOfClasses(SM.Preferences));
+  await remove(digestUrlOf(container), subjectsOfClasses(SM.DocumentReceipt, SM.DeckSchedule));
+  // A catalog that cannot be read is the one record of the decks' documents, which are kept: so is it.
+  if (catalog !== UNREADABLE) await remove(catalogUrl, solidMemoSubjects);
   for (const subcontainer of [
     cardsContainerOf(container),
     reviewsContainerOf(container),
@@ -95,13 +106,14 @@ export async function deleteInstanceData(
   ]) {
     await deleteContainerIfEmpty(subcontainer, fetch);
   }
-  await deleteIfPresent(meta, fetch);
+  await remove(meta, subjectsOfClasses(SM.Instance));
   if (await deleteContainerIfEmpty(container, fetch))
-    return { keptFolder: null, keptReleases: false };
+    return { keptFolder: null, keptReleases: false, keptDocuments: kept };
   // Releases others may read by their address are never deleted: the user is told they are why the folder is kept.
   return {
     keptFolder: container,
     keptReleases: (await fetch(releasesContainerOf(container), { method: "HEAD" })).ok,
+    keptDocuments: kept,
   };
 }
 
@@ -141,13 +153,43 @@ function draftsOf(catalog: SolidDataset, container: string): string[] {
       );
 }
 
-/** The cards and reviews documents every deck of a catalog document names, whether or not the deck fits its shape. */
-function deckDocumentsOf(catalog: SolidDataset): string[] {
+/**
+ * The cards and reviews documents every deck of a catalog document
+ * names, whether or not the deck fits its shape, each with the entry
+ * naming it: entries of this document only.
+ */
+function deckDocumentsOf(
+  catalog: SolidDataset,
+  catalogUrl: string,
+): { entry: string; url: string }[] {
   return getThingAll(catalog)
-    .filter((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))
-    .flatMap((thing) => [
-      ...getUrlAll(thing, SM.cardsDocument),
-      ...getUrlAll(thing, SM.reviewsDocument),
-    ])
-    .map(documentUrlOf);
+    .filter(
+      (thing) =>
+        getUrlAll(thing, RDF.type).includes(SM.Deck) &&
+        isSameUrl(documentUrlOf(thing.url), catalogUrl),
+    )
+    .flatMap((thing) =>
+      [...getUrlAll(thing, SM.cardsDocument), ...getUrlAll(thing, SM.reviewsDocument)].map(
+        (url) => ({ entry: thing.url, url: documentUrlOf(url) }),
+      ),
+    );
+}
+
+/**
+ * Of the decks' documents, those that are their decks' to delete: at an
+ * address a deck's may be (isDeckInPlace) and not unclaimed (deckPlace.ts).
+ * An unclaimed document may be anyone's, and is kept.
+ */
+async function deletableDeckDocuments(
+  named: readonly { entry: string; url: string }[],
+  fetch: typeof globalThis.fetch,
+): Promise<string[]> {
+  const guard = createDeckDocumentGuard(fetch);
+  const deletable: string[] = [];
+  for (const { entry, url } of named) {
+    const deck = { url: entry, title: {}, cardsDocumentUrl: url, reviewsDocumentUrl: url };
+    if (deletable.includes(url) || !isDeckInPlace(deck)) continue;
+    if ((await guard.unclaimed(deck)).length === 0) deletable.push(url);
+  }
+  return deletable;
 }

@@ -4,6 +4,7 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
+import type { KeptDocuments } from "@solid-memo/domain/instance";
 import { isGuestUrl, mentionsGuest } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
@@ -140,7 +141,8 @@ export interface ReleaseDraftUseCases {
    * changed what they change (mergedDraft).
    */
   editReleaseDraft(draftUrl: string, changes: readonly DraftChange[]): Promise<DraftEdit>;
-  deleteReleaseDraft(draft: ReleaseDraftSummary): Promise<void>;
+  /** Delete a draft; the result names the documents kept for another app's data in them. */
+  deleteReleaseDraft(draft: ReleaseDraftSummary): Promise<KeptDocuments>;
   /**
    * The release check of the draft as it is (docs/studio.md, The release
    * check), for a pod or for the repository's library (`policy`): the

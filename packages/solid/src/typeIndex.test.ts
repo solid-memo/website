@@ -549,6 +549,30 @@ describe("readInstanceRegistrations", () => {
       { containerUrl: "https://alice.example/solid-memo/b/", title: null },
     ]);
   });
+
+  it("leaves out a registration whose address a request would send elsewhere", async () => {
+    const at = (id: string, url: string) =>
+      registered(id, SM.Instance, SOLID.instanceContainer, url);
+    mockDatasets({
+      [PRIVATE_INDEX]: privateIndex(
+        at("ok", "https://alice.example/solid-memo/a/"),
+        at("dots", "https://alice.example/solid-memo/../"),
+        at("encoded", "https://alice.example/solid-memo/%2e%2e/"),
+        at("case", "https://Alice.example/solid-memo/a/"),
+        at("port", "https://alice.example:443/solid-memo/a/"),
+        at("query", "https://alice.example/solid-memo/a/?x"),
+        at("swedish", "https://alice.example/kortlekar-å/"),
+        at("scheme", "urn:x:solid-memo"),
+      ),
+    });
+    await expect(readInstanceRegistrations(PRIVATE_INDEX, noFetch)).resolves.toEqual([
+      { containerUrl: "https://alice.example/solid-memo/a/", title: null },
+      // Another spelling of a folder is that folder, kept as written.
+      { containerUrl: "https://Alice.example/solid-memo/a/", title: null },
+      { containerUrl: "https://alice.example:443/solid-memo/a/", title: null },
+      { containerUrl: "https://alice.example/kortlekar-å/", title: null },
+    ]);
+  });
 });
 
 /** A registration in the private index, of one class, naming `url` under `predicate`. */

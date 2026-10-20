@@ -27,19 +27,38 @@ describe("KeptFolderNotice", () => {
     );
   });
 
-  it("is nothing when no folder was kept", () => {
-    const { container } = render(<KeptFolderNotice url={null} />);
+  it("is nothing when no folder and no document was kept", () => {
+    const { container } = render(<KeptFolderNotice url={null} documents={0} />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("says how many documents were kept for another app's data in them, after the folder", () => {
+    render(<KeptFolderNotice url={FOLDER} documents={2} />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "another app put files there. 2 documents were kept because they also hold other apps' data.",
+    );
+  });
+
+  it("says a document was kept when the folder is gone", () => {
+    render(<KeptFolderNotice url={null} documents={1} />);
+    const notice = screen.getByRole("status");
+    expect(notice).toHaveTextContent(
+      /^1 document was kept because it also holds another app's data\.$/,
+    );
+    expect(within(notice).queryByRole("link")).toBeNull();
   });
 
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <KeptFolderNotice url={FOLDER} />
-        <KeptFolderNotice url={FOLDER} releases />
+        <KeptFolderNotice url={FOLDER} releases documents={3} />
       </I18nProvider>,
     );
     const [other, releases] = screen.getAllByRole("status");
+    expect(releases).toHaveTextContent(
+      "3 dokument behölls eftersom de även innehåller andra appars data.",
+    );
     expect(other).toHaveTextContent(
       "Solid Memo tog bort sina egna data och behöll mappen i din Pod",
     );

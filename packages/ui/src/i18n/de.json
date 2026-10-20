@@ -394,6 +394,17 @@
     "preferences": "Einstellungen",
     "repair": "Reparieren"
   },
+  "unclaimedDecks": {
+    "region": "Zu bestätigende Stapel",
+    "heading": "Solid Memo ändert nichts an den Dokumenten dieser Stapel, bis du bestätigst, dass es die eigenen Dokumente der Stapel sind.",
+    "hint": "Die Dokumente eines Stapels hier geben nicht an, dass sie zu ihm gehören, und sie liegen außerhalb des eigenen Ordners der Instanz, wo auch Daten anderer genannt sein könnten. Solid Memo liest sie und lernt mit ihnen, speichert dort aber keine Antworten oder Änderungen, und wenn du den Stapel entfernst, wird nur sein Eintrag entfernt. Bestätige nur Dokumente, von denen du weißt, dass sie zum Stapel gehören.",
+    "deck": "{deck}: Seine Dokumente geben nicht an, dass sie zu diesem Stapel gehören.",
+    "claim": "Das sind die Dokumente dieses Stapels",
+    "confirm": "Solid Memo markiert diese Dokumente als Dokumente von {deck} und ändert und entfernt sie von da an mit dem Stapel:",
+    "confirmButton": "Als Dokumente des Stapels markieren",
+    "cancel": "Abbrechen",
+    "claiming": "Wird markiert …"
+  },
   "deckAbout": {
     "label": "Über diesen Stapel",
     "topicsLine": "Themen: {topics}",
@@ -659,7 +670,11 @@
   "keptFolder": {
     "text": "Solid Memo hat seine eigenen Daten gelöscht und {link} behalten: Eine andere App hat dort Dateien abgelegt.",
     "releases": "Solid Memo hat seine eigenen Daten gelöscht und {link} behalten: Dort liegen die daraus veröffentlichten Ausgaben, die andere vielleicht gerade lesen. Was eine andere App dort abgelegt hat, bleibt ebenfalls erhalten.",
-    "folder": "den Ordner in deinem Pod"
+    "folder": "den Ordner in deinem Pod",
+    "documents": {
+      "one": "{count} Dokument wurde behalten, weil es auch Daten einer anderen App enthält.",
+      "other": "{count} Dokumente wurden behalten, weil sie auch Daten anderer Apps enthalten."
+    }
   },
   "instanceUpdate": {
     "confirmRegion": "Aktualisierung starten",
@@ -1319,7 +1334,8 @@
       "MaxInclusive": "Der Wert ist zu groß.",
       "MinLength": "Der Text ist zu kurz.",
       "MaxLength": "Der Text ist zu lang.",
-      "Closed": "Die Eigenschaft ist hier nicht erlaubt."
+      "Closed": "Die Eigenschaft ist hier nicht erlaubt.",
+      "DeckPlace": "Der Eintrag des Stapels steht nicht im Katalog seiner Instanz, oder er nennt ein Dokument unter einer Adresse, die kein Dokument eines Stapels haben darf, etwa die Zugriffskontrolle einer anderen Ressource oder eines der eigenen Dokumente der Instanz. Solid Memo verwendet ihn nicht."
     }
   },
   "webIdDocument": {
@@ -1412,6 +1428,7 @@
     "dataNotConforming": "Solid Memo hat dies nicht gespeichert: Es hat nicht das Format, das Solid Memo erwartet. Es wurde nichts geändert. Lade die Seite neu und versuche es erneut.",
     "deckGone": "Den Stapel „{deck}“ gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App entfernt.",
     "cardsDocumentGone": "Die Karten von „{deck}“ lassen sich nicht mehr finden. Lade die Seite neu und versuche es erneut.",
+    "deckDocumentUnclaimed": "Solid Memo hat „{deck}“ nicht geändert: Seine Dokumente geben nicht an, dass sie zu diesem Stapel gehören. Es wurde nichts geändert. Bestätige dort, wo die Datenprüfung den Stapel auflistet, dass es seine Dokumente sind, und versuche es dann erneut.",
     "cardGone": "Diese Karte gibt es nicht mehr. Vielleicht wurde sie in einem anderen Tab oder einer anderen App entfernt. Lade die Seite neu.",
     "notADeck": "Das ist kein Stapel von Solid Memo, daher kann er nicht hinzugefügt werden. Wähle einen anderen Stapel.",
     "libraryDeckTooNew": "Dieser Stapel hat ein neueres Format, als diese Version von Solid Memo lesen kann. Lade die Seite neu, um die neueste Version zu erhalten.",
@@ -1426,6 +1443,7 @@
     "draftGone": "Diesen Entwurf gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App gelöscht.",
     "releaseUnreadable": "Solid Memo kann unter {url} keine Ausgabe lesen. Prüfe die Adresse und ob die Ausgabe dort veröffentlicht ist.",
     "notAReleaseFile": "Diese Datei enthält nicht genau eine Ausgabe eines Stapels oder Kurses. Wähle eine Ausgabe, die als Turtle oder JSON-LD gespeichert ist.",
+    "draftIdUnsupported": "Dieser Entwurf nennt einen seiner Teile „#{id}“, und das kann ein Entwurf nicht übernehmen: Eine ID in einem Entwurf besteht aus den Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“ und beginnt mit einem Buchstaben oder einer Ziffer. Solid Memo öffnet und ändert ihn nicht.",
     "releaseIdUnsupported": "Diese Ausgabe nennt einen ihrer Teile „#{id}“, und das kann ein Entwurf nicht übernehmen: Eine ID in einem Entwurf besteht aus den Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“ und beginnt mit einem Buchstaben oder einer Ziffer. Diese Ausgabe lässt sich nicht zu einem Entwurf machen.",
     "releaseTaken": "Unter {url} ist bereits eine Ausgabe veröffentlicht, und eine Ausgabe wird nie überschrieben. Veröffentliche die nächste Version oder wähle einen anderen Ordner.",
     "releaseHasErrors": {

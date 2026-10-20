@@ -394,6 +394,17 @@
     "preferences": "Inställningar",
     "repair": "Reparera"
   },
+  "unclaimedDecks": {
+    "region": "Kortlekar att bekräfta",
+    "heading": "Solid Memo ändrar inget i de här kortlekarnas dokument förrän du bekräftar att de är kortlekarnas egna.",
+    "hint": "En kortleks dokument här säger inte att de hör till den, och de ligger utanför instansens egen mapp, där någon annans data kan vara angivna. Solid Memo läser dem och studerar från dem, men sparar inga svar eller ändringar där, och tar du bort kortleken tas bara dess post bort. Bekräfta bara dokument som du vet är kortlekens.",
+    "deck": "{deck}: dess dokument säger inte att de hör till den här kortleken.",
+    "claim": "Det här är kortlekens dokument",
+    "confirm": "Solid Memo markerar de här dokumenten som dokument för {deck} och ändrar och tar sedan bort dem tillsammans med kortleken:",
+    "confirmButton": "Markera dem som kortlekens",
+    "cancel": "Avbryt",
+    "claiming": "Markerar …"
+  },
   "deckAbout": {
     "label": "Om den här kortleken",
     "topicsLine": "Ämnen: {topics}",
@@ -659,7 +670,11 @@
   "keptFolder": {
     "text": "Solid Memo tog bort sina egna data och behöll {link}: en annan app har lagt filer där.",
     "releases": "Solid Memo tog bort sina egna data och behöll {link}: där finns de utgåvor som publicerats från den, som andra kan läsa. Det som en annan app har lagt där behålls också.",
-    "folder": "mappen i din Pod"
+    "folder": "mappen i din Pod",
+    "documents": {
+      "one": "{count} dokument behölls eftersom det även innehåller en annan apps data.",
+      "other": "{count} dokument behölls eftersom de även innehåller andra appars data."
+    }
   },
   "instanceUpdate": {
     "confirmRegion": "Starta uppdateringen",
@@ -1319,7 +1334,8 @@
       "MaxInclusive": "Värdet är för stort.",
       "MinLength": "Texten är för kort.",
       "MaxLength": "Texten är för lång.",
-      "Closed": "Egenskapen är inte tillåten här."
+      "Closed": "Egenskapen är inte tillåten här.",
+      "DeckPlace": "Kortlekens post finns inte i instansens katalog, eller så anger den ett dokument på en adress som ingen kortleks dokument får ha, till exempel en annan resurs åtkomstkontroll eller ett av instansens egna dokument. Solid Memo använder den inte."
     }
   },
   "webIdDocument": {
@@ -1412,6 +1428,7 @@
     "dataNotConforming": "Solid Memo sparade inte det här: det har inte det format Solid Memo förväntar sig. Inget ändrades. Läs in sidan igen och försök på nytt.",
     "deckGone": "Kortleken ”{deck}” finns inte längre. Kanske togs den bort i en annan flik eller app.",
     "cardsDocumentGone": "Korten i ”{deck}” går inte längre att hitta. Läs in sidan igen och försök på nytt.",
+    "deckDocumentUnclaimed": "Solid Memo ändrade inte ”{deck}”: dess dokument säger inte att de hör till den här kortleken. Inget ändrades. Bekräfta att de är kortlekens dokument där datakontrollen listar kortleken och försök sedan igen.",
     "cardGone": "Kortet finns inte längre. Kanske togs det bort i en annan flik eller app. Läs in sidan igen.",
     "notADeck": "Det är ingen kortlek från Solid Memo, så den kan inte läggas till. Välj en annan kortlek.",
     "libraryDeckTooNew": "Kortleken har ett nyare format än den här versionen av Solid Memo kan läsa. Läs in sidan igen för att få den senaste versionen.",
@@ -1426,6 +1443,7 @@
     "draftGone": "Det utkastet finns inte längre. Det kanske togs bort i en annan flik eller app.",
     "releaseUnreadable": "Solid Memo kan inte läsa någon utgåva på {url}. Kontrollera adressen och att utgåvan är publicerad där.",
     "notAReleaseFile": "Den filen innehåller inte en utgåva av en kortlek eller kurs. Välj en utgåva sparad som Turtle eller JSON-LD.",
+    "draftIdUnsupported": "Utkastet kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Solid Memo varken öppnar eller ändrar det.",
     "releaseIdUnsupported": "Utgåvan kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Den kan inte göras till ett utkast.",
     "releaseTaken": "En utgåva är redan publicerad på {url}, och en utgåva skrivs aldrig över. Publicera nästa version, eller välj en annan mapp.",
     "releaseHasErrors": {

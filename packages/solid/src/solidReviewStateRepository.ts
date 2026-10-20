@@ -4,6 +4,7 @@
 
 import { createSolidDataset, type SolidDataset } from "@inrupt/solid-client";
 import type { ReviewStateRepository } from "@solid-memo/application/ports";
+import type { Deck } from "@solid-memo/domain/deck";
 import type { PromptStates } from "@solid-memo/domain/grading";
 import type { ReviewKey, ReviewStates } from "@solid-memo/domain/review";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
@@ -13,6 +14,7 @@ import {
   PreconditionFailedError,
   saveDataset,
 } from "./datasets";
+import { createDeckDocumentGuard } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
 import {
@@ -45,6 +47,23 @@ export function createSolidReviewStateRepository({
   checkWrite = noWriteCheck,
   randomId = () => crypto.randomUUID(),
 }: SolidReviewStateRepositoryDeps): ReviewStateRepository {
+  const guard = createDeckDocumentGuard(fetch);
+
+  /**
+   * Save a deck's reviews document, saying whose it is (`<>
+   * dcterms:isPartOf` the deck's entry), once the subjects the write
+   * touched are checked: only one that is the deck's to change
+   * (deckPlace.ts, guard.writable), else nothing is sent.
+   */
+  async function saveReviews(
+    deck: Deck,
+    { dataset, subjects }: { dataset: SolidDataset; subjects: readonly string[] },
+  ): Promise<void> {
+    const written = await guard.writable(deck, deck.reviewsDocumentUrl, dataset);
+    await checkWrite(written, subjects, "pod");
+    await saveDataset(deck.reviewsDocumentUrl, written, fetch);
+  }
+
   return {
     async listReviewStates(deck): Promise<ReviewStates> {
       const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
@@ -71,8 +90,7 @@ export function createSolidReviewStateRepository({
     async gradeReviewState(deck, key, grade) {
       const save = async (dataset: SolidDataset) => {
         const written = withGradedReviewState(dataset, deck, key, grade, randomId);
-        await checkWrite(written.dataset, written.subjects, "pod");
-        await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+        await saveReviews(deck, written);
         return { state: written.state, current: written.current };
       };
       const kept = keptDataset(deck.reviewsDocumentUrl, fetch);
@@ -90,9 +108,8 @@ export function createSolidReviewStateRepository({
 
     async createReviewStates(deck, states): Promise<void> {
       const written = withReviewStates(createSolidDataset(), deck, states, randomId);
-      await checkWrite(written.dataset, written.subjects, "pod");
       // A new dataset: saved only if nothing is there yet (If-None-Match: *).
-      await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+      await saveReviews(deck, written);
     },
 
     async applyReviewChanges(deck, { save, remove, fsrs = NO_FSRS, every = false }): Promise<void> {
@@ -107,8 +124,7 @@ export function createSolidReviewStateRepository({
         every ? { fsrs: fsrs.remove } : { sm2: remove, fsrs: fsrs.remove },
       );
       const written = withReviewStates(without, deck, { sm2: save, fsrs: fsrs.save }, randomId);
-      await checkWrite(written.dataset, written.subjects, "pod");
-      await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+      await saveReviews(deck, written);
     },
 
     async writeFsrsStates(deck, edit): Promise<void> {
@@ -118,10 +134,9 @@ export function createSolidReviewStateRepository({
         const fsrs = edit(toReviewStates(dataset, deck));
         if (fsrs.length === 0) return;
         const written = withReviewStates(dataset, deck, { sm2: [], fsrs }, randomId);
-        await checkWrite(written.dataset, written.subjects, "pod");
         try {
           // If-Match the read above.
-          await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+          await saveReviews(deck, written);
           return;
         } catch (error) {
           if (!(error instanceof PreconditionFailedError) || attempt === WRITE_ATTEMPTS)
@@ -142,9 +157,8 @@ export function createSolidReviewStateRepository({
         { sm2: outdated.map(upgradeReviewState) },
         randomId,
       );
-      await checkWrite(written.dataset, written.subjects, "pod");
       // If-Match the read above.
-      await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+      await saveReviews(deck, written);
       return true;
     },
   };

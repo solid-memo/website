@@ -1285,6 +1285,15 @@ counts the problems, then the screen has four parts:
   domain reads no Markdown: the screen passes the check in
   (`deckTextCheck` in `ui`).
 
+Above them, on a deck's health and the instance's, a deck whose
+documents are unclaimed (they do not say they are the deck's, and are
+outside the instance's own folder:
+[data-model.md](data-model.md#where-an-instances-documents-are)) is
+named with its documents' addresses (`UnclaimedDecksNotice`). "These
+are this deck's documents" asks once more, then marks them as the
+deck's (`claimDeckDocuments`), and the checks are read afresh. Until
+then nothing in those documents changes.
+
 Each counts toward the badge on [Home](#home): every violation
 (warnings aside), every side to settle, every group of cards that say
 the same, and every Markdown finding (`healthProblemCount`).
@@ -1505,7 +1514,11 @@ in it is one a draft can keep: letters A to Z, digits, `.`, `_` and
 `-`, starting with a letter or digit (`unsupportedIdOf`). A chapter is
 kept in a document named after its id, which another id would not
 survive; such a release is refused (`releaseIdUnsupported`) before
-anything is written.
+anything is written. A draft's documents may have been written by
+another app, so the same holds for a draft itself: one whose documents
+name a subject by another id is not opened, and no change gives a
+draft one (`draftIdUnsupported`): either is refused with nothing
+written.
 
 It is named after its title, or its release's name, unlike the
 instance's other drafts of that version. Only a draft's place taken
@@ -2129,7 +2142,11 @@ releases it, two ways.
   as its server's access control says it: its own ACL on a server with
   Web Access Control, its ACR on one with Access Control Policies
   (`ReleasePublisher`, [boundaries.md](boundaries.md#access-control)).
-  This is the only place the app changes who may read something.
+  This is the only place the app changes who may read something, and
+  only the release's own access control, beside it on its server
+  (`<release>.acl` or `<release>.acr`), is ever written, whatever a
+  server's answers name instead: nothing of another origin is asked,
+  nothing else is written, and a write follows no redirect.
 - **Listed.** The catalog links it (`sm:publishedRelease`).
 - **Frozen.** The draft names the release it was published as
   (`sm:releasedAs`), and changes no more: every screen shows it, frozen.
@@ -2149,13 +2166,22 @@ releases it, two ways.
   draft would state the same.
 
 A pod that will not make the release public (it has no access control
-the app can write, it refuses the write, or it names the folder's
-access control as the release's, so the write would change the whole
-folder's) still has the release, written and listed, readable by its
+the app can write, it refuses the write, or it names another access
+control than the release's own as the release's, such as the folder's,
+whose change would be the whole folder's) still has the release, written and listed, readable by its
 owner alone. The draft is released all the same: what is written there
 is frozen. The screen says so ("Only you can read it"), with **Make it
 public**, which tries the access again (`makeReleasePublic`;
-`publicAccessRefused` when it still fails). Whether a release is public
+`publicAccessRefused` when it still fails). It does so only for a
+release the instance's catalog lists whose document is a release (its
+own subject an `sm:Deck`), in the instance or in one of the user's
+storages that the instance is in too: the catalog is data anyone may
+have written, and a link it holds leads nothing else to everyone, nor
+a release of the user's own that an instance in someone else's pod
+lists. The releases screen
+lists only links at an http(s) address named as a release is,
+`…/<name>/v<N>.ttl`, as a request sends it
+([data-model.md](data-model.md#where-an-instances-documents-are)). Whether a release is public
 is asked as someone with no login would ask (`isReleasePublic`, a
 request without credentials).
 
@@ -2217,7 +2243,9 @@ to find their storages as logging in does, which tell the leaves in
 their pod apart; when it cannot, none are. While it reads the
 documents, it says how many it has read of how many. A document the
 catalog names outside the instance is not read, nor one whose address
-climbs out of it (`..`, `%2e%2e`), nor a folder. A document that cannot
+climbs out of it (`..`, `%2e%2e`), nor a folder, as anywhere in the app
+([data-model.md](data-model.md#where-an-instances-documents-are)); nor
+is a deck the instance does not keep where it keeps decks. A document that cannot
 be read (refused, say, or not Turtle) is drawn as such, and the rest as
 read: a broken instance is where the graph helps most.
 

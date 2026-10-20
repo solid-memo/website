@@ -27,11 +27,14 @@ import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublish
  */
 export function ReleasePublishContainer({
   useCases,
+  webId,
   editor,
   links,
   onStarted,
 }: {
   useCases: UseCases;
+  /** Who makes the release public again (useMakePublic). */
+  webId: string;
   editor: DraftEditor;
   links: ReleasePublishLinks;
   /** A next version started: its draft. */
@@ -61,7 +64,7 @@ export function ReleasePublishContainer({
         queryClient.invalidateQueries({ queryKey: publishedKey(instanceUrl) }),
       ]),
   });
-  const publicMutation = useMakePublic(useCases, instanceUrl);
+  const publicMutation = useMakePublic(useCases, instanceUrl, webId);
   const nextMutation = useStartNextVersion(useCases, instanceUrl, onStarted);
   const downloadMutation = useMutation({ mutationFn: () => useCases.downloadRelease(draft.url) });
   const errors = rules.data === undefined ? undefined : publishErrors(rules.data);

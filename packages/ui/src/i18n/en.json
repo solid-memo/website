@@ -394,6 +394,17 @@
     "preferences": "Preferences",
     "repair": "Repair"
   },
+  "unclaimedDecks": {
+    "region": "Decks to confirm",
+    "heading": "Solid Memo changes nothing in these decks' documents until you confirm they are the decks' own.",
+    "hint": "A deck's documents here don't say they belong to it, and they are outside the instance's own folder, where someone else's data could be named. Solid Memo reads them and studies from them, but saves no answer or edit there, and removing the deck removes only its entry. Confirm only documents you know are the deck's.",
+    "deck": "{deck}: its documents don't say they belong to this deck.",
+    "claim": "These are this deck's documents",
+    "confirm": "Solid Memo will mark these documents as the documents of {deck}, and from then on change and delete them with the deck:",
+    "confirmButton": "Mark them as the deck's",
+    "cancel": "Cancel",
+    "claiming": "Marking…"
+  },
   "deckAbout": {
     "label": "About this deck",
     "topicsLine": "Topics: {topics}",
@@ -659,7 +670,11 @@
   "keptFolder": {
     "text": "Solid Memo deleted its own data and kept {link}: another app put files there.",
     "releases": "Solid Memo deleted its own data and kept {link}: the releases published from it are there, which others may be reading. Anything another app put there is kept too.",
-    "folder": "the folder in your Pod"
+    "folder": "the folder in your Pod",
+    "documents": {
+      "one": "{count} document was kept because it also holds another app's data.",
+      "other": "{count} documents were kept because they also hold other apps' data."
+    }
   },
   "instanceUpdate": {
     "confirmRegion": "Start the update",
@@ -1319,7 +1334,8 @@
       "MaxInclusive": "The value is too large.",
       "MinLength": "The text is too short.",
       "MaxLength": "The text is too long.",
-      "Closed": "The property is not allowed here."
+      "Closed": "The property is not allowed here.",
+      "DeckPlace": "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it."
     }
   },
   "webIdDocument": {
@@ -1412,6 +1428,7 @@
     "dataNotConforming": "Solid Memo did not save this: it is not in the format Solid Memo expects. Nothing was changed. Reload the page and try again.",
     "deckGone": "The deck “{deck}” no longer exists. Perhaps it was removed in another tab or app.",
     "cardsDocumentGone": "The cards of “{deck}” can no longer be found. Reload the page and try again.",
+    "deckDocumentUnclaimed": "Solid Memo did not change “{deck}”: its documents do not say they belong to this deck. Nothing was changed. Where the data check lists the deck, confirm that they are its documents, then try again.",
     "cardGone": "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
     "notADeck": "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
     "libraryDeckTooNew": "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
@@ -1426,6 +1443,7 @@
     "draftGone": "That draft no longer exists. Perhaps it was deleted in another tab or app.",
     "releaseUnreadable": "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
     "notAReleaseFile": "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
+    "draftIdUnsupported": "This draft names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. Solid Memo does not open or change it.",
     "releaseIdUnsupported": "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
     "releaseTaken": "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
     "releaseHasErrors": {

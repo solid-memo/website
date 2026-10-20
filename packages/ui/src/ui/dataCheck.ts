@@ -12,6 +12,7 @@ import {
 import {
   arrangementSetAside,
   setAsideDecks,
+  type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
 
@@ -25,6 +26,8 @@ export interface DataCheck {
   error: Error | null;
   /** The check's report when the data does not conform; else null. */
   report: ValidationReport | null;
+  /** The decks whose documents the check found unclaimed, conforming or not: none until it is in. */
+  unclaimed: readonly UnclaimedDeck[];
   /** Under "set invalid data aside", a deck with invalid data: read-only until it is repaired. */
   isSetAside: (deck: Deck) => boolean;
   /** Under "set invalid data aside", the catalog or a deck group has invalid data: the arrangement is read-only. */
@@ -72,6 +75,7 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     pending: checkQuery.isPending,
     error: checkQuery.error,
     report,
+    unclaimed: checkQuery.data?.unclaimed ?? [],
     isSetAside,
     arrangementSetAside: setsAside && arrangementSetAside(report),
     readOnly(deck) {

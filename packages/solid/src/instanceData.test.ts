@@ -11,18 +11,23 @@ const ROOT = "https://pod.example/";
 const INSTANCE = `${ROOT}solid-memo/main/`;
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
-/** A pod in memory, every DELETE recorded; `fail` answers a request (by method and URL) with a status instead. */
+/**
+ * A pod in memory, every DELETE recorded; `fail` answers a request (by
+ * method and URL) with a status instead. Each address is resolved as a
+ * browser's fetch resolves it before the request leaves (dot segments,
+ * `%2e%2e` too, removed), so a test sees where a request really goes.
+ */
 function pod(fail: (method: string, url: string) => number | null = () => null) {
   const store = createMemoryResourceStore();
   let etags = 0;
   const local = createLocalPod({ root: ROOT, store, newEtag: () => `"e${++etags}"` });
   const deleted: string[] = [];
   const fetch = (async (input, init) => {
-    const url = String(input);
+    const url = new Request(String(input)).url;
     const method = (init?.method ?? "GET").toUpperCase();
     const status = fail(method, url);
     if (status !== null) return new Response("refused", { status });
-    const response = await local(input, init);
+    const response = await local(url, init);
     if (method === "DELETE" && response.ok) deleted.push(url);
     return response;
   }) as typeof globalThis.fetch;
@@ -62,6 +67,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE.slice(0, -1), p.fetch)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     expect(p.deleted).toEqual([
@@ -103,6 +109,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     const deleted = p.deleted;
@@ -132,6 +139,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
   });
 
@@ -156,6 +164,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: INSTANCE,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     for (const url of foreign) expect(await p.exists(url), url).toBe(true);
@@ -173,6 +182,61 @@ describe("deleteInstanceData", () => {
     );
   });
 
+  it("removes only Solid Memo's subjects from a document that also holds another app's, keeps it, and names it", async () => {
+    const p = pod();
+    await seedInstance(p, `<#recipes> <https://other.example/says> "kept" .`);
+    const other = `<#note> <https://other.example/says> "kept" .`;
+    for (const url of [
+      `${INSTANCE}decks/deck-1.ttl`,
+      `${INSTANCE}history/2026-09.ttl`,
+      `${INSTANCE}preferences.ttl`,
+      `${INSTANCE}meta.ttl`,
+    ]) {
+      const text = await (await p.fetch(url)).text();
+      await p.put(url, `${text}\n${other}`);
+    }
+
+    const kept = [
+      `${INSTANCE}decks/deck-1.ttl`,
+      `${INSTANCE}history/2026-09.ttl`,
+      `${INSTANCE}preferences.ttl`,
+      `${INSTANCE}catalog.ttl`,
+      `${INSTANCE}meta.ttl`,
+    ];
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
+      keptFolder: INSTANCE,
+      keptReleases: false,
+      keptDocuments: kept,
+    });
+    for (const url of kept) {
+      const text = await (await p.fetch(url)).text();
+      expect(text, url).toContain("https://other.example/says");
+      expect(text, url).not.toContain(SM);
+    }
+    expect(await p.exists(`${INSTANCE}reviews/deck-1.ttl`)).toBe(false);
+    expect(await p.exists(`${INSTANCE}digest.ttl`)).toBe(false);
+  });
+
+  it("removes a deck's document elsewhere that says it is the deck's, and nothing of one that does not", async () => {
+    const p = pod();
+    const linked = `${ROOT}notes/linked.ttl`;
+    const unlinked = `${ROOT}notes/unlinked.ttl`;
+    await seedInstance(
+      p,
+      `<#deck-3> a <${SM}Deck> ; <${SM}cardsDocument> <${linked}> ; <${SM}reviewsDocument> <${unlinked}> .`,
+    );
+    await p.put(
+      linked,
+      `<> <http://purl.org/dc/terms/isPartOf> <${INSTANCE}catalog.ttl#deck-3> .\n<#c3> a <${SM}Card> .`,
+    );
+    await p.put(unlinked, `<#c3> a <${SM}ReviewState> .`);
+
+    await deleteInstanceData(INSTANCE, p.fetch);
+
+    expect(await p.exists(linked)).toBe(false);
+    expect(await p.exists(unlinked)).toBe(true);
+  });
+
   it("keeps the releases published from the instance, and says they are why the folder was kept", async () => {
     const p = pod();
     await seedInstance(p, `<#catalog> <${SM}publishedRelease> <releases/solid/v1.ttl> .`);
@@ -181,6 +245,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: INSTANCE,
       keptReleases: true,
+      keptDocuments: [],
     });
 
     expect(await p.urls()).toEqual([
@@ -206,9 +271,11 @@ describe("deleteInstanceData", () => {
     await p.put(elsewhere, `<#c9> a <${SM}Card> .`);
     await p.put(`${INSTANCE}attachments/kept.ttl`, `<#k> <#v> "1" .`);
 
+    // The catalog keeps the subject that is no deck, which is not Solid Memo's.
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: INSTANCE,
       keptReleases: false,
+      keptDocuments: [`${INSTANCE}catalog.ttl`],
     });
 
     expect(await p.exists(elsewhere)).toBe(true);
@@ -219,16 +286,77 @@ describe("deleteInstanceData", () => {
     expect(await p.exists(`${INSTANCE}meta.ttl`)).toBe(false);
   });
 
+  it("follows the catalog to no address a request would resolve outside decks/ and reviews/, however it is spelled", async () => {
+    const p = pod();
+    // Another user's documents on the same server, and the user's own beside the instance.
+    const targets = [
+      `${ROOT}alice/profile/card`,
+      `${ROOT}alice/private/diary.ttl`,
+      `${ROOT}solid-memo/secret.ttl`,
+      `${INSTANCE}attachments/kept.ttl`,
+      `${INSTANCE}decks/deck-1.ttl`,
+    ];
+    const spellings = [
+      `${INSTANCE}decks/../../../alice/profile/card`,
+      `${INSTANCE}%2e%2e/%2E%2e/alice/private/diary.ttl`,
+      `${INSTANCE}reviews/.%2E/%2e./secret.ttl`,
+      `${INSTANCE}decks/%2e%2e/attachments/kept.ttl`,
+      `${INSTANCE}reviews/../decks/deck-1.ttl`,
+      `HTTPS://POD.EXAMPLE/solid-memo/main/decks/deck-1.ttl`,
+      `https://pod.example:443/solid-memo/main/reviews/../decks/deck-1.ttl`,
+    ];
+    await seedInstance(
+      p,
+      spellings
+        .map(
+          (url, n) =>
+            `<#far-${n}> a <${SM}Deck> ; <${SM}cardsDocument> <${url}> ; <${SM}reviewsDocument> <${url}> .`,
+        )
+        .join("\n"),
+    );
+    for (const url of targets) await p.put(url, `<#x> <#y> "kept" .`);
+    await p.put(`${INSTANCE}decks/deck-1.ttl`, `<#c1> a <${SM}Card> .`);
+
+    await deleteInstanceData(INSTANCE, p.fetch);
+
+    for (const url of targets.slice(0, 4)) expect(await p.exists(url), url).toBe(true);
+    // The deck's own document goes as the catalog's deck-1 names it, once.
+    expect(p.deleted.filter((url) => url === `${INSTANCE}decks/deck-1.ttl`)).toHaveLength(1);
+    expect(p.deleted.every((url) => url.startsWith(INSTANCE))).toBe(true);
+  });
+
+  it("follows another user's attached instance to nothing of the user's on the same server", async () => {
+    const p = pod();
+    const bob = `${ROOT}bob/solid-memo/main/`;
+    const card = `${ROOT}alice/profile/card`;
+    await p.put(card, `<#me> a <http://xmlns.com/foaf/0.1/Person> .`);
+    await p.put(`${bob}meta.ttl`, `<#it> a <${SM}Instance> .`);
+    await p.put(
+      `${bob}catalog.ttl`,
+      `<#d> a <${SM}Deck> ; <${SM}cardsDocument> <${bob}../../../alice/profile/card> ; <${SM}reviewsDocument> <${card}> .`,
+    );
+
+    await expect(deleteInstanceData(bob, p.fetch)).resolves.toEqual({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+    expect(await p.exists(card)).toBe(true);
+    expect(p.deleted.every((url) => url.startsWith(bob))).toBe(true);
+  });
+
   it("counts what is already gone as deleted, so a delete that failed part-way can be done again", async () => {
     const p = pod();
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
     await p.put(`${INSTANCE}meta.ttl`, `<#it> a <${SM}Instance> .`);
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,
+      keptDocuments: [],
     });
     expect(await p.urls()).toEqual([ROOT, `${ROOT}solid-memo/`]);
 
@@ -241,6 +369,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, raced.fetch)).resolves.toEqual({
       keptFolder: INSTANCE,
       keptReleases: false,
+      keptDocuments: [],
     });
     expect(await raced.urls()).toEqual([
       ROOT,
@@ -269,6 +398,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, raced.fetch)).resolves.toEqual({
       keptFolder: INSTANCE,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     const unreadable = pod((method, url) =>
@@ -304,6 +434,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, garbled)).resolves.toEqual({
       keptFolder: INSTANCE,
       keptReleases: false,
+      keptDocuments: [],
     });
 
     expect(await p.urls()).toEqual([

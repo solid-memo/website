@@ -2,13 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  createSolidDataset,
-  deleteContainer,
-  deleteSolidDataset,
-  getThing,
-  setThing,
-} from "@inrupt/solid-client";
+import { createSolidDataset, deleteContainer, getThing, setThing } from "@inrupt/solid-client";
 import type { InstanceRepository } from "@solid-memo/application/ports";
 import {
   DATA_CLASSES,
@@ -20,9 +14,10 @@ import {
   type InstanceMeta,
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
-import { metaUrlOf } from "@solid-memo/domain/instanceLayout";
+import { instanceAddressOf, isPlainHttpUrl, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
-import { getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
+import { getSolidDatasetOrNull, readDataset, removeOwned, saveDataset } from "./datasets";
+import { subjectsOfClasses } from "./ownership";
 import { deleteInstanceData } from "./instanceData";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { toInstance, toInstanceMeta, toInstanceMetaThing } from "./mappers/instanceMapper";
@@ -38,6 +33,7 @@ import {
   type InstanceRegistration,
 } from "./typeIndex";
 import { ensureTrailingSlash, lastPathSegment } from "./urls";
+import { SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
 
 export interface SolidInstanceRepositoryDeps {
@@ -77,7 +73,8 @@ export function createSolidInstanceRepository({
     },
 
     async createInstance({ webId, containerUrl, name, registrationTarget }) {
-      const url = ensureTrailingSlash(containerUrl);
+      // As a request would send it, so every address made from it is compared as sent.
+      const url = instanceAddressOf(containerUrl);
       const metaUrl = metaUrlOf(url);
       await saveMetaDocument(
         metaUrl,
@@ -123,7 +120,9 @@ export function createSolidInstanceRepository({
     },
 
     async attachInstance({ webId, instanceUrl, registrationTarget }) {
-      const url = ensureTrailingSlash(instanceUrl);
+      // As a request would send it, so every address made from it is compared as sent; an http(s) folder only.
+      const url = instanceAddressOf(instanceUrl);
+      if (!isPlainHttpUrl(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
       const name = await readInstanceName(url, fetch);
       const indexUrl = await ensureTypeIndex(registrationTarget, webId, url, fetch);
       await addRegistrations(
@@ -336,13 +335,18 @@ async function readInstanceName(
   return toInstanceMeta(meta)?.name ?? lastPathSegment(instanceUrl);
 }
 
+/**
+ * Take back the instance's `meta.ttl` a creation that failed wrote: its
+ * `#it` only, the document when nothing else is in it (removeOwned),
+ * then the folder if it is then empty. Whatever fails is left.
+ */
 async function bestEffortCleanup(
   metaUrl: string,
   containerUrl: string,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   try {
-    await deleteSolidDataset(metaUrl, { fetch });
+    await removeOwned(metaUrl, subjectsOfClasses(SM.Instance), fetch);
     await deleteContainer(containerUrl, { fetch });
   } catch {}
 }

@@ -386,6 +386,24 @@ your Pod, and add decks to it. It starts empty, with its own decks and
 its own study. "Switch instance" takes you back to the first one, and
 with two instances, Solid Memo asks which to open when you come back.
 
+## Decks to confirm
+
+A deck's cards and progress may be kept anywhere in your Pod: in
+another folder, under other names, or right in your Pod's root.
+Solid Memo writes to those documents, or deletes them with the deck,
+only when they say they belong to the deck, which every document it
+writes says. An older document outside the instance's own folder may
+not say it yet, and Solid Memo never adds that by itself there, where
+someone else's data could be named instead.
+
+Such a deck is listed under **Decks to confirm**, above your decks and
+on the Studio's Health screen, with the addresses of its documents.
+You can still open it and study it, but no answer or edit is saved to
+those documents, and removing the deck removes only it from the list.
+If they are the deck's, press **These are this deck's documents**,
+check the addresses once more and press **Mark them as the deck's**.
+From then on the deck works as any other.
+
 ## Solid Memo Studio
 
 "Open in Studio", in the instance bar, on a deck's page or in a deck's

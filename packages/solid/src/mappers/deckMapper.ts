@@ -34,6 +34,7 @@ import {
   distractorToRecord,
 } from "@solid-memo/domain/deckRecord";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
+import { isDeckInPlace, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import {
@@ -59,12 +60,25 @@ export function agentNamesOf(dataset: SolidDataset): Map<string, string> {
   return names;
 }
 
-/** Every deck of a catalog document, its creators named from the agents beside it. */
-export function toDecks(dataset: SolidDataset): Deck[] {
+/**
+ * Every deck of the catalog document at `catalogUrl`, its creators named
+ * from the agents beside it: those whose entry is a subject of this
+ * document and whose cards and reviews documents are where the instance
+ * keeps them (isDeckInPlace), each as a request sends the address, which
+ * another spelling of the same one is (isSameUrl). The catalog is data anyone may have
+ * written, so a deck it names elsewhere is not one of the instance's:
+ * nothing reads, writes or deletes through it, and the instance check
+ * reports its entry, which a repair may remove (docs/data-model.md,
+ * "Where an instance's documents are").
+ */
+export function toDecks(dataset: SolidDataset, catalogUrl: string): Deck[] {
   const names = agentNamesOf(dataset);
   return getThingAll(dataset)
     .map((thing) => toDeck(thing, names))
-    .filter((deck): deck is Deck => deck !== null);
+    .filter(
+      (deck): deck is Deck =>
+        deck !== null && isSameUrl(documentUrlOf(deck.url), catalogUrl) && isDeckInPlace(deck),
+    );
 }
 
 /**

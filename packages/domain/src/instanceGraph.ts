@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { SITE } from "@solid-memo/vocab/ns";
-import { ensureTrailingSlash } from "./instanceLayout";
+import { ensureTrailingSlash, isDocumentIn } from "./instanceLayout";
 import { KNOWN_LICENSES } from "./license";
 import { DCTERMS_NS, SCHEMA_NS } from "./release/releaseModel";
 import { RDF_TYPE, type DraftTriple } from "./release/releaseDraft";
@@ -145,23 +145,6 @@ const LICENSES = new Set(KNOWN_LICENSES);
 const LICENSE = `${DCTERMS_NS}license`;
 const LICENSE_DOCUMENT = `${DCTERMS_NS}LicenseDocument`;
 
-/**
- * Whether `url` is a document of the instance at `root` (ending in a
- * slash): in it as written, with no dot segment (`..`, `%2e%2e`) that a
- * request would resolve to elsewhere, and neither a folder nor a part of
- * a document (a fragment). The catalog that names an instance's
- * documents is data anyone may have written.
- */
-export function isInstanceDocumentUrl(url: string, root: string): boolean {
-  let resolved: string;
-  try {
-    resolved = new URL(url).href;
-  } catch {
-    return false;
-  }
-  return resolved === url && url.startsWith(root) && !url.endsWith("/") && !url.includes("#");
-}
-
 /** The id of a term a document states: a blank node's is scoped to the document. */
 function idOf(term: string, document: string): string {
   return term.startsWith("_:") ? `${term}@${document}` : term;
@@ -233,7 +216,7 @@ export function instanceGraphOf({
   // A storage named without its trailing slash holds no address that merely starts as it does.
   const pods = storages.map(ensureTrailingSlash);
   // A document elsewhere is not the instance's data, whatever the catalog says.
-  const documents = read.filter(({ url }) => isInstanceDocumentUrl(url, root));
+  const documents = read.filter(({ url }) => isDocumentIn(url, root));
   const nodes = new Map<string, GraphNode>();
   const edges = new Map<string, GraphEdge>();
   const edge = (from: string, to: string, predicate: string, kind: GraphEdgeKind): boolean => {

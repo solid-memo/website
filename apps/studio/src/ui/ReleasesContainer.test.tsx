@@ -36,6 +36,7 @@ function renderContainer(useCases: UseCases, onStarted = vi.fn()) {
       <ReleasesContainer
         useCases={useCases}
         instance={instanceA}
+        webId="https://alice.example/profile/card#me"
         healthHref="#/health"
         draftsHref="#/drafts"
         draftHref={(draft) => `#/draft/${draft.name}`}
@@ -59,7 +60,11 @@ describe("ReleasesContainer", () => {
     expect(screen.getByText("Reading the releases…")).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Make solid, version 1 public" }));
     expect(await screen.findByRole("cell", { name: "Everyone" })).toBeInTheDocument();
-    expect(useCases.makeReleasePublic).toHaveBeenCalledWith(SOLID);
+    expect(useCases.makeReleasePublic).toHaveBeenCalledWith(
+      instanceA.url,
+      SOLID,
+      "https://alice.example/profile/card#me",
+    );
     expect(invalidate).toHaveBeenCalledWith({ queryKey: publicKey(SOLID) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: publishedKey(instanceA.url) });
   });

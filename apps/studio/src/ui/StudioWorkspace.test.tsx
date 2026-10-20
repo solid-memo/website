@@ -2168,7 +2168,13 @@ describe("StudioWorkspace", () => {
       expect(screen.getByText(/Only you can read it/)).toBeInTheDocument();
       expect(useCases.isReleasePublic).not.toHaveBeenCalled();
       fireEvent.click(screen.getByRole("button", { name: "Make it public" }));
-      await waitFor(() => expect(useCases.makeReleasePublic).toHaveBeenCalledWith(target));
+      await waitFor(() =>
+        expect(useCases.makeReleasePublic).toHaveBeenCalledWith(
+          instanceA.url,
+          target,
+          session.webId,
+        ),
+      );
       expect(await screen.findByText("Anyone with its address can read it.")).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Download .ttl" }));
       await waitFor(() => expect(useCases.downloadRelease).toHaveBeenCalledWith(DRAFT_URL));

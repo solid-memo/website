@@ -137,7 +137,7 @@ describe("DraftsContainer", () => {
     let finish: () => void = () => undefined;
     const useCases = makeUseCasesFake({ listReleaseDrafts: vi.fn(async () => [solid]) });
     vi.mocked(useCases.deleteReleaseDraft).mockImplementationOnce(
-      () => new Promise((resolve) => (finish = () => resolve())),
+      () => new Promise((resolve) => (finish = () => resolve({ keptDocuments: [] }))),
     );
     renderContainer(useCases);
     fireEvent.click(

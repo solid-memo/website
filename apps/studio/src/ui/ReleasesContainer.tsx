@@ -25,6 +25,7 @@ import { ReleasesScreen } from "./ReleasesScreen";
 export function ReleasesContainer({
   useCases,
   instance,
+  webId,
   healthHref,
   draftsHref,
   draftHref,
@@ -32,6 +33,8 @@ export function ReleasesContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
+  /** Who makes a release public again (useMakePublic). */
+  webId: string;
   healthHref: string;
   draftsHref: string;
   /** A draft's overview. */
@@ -49,7 +52,7 @@ export function ReleasesContainer({
     queryKey: draftsKey(instance.url),
     queryFn: () => useCases.listReleaseDrafts(instance.url),
   });
-  const publicMutation = useMakePublic(useCases, instance.url);
+  const publicMutation = useMakePublic(useCases, instance.url, webId);
   const nextMutation = useStartNextVersion(useCases, instance.url, onStarted);
 
   if (releasesQuery.error) return <ErrorMessage error={errorText(releasesQuery.error)} />;

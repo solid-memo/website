@@ -470,6 +470,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           <ReleaseMetadataContainer
             key={route.draftUrl}
             useCases={useCases}
+            webId={session.webId}
             draftUrl={route.draftUrl}
             links={draftLinks(route.draftUrl)}
             publishLinks={{
@@ -635,6 +636,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             key={route.instanceUrl}
             useCases={useCases}
             instance={activeInstance!}
+            webId={session.webId}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
             draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
             draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}

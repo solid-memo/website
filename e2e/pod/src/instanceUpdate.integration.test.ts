@@ -510,7 +510,9 @@ const isWrite = (request: Recorded) => !READS.has(request.method);
 /**
  * Every write to one of the documents was held to the version it was read
  * at: If-Match the ETag the server gave the last read of it, where the
- * server enforces If-Match; else made right after a read of it.
+ * server enforces If-Match; else made right after a read of it (a HEAD of
+ * a folder aside: whether the instance's folder is its own is asked once,
+ * before its first write, and changes no document).
  */
 function expectConditional(
   sent: Recorded[],
@@ -521,7 +523,11 @@ function expectConditional(
     if (!isWrite(request) || !documents.includes(request.url)) continue;
     const named = `${request.method} ${request.url}`;
     if (!conditional.edits) {
-      expect(sent[index - 1], named).toMatchObject({ method: "GET", url: request.url });
+      const before = sent
+        .slice(0, index)
+        .reverse()
+        .find((earlier) => !(earlier.method === "HEAD" && earlier.url.endsWith("/")));
+      expect(before, named).toMatchObject({ method: "GET", url: request.url });
       continue;
     }
     const read = sent

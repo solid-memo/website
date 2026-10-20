@@ -103,12 +103,13 @@ const siteFetch: typeof fetch = async (input) => {
   return response;
 };
 
-async function app() {
-  const store = createMemoryResourceStore();
+/** The app over a local pod kept in `store`, reading the library through `site`. */
+async function app(site: typeof fetch = siteFetch, store = createMemoryResourceStore()) {
   const podFetch = createLocalPod({ root: POD, store, newEtag: () => `"${crypto.randomUUID()}"` });
+  // Alice's profile, on a pod that has none yet.
   await podFetch(`${POD}profile/card`, {
     method: "PUT",
-    headers: { "Content-Type": "text/turtle" },
+    headers: { "Content-Type": "text/turtle", "If-None-Match": "*" },
     body: `<#me> <http://xmlns.com/foaf/0.1/name> "Alice" ; <http://www.w3.org/ns/pim/space#storage> <${POD}> .`,
   });
   const shapeValidator = createShaclShapeValidator({
@@ -121,7 +122,7 @@ async function app() {
   const useCases = createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
-    deckLibrary: createSolidDeckLibrary({ fetch: siteFetch, indexUrl: `${SITE}decks/index.ttl` }),
+    deckLibrary: createSolidDeckLibrary({ fetch: site, indexUrl: `${SITE}decks/index.ttl` }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, ...ids }),
     deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, ...ids }),
@@ -249,5 +250,216 @@ describe("a deck imported from the library", () => {
       `<${listed!.url}> <${KEYWORD}> "huvudstäder"@sv .`,
       `<${listed!.url}> <${KEYWORD}> "länder"@sv .`,
     ]);
+  });
+});
+
+const FIRST = `${SITE}decks/capitals-of-the-world/v1.ttl`;
+const LATEST = `${SITE}decks/capitals-of-the-world/v3.ttl`;
+
+/** The card ids a release of the library holds, as the site publishes it through `site`. */
+async function releaseCardIds(url: string, site: typeof fetch = siteFetch): Promise<string[]> {
+  const turtle = await (await site(url)).text();
+  return [...turtle.matchAll(/^<#([^>]+)>\n {4}a solid-memo:Card\b/gm)]
+    .map((match) => match[1]!)
+    .sort();
+}
+
+/** The library as the site publishes it, its latest capitals-of-the-world release without the card `id`. */
+function withoutCard(id: string): typeof fetch {
+  return async (input, init) => {
+    const response = await siteFetch(input, init);
+    if (String(input) !== LATEST) return response;
+    const turtle = (await response.text()).replace(new RegExp(`\\n<#${id}>\\n(?:.+\\n)+`), "\n");
+    const changed = new Response(turtle, { headers: { "content-type": "text/turtle" } });
+    return Object.defineProperty(changed, "url", { value: LATEST });
+  };
+}
+
+/** How often the document at `url` says it is the deck's. */
+async function backLinks(store: ResourceStore, url: string, deckUrl: string): Promise<number> {
+  return (await everyTriple(store)).filter(
+    (line) => line.startsWith(`<${url}> <${DCTERMS}isPartOf> `) && line.includes(deckUrl),
+  ).length;
+}
+
+/** The document at `url` as one written before documents said whose they are: its dcterms:isPartOf gone. */
+async function unlink(store: ResourceStore, url: string): Promise<void> {
+  const resource = await store.get(url);
+  if (resource?.kind !== "rdf") throw new Error(`${url} is not an RDF document`);
+  await store.set(url, {
+    ...resource,
+    etag: `"${crypto.randomUUID()}"`,
+    triples: resource.triples.filter((line) => !line.startsWith(`<${url}> <${DCTERMS}isPartOf> `)),
+  });
+}
+
+/**
+ * A library deck imported into an instance at `containerUrl`, one card
+ * studied, and the site whose latest release removes that card.
+ */
+async function studiedDeck(containerUrl: string) {
+  const first = await app();
+  const instance = await first.useCases.createInstance(ALICE, {
+    containerUrl,
+    name: "Main",
+    registrationTarget: "private",
+  });
+  const deck = await first.useCases.importLibraryDeck(instance.url, { url: FIRST } as LibraryDeck);
+  const cards = await first.useCases.listCards(deck);
+  const studied = [...cards].sort((a, b) => a.id.localeCompare(b.id));
+  for (const card of studied.slice(0, 2)) {
+    await first.useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "front-to-back" },
+      4,
+      new Date("2026-10-20T10:00:00.000Z"),
+    );
+  }
+  const removed = studied[0]!.id;
+  const kept = studied[1]!.id;
+  return { store: first.store, instance, deck, removed, kept, site: withoutCard(removed) };
+}
+
+/** The deck's library upgrade to the latest release, through the app over `site` and the same pod. */
+async function upgrade(
+  store: ResourceStore,
+  site: typeof fetch,
+  instanceUrl: string,
+  deckUrl: string,
+) {
+  const { useCases } = await app(site, store);
+  const deck = (await useCases.listDecks(instanceUrl)).find((one) => one.url === deckUrl)!;
+  const [copy] = await useCases.listLibraryUpdates(instanceUrl);
+  const plan = await useCases.planLibraryUpgrade(deck, copy);
+  expect(plan).not.toBeNull();
+  return { useCases, deck, plan: plan!, outcome: await useCases.applyLibraryUpgrade(deck, plan!) };
+}
+
+describe("a library deck's documents, through its import and an upgrade", () => {
+  it("say once each that they are the deck's, and its cards and review states are as they would be without it", {
+    timeout: 60_000,
+  }, async () => {
+    const { useCases, store } = await app();
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const deck = await useCases.importLibraryDeck(instance.url, { url: FIRST } as LibraryDeck);
+    const cards = await useCases.listCards(deck);
+    await useCases.recordReview(
+      instance.url,
+      deck,
+      { card: cards[0]!, direction: "front-to-back" },
+      4,
+      new Date("2026-10-20T10:00:00.000Z"),
+    );
+    // Only the documents say so: no card or review state does.
+    const partOfSubjects = async () =>
+      new Set(
+        (await everyTriple(store))
+          .filter((line) => line.includes(`<${DCTERMS}isPartOf> <${deck.url}>`))
+          .map((line) => line.split(" ")[0]),
+      );
+    expect(await backLinks(store, deck.cardsDocumentUrl, deck.url)).toBe(1);
+    expect(await backLinks(store, deck.reviewsDocumentUrl, deck.url)).toBe(1);
+    const states = await useCases.listDeckReviewStates(deck);
+    expect(states.sm2.map((state) => state.cardId)).toEqual([cards[0]!.id]);
+
+    const [copy] = await useCases.listLibraryUpdates(instance.url);
+    const plan = await useCases.planLibraryUpgrade(deck, copy);
+    expect(plan).not.toBeNull();
+    await expect(useCases.applyLibraryUpgrade(deck, plan!)).resolves.toMatchObject({ ok: true });
+
+    const [upgraded] = await useCases.listDecks(instance.url);
+    expect(upgraded!.sourceUrl).toBe(LATEST);
+    expect(await backLinks(store, upgraded!.cardsDocumentUrl, deck.url)).toBe(1);
+    expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
+    expect(await partOfSubjects()).toEqual(
+      new Set([`<${upgraded!.cardsDocumentUrl}>`, `<${upgraded!.reviewsDocumentUrl}>`]),
+    );
+    // The cards are the release's, every one; the state studied is as it was.
+    expect((await useCases.listCards(upgraded!)).map((card) => card.id).sort()).toEqual(
+      await releaseCardIds(LATEST),
+    );
+    expect(await useCases.listDeckReviewStates(upgraded!)).toEqual(states);
+    const report = await useCases.validateInstance(instance.url);
+    expect(report.conforms).toBe(true);
+    expect(report.unclaimed).toBeUndefined();
+  });
+
+  it("an upgrade that removes a studied card writes the reviews document too, which still says once it is the deck's", {
+    timeout: 60_000,
+  }, async () => {
+    const { store, instance, deck, removed, kept, site } = await studiedDeck(`${POD}solid-memo/`);
+    const { useCases, plan, outcome } = await upgrade(store, site, instance.url, deck.url);
+    expect(plan.remove.map((card) => card.id)).toEqual([removed]);
+    expect(outcome).toMatchObject({ ok: true });
+
+    const [upgraded] = await useCases.listDecks(instance.url);
+    expect((await useCases.listCards(upgraded!)).map((card) => card.id).sort()).toEqual(
+      await releaseCardIds(LATEST, site),
+    );
+    const states = await useCases.listDeckReviewStates(upgraded!);
+    expect(states.sm2.map((state) => state.cardId)).toEqual([kept]);
+    expect(await backLinks(store, upgraded!.cardsDocumentUrl, deck.url)).toBe(1);
+    expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
+  });
+
+  it("made before documents said whose they are, in the instance's own folder, says so in the upgrade's own writes", {
+    timeout: 60_000,
+  }, async () => {
+    const { store, instance, deck, kept, site } = await studiedDeck(`${POD}solid-memo/`);
+    await unlink(store, deck.cardsDocumentUrl);
+    await unlink(store, deck.reviewsDocumentUrl);
+    expect(await backLinks(store, deck.cardsDocumentUrl, deck.url)).toBe(0);
+
+    const { useCases, outcome } = await upgrade(store, site, instance.url, deck.url);
+    expect(outcome).toMatchObject({ ok: true });
+    const [upgraded] = await useCases.listDecks(instance.url);
+    expect(upgraded!.sourceUrl).toBe(LATEST);
+    expect(
+      (await useCases.listDeckReviewStates(upgraded!)).sm2.map((state) => state.cardId),
+    ).toEqual([kept]);
+    expect(await backLinks(store, upgraded!.cardsDocumentUrl, deck.url)).toBe(1);
+    expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
+  });
+
+  it("made before documents said whose they are, in an instance at the pod's root, is refused, nothing changed, until the user claims them", {
+    timeout: 60_000,
+  }, async () => {
+    const { store, instance, deck, removed, kept, site } = await studiedDeck(POD);
+    expect(instance.url).toBe(POD);
+    await unlink(store, deck.cardsDocumentUrl);
+    await unlink(store, deck.reviewsDocumentUrl);
+    const before = await everyTriple(store);
+
+    const refused = await upgrade(store, site, instance.url, deck.url);
+    expect(refused.outcome).toMatchObject({
+      ok: false,
+      step: "cards",
+      error: expect.objectContaining({ code: "deckDocumentUnclaimed" }),
+      changed: false,
+    });
+    expect(await everyTriple(store)).toEqual(before);
+
+    await refused.useCases.claimDeckDocuments(instance.url, deck.url);
+    expect(await backLinks(store, deck.cardsDocumentUrl, deck.url)).toBe(1);
+    expect(await backLinks(store, deck.reviewsDocumentUrl, deck.url)).toBe(1);
+
+    const { useCases, plan, outcome } = await upgrade(store, site, instance.url, deck.url);
+    expect(plan.remove.map((card) => card.id)).toEqual([removed]);
+    expect(outcome).toMatchObject({ ok: true });
+    const [upgraded] = await useCases.listDecks(instance.url);
+    expect(upgraded!.sourceUrl).toBe(LATEST);
+    expect((await useCases.listCards(upgraded!)).map((card) => card.id).sort()).toEqual(
+      await releaseCardIds(LATEST, site),
+    );
+    expect(
+      (await useCases.listDeckReviewStates(upgraded!)).sm2.map((state) => state.cardId),
+    ).toEqual([kept]);
+    expect(await backLinks(store, upgraded!.cardsDocumentUrl, deck.url)).toBe(1);
+    expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
   });
 });
