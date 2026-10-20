@@ -2462,7 +2462,10 @@ form.card-edit {
 }
 
 .card-question > p {
-  font-size: clamp(2rem, 9vw, 3.25rem);
+  /* Full size up to 12 characters, then a little smaller per character, down
+     to 0.6 of it at 52; never under 1.5rem, so it stays above the answer. */
+  --fit: clamp(0.6, 1 - (var(--text-length, 0) - 12) / 100, 1);
+  font-size: max(1.5rem, clamp(2rem, 9vw, 3.25rem) * var(--fit));
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;

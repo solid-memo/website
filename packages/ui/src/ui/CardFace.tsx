@@ -25,7 +25,9 @@ import { ZoomableImage } from "./ZoomableImage";
  * The face is sized by its role — the question large, the answer under
  * it smaller — not by which side it is, so a deck studied back-to-front
  * looks like any other. Without a role, the front asks and the back
- * answers.
+ * answers. A question's text shrinks a little as it grows longer, so a
+ * phrase is not set as large as a word; its length is passed to the
+ * stylesheet as `--text-length`, in characters.
  *
  * Size and place say which face is which only to the eye, so each face
  * also starts with a hidden name for screen readers: "Question" and
@@ -63,6 +65,7 @@ export function CardFace({
   const markdown = isMarkdown(textFormat);
   const role = givenRole ?? (side === "front" ? "question" : "answer");
   const shownText = readerText(text);
+  const textLength = [...plainDataText(shownText, markdown)].length;
   const description = imageDescription === undefined ? "" : readerText(imageDescription);
   const name =
     givenRole === undefined
@@ -73,7 +76,7 @@ export function CardFace({
         ? t("cardFace.question")
         : t("cardFace.answer");
   return (
-    <div class={`card-face card-${side} card-${role}`}>
+    <div class={`card-face card-${side} card-${role}`} style={`--text-length: ${textLength}`}>
       <span class="visually-hidden">{`${name}: `}</span>
       {imageUrl !== undefined &&
         (isHttpUrl(imageUrl) ? (
