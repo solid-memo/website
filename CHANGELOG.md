@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [4.1.3](https://github.com/solid-memo/website/compare/v4.1.2...v4.1.3) (2026-10-20)
+
+### Bug Fixes
+
+* **web:** unregister the old journeys report's service workers ([786bdea](https://github.com/solid-memo/website/commit/786bdea71787fe07f5eb444a49a24934a09d5774))
+
 ## [4.1.2](https://github.com/solid-memo/website/compare/v4.1.1...v4.1.2) (2026-10-20)
 
 ### Bug Fixes
