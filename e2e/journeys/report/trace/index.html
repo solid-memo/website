@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- Published in place of the report's own trace viewer
+       (docs/deployment.md#the-journeys-report), at the address its Trace
+       links open. It sends a trace on to Playwright's trace viewer at
+       trace.playwright.dev, which fetches the trace from this site, but
+       only a trace of the report's own: a file of its data/ folder, named
+       as the report names a trace. Anything else stays here. The one
+       script it lets run is the one below, by its hash
+       (harness/reportTrace.test.ts checks it still matches). -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'sha256-d9ZWKxNnzFdY+Fq42V8K7R5EucCi5MRWmp4gg7Luuew='; base-uri 'none'; form-action 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>A user journey's trace</title>
+  <script>
+    (function () {
+      var data = new URL("../data/", location.href);
+      var traces = new URLSearchParams(location.search).getAll("trace").map(function (trace) {
+        try {
+          return new URL(trace, location.href);
+        } catch (e) {
+          return null;
+        }
+      });
+      // A trace of the report's is data/<its SHA-1>.zip, and nothing more:
+      // no query, no escaped slash that Pages would read as a folder.
+      var ours = traces.length > 0 && traces.every(function (trace) {
+        return trace !== null && trace.href.indexOf(data.href) === 0 &&
+          /^[0-9a-f]{40}\.zip$/.test(trace.href.slice(data.href.length));
+      });
+      if (ours)
+        location.replace("https://trace.playwright.dev/?" + traces.map(function (trace) {
+          return "trace=" + encodeURIComponent(trace.href);
+        }).join("&"));
+    })();
+  </script>
+</head>
+
+<body>
+  <p>This page opens a trace of <a href="../">Solid Memo's user journeys</a> in
+    <a href="https://trace.playwright.dev/">Playwright's trace viewer</a>. It opens
+    only the report's own traces.</p>
+</body>
+
+</html>

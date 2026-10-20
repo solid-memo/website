@@ -306,7 +306,10 @@ jobs:
         with:
           fetch-depth: 0
           filter: blob:none
-          sparse-checkout: .github
+          # .github for the tags, and what stands in for the trace viewer.
+          sparse-checkout: |
+            .github
+            e2e/journeys/report
           persist-credentials: false
       - name: The tag is still the newest version
         if: steps.key.outputs.set == 'true'
@@ -328,7 +331,11 @@ jobs:
           path: ${{ runner.temp }}/journeys
       # The report, with the files Pages needs beside it: CNAME, which
       # keeps the custom domain, .nojekyll, so Pages serves the files as
-      # they are, and robots.txt, which keeps search engines out. One
+      # they are, and robots.txt, which keeps search engines out. Its
+      # trace viewer is left out: the viewer opens a trace from any
+      # address, so e2e/journeys/report/trace/ stands in for it, sending
+      # the report's own traces on to trace.playwright.dev
+      # (docs/deployment.md#the-journeys-report). One
       # commit with no parent, force-pushed over main. The key is written
       # to a file for this step alone, which git's ssh reads, as in
       # release.yml; GitHub's host keys come from its API.
@@ -348,6 +355,8 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
           cd "$RUNNER_TEMP/journeys"
           test -f index.html
+          rm -rf trace
+          cp -R "$GITHUB_WORKSPACE/e2e/journeys/report/trace" trace
           echo "$JOURNEYS_HOST" > CNAME
           touch .nojekyll
           printf 'User-agent: *\nDisallow: /\n' > robots.txt

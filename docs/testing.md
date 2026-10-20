@@ -466,8 +466,9 @@ skips the journeys, it takes their reports from the run that ran them
 on its code, usually the merge queue's
 ([releasing.md](releasing.md#what-each-stage-checks)). It shows every
 journey's steps and screenshots, and its **Trace** link opens the
-step-by-step timeline in the browser (the trace viewer is part of the report and
-needs it served, as it is there, not opened as a file). In the merge
+step-by-step timeline in the browser, at <https://trace.playwright.dev>,
+which fetches the trace from the report's site
+([deployment.md](deployment.md#the-journeys-report)). In the merge
 queue, and on `main` when its run runs them, the journeys always keep
 their traces for this. The report is public and
 holds the throwaway accounts' passwords and tokens, which die with the
