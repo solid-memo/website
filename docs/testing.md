@@ -132,6 +132,10 @@ limit on pulls without an account the runners share: each job restores
 its server's images ([e2e-images](../.github/actions/e2e-images/action.yml)),
 and only when the cache has none under the job's key does it pull or
 build them, then, on `main`, save them ([e2e/pod/images.ts](../e2e/pod/images.ts)).
+Where `main`'s run skips the jobs that would save them
+([releasing.md](releasing.md#what-each-stage-checks)), CI's `warm` jobs
+save the images of every server, blocking and advisory, that the cache
+lacks (`node e2e/pod/servers.ts keys all` names their keys).
 A pull request and the merge queue read `main`'s images but save none:
 GitHub keeps what a run saves under its ref, so their copies would never
 be read again, and they would count toward the repository's 10 GB of
@@ -303,8 +307,10 @@ for). It keeps its pods in files, not in memory, because the journeys
 PATCH Swedish text (see above). The journeys need Docker and the
 browsers (`npm run browsers -w @solid-memo/e2e-journeys` installs
 Chromium, Firefox and WebKit, with the system libraries they need), and CI
-runs them on every pull request and every push to `main`. They block,
-as the blocking servers do.
+runs them on every pull request and in the merge queue, and on `main`
+those in Chromium always, the others only where the code has not passed
+them yet ([releasing.md](releasing.md#what-each-stage-checks)). They
+block, as the blocking servers do.
 
 Further journeys go through:
 
@@ -438,11 +444,15 @@ error, and the browser it failed in. The job's
 published with each deploy: the report of the CI run on the release
 commit the site runs (none after a deploy by hand), every browser's
 journeys in one, as the `journeys-report` job merges them from both
-journeys jobs (Playwright's blob reports). It shows every
+journeys jobs (Playwright's blob reports); the engines', when the
+release commit's run skips them, from the run that ran them on its code,
+usually the merge queue's
+([releasing.md](releasing.md#what-each-stage-checks)). It shows every
 journey's steps and screenshots, and its **Trace** link opens the
 step-by-step timeline in the browser (the trace viewer is part of the report and
-needs it served, as it is there, not opened as a file). On `main` the
-journeys always keep their traces for this. The report is public and
+needs it served, as it is there, not opened as a file). On `main`, and
+for the engines in the merge queue, the journeys always keep their
+traces for this. The report is public and
 holds the throwaway accounts' passwords and tokens, which die with the
 run's server, and it is kept out of search engines (`robots.txt`).
 Since only a green run on a release commit deploys, a failure on
@@ -541,29 +551,32 @@ they show.
 fork's included, in the merge queue ([below](#the-merge-queue)), on
 every push to `main`, and by hand. A branch's pushes alone run nothing,
 so a pull request's commits are not checked twice for one push. Its
-jobs, side by side:
+jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-timing-dependent-jobs):
 
-| Job | What it checks |
-|---|---|
-| `build` | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`, with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
-| `library` | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
-| `crosscheck` | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
-| `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
-| `contract (<server>)` | that each advisory server starts and meets the contract |
-| `journeys (<browsers>)` | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
-| `journeys-report` | nothing: on `main`, after both `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)). When both passed, it fails without both their reports; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
-| `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
-| `workflows` | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
-| `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
-| `ci-ok` | that every job above passed, `journeys-report` and `caches` aside |
+| Job | Kind | What it checks |
+|---|---|---|
+| `gate` | deterministic | what the run runs: every job, or the deterministic ones alone (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes; and the journeys' matrix, without the engines when they are skipped |
+| `build` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`, with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
+| `library` | deterministic | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
+| `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
+| `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
+| `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
+| `journeys (<browsers>)` | deterministic in Chromium, timing-dependent in the other engines | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
+| `journeys-report` | deterministic | nothing: on `main`, after both `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)); when this run skipped the engines, their run comes from the run that tested its code (the gate's `tested-by`). When the journeys passed, it fails without both their reports; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
+| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
+| `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
+| `caches` | deterministic | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `warm`, `warm-images`, `warm-browsers` | deterministic | nothing: on `main`, when the timing-dependent jobs are skipped, `warm` looks up the caches they would have saved, each server's images and the engines' browsers, and the other two pull, build or download only what is missing, and save it. Like `caches`, they fail neither the run nor `ci-ok` |
+| `ci-ok` | deterministic | that every job above passed, `journeys-report`, `caches` and the `warm` jobs aside; `pod` and `contract` may be skipped only when the gate skipped them |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
 on `main` (a setting of the repository, Settings › Rules) is to require
 it and nothing else, and Renovate merges its updates
 through a pull request once it passes (`automergeType: 'pr'` in
 `renovate.json5`), as anyone's change is merged. It runs even when a job
-before it failed, and fails unless every one passed. A matrix job's
+before it failed, and fails unless every one passed, or, for `pod` and
+`contract`, was skipped by the gate. A matrix job's
 checks are named per server, and jobs come and go, so the ruleset names
 this job alone. (Another workflow's job named `build`, deploy.yml's,
 would also answer to a required check of that name.) Deploys follow a
@@ -571,6 +584,37 @@ green run on a release commit on `main`
 ([deployment.md](deployment.md#github-pages-automatic)). Every check of
 `ns/` and `decks/` runs here, the comparison with the base included, so
 `ci-ok` gates them all and nothing is checked twice.
+
+### Deterministic and timing-dependent jobs
+
+A **deterministic** job gives the same answer on any runner: types,
+lint, unit tests, request counts, the docs. A **timing-dependent** one
+can fail on sound code because the runner was busy or a real server
+was slow: the end-to-end tests against real servers (`pod`,
+`contract`) and the journeys in Firefox, WebKit and on a phone. Each
+job in [ci.yml](../.github/workflows/ci.yml) says which it is, in its
+comment and in the table above, and a new job is given its kind when it
+is added, which decides where it runs
+([releasing.md](releasing.md#what-each-stage-checks)): every job runs in
+a pull request and the merge queue, and blocks there, but a
+timing-dependent one is skipped on a push to `main` the queue passed and
+on a release commit, whose code it already ran on. A job that runs
+always blocks.
+
+The journeys in Chromium are end to end too, yet they run everywhere:
+they are every journey, in the browser most people use, so a wait that
+flakes there is fixed, not retried (`retries: 0` in
+[playwright.config.ts](../e2e/journeys/playwright.config.ts)).
+
+**Count, don't time, where the answer can be counted.** A regression
+in network use, round trips growing from linear to quadratic, is caught
+by counting the requests a use case makes against a fake pod, as the
+Solid adapters' tests do; a count is deterministic, so it can block at
+every stage. Time is measured only for CPU work, and then as a ratio of
+two runs on the same machine (the growth tests,
+[growth.ts](../packages/domain/src/testing/growth.ts)), not against a
+budget in milliseconds. The pod tests that time a server only print
+what they measure, and fail on none of it.
 
 ### The merge queue
 

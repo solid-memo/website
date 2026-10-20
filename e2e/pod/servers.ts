@@ -580,11 +580,13 @@ async function untilUp(name: string, url: string, timeoutMs: number, log: string
  * `node servers.ts prepare [id...]` pulls or builds the servers' images
  * (every one when none is named), `contract [id...]` starts each, checks
  * the contract and stops it, `key <id>` prints what names its images
- * (imageKey), `clean` takes down what interrupted runs left.
+ * (imageKey), `keys [id...]` each server's id and key, one a line (the
+ * blocking servers when none is named), `clean` takes down what
+ * interrupted runs left.
  */
 if (import.meta.main) {
   const [command, ...ids] = process.argv.slice(2);
-  const named = serversNamed(ids.length > 0 ? ids.join(",") : "all");
+  const named = serversNamed(ids.length > 0 ? ids.join(",") : command === "keys" ? "" : "all");
   if (command === "prepare") {
     for (const id of named) {
       console.log(`Preparing ${id}`);
@@ -599,10 +601,12 @@ if (import.meta.main) {
     }
   } else if (command === "key" && named.length === 1) {
     console.log(imageKey(named[0]!));
+  } else if (command === "keys") {
+    for (const id of named) console.log(`${id} ${imageKey(id)}`);
   } else if (command === "clean") {
     const taken = await clean();
     console.log(taken.length > 0 ? `Took down ${taken.join(", ")}.` : "Nothing to take down.");
   } else {
-    throw new Error(`Usage: node servers.ts prepare|contract|clean [id...] | key <id>`);
+    throw new Error(`Usage: node servers.ts prepare|contract|keys|clean [id...] | key <id>`);
   }
 }

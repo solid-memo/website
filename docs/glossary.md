@@ -221,7 +221,8 @@ it most. The specifications' versions and status are in
   every pull request and every push to `main`. A change is merged only
   when they pass. [testing.md](testing.md#continuous-integration).
 - **`ci-ok`**: the one CI check a merge to `main` waits for, which
-  passes only when every other job passed.
+  passes only when every other job passed, or was skipped as CI's gate
+  decides ([releasing.md](releasing.md#what-each-stage-checks)).
   [testing.md](testing.md#continuous-integration).
 - **commitlint**: the tool that checks that a commit message follows
   Conventional Commits. CI runs it on a pull request's commits.
