@@ -11,6 +11,8 @@ import {
   isPaletteValue,
   literalColors,
   contrastTargets,
+  DEFICIENCIES,
+  difference,
   over,
   paletteBlocks,
   type PaletteBlock,
@@ -634,6 +636,35 @@ describe("contrast", () => {
     "keeps the text on the primary color at the ratio text needs in %s, as on the line a dragged deck would land on",
     (_, block) => {
       expectContrast(block, "var(--on-primary)", "var(--primary)");
+    },
+  );
+
+  it("tells colors apart as each deficiency sees them, Machado's model in OKLab", () => {
+    // Standard's grades 3 and 4: a yellow and a green, far apart to most, close to the red-blind.
+    const yellow = colorOf("#d9b11c", {});
+    const green = colorOf("#7fb13c", {});
+    expect(difference(yellow, yellow)).toBe(0);
+    expect(difference(colorOf("#000000", {}), colorOf("#ffffff", {}))).toBeCloseTo(1, 3);
+    expect(difference(yellow, green)).toBeGreaterThan(0.1);
+    expect(difference(yellow, green, "protanopia")).toBeLessThan(0.05);
+    // Blue-blindness confuses blue and green, not these.
+    expect(difference(yellow, green, "tritanopia")).toBeGreaterThan(0.1);
+  });
+
+  it.each(EACH_BLOCK.filter(([, block]) => block.palette === "color-vision"))(
+    "keeps the answer buttons' neighboring grades apart to every color vision in %s",
+    (_, block) => {
+      for (let grade = 0; grade < 5; grade++) {
+        const [one, two] = [grade, grade + 1].map((g) => colorOf(`var(--grade-${g})`, block.roles));
+        for (const deficiency of [undefined, ...DEFICIENCIES]) {
+          const apart = difference(one!, two!, deficiency);
+          expect({ grade, deficiency, apart: apart >= 0.08 }).toEqual({
+            grade,
+            deficiency,
+            apart: true,
+          });
+        }
+      }
     },
   );
 

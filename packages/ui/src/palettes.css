@@ -324,3 +324,154 @@
   --ring: 0 0 0 3px var(--primary);
   --zoom-backdrop: #000000e6;
 }
+
+/*
+ * Color-blind friendly, light: Standard's surfaces, with meaning moved
+ * off red and green to blue, orange and vermilion, Masataka Okabe's
+ * and Kei Ito's colors (docs/theme.md, Palette sources), darkened where
+ * they are text. The answer buttons run from vermilion (Again) through
+ * orange, yellow and sky blue to blue (Easy), told apart without red
+ * and green; style.test.ts checks them as each deficiency sees them.
+ */
+:root[data-palette="color-vision"] {
+  --bg: #f7f6f1;
+  --surface: #ffffff;
+  --surface-sunken: #fbfaf5;
+  --surface-hover: #f1efe6;
+  --text: #16202a;
+  --text-muted: #545c68;
+  --border: #e4e1d5;
+  --border-strong: #cfcbbb;
+  --control-border: #858072;
+
+  --primary: #00649c;
+  --primary-fill: #00649c;
+  --primary-hover: #004e7a;
+  --primary-soft: #e4f0f7;
+  --on-primary: #ffffff;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #005a8c;
+  --link-hover-bg: #e4e5e7;
+  --link-hover-border: #9a9fa6;
+
+  --accent-blue: #9ccbea;
+  --accent-yellow: #e69f00;
+  --accent-red: #d55e00;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #a84800;
+  --danger-soft: #fbeee5;
+  --danger-border: #efc6a9;
+  --warning-text: #7a5300;
+  --warning-soft: #fdf3dc;
+  --warning-border: #e6c470;
+
+  --grade-0: #d55e00;
+  --grade-1: #e69f00;
+  --grade-2: #f0e442;
+  --grade-3: #56b4e9;
+  --grade-4: #2b93cd;
+  --grade-5: #0072b2;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #9ccbea80;
+  --paper-yellow: #e69f0029;
+  --shine: #ffffff8c;
+
+  --masthead-bg: #16202a;
+  --masthead-text: #f7f6f1;
+  --masthead-border: transparent;
+  --masthead-blue: #9ccbea;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
+  --toggle-bg: var(--paper-yellow);
+  --toggle-edge: var(--border-strong);
+  --toggle-hover-edge: var(--accent-yellow);
+
+  --shadow-sm: 0 1px 2px #16202a0f;
+  --shadow: 0 1px 2px #16202a0d, 0 8px 24px -12px #16202a2e;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #16202ad9;
+}
+
+/* Color-blind friendly, dark: Standard's dark surfaces, light fills under dark text. */
+:root[data-palette="color-vision"][data-theme="dark"] {
+  --bg: #11171e;
+  --surface: #19212b;
+  --surface-sunken: #151c25;
+  --surface-hover: #232e3b;
+  --text: #ecebe4;
+  --text-muted: #b9c2cc;
+  --border: #2a3644;
+  --border-strong: #3a4859;
+  --control-border: #66788d;
+
+  --primary: #56b4e9;
+  --primary-fill: #56b4e9;
+  --primary-hover: #7fc6ef;
+  --primary-soft: #14293a;
+  --on-primary: #000000;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #8dcdf2;
+  --link-hover-bg: #3a414b;
+  --link-hover-border: #7d8692;
+
+  --accent-blue: #9ccbea;
+  --accent-yellow: #e69f00;
+  --accent-red: #d55e00;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ff9b5e;
+  --danger-soft: #3a2216;
+  --danger-border: #6e3a1c;
+  --warning-text: #f0b43c;
+  --warning-soft: #33280e;
+  --warning-border: #5e4a17;
+
+  --grade-0: #d55e00;
+  --grade-1: #e69f00;
+  --grade-2: #f0e442;
+  --grade-3: #56b4e9;
+  --grade-4: #2b93cd;
+  --grade-5: #0072b2;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #9ccbea12;
+  --paper-yellow: #e69f000d;
+  --shine: #ffffff14;
+
+  --masthead-bg: #1d2937;
+  --masthead-text: #f7f6f1;
+  --masthead-border: #2f3d4e;
+  --masthead-blue: #5d86a3;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: var(--masthead-blue);
+  --toggle-bg: var(--masthead-bg);
+  --toggle-edge: var(--masthead-border);
+  --toggle-hover-edge: var(--masthead-blue);
+
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow: 0 1px 2px #0000004d, 0 10px 28px -14px #00000099;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #000000e0;
+}

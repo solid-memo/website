@@ -8,7 +8,7 @@
  * in the dark, apart from the theme itself. A preference, kept on the
  * device.
  */
-export const PALETTES = ["standard", "high-contrast"] as const;
+export const PALETTES = ["standard", "high-contrast", "color-vision"] as const;
 
 export type Palette = (typeof PALETTES)[number];
 

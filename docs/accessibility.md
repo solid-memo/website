@@ -25,7 +25,8 @@ What the app does for it today:
 - **Themes and palettes**: a light and a dark theme, each with text at
   a contrast of 4.5:1 or more and the edges of fields at 3:1, in every
   palette; the High contrast palette holds text to 7:1 and the edges
-  of fields to 4.5:1 ([theme.md](theme.md#palettes),
+  of fields to 4.5:1, and the Color-blind friendly one moves meaning
+  off red and green ([theme.md](theme.md#palettes),
   [below](#checked-automatically)).
 - **Motion**: the browser's "reduce motion" turns the animations off.
 - **Targets**: buttons and links are 24px high at least, or far enough
@@ -64,7 +65,9 @@ but the journeys:
   High contrast's own ratios there), the contrast of text
   and muted text and of fields' edges on every surface, of the text on
   a primary fill, of links, danger and warning text, of the masthead's
-  text, and of an answer button's text on its grade's tint
+  text, and of an answer button's text on its grade's tint, and in the
+  Color-blind friendly palette that neighboring grades stay apart as
+  each color vision deficiency sees them
   ([`style.test.ts`](../packages/ui/src/style.test.ts),
   [theme.md](theme.md#color-roles)), and of every
   text color the Studio's stylesheet uses on every surface it uses, in

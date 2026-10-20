@@ -55,6 +55,7 @@ it does for the reader, and each in the light theme and in the dark:
 | Palette | Id | What it does |
 |---|---|---|
 | Standard | `standard` | The app's own colors, the answer buttons from red (Again) to green (Easy). |
+| Color-blind friendly | `color-vision` | Standard's surfaces, with meaning moved off red and green: blue for the primary color and links, orange for warnings, vermilion for danger, and the answer buttons from vermilion through orange, yellow and sky blue to blue. |
 | High contrast | `high-contrast` | Black on white, or white on black: text at 7:1 or more, fields' edges at 4.5:1 or more, no page discs or glint, edges in place of soft shadows, and a solid focus ring. |
 
 The choice is kept on the device, by the `PalettePreference` port
@@ -116,6 +117,13 @@ at 4.5:1 and fields' edges at 3:1, or in High contrast at 7:1 and
 4.5:1 (`contrastTargets`). The two pairs below 4.5:1 in Standard's
 dark block, which accessibility.md lists among its known gaps, are
 checked in every other block.
+
+The answer buttons of Color-blind friendly are checked as protanopia,
+deuteranopia and tritanopia see them too: each deficiency simulated by
+Machado, Oliveira and Fernandes' model (2009), each grade at least
+0.08 apart from the next in OKLab, four times what is just
+noticeable. In every palette the buttons' names, not their colors, say
+which grade is which.
 The shared helper that reads the blocks, mixes their colors and
 computes WCAG's contrast ratio is
 [`contrast.ts`](../packages/domain/src/testing/contrast.ts).
@@ -138,6 +146,12 @@ The palettes' colors are ours, but some are taken from published
 color schemes, whose authors are credited here. Only the values are
 taken, and no file of theirs is copied:
 
+- **Color-blind friendly**: blue, sky blue, orange, yellow and
+  vermilion (`#0072b2`, `#56b4e9`, `#e69f00`, `#f0e442`, `#d55e00`)
+  are Masataka Okabe's and Kei Ito's palette for Color Universal
+  Design, [Color Universal Design](https://jfly.uni-koeln.de/color/),
+  darkened where they are text. The palette is not certified, and
+  does not carry the CUD mark.
 - **High contrast**: the blue, yellow and red accents (`#004488`,
   `#ddaa33`, `#bb5566`) are Paul Tol's high-contrast scheme, from his
   technical note SRON/EPS/TN/09-002 and
