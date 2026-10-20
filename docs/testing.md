@@ -329,7 +329,25 @@ Further journeys go through:
 - a screen that fails while it renders (the Studio's code, swapped for
   code that throws): "Something went wrong" under the header that still
   works, its details copied and its report link filled in, and the way
-  back to the start.
+  back to the start;
+- what Solid Memo leaves alone in a pod
+  ([pod-safety.journey.ts](../e2e/journeys/journeys/pod-safety.journey.ts)),
+  each journey reading the user's pod with plain requests after an
+  everyday action to find their documents as they were, the same status
+  and content and none added: an instance another user shares, whose
+  catalog names the user's profile and a private document as its decks'
+  documents, by their addresses or spelled to resolve there, its deck
+  removed and the instance deleted, the Studio's health naming those
+  decks; a draft there whose chapter has an id Solid Memo does not
+  accept, which the Studio does not open, saying why; a release
+  published and made public where the server names an access control
+  elsewhere in the pod as the release's, the user's private document
+  still unreadable to someone with no login; a deck's document that
+  another app also writes to, kept with that app's data when the
+  instance is deleted, which the picker says; and an instance laid out
+  flat at the pod's root, with an older deck that is read and studied,
+  then changed and removed once the user confirms its documents on the
+  Studio's health screen.
 
 ### Browsers
 

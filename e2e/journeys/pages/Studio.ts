@@ -23,6 +23,8 @@ import { cellOf } from "./tables.ts";
  * releases (made, the next version of a release among them, listed in
  * the sidebar and deleted), the releases it published, its graph (a
  * node reached by keyboard, a leaf found and its neighbors as a table),
+ * the decks whose documents are to confirm as their own, and the data a
+ * check finds that no repair covers, removed, on the health screen,
  * and its way back
  * to Solid Memo. Its sections are reached from its sidebar, a deck's or
  * a draft's screens from their tabs.
@@ -242,7 +244,11 @@ export class Studio extends Screen {
     });
   }
 
-  /** Deletes the selected decks, confirming the question that names them; their rows go. */
+  /**
+   * Deletes the selected decks, confirming the question that names them;
+   * their rows go, and the status line says so, or, when none is left,
+   * Home says the instance has no decks.
+   */
   async deleteSelected(instance: string, decks: string[]): Promise<void> {
     await this.intent(`Delete ${decks.join(", ")}`, async () => {
       const names = decks.map((deck) => `“${deck}”`).join(", ");
@@ -254,7 +260,11 @@ export class Studio extends Screen {
         this.tp("studio.bulk.removeConfirm", { count: decks.length, names }),
         "studio.bulk.remove",
       );
-      await this.expectStatus(this.t("studio.bulk.removed", { count: decks.length }));
+      const status = this.page
+        .getByRole("status")
+        .filter({ hasText: this.t("studio.bulk.removed", { count: decks.length }) });
+      const empty = this.page.getByRole("main").getByText(this.tp("studio.decks.empty"));
+      await expect(status.or(empty)).toHaveCount(1);
       for (const deck of decks) await expect(this.row(instance, deck)).toHaveCount(0);
     });
   }
@@ -1400,6 +1410,76 @@ export class Studio extends Screen {
   /** What can be done with the selected cards. */
   private get cardBulk(): Locator {
     return this.page.getByRole("group", { name: this.t("studio.cardBulk.label") });
+  }
+
+  /** The notice of the decks whose documents do not say they are the decks' own ("Decks to confirm"). */
+  private get unclaimed(): Locator {
+    return this.page.getByRole("region", { name: this.t("unclaimedDecks.region"), exact: true });
+  }
+
+  /** A deck's item in that notice, by its name. */
+  private unclaimedDeck(deck: string): Locator {
+    return this.unclaimed
+      .getByRole("listitem")
+      .filter({ hasText: this.t("unclaimedDecks.deck", { deck }) });
+  }
+
+  /** The health screen names the deck as one whose documents, these, do not say they are its own. */
+  async expectUnclaimed(deck: string, documents: readonly string[]): Promise<void> {
+    await this.intent(`See that the documents of ${deck} are to confirm`, async () => {
+      const item = this.unclaimedDeck(deck);
+      await expect(item).toBeVisible();
+      for (const url of documents)
+        await expect(item.getByRole("link").filter({ hasText: url })).toHaveAttribute("href", url);
+    });
+  }
+
+  /**
+   * Confirms, on the health screen, that the deck's documents are its
+   * own ("These are this deck's documents", then "Mark them as the
+   * deck's"): the notice goes once they say so.
+   */
+  async claimDocuments(deck: string): Promise<void> {
+    await this.intent(`Confirm that the documents of ${deck} are its own`, async () => {
+      const item = this.unclaimedDeck(deck);
+      await item.getByRole("button", { name: this.t("unclaimedDecks.claim"), exact: true }).click();
+      await expect(item).toContainText(this.t("unclaimedDecks.confirm", { deck }));
+      await item
+        .getByRole("button", { name: this.t("unclaimedDecks.confirmButton"), exact: true })
+        .click();
+      await expect(this.unclaimed).toHaveCount(0);
+    });
+  }
+
+  /** The health screen's data check names `subject`, by its address, with this problem. */
+  async expectDataProblem(subject: string, problem: string): Promise<void> {
+    await this.intent(`See the problem of ${subject}`, async () => {
+      await expect(
+        this.page
+          .getByRole("region", { name: this.t("studio.health.dataHeading"), exact: true })
+          .getByRole("listitem")
+          .filter({ hasText: subject })
+          .filter({ hasText: problem })
+          .first(),
+      ).toBeVisible();
+    });
+  }
+
+  /** Removes `subject`, which no repair covers, from the health screen, confirming: it is no longer offered. */
+  async removeData(subject: string): Promise<void> {
+    await this.intent(`Remove ${subject}`, async () => {
+      const remove = this.page.getByRole("button", {
+        name: this.t("studio.health.remove", { subject }),
+        exact: true,
+      });
+      await remove.click();
+      await this.confirm(
+        "studio.confirm.removeData",
+        new RegExp(escapeRegExp(this.t("repair.removeConfirm", { url: subject }))),
+        "repair.removeButton",
+      );
+      await expect(remove).toHaveCount(0);
+    });
   }
 
   /** What can be done with the selected decks. */
