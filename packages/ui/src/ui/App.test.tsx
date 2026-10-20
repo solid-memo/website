@@ -393,6 +393,10 @@ describe("AppShell", () => {
     // The picture is decorative; the product name is the page's heading.
     expect(container.querySelector("img.hero")).toHaveAttribute("alt", "");
     expect(screen.getByRole("heading", { level: 1, name: "Solid Memo" })).toBeInTheDocument();
+    // Both are one link home, as the masthead's logo and name are.
+    const home = screen.getByRole("link", { name: "Solid Memo" });
+    expect(home).toHaveAttribute("href", "#/");
+    expect(home).toContainElement(container.querySelector("img.hero"));
     // The theme and language choices make the banner; the onboarding is the main content.
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
@@ -400,6 +404,18 @@ describe("AppShell", () => {
       within(screen.getByRole("main")).getByRole("heading", { name: "Set up your Solid Pod" }),
     ).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Log in – Solid Memo"));
+  });
+
+  it("starts the onboarding over from its home link, wherever in it the user is", async () => {
+    renderApp(makeUseCases());
+    fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
+    expect(screen.queryByRole("heading", { name: "Try it right away" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("link", { name: "Solid Memo" }));
+
+    expect(screen.getByRole("heading", { name: "Try it right away" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "I already have a Pod" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("WebID")).toBeNull();
   });
 
   it("is called by the site's own name, and suggests the site's own Pod providers", async () => {
@@ -685,6 +701,11 @@ describe("AppShell", () => {
     expect(alert).toHaveFocus();
     expect(alert.previousElementSibling).toHaveClass("tagline");
     expect(screen.getByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
+
+    // Home is the first step, as on a first visit, without the reason the user came back.
+    fireEvent.click(screen.getByRole("link", { name: "Solid Memo" }));
+    expect(screen.getByRole("heading", { name: "Try it right away" })).toBeInTheDocument();
+    expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
   });
 
   it("logs out and returns to the WebID form", async () => {
