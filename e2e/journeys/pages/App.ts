@@ -133,9 +133,26 @@ export class App {
    * One step of a journey, as the journey's spec names it ("03 · Set new
    * cards per day to 1"): a group in the report and the trace, with a
    * screenshot of where it left the app, and that screen checked for
-   * accessibility.
+   * accessibility, in a step of its own, "Accessibility", so the report
+   * says how long the check took apart from the step's own work. A
+   * project whose metadata says `accessibility: false` leaves the check
+   * out (playwright.config.ts).
+   *
+   * `in` names the projects the step runs in; elsewhere it is skipped,
+   * and the report says so. It is for a step that tests the app's logic,
+   * the same in every engine, in a journey the other engines run for
+   * what differs between them (docs/testing.md#browsers).
    */
-  async step(title: string, body: () => Promise<void>): Promise<void> {
+  async step(
+    title: string,
+    body: () => Promise<void>,
+    { in: projects }: { in?: readonly string[] } = {},
+  ): Promise<void> {
+    if (projects !== undefined && !projects.includes(this.testInfo.project.name)) {
+      await test.step
+        .skip(title, async () => {});
+      return;
+    }
     await test.step(title, async () => {
       await body();
       const unmet = this.expectedDialogs.splice(0).map(String);
@@ -144,7 +161,9 @@ export class App {
         body: await this.page.screenshot(),
         contentType: "image/png",
       });
-      await this.checkAccessibility(title);
+      if (this.testInfo.project.metadata.accessibility !== false) {
+        await test.step("Accessibility", () => this.checkAccessibility(title));
+      }
     });
   }
 

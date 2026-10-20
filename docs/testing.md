@@ -359,7 +359,7 @@ Further journeys go through:
 
 Every journey runs in desktop Chromium, the `chromium` project in
 [playwright.config.ts](../e2e/journeys/playwright.config.ts). Three
-more projects run only the journeys tagged `@smoke`, `@guest` and
+more projects run only the journeys tagged `@guest` and
 `@reload`: `firefox` (desktop Firefox), `webkit` (desktop Safari's
 engine) and `phone` (an iPhone 14's screen and touch, on WebKit). Those
 journeys go through what differs most between engines: the login's
@@ -368,14 +368,24 @@ browser's storage through them, the silent restore of a session after a
 reload, and a page narrow enough to lay out for a phone. The other
 journeys test the app's logic, which is the same in every engine, so
 running them all in each would about triple the time for little gain. A
-journey tagged with one of the three runs in every browser; tag another
-only when what it tests differs between engines. CI runs Chromium's
-journeys apart from the other three projects', each split in two shards
-(`npx playwright test --shard`), four jobs side by side:
-`journeys (chromium, 1/2)` to `journeys (engines, 2/2)`. The run waits
-for the slowest shard, about half of what one job took, and each shard
-pays the job's setup again, about a minute. Playwright shards Chromium's
-journeys by file, so a file's journeys stay in one shard. The [user guide](user-guide.md#supported-browsers)
+journey tagged with one of the two runs in every browser; tag another
+only when what it tests differs between engines. A step of such a
+journey that tests the app's logic again names the projects it runs in
+(`app.step(title, body, { in: ["chromium"] })`), and the report shows
+it skipped in the others, as the reload journey's statistics and the
+shared link's import are. CI runs them in five
+jobs side by side: Chromium's journeys in two shards
+(`npx playwright test --shard`), `journeys (chromium-1)` and
+`journeys (chromium-2)`, and each other project's in a job of its own,
+`journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`. The
+run waits for the slowest job, and each job pays the setup again, about
+a minute. Chromium's journeys run fully parallel
+(`fullyParallel: true`), each a unit the shards and workers share out,
+so a file of several journeys, such as `pod-safety`, is spread over
+both shards; a file whose journeys depend on each other runs them in
+turn (`test.describe.configure({ mode: "serial" })`). A job a project makes its own, rather than a shard of all
+three, keeps WebKit's and the phone's journeys, the slowest, from
+landing in one job. The [user guide](user-guide.md#supported-browsers)
 says which browsers Solid Memo supports.
 
 The engines differ in three ways the journeys allow for:
@@ -414,8 +424,11 @@ are.
 **Accessibility.** Each step's end checks the screen it leaves the app
 on with [axe](https://github.com/dequelabs/axe-core), in the light and
 the dark theme, against WCAG 2.0, 2.1 and 2.2 at levels A and AA
-(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
-A violation fails the journey, which goes on to its end so that every
+(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)),
+in a step of its own, "Accessibility", within the journey's step, so the
+report shows how long the check took. Chromium and the phone run it;
+desktop Firefox and WebKit leave it out, as their projects' metadata
+says (`accessibility: false`, [accessibility.md](accessibility.md)). A violation fails the journey, which goes on to its end so that every
 screen is checked. A violation let pass is listed in that file's
 `KNOWN_EXCEPTIONS`, with its reason. The Solid server's own pages, its
 login, are not checked. What the app aims for, and what else is
@@ -447,7 +460,7 @@ error, and the browser it failed in. The job's
 published with each deploy: the report of the CI run on the release
 commit the site runs (none after a deploy by hand), every browser's
 journeys in one, as the `journeys-report` job merges them from every
-journeys job (Playwright's blob reports, one a shard). As the release commit's run
+journeys job (Playwright's blob reports, one a job). As the release commit's run
 skips the journeys, it takes their reports from the run that ran them
 on its code, usually the merge queue's
 ([releasing.md](releasing.md#what-each-stage-checks)). It shows every
@@ -517,8 +530,9 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
 - **One after another**: a journey that needs what another made is in
   its file, after it, and the file runs in turn (`mode: "serial"`): the
-  course the Studio journey publishes is added from its link by the next
-  journey in [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts),
+  course the Studio's course journey publishes is added from its link by
+  the next journey in
+  [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts),
   which is skipped when the first fails.
 
 The harness's own code (`harness/`) has unit tests (`npm test`, so `npm
@@ -564,8 +578,8 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
-| `journeys (<browsers>, <shard>)` | timing-dependent | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone, each browser's in two shards ([Browsers](#browsers)) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every shard's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
+| `journeys (<project>)` | timing-dependent | the user journeys: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every job's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |

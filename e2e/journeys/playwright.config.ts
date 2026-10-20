@@ -20,12 +20,13 @@ if (!(TRACE_MODES as readonly string[]).includes(trace))
   throw new Error(`JOURNEY_TRACE is "${trace}"; it may be ${TRACE_MODES.join(", ")}.`);
 
 /**
- * The journeys the other engines and the phone run: logging in, a guest's
- * study kept in the browser through the login's redirects, and the silent
- * restore of a session after a reload, which differ most between engines.
- * The rest exercise the app's logic, which doesn't (docs/testing.md#browsers).
+ * The journeys the other engines and the phone run: a guest's study kept
+ * in the browser through the login's redirects, and the silent restore of
+ * a session after a reload, which differ most between engines; the
+ * reload's journey also logs in and out, as @smoke does in Chromium. The
+ * rest exercise the app's logic, which doesn't (docs/testing.md#browsers).
  */
-const ENGINE_JOURNEYS = /@smoke|@guest|@reload/;
+const ENGINE_JOURNEYS = /@guest|@reload/;
 
 export default defineConfig({
   testDir: "journeys",
@@ -64,10 +65,28 @@ export default defineConfig({
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },
+  // Axe checks each step's screen in Chromium and on the phone, which is
+  // WebKit too; desktop Firefox and WebKit leave it out
+  // (docs/accessibility.md): it takes about 40% of a journey's time, and
+  // the same screens are checked in Chromium.
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] }, grep: ENGINE_JOURNEYS },
-    { name: "webkit", use: { ...devices["Desktop Safari"] }, grep: ENGINE_JOURNEYS },
+    // Chromium runs every journey, in two shards in CI: a file's journeys
+    // too may run side by side, and in either shard, so pod-safety's six
+    // do not take one shard's last 100 seconds. A file whose journeys
+    // depend on each other says so (studio-course.journey.ts, serial).
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, fullyParallel: true },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+      grep: ENGINE_JOURNEYS,
+      metadata: { accessibility: false },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+      grep: ENGINE_JOURNEYS,
+      metadata: { accessibility: false },
+    },
     // Safari on an iPhone: a phone's viewport, touch, and WebKit.
     { name: "phone", use: { ...devices["iPhone 14"] }, grep: ENGINE_JOURNEYS },
   ],

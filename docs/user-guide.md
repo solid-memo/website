@@ -455,14 +455,15 @@ screenshot of each.
 | The course for newcomers, from an empty deck list | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–05 |
 | A course's first chapter and its final review | [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts) | 03–08 |
 | A course's answers and chapters in the statistics, and its most-confused options | course-chapter | 09–10 |
-| Adding a course from a link and playing it | [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts), second journey | 03–05 |
-| Solid Memo Studio | studio.journey.ts, first journey | 06–36 |
+| Adding a course from a link and playing it | [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts), second journey | 03–05 |
+| Solid Memo Studio | [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts) | 06–31 |
+| Writing a course in the Studio, trying it and publishing it | studio-course.journey.ts, first journey | 05–11 |
 | Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
 | Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
 | A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |
 | The dark theme, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–04, 08–10 |
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
-| Exporting a deck as a file and importing it again, with its progress | studio.journey.ts, first journey | 21–23 |
+| Exporting a deck as a file and importing it again, with its progress | studio.journey.ts | 21–23 |
 | Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |
 | Reviewing on a later study day, forgetting cards, and the hardest cards | later-day | 07–12 |
 | Updating a library deck to its new release, its progress kept | [library-upgrade.journey.ts](../e2e/journeys/journeys/library-upgrade.journey.ts) | 04–10 |

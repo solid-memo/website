@@ -46,8 +46,8 @@ but the journeys:
 - **Every screen a journey visits**: the
   [user journeys](testing.md#user-journeys) run
   [axe](https://github.com/dequelabs/axe-core) on the screen each step
-  ends on, in the light and the dark theme, in each browser a journey
-  runs in (on a phone too), with its rules for WCAG 2.0,
+  ends on, in the light and the dark theme, in Chromium and on the
+  phone (WebKit), with its rules for WCAG 2.0,
   2.1 and 2.2 at levels A and AA. A violation fails the journey, and the
   report says which rule, on which element, with what axe found
   ([`harness/accessibility.ts`](../e2e/journeys/harness/accessibility.ts)).
@@ -100,7 +100,10 @@ and an issue for one is welcome ([below](#report-a-barrier)).
 - **Browsers**: every journey runs in Chromium, but only those that
   differ between engines run in Firefox, WebKit and on a phone
   ([testing.md](testing.md#browsers)), so axe sees the other screens
-  in Chromium alone.
+  in Chromium alone. Desktop Firefox and WebKit run no axe at all: the
+  check takes about 40% of a journey's time, and the phone already
+  checks WebKit's rendering. What only Firefox computes, such as the
+  contrast of a color it mixes (`color-mix`), goes unchecked.
 - **The graph**: the Studio's graph of an instance is drawn as one
   image, its nodes reached one by one with the arrow keys, by where
   they are drawn, not along their links; the edges to vocabulary
