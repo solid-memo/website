@@ -158,8 +158,8 @@ and [reuse.md](reuse.md) walks through running a copy.
 The user journeys' report ([testing.md](testing.md#user-journeys)),
 every browser's in one with each journey's trace, is published at
 <https://journeys.solid-memo.com/>, a site of its own, not beside the
-app, so the report and its trace viewer, which are Playwright's
-scripts, do not run on the app's origin. After the site is deployed, the deploy workflow's `journeys`
+app, so the report, which is Playwright's scripts, does not run on the
+app's origin. After the site is deployed, the deploy workflow's `journeys`
 job takes the `journeys-report` artifact of the CI run on the release
 commit and force-pushes it, as one commit with no parent, over `main`
 of the repository [solid-memo/journeys](https://github.com/solid-memo/journeys),
@@ -168,6 +168,25 @@ code, only the newest report, with beside it a `CNAME` naming the
 domain, a `.nojekyll`, so Pages serves the files as they are, and a
 `robots.txt` that keeps search engines out. A deploy by hand has no CI
 run, so it publishes no report, and the last one stays.
+
+The report's own trace viewer is not published. It opens a trace from
+any address its `trace` parameter names, or that a page which opens it
+sends it, and shows that trace's pages on the site it is served from,
+so on `journeys.solid-memo.com` it would show anyone's pages at a
+solid-memo.com address. The job publishes
+[e2e/journeys/report/trace/](../e2e/journeys/report/trace/) in its
+place: an `index.html` at the address the report's **Trace** links
+open, which sends a trace of the report's, a file of its `data/` folder
+named as the report names a trace, on to Playwright's own copy of the
+viewer, <https://trace.playwright.dev/>, and any other trace nowhere;
+and a `sw.bundle.js` at the address of the viewer's service worker,
+which a browser that opened a trace before fetches as that worker's
+update, and which unregisters itself. That browser's next visit under
+`/trace/` is the one that fetches it, so the old worker still answers
+that visit; no answer from the site can come before it. The viewer at
+trace.playwright.dev fetches the trace from this site, which Pages
+serves with `Access-Control-Allow-Origin: *`; it needs no account and
+sends the trace nowhere.
 
 Until v4.1.2 the report was published beside the app, at `/journeys/`.
 A browser that opened a trace there registered the trace viewer's
