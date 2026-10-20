@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [4.1.1](https://github.com/solid-memo/website/compare/v4.1.0...v4.1.1) (2026-10-20)
+
+### Bug Fixes
+
+* **solid:** refuse unsafe pod writes in one fence ([38a0d12](https://github.com/solid-memo/website/commit/38a0d12ffa324282424617f80e423134c3fe3bfe))
+* **solid:** use a catalog-named document only where it is the deck's own ([64b3269](https://github.com/solid-memo/website/commit/64b3269cd2a4354a46389a9834d5da2fe992f83d))
+
 ## [4.1.0](https://github.com/solid-memo/website/compare/v4.0.0...v4.1.0) (2026-10-19)
 
 ### Features
