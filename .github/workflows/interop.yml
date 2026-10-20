@@ -9,7 +9,11 @@ name: Interop
 # job per server, as CI runs the blocking ones. A job fails only on a test
 # failing that its servers/<id>/expected-failures.json does not list, or
 # when no test ran; the job's summary says what passed, what failed as
-# expected and why, and what passes though listed.
+# expected and why, and what passes though listed. A release commit,
+# whose push its paths match (package.json, package-lock.json), runs
+# nothing: it changes only the version's files, so its code is the
+# commit's before it, which Interop already ran on
+# (docs/releasing.md).
 
 on:
   push:
@@ -31,13 +35,21 @@ on:
 permissions:
   contents: read
 
+# A newer push's run cancels the one still going. A release commit's run,
+# which runs nothing, has a group of its own, so it never cancels the run
+# on the code it releases.
 concurrency:
-  group: interop-${{ github.ref }}
+  group: >-
+    interop-${{ github.ref }}${{
+    startsWith(github.event.head_commit.message, 'chore(release): ') &&
+    format('-{0}', github.sha) || '' }}
   cancel-in-progress: true
 
 jobs:
   pod:
     name: pod (${{ matrix.server }})
+    if: >-
+      !startsWith(github.event.head_commit.message, 'chore(release): ')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
