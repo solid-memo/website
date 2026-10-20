@@ -796,7 +796,15 @@ main.landing {
   padding-top: 2.5rem;
 }
 
-main.landing > h1 {
+/* The landing's picture and name, one link home: still the picture over the heading. */
+a.hero-brand {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+main.landing > h1,
+main.landing > a.hero-brand > h1 {
   margin: 0.25rem 0 0.4rem;
   font-size: 2.8rem;
   text-align: center;

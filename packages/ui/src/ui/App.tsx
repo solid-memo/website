@@ -219,6 +219,8 @@ function AppContent({
   const [session, setSession] = useState<Session | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [returning, setReturning] = useState(false);
+  // Counts the landing's home link's presses: each starts the onboarding afresh.
+  const [landingVisit, setLandingVisit] = useState(0);
   const [busy, setBusy] = useState(false);
   const [authError, setAuthError] = useState<unknown>(null);
   // Said in whatever language the user reads by the time it shows, not as an error's message.
@@ -312,6 +314,13 @@ function AppContent({
     }
   }
 
+  /** The landing's home link: back to its first step, as on a first visit. */
+  function handleLandingHome() {
+    setReturning(false);
+    setAuthError(null);
+    setLandingVisit((visit) => visit + 1);
+  }
+
   async function handleLogout() {
     await useCases.logout();
     setSession(null);
@@ -351,12 +360,16 @@ function AppContent({
       <>
         <SiteHeader link={identity.headerLink} />
         <main id={MAIN_ID} tabIndex={-1} class="landing">
-          <Hero name={t(identity.name)} />
+          <Hero
+            name={t(identity.name)}
+            home={{ href: identity.home, onFollow: handleLandingHome }}
+          />
           <p class="tagline">{guest ? t("app.loginToKeep") : t(identity.tagline)}</p>
           {/* First and focused: after the session expired the whole screen
               changed under the user, and this says why. */}
           <ErrorMessage error={authText} focus />
           <OnboardingFlow
+            key={landingVisit}
             providers={providers}
             busy={busy}
             returning={returning || guest}
@@ -488,13 +501,24 @@ function SiteHeader({ link }: { link: AppIdentity["headerLink"] }) {
   );
 }
 
-/** The landing picture, decorative, over the app's name as the page's heading. */
-function Hero({ name }: { name: string }) {
-  return (
+/**
+ * The landing picture, decorative, over the app's name as the page's
+ * heading. Given `home`, both are one link home, which the landing
+ * follows by starting over (pressed where the hash already is home, the
+ * link alone would not change a thing).
+ */
+function Hero({ name, home }: { name: string; home?: { href: string; onFollow: () => void } }) {
+  const hero = (
     <>
       <img class="hero" src={illustrationUrl} alt="" width={640} height={427} />
       <h1>{name}</h1>
     </>
+  );
+  if (home === undefined) return hero;
+  return (
+    <a class="brand hero-brand" href={home.href} onClick={home.onFollow}>
+      {hero}
+    </a>
   );
 }
 
