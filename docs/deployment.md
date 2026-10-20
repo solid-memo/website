@@ -169,6 +169,14 @@ domain, a `.nojekyll`, so Pages serves the files as they are, and a
 `robots.txt` that keeps search engines out. A deploy by hand has no CI
 run, so it publishes no report, and the last one stays.
 
+Until v4.1.2 the report was published beside the app, at `/journeys/`.
+A browser that opened a trace there registered the trace viewer's
+service worker, and a registration outlives its script: the worker
+still loads any trace a link names and serves its pages on the app's
+origin. So the app, as it starts, unregisters every service worker
+under `journeys/` ([journeysWorkers.ts](../apps/web/src/journeysWorkers.ts));
+it registers none of its own.
+
 The job pushes with a deploy key: its public half is the journeys
 repository's, with write access, and its private half is the secret
 `JOURNEYS_DEPLOY_KEY` of the `journeys` environment here, which admits
