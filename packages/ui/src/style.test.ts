@@ -314,6 +314,28 @@ describe("reflow", () => {
     expect(styled(html, selector).overflowWrap).toBe("anywhere");
   });
 
+  it.each(["input", "textarea"])(
+    "keeps a %s no wider than what it is in, its width in characters at any text size",
+    (tag) => {
+      expect(styled(`<${tag}></${tag}>`, tag).maxWidth).toBe("100%");
+    },
+  );
+
+  it("lets a card table's column names break, its cells' room cut, on a narrow screen", () => {
+    const narrow = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter(
+        (rule): rule is CSSMediaRule =>
+          rule instanceof CSSMediaRule && rule.conditionText === "(max-width: 30rem)",
+      )
+      .flatMap((rule) => [...rule.cssRules] as CSSStyleRule[])
+      .filter((rule) => rule.selectorText.includes(".card-table"));
+    expect(narrow.map((rule) => rule.style.cssText)).toEqual([
+      "padding-inline: 0.45rem;",
+      "overflow-wrap: anywhere;",
+    ]);
+  });
+
   it("lets a group's header wrap its actions under its name", () => {
     expect(styled(`<div class="deck-group-header"></div>`, "div").flexWrap).toBe("wrap");
     expect(

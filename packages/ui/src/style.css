@@ -788,8 +788,10 @@ label {
   color: var(--text-muted);
 }
 
+/* No wider than what it is in, however large the text: a field's own width is in characters. */
 input,
 textarea {
+  max-width: 100%;
   font: inherit;
   color: var(--text);
   min-height: 2.75rem;
@@ -2263,6 +2265,21 @@ td.clickable a.cell-overlay {
   margin-left: 0.4rem;
 }
 
+/* On a narrow screen, or in large text, the cells keep less room about
+   their text, and a column's name may break, rather than widen the page. */
+@media (max-width: 30rem) {
+  .card-table th,
+  .card-table td,
+  .card-table td.clickable a,
+  .card-table td.clickable.back-cell {
+    padding-inline: 0.45rem;
+  }
+
+  .card-table th {
+    overflow-wrap: anywhere;
+  }
+}
+
 .card-table tbody tr:has(td.clickable):hover td {
   background: var(--surface-hover);
 }
@@ -3403,6 +3420,7 @@ details summary:hover {
 }
 
 .thing {
+  overflow-wrap: anywhere;
   margin: 1rem 0;
   padding: 0;
   border: none;

@@ -195,6 +195,10 @@ not follow the root's font size is kept to a few places, and made to:
 - **The Studio's panes**: a splitter's least and most sizes are in
   pixels for a root font size of 16px, and as much larger as the root's
   font size is ([`splitter.ts`](../apps/studio/src/ui/shell/splitter.ts)).
+- **What could widen the page** at 320px in the largest text does
+  not: a field is no wider than what it is in, though its own width is
+  in characters, and on a narrow screen a card table's cells keep less
+  room about their text and its column names may break.
 - **Text that could be cut short** wraps instead: the name of the
   group a dragged deck would land in, a bar chart's names under its
   bars, and the Studio's instance switcher. Who is signed in, which the
