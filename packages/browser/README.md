@@ -1,16 +1,17 @@
 # @solid-memo/browser
 
 The adapters for the browser itself: the update journal, the language,
-the theme and the text size kept on this device (`localStorage`), the
-guest's pod's store (IndexedDB), and files saved as downloads and
-opened from the user's disk.
+the theme, the palette and the text size kept on this device
+(`localStorage`), the guest's pod's store (IndexedDB), and files saved
+as downloads and opened from the user's disk.
 
 ## Exports
 
 `@solid-memo/browser/<module>` is `src/<module>.ts`:
 
 - `localStorageUpdateJournal`, `localStorageLanguagePreference`,
-  `localStorageThemePreference` and `localStorageTextSizePreference`.
+  `localStorageThemePreference`, `localStoragePalettePreference` and
+  `localStorageTextSizePreference`.
 - `indexedDbResourceStore`: the guest's pod ([guest-mode.md](../../docs/guest-mode.md)).
 - `fileExchange`: the `FileExchange` port, with a `Blob` behind a link
   and a hidden file input ([boundaries.md](../../docs/boundaries.md#files-without-a-vendor-library)).

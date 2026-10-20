@@ -25,6 +25,7 @@ import {
   type LibraryCopy,
 } from "@solid-memo/domain/library";
 import { pickLocale, type Locale } from "@solid-memo/domain/locale";
+import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { planRepair, type Repair, type RepairPlan } from "@solid-memo/domain/repair";
@@ -268,6 +269,7 @@ import type {
   ContainerMove,
   GuestPod,
   LanguagePreference,
+  PalettePreference,
   TextSizePreference,
   ThemePreference,
   UpdateJournal,
@@ -379,6 +381,10 @@ export interface UseCases
    * (until its first preferences are saved, the device keeps it alone).
    */
   chooseTheme(choice: ThemeChoice, instanceUrl: string | null): Promise<void>;
+  /** The palette chosen on this device; "standard" when none was. */
+  paletteChoice(): Palette;
+  /** Show the app in this palette from now on, on this device. */
+  choosePalette(palette: Palette): void;
   /** The text size chosen on this device; "default" when none was. */
   textSizeChoice(): TextSize;
   /** Show the text at this size from now on, on this device. */
@@ -1233,6 +1239,8 @@ export interface Dependencies {
   languagePreference?: LanguagePreference;
   /** The theme the user chose; by default none is kept. */
   themePreference?: ThemePreference;
+  /** The palette the user chose; by default none is kept. */
+  palettePreference?: PalettePreference;
   /** The text size the user chose; by default none is kept. */
   textSizePreference?: TextSizePreference;
   /** The clock; injected for tests. */
@@ -1348,6 +1356,10 @@ async function readNow<T>(read: Promise<Since<T>>): Promise<{ value: T; version:
 
 const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
 const NO_THEME_PREFERENCE: ThemePreference = { chosen: () => "system", choose: () => undefined };
+const NO_PALETTE_PREFERENCE: PalettePreference = {
+  chosen: () => DEFAULT_PALETTE,
+  choose: () => undefined,
+};
 const NO_TEXT_SIZE_PREFERENCE: TextSizePreference = {
   chosen: () => DEFAULT_TEXT_SIZE,
   choose: () => undefined,
@@ -1581,6 +1593,7 @@ export function createUseCases({
   updateJournal = NO_JOURNAL,
   languagePreference = NO_LANGUAGE_PREFERENCE,
   themePreference = NO_THEME_PREFERENCE,
+  palettePreference = NO_PALETTE_PREFERENCE,
   textSizePreference = NO_TEXT_SIZE_PREFERENCE,
   now = () => new Date(),
   newId = () => crypto.randomUUID(),
@@ -3081,6 +3094,12 @@ export function createUseCases({
         });
       themeWrites.set(instanceUrl, write);
       return write;
+    },
+    paletteChoice() {
+      return palettePreference.chosen();
+    },
+    choosePalette(palette) {
+      palettePreference.choose(palette);
     },
     textSizeChoice() {
       return textSizePreference.chosen();

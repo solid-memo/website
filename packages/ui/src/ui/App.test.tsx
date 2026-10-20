@@ -13,6 +13,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
+import { PALETTES } from "@solid-memo/domain/palette";
 import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
@@ -206,17 +207,23 @@ describe("AppShell", () => {
     });
   });
 
-  describe("text size", () => {
+  describe("palette and text size", () => {
     afterEach(() => {
+      delete document.documentElement.dataset.palette;
       delete document.documentElement.dataset.textSize;
     });
 
-    /** A workspace with a button for each text size, as the preferences have a choice for each. */
-    function SizedWorkspace() {
-      const { textSize, chooseTextSize } = useTheme();
+    /** A workspace with a button for each palette and each text size, as the preferences have a choice for each. */
+    function AppearanceWorkspace() {
+      const { palette, choosePalette, textSize, chooseTextSize } = useTheme();
       return (
         <main id={MAIN_ID}>
-          <p>{`Text size: ${textSize}`}</p>
+          <p>{`Palette: ${palette}, text size: ${textSize}`}</p>
+          {PALETTES.map((option) => (
+            <button key={option} type="button" onClick={() => choosePalette(option)}>
+              {option}
+            </button>
+          ))}
           {TEXT_SIZES.map((size) => (
             <button key={size} type="button" onClick={() => chooseTextSize(size)}>
               {size}
@@ -226,38 +233,64 @@ describe("AppShell", () => {
       );
     }
 
-    function renderSized(useCases: UseCases) {
+    function renderAppearance(overrides: Partial<UseCases>) {
+      const useCases = makeUseCases({
+        restoreSession: vi.fn(async () => ({
+          session: { webId: "https://guest.invalid/profile#me", guest: true as const },
+          origin: "restored" as const,
+        })),
+        ...overrides,
+      });
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      return render(
+      render(
         <QueryClientProvider client={queryClient}>
           <AppShell
             useCases={useCases}
             source={source}
             providers={POD_PROVIDERS}
             identity={SOLID_MEMO}
-            workspace={SizedWorkspace}
+            workspace={AppearanceWorkspace}
           />
         </QueryClientProvider>,
       );
+      return useCases;
     }
 
+    it("shows the palette chosen on this device, and keeps a new choice there, the browser's chrome in its background", async () => {
+      vi.spyOn(window, "matchMedia").mockReturnValue({
+        matches: true,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      } as unknown as MediaQueryList);
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      const palettes = document.createElement("style");
+      palettes.textContent = readFileSync(join(import.meta.dirname, "../palettes.css"), "utf8");
+      document.head.append(meta, palettes);
+      const useCases = renderAppearance({ paletteChoice: vi.fn(() => "high-contrast" as const) });
+      expect(await screen.findByText(/^Palette: high-contrast/)).toBeInTheDocument();
+      expect(document.documentElement.dataset.palette).toBe("high-contrast");
+      expect(meta.content).toBe("#000000");
+      // Standard is no attribute at all, as index.html leaves it.
+      fireEvent.click(screen.getByRole("button", { name: "standard" }));
+      expect(useCases.choosePalette).toHaveBeenCalledWith("standard");
+      expect(document.documentElement.dataset.palette).toBeUndefined();
+      expect(meta.content).toBe("#11171e");
+      meta.remove();
+      palettes.remove();
+      vi.restoreAllMocks();
+    });
+
     it("shows the text at the size chosen on this device, and keeps a new choice there", async () => {
-      const useCases = makeUseCases({
-        restoreSession: vi.fn(async () => ({
-          session: { webId: "https://guest.invalid/profile#me", guest: true as const },
-          origin: "restored" as const,
-        })),
-        textSizeChoice: vi.fn(() => "larger" as const),
-      });
-      renderSized(useCases);
-      expect(await screen.findByText("Text size: larger")).toBeInTheDocument();
+      const useCases = renderAppearance({ textSizeChoice: vi.fn(() => "larger" as const) });
+      expect(await screen.findByText(/text size: larger$/)).toBeInTheDocument();
       expect(document.documentElement.dataset.textSize).toBe("larger");
       fireEvent.click(screen.getByRole("button", { name: "largest" }));
       expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest");
       expect(document.documentElement.dataset.textSize).toBe("largest");
       // The default size is no attribute at all, as index.html leaves it.
       fireEvent.click(screen.getByRole("button", { name: "default" }));
-      expect(screen.getByText("Text size: default")).toBeInTheDocument();
+      expect(screen.getByText(/text size: default$/)).toBeInTheDocument();
       expect(document.documentElement.dataset.textSize).toBeUndefined();
     });
   });

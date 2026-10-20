@@ -10,11 +10,13 @@ import {
   contrast,
   isPaletteValue,
   literalColors,
+  contrastTargets,
   over,
   paletteBlocks,
   type PaletteBlock,
   uncommented,
 } from "@solid-memo/domain/testing/contrast";
+import { PALETTES as PALETTE_IDS } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, TEXT_SIZES } from "@solid-memo/domain/textSize";
 
 const read = (name: string) => readFileSync(join(import.meta.dirname, name), "utf8");
@@ -425,6 +427,10 @@ describe("palettes", () => {
     );
   });
 
+  it("has blocks for each palette the app offers, and for no other", () => {
+    expect([...new Set(BLOCKS.map(({ palette }) => palette))]).toEqual([...PALETTE_IDS]);
+  });
+
   it.each(BLOCKS.map((block) => [block.selector, block] as const))(
     "sets every role in %s, each written as a palette's color",
     (_, block) => {
@@ -481,8 +487,24 @@ describe("palettes", () => {
 /** Each palette block, by its selector, as the tests below take them. */
 const EACH_BLOCK = BLOCKS.map((block) => [block.selector, block] as const);
 
-/** Expects `text` on `surface`, both palette colors in `block`, at `ratio` or more. */
-function expectContrast(block: PaletteBlock, text: string, surface: string, ratio: number) {
+/**
+ * The block with the two pairs below 4.5:1 that docs/accessibility.md
+ * lists among its known gaps, Standard's dark one: text on the primary
+ * color, and muted text on a grade's hovered tint. No other block may
+ * have them.
+ */
+const KNOWN_GAPS = ':root[data-theme="dark"]';
+
+/**
+ * Expects `text` on `surface`, both palette colors in `block`, at `ratio`
+ * or more: by default the ratio text needs in the block's palette.
+ */
+function expectContrast(
+  block: PaletteBlock,
+  text: string,
+  surface: string,
+  ratio = contrastTargets(block.palette).text,
+) {
   const color = (value: string) => colorOf(value, block.roles);
   const under = color(surface);
   // A see-through surface is laid over the page's background.
@@ -522,68 +544,96 @@ describe("contrast", () => {
     expect(() => paletteBlocks(".a { --bg: #ffffff; }")).toThrow();
   });
 
-  it.each(EACH_BLOCK)("gives text fields an edge of at least 3:1 in %s", (_, block) => {
-    for (const surface of surfaces)
-      expectContrast(block, "var(--control-border)", role(surface), 3);
+  it("asks more of High contrast: text at 7:1, and fields' edges at 4.5:1", () => {
+    expect(contrastTargets("standard")).toEqual({ text: 4.5, edge: 3 });
+    expect(contrastTargets("high-contrast")).toEqual({ text: 7, edge: 4.5 });
   });
 
-  it.each(EACH_BLOCK)("keeps text and muted text at 4.5:1 or more in %s", (_, block) => {
+  it.each(EACH_BLOCK)("gives text fields an edge of the ratio they need in %s", (_, block) => {
+    for (const surface of surfaces)
+      expectContrast(
+        block,
+        "var(--control-border)",
+        role(surface),
+        contrastTargets(block.palette).edge,
+      );
+  });
+
+  it.each(EACH_BLOCK)("keeps text and muted text at the ratio text needs in %s", (_, block) => {
     for (const text of ["--text", "--text-muted"])
       for (const surface of [...surfaces, "--primary-soft"])
-        expectContrast(block, role(text), role(surface), 4.5);
+        expectContrast(block, role(text), role(surface));
   });
 
   it.each(EACH_BLOCK)(
     "keeps muted text readable over the background's blue disc and the course card's yellow glow in %s",
     (_, block) => {
-      expectContrast(block, "var(--text-muted)", "var(--paper-blue)", 4.5);
+      expectContrast(block, "var(--text-muted)", "var(--paper-blue)");
       const glow = colorOf("var(--paper-yellow)", block.roles);
       const card = colorOf("var(--primary-soft)", block.roles);
       expect(
         contrast(colorOf("var(--text-muted)", block.roles), over(glow, card)),
-      ).toBeGreaterThanOrEqual(4.5);
+      ).toBeGreaterThanOrEqual(contrastTargets(block.palette).text);
     },
   );
 
   it.each(EACH_BLOCK)(
-    "keeps the text on a primary fill, a link, and danger and warning text at 4.5:1 or more in %s",
+    "keeps the text on a primary fill, a link, and danger and warning text at the ratio text needs in %s",
     (_, block) => {
       for (const fill of ["--primary-fill", "--primary-hover"])
-        expectContrast(block, "var(--on-primary)", role(fill), 4.5);
+        expectContrast(block, "var(--on-primary)", role(fill));
       for (const surface of [...surfaces, "--primary-soft", "--link-hover-bg"])
-        expectContrast(block, "var(--link)", role(surface), 4.5);
+        expectContrast(block, "var(--link)", role(surface));
       for (const surface of [...surfaces, "--danger-soft"])
-        expectContrast(block, "var(--danger)", role(surface), 4.5);
+        expectContrast(block, "var(--danger)", role(surface));
       for (const surface of [...surfaces, "--warning-soft"])
-        expectContrast(block, "var(--warning-text)", role(surface), 4.5);
+        expectContrast(block, "var(--warning-text)", role(surface));
     },
   );
 
-  it.each(EACH_BLOCK)("keeps the masthead's text at 4.5:1 or more in %s", (_, block) => {
+  it.each(EACH_BLOCK)("keeps the masthead's text at the ratio text needs in %s", (_, block) => {
     for (const surface of ["--masthead-bg", "--masthead-link-hover-bg"])
-      expectContrast(block, "var(--masthead-text)", role(surface), 4.5);
+      expectContrast(block, "var(--masthead-text)", role(surface));
     // The session line, the masthead's text faded (style.css).
     expectContrast(
       block,
       "color-mix(in srgb, var(--masthead-text) 72%, transparent)",
       "var(--masthead-bg)",
-      4.5,
     );
     for (const surface of ["--masthead-text", "--masthead-button-hover"])
-      expectContrast(block, "var(--masthead-button-text)", role(surface), 4.5);
+      expectContrast(block, "var(--masthead-button-text)", role(surface));
   });
 
   // The tints and the hovered tint of style.css's .quality-buttons; the interval under a grade's name is muted.
   it.each(EACH_BLOCK)(
-    "keeps an answer button's text at 4.5:1 or more on its grade's tint in %s",
+    "keeps an answer button's text at the ratio text needs on its grade's tint in %s",
     (_, block) => {
       for (let grade = 0; grade <= 5; grade++) {
         const tint = (percent: number) =>
           `color-mix(in srgb, var(--grade-${grade}) ${percent}%, var(--surface))`;
-        expectContrast(block, "var(--text)", tint(12), 4.5);
-        expectContrast(block, "var(--text)", tint(24), 4.5);
-        expectContrast(block, "var(--text-muted)", tint(12), 4.5);
+        expectContrast(block, "var(--text)", tint(12));
+        expectContrast(block, "var(--text)", tint(24));
+        expectContrast(block, "var(--text-muted)", tint(12));
+        if (block.selector !== KNOWN_GAPS) expectContrast(block, "var(--text-muted)", tint(24));
       }
+    },
+  );
+
+  it("has the known gaps in Standard's dark block alone, as docs/accessibility.md says", () => {
+    const gaps = BLOCKS.filter(
+      (block) =>
+        contrast(
+          colorOf("var(--on-primary)", block.roles),
+          colorOf("var(--primary)", block.roles),
+        ) < 4.5,
+    ).map(({ selector }) => selector);
+    expect(gaps).toEqual([KNOWN_GAPS]);
+  });
+
+  it.each(EACH_BLOCK.filter(([selector]) => selector !== KNOWN_GAPS))(
+    "keeps the text on the primary color at the ratio text needs in %s, as on the line a dragged deck would land on",
+    (_, block) => {
+      expectContrast(block, "var(--on-primary)", "var(--primary)");
     },
   );
 

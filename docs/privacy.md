@@ -63,6 +63,7 @@ they hold before any pod is reached and stay out of your pod:
 |---|---|---|
 | `solid-memo:language` | the language you chose | [`localStorageLanguagePreference.ts`](../packages/browser/src/localStorageLanguagePreference.ts) |
 | `solid-memo:theme` | light, dark or the browser's | [`localStorageThemePreference.ts`](../packages/browser/src/localStorageThemePreference.ts) |
+| `solid-memo:palette` | the colors you chose (none for Standard) | [`localStoragePalettePreference.ts`](../packages/browser/src/localStoragePalettePreference.ts) |
 | `solid-memo:textSize` | the text size you chose (none for Default) | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages you picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:collapsedGroups.<instance URL>` | which deck groups you folded | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |

@@ -10,18 +10,19 @@
        <base>, no form posted anywhere. Pictures come from pods, so img-src
        stays open; style-src waits on the inline styles of src/ui. -->
   <meta http-equiv="Content-Security-Policy"
-    content="script-src 'self' 'sha256-HxqyWxHDT6qmUKrmXEb2W0rcjEOkb6Hw/hYX1GrVDT4='; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    content="script-src 'self' 'sha256-JYJjGWZLRgh/iFSN6RTz+lm5XwkfITw8HFSANJ+Gv6U='; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Spaced-repetition flashcards that live in your own Solid pod." />
   <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)" />
-  <!-- The theme and the text size before the first paint, so the page
-       does not flash in the other theme or at the other size: the
-       choices kept on this device (the keys localStorageThemePreference.ts
-       and localStorageTextSizePreference.ts keep them under), else the
-       browser's. A text size is set as it is stored, if it is in the form
-       every one is, so a later one needs no change here (or to the hash
-       above). The app takes over from here (src/ui/theme.tsx). -->
+  <!-- The theme, the palette and the text size before the first paint,
+       so the page does not flash in other colors or at another size: the
+       choices kept on this device (under the keys of the browser
+       package's localStorage{Theme,Palette,TextSize}Preference.ts), else
+       the browser's. A palette or a text size is set as it is stored, if
+       it is in the form every one is, so a later one needs no change here
+       (or to the hash above). The app takes over from here
+       (src/ui/theme.tsx). -->
   <script>
     (function () {
       var root = document.documentElement;
@@ -36,8 +37,11 @@
       root.dataset.theme =
         chosen === "light" || chosen === "dark" ? chosen
         : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      var name = /^[a-z][a-z-]{0,31}$/;
+      var palette = stored("solid-memo:palette");
+      if (palette !== null && name.test(palette)) root.dataset.palette = palette;
       var size = stored("solid-memo:textSize");
-      if (size !== null && /^[a-z][a-z-]{0,31}$/.test(size)) root.dataset.textSize = size;
+      if (size !== null && name.test(size)) root.dataset.textSize = size;
     })();
   </script>
   <!-- Favicons at fixed root URLs (public/), not fingerprinted assets:

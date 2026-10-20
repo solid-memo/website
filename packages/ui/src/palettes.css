@@ -175,3 +175,152 @@
   --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
   --zoom-backdrop: #000000e0;
 }
+
+/*
+ * High contrast, light: black on white, text at 7:1 or more and the
+ * edges of fields at 4.5:1, the page's discs and glint left out, and a
+ * solid focus ring. Its blue, yellow and red are Paul Tol's
+ * high-contrast scheme (docs/theme.md, Palette sources).
+ */
+:root[data-palette="high-contrast"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-sunken: #f3f3f3;
+  --surface-hover: #e8e8e8;
+  --text: #000000;
+  --text-muted: #303030;
+  --border: #6e6e6e;
+  --border-strong: #303030;
+  --control-border: #4d4d4d;
+
+  --primary: #004488;
+  --primary-fill: #004488;
+  --primary-hover: #002d5c;
+  --primary-soft: #e3edf7;
+  --on-primary: #ffffff;
+  --primary-bevel: 0 0 0 1px #000000;
+  --link: #004488;
+  --link-hover-bg: #e3edf7;
+  --link-hover-border: #004488;
+
+  --accent-blue: #004488;
+  --accent-yellow: #ddaa33;
+  --accent-red: #bb5566;
+  --heading-pop: transparent;
+
+  --danger: #8f1029;
+  --danger-soft: #fbeef0;
+  --danger-border: #8f1029;
+  --warning-text: #5c3f00;
+  --warning-soft: #fbf3df;
+  --warning-border: #8a6400;
+
+  --grade-0: #b8211a;
+  --grade-1: #c75a12;
+  --grade-2: #c98a00;
+  --grade-3: #a99000;
+  --grade-4: #5f8f1c;
+  --grade-5: #1f6e35;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: transparent;
+  --paper-yellow: transparent;
+  --shine: transparent;
+
+  --masthead-bg: #000000;
+  --masthead-text: #ffffff;
+  --masthead-border: transparent;
+  --masthead-blue: #77aadd;
+  --masthead-link-hover-bg: #333333;
+  --masthead-link-hover-border: #ffffff;
+  --masthead-button-text: #000000;
+  --masthead-button-hover: #dddddd;
+  --masthead-button-shadow: 0 0 0 1px #ffffff;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: var(--text);
+  --toggle-bg: var(--surface);
+  --toggle-edge: var(--text);
+  --toggle-hover-edge: var(--primary);
+
+  --shadow-sm: 0 0 0 1px var(--border);
+  --shadow: 0 0 0 1px var(--border-strong);
+  --ring: 0 0 0 3px var(--primary);
+  --zoom-backdrop: #000000e6;
+}
+
+/* High contrast, dark: white on black, as the light one is. */
+:root[data-palette="high-contrast"][data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0f0f0f;
+  --surface-sunken: #080808;
+  --surface-hover: #262626;
+  --text: #ffffff;
+  --text-muted: #d6d6d6;
+  --border: #8c8c8c;
+  --border-strong: #cccccc;
+  --control-border: #a6a6a6;
+
+  --primary: #8ec5ff;
+  --primary-fill: #8ec5ff;
+  --primary-hover: #b8dbff;
+  --primary-soft: #0e2a47;
+  --on-primary: #000000;
+  --primary-bevel: 0 0 0 1px #ffffff;
+  --link: #a6d1ff;
+  --link-hover-bg: #0e2a47;
+  --link-hover-border: #a6d1ff;
+
+  --accent-blue: #77aadd;
+  --accent-yellow: #ddaa33;
+  --accent-red: #bb5566;
+  --heading-pop: transparent;
+
+  --danger: #ffb3bd;
+  --danger-soft: #3d0a12;
+  --danger-border: #ff8090;
+  --warning-text: #ffd97a;
+  --warning-soft: #2e2200;
+  --warning-border: #b38a00;
+
+  --grade-0: #e8432b;
+  --grade-1: #ee7733;
+  --grade-2: #ddaa33;
+  --grade-3: #d9c21c;
+  --grade-4: #8fc24a;
+  --grade-5: #44aa66;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: transparent;
+  --paper-yellow: transparent;
+  --shine: transparent;
+
+  --masthead-bg: #000000;
+  --masthead-text: #ffffff;
+  --masthead-border: #ffffff;
+  --masthead-blue: #77aadd;
+  --masthead-link-hover-bg: #333333;
+  --masthead-link-hover-border: #ffffff;
+  --masthead-button-text: #000000;
+  --masthead-button-hover: #dddddd;
+  --masthead-button-shadow: 0 0 0 1px #ffffff;
+  --logo-shadow: 0 0 0 1px #ffffff;
+
+  --toggle-icon: var(--text);
+  --toggle-bg: var(--surface);
+  --toggle-edge: var(--text);
+  --toggle-hover-edge: var(--primary);
+
+  --shadow-sm: 0 0 0 1px var(--border);
+  --shadow: 0 0 0 1px var(--border-strong);
+  --ring: 0 0 0 3px var(--primary);
+  --zoom-backdrop: #000000e6;
+}

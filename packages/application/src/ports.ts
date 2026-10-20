@@ -5,6 +5,7 @@
 import type { Catalog } from "@solid-memo/domain/catalog";
 import type { Locale } from "@solid-memo/domain/locale";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
@@ -832,6 +833,18 @@ export interface ThemePreference {
   /** The chosen theme; "system" when none was chosen (or it was forgotten). */
   chosen(): ThemeChoice;
   choose(choice: ThemeChoice): void;
+}
+
+/**
+ * Driven port: the palette the user chose, kept where the app runs (the
+ * browser), since the first paint needs it before any pod is reached.
+ * Best effort: it may forget, and the app is then in its standard
+ * colors.
+ */
+export interface PalettePreference {
+  /** The chosen palette; "standard" when none was chosen (or it was forgotten). */
+  chosen(): Palette;
+  choose(palette: Palette): void;
 }
 
 /**

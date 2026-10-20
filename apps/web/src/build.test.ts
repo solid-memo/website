@@ -252,13 +252,19 @@ describe("the page's first-paint script", () => {
     expect(firstPaint({}, { blocked: true })).toEqual({ theme: "light" });
   });
 
-  it("sets the text size kept on the device, if it is in the form one takes", () => {
-    expect(firstPaint({ "solid-memo:textSize": "larger" })).toEqual({
+  it("sets the palette and the text size kept on the device, if each is in the form one takes", () => {
+    expect(
+      firstPaint({ "solid-memo:palette": "high-contrast", "solid-memo:textSize": "larger" }),
+    ).toEqual({ theme: "light", palette: "high-contrast", textSize: "larger" });
+    // A palette or size the app has yet to have is set all the same: the stylesheet shows it as the default.
+    expect(firstPaint({ "solid-memo:palette": "x".repeat(32) })).toEqual({
       theme: "light",
-      textSize: "larger",
+      palette: "x".repeat(32),
     });
-    for (const size of ["", "Larger", "x".repeat(33), 'large" onload="x', "1x"])
-      expect(firstPaint({ "solid-memo:textSize": size })).toEqual({ theme: "light" });
+    for (const value of ["", "Larger", "x".repeat(33), 'large" onload="x', "1x"])
+      expect(firstPaint({ "solid-memo:palette": value, "solid-memo:textSize": value })).toEqual({
+        theme: "light",
+      });
   });
 });
 

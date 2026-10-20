@@ -165,6 +165,16 @@ export function contrast(text: Rgba, surface: Rgba): number {
   return (high! + 0.05) / (low! + 0.05);
 }
 
+/**
+ * The least contrast a palette's blocks hold to (docs/accessibility.md):
+ * text on what it is on, and a text field's edge on its surface. WCAG's
+ * AA (4.5:1 and 3:1) for every palette; High contrast's AAA for text
+ * (7:1), and AA text's ratio for edges.
+ */
+export function contrastTargets(palette: string): { text: number; edge: number } {
+  return palette === "high-contrast" ? { text: 7, edge: 4.5 } : { text: 4.5, edge: 3 };
+}
+
 /** A color written as palettes.css writes one, alone: see colorOf. */
 const COLOR_PART = String.raw`#[0-9a-f]{6}(?:[0-9a-f]{2})?|transparent|var\(--[\w-]+\)`;
 

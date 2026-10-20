@@ -47,6 +47,26 @@ flashes in the other theme; `packages/ui/src/ui/theme.tsx` takes over from there
 sets the `theme-color` meta tags for the browser's own chrome, in the
 page's background (`--bg`) as the stylesheet has it.
 
+## Palettes
+
+Apart from light and dark, the colors come in palettes, each for what
+it does for the reader, and each in the light theme and in the dark:
+
+| Palette | Id | What it does |
+|---|---|---|
+| Standard | `standard` | The app's own colors, the answer buttons from red (Again) to green (Easy). |
+| High contrast | `high-contrast` | Black on white, or white on black: text at 7:1 or more, fields' edges at 4.5:1 or more, no page discs or glint, edges in place of soft shadows, and a solid focus ring. |
+
+The choice is kept on the device, by the `PalettePreference` port
+([localStoragePalettePreference.ts](../packages/browser/src/localStoragePalettePreference.ts),
+key `solid-memo:palette`; Standard is no key at all), and shown as
+`<html data-palette>`: the script in `apps/web/index.html` sets it
+before the first paint, and `theme.tsx` from there, before it sets the
+`theme-color` meta tags from the palette's background; Standard goes
+without. The script takes any value of the form an id has (lowercase
+letters and hyphens, at most 32), so a later palette needs no new
+script, and one this version does not have shows as Standard.
+
 ## Color roles
 
 Every color the site and the Studio draw with is a role, a custom
@@ -57,11 +77,11 @@ color of their own; they may mix two roles (`color-mix(in srgb, …)`),
 as a hovered answer button's tint does.
 
 A palette is two blocks of `palettes.css`: one for the light theme, one
-for the dark. Standard, today's only palette, is `:root` and
-`:root[data-theme="dark"]`. Another palette's blocks would be
-`:root[data-palette="…"]` and `:root[data-palette="…"][data-theme="dark"]`,
-after Standard's; a palette with no blocks shows as Standard. Each
-block sets every role, so no block leans on another.
+for the dark. Standard's are `:root` and `:root[data-theme="dark"]`.
+Another palette's blocks are `:root[data-palette="…"]` and
+`:root[data-palette="…"][data-theme="dark"]`, after Standard's; a
+palette with no blocks shows as Standard. Each block sets every role,
+so no block leans on another.
 
 The roles fall into groups:
 
@@ -91,7 +111,11 @@ block sets every role in these forms, that `style.css` writes out no
 color (`studio.test.ts` checks the same of `studio.css`), and the
 contrast of the pairs that hold text in every block: text and muted
 text on every surface, the text on a primary fill, links, danger and warning text, the masthead's text, and an answer
-button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)).
+button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)),
+at 4.5:1 and fields' edges at 3:1, or in High contrast at 7:1 and
+4.5:1 (`contrastTargets`). The two pairs below 4.5:1 in Standard's
+dark block, which accessibility.md lists among its known gaps, are
+checked in every other block.
 The shared helper that reads the blocks, mixes their colors and
 computes WCAG's contrast ratio is
 [`contrast.ts`](../packages/domain/src/testing/contrast.ts).
@@ -107,6 +131,18 @@ Some colors stay fixed on purpose, whatever the palette:
   before the app runs (`themeColor.test.ts` keeps them in step);
 - forced colors (Windows High Contrast and the like), whose rules
   draw with the system's colors over every palette.
+
+## Palette sources
+
+The palettes' colors are ours, but some are taken from published
+color schemes, whose authors are credited here. Only the values are
+taken, and no file of theirs is copied:
+
+- **High contrast**: the blue, yellow and red accents (`#004488`,
+  `#ddaa33`, `#bb5566`) are Paul Tol's high-contrast scheme, from his
+  technical note SRON/EPS/TN/09-002 and
+  [his notes on color schemes](https://sronpersonalpages.nl/~pault/),
+  which state no license.
 
 ## Text size
 

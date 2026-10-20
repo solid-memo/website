@@ -51,6 +51,7 @@ import {
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES, NEW_INSTANCE_PREFERENCES } from "@solid-memo/domain/preferences";
+import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { fsrsInterval, fsrsReview, memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
@@ -334,6 +335,29 @@ describe("createUseCases", () => {
       const useCases = createUseCases(makeDeps());
       useCases.chooseLanguage("en");
       expect(useCases.language(["sv-SE"])).toBe("sv");
+    });
+  });
+
+  describe("palette", () => {
+    it("shows the chosen palette, and keeps a new choice on this device", () => {
+      let chosen: Palette = "high-contrast";
+      const palettePreference = {
+        chosen: () => chosen,
+        choose: vi.fn((palette: Palette) => {
+          chosen = palette;
+        }),
+      };
+      const useCases = createUseCases({ ...makeDeps(), palettePreference });
+      expect(useCases.paletteChoice()).toBe("high-contrast");
+      useCases.choosePalette("standard");
+      expect(palettePreference.choose).toHaveBeenCalledWith("standard");
+      expect(useCases.paletteChoice()).toBe("standard");
+    });
+
+    it("shows the standard palette when none is kept", () => {
+      const useCases = createUseCases(makeDeps());
+      useCases.choosePalette("high-contrast");
+      expect(useCases.paletteChoice()).toBe("standard");
     });
   });
 

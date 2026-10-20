@@ -24,6 +24,7 @@ import {
 } from "@solid-memo/solid/solidReleasePublisher";
 import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
+import { createLocalStoragePalettePreference } from "@solid-memo/browser/localStoragePalettePreference";
 import { createLocalStorageTextSizePreference } from "@solid-memo/browser/localStorageTextSizePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
@@ -134,6 +135,7 @@ export function createAppUseCases({
     updateJournal: createLocalStorageUpdateJournal(),
     languagePreference: createLocalStorageLanguagePreference(),
     themePreference: createLocalStorageThemePreference(),
+    palettePreference: createLocalStoragePalettePreference(),
     textSizePreference: createLocalStorageTextSizePreference(),
     writeFence,
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),

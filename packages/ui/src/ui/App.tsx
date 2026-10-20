@@ -5,6 +5,7 @@
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
 import type { Locale } from "@solid-memo/domain/locale";
+import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { usePanelFocus } from "./panelFocus";
 import {
+  applyPalette,
   applyTextSize,
   applyTheme,
   browserTheme,
@@ -131,10 +133,17 @@ export function AppShell({
   const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() => useCases.themeChoice());
   const [preferredTheme, setPreferredTheme] = useState<Theme>(browserTheme);
   const theme = resolveTheme(themeChoice, preferredTheme);
+  const [palette, setPalette] = useState<Palette>(() => useCases.paletteChoice());
 
   useEffect(() => {
+    applyPalette(palette);
     applyTheme(theme);
-  }, [theme]);
+  }, [palette, theme]);
+
+  function choosePalette(chosen: Palette) {
+    useCases.choosePalette(chosen);
+    setPalette(chosen);
+  }
 
   // The browser's theme as it changes (the OS going dark at dusk), shown while the choice is "system".
   useEffect(() => {
@@ -188,6 +197,8 @@ export function AppShell({
           themeInstance.current = instanceUrl;
         }}
         onAdopt={setThemeChoice}
+        palette={palette}
+        onChoosePalette={choosePalette}
         textSize={textSize}
         onChooseTextSize={chooseTextSize}
       >

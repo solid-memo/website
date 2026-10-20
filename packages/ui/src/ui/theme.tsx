@@ -6,6 +6,7 @@ import { createContext, type ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
 
@@ -30,6 +31,18 @@ export function applyTheme(theme: Theme) {
   for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
     meta.content = background;
   }
+}
+
+/**
+ * Shows the page in a palette: the stylesheet's colors follow the root's
+ * data-palette (index.html sets it before the first paint), which the
+ * standard palette goes without. Before applyTheme, whose meta tags take
+ * the background the palette gives.
+ */
+export function applyPalette(palette: Palette) {
+  const root = document.documentElement;
+  if (palette === DEFAULT_PALETTE) delete root.dataset.palette;
+  else root.dataset.palette = palette;
 }
 
 /**
@@ -59,6 +72,10 @@ interface ThemeState {
   followInstance(instanceUrl: string | null): void;
   /** Show the choice an instance's preferences hold. */
   adoptTheme(choice: ThemeChoice): void;
+  /** The palette chosen. */
+  palette: Palette;
+  /** Show the page in another palette from now on. */
+  choosePalette(palette: Palette): void;
   /** The text size chosen. */
   textSize: TextSize;
   /** Show the text at another size from now on. */
@@ -74,6 +91,8 @@ const ThemeContext = createContext<ThemeState>({
   chooseTheme: ignore,
   followInstance: ignore,
   adoptTheme: ignore,
+  palette: DEFAULT_PALETTE,
+  choosePalette: ignore,
   textSize: DEFAULT_TEXT_SIZE,
   chooseTextSize: ignore,
 });
@@ -85,6 +104,8 @@ export function ThemeProvider({
   onChoose,
   onFollowInstance = ignore,
   onAdopt = ignore,
+  palette = DEFAULT_PALETTE,
+  onChoosePalette = ignore,
   textSize = DEFAULT_TEXT_SIZE,
   onChooseTextSize = ignore,
   children,
@@ -95,6 +116,8 @@ export function ThemeProvider({
   onChoose: (choice: ThemeChoice) => void;
   onFollowInstance?: (instanceUrl: string | null) => void;
   onAdopt?: (choice: ThemeChoice) => void;
+  palette?: Palette;
+  onChoosePalette?: (palette: Palette) => void;
   textSize?: TextSize;
   onChooseTextSize?: (size: TextSize) => void;
   children: ComponentChildren;
@@ -107,6 +130,8 @@ export function ThemeProvider({
         chooseTheme: onChoose,
         followInstance: onFollowInstance,
         adoptTheme: onAdopt,
+        palette,
+        choosePalette: onChoosePalette,
         textSize,
         chooseTextSize: onChooseTextSize,
       }}

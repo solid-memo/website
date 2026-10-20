@@ -22,9 +22,11 @@ What the app does for it today:
   and a deck's alike, so a screen reader reads it in that language and
   right-to-left text, such as Arabic, reads right to left
   ([i18n.md](i18n.md)).
-- **Themes**: a light and a dark theme, each with text at a contrast of
-  4.5:1 or more and the edges of fields at 3:1
-  ([theme.md](theme.md), [below](#checked-automatically)).
+- **Themes and palettes**: a light and a dark theme, each with text at
+  a contrast of 4.5:1 or more and the edges of fields at 3:1, in every
+  palette; the High contrast palette holds text to 7:1 and the edges
+  of fields to 4.5:1 ([theme.md](theme.md#palettes),
+  [below](#checked-automatically)).
 - **Motion**: the browser's "reduce motion" turns the animations off.
 - **Targets**: buttons and links are 24px high at least, or far enough
   from their neighbors, as WCAG 2.2 asks; the Studio's rows and
@@ -58,7 +60,8 @@ but the journeys:
   A rule is turned off only for the files its reason holds for, with
   the reason in [`biome.jsonc`](../biome.jsonc)
   ([style.md](style.md#formatting)).
-- **Contrast**: unit tests check, in both themes, the contrast of text
+- **Contrast**: unit tests check, in both themes of every palette (at
+  High contrast's own ratios there), the contrast of text
   and muted text and of fields' edges on every surface, of the text on
   a primary fill, of links, danger and warning text, of the masthead's
   text, and of an answer button's text on its grade's tint
@@ -102,7 +105,8 @@ and an issue for one is welcome ([below](#report-a-barrier)).
   dark theme: the label on the line where a dragged deck would land
   (`--on-primary` on `--primary`), and the interval under an answer
   button's name while the pointer is over the button (muted text on
-  the hovered tint of the middle grades).
+  the hovered tint of the middle grades). The tests hold every other
+  palette and theme to both.
 - **Screen readers**: no pass with a screen reader, NVDA or VoiceOver,
   through the main journeys is written down yet. It would find what
   the checks above can't, such as whether a reader takes up the

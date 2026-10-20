@@ -123,7 +123,7 @@ learner's Pod, nor they what it wrote:
 |---|---|---|
 | `https://solid-memo.com/` (`SITE`) | [ns.ts](../packages/vocab/src/ns.ts), [shacl_crosscheck.py](../scripts/shacl_crosscheck.py) | The vocabulary, the shapes and the library's decks. Pods store these IRIs. |
 | `solid-memo/` | [guest.ts](../packages/domain/src/guest.ts), [trial.ts](../packages/domain/src/release/trial.ts) | The folder an instance gets in a Pod. |
-| `solid-memo:*` keys | `packages/browser/src/`, [solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts), the first-paint script in index.html | What the browser keeps: the language, the theme, the text size, the update journal, the hash a login set off from. |
+| `solid-memo:*` keys | `packages/browser/src/`, [solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts), the first-paint script in index.html | What the browser keeps: the language, the theme, the palette, the text size, the update journal, the hash a login set off from. |
 | `solid-memo-guest-pod` | [indexedDbResourceStore.ts](../packages/browser/src/indexedDbResourceStore.ts) | The guest's Pod in the browser ([guest-mode.md](guest-mode.md)). |
 
 The browser keeps its data per origin, so the last two never mix

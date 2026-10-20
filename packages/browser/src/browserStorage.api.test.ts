@@ -7,6 +7,7 @@ import type { StoredResource } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { DATABASE, DATABASE_VERSION, LOCK, RESOURCES } from "./indexedDbResourceStore";
 import { KEY as LANGUAGE_KEY } from "./localStorageLanguagePreference";
+import { KEY as PALETTE_KEY } from "./localStoragePalettePreference";
 import { KEY as TEXT_SIZE_KEY } from "./localStorageTextSizePreference";
 import { KEY as THEME_KEY } from "./localStorageThemePreference";
 import { PREFIX as JOURNAL_PREFIX } from "./localStorageUpdateJournal";
@@ -34,6 +35,7 @@ const RECORDS: { [K in StoredResource["kind"]]: Extract<StoredResource, { kind: 
 it("keeps api/browser-storage/browser.txt to what the browser keeps", async () => {
   const lines = [
     `localStorage: ${LANGUAGE_KEY}`,
+    `localStorage: ${PALETTE_KEY}`,
     `localStorage: ${TEXT_SIZE_KEY}`,
     `localStorage: ${THEME_KEY}`,
     `localStorage: ${JOURNAL_PREFIX}<source URL>`,

@@ -9,6 +9,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import {
   colorOf,
   contrast,
+  contrastTargets,
   literalColors,
   paletteBlocks,
 } from "@solid-memo/domain/testing/contrast";
@@ -349,8 +350,10 @@ describe("the Studio's contrast", () => {
   const studio = sheet.slice(0, forcedStart) + sheet.slice(forcedEnd);
   const forced = sheet.slice(forcedStart, forcedEnd);
 
-  /** Each palette block's roles, by its selector. */
-  const blocks = paletteBlocks(PALETTES).map(({ selector, roles }) => [selector, roles] as const);
+  /** Each palette block's roles, by its selector, and the ratio its text needs (4.5:1, High contrast's 7:1). */
+  const blocks = paletteBlocks(PALETTES).map(
+    ({ selector, roles, palette }) => [selector, roles, contrastTargets(palette).text] as const,
+  );
   /** WCAG's contrast ratio of two roles of a block. */
   const ratio = (roles: Record<string, string>, text: string, surface: string) =>
     contrast(colorOf(`var(${text})`, roles), colorOf(`var(${surface})`, roles));
@@ -496,19 +499,22 @@ describe("the Studio's contrast", () => {
     }
   });
 
-  it.each(blocks)("keeps every text color at 4.5:1 or more on every surface in %s", (_, roles) => {
-    const texts = used("color");
-    const surfaces = used("background").filter((surface) => !(surface in TEXTLESS));
-    expect(texts).toContain("--text-muted");
-    expect(surfaces).toContain("--surface-sunken");
-    for (const text of texts) {
-      for (const surface of surfaces) {
-        expect({ text, surface, enough: ratio(roles, text, surface) >= 4.5 }).toEqual({
-          text,
-          surface,
-          enough: true,
-        });
+  it.each(blocks)(
+    "keeps every text color at the ratio text needs on every surface in %s",
+    (_, roles, needs) => {
+      const texts = used("color");
+      const surfaces = used("background").filter((surface) => !(surface in TEXTLESS));
+      expect(texts).toContain("--text-muted");
+      expect(surfaces).toContain("--surface-sunken");
+      for (const text of texts) {
+        for (const surface of surfaces) {
+          expect({ text, surface, enough: ratio(roles, text, surface) >= needs }).toEqual({
+            text,
+            surface,
+            enough: true,
+          });
+        }
       }
-    }
-  });
+    },
+  );
 });
