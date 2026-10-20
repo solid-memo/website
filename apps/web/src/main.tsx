@@ -9,15 +9,21 @@ import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
 import { siteConfig } from "./config";
+import { unregisterJourneysWorkers } from "./journeysWorkers";
 
 // The build's settings (docs/configuration.md), checked as it was built (vite.config.ts).
 const config = siteConfig(import.meta.env);
 
+// The site is the folder this page is served from.
+const servedSite = new URL(".", document.baseURI).href;
+
+// The old journeys' report's trace viewer, gone but still registered (docs/deployment.md#the-journeys-report).
+void unregisterJourneysWorkers(navigator.serviceWorker, servedSite);
+
 const useCases = createAppUseCases({
   // The name the identity provider shows when the user logs in.
   clientName: config.appName,
-  // The site is the folder this page is served from.
-  servedSite: new URL(".", document.baseURI).href,
+  servedSite,
   // VITE_LIBRARY_INDEX_URL points a build at another copy of the deck library.
   libraryIndexUrl: config.libraryIndexUrl,
   ruleset: __SHAPES_RULESET__,
