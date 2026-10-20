@@ -21,6 +21,16 @@ describe("CardFace", () => {
     expect(container.querySelector("img")).toBeNull();
   });
 
+  it("passes its text's length in characters to the stylesheet, Markdown marks not counted", () => {
+    const length = (face: Element) =>
+      face.querySelector<HTMLElement>(".card-face")!.style.getPropertyValue("--text-length");
+    expect(length(render(<CardFace side="front" text={{ "": "水を🍵" }} />).container)).toBe("3");
+    const markdown = render(
+      <CardFace side="front" text={{ "": "**bold**" }} textFormat={SM.markdown} />,
+    );
+    expect(length(markdown.container)).toBe("4");
+  });
+
   it("marks text in another language than the page's with its language, and untagged text with none", () => {
     render(
       <CardFace
