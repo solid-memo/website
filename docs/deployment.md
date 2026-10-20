@@ -115,14 +115,14 @@ data it reads:
 |---|---|---|
 | `/` (`index.html`, `assets/`) | `apps/web/`, `apps/studio/` | The app, [Solid Memo Studio](studio.md) at `#/studio` included, in a chunk of its own under `assets/`. |
 | `/about/index.html` | `apps/web/public/about/` | What Solid Memo is, for learners, deck authors, technologists and decision makers: plain HTML, in English, that search engines and browsers without script can read. It runs no script, so it follows the browser's light or dark, not the theme chosen in the app; [aboutPage.test.ts](../apps/web/src/aboutPage.test.ts) checks its policy and its links. It has a link preview of its own (`og:` and `twitter:` tags), with the site's picture. `sitemap.xml` lists it, the app's footer links to it, and so does the site's page in a `<noscript>`. Its links to the docs lead to `/docs/` on the same site. |
-| `/robots.txt`, `/sitemap.xml` | written by the build, from [CNAME](../CNAME) | `robots.txt` keeps search engines out of `/journeys/` and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, except a page whose `<meta name="robots">` says `noindex` (the Studio's old address), on the domain in `CNAME` ([below](#custom-domain-optional)). Without a `CNAME`, there is no sitemap, and `robots.txt` names none. |
+| `/robots.txt`, `/sitemap.xml` | written by the build, from [CNAME](../CNAME) | `robots.txt` keeps search engines out of `/journeys/`, the report's old address, and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, except a page whose `<meta name="robots">` says `noindex` (the Studio's and the journeys' report's old addresses), on the domain in `CNAME` ([below](#custom-domain-optional)). Without a `CNAME`, there is no sitemap, and `robots.txt` names none. |
 | `/docs/` (`index.html`, `<page>/index.html`, `versions/`, `diagrams/`, `docs.css`) | [`docs/`](README.md), rendered by the build | These docs as static pages, in English, at the version deployed: the README at `/docs/`, with the list of pages from their index, [docs.ttl](docs.ttl), every other page at `/docs/<page>/`, and a list of versions at `/docs/versions/`, which the deploy writes again with every release ([below](#each-releases-docs)) ([markdown.md](markdown.md#the-docs-as-a-site)). Like the About page they run no script, so they follow the browser's light or dark. Their diagrams are drawn as the site is built, light and dark, as SVG files in `diagrams/` with the font's license, `OFL-Fredoka.txt`, beside them. Their links into the repository lead to `VITE_REPO_URL` at the commit built ([configuration.md](configuration.md#vite_repo_url)). The app's footer, the About page, the site's page in a `<noscript>`, and `publiccode.yml`'s `documentation` link to `/docs/`. These addresses may change in any version: they are not part of the public API ([releasing.md](releasing.md#the-public-api)). |
 | `/docs/X.Y.Z/` | each release's GitHub release, its docs' archive | The docs of every release whose GitHub release carries their archive, as that release rendered them, the deployed version's included: the same pages one folder deeper, never indexed, their links into the repository at the release's tag ([below](#each-releases-docs)). Like `/docs/`, not part of the public API. |
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
 | `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
-| `/journeys/` | the CI run's `journeys-report` artifact | The user journeys' report ([testing.md](testing.md#user-journeys)), every browser's in one, with each journey's trace. The report of the CI run on the release commit; not there after a deploy by hand. |
+| `/journeys/index.html` | `apps/web/public/journeys/` | The user journeys' report's old address: a page that sends `/journeys/#x` on to `https://journeys.solid-memo.com/#x`, where the report now lives ([below](#the-journeys-report)). |
 
 Vite copies `ns/`, `decks/` and `vendor/` as they are
 (`turtleDirectoryPlugin` in
@@ -152,6 +152,31 @@ but the IRIs it reads still name `https://solid-memo.com/`, which
 site is served. A fork gives its build its own name, repository link and
 Pod providers in `VITE_` variables ([configuration.md](configuration.md)),
 and [reuse.md](reuse.md) walks through running a copy.
+
+## The journeys' report
+
+The user journeys' report ([testing.md](testing.md#user-journeys)),
+every browser's in one with each journey's trace, is published at
+<https://journeys.solid-memo.com/>, a site of its own, not beside the
+app, so the report and its trace viewer, which are Playwright's
+scripts, do not run on the app's origin. After the site is deployed, the deploy workflow's `journeys`
+job takes the `journeys-report` artifact of the CI run on the release
+commit and force-pushes it, as one commit with no parent, over `main`
+of the repository [solid-memo/journeys](https://github.com/solid-memo/journeys),
+which GitHub Pages serves from that branch. So that repository holds no
+code, only the newest report, with beside it a `CNAME` naming the
+domain, a `.nojekyll`, so Pages serves the files as they are, and a
+`robots.txt` that keeps search engines out. A deploy by hand has no CI
+run, so it publishes no report, and the last one stays.
+
+The job pushes with a deploy key: its public half is the journeys
+repository's, with write access, and its private half is the secret
+`JOURNEYS_DEPLOY_KEY` of the `journeys` environment here, which admits
+only `main`, as the `release` environment does
+([releasing.md](releasing.md#the-deploy-key)). Without the secret, as
+in a fork, the job publishes nothing and says so. `journeys.solid-memo.com`
+is a `CNAME` record pointing at `solid-memo.github.io`, and the journeys
+repository's Pages settings name it, with HTTPS enforced.
 
 ## Why any static host works, unconfigured
 

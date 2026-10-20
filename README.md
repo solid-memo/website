@@ -65,7 +65,7 @@ courses, on a desktop's screen:
 ![Solid Memo Studio on a desktop's screen: a sidebar of sections and decks, a table of the instance's decks with their settings and counts, and the deck picked in it described in a panel beside it.](apps/web/public/screenshots/studio.png)
 
 To see what the app does without signing in, open the report of its
-[user journeys](https://solid-memo.com/journeys/): tests that use the
+[user journeys](https://journeys.solid-memo.com/): tests that use the
 app in a browser as a person would, step by step, from CI's run on the
 version the site runs (none after a deploy by hand)
 ([docs/testing.md](docs/testing.md#user-journeys)).

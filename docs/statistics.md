@@ -440,4 +440,4 @@ rest of their study when they log in.
   steps 07 and 09 check that trying a course in the Studio's sandbox
   leaves the statistics as they were. The page object is
   [Statistics.ts](../e2e/journeys/pages/Statistics.ts). The latest
-  run's screenshots are online at <https://solid-memo.com/journeys/>.
+  run's screenshots are online at <https://journeys.solid-memo.com/>.

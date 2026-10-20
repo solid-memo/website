@@ -456,9 +456,10 @@ error, and the browser it failed in. The job's
   Open the report with `npx playwright show-report <dir>`.
 - `logs/css.log`: the server's whole log.
 
-**The latest report is online** at <https://solid-memo.com/journeys/>,
-published with each deploy: the report of the CI run on the release
-commit the site runs (none after a deploy by hand), every browser's
+**The latest report is online** at <https://journeys.solid-memo.com/>,
+a site of its own that each deploy publishes
+([deployment.md](deployment.md#the-journeys-report)): the report of the CI run on the release
+commit the site runs (after a deploy by hand, still the last release's), every browser's
 journeys in one, as the `journeys-report` job merges them from every
 journeys job (Playwright's blob reports, one a job). As the release commit's run
 skips the journeys, it takes their reports from the run that ran them
@@ -579,7 +580,7 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
 | `journeys (<project>)` | timing-dependent | the user journeys: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every job's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `journeys.solid-memo.com` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every job's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |

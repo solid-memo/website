@@ -532,7 +532,7 @@ What holds today, and what does not, criterion by criterion.
   to.
 - MUST, met — how to install and run, in the README.
 - MUST, met — examples of the key functionality: the user guide and the
-  [user journeys](https://solid-memo.com/journeys/) report.
+  [user journeys](https://journeys.solid-memo.com/) report.
 - SHOULD, met — an overview for a wide audience: the README's "About"
   and the about page.
 - SHOULD, met — how to run a standalone copy: the README's "Run it on its

@@ -61,7 +61,7 @@ export function sitemapXml(origin: string, paths: readonly string[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("")}</urlset>\n`;
 }
 
-/** robots.txt: everything but the journeys' report (docs/testing.md), and the sitemap when there is one. */
+/** robots.txt: everything but the journeys' report's old address (docs/deployment.md#the-journeys-report), and the sitemap when there is one. */
 export function robotsTxt(origin: string | null): string {
   const rules = "User-agent: *\nAllow: /\nDisallow: /journeys/\n";
   return origin === null ? rules : `${rules}\nSitemap: ${origin}/sitemap.xml\n`;
