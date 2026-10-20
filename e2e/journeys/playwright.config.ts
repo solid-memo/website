@@ -20,12 +20,13 @@ if (!(TRACE_MODES as readonly string[]).includes(trace))
   throw new Error(`JOURNEY_TRACE is "${trace}"; it may be ${TRACE_MODES.join(", ")}.`);
 
 /**
- * The journeys the other engines and the phone run: logging in, a guest's
- * study kept in the browser through the login's redirects, and the silent
- * restore of a session after a reload, which differ most between engines.
- * The rest exercise the app's logic, which doesn't (docs/testing.md#browsers).
+ * The journeys the other engines and the phone run: a guest's study kept
+ * in the browser through the login's redirects, and the silent restore of
+ * a session after a reload, which differ most between engines; the
+ * reload's journey also logs in and out, as @smoke does in Chromium. The
+ * rest exercise the app's logic, which doesn't (docs/testing.md#browsers).
  */
-const ENGINE_JOURNEYS = /@smoke|@guest|@reload/;
+const ENGINE_JOURNEYS = /@guest|@reload/;
 
 export default defineConfig({
   testDir: "journeys",

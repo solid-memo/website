@@ -359,7 +359,7 @@ Further journeys go through:
 
 Every journey runs in desktop Chromium, the `chromium` project in
 [playwright.config.ts](../e2e/journeys/playwright.config.ts). Three
-more projects run only the journeys tagged `@smoke`, `@guest` and
+more projects run only the journeys tagged `@guest` and
 `@reload`: `firefox` (desktop Firefox), `webkit` (desktop Safari's
 engine) and `phone` (an iPhone 14's screen and touch, on WebKit). Those
 journeys go through what differs most between engines: the login's
@@ -368,7 +368,7 @@ browser's storage through them, the silent restore of a session after a
 reload, and a page narrow enough to lay out for a phone. The other
 journeys test the app's logic, which is the same in every engine, so
 running them all in each would about triple the time for little gain. A
-journey tagged with one of the three runs in every browser; tag another
+journey tagged with one of the two runs in every browser; tag another
 only when what it tests differs between engines. CI runs them in five
 jobs side by side: Chromium's journeys in two shards
 (`npx playwright test --shard`), `journeys (chromium-1)` and

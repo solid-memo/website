@@ -12,7 +12,8 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
  * deck list, the statistics and each card's history count every answer
  * once (docs/srs.md#study-sessions). Catches answers kept only in the
  * page, a session that starts over with the cards already answered, and
- * a reload that loses the route.
+ * a reload that loses the route. Then the learner logs out: in the other
+ * engines, which run no smoke journey, this is the one that does.
  *
  * Four new cards, all within the five new cards a day: two answered
  * Good before the reload, the other two after it. Good keeps a card out
@@ -112,5 +113,11 @@ test("reload in the middle of a study session @reload", async ({ app, account, r
         { kind: app.t("card.historyFirst"), answer: app.t("study.minimal.good") },
       ]);
     }
+  });
+
+  // The other engines run no smoke journey: this one logs out for it.
+  await app.step("11 · Log out", async () => {
+    await app.chrome.logOut();
+    await app.onboarding.expectLoggedOut();
   });
 });
