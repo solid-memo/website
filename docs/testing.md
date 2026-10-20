@@ -530,8 +530,9 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
 - **One after another**: a journey that needs what another made is in
   its file, after it, and the file runs in turn (`mode: "serial"`): the
-  course the Studio journey publishes is added from its link by the next
-  journey in [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts),
+  course the Studio's course journey publishes is added from its link by
+  the next journey in
+  [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts),
   which is skipped when the first fails.
 
 The harness's own code (`harness/`) has unit tests (`npm test`, so `npm

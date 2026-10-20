@@ -73,7 +73,7 @@ export default defineConfig({
     // Chromium runs every journey, in two shards in CI: a file's journeys
     // too may run side by side, and in either shard, so pod-safety's six
     // do not take one shard's last 100 seconds. A file whose journeys
-    // depend on each other says so (studio.journey.ts, serial).
+    // depend on each other says so (studio-course.journey.ts, serial).
     { name: "chromium", use: { ...devices["Desktop Chrome"] }, fullyParallel: true },
     {
       name: "firefox",

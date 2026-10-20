@@ -4,21 +4,7 @@
 
 import { expect } from "@playwright/test";
 import { test } from "../fixtures.ts";
-import { logInAndCreateInstance } from "../flows/logIn.ts";
 import { BRIGHTEST_STARS } from "../pages/Library.ts";
-
-// The second journey adds what the first publishes: they run in turn, the second only after the first passed.
-test.describe.configure({ mode: "serial" });
-
-/** The course the Studio journey published, at its address: what the next journey adds from a link. */
-let published: { url: string; title: string } | null = null;
-
-/** The course the Studio journey writes: its one chapter, its step's theory, and its questions by their right answers. */
-const COURSE = {
-  chapter: "Pods",
-  theory: "A pod is where your data lives.",
-  answers: { "Where does your data live?": "In a pod", "Who chooses the app?": "You do" },
-};
 
 /**
  * Solid Memo Studio in Solid Memo's page (docs/studio.md): a visitor
@@ -53,26 +39,15 @@ const COURSE = {
  * export one of them as a Turtle file, with their progress, delete it,
  * once the user confirms, and import it again from the file, its card
  * due as before. They draft a release of a deck and a blank course,
- * which the sidebar lists, and delete the course's draft, confirming. They
- * write a course in a blank draft: a chapter, a step with its theory,
- * and two questions, the first with two wrong options, saved as they
- * go, trying one question as the course would ask it. Its release check
- * lists what is still wrong: the second question has no wrong options
- * and the release no description. They follow each problem to its field,
- * fix it, and see it clear; the shapes find what a release still lacks,
- * and the listing preview shows the course as the library will. They rename the instance
+ * which the sidebar lists, and delete the course's draft, confirming.
+ * They rename the instance
  * and describe its catalog, under a license, then pick it, by its new
  * name, from the picker. Among its library copies, the library deck is
- * up to date. They note what Solid Memo's statistics count, then
- * test-play the course they wrote in the Studio's trial, to the end of
- * its one chapter's final review. The instance's decks, and Solid
- * Memo's statistics, are as they were: the trial is played in a sandbox.
+ * up to date.
  * They draft the next version of the library deck, by its address,
  * retire one of its cards, and compare the draft with the release: it
  * keeps the series' rules, lists the card retired, and a learner's copy
- * would retire it too, losing nothing. They say how the course was made,
- * then publish it to their pod, saying it will be public: someone with no
- * login reads it, and the releases list it. They move down the library
+ * would retire it too, losing nothing. They move down the library
  * deck's cards with the keyboard and back, one selected: the row with
  * the focus stays in sight between the header row and the bar of the
  * rows selected, which stick. They draw the instance as a graph, open
@@ -80,13 +55,13 @@ const COURSE = {
  * draft of the next version follows: a leaf outside the pod, never
  * fetched, shown with the draft that links to it as a table, and let go
  * of it with a click on the drawing's background. They go back to Solid Memo, still
- * logged in, which lists the deck they made that is left.
+ * logged in, which lists the deck they made that is left. Writing,
+ * checking, trying and publishing a course is studio-course.journey.ts's.
  */
 test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({
   app,
   account,
   runId,
-  playwright,
 }) => {
   const instance = `Studio ${runId}`;
   const alpha = `Alpha ${runId}`;
@@ -94,7 +69,6 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   const group = `Pair ${runId}`;
   const renamed = `Renamed ${runId}`;
   const course = `Course ${runId}`;
-  const authored = `Authored ${runId}`;
 
   await app.step("01 · Visit the Studio's old address: the Studio's landing page", () =>
     app.studio.visitOldAddress(),
@@ -315,108 +289,25 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     },
   );
 
-  await app.step(
-    "25 · Write a course: a chapter, a step, and two questions with two wrong options each",
-    async () => {
-      await app.studio.openDrafts(instance);
-      await app.studio.draftCourse(instance, authored);
-      await app.draftEditor.openDraft(authored);
-      await app.draftEditor.addChapter("Pods");
-      await app.draftEditor.openChapter("Pods");
-      await app.draftEditor.addStep();
-      await app.draftEditor.writeTheory("A pod is where your data lives.");
-      await app.draftEditor.addQuestion("Where does your data live?", "In a pod");
-      await app.draftEditor.addQuestion("Who chooses the app?", "You do");
-      await app.draftEditor.openQuestion("Where does your data live?");
-      await app.draftEditor.addWrongOption("In the app", "Apps only read it.");
-      await app.draftEditor.addWrongOption("On a server of the app's", "The pod is yours.");
-      await app.draftEditor.answerPreviewWrong("In the app", "Apps only read it.");
-      await app.draftEditor.expectOutline(authored, "Pods", "Step 1.1", [
-        "Where does your data live?",
-        "Who chooses the app?",
-      ]);
-      await app.draftEditor.expectBadge("Who chooses the app?", 1);
-    },
-  );
-
-  await app.step(
-    "26 · Check the release: follow its problems to their fields, fix them, and see them clear",
-    async () => {
-      const fewOptions = app.t("studio.problem.fewDistractors", { count: 0, least: 2 });
-      const noDescription = app.t("studio.problem.required", {
-        field: app.t("studio.field.description"),
-      });
-      const release = app.t("studio.check.release");
-      await app.draftEditor.openCheck();
-      await app.draftEditor.expectProblem("Who chooses the app?", fewOptions);
-      await app.draftEditor.expectProblem(release, noDescription);
-      await app.draftEditor.followProblem("Who chooses the app?", fewOptions);
-      await app.draftEditor.addWrongOption("The pod", "A pod holds data.");
-      await app.draftEditor.addWrongOption("Its maker", "The user chooses.");
-      await app.draftEditor.openCheck();
-      await app.draftEditor.expectNoProblem("Who chooses the app?", fewOptions);
-      await app.draftEditor.followProblem(release, noDescription);
-      await app.draftEditor.writeDescription("What a pod is, and who holds the data in it.");
-      await app.draftEditor.openCheck();
-      await app.draftEditor.expectNoProblem(release, noDescription);
-      await app.draftEditor.checkShapes();
-      await app.draftEditor.openPreview(authored);
-      await app.chrome.breadcrumb("breadcrumbs.decks");
-    },
-  );
-
-  await app.step("27 · Rename the instance and describe its catalog", async () => {
+  await app.step("25 · Rename the instance and describe its catalog", async () => {
     await app.studio.openInstance(instance);
     await app.studio.renameInstance(renamed);
     await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
   });
 
-  await app.step("28 · Pick the instance, by its new name, from the instance picker", async () => {
+  await app.step("26 · Pick the instance, by its new name, from the instance picker", async () => {
     await app.studio.pickInstance(renamed);
     await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("29 · See the library deck among the library copies, up to date", async () => {
+  await app.step("27 · See the library deck among the library copies, up to date", async () => {
     await app.studio.openLibraryCopies(renamed, BRIGHTEST_STARS.en);
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  const counted: Record<string, string> = {};
-  const tiles = ["answers", "studyDays", "cards"] as const;
-  await app.step("30 · Note what Solid Memo's statistics count", async () => {
-    await app.studio.backToApp();
-    await app.statistics.open();
-    for (const tile of tiles) counted[tile] = await app.statistics.value(tile);
-  });
-
   await app.step(
-    "31 · Test-play the course in the Studio's trial, to the end of its final review",
+    "28 · Draft the library deck's next version, retire a card, and compare it with the release: learners lose nothing",
     async () => {
-      await app.studio.openFromApp();
-      await app.studio.openDrafts(renamed);
-      await app.draftEditor.openDraft(authored);
-      await app.trial.open(authored);
-      await app.trial.playToTheEnd(COURSE.chapter, COURSE.theory, COURSE.answers);
-    },
-  );
-
-  await app.step(
-    "32 · The instance's decks and Solid Memo's statistics are as they were",
-    async () => {
-      await app.chrome.breadcrumb("breadcrumbs.decks");
-      await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
-      await app.studio.expectDeck(renamed, beta, { cards: 1, due: 1 });
-      await app.studio.expectNoDeck(renamed, authored);
-      await app.studio.backToApp();
-      await app.statistics.open();
-      for (const tile of tiles) expect(await app.statistics.value(tile), tile).toBe(counted[tile]);
-    },
-  );
-
-  await app.step(
-    "33 · Draft the library deck's next version, retire a card, and compare it with the release: learners lose nothing",
-    async () => {
-      await app.studio.openFromApp();
       await app.studio.openDrafts(renamed);
       // A library release by its address, which the site serves (docs/deck-library.md).
       const release = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
@@ -435,50 +326,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   );
 
   await app.step(
-    "34 · Say how the course was made: its author, an attribution, its license, a source and an AI check; follow the source's warning and fix it",
-    async () => {
-      const source = "https://example.org/pods-explained";
-      const undescribed = app.t("studio.problem.sourceUndescribed", {
-        missing: app.t("studio.release.detail.creator"),
-      });
-      await app.chrome.breadcrumb("breadcrumbs.decks");
-      await app.studio.openDrafts(renamed);
-      await app.draftEditor.openDraft(authored);
-      await app.draftEditor.openRelease();
-      await app.draftEditor.addAuthor("Journey Author");
-      await app.draftEditor.attributeWithAi("Journey Author");
-      await app.draftEditor.chooseReleaseLicense("CC0 1.0");
-      await app.draftEditor.addSource(source, "Pods explained", "The page's footer: CC0.");
-      await app.draftEditor.recordAiCheck("Facts", "every question", "none wrong");
-      await app.draftEditor.openCheck();
-      await app.draftEditor.expectProblem(source, undescribed);
-      await app.draftEditor.followProblem(source, undescribed);
-      await app.draftEditor.describeSource(source, "Pods explained", "Example authors");
-      await app.draftEditor.openCheck();
-      await app.draftEditor.expectNoProblem(source, undescribed);
-    },
-  );
-
-  await app.step(
-    "35 · Publish the course to the pod, public: anyone can read it, and the releases list it",
-    async () => {
-      await app.draftEditor.openRelease();
-      await app.draftEditor.choosePublisher("Journey Author");
-      const url = await app.draftEditor.publish();
-      // Someone with no login reads it.
-      const anyone = await playwright.request.newContext();
-      const read = await anyone.get(url, { headers: { accept: "text/turtle" } });
-      expect(read.status()).toBe(200);
-      expect(await read.text()).toContain(`"${authored}"@en`);
-      await anyone.dispose();
-      await app.studio.openReleases(renamed);
-      await app.studio.expectRelease(renamed, url, `authored-${runId}`, 1);
-      published = { url, title: authored };
-    },
-  );
-
-  await app.step(
-    "36 · Move down the library deck's cards with the keyboard and back, one selected: each row in sight between the header row and the bar",
+    "29 · Move down the library deck's cards with the keyboard and back, one selected: each row in sight between the header row and the bar",
     async () => {
       await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.moveThroughCardsInSight(renamed, BRIGHTEST_STARS.en, 30);
@@ -486,7 +334,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   );
 
   await app.step(
-    "37 · Draw the instance as a graph: open a node by keyboard, find the library release the next version follows, a leaf never fetched, see it and its draft in the table, and let go of it",
+    "30 · Draw the instance as a graph: open a node by keyboard, find the library release the next version follows, a leaf never fetched, see it and its draft in the table, and let go of it",
     async () => {
       await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.openGraph(renamed);
@@ -503,52 +351,9 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     },
   );
 
-  await app.step("38 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("31 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);
-  });
-});
-
-/**
- * A course published in a pod, added from its link by someone else
- * (docs/deck-library.md, From a link): another user, with an account and
- * a pod of their own, opens "Add from a link" from their empty deck list
- * and pastes the address of the course the Studio journey published.
- * The release is read and shown, with the host it is published on, as a
- * course. They start it, and play its chapter to the end of its final
- * review, as a library course is played. Their deck list then says where
- * the course came from.
- */
-test("add a course published in a pod from its link, as another user, and play its chapter @studio", async ({
-  app,
-  account,
-  runId,
-}) => {
-  const course = published;
-  expect(course, "the Studio journey, just before, publishes the course").not.toBeNull();
-  const { url, title } = course!;
-
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in as another user and create an instance", () =>
-    logInAndCreateInstance(app, account, `Learner ${runId}`),
-  );
-  await app.step(
-    "03 · Paste the course's link: what it is, and where it is published",
-    async () => {
-      await app.importUrl.openFromDeckList();
-      await app.importUrl.showCourse(url, title);
-    },
-  );
-  await app.step(
-    "04 · Start the course and play its chapter to the end of its final review",
-    async () => {
-      await app.importUrl.startCourse(title);
-      await app.course.playChapter(COURSE.chapter, COURSE.theory, COURSE.answers);
-    },
-  );
-  await app.step("05 · Back at Decks: the course says where it came from", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.expectDeckFrom(title, new URL(url).host);
   });
 });

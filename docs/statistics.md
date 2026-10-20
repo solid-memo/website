@@ -436,8 +436,8 @@ rest of their study when they log in.
   and not as recall, and the chapter just completed under "Your
   courses", done, with its graded answers; and step 10 that the
   course's deck names the wrong options chosen in its final review. In
-  [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts),
-  steps 30 and 32 check that trying a course in the Studio's sandbox
+  [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts),
+  steps 07 and 09 check that trying a course in the Studio's sandbox
   leaves the statistics as they were. The page object is
   [Statistics.ts](../e2e/journeys/pages/Statistics.ts). The latest
   run's screenshots are online at <https://solid-memo.com/journeys/>.
