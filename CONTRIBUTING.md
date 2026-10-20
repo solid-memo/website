@@ -192,7 +192,12 @@ Closes: #42
   its number (`#NN`) anywhere in its message. If your change has no
   issue, open one first, or open the pull request and then amend the
   commit to name it (`Closes: #NN`) and push again.
-  Renovate's updates are the one exception: a commit cannot name a pull
+  A security fix, made in private as [SECURITY.md](SECURITY.md) says,
+  names its GitHub security advisory instead
+  (`Refs: GHSA-xxxx-xxxx-xxxx`), since no public issue may describe it
+  before the fix is deployed; `npm run check:closes` takes that for its
+  pull request too.
+  Renovate's updates are the other exception: a commit cannot name a pull
   request that has no number yet, so its body ends with the `Why:` line
   of `commitBody` in [renovate.json5](renovate.json5), and its merge
   commit names the pull request.
