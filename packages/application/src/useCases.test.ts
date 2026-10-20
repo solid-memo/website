@@ -51,6 +51,7 @@ import {
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES, NEW_INSTANCE_PREFERENCES } from "@solid-memo/domain/preferences";
+import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { fsrsInterval, fsrsReview, memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
 import type { SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
@@ -333,6 +334,29 @@ describe("createUseCases", () => {
       const useCases = createUseCases(makeDeps());
       useCases.chooseLanguage("en");
       expect(useCases.language(["sv-SE"])).toBe("sv");
+    });
+  });
+
+  describe("text size", () => {
+    it("shows the chosen size, and keeps a new choice on this device", () => {
+      let chosen: TextSize = "large";
+      const textSizePreference = {
+        chosen: () => chosen,
+        choose: vi.fn((size: TextSize) => {
+          chosen = size;
+        }),
+      };
+      const useCases = createUseCases({ ...makeDeps(), textSizePreference });
+      expect(useCases.textSizeChoice()).toBe("large");
+      useCases.chooseTextSize("largest");
+      expect(textSizePreference.choose).toHaveBeenCalledWith("largest");
+      expect(useCases.textSizeChoice()).toBe("largest");
+    });
+
+    it("shows the browser's own size when none is kept", () => {
+      const useCases = createUseCases(makeDeps());
+      useCases.chooseTextSize("larger");
+      expect(useCases.textSizeChoice()).toBe("default");
     });
   });
 

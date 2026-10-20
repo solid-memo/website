@@ -62,6 +62,27 @@
 }
 
 /*
+ * The larger text sizes, which the root's data-text-size turns on (see
+ * ui/theme.tsx, docs/theme.md): the root's font size as a share of the
+ * browser's, so the browser's own text size is multiplied in, and
+ * --text-scale with it, for what the window sizes.
+ */
+:root[data-text-size="large"] {
+  --text-scale: 1.125;
+  font-size: 112.5%;
+}
+
+:root[data-text-size="larger"] {
+  --text-scale: 1.25;
+  font-size: 125%;
+}
+
+:root[data-text-size="largest"] {
+  --text-scale: 1.5;
+  font-size: 150%;
+}
+
+/*
  * Korean, on a Korean page or in text marked lang="ko" on another: Korean
  * fonts before the pan-CJK Japanese ones (which hold Hangul too, but with
  * Japanese shapes and metrics), Fredoka still first for the Latin letters,

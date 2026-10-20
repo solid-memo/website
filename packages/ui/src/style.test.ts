@@ -15,6 +15,7 @@ import {
   type PaletteBlock,
   uncommented,
 } from "@solid-memo/domain/testing/contrast";
+import { DEFAULT_TEXT_SIZE, TEXT_SIZES } from "@solid-memo/domain/textSize";
 
 const read = (name: string) => readFileSync(join(import.meta.dirname, name), "utf8");
 /** The palettes, which style.css imports. */
@@ -382,6 +383,20 @@ describe("text size", () => {
     const queries = [...css.matchAll(/@media([^{]*)\{/g)].map((m) => m[1]!.trim());
     expect(queries.length).toBeGreaterThan(0);
     for (const query of queries) expect(query).not.toMatch(/\dpx/);
+  });
+
+  it("scales the root's font size and --text-scale alike at each larger size, and the default not at all", () => {
+    const steps = rules.filter(({ selector }) => selector.startsWith(":root[data-text-size="));
+    expect(steps.map(({ selector }) => selector)).toEqual(
+      TEXT_SIZES.filter((size) => size !== DEFAULT_TEXT_SIZE).map(
+        (size) => `:root[data-text-size="${size}"]`,
+      ),
+    );
+    for (const { body } of steps) {
+      const scale = /--text-scale:\s*([\d.]+);/.exec(body)![1]!;
+      expect(body).toMatch(new RegExp(`font-size:\\s*${Number(scale) * 100}%;`));
+      expect(Number(scale)).toBeGreaterThan(1);
+    }
   });
 
   it("grows the text the window sizes with --text-scale, 1 by default", () => {

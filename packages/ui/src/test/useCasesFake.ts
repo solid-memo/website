@@ -81,6 +81,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     themeChoice: vi.fn(() => "system" as const),
     instanceTheme: vi.fn(async () => null),
     chooseTheme: vi.fn(async () => undefined),
+    textSizeChoice: vi.fn(() => "default" as const),
+    chooseTextSize: vi.fn(),
     discoverAccount: vi.fn(async (session) => ({
       webId: session.webId,
       podUrl: "https://pod.example/",

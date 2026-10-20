@@ -5,6 +5,7 @@
 import type { Catalog } from "@solid-memo/domain/catalog";
 import type { Locale } from "@solid-memo/domain/locale";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
@@ -831,6 +832,18 @@ export interface ThemePreference {
   /** The chosen theme; "system" when none was chosen (or it was forgotten). */
   chosen(): ThemeChoice;
   choose(choice: ThemeChoice): void;
+}
+
+/**
+ * Driven port: the text size the user chose, kept where the app runs
+ * (the browser), since the first paint needs it before any pod is
+ * reached. Best effort: it may forget, and the text is then the
+ * browser's own size.
+ */
+export interface TextSizePreference {
+  /** The chosen size; "default" when none was chosen (or it was forgotten). */
+  chosen(): TextSize;
+  choose(size: TextSize): void;
 }
 
 /**

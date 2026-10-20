@@ -5,6 +5,7 @@
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
 import type { Locale } from "@solid-memo/domain/locale";
+import type { TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -22,7 +23,14 @@ import { Loading } from "./Loading";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { usePanelFocus } from "./panelFocus";
-import { applyTheme, browserTheme, DARK_QUERY, instanceThemeKey, ThemeProvider } from "./theme";
+import {
+  applyTextSize,
+  applyTheme,
+  browserTheme,
+  DARK_QUERY,
+  instanceThemeKey,
+  ThemeProvider,
+} from "./theme";
 import { ThemeToggle } from "./ThemeToggle";
 import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
@@ -136,6 +144,17 @@ export function AppShell({
     return () => query.removeEventListener("change", follow);
   }, []);
 
+  const [textSize, setTextSize] = useState<TextSize>(() => useCases.textSizeChoice());
+
+  useEffect(() => {
+    applyTextSize(textSize);
+  }, [textSize]);
+
+  function chooseTextSize(chosen: TextSize) {
+    useCases.chooseTextSize(chosen);
+    setTextSize(chosen);
+  }
+
   // The open instance, whose preferences keep the choice once it has them.
   const themeInstance = useRef<string | null>(null);
   const themeChoices = useRef(0);
@@ -169,6 +188,8 @@ export function AppShell({
           themeInstance.current = instanceUrl;
         }}
         onAdopt={setThemeChoice}
+        textSize={textSize}
+        onChooseTextSize={chooseTextSize}
       >
         <AppName.Provider value={identity.name}>
           <RepoUrl.Provider value={source.repoUrl}>

@@ -221,6 +221,47 @@ describe("the page's Content Security Policy", () => {
   });
 });
 
+/*
+ * The script that sets the device's choices on the root before the first
+ * paint (docs/theme.md), as the built page has it, run with what the
+ * device keeps and the browser's wish for a dark page.
+ */
+describe("the page's first-paint script", () => {
+  function firstPaint(kept: Record<string, string>, { dark = false, blocked = false } = {}) {
+    const script = [...dom.scripts].find(
+      (element) => !element.hasAttribute("src") && element.type !== "application/ld+json",
+    )!;
+    const root = { dataset: {} as Record<string, string> };
+    const localStorage = {
+      getItem(key: string) {
+        if (blocked) throw new Error("blocked");
+        return kept[key] ?? null;
+      },
+    };
+    new Function("document", "localStorage", "matchMedia", script.text)(
+      { documentElement: root },
+      localStorage,
+      () => ({ matches: dark }),
+    );
+    return root.dataset;
+  }
+
+  it("sets the theme kept on the device, else the browser's", () => {
+    expect(firstPaint({ "solid-memo:theme": "dark" })).toEqual({ theme: "dark" });
+    expect(firstPaint({ "solid-memo:theme": "sepia" }, { dark: true })).toEqual({ theme: "dark" });
+    expect(firstPaint({}, { blocked: true })).toEqual({ theme: "light" });
+  });
+
+  it("sets the text size kept on the device, if it is in the form one takes", () => {
+    expect(firstPaint({ "solid-memo:textSize": "larger" })).toEqual({
+      theme: "light",
+      textSize: "larger",
+    });
+    for (const size of ["", "Larger", "x".repeat(33), 'large" onload="x', "1x"])
+      expect(firstPaint({ "solid-memo:textSize": size })).toEqual({ theme: "light" });
+  });
+});
+
 describe("the page's structured data", () => {
   type Node = Record<string, unknown>;
   const graph = () => {

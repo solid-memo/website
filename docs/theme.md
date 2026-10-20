@@ -110,11 +110,23 @@ Some colors stay fixed on purpose, whatever the palette:
 
 ## Text size
 
+The text comes in four sizes: Default, the browser's own, then Large,
+Larger and Largest, at 112.5%, 125% and 150% of it. The choice is kept
+on the device, by the `TextSizePreference` port
+([localStorageTextSizePreference.ts](../packages/browser/src/localStorageTextSizePreference.ts),
+key `solid-memo:textSize`; Default is no key at all), and shown as
+`<html data-text-size>`: the script in `apps/web/index.html` sets it
+before the first paint, and `theme.tsx` from there; Default goes
+without. Each size sets the root's font size as a percentage, so the
+browser's own text size is multiplied in, and `--text-scale` (1.125,
+1.25 or 1.5) with it. The Studio is on the same page, so it follows
+too; its Comfortable layout is a setting of its own, and the two
+multiply.
+
 The text is sized in `rem`, its line heights without a unit and its
 letter spacing in `em`, so the root's font size scales nearly all of
-it: the browser's own text size does today, and a text size the user
-chooses can set the root's font size the same way. What does not
-follow the root's font size is kept to a few places, and made to:
+it, the browser's own text size and the size chosen alike. What does
+not follow the root's font size is kept to a few places, and made to:
 
 - **What the window sizes**: the card's question and answer are sized
   by the window's width (`vw`), within bounds in `rem`. The `vw` term

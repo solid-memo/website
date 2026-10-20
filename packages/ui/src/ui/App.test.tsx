@@ -13,8 +13,10 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
+import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
+import { useTheme } from "./theme";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const restored: EstablishedSession = { session, origin: "restored" };
@@ -201,6 +203,62 @@ describe("AppShell", () => {
       expect(useCases.instanceTheme).toHaveBeenCalledOnce();
       await act(async () => writes[1]());
       await waitFor(() => expect(useCases.instanceTheme).toHaveBeenCalledTimes(2));
+    });
+  });
+
+  describe("text size", () => {
+    afterEach(() => {
+      delete document.documentElement.dataset.textSize;
+    });
+
+    /** A workspace with a button for each text size, as the preferences have a choice for each. */
+    function SizedWorkspace() {
+      const { textSize, chooseTextSize } = useTheme();
+      return (
+        <main id={MAIN_ID}>
+          <p>{`Text size: ${textSize}`}</p>
+          {TEXT_SIZES.map((size) => (
+            <button key={size} type="button" onClick={() => chooseTextSize(size)}>
+              {size}
+            </button>
+          ))}
+        </main>
+      );
+    }
+
+    function renderSized(useCases: UseCases) {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      return render(
+        <QueryClientProvider client={queryClient}>
+          <AppShell
+            useCases={useCases}
+            source={source}
+            providers={POD_PROVIDERS}
+            identity={SOLID_MEMO}
+            workspace={SizedWorkspace}
+          />
+        </QueryClientProvider>,
+      );
+    }
+
+    it("shows the text at the size chosen on this device, and keeps a new choice there", async () => {
+      const useCases = makeUseCases({
+        restoreSession: vi.fn(async () => ({
+          session: { webId: "https://guest.invalid/profile#me", guest: true as const },
+          origin: "restored" as const,
+        })),
+        textSizeChoice: vi.fn(() => "larger" as const),
+      });
+      renderSized(useCases);
+      expect(await screen.findByText("Text size: larger")).toBeInTheDocument();
+      expect(document.documentElement.dataset.textSize).toBe("larger");
+      fireEvent.click(screen.getByRole("button", { name: "largest" }));
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest");
+      expect(document.documentElement.dataset.textSize).toBe("largest");
+      // The default size is no attribute at all, as index.html leaves it.
+      fireEvent.click(screen.getByRole("button", { name: "default" }));
+      expect(screen.getByText("Text size: default")).toBeInTheDocument();
+      expect(document.documentElement.dataset.textSize).toBeUndefined();
     });
   });
 

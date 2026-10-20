@@ -6,6 +6,7 @@ import { createContext, type ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
 
 /** The browser's wish for a dark page. */
@@ -31,6 +32,17 @@ export function applyTheme(theme: Theme) {
   }
 }
 
+/**
+ * Shows the text at a size: the stylesheet scales the root's font size
+ * by the root's data-text-size (index.html sets it before the first
+ * paint), which the default size goes without.
+ */
+export function applyTextSize(size: TextSize) {
+  const root = document.documentElement;
+  if (size === DEFAULT_TEXT_SIZE) delete root.dataset.textSize;
+  else root.dataset.textSize = size;
+}
+
 /** The query key of an instance's theme, to refetch it after a write. */
 export function instanceThemeKey(instanceUrl: string) {
   return ["instanceTheme", instanceUrl];
@@ -47,6 +59,10 @@ interface ThemeState {
   followInstance(instanceUrl: string | null): void;
   /** Show the choice an instance's preferences hold. */
   adoptTheme(choice: ThemeChoice): void;
+  /** The text size chosen. */
+  textSize: TextSize;
+  /** Show the text at another size from now on. */
+  chooseTextSize(size: TextSize): void;
 }
 
 /** What a theme state does with what it is not asked to keep. */
@@ -58,6 +74,8 @@ const ThemeContext = createContext<ThemeState>({
   chooseTheme: ignore,
   followInstance: ignore,
   adoptTheme: ignore,
+  textSize: DEFAULT_TEXT_SIZE,
+  chooseTextSize: ignore,
 });
 
 /** The theme the screens below are shown in, and how to choose another. */
@@ -67,6 +85,8 @@ export function ThemeProvider({
   onChoose,
   onFollowInstance = ignore,
   onAdopt = ignore,
+  textSize = DEFAULT_TEXT_SIZE,
+  onChooseTextSize = ignore,
   children,
 }: {
   choice: ThemeChoice;
@@ -75,6 +95,8 @@ export function ThemeProvider({
   onChoose: (choice: ThemeChoice) => void;
   onFollowInstance?: (instanceUrl: string | null) => void;
   onAdopt?: (choice: ThemeChoice) => void;
+  textSize?: TextSize;
+  onChooseTextSize?: (size: TextSize) => void;
   children: ComponentChildren;
 }) {
   return (
@@ -85,6 +107,8 @@ export function ThemeProvider({
         chooseTheme: onChoose,
         followInstance: onFollowInstance,
         adoptTheme: onAdopt,
+        textSize,
+        chooseTextSize: onChooseTextSize,
       }}
     >
       {children}
