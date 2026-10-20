@@ -56,6 +56,30 @@
     "light": "Ljust",
     "dark": "Mörkt"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "De vanliga färgerna, svarsknapparna från rött till grönt."
+    },
+    "highContrast": {
+      "name": "Hög kontrast",
+      "description": "Svart och vitt, med texten och fältens kanter som skarpast."
+    },
+    "colorVision": {
+      "name": "Färgblindvänlig",
+      "description": "Blått, orange och cinnoberrött i stället för rött och grönt."
+    },
+    "parchment": {
+      "name": "Pergament (lite bländning)",
+      "description": "Varma ytor, mörkare än vitt, som bländar mindre."
+    }
+  },
+  "textSize": {
+    "default": "Standard",
+    "large": "Stor",
+    "larger": "Större",
+    "largest": "Störst"
+  },
   "common": {
     "cardCount": {
       "one": "{count} kort",
@@ -1109,6 +1133,16 @@
     "theme": {
       "legend": "Utseende",
       "hint": "Gäller direkt. När inställningarna har sparats sparas det i din Pod, så att alla enheter du loggar in på ser likadana ut."
+    },
+    "palette": {
+      "legend": "Färger",
+      "hint": "Gäller direkt, i ljust och mörkt tema, och sparas på den här enheten.",
+      "moreContrast": "Din enhet ber om mer kontrast: Hög kontrast kan passa dig."
+    },
+    "textSize": {
+      "legend": "Textstorlek",
+      "hint": "Gäller direkt och sparas på den här enheten. Den förstorar webbläsarens egen textstorlek.",
+      "sample": "Ett kort i taget, lite varje dag."
     },
     "heading": "Studieinställningar",
     "loading": "Läser in inställningar…",

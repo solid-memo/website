@@ -331,6 +331,8 @@ of your answers, and nothing turns them off
 |---|---|
 | Language | The app's language. Kept on this device. |
 | Appearance | Light, dark, or as your browser says. Once saved, kept in your Pod, so every device looks the same ([theme.md](theme.md)). |
+| Colors | Standard, High contrast, Color-blind friendly or Parchment (low glare), each shown with a swatch in its own colors, in the light theme and the dark. When your device asks for more contrast, the preferences suggest High contrast. Takes effect right away, and is kept on this device ([theme.md](theme.md#palettes)). |
+| Text size | Default, Large, Larger or Largest: up to one and a half times your browser's own text size, which it multiplies. Each has a sample line at its size. Takes effect right away, and is kept on this device ([theme.md](theme.md#text-size)). |
 | New cards per day | How many new cards a day brings, 5 to start with. Every new card comes back for reviews in the days after, so it is better to start small. |
 | Max reviews per day | A cap on the reviews of one day, 200 to start with. |
 | Day starts at | The hour a new study day begins, 4 in the morning to start with, so studying late at night still counts for that day. |
@@ -375,6 +377,11 @@ Under Appearance in the preferences, "As my browser" follows your
 device's setting ([theme.md](theme.md)). For example: switch to dark,
 then press Save in the preferences. Log in on another device, and Solid
 Memo opens in dark there too, since the choice is kept in your Pod.
+
+Colors and Text size, under Appearance, change the palette and the
+size of the text, in light and in dark alike. For example: choose High
+contrast and Larger, and reload the page; Solid Memo still shows them,
+on this device.
 
 ## More than one instance
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { AnswerScale } from "@solid-memo/domain/answerScale";
 import {
   INVALID_DATA_POLICIES,
@@ -11,11 +11,24 @@ import {
 import { LOCALES } from "@solid-memo/domain/locale";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
+import { PALETTES, type Palette } from "@solid-memo/domain/palette";
+import { TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { THEME_CHOICES } from "@solid-memo/domain/theme";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { LANGUAGE_NAMES } from "./LanguageSelector";
 import { useTheme } from "./theme";
+
+/** Each palette's messages, by its id. */
+const PALETTE_MESSAGES = {
+  standard: "standard",
+  "high-contrast": "highContrast",
+  "color-vision": "colorVision",
+  parchment: "parchment",
+} as const satisfies Record<Palette, string>;
+
+/** The browser's wish for more contrast, which High contrast answers. */
+const MORE_CONTRAST_QUERY = "(prefers-contrast: more)";
 
 /** The answer scales on offer, each with its label and meaning. */
 function answerScaleOptions(t: I18n["t"]): {
@@ -114,7 +127,24 @@ export function PreferencesScreen({
   onSave: (preferences: StudyPreferences) => void;
 }) {
   const { t, locale, chooseLocale } = useI18n();
-  const { choice: themeChoice, chooseTheme } = useTheme();
+  const {
+    choice: themeChoice,
+    chooseTheme,
+    palette,
+    choosePalette,
+    textSize,
+    chooseTextSize,
+  } = useTheme();
+  const [moreContrast, setMoreContrast] = useState(() => matchMedia(MORE_CONTRAST_QUERY).matches);
+  const showContrastHint = moreContrast && palette !== "high-contrast";
+
+  // The browser's wish as it changes while the screen is open.
+  useEffect(() => {
+    const query = matchMedia(MORE_CONTRAST_QUERY);
+    const follow = () => setMoreContrast(query.matches);
+    query.addEventListener("change", follow);
+    return () => query.removeEventListener("change", follow);
+  }, []);
   const [newCardsPerDay, setNewCardsPerDay] = useState(String(preferences.newCardsPerDay));
   const [maxReviewsPerDay, setMaxReviewsPerDay] = useState(String(preferences.maxReviewsPerDay));
   const [dayBoundaryHour, setDayBoundaryHour] = useState(String(preferences.dayBoundaryHour));
@@ -187,6 +217,67 @@ export function PreferencesScreen({
           ))}
           <p id="pref-theme-hint" class="hint">
             {t("preferences.theme.hint")}
+          </p>
+        </fieldset>
+        <fieldset
+          aria-describedby={
+            showContrastHint ? "pref-palette-contrast-hint pref-palette-hint" : "pref-palette-hint"
+          }
+        >
+          <legend>{t("preferences.palette.legend")}</legend>
+          {PALETTES.map((option) => (
+            <label key={option} class="radio-option">
+              <input
+                type="radio"
+                name="palette"
+                value={option}
+                checked={palette === option}
+                onChange={() => choosePalette(option)}
+              />
+              {/* The palette's own colors, which its data-palette gives (palettes.css). */}
+              <span class="palette-swatch" data-palette={option} aria-hidden="true">
+                <i class="swatch-text" />
+                <i class="swatch-primary" />
+                <i class="swatch-worst" />
+                <i class="swatch-best" />
+              </span>
+              {t(`palette.${PALETTE_MESSAGES[option]}.name`)}
+              <span class="hint">{t(`palette.${PALETTE_MESSAGES[option]}.description`)}</span>
+            </label>
+          ))}
+          {showContrastHint && (
+            <p id="pref-palette-contrast-hint" class="hint">
+              {t("preferences.palette.moreContrast")}
+            </p>
+          )}
+          <p id="pref-palette-hint" class="hint">
+            {t("preferences.palette.hint")}
+          </p>
+        </fieldset>
+        <fieldset aria-describedby="pref-text-size-hint">
+          <legend>{t("preferences.textSize.legend")}</legend>
+          {TEXT_SIZES.map((option) => (
+            <label key={option} class="radio-option">
+              <input
+                type="radio"
+                name="textSize"
+                value={option}
+                checked={textSize === option}
+                onChange={() => chooseTextSize(option)}
+              />
+              {t(`textSize.${option}`)}
+              {/* At the size it names, whatever size the page is at now. */}
+              <span
+                class="hint text-size-sample"
+                style={{ fontSize: `calc(1rem * ${TEXT_SCALES[option]} / var(--text-scale))` }}
+                aria-hidden="true"
+              >
+                {t("preferences.textSize.sample")}
+              </span>
+            </label>
+          ))}
+          <p id="pref-text-size-hint" class="hint">
+            {t("preferences.textSize.hint")}
           </p>
         </fieldset>
         <label for="pref-new">{t("preferences.newCardsPerDay")}</label>

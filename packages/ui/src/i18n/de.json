@@ -56,6 +56,30 @@
     "light": "Hell",
     "dark": "Dunkel"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "Die üblichen Farben, die Antwortknöpfe von Rot bis Grün."
+    },
+    "highContrast": {
+      "name": "Hoher Kontrast",
+      "description": "Schwarz und Weiß, Text und Feldränder so scharf wie möglich."
+    },
+    "colorVision": {
+      "name": "Farbenblind-freundlich",
+      "description": "Blau, Orange und Zinnoberrot statt Rot und Grün."
+    },
+    "parchment": {
+      "name": "Pergament (blendarm)",
+      "description": "Warme Flächen, dunkler als Weiß, die weniger blenden."
+    }
+  },
+  "textSize": {
+    "default": "Standard",
+    "large": "Groß",
+    "larger": "Größer",
+    "largest": "Am größten"
+  },
   "common": {
     "cardCount": {
       "one": "{count} Karte",
@@ -1109,6 +1133,16 @@
     "theme": {
       "legend": "Erscheinungsbild",
       "hint": "Wirkt sofort. Sobald diese Einstellungen gespeichert sind, liegt es in deinem Pod, sodass jedes Gerät, auf dem du dich anmeldest, gleich aussieht."
+    },
+    "palette": {
+      "legend": "Farben",
+      "hint": "Wirkt sofort, im hellen wie im dunklen Modus, und wird auf diesem Gerät gespeichert.",
+      "moreContrast": "Dein Gerät wünscht mehr Kontrast: Hoher Kontrast könnte dir liegen."
+    },
+    "textSize": {
+      "legend": "Textgröße",
+      "hint": "Wirkt sofort und wird auf diesem Gerät gespeichert. Sie vergrößert die Textgröße deines Browsers.",
+      "sample": "Eine Karte nach der anderen, jeden Tag ein wenig."
     },
     "heading": "Lerneinstellungen",
     "loading": "Einstellungen werden geladen…",

@@ -3157,6 +3157,50 @@ fieldset:where(:not(.studio-scope)) label.radio-option .hint {
   margin: 0.1rem 0 0.4rem 1.6rem;
 }
 
+/*
+ * A palette's swatch in the preferences, in the palette's own colors
+ * (its data-palette, palettes.css): its background, its text, its
+ * primary fill, and the answer buttons' first and last grades.
+ */
+.palette-swatch {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin: 0 0.4rem 0 0.1rem;
+  padding: 0.2rem 0.3rem;
+  vertical-align: middle;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.palette-swatch i {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.palette-swatch .swatch-text {
+  background: var(--text);
+}
+
+.palette-swatch .swatch-primary {
+  background: var(--primary-fill);
+}
+
+.palette-swatch .swatch-worst {
+  background: var(--grade-0);
+}
+
+.palette-swatch .swatch-best {
+  background: var(--grade-5);
+}
+
+/* A text size's sample line, at the size it names. */
+.text-size-sample {
+  color: var(--text);
+  line-height: 1.4;
+}
+
 /* A text's language: a button under its field, opening in place onto
    radios. Each radio's row is a 24px target at least (WCAG 2.5.8), and a
    long language name wraps rather than widening the page at 320px. */

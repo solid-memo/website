@@ -28,6 +28,9 @@ What the app does for it today:
   of fields to 4.5:1, and the Color-blind friendly one moves meaning
   off red and green ([theme.md](theme.md#palettes),
   [below](#checked-automatically)).
+- **Text size**: four sizes, up to one and a half times the browser's
+  own, which they multiply, so text can be made larger without zooming
+  the whole page ([theme.md](theme.md#text-size)).
 - **Motion**: the browser's "reduce motion" turns the animations off.
 - **Targets**: buttons and links are 24px high at least, or far enough
   from their neighbors, as WCAG 2.2 asks; the Studio's rows and
@@ -51,7 +54,12 @@ but the journeys:
   [axe](https://github.com/dequelabs/axe-core) on the screen each step
   ends on, in the light and the dark theme, in Chromium and on the
   phone (WebKit), with its rules for WCAG 2.0,
-  2.1 and 2.2 at levels A and AA. A violation fails the journey, and the
+  2.1 and 2.2 at levels A and AA, and in Chromium with its contrast
+  rules (`color-contrast`, `link-in-text-block`) in both themes of
+  every other palette. Then, in Chromium, at the largest text size and
+  320px wide, the screen must not scroll sideways, and no text kept on
+  one line may be cut short without a title that holds it whole
+  (WCAG 1.4.4 and 1.4.10), which axe does not check. A violation fails the journey, and the
   report says which rule, on which element, with what axe found
   ([`harness/accessibility.ts`](../e2e/journeys/harness/accessibility.ts)).
   A violation that is let pass is listed there, in `KNOWN_EXCEPTIONS`,

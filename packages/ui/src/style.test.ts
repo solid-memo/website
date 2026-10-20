@@ -19,7 +19,7 @@ import {
   uncommented,
 } from "@solid-memo/domain/testing/contrast";
 import { PALETTES as PALETTE_IDS } from "@solid-memo/domain/palette";
-import { DEFAULT_TEXT_SIZE, TEXT_SIZES } from "@solid-memo/domain/textSize";
+import { DEFAULT_TEXT_SIZE, TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 
 const read = (name: string) => readFileSync(join(import.meta.dirname, name), "utf8");
 /** The palettes, which style.css imports. */
@@ -418,11 +418,12 @@ describe("text size", () => {
         (size) => `:root[data-text-size="${size}"]`,
       ),
     );
-    for (const { body } of steps) {
-      const scale = /--text-scale:\s*([\d.]+);/.exec(body)![1]!;
-      expect(body).toMatch(new RegExp(`font-size:\\s*${Number(scale) * 100}%;`));
-      expect(Number(scale)).toBeGreaterThan(1);
+    for (const [at, { body }] of steps.entries()) {
+      const scale = TEXT_SCALES[TEXT_SIZES[at + 1]!];
+      expect(body).toMatch(new RegExp(`--text-scale:\\s*${scale};`));
+      expect(body).toMatch(new RegExp(`font-size:\\s*${scale * 100}%;`));
     }
+    expect(TEXT_SCALES[DEFAULT_TEXT_SIZE]).toBe(1);
   });
 
   it("grows the text the window sizes with --text-scale, 1 by default", () => {
@@ -449,6 +450,31 @@ describe("palettes", () => {
     expect(BLOCKS.map(({ palette, theme }) => `${palette} ${theme}`).sort()).toEqual(
       [...palettes].flatMap((palette) => [`${palette} dark`, `${palette} light`]).sort(),
     );
+  });
+
+  it("gives an element marked with a palette that palette's colors, in the page's theme, whatever the page's palette", () => {
+    const root = document.documentElement;
+    root.dataset.palette = "high-contrast";
+    // Put in anew each time: the test DOM keeps an element's computed style once read.
+    const shown = () => {
+      document.body.innerHTML = PALETTE_IDS.map((id) => `<i data-palette="${id}"></i>`).join("");
+      return [...document.querySelectorAll("i")].map((element) =>
+        getComputedStyle(element).getPropertyValue("--bg").trim(),
+      );
+    };
+    const background = (theme: string) =>
+      PALETTE_IDS.map(
+        (id) =>
+          BLOCKS.find((block) => block.palette === id && block.theme === theme)!.roles["--bg"],
+      );
+    try {
+      expect(shown()).toEqual(background("light"));
+      root.dataset.theme = "dark";
+      expect(shown()).toEqual(background("dark"));
+    } finally {
+      delete root.dataset.palette;
+      delete root.dataset.theme;
+    }
   });
 
   it("has blocks for each palette the app offers, and for no other", () => {
@@ -566,6 +592,23 @@ describe("contrast", () => {
     expect(() => colorOf("color-mix(in oklab, #ffffff, #000000)", roles)).toThrow();
     expect(() => colorOf("white", roles)).toThrow();
     expect(() => paletteBlocks(".a { --bg: #ffffff; }")).toThrow();
+    // A block is for the root and for an element marked with its palette, in that theme.
+    expect(() => paletteBlocks(":root { --bg: #ffffff; }")).toThrow();
+    expect(() =>
+      paletteBlocks(':root[data-theme="dark"], [data-palette="standard"] { --bg: #ffffff; }'),
+    ).toThrow();
+    expect(
+      paletteBlocks(
+        ':root[data-palette="a"][data-theme="dark"], [data-theme="dark"] [data-palette="a"] { --bg: #ffffff; }',
+      ),
+    ).toEqual([
+      {
+        palette: "a",
+        theme: "dark",
+        selector: ':root[data-palette="a"][data-theme="dark"]',
+        roles: { "--bg": "#ffffff" },
+      },
+    ]);
   });
 
   it("asks more of High contrast: text at 7:1, and fields' edges at 4.5:1", () => {

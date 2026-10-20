@@ -56,6 +56,30 @@
     "light": "Clair",
     "dark": "Sombre"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "Les couleurs habituelles, les boutons de réponse du rouge au vert."
+    },
+    "highContrast": {
+      "name": "Contraste élevé",
+      "description": "Noir et blanc, le texte et les bords des champs aussi nets que possible."
+    },
+    "colorVision": {
+      "name": "Adapté au daltonisme",
+      "description": "Bleu, orange et vermillon à la place du rouge et du vert."
+    },
+    "parchment": {
+      "name": "Parchemin (moins éblouissant)",
+      "description": "Des surfaces chaudes, plus sombres que le blanc, qui éblouissent moins."
+    }
+  },
+  "textSize": {
+    "default": "Par défaut",
+    "large": "Grand",
+    "larger": "Plus grand",
+    "largest": "Très grand"
+  },
   "common": {
     "cardCount": {
       "one": "{count} carte",
@@ -1169,6 +1193,16 @@
     "theme": {
       "legend": "Apparence",
       "hint": "S’applique immédiatement. Une fois ces préférences enregistrées, l’apparence est conservée dans votre Pod : tous les appareils sur lesquels vous vous connectez ont le même aspect."
+    },
+    "palette": {
+      "legend": "Couleurs",
+      "hint": "S’applique immédiatement, en mode clair comme en mode sombre, et est conservé sur cet appareil.",
+      "moreContrast": "Votre appareil demande plus de contraste : Contraste élevé pourrait vous convenir."
+    },
+    "textSize": {
+      "legend": "Taille du texte",
+      "hint": "S’applique immédiatement et est conservée sur cet appareil. Elle agrandit la taille de texte de votre navigateur.",
+      "sample": "Une carte à la fois, un peu chaque jour."
     },
     "heading": "Préférences d’étude",
     "loading": "Chargement des préférences…",

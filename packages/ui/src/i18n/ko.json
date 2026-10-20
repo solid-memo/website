@@ -56,6 +56,30 @@
     "light": "밝게",
     "dark": "어둡게"
   },
+  "palette": {
+    "standard": {
+      "name": "기본",
+      "description": "평소의 색으로, 답 버튼은 빨강에서 초록까지예요."
+    },
+    "highContrast": {
+      "name": "고대비",
+      "description": "검정과 흰색으로, 글자와 입력란 테두리가 가장 또렷해요."
+    },
+    "colorVision": {
+      "name": "색각 이상 친화",
+      "description": "빨강과 초록 대신 파랑, 주황, 주홍을 써요."
+    },
+    "parchment": {
+      "name": "양피지 (눈부심 적게)",
+      "description": "흰색보다 어두운 따뜻한 바탕이라 덜 눈부셔요."
+    }
+  },
+  "textSize": {
+    "default": "기본",
+    "large": "크게",
+    "larger": "더 크게",
+    "largest": "가장 크게"
+  },
   "common": {
     "cardCount": {
       "other": "카드 {count}장"
@@ -1049,6 +1073,16 @@
     "theme": {
       "legend": "화면 모드",
       "hint": "바로 적용돼요. 이 설정을 저장하면 Pod에 보관되므로, 로그인하는 모든 기기에서 똑같이 보여요."
+    },
+    "palette": {
+      "legend": "색",
+      "hint": "바로 적용되며, 밝은 모드와 어두운 모드 모두에 쓰이고 이 기기에 저장돼요.",
+      "moreContrast": "기기에서 더 높은 대비를 요청하고 있어요. 고대비가 맞을 수 있어요."
+    },
+    "textSize": {
+      "legend": "글자 크기",
+      "hint": "바로 적용되며 이 기기에 저장돼요. 브라우저의 글자 크기를 더 키워요.",
+      "sample": "하루에 조금씩, 카드 한 장씩."
     },
     "heading": "학습 설정",
     "loading": "설정을 불러오는 중…",

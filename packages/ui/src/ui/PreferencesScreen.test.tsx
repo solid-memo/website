@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { PreferencesScreen } from "./PreferencesScreen";
 import { I18nProvider } from "./i18n";
 import { ThemeProvider } from "./theme";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { PALETTES } from "@solid-memo/domain/palette";
+import { TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 
 function renderScreen(overrides: Partial<Parameters<typeof PreferencesScreen>[0]> = {}) {
   const props = {
@@ -90,6 +92,140 @@ describe("PreferencesScreen", () => {
     expect(onSave).not.toHaveBeenCalled();
     fireEvent.submit(container.querySelector("form")!);
     expect(onSave).toHaveBeenCalledWith({ ...DEFAULT_PREFERENCES, theme: "dark" });
+  });
+
+  describe("colors and text size", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** The browser asking for more contrast or not, a wish it can change. */
+    function contrastQuery(moreContrast: boolean) {
+      const listeners = new Set<() => void>();
+      vi.spyOn(window, "matchMedia").mockImplementation(
+        (query) =>
+          ({
+            get matches() {
+              return moreContrast && query === "(prefers-contrast: more)";
+            },
+            addEventListener: (_: string, listener: () => void) => listeners.add(listener),
+            removeEventListener: (_: string, listener: () => void) => listeners.delete(listener),
+          }) as unknown as MediaQueryList,
+      );
+      return {
+        change(now: boolean) {
+          moreContrast = now;
+          act(() => listeners.forEach((listener) => listener()));
+        },
+        listeners,
+      };
+    }
+
+    /** The screen in a palette and at a text size, the browser asking for more contrast or not. */
+    function renderAppearance(moreContrast = false) {
+      const contrast = contrastQuery(moreContrast);
+      const choosePalette = vi.fn();
+      const chooseTextSize = vi.fn();
+      const onSave = vi.fn();
+      const view = render(
+        <ThemeProvider
+          choice="system"
+          onChoose={() => undefined}
+          palette="color-vision"
+          onChoosePalette={choosePalette}
+          textSize="larger"
+          onChooseTextSize={chooseTextSize}
+        >
+          <PreferencesScreen
+            preferences={DEFAULT_PREFERENCES}
+            busy={false}
+            error={null}
+            onSave={onSave}
+          />
+        </ThemeProvider>,
+      );
+      return { ...view, contrast, choosePalette, chooseTextSize, onSave };
+    }
+
+    it("switches the palette right away, each shown in its own colors, without saving", () => {
+      const { container, choosePalette, onSave } = renderAppearance();
+      const group = screen.getByRole("group", { name: "Colors" });
+      expect(group).toHaveAccessibleDescription(
+        /^Takes effect right away, in the light theme and the dark/,
+      );
+      expect(
+        within(group)
+          .getAllByRole("radio")
+          .map((radio) => radio.getAttribute("value")),
+      ).toEqual([...PALETTES]);
+      expect(screen.getByRole("radio", { name: /^Color-blind friendly/ })).toBeChecked();
+      expect(screen.getByRole("radio", { name: /^Standard/ })).toHaveAccessibleName(
+        "Standard The usual colors, the answer buttons from red to green.",
+      );
+      const swatches = [...container.querySelectorAll(".palette-swatch")];
+      expect(swatches.map((swatch) => swatch.getAttribute("data-palette"))).toEqual([...PALETTES]);
+      for (const swatch of swatches) expect(swatch).toHaveAttribute("aria-hidden", "true");
+      fireEvent.click(screen.getByRole("radio", { name: /^High contrast/ }));
+      expect(choosePalette).toHaveBeenCalledWith("high-contrast");
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it("points to High contrast when the browser asks for more contrast", () => {
+      renderAppearance(true);
+      expect(screen.getByRole("group", { name: "Colors" })).toHaveAccessibleDescription(
+        /^Your device asks for more contrast: High contrast may suit you\. Takes effect right away/,
+      );
+    });
+
+    it("shows the hint or takes it away as the browser's wish changes", async () => {
+      const { contrast, unmount } = renderAppearance();
+      contrast.change(true);
+      expect(screen.getByText(/asks for more contrast/)).toBeInTheDocument();
+      contrast.change(false);
+      expect(screen.queryByText(/asks for more contrast/)).toBeNull();
+      expect(screen.getByRole("group", { name: "Colors" })).toHaveAccessibleDescription(
+        /^Takes effect right away/,
+      );
+      unmount();
+      await waitFor(() => expect(contrast.listeners.size).toBe(0));
+    });
+
+    it("says nothing of it otherwise", () => {
+      renderAppearance();
+      expect(screen.queryByText(/asks for more contrast/)).toBeNull();
+    });
+
+    it("leaves the hint out once High contrast is chosen", () => {
+      contrastQuery(true);
+      render(
+        <ThemeProvider choice="system" onChoose={() => undefined} palette="high-contrast">
+          <PreferencesScreen
+            preferences={DEFAULT_PREFERENCES}
+            busy={false}
+            error={null}
+            onSave={vi.fn()}
+          />
+        </ThemeProvider>,
+      );
+      expect(screen.queryByText(/asks for more contrast/)).toBeNull();
+    });
+
+    it("switches the text size right away, each with a sample line at its size, without saving", () => {
+      const { container, chooseTextSize, onSave } = renderAppearance();
+      const group = screen.getByRole("group", { name: "Text size" });
+      expect(group).toHaveAccessibleDescription(
+        /^Takes effect right away, and is kept on this device/,
+      );
+      expect(screen.getByRole("radio", { name: "Larger" })).toBeChecked();
+      expect(
+        [...container.querySelectorAll<HTMLElement>(".text-size-sample")].map(
+          (sample) => sample.style.fontSize,
+        ),
+      ).toEqual(TEXT_SIZES.map((size) => `calc(1rem * ${TEXT_SCALES[size]} / var(--text-scale))`));
+      fireEvent.click(screen.getByRole("radio", { name: "Largest" }));
+      expect(chooseTextSize).toHaveBeenCalledWith("largest");
+      expect(onSave).not.toHaveBeenCalled();
+    });
   });
 
   it("prefills the current preferences", () => {

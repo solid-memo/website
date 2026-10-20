@@ -35,15 +35,26 @@ export function uncommented(css: string): string {
 /** The selector of a palette block: `:root` for Standard, then the palette, then the dark theme. */
 const BLOCK = /^:root(?:\[data-palette="([a-z][a-z-]*)"\])?(\[data-theme="dark"\])?$/;
 
+/** The selector that gives a palette block's roles to an element inside the page marked with its palette, in the page's theme. */
+function markedSelector(palette: string, dark: boolean): string {
+  return `${dark ? '[data-theme="dark"] ' : ""}[data-palette="${palette}"]`;
+}
+
 /**
- * Every block of palettes.css, in the order written. A rule whose
- * selector is not a palette block's throws: the file holds nothing else.
+ * Every block of palettes.css, in the order written, by its selector
+ * for the root. A rule whose selectors are not a palette block's two,
+ * for the root and for an element marked with the palette, throws: the
+ * file holds nothing else.
  */
 export function paletteBlocks(css: string): PaletteBlock[] {
   return [...uncommented(css).matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => {
-    const selector = match[1]!.trim();
+    const [selector = "", ...marked] = match[1]!.split(",").map((part) => part.trim());
     const parts = BLOCK.exec(selector);
-    if (parts === null) throw new Error(`Not a palette block: ${selector}`);
+    if (
+      parts === null ||
+      marked.join(",") !== markedSelector(parts[1] ?? "standard", parts[2] !== undefined)
+    )
+      throw new Error(`Not a palette block: ${match[1]!.trim()}`);
     const roles = Object.fromEntries(
       match[2]!
         .split(";")

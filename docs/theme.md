@@ -4,7 +4,8 @@ The app comes light or dark. The user chooses with the sun/moon toggle at
 the top of every screen, or under Appearance in the study preferences,
 where a third choice, "As my browser", follows `prefers-color-scheme`
 (and keeps following it as it changes). Until anything is chosen, that
-is what the app does.
+is what the app does. Beside it, the preferences choose the
+[colors](#palettes) and the [text size](#text-size), in either theme.
 
 ## Where the choice is kept
 
@@ -50,7 +51,12 @@ page's background (`--bg`) as the stylesheet has it.
 ## Palettes
 
 Apart from light and dark, the colors come in palettes, each for what
-it does for the reader, and each in the light theme and in the dark:
+it does for the reader, and each in the light theme and in the dark.
+The user chooses under Colors in the study preferences, each palette
+with a one-line description and a swatch drawn in its own colors (an
+element marked with its `data-palette`, which its blocks style too);
+when the browser asks for more contrast (`prefers-contrast: more`),
+the preferences suggest High contrast. A choice takes effect at once:
 
 | Palette | Id | What it does |
 |---|---|---|
@@ -65,7 +71,8 @@ key `solid-memo:palette`; Standard is no key at all), and shown as
 `<html data-palette>`: the script in `apps/web/index.html` sets it
 before the first paint, and `theme.tsx` from there, before it sets the
 `theme-color` meta tags from the palette's background; Standard goes
-without. The script takes any value of the form an id has (lowercase
+without. Unlike the theme, neither the palette nor the text size is
+kept in the pod yet: each device has its own. The script takes any value of the form an id has (lowercase
 letters and hyphens, at most 32), so a later palette needs no new
 script, and one this version does not have shows as Standard.
 
@@ -168,7 +175,9 @@ taken, and no file of theirs is copied:
 ## Text size
 
 The text comes in four sizes: Default, the browser's own, then Large,
-Larger and Largest, at 112.5%, 125% and 150% of it. The choice is kept
+Larger and Largest, at 112.5%, 125% and 150% of it. The user chooses
+under Text size in the study preferences, each size with a sample line
+at that size, and the choice takes effect at once. It is kept
 on the device, by the `TextSizePreference` port
 ([localStorageTextSizePreference.ts](../packages/browser/src/localStorageTextSizePreference.ts),
 key `solid-memo:textSize`; Default is no key at all), and shown as

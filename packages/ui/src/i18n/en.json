@@ -56,6 +56,30 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "The usual colors, the answer buttons from red to green."
+    },
+    "highContrast": {
+      "name": "High contrast",
+      "description": "Black and white, the text and the edges of fields at their sharpest."
+    },
+    "colorVision": {
+      "name": "Color-blind friendly",
+      "description": "Blue, orange and vermilion in place of red and green."
+    },
+    "parchment": {
+      "name": "Parchment (low glare)",
+      "description": "Warm surfaces, dimmer than white, that glare less."
+    }
+  },
+  "textSize": {
+    "default": "Default",
+    "large": "Large",
+    "larger": "Larger",
+    "largest": "Largest"
+  },
   "common": {
     "cardCount": {
       "one": "{count} card",
@@ -1109,6 +1133,16 @@
     "theme": {
       "legend": "Appearance",
       "hint": "Takes effect right away. Once these preferences are saved it is kept in your Pod, so every device you log in on looks the same."
+    },
+    "palette": {
+      "legend": "Colors",
+      "hint": "Takes effect right away, in the light theme and the dark, and is kept on this device.",
+      "moreContrast": "Your device asks for more contrast: High contrast may suit you."
+    },
+    "textSize": {
+      "legend": "Text size",
+      "hint": "Takes effect right away, and is kept on this device. It enlarges your browser's own text size.",
+      "sample": "One card at a time, a little every day."
     },
     "heading": "Study preferences",
     "loading": "Loading preferences…",

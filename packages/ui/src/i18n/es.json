@@ -56,6 +56,30 @@
     "light": "Claro",
     "dark": "Oscuro"
   },
+  "palette": {
+    "standard": {
+      "name": "Estándar",
+      "description": "Los colores de siempre, con los botones de respuesta del rojo al verde."
+    },
+    "highContrast": {
+      "name": "Alto contraste",
+      "description": "Blanco y negro, con el texto y los bordes de los campos lo más nítidos posible."
+    },
+    "colorVision": {
+      "name": "Apto para daltónicos",
+      "description": "Azul, naranja y bermellón en lugar de rojo y verde."
+    },
+    "parchment": {
+      "name": "Pergamino (menos deslumbrante)",
+      "description": "Superficies cálidas, más oscuras que el blanco, que deslumbran menos."
+    }
+  },
+  "textSize": {
+    "default": "Predeterminado",
+    "large": "Grande",
+    "larger": "Más grande",
+    "largest": "El más grande"
+  },
   "common": {
     "cardCount": {
       "one": "{count} tarjeta",
@@ -1169,6 +1193,16 @@
     "theme": {
       "legend": "Apariencia",
       "hint": "Se aplica al instante. Cuando guardes estas preferencias, se conserva en tu Pod, así que se ve igual en todos los dispositivos donde inicies sesión."
+    },
+    "palette": {
+      "legend": "Colores",
+      "hint": "Se aplica al instante, en el tema claro y en el oscuro, y se guarda en este dispositivo.",
+      "moreContrast": "Tu dispositivo pide más contraste: Alto contraste puede irte bien."
+    },
+    "textSize": {
+      "legend": "Tamaño del texto",
+      "hint": "Se aplica al instante y se guarda en este dispositivo. Amplía el tamaño de texto de tu navegador.",
+      "sample": "Una tarjeta cada vez, un poco cada día."
     },
     "heading": "Preferencias de estudio",
     "loading": "Cargando preferencias…",

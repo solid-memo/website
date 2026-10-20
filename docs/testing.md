@@ -326,7 +326,8 @@ Further journeys go through:
   which is kept, and the app says why;
 - logging out and back in, and in on a second device, onto the same
   instance, after a WebID the form refuses and a consent refused, the
-  dark theme following through the pod;
+  dark theme following through the pod, and High contrast and Larger
+  text kept on the first device through a reload;
 - updating a copy of a library deck's first release to its second,
   offered in Solid Memo and in the Studio, the day's study kept;
 - trying Solid Memo as a guest and moving the guest's study into a new
@@ -422,11 +423,20 @@ never asserts which card a shuffled queue shows, only how many there
 are.
 
 **Accessibility.** Each step's end checks the screen it leaves the app
-on with [axe](https://github.com/dequelabs/axe-core), in the light and
-the dark theme, against WCAG 2.0, 2.1 and 2.2 at levels A and AA
-(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)),
-in a step of its own, "Accessibility", within the journey's step, so the
-report shows how long the check took. Chromium and the phone run it;
+on with [axe](https://github.com/dequelabs/axe-core) in each palette
+and theme, and its reflow at the largest text size
+(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
+Only the colors change between palettes, so the others run only the
+rules colors can break:
+
+| Check | Palettes and themes | Rules | Where |
+|---|---|---|---|
+| axe | Standard, light and dark | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
+| axe | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
+| Reflow | Standard, light, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
+
+The checks run in a step of their own, "Accessibility", within the
+journey's step, so the report shows how long they took. Chromium and the phone run it;
 desktop Firefox and WebKit leave it out, as their projects' metadata
 says (`accessibility: false`, [accessibility.md](accessibility.md)). A violation fails the journey, which goes on to its end so that every
 screen is checked. A violation let pass is listed in that file's
@@ -451,8 +461,10 @@ error, and the browser it failed in. The job's
     requests, the seed, the time zone;
   - `css.log`: the server's log for the journey's time;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;
-  - `<step> · accessibility, <theme>.json`: what axe found on a step's
-    screen, when it found a violation.
+  - `<step> · accessibility, <palette>, <theme>.json`: what axe found on a step's
+    screen, when it found a violation;
+  - `<step> · reflow.png`: the screen at the largest text size and 320px
+    wide, when it did not reflow.
   Open the report with `npx playwright show-report <dir>`.
 - `logs/css.log`: the server's whole log.
 
