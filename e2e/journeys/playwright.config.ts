@@ -70,7 +70,11 @@ export default defineConfig({
   // (docs/accessibility.md): it takes about 40% of a journey's time, and
   // the same screens are checked in Chromium.
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    // Chromium runs every journey, in two shards in CI: a file's journeys
+    // too may run side by side, and in either shard, so pod-safety's six
+    // do not take one shard's last 100 seconds. A file whose journeys
+    // depend on each other says so (studio.journey.ts, serial).
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, fullyParallel: true },
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },

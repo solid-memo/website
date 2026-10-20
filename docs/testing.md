@@ -379,7 +379,11 @@ jobs side by side: Chromium's journeys in two shards
 `journeys (chromium-2)`, and each other project's in a job of its own,
 `journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`. The
 run waits for the slowest job, and each job pays the setup again, about
-a minute. A job a project makes its own, rather than a shard of all
+a minute. Chromium's journeys run fully parallel
+(`fullyParallel: true`), each a unit the shards and workers share out,
+so a file of several journeys, such as `pod-safety`, is spread over
+both shards; a file whose journeys depend on each other runs them in
+turn (`test.describe.configure({ mode: "serial" })`). A job a project makes its own, rather than a shard of all
 three, keeps WebKit's and the phone's journeys, the slowest, from
 landing in one job. The [user guide](user-guide.md#supported-browsers)
 says which browsers Solid Memo supports.
