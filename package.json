@@ -52,6 +52,7 @@
     "check:dependencies": "node -e \"import('./scripts/checkDependencies.ts').then((m) => m.run(process))\"",
     "check:reuse": "node -e \"import('./scripts/checkReuse.ts').then((m) => m.run(process))\"",
     "check:actions": "node -e \"import('./scripts/checkActions.ts').then((m) => m.run(process))\"",
+    "ci:gate": "node -e \"import('./scripts/ciGate.ts').then((m) => m.run(process))\"",
     "check:providers": "node -e \"import('./scripts/checkProviders.ts').then((m) => m.run(process))\"",
     "coverage:summary": "node -e \"import('./scripts/coverageSummary.ts').then((m) => m.run(process))\"",
     "release:version": "node -e \"import('./scripts/releaseVersion.ts').then((m) => m.run(process))\" --",

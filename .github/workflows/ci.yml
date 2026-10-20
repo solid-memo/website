@@ -6,7 +6,8 @@ name: CI
 
 # Every change is checked before it is merged (docs/testing.md#continuous-integration):
 # a pull request, from this repository or a fork, runs every job here,
-# and so does each push to main. A pull request is merged through the
+# and a push to main every job or the deterministic ones, as the gate
+# decides (below). A pull request is merged through the
 # merge queue (merge_group), which runs them again on the pull request
 # on top of main and of those ahead of it in the queue, and merges
 # exactly the commit that passed. A branch's pushes alone run nothing,
@@ -16,6 +17,17 @@ name: CI
 # ours. The one exception, caches, runs on main alone and runs no code
 # of the repository's. Only runs on main save Turbo's cache and the
 # end-to-end images; a pull request and the merge queue read main's.
+#
+# Each job is labeled deterministic, the same answer on any runner, or
+# timing-dependent, its answer hanging on how busy the runner or a real
+# server is (docs/testing.md#continuous-integration). The gate job
+# decides whether the timing-dependent ones run
+# (docs/releasing.md#what-each-stage-checks): in a pull request, in the
+# merge queue, by hand, and on a push to main that skipped the queue,
+# but not on a push the queue passed, nor on a release commit, whose
+# tree the queue (or its parent's full run) already tested. A job that
+# runs blocks. A new job is given its label, and so its place in the
+# gates, when it is added.
 
 on:
   pull_request:
@@ -50,6 +62,40 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  # What this run runs (npm run ci:gate): every job (jobs=all), or the
+  # deterministic ones alone (jobs=deterministic), with the run that ran
+  # the others on this tree (tested-by). On a release commit, it also
+  # fails unless the commit changes nothing but the files a release
+  # writes. Only on a push to main does it ask GitHub's API: whether the
+  # merge queue passed the commit, or CI on main a release commit's
+  # parent. Deterministic.
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # To look up CI's runs on the commit and on its parent.
+      actions: read
+    outputs:
+      jobs: ${{ steps.gate.outputs.jobs }}
+      tested-by: ${{ steps.gate.outputs.tested-by }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The script imports no package, so nothing is installed.
+      - id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run ci:gate
+
+  # Deterministic. Its growth tests time CPU work, but as the ratio of two
+  # runs on the same runner, which a busy runner leaves about the same
+  # (packages/domain/src/testing/growth.ts).
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -108,7 +154,7 @@ jobs:
   # repository's 10 GB until GitHub's 7 days are up. A job of its own, so
   # the only token that can delete caches is in a job that runs none of
   # the repository's code; and one that may fail without failing the run,
-  # which release.yml and deploy.yml wait for.
+  # which release.yml and deploy.yml wait for. Deterministic.
   caches:
     if: github.ref == 'refs/heads/main'
     needs: build
@@ -136,7 +182,7 @@ jobs:
   # API (docs/releasing.md#how-ci-holds-to-it): no line of api/ gone
   # unless a commit says the change breaks, and none of api/frozen/ at
   # all. It needs the whole history, which build does not, so it is a
-  # job of its own.
+  # job of its own. Deterministic.
   library:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -194,6 +240,7 @@ jobs:
   # included. It reads only files in the repository (no npm install, no
   # generated code, no build), so it runs beside build rather than after
   # it, and the deploy waits for it like every other job here.
+  # Deterministic.
   crosscheck:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -219,8 +266,12 @@ jobs:
   # in Docker on this runner and runs the whole suite (docs/testing.md). One server failing does not stop the others;
   # what the server printed is kept when its job fails. Only a run on main
   # saves the images; elsewhere, new images are pulled through the mirror.
+  # Timing-dependent: real servers, started on a shared runner. Where it is
+  # skipped on main, warm saves the images it would have.
   pod:
     name: pod (${{ matrix.server }})
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -267,8 +318,11 @@ jobs:
   # The advisory servers (docs/testing.md) only report, in the Interop
   # workflow, but each must still start and meet the harness's contract:
   # a change that breaks one fails here, not unnoticed until Interop runs.
+  # Timing-dependent: real servers, which must start in time.
   contract:
     name: contract (${{ matrix.server }})
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -313,20 +367,34 @@ jobs:
   # The user journeys (e2e/journeys, docs/testing.md): the built app in
   # Chromium, logging in to a Community Solid Server 7 behind TLS that the
   # harness starts in Docker, each journey with an account and pod of its
-  # own. The other engines and the phone run a few of them, in a job of
-  # their own so neither job takes longer than one did
-  # (docs/testing.md#browsers). When one fails, the job's summary names the
-  # step it failed in, and its artifact holds the trace to replay it step
+  # own. The other engines and the phone run a few of them
+  # (docs/testing.md#browsers). Each browser's journeys are split in
+  # SHARDS jobs (npx playwright --shard), side by side, so the run waits
+  # for one shard's share of them, not for all: each shard pays the
+  # setup again (about a minute), for a shorter wall time. When one
+  # fails, the job's summary names the step it failed in, and its
+  # artifact holds the trace to replay it step
   # by step (`npx playwright show-trace`), the report, a video, and the
-  # server's log. On main the traces are kept always, and each job keeps
-  # its run as a blob, for journeys-report to merge.
+  # server's log. On main and in the merge queue the traces are kept
+  # always, and each job keeps its run as a blob, for journeys-report to
+  # merge: main's report takes them from the run that tested its tree
+  # when it skips them (gate's tested-by), the queue's as a rule.
+  # Timing-dependent: end to end, waiting on a real server behind TLS,
+  # on a shared runner. Their waits are fixed where they flake, not
+  # retried (retries: 0, playwright.config.ts).
   journeys:
-    name: journeys (${{ matrix.name }})
+    name: journeys (${{ matrix.name }}, ${{ matrix.shard }}/2)
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
+        name: [chromium, engines]
+        # 1 to SHARDS, which journeys-report's env and the name above
+        # repeat.
+        shard: [1, 2]
         include:
           - name: chromium
             projects: --project=chromium
@@ -336,9 +404,12 @@ jobs:
             projects: --project=firefox --project=webkit --project=phone
             browsers: chromium-headless-shell firefox webkit
     env:
-      JOURNEY_TRACE: ${{ (inputs.trace || github.ref == 'refs/heads/main') && 'on' || '' }}
-      # The blob's name, so the two jobs' blobs sit side by side when merged.
-      PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.name }}.zip
+      JOURNEY_TRACE: >-
+        ${{ (inputs.trace || github.ref == 'refs/heads/main' ||
+        github.event_name == 'merge_group') && 'on' || '' }}
+      SHARDS: 2
+      # The blob's name, so the jobs' blobs sit side by side when merged.
+      PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.name }}-${{ matrix.shard }}.zip
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -376,13 +447,14 @@ jobs:
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
-      - run: npm run journeys -- ${{ matrix.projects }}
+      - run: npm run journeys -- ${{ matrix.projects }} --shard="${{ matrix.shard }}/$SHARDS"
       - if: always()
-        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ github.run_attempt }}
-      - if: failure() || env.JOURNEY_TRACE == 'on'
+        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ matrix.shard }}-${{ github.run_attempt }}
+      # In the queue, the blob below holds the traces; this, only on a failure.
+      - if: failure() || (env.JOURNEY_TRACE == 'on' && github.event_name != 'merge_group')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-${{ matrix.name }}-${{ github.run_attempt }}
+          name: journeys-${{ matrix.name }}-${{ matrix.shard }}-${{ github.run_attempt }}
           path: |
             e2e/journeys/playwright-report/
             e2e/journeys/test-results/
@@ -391,26 +463,33 @@ jobs:
       # A job run again replaces its blob from the attempt before; kept as
       # long as the report, so that re-running one job still finds the
       # other's.
-      - if: always() && github.ref == 'refs/heads/main'
+      - if: always() && (github.ref == 'refs/heads/main' || github.event_name == 'merge_group')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-blob-${{ matrix.name }}
+          name: journeys-blob-${{ matrix.name }}-${{ matrix.shard }}
           path: e2e/journeys/blob-report/
           retention-days: 7
           overwrite: true
 
-  # On main, the two journeys jobs' runs merged into one report, every
+  # On main, the journeys jobs' runs merged into one report, every
   # browser's journeys and their traces in it, even when a journey failed:
-  # the deploy publishes it at /journeys/ (docs/deployment.md). When both
-  # jobs passed, both blobs must be there, so a run the deploy may publish
-  # never has a report missing a browser. ci-ok doesn't need it, as it
-  # runs on main alone; its failure still fails the run, and so holds
-  # back release and deploy.
+  # the deploy publishes it at /journeys/ (docs/deployment.md). When this
+  # run skipped the journeys, their blobs come from the run gate names,
+  # which ran them on this tree: the merge queue's, or a release commit's
+  # parent's. When the journeys passed, or ran there, every shard's blob
+  # must be there, so a run the deploy may publish never has a report
+  # missing a browser. ci-ok doesn't need it, as it runs on main alone;
+  # its failure still fails the run, and so holds back release and
+  # deploy. Deterministic.
   journeys-report:
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
-    needs: journeys
+    needs: [gate, journeys]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      # To download the journeys' blobs from the run that tested this tree.
+      actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -420,18 +499,33 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - if: needs.gate.outputs.jobs == 'all'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: journeys-blob-*
           merge-multiple: true
           path: e2e/journeys/blob-reports/
+      - if: needs.gate.outputs.jobs == 'deterministic'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: journeys-blob-*
+          merge-multiple: true
+          run-id: ${{ needs.gate.outputs.tested-by }}
+          github-token: ${{ github.token }}
+          path: e2e/journeys/blob-reports/
       - working-directory: e2e/journeys
         env:
           JOURNEYS: ${{ needs.journeys.result }}
+          JOBS: ${{ needs.gate.outputs.jobs }}
+          # As journeys' matrix has them.
+          SHARDS: 2
         run: |
-          if [ "$JOURNEYS" = success ]; then
-            test -f blob-reports/report-chromium.zip
-            test -f blob-reports/report-engines.zip
+          if [ "$JOURNEYS" = success ] || [ "$JOBS" = deterministic ]; then
+            for name in chromium engines; do
+              for shard in $(seq "$SHARDS"); do
+                test -f "blob-reports/report-$name-$shard.zip"
+              done
+            done
           fi
           if compgen -G 'blob-reports/*.zip' > /dev/null; then
             npx playwright merge-reports --reporter html blob-reports
@@ -444,6 +538,165 @@ jobs:
           retention-days: 7
           overwrite: true
 
+  # On main, when the timing-dependent jobs are skipped, the caches they
+  # would have saved there, which every pull request and queue run reads:
+  # each server's images and the journeys' (e2e-images), and the
+  # journeys' browsers. This job only looks them up, by the keys those
+  # jobs use; warm-images and warm-browsers make and save what is
+  # missing, and nothing else, so a run with every cache in place spends
+  # one short job. Like caches, they may fail without failing the run.
+  # Deterministic.
+  warm:
+    if: github.ref == 'refs/heads/main' && needs.gate.outputs.jobs == 'deterministic'
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+      # To list main's caches.
+      actions: read
+    outputs:
+      images: ${{ steps.missing.outputs.images }}
+      browsers: ${{ steps.missing.outputs.browsers }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # shell: bash runs with pipefail, so a listing that fails fails the
+      # step instead of finding every cache missing.
+      - name: What main's cache lacks
+        id: missing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          JOURNEYS_KEY: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
+        run: |
+          # Listed once each, outside any condition, where a failure
+          # fails the step: inside one, bash would read it as a miss.
+          listed=$(gh cache list --ref refs/heads/main --key e2e-images- --limit 1000 --json key)
+          listed+=$(gh cache list --ref refs/heads/main --key playwright- --limit 1000 --json key)
+          cached() {
+            jq -se --arg key "$1" 'add | any(.[]; .key == $key)' <<< "$listed" > /dev/null
+          }
+          # Named as e2e-images names them: pod-<server>, and journeys.
+          keys=$(node e2e/pod/servers.ts keys all | sed 's/^/pod-/')
+          keys+=$'\n'"journeys $JOURNEYS_KEY"
+          images=()
+          while read -r name key; do
+            cached "e2e-images-$RUNNER_OS-$RUNNER_ARCH-$name-$key" || images+=("$name")
+          done <<< "$keys"
+          echo "Images missing: ${images[*]:-none}"
+          echo "images=$(jq -cn '$ARGS.positional' --args "${images[@]}")" >> "$GITHUB_OUTPUT"
+          version=$(node -p "require('@playwright/test/package.json').version")
+          browsers=()
+          for name in chromium engines; do
+            cached "playwright-$RUNNER_OS-$version-$name" || browsers+=("$name")
+          done
+          echo "Browsers missing: ${browsers[*]:-none}"
+          echo "browsers=$(jq -cn '$ARGS.positional' --args "${browsers[@]}")" >> "$GITHUB_OUTPUT"
+
+  # Missing images, pulled or built as pod, contract and journeys would,
+  # and saved under their key. Deterministic.
+  warm-images:
+    if: needs.warm.outputs.images != '' && needs.warm.outputs.images != '[]'
+    needs: warm
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        images: ${{ fromJSON(needs.warm.outputs.images) }}
+    # The names come from an output, so they reach the shell as a
+    # variable, never written into a script.
+    env:
+      IMAGES: ${{ matrix.images }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: key
+        env:
+          JOURNEYS_KEY: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
+        run: |
+          if [ "$IMAGES" = journeys ]; then
+            echo "key=$JOURNEYS_KEY" >> "$GITHUB_OUTPUT"
+            echo "compose=e2e/journeys/css/compose.yml" >> "$GITHUB_OUTPUT"
+          else
+            echo "key=$(node e2e/pod/servers.ts key "${IMAGES#pod-}")" >> "$GITHUB_OUTPUT"
+            echo "compose=e2e/pod/servers/${IMAGES#pod-}/compose.yml" >> "$GITHUB_OUTPUT"
+          fi
+      - id: images
+        uses: ./.github/actions/e2e-images
+        with:
+          name: ${{ matrix.images }}
+          key: ${{ steps.key.outputs.key }}
+      - run: |
+          if [ "$IMAGES" = journeys ]; then
+            npm run css:prepare -w @solid-memo/e2e-journeys
+          else
+            npm run servers -w @solid-memo/e2e-pod -- "${IMAGES#pod-}"
+          fi
+      - if: steps.images.outputs.hit != 'true'
+        env:
+          FILE: ${{ steps.images.outputs.file }}
+          COMPOSE: ${{ steps.key.outputs.compose }}
+        run: node e2e/pod/images.ts save "$FILE" "$COMPOSE"
+      - if: steps.images.outputs.hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.images.outputs.file }}
+          key: ${{ steps.images.outputs.key }}
+
+  # A journeys job's missing browsers, downloaded as it would (its
+  # matrix's browsers), and saved under the key it restores them by.
+  # Deterministic.
+  warm-browsers:
+    if: needs.warm.outputs.browsers != '' && needs.warm.outputs.browsers != '[]'
+    needs: warm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        browsers: ${{ fromJSON(needs.warm.outputs.browsers) }}
+    env:
+      BROWSERS: ${{ matrix.browsers }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - run: |
+          if [ "$BROWSERS" = chromium ]; then
+            npx playwright install chromium
+          else
+            npx playwright install chromium-headless-shell firefox webkit
+          fi
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browsers }}
+
   # The docs (docs/testing.md#documentation): every link to a file or a
   # heading in the repository resolves (lychee, offline: the web's
   # addresses are checked weekly, by links.yml, so a site that is down
@@ -454,7 +707,7 @@ jobs:
   # the job installs no npm packages: reuse comes from PyPI, pinned in
   # scripts/requirements-lint.txt, not as fsfe/reuse-action's Docker
   # image, which Docker Hub's limit on pulls without an account, shared
-  # by the runners, could refuse, and which names its image by a tag.
+  # by the runners, could refuse, and which names its image by a tag. Deterministic.
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -485,7 +738,7 @@ jobs:
   # shellcheck), zizmor their security, such as an expression written
   # into a script or a job given more rights than it uses. Offline:
   # zizmor's audits that ask GitHub's API are left out. Both are Python
-  # packages, pinned in scripts/requirements-lint.txt.
+  # packages, pinned in scripts/requirements-lint.txt. Deterministic.
   workflows:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -522,6 +775,7 @@ jobs:
   # from the API when the step runs, not from the event, so editing it
   # and running the job again is enough. Renovate's pull requests have
   # no issue, and are left out, as commitlint leaves out their commits.
+  # Deterministic.
   commits:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -574,20 +828,39 @@ jobs:
           npm run check:closes -- --base "$BASE" --head "$HEAD" --body-file "$body"
 
   # The one check a merge to main waits for (the ruleset on main is to
-  # require it): it passes only when every job above passed. A matrix
-  # job's checks are named per server, and jobs come and go; this name
-  # stays.
+  # require it): it passes only when every job it needs passed (not
+  # journeys-report, caches or the warm jobs), but for the
+  # timing-dependent jobs gate skipped (jobs=deterministic), which may be
+  # skipped then and only then. Every job it needs is in one of its two
+  # lists, or it fails. A matrix job's checks are named per server, and
+  # jobs come and go; this name stays.
   ci-ok:
     if: always()
-    needs: [build, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
+    needs: [gate, build, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Every job passed
+      - name: Every job passed, or gate skipped it
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
+          DETERMINISTIC: >-
+            ${{ needs.gate.result }} ${{ needs.build.result }} ${{ needs.library.result }}
+            ${{ needs.crosscheck.result }} ${{ needs.docs.result }}
+            ${{ needs.workflows.result }} ${{ needs.commits.result }}
+          TIMING: ${{ needs.pod.result }} ${{ needs.contract.result }} ${{ needs.journeys.result }}
+          JOBS: ${{ needs.gate.outputs.jobs }}
         run: |
-          echo "The jobs' results: $RESULTS"
-          for result in $RESULTS; do
+          echo "The jobs' results: $RESULTS (gate: ${JOBS:-none})"
+          read -ra all <<< "$RESULTS"
+          read -ra deterministic <<< "$DETERMINISTIC"
+          read -ra timing <<< "$TIMING"
+          [ "${#all[@]}" -eq $(( ${#deterministic[@]} + ${#timing[@]} )) ] || {
+            echo "::error::ci-ok needs a job neither of its lists names: add it to one."
+            exit 1
+          }
+          for result in "${deterministic[@]}"; do
             [ "$result" = success ] || exit 1
+          done
+          for result in "${timing[@]}"; do
+            [ "$result" = success ] || { [ "$result" = skipped ] && [ "$JOBS" = deterministic ]; } || exit 1
           done

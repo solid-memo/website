@@ -18,7 +18,7 @@ is made:
 flowchart LR
     accTitle: When a version is deployed
     accDescr: A push to main, or a run by hand, deploys only the newest version, from its release commit and with its GitHub release, after the build, each release's docs and the guard.
-    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods,<br/>journeys, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
+    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
     tag -->|no| skip["not deployed"]
     tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
     release -->|no| skip
@@ -34,8 +34,10 @@ repository:
 - **After CI on a release.** A release ([releasing.md](releasing.md))
   follows a green CI run on `main`, in a workflow of its own. It pushes
   a commit to `main` that sets the new version,
-  `chore(release): X.Y.Z`, and tags it `vX.Y.Z`. CI runs on that commit
-  as on any push, and once it passes, the deploy builds it, so the
+  `chore(release): X.Y.Z`, and tags it `vX.Y.Z`. CI runs on that commit,
+  its deterministic jobs only, as the code is its parent's
+  ([releasing.md](releasing.md#what-each-stage-checks)), and once it
+  passes, the deploy builds it, so the
   site's footer shows the new version. The deploy looks for a version
   tag that names the commit CI checked, and deploys nothing when there
   is none: any other push to `main`, a merged pull request or a
