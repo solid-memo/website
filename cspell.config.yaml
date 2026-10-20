@@ -98,6 +98,10 @@ words:
   - adms
   - bidi
   - CLDR
+  # CSS's color notations: #rrggbb, #rrggbbaa, color-mix(in srgb, …)
+  - rrggbb
+  - rrggbbaa
+  - srgb
   # A font's table from characters to glyphs
   - cmap
   - commonmark

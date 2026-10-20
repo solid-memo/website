@@ -7,61 +7,14 @@
 @import "@fontsource-variable/fredoka";
 @import "@fontsource/bangers";
 @import "@fontsource-variable/noto-naskh-arabic";
+@import "./palettes.css";
 
 :root {
   color-scheme: light;
 
-  --bg: #f7f6f1;
-  --surface: #ffffff;
-  --surface-sunken: #fbfaf5;
-  --surface-hover: #f1efe6;
-  --text: #16202a;
-  --text-muted: #545c68;
-  --border: #e4e1d5;
-  --border-strong: #cfcbbb;
-  /* A text field's edge: at least 3:1 on every surface it sits on. */
-  --control-border: #858072;
-
-  --primary: #2c6b3d;
-  --primary-fill: #2c6b3d;
-  --primary-hover: #235430;
-  --primary-soft: #e6f1e8;
-  --on-primary: #ffffff;
-  --link: #25603a;
-  --link-hover-bg: #e4e5e7;
-  --link-hover-border: #9a9fa6;
-
-  --accent-blue: #b1cfe3;
-  --accent-yellow: #e8ab14;
-  --accent-red: #e8432b;
-
-  --danger: #c42d18;
-  --danger-soft: #fdeee9;
-  --danger-border: #f0c9be;
-  --warning-text: #7a5800;
-  --warning-soft: #fdf4dc;
-  --warning-border: #e6c876;
-
-  --paper-blue: rgba(177, 207, 227, 0.5);
-  --paper-yellow: rgba(232, 171, 20, 0.16);
-
-  --masthead-bg: #16202a;
-  --masthead-text: #f7f6f1;
-  --masthead-border: transparent;
-  --masthead-blue: #9fc3da;
-
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
-  --shadow-sm: 0 1px 2px rgba(22, 32, 42, 0.06);
-  --shadow: 0 1px 2px rgba(22, 32, 42, 0.05), 0 8px 24px -12px rgba(22, 32, 42, 0.18);
-  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
-  /* Under an enlarged picture: the page dimmed, so the picture stands out. */
-  --zoom-backdrop: rgba(22, 32, 42, 0.85);
-
-  --heading-pop: var(--accent-yellow);
-  /* The glint that sweeps across the course for newcomers: decoration only. */
-  --shine: rgb(255 255 255 / 0.55);
 
   --font-mono:
     ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas", "Liberation Mono",
@@ -95,47 +48,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* The dark theme, which the root's data-theme turns on (see ui/theme.tsx). */
+/* The dark theme, which the root's data-theme turns on (see ui/theme.tsx); its colors are
+   in palettes.css. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-
-  --bg: #11171e;
-  --surface: #19212b;
-  --surface-sunken: #151c25;
-  --surface-hover: #232e3b;
-  --text: #ecebe4;
-  --text-muted: #9ba6b2;
-  --border: #2a3644;
-  --border-strong: #3a4859;
-  --control-border: #66788d;
-
-  --primary: #4fae6a;
-  --primary-fill: #2a7340;
-  --primary-hover: #33864b;
-  --primary-soft: #1b3324;
-  --on-primary: #ffffff;
-  --link: #74cc8e;
-  --link-hover-bg: #3a414b;
-  --link-hover-border: #7d8692;
-
-  --danger: #ff8a75;
-  --danger-soft: #38201c;
-  --danger-border: #63302a;
-  --warning-text: #f1d283;
-  --warning-soft: #33280e;
-  --warning-border: #5e4a17;
-
-  --paper-blue: rgba(177, 207, 227, 0.07);
-  --paper-yellow: rgba(232, 171, 20, 0.05);
-
-  --masthead-bg: #1d2937;
-  --masthead-border: #2f3d4e;
-  --masthead-blue: #5d86a3;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
-  --zoom-backdrop: rgba(0, 0, 0, 0.88);
-  --shine: rgb(255 255 255 / 0.08);
 }
 
 /*
@@ -409,7 +325,7 @@ main.workspace {
 /*
  * The theme toggle, a small outlined 1.5rem by 1rem rectangle: a yellow
  * sun on a pale fill in the light theme, a blue moon on the masthead's
- * navy in the dark one.
+ * navy in the dark one (the --toggle-* roles, palettes.css).
  */
 .theme-toggle {
   width: 1.5rem;
@@ -417,29 +333,17 @@ main.workspace {
   min-height: 0;
   margin: 0.2rem;
   padding: 0;
-  /* The accent's yellow, deepened enough to stand out on the pale fill. */
-  color: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
-  background: var(--paper-yellow);
+  color: var(--toggle-icon);
+  background: var(--toggle-bg);
   border: none;
   border-radius: 0;
-  box-shadow: 0 0 0 1px var(--border-strong);
+  box-shadow: 0 0 0 1px var(--toggle-edge);
 }
 
 .theme-toggle:hover:not(:disabled) {
   background: var(--surface-hover);
-  box-shadow: 0 0 0 1px var(--accent-yellow);
+  box-shadow: 0 0 0 1px var(--toggle-hover-edge);
   transform: none;
-}
-
-:root[data-theme="dark"] .theme-toggle {
-  color: var(--masthead-blue);
-  background: var(--masthead-bg);
-  box-shadow: 0 0 0 1px var(--masthead-border);
-}
-
-:root[data-theme="dark"] .theme-toggle:hover:not(:disabled) {
-  background: var(--surface-hover);
-  box-shadow: 0 0 0 1px var(--masthead-blue);
 }
 
 .theme-toggle svg.icon {
@@ -634,8 +538,8 @@ h2 a:hover {
 }
 
 .masthead {
-  --link-hover-bg: #4a525d;
-  --link-hover-border: #8d96a2;
+  --link-hover-bg: var(--masthead-link-hover-bg);
+  --link-hover-border: var(--masthead-link-hover-border);
   --blob: 6.5rem;
   --blob-x: 2.5rem;
   --dot: 0.5rem;
@@ -704,7 +608,7 @@ h2 a:hover {
   width: auto;
   border-radius: var(--radius);
   border: 2px solid var(--masthead-text);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--logo-shadow);
   transform: translateY(-50%) rotate(-4deg);
   transition: transform 0.15s ease;
 }
@@ -771,13 +675,13 @@ h2 a:hover {
 .masthead button {
   background: var(--masthead-text);
   border-color: transparent;
-  color: #16202a;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: var(--masthead-button-text);
+  box-shadow: var(--masthead-button-shadow);
 }
 
 .masthead button:hover:not(:disabled),
 .masthead button:focus-visible {
-  background: #ffffff;
+  background: var(--masthead-button-hover);
   transform: translateY(-1px) rotate(2deg);
 }
 
@@ -990,9 +894,7 @@ a.button.primary {
   background: var(--primary-fill);
   border-color: var(--primary-fill);
   color: var(--on-primary);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 1px 2px rgba(22, 32, 42, 0.2);
+  box-shadow: var(--primary-bevel);
 }
 
 button[type="submit"]:hover:not(:disabled, [aria-disabled="true"]),
@@ -2655,27 +2557,27 @@ form.card-edit {
 }
 
 .quality-buttons button[data-grade="0"] {
-  --grade: #d63a25;
+  --grade: var(--grade-0);
 }
 
 .quality-buttons button[data-grade="1"] {
-  --grade: #e2662a;
+  --grade: var(--grade-1);
 }
 
 .quality-buttons button[data-grade="2"] {
-  --grade: #e8932a;
+  --grade: var(--grade-2);
 }
 
 .quality-buttons button[data-grade="3"] {
-  --grade: #d9b11c;
+  --grade: var(--grade-3);
 }
 
 .quality-buttons button[data-grade="4"] {
-  --grade: #7fb13c;
+  --grade: var(--grade-4);
 }
 
 .quality-buttons button[data-grade="5"] {
-  --grade: #2f8a4a;
+  --grade: var(--grade-5);
 }
 
 .quality-buttons.minimal {
@@ -3836,7 +3738,7 @@ p[role="status"]:not(.loading) {
 
 .validation th,
 .validation td {
-  border: 1px solid var(--border, #ccc);
+  border: 1px solid var(--border);
   padding: 0.25rem 0.5rem;
   text-align: start;
   vertical-align: top;
@@ -4272,16 +4174,16 @@ p[role="status"]:not(.loading) {
    named in a legend above the bars; a pointed bar is outlined, so each
    step keeps its tint. */
 .bar-step-1 {
-  --series: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series: var(--series-1);
 }
 .bar-step-2 {
-  --series: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series: var(--series-2);
 }
 .bar-step-3 {
-  --series: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series: var(--series-3);
 }
 .bar-step-4 {
-  --series: var(--primary);
+  --series: var(--series-4);
 }
 
 .bar-chart .bar[class*="bar-step-"] {

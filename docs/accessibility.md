@@ -58,9 +58,12 @@ but the journeys:
   A rule is turned off only for the files its reason holds for, with
   the reason in [`biome.jsonc`](../biome.jsonc)
   ([style.md](style.md#formatting)).
-- **Contrast**: unit tests check the contrast of muted text and of
-  fields' edges on every surface, in both themes
-  ([`style.test.ts`](../packages/ui/src/style.test.ts)), and of every
+- **Contrast**: unit tests check, in both themes, the contrast of text
+  and muted text and of fields' edges on every surface, of the text on
+  a primary fill, of links, danger and warning text, of the masthead's
+  text, and of an answer button's text on its grade's tint
+  ([`style.test.ts`](../packages/ui/src/style.test.ts),
+  [theme.md](theme.md#color-roles)), and of every
   text color the Studio's stylesheet uses on every surface it uses, in
   both themes, the surfaces that hold no text left out by name
   ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)).
@@ -89,9 +92,14 @@ What a tool can't judge is checked by hand as a change is reviewed:
 A gap that is planned links to its issue; the others have none yet,
 and an issue for one is welcome ([below](#report-a-barrier)).
 
-- **Contrast tests**: for the site's stylesheet they cover some token
-  pairs only, not every text and surface pair in both themes. axe
-  checks the contrast of the screens the journeys visit.
+- **Contrast tests**: for the site's stylesheet they cover the pairs
+  listed [above](#checked-automatically), not every text and surface
+  pair in both themes. axe checks the contrast of the screens the
+  journeys visit. Two pairs the tests leave out are below 4.5:1 in the
+  dark theme: the label on the line where a dragged deck would land
+  (`--on-primary` on `--primary`), and the interval under an answer
+  button's name while the pointer is over the button (muted text on
+  the hovered tint of the middle grades).
 - **Screen readers**: no pass with a screen reader, NVDA or VoiceOver,
   through the main journeys is written down yet. It would find what
   the checks above can't, such as whether a reader takes up the

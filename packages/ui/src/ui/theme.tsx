@@ -11,9 +11,6 @@ import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/t
 /** The browser's wish for a dark page. */
 export const DARK_QUERY = "(prefers-color-scheme: dark)";
 
-/** The browser's chrome around the page, matching each theme's background. */
-const THEME_COLORS: Record<Theme, string> = { light: "#f7f6f1", dark: "#11171e" };
-
 /** The theme the browser prefers. */
 export function browserTheme(): Theme {
   return matchMedia(DARK_QUERY).matches ? "dark" : "light";
@@ -22,12 +19,15 @@ export function browserTheme(): Theme {
 /**
  * Shows the page in a theme: the stylesheet's colors follow the root's
  * data-theme (index.html sets it before the first paint), the browser's
- * chrome follows the theme-color meta tags.
+ * chrome follows the theme-color meta tags, in the page's background
+ * as the palette shown has it (--bg, palettes.css).
  */
 export function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  const background = getComputedStyle(root).getPropertyValue("--bg").trim();
   for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
-    meta.content = THEME_COLORS[theme];
+    meta.content = background;
   }
 }
 

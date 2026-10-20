@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -132,7 +134,10 @@ describe("AppShell", () => {
       fakeBrowserScheme(false);
       const meta = document.createElement("meta");
       meta.name = "theme-color";
-      document.head.append(meta);
+      // The palettes, for the browser's chrome to take the background from.
+      const palettes = document.createElement("style");
+      palettes.textContent = readFileSync(join(import.meta.dirname, "../palettes.css"), "utf8");
+      document.head.append(meta, palettes);
       const useCases = makeUseCases();
       renderApp(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Switch to dark mode" }));
@@ -145,6 +150,7 @@ describe("AppShell", () => {
       await waitFor(() => expect(useCases.chooseTheme).toHaveBeenCalledTimes(2));
       expect(useCases.instanceTheme).not.toHaveBeenCalled();
       meta.remove();
+      palettes.remove();
     });
 
     it("shows the theme the open instance's preferences hold, and keeps a new choice there", async () => {

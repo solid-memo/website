@@ -44,7 +44,69 @@ script in `apps/web/index.html` (the page the [Studio](studio.md) is
 in too) sets the attribute from the device's
 choice, else the browser's, before the first paint, so a page never
 flashes in the other theme; `packages/ui/src/ui/theme.tsx` takes over from there and also
-sets the `theme-color` meta tags for the browser's own chrome.
+sets the `theme-color` meta tags for the browser's own chrome, in the
+page's background (`--bg`) as the stylesheet has it.
+
+## Color roles
+
+Every color the site and the Studio draw with is a role, a custom
+property such as `--bg`, `--text`, `--primary-fill` or `--grade-0`, set
+in [`palettes.css`](../packages/ui/src/palettes.css), which `style.css`
+imports. `style.css` and `studio.css` name the roles and write out no
+color of their own; they may mix two roles (`color-mix(in srgb, …)`),
+as a hovered answer button's tint does.
+
+A palette is two blocks of `palettes.css`: one for the light theme, one
+for the dark. Standard, today's only palette, is `:root` and
+`:root[data-theme="dark"]`. Another palette's blocks would be
+`:root[data-palette="…"]` and `:root[data-palette="…"][data-theme="dark"]`,
+after Standard's; a palette with no blocks shows as Standard. Each
+block sets every role, so no block leans on another.
+
+The roles fall into groups:
+
+- **Surfaces and text**: `--bg`, `--surface`, `--surface-sunken`,
+  `--surface-hover`, `--text`, `--text-muted`, the borders, and
+  `--control-border`, a text field's edge.
+- **Primary and links**: `--primary` (rings, lines and green text),
+  `--primary-fill` and `--primary-hover` (a primary button's fill),
+  `--primary-soft`, `--on-primary` (text on the fill), `--primary-bevel`,
+  `--link` and a link's hover colors.
+- **Meaning**: `--danger*` and `--warning*`, and the answer buttons'
+  grades `--grade-0` (Again) to `--grade-5` (Easy).
+- **Charts**: `--series-1` to `--series-4`, the steps of a bar of
+  several series.
+- **Decoration**: the accents, `--heading-pop`, the page's discs
+  (`--paper-blue`, `--paper-yellow`) and the newcomers' glint (`--shine`).
+- **The masthead and the theme toggle**: `--masthead-*`, `--logo-shadow`
+  and `--toggle-*`.
+- **Depth**: `--shadow-sm`, `--shadow`, `--ring` (the focus ring of a
+  field) and `--zoom-backdrop`.
+
+A block writes a color only as `#rrggbb`, as `#rrggbbaa` for one seen
+through (its alpha in 255ths, as the browser keeps it), as
+`transparent`, as another role (`var()`), or as a mix of these; a
+shadow is lengths and such colors. `style.test.ts` checks that every
+block sets every role in these forms, that `style.css` writes out no
+color (`studio.test.ts` checks the same of `studio.css`), and the
+contrast of the pairs that hold text in every block: text and muted
+text on every surface, the text on a primary fill, links, danger and warning text, the masthead's text, and an answer
+button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)).
+The shared helper that reads the blocks, mixes their colors and
+computes WCAG's contrast ratio is
+[`contrast.ts`](../packages/domain/src/testing/contrast.ts).
+
+Some colors stay fixed on purpose, whatever the palette:
+
+- the pictures, `illustration.svg` and `favicon.svg`;
+- the static About page (`apps/web/public/about/`) and the docs' own
+  stylesheet (`packages/markdown/tooling/docs.css`), which load no
+  `palettes.css`;
+- the `theme-color` meta tags written out in `index.html` and the About
+  page, which hold Standard's backgrounds for the browser's chrome
+  before the app runs (`themeColor.test.ts` keeps them in step);
+- forced colors (Windows High Contrast and the like), whose rules
+  draw with the system's colors over every palette.
 
 ## Korean text
 

@@ -1,0 +1,177 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/*
+ * The palettes (docs/theme.md, Color roles): every color the site draws
+ * with, as roles that style.css and the Studio's studio.css name and
+ * never write out themselves. Each palette is two blocks, its light
+ * theme's and its dark one's, and each block sets every role, so no
+ * palette leans on another's: Standard's are `:root` and
+ * `:root[data-theme="dark"]`, another's `:root[data-palette="…"]` and
+ * `:root[data-palette="…"][data-theme="dark"]`, after them. A palette
+ * without blocks is shown as Standard.
+ *
+ * A block holds only colors written as #rrggbb (#rrggbbaa for one seen
+ * through, its alpha in 255ths as the browser keeps it), `transparent`,
+ * a role (`var()`) or a mix of these (`color-mix(in srgb, …)`), and
+ * shadows of them: style.test.ts checks it, and the contrast of the
+ * pairs that hold text, in every block.
+ */
+
+/* Standard, light. */
+:root {
+  --bg: #f7f6f1;
+  --surface: #ffffff;
+  --surface-sunken: #fbfaf5;
+  --surface-hover: #f1efe6;
+  --text: #16202a;
+  --text-muted: #545c68;
+  --border: #e4e1d5;
+  --border-strong: #cfcbbb;
+  /* A text field's edge: at least 3:1 on every surface it sits on. */
+  --control-border: #858072;
+
+  --primary: #2c6b3d;
+  --primary-fill: #2c6b3d;
+  --primary-hover: #235430;
+  --primary-soft: #e6f1e8;
+  --on-primary: #ffffff;
+  /* A primary button's raised edge: a glint along its top, a shade under it. */
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #25603a;
+  --link-hover-bg: #e4e5e7;
+  --link-hover-border: #9a9fa6;
+
+  --accent-blue: #b1cfe3;
+  --accent-yellow: #e8ab14;
+  --accent-red: #e8432b;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #c42d18;
+  --danger-soft: #fdeee9;
+  --danger-border: #f0c9be;
+  --warning-text: #7a5800;
+  --warning-soft: #fdf4dc;
+  --warning-border: #e6c876;
+
+  /* The answer buttons, Again (0) to Easy (5): tints of these under text. */
+  --grade-0: #d63a25;
+  --grade-1: #e2662a;
+  --grade-2: #e8932a;
+  --grade-3: #d9b11c;
+  --grade-4: #7fb13c;
+  --grade-5: #2f8a4a;
+
+  /* A chart's series, 1 the lightest: steps of the green. */
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  /* The page's discs: the accent blue at 50%, the yellow at 16%. */
+  --paper-blue: #b1cfe380;
+  --paper-yellow: #e8ab1429;
+  /* The glint that sweeps across the course for newcomers: decoration only. */
+  --shine: #ffffff8c;
+
+  --masthead-bg: #16202a;
+  --masthead-text: #f7f6f1;
+  --masthead-border: transparent;
+  --masthead-blue: #9fc3da;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  /* The masthead's buttons: its text color their fill, white under the pointer. */
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  /* The theme toggle: a yellow sun on a pale fill. */
+  --toggle-icon: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
+  --toggle-bg: var(--paper-yellow);
+  --toggle-edge: var(--border-strong);
+  --toggle-hover-edge: var(--accent-yellow);
+
+  --shadow-sm: 0 1px 2px #16202a0f;
+  --shadow: 0 1px 2px #16202a0d, 0 8px 24px -12px #16202a2e;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  /* Under an enlarged picture: the page dimmed, so the picture stands out. */
+  --zoom-backdrop: #16202ad9;
+}
+
+/* Standard, dark. */
+:root[data-theme="dark"] {
+  --bg: #11171e;
+  --surface: #19212b;
+  --surface-sunken: #151c25;
+  --surface-hover: #232e3b;
+  --text: #ecebe4;
+  --text-muted: #9ba6b2;
+  --border: #2a3644;
+  --border-strong: #3a4859;
+  --control-border: #66788d;
+
+  --primary: #4fae6a;
+  --primary-fill: #2a7340;
+  --primary-hover: #33864b;
+  --primary-soft: #1b3324;
+  --on-primary: #ffffff;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #74cc8e;
+  --link-hover-bg: #3a414b;
+  --link-hover-border: #7d8692;
+
+  --accent-blue: #b1cfe3;
+  --accent-yellow: #e8ab14;
+  --accent-red: #e8432b;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ff8a75;
+  --danger-soft: #38201c;
+  --danger-border: #63302a;
+  --warning-text: #f1d283;
+  --warning-soft: #33280e;
+  --warning-border: #5e4a17;
+
+  --grade-0: #d63a25;
+  --grade-1: #e2662a;
+  --grade-2: #e8932a;
+  --grade-3: #d9b11c;
+  --grade-4: #7fb13c;
+  --grade-5: #2f8a4a;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  /* The accent blue at 7%, the yellow at 5%. */
+  --paper-blue: #b1cfe312;
+  --paper-yellow: #e8ab140d;
+  --shine: #ffffff14;
+
+  --masthead-bg: #1d2937;
+  --masthead-text: #f7f6f1;
+  --masthead-border: #2f3d4e;
+  --masthead-blue: #5d86a3;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  /* The theme toggle: a blue moon on the masthead's navy. */
+  --toggle-icon: var(--masthead-blue);
+  --toggle-bg: var(--masthead-bg);
+  --toggle-edge: var(--masthead-border);
+  --toggle-hover-edge: var(--masthead-blue);
+
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow: 0 1px 2px #0000004d, 0 10px 28px -14px #00000099;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #000000e0;
+}
