@@ -369,13 +369,15 @@ reload, and a page narrow enough to lay out for a phone. The other
 journeys test the app's logic, which is the same in every engine, so
 running them all in each would about triple the time for little gain. A
 journey tagged with one of the three runs in every browser; tag another
-only when what it tests differs between engines. CI runs Chromium's
-journeys apart from the other three projects', each split in two shards
-(`npx playwright test --shard`), four jobs side by side:
-`journeys (chromium, 1/2)` to `journeys (engines, 2/2)`. The run waits
-for the slowest shard, about half of what one job took, and each shard
-pays the job's setup again, about a minute. Playwright shards Chromium's
-journeys by file, so a file's journeys stay in one shard. The [user guide](user-guide.md#supported-browsers)
+only when what it tests differs between engines. CI runs them in five
+jobs side by side: Chromium's journeys in two shards
+(`npx playwright test --shard`), `journeys (chromium-1)` and
+`journeys (chromium-2)`, and each other project's in a job of its own,
+`journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`. The
+run waits for the slowest job, and each job pays the setup again, about
+a minute. A job a project makes its own, rather than a shard of all
+three, keeps WebKit's and the phone's journeys, the slowest, from
+landing in one job. The [user guide](user-guide.md#supported-browsers)
 says which browsers Solid Memo supports.
 
 The engines differ in three ways the journeys allow for:
@@ -448,7 +450,7 @@ error, and the browser it failed in. The job's
 published with each deploy: the report of the CI run on the release
 commit the site runs (none after a deploy by hand), every browser's
 journeys in one, as the `journeys-report` job merges them from every
-journeys job (Playwright's blob reports, one a shard). As the release commit's run
+journeys job (Playwright's blob reports, one a job). As the release commit's run
 skips the journeys, it takes their reports from the run that ran them
 on its code, usually the merge queue's
 ([releasing.md](releasing.md#what-each-stage-checks)). It shows every
@@ -565,8 +567,8 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
-| `journeys (<browsers>, <shard>)` | timing-dependent | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone, each browser's in two shards ([Browsers](#browsers)) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every shard's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
+| `journeys (<project>)` | timing-dependent | the user journeys: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every job's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |

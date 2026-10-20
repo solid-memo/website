@@ -368,10 +368,12 @@ jobs:
   # Chromium, logging in to a Community Solid Server 7 behind TLS that the
   # harness starts in Docker, each journey with an account and pod of its
   # own. The other engines and the phone run a few of them
-  # (docs/testing.md#browsers). Each browser's journeys are split in
-  # SHARDS jobs (npx playwright --shard), side by side, so the run waits
-  # for one shard's share of them, not for all: each shard pays the
-  # setup again (about a minute), for a shorter wall time. When one
+  # (docs/testing.md#browsers). Five jobs run them side by side, so the
+  # run waits for the slowest, not for all: Chromium's journeys in two
+  # shards (npx playwright --shard), and each other engine's in a job of
+  # its own, so that WebKit's and the phone's, the slowest, never land
+  # together. Each job pays the setup again (about a minute), for a
+  # shorter wall time. When one
   # fails, the job's summary names the step it failed in, and its
   # artifact holds the trace to replay it step
   # by step (`npx playwright show-trace`), the report, a video, and the
@@ -383,33 +385,45 @@ jobs:
   # on a shared runner. Their waits are fixed where they flake, not
   # retried (retries: 0, playwright.config.ts).
   journeys:
-    name: journeys (${{ matrix.name }}, ${{ matrix.shard }}/2)
+    name: journeys (${{ matrix.name }})
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
       fail-fast: false
+      # name: the job's, and its blob's (journeys-report lists them);
+      # projects: what it runs; browsers: what it installs, the build
+      # drawing the docs' diagrams in Chromium's headless shell; cache: the
+      # key its browsers are kept under, the phone's being WebKit's.
       matrix:
-        name: [chromium, engines]
-        # 1 to SHARDS, which journeys-report's env and the name above
-        # repeat.
-        shard: [1, 2]
         include:
-          - name: chromium
-            projects: --project=chromium
+          - name: chromium-1
+            projects: --project=chromium --shard=1/2
             browsers: chromium
-          # The build draws the docs' diagrams in Chromium's headless shell.
-          - name: engines
-            projects: --project=firefox --project=webkit --project=phone
-            browsers: chromium-headless-shell firefox webkit
+            cache: chromium
+          - name: chromium-2
+            projects: --project=chromium --shard=2/2
+            browsers: chromium
+            cache: chromium
+          - name: firefox
+            projects: --project=firefox
+            browsers: chromium-headless-shell firefox
+            cache: firefox
+          - name: webkit
+            projects: --project=webkit
+            browsers: chromium-headless-shell webkit
+            cache: webkit
+          - name: phone
+            projects: --project=phone
+            browsers: chromium-headless-shell webkit
+            cache: webkit
     env:
       JOURNEY_TRACE: >-
         ${{ (inputs.trace || github.ref == 'refs/heads/main' ||
         github.event_name == 'merge_group') && 'on' || '' }}
-      SHARDS: 2
       # The blob's name, so the jobs' blobs sit side by side when merged.
-      PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.name }}-${{ matrix.shard }}.zip
+      PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.name }}.zip
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -425,7 +439,7 @@ jobs:
         id: browsers
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.name }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.cache }}
       - if: steps.browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps ${{ matrix.browsers }}
       - if: steps.browsers.outputs.cache-hit == 'true'
@@ -447,14 +461,14 @@ jobs:
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
-      - run: npm run journeys -- ${{ matrix.projects }} --shard="${{ matrix.shard }}/$SHARDS"
+      - run: npm run journeys -- ${{ matrix.projects }}
       - if: always()
-        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ matrix.shard }}-${{ github.run_attempt }}
+        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ github.run_attempt }}
       # In the queue, the blob below holds the traces; this, only on a failure.
       - if: failure() || (env.JOURNEY_TRACE == 'on' && github.event_name != 'merge_group')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-${{ matrix.name }}-${{ matrix.shard }}-${{ github.run_attempt }}
+          name: journeys-${{ matrix.name }}-${{ github.run_attempt }}
           path: |
             e2e/journeys/playwright-report/
             e2e/journeys/test-results/
@@ -466,7 +480,7 @@ jobs:
       - if: always() && (github.ref == 'refs/heads/main' || github.event_name == 'merge_group')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-blob-${{ matrix.name }}-${{ matrix.shard }}
+          name: journeys-blob-${{ matrix.name }}
           path: e2e/journeys/blob-report/
           retention-days: 7
           overwrite: true
@@ -476,7 +490,7 @@ jobs:
   # the deploy publishes it at /journeys/ (docs/deployment.md). When this
   # run skipped the journeys, their blobs come from the run gate names,
   # which ran them on this tree: the merge queue's, or a release commit's
-  # parent's. When the journeys passed, or ran there, every shard's blob
+  # parent's. When the journeys passed, or ran there, every job's blob
   # must be there, so a run the deploy may publish never has a report
   # missing a browser. ci-ok doesn't need it, as it runs on main alone;
   # its failure still fails the run, and so holds back release and
@@ -517,14 +531,12 @@ jobs:
         env:
           JOURNEYS: ${{ needs.journeys.result }}
           JOBS: ${{ needs.gate.outputs.jobs }}
-          # As journeys' matrix has them.
-          SHARDS: 2
+          # The journeys jobs' names, as their matrix has them.
+          REPORTS: chromium-1 chromium-2 firefox webkit phone
         run: |
           if [ "$JOURNEYS" = success ] || [ "$JOBS" = deterministic ]; then
-            for name in chromium engines; do
-              for shard in $(seq "$SHARDS"); do
-                test -f "blob-reports/report-$name-$shard.zip"
-              done
+            for name in $REPORTS; do
+              test -f "blob-reports/report-$name.zip"
             done
           fi
           if compgen -G 'blob-reports/*.zip' > /dev/null; then
@@ -596,7 +608,8 @@ jobs:
           echo "images=$(jq -cn '$ARGS.positional' --args "${images[@]}")" >> "$GITHUB_OUTPUT"
           version=$(node -p "require('@playwright/test/package.json').version")
           browsers=()
-          for name in chromium engines; do
+          # The journeys matrix's caches.
+          for name in chromium firefox webkit; do
             cached "playwright-$RUNNER_OS-$version-$name" || browsers+=("$name")
           done
           echo "Browsers missing: ${browsers[*]:-none}"
@@ -687,10 +700,11 @@ jobs:
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - run: |
+          # As the journeys matrix installs them for this cache.
           if [ "$BROWSERS" = chromium ]; then
             npx playwright install chromium
           else
-            npx playwright install chromium-headless-shell firefox webkit
+            npx playwright install chromium-headless-shell "$BROWSERS"
           fi
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
