@@ -111,6 +111,16 @@ describe("the Studio's layout preferences", () => {
     });
   });
 
+  it("keep a pane's size past its bounds at the browser's own text size, in larger text", () => {
+    localStorage.setItem(KEY, JSON.stringify({ asideWidth: 900 }));
+    document.documentElement.style.fontSize = "150%";
+    try {
+      expect(studioPrefs().asideWidth).toBe(900);
+    } finally {
+      document.documentElement.style.fontSize = "";
+    }
+  });
+
   it("are the defaults, and are not kept, when the browser's storage refuses", () => {
     const refusing = () => {
       throw new Error("SecurityError");

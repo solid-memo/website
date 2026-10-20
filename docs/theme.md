@@ -123,6 +123,9 @@ follow the root's font size is kept to a few places, and made to:
 - **Breakpoints** are in `rem`. A media query reads `rem` as the
   browser's own font size, not the root's, so a breakpoint follows the
   browser's text size but not the page's.
+- **The Studio's panes**: a splitter's least and most sizes are in
+  pixels for a root font size of 16px, and as much larger as the root's
+  font size is ([`splitter.ts`](../apps/studio/src/ui/shell/splitter.ts)).
 - **Text that could be cut short** wraps instead: the name of the
   group a dragged deck would land in, a bar chart's names under its
   bars, and the Studio's instance switcher. Who is signed in, which the

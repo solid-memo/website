@@ -2,7 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, DOCK_HEIGHT, type PaneSize } from "./splitter";
+import {
+  ASIDE_WIDTH,
+  clampSize,
+  DETAIL_WIDTH,
+  DOCK_HEIGHT,
+  type PaneSize,
+  scaledPane,
+} from "./splitter";
 import { VIEW_TABLES, type SavedView, type ViewTable } from "./views";
 
 /** How tightly the Studio's rows and controls are packed: compact (about 28px), or comfortable (44px, for touch). */
@@ -72,9 +79,11 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
   } = typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
   const shown = (value: unknown, fallback: boolean) =>
     typeof value === "boolean" ? value : fallback;
-  // A size out of its bounds is brought within them: the bounds may have changed since.
+  // A size out of its bounds is brought within them: the bounds (or the text size) may have changed since.
   const sized = (value: unknown, size: PaneSize) =>
-    typeof value === "number" && Number.isFinite(value) ? clampSize(value, size) : size.initial;
+    typeof value === "number" && Number.isFinite(value)
+      ? clampSize(value, scaledPane(size))
+      : size.initial;
   return {
     density: DENSITIES.includes(density as Density) ? (density as Density) : DEFAULT_PREFS.density,
     sidebar: shown(sidebar, DEFAULT_PREFS.sidebar),

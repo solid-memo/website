@@ -7,7 +7,7 @@ import { useId } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { StudioRoute } from "../router";
 import type { ActivityEntry } from "./activity";
-import { DOCK_HEIGHT } from "./splitter";
+import { clampSize, DOCK_HEIGHT, scaledPane } from "./splitter";
 import { Splitter } from "./Splitter";
 
 /** The dock's tabs, in their order. */
@@ -59,6 +59,9 @@ export function BottomDock({
 }) {
   const { t, locale } = useI18n();
   const base = useId();
+  // Within bounds as large as the text.
+  const size = scaledPane(DOCK_HEIGHT);
+  const shownHeight = clampSize(height, size);
   const tabId = (each: DockTab) => `${base}-${each}`;
   const panelId = `${base}-panel`;
   const label = (each: DockTab) =>
@@ -81,14 +84,14 @@ export function BottomDock({
       aria-label={t("studio.dock.label")}
       data-region
       tabIndex={-1}
-      style={{ height: `${height}px` }}
+      style={{ height: `${shownHeight}px` }}
     >
       <Splitter
         label={t("studio.dock.resize")}
         controls={id}
         orientation="horizontal"
-        value={height}
-        size={DOCK_HEIGHT}
+        value={shownHeight}
+        size={size}
         onChange={onHeight}
       />
       <div class="studio-dock-bar">

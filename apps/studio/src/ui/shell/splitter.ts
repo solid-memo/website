@@ -21,6 +21,17 @@ export const DETAIL_WIDTH: PaneSize = { min: 320, max: 960, initial: 480 };
 /** The dock's height, under the main content. */
 export const DOCK_HEIGHT: PaneSize = { min: 96, max: 480, initial: 192 };
 
+/**
+ * A pane's bounds at the page's text size: those above are for a root
+ * font size of 16px, the browser's own, and a larger text size (the
+ * browser's, or the page's) makes them as much larger, so a pane keeps
+ * as much of its content in sight.
+ */
+export function scaledPane(size: PaneSize): PaneSize {
+  const scale = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) / 16;
+  return { ...size, min: Math.round(size.min * scale), max: Math.round(size.max * scale) };
+}
+
 /** How far an arrow key moves a splitter, in CSS pixels. */
 export const SPLITTER_STEP = 16;
 
