@@ -18,7 +18,7 @@ package's own tests cover its own code — `npm test` fails below that.
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
-npm run check:ci  # npm run check without the deck library, as CI's build job runs it (its library job checks the library)
+npm run check:ci  # npm run check without the deck library, as CI's check job runs it (its library job checks the library)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
@@ -592,31 +592,34 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 
 | Job | Kind | What it checks |
 |---|---|---|
-| `gate` | deterministic | what the run runs: every job, or the deterministic ones alone (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `build` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`, with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
+| `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
+| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s. The merge queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
+| `site` | deterministic | `npm run build`, once for the whole run, the docs' diagrams drawn in Chromium's headless shell as in `check`; the site is kept a week as the run's `site` artifact, so a `journeys` job run again still finds it, and the `journeys` jobs test that build, which the deploy ships ([deployment.md](deployment.md#the-build-ci-tested)) |
+| `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over what that run made, its site, kept as this run's `site` artifact, and, but on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
+| `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
 | `library` | deterministic | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
 | `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
-| `journeys (<project>)` | timing-dependent | the user journeys: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `journeys.solid-memo.com` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every job's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
-| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `journeys.solid-memo.com` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped by the gate, it fails without every job's report (when the `site` job's failure skipped them, it has none to merge, and the run fails already); its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
+| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `check`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | deterministic | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
-| `warm`, `warm-images`, `warm-browsers` | deterministic | nothing: on `main`, when the timing-dependent jobs are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's and the journeys' browsers, and the other two pull, build or download only what is missing, and save it. Like `caches`, they fail neither the run nor `ci-ok` |
-| `ci-ok` | deterministic | that every job above passed, `journeys-report`, `caches` and the `warm` jobs aside; `pod`, `contract` and `journeys` may be skipped only when the gate skipped them |
+| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another and the jobs that test are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's, the journeys' browsers and Chromium's headless shell, and `warm-images` and `warm-browsers` pull, build or download only what is missing, and save it; `warm-pip` installs the Python tools, so setup-python saves pip's caches where `main` lacks them. Like `caches`, they fail neither the run nor `ci-ok` |
+| `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches` and the `warm` jobs aside |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
 on `main` (a setting of the repository, Settings › Rules) is to require
 it and nothing else, and Renovate merges its updates
 through a pull request once it passes (`automergeType: 'pr'` in
 `renovate.json5`), as anyone's change is merged. It runs even when a job
-before it failed, and fails unless every one passed, or, for `pod`,
-`contract` and `journeys`, was skipped by the gate. A matrix job's
+before it failed, and fails unless every one passed, or was skipped by
+the gate's choice: the jobs that test when the run reuses another, the
+two that reuse when it tests. A matrix job's
 checks are named per server, and jobs come and go, so the ruleset names
-this job alone. (Another workflow's job named `build`, deploy.yml's,
-would also answer to a required check of that name.) Deploys follow a
+this job alone. Deploys follow a
 green run on a release commit on `main`
 ([deployment.md](deployment.md#github-pages-automatic)). Every check of
 `ns/` and `decks/` runs here, the comparison with the base included, so
@@ -631,12 +634,11 @@ was slow: the end-to-end tests against real servers (`pod`,
 `contract`) and the user journeys in every browser. Each
 job in [ci.yml](../.github/workflows/ci.yml) says which it is, in its
 comment and in the table above, and a new job is given its kind when it
-is added, which decides where it runs
-([releasing.md](releasing.md#what-each-stage-checks)): every job runs in
-a pull request and the merge queue, and blocks there, but a
-timing-dependent one is skipped on a push to `main` the queue passed and
-on a release commit, whose code it already ran on. A job that runs
-always blocks.
+is added. Both kinds run where a tree is tested, in a pull request and
+the merge queue, and block there; neither runs again on a push to
+`main` the queue passed or on a release commit, whose code they already
+ran on ([releasing.md](releasing.md#what-each-stage-checks)). A job that
+runs always blocks.
 
 A timing-dependent job that fails where it runs is fixed, not retried:
 the journeys' waits, for one, are made to hold, with no second try
@@ -699,7 +701,12 @@ token can delete caches, runs on `main` alone), no job uses a secret,
 and no checkout keeps the token (`persist-credentials: false`). A fork's
 run may restore the caches `main`'s runs saved; what it saves (npm's,
 pip's and Playwright's, not Turbo's or the images') is kept for its own
-pull request only.
+pull request only. No pull request run's artifact reaches `main`:
+`reuse` takes over only those of a run of this repository's own, the
+merge queue's run that passed the commit `main` moved to or, for a
+release commit whose parent skipped the queue, that parent's push run
+on `main`. Either ran the code that landed, as `main`'s own run would
+have.
 
 The job ids `pod` and `contract`, and their `matrix.server` lists, are
 read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that
@@ -802,7 +809,7 @@ ends with checks of the repository as a whole, plain Node scripts in
 ## Documentation
 
 The project's Markdown (`docs/`, the READMEs, `AGENTS.md`) is checked
-for its style and spelling by `npm run check` (so in CI's `build` job),
+for its style and spelling by `npm run check` (so in CI's `check` job),
 and for its links, with publiccode.yml and every file's license, by
 CI's `docs` job:
 
@@ -945,6 +952,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | The docs as a site (`packages/markdown/tooling/`) | an injected `Io` and `draw`, a fake browser | `docsSite.test.ts` renders docs held in memory: each kind of link from the README and from a page, and that no address starts with `/`; every problem, with its file and line; escaping; the page's frame, the figure and the figure without drawings; the font's license beside the drawings and in the footer of a page with a figure; and an archive; and that every page it writes passes `checkPage`, which refuses what a page is not written as. It also renders the repository's own `docs/` with a fake `draw` and checks that each page has as many links, tables and figures as its source, so a docs edit that breaks a link fails `npm run check` (the task's inputs hold `docs/` and the Markdown at the root). `publishDocs.test.ts` runs the Vite plugin's build hook and its dev server's middleware with a fake browser ([markdown.md](markdown.md#the-docs-as-a-site)). |
 | A release's docs as an archive (`scripts/docsArchive.ts`) | an injected `Io` and `draw` | `docsArchive.test.ts` packs the repository's own `docs/` with a `draw` that makes drawings as `drawDiagrams` does, with the system's `tar`, and lists and unpacks the archive: every entry under `docs/`, in order, the font's license among them and the list of versions not, every drawing safe to serve (`checkSvg`) and carrying the font's notice, and a page linking the release's tag and never indexed. Nothing is written when the diagrams were not drawn, a drawing is unsafe or lacks the notice, or the docs have problems. The script's own `draw` is held to drawing in Chromium under `DOCS_DIAGRAMS=skip` too, and its repository address to `apps/web`'s `.env` files, as the site's build reads them ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). |
 | Each release's docs, served by the deploy (`scripts/docsVersions.ts`) | an injected `Io`: the environment, GitHub's API in memory, and the attestation check | `docsVersions.test.ts` packs a release's docs as `renderDocsSite` writes an archive, with the system's `tar`, and serves it from a fake API, a hundred releases a page: it is unpacked under `docs/X.Y.Z/` of a built site, a draft's or a missing archive is a notice, and the list of versions is written over the build's, every tag newest first. An archive is left out, with an error, when someone else uploaded it, it has no digest or another one, its address is off the API, it cannot be downloaded, GitHub holds no attestation of it (asked of the bytes downloaded, before anything is unpacked; the default check runs `gh attestation verify` for the release workflow on `main`, tried with a fake `gh`), or it is not an archive, or it holds a link, a file outside `docs/` or of another kind, a file twice, no front page, drawings without the font's license, or a page, stylesheet or drawing that its check refuses; and when its folder is in the build already. An API that cannot be read leaves every version linked in the repository. The script asks for its folder, `DOCS_TAGS` and a repository on GitHub ([deployment.md](deployment.md#each-releases-docs)). |
+| The version a deployed site states (`scripts/siteVersion.ts`) | an injected `Io`: the site's files in memory, the repository's version | `siteVersion.test.ts` gives a built site the repository's version: the app's page and every page of the docs, the list of versions included, state it, and nothing else is written; a page that states none is named and nothing is written, and a site not built, a version that is not `X.Y.Z` or a call without one folder are refused. `withSiteVersion` (`config.test.ts`) and `withDocsVersion` (`docsSite.test.ts`) make a page the one a build at the new version writes. |
 | The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, what the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of JavaScript gzipped (623 kB in October 2026, against 630, raised from 600 for the Studio graph's messages in each language, from 610 for the palettes, the text sizes and preferences format 6, which the preferences' screen and the first instance read need, and from 620 for the palette editor, its messages in each language and the built-in palettes' colors it starts from; past it, the test names the largest modules, and a change that needs the weight raises the budget, saying why), and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). It also checks the docs the build publishes: a page for each `docs/*.md`, each with the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address and ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link leading to a heading, a page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure for each Mermaid block, its light and dark drawings safe to serve (`checkSvg`) and carrying the font's notice; the font's license beside them, as the package has it; the sitemap listing every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, a page the build serves. It draws in the real Chromium, as the build does; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source instead, and nothing is drawn. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME` and the root's `package.json`, which the build reads, `publiccode.yml`, and the Markdown at the root, whose headings the docs' links lead to. |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `createAppUseCases` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |

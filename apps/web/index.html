@@ -13,6 +13,12 @@
     content="script-src 'self' 'sha256-o/OkTyg5paAjpiXKPEbN6jdtH/hBgznG3HB8dXsFsCU='; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Spaced-repetition flashcards that live in your own Solid pod." />
+  <!-- The site's version, from the root package.json, put in by
+       vite.config.ts; the footer and error reports read it from here
+       (src/config.ts). In the page rather than in the script, whose file
+       is named by a hash of its content, so a built site can be given
+       another version without touching its script (docs/configuration.md). -->
+  <meta name="version" content="%APP_VERSION%" />
   <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)" />
   <!-- The theme, the palette and the text size before the first paint,

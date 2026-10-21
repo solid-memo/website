@@ -247,10 +247,10 @@ What holds today, and what does not, criterion by criterion.
 ### 1. Code in the open
 
 - MUST, met — the source code in use is public. Production runs only a
-  released version, built from its release commit on `main`, the one its
-  tag names, after CI passes on that commit
-  ([deployment.md](deployment.md)), and only the newest version, once
-  its GitHub release is made. A deploy by hand runs only from `main`,
+  released version, after CI passes on its release commit on `main`, the
+  one its tag names: the site CI built and tested from that code, given
+  the released version ([deployment.md](deployment.md#the-build-ci-tested)),
+  and only the newest version, once its GitHub release is made. A deploy by hand runs only from `main`,
   deploys the newest version, and runs `npm run check` on it first.
 - MUST, met — the source of the policy in use is public. The SM-2 and
   FSRS-6 schedulers and the library's rules are in the repository
@@ -651,11 +651,11 @@ What holds today, and what does not, criterion by criterion.
   tests, which CI runs before the cross-check ([testing.md](testing.md)).
 - MUST, met — contributions pass all tests before they are merged.
   CI runs on every pull request, in the merge queue and on every push to
-  `main`, and `ci-ok` passes only when all its jobs did (on `main`,
-  the timing-dependent ones that the merge queue already passed are
-  skipped, [releasing.md](releasing.md#what-each-stage-checks)): `build`,
-  `library` (the deck library and the public API compared with the
-  change's base), `crosscheck`, `pod`, `contract`, `journeys` (every
+  `main`, and `ci-ok` passes only when all its jobs did (on `main`, a
+  tree the merge queue already passed is not tested again,
+  [releasing.md](releasing.md#what-each-stage-checks)): `check`,
+  `site` (the build the journeys run on), `library` (the deck library
+  and the public API compared with the change's base), `crosscheck`, `pod`, `contract`, `journeys` (every
   journey in Chromium, and a set of them in Firefox, WebKit and on a
   phone, with axe's accessibility checks), `docs`, `workflows`
   (actionlint and zizmor over the workflows) and `commits` (commitlint
@@ -1146,7 +1146,7 @@ landed and **Open.** when it has not: most of it landed on the branch
   run's summary.
 - **Done.** **A docs job.** lychee (offline on every change, online weekly),
   `reuse lint` and the publiccode.yml parser; markdownlint and cspell
-  run in `npm run check`, so in the build job.
+  run in `npm run check`, so in the check job.
 - **Done.** **License required.** `npm run library:check` refuses a new deck
   version without `dcterms:license`, and `sm2.test.ts` checks the
   scheduler against the table it reads from

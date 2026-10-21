@@ -18,10 +18,12 @@ name: Release
 # run's own token could not, and a push made with it would start no
 # workflow. A push with the key does, so CI runs on the release commit,
 # the deploy after it puts the new version on the site (deploy.yml deploys
-# only a commit a version tag names), and this workflow runs again and
-# finds nothing to release since the tag. The key is a secret of the
-# release environment, which allows only main, so a workflow pushed on
-# any other branch cannot read it, as it could a repository secret.
+# only a commit a version tag names). This workflow skips that run:
+# nothing has been committed since the release commit's own tag, so a
+# release job there would install everything and set up Chromium only for
+# semantic-release to find nothing. The key is a secret of the release
+# environment, which allows only main, so a workflow pushed on any other
+# branch cannot read it, as it could a repository secret.
 #
 # The GitHub release carries the version's docs, rendered and drawn in
 # Chromium in the release's prepare step (npm run docs:archive), and
@@ -62,7 +64,8 @@ jobs:
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): '))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

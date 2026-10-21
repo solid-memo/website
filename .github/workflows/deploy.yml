@@ -7,7 +7,8 @@ name: Deploy to GitHub Pages
 # The site, the newest released version only (docs/deployment.md): when
 # CI has passed on a push to main, the commit it checked, if a version
 # tag (vX.Y.Z, which release.yml pushes with the release commit) names
-# it; or, run by hand from main, the newest version, after npm run
+# it, as the site CI built and tested, given the version's number; or,
+# run by hand from main, the newest version, built here after npm run
 # check. Either way, only if the tag is the newest version on main, names
 # that version's release commit, and has its GitHub release. Other
 # commits on main are not deployed, and neither is an older version: the
@@ -159,9 +160,12 @@ jobs:
     permissions:
       contents: read
       attestations: read
+      # To download the site from the CI run on the release commit.
+      actions: read
       # To set up GitHub Pages, before the artifact is uploaded.
       pages: write
-    # A run by hand checks first, with no Turbo cache: as long as CI's build.
+    # A run by hand checks and builds first, with no Turbo cache: as long
+    # as CI's check and site jobs.
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -173,16 +177,44 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Chromium, which npm run check and npm run build draw the docs' Mermaid
-      # diagrams in (docs/markdown.md). The action is the checked-out
-      # version's: one from before the drawings has none, and needs none.
-      - if: hashFiles('.github/actions/chromium/action.yml') != ''
+      # After CI on the release commit, the site that run carries (its site
+      # artifact): the build of the tree the merge queue tested, and the
+      # user journeys ran on, which its reuse job took over, or its own
+      # site job's when it ran every job. That build came before the
+      # release wrote its version, so the version is put in its pages, the
+      # one place it is stated (npm run site:version); its scripts, and
+      # the commit it names, stay as tested (docs/deployment.md). A version
+      # from before (no siteVersion.ts) has no such artifact, and is built
+      # here, as it was then. The artifact is unpacked outside the checkout,
+      # as the journeys' report is below, so none of its files can stand in
+      # for one of the checkout's that a later step runs; only once it is
+      # stated does it go where the build would have written it.
+      - if: github.event_name == 'workflow_run' && hashFiles('scripts/siteVersion.ts') != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/site/
+      - if: github.event_name == 'workflow_run' && hashFiles('scripts/siteVersion.ts') != ''
+        env:
+          SITE: ${{ runner.temp }}/site
+        run: |
+          npm run site:version -- "$SITE"
+          mv "$SITE" apps/web/dist
+      # A run by hand has no CI run behind it, so it checks the version and
+      # builds it. Chromium, which npm run check and npm run build draw the
+      # docs' Mermaid diagrams in (docs/markdown.md); the action is the
+      # checked-out version's: one from before the drawings has none, and
+      # needs none.
+      - if: >-
+          (github.event_name == 'workflow_dispatch' || hashFiles('scripts/siteVersion.ts') == '') &&
+          hashFiles('.github/actions/chromium/action.yml') != ''
         uses: ./.github/actions/chromium
-      # CI checked the commit a workflow_run deploys; a run by hand has no
-      # CI run behind it, so it checks the version itself.
       - if: github.event_name == 'workflow_dispatch'
         run: npm run check
-      - run: npm run build
+      - if: github.event_name == 'workflow_dispatch' || hashFiles('scripts/siteVersion.ts') == ''
+        run: npm run build
       # Each release's docs, from the archive its GitHub release carries,
       # under /docs/X.Y.Z/, and the list of every version over the build's
       # (docs/deployment.md#each-releases-docs). A version whose archive is

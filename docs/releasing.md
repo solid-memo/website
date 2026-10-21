@@ -209,37 +209,43 @@ lists only in part.
 ## What each stage checks
 
 A change to `main` meets CI up to four times on its way to the site,
-and the stages do not all have the same say. Each job of
-[ci.yml](../.github/workflows/ci.yml) is deterministic or
-timing-dependent ([testing.md](testing.md#deterministic-and-timing-dependent-jobs)),
-and CI's `gate` job (`npm run ci:gate`,
+but its tree is tested once. CI's `gate` job (`npm run ci:gate`,
 [ciGate.ts](../scripts/ciGate.ts)) decides, for each run, whether the
-timing-dependent jobs run. Every job that runs blocks; the
-timing-dependent ones are skipped, not run to no purpose, where the same
-code already passed them, as they are the slowest jobs and the ones a
-busy runner fails.
+run tests its tree, every job running and blocking, or reuses the run
+that already tested the same tree: then the jobs that test are skipped,
+not run again to the same end, and the run takes over what that run
+made.
 
 | Stage | What runs, and blocks |
 |---|---|
 | A pull request | every job |
 | The merge queue (`merge_group`) | every job: this is where a tree is tested at full strength before it lands, and where a flaky check is fixed, not retried |
-| A push to `main` the merge queue passed | the deterministic jobs; the same commit passed every job in the queue |
+| A push to `main` the merge queue passed | the queue's run is reused: its site and Turbo's cache are taken over |
 | A push to `main` that skipped the queue | every job, as in the queue |
-| A release commit | the deterministic jobs, and that the commit changes nothing but the files a release writes, when CI passed its parent on `main`; every job when it did not |
+| A release commit | the run that tested its parent is reused: its site is taken over, and the commit's own files are linted, once the `gate` has checked that it changes nothing but the files a release writes, when CI passed its parent on `main`; every job when it did not |
 | A run by hand | every job |
 
-So a change's timing-dependent jobs run in its pull request, once for
-each push to it, and once more in the merge queue, and never again for
-the same code. Interop ([testing.md](testing.md)), which runs the
-advisory servers' suites after a push to `main`, likewise skips a
-release commit.
+So a change's tree is tested in its pull request, once for each push
+to it, and once more in the merge queue, on top of `main` and the pull
+requests ahead of it, and never again. Interop
+([testing.md](testing.md)), which runs the advisory servers' suites
+after a push to `main`, likewise skips a release commit.
 
 **Test a tree once, at full strength, before it lands.** The merge
 queue builds exactly the commit `main` moves to
 ([testing.md](testing.md#the-merge-queue)), so the push run on `main`
-that follows checks a tree CI already passed in full. The gate asks
+that follows meets a tree CI already passed in full. The gate asks
 GitHub's API whether a `merge_group` run passed that commit; when one
-did, only the deterministic jobs run.
+did, the push run tests nothing again, and its `reuse` job takes over
+what the queue's run made: the site its `site` job built, kept as the
+push run's own `site` artifact, and Turbo's cache after its `check`
+job, which the queue's run keeps as its `turbo-cache` artifact and the
+push run saves as `main`'s, the cache every pull request starts from.
+When the queue tests several pull requests at once, each is a commit
+of its own on top of those ahead of it, with a run of its own, and
+`main` moves to the last; a run is found by its commit, never by its
+pull request, so `main`'s run reuses the one that tested its whole
+tree.
 
 **Know when a change skipped the queue.** A change can reach `main`
 without the queue: a merge through a ruleset bypass, such as one from a
@@ -249,31 +255,37 @@ its commit, and every job runs. The release follows that run only
 once it passes ([below](#what-a-release-does)), so a release built on
 such a commit waits for the full run.
 
-**Deploy on the tested tree.** A release commit changes only the
-version's files: the five that `release.config.mjs` lists (`assets`):
-`CHANGELOG.md`, `CITATION.cff`, `package.json`, `package-lock.json`
-and `publiccode.yml`. Its code is its parent's, which CI passed on
-`main` before the release was made. So its run runs the deterministic
-jobs, the build among them, and the gate fails it if the commit changes
-any other file, or has more than one parent. The timing-dependent jobs,
-the user journeys in every browser among them, are skipped, and cannot
-hold up the deploy. Should CI not have passed its parent on `main` (a release
-commit pushed by hand), every job runs.
+**A release commit is not tested again.** A release commit changes
+only the version's files: the five that `release.config.mjs` lists
+(`assets`): `CHANGELOG.md`, `CITATION.cff`, `package.json`,
+`package-lock.json` and `publiccode.yml`. Its code is its parent's,
+which CI passed on `main` before the release was made. So its run
+reuses the one that tested its parent, taking over its site, which the
+deploy ships ([deployment.md](deployment.md#the-build-ci-tested)), and the
+gate fails it if the commit changes any other file, or has more than
+one parent; its `release-files` job lints those files as
+`npm run check` does, and checks `publiccode.yml` with its parser.
+Nothing that tests code, the user journeys in every browser among it,
+runs again, so none of it can hold up the deploy. Should CI not have
+passed its parent on `main` (a release commit pushed by hand), every
+job runs.
 
 The report of the journeys the deploy publishes at `journeys.solid-memo.com`
-([deployment.md](deployment.md#the-journeys-report)) still has every browser's: the release
-commit's run takes the journeys from the run that ran them on its code,
-which the gate names (`tested-by`). That is its parent's merge queue
-run, which keeps the journeys' traces and reports for this, or, for a
-parent that skipped the queue, the parent's own push run. GitHub keeps
-that run's reports for 7 days; once one has expired, as for a release
-made late by hand, the gate runs every job instead.
+([deployment.md](deployment.md#the-journeys-report)) still has every browser's: a run that
+reuses another takes the journeys from it (`tested-by`). That is the
+merge queue's run of the commit, or of a release commit's parent, which
+keeps the journeys' traces and reports for this, or, for a parent that
+skipped the queue, the parent's own push run. GitHub keeps that run's
+artifacts for 7 days; once one the run would take over has expired, as
+for a release made late by hand, the gate runs every job instead.
 
 What a skipped job would have saved on `main`, the caches every pull
 request reads, CI's `warm` jobs save instead: `warm` looks up each
-server's images, the journeys' server's, and the journeys' browsers, and `warm-images` and
-`warm-browsers` pull, build or download only what is missing, and save
-it ([testing.md](testing.md#continuous-integration)).
+server's images, the journeys' server's, the journeys' browsers and
+Chromium's headless shell, and `warm-images` and `warm-browsers` pull,
+build or download only what is missing, and save it; `warm-pip`
+installs the Python tools, so pip's caches are saved where `main`
+lacks them ([testing.md](testing.md#continuous-integration)).
 
 A `workflow_dispatch` run of the deploy runs `npm run check` itself,
 as before, and needs no CI run.
@@ -340,10 +352,12 @@ and in `publiccode.yml` where it says the same.
 tag, so a release writes nothing into it.
 
 The release commit is not marked to skip CI. CI runs on it, and once
-it passes, the deploy builds that commit, the one the tag names, and
-puts the new version on the site, its footer included; it deploys no
-other commit ([deployment.md](deployment.md)). The release workflow
-runs again too, finds no commit since the tag, and releases nothing.
+it passes, the deploy ships the site that run carries, the build CI
+tested, with the new version put in its pages, its footer included
+([deployment.md](deployment.md#the-build-ci-tested)); it deploys no
+other commit. The release workflow
+does not run on it: nothing has been committed since the tag, so it
+would release nothing.
 CI's run on a release commit has a concurrency group of its own, so a
 newer push to `main` cannot replace it while it waits, and hold back
 the deploy ([testing.md](testing.md#continuous-integration)).
@@ -494,13 +508,20 @@ next push to `main` that passes CI also tries again.
   `chore(release): X.Y.Z`, or if the GitHub release is missing.
 
 - **CI failed on the release commit**: the version is released but not
-  deployed. No timing-dependent job runs there
+  deployed. When the run reuses the one that tested its parent, nothing
+  that tests code runs there
   ([What each stage checks](#what-each-stage-checks)), so the failure is
-  a deterministic job's, or the `gate`'s, which refuses a release commit
-  that changes more than the version's files. A deterministic job that
-  failed on code its parent passed with is flaky: re-run CI's failed
-  jobs on that commit, and fix the flake in a pull request of its own;
-  once the run passes, the deploy follows as usual. Or run the deploy by
+  the `gate`'s, which refuses a release commit that changes more than
+  the version's files, `release-files`', which lints them, `reuse`'s,
+  which takes over the tested run's site, or `journeys-report`'s, which
+  merges the tested run's journeys. A lint that fails is fixed in a pull
+  request of its own, which the next release ships; a `reuse` or a
+  `journeys-report` that failed on its download is run again: re-run
+  CI's failed jobs on that commit, and once the run passes, the deploy
+  follows as usual. When every job ran instead (CI had not passed the
+  parent on `main`, or an artifact the run would take over had
+  expired), a failure there is met as on any push to `main`: a flaky
+  job is re-run, and its flake fixed in a pull request of its own. Or run the deploy by
   hand, which checks the version itself. Either deploys the version
   only while it is the newest: once a newer one is released, the deploy
   after a re-run deploys nothing, and says so, and the site stays on

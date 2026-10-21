@@ -15,9 +15,9 @@ import { PAINTED_ROLES } from "@solid-memo/domain/customPalette";
 import { checkSvg, fontNotice } from "@solid-memo/markdown/tooling/diagrams";
 import { DOCS_CSP } from "@solid-memo/markdown/tooling/docsSite";
 import { diagramMode, FONT_LICENSE_FILE } from "@solid-memo/markdown/tooling/drawDiagrams";
-import { commitSha } from "@solid-memo/vocab/tooling/siteBuild";
+import { appVersion, commitSha } from "@solid-memo/vocab/tooling/siteBuild";
 import { siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
-import { siteConfig, siteHtml, type SiteConfig } from "./config";
+import { siteConfig, siteHtml, siteVersion, type SiteConfig } from "./config";
 
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
@@ -363,7 +363,7 @@ describe("the page's name", () => {
   it("is the site's (VITE_APP_NAME, Solid Memo when unset) in its title, link preview and JSON-LD", () => {
     const config = builtConfig();
     const { appName } = config;
-    const inHtml = siteHtml("%APP_NAME%", config);
+    const inHtml = siteHtml("%APP_NAME%", { ...config, version: appVersion() });
     expect(html).not.toContain("%APP_NAME");
     expect(html).toContain(
       `<title>${inHtml} - Spaced-repetition flashcards in your Solid pod</title>`,
@@ -379,7 +379,16 @@ describe("the page's name", () => {
 describe("the page's repository", () => {
   it("is the site's (VITE_REPO_URL, Solid Memo's when unset) in its noscript link", () => {
     expect(html).not.toContain("%REPO_URL");
-    expect(html).toContain(`<a href="${siteHtml("%REPO_URL%", builtConfig())}">source code</a>`);
+    expect(html).toContain(
+      `<a href="${siteHtml("%REPO_URL%", { ...builtConfig(), version: appVersion() })}">source code</a>`,
+    );
+  });
+});
+
+describe("the page's version", () => {
+  it("is the root package.json's, in a meta element the page reads", () => {
+    expect(html).not.toContain("%APP_VERSION");
+    expect(siteVersion(dom)).toBe(appVersion());
   });
 });
 

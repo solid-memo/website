@@ -595,13 +595,28 @@ describe("AppShell", () => {
       );
     }
 
-    afterEach(() => {
+    /**
+     * Goes to `hash` once the window has said so: happy-dom fires
+     * hashchange later, and a boundary that heard it only after the
+     * workspace failed would render the screen again, a heading found
+     * before it then gone from the page.
+     */
+    async function goTo(hash: string) {
+      if (window.location.hash === hash) return;
+      const changed = new Promise((resolve) =>
+        window.addEventListener("hashchange", resolve, { once: true }),
+      );
+      window.location.hash = hash;
+      await changed;
+    }
+
+    afterEach(async () => {
       vi.restoreAllMocks();
-      window.location.hash = "";
+      await goTo("");
     });
 
     it("says so under the same masthead and above the same footer, which still work", async () => {
-      window.location.hash = "#/broken";
+      await goTo("#/broken");
       renderFragile();
       const heading = await screen.findByRole("heading", {
         level: 2,
@@ -626,7 +641,7 @@ describe("AppShell", () => {
     });
 
     it("renders the workspace afresh at the start", async () => {
-      window.location.hash = "#/broken";
+      await goTo("#/broken");
       renderFragile();
       fireEvent.click(await screen.findByRole("button", { name: "Go to the start" }));
       expect(await screen.findByText("The deck list")).toBeInTheDocument();

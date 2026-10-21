@@ -15,7 +15,9 @@ import {
   isRelease,
   main,
   run,
+  SITE,
   strayFiles,
+  TURBO_CACHE,
 } from "./ciGate.ts";
 
 const SHA = "a".repeat(40);
@@ -83,23 +85,35 @@ describe("decide", () => {
     expect(passed).not.toHaveBeenCalled();
   });
 
-  it("runs the deterministic jobs on main when the merge queue passed the commit", async () => {
+  it("reuses the queue run on main when the merge queue passed the commit", async () => {
     const passed = runs({ [`${SHA}:merge_group`]: 9 });
-    expect(await decide(fakeIo({ passed }))).toEqual({
-      jobs: "deterministic",
+    const kept = vi.fn(async () => true);
+    expect(await decide(fakeIo({ passed, kept }))).toEqual({
+      jobs: "reuse",
       testedBy: 9,
-      why: "aaaaaaaa passed the merge queue in run 9: the deterministic jobs run.",
+      why: "aaaaaaaa passed the merge queue in run 9: this run reuses it.",
     });
+    expect(kept.mock.calls).toEqual([
+      [9, JOURNEYS_BLOBS],
+      [9, SITE],
+      [9, TURBO_CACHE],
+    ]);
   });
 
-  it("runs every job on main when the queue run's journeys' blobs have expired", async () => {
-    const kept = vi.fn(async () => false);
+  it("runs every job on main when the queue run keeps an artifact no longer", async () => {
+    const kept = vi.fn(async (_run: number, prefix: string) => prefix !== SITE);
     const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept });
     expect(await decide(io)).toEqual({
       jobs: "all",
-      why: "aaaaaaaa passed the merge queue in run 9, but it keeps no journeys-blob-* blobs, or they expired: every job runs, so the journeys' report is whole.",
+      why: "aaaaaaaa passed the merge queue in run 9, but it keeps no site*, or they expired: every job runs, so nothing is missing.",
     });
-    expect(kept).toHaveBeenCalledWith(9, JOURNEYS_BLOBS);
+  });
+
+  it("names every artifact the queue run keeps no longer", async () => {
+    const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept: async () => false });
+    expect((await decide(io)).why).toContain(
+      "keeps no journeys-blob-*, site*, turbo-cache*, or they expired",
+    );
   });
 
   it("runs every job on main when the commit skipped the merge queue", async () => {
@@ -112,19 +126,24 @@ describe("decide", () => {
   describe("on a release commit", () => {
     const release = () => ({ sha: SHA, subject: "chore(release): 4.1.1", parents: [PARENT] });
 
-    it("runs the deterministic jobs, tested by its parent's queue run, when CI passed the parent on main", async () => {
+    it("reuses its parent's queue run when CI passed the parent on main, but not its Turbo cache", async () => {
       const passed = runs({ [`${PARENT}:push`]: 7, [`${PARENT}:merge_group`]: 9 });
-      expect(await decide(fakeIo({ head: release, passed }))).toEqual({
-        jobs: "deterministic",
+      const kept = vi.fn(async () => true);
+      expect(await decide(fakeIo({ head: release, passed, kept }))).toEqual({
+        jobs: "reuse",
         testedBy: 9,
-        why: "A release commit, changing only the version's files, on bbbbbbbb, which CI passed on main; run 9 ran every job on its code: the deterministic jobs run.",
+        why: "A release commit, changing only the version's files, on bbbbbbbb, which CI passed on main; run 9 ran every job on its code: this run reuses it.",
       });
+      expect(kept.mock.calls).toEqual([
+        [9, JOURNEYS_BLOBS],
+        [9, SITE],
+      ]);
     });
 
-    it("is tested by its parent's push run when the parent skipped the queue", async () => {
+    it("reuses its parent's push run when the parent skipped the queue", async () => {
       const passed = runs({ [`${PARENT}:push`]: 7 });
       expect(await decide(fakeIo({ head: release, passed }))).toMatchObject({
-        jobs: "deterministic",
+        jobs: "reuse",
         testedBy: 7,
       });
     });
@@ -154,10 +173,10 @@ describe("main", () => {
     expect(io.logs).toEqual([expect.stringContaining("without passing the merge queue")]);
   });
 
-  it("writes which run tested the code when only the deterministic jobs run", async () => {
+  it("writes which run tested the code when the run reuses it", async () => {
     const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }) });
     expect(await main(io)).toBe(0);
-    expect(io.outputs).toEqual(["jobs=deterministic", "tested-by=9"]);
+    expect(io.outputs).toEqual(["jobs=reuse", "tested-by=9"]);
   });
 
   it("fails, writing nothing, on a release commit that is not one", async () => {

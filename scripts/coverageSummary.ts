@@ -5,7 +5,7 @@
 /**
  * `npm run coverage:summary`: the coverage each package's last `npm test`
  * measured (vitest's json-summary, `<package>/coverage/coverage-summary.json`),
- * as a Markdown table. CI's build job adds it to its run's summary
+ * as a Markdown table. CI's check job adds it to its run's summary
  * ($GITHUB_STEP_SUMMARY); without that variable it is printed. Turbo
  * restores a cached test's coverage/ folder, so a cached run has one too.
  * It only reports: the thresholds are each package's (docs/testing.md).

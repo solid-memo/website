@@ -52,10 +52,9 @@ describe("appVersion", () => {
 });
 
 describe("siteDefines", () => {
-  it("gives the apps all three as code", () => {
+  it("gives the apps the commit and the ruleset as code, but not the version", () => {
     execFileSync.mockReturnValue("abc123\n");
     expect(siteDefines()).toEqual({
-      __APP_VERSION__: JSON.stringify(appVersion()),
       __COMMIT_SHA__: '"abc123"',
       __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
     });

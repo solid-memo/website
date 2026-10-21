@@ -17,9 +17,10 @@
  *
  * The release commit is not marked [skip ci]: CI runs on it, and the
  * deploy that follows, which deploys only a commit a version tag names,
- * builds the site and the footer's version from it. Run again on
- * its own commit, semantic-release finds nothing since the tag, and
- * releases nothing.
+ * ships the site that run carries, the build CI tested, with the
+ * version from the commit's package.json put in its pages. The release
+ * workflow does not run on a release commit: there is nothing since the
+ * tag to release.
  */
 
 /**
@@ -109,7 +110,8 @@ export default {
     ["@semantic-release/release-notes-generator", { preset: "conventionalcommits", parserOpts }],
     ["@semantic-release/changelog", { changelogFile: "CHANGELOG.md", changelogTitle }],
     // The root package.json's version, and package-lock.json's: the
-    // footer reads it (packages/vocab/tooling/siteBuild.ts). The
+    // deploy puts it in the site's pages, which the footer reads it from
+    // (scripts/siteVersion.ts). The
     // workspace is private, and nothing is published to npm.
     ["@semantic-release/npm", { npmPublish: false }],
     // publiccode.yml's and CITATION.cff's version and date; then the
