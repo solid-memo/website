@@ -86,7 +86,8 @@ but the journeys:
   ([`style.test.ts`](../packages/ui/src/style.test.ts),
   [theme.md](theme.md#color-roles)), and of every
   text color the Studio's stylesheet uses on every surface it uses, in
-  both themes, the surfaces that hold no text left out by name
+  both themes, the surfaces that hold no text left out by name, and of
+  the sidebar's faint pin, at the ratio a field's edge needs
   ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)). Every
   built-in palette passes the palette editor's own check of a palette
   of one's own, which measures every pair the tests check of the
