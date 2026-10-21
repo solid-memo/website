@@ -582,6 +582,31 @@
     "weekChange": {
       "one": "{count} diese Woche, {change} gegenüber letzter Woche",
       "other": "{count} diese Woche, {change} gegenüber letzter Woche"
+    },
+    "welcome": {
+      "heading": "Deine Serie",
+      "makeIt": "Willkommen zurück! Lerne heute, dann sind es {next}.",
+      "counting": {
+        "one": "Weiter so: {count} Tag und es werden mehr.",
+        "other": "Weiter so: {count} Tage und es werden mehr."
+      },
+      "waiting": {
+        "one": "Deine Serie von {count} Tag wartet auf die Karten von heute.",
+        "other": "Deine Serie von {count} Tagen wartet auf die Karten von heute."
+      },
+      "oneSession": "Eine Lerneinheit hält deine Serie am Leben.",
+      "tieRecord": "Noch ein Tag, und du erreichst deinen Rekord von {longest}.",
+      "newRecord": "Lerne heute für einen neuen Rekord!",
+      "lapsed": {
+        "start": "Starte heute eine neue Serie.",
+        "fresh": "Willkommen zurück! Ein paar Karten heute beginnen eine neue Serie.",
+        "dayOne": "Jede Serie beginnt mit Tag eins. Heute kann es so weit sein.",
+        "record": {
+          "one": "Dein Rekord ist {count} Tag. Starte heute eine Serie, um ihn zu schlagen.",
+          "other": "Dein Rekord ist {count} Tage. Starte heute eine neue Serie."
+        },
+        "ready": "Schön, dich wiederzusehen. Deine Karten warten, wenn du so weit bist."
+      }
     }
   },
   "newcomerCourse": {

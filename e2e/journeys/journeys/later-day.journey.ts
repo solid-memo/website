@@ -10,7 +10,8 @@ import { fixedOffsetZone, offsetWhereItIs } from "../harness/timezone.ts";
  * A later study day, as the journey's spec numbers it: on SM-2, which a
  * new instance is not on (it starts on FSRS-6), study a deck of four
  * cards, switch the scheduler to FSRS-6 from the deck list's invitation,
- * come back the next study day, review them, forgetting two,
+ * come back the next study day, welcomed back with the streak, review
+ * them, forgetting two,
  * and read what that did to the statistics and the deck's hardest cards;
  * then reload, and the deck list still agrees. It catches the review
  * path (cards met before, due again, answered Again) and the deck list's
@@ -108,13 +109,20 @@ test("a later study day @review", async ({ app, account, runId }) => {
   );
 
   await app.step(
-    "07 · At 5 a.m., the next study day, open Solid Memo again: every card is due",
+    "07 · At 5 a.m., the next study day, open Solid Memo again: every card is due, and the streak welcomes back",
     async () => {
       await app.setTimeZone(fixedOffsetZone(night + 3 * 60));
       await app.chrome.reload();
       // A good answer to a new card gave it a day, which the switch kept:
       // all four are due today.
       await app.decks.expectToReview(deck, cards);
+      // Yesterday's one study day is the streak, and the record that
+      // studying today beats.
+      await app.decks.expectWelcomeBack({
+        streak: 1,
+        note: "today.welcome.newRecord",
+        left: cards,
+      });
     },
   );
 

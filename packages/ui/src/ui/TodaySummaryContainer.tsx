@@ -6,12 +6,13 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
-import { todayOf } from "@solid-memo/domain/statistics";
+import { todayOf, welcomeBackOf } from "@solid-memo/domain/statistics";
 import { expectedTimeToday } from "@solid-memo/domain/studyTime";
 import { studyCountsQuery } from "./DeckStudyAction";
 import { statisticsHref } from "./router";
 import { statisticsQuery } from "./studyFigures";
 import { TodaySummary } from "./TodaySummary";
+import { WelcomeBack } from "./WelcomeBack";
 
 /**
  * Today's study above the deck list, from the answers of the last
@@ -25,8 +26,10 @@ import { TodaySummary } from "./TodaySummary";
  * about how many minutes they will take, from how long an answer has
  * taken and how often young cards were forgotten over those months
  * (expectedTimeToday), a minute at least.
- * Nothing before the day's first answer, or when the answers cannot be
- * read: the deck list works without them.
+ * Before the day's first answer, a word of welcome back in its place,
+ * with the streak that studying today keeps (WelcomeBack), for a learner
+ * who has studied before. Nothing when the answers cannot be read: the
+ * deck list works without them.
  */
 export function TodaySummaryContainer({
   useCases,
@@ -44,19 +47,27 @@ export function TodaySummaryContainer({
   const known = counts.every((one) => one.data !== undefined);
   const reviews = counts.reduce((sum, { data }) => sum + (data?.dueCount ?? 0), 0);
   const newCards = counts.reduce((sum, { data }) => sum + (data?.newCount ?? 0), 0);
-  const today = statistics.data === undefined ? null : todayOf(statistics.data);
-  if (today === null) return null;
+  if (statistics.data === undefined) return null;
   const ms = expectedTimeToday({
     reviews,
     newCards,
-    young: statistics.data!.retention.young,
-    medianAnswerMs: statistics.data!.studyTime.medianAnswerMs,
+    young: statistics.data.retention.young,
+    medianAnswerMs: statistics.data.studyTime.medianAnswerMs,
   });
+  const left = known ? reviews + newCards : undefined;
+  const minutesLeft = ms === null ? undefined : Math.max(1, Math.round(ms / 60_000));
+  const today = todayOf(statistics.data);
+  if (today === null) {
+    const welcome = welcomeBackOf(statistics.data);
+    return welcome === null ? null : (
+      <WelcomeBack welcome={welcome} left={left} minutesLeft={minutesLeft} />
+    );
+  }
   return (
     <TodaySummary
       today={today}
-      left={known ? reviews + newCards : undefined}
-      minutesLeft={ms === null ? undefined : Math.max(1, Math.round(ms / 60_000))}
+      left={left}
+      minutesLeft={minutesLeft}
       statisticsHref={statisticsHref(instance.url)}
     />
   );

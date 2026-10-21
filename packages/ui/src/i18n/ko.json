@@ -561,6 +561,28 @@
     },
     "weekChange": {
       "other": "이번 주 {count}장, 지난주보다 {change}"
+    },
+    "welcome": {
+      "heading": "연속 학습",
+      "makeIt": "다시 오셨네요! 오늘 학습하면 {next}일이 돼요.",
+      "counting": {
+        "other": "계속 이어가요: {count}일째 이어지고 있어요."
+      },
+      "waiting": {
+        "other": "{count}일 연속 기록이 오늘의 카드를 기다리고 있어요."
+      },
+      "oneSession": "한 번만 학습해도 연속 기록이 이어져요.",
+      "tieRecord": "하루만 더 하면 최고 기록 {longest}일과 같아져요.",
+      "newRecord": "오늘 학습하면 새 기록이에요!",
+      "lapsed": {
+        "start": "오늘 새 연속 기록을 시작해 보세요.",
+        "fresh": "다시 오셨네요! 오늘 카드 몇 장이면 새 연속 기록이 시작돼요.",
+        "dayOne": "모든 연속 기록은 첫날부터 시작해요. 오늘이 그날일 수 있어요.",
+        "record": {
+          "other": "최고 기록은 {count}일이에요. 오늘 새 연속 기록을 시작해 보세요."
+        },
+        "ready": "다시 만나 반가워요. 카드는 준비되면 언제든 기다리고 있어요."
+      }
     }
   },
   "newcomerCourse": {

@@ -603,6 +603,34 @@
       "one": "{count} cette semaine, {change} par rapport à la précédente",
       "many": "{count} cette semaine, {change} par rapport à la précédente",
       "other": "{count} cette semaine, {change} par rapport à la précédente"
+    },
+    "welcome": {
+      "heading": "Votre série",
+      "makeIt": "Bon retour ! Étudiez aujourd’hui pour passer à {next}.",
+      "counting": {
+        "one": "Continuez : {count} jour et ce n’est pas fini.",
+        "many": "Continuez : {count} de jours et ce n’est pas fini.",
+        "other": "Continuez : {count} jours et ce n’est pas fini."
+      },
+      "waiting": {
+        "one": "Votre série de {count} jour attend les cartes du jour.",
+        "many": "Votre série de {count} de jours attend les cartes du jour.",
+        "other": "Votre série de {count} jours attend les cartes du jour."
+      },
+      "oneSession": "Une séance suffit à garder votre série en vie.",
+      "tieRecord": "Encore un jour et vous égalez votre record de {longest}.",
+      "newRecord": "Étudiez aujourd’hui pour un nouveau record !",
+      "lapsed": {
+        "start": "Commencez une nouvelle série aujourd’hui.",
+        "fresh": "Bon retour ! Quelques cartes aujourd’hui lancent une nouvelle série.",
+        "dayOne": "Toute série commence par un premier jour. Ce peut être aujourd’hui.",
+        "record": {
+          "one": "Votre record est de {count} jour. Commencez une série aujourd’hui pour le battre.",
+          "many": "Votre record est de {count} de jours. Commencez une nouvelle série aujourd’hui.",
+          "other": "Votre record est de {count} jours. Commencez une nouvelle série aujourd’hui."
+        },
+        "ready": "Ravi de vous revoir. Vos cartes vous attendent quand vous voulez."
+      }
     }
   },
   "newcomerCourse": {

@@ -16,6 +16,7 @@ import {
   statisticsOf,
   streaksOf,
   todayOf,
+  welcomeBackOf,
 } from "./statistics";
 
 const DECK = "https://pod.example/i/catalog.ttl#deck-";
@@ -438,5 +439,37 @@ describe("todayOf", () => {
 
   it("is null while nothing is studied today", () => {
     expect(todayOf(statisticsOf([answer("2026-10-02", 4)], "2026-10-03"))).toBeNull();
+  });
+});
+
+describe("welcomeBackOf", () => {
+  it("keeps yesterday's streak while nothing is studied today, with the day as a number", () => {
+    const statistics = statisticsOf(
+      [
+        answer("2026-09-20", 4, undefined, "1", "a"),
+        answer("2026-09-21", 4, undefined, "1", "b"),
+        answer("2026-09-22", 4, undefined, "1", "c"),
+        answer("2026-10-02", 4, undefined, "1", "d"),
+      ],
+      "2026-10-03",
+    );
+    expect(welcomeBackOf(statistics)).toEqual({ streak: 1, longestStreak: 3, dayNumber: 20_729 });
+    // The next day's number is the next one.
+    expect(welcomeBackOf(statisticsOf([answer("2026-10-02", 4)], "2026-10-04"))).toMatchObject({
+      dayNumber: 20_730,
+    });
+  });
+
+  it("has a lapsed streak at 0, the record kept", () => {
+    expect(welcomeBackOf(statisticsOf([answer("2026-09-30", 4)], "2026-10-03"))).toEqual({
+      streak: 0,
+      longestStreak: 1,
+      dayNumber: 20_729,
+    });
+  });
+
+  it("is null once today has an answer, and without a study day to come back to", () => {
+    expect(welcomeBackOf(statisticsOf([answer("2026-10-03", 4)], "2026-10-03"))).toBeNull();
+    expect(welcomeBackOf(statisticsOf([], "2026-10-03"))).toBeNull();
   });
 });

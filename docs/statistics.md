@@ -38,8 +38,35 @@ study session usually ends) says what the day came to:
   minutes to go", [below](#time-spent-and-the-hours-of-the-day)), once
   how long an answer takes is known.
 
-Before the day's first answer there is no strip. When the answers
-cannot be read there is none either: the deck list works without it.
+Before the day's first answer, a learner who has studied before is
+welcomed back in the strip's place, with the streak that studying today
+keeps. Through yesterday's study the streak is still alive, so it
+leads, "5-day streak", with a note on it; then the cards left to study
+today and about how long they will take, as in the strip, so the note
+ends in something to do. The note changes each study day, so a learner
+who opens the app and leaves again does not read one line on every
+visit:
+
+- **When one more day ties or beats the record**, the note says so:
+  "One more day ties your record of 9." or "Study today for a new
+  record!".
+- **Else** it takes, one a day in turn, "Welcome back! Study today to
+  make it 6.", "Keep it going: 5 days and counting.", "Your 5-day
+  streak is waiting for today's cards." and "One session keeps your
+  streak alive.".
+- **Once the streak has lapsed**, there is no streak to show, and a
+  gentle note takes its place, one a day in turn: "Start a new streak
+  today.", "Welcome back! A few cards today begin a new streak.",
+  "Every streak begins with day one. Today can be it.", "Your record
+  is 9 days. Start a new streak today." and "Good to see you again.
+  Your cards are ready when you are.".
+
+The study day picks the note, not chance: it stays put while the list
+reads again within a day, and the next day takes the next one. With no
+study day in the last 12 months there is nothing to come back to, and
+no note. After the day's first answer the strip takes its place. When
+the answers cannot be read there is neither: the deck list works
+without them.
 It reads the last 12 study months, whatever range the statistics page
 opens on, so the record is the year's; that is the page's own read when
 its range is the last 12 months, so the two never read them twice.

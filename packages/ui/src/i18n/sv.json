@@ -582,6 +582,31 @@
     "weekChange": {
       "one": "{count} den här veckan, {change} mot förra veckan",
       "other": "{count} den här veckan, {change} mot förra veckan"
+    },
+    "welcome": {
+      "heading": "Din svit",
+      "makeIt": "Välkommen tillbaka! Studera i dag så blir det {next}.",
+      "counting": {
+        "one": "Håll i det: {count} dag i rad och det fortsätter.",
+        "other": "Håll i det: {count} dagar i rad och det fortsätter."
+      },
+      "waiting": {
+        "one": "Din svit på {count} dag väntar på dagens kort.",
+        "other": "Din svit på {count} dagar väntar på dagens kort."
+      },
+      "oneSession": "En session håller din svit vid liv.",
+      "tieRecord": "En dag till så tangerar du ditt rekord på {longest}.",
+      "newRecord": "Studera i dag för ett nytt rekord!",
+      "lapsed": {
+        "start": "Börja en ny svit i dag.",
+        "fresh": "Välkommen tillbaka! Några kort i dag startar en ny svit.",
+        "dayOne": "Varje svit börjar med dag ett. Det kan vara i dag.",
+        "record": {
+          "one": "Ditt rekord är {count} dag. Börja en svit i dag och slå det.",
+          "other": "Ditt rekord är {count} dagar. Börja en ny svit i dag."
+        },
+        "ready": "Kul att se dig igen. Dina kort väntar när du är redo."
+      }
     }
   },
   "newcomerCourse": {
