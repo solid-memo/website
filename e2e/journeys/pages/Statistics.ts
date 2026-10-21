@@ -5,7 +5,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
-import { escapeRegExp } from "../harness/strings.ts";
+import { escapeRegExp, textPattern } from "../harness/strings.ts";
 import { cellOf } from "./tables.ts";
 
 /** The statistics' tabs, as the URL names them. */
@@ -55,11 +55,11 @@ export interface DeckRow {
   name: string;
   answers: number;
   introduced?: number;
-  /** Young and mature recall: reviews remembered of reviews. */
+  /** Young and mature recall: reviews remembered of reviews; null for none, so not shown. */
   young?: { recalled: number; reviews: number } | null;
   mature?: { recalled: number; reviews: number } | null;
-  /** Recall each way, shown only with reviews both ways: `"–"` without. */
-  directions?: "–";
+  /** Recall each way, shown only with reviews both ways: null without. */
+  directions?: null;
   /** First try: new cards remembered of new cards. */
   firstTry?: { recalled: number; introduced: number } | null;
   lapses?: number;
@@ -105,7 +105,7 @@ export interface ExpectedStatistics {
    * months read: "thisMonth" for a log begun in the current month.
    */
   coverage?: "thisMonth";
-  /** Every row of "By deck", in any order. */
+  /** Every deck's block under "By deck", in any order. */
   decks?: DeckRow[];
   /** Today's row of "What each day held". */
   today?: DayHeld;
@@ -150,7 +150,7 @@ export interface ExpectedStatistics {
 
 /**
  * "Statistics", of the instance or of one deck: the range the figures
- * are of and four tabs. The overview's tiles, calendar and table by
+ * are of and four tabs. The overview's tiles, calendar and figures by
  * deck; the activity's charts of each day, the weekdays, the time spent
  * and the hours of the day, the cards introduced and where they stood
  * week by week; the memory's recall,
@@ -164,9 +164,7 @@ export class Statistics extends Screen {
   }
 
   private get byDeck(): Locator {
-    return this.main.getByRole("table").filter({
-      has: this.page.getByRole("columnheader", { name: this.t("statistics.lastStudied") }),
-    });
+    return this.main.getByRole("list", { name: this.t("statistics.byDeck"), exact: true });
   }
 
   /**
@@ -421,7 +419,7 @@ export class Statistics extends Screen {
   }
 
   /**
-   * On a deck's own statistics: the overview without a table by deck,
+   * On a deck's own statistics: the overview without the figures by deck,
    * and the activity of the deck's answers alone, `answers` of them today.
    */
   async expectDeckStatistics(answers: number): Promise<void> {
@@ -749,60 +747,70 @@ export class Statistics extends Screen {
     );
   }
 
+  /**
+   * Each deck's block under "By deck": its answers and when it was last
+   * studied, then each figure given, under its label; a share of none
+   * (null) is not shown.
+   */
   private async expectByDeck(decks: DeckRow[]): Promise<void> {
-    // Data rows only: the header row has column headers, not cells.
-    await expect(
-      this.byDeck.getByRole("row").filter({ has: this.page.getByRole("cell") }),
-    ).toHaveCount(decks.length);
+    await expect(this.byDeck.getByRole("listitem")).toHaveCount(decks.length);
     const today = await this.today();
-    const any = /.+/;
-    const recall = (shown?: { recalled: number; reviews: number } | null) =>
-      shown === undefined
-        ? any
-        : shown === null
-          ? "–"
-          : this.t("statistics.recallShare", {
-              percent: this.percent(shown.recalled, shown.reviews),
-              count: shown.reviews,
-            });
-    const quiz = (shown?: { right: number; answers: number } | null) =>
-      shown === undefined
-        ? any
-        : shown === null
-          ? "–"
-          : this.t("statistics.quizShare", {
-              percent: this.percent(shown.right, shown.answers),
-              count: shown.answers,
-            });
-    const firstTry = (shown?: { recalled: number; introduced: number } | null) =>
-      shown === undefined
-        ? any
-        : shown === null
-          ? "–"
-          : this.t("statistics.firstTryShare", {
-              percent: this.percent(shown.recalled, shown.introduced),
-              count: shown.introduced,
-            });
+    const share = (percent: string, of: string) => `${percent} ${of}`;
     for (const deck of decks) {
-      const row = this.byDeck
-        .getByRole("row")
-        .filter({ has: this.page.getByRole("rowheader", { name: deck.name, exact: true }) });
-      const cells = [
-        String(deck.answers),
-        deck.introduced === undefined ? any : String(deck.introduced),
-        recall(deck.young),
-        recall(deck.mature),
-        deck.directions === undefined ? any : deck.directions,
-        firstTry(deck.firstTry),
-        deck.lapses === undefined ? any : String(deck.lapses),
-        quiz(deck.quiz),
-        deck.lastStudied === "today" ? today : any,
-      ];
-      await expect(row.getByRole("cell"), `By deck: ${deck.name}`).toHaveText(cells);
+      const block = this.byDeck.getByRole("listitem").filter({
+        has: this.page.getByRole("heading", { name: deck.name, exact: true }),
+      });
+      await expect(block.locator(".hint"), `By deck: ${deck.name}`).toHaveText(
+        deck.lastStudied === "today"
+          ? this.t("statistics.deckAnswered", { count: deck.answers, date: today })
+          : textPattern(this.app.locale, "statistics.deckAnswered", { count: deck.answers }),
+      );
+      const figure = (key: string) =>
+        block.locator("dl > div").filter({
+          has: this.page.getByRole("term").getByText(this.t(`statistics.${key}`), { exact: true }),
+        });
+      const expectFigure = async (key: string, value: string | null | undefined) => {
+        if (value === undefined) return;
+        if (value === null) await expect(figure(key), `${deck.name}: ${key}`).toHaveCount(0);
+        else
+          await expect(figure(key).getByRole("definition"), `${deck.name}: ${key}`).toHaveText(
+            value,
+          );
+      };
+      const recall = (shown?: { recalled: number; reviews: number } | null) =>
+        shown == null
+          ? shown
+          : share(
+              this.percent(shown.recalled, shown.reviews),
+              this.t("statistics.ofReviews", { count: shown.reviews }),
+            );
+      await expectFigure("introducedColumn", deck.introduced?.toString());
+      await expectFigure("youngRecall", recall(deck.young));
+      await expectFigure("matureRecall", recall(deck.mature));
+      await expectFigure("directionsColumn", deck.directions);
+      await expectFigure(
+        "firstTry",
+        deck.firstTry == null
+          ? deck.firstTry
+          : share(
+              this.percent(deck.firstTry.recalled, deck.firstTry.introduced),
+              this.t("statistics.ofNewCards", { count: deck.firstTry.introduced }),
+            ),
+      );
+      await expectFigure("lapses", deck.lapses?.toString());
+      await expectFigure(
+        "quizAccuracy",
+        deck.quiz == null
+          ? deck.quiz
+          : share(
+              this.percent(deck.quiz.right, deck.quiz.answers),
+              this.t("statistics.rightOfAnswers", { count: deck.quiz.answers }),
+            ),
+      );
     }
   }
 
-  /** Today's study day as the table shows dates: in the browser's time zone, written as the app writes dates. */
+  /** Today's study day as the statistics show dates: in the browser's time zone, written as the app writes dates. */
   private async today(): Promise<string> {
     return this.page.evaluate((locale) => {
       const now = new Date();

@@ -298,7 +298,7 @@ describe("StatisticsContainer", () => {
     ).toBeInTheDocument();
   });
 
-  it("is of one deck's answers, with no table by deck, recall each way and its own progress", async () => {
+  it("is of one deck's answers, with no figures by deck, recall each way and its own progress", async () => {
     const useCases = makeUseCasesFake({ getStatistics: vi.fn(async () => statistics) });
     const overview = open(useCases, { one: deck });
     expect(await screen.findByText("Activity, the last 52 weeks")).toBeInTheDocument();
@@ -306,7 +306,7 @@ describe("StatisticsContainer", () => {
       range: 90,
       deckUrl: deck.url,
     });
-    expect(screen.queryByRole("region", { name: "By deck" })).toBeNull();
+    expect(screen.queryByRole("list", { name: "By deck" })).toBeNull();
     overview.unmount();
     open(useCases, { one: deck, view: "cards" });
     expect(await screen.findByText("Card maturity")).toBeInTheDocument();

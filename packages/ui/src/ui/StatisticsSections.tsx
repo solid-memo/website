@@ -4,13 +4,7 @@
 
 import type { StatisticsReport } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import type { Quiz, Recall } from "@solid-memo/domain/statistics";
-import {
-  daysBetween,
-  RECENT_DAYS,
-  type DirectionRecall,
-  type FirstTry,
-} from "@solid-memo/domain/studyPatterns";
+import { daysBetween, RECENT_DAYS } from "@solid-memo/domain/studyPatterns";
 import { ActivityCalendar } from "./charts/ActivityCalendar";
 import { DayHeldBars } from "./charts/DayHeldBars";
 import { GradeBars } from "./charts/GradeBars";
@@ -41,7 +35,7 @@ import {
 } from "./charts/StudyTimeChart";
 import { WeekdayChart } from "./charts/WeekdayChart";
 import { useI18n } from "./i18n";
-import { ReaderText } from "./ReaderText";
+import { ByDeckStatistics } from "./ByDeckStatistics";
 
 /**
  * The statistics' tabs, each of the answers of the range read
@@ -67,7 +61,7 @@ export function OverviewSection({
   cardsYouKnow,
 }: {
   statistics: StatisticsReport;
-  /** The instance's decks, for the table by deck; none for one deck's statistics, which have no table. */
+  /** The instance's decks, for the figures by deck; none for one deck's statistics, which have none. */
   decks?: readonly Deck[];
   /** Whether the range is the whole log. */
   allTime: boolean;
@@ -138,90 +132,7 @@ export function OverviewSection({
         </>
       )}
       <ActivityCalendar days={statistics.recentDays} today={statistics.today} />
-      {decks !== undefined && <ByDeckTable statistics={statistics} decks={decks} />}
-    </>
-  );
-}
-
-/** Each deck's figures, a row a deck; a deck since removed is named as such. */
-function ByDeckTable({
-  statistics,
-  decks,
-}: {
-  statistics: StatisticsReport;
-  decks: readonly Deck[];
-}) {
-  const { t, formatDate, formatPercent, directionLabel } = useI18n();
-  const nameOf = (deckUrl: string) => {
-    const deck = decks.find((d) => d.url === deckUrl);
-    return deck === undefined ? t("statistics.removedDeck") : <ReaderText text={deck.title} />;
-  };
-  // A share with the count it is of, however few; a dash when there are none.
-  const recallCell = ({ reviews, recalled }: Recall) =>
-    reviews === 0
-      ? "–"
-      : t("statistics.recallShare", { percent: formatPercent(recalled / reviews), count: reviews });
-  const quizCell = ({ answers, right }: Quiz) =>
-    answers === 0
-      ? "–"
-      : t("statistics.quizShare", { percent: formatPercent(right / answers), count: answers });
-  const firstTryCell = ({ introduced, recalled }: FirstTry) =>
-    introduced === 0
-      ? "–"
-      : t("statistics.firstTryShare", {
-          percent: formatPercent(recalled / introduced),
-          count: introduced,
-        });
-  // Recall each way, only where a deck has reviews both ways.
-  const directionsCell = (directions: readonly DirectionRecall[]) =>
-    directions.length < 2
-      ? "–"
-      : directions
-          .map(({ direction, recall }) =>
-            t("statistics.directionShare", {
-              direction: directionLabel(direction),
-              share: recallCell(recall),
-            }),
-          )
-          .join(" · ");
-  return (
-    <>
-      <h3 id="by-deck-heading">{t("statistics.byDeck")}</h3>
-      {/* Ten columns are wider than a phone: the table scrolls, its deck column stays. */}
-      <div class="table-scroll" role="region" aria-labelledby="by-deck-heading" tabIndex={0}>
-        <table class="deck-statistics">
-          <thead>
-            <tr>
-              <th scope="col">{t("statistics.deck")}</th>
-              <th scope="col">{t("statistics.answers")}</th>
-              <th scope="col">{t("statistics.introducedColumn")}</th>
-              <th scope="col">{t("statistics.youngRecall")}</th>
-              <th scope="col">{t("statistics.matureRecall")}</th>
-              <th scope="col">{t("statistics.directionsColumn")}</th>
-              <th scope="col">{t("statistics.firstTry")}</th>
-              <th scope="col">{t("statistics.lapses")}</th>
-              <th scope="col">{t("statistics.quizAccuracy")}</th>
-              <th scope="col">{t("statistics.lastStudied")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {statistics.decks.map((deck) => (
-              <tr key={deck.deckUrl}>
-                <th scope="row">{nameOf(deck.deckUrl)}</th>
-                <td>{deck.answers}</td>
-                <td>{deck.introduced}</td>
-                <td>{recallCell(deck.retention.young)}</td>
-                <td>{recallCell(deck.retention.mature)}</td>
-                <td>{directionsCell(deck.directions)}</td>
-                <td>{firstTryCell(deck.firstTry)}</td>
-                <td>{deck.lapses}</td>
-                <td>{quizCell(deck.quiz)}</td>
-                <td>{formatDate(deck.lastStudyDay)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {decks !== undefined && <ByDeckStatistics decks={decks} statistics={statistics.decks} />}
     </>
   );
 }

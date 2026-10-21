@@ -195,7 +195,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
             introduced: cards,
             young: { recalled: 2, reviews: cards },
             mature: null,
-            directions: "–",
+            directions: null,
             firstTry: { recalled: cards, introduced: cards },
             lapses: 2,
             quiz: null,

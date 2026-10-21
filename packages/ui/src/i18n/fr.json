@@ -1747,6 +1747,11 @@
     "introduced": "Nouvelles",
     "introducedColumn": "Introduites",
     "byDeck": "Par paquet",
+    "deckAnswered": {
+      "one": "{count} réponse · dernière étude : {date}",
+      "many": "{count} de réponses · dernière étude : {date}",
+      "other": "{count} réponses · dernière étude : {date}"
+    },
     "deck": "Paquet",
     "lastStudied": "Dernière étude",
     "youngRecall": "Récentes retenues",

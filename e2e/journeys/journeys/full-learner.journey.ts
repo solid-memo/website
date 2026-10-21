@@ -233,7 +233,7 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
         introduced: 2,
         young: null,
         mature: null,
-        directions: "–" as const,
+        directions: null,
         // Deck B's first card was answered Again when it was new.
         firstTry: { recalled: i === 0 ? 2 : 1, introduced: 2 },
         lapses: 0,

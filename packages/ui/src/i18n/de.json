@@ -1665,6 +1665,10 @@
     "introduced": "Neu",
     "introducedColumn": "Eingeführt",
     "byDeck": "Nach Stapel",
+    "deckAnswered": {
+      "one": "{count} Antwort · zuletzt gelernt am {date}",
+      "other": "{count} Antworten · zuletzt gelernt am {date}"
+    },
     "deck": "Stapel",
     "lastStudied": "Zuletzt gelernt",
     "youngRecall": "Junge Karten gewusst",
