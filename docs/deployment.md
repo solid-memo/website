@@ -17,14 +17,14 @@ is made:
 ```mermaid
 flowchart LR
     accTitle: When a version is deployed
-    accDescr: A push to main, or a run by hand, deploys only the newest version, from its release commit and with its GitHub release, after the build, each release's docs and the guard.
-    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
+    accDescr: A push to main, or a run by hand, deploys only the newest version, from its release commit and with its GitHub release: after CI, the site CI built and tested, given the version; by hand, a build after npm run check; then each release's docs and the guard.
+    push["push to main"] --> ci["CI: the site, built<br/>and tested once"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
     tag -->|no| skip["not deployed"]
     tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
     release -->|no| skip
-    release -->|yes| build["deploy.yml:<br/>npm run build"] --> versions["each release's docs<br/>from its GitHub release<br/>under docs/X.Y.Z/"] --> guard["ns/, decks/,<br/>robots.txt, sitemap.xml,<br/>docs/ and its diagrams<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    release -->|yes| site["deploy.yml: CI's site,<br/>npm run site:version"] --> versions["each release's docs<br/>from its GitHub release<br/>under docs/X.Y.Z/"] --> guard["ns/, decks/,<br/>robots.txt, sitemap.xml,<br/>docs/ and its diagrams<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
     hand["run by hand<br/>from main"] --> newest["deploy.yml:<br/>the newest version"] --> release
-    release -->|"yes, by hand"| check["npm run check"] --> build
+    release -->|"yes, by hand"| check["npm run check,<br/>npm run build"] --> versions
 ```
 
 A red CI run never deploys, and neither does a green one on a commit
@@ -35,10 +35,12 @@ repository:
   follows a green CI run on `main`, in a workflow of its own. It pushes
   a commit to `main` that sets the new version,
   `chore(release): X.Y.Z`, and tags it `vX.Y.Z`. CI runs on that commit,
-  its deterministic jobs only, as the code is its parent's
-  ([releasing.md](releasing.md#what-each-stage-checks)), and once it
-  passes, the deploy builds it, so the
-  site's footer shows the new version. The deploy looks for a version
+  testing nothing again, as the code is its parent's: it takes over the
+  site the run that tested its parent built, the build the user
+  journeys ran on ([releasing.md](releasing.md#what-each-stage-checks)).
+  Once it passes, the deploy ships that site
+  ([below](#the-build-ci-tested)), so the site's footer shows the new
+  version. The deploy looks for a version
   tag that names the commit CI checked, and deploys nothing when there
   is none: any other push to `main`, a merged pull request or a
   Renovate update, goes live with the next version, which includes it.
@@ -87,15 +89,17 @@ repository:
   failed, say. It checks that version as above: its release commit and
   its GitHub release.
   No CI run is behind it, so it runs `npm run check` on that version
-  before it builds it. It has no Turbo cache, so it takes about as long
-  as CI's `check` and `site` jobs one after the other.
+  and builds it, Chromium installed first
+  ([.github/actions/chromium](../.github/actions/chromium/action.yml)),
+  as the build draws the docs' diagrams ([markdown.md](markdown.md#diagrams)).
+  It has no Turbo cache, so it takes about as long as CI's `check` and
+  `site` jobs one after the other.
 
 The workflow enables Pages for the repository on its first run, and
 stops before deploying if the vocabulary, the deck library or the docs
-are missing from the build, or the docs' diagrams were not drawn. It
-installs Chromium for them first ([.github/actions/chromium](../.github/actions/chromium/action.yml)),
-as the build draws them ([markdown.md](markdown.md#diagrams)). CI's checks of `ns/` and `decks/`, the comparison of
-the deck library with its base included
+are missing from the site, or the docs' diagrams were not drawn. CI's
+checks of `ns/` and `decks/`, the comparison of the deck library with
+its base included
 ([deck-library.md](deck-library.md#checks)), are among those a deploy
 waits for. The `github-pages`
 environment should also be limited to `main` in the repository's
@@ -105,6 +109,35 @@ a tag, so that limit holds. Since a tag picks what is deployed, version
 tags must be protected too: a ruleset on `refs/tags/v*` lets only the
 release's deploy key and an admin create them
 ([releasing.md](releasing.md#the-deploy-key)).
+
+### The build CI tested
+
+After CI on a release commit, the deploy builds nothing. It downloads
+the `site` artifact of that CI run: the site the run that tested the
+release commit's parent built, the merge queue's as a rule, which every
+user journey ran on, and which the release commit's run took over (its
+`reuse` job); or the release commit's own build, when that run tested
+its tree
+([releasing.md](releasing.md#what-each-stage-checks)). So the site
+deployed is the one tested, and a deploy cannot fail on what a build
+would fetch, Chromium or its system libraries.
+
+That site was built before the release wrote the new version, so it
+states the version before it. The version is stated in the pages
+alone, never in the scripts, whose files are named by a hash of their
+content ([configuration.md](configuration.md#what-a-build-computes)),
+so `npm run site:version -- apps/web/dist`
+([siteVersion.ts](../scripts/siteVersion.ts)) puts the released one,
+from the release commit's `package.json`, in the app's page
+(`index.html`, which the footer and error reports read it from) and in
+the header of every page of the docs, and changes nothing else. It
+refuses a site with a page that states no version. The site still
+names the commit it was built from, in the footer and in the docs'
+links into the repository: as a rule the release commit's parent, which
+is on `main` with the same code and docs as the release commit, or the
+release commit itself when its run tested its tree. A version released
+before the site was kept this way has no such artifact, so a deploy
+after CI on its release commit builds it, as deploys did then.
 
 ### What the artifact contains
 
@@ -319,8 +352,8 @@ publishes it, and it replaces an archive that is not attested
 
 The deploy serves every release's docs beside the deployed version's,
 at `/docs/X.Y.Z/`, from the archive its GitHub release carries
-([above](#a-releases-docs-as-an-archive)). After `npm run build`, it
-runs `npm run docs:versions -- apps/web/dist`
+([above](#a-releases-docs-as-an-archive)). Once it has the site, CI's
+or its own build, it runs `npm run docs:versions -- apps/web/dist`
 ([docsVersions.ts](../scripts/docsVersions.ts)) with every version tag
 up to the one deployed, newest first. For each tag, the script finds
 the archive on its GitHub release through GitHub's API, with the run's
@@ -330,7 +363,7 @@ and stays the same after the next release. Then the script writes the
 list of versions, `/docs/versions/`, over the build's: every tag,
 newest first, linked to its docs on the site where they are served,
 and always to its docs in the repository at the tag and to its release
-notes. `/docs/` itself stays the deployed version's own build.
+notes. `/docs/` itself stays the deployed version's own, as built.
 
 The archived pages run on the app's origin, which holds the learner's
 storage and the guest's pod, so an archive is served only when:

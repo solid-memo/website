@@ -149,8 +149,9 @@ and nothing merges on its own
 
 ## Deploying
 
-The site at <https://solid-memo.com/> runs the latest version, built from
-its release commit on `main`, and nothing else. A version deploys once
+The site at <https://solid-memo.com/> runs the latest version and nothing
+else: the site CI built and tested from its release commit's code on
+`main`, given that version ([docs/deployment.md](docs/deployment.md#the-build-ci-tested)). A version deploys once
 CI has passed on its release commit; any other push to `main` waits
 for the next version ([docs/deployment.md](docs/deployment.md)). A
 deploy by hand is run only from `main`, and only by a maintainer, and

@@ -55,9 +55,13 @@ A variable in the environment wins over the same one in a file. Copy
 [.env.example](../apps/web/.env.example) to start; its lines are
 commented out, so the copy changes nothing until you uncomment one.
 
-In CI, set them on the step that builds. The deploy workflow
-([deploy.yml](../.github/workflows/deploy.yml)) sets none; a fork that
-deploys with it can add them from its repository's variables (a
+In CI, set them on every step that builds the site. The site deployed
+after a release is the one CI built and tested, in the `site` job of
+[ci.yml](../.github/workflows/ci.yml)
+([deployment.md](deployment.md#the-build-ci-tested)); the deploy
+workflow ([deploy.yml](../.github/workflows/deploy.yml)) builds only
+when it is run by hand. Neither sets any; a fork that deploys with them
+can add its repository's variables to both builds, so they agree (a
 variable the repository does not have is blank, so the default):
 
 ```yaml
@@ -243,7 +247,7 @@ in its script.
 
 | Value | From | Shown or used |
 |---|---|---|
-| the version, `<meta name="version">` in `index.html` | the `version` in the root [package.json](../package.json) | The footer's version, and the one an error report names. It is in the page, not the script, whose file is named by a hash of its content, so a built site can be given another version without touching its script. |
+| the version, `<meta name="version">` in `index.html` | the `version` in the root [package.json](../package.json) | The footer's version, and the one an error report names. It is in the page, not the script, whose file is named by a hash of its content, so a built site can be given another version without touching its script: the deploy gives the site CI tested the version released (`npm run site:version`, [deployment.md](deployment.md#the-build-ci-tested)). |
 | `__COMMIT_SHA__` | `git rev-parse HEAD`, else `GITHUB_SHA`, else none | The footer's commit link; left out when unknown. The docs' links into the repository name the same commit, or `main` when it is unknown. |
 | `__SHAPES_RULESET__` | a hash of `ns/shapes/` and the vendored profiles | Which rules a pod's check receipts were made under ([validation.md](validation.md)). |
 

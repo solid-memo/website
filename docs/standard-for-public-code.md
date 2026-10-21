@@ -247,10 +247,10 @@ What holds today, and what does not, criterion by criterion.
 ### 1. Code in the open
 
 - MUST, met — the source code in use is public. Production runs only a
-  released version, built from its release commit on `main`, the one its
-  tag names, after CI passes on that commit
-  ([deployment.md](deployment.md)), and only the newest version, once
-  its GitHub release is made. A deploy by hand runs only from `main`,
+  released version, after CI passes on its release commit on `main`, the
+  one its tag names: the site CI built and tested from that code, given
+  the released version ([deployment.md](deployment.md#the-build-ci-tested)),
+  and only the newest version, once its GitHub release is made. A deploy by hand runs only from `main`,
   deploys the newest version, and runs `npm run check` on it first.
 - MUST, met — the source of the policy in use is public. The SM-2 and
   FSRS-6 schedulers and the library's rules are in the repository

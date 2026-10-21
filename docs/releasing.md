@@ -260,7 +260,8 @@ only the version's files: the five that `release.config.mjs` lists
 (`assets`): `CHANGELOG.md`, `CITATION.cff`, `package.json`,
 `package-lock.json` and `publiccode.yml`. Its code is its parent's,
 which CI passed on `main` before the release was made. So its run
-reuses the one that tested its parent, taking over its site, and the
+reuses the one that tested its parent, taking over its site, which the
+deploy ships ([deployment.md](deployment.md#the-build-ci-tested)), and the
 gate fails it if the commit changes any other file, or has more than
 one parent; its `release-files` job lints those files as
 `npm run check` does, and checks `publiccode.yml` with its parser.
@@ -351,9 +352,10 @@ and in `publiccode.yml` where it says the same.
 tag, so a release writes nothing into it.
 
 The release commit is not marked to skip CI. CI runs on it, and once
-it passes, the deploy builds that commit, the one the tag names, and
-puts the new version on the site, its footer included; it deploys no
-other commit ([deployment.md](deployment.md)). The release workflow
+it passes, the deploy ships the site that run carries, the build CI
+tested, with the new version put in its pages, its footer included
+([deployment.md](deployment.md#the-build-ci-tested)); it deploys no
+other commit. The release workflow
 does not run on it: nothing has been committed since the tag, so it
 would release nothing.
 CI's run on a release commit has a concurrency group of its own, so a

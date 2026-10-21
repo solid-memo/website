@@ -1007,6 +1007,22 @@ ${figures ? `<li><a href="${at.docs}diagrams/${FONT_LICENSE_NAME}">Diagrams set 
 /** A release on the list of versions, and whether the site serves its docs, at `/docs/X.Y.Z/`. */
 export type ListedRelease = { version: string; hosted: boolean };
 
+/** The version a page of the docs states in its header, as pageShell and versionsPage write it. */
+const STATED_VERSION = /(<p class="version">Version )[^ <]+/;
+
+/**
+ * A page of the docs stating `version` in its header instead of the one
+ * it was built with; null for a page that states none. The deploy gives
+ * the site CI tested, built before its release, the released version
+ * (docs/deployment.md#github-pages-automatic). Only the header changes:
+ * a live page names its version nowhere else, and the list of versions
+ * is written again by the deploy.
+ */
+export function withDocsVersion(html: string, version: string): string | null {
+  if (!STATED_VERSION.test(html)) return null;
+  return html.replace(STATED_VERSION, (_, before: string) => `${before}${escapeHtml(version)}`);
+}
+
 /**
  * The list of versions, at `docs/versions/`. A build lists its own
  * version and links the releases on the repository's host; the deploy

@@ -4,7 +4,16 @@
 
 import { describe, expect, it } from "vitest";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
-import { DEFAULT_APP_NAME, DEFAULT_REPO_URL, siteConfig, siteHtml, siteVersion } from "./config";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  DEFAULT_APP_NAME,
+  DEFAULT_REPO_URL,
+  siteConfig,
+  siteHtml,
+  siteVersion,
+  withSiteVersion,
+} from "./config";
 
 describe("siteConfig", () => {
   it("is Solid Memo's own settings when nothing is set", () => {
@@ -212,5 +221,19 @@ describe("siteVersion", () => {
 
   it("is empty when the page states none", () => {
     expect(siteVersion(page('<meta name="description" content="4.2.0" />'))).toBe("");
+  });
+});
+
+describe("withSiteVersion", () => {
+  const index = readFileSync(join(import.meta.dirname, "../index.html"), "utf8");
+  const built = (version: string) =>
+    siteHtml(index, { appName: DEFAULT_APP_NAME, repoUrl: DEFAULT_REPO_URL, version });
+
+  it("makes the page the one its build at that version would write", () => {
+    expect(withSiteVersion(built("4.1.2"), "4.2.0")).toBe(built("4.2.0"));
+  });
+
+  it("is null for a page that states no version", () => {
+    expect(withSiteVersion("<head></head>", "4.2.0")).toBeNull();
   });
 });

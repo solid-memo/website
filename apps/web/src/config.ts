@@ -191,6 +191,24 @@ export function siteHtml(
   );
 }
 
+/** The version index.html states, as siteHtml fills it in. */
+const STATED_VERSION = /(<meta name="version" content=")[^"]*(")/;
+
+/**
+ * index.html, built, stating `version` instead of the one it was built
+ * with; null for a page that states none. The deploy gives the site CI
+ * tested, built before its release, the released version
+ * (docs/deployment.md#github-pages-automatic); the scripts, which read
+ * it from the page, stay as tested.
+ */
+export function withSiteVersion(html: string, version: string): string | null {
+  if (!STATED_VERSION.test(html)) return null;
+  return html.replace(
+    STATED_VERSION,
+    (_, before: string, after: string) => `${before}${escapeHtml(version)}${after}`,
+  );
+}
+
 /**
  * The site's version, as its page states it (`<meta name="version">`,
  * which siteHtml fills in): the footer and error reports show it. Empty

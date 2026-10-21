@@ -21,6 +21,7 @@ import {
   renderDocsSite,
   repositoryIo,
   versionsPage,
+  withDocsVersion,
 } from "./docsSite.ts";
 import { drawInputs } from "./drawDiagrams.ts";
 
@@ -1037,4 +1038,24 @@ describe("the repository's own docs", () => {
       if (path.endsWith(".css")) expect(checkStylesheet(content), path).toBeNull();
     }
   }, 120_000);
+});
+
+describe("withDocsVersion", () => {
+  it("makes a live page the one its build at that version would write", async () => {
+    const built = await render(siteFiles());
+    const released = await render(siteFiles(), { version: "3.0.0" });
+    for (const name of ["index.html", "one/index.html", "two/index.html"]) {
+      expect(withDocsVersion(built.get(name)!, "3.0.0")).toBe(released.get(name));
+    }
+  });
+
+  it("states the version in the list of versions' header", () => {
+    expect(withDocsVersion(versionsPage({ repoUrl: REPO, version: "2.2.0" }), "3.0.0")).toContain(
+      '<p class="version">Version 3.0.0</p>',
+    );
+  });
+
+  it("is null for a page that states no version", () => {
+    expect(withDocsVersion("<header></header>", "3.0.0")).toBeNull();
+  });
 });
