@@ -21,6 +21,33 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [5.0.0](https://github.com/solid-memo/website/compare/v4.2.0...v5.0.0) (2026-10-21)
+
+### ⚠ BREAKING CHANGES
+
+* **vocab:** the app writes preferences in format 6. An older
+version of Solid Memo reads format-6 preferences without the palette
+and the text size and refuses to save over them, so after this version
+saves or updates an instance's preferences, a tab or device still on an
+older version cannot save its preferences, its theme or "Not now" to
+the invitation to FSRS-6 until it is reloaded.
+
+### Features
+
+* **ui:** add a Color-blind friendly palette ([70520b7](https://github.com/solid-memo/website/commit/70520b7080739f021670d2e843018e78c2ecf57f)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **ui:** add a High contrast palette, kept on the device ([ecfa427](https://github.com/solid-memo/website/commit/ecfa42749c0f12e5294964394cc48dab64020292)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **ui:** add a Parchment palette for low glare ([4e254ae](https://github.com/solid-memo/website/commit/4e254ae899a9dd930bb2b3582c4b07519e5c2536)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **ui:** choose the colors and the text size in the preferences ([28982bf](https://github.com/solid-memo/website/commit/28982bffa74eda97b9d0bd3e207f64d5342c4746)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **ui:** show the text at a larger size kept on the device ([48ed73c](https://github.com/solid-memo/website/commit/48ed73ca4018ef191a83a9b56072b5c862f54722)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **vocab:** design a palette of one's own, kept in the pod ([ecdd5a4](https://github.com/solid-memo/website/commit/ecdd5a40c6c84ba1b20f8ed52e4eb1e31fa1c365)), closes [#rrggbb](https://github.com/solid-memo/website/issues/rrggbb) [#rrggbb](https://github.com/solid-memo/website/issues/rrggbb) [#211](https://github.com/solid-memo/website/issues/211)
+* **vocab:** keep the palette and the text size in the pod's preferences ([d7e4071](https://github.com/solid-memo/website/commit/d7e4071e41d25ca57a2456e5af6258f0a3e0daea)), closes [#211](https://github.com/solid-memo/website/issues/211)
+
+### Bug Fixes
+
+* **studio:** scale the panes' size limits with the root font size ([821ff3e](https://github.com/solid-memo/website/commit/821ff3ef89c152605a732812f90fa77933f3b3c3)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **ui:** keep a later choice of colors over the read of an earlier one ([8d4dff2](https://github.com/solid-memo/website/commit/8d4dff2cc02c97510dc146844befedfeb905ff52)), closes [#211](https://github.com/solid-memo/website/issues/211)
+* **ui:** keep fields and card tables within 320px at the largest text ([0ce902f](https://github.com/solid-memo/website/commit/0ce902f306d55cfcfe6c9e93357949ebbbf2678f)), closes [#211](https://github.com/solid-memo/website/issues/211)
+
 ## [4.2.0](https://github.com/solid-memo/website/compare/v4.1.3...v4.2.0) (2026-10-20)
 
 ### Features
