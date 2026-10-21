@@ -582,6 +582,31 @@
     "weekChange": {
       "one": "{count} this week, {change} on last week",
       "other": "{count} this week, {change} on last week"
+    },
+    "welcome": {
+      "heading": "Your streak",
+      "makeIt": "Welcome back! Study today to make it {next}.",
+      "counting": {
+        "one": "Keep it going: {count} day and counting.",
+        "other": "Keep it going: {count} days and counting."
+      },
+      "waiting": {
+        "one": "Your {count}-day streak is waiting for today's cards.",
+        "other": "Your {count}-day streak is waiting for today's cards."
+      },
+      "oneSession": "One session keeps your streak alive.",
+      "tieRecord": "One more day ties your record of {longest}.",
+      "newRecord": "Study today for a new record!",
+      "lapsed": {
+        "start": "Start a new streak today.",
+        "fresh": "Welcome back! A few cards today begin a new streak.",
+        "dayOne": "Every streak begins with day one. Today can be it.",
+        "record": {
+          "one": "Your record is {count} day. Start a streak today to beat it.",
+          "other": "Your record is {count} days. Start a new streak today."
+        },
+        "ready": "Good to see you again. Your cards are ready when you are."
+      }
     }
   },
   "newcomerCourse": {

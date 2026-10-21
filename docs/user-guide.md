@@ -112,6 +112,10 @@ The deck list is home. From the top:
 - **Today**: once you have studied today, a strip with your streak (days
   in a row), a word of praise, and the day's numbers, with a link to
   all your statistics ([statistics.md](statistics.md#the-today-strip)).
+  Before you study, a word of welcome back: the streak that studying
+  today keeps, a note on it that changes from day to day, and the cards
+  left to study today. Once a streak has lapsed, a gentle note to start
+  a new one.
 - **Your courses**: each course you have started and not finished, how
   many of its chapters are done, and a button to go on where you left
   off ([courses.md](courses.md#the-learners-flow)).
@@ -488,6 +492,7 @@ screenshot of each.
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts | 21–23 |
 | Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |
 | Reviewing on a later study day, forgetting cards, and the hardest cards | later-day | 07–12 |
+| Welcomed back with the streak before the day's first answer | later-day | 07 |
 | Updating a library deck to its new release, its progress kept | [library-upgrade.journey.ts](../e2e/journeys/journeys/library-upgrade.journey.ts) | 04–10 |
 | Undoing an answer, and resetting today's study | [reset-day.journey.ts](../e2e/journeys/journeys/reset-day.journey.ts) | 07–12 |
 | Reloading in the middle of a study session | [study-reload.journey.ts](../e2e/journeys/journeys/study-reload.journey.ts) | 05–10 |

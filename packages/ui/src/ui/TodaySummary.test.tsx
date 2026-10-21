@@ -234,10 +234,29 @@ describe("TodaySummaryContainer", () => {
     expect(screen.queryByText(/to go/)).toBeNull();
   });
 
-  it("shows nothing before the day's first answer, even with a streak to keep", async () => {
+  it("welcomes back before the day's first answer, with the streak to keep and the cards left", async () => {
+    // A two-day streak through yesterday, with an answer that took about 20 s.
     const getStatistics = vi.fn(async () =>
-      statisticsReportOf([answer("2026-10-01"), answer("2026-10-02")], "2026-10-03"),
+      statisticsReportOf(
+        [
+          answer("2026-10-01"),
+          answer("2026-10-02"),
+          { ...answer("2026-10-02"), id: "answer-2", answeredAt: "2026-10-02T10:00:20.000Z" },
+        ],
+        "2026-10-03",
+      ),
     );
+    const getStudyCounts = vi.fn(async () => ({ dueCount: 4, newCount: 2 }));
+    renderContainer(getStatistics, { decks: [deckOf("deck-1")], getStudyCounts });
+    const note = await screen.findByRole("complementary", { name: "Your streak" });
+    expect(note).toHaveTextContent(
+      /^2-day streak .+6 left to study today · about 2 minutes to go$/,
+    );
+    expect(screen.queryByRole("complementary", { name: "Today" })).toBeNull();
+  });
+
+  it("shows nothing before the day's first answer without a study day to come back to", async () => {
+    const getStatistics = vi.fn(async () => statisticsReportOf([], "2026-10-03"));
     const { container } = renderContainer(getStatistics);
     await vi.waitFor(() => expect(getStatistics).toHaveBeenCalled());
     await Promise.resolve();

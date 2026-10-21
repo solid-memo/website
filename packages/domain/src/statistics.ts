@@ -18,6 +18,7 @@ import {
   type ChainIndex,
 } from "./answerChain";
 import {
+  daysBetween,
   daysStudiedOf,
   firstTrySuccessOf,
   gradeGroupsOf,
@@ -448,5 +449,30 @@ export function todayOf(statistics: Statistics): TodaySummary | null {
       answers: statistics.week.current.answers,
       previous: statistics.week.previous.answers,
     },
+  };
+}
+
+/** Where the streak stands before the day's first answer, for a word of welcome back. */
+export interface WelcomeBack {
+  /** Study days in a row up to yesterday; 0 once the streak has lapsed. */
+  streak: number;
+  /** The longest run of study days there has been. */
+  longestStreak: number;
+  /** Today's study day as a count of days, which picks the day's words: the next day's differ. */
+  dayNumber: number;
+}
+
+/**
+ * Where the streak stands while nothing is studied today, for a learner
+ * who has studied before; null once today has an answer (todayOf says
+ * what it came to), or when there is no study day to come back to.
+ */
+export function welcomeBackOf(statistics: Statistics): WelcomeBack | null {
+  if (statistics.streaks.longest === 0) return null;
+  if (statistics.days.some((activity) => activity.studyDay === statistics.today)) return null;
+  return {
+    streak: statistics.streaks.current,
+    longestStreak: statistics.streaks.longest,
+    dayNumber: daysBetween("1970-01-01", statistics.today),
   };
 }

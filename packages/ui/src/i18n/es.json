@@ -603,6 +603,34 @@
       "one": "{count} esta semana, {change} respecto a la anterior",
       "many": "{count} esta semana, {change} respecto a la anterior",
       "other": "{count} esta semana, {change} respecto a la anterior"
+    },
+    "welcome": {
+      "heading": "Tu racha",
+      "makeIt": "¡Hola de nuevo! Estudia hoy y serán {next}.",
+      "counting": {
+        "one": "Sigue así: {count} día y contando.",
+        "many": "Sigue así: {count} de días y contando.",
+        "other": "Sigue así: {count} días y contando."
+      },
+      "waiting": {
+        "one": "Tu racha de {count} día espera las tarjetas de hoy.",
+        "many": "Tu racha de {count} de días espera las tarjetas de hoy.",
+        "other": "Tu racha de {count} días espera las tarjetas de hoy."
+      },
+      "oneSession": "Una sesión mantiene viva tu racha.",
+      "tieRecord": "Un día más y igualas tu récord de {longest}.",
+      "newRecord": "¡Estudia hoy para un nuevo récord!",
+      "lapsed": {
+        "start": "Empieza una nueva racha hoy.",
+        "fresh": "¡Hola de nuevo! Unas pocas tarjetas hoy empiezan una nueva racha.",
+        "dayOne": "Toda racha empieza por el primer día. Hoy puede ser ese día.",
+        "record": {
+          "one": "Tu récord es de {count} día. Empieza una racha hoy para superarlo.",
+          "many": "Tu récord es de {count} de días. Empieza una nueva racha hoy.",
+          "other": "Tu récord es de {count} días. Empieza una nueva racha hoy."
+        },
+        "ready": "Qué bien verte de nuevo. Tus tarjetas te esperan cuando quieras."
+      }
     }
   },
   "newcomerCourse": {

@@ -251,12 +251,43 @@ export class DeckList extends Screen {
 
   /**
    * The today strip above the list counts the day's answers so far, as
-   * many as `answers`, those of the session just ended included.
+   * many as `answers`, those of the session just ended included; the
+   * word of welcome back is gone.
    */
   async expectAnsweredToday(answers: number): Promise<void> {
     await expect(
       this.page.getByRole("complementary", { name: this.t("today.heading"), exact: true }),
     ).toContainText(this.t("today.answers", { count: answers }));
+    await expect(this.welcomeBack).toHaveCount(0);
+  }
+
+  /**
+   * Before the day's first answer, the word of welcome back in the today
+   * strip's place: the streak of `streak` days kept through yesterday,
+   * the note `note`, and `left` cards left to study today.
+   */
+  async expectWelcomeBack({
+    streak,
+    note,
+    left,
+  }: {
+    streak: number;
+    note: string;
+    left: number;
+  }): Promise<void> {
+    await expect(this.welcomeBack).toContainText(this.t("today.streakCount", { count: streak }));
+    await expect(this.welcomeBack).toContainText(this.t(note));
+    await expect(this.welcomeBack).toContainText(this.t("today.stillDue", { count: left }));
+    await expect(
+      this.page.getByRole("complementary", { name: this.t("today.heading"), exact: true }),
+    ).toHaveCount(0);
+  }
+
+  private get welcomeBack(): Locator {
+    return this.page.getByRole("complementary", {
+      name: this.t("today.welcome.heading"),
+      exact: true,
+    });
   }
 
   /** No answer today: the today strip above the list is not shown. */
