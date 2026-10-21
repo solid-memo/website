@@ -1365,7 +1365,8 @@
       "dangerSoft": "Teinte du texte de danger",
       "warningText": "Texte d’avertissement",
       "warningSoft": "Teinte du texte d’avertissement",
-      "grade": "Bouton de réponse {grade}"
+      "grade": "Bouton de réponse {grade}",
+      "series": "Palier de graphique {step}"
     }
   },
   "findable": {

@@ -121,7 +121,7 @@ const BUILT_IN: Record<Palette, Record<Theme, string>> = {
       "#e2662a #e8932a #d9b11c #7fb13c #2f8a4a #f1efe6 #cfcbbb " +
       "#235430 #e6f1e8 #e4e5e7 #fdeee9 #f0c9be #fdf4dc #e6c876",
     dark:
-      "#11171e #19212b #151c25 #ecebe4 #9ba6b2 #2a3644 #66788d " +
+      "#11171e #19212b #151c25 #ecebe4 #aab4bf #2a3644 #66788d " +
       "#4fae6a #2a7340 #ffffff #74cc8e #ff8a75 #f1d283 #d63a25 " +
       "#e2662a #e8932a #d9b11c #7fb13c #2f8a4a #232e3b #3a4859 " +
       "#33864b #1b3324 #3a414b #38201c #63302a #33280e #5e4a17",
@@ -237,6 +237,53 @@ export function effectiveColors(palette: PaletteSettings, theme: Theme): Record<
   return { ...builtInColors(palette.basedOn, theme), ...paintedColors(palette, theme) };
 }
 
+/** A chart's steps, 1 the faintest (palettes.css's `--series-*`). */
+export const SERIES_ROLES = ["--series-1", "--series-2", "--series-3", "--series-4"] as const;
+
+/** A step mixed as `color-mix(in srgb, one p%, two)`; at 100% it is `one` itself. */
+type Step = readonly [one: PaletteRole, percent: number, two: PaletteRole];
+
+const PRIMARY: Step = ["--primary", 100, "--surface-sunken"];
+const sunken = (percent: number): Step => ["--primary", percent, "--surface-sunken"];
+const text = (percent: number): Step => ["--text", percent, "--primary"];
+
+/**
+ * How each built-in palette mixes a chart's steps in a theme, from the
+ * roles a palette paints, as palettes.css does (style.test.ts keeps the
+ * two in step): a palette of one's own that changes those roles changes
+ * its steps with them.
+ */
+const SERIES: Record<Palette, Record<Theme, readonly Step[]>> = {
+  standard: {
+    light: [sunken(70), sunken(90), text(15), text(50)],
+    dark: [sunken(65), sunken(85), text(10), text(50)],
+  },
+  "high-contrast": {
+    light: [sunken(75), sunken(90), text(15), text(50)],
+    dark: [sunken(65), sunken(80), PRIMARY, text(50)],
+  },
+  "color-vision": {
+    light: [sunken(70), sunken(90), text(15), text(50)],
+    dark: [sunken(60), sunken(80), PRIMARY, text(50)],
+  },
+  parchment: {
+    light: [sunken(75), sunken(90), text(10), text(60)],
+    dark: [sunken(55), sunken(75), sunken(95), text(50)],
+  },
+};
+
+/** A palette's chart steps in a theme, by role, mixed from its colors as its base mixes them. */
+export function seriesColors(palette: PaletteSettings, theme: Theme): Record<string, string> {
+  const colors = effectiveColors(palette, theme);
+  const color = (role: PaletteRole) => hexColor(colors[role]!)!;
+  return Object.fromEntries(
+    SERIES[palette.basedOn][theme].map(([one, percent, two], at) => [
+      SERIES_ROLES[at],
+      hexOf(mix(color(one), percent, color(two), 100 - percent)),
+    ]),
+  );
+}
+
 /** A pair of colors the check measures: one in front, text or an edge, on what it is on. */
 export interface CheckedPair {
   front: string;
@@ -247,7 +294,7 @@ export interface CheckedPair {
    * .quality-buttons).
    */
   tint?: 12 | 24;
-  /** An edge (a text field's, a focus ring's), held to the edge's ratio, not the text's. */
+  /** An edge (a text field's, a focus ring's, a chart's step), held to the edge's ratio, not the text's. */
   edge?: true;
 }
 
@@ -258,8 +305,8 @@ const SURFACES = ["--bg", "--surface", "--surface-sunken", "--surface-hover"];
  * tests check of every built-in palette (style.test.ts) among the roles
  * a palette of one's own paints: text, muted text, links, danger and
  * warning text on every surface and on their own tints, the text on a
- * primary button and on the primary color, an answer button's text and
- * muted text on its tint, and a field's edge and the focus ring on the
+ * primary button, an answer button's text and muted text on its tint,
+ * and a field's edge, the focus ring and a chart's steps on the
  * surfaces.
  */
 export const CHECKED_PAIRS: readonly CheckedPair[] = [
@@ -274,7 +321,6 @@ export const CHECKED_PAIRS: readonly CheckedPair[] = [
   { front: "--warning-text", back: "--warning-soft" },
   { front: "--on-primary", back: "--primary-fill" },
   { front: "--on-primary", back: "--primary-hover" },
-  { front: "--on-primary", back: "--primary" },
   ...[0, 1, 2, 3, 4, 5].flatMap((grade) =>
     ["--text", "--text-muted"].flatMap((front) =>
       ([12, 24] as const).map((tint) => ({ front, back: `--grade-${grade}`, tint })),
@@ -282,6 +328,9 @@ export const CHECKED_PAIRS: readonly CheckedPair[] = [
   ),
   ...SURFACES.map((back) => ({ front: "--control-border", back, edge: true as const })),
   ...["--bg", "--surface"].map((back) => ({ front: "--primary", back, edge: true as const })),
+  ...SERIES_ROLES.flatMap((front) =>
+    ["--surface", "--surface-sunken"].map((back) => ({ front, back, edge: true as const })),
+  ),
 ];
 
 /**
@@ -321,19 +370,15 @@ function ratioOf(pair: CheckedPair, colors: Record<string, string>): number {
 /**
  * Every checked pair of a palette in each theme, measured against the
  * targets of its base (contrastTargets): what the editor shows, and
- * what a save is held to. A pair the base itself has below its target,
- * one of the known gaps docs/accessibility.md lists, is held to the
- * base's own ratio instead, so that the gap counts against the base,
- * not against a palette that keeps it.
+ * what a save is held to.
  */
 export function checkPalette(palette: PaletteSettings): PairCheck[] {
   const targets = contrastTargets(palette.basedOn);
   return THEMES.flatMap((theme) => {
-    const colors = effectiveColors(palette, theme);
-    const base = builtInColors(palette.basedOn, theme);
+    const colors = { ...effectiveColors(palette, theme), ...seriesColors(palette, theme) };
     return CHECKED_PAIRS.map((pair): PairCheck => {
       const ratio = ratioOf(pair, colors);
-      const target = Math.min(pair.edge ? targets.edge : targets.text, ratioOf(pair, base));
+      const target = pair.edge ? targets.edge : targets.text;
       const reading = isReading(pair);
       return {
         ...pair,

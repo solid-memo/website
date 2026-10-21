@@ -1301,7 +1301,8 @@
       "dangerSoft": "Danger tint",
       "warningText": "Warning text",
       "warningSoft": "Warning tint",
-      "grade": "Answer button {grade}"
+      "grade": "Answer button {grade}",
+      "series": "Chart step {step}"
     }
   },
   "findable": {

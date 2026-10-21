@@ -189,7 +189,7 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page, ".studio-cell-edit").minHeight).toBe("0");
     expect(styleOf(page, ".studio-cell-edit").backgroundImage).toBe("none");
     expect(styleOf(page, ".studio-cell-edit").cursor).toBe("text");
-    expect(styleOf(page, ".studio-pin").opacity).toBe("0.35");
+    expect(styleOf(page, ".studio-pin").opacity).toBe("0.75");
     expect(styleOf(page, ".studio-pin.pinned").opacity).toBe("1");
   });
 
@@ -488,6 +488,21 @@ describe("the Studio's contrast", () => {
           enough: true,
         });
       }
+    },
+  );
+
+  it.each(paletteBlocks(PALETTES).map((block) => [block.selector, block] as const))(
+    "keeps the sidebar's faint pin at the ratio an edge needs on the sidebar in %s",
+    (_, { roles, palette }) => {
+      const pin = rules.find(
+        ({ selector }) => selector === ':root[data-surface="studio"] .studio-sidebar .studio-pin',
+      )!;
+      const opacity = Number(/(?:^|[;\s])opacity:\s*([\d.]+)/.exec(pin.body)![1]);
+      expect(pin.body).toMatch(/(?:^|[;\s])color:\s*var\(--text-muted\)/);
+      const faint = { ...colorOf("var(--text-muted)", roles), a: opacity };
+      expect(contrast(faint, colorOf("var(--surface-sunken)", roles))).toBeGreaterThanOrEqual(
+        contrastTargets(palette).edge,
+      );
     },
   );
 

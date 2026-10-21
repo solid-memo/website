@@ -17,7 +17,6 @@ import {
   paletteVerdict,
   parsePalette,
   type CustomPalette,
-  type PaletteSettings,
 } from "./customPalette";
 import { PALETTES } from "./palette";
 
@@ -199,20 +198,20 @@ describe("checkPalette", () => {
     expect(isReadable({ ...READING, dark: { "--text": "#26221b" } })).toBe(false);
   });
 
-  it("holds a pair its base has below the target, a known gap, to the base's own ratio", () => {
-    const gap = (palette: PaletteSettings) =>
-      checkPalette(palette).find(
-        (check) =>
-          check.theme === "dark" && check.front === "--on-primary" && check.back === "--primary",
-      )!;
-    const kept = gap({ basedOn: "standard", light: {}, dark: {} });
-    expect(kept.target).toBeLessThan(4.5);
-    expect(kept.target).toBe(kept.ratio);
-    expect(kept.verdict).toBe("pass");
-    // Lighter still, the primary color holds its text below what the base has.
-    expect(gap({ basedOn: "standard", light: {}, dark: { "--primary": "#7fd89a" } }).verdict).toBe(
-      "low",
-    );
+  it("measures a chart's steps as its base mixes them from the colors the palette sets", () => {
+    // A lighter green still holds an edge on the surfaces, but its faintest step does not.
+    const light = checkPalette({
+      basedOn: "standard",
+      light: { "--primary": "#3a8a4f" },
+      dark: {},
+    });
+    const passing = (front: string) =>
+      light
+        .filter((check) => check.theme === "light" && check.front === front)
+        .map((check) => check.verdict);
+    expect(passing("--primary")).toEqual(["pass", "pass"]);
+    expect(passing("--series-1")).toContain("low");
+    expect(passing("--series-4")).toEqual(["pass", "pass"]);
   });
 
   it("measures an answer button's text on its grade's tint over the surface, and the focus ring as an edge", () => {

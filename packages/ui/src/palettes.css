@@ -70,11 +70,16 @@
   --grade-4: #7fb13c;
   --grade-5: #2f8a4a;
 
-  /* A chart's series, 1 the lightest: steps of the green. */
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  /*
+   * A chart's series, 1 the faintest: steps of the green, the last
+   * mixed with the text, each at the ratio an edge needs on the surface
+   * and the sunken surface (style.test.ts), a surface gap between steps
+   * that touch.
+   */
+  --series-1: color-mix(in srgb, var(--primary) 70%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 90%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--text) 15%, var(--primary));
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   /* The page's discs: the accent blue at 50%, the yellow at 16%. */
   --paper-blue: #b1cfe380;
@@ -115,7 +120,7 @@
   --surface-sunken: #151c25;
   --surface-hover: #232e3b;
   --text: #ecebe4;
-  --text-muted: #9ba6b2;
+  --text-muted: #aab4bf;
   --border: #2a3644;
   --border-strong: #3a4859;
   --control-border: #66788d;
@@ -149,10 +154,10 @@
   --grade-4: #7fb13c;
   --grade-5: #2f8a4a;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 65%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 85%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--text) 10%, var(--primary));
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   /* The accent blue at 7%, the yellow at 5%. */
   --paper-blue: #b1cfe312;
@@ -229,10 +234,10 @@
   --grade-4: #5f8f1c;
   --grade-5: #1f6e35;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 90%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--text) 15%, var(--primary));
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   --paper-blue: transparent;
   --paper-yellow: transparent;
@@ -302,10 +307,10 @@
   --grade-4: #8fc24a;
   --grade-5: #44aa66;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 65%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 80%, var(--surface-sunken));
+  --series-3: var(--primary);
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   --paper-blue: transparent;
   --paper-yellow: transparent;
@@ -382,10 +387,10 @@
   --grade-4: #2b93cd;
   --grade-5: #0072b2;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 70%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 90%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--text) 15%, var(--primary));
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   --paper-blue: #9ccbea80;
   --paper-yellow: #e69f0029;
@@ -455,10 +460,10 @@
   --grade-4: #2b93cd;
   --grade-5: #0072b2;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 60%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 80%, var(--surface-sunken));
+  --series-3: var(--primary);
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   --paper-blue: #9ccbea12;
   --paper-yellow: #e69f000d;
@@ -533,10 +538,10 @@
   --grade-4: #7b8f00;
   --grade-5: #489100;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 90%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--text) 10%, var(--primary));
+  --series-4: color-mix(in srgb, var(--text) 60%, var(--primary));
 
   --paper-blue: #b2c6d266;
   --paper-yellow: #ad89001f;
@@ -609,10 +614,10 @@
   --grade-4: #a8b934;
   --grade-5: #75b938;
 
-  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
-  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
-  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
-  --series-4: var(--primary);
+  --series-1: color-mix(in srgb, var(--primary) 55%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 95%, var(--surface-sunken));
+  --series-4: color-mix(in srgb, var(--text) 50%, var(--primary));
 
   --paper-blue: #4695f70d;
   --paper-yellow: #dbb32d0a;

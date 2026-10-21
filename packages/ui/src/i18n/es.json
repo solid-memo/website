@@ -1365,7 +1365,8 @@
       "dangerSoft": "Tono del texto de peligro",
       "warningText": "Texto de aviso",
       "warningSoft": "Tono del texto de aviso",
-      "grade": "Botón de respuesta {grade}"
+      "grade": "Botón de respuesta {grade}",
+      "series": "Paso de gráfico {step}"
     }
   },
   "findable": {

@@ -47,13 +47,15 @@ const ROLE_MESSAGES = {
   "--warning-soft": "warningSoft",
 } as const;
 
-/** What a role is called: the answer buttons by their grade's name in study. */
+/** What a role is called: the answer buttons by their grade's name in study, a chart's steps by number. */
 function roleName(role: string, t: I18n["t"]): string {
   const grade = /^--grade-(\d)$/.exec(role);
   if (grade !== null)
     return t("paletteEditor.role.grade", {
       grade: t(`study.quality.${GRADES[Number(grade[1])]!}`),
     });
+  const step = /^--series-(\d)$/.exec(role);
+  if (step !== null) return t("paletteEditor.role.series", { step: step[1]! });
   return t(`paletteEditor.role.${ROLE_MESSAGES[role as keyof typeof ROLE_MESSAGES]}`);
 }
 

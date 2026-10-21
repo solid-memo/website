@@ -1670,7 +1670,8 @@
 
 /*
  * A pin beside each deck and draft of the sidebar: faint until its row
- * is pointed at or has the focus, marked while the item is pinned.
+ * is pointed at or has the focus, though still at the ratio an edge
+ * needs on the sidebar (WCAG 1.4.11), marked while the item is pinned.
  */
 :root[data-surface="studio"] .studio-sidebar .studio-pin {
   flex: none;
@@ -1685,7 +1686,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   box-shadow: none;
-  opacity: 0.35;
+  opacity: 0.75;
 }
 
 :root[data-surface="studio"] .studio-sidebar li:is(:hover, :focus-within) .studio-pin,

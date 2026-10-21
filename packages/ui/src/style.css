@@ -1747,7 +1747,7 @@ html.drag-active {
   max-width: 80%;
   padding: 0 0.45rem;
   border-radius: var(--radius-sm);
-  background: var(--primary);
+  background: var(--primary-fill);
   color: var(--on-primary);
   font-size: 0.75rem;
   line-height: 1.5;
@@ -4424,19 +4424,19 @@ p[role="status"]:not(.loading) {
 }
 
 .calendar-day.level-1 {
-  background: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  background: var(--series-1);
   box-shadow: none;
 }
 .calendar-day.level-2 {
-  background: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  background: var(--series-2);
   box-shadow: none;
 }
 .calendar-day.level-3 {
-  background: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  background: var(--series-3);
   box-shadow: none;
 }
 .calendar-day.level-4 {
-  background: var(--primary);
+  background: var(--series-4);
   box-shadow: none;
 }
 .calendar-day.pointed {
@@ -4488,7 +4488,7 @@ p[role="status"]:not(.loading) {
   fill: transparent;
 }
 
-/* A bar of several series: a step of the green each, 1 the lightest,
+/* A bar of several series: a step of the green each, 1 the faintest,
    named in a legend above the bars; a pointed bar is outlined, so each
    step keeps its tint. */
 .bar-step-1 {
@@ -4553,8 +4553,8 @@ p[role="status"]:not(.loading) {
 }
 
 /* The answer buttons pressed: a bar a kind of answer, its name beside
-   it, Again the sunken surface with a border and Easy the full green,
-   a surface gap between the steps. */
+   it, Again the surface with a field's edge and the others steps of
+   the green, a surface gap between the steps. */
 .grade-rows {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -4593,19 +4593,19 @@ p[role="status"]:not(.loading) {
 
 .grade-again {
   background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--border-strong);
+  box-shadow: inset 0 0 0 1px var(--control-border);
 }
 
 .grade-hard {
-  background: color-mix(in srgb, var(--primary) 35%, var(--surface-sunken));
+  background: var(--series-1);
 }
 
 .grade-good {
-  background: color-mix(in srgb, var(--primary) 65%, var(--surface-sunken));
+  background: var(--series-2);
 }
 
 .grade-easy {
-  background: var(--primary);
+  background: var(--series-3);
 }
 
 .chart-note {
@@ -4673,7 +4673,7 @@ p[role="status"]:not(.loading) {
 
 .line-chart .line-young,
 .line-key .line-young {
-  stroke: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  stroke: var(--series-1);
   stroke-dasharray: 5 4;
 }
 
@@ -4704,8 +4704,9 @@ p[role="status"]:not(.loading) {
   height: 0.5rem;
 }
 
-/* How mature the cards are: one bar of four steps of the green, new
-   the sunken surface with a border, a surface gap between the steps. */
+/* How mature the cards are: one bar of four steps, new the sunken
+   surface with a field's edge and the others steps of the green, a
+   surface gap between the steps. */
 .maturity-bar {
   display: flex;
   gap: 2px;
@@ -4723,19 +4724,19 @@ p[role="status"]:not(.loading) {
 
 .maturity-new {
   background: var(--surface-sunken);
-  box-shadow: inset 0 0 0 1px var(--border-strong);
+  box-shadow: inset 0 0 0 1px var(--control-border);
 }
 
 .maturity-relearning {
-  background: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  background: var(--series-1);
 }
 
 .maturity-young {
-  background: color-mix(in srgb, var(--primary) 55%, var(--surface-sunken));
+  background: var(--series-2);
 }
 
 .maturity-mature {
-  background: var(--primary);
+  background: var(--series-3);
 }
 
 .maturity-legend {

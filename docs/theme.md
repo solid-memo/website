@@ -132,8 +132,10 @@ The roles fall into groups:
   `--link` and a link's hover colors.
 - **Meaning**: `--danger*` and `--warning*`, and the answer buttons'
   grades `--grade-0` (Again) to `--grade-5` (Easy).
-- **Charts**: `--series-1` to `--series-4`, the steps of a bar of
-  several series.
+- **Charts**: `--series-1` to `--series-4`, the steps of the green a
+  chart draws with, 1 the faintest: the bars of several series, the
+  activity calendar's days, the answer buttons' and the cards' bars,
+  and the young cards' line.
 - **Decoration**: the accents, `--heading-pop`, the page's discs
   (`--paper-blue`, `--paper-yellow`) and the newcomers' glint (`--shine`).
 - **The masthead and the theme toggle**: `--masthead-*`, `--logo-shadow`
@@ -150,10 +152,8 @@ color (`studio.test.ts` checks the same of `studio.css`), and the
 contrast of the pairs that hold text in every block: text and muted
 text on every surface, the text on a primary fill, links, danger and warning text, the masthead's text, and an answer
 button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)),
-at 4.5:1 and fields' edges at 3:1, or in High contrast at 7:1 and
-4.5:1 (`contrastTargets`). The two pairs below 4.5:1 in Standard's
-dark block, which accessibility.md lists among its known gaps, are
-checked in every other block.
+at 4.5:1, and fields' edges and a chart's steps (WCAG 1.4.11) at 3:1,
+or in High contrast at 7:1 and 4.5:1 (`contrastTargets`).
 
 The answer buttons of Color-blind friendly are checked as protanopia,
 deuteranopia and tritanopia see them too: each deficiency simulated by
@@ -232,8 +232,10 @@ strong border (20% of the text over the border), a hovered button
 (20% of the text over its fill), the primary color's, a link's, the
 danger's and the warning's tints, and the danger's and the warning's
 borders (`DERIVED` in
-[customPalette.ts](../packages/domain/src/customPalette.ts)). The
-masthead, the charts and the decoration stay the base's.
+[customPalette.ts](../packages/domain/src/customPalette.ts)). A
+chart's steps are mixed as the base mixes them, from the primary
+color, the text and the sunken surface the palette has (`SERIES`
+there). The masthead and the decoration stay the base's.
 
 A preview in each theme shows the colors as they are. Below it, a table
 measures every pair that holds text, or that must be seen, against the
@@ -241,17 +243,15 @@ contrast it needs, as each color is chosen, and a live region says how
 they stand: text, muted text, links, danger and warning text on every
 surface, and on their tints; muted text and links on the primary
 color's tint, as on the course card; a link on its hovered tint; the
-text on a button and on the primary color; an answer button's text and
-muted text on its tint, and on its tint under the pointer; and a
-field's edge and the focus ring on the surfaces (`CHECKED_PAIRS`).
+text on a button; an answer button's text and muted text on its tint,
+and on its tint under the pointer; and a field's edge, the focus ring
+and a chart's steps on the surfaces (`CHECKED_PAIRS`).
 These are the pairs `style.test.ts` checks of the built-in palettes,
 of the roles a palette of one's own paints, and `style.test.ts` fails
 on any it checks that the list leaves out. A pair needs what the base needs
 (`contrastTargets`): 4.5:1 for text and 3:1 for edges, or 7:1 and 4.5:1
-on High contrast. A pair the base itself has below that, one of the
-[known gaps](accessibility.md#known-gaps), needs what the base has, so
-a palette that keeps its base's colors there still passes. A palette with a pair below that is saved only after
-"Use anyway"; one whose text is below 3:1 on the background or on a
+on High contrast. A palette with a pair below that is saved only
+after "Use anyway"; one whose text is below 3:1 on the background or on a
 surface is not saved at all. Saving it ("Save and use") shows the app
 in it from then on, as choosing it under Colors does.
 

@@ -19,7 +19,13 @@ import {
   uncommented,
 } from "@solid-memo/domain/testing/contrast";
 import { PALETTES as PALETTE_IDS } from "@solid-memo/domain/palette";
-import { builtInColors, CHECKED_PAIRS, PAINTED_ROLES } from "@solid-memo/domain/customPalette";
+import {
+  builtInColors,
+  CHECKED_PAIRS,
+  PAINTED_ROLES,
+  SERIES_ROLES,
+  seriesColors,
+} from "@solid-memo/domain/customPalette";
 import { hexOf } from "@solid-memo/domain/contrast";
 import { DEFAULT_TEXT_SIZE, TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 
@@ -540,14 +546,6 @@ describe("palettes", () => {
 const EACH_BLOCK = BLOCKS.map((block) => [block.selector, block] as const);
 
 /**
- * The block with the two pairs below 4.5:1 that docs/accessibility.md
- * lists among its known gaps, Standard's dark one: text on the primary
- * color, and muted text on a grade's hovered tint. No other block may
- * have them.
- */
-const KNOWN_GAPS = ':root[data-theme="dark"]';
-
-/**
  * Each pair expectContrast measured of the roles a palette of one's own
  * paints, as `front back tint`, which its editor must measure too
  * (CHECKED_PAIRS).
@@ -561,7 +559,9 @@ function paintedPair(text: string, surface: string): string | null {
   const tint = /^color-mix\(in srgb, var\((--grade-\d)\) (\d+)%, var\(--surface\)\)$/.exec(surface);
   const back = plain?.[1] ?? tint?.[1];
   if (front === undefined || back === undefined) return null;
-  if (!PAINTED_ROLES.includes(front) || !PAINTED_ROLES.includes(back)) return null;
+  // A chart's step is mixed from roles a palette of one's own paints, so its editor measures it too.
+  const fronts: readonly string[] = [...PAINTED_ROLES, ...SERIES_ROLES];
+  if (!fronts.includes(front) || !PAINTED_ROLES.includes(back)) return null;
   return `${front} ${back} ${tint?.[2] ?? ""}`;
 }
 
@@ -703,26 +703,23 @@ describe("contrast", () => {
         expectContrast(block, "var(--text)", tint(12));
         expectContrast(block, "var(--text)", tint(24));
         expectContrast(block, "var(--text-muted)", tint(12));
-        if (block.selector !== KNOWN_GAPS) expectContrast(block, "var(--text-muted)", tint(24));
+        expectContrast(block, "var(--text-muted)", tint(24));
       }
     },
   );
 
-  it("has the known gaps in Standard's dark block alone, as docs/accessibility.md says", () => {
-    const gaps = BLOCKS.filter(
-      (block) =>
-        contrast(
-          colorOf("var(--on-primary)", block.roles),
-          colorOf("var(--primary)", block.roles),
-        ) < 4.5,
-    ).map(({ selector }) => selector);
-    expect(gaps).toEqual([KNOWN_GAPS]);
-  });
-
-  it.each(EACH_BLOCK.filter(([selector]) => selector !== KNOWN_GAPS))(
-    "keeps the text on the primary color at the ratio text needs in %s, as on the line a dragged deck would land on",
+  // WCAG 1.4.11: a chart's marks are held as an edge is, on the surfaces a chart and its empty days sit on (a section, a track).
+  it.each(EACH_BLOCK)(
+    "keeps every step of a chart at the ratio an edge needs in %s",
     (_, block) => {
-      expectContrast(block, "var(--on-primary)", "var(--primary)");
+      for (let step = 1; step <= 4; step++)
+        for (const surface of ["--surface", "--surface-sunken"])
+          expectContrast(
+            block,
+            `var(--series-${step})`,
+            role(surface),
+            contrastTargets(block.palette).edge,
+          );
     },
   );
 
@@ -748,6 +745,17 @@ describe("contrast", () => {
         }),
       );
       expect(builtInColors(block.palette as never, block.theme)).toEqual(colors);
+    },
+  );
+
+  it.each(EACH_BLOCK)(
+    "mixes a chart's steps for a palette of one's own as %s mixes them",
+    (_, block) => {
+      const steps = Object.fromEntries(
+        SERIES_ROLES.map((role) => [role, hexOf(colorOf(`var(${role})`, block.roles))]),
+      );
+      const settings = { basedOn: block.palette as never, light: {}, dark: {} };
+      expect(seriesColors(settings, block.theme)).toEqual(steps);
     },
   );
 
@@ -796,6 +804,42 @@ describe("contrast", () => {
       )!;
     expect(rule.style.getPropertyValue("color")).toBe("var(--text-muted)");
     expect(rule.style.getPropertyValue("opacity")).toBe("1");
+  });
+});
+
+// The statistics' charts draw their marks in the roles the contrast tests above measure.
+describe("charts", () => {
+  const drawn = (html: string, property: string) => {
+    document.body.innerHTML = html;
+    return lastMatching(document.body.firstElementChild!, property);
+  };
+
+  it.each([
+    [`<span class="calendar-day level-1"></span>`, "var(--series-1)"],
+    [`<span class="calendar-day level-2"></span>`, "var(--series-2)"],
+    [`<span class="calendar-day level-3"></span>`, "var(--series-3)"],
+    [`<span class="calendar-day level-4"></span>`, "var(--series-4)"],
+    [`<span class="grade-segment grade-hard"></span>`, "var(--series-1)"],
+    [`<span class="grade-segment grade-good"></span>`, "var(--series-2)"],
+    [`<span class="grade-segment grade-easy"></span>`, "var(--series-3)"],
+    [`<span class="maturity-segment maturity-relearning"></span>`, "var(--series-1)"],
+    [`<span class="maturity-segment maturity-young"></span>`, "var(--series-2)"],
+    [`<span class="maturity-segment maturity-mature"></span>`, "var(--series-3)"],
+  ])("fills %s with %s", (html, role) => {
+    expect(drawn(html, "background")).toBe(role);
+  });
+
+  it("strokes the young cards' line in a step of the green", () => {
+    document.body.innerHTML = `<svg class="line-chart"><path class="line-young"></path></svg>`;
+    expect(lastMatching(document.querySelector(".line-young")!, "stroke")).toBe("var(--series-1)");
+  });
+
+  it("edges the empty steps, Again and new cards, as a field is", () => {
+    for (const html of [
+      `<span class="grade-segment grade-again"></span>`,
+      `<span class="maturity-segment maturity-new"></span>`,
+    ])
+      expect(drawn(html, "box-shadow")).toBe("inset 0 0 0 1px var(--control-border)");
   });
 });
 
@@ -910,6 +954,18 @@ describe("dragging the deck list", () => {
     ).toBe(
       "calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0",
     );
+  });
+
+  // The contrast tests hold the text on a primary fill to the ratio text needs, not the text on the primary color.
+  it("draws the group's name on the drop line on a primary fill", () => {
+    const label = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .find(
+        (rule): rule is CSSStyleRule =>
+          rule instanceof CSSStyleRule && rule.selectorText === ".drop-line[data-label]::after",
+      )!;
+    expect(label.style.getPropertyValue("background")).toBe("var(--primary-fill)");
+    expect(label.style.getPropertyValue("color")).toBe("var(--on-primary)");
   });
 
   it("gives the focus proxy a 16px font, so focusing it does not zoom a phone's page", () => {
