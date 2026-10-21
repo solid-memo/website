@@ -3,31 +3,30 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * `npm run ci:gate`: which of CI's jobs this run runs
- * (docs/releasing.md#what-each-stage-checks): every job, or only the
- * deterministic ones, the timing-dependent ones (real servers, the
- * user journeys in every browser) skipped where the same tree already
- * passed them. Every job that runs blocks.
+ * `npm run ci:gate`: whether CI's run tests this tree, or reuses the run
+ * that already did (docs/releasing.md#what-each-stage-checks). A tree is
+ * tested once, at full strength, and every job that runs blocks.
  *
  * - A pull request, the merge queue and a run by hand: every job. The
  *   merge queue is where a tree is tested at full strength before it
  *   lands, so a flaky check is fixed there, not retried later.
- * - A push to main whose commit a merge_group run passed: the
- *   deterministic jobs. The same tree passed every job already.
+ * - A push to main whose commit a merge_group run passed: the run reuses
+ *   that one. The same tree passed every job there already.
  * - A push to main that skipped the queue (a merge through a ruleset
  *   bypass, such as an advisory's): every job, as in the queue, so a
  *   release built on it waits for the full run.
- * - A release commit, whose parent passed CI on main: the deterministic
- *   jobs, and the commit must change nothing but the files a release
- *   writes (release.config.mjs), or the gate fails. Its code is its
- *   parent's, already tested.
+ * - A release commit, whose parent passed CI on main: the run reuses the
+ *   one that tested its parent, and the commit must change nothing but
+ *   the files a release writes (release.config.mjs), or the gate fails.
+ *   Its code is its parent's, already tested.
  *
- * It writes `jobs=all` or `jobs=deterministic` to GITHUB_OUTPUT, and with
- * the latter `tested-by=<run id>`: the CI run that ran the timing-dependent
- * jobs on this tree, whose journeys the report on main takes in. When
- * that run's blobs of them have expired (GitHub keeps them 7 days, as
- * after a release made late by hand), every job runs instead, so the
- * report is never short of them.
+ * It writes `jobs=all` or `jobs=reuse` to GITHUB_OUTPUT, and with the
+ * latter `tested-by=<run id>`: the CI run that tested this tree, whose
+ * artifacts the run takes over: the journeys' blobs for main's report,
+ * the site the deploy ships, and, but on a release commit, Turbo's cache
+ * for main. When that run keeps one of them no longer (GitHub keeps
+ * them 7 days, as after a release made late by hand), every job runs
+ * instead, so nothing is missing.
  */
 import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
@@ -38,13 +37,8 @@ const { assets } = (await import(new URL("../release.config.mjs", import.meta.ur
   assets: string[];
 };
 
-/**
- * What a run runs, every job or the deterministic ones alone, and, when
- * those alone, the run that ran the others on this code.
- */
-export type Gate =
-  | { jobs: "all"; why: string }
-  | { jobs: "deterministic"; testedBy: number; why: string };
+/** What a run runs: every job, or none but those that reuse the run that tested this code. */
+export type Gate = { jobs: "all"; why: string } | { jobs: "reuse"; testedBy: number; why: string };
 
 const MAIN = "refs/heads/main";
 /**
@@ -52,6 +46,10 @@ const MAIN = "refs/heads/main";
  * which main's report takes from the run that ran them.
  */
 export const JOURNEYS_BLOBS = "journeys-blob-";
+/** The site the run built (ci.yml's site job), which the deploy ships. */
+export const SITE = "site";
+/** Turbo's cache after a queue run's checks (ci.yml's check job), which becomes main's. */
+export const TURBO_CACHE = "turbo-cache";
 const RELEASE = "chore(release): ";
 
 /** Whether a commit is a release commit, as ci.yml's concurrency group tells them apart. */
@@ -81,14 +79,23 @@ export interface GateIo {
   log(message: string): void;
 }
 
-/** The deterministic jobs, the others having run in `testedBy`, while it keeps its journeys' blobs. */
-async function testedIn(io: GateIo, testedBy: number, why: string): Promise<Gate> {
-  if (await io.kept(testedBy, JOURNEYS_BLOBS)) {
-    return { jobs: "deterministic", testedBy, why: `${why}: the deterministic jobs run.` };
+/** Reuse of `testedBy`, while it keeps every artifact named: every job otherwise. */
+async function testedIn(
+  io: GateIo,
+  testedBy: number,
+  artifacts: readonly string[],
+  why: string,
+): Promise<Gate> {
+  const lost: string[] = [];
+  for (const prefix of artifacts) {
+    if (!(await io.kept(testedBy, prefix))) lost.push(`${prefix}*`);
+  }
+  if (lost.length === 0) {
+    return { jobs: "reuse", testedBy, why: `${why}: this run reuses it.` };
   }
   return {
     jobs: "all",
-    why: `${why}, but it keeps no ${JOURNEYS_BLOBS}* blobs, or they expired: every job runs, so the journeys' report is whole.`,
+    why: `${why}, but it keeps no ${lost.join(", ")}, or they expired: every job runs, so nothing is missing.`,
   };
 }
 
@@ -118,15 +125,22 @@ export async function decide(io: GateIo): Promise<Gate> {
     }
     // The parent's push run ran every job only when the queue had not.
     const testedBy = (await io.passed(parent, "merge_group")) ?? onMain;
+    // Turbo's cache is not taken over: main's holds its parent's already.
     return testedIn(
       io,
       testedBy,
+      [JOURNEYS_BLOBS, SITE],
       `A release commit, changing only the version's files, on ${parent.slice(0, 8)}, which CI passed on main; run ${testedBy} ran every job on its code`,
     );
   }
   const queued = await io.passed(sha, "merge_group");
   if (queued !== undefined) {
-    return testedIn(io, queued, `${sha.slice(0, 8)} passed the merge queue in run ${queued}`);
+    return testedIn(
+      io,
+      queued,
+      [JOURNEYS_BLOBS, SITE, TURBO_CACHE],
+      `${sha.slice(0, 8)} passed the merge queue in run ${queued}`,
+    );
   }
   return {
     jobs: "all",
@@ -140,7 +154,7 @@ export async function main(io: GateIo): Promise<number> {
     const gate = await decide(io);
     io.log(gate.why);
     io.output("jobs", gate.jobs);
-    if (gate.jobs === "deterministic") io.output("tested-by", String(gate.testedBy));
+    if (gate.jobs === "reuse") io.output("tested-by", String(gate.testedBy));
     return 0;
   } catch (error) {
     io.log((error as Error).message);

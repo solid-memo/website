@@ -6,28 +6,29 @@ name: CI
 
 # Every change is checked before it is merged (docs/testing.md#continuous-integration):
 # a pull request, from this repository or a fork, runs every job here,
-# and a push to main every job or the deterministic ones, as the gate
-# decides (below). A pull request is merged through the
-# merge queue (merge_group), which runs them again on the pull request
-# on top of main and of those ahead of it in the queue, and merges
-# exactly the commit that passed. A branch's pushes alone run nothing,
-# so a pull request's commits are not checked twice for one push. The
-# jobs read the repository and nothing else: the token can only read,
-# and no secret is used, so a fork's pull request runs them as safely as
-# ours. The one exception, caches, runs on main alone and runs no code
-# of the repository's. Only runs on main save Turbo's cache and the
-# end-to-end images; a pull request and the merge queue read main's.
+# and a push to main every job or none but those that reuse the run that
+# tested its tree, as the gate decides (below). A pull request is merged
+# through the merge queue (merge_group), which runs them again on the
+# pull request on top of main and of those ahead of it in the queue, and
+# merges exactly the commit that passed. A branch's pushes alone run
+# nothing, so a pull request's commits are not checked twice for one
+# push. The jobs read the repository and nothing else: the token can
+# only read, and no secret is used, so a fork's pull request runs them as
+# safely as ours. The one exception, caches, runs on main alone and runs
+# no code of the repository's. Only runs on main save Turbo's cache and
+# the end-to-end images, Turbo's being the queue's when main's run reuses
+# it; a pull request and the merge queue read main's.
 #
-# Each job is labeled deterministic, the same answer on any runner, or
-# timing-dependent, its answer hanging on how busy the runner or a real
-# server is (docs/testing.md#continuous-integration). The gate job
-# decides whether the timing-dependent ones run
-# (docs/releasing.md#what-each-stage-checks): in a pull request, in the
-# merge queue, by hand, and on a push to main that skipped the queue,
-# but not on a push the queue passed, nor on a release commit, whose
-# tree the queue (or its parent's full run) already tested. A job that
-# runs blocks. A new job is given its label, and so its place in the
-# gates, when it is added.
+# A tree is tested once (docs/releasing.md#what-each-stage-checks): the
+# gate job has every job run in a pull request, in the merge queue, by
+# hand, and on a push to main that skipped the queue, but on a push the
+# queue passed, or a release commit, whose tree the queue (or its
+# parent's full run) already tested, the run reuses that one: the jobs
+# that test are skipped, and reuse takes over the site and Turbo's cache
+# it made. A job that runs blocks. Each job is labeled deterministic, the
+# same answer on any runner, or timing-dependent, its answer hanging on
+# how busy the runner or a real server is
+# (docs/testing.md#deterministic-and-timing-dependent-jobs).
 
 on:
   pull_request:
@@ -62,9 +63,9 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # What this run runs (npm run ci:gate): every job (jobs=all), or the
-  # deterministic ones alone (jobs=deterministic), with the run that ran
-  # the others on this tree (tested-by). On a release commit, it also
+  # What this run runs (npm run ci:gate): every job (jobs=all), or only
+  # those that reuse the run that tested this tree (jobs=reuse), that run
+  # being tested-by. On a release commit, it also
   # fails unless the commit changes nothing but the files a release
   # writes. Only on a push to main does it ask GitHub's API: whether the
   # merge queue passed the commit, or CI on main a release commit's
@@ -97,6 +98,8 @@ jobs:
   # the ratio of two runs on the same runner, which a busy runner leaves
   # about the same (packages/domain/src/testing/growth.ts).
   check:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -145,16 +148,32 @@ jobs:
         with:
           path: .turbo/cache
           key: turbo-check-${{ github.sha }}
+      # In the queue, the cache is kept as the run's turbo-cache artifact
+      # instead: main's run of the same commit reuses this run (gate's
+      # tested-by), and saves it as main's (the reuse job). Its entries are
+      # compressed already.
+      - if: github.event_name == 'merge_group'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: turbo-cache
+          path: .turbo/cache/
+          include-hidden-files: true
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
 
-  # Main's older Turbo caches (check's), deleted once check has saved its
+  # Main's older Turbo caches, deleted once check or reuse has saved its
   # own, which was built on them, and they would count toward the
   # repository's 10 GB until GitHub's 7 days are up. A job of its own, so
   # the only token that can delete caches is in a job that runs none of
   # the repository's code; and one that may fail without failing the run,
   # which release.yml and deploy.yml wait for. Deterministic.
   caches:
-    if: github.ref == 'refs/heads/main'
-    needs: check
+    if: >-
+      github.ref == 'refs/heads/main' && !cancelled() &&
+      (needs.check.result == 'success' || needs.reuse.result == 'success')
+    needs: [check, reuse]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     continue-on-error: true
@@ -182,6 +201,8 @@ jobs:
   # build it again, still finds it; a job run again replaces it.
   # Deterministic.
   site:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -212,6 +233,8 @@ jobs:
   # all. It needs the whole history, which check does not, so it is a
   # job of its own. Deterministic.
   library:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -270,6 +293,8 @@ jobs:
   # it, and the deploy waits for it like every other job here.
   # Deterministic.
   crosscheck:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -545,7 +570,7 @@ jobs:
           pattern: journeys-blob-*
           merge-multiple: true
           path: e2e/journeys/blob-reports/
-      - if: needs.gate.outputs.jobs == 'deterministic'
+      - if: needs.gate.outputs.jobs == 'reuse'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: journeys-blob-*
@@ -560,7 +585,7 @@ jobs:
           # The journeys jobs' names, as their matrix has them.
           REPORTS: chromium-1 chromium-2 firefox webkit phone
         run: |
-          if [ "$JOURNEYS" = success ] || [ "$JOBS" = deterministic ]; then
+          if [ "$JOURNEYS" = success ] || [ "$JOBS" = reuse ]; then
             for name in $REPORTS; do
               test -f "blob-reports/report-$name.zip"
             done
@@ -576,16 +601,94 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  # On main, when the timing-dependent jobs are skipped, the caches they
-  # would have saved there, which every pull request and queue run reads:
-  # each server's images and the journeys' (e2e-images), and the
-  # journeys' browsers. This job only looks them up, by the keys those
-  # jobs use; warm-images and warm-browsers make and save what is
-  # missing, and nothing else, so a run with every cache in place spends
-  # one short job. Like caches, they may fail without failing the run.
+  # On main, when this run reuses the one that tested its tree (gate's
+  # jobs=reuse, tested-by), what that run made is taken over, not made
+  # again: its site, kept as this run's site artifact, which the deploy
+  # ships (docs/deployment.md), and, but on a release commit, its Turbo
+  # cache, saved as main's, which every pull request and queue run
+  # restores. That run tested this very tree: the queue's commit is the
+  # one main moved to, and a release commit's code is its parent's. On a
+  # release commit, main's Turbo cache holds its parent's already. It runs
+  # none of the repository's code, so it needs no checkout. Deterministic.
+  reuse:
+    if: needs.gate.outputs.jobs == 'reuse'
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # To download the site and Turbo's cache from the run that tested this tree.
+      actions: read
+    env:
+      RELEASE: >-
+        ${{ startsWith(github.event.head_commit.message, 'chore(release): ') }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          run-id: ${{ needs.gate.outputs.tested-by }}
+          github-token: ${{ github.token }}
+          path: site/
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: site/
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
+      - if: env.RELEASE != 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: turbo-cache
+          run-id: ${{ needs.gate.outputs.tested-by }}
+          github-token: ${{ github.token }}
+          path: .turbo/cache/
+      - if: env.RELEASE != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-check-${{ github.sha }}
+
+  # A release commit's own files, when this run reuses the one that tested
+  # its parent: the gate has checked that it changes nothing else, and
+  # its code is its parent's, so these are what it can get wrong. Biome's
+  # rules (package.json), markdownlint's and cspell's (CHANGELOG.md), as
+  # npm run check has them, and publiccode.yml, by its parser.
   # Deterministic.
+  release-files:
+    if: >-
+      needs.gate.outputs.jobs == 'reuse' &&
+      startsWith(github.event.head_commit.message, 'chore(release): ')
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run lint:markdown
+      - run: npm run lint:spelling
+      - uses: ./.github/actions/publiccode
+        with:
+          network: "false"
+
+  # On main, when this run reuses another and the jobs that test are
+  # skipped, the caches they would have saved there, which every pull
+  # request and queue run reads: each server's images and the journeys'
+  # (e2e-images), the journeys' browsers, and Chromium's headless shell
+  # (.github/actions/chromium). This job only looks them up, by the keys
+  # those jobs use; warm-images and warm-browsers make and save what is
+  # missing, and nothing else, so a run with every cache in place spends
+  # one short job; warm-pip, pip's. Like caches, they may fail without
+  # failing the run. Deterministic.
   warm:
-    if: github.ref == 'refs/heads/main' && needs.gate.outputs.jobs == 'deterministic'
+    if: github.ref == 'refs/heads/main' && needs.gate.outputs.jobs == 'reuse'
     needs: gate
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -638,6 +741,10 @@ jobs:
           for name in chromium firefox webkit; do
             cached "playwright-$RUNNER_OS-$version-$name" || browsers+=("$name")
           done
+          # The headless shell check and site draw the docs' diagrams in,
+          # under the chromium action's key, by markdown's playwright.
+          shell=$(node -p "require('playwright/package.json').version")
+          cached "playwright-shell-$RUNNER_OS-$shell" || browsers+=("shell")
           echo "Browsers missing: ${browsers[*]:-none}"
           echo "browsers=$(jq -cn '$ARGS.positional' --args "${browsers[@]}")" >> "$GITHUB_OUTPUT"
 
@@ -699,8 +806,9 @@ jobs:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
 
-  # A journeys job's missing browsers, downloaded as it would (its
-  # matrix's browsers), and saved under the key it restores them by.
+  # A journeys job's missing browser, downloaded as it would (its
+  # matrix's browser), or the missing headless shell, as the chromium
+  # action downloads it, and saved under the key it is restored by.
   # Deterministic.
   warm-browsers:
     if: needs.warm.outputs.browsers != '' && needs.warm.outputs.browsers != '[]'
@@ -723,14 +831,51 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      # As the journeys matrix installs it for this cache.
-      - run: npx playwright install "$BROWSERS"
+      - id: key
+        run: |
+          if [ "$BROWSERS" = shell ]; then
+            echo "key=playwright-shell-$RUNNER_OS-$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+          else
+            echo "key=playwright-$RUNNER_OS-$(node -p "require('@playwright/test/package.json').version")-$BROWSERS" >> "$GITHUB_OUTPUT"
+          fi
+      - run: |
+          if [ "$BROWSERS" = shell ]; then
+            npx playwright install --only-shell chromium
+          else
+            npx playwright install "$BROWSERS"
+          fi
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browsers }}
+          key: ${{ steps.key.outputs.key }}
+
+  # On main, when this run reuses another, pip's caches, which crosscheck,
+  # docs and workflows restore in every pull request and queue run, under
+  # setup-python's keys: the Python tools installed, so setup-python
+  # saves each when main lacks it. A key main has is only restored. Like
+  # caches, it may fail without failing the run. Deterministic.
+  warm-pip:
+    if: github.ref == 'refs/heads/main' && needs.gate.outputs.jobs == 'reuse'
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: scripts/requirements-ci.txt
+      - run: pip install -r scripts/requirements-ci.txt
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: scripts/requirements-lint.txt
+      - run: pip install -r scripts/requirements-lint.txt
 
   # The docs (docs/testing.md#documentation): every link to a file or a
   # heading in the repository resolves (lychee, offline: the web's
@@ -744,6 +889,8 @@ jobs:
   # image, which Docker Hub's limit on pulls without an account, shared
   # by the runners, could refuse, and which names its image by a tag. Deterministic.
   docs:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -775,6 +922,8 @@ jobs:
   # zizmor's audits that ask GitHub's API are left out. Both are Python
   # packages, pinned in scripts/requirements-lint.txt. Deterministic.
   workflows:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -812,6 +961,8 @@ jobs:
   # no issue, and are left out, as commitlint leaves out their commits.
   # Deterministic.
   commits:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -863,40 +1014,60 @@ jobs:
           npm run check:closes -- --base "$BASE" --head "$HEAD" --body-file "$body"
 
   # The one check a merge to main waits for (the ruleset on main is to
-  # require it): it passes only when every job it needs passed (not
-  # journeys-report, caches or the warm jobs), but for the
-  # timing-dependent jobs gate skipped (jobs=deterministic), which may be
-  # skipped then and only then. Every job it needs is in one of its two
-  # lists, or it fails. A matrix job's checks are named per server, and
-  # jobs come and go; this name stays.
+  # require it). The gate must pass; then, when the run tests its tree
+  # (jobs=all), every job that tests it must pass, and when it reuses the
+  # run that did (jobs=reuse), reuse must pass, and release-files too on
+  # a release commit, the jobs that test being skipped. journeys-report,
+  # caches and the warm jobs are not among them. Every job it needs is
+  # the gate or in one of its two lists, or it fails. A matrix job's
+  # checks are named per server, and jobs come and go; this name stays.
   ci-ok:
     if: always()
-    needs: [gate, check, site, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
+    needs:
+      [gate, check, site, library, crosscheck, pod, contract, journeys, docs, workflows, commits,
+       reuse, release-files]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Every job passed, or gate skipped it
+      - name: Every job passed, or the gate's choice skipped it
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
-          DETERMINISTIC: >-
-            ${{ needs.gate.result }} ${{ needs.check.result }} ${{ needs.site.result }}
-            ${{ needs.library.result }}
-            ${{ needs.crosscheck.result }} ${{ needs.docs.result }}
+          GATE: ${{ needs.gate.result }}
+          TESTS: >-
+            ${{ needs.check.result }} ${{ needs.site.result }} ${{ needs.library.result }}
+            ${{ needs.crosscheck.result }} ${{ needs.pod.result }} ${{ needs.contract.result }}
+            ${{ needs.journeys.result }} ${{ needs.docs.result }}
             ${{ needs.workflows.result }} ${{ needs.commits.result }}
-          TIMING: ${{ needs.pod.result }} ${{ needs.contract.result }} ${{ needs.journeys.result }}
+          REUSE: ${{ needs.reuse.result }}
+          RELEASE_FILES: ${{ needs.release-files.result }}
+          RELEASE: >-
+            ${{ startsWith(github.event.head_commit.message, 'chore(release): ') }}
           JOBS: ${{ needs.gate.outputs.jobs }}
         run: |
           echo "The jobs' results: $RESULTS (gate: ${JOBS:-none})"
           read -ra all <<< "$RESULTS"
-          read -ra deterministic <<< "$DETERMINISTIC"
-          read -ra timing <<< "$TIMING"
-          [ "${#all[@]}" -eq $(( ${#deterministic[@]} + ${#timing[@]} )) ] || {
+          read -ra tests <<< "$TESTS"
+          [ "${#all[@]}" -eq $(( 3 + ${#tests[@]} )) ] || {
             echo "::error::ci-ok needs a job neither of its lists names: add it to one."
             exit 1
           }
-          for result in "${deterministic[@]}"; do
-            [ "$result" = success ] || exit 1
-          done
-          for result in "${timing[@]}"; do
-            [ "$result" = success ] || { [ "$result" = skipped ] && [ "$JOBS" = deterministic ]; } || exit 1
-          done
+          [ "$GATE" = success ] || exit 1
+          case "$JOBS" in
+            all)
+              for result in "${tests[@]}"; do
+                [ "$result" = success ] || exit 1
+              done
+              ;;
+            reuse)
+              for result in "${tests[@]}"; do
+                [ "$result" = skipped ] || exit 1
+              done
+              [ "$REUSE" = success ] || exit 1
+              if [ "$RELEASE" = true ]; then
+                [ "$RELEASE_FILES" = success ] || exit 1
+              fi
+              ;;
+            *)
+              exit 1
+              ;;
+          esac

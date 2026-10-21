@@ -592,9 +592,11 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 
 | Job | Kind | What it checks |
 |---|---|---|
-| `gate` | deterministic | what the run runs: every job, or the deterministic ones alone (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
+| `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
+| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s. The merge queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
 | `site` | deterministic | `npm run build`, once for the whole run, the docs' diagrams drawn in Chromium's headless shell as in `check`; the site is kept a week as the run's `site` artifact, so a `journeys` job run again still finds it, and the `journeys` jobs test that build |
+| `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over what that run made, its site, kept as this run's `site` artifact, and, but on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
+| `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
 | `library` | deterministic | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
 | `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
@@ -604,17 +606,18 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `check`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | deterministic | nothing: on `main`, after `check`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
-| `warm`, `warm-images`, `warm-browsers` | deterministic | nothing: on `main`, when the timing-dependent jobs are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's and the journeys' browsers, and the other two pull, build or download only what is missing, and save it. Like `caches`, they fail neither the run nor `ci-ok` |
-| `ci-ok` | deterministic | that every job above passed, `journeys-report`, `caches` and the `warm` jobs aside; `pod`, `contract` and `journeys` may be skipped only when the gate skipped them |
+| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another and the jobs that test are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's, the journeys' browsers and Chromium's headless shell, and `warm-images` and `warm-browsers` pull, build or download only what is missing, and save it; `warm-pip` installs the Python tools, so setup-python saves pip's caches where `main` lacks them. Like `caches`, they fail neither the run nor `ci-ok` |
+| `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches` and the `warm` jobs aside |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
 on `main` (a setting of the repository, Settings › Rules) is to require
 it and nothing else, and Renovate merges its updates
 through a pull request once it passes (`automergeType: 'pr'` in
 `renovate.json5`), as anyone's change is merged. It runs even when a job
-before it failed, and fails unless every one passed, or, for `pod`,
-`contract` and `journeys`, was skipped by the gate. A matrix job's
+before it failed, and fails unless every one passed, or was skipped by
+the gate's choice: the jobs that test when the run reuses another, the
+two that reuse when it tests. A matrix job's
 checks are named per server, and jobs come and go, so the ruleset names
 this job alone. Deploys follow a
 green run on a release commit on `main`
@@ -631,12 +634,11 @@ was slow: the end-to-end tests against real servers (`pod`,
 `contract`) and the user journeys in every browser. Each
 job in [ci.yml](../.github/workflows/ci.yml) says which it is, in its
 comment and in the table above, and a new job is given its kind when it
-is added, which decides where it runs
-([releasing.md](releasing.md#what-each-stage-checks)): every job runs in
-a pull request and the merge queue, and blocks there, but a
-timing-dependent one is skipped on a push to `main` the queue passed and
-on a release commit, whose code it already ran on. A job that runs
-always blocks.
+is added. Both kinds run where a tree is tested, in a pull request and
+the merge queue, and block there; neither runs again on a push to
+`main` the queue passed or on a release commit, whose code they already
+ran on ([releasing.md](releasing.md#what-each-stage-checks)). A job that
+runs always blocks.
 
 A timing-dependent job that fails where it runs is fixed, not retried:
 the journeys' waits, for one, are made to hold, with no second try
@@ -699,7 +701,12 @@ token can delete caches, runs on `main` alone), no job uses a secret,
 and no checkout keeps the token (`persist-credentials: false`). A fork's
 run may restore the caches `main`'s runs saved; what it saves (npm's,
 pip's and Playwright's, not Turbo's or the images') is kept for its own
-pull request only.
+pull request only. No pull request run's artifact reaches `main`:
+`reuse` takes over only those of a run of this repository's own, the
+merge queue's run that passed the commit `main` moved to or, for a
+release commit whose parent skipped the queue, that parent's push run
+on `main`. Either ran the code that landed, as `main`'s own run would
+have.
 
 The job ids `pod` and `contract`, and their `matrix.server` lists, are
 read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that

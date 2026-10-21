@@ -651,9 +651,9 @@ What holds today, and what does not, criterion by criterion.
   tests, which CI runs before the cross-check ([testing.md](testing.md)).
 - MUST, met — contributions pass all tests before they are merged.
   CI runs on every pull request, in the merge queue and on every push to
-  `main`, and `ci-ok` passes only when all its jobs did (on `main`,
-  the timing-dependent ones that the merge queue already passed are
-  skipped, [releasing.md](releasing.md#what-each-stage-checks)): `check`,
+  `main`, and `ci-ok` passes only when all its jobs did (on `main`, a
+  tree the merge queue already passed is not tested again,
+  [releasing.md](releasing.md#what-each-stage-checks)): `check`,
   `site` (the build the journeys run on), `library` (the deck library
   and the public API compared with the change's base), `crosscheck`, `pod`, `contract`, `journeys` (every
   journey in Chromium, and a set of them in Firefox, WebKit and on a
