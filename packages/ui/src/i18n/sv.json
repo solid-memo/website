@@ -1666,6 +1666,10 @@
     "introduced": "Nya",
     "introducedColumn": "Introducerade",
     "byDeck": "Per kortlek",
+    "deckAnswered": {
+      "one": "{count} svar · senast studerad {date}",
+      "other": "{count} svar · senast studerad {date}"
+    },
     "deck": "Kortlek",
     "lastStudied": "Senast studerad",
     "youngRecall": "Unga kort, ihågkomna",

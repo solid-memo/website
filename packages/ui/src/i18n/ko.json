@@ -1584,6 +1584,9 @@
     "introduced": "새 카드",
     "introducedColumn": "도입한 카드",
     "byDeck": "덱별",
+    "deckAnswered": {
+      "other": "답변 {count}개 · 마지막 학습 {date}"
+    },
     "deck": "덱",
     "lastStudied": "마지막 학습",
     "youngRecall": "익히는 중인 카드 기억률",

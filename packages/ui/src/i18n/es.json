@@ -1748,6 +1748,11 @@
     "introduced": "Nuevas",
     "introducedColumn": "Introducidas",
     "byDeck": "Por mazo",
+    "deckAnswered": {
+      "one": "{count} respuesta · último estudio: {date}",
+      "many": "{count} de respuestas · último estudio: {date}",
+      "other": "{count} respuestas · último estudio: {date}"
+    },
     "deck": "Mazo",
     "lastStudied": "Último estudio",
     "youngRecall": "Jóvenes recordadas",

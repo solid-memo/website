@@ -4971,9 +4971,9 @@ table.deck-statistics td {
   margin: 1.5rem 0 0;
 }
 
-/* The table by deck is wider than a phone: it scrolls sideways in its
-   own region, the deck's name kept in view on the panel's surface, and
-   read as a cell, not as a column's heading. */
+/* A table of the statistics can be wider than its section: it scrolls
+   sideways in its own region, the row's name kept in view on the
+   panel's surface, and read as a cell, not as a column's heading. */
 .statistics .table-scroll {
   overflow-x: auto;
   margin-bottom: 1.25rem;
@@ -4995,6 +4995,68 @@ table.deck-statistics th[scope="row"] {
 
 table.deck-statistics td {
   white-space: nowrap;
+}
+
+/* The figures by deck: a block a deck, as many to a row as fit (one on
+   a phone, two in the page's column), each a panel like a tile: its
+   name, a line of its answers and last study, then its figures, labels
+   over values, as many to a row as fit. A share's count is under its
+   percent, smaller and muted, as in a tile. */
+.by-deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  gap: 0.75rem;
+  margin: 0.75rem 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.by-deck > li {
+  padding: 0.75rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.by-deck h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.by-deck .hint {
+  margin: 0.15rem 0 0.6rem;
+}
+
+.by-deck dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(7.5rem, 100%), 1fr));
+  gap: 0.6rem 1rem;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.by-deck dt {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.by-deck dd {
+  margin: 0;
+}
+
+/* Recall each way takes a row of its own: "Front → back: 90%" on one line. */
+.by-deck-directions {
+  grid-column: 1 / -1;
+}
+
+.by-deck dd + dd {
+  margin-top: 0.3rem;
+}
+
+.by-deck .share-of {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 
 /* A table's own name above it, as a chart's caption is. */

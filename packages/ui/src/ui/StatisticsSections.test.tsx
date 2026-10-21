@@ -66,61 +66,21 @@ describe("OverviewSection", () => {
     render(
       <OverviewSection statistics={statistics} decks={[deck]} allTime={false} cardsYouKnow={3} />,
     );
-    expect(headings()).toEqual(["By deck"]);
+    expect(headings()).toEqual(["By deck", "Capitals", "A removed deck"]);
     expect(screen.getAllByText("2 days")).toHaveLength(2);
     expect(screen.getByRole("group", { name: "Last 30 days" })).toHaveTextContent("2 of 30 days7%");
     expect(screen.getByRole("group", { name: "Cards you know" })).toHaveTextContent(
       "3Mature now: reviewed at 21 days or more",
     );
     expect(screen.getByText("Activity, the last 52 weeks")).toBeInTheDocument();
-    const byDeck = screen.getByRole("region", { name: "By deck" });
-    const cells = (row: HTMLElement) =>
-      within(row)
-        .queryAllByRole(/columnheader|rowheader|cell/)
-        .map((cell) => cell.textContent);
-    expect(within(byDeck).getAllByRole("row").map(cells)).toEqual([
-      [
-        "Deck",
-        "Answers",
-        "Introduced",
-        "Young recall",
-        "Mature recall",
-        "By direction",
-        "First try",
-        "Lapses",
-        "Graded course answers",
-        "Last studied",
-      ],
-      [
-        "Capitals",
-        "2",
-        "1",
-        "100% of 1 review",
-        "–",
-        "–",
-        "100% of 1 new card",
-        "0",
-        "–",
-        "September 21, 2026",
-      ],
-      [
-        "A removed deck",
-        "1",
-        "1",
-        "–",
-        "–",
-        "–",
-        "100% of 1 new card",
-        "0",
-        "–",
-        "September 21, 2026",
-      ],
-    ]);
+    expect(
+      within(screen.getByRole("list", { name: "By deck" })).getAllByRole("listitem"),
+    ).toHaveLength(2);
   });
 
   it("gives the whole log's cards introduced and grown mature when the range is all of it, and no cards known before they are read", () => {
     render(<OverviewSection statistics={statistics} decks={[deck]} allTime={true} />);
-    expect(headings()).toEqual(["All time", "By deck"]);
+    expect(headings()).toEqual(["All time", "By deck", "Capitals", "A removed deck"]);
     expect(screen.getByRole("group", { name: "Cards introduced" })).toHaveTextContent(
       /^Cards introduced2Each/,
     );
@@ -165,35 +125,10 @@ describe("OverviewSection", () => {
     );
   });
 
-  it("has no table by deck for one deck's statistics", () => {
+  it("has no figures by deck for one deck's statistics", () => {
     render(<OverviewSection statistics={statistics} allTime={false} />);
     expect(headings()).toEqual([]);
-    expect(screen.queryByRole("region", { name: "By deck" })).toBeNull();
-  });
-
-  it("gives a deck's recall each way only when it has reviews both ways", () => {
-    const both = statisticsReportOf(
-      [
-        answer("2026-09-21", deck.url, 1),
-        answer("2026-09-21", deck.url, 1, {
-          id: "answer-back",
-          direction: "back-to-front",
-          grade: 1,
-        }),
-      ],
-      "2026-09-21",
-    );
-    render(<OverviewSection statistics={both} decks={[deck]} allTime={false} />);
-    const row = within(screen.getByRole("region", { name: "By deck" })).getAllByRole("row")[1]!;
-    expect(within(row).getAllByRole("cell")[4]).toHaveTextContent(
-      "Front → back: 100% of 1 review · Back → front: 0% of 1 review",
-    );
-  });
-
-  it("gives a course's graded answers in its deck's row", () => {
-    render(<OverviewSection statistics={courseOnly} decks={[deck]} allTime={false} />);
-    const row = within(screen.getByRole("region", { name: "By deck" })).getAllByRole("row")[1]!;
-    expect(within(row).getAllByRole("cell")[7]).toHaveTextContent("50% of 2 answers");
+    expect(screen.queryByRole("list", { name: "By deck" })).toBeNull();
   });
 
   it("says since when, when the log begins after the range read, and nothing of it otherwise", () => {

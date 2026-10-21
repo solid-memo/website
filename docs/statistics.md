@@ -117,7 +117,7 @@ cannot reach further back. Each tab, from the top:
 | Overview | Tiles | Answers, Study days, Cards studied, Cards you know (the cards mature now, from where the cards stand), Current streak, Longest streak, and how many of the last 30 days were studied ("12 of 30 days", with its share). A streak is study days in a row; the current one still counts while today is not studied yet. |
 | Overview | All time | Only for all time: how many cards were introduced, and how many have grown mature (reached an interval of 21 days), over the whole log, each card once, whatever came after; and about how long was studied over the whole log, recorded since the first answer with a time ("Recorded since …, estimated before") and estimated before it ([below](#time-spent-and-the-hours-of-the-day)), a dash while no time is known. With the tiles above and the cards introduced over time, all of them the whole log's then, the longest streak among them, that is how far the learner has come. |
 | Overview | Activity calendar | A calendar of the last 52 weeks, whatever the range, a column a week, each day as green as its share of the busiest day's answers. |
-| Overview | By deck | A table of each deck's answers, cards introduced, young and mature recall, recall each way (for a deck with reviews both ways), first try, lapses, graded course answers and the day it was last studied. It scrolls sideways on a narrow screen, the deck's name kept in view. A deck since removed is "A removed deck". |
+| Overview | By deck | A block a deck, as many to a row as fit (one on a phone, two on a larger screen), so nothing scrolls sideways: under the deck's name, its answers and the day it was last studied ("12 answers · last studied September 21, 2026"), then its figures, each under its label: cards introduced, young and mature recall, first try, lapses, graded course answers and recall each way (for a deck with reviews both ways, a direction a line). A share shows its count under its percent, as a tile does, and a share of nothing (no reviews, no course answers) is left out. Ten figures a deck are too many for a table's row in the page's column ([ByDeckStatistics.tsx](../packages/ui/src/ui/ByDeckStatistics.tsx)). A deck since removed is "A removed deck". |
 | Overview | Download my answers (CSV) | Saves the range's answers, of every deck or of the deck, as a CSV file on the learner's device (`UseCases.saveAnswers`, `answersCsv` in [answerCsv.ts](../packages/domain/src/answerCsv.ts)): a row an answer, oldest first, with every column the log has (`answered_at`, `study_day`, `deck`, `card`, `direction`, `grade`, `mode`, `prior_interval_days`, `next_interval_days`, `chosen_distractor`, `recall_millis`, `grade_millis`, `prior_due`, `utc_offset_minutes`), named in English whatever the page's language. It is handed to the browser to save as any download; nothing is sent anywhere. |
 | Activity | What each day held | The last 30 days as stacked bars: reviews remembered, cards new that day, lapses and repeats, a step of the green each, named in a legend. A course answer to a card seen before is none of these, so it counts only among the day's answers, in the table. |
 | Activity | Answers by weekday | A bar a weekday, Monday first: its answers divided by how many of that weekday there have been since the first study day read, and in the table how many of them were studied ("3 of 4"). |
@@ -278,7 +278,7 @@ often, each with its card and how often (`confusionsOf`).
 The deck's statistics page, `#/deck-statistics?instance=…&deck=…`
 (under the deck in the breadcrumbs: Decks › *deck* › Statistics), has
 the range and the tabs of the statistics page, of the deck's answers
-alone: its own activity calendar on the overview, without the table
+alone: its own activity calendar on the overview, without the figures
 by deck; recall each way on the memory tab when it has reviews both
 ways, with its hardest cards and most-confused options in place of the
 leeches across decks; its own cards and, for a course's deck, its
@@ -454,7 +454,7 @@ rest of their study when they log in.
   week's young and mature cards, what the day held (one repeat), the
   weekdays, the time spent (its sessions a count, never its minutes,
   which hang on how fast the journey runs) and the answers by hour of
-  the day (their total), the table by deck, every maturity bar
+  the day (their total), the figures by deck, every maturity bar
   (relearning among them), the overdue tile, the interval chart and
   that no leech is listed before any review, then reads today in the
   calendar from the keyboard, and over all time that the time studied

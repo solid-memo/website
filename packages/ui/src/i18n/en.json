@@ -1666,6 +1666,10 @@
     "introduced": "New",
     "introducedColumn": "Introduced",
     "byDeck": "By deck",
+    "deckAnswered": {
+      "one": "{count} answer · last studied {date}",
+      "other": "{count} answers · last studied {date}"
+    },
     "deck": "Deck",
     "lastStudied": "Last studied",
     "youngRecall": "Young recall",
