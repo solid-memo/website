@@ -17,7 +17,6 @@ import {
   paletteVerdict,
   parsePalette,
   type CustomPalette,
-  type PaletteSettings,
 } from "./customPalette";
 import { PALETTES } from "./palette";
 
@@ -197,22 +196,6 @@ describe("checkPalette", () => {
     expect(isReadable(READING)).toBe(true);
     expect(isReadable({ ...READING, light: { "--text-muted": "#9a9080" } })).toBe(true);
     expect(isReadable({ ...READING, dark: { "--text": "#26221b" } })).toBe(false);
-  });
-
-  it("holds a pair its base has below the target, a known gap, to the base's own ratio", () => {
-    const gap = (palette: PaletteSettings) =>
-      checkPalette(palette).find(
-        (check) =>
-          check.theme === "dark" && check.front === "--on-primary" && check.back === "--primary",
-      )!;
-    const kept = gap({ basedOn: "standard", light: {}, dark: {} });
-    expect(kept.target).toBeLessThan(4.5);
-    expect(kept.target).toBe(kept.ratio);
-    expect(kept.verdict).toBe("pass");
-    // Lighter still, the primary color holds its text below what the base has.
-    expect(gap({ basedOn: "standard", light: {}, dark: { "--primary": "#7fd89a" } }).verdict).toBe(
-      "low",
-    );
   });
 
   it("measures an answer button's text on its grade's tint over the surface, and the focus ring as an edge", () => {

@@ -151,9 +151,7 @@ contrast of the pairs that hold text in every block: text and muted
 text on every surface, the text on a primary fill, links, danger and warning text, the masthead's text, and an answer
 button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)),
 at 4.5:1 and fields' edges at 3:1, or in High contrast at 7:1 and
-4.5:1 (`contrastTargets`). The pair below 4.5:1 in Standard's dark
-block, which accessibility.md lists among its known gaps, is checked
-in every other block.
+4.5:1 (`contrastTargets`).
 
 The answer buttons of Color-blind friendly are checked as protanopia,
 deuteranopia and tritanopia see them too: each deficiency simulated by
@@ -241,16 +239,14 @@ contrast it needs, as each color is chosen, and a live region says how
 they stand: text, muted text, links, danger and warning text on every
 surface, and on their tints; muted text and links on the primary
 color's tint, as on the course card; a link on its hovered tint; the
-text on a button and on the primary color; an answer button's text and
+text on a button; an answer button's text and
 muted text on its tint, and on its tint under the pointer; and a
 field's edge and the focus ring on the surfaces (`CHECKED_PAIRS`).
 These are the pairs `style.test.ts` checks of the built-in palettes,
 of the roles a palette of one's own paints, and `style.test.ts` fails
 on any it checks that the list leaves out. A pair needs what the base needs
 (`contrastTargets`): 4.5:1 for text and 3:1 for edges, or 7:1 and 4.5:1
-on High contrast. A pair the base itself has below that, one of the
-[known gaps](accessibility.md#known-gaps), needs what the base has, so
-a palette that keeps its base's colors there still passes. A palette with a pair below that is saved only after
+on High contrast. A palette with a pair below that is saved only after
 "Use anyway"; one whose text is below 3:1 on the background or on a
 surface is not saved at all. Saving it ("Save and use") shows the app
 in it from then on, as choosing it under Colors does.

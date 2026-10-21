@@ -540,13 +540,6 @@ describe("palettes", () => {
 const EACH_BLOCK = BLOCKS.map((block) => [block.selector, block] as const);
 
 /**
- * The block with the pair below 4.5:1 that docs/accessibility.md lists
- * among its known gaps, Standard's dark one: text on the primary color.
- * No other block may have it.
- */
-const KNOWN_GAPS = ':root[data-theme="dark"]';
-
-/**
  * Each pair expectContrast measured of the roles a palette of one's own
  * paints, as `front back tint`, which its editor must measure too
  * (CHECKED_PAIRS).
@@ -704,24 +697,6 @@ describe("contrast", () => {
         expectContrast(block, "var(--text-muted)", tint(12));
         expectContrast(block, "var(--text-muted)", tint(24));
       }
-    },
-  );
-
-  it("has the known gap in Standard's dark block alone, as docs/accessibility.md says", () => {
-    const gaps = BLOCKS.filter(
-      (block) =>
-        contrast(
-          colorOf("var(--on-primary)", block.roles),
-          colorOf("var(--primary)", block.roles),
-        ) < 4.5,
-    ).map(({ selector }) => selector);
-    expect(gaps).toEqual([KNOWN_GAPS]);
-  });
-
-  it.each(EACH_BLOCK.filter(([selector]) => selector !== KNOWN_GAPS))(
-    "keeps the text on the primary color at the ratio text needs in %s, as on the line a dragged deck would land on",
-    (_, block) => {
-      expectContrast(block, "var(--on-primary)", "var(--primary)");
     },
   );
 
@@ -909,6 +884,18 @@ describe("dragging the deck list", () => {
     ).toBe(
       "calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0",
     );
+  });
+
+  // The contrast tests hold the text on a primary fill to the ratio text needs, not the text on the primary color.
+  it("draws the group's name on the drop line on a primary fill", () => {
+    const label = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .find(
+        (rule): rule is CSSStyleRule =>
+          rule instanceof CSSStyleRule && rule.selectorText === ".drop-line[data-label]::after",
+      )!;
+    expect(label.style.getPropertyValue("background")).toBe("var(--primary-fill)");
+    expect(label.style.getPropertyValue("color")).toBe("var(--on-primary)");
   });
 
   it("gives the focus proxy a 16px font, so focusing it does not zoom a phone's page", () => {

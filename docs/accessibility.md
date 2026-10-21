@@ -122,17 +122,13 @@ and an issue for one is welcome ([below](#report-a-barrier)).
 - **Contrast tests**: for the site's stylesheet they cover the pairs
   listed [above](#checked-automatically), not every text and surface
   pair in both themes. axe checks the contrast of the screens the
-  journeys visit. One pair the tests leave out is below 4.5:1 in the
-  dark theme: the label on the line where a dragged deck would land
-  (`--on-primary` on `--primary`). The tests hold every other palette
-  and theme to it.
+  journeys visit.
 - **Palettes of one's own**: a palette the user designs may hold pairs
   below the contrast they need, once the user says "Use anyway", and
   one written into the pod by another app may hold anything the
   checks allow but text below 3:1 on a surface, which is shown as its
   base: no journey's axe check sees it, and only the editor's own
-  check measures it, on the pairs it lists. Where the base has a gap
-  listed here, the check holds a palette to what the base has.
+  check measures it, on the pairs it lists.
 - **Screen readers**: no pass with a screen reader, NVDA or VoiceOver,
   through the main journeys is written down yet. It would find what
   the checks above can't, such as whether a reader takes up the

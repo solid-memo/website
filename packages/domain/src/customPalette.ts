@@ -258,7 +258,7 @@ const SURFACES = ["--bg", "--surface", "--surface-sunken", "--surface-hover"];
  * tests check of every built-in palette (style.test.ts) among the roles
  * a palette of one's own paints: text, muted text, links, danger and
  * warning text on every surface and on their own tints, the text on a
- * primary button and on the primary color, an answer button's text and
+ * primary button, an answer button's text and
  * muted text on its tint, and a field's edge and the focus ring on the
  * surfaces.
  */
@@ -274,7 +274,6 @@ export const CHECKED_PAIRS: readonly CheckedPair[] = [
   { front: "--warning-text", back: "--warning-soft" },
   { front: "--on-primary", back: "--primary-fill" },
   { front: "--on-primary", back: "--primary-hover" },
-  { front: "--on-primary", back: "--primary" },
   ...[0, 1, 2, 3, 4, 5].flatMap((grade) =>
     ["--text", "--text-muted"].flatMap((front) =>
       ([12, 24] as const).map((tint) => ({ front, back: `--grade-${grade}`, tint })),
@@ -321,19 +320,15 @@ function ratioOf(pair: CheckedPair, colors: Record<string, string>): number {
 /**
  * Every checked pair of a palette in each theme, measured against the
  * targets of its base (contrastTargets): what the editor shows, and
- * what a save is held to. A pair the base itself has below its target,
- * one of the known gaps docs/accessibility.md lists, is held to the
- * base's own ratio instead, so that the gap counts against the base,
- * not against a palette that keeps it.
+ * what a save is held to.
  */
 export function checkPalette(palette: PaletteSettings): PairCheck[] {
   const targets = contrastTargets(palette.basedOn);
   return THEMES.flatMap((theme) => {
     const colors = effectiveColors(palette, theme);
-    const base = builtInColors(palette.basedOn, theme);
     return CHECKED_PAIRS.map((pair): PairCheck => {
       const ratio = ratioOf(pair, colors);
-      const target = Math.min(pair.edge ? targets.edge : targets.text, ratioOf(pair, base));
+      const target = pair.edge ? targets.edge : targets.text;
       const reading = isReading(pair);
       return {
         ...pair,

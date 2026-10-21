@@ -1747,7 +1747,7 @@ html.drag-active {
   max-width: 80%;
   padding: 0 0.45rem;
   border-radius: var(--radius-sm);
-  background: var(--primary);
+  background: var(--primary-fill);
   color: var(--on-primary);
   font-size: 0.75rem;
   line-height: 1.5;
