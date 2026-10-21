@@ -16,8 +16,8 @@ import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 /**
  * The settings the page reads (docs/configuration.md), checked as the
  * build starts, so a wrong one fails the build rather than the page;
- * and the site's name, put in the page's HTML. The docs' plugin reads
- * them too, through `api`.
+ * and the site's name and version, put in the page's HTML. The docs'
+ * plugin reads them too, through `api`.
  */
 function siteSettings(): Plugin<{ settings(): SiteConfig }> {
   let settings: SiteConfig;
@@ -28,7 +28,7 @@ function siteSettings(): Plugin<{ settings(): SiteConfig }> {
       settings = siteConfig(config.env);
     },
     transformIndexHtml(html) {
-      return siteHtml(html, settings);
+      return siteHtml(html, { ...settings, version: appVersion() });
     },
   };
 }

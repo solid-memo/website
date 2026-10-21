@@ -8,7 +8,7 @@ import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
-import { siteConfig } from "./config";
+import { siteConfig, siteVersion } from "./config";
 import { unregisterJourneysWorkers } from "./journeysWorkers";
 
 // The build's settings (docs/configuration.md), checked as it was built (vite.config.ts).
@@ -32,7 +32,11 @@ const useCases = createAppUseCases({
 
 const queryClient = new QueryClient();
 
-const source = { repoUrl: config.repoUrl, version: __APP_VERSION__, commitSha: __COMMIT_SHA__ };
+const source = {
+  repoUrl: config.repoUrl,
+  version: siteVersion(document),
+  commitSha: __COMMIT_SHA__,
+};
 
 render(
   // An error nothing else caught gets a screen or a notice, never a blank page (docs/privacy.md).

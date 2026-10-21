@@ -30,7 +30,7 @@ export function commitSha(): string | null {
   }
 }
 
-/** The site's version, shown in the footer: the repository's, from its root package.json. */
+/** The site's version, which its page states for the footer: the repository's, from its root package.json. */
 export function appVersion(): string {
   return (
     JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")) as { version: string }
@@ -58,10 +58,14 @@ export function shapesRuleset(): string {
   return hash.digest("hex").slice(0, 16);
 }
 
-/** Vite's `define`: `__APP_VERSION__`, `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each app's vite-env.d.ts declares them. */
+/**
+ * Vite's `define`: `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each
+ * app's vite-env.d.ts declares them. The version is not one: the page
+ * states it in its HTML (apps/web/index.html), so a built site can be
+ * given another version without touching its script.
+ */
 export function siteDefines(): Record<string, string> {
   return {
-    __APP_VERSION__: JSON.stringify(appVersion()),
     __COMMIT_SHA__: JSON.stringify(commitSha()),
     __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
   };

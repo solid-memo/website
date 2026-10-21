@@ -165,20 +165,37 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * index.html with the site's settings in place of its placeholders:
- * `%APP_NAME%` and `%REPO_URL%` in its text and attributes,
- * `%APP_NAME_JSON%` and `%REPO_URL_JSON%` as JSON strings in its JSON-LD
- * (whose `<` is escaped too, so it cannot end the script). One pass puts
- * each value in as it is: a `$&` in it, or another placeholder, stays
- * text. vite.config.ts applies it to the page as it is built.
+ * index.html with the site's settings and its version in place of its
+ * placeholders: `%APP_NAME%`, `%REPO_URL%` and `%APP_VERSION%` in its
+ * text and attributes, `%APP_NAME_JSON%` and `%REPO_URL_JSON%` as JSON
+ * strings in its JSON-LD (whose `<` is escaped too, so it cannot end the
+ * script). One pass puts each value in as it is: a `$&` in it, or
+ * another placeholder, stays text. vite.config.ts applies it to the page
+ * as it is built.
  */
-export function siteHtml(html: string, config: Pick<SiteConfig, "appName" | "repoUrl">): string {
-  const values = { APP_NAME: config.appName, REPO_URL: config.repoUrl };
+export function siteHtml(
+  html: string,
+  config: Pick<SiteConfig, "appName" | "repoUrl"> & { version: string },
+): string {
+  const values = {
+    APP_NAME: config.appName,
+    REPO_URL: config.repoUrl,
+    APP_VERSION: config.version,
+  };
   return html.replace(
-    /%(APP_NAME|REPO_URL)(_JSON)?%/g,
+    /%(APP_NAME|REPO_URL|APP_VERSION)(_JSON)?%/g,
     (_, name: keyof typeof values, json: string | undefined) =>
       json === undefined
         ? escapeHtml(values[name])
         : JSON.stringify(values[name]).replace(/</g, "\\u003c"),
   );
+}
+
+/**
+ * The site's version, as its page states it (`<meta name="version">`,
+ * which siteHtml fills in): the footer and error reports show it. Empty
+ * when the page states none.
+ */
+export function siteVersion(page: Pick<ParentNode, "querySelector">): string {
+  return page.querySelector('meta[name="version"]')?.getAttribute("content") ?? "";
 }

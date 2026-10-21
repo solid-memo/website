@@ -238,11 +238,12 @@ server says why, once.
 
 These are not settings: the build works them out
 ([siteBuild.ts](../packages/vocab/tooling/siteBuild.ts)) and passes
-them to the page as constants.
+them to the page, the version in its HTML and the others as constants
+in its script.
 
-| Constant | From | Shown or used |
+| Value | From | Shown or used |
 |---|---|---|
-| `__APP_VERSION__` | the `version` in the root [package.json](../package.json) | The footer's version. |
+| the version, `<meta name="version">` in `index.html` | the `version` in the root [package.json](../package.json) | The footer's version, and the one an error report names. It is in the page, not the script, whose file is named by a hash of its content, so a built site can be given another version without touching its script. |
 | `__COMMIT_SHA__` | `git rev-parse HEAD`, else `GITHUB_SHA`, else none | The footer's commit link; left out when unknown. The docs' links into the repository name the same commit, or `main` when it is unknown. |
 | `__SHAPES_RULESET__` | a hash of `ns/shapes/` and the vendored profiles | Which rules a pod's check receipts were made under ([validation.md](validation.md)). |
 
