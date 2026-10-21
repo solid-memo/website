@@ -595,13 +595,25 @@ describe("AppShell", () => {
       );
     }
 
+    /**
+     * Goes to `hash` and waits until the window hears of it: heard after
+     * the render, the hashchange would render the failed screen afresh,
+     * and the crash screen with it.
+     */
+    function goTo(hash: string) {
+      return new Promise<void>((resolve) => {
+        window.addEventListener("hashchange", () => resolve(), { once: true });
+        window.location.hash = hash;
+      });
+    }
+
     afterEach(() => {
       vi.restoreAllMocks();
       window.location.hash = "";
     });
 
     it("says so under the same masthead and above the same footer, which still work", async () => {
-      window.location.hash = "#/broken";
+      await goTo("#/broken");
       renderFragile();
       const heading = await screen.findByRole("heading", {
         level: 2,
@@ -626,7 +638,7 @@ describe("AppShell", () => {
     });
 
     it("renders the workspace afresh at the start", async () => {
-      window.location.hash = "#/broken";
+      await goTo("#/broken");
       renderFragile();
       fireEvent.click(await screen.findByRole("button", { name: "Go to the start" }));
       expect(await screen.findByText("The deck list")).toBeInTheDocument();
