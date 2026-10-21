@@ -215,6 +215,25 @@ describe("StudyScreen", () => {
     expect(screen.getByText("Session finished — all cards reviewed.")).toBeInTheDocument();
   });
 
+  it("offers End session in the header while studying, a plain button", () => {
+    renderScreen({ onUndo: vi.fn() });
+    const end = screen.getByRole("button", { name: "End session" });
+    expect(end.closest("header")).not.toBeNull();
+    expect(end).not.toHaveClass("primary");
+  });
+
+  it("makes End session the next step once the session is over, Undo beside it", () => {
+    const { props } = renderScreen({ prompt: null, position: 4, total: 3, onUndo: vi.fn() });
+    const end = screen.getByRole("button", { name: "End session" });
+    expect(end.closest("header")).toBeNull();
+    expect(end).toHaveClass("primary");
+    expect(end.closest(".study-end")).toContainElement(
+      screen.getByRole("button", { name: "Undo last answer" }),
+    );
+    fireEvent.click(end);
+    expect(props.onExit).toHaveBeenCalledOnce();
+  });
+
   it("shows the empty state when nothing is due", () => {
     renderScreen({ prompt: null, position: 1, total: 0 });
     expect(screen.getByText("Nothing to study today — come back tomorrow!")).toHaveFocus();
