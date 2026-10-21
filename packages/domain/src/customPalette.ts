@@ -121,7 +121,7 @@ const BUILT_IN: Record<Palette, Record<Theme, string>> = {
       "#e2662a #e8932a #d9b11c #7fb13c #2f8a4a #f1efe6 #cfcbbb " +
       "#235430 #e6f1e8 #e4e5e7 #fdeee9 #f0c9be #fdf4dc #e6c876",
     dark:
-      "#11171e #19212b #151c25 #ecebe4 #9ba6b2 #2a3644 #66788d " +
+      "#11171e #19212b #151c25 #ecebe4 #aab4bf #2a3644 #66788d " +
       "#4fae6a #2a7340 #ffffff #74cc8e #ff8a75 #f1d283 #d63a25 " +
       "#e2662a #e8932a #d9b11c #7fb13c #2f8a4a #232e3b #3a4859 " +
       "#33864b #1b3324 #3a414b #38201c #63302a #33280e #5e4a17",

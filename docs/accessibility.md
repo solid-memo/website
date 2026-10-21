@@ -122,12 +122,10 @@ and an issue for one is welcome ([below](#report-a-barrier)).
 - **Contrast tests**: for the site's stylesheet they cover the pairs
   listed [above](#checked-automatically), not every text and surface
   pair in both themes. axe checks the contrast of the screens the
-  journeys visit. Two pairs the tests leave out are below 4.5:1 in the
+  journeys visit. One pair the tests leave out is below 4.5:1 in the
   dark theme: the label on the line where a dragged deck would land
-  (`--on-primary` on `--primary`), and the interval under an answer
-  button's name while the pointer is over the button (muted text on
-  the hovered tint of the middle grades). The tests hold every other
-  palette and theme to both.
+  (`--on-primary` on `--primary`). The tests hold every other palette
+  and theme to it.
 - **Palettes of one's own**: a palette the user designs may hold pairs
   below the contrast they need, once the user says "Use anyway", and
   one written into the pod by another app may hold anything the

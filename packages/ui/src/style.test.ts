@@ -540,10 +540,9 @@ describe("palettes", () => {
 const EACH_BLOCK = BLOCKS.map((block) => [block.selector, block] as const);
 
 /**
- * The block with the two pairs below 4.5:1 that docs/accessibility.md
- * lists among its known gaps, Standard's dark one: text on the primary
- * color, and muted text on a grade's hovered tint. No other block may
- * have them.
+ * The block with the pair below 4.5:1 that docs/accessibility.md lists
+ * among its known gaps, Standard's dark one: text on the primary color.
+ * No other block may have it.
  */
 const KNOWN_GAPS = ':root[data-theme="dark"]';
 
@@ -703,12 +702,12 @@ describe("contrast", () => {
         expectContrast(block, "var(--text)", tint(12));
         expectContrast(block, "var(--text)", tint(24));
         expectContrast(block, "var(--text-muted)", tint(12));
-        if (block.selector !== KNOWN_GAPS) expectContrast(block, "var(--text-muted)", tint(24));
+        expectContrast(block, "var(--text-muted)", tint(24));
       }
     },
   );
 
-  it("has the known gaps in Standard's dark block alone, as docs/accessibility.md says", () => {
+  it("has the known gap in Standard's dark block alone, as docs/accessibility.md says", () => {
     const gaps = BLOCKS.filter(
       (block) =>
         contrast(

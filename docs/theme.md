@@ -151,9 +151,9 @@ contrast of the pairs that hold text in every block: text and muted
 text on every surface, the text on a primary fill, links, danger and warning text, the masthead's text, and an answer
 button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)),
 at 4.5:1 and fields' edges at 3:1, or in High contrast at 7:1 and
-4.5:1 (`contrastTargets`). The two pairs below 4.5:1 in Standard's
-dark block, which accessibility.md lists among its known gaps, are
-checked in every other block.
+4.5:1 (`contrastTargets`). The pair below 4.5:1 in Standard's dark
+block, which accessibility.md lists among its known gaps, is checked
+in every other block.
 
 The answer buttons of Color-blind friendly are checked as protanopia,
 deuteranopia and tritanopia see them too: each deficiency simulated by
