@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/preact";
+import { render, screen, within } from "@testing-library/preact";
 import { CourseStrip, type CourseStripEntry } from "./CourseStrip";
 
 const entry = (fields: Partial<CourseStripEntry> = {}): CourseStripEntry => ({
@@ -21,6 +21,8 @@ describe("CourseStrip", () => {
   it("shows each course's title, the chapters done, and a button to go on", () => {
     render(<CourseStrip entries={[entry()]} />);
     const strip = screen.getByRole("complementary", { name: "Your courses" });
+    expect(within(strip).getByRole("heading", { level: 2, name: "Your courses" })).toBeVisible();
+    expect(strip).toHaveTextContent("The courses you have added and not finished yet.");
     expect(strip).toHaveTextContent("1 of 3 chapters done");
     expect(screen.getByRole("link", { name: "Solid fundamentals" })).toHaveAttribute(
       "href",
