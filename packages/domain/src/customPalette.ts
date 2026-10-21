@@ -237,6 +237,53 @@ export function effectiveColors(palette: PaletteSettings, theme: Theme): Record<
   return { ...builtInColors(palette.basedOn, theme), ...paintedColors(palette, theme) };
 }
 
+/** A chart's steps, 1 the faintest (palettes.css's `--series-*`). */
+export const SERIES_ROLES = ["--series-1", "--series-2", "--series-3", "--series-4"] as const;
+
+/** A step mixed as `color-mix(in srgb, one p%, two)`; at 100% it is `one` itself. */
+type Step = readonly [one: PaletteRole, percent: number, two: PaletteRole];
+
+const PRIMARY: Step = ["--primary", 100, "--surface-sunken"];
+const sunken = (percent: number): Step => ["--primary", percent, "--surface-sunken"];
+const text = (percent: number): Step => ["--text", percent, "--primary"];
+
+/**
+ * How each built-in palette mixes a chart's steps in a theme, from the
+ * roles a palette paints, as palettes.css does (style.test.ts keeps the
+ * two in step): a palette of one's own that changes those roles changes
+ * its steps with them.
+ */
+const SERIES: Record<Palette, Record<Theme, readonly Step[]>> = {
+  standard: {
+    light: [sunken(70), sunken(90), text(15), text(50)],
+    dark: [sunken(65), sunken(85), text(10), text(50)],
+  },
+  "high-contrast": {
+    light: [sunken(75), sunken(90), text(15), text(50)],
+    dark: [sunken(65), sunken(80), PRIMARY, text(50)],
+  },
+  "color-vision": {
+    light: [sunken(70), sunken(90), text(15), text(50)],
+    dark: [sunken(60), sunken(80), PRIMARY, text(50)],
+  },
+  parchment: {
+    light: [sunken(75), sunken(90), text(10), text(60)],
+    dark: [sunken(55), sunken(75), sunken(95), text(50)],
+  },
+};
+
+/** A palette's chart steps in a theme, by role, mixed from its colors as its base mixes them. */
+export function seriesColors(palette: PaletteSettings, theme: Theme): Record<string, string> {
+  const colors = effectiveColors(palette, theme);
+  const color = (role: PaletteRole) => hexColor(colors[role]!)!;
+  return Object.fromEntries(
+    SERIES[palette.basedOn][theme].map(([one, percent, two], at) => [
+      SERIES_ROLES[at],
+      hexOf(mix(color(one), percent, color(two), 100 - percent)),
+    ]),
+  );
+}
+
 /** A pair of colors the check measures: one in front, text or an edge, on what it is on. */
 export interface CheckedPair {
   front: string;
@@ -247,7 +294,7 @@ export interface CheckedPair {
    * .quality-buttons).
    */
   tint?: 12 | 24;
-  /** An edge (a text field's, a focus ring's), held to the edge's ratio, not the text's. */
+  /** An edge (a text field's, a focus ring's, a chart's step), held to the edge's ratio, not the text's. */
   edge?: true;
 }
 
@@ -258,8 +305,8 @@ const SURFACES = ["--bg", "--surface", "--surface-sunken", "--surface-hover"];
  * tests check of every built-in palette (style.test.ts) among the roles
  * a palette of one's own paints: text, muted text, links, danger and
  * warning text on every surface and on their own tints, the text on a
- * primary button, an answer button's text and
- * muted text on its tint, and a field's edge and the focus ring on the
+ * primary button, an answer button's text and muted text on its tint,
+ * and a field's edge, the focus ring and a chart's steps on the
  * surfaces.
  */
 export const CHECKED_PAIRS: readonly CheckedPair[] = [
@@ -281,6 +328,9 @@ export const CHECKED_PAIRS: readonly CheckedPair[] = [
   ),
   ...SURFACES.map((back) => ({ front: "--control-border", back, edge: true as const })),
   ...["--bg", "--surface"].map((back) => ({ front: "--primary", back, edge: true as const })),
+  ...SERIES_ROLES.flatMap((front) =>
+    ["--surface", "--surface-sunken"].map((back) => ({ front, back, edge: true as const })),
+  ),
 ];
 
 /**
@@ -325,7 +375,7 @@ function ratioOf(pair: CheckedPair, colors: Record<string, string>): number {
 export function checkPalette(palette: PaletteSettings): PairCheck[] {
   const targets = contrastTargets(palette.basedOn);
   return THEMES.flatMap((theme) => {
-    const colors = effectiveColors(palette, theme);
+    const colors = { ...effectiveColors(palette, theme), ...seriesColors(palette, theme) };
     return CHECKED_PAIRS.map((pair): PairCheck => {
       const ratio = ratioOf(pair, colors);
       const target = pair.edge ? targets.edge : targets.text;

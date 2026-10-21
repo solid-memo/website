@@ -1276,7 +1276,8 @@
       "dangerSoft": "Farbton des Gefahrentexts",
       "warningText": "Warntext",
       "warningSoft": "Farbton des Warntexts",
-      "grade": "Antwortknopf {grade}"
+      "grade": "Antwortknopf {grade}",
+      "series": "Diagrammstufe {step}"
     }
   },
   "findable": {

@@ -13,7 +13,7 @@ export interface Bar {
   text: string;
 }
 
-/** A series of a BarChart with more than one: its words in the legend, and its step of the green, 1 lightest to 4. */
+/** A series of a BarChart with more than one: its words in the legend, and its step of the green, 1 faintest to 4. */
 export interface BarSeries {
   label: string;
   step: 1 | 2 | 3 | 4;

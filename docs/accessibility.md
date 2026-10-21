@@ -23,10 +23,10 @@ What the app does for it today:
   right-to-left text, such as Arabic, reads right to left
   ([i18n.md](i18n.md)).
 - **Themes and palettes**: a light and a dark theme, each with text at
-  a contrast of 4.5:1 or more and the edges of fields at 3:1, in every
-  palette; the High contrast palette holds text to 7:1 and the edges
-  of fields to 4.5:1, and the Color-blind friendly one moves meaning
-  off red and green ([theme.md](theme.md#palettes),
+  a contrast of 4.5:1 or more and the edges of fields and the steps of
+  the charts at 3:1, in every palette; the High contrast palette holds
+  text to 7:1 and the edges and steps to 4.5:1, and the Color-blind
+  friendly one moves meaning off red and green ([theme.md](theme.md#palettes),
   [below](#checked-automatically)). A palette of one's own measures
   every pair that holds text as its colors are chosen, in a table and
   in a live region, asks before it saves one below the contrast it
@@ -79,8 +79,9 @@ but the journeys:
   High contrast's own ratios there), the contrast of text
   and muted text and of fields' edges on every surface, of the text on
   a primary fill, of links, danger and warning text, of the masthead's
-  text, and of an answer button's text on its grade's tint, and in the
-  Color-blind friendly palette that neighboring grades stay apart as
+  text, of an answer button's text on its grade's tint, and of a
+  chart's steps on the surfaces, at the ratio a field's edge needs,
+  and in the Color-blind friendly palette that neighboring grades stay apart as
   each color vision deficiency sees them
   ([`style.test.ts`](../packages/ui/src/style.test.ts),
   [theme.md](theme.md#color-roles)), and of every

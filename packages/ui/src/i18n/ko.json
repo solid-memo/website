@@ -1215,7 +1215,8 @@
       "dangerSoft": "위험 글자의 옅은 색",
       "warningText": "주의 글자",
       "warningSoft": "주의 글자의 옅은 색",
-      "grade": "답 버튼 {grade}"
+      "grade": "답 버튼 {grade}",
+      "series": "차트 단계 {step}"
     }
   },
   "findable": {

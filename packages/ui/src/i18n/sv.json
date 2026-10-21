@@ -1276,7 +1276,8 @@
       "dangerSoft": "Faratextens ton",
       "warningText": "Varningstext",
       "warningSoft": "Varningstextens ton",
-      "grade": "Svarsknapp {grade}"
+      "grade": "Svarsknapp {grade}",
+      "series": "Diagramsteg {step}"
     }
   },
   "findable": {

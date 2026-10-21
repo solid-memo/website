@@ -139,10 +139,12 @@ reached by the keyboard is said once more in a status line, so a screen
 reader reads each step out, while sweeping the pointer stays quiet. A
 screen reader that reads the page in browse mode keeps the arrow keys
 for itself: its focus mode passes them on, and the tables say the same.
-Only shades of one green are used; where two lines meet, a dash or a
-legend tells them apart, and where bars hold several series, a legend
-names each step of the green. In forced-colors mode the steps keep apart
-as empty, hatched and filled. The histograms are the Studio's own,
+Only shades of one green are used, each at 3:1 or more on the
+surfaces (4.5:1 in High contrast), as WCAG 1.4.11 asks of a chart's
+marks, with a surface gap between steps that touch; where two lines
+meet, a dash or a legend tells them apart, and where bars hold several
+series, a legend names each step of the green. In forced-colors mode
+the steps keep apart as empty, hatched and filled. The histograms are the Studio's own,
 shared from the UI package.
 
 The page reads three things on their own, so none waits for another:

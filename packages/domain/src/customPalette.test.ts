@@ -198,6 +198,22 @@ describe("checkPalette", () => {
     expect(isReadable({ ...READING, dark: { "--text": "#26221b" } })).toBe(false);
   });
 
+  it("measures a chart's steps as its base mixes them from the colors the palette sets", () => {
+    // A lighter green still holds an edge on the surfaces, but its faintest step does not.
+    const light = checkPalette({
+      basedOn: "standard",
+      light: { "--primary": "#3a8a4f" },
+      dark: {},
+    });
+    const passing = (front: string) =>
+      light
+        .filter((check) => check.theme === "light" && check.front === front)
+        .map((check) => check.verdict);
+    expect(passing("--primary")).toEqual(["pass", "pass"]);
+    expect(passing("--series-1")).toContain("low");
+    expect(passing("--series-4")).toEqual(["pass", "pass"]);
+  });
+
   it("measures an answer button's text on its grade's tint over the surface, and the focus ring as an edge", () => {
     const checks = checkPalette({ ...READING, light: { "--grade-0": "#000000" } });
     const tint = checks.find(
