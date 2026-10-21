@@ -653,9 +653,9 @@ What holds today, and what does not, criterion by criterion.
   CI runs on every pull request, in the merge queue and on every push to
   `main`, and `ci-ok` passes only when all its jobs did (on `main`,
   the timing-dependent ones that the merge queue already passed are
-  skipped, [releasing.md](releasing.md#what-each-stage-checks)): `build`,
-  `library` (the deck library and the public API compared with the
-  change's base), `crosscheck`, `pod`, `contract`, `journeys` (every
+  skipped, [releasing.md](releasing.md#what-each-stage-checks)): `check`,
+  `site` (the build the journeys run on), `library` (the deck library
+  and the public API compared with the change's base), `crosscheck`, `pod`, `contract`, `journeys` (every
   journey in Chromium, and a set of them in Firefox, WebKit and on a
   phone, with axe's accessibility checks), `docs`, `workflows`
   (actionlint and zizmor over the workflows) and `commits` (commitlint
@@ -1146,7 +1146,7 @@ landed and **Open.** when it has not: most of it landed on the branch
   run's summary.
 - **Done.** **A docs job.** lychee (offline on every change, online weekly),
   `reuse lint` and the publiccode.yml parser; markdownlint and cspell
-  run in `npm run check`, so in the build job.
+  run in `npm run check`, so in the check job.
 - **Done.** **License required.** `npm run library:check` refuses a new deck
   version without `dcterms:license`, and `sm2.test.ts` checks the
   scheduler against the table it reads from

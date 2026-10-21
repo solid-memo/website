@@ -88,7 +88,7 @@ repository:
   its GitHub release.
   No CI run is behind it, so it runs `npm run check` on that version
   before it builds it. It has no Turbo cache, so it takes about as long
-  as CI's build job.
+  as CI's `check` and `site` jobs one after the other.
 
 The workflow enables Pages for the repository on its first run, and
 stops before deploying if the vocabulary, the deck library or the docs

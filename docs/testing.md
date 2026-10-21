@@ -18,7 +18,7 @@ package's own tests cover its own code — `npm test` fails below that.
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
-npm run check:ci  # npm run check without the deck library, as CI's build job runs it (its library job checks the library)
+npm run check:ci  # npm run check without the deck library, as CI's check job runs it (its library job checks the library)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
@@ -593,17 +593,18 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or the deterministic ones alone (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `build` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`, with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
+| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
+| `site` | deterministic | `npm run build`, once for the whole run, the docs' diagrams drawn in Chromium's headless shell as in `check`; the site is kept a week as the run's `site` artifact, so a `journeys` job run again still finds it, and the `journeys` jobs test that build |
 | `library` | deterministic | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
 | `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
-| `journeys (<project>)` | timing-dependent | the user journeys: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `journeys.solid-memo.com` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped, it fails without every job's report; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
-| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `journeys.solid-memo.com` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped by the gate, it fails without every job's report (when the `site` job's failure skipped them, it has none to merge, and the run fails already); its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
+| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `check`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | deterministic | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `caches` | deterministic | nothing: on `main`, after `check`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `warm`, `warm-images`, `warm-browsers` | deterministic | nothing: on `main`, when the timing-dependent jobs are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's and the journeys' browsers, and the other two pull, build or download only what is missing, and save it. Like `caches`, they fail neither the run nor `ci-ok` |
 | `ci-ok` | deterministic | that every job above passed, `journeys-report`, `caches` and the `warm` jobs aside; `pod`, `contract` and `journeys` may be skipped only when the gate skipped them |
 
@@ -615,8 +616,7 @@ through a pull request once it passes (`automergeType: 'pr'` in
 before it failed, and fails unless every one passed, or, for `pod`,
 `contract` and `journeys`, was skipped by the gate. A matrix job's
 checks are named per server, and jobs come and go, so the ruleset names
-this job alone. (Another workflow's job named `build`, deploy.yml's,
-would also answer to a required check of that name.) Deploys follow a
+this job alone. Deploys follow a
 green run on a release commit on `main`
 ([deployment.md](deployment.md#github-pages-automatic)). Every check of
 `ns/` and `decks/` runs here, the comparison with the base included, so
@@ -802,7 +802,7 @@ ends with checks of the repository as a whole, plain Node scripts in
 ## Documentation
 
 The project's Markdown (`docs/`, the READMEs, `AGENTS.md`) is checked
-for its style and spelling by `npm run check` (so in CI's `build` job),
+for its style and spelling by `npm run check` (so in CI's `check` job),
 and for its links, with publiccode.yml and every file's license, by
 CI's `docs` job:
 

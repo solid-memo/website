@@ -93,10 +93,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: npm run ci:gate
 
-  # Deterministic. Its growth tests time CPU work, but as the ratio of two
-  # runs on the same runner, which a busy runner leaves about the same
-  # (packages/domain/src/testing/growth.ts).
-  build:
+  # npm run check:ci. Deterministic. Its growth tests time CPU work, but as
+  # the ratio of two runs on the same runner, which a busy runner leaves
+  # about the same (packages/domain/src/testing/growth.ts).
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -140,16 +140,13 @@ jobs:
       # gate are each package's own, in npm run check.
       - if: success() || failure()
         run: npm run coverage:summary
-      # The app's build states the commit (GITHUB_SHA), so it is never
-      # found in the cache: it reads the cache but adds nothing to it.
-      - run: npm run build -- --cache=local:r
       - if: github.ref == 'refs/heads/main' && steps.turbo.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .turbo/cache
           key: turbo-check-${{ github.sha }}
 
-  # Main's older Turbo caches (build's), deleted once build has saved its
+  # Main's older Turbo caches (check's), deleted once check has saved its
   # own, which was built on them, and they would count toward the
   # repository's 10 GB until GitHub's 7 days are up. A job of its own, so
   # the only token that can delete caches is in a job that runs none of
@@ -157,7 +154,7 @@ jobs:
   # which release.yml and deploy.yml wait for. Deterministic.
   caches:
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 5
     continue-on-error: true
@@ -175,13 +172,44 @@ jobs:
           gh cache list --ref refs/heads/main --key turbo-check- --sort created_at --order desc --limit 100 \
             --json id --jq '.[1:][].id' | xargs -r -n1 gh cache delete
 
+  # The site, built once for the whole run (npm run build): the journeys
+  # test this build, which they download, rather than each building its
+  # own. It reads no Turbo cache: the build states the commit, so it is
+  # never found there, and vocab's generate:check, the one task it runs
+  # first, is check's to cache. Chromium's headless shell draws the docs'
+  # diagrams. The build is kept a week, as the journeys' blobs are, so
+  # that a journeys job run again (Re-run failed jobs), which does not
+  # build it again, still finds it; a job run again replaces it.
+  # Deterministic.
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: ./.github/actions/chromium
+      - run: npm run build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: apps/web/dist/
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
+
   # The change compared with its base. The deck library
   # (docs/deck-library.md#checks): no published version
   # (decks/<name>/v<N>.ttl) edited or removed, and every version new
   # since then naming the library's contact and no email. The public
   # API (docs/releasing.md#how-ci-holds-to-it): no line of api/ gone
   # unless a commit says the change breaks, and none of api/frozen/ at
-  # all. It needs the whole history, which build does not, so it is a
+  # all. It needs the whole history, which check does not, so it is a
   # job of its own. Deterministic.
   library:
     runs-on: ubuntu-latest
@@ -238,7 +266,7 @@ jobs:
   # The vocabulary, the deck library and pod catalog documents, checked
   # again by an independent SHACL engine (pySHACL), SPARQL constraints
   # included. It reads only files in the repository (no npm install, no
-  # generated code, no build), so it runs beside build rather than after
+  # generated code, no build), so it runs beside check rather than after
   # it, and the deploy waits for it like every other job here.
   # Deterministic.
   crosscheck:
@@ -364,9 +392,10 @@ jobs:
           path: e2e/pod/logs/
           retention-days: 7
 
-  # The user journeys (e2e/journeys, docs/testing.md): the built app in
-  # Chromium, logging in to a Community Solid Server 7 behind TLS that the
-  # harness starts in Docker, each journey with an account and pod of its
+  # The user journeys (e2e/journeys, docs/testing.md): the site job's
+  # build of the app, served by vite preview, in Chromium, logging in to
+  # a Community Solid Server 7 behind TLS that the harness starts in
+  # Docker, each journey with an account and pod of its
   # own. The other engines and the phone run a few of them
   # (docs/testing.md#browsers). Five jobs run them side by side, so the
   # run waits for the slowest, not for all: Chromium's journeys in two
@@ -386,38 +415,32 @@ jobs:
   # retried (retries: 0, playwright.config.ts).
   journeys:
     name: journeys (${{ matrix.name }})
-    needs: gate
+    needs: [gate, site]
     if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
       fail-fast: false
       # name: the job's, and its blob's (journeys-report lists them);
-      # projects: what it runs; browsers: what it installs, the build
-      # drawing the docs' diagrams in Chromium's headless shell; cache: the
-      # key its browsers are kept under, the phone's being WebKit's.
+      # projects: what it runs; browser: what it installs, and the key it
+      # is kept under, the phone's being WebKit's.
       matrix:
         include:
           - name: chromium-1
             projects: --project=chromium --shard=1/2
-            browsers: chromium
-            cache: chromium
+            browser: chromium
           - name: chromium-2
             projects: --project=chromium --shard=2/2
-            browsers: chromium
-            cache: chromium
+            browser: chromium
           - name: firefox
             projects: --project=firefox
-            browsers: chromium-headless-shell firefox
-            cache: firefox
+            browser: firefox
           - name: webkit
             projects: --project=webkit
-            browsers: chromium-headless-shell webkit
-            cache: webkit
+            browser: webkit
           - name: phone
             projects: --project=phone
-            browsers: chromium-headless-shell webkit
-            cache: webkit
+            browser: webkit
     env:
       JOURNEY_TRACE: >-
         ${{ (inputs.trace || github.ref == 'refs/heads/main' ||
@@ -439,12 +462,15 @@ jobs:
         id: browsers
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.cache }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browser }}
       - if: steps.browsers.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps ${{ matrix.browsers }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
       - if: steps.browsers.outputs.cache-hit == 'true'
-        run: npx playwright install-deps ${{ matrix.browsers }}
-      - run: npx turbo run build --filter=@solid-memo/web
+        run: npx playwright install-deps ${{ matrix.browser }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: apps/web/dist/
       - id: images
         uses: ./.github/actions/e2e-images
         with:
@@ -699,13 +725,8 @@ jobs:
       - run: npm ci
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - run: |
-          # As the journeys matrix installs them for this cache.
-          if [ "$BROWSERS" = chromium ]; then
-            npx playwright install chromium
-          else
-            npx playwright install chromium-headless-shell "$BROWSERS"
-          fi
+      # As the journeys matrix installs it for this cache.
+      - run: npx playwright install "$BROWSERS"
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
@@ -717,7 +738,7 @@ jobs:
   # fails no change), publiccode.yml, once there, is valid, and every
   # file states its copyright and license, as REUSE has it (`reuse lint`,
   # docs/style.md#licenses). The Markdown's style and spelling are
-  # npm run check's, in build. None of these tools is an npm package, so
+  # npm run check's, in check. None of these tools is an npm package, so
   # the job installs no npm packages: reuse comes from PyPI, pinned in
   # scripts/requirements-lint.txt, not as fsfe/reuse-action's Docker
   # image, which Docker Hub's limit on pulls without an account, shared
@@ -850,7 +871,7 @@ jobs:
   # jobs come and go; this name stays.
   ci-ok:
     if: always()
-    needs: [gate, build, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
+    needs: [gate, check, site, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -858,7 +879,8 @@ jobs:
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
           DETERMINISTIC: >-
-            ${{ needs.gate.result }} ${{ needs.build.result }} ${{ needs.library.result }}
+            ${{ needs.gate.result }} ${{ needs.check.result }} ${{ needs.site.result }}
+            ${{ needs.library.result }}
             ${{ needs.crosscheck.result }} ${{ needs.docs.result }}
             ${{ needs.workflows.result }} ${{ needs.commits.result }}
           TIMING: ${{ needs.pod.result }} ${{ needs.contract.result }} ${{ needs.journeys.result }}

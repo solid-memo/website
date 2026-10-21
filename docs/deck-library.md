@@ -573,7 +573,7 @@ fails, and so does a version not published there that states
 published one, so that rule does not run. `npm run check` runs
 `library:check` without a base, as a Turbo task of the shacl package
 ([turbo.json](../packages/shacl/turbo.json)), cached until a file it
-reads (`ns/`, `decks/`, its packages' code) changes. CI's `build` job
+reads (`ns/`, `decks/`, its packages' code) changes. CI's `check` job
 runs `npm run check:ci`, which leaves it out, since the `library` job
 checks the same and more. CI's `library`
 job ([ci.yml](../.github/workflows/ci.yml),
