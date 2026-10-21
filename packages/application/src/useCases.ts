@@ -1855,7 +1855,10 @@ export function createUseCases({
       .then(async () => {
         const stored = await preferencesRepository.getPreferences(instanceUrl);
         const next = stored === null ? null : changed(stored.preferences);
-        if (next !== null) await preferencesRepository.savePreferences(instanceUrl, next);
+        if (next === null) return;
+        await preferencesRepository.savePreferences(instanceUrl, next);
+        // A read begun before the write holds what it replaced: the next read is made afresh.
+        preferenceReads.delete(instanceUrl);
       });
     appearanceWrites.set(instanceUrl, write);
     return write;

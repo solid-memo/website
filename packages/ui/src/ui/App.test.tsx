@@ -14,7 +14,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
-import { PALETTES } from "@solid-memo/domain/palette";
+import { PALETTES, type Palette } from "@solid-memo/domain/palette";
 import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
@@ -326,6 +326,46 @@ describe("AppShell", () => {
       fireEvent.click(screen.getByRole("button", { name: "largest" }));
       expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", INSTANCE_URL);
       await waitFor(() => expect(useCases.instanceTextSize).toHaveBeenCalledTimes(3));
+      expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
+    });
+
+    it("shows no earlier choice that a read begun before a later one brings back", async () => {
+      const reads: ((size: "default" | "large" | "largest") => void)[] = [];
+      const writes: (() => void)[] = [];
+      const useCases = renderAppearance(
+        {
+          instancePalette: vi
+            .fn<() => Promise<Palette>>()
+            .mockResolvedValueOnce("parchment")
+            .mockResolvedValue("high-contrast"),
+          instanceTextSize: vi
+            .fn<() => Promise<"default" | "large" | "largest">>()
+            .mockResolvedValueOnce("large")
+            .mockImplementation(() => new Promise((resolve) => reads.push(resolve))),
+          chooseTextSize: vi.fn(() => new Promise<void>((resolve) => writes.push(resolve))),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
+      // The palette is written, and the pod read back, while the text size is chosen.
+      fireEvent.click(screen.getByRole("button", { name: "high-contrast" }));
+      await waitFor(() => expect(reads).toHaveLength(1));
+      fireEvent.click(screen.getByRole("button", { name: "largest" }));
+      // Read before the text size was chosen, it holds another.
+      await act(async () => {
+        reads[0]!("default");
+        // The query tells its observers a moment later.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
+      // Once the text size is written, its own read back is shown.
+      await act(async () => writes[0]!());
+      await waitFor(() => expect(reads).toHaveLength(2));
+      await act(async () => {
+        reads[1]!("largest");
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", INSTANCE_URL);
       expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
     });
 

@@ -452,6 +452,34 @@ describe("createUseCases", () => {
       });
     });
 
+    it("reads the preferences afresh after a choice is written, not with a read begun before it", async () => {
+      const deps = makeDeps();
+      let stored = {
+        preferences: { ...DEFAULT_PREFERENCES, palette: `${SM}standardPalette` },
+        formatVersion: 6,
+      };
+      let release!: () => void;
+      const held = new Promise<void>((resolve) => (release = resolve));
+      // The first read is held until the choice is written; every other is answered at once.
+      vi.mocked(deps.preferencesRepository.getPreferences)
+        .mockImplementationOnce(async () => {
+          const then = stored;
+          await held;
+          return then;
+        })
+        .mockImplementation(async () => stored);
+      vi.mocked(deps.preferencesRepository.savePreferences).mockImplementation(async (_, saved) => {
+        stored = { preferences: saved, formatVersion: 6 };
+      });
+      const useCases = createUseCases(deps);
+      const before = useCases.instancePalette(INSTANCE);
+      await useCases.choosePalette("parchment", INSTANCE);
+      const after = useCases.instancePalette(INSTANCE);
+      release();
+      await expect(before).resolves.toBe("standard");
+      await expect(after).resolves.toBe("parchment");
+    });
+
     it("keeps the palette of saved preferences on this device, and a stored one this version does not know while Standard is shown", async () => {
       const palettePreference = devicePreference("parchment");
       const deps = makeDeps();
