@@ -4288,14 +4288,25 @@ p[role="status"]:not(.loading) {
   }
 }
 
-/* The courses to go on with, above the deck list: each its title and the
-   chapters done beside its button, so the title wraps before the button. */
+/* The courses to go on with, above the deck list, under a heading and a
+   line on what they are: each its title and the chapters done beside its
+   button, so the title wraps before the button. */
 .course-strip {
   margin: 0 0 1rem;
   padding: 0.5rem 0.9rem;
   background: var(--surface-sunken);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+}
+
+/* Smaller than a screen's heading, such as the deck list's below it. */
+.course-strip h2 {
+  font-size: 1.15rem;
+  margin: 0.3rem 0 0.35rem;
+}
+
+.course-strip > .hint {
+  margin: 0 0 0.25rem;
 }
 
 .course-strip ul {
@@ -4337,7 +4348,7 @@ p[role="status"]:not(.loading) {
   grid-row: 1 / span 3;
 }
 
-.course-strip .hint {
+.course-strip li .hint {
   padding-left: 1.75rem;
   font-size: 0.85rem;
 }

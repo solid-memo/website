@@ -160,7 +160,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    as it does a library course (`useCopies`). Until every chapter is
    completed, the course is offered above the deck list, with its
    chapters done and a button to go on where the learner left off; a
-   course deck's menu leads to its page too.
+   course deck's menu leads to its page too. The strip it is in is
+   headed "Your courses", with a line saying these are the courses
+   added and not finished yet.
 2. **A step.** A step comes in two phases. First the learner reads the
    theory, with no question shown. Theory in chunks is read one chunk
    at a time, starting at the first: "Part 2 of 3" says where the

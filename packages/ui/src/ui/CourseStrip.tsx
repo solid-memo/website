@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useId } from "preact/hooks";
 import { useQueries } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -32,15 +33,19 @@ export interface CourseStripEntry {
 
 /**
  * The courses the learner has started and not finished, in a strip
- * above the deck list, so going on with one is never a menu away: each
- * with its title (to the course's page), how many chapters are done,
- * and a button to go on where they left off.
+ * above the deck list, so going on with one is never a menu away: under
+ * a heading that says what they are and why they are there, each with
+ * its title (to the course's page), how many chapters are done, and a
+ * button to go on where they left off.
  */
 export function CourseStrip({ entries }: { entries: readonly CourseStripEntry[] }) {
   const { t, readerText } = useI18n();
+  const headingId = useId();
   if (entries.length === 0) return null;
   return (
-    <aside class="course-strip" aria-label={t("deckList.courses")}>
+    <aside class="course-strip" aria-labelledby={headingId}>
+      <h2 id={headingId}>{t("deckList.courses")}</h2>
+      <p class="hint">{t("deckList.coursesHint")}</p>
       <ul>
         {entries.map((entry) => (
           <li key={entry.key}>

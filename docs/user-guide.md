@@ -116,9 +116,10 @@ The deck list is home. From the top:
   today keeps, a note on it that changes from day to day, and the cards
   left to study today. Once a streak has lapsed, a gentle note to start
   a new one.
-- **Your courses**: each course you have started and not finished, how
-  many of its chapters are done, and a button to go on where you left
-  off ([courses.md](courses.md#the-learners-flow)).
+- **Your courses**: each course you have added and not finished,
+  started or not, how many of its chapters are done, and a button to
+  start it or go on where you left off
+  ([courses.md](courses.md#the-learners-flow)).
 - **Try FSRS-6**: while your instance schedules with SM-2, an
   invitation to switch to FSRS-6, the recommended scheduler: its
   intervals differ clearly by your answer, and it adapts to how late you

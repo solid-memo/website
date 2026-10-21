@@ -484,6 +484,7 @@
   },
   "deckList": {
     "courses": "Your courses",
+    "coursesHint": "The courses you have added and not finished yet.",
     "continueCourseNamed": "Continue {course}",
     "startCourseNamed": "Start the course {course}",
     "courseProgress": "Chapters done",

@@ -473,6 +473,7 @@
   },
   "deckList": {
     "courses": "내 코스",
+    "coursesHint": "추가했지만 아직 마치지 않은 코스예요.",
     "continueCourseNamed": "{course} 계속하기",
     "startCourseNamed": "{course} 코스 시작하기",
     "courseProgress": "완료한 챕터",

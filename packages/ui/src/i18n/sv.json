@@ -484,6 +484,7 @@
   },
   "deckList": {
     "courses": "Dina kurser",
+    "coursesHint": "Kurserna du har lagt till och inte gjort klart än.",
     "continueCourseNamed": "Fortsätt {course}",
     "startCourseNamed": "Börja kursen {course}",
     "courseProgress": "Avklarade kapitel",
