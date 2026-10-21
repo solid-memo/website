@@ -21,6 +21,20 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [5.2.0](https://github.com/solid-memo/website/compare/v5.1.0...v5.2.0) (2026-10-21)
+
+### Features
+
+* **ui:** make End session the next step and Undo a quiet one ([6cbf227](https://github.com/solid-memo/website/commit/6cbf227a6c34be3bc71e58dc2a1b0157cefdd13e)), closes [#219](https://github.com/solid-memo/website/issues/219)
+* **ui:** show the statistics by deck as a block a deck ([4d037fd](https://github.com/solid-memo/website/commit/4d037fdbe9814c453bbd2e902ec547d5cd3cf2b3)), closes [#223](https://github.com/solid-memo/website/issues/223)
+
+### Bug Fixes
+
+* **studio:** keep the sidebar's faint pin at 3:1 ([fc9783a](https://github.com/solid-memo/website/commit/fc9783aff1e8c773b887567c5c7e0140a3de22ce)), closes [#216](https://github.com/solid-memo/website/issues/216)
+* **ui:** draw the drop line's label on the primary fill ([67adfea](https://github.com/solid-memo/website/commit/67adfea41f2ece0ec12433c40cf44971bb7f1c94)), closes [#216](https://github.com/solid-memo/website/issues/216)
+* **ui:** keep every step of a chart at 3:1 on the surfaces ([c78fe4b](https://github.com/solid-memo/website/commit/c78fe4b934b2780ea66aa53d272a36a9884965e2)), closes [#216](https://github.com/solid-memo/website/issues/216)
+* **ui:** raise Standard's dark muted text to 4.5:1 on a hovered grade ([a4d7b99](https://github.com/solid-memo/website/commit/a4d7b99071a6c6342f042321a31676d02a8c867f)), closes [#9ba6b2](https://github.com/solid-memo/website/issues/9ba6b2) [#aab4bf](https://github.com/solid-memo/website/issues/aab4bf) [#216](https://github.com/solid-memo/website/issues/216)
+
 ## [5.1.0](https://github.com/solid-memo/website/compare/v5.0.0...v5.1.0) (2026-10-21)
 
 ### Features
