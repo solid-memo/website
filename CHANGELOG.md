@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [5.3.1](https://github.com/solid-memo/website/compare/v5.3.0...v5.3.1) (2026-10-21)
+
+### Bug Fixes
+
+* **ui:** keep deck names readable in a narrow deck list ([913cb38](https://github.com/solid-memo/website/commit/913cb383a6ca84249d00c8ab2339402d81b0605a)), closes [#221](https://github.com/solid-memo/website/issues/221)
+
 ## [5.3.0](https://github.com/solid-memo/website/compare/v5.2.0...v5.3.0) (2026-10-21)
 
 ### Features
