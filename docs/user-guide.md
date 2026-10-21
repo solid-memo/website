@@ -187,9 +187,10 @@ counts as remembered. The better you remember a card, the longer it
 waits before it comes back: a day, then a few days, then weeks. That is
 spaced repetition, and Solid Memo schedules it with FSRS-6, which a new
 instance starts on, or with the SM-2 method when you choose it in the
-preferences ([srs.md](srs.md)). When the session is over it says so; "End session"
-takes you back to your decks at any time, and nothing you answered is
-lost.
+preferences ([srs.md](srs.md)). "End session", at the top, takes you
+back to your decks at any time, and nothing you answered is lost. When
+the session is over it says so, with "End session" under it as the next
+step and Undo beside it.
 
 A deck you study both ways asks each card front to back and back to
 front, each on its own schedule.

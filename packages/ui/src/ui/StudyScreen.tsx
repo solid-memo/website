@@ -156,6 +156,29 @@ export function StudyScreen({
     onUndo();
   }
 
+  const endButton = (
+    <button class={finished ? "primary" : undefined} onClick={onExit} disabled={busy}>
+      {t("study.endSession")}
+    </button>
+  );
+  // A quiet button, as undoing is the exception: most answers stand.
+  const undoButton = onUndo !== undefined && (
+    <div class="study-undo">
+      {/* Only aria-disabled while busy, as the grades are: pressed, it
+          keeps the focus if undoing fails. */}
+      <button
+        onClick={() => {
+          if (!busy) onUndo();
+        }}
+        aria-disabled={busy}
+        aria-keyshortcuts="U Control+Z Meta+Z"
+      >
+        {t("study.undo")}
+      </button>
+      <p class="hint study-keys">{t("study.keys.undo")}</p>
+    </div>
+  );
+
   const progress = t("study.position", { position, total });
   const said = putBack ? t("study.putBack") : undone ? t("study.undone") : null;
   return (
@@ -170,9 +193,8 @@ export function StudyScreen({
             ),
           })}
         </h2>
-        <button onClick={onExit} disabled={busy}>
-          {t("study.endSession")}
-        </button>
+        {/* At the end it is the next step, under the end message. */}
+        {!finished && endButton}
       </header>
       {/* One status line, mounted for the whole session so screen readers
           hear each change: the position, a card put back and an answer
@@ -184,9 +206,15 @@ export function StudyScreen({
       {/* The end is said by taking the focus, outside the status line, so
           it is heard once. */}
       {finished && (
-        <p ref={endRef} tabIndex={-1}>
-          {total === 0 ? t("study.nothingToday") : t("study.finished")}
-        </p>
+        <>
+          <p ref={endRef} tabIndex={-1}>
+            {total === 0 ? t("study.nothingToday") : t("study.finished")}
+          </p>
+          <div class="study-end">
+            {endButton}
+            {undoButton}
+          </div>
+        </>
       )}
       {prompt !== null && (
         <StudyCard
@@ -205,22 +233,7 @@ export function StudyScreen({
           cardId={prompt.card.id}
         />
       )}
-      {onUndo !== undefined && (
-        <div class="study-undo">
-          {/* Only aria-disabled while busy, as the grades are: pressed, it
-              keeps the focus if undoing fails. */}
-          <button
-            onClick={() => {
-              if (!busy) onUndo();
-            }}
-            aria-disabled={busy}
-            aria-keyshortcuts="U Control+Z Meta+Z"
-          >
-            {t("study.undo")}
-          </button>
-          <p class="hint study-keys">{t("study.keys.undo")}</p>
-        </div>
-      )}
+      {!finished && undoButton}
       <ErrorMessage error={error} />
     </section>
   );
