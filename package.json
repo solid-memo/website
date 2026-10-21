@@ -31,7 +31,7 @@
     "packages/*",
     "e2e/*"
   ],
-  "packageManager": "npm@12.2.0",
+  "packageManager": "npm@12.2.1",
   "scripts": {
     "dev": "npm run dev -w @solid-memo/web",
     "start": "npm run build && npm run preview -w @solid-memo/web",
