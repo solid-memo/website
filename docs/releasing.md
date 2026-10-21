@@ -343,7 +343,8 @@ The release commit is not marked to skip CI. CI runs on it, and once
 it passes, the deploy builds that commit, the one the tag names, and
 puts the new version on the site, its footer included; it deploys no
 other commit ([deployment.md](deployment.md)). The release workflow
-runs again too, finds no commit since the tag, and releases nothing.
+does not run on it: nothing has been committed since the tag, so it
+would release nothing.
 CI's run on a release commit has a concurrency group of its own, so a
 newer push to `main` cannot replace it while it waits, and hold back
 the deploy ([testing.md](testing.md#continuous-integration)).

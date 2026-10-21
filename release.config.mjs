@@ -17,9 +17,9 @@
  *
  * The release commit is not marked [skip ci]: CI runs on it, and the
  * deploy that follows, which deploys only a commit a version tag names,
- * builds the site and the footer's version from it. Run again on
- * its own commit, semantic-release finds nothing since the tag, and
- * releases nothing.
+ * builds the site and the footer's version from it. The release
+ * workflow does not run on a release commit: there is nothing since the
+ * tag to release.
  */
 
 /**
