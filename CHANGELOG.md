@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [5.1.0](https://github.com/solid-memo/website/compare/v5.0.0...v5.1.0) (2026-10-21)
+
+### Features
+
+* **ui:** welcome a returning learner with their streak ([82b0b8f](https://github.com/solid-memo/website/commit/82b0b8f19124a8dda066eeda67e3a2ca3c65e49d)), closes [#213](https://github.com/solid-memo/website/issues/213)
+
 ## [5.0.0](https://github.com/solid-memo/website/compare/v4.2.0...v5.0.0) (2026-10-21)
 
 ### ⚠ BREAKING CHANGES
