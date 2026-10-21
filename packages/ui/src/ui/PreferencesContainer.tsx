@@ -14,7 +14,7 @@ import { Loading } from "./Loading";
 import { PreferencesScreen } from "./PreferencesScreen";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useI18n } from "./i18n";
-import { instanceAppearanceKey } from "./theme";
+import { instanceAppearanceKey, palettesKey } from "./theme";
 
 /**
  * Owns the preferences query/mutation for one instance. Saved with the
@@ -48,6 +48,11 @@ export function PreferencesContainer({
   const preferencesQuery = useQuery({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
+  });
+  // The palettes the user designed: none offered while they cannot be read.
+  const palettesQuery = useQuery({
+    queryKey: palettesKey(instance.url),
+    queryFn: () => useCases.listPalettes(instance.url),
   });
 
   const saveMutation = useMutation({
@@ -106,7 +111,9 @@ export function PreferencesContainer({
 
   return (
     <PreferencesScreen
+      instanceUrl={instance.url}
       preferences={submitted ?? preferencesQuery.data}
+      palettes={palettesQuery.data}
       busy={saveMutation.isPending}
       error={errorText(saveMutation.error)}
       onSave={(preferences) => {

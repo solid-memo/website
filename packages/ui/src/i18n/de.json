@@ -168,7 +168,8 @@
     "course": "Kurs",
     "courseReview": "Abschlusswiederholung",
     "groups": "Gruppen",
-    "importUrl": "Über einen Link hinzufügen"
+    "importUrl": "Über einen Link hinzufügen",
+    "palette": "Palette"
   },
   "browser": {
     "heading": "Kartenverwaltung: {deck}",
@@ -1137,7 +1138,12 @@
     "palette": {
       "legend": "Farben",
       "hint": "Wirkt sofort, im hellen wie im dunklen Modus. Sobald diese Einstellungen gespeichert sind, liegen sie wie das Erscheinungsbild in deinem Pod.",
-      "moreContrast": "Dein Gerät wünscht mehr Kontrast: Hoher Kontrast könnte dir liegen."
+      "moreContrast": "Dein Gerät wünscht mehr Kontrast: Hoher Kontrast könnte dir liegen.",
+      "ownDescription": "Deine eigenen Farben, auf Basis von {base}.",
+      "edit": "Bearbeiten",
+      "editLabel": "{name} bearbeiten",
+      "design": "Palette gestalten",
+      "reset": "Farben zurücksetzen"
     },
     "textSize": {
       "legend": "Textgröße",
@@ -1198,6 +1204,80 @@
       "hint": "Zeigt Entwicklerwerkzeuge: dein rohes WebID-Dokument unter der App und eine Prüfung der Dokumente dieser Instanz anhand der Formen von Solid Memo."
     },
     "save": "Speichern"
+  },
+  "paletteEditor": {
+    "headingNew": "Palette gestalten",
+    "headingEdit": "Palette bearbeiten",
+    "intro": "Wähle die Farben, die du am besten liest. Jedes Paar, das Text trägt, wird beim Wählen gemessen: Ein Paar mit weniger Kontrast, als es braucht, wird markiert, und vor dem Speichern wirst du gefragt.",
+    "name": "Name",
+    "basedOn": "Basiert auf",
+    "basedOnHint": "Eine Farbe, die du lässt, wie sie ist, bleibt die der Basispalette.",
+    "light": "Heller Modus",
+    "dark": "Dunkler Modus",
+    "clear": {
+      "light": "Zurück zu den hellen Farben der Basis",
+      "dark": "Zurück zu den dunklen Farben der Basis"
+    },
+    "status": {
+      "pass": "Jedes Paar hat den Kontrast, den es braucht.",
+      "low": {
+        "one": "{count} Paar hat weniger Kontrast, als es braucht.",
+        "other": "{count} Paare haben weniger Kontrast, als sie brauchen."
+      },
+      "refused": "Der Text ist zu blass, um ihn auf dem Hintergrund zu lesen. Wähle Farben, die sich stärker unterscheiden."
+    },
+    "useAnyway": "Trotzdem verwenden",
+    "save": "Speichern und verwenden",
+    "saving": "Wird gespeichert…",
+    "cancel": "Zurück zu den Einstellungen",
+    "loading": "Paletten werden geladen…",
+    "preview": {
+      "heading": "Die Frage einer Karte",
+      "muted": "Ein Hinweis in gedämpftem Text",
+      "link": "Ein Link",
+      "danger": "Gefahr",
+      "warning": "Warnung",
+      "button": "Ein Knopf",
+      "field": "Ein Feld"
+    },
+    "contrast": {
+      "light": "Kontrast im hellen Modus",
+      "dark": "Kontrast im dunklen Modus",
+      "front": "Farbe",
+      "back": "Auf",
+      "ratio": "Kontrast",
+      "needs": "Braucht",
+      "result": "Ergebnis",
+      "tint": {
+        "12": "dem Farbton von {button}",
+        "24": "dem Farbton von {button} unter dem Zeiger"
+      },
+      "ratioValue": "{ratio}:1",
+      "pass": "Genug",
+      "low": "Zu wenig",
+      "refused": "Unlesbar"
+    },
+    "role": {
+      "bg": "Seitenhintergrund",
+      "surface": "Karten und Bereiche",
+      "surfaceSunken": "Vertiefte Flächen",
+      "surfaceHover": "Flächen unter dem Zeiger",
+      "text": "Text",
+      "textMuted": "Gedämpfter Text",
+      "border": "Linien",
+      "controlBorder": "Feldränder",
+      "primary": "Hauptfarbe und Fokusring",
+      "primaryFill": "Knöpfe",
+      "primaryHover": "Knöpfe unter dem Zeiger",
+      "primarySoft": "Farbton der Hauptfarbe",
+      "onPrimary": "Text auf Knöpfen",
+      "link": "Links",
+      "danger": "Gefahrentext",
+      "dangerSoft": "Farbton des Gefahrentexts",
+      "warningText": "Warntext",
+      "warningSoft": "Farbton des Warntexts",
+      "grade": "Antwortknopf {grade}"
+    }
   },
   "findable": {
     "heading": "Für andere Apps auffindbar",
@@ -1419,6 +1499,9 @@
     "authorEmpty": "Jede Person braucht einen Namen.",
     "authorTwice": "{author} ist zweimal genannt. Nenne jede Person nur einmal.",
     "instanceNameEmpty": "Eine Instanz braucht einen Namen.",
+    "paletteNameEmpty": "Eine Palette braucht einen Namen.",
+    "paletteUnreadable": "Der Text ist zu blass, um ihn auf dem Hintergrund zu lesen (weniger als 3:1). Wähle Farben, die sich stärker unterscheiden.",
+    "paletteContrastLow": "Einige Farben haben weniger Kontrast, als sie brauchen. Wähle andere oder verwende sie trotzdem.",
     "catalogNeedsDescription": "Der Katalog braucht eine Beschreibung.",
     "noCatalogToUpdate": "Diese Instanz hat noch keinen Katalog. Aktualisiere die Instanz zuerst in Solid Memo.",
     "noMetaToUpdate": "Diese Instanz hat keine Beschreibung, die sich aktualisieren lässt. Lade die Seite neu und versuche es erneut.",

@@ -369,6 +369,22 @@ size in the pod, as format 4 keeps the theme ([theme.md](theme.md#where-the-choi
   rules' hash changed: every instance is checked in full once on its
   next opening.
 
+Palette and color set format 1 (vocabulary 1.23) are new shapes, for
+the palettes a user designs in the instance's `palettes.ttl`
+([theme.md](theme.md#palettes-of-ones-own)):
+
+- **No format moved.** The preferences name a palette of the user's own
+  by its IRI in `sm:palette`, which preferences format 6 allows, so
+  nothing migrates and nothing is written until the user saves a
+  palette. An older version reads such preferences, keeps the palette
+  through a save, and shows Standard; it does not read `palettes.ttl`.
+- **A color set is closed.** Its shape allows only its colors, so a
+  color added later is color set format 2, read by this version with
+  format 1's shape and never written over (`writtenByNewerApp`).
+- **One full re-check.** New shape files joined the rules, so the
+  rules' hash changed: every instance is checked in full once on its
+  next opening, `palettes.ttl` among its documents.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape

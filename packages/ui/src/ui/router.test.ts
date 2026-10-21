@@ -141,6 +141,12 @@ const roundTrips: RouteRef[] = [
     chapterUrl: "https://solid-memo.com/decks/solid/v1.ttl#ch-linked-data",
   },
   { screen: "preferences", instanceUrl: "https://pod.example/solid-memo/a/" },
+  { screen: "palette", instanceUrl: "https://pod.example/solid-memo/a/" },
+  {
+    screen: "palette",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    paletteUrl: "https://pod.example/solid-memo/a/palettes.ttl#palette-1",
+  },
   { screen: "statistics", instanceUrl: "https://pod.example/solid-memo/a/" },
   {
     screen: "statistics",
@@ -263,6 +269,8 @@ describe("routeToHash / parseHash", () => {
     "#/course-chapter?instance=a&chapter=c",
     "#/course-review?deck=b&chapter=c",
     "#/preferences",
+    "#/palette",
+    "#/palette?palette=p",
     "#/statistics",
     "#/deck-statistics?instance=a",
     "#/deck-statistics?deck=b",

@@ -27,7 +27,12 @@ What the app does for it today:
   palette; the High contrast palette holds text to 7:1 and the edges
   of fields to 4.5:1, and the Color-blind friendly one moves meaning
   off red and green ([theme.md](theme.md#palettes),
-  [below](#checked-automatically)).
+  [below](#checked-automatically)). A palette of one's own measures
+  every pair that holds text as its colors are chosen, in a table and
+  in a live region, asks before it saves one below the contrast it
+  needs, refuses text below 3:1 on the background, and "Reset colors"
+  is drawn in the standard colors, so it is readable whatever such a
+  palette does ([theme.md](theme.md#palettes-of-ones-own)).
 - **Text size**: four sizes, up to one and a half times the browser's
   own, which they multiply, so text can be made larger without zooming
   the whole page ([theme.md](theme.md#text-size)).
@@ -56,7 +61,8 @@ but the journeys:
   phone (WebKit), with its rules for WCAG 2.0,
   2.1 and 2.2 at levels A and AA, and in Chromium with its contrast
   rules (`color-contrast`, `link-in-text-block`) in both themes of
-  every other palette. Then, in Chromium, at the largest text size and
+  every other palette, a palette of the user's own taken off the page
+  for it. Then, in Chromium, at the largest text size and
   320px wide, the screen must not scroll sideways, and no text kept on
   one line may be cut short without a title that holds it whole
   (WCAG 1.4.4 and 1.4.10), which axe does not check. A violation fails the journey, and the
@@ -80,7 +86,11 @@ but the journeys:
   [theme.md](theme.md#color-roles)), and of every
   text color the Studio's stylesheet uses on every surface it uses, in
   both themes, the surfaces that hold no text left out by name
-  ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)).
+  ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)). Every
+  built-in palette passes the palette editor's own check of a palette
+  of one's own, which measures every pair the tests check of the
+  colors such a palette paints (`style.test.ts` checks that it does)
+  ([`customPalette.test.ts`](../packages/domain/src/customPalette.test.ts)).
 - **Text size**: unit tests fail on a font size or a breakpoint in
   pixels, which larger text would leave as they are
   ([theme.md](theme.md#text-size)).
@@ -118,6 +128,13 @@ and an issue for one is welcome ([below](#report-a-barrier)).
   button's name while the pointer is over the button (muted text on
   the hovered tint of the middle grades). The tests hold every other
   palette and theme to both.
+- **Palettes of one's own**: a palette the user designs may hold pairs
+  below the contrast they need, once the user says "Use anyway", and
+  one written into the pod by another app may hold anything the
+  checks allow but text below 3:1 on a surface, which is shown as its
+  base: no journey's axe check sees it, and only the editor's own
+  check measures it, on the pairs it lists. Where the base has a gap
+  listed here, the check holds a palette to what the base has.
 - **Screen readers**: no pass with a screen reader, NVDA or VoiceOver,
   through the main journeys is written down yet. It would find what
   the checks above can't, such as whether a reader takes up the

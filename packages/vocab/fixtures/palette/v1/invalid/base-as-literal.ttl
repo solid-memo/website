@@ -1,0 +1,10 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+
+# A palette whose base is a string, not a concept.
+<#palette-a>
+    a solid-memo:Palette ;
+    dcterms:title "Mine"@en ;
+    solid-memo:basedOn "parchment" ;
+    solid-memo:lightColors <#palette-a-light> ;
+    solid-memo:darkColors <#palette-a-dark> .

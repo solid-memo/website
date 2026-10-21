@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.22 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.23 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -28,6 +28,10 @@ export const SM = {
   Step: `${SM_NS}Step`,
   /** A wrong option of a card asked as a multiple-choice question, the card's back being the right one. A subject of the document that holds its card, which names it with solid-memo:distractor; copied with the card. (Added in 1.14.) */
   Distractor: `${SM_NS}Distractor`,
+  /** A palette the user designed: its name, the palette of solid-memo:Palettes it is based on, and its colors in the light theme and in the dark, each a solid-memo:ColorSet. A subject of the instance's palettes document. The instance's preferences choose it with solid-memo:palette, as they choose a concept of solid-memo:Palettes. A color it does not set is the base palette's. (Added in 1.23.) */
+  Palette: `${SM_NS}Palette`,
+  /** The colors of a user's palette in one theme, the light or the dark: for each color it sets, an opaque sRGB color written #rrggbb. A subject of the instance's palettes document, beside its palette. (Added in 1.23.) */
+  ColorSet: `${SM_NS}ColorSet`,
   /** Which version of its class's shape the subject conforms to. Absent means 1, the format that predates the field. Every subject Solid Memo writes carries it. (Since 1.0.) */
   formatVersion: `${SM_NS}formatVersion`,
   /** Where a deck or deck group stands among the members of the one catalogue or group it is in, 0 first; the decks and groups of one parent share one sequence. Absent means after every member that has one. (Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
@@ -132,6 +136,50 @@ export const SM = {
   palette: `${SM_NS}palette`,
   /** How large the app shows its text, against the browser's own text size: a concept of solid-memo:TextSizes. (Added in 1.22 for preferences format 6.) */
   textSize: `${SM_NS}textSize`,
+  /** The palette of solid-memo:Palettes a user's palette is based on, whose colors it has where it sets none. A palette this reader does not know is read as the standard one. (Added in 1.23 for palette format 1.) */
+  basedOn: `${SM_NS}basedOn`,
+  /** A user's palette's colors in the light theme. (Added in 1.23 for palette format 1.) */
+  lightColors: `${SM_NS}lightColors`,
+  /** A user's palette's colors in the dark theme. (Added in 1.23 for palette format 1.) */
+  darkColors: `${SM_NS}darkColors`,
+  /** The page's background (the --bg color role), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  backgroundColor: `${SM_NS}backgroundColor`,
+  /** The surface of cards, panels and fields (--surface), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  surfaceColor: `${SM_NS}surfaceColor`,
+  /** A surface set into another, such as a table's header (--surface-sunken), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  sunkenSurfaceColor: `${SM_NS}sunkenSurfaceColor`,
+  /** The text (--text), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  textColor: `${SM_NS}textColor`,
+  /** Text that says less, such as a hint (--text-muted), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  mutedTextColor: `${SM_NS}mutedTextColor`,
+  /** The lines between parts of the page (--border), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  borderColor: `${SM_NS}borderColor`,
+  /** A text field's edge (--control-border), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  fieldEdgeColor: `${SM_NS}fieldEdgeColor`,
+  /** The primary color, of rings, lines, focus rings and text in it (--primary), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  primaryColor: `${SM_NS}primaryColor`,
+  /** A primary button's fill (--primary-fill), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  primaryFillColor: `${SM_NS}primaryFillColor`,
+  /** The text on a primary button's fill (--on-primary), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  onPrimaryColor: `${SM_NS}onPrimaryColor`,
+  /** A link's text (--link), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  linkColor: `${SM_NS}linkColor`,
+  /** Text that warns of a loss or tells of an error (--danger), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  dangerColor: `${SM_NS}dangerColor`,
+  /** Text that asks for care (--warning-text), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  warningColor: `${SM_NS}warningColor`,
+  /** The answer button of grade 0, Again (--grade-0), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  grade0Color: `${SM_NS}grade0Color`,
+  /** The answer button of grade 1 (--grade-1), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  grade1Color: `${SM_NS}grade1Color`,
+  /** The answer button of grade 2, Hard on the four-button scale (--grade-2), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  grade2Color: `${SM_NS}grade2Color`,
+  /** The answer button of grade 3, Good on the four-button scale (--grade-3), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  grade3Color: `${SM_NS}grade3Color`,
+  /** The answer button of grade 4 (--grade-4), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  grade4Color: `${SM_NS}grade4Color`,
+  /** The answer button of grade 5, Easy (--grade-5), as an opaque sRGB color written #rrggbb. (Added in 1.23 for color set format 1.) */
+  grade5Color: `${SM_NS}grade5Color`,
   /** The document a receipt is about. (Added in 1.9.) */
   receiptOf: `${SM_NS}receiptOf`,
   /** The version of the document a receipt is about: its ETag, as the pod gave it. (Added in 1.9.) */

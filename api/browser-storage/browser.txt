@@ -6,6 +6,9 @@ indexedDB: solid-memo-guest-pod store resources, record of kind rdf: etag, kind,
 indexedDB: solid-memo-guest-pod version 1, store resources, keyed by resource URL under https://guest.solid-memo.invalid/
 localStorage: solid-memo:language
 localStorage: solid-memo:palette
+localStorage: solid-memo:palette-colors, field dark
+localStorage: solid-memo:palette-colors, field light
+localStorage: solid-memo:palette-colors, field palette
 localStorage: solid-memo:textSize
 localStorage: solid-memo:theme
 localStorage: solid-memo:update:<source URL>

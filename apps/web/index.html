@@ -10,7 +10,7 @@
        <base>, no form posted anywhere. Pictures come from pods, so img-src
        stays open; style-src waits on the inline styles of src/ui. -->
   <meta http-equiv="Content-Security-Policy"
-    content="script-src 'self' 'sha256-JYJjGWZLRgh/iFSN6RTz+lm5XwkfITw8HFSANJ+Gv6U='; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    content="script-src 'self' 'sha256-o/OkTyg5paAjpiXKPEbN6jdtH/hBgznG3HB8dXsFsCU='; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Spaced-repetition flashcards that live in your own Solid pod." />
   <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />
@@ -21,7 +21,10 @@
        package's localStorage{Theme,Palette,TextSize}Preference.ts), else
        the browser's. A palette or a text size is set as it is stored, if
        it is in the form every one is, so a later one needs no change here
-       (or to the hash above). The app takes over from here
+       (or to the hash above). A palette of the user's own has its colors
+       for the theme set on the root (key solid-memo:palette-colors, of
+       localStorageCustomPalettePreference.ts), each only for a role it may
+       set and only if it is #rrggbb. The app takes over from here
        (src/ui/theme.tsx). -->
   <script>
     (function () {
@@ -42,6 +45,16 @@
       if (palette !== null && name.test(palette)) root.dataset.palette = palette;
       var size = stored("solid-memo:textSize");
       if (size !== null && name.test(size)) root.dataset.textSize = size;
+      var role =
+        /^--(bg|surface(-sunken|-hover)?|text(-muted)?|border(-strong)?|control-border|primary(-fill|-hover|-soft)?|on-primary|link(-hover-bg)?|danger(-soft|-border)?|warning-(text|soft|border)|grade-[0-5])$/;
+      try {
+        var colors = JSON.parse(stored("solid-memo:palette-colors"))[root.dataset.theme];
+        for (var key in colors) {
+          var color = colors[key];
+          if (role.test(key) && typeof color === "string" && /^#[0-9a-fA-F]{6}$/.test(color))
+            root.style.setProperty(key, color);
+        }
+      } catch (e) {}
     })();
   </script>
   <!-- Favicons at fixed root URLs (public/), not fingerprinted assets:

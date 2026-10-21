@@ -72,6 +72,10 @@ export type RouteRef =
   /** A chapter's final review, which completes it. */
   | { screen: "courseReview"; instanceUrl: string; deckUrl: string; chapterUrl: string }
   | { screen: "preferences"; instanceUrl: string }
+  /** The editor of a palette of the user's own (docs/theme.md): `paletteUrl`
+      is the palette's subject in the instance's palettes document; absent,
+      a new palette. */
+  | { screen: "palette"; instanceUrl: string; paletteUrl?: string }
   /** The instance's study statistics: `range` the answers they are of,
       `view` the tab shown; absent, the defaults (DEFAULT_STATISTICS_RANGE,
       "overview"). */
@@ -247,6 +251,11 @@ export function routeToHash(ref: RouteRef): string {
       })}`;
     case "preferences":
       return `#/preferences${params({ instance: ref.instanceUrl })}`;
+    case "palette":
+      return `#/palette${params({
+        instance: ref.instanceUrl,
+        ...(ref.paletteUrl === undefined ? {} : { palette: ref.paletteUrl }),
+      })}`;
     case "statistics":
       return `#/statistics${params({ instance: ref.instanceUrl, ...statisticsParams(ref) })}`;
     case "deckStatistics":
@@ -351,6 +360,14 @@ export function isStudioHash(hash: string): boolean {
  */
 export function studioHref(instanceUrl: string): string {
   return `#${STUDIO_PATH}${params({ instance: instanceUrl })}`;
+}
+
+/** The palette editor's route: a palette of the user's own, or a new one; null without an instance. */
+function paletteRoute(instanceUrl: string | null, paletteUrl: string | null): RouteRef | null {
+  if (instanceUrl === null) return null;
+  return paletteUrl === null
+    ? { screen: "palette", instanceUrl }
+    : { screen: "palette", instanceUrl, paletteUrl };
 }
 
 /** Parse a location hash; null for anything that isn't a valid route. */
@@ -459,6 +476,8 @@ export function parseHash(hash: string): RouteRef | null {
     }
     case "/preferences":
       return instanceUrl === null ? null : { screen: "preferences", instanceUrl };
+    case "/palette":
+      return paletteRoute(instanceUrl, query.get("palette"));
     case "/statistics":
       return instanceUrl === null
         ? null

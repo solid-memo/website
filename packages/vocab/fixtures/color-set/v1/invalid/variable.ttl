@@ -1,0 +1,6 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# Another role in place of a color.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:textColor "var(--text)" .

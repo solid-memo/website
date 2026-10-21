@@ -1,0 +1,70 @@
+@base <https://solid-memo.com/ns/shapes/palette/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# A palette, format 1 (vocabulary 1.23): one the user designed, a subject
+# of the instance's palettes document. It has a name, the palette of
+# solid-memo:Palettes it is based on, and its colors in the light theme
+# and in the dark, each a color set beside it in the same document
+# (color-set/v1.ttl). The base lists no concepts, as the preferences'
+# palette lists none: a reader that does not know it bases the palette
+# on the standard colors.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "PaletteV1" ;
+    rdfs:comment "Palette format 1: a palette the user designed, with a language-tagged name, the palette it is based on, and a color set for the light theme and one for the dark." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Palette ;
+    sh:property <#formatVersion> ,
+                <#title> ,
+                <#basedOn> ,
+                <#lightColors> ,
+                <#darkColors> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:message "A palette's name is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "En paletts namn är språktaggad text på valfritt språk, ett per språk (\"…\"@sv)."@sv .
+
+<#basedOn>
+    a sh:PropertyShape ;
+    sh:path solid-memo:basedOn ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A palette names the palette it is based on, once: a concept of solid-memo:Palettes."@en ,
+               "En palett anger den palett den bygger på, en gång: ett begrepp i solid-memo:Palettes."@sv .
+
+<#lightColors>
+    a sh:PropertyShape ;
+    sh:path solid-memo:lightColors ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A palette names its colors in the light theme, once: a solid-memo:ColorSet."@en ,
+               "En palett anger sina färger i det ljusa temat, en gång: en solid-memo:ColorSet."@sv .
+
+<#darkColors>
+    a sh:PropertyShape ;
+    sh:path solid-memo:darkColors ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A palette names its colors in the dark theme, once: a solid-memo:ColorSet."@en ,
+               "En palett anger sina färger i det mörka temat, en gång: en solid-memo:ColorSet."@sv .

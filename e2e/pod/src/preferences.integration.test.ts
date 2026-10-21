@@ -129,14 +129,20 @@ describe.each(SERVERS)("preferences on $name", ({ url: server }) => {
       palette: "https://solid-memo.com/ns/vocab/v1.ttl#highContrastPalette",
       textSize: "larger",
     });
-    expect(await page().instancePalette(instanceUrl)).toBe("high-contrast");
+    expect(await page().instancePalette(instanceUrl)).toEqual({
+      palette: "high-contrast",
+      custom: null,
+    });
     expect(await page().instanceTextSize(instanceUrl)).toBe("larger");
 
-    // A palette of the user's own, as a later version writes it: straight to the pod.
-    const own = `${instanceUrl}palettes.ttl#mine`;
+    // A palette of a later version, as it writes it: straight to the pod.
+    const later = "https://solid-memo.com/ns/vocab/v1.ttl#sepiaPalette";
     const stored = await page().getPreferences(instanceUrl);
-    await laterVersion().savePreferences(instanceUrl, { ...stored, palette: own });
-    expect(await page().instancePalette(instanceUrl)).toBe("standard");
+    await laterVersion().savePreferences(instanceUrl, { ...stored, palette: later });
+    expect(await page().instancePalette(instanceUrl)).toEqual({
+      palette: "standard",
+      custom: null,
+    });
     // Saved again as shown, in Standard, the palette is kept as it was.
     await page().savePreferences(instanceUrl, {
       ...stored,
@@ -144,7 +150,7 @@ describe.each(SERVERS)("preferences on $name", ({ url: server }) => {
       newCardsPerDay: 3,
     });
     expect(await page().getPreferences(instanceUrl)).toMatchObject({
-      palette: own,
+      palette: later,
       newCardsPerDay: 3,
     });
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);

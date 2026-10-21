@@ -43,6 +43,11 @@ function pod(fail: (method: string, url: string) => number | null = () => null) 
 async function seedInstance(p: ReturnType<typeof pod>, catalogExtra = "") {
   await p.put(`${INSTANCE}meta.ttl`, `<#it> a <${SM}Instance> .`);
   await p.put(`${INSTANCE}preferences.ttl`, `<#it> a <${SM}Preferences> .`);
+  await p.put(
+    `${INSTANCE}palettes.ttl`,
+    `<#palette-1> a <${SM}Palette> ; <${SM}lightColors> <#palette-1-light> .
+<#palette-1-light> a <${SM}ColorSet> .`,
+  );
   await p.put(`${INSTANCE}digest.ttl`, `<#receipt-catalog.ttl> a <${SM}DocumentReceipt> .`);
   await p.put(
     `${INSTANCE}catalog.ttl`,
@@ -77,6 +82,7 @@ describe("deleteInstanceData", () => {
       `${INSTANCE}history/2026-09.ttl`,
       `${INSTANCE}history/2026-10.ttl`,
       `${INSTANCE}preferences.ttl`,
+      `${INSTANCE}palettes.ttl`,
       `${INSTANCE}digest.ttl`,
       `${INSTANCE}catalog.ttl`,
       `${INSTANCE}decks/`,
@@ -190,6 +196,7 @@ describe("deleteInstanceData", () => {
       `${INSTANCE}decks/deck-1.ttl`,
       `${INSTANCE}history/2026-09.ttl`,
       `${INSTANCE}preferences.ttl`,
+      `${INSTANCE}palettes.ttl`,
       `${INSTANCE}meta.ttl`,
     ]) {
       const text = await (await p.fetch(url)).text();
@@ -200,6 +207,7 @@ describe("deleteInstanceData", () => {
       `${INSTANCE}decks/deck-1.ttl`,
       `${INSTANCE}history/2026-09.ttl`,
       `${INSTANCE}preferences.ttl`,
+      `${INSTANCE}palettes.ttl`,
       `${INSTANCE}catalog.ttl`,
       `${INSTANCE}meta.ttl`,
     ];

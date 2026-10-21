@@ -57,8 +57,9 @@ export interface StudyPreferences {
   schedulerInvitationDismissed: boolean;
   /**
    * The colors the app is shown in: the IRI of a concept of
-   * solid-memo:Palettes, or of a palette this version does not know (a
-   * later version's, or one of the user's own), which is kept as it is
+   * solid-memo:Palettes, of one of the user's own in the instance's
+   * palettes document (domain/customPalette.ts), or of a palette this
+   * version does not know (a later version's), which is kept as it is
    * and shown as Standard (shownPalette). Kept on the device too, as
    * the theme is.
    */
@@ -137,8 +138,16 @@ export function shownPalette(prefs: Pick<StudyPreferences, "palette">): Palette 
 /**
  * The palette preferences keep when the app is shown in `palette`: the
  * one they hold while it shows as that, so a palette this version does
- * not know outlives a save, else the concept of the one shown.
+ * not know outlives a save, else the concept of the one shown. A palette
+ * of the user's own (`isOwn`, one of the instance's palettes document) is
+ * one it knows, and a choice of a built-in palette replaces it.
  */
-export function keptPalette(prefs: Pick<StudyPreferences, "palette">, palette: Palette): string {
-  return shownPalette(prefs) === palette ? prefs.palette : conceptOfPalette(palette);
+export function keptPalette(
+  prefs: Pick<StudyPreferences, "palette">,
+  palette: Palette,
+  isOwn: (iri: string) => boolean = () => false,
+): string {
+  return shownPalette(prefs) === palette && !isOwn(prefs.palette)
+    ? prefs.palette
+    : conceptOfPalette(palette);
 }

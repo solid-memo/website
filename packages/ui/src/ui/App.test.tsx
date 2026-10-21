@@ -14,7 +14,8 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
-import { PALETTES, type Palette } from "@solid-memo/domain/palette";
+import { PALETTES } from "@solid-memo/domain/palette";
+import type { CustomPalette, ShownPalette } from "@solid-memo/domain/customPalette";
 import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
@@ -212,21 +213,39 @@ describe("AppShell", () => {
     afterEach(() => {
       delete document.documentElement.dataset.palette;
       delete document.documentElement.dataset.textSize;
+      document.documentElement.removeAttribute("style");
     });
 
     const INSTANCE_URL = "https://pod.example/solid-memo/main/";
+    const READING: CustomPalette = {
+      url: `${INSTANCE_URL}palettes.ttl#palette-reading`,
+      title: { en: "Reading" },
+      basedOn: "parchment",
+      light: { "--text": "#2b2118" },
+      dark: { "--text": "#ffffff" },
+    };
 
     /** A workspace with a button for each palette and each text size, as the preferences have a choice for each. */
     function AppearanceWorkspace() {
-      const { palette, choosePalette, textSize, chooseTextSize } = useTheme();
+      const {
+        palette,
+        customPalette,
+        choosePalette,
+        chooseCustomPalette,
+        textSize,
+        chooseTextSize,
+      } = useTheme();
       return (
         <main id={MAIN_ID}>
-          <p>{`Palette: ${palette}, text size: ${textSize}`}</p>
+          <p>{`Palette: ${customPalette === null ? "" : "reading over "}${palette}, text size: ${textSize}`}</p>
           {PALETTES.map((option) => (
             <button key={option} type="button" onClick={() => choosePalette(option)}>
               {option}
             </button>
           ))}
+          <button type="button" onClick={() => chooseCustomPalette(READING)}>
+            reading
+          </button>
           {TEXT_SIZES.map((size) => (
             <button key={size} type="button" onClick={() => chooseTextSize(size)}>
               {size}
@@ -309,7 +328,7 @@ describe("AppShell", () => {
     it("shows the palette and the text size the open instance's preferences hold, and keeps a new choice there", async () => {
       const useCases = renderAppearance(
         {
-          instancePalette: vi.fn(async () => "parchment" as const),
+          instancePalette: vi.fn(async () => ({ palette: "parchment" as const, custom: null })),
           instanceTextSize: vi.fn(async () => "large" as const),
         },
         InstanceAppearanceWorkspace,
@@ -317,7 +336,10 @@ describe("AppShell", () => {
       expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
       await waitFor(() => expect(document.documentElement.dataset.palette).toBe("parchment"));
       expect(document.documentElement.dataset.textSize).toBe("large");
-      vi.mocked(useCases.instancePalette).mockResolvedValue("high-contrast");
+      vi.mocked(useCases.instancePalette).mockResolvedValue({
+        palette: "high-contrast",
+        custom: null,
+      });
       fireEvent.click(screen.getByRole("button", { name: "high-contrast" }));
       expect(useCases.choosePalette).toHaveBeenCalledWith("high-contrast", INSTANCE_URL);
       // Read back from the pod once written.
@@ -329,15 +351,73 @@ describe("AppShell", () => {
       expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
     });
 
+    it("paints a palette of the user's own over its base, in the theme shown, and takes its colors off for a built-in one", async () => {
+      const root = document.documentElement;
+      const useCases = renderAppearance(
+        {
+          customPaletteChoice: vi.fn(() => READING),
+          paletteChoice: vi.fn(() => "parchment" as const),
+        },
+        AppearanceWorkspace,
+      );
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      expect(root.dataset.palette).toBe("parchment");
+      expect(root.style.getPropertyValue("--text")).toBe("#2b2118");
+      fireEvent.click(screen.getByRole("button", { name: "standard" }));
+      expect(root.style.getPropertyValue("--text")).toBe("");
+      expect(root.dataset.palette).toBeUndefined();
+      fireEvent.click(screen.getByRole("button", { name: "reading" }));
+      expect(useCases.chooseCustomPalette).toHaveBeenCalledWith(READING, null);
+      expect(root.dataset.palette).toBe("parchment");
+      expect(root.style.getPropertyValue("--text")).toBe("#2b2118");
+    });
+
+    it("paints a palette of the user's own in its dark colors in the dark theme", async () => {
+      renderAppearance({
+        themeChoice: vi.fn(() => "dark" as const),
+        customPaletteChoice: vi.fn(() => READING),
+        paletteChoice: vi.fn(() => "parchment" as const),
+      });
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      expect(document.documentElement.style.getPropertyValue("--text")).toBe("#ffffff");
+    });
+
+    it("shows the palette of the user's own the open instance's preferences name, and paints it again only as it changes", async () => {
+      const root = document.documentElement;
+      const useCases = renderAppearance(
+        {
+          instancePalette: vi.fn(async () => ({
+            palette: "parchment" as const,
+            custom: { ...READING },
+          })),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      await waitFor(() => expect(root.style.getPropertyValue("--text")).toBe("#2b2118"));
+      // Chosen, written and read back the same: not painted again.
+      fireEvent.click(screen.getByRole("button", { name: "reading" }));
+      root.style.setProperty("--text", "#000000");
+      await waitFor(() => expect(useCases.instancePalette).toHaveBeenCalledTimes(2));
+      expect(root.style.getPropertyValue("--text")).toBe("#000000");
+      // Read back changed: painted again.
+      vi.mocked(useCases.instancePalette).mockResolvedValue({
+        palette: "parchment",
+        custom: { ...READING, light: { "--text": "#111111" } },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "reading" }));
+      await waitFor(() => expect(root.style.getPropertyValue("--text")).toBe("#111111"));
+    });
+
     it("shows no earlier choice that a read begun before a later one brings back", async () => {
       const reads: ((size: "default" | "large" | "largest") => void)[] = [];
       const writes: (() => void)[] = [];
       const useCases = renderAppearance(
         {
           instancePalette: vi
-            .fn<() => Promise<Palette>>()
-            .mockResolvedValueOnce("parchment")
-            .mockResolvedValue("high-contrast"),
+            .fn<() => Promise<ShownPalette>>()
+            .mockResolvedValueOnce({ palette: "parchment", custom: null })
+            .mockResolvedValue({ palette: "high-contrast", custom: null }),
           instanceTextSize: vi
             .fn<() => Promise<"default" | "large" | "largest">>()
             .mockResolvedValueOnce("large")
@@ -372,7 +452,7 @@ describe("AppShell", () => {
     it("puts back the pod's palette and text size when a choice cannot be written there", async () => {
       renderAppearance(
         {
-          instancePalette: vi.fn(async () => "parchment" as const),
+          instancePalette: vi.fn(async () => ({ palette: "parchment" as const, custom: null })),
           instanceTextSize: vi.fn(async () => "large" as const),
           choosePalette: vi.fn(async () => Promise.reject(new Error("412"))),
           chooseTextSize: vi.fn(async () => Promise.reject(new Error("412"))),

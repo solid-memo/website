@@ -45,6 +45,7 @@ import { LibraryPreviewContainer } from "./LibraryPreviewContainer";
 import { Loading } from "./Loading";
 import { MigrationContainer } from "./MigrationContainer";
 import { StudyContainer } from "./StudyContainer";
+import { PaletteEditorContainer } from "./PaletteEditorContainer";
 import { PreferencesContainer } from "./PreferencesContainer";
 import { StatisticsContainer } from "./StatisticsContainer";
 import { StoragePicker } from "./StoragePicker";
@@ -390,7 +391,10 @@ export function Workspace({
   // aside. A check that fails sets nothing aside.
   const checkUnsettled = activeInstance !== null && policy === "block-subject" && check.pending;
   /** Screens that stay reachable whatever the data: where the policy is changed and the report read. */
-  const alwaysReachable = route?.screen === "preferences" || route?.screen === "validation";
+  const alwaysReachable =
+    route?.screen === "preferences" ||
+    route?.screen === "palette" ||
+    route?.screen === "validation";
 
   const storagesQuery = useQuery({
     queryKey: ["storages", webId],
@@ -861,6 +865,15 @@ export function Workspace({
               <FindableContainer useCases={useCases} session={session} instance={activeInstance!} />
             )}
           </>
+        );
+      case "palette":
+        return (
+          <PaletteEditorContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            paletteUrl={route.paletteUrl}
+            onDone={() => navigate({ screen: "preferences", instanceUrl: instanceUrl! })}
+          />
         );
       case "statistics":
       case "deckStatistics":

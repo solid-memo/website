@@ -8,6 +8,8 @@ catalog: read from format 1
 catalog: written in format 1
 chapter: read from format 1
 chapter: written in format 1
+colorSet: read from format 1
+colorSet: written in format 1
 deck: read from format 1
 deck: written in format 6
 deckGroup: read from format 1
@@ -34,6 +36,8 @@ libraryDeck: read from format 1
 libraryDeck: written in format 6
 libraryDeckSeries: read from format 1
 libraryDeckSeries: written in format 3
+palette: read from format 1
+palette: written in format 1
 preferences: read from format 1
 preferences: written in format 6
 reviewState: read from format 1

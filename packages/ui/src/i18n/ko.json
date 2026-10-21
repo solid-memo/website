@@ -166,7 +166,8 @@
     "course": "코스",
     "courseReview": "마무리 복습",
     "groups": "그룹",
-    "importUrl": "링크로 추가"
+    "importUrl": "링크로 추가",
+    "palette": "팔레트"
   },
   "browser": {
     "heading": "카드 브라우저: {deck}",
@@ -1077,7 +1078,12 @@
     "palette": {
       "legend": "색",
       "hint": "바로 적용되며, 밝은 모드와 어두운 모드 모두에 쓰여요. 이 설정을 저장하면 화면 모드처럼 Pod에 보관돼요.",
-      "moreContrast": "기기에서 더 높은 대비를 요청하고 있어요. 고대비가 맞을 수 있어요."
+      "moreContrast": "기기에서 더 높은 대비를 요청하고 있어요. 고대비가 맞을 수 있어요.",
+      "ownDescription": "{base} 팔레트를 바탕으로 한 나만의 색이에요.",
+      "edit": "편집",
+      "editLabel": "{name} 편집",
+      "design": "팔레트 만들기",
+      "reset": "색 초기화"
     },
     "textSize": {
       "legend": "글자 크기",
@@ -1138,6 +1144,79 @@
       "hint": "개발자 도구를 표시해요. 앱 아래에 WebID 원본 문서를 보여 주고, 이 인스턴스의 문서를 Solid Memo의 셰이프로 검사해요."
     },
     "save": "저장"
+  },
+  "paletteEditor": {
+    "headingNew": "팔레트 만들기",
+    "headingEdit": "팔레트 편집",
+    "intro": "가장 잘 읽히는 색을 고르세요. 글자가 놓이는 색 쌍은 고르는 동안 바로 측정돼요. 필요한 대비에 못 미치는 쌍은 표시되고, 저장하기 전에 한 번 더 물어봐요.",
+    "name": "이름",
+    "basedOn": "바탕 팔레트",
+    "basedOnHint": "그대로 둔 색은 바탕 팔레트의 색을 따라요.",
+    "light": "밝은 모드",
+    "dark": "어두운 모드",
+    "clear": {
+      "light": "바탕 팔레트의 밝은 색으로 되돌리기",
+      "dark": "바탕 팔레트의 어두운 색으로 되돌리기"
+    },
+    "status": {
+      "pass": "모든 쌍이 필요한 대비를 갖추고 있어요.",
+      "low": {
+        "other": "{count}개 쌍의 대비가 필요한 만큼 되지 않아요."
+      },
+      "refused": "글자가 너무 흐려서 바탕 위에서 읽을 수 없어요. 서로 더 다른 색을 골라 주세요."
+    },
+    "useAnyway": "그대로 사용",
+    "save": "저장하고 사용",
+    "saving": "저장하는 중…",
+    "cancel": "설정으로 돌아가기",
+    "loading": "팔레트를 불러오는 중…",
+    "preview": {
+      "heading": "카드의 질문",
+      "muted": "흐린 글자로 쓴 도움말",
+      "link": "링크",
+      "danger": "위험",
+      "warning": "주의",
+      "button": "버튼",
+      "field": "입력란"
+    },
+    "contrast": {
+      "light": "밝은 모드의 대비",
+      "dark": "어두운 모드의 대비",
+      "front": "색",
+      "back": "바탕",
+      "ratio": "대비",
+      "needs": "필요",
+      "result": "결과",
+      "tint": {
+        "12": "{button}의 옅은 색",
+        "24": "포인터를 올린 {button}의 옅은 색"
+      },
+      "ratioValue": "{ratio}:1",
+      "pass": "충분",
+      "low": "부족",
+      "refused": "읽을 수 없음"
+    },
+    "role": {
+      "bg": "페이지 바탕",
+      "surface": "카드와 패널",
+      "surfaceSunken": "움푹한 면",
+      "surfaceHover": "포인터 아래의 면",
+      "text": "글자",
+      "textMuted": "흐린 글자",
+      "border": "선",
+      "controlBorder": "입력란 테두리",
+      "primary": "주 색과 포커스 테두리",
+      "primaryFill": "버튼",
+      "primaryHover": "포인터 아래의 버튼",
+      "primarySoft": "주 색의 옅은 색",
+      "onPrimary": "버튼 위 글자",
+      "link": "링크",
+      "danger": "위험 글자",
+      "dangerSoft": "위험 글자의 옅은 색",
+      "warningText": "주의 글자",
+      "warningSoft": "주의 글자의 옅은 색",
+      "grade": "답 버튼 {grade}"
+    }
   },
   "findable": {
     "heading": "다른 앱에서 찾을 수 있음",
@@ -1353,6 +1432,9 @@
     "authorEmpty": "저자 이름을 입력해 주세요.",
     "authorTwice": "{author}이(가) 두 번 들어 있어요. 저자는 한 번씩만 입력해 주세요.",
     "instanceNameEmpty": "인스턴스 이름을 입력해 주세요.",
+    "paletteNameEmpty": "팔레트 이름을 입력해 주세요.",
+    "paletteUnreadable": "글자가 너무 흐려서 바탕 위에서 읽을 수 없어요(3:1 미만). 서로 더 다른 색을 골라 주세요.",
+    "paletteContrastLow": "일부 색의 대비가 필요한 만큼 되지 않아요. 다른 색을 고르거나 그대로 사용하세요.",
     "catalogNeedsDescription": "카탈로그에 설명을 입력해 주세요.",
     "noCatalogToUpdate": "이 인스턴스에는 아직 카탈로그가 없어요. 먼저 Solid Memo에서 인스턴스를 업데이트해 주세요.",
     "noMetaToUpdate": "이 인스턴스에는 업데이트할 설명이 없어요. 페이지를 새로고침하고 다시 시도해 주세요.",

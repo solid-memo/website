@@ -23,6 +23,7 @@ import {
   isCanonicalUrl,
   isDeckInPlace,
   isDocumentIn,
+  isPaletteOf,
   isInstanceAddress,
   isPlainHttpUrl,
   isSafeDocumentUrl,
@@ -31,6 +32,8 @@ import {
   monthOfHistoryUrl,
   ownsDocument,
   metaUrlOf,
+  palettesUrlOf,
+  paletteUrlOf,
   preferencesUrlOf,
   reviewsContainerOf,
 } from "./instanceLayout";
@@ -44,6 +47,7 @@ describe("instance layout", () => {
     expect(metaUrlOf(INSTANCE)).toBe(`${INSTANCE}/meta.ttl`);
     expect(preferencesUrlOf(`${INSTANCE}/`)).toBe(`${INSTANCE}/preferences.ttl`);
     expect(catalogUrlOf(INSTANCE)).toBe(`${INSTANCE}/catalog.ttl`);
+    expect(palettesUrlOf(INSTANCE)).toBe(`${INSTANCE}/palettes.ttl`);
   });
 
   it("names the containers of the decks' documents, with or without a trailing slash", () => {
@@ -63,11 +67,33 @@ describe("instance layout", () => {
     expect(instanceDocumentUrls(INSTANCE, [deck, elsewhere])).toEqual([
       `${INSTANCE}/meta.ttl`,
       `${INSTANCE}/preferences.ttl`,
+      `${INSTANCE}/palettes.ttl`,
       `${INSTANCE}/catalog.ttl`,
       `${INSTANCE}/decks/deck-1.ttl`,
       `${INSTANCE}/reviews/deck-1.ttl`,
       "https://pod.example/kort/spanish.ttl",
     ]);
+  });
+});
+
+describe("the palettes the user designed", () => {
+  it("are subjects of the instance's palettes document", () => {
+    expect(paletteUrlOf(INSTANCE, "a1")).toBe(`${INSTANCE}/palettes.ttl#palette-a1`);
+    expect(isPaletteOf(INSTANCE, paletteUrlOf(INSTANCE, "a1"))).toBe(true);
+    // Spelled another way, as a request sends it the same.
+    expect(isPaletteOf(INSTANCE, "https://POD.example/solid-memo/main/palettes.ttl#x")).toBe(true);
+  });
+
+  it("are read nowhere else", () => {
+    for (const iri of [
+      `${INSTANCE}/palettes.ttl`,
+      `${INSTANCE}/palettes.ttl#`,
+      `${INSTANCE}/other.ttl#palette-a1`,
+      "https://evil.example/solid-memo/main/palettes.ttl#palette-a1",
+      "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      "#palette-a1",
+    ])
+      expect(isPaletteOf(INSTANCE, iri), iri).toBe(false);
   });
 });
 
@@ -305,6 +331,7 @@ describe("where an instance's documents are", () => {
       { cardsDocumentUrl: `${ROOT}meta.ttl` },
       { cardsDocumentUrl: `${ROOT}catalog.ttl` },
       { reviewsDocumentUrl: `${ROOT}preferences.ttl` },
+      { cardsDocumentUrl: `${ROOT}palettes.ttl` },
       { reviewsDocumentUrl: "https://Pod.example/solid-memo/main/digest.ttl" },
       { reviewsDocumentUrl: `${ROOT}history/2026-10.ttl` },
       { cardsDocumentUrl: `${ROOT}drafts/spanish/v1/cards.ttl` },

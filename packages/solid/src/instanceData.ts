@@ -15,6 +15,7 @@ import {
   isSameUrl,
   metaUrlOf,
   monthOfHistoryUrl,
+  palettesUrlOf,
   preferencesUrlOf,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
@@ -43,8 +44,8 @@ import { RDF, SM } from "./vocab";
  * 3. the drafts the catalog links (`sm:releaseDraft`), those in the
  *    instance's `drafts/` only: each draft's documents and its folders,
  *    as deleting the draft does (deleteDraftResources);
- * 4. the preferences, the digest, then the catalog, which named the
- *    decks' documents and the drafts, so a delete that fails before it
+ * 4. the preferences, the palettes, the digest, then the catalog, which
+ *    named the decks' documents and the drafts, so a delete that fails before it
  *    can be retried (a catalog the pod serves but that cannot be read
  *    is kept, and with it the decks' documents and the drafts, which
  *    nothing else names);
@@ -56,8 +57,9 @@ import { RDF, SM } from "./vocab";
  *
  * From each document only what is Solid Memo's of its kind is removed
  * (datasets.ts removeOwned, ownership.ts): a deck's cards, distractors
- * and review states, the answers, the preferences, the digest's
- * receipts and schedules, the catalog's subjects, the instance's
+ * and review states, the answers, the preferences, the palettes and
+ * their color sets, the digest's receipts and schedules, the catalog's
+ * subjects, the instance's
  * `#it`; a document is deleted only when nothing else is left in it,
  * and one that also holds another app's data is kept with that, which
  * the result names (`keptDocuments`). A document's access control (its
@@ -95,6 +97,7 @@ export async function deleteInstanceData(
     kept.push(...(await deleteDraftResources(draft, fetch)));
   }
   await remove(preferencesUrlOf(container), subjectsOfClasses(SM.Preferences));
+  await remove(palettesUrlOf(container), subjectsOfClasses(SM.Palette, SM.ColorSet));
   await remove(digestUrlOf(container), subjectsOfClasses(SM.DocumentReceipt, SM.DeckSchedule));
   // A catalog that cannot be read is the one record of the decks' documents, which are kept: so is it.
   if (catalog !== UNREADABLE) await remove(catalogUrl, solidMemoSubjects);

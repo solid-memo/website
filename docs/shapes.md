@@ -29,6 +29,8 @@ chapter/v1.ttl, step/v1.ttl   …/chapter/v1.ttl#inLibrary  (a course's outline)
 distractor/v1.ttl             …/distractor/v1.ttl#shape  (a wrong option, in a pod or the library)
 draft-deck/v1.ttl, draft-chapter/v1.ttl, draft-step/v1.ttl
                               …/draft-deck/v1.ttl#inDraft  (a release's draft)
+palette/v1.ttl, color-set/v1.ttl
+                              …/palette/v1.ttl#shape  (a palette of the user's own)
 ```
 
 Each file's address is its IRI and its `@base`. The IRIs keep `.ttl` on
@@ -90,7 +92,11 @@ checked by the shapes every place shares (`<#shape>`).
   which reads "absent or 1" — the rule that a missing version means the
   format that predates the field.
 - **Not closed.** Unknown triples are neither violations nor removed:
-  readers ignore them and writers edit subjects in place.
+  readers ignore them and writers edit subjects in place. One shape is
+  closed, color set format 1: the app paints with what a color set
+  says ([theme.md](theme.md#how-a-palette-of-ones-own-is-held-safe)),
+  so any property but its colors (and `rdf:type`) is reported, and a
+  color added later is a new format of it.
 - **Property shapes are named** (`<#front>`, never blank nodes), so the
   generator and the results can refer to them. `sh:message` is set where
   the engine's default text would be cryptic, always in English and
@@ -141,6 +147,8 @@ checked by the shapes every place shares (`<#shape>`).
 | Preferences 4 | Preferences 3 + `sm:theme` 1..1, a concept of `sm:Themes` (see [theme.md](theme.md)) |
 | Preferences 5 | Preferences 4 + `sm:studyScheduler` 1..1, `sm:sm2` or `sm:fsrs6`, `sm:desiredRetention` 1..1 decimal, 0.7 to 0.97, and `sm:schedulerInvitationDismissed` 1..1 boolean |
 | Preferences 6 | Preferences 5 + `sm:palette` 1..1, any IRI (a concept of `sm:Palettes`, or a palette this version does not know, which it keeps), and `sm:textSize` 1..1, a concept of `sm:TextSizes` (see [theme.md](theme.md#where-the-choice-is-kept)) |
+| Palette 1 | A palette of the user's own (vocabulary 1.23), a subject of the instance's `palettes.ttl`: `dcterms:title` 1..n language-tagged text, one per language; `sm:basedOn` 1..1 IRI, a concept of `sm:Palettes` with no `sh:in` (a base this version does not know reads as Standard); `sm:lightColors` and `sm:darkColors` 1..1 IRIs, its color sets, subjects of the same document ([theme.md](theme.md#palettes-of-ones-own)). Preferences 6 choose it by its IRI in `sm:palette`, with no new format |
+| Color set 1 | A palette's colors in one theme: `sm:backgroundColor`, `sm:surfaceColor`, `sm:sunkenSurfaceColor`, `sm:textColor`, `sm:mutedTextColor`, `sm:borderColor`, `sm:fieldEdgeColor`, `sm:primaryColor`, `sm:primaryFillColor`, `sm:onPrimaryColor`, `sm:linkColor`, `sm:dangerColor`, `sm:warningColor` and `sm:grade0Color` to `sm:grade5Color`, each 0..1, an `xsd:string` that matches `^#[0-9a-fA-F]{6}$` (an opaque color). Closed (`sh:closed`, `rdf:type` ignored): no other property |
 | Library deck series 1 | The deck across its releases in the library index: a `dcat:DatasetSeries` and `dcat:Dataset`; title, description, publisher 1..1; `dcat:first`, `dcat:last`, `dcat:hasCurrentVersion` 1..1; `dcat:hasVersion` 1..n; themes and keywords 0..n |
 | Library deck series 2 | Library deck series 1 with the version stated (`sh:hasValue 2`) and the title and description as language-tagged text, as in deck format 4 |
 | Library deck series 3 | Library deck series 2, but the keywords, copied from the current release, are language-tagged text, several per language, or untagged as a library deck 4 release has them |

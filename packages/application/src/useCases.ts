@@ -26,6 +26,14 @@ import {
 } from "@solid-memo/domain/library";
 import { pickLocale, type Locale } from "@solid-memo/domain/locale";
 import { conceptOfPalette } from "@solid-memo/domain/concepts";
+import {
+  checkPalette,
+  isReadable,
+  paletteVerdict,
+  type CustomPalette,
+  type PaletteDraft,
+  type ShownPalette,
+} from "@solid-memo/domain/customPalette";
 import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
@@ -106,7 +114,10 @@ import {
   historyUrlOf,
   instanceAddressOf,
   instanceDocumentUrls,
+  isPaletteOf,
+  isSameUrl,
   metaUrlOf,
+  paletteUrlOf,
   preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
 import {
@@ -272,7 +283,9 @@ import type {
   ContainerMove,
   GuestPod,
   LanguagePreference,
+  CustomPalettePreference,
   PalettePreference,
+  PaletteRepository,
   TextSizePreference,
   ThemePreference,
   UpdateJournal,
@@ -387,18 +400,55 @@ export interface UseCases
   /** The palette chosen on this device; "standard" when none was. */
   paletteChoice(): Palette;
   /**
-   * The palette an instance's preferences are shown in (Standard for one
-   * this version does not know), kept on this device too for the next
-   * visit's first paint; null when the instance has no preferences yet.
+   * The palette of the user's own shown on this device, as kept for the
+   * first paint; null when a built-in one is. One whose text is not
+   * readable on the background or a surface (checkPalette), which any
+   * script of the site may have written there, is forgotten, and its
+   * base shown.
    */
-  instancePalette(instanceUrl: string): Promise<Palette | null>;
+  customPaletteChoice(): CustomPalette | null;
+  /**
+   * The palette an instance's preferences are shown in: one of the
+   * user's own when they name a palette of the instance's palettes
+   * document (and no other document is read for it), over its base;
+   * else a built-in one, Standard for one this version does not know.
+   * A palette of one's own whose text is not readable on the background
+   * or a surface (checkPalette), as another app may have written it, is
+   * shown as its base, and the preferences keep naming it. Kept on this
+   * device too for the next visit's first paint; null when the instance
+   * has no preferences yet.
+   */
+  instancePalette(instanceUrl: string): Promise<ShownPalette | null>;
   /**
    * Show the app in this palette from now on: on this device, and in the
    * instance's preferences as chooseTheme keeps a theme. Preferences
    * whose palette this version does not know keep it while Standard is
-   * shown.
+   * shown; one of the user's own is replaced.
    */
   choosePalette(palette: Palette, instanceUrl: string | null): Promise<void>;
+  /**
+   * Show the app in a palette of the user's own from now on: on this
+   * device, and in the instance's preferences, which name it by its
+   * address, as chooseTheme keeps a theme.
+   */
+  chooseCustomPalette(palette: CustomPalette, instanceUrl: string): Promise<void>;
+  /** The palettes the user designed in an instance (docs/theme.md, Palettes of one's own). */
+  listPalettes(instanceUrl: string): Promise<CustomPalette[]>;
+  /**
+   * Save a palette the user designed in the instance's palettes
+   * document, a new one (no address yet) at a new subject; the palette
+   * as saved. Refused before anything is written when it has no name
+   * (paletteNameEmpty), when its text is not readable on the background
+   * or a surface (paletteUnreadable, checkPalette), and when a pair is
+   * below the contrast it needs (paletteContrastLow), unless `useAnyway`.
+   * When the palette is the one this device shows, the device's copy is
+   * kept up to date.
+   */
+  savePalette(
+    instanceUrl: string,
+    palette: PaletteDraft,
+    options?: { useAnyway?: boolean },
+  ): Promise<CustomPalette>;
   /** The text size chosen on this device; "default" when none was. */
   textSizeChoice(): TextSize;
   /**
@@ -1271,6 +1321,10 @@ export interface Dependencies {
   themePreference?: ThemePreference;
   /** The palette the user chose; by default none is kept. */
   palettePreference?: PalettePreference;
+  /** A copy of the user's own palette being shown; by default none is kept. */
+  customPalettePreference?: CustomPalettePreference;
+  /** The palettes the user designed; by default there are none. */
+  paletteRepository?: PaletteRepository;
   /** The text size the user chose; by default none is kept. */
   textSizePreference?: TextSizePreference;
   /** The clock; injected for tests. */
@@ -1390,6 +1444,10 @@ const NO_PALETTE_PREFERENCE: PalettePreference = {
   chosen: () => DEFAULT_PALETTE,
   choose: () => undefined,
 };
+const NO_CUSTOM_PALETTE_PREFERENCE: CustomPalettePreference = {
+  chosen: () => null,
+  choose: () => undefined,
+};
 const NO_TEXT_SIZE_PREFERENCE: TextSizePreference = {
   chosen: () => DEFAULT_TEXT_SIZE,
   choose: () => undefined,
@@ -1447,6 +1505,12 @@ const NO_RELEASES: ReleasePublisher = {
   makePublic: noDrafts,
   isPublic: noDrafts,
   listPublished: none,
+};
+const NO_PALETTES: PaletteRepository = {
+  listPalettes: none,
+  savePalette: async () => {
+    throw new Error("This app keeps no palettes.");
+  },
 };
 const NO_INSTANCE_GRAPH: InstanceGraphReader = {
   readDocument: async () => {
@@ -1624,6 +1688,8 @@ export function createUseCases({
   languagePreference = NO_LANGUAGE_PREFERENCE,
   themePreference = NO_THEME_PREFERENCE,
   palettePreference = NO_PALETTE_PREFERENCE,
+  customPalettePreference = NO_CUSTOM_PALETTE_PREFERENCE,
+  paletteRepository = NO_PALETTES,
   textSizePreference = NO_TEXT_SIZE_PREFERENCE,
   now = () => new Date(),
   newId = () => crypto.randomUUID(),
@@ -1869,19 +1935,53 @@ export function createUseCases({
     return (appearanceWrites.get(instanceUrl) ?? Promise.resolve()).catch(() => undefined);
   }
 
-  /** Keep on this device how saved preferences show the app, for the next visit's first paint. */
-  function keepAppearance(preferences: StudyPreferences) {
+  /**
+   * Keep on this device how saved preferences show the app, for the next
+   * visit's first paint. A palette of the user's own, which the device
+   * keeps as it was chosen, is left as it is.
+   */
+  function keepAppearance(instanceUrl: string, preferences: StudyPreferences) {
     themePreference.choose(preferences.theme);
-    palettePreference.choose(shownPalette(preferences));
+    if (!isPaletteOf(instanceUrl, preferences.palette)) {
+      palettePreference.choose(shownPalette(preferences));
+      customPalettePreference.choose(null);
+    }
     textSizePreference.choose(preferences.textSize);
   }
 
-  /** The preferences of an instance made now, or saved for the first time: shown as this device shows the app. */
-  function withDeviceAppearance(preferences: StudyPreferences): StudyPreferences {
+  /**
+   * The palette saved preferences keep: one of the user's own of the
+   * instance as it is, else as keptPalette has it, against what the
+   * preferences held (`stored`).
+   */
+  function savedPalette(
+    instanceUrl: string,
+    stored: StudyPreferences,
+    preferences: StudyPreferences,
+  ): string {
+    const isOwn = (iri: string) => isPaletteOf(instanceUrl, iri);
+    return isOwn(preferences.palette)
+      ? preferences.palette
+      : keptPalette(stored, shownPalette(preferences), isOwn);
+  }
+
+  /**
+   * The preferences of an instance made now, or saved for the first
+   * time: shown as this device shows the app, its palette of the user's
+   * own among them when it is one of that instance's.
+   */
+  function withDeviceAppearance(
+    preferences: StudyPreferences,
+    instanceUrl: string | null = null,
+  ): StudyPreferences {
+    const custom = customPalettePreference.chosen();
     return {
       ...preferences,
       theme: themePreference.chosen(),
-      palette: conceptOfPalette(palettePreference.chosen()),
+      palette:
+        custom !== null && instanceUrl !== null && isPaletteOf(instanceUrl, custom.url)
+          ? custom.url
+          : conceptOfPalette(palettePreference.chosen()),
       textSize: textSizePreference.chosen(),
     };
   }
@@ -3169,20 +3269,63 @@ export function createUseCases({
     paletteChoice() {
       return palettePreference.chosen();
     },
+    customPaletteChoice() {
+      const custom = customPalettePreference.chosen();
+      if (custom === null || isReadable(custom)) return custom;
+      customPalettePreference.choose(null);
+      return null;
+    },
     async instancePalette(instanceUrl) {
       const stored = await readStoredPreferences(instanceUrl);
       if (stored === null) return null;
-      const palette = shownPalette(stored.preferences);
+      const iri = stored.preferences.palette;
+      // Only the instance's own palettes document is read: the preferences are data, and may name any address.
+      const own = isPaletteOf(instanceUrl, iri)
+        ? ((await paletteRepository.listPalettes(instanceUrl)).find((listed) =>
+            isSameUrl(listed.url, iri),
+          ) ?? null)
+        : null;
+      const custom = own !== null && isReadable(own) ? own : null;
+      const palette = own?.basedOn ?? shownPalette(stored.preferences);
       palettePreference.choose(palette);
-      return palette;
+      customPalettePreference.choose(custom);
+      return { palette, custom };
     },
     choosePalette(palette, instanceUrl) {
       palettePreference.choose(palette);
+      customPalettePreference.choose(null);
       if (instanceUrl === null) return Promise.resolve();
       return writeAppearance(instanceUrl, (preferences) => {
-        const kept = keptPalette(preferences, palette);
+        const kept = keptPalette(preferences, palette, (iri) => isPaletteOf(instanceUrl, iri));
         return kept === preferences.palette ? null : { ...preferences, palette: kept };
       });
+    },
+    chooseCustomPalette(palette, instanceUrl) {
+      palettePreference.choose(palette.basedOn);
+      customPalettePreference.choose(palette);
+      return writeAppearance(instanceUrl, (preferences) =>
+        preferences.palette === palette.url ? null : { ...preferences, palette: palette.url },
+      );
+    },
+    listPalettes(instanceUrl) {
+      return paletteRepository.listPalettes(instanceUrl);
+    },
+    async savePalette(instanceUrl, draft, { useAnyway = false } = {}) {
+      if (Object.values(draft.title).every((name) => name.trim() === ""))
+        throw new AppError("paletteNameEmpty");
+      if (draft.url !== null && !isPaletteOf(instanceUrl, draft.url))
+        throw new Error(`Not a palette of ${instanceUrl}: ${draft.url}`);
+      const palette: CustomPalette = {
+        ...draft,
+        url: draft.url ?? paletteUrlOf(instanceUrl, newId()),
+      };
+      const verdict = paletteVerdict(checkPalette(palette));
+      if (verdict === "refused") throw new AppError("paletteUnreadable");
+      if (verdict === "low" && !useAnyway) throw new AppError("paletteContrastLow");
+      await paletteRepository.savePalette(instanceUrl, palette);
+      if (customPalettePreference.chosen()?.url === palette.url)
+        customPalettePreference.choose(palette);
+      return palette;
     },
     textSizeChoice() {
       return textSizePreference.chosen();
@@ -3724,14 +3867,14 @@ export function createUseCases({
       });
     },
     async savePreferences(instanceUrl, preferences) {
-      keepAppearance(preferences);
+      keepAppearance(instanceUrl, preferences);
       // Read after a choice still being written, so the save is not refused for the version it made.
       await afterAppearanceWrites(instanceUrl);
       const stored = await getPreferences(instanceUrl);
       await preferencesRepository.savePreferences(instanceUrl, {
         ...withInvitationAnswer(preferences, stored),
         scheduler: stored.scheduler,
-        palette: keptPalette(stored, shownPalette(preferences)),
+        palette: savedPalette(instanceUrl, stored, preferences),
       });
     },
     async switchScheduler(instanceUrl, preferences, onProgress = () => undefined) {
@@ -3771,12 +3914,12 @@ export function createUseCases({
       progress.finished("preferences");
       // Saved last, and only once every deck is written: until then SM-2 sets the due days.
       if (outcome.failed.length === 0) {
-        keepAppearance(preferences);
+        keepAppearance(instanceUrl, preferences);
         await afterAppearanceWrites(instanceUrl);
         const stored = await getPreferences(instanceUrl);
         await preferencesRepository.savePreferences(instanceUrl, {
           ...withInvitationAnswer(preferences, stored),
-          palette: keptPalette(stored, shownPalette(preferences)),
+          palette: savedPalette(instanceUrl, stored, preferences),
         });
         outcome.switched = true;
         await Promise.all(
@@ -3789,7 +3932,8 @@ export function createUseCases({
     async dismissSchedulerInvitation(instanceUrl) {
       await afterAppearanceWrites(instanceUrl);
       const stored = await preferencesRepository.getPreferences(instanceUrl);
-      const preferences = stored?.preferences ?? withDeviceAppearance(DEFAULT_PREFERENCES);
+      const preferences =
+        stored?.preferences ?? withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);
       if (preferences.schedulerInvitationDismissed) return;
       await preferencesRepository.savePreferences(instanceUrl, {
         ...preferences,

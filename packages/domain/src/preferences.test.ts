@@ -66,6 +66,14 @@ describe("the palette of preferences", () => {
     );
   });
 
+  it("replaces one of the user's own with the built-in palette chosen", () => {
+    const isOwn = (iri: string) => iri === OWN_PALETTE;
+    expect(keptPalette({ palette: OWN_PALETTE }, "standard", isOwn)).toBe(`${SM}standardPalette`);
+    expect(keptPalette({ palette: `${SM}parchmentPalette` }, "parchment", isOwn)).toBe(
+      `${SM}parchmentPalette`,
+    );
+  });
+
   it("takes the concept of another palette shown", () => {
     expect(keptPalette({ palette: OWN_PALETTE }, "color-vision")).toBe(`${SM}colorVisionPalette`);
     expect(keptPalette(DEFAULT_PREFERENCES, "high-contrast")).toBe(`${SM}highContrastPalette`);

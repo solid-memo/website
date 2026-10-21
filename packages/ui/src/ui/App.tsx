@@ -5,6 +5,11 @@
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
 import type { Locale } from "@solid-memo/domain/locale";
+import {
+  parsePalette,
+  type CustomPalette,
+  type ShownPalette,
+} from "@solid-memo/domain/customPalette";
 import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
@@ -25,6 +30,7 @@ import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { usePanelFocus } from "./panelFocus";
 import {
+  applyCustomColors,
   applyPalette,
   applyTextSize,
   applyTheme,
@@ -134,11 +140,15 @@ export function AppShell({
   const [preferredTheme, setPreferredTheme] = useState<Theme>(browserTheme);
   const theme = resolveTheme(themeChoice, preferredTheme);
   const [palette, setPalette] = useState<Palette>(() => useCases.paletteChoice());
+  const [customPalette, setCustomPalette] = useState<CustomPalette | null>(() =>
+    useCases.customPaletteChoice(),
+  );
 
   useEffect(() => {
     applyPalette(palette);
+    applyCustomColors(customPalette, theme);
     applyTheme(theme);
-  }, [palette, theme]);
+  }, [palette, customPalette, theme]);
 
   // The browser's theme as it changes (the OS going dark at dusk), shown while the choice is "system".
   useEffect(() => {
@@ -199,7 +209,24 @@ export function AppShell({
 
   function choosePalette(chosen: Palette) {
     setPalette(chosen);
+    setCustomPalette(null);
     keepChoice((instanceUrl) => useCases.choosePalette(chosen, instanceUrl));
+  }
+
+  /** A palette of the user's own is one of an instance's, chosen while it is open. */
+  function chooseCustomPalette(chosen: CustomPalette) {
+    setPalette(chosen.basedOn);
+    setCustomPalette(chosen);
+    keepChoice((instanceUrl) => useCases.chooseCustomPalette(chosen, instanceUrl!));
+  }
+
+  /** The palette a read of the instance shows; a palette of the user's own read again the same is kept as it is, and not painted again. */
+  function adoptPalette(shown: ShownPalette) {
+    setPalette(shown.palette);
+    // Compared as the rules have them (parsePalette): the same colors in any order are the same palette.
+    const same = (palette: CustomPalette | null) =>
+      JSON.stringify(palette && parsePalette(palette));
+    setCustomPalette((was) => (same(was) === same(shown.custom) ? was : shown.custom));
   }
 
   function chooseTextSize(chosen: TextSize) {
@@ -218,8 +245,10 @@ export function AppShell({
         }}
         onAdopt={adopting(setThemeChoice)}
         palette={palette}
+        customPalette={customPalette}
         onChoosePalette={choosePalette}
-        onAdoptPalette={adopting(setPalette)}
+        onChooseCustomPalette={chooseCustomPalette}
+        onAdoptPalette={adopting(adoptPalette)}
         textSize={textSize}
         onChooseTextSize={chooseTextSize}
         onAdoptTextSize={adopting(setTextSize)}

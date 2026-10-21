@@ -6,6 +6,13 @@ import { createContext, type ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import {
+  isHexColor,
+  paintedColors,
+  PAINTED_ROLES,
+  type CustomPalette,
+  type ShownPalette,
+} from "@solid-memo/domain/customPalette";
 import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
@@ -46,6 +53,37 @@ export function applyPalette(palette: Palette) {
 }
 
 /**
+ * Colors as style properties a palette of the user's own may set: only
+ * the roles it may paint (PAINTED_ROLES), each only when its value is
+ * `#rrggbb`. What the pod, or the device's copy of it, says is held to
+ * this once more where it is painted, so no CSS text, `url()` or `var()`
+ * from either ever reaches a style (docs/theme.md, Palettes of one's
+ * own).
+ */
+export function paletteStyle(colors: Readonly<Record<string, string>>): Record<string, string> {
+  return Object.fromEntries(
+    PAINTED_ROLES.filter((role) => Object.hasOwn(colors, role) && isHexColor(colors[role])).map(
+      (role) => [role, colors[role]!],
+    ),
+  );
+}
+
+/**
+ * Paints the root in a palette of the user's own, in the theme shown,
+ * over its base (applyPalette): each of its colors set on the root's
+ * style, one property at a time (paletteStyle). With none, every color
+ * a palette may paint is taken off the root again. Before applyTheme,
+ * whose meta tags take the background it gives.
+ */
+export function applyCustomColors(custom: CustomPalette | null, theme: Theme) {
+  const style = document.documentElement.style;
+  for (const role of PAINTED_ROLES) style.removeProperty(role);
+  if (custom === null) return;
+  for (const [role, color] of Object.entries(paletteStyle(paintedColors(custom, theme))))
+    style.setProperty(role, color);
+}
+
+/**
  * Shows the text at a size: the stylesheet scales the root's font size
  * by the root's data-text-size (index.html sets it before the first
  * paint), which the default size goes without.
@@ -64,6 +102,11 @@ export function instanceAppearanceKey(instanceUrl: string) {
   return ["instanceAppearance", instanceUrl];
 }
 
+/** The query key of the palettes the user designed in an instance. */
+export function palettesKey(instanceUrl: string) {
+  return ["palettes", instanceUrl];
+}
+
 interface ThemeState {
   /** What the user chose, "system" among the choices. */
   choice: ThemeChoice;
@@ -75,12 +118,16 @@ interface ThemeState {
   followInstance(instanceUrl: string | null): void;
   /** Show the choice an instance's preferences hold. */
   adoptTheme(choice: ThemeChoice): void;
-  /** The palette chosen. */
+  /** The palette chosen: a built-in one, or the base of the user's own shown over it. */
   palette: Palette;
+  /** The palette of the user's own shown, over its base; null for none. */
+  customPalette: CustomPalette | null;
   /** Show the page in another palette from now on. */
   choosePalette(palette: Palette): void;
+  /** Show the page in a palette of the user's own from now on. */
+  chooseCustomPalette(palette: CustomPalette): void;
   /** Show the palette an instance's preferences are shown in. */
-  adoptPalette(palette: Palette): void;
+  adoptPalette(shown: ShownPalette): void;
   /** The text size chosen. */
   textSize: TextSize;
   /** Show the text at another size from now on. */
@@ -99,7 +146,9 @@ const ThemeContext = createContext<ThemeState>({
   followInstance: ignore,
   adoptTheme: ignore,
   palette: DEFAULT_PALETTE,
+  customPalette: null,
   choosePalette: ignore,
+  chooseCustomPalette: ignore,
   adoptPalette: ignore,
   textSize: DEFAULT_TEXT_SIZE,
   chooseTextSize: ignore,
@@ -114,7 +163,9 @@ export function ThemeProvider({
   onFollowInstance = ignore,
   onAdopt = ignore,
   palette = DEFAULT_PALETTE,
+  customPalette = null,
   onChoosePalette = ignore,
+  onChooseCustomPalette = ignore,
   onAdoptPalette = ignore,
   textSize = DEFAULT_TEXT_SIZE,
   onChooseTextSize = ignore,
@@ -128,8 +179,10 @@ export function ThemeProvider({
   onFollowInstance?: (instanceUrl: string | null) => void;
   onAdopt?: (choice: ThemeChoice) => void;
   palette?: Palette;
+  customPalette?: CustomPalette | null;
   onChoosePalette?: (palette: Palette) => void;
-  onAdoptPalette?: (palette: Palette) => void;
+  onChooseCustomPalette?: (palette: CustomPalette) => void;
+  onAdoptPalette?: (shown: ShownPalette) => void;
   textSize?: TextSize;
   onChooseTextSize?: (size: TextSize) => void;
   onAdoptTextSize?: (size: TextSize) => void;
@@ -144,7 +197,9 @@ export function ThemeProvider({
         followInstance: onFollowInstance,
         adoptTheme: onAdopt,
         palette,
+        customPalette,
         choosePalette: onChoosePalette,
+        chooseCustomPalette: onChooseCustomPalette,
         adoptPalette: onAdoptPalette,
         textSize,
         chooseTextSize: onChooseTextSize,

@@ -23,7 +23,9 @@ import { logInAndCreateInstance, logInToInstance } from "../flows/logIn.ts";
  * preferences once they are saved (docs/theme.md), so the second device,
  * which starts in the browser's light theme, the standard colors and the
  * browser's text size, takes on the first device's when the instance
- * opens.
+ * opens. There the learner designs a palette of their own, warned of a
+ * pair with too little contrast and using it anyway; a third device
+ * finds it in the pod, and resets the colors to Standard.
  */
 test("a returning learner @returning", async ({ app, account, runId, newDevice }) => {
   const instance = `Journey ${runId}`;
@@ -103,4 +105,41 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
       await device.preferences.expectTextSize("larger");
     },
   );
+
+  await device.step(
+    "12 · Design a palette of one's own: its faint muted text is warned of, used anyway, and the page painted in it",
+    async () => {
+      await device.paletteEditor.openNew();
+      await device.paletteEditor.name("Evening");
+      await device.paletteEditor.setColor("dark", "textMuted", "#4a5058");
+      await device.paletteEditor.expectTooLittleContrast("dark");
+      await device.paletteEditor.saveAnyway();
+      await device.preferences.expectOwnPalette("Evening", EVENING);
+    },
+  );
+
+  const third = await newDevice();
+
+  await third.step(
+    "13 · On a third device, log in: the palette of one's own comes from the Pod",
+    async () => {
+      await third.onboarding.visit();
+      await logInToInstance(third, account, instance);
+      await third.chrome.expectTheme("dark");
+      await third.preferences.open();
+      await third.preferences.expectOwnPalette("Evening", EVENING);
+    },
+  );
+
+  await third.step("14 · Reset the colors to Standard, which the Pod keeps", async () => {
+    await third.preferences.resetColors();
+    // Saved once the choice is written; back to Decks.
+    await third.preferences.save();
+    await third.chrome.reload();
+    await third.preferences.open();
+    await third.preferences.expectPalette("standard");
+  });
 });
+
+/** The palette of one's own step 12 designs: Standard, its muted text in the dark theme fainter. */
+const EVENING = { basedOn: "standard", role: "--text-muted", color: "#4a5058" } as const;

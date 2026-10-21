@@ -37,6 +37,7 @@ import { Library } from "./Library.ts";
 import { LibraryDeck } from "./LibraryDeck.ts";
 import { LibraryPreview } from "./LibraryPreview.ts";
 import { Onboarding } from "./Onboarding.ts";
+import { PaletteEditor } from "./PaletteEditor.ts";
 import { Preferences } from "./Preferences.ts";
 import { SomethingWentWrong } from "./SomethingWentWrong.ts";
 import { Statistics } from "./Statistics.ts";
@@ -71,6 +72,7 @@ export class App {
   readonly cardEditor = new CardEditor(this);
   readonly study = new Study(this);
   readonly preferences = new Preferences(this);
+  readonly paletteEditor = new PaletteEditor(this);
   readonly statistics = new Statistics(this);
   readonly validation = new Validation(this);
   readonly library = new Library(this);
@@ -190,10 +192,12 @@ export class App {
     const shown = await this.rootAttributes();
     for (const { palette, theme, full } of SCHEMES) {
       if (!full && !chromium) continue;
-      // The stylesheet's colors follow the root's data-palette and data-theme alone (docs/theme.md).
+      // The stylesheet's colors follow the root's data-palette and data-theme alone (docs/theme.md),
+      // once a palette of the user's own, which the root's style paints, is taken off.
       await this.setRootAttributes({
         "data-palette": palette === "standard" ? null : palette,
         "data-theme": theme,
+        style: null,
       });
       const axe = new AxeBuilder({ page: this.page });
       const { violations } = await (full
@@ -216,13 +220,13 @@ export class App {
     if (chromium) await this.checkReflow(title);
   }
 
-  /** The root's attributes the stylesheet's colors and text size follow. */
+  /** The root's attributes the stylesheet's colors and text size follow, and its style, where a palette of the user's own is painted. */
   private async rootAttributes(): Promise<Record<string, string | null>> {
     return this.page
       .locator("html")
       .evaluate((html) =>
         Object.fromEntries(
-          ["data-palette", "data-theme", "data-text-size"].map((name) => [
+          ["data-palette", "data-theme", "data-text-size", "style"].map((name) => [
             name,
             html.getAttribute(name),
           ]),
@@ -254,6 +258,7 @@ export class App {
       "data-palette": null,
       "data-theme": "light",
       "data-text-size": REFLOW.textSize,
+      style: null,
     });
     await this.page.setViewportSize({ width: REFLOW.width, height: viewport.height });
     try {

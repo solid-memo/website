@@ -84,6 +84,13 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     paletteChoice: vi.fn(() => "standard" as const),
     instancePalette: vi.fn(async () => null),
     choosePalette: vi.fn(async () => undefined),
+    customPaletteChoice: vi.fn(() => null),
+    chooseCustomPalette: vi.fn(async () => undefined),
+    listPalettes: vi.fn(async () => []),
+    savePalette: vi.fn(async (_instanceUrl, draft) => ({
+      ...draft,
+      url: draft.url ?? `${_instanceUrl}palettes.ttl#palette-new`,
+    })),
     textSizeChoice: vi.fn(() => "default" as const),
     instanceTextSize: vi.fn(async () => null),
     chooseTextSize: vi.fn(async () => undefined),

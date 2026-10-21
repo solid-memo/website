@@ -158,6 +158,26 @@ describe("Workspace", () => {
       expect(screen.getByRole("region", { name: "Data check" })).toBeInTheDocument();
     });
 
+    it("keeps the palette editor reachable while an instance is blocked", async () => {
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "palette", instanceUrl: instanceA.url }),
+      );
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          getPreferences: withPolicy("block-instance"),
+          validateInstance: vi.fn(async () => invalid),
+        }),
+      );
+      expect(await screen.findByRole("heading", { name: "Design a palette" })).toBeInTheDocument();
+      fireEvent.input(screen.getByLabelText("Name"), { target: { value: "Mine" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save and use" }));
+      // Saved, it goes back to the preferences.
+      expect(await screen.findByRole("heading", { name: "Study preferences" })).toBeInTheDocument();
+    });
+
     it("sets aside the decks with invalid data, keeping the rest", async () => {
       const other = {
         ...deck,

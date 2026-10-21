@@ -79,6 +79,7 @@ describe("readInstanceGraph", () => {
       [
         `${INSTANCE}meta.ttl`,
         `${INSTANCE}preferences.ttl`,
+        `${INSTANCE}palettes.ttl`,
         CATALOG,
         CARDS,
         REVIEWS,
@@ -102,7 +103,7 @@ describe("readInstanceGraph", () => {
     const { useCases } = setUp({ decks: [] });
     const onProgress = vi.fn();
     await useCases.readInstanceGraph(INSTANCE, WEBID, { onProgress });
-    expect(onProgress.mock.calls).toEqual(Array.from({ length: 10 }, (_, read) => [read, 9]));
+    expect(onProgress.mock.calls).toEqual(Array.from({ length: 11 }, (_, read) => [read, 10]));
   });
 
   it("reads a few documents at a time", async () => {
@@ -117,7 +118,7 @@ describe("readInstanceGraph", () => {
     });
     const graph = await useCases.readInstanceGraph(INSTANCE, WEBID);
     expect(most).toBe(6);
-    expect(graph.nodes.filter((node) => node.kind === "document")).toHaveLength(11);
+    expect(graph.nodes.filter((node) => node.kind === "document")).toHaveLength(12);
   });
 
   it("draws a document that cannot be read as such, and the rest as read", async () => {
@@ -131,7 +132,7 @@ describe("readInstanceGraph", () => {
       found: false,
       unreadable: true,
     });
-    expect(graph.nodes.filter((node) => node.kind === "document")).toHaveLength(11);
+    expect(graph.nodes.filter((node) => node.kind === "document")).toHaveLength(12);
   });
 
   it("reads no address the catalog names that climbs out of the instance, nor a folder", async () => {

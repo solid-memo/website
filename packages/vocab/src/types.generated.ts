@@ -17,7 +17,7 @@ export type LangText = Readonly<Record<string, string>>;
 export type LangTexts = Readonly<Record<string, readonly string[]>>;
 
 /** The record kinds the shapes describe (see docs/shapes.md). */
-export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "draftChapter" | "draftDeck" | "draftStep" | "fsrsReviewState" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState" | "step";
+export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "colorSet" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "draftChapter" | "draftDeck" | "draftStep" | "fsrsReviewState" | "instance" | "libraryDeck" | "libraryDeckSeries" | "palette" | "preferences" | "reviewState" | "step";
 
 /** The shape version this app writes for each kind. */
 export const LATEST_VERSION = {
@@ -26,6 +26,7 @@ export const LATEST_VERSION = {
   card: 6,
   catalog: 1,
   chapter: 1,
+  colorSet: 1,
   deck: 6,
   deckGroup: 1,
   deckSchedule: 2,
@@ -39,6 +40,7 @@ export const LATEST_VERSION = {
   instance: 2,
   libraryDeck: 6,
   libraryDeckSeries: 3,
+  palette: 1,
   preferences: 6,
   reviewState: 2,
   step: 1,
@@ -167,6 +169,29 @@ export interface ChapterV1 {
   readonly reviewQuestion: readonly string[];
   readonly deprecated?: boolean;
   readonly textFormat?: string;
+}
+
+/** Color set format 1: a palette's colors in one theme, each optional and written #rrggbb, and no other property. */
+export interface ColorSetV1 {
+  readonly backgroundColor?: string;
+  readonly surfaceColor?: string;
+  readonly sunkenSurfaceColor?: string;
+  readonly textColor?: string;
+  readonly mutedTextColor?: string;
+  readonly borderColor?: string;
+  readonly fieldEdgeColor?: string;
+  readonly primaryColor?: string;
+  readonly primaryFillColor?: string;
+  readonly onPrimaryColor?: string;
+  readonly linkColor?: string;
+  readonly dangerColor?: string;
+  readonly warningColor?: string;
+  readonly grade0Color?: string;
+  readonly grade1Color?: string;
+  readonly grade2Color?: string;
+  readonly grade3Color?: string;
+  readonly grade4Color?: string;
+  readonly grade5Color?: string;
 }
 
 /** Deck format 1 as a catalog entry in a pod. */
@@ -565,6 +590,14 @@ export interface LibraryDeckSeriesV3 {
   readonly hasCurrentVersion: string;
 }
 
+/** Palette format 1: a palette the user designed, with a language-tagged name, the palette it is based on, and a color set for the light theme and one for the dark. */
+export interface PaletteV1 {
+  readonly title: LangText;
+  readonly basedOn: string;
+  readonly lightColors: string;
+  readonly darkColors: string;
+}
+
 /** Preferences format 1: every field optional. */
 export interface PreferencesV1 {
   readonly newCardsPerDay?: number;
@@ -682,6 +715,7 @@ export type AnswerRecord = { version: 1; data: AnswerV1 };
 export type CardRecord = { version: 1; data: CardV1 } | { version: 2; data: CardV2 } | { version: 3; data: CardV3 } | { version: 4; data: CardV4 } | { version: 5; data: CardV5 } | { version: 6; data: CardV6 };
 export type CatalogRecord = { version: 1; data: CatalogV1 };
 export type ChapterRecord = { version: 1; data: ChapterV1 };
+export type ColorSetRecord = { version: 1; data: ColorSetV1 };
 export type DeckRecord = { version: 1; data: DeckV1 } | { version: 2; data: DeckV2 } | { version: 3; data: DeckV3 } | { version: 4; data: DeckV4 } | { version: 5; data: DeckV5 } | { version: 6; data: DeckV6 };
 export type DeckGroupRecord = { version: 1; data: DeckGroupV1 };
 export type DeckScheduleRecord = { version: 1; data: DeckScheduleV1 } | { version: 2; data: DeckScheduleV2 };
@@ -695,6 +729,7 @@ export type FsrsReviewStateRecord = { version: 1; data: FsrsReviewStateV1 };
 export type InstanceRecord = { version: 1; data: InstanceV1 } | { version: 2; data: InstanceV2 };
 export type LibraryDeckRecord = { version: 1; data: LibraryDeckV1 } | { version: 2; data: LibraryDeckV2 } | { version: 3; data: LibraryDeckV3 } | { version: 4; data: LibraryDeckV4 } | { version: 5; data: LibraryDeckV5 } | { version: 6; data: LibraryDeckV6 };
 export type LibraryDeckSeriesRecord = { version: 1; data: LibraryDeckSeriesV1 } | { version: 2; data: LibraryDeckSeriesV2 } | { version: 3; data: LibraryDeckSeriesV3 };
+export type PaletteRecord = { version: 1; data: PaletteV1 };
 export type PreferencesRecord = { version: 1; data: PreferencesV1 } | { version: 2; data: PreferencesV2 } | { version: 3; data: PreferencesV3 } | { version: 4; data: PreferencesV4 } | { version: 5; data: PreferencesV5 } | { version: 6; data: PreferencesV6 };
 export type ReviewStateRecord = { version: 1; data: ReviewStateV1 } | { version: 2; data: ReviewStateV2 };
 export type StepRecord = { version: 1; data: StepV1 };
@@ -706,6 +741,7 @@ export type VersionedRecord = {
   card: CardRecord;
   catalog: CatalogRecord;
   chapter: ChapterRecord;
+  colorSet: ColorSetRecord;
   deck: DeckRecord;
   deckGroup: DeckGroupRecord;
   deckSchedule: DeckScheduleRecord;
@@ -719,6 +755,7 @@ export type VersionedRecord = {
   instance: InstanceRecord;
   libraryDeck: LibraryDeckRecord;
   libraryDeckSeries: LibraryDeckSeriesRecord;
+  palette: PaletteRecord;
   preferences: PreferencesRecord;
   reviewState: ReviewStateRecord;
   step: StepRecord;
@@ -731,6 +768,7 @@ export type LatestRecord = {
   card: CardV6;
   catalog: CatalogV1;
   chapter: ChapterV1;
+  colorSet: ColorSetV1;
   deck: DeckV6;
   deckGroup: DeckGroupV1;
   deckSchedule: DeckScheduleV2;
@@ -744,6 +782,7 @@ export type LatestRecord = {
   instance: InstanceV2;
   libraryDeck: LibraryDeckV6;
   libraryDeckSeries: LibraryDeckSeriesV3;
+  palette: PaletteV1;
   preferences: PreferencesV6;
   reviewState: ReviewStateV2;
   step: StepV1;

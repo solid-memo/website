@@ -1,0 +1,25 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# A color set that sets every color it may.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:backgroundColor "#f7f6f1" ;
+    solid-memo:surfaceColor "#ffffff" ;
+    solid-memo:sunkenSurfaceColor "#fbfaf5" ;
+    solid-memo:textColor "#16202a" ;
+    solid-memo:mutedTextColor "#545c68" ;
+    solid-memo:borderColor "#e4e1d5" ;
+    solid-memo:fieldEdgeColor "#858072" ;
+    solid-memo:primaryColor "#2c6b3d" ;
+    solid-memo:primaryFillColor "#2c6b3d" ;
+    solid-memo:onPrimaryColor "#ffffff" ;
+    solid-memo:linkColor "#25603a" ;
+    solid-memo:dangerColor "#c42d18" ;
+    solid-memo:warningColor "#7a5800" ;
+    solid-memo:grade0Color "#d63a25" ;
+    solid-memo:grade1Color "#e2662a" ;
+    solid-memo:grade2Color "#e8932a" ;
+    solid-memo:grade3Color "#d9b11c" ;
+    solid-memo:grade4Color "#7fb13c" ;
+    solid-memo:grade5Color "#2f8a4a" .

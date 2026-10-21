@@ -18,3 +18,14 @@ export const DEFAULT_PALETTE: Palette = "standard";
 export function isPalette(value: string): value is Palette {
   return (PALETTES as readonly string[]).includes(value);
 }
+
+/**
+ * The least contrast a palette holds to (docs/accessibility.md): text on
+ * what it is on, and an edge on its surface (a text field's, a focus
+ * ring's). WCAG's AA (4.5:1 and 3:1) for every palette; High contrast's
+ * AAA for text (7:1), and AA text's ratio for edges. A palette the user
+ * designs is held to its base's.
+ */
+export function contrastTargets(palette: string): { text: number; edge: number } {
+  return palette === "high-contrast" ? { text: 7, edge: 4.5 } : { text: 4.5, edge: 3 };
+}

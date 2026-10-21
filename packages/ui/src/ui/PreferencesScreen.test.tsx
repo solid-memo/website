@@ -9,10 +9,15 @@ import { I18nProvider } from "./i18n";
 import { ThemeProvider } from "./theme";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { PALETTES } from "@solid-memo/domain/palette";
+import type { CustomPalette } from "@solid-memo/domain/customPalette";
+import { routeToHash } from "./router";
 import { TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
+
+const INSTANCE = "https://pod.example/solid-memo/main/";
 
 function renderScreen(overrides: Partial<Parameters<typeof PreferencesScreen>[0]> = {}) {
   const props = {
+    instanceUrl: INSTANCE,
     preferences: DEFAULT_PREFERENCES,
     busy: false,
     error: null,
@@ -53,6 +58,7 @@ describe("PreferencesScreen", () => {
     render(
       <I18nProvider locale="en" onChoose={onChoose}>
         <PreferencesScreen
+          instanceUrl={INSTANCE}
           preferences={DEFAULT_PREFERENCES}
           busy={false}
           error={null}
@@ -76,6 +82,7 @@ describe("PreferencesScreen", () => {
     const { container } = render(
       <ThemeProvider choice="dark" onChoose={onChoose}>
         <PreferencesScreen
+          instanceUrl={INSTANCE}
           preferences={DEFAULT_PREFERENCES}
           busy={false}
           error={null}
@@ -137,6 +144,7 @@ describe("PreferencesScreen", () => {
           onChooseTextSize={chooseTextSize}
         >
           <PreferencesScreen
+            instanceUrl={INSTANCE}
             preferences={DEFAULT_PREFERENCES}
             busy={false}
             error={null}
@@ -204,11 +212,17 @@ describe("PreferencesScreen", () => {
       const onSave = vi.fn();
       const preferences = {
         ...DEFAULT_PREFERENCES,
-        palette: "https://pod.example/solid-memo/main/palettes.ttl#mine",
+        palette: "https://solid-memo.com/ns/vocab/v1.ttl#sepiaPalette",
       };
       const { container } = render(
         <ThemeProvider choice="system" onChoose={() => undefined}>
-          <PreferencesScreen preferences={preferences} busy={false} error={null} onSave={onSave} />
+          <PreferencesScreen
+            instanceUrl={INSTANCE}
+            preferences={preferences}
+            busy={false}
+            error={null}
+            onSave={onSave}
+          />
         </ThemeProvider>,
       );
       expect(screen.getByRole("radio", { name: /^Standard/ })).toBeChecked();
@@ -226,6 +240,7 @@ describe("PreferencesScreen", () => {
       render(
         <ThemeProvider choice="system" onChoose={() => undefined} palette="high-contrast">
           <PreferencesScreen
+            instanceUrl={INSTANCE}
             preferences={DEFAULT_PREFERENCES}
             busy={false}
             error={null}
@@ -234,6 +249,113 @@ describe("PreferencesScreen", () => {
         </ThemeProvider>,
       );
       expect(screen.queryByText(/asks for more contrast/)).toBeNull();
+    });
+
+    describe("of the user's own", () => {
+      const READING: CustomPalette = {
+        url: `${INSTANCE}palettes.ttl#palette-reading`,
+        title: { en: "Reading" },
+        basedOn: "parchment",
+        light: { "--bg": "#f4ecd8", "--text": "url(x)" } as CustomPalette["light"],
+        dark: {},
+      };
+
+      function renderOwn(customPalette: CustomPalette | null) {
+        contrastQuery(customPalette !== null);
+        const choosePalette = vi.fn();
+        const chooseCustomPalette = vi.fn();
+        const onSave = vi.fn();
+        const view = render(
+          <ThemeProvider
+            choice="light"
+            onChoose={() => undefined}
+            palette="parchment"
+            customPalette={customPalette}
+            onChoosePalette={choosePalette}
+            onChooseCustomPalette={chooseCustomPalette}
+          >
+            <PreferencesScreen
+              instanceUrl={INSTANCE}
+              preferences={DEFAULT_PREFERENCES}
+              palettes={[READING]}
+              busy={false}
+              error={null}
+              onSave={onSave}
+            />
+          </ThemeProvider>,
+        );
+        return { ...view, choosePalette, chooseCustomPalette, onSave };
+      }
+
+      it("offers each beside the built-in ones, in its own colors, with a link to edit it", () => {
+        const { container, chooseCustomPalette } = renderOwn(null);
+        const radio = screen.getByRole("radio", { name: /^Reading/ });
+        expect(radio).toHaveAccessibleName(
+          "Reading Your own colors, based on Parchment (low glare).",
+        );
+        expect(radio).not.toBeChecked();
+        expect(screen.getByRole("radio", { name: /^Parchment/ })).toBeChecked();
+        const swatch = container.querySelectorAll<HTMLElement>(".palette-swatch")[4]!;
+        expect(swatch).toHaveAttribute("data-palette", "parchment");
+        // Only a color written #rrggbb reaches the style.
+        expect(swatch.style.getPropertyValue("--bg")).toBe("#f4ecd8");
+        expect(swatch.style.getPropertyValue("--text")).toBe("");
+        expect(screen.getByRole("link", { name: "Edit Reading" })).toHaveAttribute(
+          "href",
+          routeToHash({ screen: "palette", instanceUrl: INSTANCE, paletteUrl: READING.url }),
+        );
+        expect(screen.getByRole("link", { name: "Design a palette" })).toHaveAttribute(
+          "href",
+          routeToHash({ screen: "palette", instanceUrl: INSTANCE }),
+        );
+        fireEvent.click(radio);
+        expect(chooseCustomPalette).toHaveBeenCalledWith(READING);
+      });
+
+      it("saves the one shown with the preferences, and goes back to Standard with Reset colors", () => {
+        const { container, onSave, choosePalette } = renderOwn(READING);
+        expect(screen.getByRole("radio", { name: /^Reading/ })).toBeChecked();
+        expect(screen.getByRole("radio", { name: /^Parchment/ })).not.toBeChecked();
+        // Shown over a base, it is no High contrast: the hint stays.
+        expect(screen.getByText(/asks for more contrast/)).toBeInTheDocument();
+        fireEvent.submit(container.querySelector("form")!);
+        expect(onSave).toHaveBeenCalledWith({
+          ...DEFAULT_PREFERENCES,
+          theme: "light",
+          palette: READING.url,
+        });
+        const reset = screen.getByRole("button", { name: "Reset colors" });
+        expect(reset.closest("[data-palette]")).toHaveAttribute("data-palette", "standard");
+        fireEvent.click(reset);
+        expect(choosePalette).toHaveBeenCalledWith("standard");
+      });
+    });
+
+    it("saves a built-in palette shown over one of the user's own the preferences hold", () => {
+      const onSave = vi.fn();
+      const preferences = { ...DEFAULT_PREFERENCES, palette: `${INSTANCE}palettes.ttl#palette-x` };
+      const { container } = render(
+        <ThemeProvider choice="light" onChoose={() => undefined}>
+          <PreferencesScreen
+            instanceUrl={INSTANCE}
+            preferences={preferences}
+            busy={false}
+            error={null}
+            onSave={onSave}
+          />
+        </ThemeProvider>,
+      );
+      fireEvent.submit(container.querySelector("form")!);
+      expect(onSave).toHaveBeenCalledWith({
+        ...DEFAULT_PREFERENCES,
+        theme: "light",
+        palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      });
+    });
+
+    it("offers no Reset colors in the Standard colors", () => {
+      renderScreen();
+      expect(screen.queryByRole("button", { name: "Reset colors" })).toBeNull();
     });
 
     it("switches the text size right away, each with a sample line at its size, without saving", () => {
@@ -451,6 +573,7 @@ describe("PreferencesScreen", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <PreferencesScreen
+          instanceUrl={INSTANCE}
           preferences={DEFAULT_PREFERENCES}
           busy={false}
           error={null}

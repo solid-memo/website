@@ -58,11 +58,13 @@ text size's.
 
 The palette's shape lists no concepts, as `sm:textFormat`'s lists none
 ([vocab.md](vocab.md#versioning-policy)): a palette of a later version,
-or one of the user's own, needs no new format. This version shows a
-palette it does not know as Standard, and keeps it: a save of the
-preferences, or a switch of scheduler, writes it back as it was while
-Standard is shown, and only choosing another palette replaces it. The
-text size's shape lists its four, as the theme's lists its three.
+or one of the user's own ([below](#palettes-of-ones-own)), needs no new
+format. This version shows a palette it does not know as Standard, and
+keeps it: a save of the preferences, or a switch of scheduler, writes
+it back as it was while Standard is shown, and only choosing another
+palette replaces it. A palette of the user's own is one it knows: a
+choice of a built-in palette replaces it. The text size's shape lists
+its four, as the theme's lists its three.
 
 ## Showing it
 
@@ -159,9 +161,11 @@ Machado, Oliveira and Fernandes' model (2009), each grade at least
 0.08 apart from the next in OKLab, four times what is just
 noticeable. In every palette the buttons' names, not their colors, say
 which grade is which.
-The shared helper that reads the blocks, mixes their colors and
-computes WCAG's contrast ratio is
-[`contrast.ts`](../packages/domain/src/testing/contrast.ts).
+The tests read the blocks with
+[`testing/contrast.ts`](../packages/domain/src/testing/contrast.ts).
+WCAG's contrast ratio and the mixing of colors are the app's own
+[`contrast.ts`](../packages/domain/src/contrast.ts), which the palette
+editor's check (`checkPalette`) uses too.
 
 Some colors stay fixed on purpose, whatever the palette:
 
@@ -190,7 +194,8 @@ taken, and no file of theirs is copied:
 - **Parchment**: the surfaces, the text and the accents are derived
   from Jan Warchoł's [Selenized](https://github.com/jan-warchol/selenized),
   under the MIT license (copyright 2021 Jan Warchoł), which
-  `palettes.css` credits in its header; its dim text is darkened to
+  `palettes.css` credits in its header, as does `customPalette.ts`,
+  which keeps a copy of the built-in palettes' colors; its dim text is darkened to
   4.5:1, and the dark theme's surfaces are warm browns of ours in
   place of Selenized's teal.
 - **High contrast**: the blue, yellow and red accents (`#004488`,
@@ -198,6 +203,129 @@ taken, and no file of theirs is copied:
   technical note SRON/EPS/TN/09-002 and
   [his notes on color schemes](https://sronpersonalpages.nl/~pault/),
   which state no license.
+
+## Palettes of one's own
+
+Under Colors, "Design a palette" opens the palette editor
+(`#/palette?instance=…`, [routing.md](routing.md#route-scheme)), and
+each palette of the user's own is listed after the built-in ones, with
+its swatch and a link to edit it. In the editor the user names the
+palette, chooses the palette it is based on, and chooses a color for
+each role it may set, in the light theme and in the dark, each field
+starting at the base's color:
+
+| Role | What it colors |
+|---|---|
+| `--bg`, `--surface`, `--surface-sunken` | The page, cards and panels, and surfaces set into them |
+| `--text`, `--text-muted` | The text, and text that says less, such as a hint |
+| `--border`, `--control-border` | Lines, and the edges of fields |
+| `--primary` | Rings, lines and text in the primary color, and the focus ring |
+| `--primary-fill`, `--on-primary` | A primary button, and its text |
+| `--link`, `--danger`, `--warning-text` | Links, and danger and warning text |
+| `--grade-0` to `--grade-5` | The answer buttons, from 0 (Blackout, or Again) to 5 (Easy) |
+
+These are the roles a reader chooses for what they read by; every
+other role is the base's. A few go with a role the palette sets, and
+are mixed from it once the palette changes it, so that they still go
+together: a hovered surface (6% of the text over the surface), a
+strong border (20% of the text over the border), a hovered button
+(20% of the text over its fill), the primary color's, a link's, the
+danger's and the warning's tints, and the danger's and the warning's
+borders (`DERIVED` in
+[customPalette.ts](../packages/domain/src/customPalette.ts)). The
+masthead, the charts and the decoration stay the base's.
+
+A preview in each theme shows the colors as they are. Below it, a table
+measures every pair that holds text, or that must be seen, against the
+contrast it needs, as each color is chosen, and a live region says how
+they stand: text, muted text, links, danger and warning text on every
+surface, and on their tints; muted text and links on the primary
+color's tint, as on the course card; a link on its hovered tint; the
+text on a button and on the primary color; an answer button's text and
+muted text on its tint, and on its tint under the pointer; and a
+field's edge and the focus ring on the surfaces (`CHECKED_PAIRS`).
+These are the pairs `style.test.ts` checks of the built-in palettes,
+of the roles a palette of one's own paints, and `style.test.ts` fails
+on any it checks that the list leaves out. A pair needs what the base needs
+(`contrastTargets`): 4.5:1 for text and 3:1 for edges, or 7:1 and 4.5:1
+on High contrast. A pair the base itself has below that, one of the
+[known gaps](accessibility.md#known-gaps), needs what the base has, so
+a palette that keeps its base's colors there still passes. A palette with a pair below that is saved only after
+"Use anyway"; one whose text is below 3:1 on the background or on a
+surface is not saved at all. Saving it ("Save and use") shows the app
+in it from then on, as choosing it under Colors does.
+
+"Reset colors", under Colors and in the editor, goes back to Standard.
+It is drawn in Standard's own colors, the element around it marked
+with `data-palette="standard"` (which palettes.css styles, as it
+styles the swatches), so it can be read and pressed whatever a palette
+does to the page.
+
+### Where a palette of one's own is kept
+
+- **In the pod**, in the instance's `palettes.ttl`: one `sm:Palette`
+  per palette at `#palette-<id>`, with its name (`dcterms:title`,
+  language-tagged, in the page's language), its base (`sm:basedOn`, a
+  concept of `sm:Palettes`) and its colors in each theme
+  (`sm:lightColors`, `sm:darkColors`), each an `sm:ColorSet` beside it,
+  `#palette-<id>-light` and `#palette-<id>-dark`, with a property for
+  each color it sets (`sm:textColor` and the like; palette and color
+  set format 1, [shapes.md](shapes.md)). The preferences choose it by
+  its address in `sm:palette`, so it needs no new preferences format,
+  and it follows the user to every device as a built-in palette does.
+- **On the device**, `solid-memo:palette` holds its base, and
+  `solid-memo:palette-colors` the palette itself and the colors to
+  paint in each theme, for the first paint
+  ([localStorageCustomPalettePreference.ts](../packages/browser/src/localStorageCustomPalettePreference.ts),
+  the `CustomPalettePreference` port). Opening the instance copies the
+  pod's palette there; choosing a built-in palette removes it.
+
+### How a palette of one's own is held safe
+
+The pod is data anyone who may write it may have written, and a
+palette is painted on every screen, so its colors are held to a few
+rules wherever they are read and wherever they are painted:
+
+- **Only the instance's own palettes are read.** A palette is read
+  only when `sm:palette` names a subject of the instance's
+  `palettes.ttl` (`isPaletteOf`), and its color sets only as subjects
+  of the same document; a palette at an address outside the document
+  is not listed. Any other address in `sm:palette` is a palette this
+  version does not know: it is never fetched, and shows as Standard.
+- **A color is `#rrggbb`, and nothing else.** The color set's shape
+  says so (`sh:pattern`) and is closed, so a property no color is,
+  such as a picture, is reported. Data that does not conform is
+  reported by the instance's check, not blocked
+  ([validation.md](validation.md)), so the code holds to the rule
+  again: `parsePalette` keeps only the listed roles, each `#rrggbb`,
+  and leaves out any other value, whatever the shape said of it.
+- **Colors reach a style one property at a time.** A palette is
+  painted on the root with `style.setProperty`, only for the roles it
+  may paint (`PAINTED_ROLES`), each value checked against `#rrggbb`
+  again where it is set (`paletteStyle` in
+  [theme.tsx](../packages/ui/src/ui/theme.tsx)). No CSS text, `url()`
+  or `var()` from the pod, or from the device's copy, ever reaches a
+  style. The swatches and the editor's preview are painted the same
+  way.
+- **The first paint checks again.** The script in `apps/web/index.html`
+  reads `solid-memo:palette-colors` for the theme it sets, and sets a
+  color only for a role a palette may paint, by name, and only if it
+  is `#rrggbb`; anything else in the key paints nothing.
+- **Unreadable text is not painted.** A palette read from the pod or
+  from the device whose text is below 3:1 on the background or on a
+  surface (`isReadable`), as another app may have written it, is shown
+  as its base, and the device's copy is forgotten, so no screen,
+  whether signing in or choosing an instance, is painted in it. The
+  preferences keep naming it, as they keep any palette this version
+  does not show.
+- **A palette low in contrast can be left.** A palette saved with "Use
+  anyway", or written by another app with pairs below what they need
+  but its text readable, is painted with the colors it has. "Reset
+  colors", in Standard's colors, gets the user out of it.
+
+The journeys' accessibility checks take a palette of the user's own
+off the page while they check each built-in palette
+([testing.md](testing.md#user-journeys)).
 
 ## Text size
 

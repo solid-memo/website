@@ -217,6 +217,39 @@ export class Preferences extends Screen {
   }
 
   /** Chooses the text size, which the page takes on at once (its root's data-text-size). */
+  /**
+   * Expects a palette of the user's own chosen, by its name, and the page
+   * painted in it: its base on the root's data-palette, and a color it
+   * sets, for the theme shown, on the root's style.
+   */
+  async expectOwnPalette(
+    name: string,
+    { basedOn, role, color }: { basedOn: Palette; role: string; color: string },
+  ): Promise<void> {
+    await this.intent(`Check that the colors are the palette ${name}`, async () => {
+      await expect(
+        this.form
+          .getByRole("group", { name: this.t("preferences.palette.legend") })
+          .getByRole("radio", { name: new RegExp(`^${escapeRegExp(name)} `) }),
+      ).toBeChecked();
+      const root = this.page.locator("html");
+      if (basedOn === "standard") await expect(root).not.toHaveAttribute("data-palette");
+      else await expect(root).toHaveAttribute("data-palette", basedOn);
+      await expect
+        .poll(() => root.evaluate((html, name) => html.style.getPropertyValue(name), role))
+        .toBe(color);
+    });
+  }
+
+  /** Goes back to the Standard colors with "Reset colors", whatever palette is shown. */
+  async resetColors(): Promise<void> {
+    await this.intent("Reset the colors", async () => {
+      await this.form.getByRole("button", { name: this.t("preferences.palette.reset") }).click();
+      await this.expectPalette("standard");
+      await expect(this.page.locator("html")).not.toHaveAttribute("style", /--/);
+    });
+  }
+
   async setTextSize(size: TextSize): Promise<void> {
     await this.intent(`Choose the text size ${this.t(`textSize.${size}`)}`, async () => {
       await this.textSize(size).check();

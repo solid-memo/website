@@ -331,7 +331,7 @@ of your answers, and nothing turns them off
 |---|---|
 | Language | The app's language. Kept on this device. |
 | Appearance | Light, dark, or as your browser says. Once saved, kept in your Pod, so every device looks the same ([theme.md](theme.md)). |
-| Colors | Standard, High contrast, Color-blind friendly or Parchment (low glare), each shown with a swatch in its own colors, in the light theme and the dark. When your device asks for more contrast, the preferences suggest High contrast. Takes effect right away. Once saved, kept in your Pod, as the appearance is ([theme.md](theme.md#palettes)). |
+| Colors | Standard, High contrast, Color-blind friendly or Parchment (low glare), each shown with a swatch in its own colors, in the light theme and the dark, and any palette you designed. When your device asks for more contrast, the preferences suggest High contrast. "Design a palette" opens the palette editor, and "Reset colors" goes back to Standard. Takes effect right away. Once saved, kept in your Pod, as the appearance is ([theme.md](theme.md#palettes)). |
 | Text size | Default, Large, Larger or Largest: up to one and a half times your browser's own text size, which it multiplies. Each has a sample line at its size. Takes effect right away. Once saved, kept in your Pod, as the appearance is ([theme.md](theme.md#text-size)). |
 | New cards per day | How many new cards a day brings, 5 to start with. Every new card comes back for reviews in the days after, so it is better to start small. |
 | Max reviews per day | A cap on the reviews of one day, 200 to start with. |
@@ -382,6 +382,19 @@ Colors and Text size, under Appearance, change the palette and the
 size of the text, in light and in dark alike, and are kept in your Pod
 as the theme is. For example: choose High contrast and Larger, then log
 in on another device; Solid Memo opens in them there too.
+
+"Design a palette", under Colors, lets you choose the colors you read
+best by: a name, the palette it starts from, and a color for the page,
+the text, the buttons, the links and the answer buttons, in light and
+in dark ([theme.md](theme.md#palettes-of-ones-own)). As you choose, a
+preview shows the colors, and a table says whether each pair of colors
+that holds text has the contrast it needs. Solid Memo asks before it
+saves colors with too little contrast ("Use anyway"), and does not
+save text you could not read on the page at all. "Save and use" keeps
+the palette in your Pod and shows Solid Memo in it on every device;
+"Edit", beside it under Colors, changes it later. Whatever a palette
+does, "Reset colors" is drawn in the standard colors, so you can always
+find it and go back to Standard.
 
 ## More than one instance
 
@@ -470,6 +483,7 @@ screenshot of each.
 | Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
 | A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |
 | The dark theme, High contrast and Larger text, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–05, 08–11 |
+| A palette of one's own, with too little contrast used anyway, found on a third device, then the colors reset | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 12–14 |
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts | 21–23 |
 | Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |

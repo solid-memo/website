@@ -19,6 +19,8 @@ import {
   uncommented,
 } from "@solid-memo/domain/testing/contrast";
 import { PALETTES as PALETTE_IDS } from "@solid-memo/domain/palette";
+import { builtInColors, CHECKED_PAIRS, PAINTED_ROLES } from "@solid-memo/domain/customPalette";
+import { hexOf } from "@solid-memo/domain/contrast";
 import { DEFAULT_TEXT_SIZE, TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 
 const read = (name: string) => readFileSync(join(import.meta.dirname, name), "utf8");
@@ -546,6 +548,24 @@ const EACH_BLOCK = BLOCKS.map((block) => [block.selector, block] as const);
 const KNOWN_GAPS = ':root[data-theme="dark"]';
 
 /**
+ * Each pair expectContrast measured of the roles a palette of one's own
+ * paints, as `front back tint`, which its editor must measure too
+ * (CHECKED_PAIRS).
+ */
+const MEASURED = new Set<string>();
+
+/** A pair's key in MEASURED, when its colors are roles a palette of one's own paints. */
+function paintedPair(text: string, surface: string): string | null {
+  const front = /^var\((--[a-z0-9-]+)\)$/.exec(text)?.[1];
+  const plain = /^var\((--[a-z0-9-]+)\)$/.exec(surface);
+  const tint = /^color-mix\(in srgb, var\((--grade-\d)\) (\d+)%, var\(--surface\)\)$/.exec(surface);
+  const back = plain?.[1] ?? tint?.[1];
+  if (front === undefined || back === undefined) return null;
+  if (!PAINTED_ROLES.includes(front) || !PAINTED_ROLES.includes(back)) return null;
+  return `${front} ${back} ${tint?.[2] ?? ""}`;
+}
+
+/**
  * Expects `text` on `surface`, both palette colors in `block`, at `ratio`
  * or more: by default the ratio text needs in the block's palette.
  */
@@ -555,6 +575,8 @@ function expectContrast(
   surface: string,
   ratio = contrastTargets(block.palette).text,
 ) {
+  const pair = paintedPair(text, surface);
+  if (pair !== null) MEASURED.add(pair);
   const color = (value: string) => colorOf(value, block.roles);
   const under = color(surface);
   // A see-through surface is laid over the page's background.
@@ -701,6 +723,31 @@ describe("contrast", () => {
     "keeps the text on the primary color at the ratio text needs in %s, as on the line a dragged deck would land on",
     (_, block) => {
       expectContrast(block, "var(--on-primary)", "var(--primary)");
+    },
+  );
+
+  // Last, once the tests above have measured their pairs.
+  it("measures in a palette of one's own every pair it measures here of the roles that palette paints", () => {
+    const checked = new Set(
+      CHECKED_PAIRS.map(({ front, back, tint }) => `${front} ${back} ${tint ?? ""}`),
+    );
+    expect(paintedPair("var(--masthead-text)", "var(--masthead-bg)")).toBeNull();
+    expect(MEASURED.size).toBeGreaterThan(0);
+    expect([...MEASURED].filter((pair) => !checked.has(pair))).toEqual([]);
+  });
+
+  // The colors a palette of the user's own has where it sets none (domain/customPalette.ts).
+  it.each(EACH_BLOCK)(
+    "gives a palette of one's own based on it the colors of %s, opaque",
+    (_, block) => {
+      const colors = Object.fromEntries(
+        PAINTED_ROLES.map((role) => {
+          const color = colorOf(`var(${role})`, block.roles);
+          expect({ role, opaque: color.a === 1 }).toEqual({ role, opaque: true });
+          return [role, hexOf(color)];
+        }),
+      );
+      expect(builtInColors(block.palette as never, block.theme)).toEqual(colors);
     },
   );
 

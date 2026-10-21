@@ -154,6 +154,10 @@ string, so other applications can look up what it means:
   versions of those shapes ([FSRS-6](#fsrs-6)). 1.22's `sm:palette`
   and `sm:textSize`, with the schemes `sm:Palettes` and `sm:TextSizes`,
   joined preferences format 6 ([theme.md](theme.md#where-the-choice-is-kept)).
+  1.23's `sm:Palette` and `sm:ColorSet`, with `sm:basedOn`,
+  `sm:lightColors`, `sm:darkColors` and a property for each color,
+  joined two new shapes, palette and color set format 1
+  ([Palettes of one's own](#palettes-of-ones-own)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
@@ -387,6 +391,33 @@ SM-2 ones ([#191](https://github.com/solid-memo/website/issues/191)):
   the retention is kept while SM-2 sets the due days, so a switch back
   to FSRS-6 finds the one chosen. It is a share from 0.7 to 0.97; 0.9,
   FSRS-6's default, is what preferences of format 4 are read with.
+
+## Palettes of one's own
+
+1.23 added the terms of a palette the user designs, kept in the
+instance's `palettes.ttl` ([theme.md](theme.md#palettes-of-ones-own)):
+
+| Term | Kind | Domain → range |
+|---|---|---|
+| `sm:Palette` | class, a subclass of `skos:Concept` | |
+| `sm:ColorSet` | class | |
+| `sm:basedOn` | object property | Palette → a concept of `sm:Palettes` |
+| `sm:lightColors`, `sm:darkColors` | object property | Palette → ColorSet |
+| `sm:backgroundColor`, `sm:surfaceColor`, `sm:sunkenSurfaceColor`, `sm:textColor`, `sm:mutedTextColor`, `sm:borderColor`, `sm:fieldEdgeColor`, `sm:primaryColor`, `sm:primaryFillColor`, `sm:onPrimaryColor`, `sm:linkColor`, `sm:dangerColor`, `sm:warningColor`, `sm:grade0Color` … `sm:grade5Color` | datatype property | ColorSet → `xsd:string`, `#rrggbb` |
+
+- **A palette of one's own is a concept.** `sm:palette`'s range is
+  `skos:Concept`, which a term's range never leaves, so `sm:Palette`
+  is a subclass of it: preferences that choose one of the user's
+  palettes keep to the range they always had, and need no new format.
+- **A color is a string, not a CSS value.** Each names one color role
+  of the app's ([theme.md](theme.md#color-roles)), written `#rrggbb`,
+  an opaque color in sRGB; there is no property for text that could be
+  any CSS. A role added later is a new property, and a new format of
+  the color set, whose shape is closed.
+- **Two color sets, not two sets of properties.** A palette's colors in
+  the light theme and in the dark are each a subject of their own,
+  with the same properties, rather than a light and a dark property of
+  each color.
 
 ## The language of text
 

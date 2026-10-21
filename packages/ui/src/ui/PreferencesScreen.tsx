@@ -10,6 +10,9 @@ import {
 } from "@solid-memo/domain/invalidDataPolicy";
 import { LOCALES } from "@solid-memo/domain/locale";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
+import { paintedColors, type CustomPalette } from "@solid-memo/domain/customPalette";
+import { isPaletteOf } from "@solid-memo/domain/instanceLayout";
+import { shown } from "@solid-memo/domain/langText";
 import { keptPalette, type StudyPreferences } from "@solid-memo/domain/preferences";
 import { PALETTES, type Palette } from "@solid-memo/domain/palette";
 import { TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
@@ -17,10 +20,11 @@ import { THEME_CHOICES } from "@solid-memo/domain/theme";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { LANGUAGE_NAMES } from "./LanguageSelector";
-import { useTheme } from "./theme";
+import { routeToHash } from "./router";
+import { paletteStyle, useTheme } from "./theme";
 
 /** Each palette's messages, by its id. */
-const PALETTE_MESSAGES = {
+export const PALETTE_MESSAGES = {
   standard: "standard",
   "high-contrast": "highContrast",
   "color-vision": "colorVision",
@@ -116,12 +120,17 @@ function policyOption(
  * always uses the four; each keeps its value meanwhile.
  */
 export function PreferencesScreen({
+  instanceUrl,
   preferences,
+  palettes = [],
   busy,
   error,
   onSave,
 }: {
+  instanceUrl: string;
   preferences: StudyPreferences;
+  /** The palettes the user designed in the instance, offered beside the built-in ones. */
+  palettes?: readonly CustomPalette[];
   busy: boolean;
   error: ErrorText | null;
   onSave: (preferences: StudyPreferences) => void;
@@ -130,13 +139,16 @@ export function PreferencesScreen({
   const {
     choice: themeChoice,
     chooseTheme,
+    theme,
     palette,
+    customPalette,
     choosePalette,
+    chooseCustomPalette,
     textSize,
     chooseTextSize,
   } = useTheme();
   const [moreContrast, setMoreContrast] = useState(() => matchMedia(MORE_CONTRAST_QUERY).matches);
-  const showContrastHint = moreContrast && palette !== "high-contrast";
+  const showContrastHint = moreContrast && (customPalette !== null || palette !== "high-contrast");
 
   // The browser's wish as it changes while the screen is open.
   useEffect(() => {
@@ -173,8 +185,10 @@ export function PreferencesScreen({
       // it holds then is not the learner's to save.
       desiredRetention: fsrs ? Number(retention) / 100 : preferences.desiredRetention,
       schedulerInvitationDismissed: preferences.schedulerInvitationDismissed,
-      // As shown, but one this version does not know stays while Standard is shown.
-      palette: keptPalette(preferences, palette),
+      // As shown, but one this version does not know stays while Standard is shown; one of the user's own does not.
+      palette:
+        customPalette?.url ??
+        keptPalette(preferences, palette, (iri) => isPaletteOf(instanceUrl, iri)),
       textSize,
     });
   }
@@ -234,7 +248,7 @@ export function PreferencesScreen({
                 type="radio"
                 name="palette"
                 value={option}
-                checked={palette === option}
+                checked={customPalette === null && palette === option}
                 onChange={() => choosePalette(option)}
               />
               {/* The palette's own colors, which its data-palette gives (palettes.css). */}
@@ -248,6 +262,52 @@ export function PreferencesScreen({
               <span class="hint">{t(`palette.${PALETTE_MESSAGES[option]}.description`)}</span>
             </label>
           ))}
+          {palettes.map((own) => (
+            <div key={own.url} class="own-palette">
+              <label class="radio-option">
+                <input
+                  type="radio"
+                  name="palette"
+                  value={own.url}
+                  checked={customPalette?.url === own.url}
+                  onChange={() => chooseCustomPalette(own)}
+                />
+                {/* Its base's colors, with its own over them, each held to #rrggbb (paletteStyle). */}
+                <span
+                  class="palette-swatch"
+                  data-palette={own.basedOn}
+                  style={paletteStyle(paintedColors(own, theme))}
+                  aria-hidden="true"
+                >
+                  <i class="swatch-text" />
+                  <i class="swatch-primary" />
+                  <i class="swatch-worst" />
+                  <i class="swatch-best" />
+                </span>
+                {shown(own.title, [locale])}
+                <span class="hint">
+                  {t("preferences.palette.ownDescription", {
+                    base: t(`palette.${PALETTE_MESSAGES[own.basedOn]}.name`),
+                  })}
+                </span>
+              </label>
+              <a
+                class="button"
+                href={routeToHash({ screen: "palette", instanceUrl, paletteUrl: own.url })}
+                aria-label={t("preferences.palette.editLabel", {
+                  name: shown(own.title, [locale]),
+                })}
+              >
+                {t("preferences.palette.edit")}
+              </a>
+            </div>
+          ))}
+          <p class="palette-actions">
+            <a class="button" href={routeToHash({ screen: "palette", instanceUrl })}>
+              {t("preferences.palette.design")}
+            </a>
+            <ResetColors />
+          </p>
           {showContrastHint && (
             <p id="pref-palette-contrast-hint" class="hint">
               {t("preferences.palette.moreContrast")}
@@ -423,5 +483,24 @@ export function PreferencesScreen({
       </form>
       <ErrorMessage error={error} />
     </section>
+  );
+}
+
+/**
+ * Back to the Standard colors, drawn in them whatever colors the page is
+ * in (its data-palette, palettes.css), so that it can be read and
+ * pressed when a palette of the user's own cannot (docs/theme.md).
+ * Shown only while another palette than Standard is.
+ */
+export function ResetColors() {
+  const { t } = useI18n();
+  const { palette, customPalette, choosePalette } = useTheme();
+  if (customPalette === null && palette === "standard") return null;
+  return (
+    <span class="reset-colors" data-palette="standard">
+      <button type="button" onClick={() => choosePalette("standard")}>
+        {t("preferences.palette.reset")}
+      </button>
+    </span>
   );
 }
