@@ -1430,6 +1430,35 @@ dl.facts .sources {
   z-index: 1;
 }
 
+/* Too narrow for the text size to keep the name beside the study action
+   and the menu (a phone at a larger text size, a group a level or more
+   in), the name and what is due take a line each, and the action and
+   the menu go under them, at the row's end, wrapping when even they do
+   not fit, so the name is never squeezed to a letter a line. In em, the
+   list's, so the text size counts. The loading bar, narrower, is kept
+   on a line of its own by its end margin. */
+.deck-list {
+  container-type: inline-size;
+}
+
+@container (max-width: 17em) {
+  .deck-list > li.deck-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .deck-list > li.deck-row > .deck-open,
+  .deck-list > li.deck-row > .name-form,
+  .deck-list .deck-meta > .hint:not(.study-done) {
+    flex-basis: 100%;
+  }
+
+  .deck-list > li.deck-row > .deck-meta > .hint.study-skeleton {
+    flex-basis: auto;
+    margin-inline-end: calc(100% - 8.25rem);
+  }
+}
+
 .row-menu {
   min-width: 2.75rem;
   min-height: 2.75rem;
