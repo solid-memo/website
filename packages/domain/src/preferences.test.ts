@@ -7,8 +7,14 @@ import {
   DEFAULT_PREFERENCES,
   effectiveAnswerScale,
   invitesToFsrs,
+  keptPalette,
   NEW_INSTANCE_PREFERENCES,
+  shownPalette,
 } from "./preferences";
+
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+/** A palette this version does not know: one of the user's own. */
+const OWN_PALETTE = "https://pod.example/solid-memo/a/palettes.ttl#mine";
 
 describe("effectiveAnswerScale", () => {
   it("is the stored scale under SM-2", () => {
@@ -40,5 +46,36 @@ describe("invitesToFsrs", () => {
 
   it("invites nobody on FSRS-6", () => {
     expect(invitesToFsrs(NEW_INSTANCE_PREFERENCES)).toBe(false);
+  });
+});
+
+describe("the palette of preferences", () => {
+  it("is the one they hold, Standard by default", () => {
+    expect(shownPalette(DEFAULT_PREFERENCES)).toBe("standard");
+    expect(shownPalette({ palette: `${SM}highContrastPalette` })).toBe("high-contrast");
+  });
+
+  it("shows one this version does not know as Standard", () => {
+    expect(shownPalette({ palette: OWN_PALETTE })).toBe("standard");
+  });
+
+  it("keeps the one held while it shows as the one shown, so an unknown one outlives a save", () => {
+    expect(keptPalette({ palette: OWN_PALETTE }, "standard")).toBe(OWN_PALETTE);
+    expect(keptPalette({ palette: `${SM}parchmentPalette` }, "parchment")).toBe(
+      `${SM}parchmentPalette`,
+    );
+  });
+
+  it("replaces one of the user's own with the built-in palette chosen", () => {
+    const isOwn = (iri: string) => iri === OWN_PALETTE;
+    expect(keptPalette({ palette: OWN_PALETTE }, "standard", isOwn)).toBe(`${SM}standardPalette`);
+    expect(keptPalette({ palette: `${SM}parchmentPalette` }, "parchment", isOwn)).toBe(
+      `${SM}parchmentPalette`,
+    );
+  });
+
+  it("takes the concept of another palette shown", () => {
+    expect(keptPalette({ palette: OWN_PALETTE }, "color-vision")).toBe(`${SM}colorVisionPalette`);
+    expect(keptPalette(DEFAULT_PREFERENCES, "high-contrast")).toBe(`${SM}highContrastPalette`);
   });
 });

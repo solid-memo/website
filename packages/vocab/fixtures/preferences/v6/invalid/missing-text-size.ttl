@@ -1,0 +1,22 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+<#it>
+    a solid-memo:Preferences ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:newCardsPerDay 20 ;
+    solid-memo:maxReviewsPerDay 200 ;
+    solid-memo:dayBoundaryHour 4 ;
+    solid-memo:answerScale "minimal" ;
+    solid-memo:developerMode true ;
+    solid-memo:invalidDataPolicy solid-memo:blockSubject ;
+    solid-memo:theme solid-memo:darkTheme ;
+    solid-memo:studyScheduler solid-memo:fsrs6 ;
+    solid-memo:desiredRetention 0.85 ;
+    solid-memo:schedulerInvitationDismissed false ;
+    solid-memo:palette solid-memo:standardPalette .

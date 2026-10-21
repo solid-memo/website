@@ -34,7 +34,9 @@ browser's engine cannot run, fails CI (see docs/validation.md):
   Studio writes (library deck format 6, a release in a pod, and the
   draft deck, chapter and step formats, a draft of one), and of the
   review states a reviews document holds (review-state format 2 and
-  FSRS review-state format 1, told apart by their scheduler). The shapes
+  FSRS review-state format 1, told apart by their scheduler), and of the
+  palettes a user designs (palette and color set format 1, the color
+  set's shape closed and its colors held to a pattern). The shapes
   have no targets (the app picks a subject's shape by its class, format
   version, context and the values some shapes fix): this script picks
   them the same way, and states each pick as an sh:targetNode;
@@ -249,7 +251,9 @@ def main() -> int:
     # The review states of a reviews document, SM-2's and FSRS-6's, each
     # picked by its scheduler.
     reviews = [(state, "pod") for kind in ("review-state/v2", "fsrs-review-state/v1") for state in sorted((VOCAB / f"fixtures/{kind}/valid").glob("*.ttl"))]
-    for fixture, context in studio + reviews:
+    # A palettes document: the palettes the user designed and their color sets.
+    palettes = [(fixture, "pod") for kind in ("palette/v1", "color-set/v1") for fixture in sorted((VOCAB / f"fixtures/{kind}/valid").glob("*.ttl"))]
+    for fixture, context in studio + reviews + palettes:
         name = fixture.relative_to(VOCAB / "fixtures").as_posix()
         data = graph((fixture, "https://pod.example/solid-memo/main/drafts/d/v1/release.ttl"))
         jobs.append((f"{name} (Solid Memo's shapes, {context})", partial(conformance, data, targeted(data, shapes, picks, context), warnings_fail=False), 0))

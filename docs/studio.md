@@ -305,7 +305,9 @@ back to went with the view.
 
 A splitter ([`shell/Splitter.tsx`](../apps/studio/src/ui/shell/Splitter.tsx))
 is a separator, as screen readers know one, that takes the focus: its
-value is the pane's size in pixels, between its least and its most.
+value is the pane's size in pixels, between its least and its most,
+which are as much larger as the text is than the browser's default
+16px ([theme.md](theme.md#text-size)).
 Left and Right (Up and Down, for the dock's) move it 16 pixels, Home
 and End to either end; the pointer drags it. The sums are in
 [`shell/splitter.ts`](../apps/studio/src/ui/shell/splitter.ts).

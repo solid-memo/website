@@ -151,7 +151,7 @@ flowchart LR
   (`history/<YYYY-MM>.ttl`), the drafts the catalog links, those in
   the instance's `drafts/` only, as deleting a draft deletes them
   ([Drafts and releases](#drafts-and-releases)), then `preferences.ttl`,
-  `digest.ttl` and `catalog.ttl`, in that order, so a delete that fails
+  `palettes.ttl`, `digest.ttl` and `catalog.ttl`, in that order, so a delete that fails
   before the catalog goes can be retried and find the decks and the
   drafts again (a catalog the pod serves but that cannot be read, as
   another app might leave it, is kept, and so are the decks' documents
@@ -163,7 +163,8 @@ flowchart LR
   removed ([Write discipline](#write-discipline), `removeOwned`): a
   deck's cards, their distractors, its review states and the
   document's saying it is the deck's; the answers of a month
-  (`sm:Answer`); the preferences (`sm:Preferences`); the digest's
+  (`sm:Answer`); the preferences (`sm:Preferences`); the palettes
+  (`sm:Palette`, `sm:ColorSet`); the digest's
   receipts and schedules; the catalog's subjects (the catalog, its
   decks, groups, agents and distributions); the instance's `#it`; a
   draft's subjects and what they lead to. A document is deleted only
@@ -272,8 +273,16 @@ data.
 │                        sm:developerMode, sm:invalidDataPolicy, sm:theme,
 │                        sm:studyScheduler (sm:sm2 or sm:fsrs6),
 │                        sm:desiredRetention,
-│                        sm:schedulerInvitationDismissed,
-│                        sm:formatVersion 5
+│                        sm:schedulerInvitationDismissed, sm:palette
+│                        (a concept of sm:Palettes, or another IRI,
+│                        kept), sm:textSize, sm:formatVersion 6
+├── palettes.ttl    the palettes the user designed, if any: one
+│                        sm:Palette per palette (#palette-<id>),
+│                        dcterms:title, sm:basedOn, sm:lightColors and
+│                        sm:darkColors, its sm:ColorSet subjects beside
+│                        it (#palette-<id>-light, #palette-<id>-dark),
+│                        a #rrggbb color for each role it sets;
+│                        sm:formatVersion 1 (docs/theme.md)
 ├── catalog.ttl     one subject per deck (titles live ONLY here), a
 │                        sm:Deck and dcat:Dataset: sm:formatVersion 6,
 │                        dcterms:description, sm:studyDirection, optional
@@ -379,7 +388,7 @@ any.
   the origin a server might read as a step elsewhere (as above), not a
   folder, not another resource's access control or metadata (`.acl`,
   `.acr`, `.meta`), and not one of the instance's own documents (its
-  meta, preferences, catalog and digest, `history/`, `drafts/`,
+  meta, preferences, palettes, catalog and digest, `history/`, `drafts/`,
   `releases/`). New decks are still made in `decks/` and `reviews/`.
 - **A deck's document is written to, or deleted, only when it says it
   is the deck's**: the document itself states `<> dcterms:isPartOf
@@ -559,9 +568,9 @@ graph LR
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, saying which version of its class's
   [shape](shapes.md) it conforms to: instance 1, decks 3 (DCAT),
-  cards 2 (pictures), review states 2, preferences 5 (the scheduler),
-  deck schedules 2 (the scheduler); the catalog, agent and distribution
-  nodes 1. Readers treat a
+  cards 2 (pictures), review states 2, preferences 6 (the palette and
+  the text size), deck schedules 2 (the scheduler); the catalog, agent and distribution
+  nodes, and a palette of the user's own and its color sets, 1. Readers treat a
   missing version as 1 — data written before the field existed — read
   older versions as they are, and pass a newer stored version through
   unchanged. Bringing a pod up to the current versions is the user's

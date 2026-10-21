@@ -5,8 +5,10 @@
 import {
   ANSWER_MODES,
   INVALID_DATA_POLICIES,
+  PALETTES as PALETTE_SCHEME,
   SCHEDULERS,
   STUDY_DIRECTIONS,
+  TEXT_SIZES as TEXT_SIZE_SCHEME,
   THEMES as THEME_SCHEME,
   type Concept,
   type ConceptScheme,
@@ -15,6 +17,8 @@ import type { AnswerMode } from "./answer";
 import { isDeckDirection, type DeckDirection } from "./deck";
 import type { Scheduler } from "./fsrs";
 import { isInvalidDataPolicy, type InvalidDataPolicy } from "./invalidDataPolicy";
+import { isPalette, type Palette } from "./palette";
+import { isTextSize, type TextSize } from "./textSize";
 import { isThemeChoice, type ThemeChoice } from "./theme";
 
 /** The IRI of a concept of the StudyDirections scheme. */
@@ -28,6 +32,12 @@ export type AnswerModeConcept = (typeof ANSWER_MODES.concepts)[number]["iri"];
 
 /** The IRI of a concept of the Themes scheme. */
 export type ThemeConcept = (typeof THEME_SCHEME.concepts)[number]["iri"];
+
+/** The IRI of a concept of the Palettes scheme. */
+export type PaletteConcept = (typeof PALETTE_SCHEME.concepts)[number]["iri"];
+
+/** The IRI of a concept of the TextSizes scheme. */
+export type TextSizeConcept = (typeof TEXT_SIZE_SCHEME.concepts)[number]["iri"];
 
 /** The IRI of a concept of the Schedulers scheme. */
 export type SchedulerConcept = (typeof SCHEDULERS.concepts)[number]["iri"];
@@ -78,6 +88,31 @@ export function themeOfConcept(iri: string): ThemeChoice | undefined {
 /** The concept of the Themes scheme that names a theme choice. */
 export function conceptOfTheme(choice: ThemeChoice): ThemeConcept {
   return conceptByNotation(THEME_SCHEME, choice)!.iri as ThemeConcept;
+}
+
+/**
+ * The palette a concept of the Palettes scheme names; undefined for any
+ * other IRI, a later version's palette or one of the user's own.
+ */
+export function paletteOfConcept(iri: string): Palette | undefined {
+  const notation = conceptByIri(PALETTE_SCHEME, iri)?.notation;
+  return notation !== undefined && isPalette(notation) ? notation : undefined;
+}
+
+/** The concept of the Palettes scheme that names a palette. */
+export function conceptOfPalette(palette: Palette): PaletteConcept {
+  return conceptByNotation(PALETTE_SCHEME, palette)!.iri as PaletteConcept;
+}
+
+/** The text size a concept of the TextSizes scheme names. */
+export function textSizeOfConcept(iri: string): TextSize | undefined {
+  const notation = conceptByIri(TEXT_SIZE_SCHEME, iri)?.notation;
+  return notation !== undefined && isTextSize(notation) ? notation : undefined;
+}
+
+/** The concept of the TextSizes scheme that names a text size. */
+export function conceptOfTextSize(size: TextSize): TextSizeConcept {
+  return conceptByNotation(TEXT_SIZE_SCHEME, size)!.iri as TextSizeConcept;
 }
 
 /** The answer mode a concept of the AnswerModes scheme names. */

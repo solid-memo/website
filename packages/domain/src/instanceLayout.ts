@@ -7,9 +7,9 @@ import { documentUrlOf } from "./subjectUrl";
 
 /**
  * Where an instance keeps its documents (see docs/data-model.md): the
- * meta, preferences and catalog documents at fixed names in the
- * container, and one cards and one reviews document per deck, named in
- * the deck's catalog entry.
+ * meta, preferences, palettes and catalog documents at fixed names in
+ * the container, and one cards and one reviews document per deck, named
+ * in the deck's catalog entry.
  */
 
 export function ensureTrailingSlash(url: string): string {
@@ -22,6 +22,29 @@ export function metaUrlOf(instanceUrl: string): string {
 
 export function preferencesUrlOf(instanceUrl: string): string {
   return `${ensureTrailingSlash(instanceUrl)}preferences.ttl`;
+}
+
+/** The palettes the user designed (domain/customPalette.ts), one subject each, with their color sets. */
+export function palettesUrlOf(instanceUrl: string): string {
+  return `${ensureTrailingSlash(instanceUrl)}palettes.ttl`;
+}
+
+/** A palette the user designed, `#palette-<id>` in the instance's palettes document. */
+export function paletteUrlOf(instanceUrl: string, id: string): string {
+  return `${palettesUrlOf(instanceUrl)}#palette-${id}`;
+}
+
+/**
+ * Whether `iri` is a subject of the instance's palettes document, as a
+ * request would send both (isSameUrl): the only place a palette the
+ * preferences name is read from. Any other IRI is a palette this version
+ * does not know, and is never fetched.
+ */
+export function isPaletteOf(instanceUrl: string, iri: string): boolean {
+  const hash = iri.indexOf("#");
+  return (
+    hash > 0 && hash < iri.length - 1 && isSameUrl(iri.slice(0, hash), palettesUrlOf(instanceUrl))
+  );
 }
 
 export function catalogUrlOf(instanceUrl: string): string {
@@ -192,15 +215,19 @@ export function isSafeWriteUrl(url: string): boolean {
 
 /**
  * Whether `url` is one of the instance's own documents, which no deck's
- * may be: its meta, preferences, catalog and digest documents, and any
- * in its `history/`, `drafts/` or `releases/`.
+ * may be: its meta, preferences, palettes, catalog and digest documents,
+ * and any in its `history/`, `drafts/` or `releases/`.
  */
 function isInstanceOwnDocument(instanceUrl: string, url: string): boolean {
   const base = ensureTrailingSlash(instanceUrl);
   return (
-    [metaUrlOf(base), preferencesUrlOf(base), catalogUrlOf(base), digestUrlOf(base)].some((own) =>
-      isSameUrl(url, own),
-    ) ||
+    [
+      metaUrlOf(base),
+      preferencesUrlOf(base),
+      palettesUrlOf(base),
+      catalogUrlOf(base),
+      digestUrlOf(base),
+    ].some((own) => isSameUrl(url, own)) ||
     ["history/", "drafts/", "releases/"].some((folder) => isDocumentIn(url, `${base}${folder}`))
   );
 }
@@ -331,6 +358,7 @@ export function instanceDocumentUrls(instanceUrl: string, decks: readonly Deck[]
   return [
     metaUrlOf(instanceUrl),
     preferencesUrlOf(instanceUrl),
+    palettesUrlOf(instanceUrl),
     catalogUrlOf(instanceUrl),
     ...decks
       .flatMap((deck) => [deck.cardsDocumentUrl, deck.reviewsDocumentUrl])

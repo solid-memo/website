@@ -335,6 +335,22 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}schedulerInvitationDismissed`,
     message: "Preferences state whether the invitation to switch to FSRS-6 was dismissed",
   },
+  "preferences/v6/invalid/missing-palette.ttl": {
+    path: `${SM}palette`,
+    message: "Preferences state the palette",
+  },
+  "preferences/v6/invalid/palette-not-iri.ttl": {
+    path: `${SM}palette`,
+    message: "Preferences state the palette",
+  },
+  "preferences/v6/invalid/missing-text-size.ttl": {
+    path: `${SM}textSize`,
+    message: "Preferences state the text size",
+  },
+  "preferences/v6/invalid/unknown-text-size.ttl": {
+    path: `${SM}textSize`,
+    message: "Preferences state the text size",
+  },
   "deck/v3/invalid/pod-with-old-direction.ttl": {
     path: `${SM}direction`,
     message: "Format 3 states the study direction with solid-memo:studyDirection",
@@ -463,6 +479,50 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
   "deck-group/v1/invalid/pod-with-negative-position.ttl": {
     path: `${SM}position`,
     message: "A deck group's position among its parent's members is one whole number, 0 or more.",
+  },
+  "palette/v1/invalid/without-title.ttl": {
+    path: `${DC}title`,
+    message: "A palette's name is language-tagged text in any language, one per language",
+  },
+  "palette/v1/invalid/untagged-title.ttl": {
+    path: `${DC}title`,
+    message: "A palette's name is language-tagged text in any language, one per language",
+  },
+  "palette/v1/invalid/two-bases.ttl": {
+    path: `${SM}basedOn`,
+    message: "A palette names the palette it is based on, once",
+  },
+  "palette/v1/invalid/base-as-literal.ttl": {
+    path: `${SM}basedOn`,
+    message: "A palette names the palette it is based on, once",
+  },
+  "palette/v1/invalid/without-dark-colors.ttl": {
+    path: `${SM}darkColors`,
+    message: "A palette names its colors in the dark theme, once",
+  },
+  "color-set/v1/invalid/short-hex.ttl": {
+    path: `${SM}textColor`,
+    message: "A color set's color is an opaque sRGB color written #rrggbb, at most one of each.",
+  },
+  "color-set/v1/invalid/see-through.ttl": {
+    path: `${SM}textColor`,
+    message: "A color set's color is an opaque sRGB color written #rrggbb, at most one of each.",
+  },
+  "color-set/v1/invalid/css-text.ttl": {
+    path: `${SM}textColor`,
+    message: "A color set's color is an opaque sRGB color written #rrggbb, at most one of each.",
+  },
+  "color-set/v1/invalid/variable.ttl": {
+    path: `${SM}textColor`,
+    message: "A color set's color is an opaque sRGB color written #rrggbb, at most one of each.",
+  },
+  "color-set/v1/invalid/two-text-colors.ttl": {
+    path: `${SM}textColor`,
+    message: "A color set's color is an opaque sRGB color written #rrggbb, at most one of each.",
+  },
+  "color-set/v1/invalid/other-property.ttl": {
+    path: "https://example.org/backgroundImage",
+    message: "A color set has the colors of its format and no other property.",
   },
   "catalog/v1/invalid/without-publisher.ttl": {
     path: `${DC}publisher`,

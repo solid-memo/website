@@ -553,15 +553,14 @@
   border-color: var(--border);
 }
 
-/* The open instance, a menu of the user's others. */
+/* The open instance, a menu of the user's others: a long name wraps
+   rather than being cut short. */
 :root[data-surface="studio"] .studio-switcher {
   max-width: 14rem;
   min-height: 2rem;
   padding: 0.15rem 0.6rem;
-  overflow: hidden;
   font-size: 0.875rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border-strong);
@@ -664,8 +663,8 @@
 
 /*
  * Who is signed in takes the room the row has left, cut short to keep
- * the header one row in a language of longer words; given less than
- * 12rem, the row wraps instead.
+ * the header one row in a language of longer words (or in larger text),
+ * the whole line its title; given less than 12rem, the row wraps instead.
  */
 :root[data-surface="studio"] .session-line {
   flex: 1 1 auto;

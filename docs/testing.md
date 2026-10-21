@@ -326,7 +326,10 @@ Further journeys go through:
   which is kept, and the app says why;
 - logging out and back in, and in on a second device, onto the same
   instance, after a WebID the form refuses and a consent refused, the
-  dark theme following through the pod;
+  dark theme, High contrast and Larger text following through the pod
+  (and kept through a reload), then a palette of one's own designed,
+  its too little contrast used anyway, found on a third device, and the
+  colors reset to Standard;
 - updating a copy of a library deck's first release to its second,
   offered in Solid Memo and in the Studio, the day's study kept;
 - trying Solid Memo as a guest and moving the guest's study into a new
@@ -422,11 +425,24 @@ never asserts which card a shuffled queue shows, only how many there
 are.
 
 **Accessibility.** Each step's end checks the screen it leaves the app
-on with [axe](https://github.com/dequelabs/axe-core), in the light and
-the dark theme, against WCAG 2.0, 2.1 and 2.2 at levels A and AA
-(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)),
-in a step of its own, "Accessibility", within the journey's step, so the
-report shows how long the check took. Chromium and the phone run it;
+on with [axe](https://github.com/dequelabs/axe-core) in each palette
+and theme, and its reflow at the largest text size
+(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
+Only the colors change between palettes, so the others run only the
+rules colors can break. A palette of the user's own, painted on the
+root's style, is taken off while they run and put back after: the
+built-in palettes are what the checks hold to, and a palette of one's
+own is the user's, measured by its editor
+([theme.md](theme.md#palettes-of-ones-own)).
+
+| Check | Palettes and themes | Rules | Where |
+|---|---|---|---|
+| axe | Standard, light and dark | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
+| axe | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
+| Reflow | Standard, light, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
+
+The checks run in a step of their own, "Accessibility", within the
+journey's step, so the report shows how long they took. Chromium and the phone run it;
 desktop Firefox and WebKit leave it out, as their projects' metadata
 says (`accessibility: false`, [accessibility.md](accessibility.md)). A violation fails the journey, which goes on to its end so that every
 screen is checked. A violation let pass is listed in that file's
@@ -451,8 +467,10 @@ error, and the browser it failed in. The job's
     requests, the seed, the time zone;
   - `css.log`: the server's log for the journey's time;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;
-  - `<step> · accessibility, <theme>.json`: what axe found on a step's
-    screen, when it found a violation.
+  - `<step> · accessibility, <palette>, <theme>.json`: what axe found on a step's
+    screen, when it found a violation;
+  - `<step> · reflow.png`: the screen at the largest text size and 320px
+    wide, when it did not reflow.
   Open the report with `npx playwright show-report <dir>`.
 - `logs/css.log`: the server's whole log.
 
@@ -927,7 +945,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | The docs as a site (`packages/markdown/tooling/`) | an injected `Io` and `draw`, a fake browser | `docsSite.test.ts` renders docs held in memory: each kind of link from the README and from a page, and that no address starts with `/`; every problem, with its file and line; escaping; the page's frame, the figure and the figure without drawings; the font's license beside the drawings and in the footer of a page with a figure; and an archive; and that every page it writes passes `checkPage`, which refuses what a page is not written as. It also renders the repository's own `docs/` with a fake `draw` and checks that each page has as many links, tables and figures as its source, so a docs edit that breaks a link fails `npm run check` (the task's inputs hold `docs/` and the Markdown at the root). `publishDocs.test.ts` runs the Vite plugin's build hook and its dev server's middleware with a fake browser ([markdown.md](markdown.md#the-docs-as-a-site)). |
 | A release's docs as an archive (`scripts/docsArchive.ts`) | an injected `Io` and `draw` | `docsArchive.test.ts` packs the repository's own `docs/` with a `draw` that makes drawings as `drawDiagrams` does, with the system's `tar`, and lists and unpacks the archive: every entry under `docs/`, in order, the font's license among them and the list of versions not, every drawing safe to serve (`checkSvg`) and carrying the font's notice, and a page linking the release's tag and never indexed. Nothing is written when the diagrams were not drawn, a drawing is unsafe or lacks the notice, or the docs have problems. The script's own `draw` is held to drawing in Chromium under `DOCS_DIAGRAMS=skip` too, and its repository address to `apps/web`'s `.env` files, as the site's build reads them ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). |
 | Each release's docs, served by the deploy (`scripts/docsVersions.ts`) | an injected `Io`: the environment, GitHub's API in memory, and the attestation check | `docsVersions.test.ts` packs a release's docs as `renderDocsSite` writes an archive, with the system's `tar`, and serves it from a fake API, a hundred releases a page: it is unpacked under `docs/X.Y.Z/` of a built site, a draft's or a missing archive is a notice, and the list of versions is written over the build's, every tag newest first. An archive is left out, with an error, when someone else uploaded it, it has no digest or another one, its address is off the API, it cannot be downloaded, GitHub holds no attestation of it (asked of the bytes downloaded, before anything is unpacked; the default check runs `gh attestation verify` for the release workflow on `main`, tried with a fake `gh`), or it is not an archive, or it holds a link, a file outside `docs/` or of another kind, a file twice, no front page, drawings without the font's license, or a page, stylesheet or drawing that its check refuses; and when its folder is in the build already. An API that cannot be read leaves every version linked in the repository. The script asks for its folder, `DOCS_TAGS` and a repository on GitHub ([deployment.md](deployment.md#each-releases-docs)). |
-| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, what the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of JavaScript gzipped (600 kB in October 2026, against 610, raised from 600 for the Studio graph's messages in each language; past it, the test names the largest modules, and a change that needs the weight raises the budget, saying why), and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). It also checks the docs the build publishes: a page for each `docs/*.md`, each with the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address and ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link leading to a heading, a page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure for each Mermaid block, its light and dark drawings safe to serve (`checkSvg`) and carrying the font's notice; the font's license beside them, as the package has it; the sitemap listing every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, a page the build serves. It draws in the real Chromium, as the build does; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source instead, and nothing is drawn. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME` and the root's `package.json`, which the build reads, `publiccode.yml`, and the Markdown at the root, whose headings the docs' links lead to. |
+| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, what the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of JavaScript gzipped (623 kB in October 2026, against 630, raised from 600 for the Studio graph's messages in each language, from 610 for the palettes, the text sizes and preferences format 6, which the preferences' screen and the first instance read need, and from 620 for the palette editor, its messages in each language and the built-in palettes' colors it starts from; past it, the test names the largest modules, and a change that needs the weight raises the budget, saying why), and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). It also checks the docs the build publishes: a page for each `docs/*.md`, each with the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address and ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link leading to a heading, a page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure for each Mermaid block, its light and dark drawings safe to serve (`checkSvg`) and carrying the font's notice; the font's license beside them, as the package has it; the sitemap listing every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, a page the build serves. It draws in the real Chromium, as the build does; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source instead, and nothing is drawn. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME` and the root's `package.json`, which the build reads, `publiccode.yml`, and the Markdown at the root, whose headings the docs' links lead to. |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `createAppUseCases` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
 | User journeys | the built app in a browser | `e2e/journeys/` drives the app in Chromium (Playwright) through whole journeys, logging in at a real identity provider (Community Solid Server 7 behind TLS) ([User journeys](#user-journeys)). |

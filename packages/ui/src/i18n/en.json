@@ -56,6 +56,30 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "The usual colors, the answer buttons from red to green."
+    },
+    "highContrast": {
+      "name": "High contrast",
+      "description": "Black and white, the text and the edges of fields at their sharpest."
+    },
+    "colorVision": {
+      "name": "Color-blind friendly",
+      "description": "Blue, orange and vermilion in place of red and green."
+    },
+    "parchment": {
+      "name": "Parchment (low glare)",
+      "description": "Warm surfaces, dimmer than white, that glare less."
+    }
+  },
+  "textSize": {
+    "default": "Default",
+    "large": "Large",
+    "larger": "Larger",
+    "largest": "Largest"
+  },
   "common": {
     "cardCount": {
       "one": "{count} card",
@@ -144,7 +168,8 @@
     "course": "Course",
     "courseReview": "Final review",
     "groups": "Groups",
-    "importUrl": "Add from a link"
+    "importUrl": "Add from a link",
+    "palette": "Palette"
   },
   "browser": {
     "heading": "Browser: {deck}",
@@ -957,7 +982,7 @@
     "countIn": "{what} in {decks}",
     "instanceFormat": "instance format {version}",
     "catalogueFormat": "a catalog of each instance's decks, which other apps read as a DCAT catalog",
-    "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data, the theme and the scheduler",
+    "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data, the theme, the scheduler, the colors and the text size",
     "deckFormat": "deck format {version}, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state",
     "cardFormat": "card format {version}, which adds pictures on cards, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state and adds a label above a card's front",
     "reviewFormat": "review-state format {version}, which keeps each study direction's state and the day's undo snapshot",
@@ -1110,6 +1135,21 @@
       "legend": "Appearance",
       "hint": "Takes effect right away. Once these preferences are saved it is kept in your Pod, so every device you log in on looks the same."
     },
+    "palette": {
+      "legend": "Colors",
+      "hint": "Takes effect right away, in the light theme and the dark. Once these preferences are saved it is kept in your Pod, as the theme is.",
+      "moreContrast": "Your device asks for more contrast: High contrast may suit you.",
+      "ownDescription": "Your own colors, based on {base}.",
+      "edit": "Edit",
+      "editLabel": "Edit {name}",
+      "design": "Design a palette",
+      "reset": "Reset colors"
+    },
+    "textSize": {
+      "legend": "Text size",
+      "hint": "Takes effect right away, and enlarges your browser's own text size. Once these preferences are saved it is kept in your Pod, as the theme is.",
+      "sample": "One card at a time, a little every day."
+    },
     "heading": "Study preferences",
     "loading": "Loading preferences…",
     "newCardsPerDay": "New cards per day",
@@ -1164,6 +1204,80 @@
       "hint": "Shows developer tools: your raw WebID document below the app, and a check of this instance's documents against Solid Memo's shapes."
     },
     "save": "Save"
+  },
+  "paletteEditor": {
+    "headingNew": "Design a palette",
+    "headingEdit": "Edit a palette",
+    "intro": "Choose the colors you read best by. Every pair that holds text is measured as you go: a pair with less contrast than it needs is marked, and saving it asks you first.",
+    "name": "Name",
+    "basedOn": "Based on",
+    "basedOnHint": "A color you leave as it is stays the base palette's.",
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "clear": {
+      "light": "Back to the base's light colors",
+      "dark": "Back to the base's dark colors"
+    },
+    "status": {
+      "pass": "Every pair has the contrast it needs.",
+      "low": {
+        "one": "{count} pair has less contrast than it needs.",
+        "other": "{count} pairs have less contrast than they need."
+      },
+      "refused": "The text is too faint to read on the background. Choose colors further apart."
+    },
+    "useAnyway": "Use anyway",
+    "save": "Save and use",
+    "saving": "Saving…",
+    "cancel": "Back to preferences",
+    "loading": "Loading the palettes…",
+    "preview": {
+      "heading": "A card's question",
+      "muted": "A hint, in muted text",
+      "link": "A link",
+      "danger": "Danger",
+      "warning": "Warning",
+      "button": "A button",
+      "field": "A field"
+    },
+    "contrast": {
+      "light": "Contrast in the light theme",
+      "dark": "Contrast in the dark theme",
+      "front": "Color",
+      "back": "On",
+      "ratio": "Contrast",
+      "needs": "Needs",
+      "result": "Result",
+      "tint": {
+        "12": "the tint of {button}",
+        "24": "the tint of {button} under the pointer"
+      },
+      "ratioValue": "{ratio}:1",
+      "pass": "Enough",
+      "low": "Too little",
+      "refused": "Unreadable"
+    },
+    "role": {
+      "bg": "Page background",
+      "surface": "Cards and panels",
+      "surfaceSunken": "Sunken surfaces",
+      "surfaceHover": "Surfaces under the pointer",
+      "text": "Text",
+      "textMuted": "Muted text",
+      "border": "Lines",
+      "controlBorder": "Edges of fields",
+      "primary": "Primary color and focus ring",
+      "primaryFill": "Buttons",
+      "primaryHover": "Buttons under the pointer",
+      "primarySoft": "Primary tint",
+      "onPrimary": "Text on buttons",
+      "link": "Links",
+      "danger": "Danger text",
+      "dangerSoft": "Danger tint",
+      "warningText": "Warning text",
+      "warningSoft": "Warning tint",
+      "grade": "Answer button {grade}"
+    }
   },
   "findable": {
     "heading": "Findable by other apps",
@@ -1385,6 +1499,9 @@
     "authorEmpty": "An author needs a name.",
     "authorTwice": "{author} is named twice. Name each author once.",
     "instanceNameEmpty": "An instance needs a name.",
+    "paletteNameEmpty": "A palette needs a name.",
+    "paletteUnreadable": "The text is too faint to read on the background (less than 3:1). Choose colors further apart.",
+    "paletteContrastLow": "Some colors have less contrast than they need. Choose others, or use them anyway.",
     "catalogNeedsDescription": "The catalog needs a description.",
     "noCatalogToUpdate": "This instance has no catalog yet. Update the instance in Solid Memo first.",
     "noMetaToUpdate": "This instance has no description to update. Reload the page and try again.",

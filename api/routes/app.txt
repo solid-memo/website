@@ -30,6 +30,8 @@
 #/new-instance?storage=https%3A%2F%2Fpod.example%2F&source=linkHeader
 #/new-instance?storage=https%3A%2F%2Fpod.example%2F&source=manual
 #/new-instance?storage=https%3A%2F%2Fpod.example%2F&source=profile
+#/palette?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
+#/palette?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&palette=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fpalettes.ttl%23palette-1
 #/preferences?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
 #/statistics?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
 #/statistics?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&range=12m

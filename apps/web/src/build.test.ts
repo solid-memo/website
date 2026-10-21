@@ -11,6 +11,7 @@ import { gzipSync } from "node:zlib";
 import { type Document, Window } from "happy-dom";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
+import { PAINTED_ROLES } from "@solid-memo/domain/customPalette";
 import { checkSvg, fontNotice } from "@solid-memo/markdown/tooling/diagrams";
 import { DOCS_CSP } from "@solid-memo/markdown/tooling/docsSite";
 import { diagramMode, FONT_LICENSE_FILE } from "@solid-memo/markdown/tooling/drawDiagrams";
@@ -52,7 +53,7 @@ const DOCS_PAGES = DOCS_SOURCES.map((name) =>
  * it weighs, with room for a little more. A change that passes it says
  * why the page needs the weight, and raises this in the same commit.
  */
-const UP_FRONT_BUDGET_KB = 610;
+const UP_FRONT_BUDGET_KB = 630;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -218,6 +219,118 @@ describe("the page's Content Security Policy", () => {
     expect(policy().get("object-src")).toEqual(["'none'"]);
     expect(policy().get("base-uri")).toEqual(["'none'"]);
     expect(policy().get("form-action")).toEqual(["'none'"]);
+  });
+});
+
+/*
+ * The script that sets the device's choices on the root before the first
+ * paint (docs/theme.md), as the built page has it, run with what the
+ * device keeps and the browser's wish for a dark page.
+ */
+function firstPaint(kept: Record<string, string>, { dark = false, blocked = false } = {}) {
+  const script = [...dom.scripts].find(
+    (element) => !element.hasAttribute("src") && element.type !== "application/ld+json",
+  )!;
+  const style: Record<string, string> = {};
+  const root = {
+    dataset: {} as Record<string, string>,
+    style: {
+      setProperty(name: string, value: string) {
+        style[name] = value;
+      },
+    },
+  };
+  const localStorage = {
+    getItem(key: string) {
+      if (blocked) throw new Error("blocked");
+      return kept[key] ?? null;
+    },
+  };
+  new Function("document", "localStorage", "matchMedia", script.text)(
+    { documentElement: root },
+    localStorage,
+    () => ({ matches: dark }),
+  );
+  return Object.keys(style).length === 0 ? root.dataset : { ...root.dataset, style };
+}
+
+describe("the page's first-paint script", () => {
+  it("sets the theme kept on the device, else the browser's", () => {
+    expect(firstPaint({ "solid-memo:theme": "dark" })).toEqual({ theme: "dark" });
+    expect(firstPaint({ "solid-memo:theme": "sepia" }, { dark: true })).toEqual({ theme: "dark" });
+    expect(firstPaint({}, { blocked: true })).toEqual({ theme: "light" });
+  });
+
+  it("sets the palette and the text size kept on the device, if each is in the form one takes", () => {
+    expect(
+      firstPaint({ "solid-memo:palette": "high-contrast", "solid-memo:textSize": "larger" }),
+    ).toEqual({ theme: "light", palette: "high-contrast", textSize: "larger" });
+    // A palette or size the app has yet to have is set all the same: the stylesheet shows it as the default.
+    expect(firstPaint({ "solid-memo:palette": "x".repeat(32) })).toEqual({
+      theme: "light",
+      palette: "x".repeat(32),
+    });
+    for (const value of ["", "Larger", "x".repeat(33), 'large" onload="x', "1x"])
+      expect(firstPaint({ "solid-memo:palette": value, "solid-memo:textSize": value })).toEqual({
+        theme: "light",
+      });
+  });
+});
+
+describe("the first paint of a palette of the user's own", () => {
+  function painted(kept: unknown, dark = false) {
+    return firstPaint(
+      { "solid-memo:palette": "parchment", "solid-memo:palette-colors": JSON.stringify(kept) },
+      { dark },
+    );
+  }
+
+  it("sets the colors kept for the theme shown on the root", () => {
+    const kept = { light: { "--text": "#2B2118" }, dark: { "--text": "#ffffff" } };
+    expect(painted(kept)).toEqual({
+      theme: "light",
+      palette: "parchment",
+      style: { "--text": "#2B2118" },
+    });
+    expect(painted(kept, true)).toMatchObject({ theme: "dark", style: { "--text": "#ffffff" } });
+  });
+
+  it("sets each role a palette may paint, and no other", () => {
+    const light = Object.fromEntries(PAINTED_ROLES.map((role) => [role, "#123456"]));
+    expect(painted({ light })).toMatchObject({ style: light });
+    expect(
+      painted({
+        light: {
+          "--masthead-bg": "#000000",
+          "--text;x": "#000000",
+          "--Text": "#000000",
+          "-text": "#000000",
+          "--grade-6": "#000000",
+        },
+      }),
+    ).toEqual({ theme: "light", palette: "parchment" });
+  });
+
+  it("sets nothing that is not #rrggbb", () => {
+    for (const color of [
+      "red",
+      "#fff",
+      "#ffffff80",
+      "var(--bg)",
+      "#ffffff; background: url(https://evil.example/x)",
+      ["#ffffff"],
+      16777215,
+    ])
+      expect(painted({ light: { "--bg": color } }), JSON.stringify(color)).toEqual({
+        theme: "light",
+        palette: "parchment",
+      });
+  });
+
+  it("paints nothing when what is kept is no palette's colors", () => {
+    for (const text of ["not json", "null", "[]", '"#ffffff"'])
+      expect(firstPaint({ "solid-memo:palette-colors": text }), text).toEqual({ theme: "light" });
+    expect(firstPaint({})).toEqual({ theme: "light" });
   });
 });
 

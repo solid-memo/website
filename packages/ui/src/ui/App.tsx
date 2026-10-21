@@ -5,6 +5,13 @@
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
 import type { Locale } from "@solid-memo/domain/locale";
+import {
+  parsePalette,
+  type CustomPalette,
+  type ShownPalette,
+} from "@solid-memo/domain/customPalette";
+import type { Palette } from "@solid-memo/domain/palette";
+import type { TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -22,7 +29,16 @@ import { Loading } from "./Loading";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { usePanelFocus } from "./panelFocus";
-import { applyTheme, browserTheme, DARK_QUERY, instanceThemeKey, ThemeProvider } from "./theme";
+import {
+  applyCustomColors,
+  applyPalette,
+  applyTextSize,
+  applyTheme,
+  browserTheme,
+  DARK_QUERY,
+  instanceAppearanceKey,
+  ThemeProvider,
+} from "./theme";
 import { ThemeToggle } from "./ThemeToggle";
 import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
@@ -123,10 +139,16 @@ export function AppShell({
   const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() => useCases.themeChoice());
   const [preferredTheme, setPreferredTheme] = useState<Theme>(browserTheme);
   const theme = resolveTheme(themeChoice, preferredTheme);
+  const [palette, setPalette] = useState<Palette>(() => useCases.paletteChoice());
+  const [customPalette, setCustomPalette] = useState<CustomPalette | null>(() =>
+    useCases.customPaletteChoice(),
+  );
 
   useEffect(() => {
+    applyPalette(palette);
+    applyCustomColors(customPalette, theme);
     applyTheme(theme);
-  }, [theme]);
+  }, [palette, customPalette, theme]);
 
   // The browser's theme as it changes (the OS going dark at dusk), shown while the choice is "system".
   useEffect(() => {
@@ -136,27 +158,80 @@ export function AppShell({
     return () => query.removeEventListener("change", follow);
   }, []);
 
-  // The open instance, whose preferences keep the choice once it has them.
-  const themeInstance = useRef<string | null>(null);
-  const themeChoices = useRef(0);
+  const [textSize, setTextSize] = useState<TextSize>(() => useCases.textSizeChoice());
 
-  function chooseTheme(chosen: ThemeChoice) {
-    setThemeChoice(chosen);
+  useEffect(() => {
+    applyTextSize(textSize);
+  }, [textSize]);
+
+  // The open instance, whose preferences keep the choices once it has them.
+  const themeInstance = useRef<string | null>(null);
+  const appearanceChoices = useRef(0);
+  /** The last choice whose write is done: until the latest is, what a read of the pod brings back is not shown. */
+  const settledChoice = useRef(0);
+
+  /** Keep a choice of theme, palette or text size: on the device, and in the open instance's preferences. */
+  function keepChoice(write: (instanceUrl: string | null) => Promise<void>) {
     const instanceUrl = themeInstance.current;
-    const count = ++themeChoices.current;
-    void useCases
-      .chooseTheme(chosen, instanceUrl)
+    const count = ++appearanceChoices.current;
+    void write(instanceUrl)
       .catch(() => undefined)
       .finally(() => {
         // Read back what the pod holds (which undoes a failed write), unless another choice is on its way.
-        if (instanceUrl === null || count !== themeChoices.current) return;
+        if (count !== appearanceChoices.current) return;
+        settledChoice.current = count;
+        if (instanceUrl === null) return;
         void queryClient.invalidateQueries({
-          queryKey: instanceThemeKey(instanceUrl),
+          queryKey: instanceAppearanceKey(instanceUrl),
         });
         void queryClient.invalidateQueries({
           queryKey: ["preferences", instanceUrl],
         });
       });
+  }
+
+  /**
+   * Shows what a read of the instance's preferences holds, unless a
+   * choice made since is still being written: a read begun before it
+   * would put the earlier choice back, and the choice's own read back
+   * comes once it is written.
+   */
+  function adopting<T>(adopt: (value: T) => void): (value: T) => void {
+    return (value) => {
+      if (settledChoice.current === appearanceChoices.current) adopt(value);
+    };
+  }
+
+  function chooseTheme(chosen: ThemeChoice) {
+    setThemeChoice(chosen);
+    keepChoice((instanceUrl) => useCases.chooseTheme(chosen, instanceUrl));
+  }
+
+  function choosePalette(chosen: Palette) {
+    setPalette(chosen);
+    setCustomPalette(null);
+    keepChoice((instanceUrl) => useCases.choosePalette(chosen, instanceUrl));
+  }
+
+  /** A palette of the user's own is one of an instance's, chosen while it is open. */
+  function chooseCustomPalette(chosen: CustomPalette) {
+    setPalette(chosen.basedOn);
+    setCustomPalette(chosen);
+    keepChoice((instanceUrl) => useCases.chooseCustomPalette(chosen, instanceUrl!));
+  }
+
+  /** The palette a read of the instance shows; a palette of the user's own read again the same is kept as it is, and not painted again. */
+  function adoptPalette(shown: ShownPalette) {
+    setPalette(shown.palette);
+    // Compared as the rules have them (parsePalette): the same colors in any order are the same palette.
+    const same = (palette: CustomPalette | null) =>
+      JSON.stringify(palette && parsePalette(palette));
+    setCustomPalette((was) => (same(was) === same(shown.custom) ? was : shown.custom));
+  }
+
+  function chooseTextSize(chosen: TextSize) {
+    setTextSize(chosen);
+    keepChoice((instanceUrl) => useCases.chooseTextSize(chosen, instanceUrl));
   }
 
   return (
@@ -168,7 +243,15 @@ export function AppShell({
         onFollowInstance={(instanceUrl) => {
           themeInstance.current = instanceUrl;
         }}
-        onAdopt={setThemeChoice}
+        onAdopt={adopting(setThemeChoice)}
+        palette={palette}
+        customPalette={customPalette}
+        onChoosePalette={choosePalette}
+        onChooseCustomPalette={chooseCustomPalette}
+        onAdoptPalette={adopting(adoptPalette)}
+        textSize={textSize}
+        onChooseTextSize={chooseTextSize}
+        onAdoptTextSize={adopting(setTextSize)}
       >
         <AppName.Provider value={identity.name}>
           <RepoUrl.Provider value={source.repoUrl}>
@@ -420,10 +503,20 @@ function AppContent({
             <span class="wordmark">{t(identity.name)}</span>
           </a>
         </h1>
+        {/* Its title the whole line, once it is known, for where it is cut short (the Studio's header). */}
         {session.guest === true ? (
-          <p class="session-line">{t("app.guestLine")}</p>
+          <p class="session-line" title={t("app.guestLine")}>
+            {t("app.guestLine")}
+          </p>
         ) : (
-          <p class="session-line">
+          <p
+            class="session-line"
+            title={
+              accountQuery.data?.name === undefined
+                ? undefined
+                : t("app.loggedInAs", { name: accountQuery.data.name })
+            }
+          >
             {tx("app.loggedInAs", {
               name: <ExternalLink url={session.webId}>{accountQuery.data?.name}</ExternalLink>,
             })}

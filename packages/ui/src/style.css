@@ -7,61 +7,21 @@
 @import "@fontsource-variable/fredoka";
 @import "@fontsource/bangers";
 @import "@fontsource-variable/noto-naskh-arabic";
+@import "./palettes.css";
 
 :root {
   color-scheme: light;
 
-  --bg: #f7f6f1;
-  --surface: #ffffff;
-  --surface-sunken: #fbfaf5;
-  --surface-hover: #f1efe6;
-  --text: #16202a;
-  --text-muted: #545c68;
-  --border: #e4e1d5;
-  --border-strong: #cfcbbb;
-  /* A text field's edge: at least 3:1 on every surface it sits on. */
-  --control-border: #858072;
-
-  --primary: #2c6b3d;
-  --primary-fill: #2c6b3d;
-  --primary-hover: #235430;
-  --primary-soft: #e6f1e8;
-  --on-primary: #ffffff;
-  --link: #25603a;
-  --link-hover-bg: #e4e5e7;
-  --link-hover-border: #9a9fa6;
-
-  --accent-blue: #b1cfe3;
-  --accent-yellow: #e8ab14;
-  --accent-red: #e8432b;
-
-  --danger: #c42d18;
-  --danger-soft: #fdeee9;
-  --danger-border: #f0c9be;
-  --warning-text: #7a5800;
-  --warning-soft: #fdf4dc;
-  --warning-border: #e6c876;
-
-  --paper-blue: rgba(177, 207, 227, 0.5);
-  --paper-yellow: rgba(232, 171, 20, 0.16);
-
-  --masthead-bg: #16202a;
-  --masthead-text: #f7f6f1;
-  --masthead-border: transparent;
-  --masthead-blue: #9fc3da;
-
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
-  --shadow-sm: 0 1px 2px rgba(22, 32, 42, 0.06);
-  --shadow: 0 1px 2px rgba(22, 32, 42, 0.05), 0 8px 24px -12px rgba(22, 32, 42, 0.18);
-  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
-  /* Under an enlarged picture: the page dimmed, so the picture stands out. */
-  --zoom-backdrop: rgba(22, 32, 42, 0.85);
 
-  --heading-pop: var(--accent-yellow);
-  /* The glint that sweeps across the course for newcomers: decoration only. */
-  --shine: rgb(255 255 255 / 0.55);
+  /*
+   * How much larger than the browser's own the text is: 1 here. What is
+   * sized by the window (vw) rather than in rem is multiplied by it, so
+   * it grows with the rest of the text.
+   */
+  --text-scale: 1;
 
   --font-mono:
     ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas", "Liberation Mono",
@@ -95,47 +55,31 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* The dark theme, which the root's data-theme turns on (see ui/theme.tsx). */
+/* The dark theme, which the root's data-theme turns on (see ui/theme.tsx); its colors are
+   in palettes.css. */
 :root[data-theme="dark"] {
   color-scheme: dark;
+}
 
-  --bg: #11171e;
-  --surface: #19212b;
-  --surface-sunken: #151c25;
-  --surface-hover: #232e3b;
-  --text: #ecebe4;
-  --text-muted: #9ba6b2;
-  --border: #2a3644;
-  --border-strong: #3a4859;
-  --control-border: #66788d;
+/*
+ * The larger text sizes, which the root's data-text-size turns on (see
+ * ui/theme.tsx, docs/theme.md): the root's font size as a share of the
+ * browser's, so the browser's own text size is multiplied in, and
+ * --text-scale with it, for what the window sizes.
+ */
+:root[data-text-size="large"] {
+  --text-scale: 1.125;
+  font-size: 112.5%;
+}
 
-  --primary: #4fae6a;
-  --primary-fill: #2a7340;
-  --primary-hover: #33864b;
-  --primary-soft: #1b3324;
-  --on-primary: #ffffff;
-  --link: #74cc8e;
-  --link-hover-bg: #3a414b;
-  --link-hover-border: #7d8692;
+:root[data-text-size="larger"] {
+  --text-scale: 1.25;
+  font-size: 125%;
+}
 
-  --danger: #ff8a75;
-  --danger-soft: #38201c;
-  --danger-border: #63302a;
-  --warning-text: #f1d283;
-  --warning-soft: #33280e;
-  --warning-border: #5e4a17;
-
-  --paper-blue: rgba(177, 207, 227, 0.07);
-  --paper-yellow: rgba(232, 171, 20, 0.05);
-
-  --masthead-bg: #1d2937;
-  --masthead-border: #2f3d4e;
-  --masthead-blue: #5d86a3;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
-  --zoom-backdrop: rgba(0, 0, 0, 0.88);
-  --shine: rgb(255 255 255 / 0.08);
+:root[data-text-size="largest"] {
+  --text-scale: 1.5;
+  font-size: 150%;
 }
 
 /*
@@ -409,7 +353,7 @@ main.workspace {
 /*
  * The theme toggle, a small outlined 1.5rem by 1rem rectangle: a yellow
  * sun on a pale fill in the light theme, a blue moon on the masthead's
- * navy in the dark one.
+ * navy in the dark one (the --toggle-* roles, palettes.css).
  */
 .theme-toggle {
   width: 1.5rem;
@@ -417,29 +361,17 @@ main.workspace {
   min-height: 0;
   margin: 0.2rem;
   padding: 0;
-  /* The accent's yellow, deepened enough to stand out on the pale fill. */
-  color: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
-  background: var(--paper-yellow);
+  color: var(--toggle-icon);
+  background: var(--toggle-bg);
   border: none;
   border-radius: 0;
-  box-shadow: 0 0 0 1px var(--border-strong);
+  box-shadow: 0 0 0 1px var(--toggle-edge);
 }
 
 .theme-toggle:hover:not(:disabled) {
   background: var(--surface-hover);
-  box-shadow: 0 0 0 1px var(--accent-yellow);
+  box-shadow: 0 0 0 1px var(--toggle-hover-edge);
   transform: none;
-}
-
-:root[data-theme="dark"] .theme-toggle {
-  color: var(--masthead-blue);
-  background: var(--masthead-bg);
-  box-shadow: 0 0 0 1px var(--masthead-border);
-}
-
-:root[data-theme="dark"] .theme-toggle:hover:not(:disabled) {
-  background: var(--surface-hover);
-  box-shadow: 0 0 0 1px var(--masthead-blue);
 }
 
 .theme-toggle svg.icon {
@@ -634,8 +566,8 @@ h2 a:hover {
 }
 
 .masthead {
-  --link-hover-bg: #4a525d;
-  --link-hover-border: #8d96a2;
+  --link-hover-bg: var(--masthead-link-hover-bg);
+  --link-hover-border: var(--masthead-link-hover-border);
   --blob: 6.5rem;
   --blob-x: 2.5rem;
   --dot: 0.5rem;
@@ -704,7 +636,7 @@ h2 a:hover {
   width: auto;
   border-radius: var(--radius);
   border: 2px solid var(--masthead-text);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--logo-shadow);
   transform: translateY(-50%) rotate(-4deg);
   transition: transform 0.15s ease;
 }
@@ -771,13 +703,13 @@ h2 a:hover {
 .masthead button {
   background: var(--masthead-text);
   border-color: transparent;
-  color: #16202a;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: var(--masthead-button-text);
+  box-shadow: var(--masthead-button-shadow);
 }
 
 .masthead button:hover:not(:disabled),
 .masthead button:focus-visible {
-  background: #ffffff;
+  background: var(--masthead-button-hover);
   transform: translateY(-1px) rotate(2deg);
 }
 
@@ -856,8 +788,10 @@ label {
   color: var(--text-muted);
 }
 
+/* No wider than what it is in, however large the text: a field's own width is in characters. */
 input,
 textarea {
+  max-width: 100%;
   font: inherit;
   color: var(--text);
   min-height: 2.75rem;
@@ -990,9 +924,7 @@ a.button.primary {
   background: var(--primary-fill);
   border-color: var(--primary-fill);
   color: var(--on-primary);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 1px 2px rgba(22, 32, 42, 0.2);
+  box-shadow: var(--primary-bevel);
 }
 
 button[type="submit"]:hover:not(:disabled, [aria-disabled="true"]),
@@ -1805,21 +1737,21 @@ html.drag-active {
   background: var(--primary);
 }
 
+/* The group's name wraps above the line rather than being cut short,
+   however large the text. */
 .drop-line[data-label]::after {
   content: attr(data-label);
   position: absolute;
   inset-inline-end: 0;
   bottom: 5px;
   max-width: 80%;
-  overflow: hidden;
   padding: 0 0.45rem;
   border-radius: var(--radius-sm);
   background: var(--primary);
   color: var(--on-primary);
   font-size: 0.75rem;
   line-height: 1.5;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* While a row is lifted, each open group ends in room enough to aim
@@ -2333,6 +2265,21 @@ td.clickable a.cell-overlay {
   margin-left: 0.4rem;
 }
 
+/* On a narrow screen, or in large text, the cells keep less room about
+   their text, and a column's name may break, rather than widen the page. */
+@media (max-width: 30rem) {
+  .card-table th,
+  .card-table td,
+  .card-table td.clickable a,
+  .card-table td.clickable.back-cell {
+    padding-inline: 0.45rem;
+  }
+
+  .card-table th {
+    overflow-wrap: anywhere;
+  }
+}
+
 .card-table tbody tr:has(td.clickable):hover td {
   background: var(--surface-hover);
 }
@@ -2465,7 +2412,7 @@ form.card-edit {
   /* Full size up to 12 characters, then a little smaller per character, down
      to 0.6 of it at 52; never under 1.5rem, so it stays above the answer. */
   --fit: clamp(0.6, 1 - (var(--text-length, 0) - 12) / 100, 1);
-  font-size: max(1.5rem, clamp(2rem, 9vw, 3.25rem) * var(--fit));
+  font-size: max(1.5rem, clamp(2rem, 9vw * var(--text-scale), 3.25rem) * var(--fit));
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -2477,7 +2424,7 @@ form.card-edit {
 }
 
 .card-answer > p {
-  font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+  font-size: clamp(1.4rem, 5.5vw * var(--text-scale), 1.8rem);
 }
 
 .card-face > p.hint {
@@ -2655,27 +2602,27 @@ form.card-edit {
 }
 
 .quality-buttons button[data-grade="0"] {
-  --grade: #d63a25;
+  --grade: var(--grade-0);
 }
 
 .quality-buttons button[data-grade="1"] {
-  --grade: #e2662a;
+  --grade: var(--grade-1);
 }
 
 .quality-buttons button[data-grade="2"] {
-  --grade: #e8932a;
+  --grade: var(--grade-2);
 }
 
 .quality-buttons button[data-grade="3"] {
-  --grade: #d9b11c;
+  --grade: var(--grade-3);
 }
 
 .quality-buttons button[data-grade="4"] {
-  --grade: #7fb13c;
+  --grade: var(--grade-4);
 }
 
 .quality-buttons button[data-grade="5"] {
-  --grade: #2f8a4a;
+  --grade: var(--grade-5);
 }
 
 .quality-buttons.minimal {
@@ -2703,7 +2650,7 @@ form.card-edit {
   margin: 0;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 30rem) {
   .quality-buttons.minimal {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -3210,6 +3157,249 @@ fieldset:where(:not(.studio-scope)) label.radio-option .hint {
   margin: 0.1rem 0 0.4rem 1.6rem;
 }
 
+/*
+ * A palette's swatch in the preferences, in the palette's own colors
+ * (its data-palette, palettes.css): its background, its text, its
+ * primary fill, and the answer buttons' first and last grades.
+ */
+.palette-swatch {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin: 0 0.4rem 0 0.1rem;
+  padding: 0.2rem 0.3rem;
+  vertical-align: middle;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.palette-swatch i {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.palette-swatch .swatch-text {
+  background: var(--text);
+}
+
+.palette-swatch .swatch-primary {
+  background: var(--primary-fill);
+}
+
+.palette-swatch .swatch-worst {
+  background: var(--grade-0);
+}
+
+.palette-swatch .swatch-best {
+  background: var(--grade-5);
+}
+
+/* A palette of the user's own in the Colors group: its choice, and a
+   link to edit it beside it. */
+.own-palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.palette-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/*
+ * "Reset colors", in the Standard colors (its data-palette, palettes.css)
+ * whatever palette the page is in, so it can be read and pressed when a
+ * palette of the user's own cannot.
+ */
+.reset-colors button {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--control-border);
+}
+
+/* The palette editor (ui/PaletteEditorScreen.tsx). */
+.palette-theme {
+  margin: 1.5rem 0;
+}
+
+.color-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.color-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.color-field input[type="color"] {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.15rem;
+}
+
+.color-field code {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+/*
+ * A theme's colors as they are: the preview is given every color a
+ * palette paints (its style, held to #rrggbb) and draws with those alone.
+ */
+.palette-preview {
+  margin: 1rem 0;
+  padding: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.palette-preview p {
+  margin: 0 0 0.5rem;
+}
+
+.palette-preview .preview-heading {
+  padding: 0.5rem 0.75rem;
+  font-size: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.palette-preview .preview-muted {
+  color: var(--text-muted);
+}
+
+.palette-preview .preview-link {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.palette-preview .preview-danger {
+  color: var(--danger);
+}
+
+.palette-preview .preview-warning {
+  color: var(--warning-text);
+}
+
+.palette-preview .preview-button {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  color: var(--on-primary);
+  background: var(--primary-fill);
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.palette-preview .preview-field {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+}
+
+.palette-preview .preview-grades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+/* An answer button's tint, as .quality-buttons draws it: its grade at 24% over the surface. */
+.palette-preview .preview-grades span {
+  min-width: 2rem;
+  padding: 0.2rem 0.5rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--preview-grade) 24%, var(--surface));
+  border: 2px solid var(--preview-grade);
+  border-radius: var(--radius-sm);
+}
+
+.preview-grade-0 {
+  --preview-grade: var(--grade-0);
+}
+
+.preview-grade-1 {
+  --preview-grade: var(--grade-1);
+}
+
+.preview-grade-2 {
+  --preview-grade: var(--grade-2);
+}
+
+.preview-grade-3 {
+  --preview-grade: var(--grade-3);
+}
+
+.preview-grade-4 {
+  --preview-grade: var(--grade-4);
+}
+
+.preview-grade-5 {
+  --preview-grade: var(--grade-5);
+}
+
+.palette-theme .table-scroll {
+  overflow-x: auto;
+}
+
+table.contrast-table td,
+table.contrast-table th {
+  padding: 0.25rem 0.5rem;
+  text-align: start;
+}
+
+/* A pair's result says it in words, and in its color too. */
+table.contrast-table tr.low td:last-child {
+  color: var(--warning-text);
+  font-weight: 600;
+}
+
+table.contrast-table tr.refused td:last-child {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.palette-status {
+  font-weight: 600;
+}
+
+.palette-warning {
+  padding: 0.75rem 1rem;
+  color: var(--warning-text);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-sm);
+}
+
+.palette-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* A text size's sample line, at the size it names. */
+.text-size-sample {
+  color: var(--text);
+  line-height: 1.4;
+}
+
 /* A text's language: a button under its field, opening in place onto
    radios. Each radio's row is a 24px target at least (WCAG 2.5.8), and a
    long language name wraps rather than widening the page at 320px. */
@@ -3473,6 +3663,7 @@ details summary:hover {
 }
 
 .thing {
+  overflow-wrap: anywhere;
   margin: 1rem 0;
   padding: 0;
   border: none;
@@ -3836,7 +4027,7 @@ p[role="status"]:not(.loading) {
 
 .validation th,
 .validation td {
-  border: 1px solid var(--border, #ccc);
+  border: 1px solid var(--border);
   padding: 0.25rem 0.5rem;
   text-align: start;
   vertical-align: top;
@@ -4272,16 +4463,16 @@ p[role="status"]:not(.loading) {
    named in a legend above the bars; a pointed bar is outlined, so each
    step keeps its tint. */
 .bar-step-1 {
-  --series: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series: var(--series-1);
 }
 .bar-step-2 {
-  --series: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series: var(--series-2);
 }
 .bar-step-3 {
-  --series: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series: var(--series-3);
 }
 .bar-step-4 {
-  --series: var(--primary);
+  --series: var(--series-4);
 }
 
 .bar-chart .bar[class*="bar-step-"] {
@@ -4329,8 +4520,7 @@ p[role="status"]:not(.loading) {
   flex: 1;
   min-width: 0;
   text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* The answer buttons pressed: a bar a kind of answer, its name beside

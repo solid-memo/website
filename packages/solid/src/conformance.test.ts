@@ -298,6 +298,17 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
   agent: {
     1: { name: "Anton", mbox: "mailto:anton@example.com" },
   },
+  palette: {
+    1: {
+      title: { en: "Reading", sv: "Läsning" },
+      basedOn: `${SM_NS}parchmentPalette`,
+      lightColors: "https://pod.example/solid-memo/a/palettes.ttl#palette-1-light",
+      darkColors: "https://pod.example/solid-memo/a/palettes.ttl#palette-1-dark",
+    },
+  },
+  colorSet: {
+    1: { backgroundColor: "#f4ecd8", textColor: "#2B2118", grade0Color: "#b3261e" },
+  },
   distribution: {
     1: {
       accessUrl: "https://pod.example/d.ttl",
@@ -469,6 +480,20 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       scheduler: `${SM_NS}fsrs6`,
       desiredRetention: 0.85,
       schedulerInvitationDismissed: false,
+    },
+    6: {
+      newCardsPerDay: 20,
+      maxReviewsPerDay: 200,
+      dayBoundaryHour: 4,
+      answerScale: "sm2",
+      developerMode: false,
+      invalidDataPolicy: `${SM_NS}warnOnly`,
+      theme: `${SM_NS}darkTheme`,
+      scheduler: `${SM_NS}fsrs6`,
+      desiredRetention: 0.85,
+      schedulerInvitationDismissed: true,
+      palette: `${SM_NS}highContrastPalette`,
+      textSize: `${SM_NS}largerTextSize`,
     },
   },
   documentReceipt: {

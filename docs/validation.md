@@ -39,7 +39,7 @@ flowchart LR
     accTitle: Validating an instance
     accDescr: The validation screen lists the instance's documents and checks each against its published shape with the SHACL engine.
     ui["ValidationContainer<br/>#/validate"] --> uc["validateInstance"]
-    uc --> docs["instanceDocumentUrls<br/>meta, preferences, catalog,<br/>every deck's cards + reviews,<br/>every draft's documents"]
+    uc --> docs["instanceDocumentUrls<br/>meta, preferences, palettes, catalog,<br/>every deck's cards + reviews,<br/>every draft's documents"]
     docs --> port["ShapeValidator.validateDocument"]
     port --> pod["pod document<br/>(authenticated fetch)"]
     port --> shapes["ns/shapes/&lt;class&gt;/v&lt;N&gt;.ttl<br/>(published with the site)"]
@@ -289,7 +289,8 @@ catalog's own problem.
 ## The write check
 
 Every repository write (a deck, its agents and distribution, the
-catalog, cards, review states, preferences, the instance record) is
+catalog, cards, review states, preferences, a palette and its color
+sets, the instance record) is
 checked before it is saved: the subjects the write touches against their
 shapes, and — in a document with DCAT subjects — against DCAT-AP
 (`checkSubjects` in [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),

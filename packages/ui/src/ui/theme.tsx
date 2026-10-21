@@ -6,13 +6,19 @@ import { createContext, type ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import {
+  isHexColor,
+  paintedColors,
+  PAINTED_ROLES,
+  type CustomPalette,
+  type ShownPalette,
+} from "@solid-memo/domain/customPalette";
+import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
+import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
 
 /** The browser's wish for a dark page. */
 export const DARK_QUERY = "(prefers-color-scheme: dark)";
-
-/** The browser's chrome around the page, matching each theme's background. */
-const THEME_COLORS: Record<Theme, string> = { light: "#f7f6f1", dark: "#11171e" };
 
 /** The theme the browser prefers. */
 export function browserTheme(): Theme {
@@ -22,18 +28,83 @@ export function browserTheme(): Theme {
 /**
  * Shows the page in a theme: the stylesheet's colors follow the root's
  * data-theme (index.html sets it before the first paint), the browser's
- * chrome follows the theme-color meta tags.
+ * chrome follows the theme-color meta tags, in the page's background
+ * as the palette shown has it (--bg, palettes.css).
  */
 export function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  const background = getComputedStyle(root).getPropertyValue("--bg").trim();
   for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
-    meta.content = THEME_COLORS[theme];
+    meta.content = background;
   }
 }
 
-/** The query key of an instance's theme, to refetch it after a write. */
-export function instanceThemeKey(instanceUrl: string) {
-  return ["instanceTheme", instanceUrl];
+/**
+ * Shows the page in a palette: the stylesheet's colors follow the root's
+ * data-palette (index.html sets it before the first paint), which the
+ * standard palette goes without. Before applyTheme, whose meta tags take
+ * the background the palette gives.
+ */
+export function applyPalette(palette: Palette) {
+  const root = document.documentElement;
+  if (palette === DEFAULT_PALETTE) delete root.dataset.palette;
+  else root.dataset.palette = palette;
+}
+
+/**
+ * Colors as style properties a palette of the user's own may set: only
+ * the roles it may paint (PAINTED_ROLES), each only when its value is
+ * `#rrggbb`. What the pod, or the device's copy of it, says is held to
+ * this once more where it is painted, so no CSS text, `url()` or `var()`
+ * from either ever reaches a style (docs/theme.md, Palettes of one's
+ * own).
+ */
+export function paletteStyle(colors: Readonly<Record<string, string>>): Record<string, string> {
+  return Object.fromEntries(
+    PAINTED_ROLES.filter((role) => Object.hasOwn(colors, role) && isHexColor(colors[role])).map(
+      (role) => [role, colors[role]!],
+    ),
+  );
+}
+
+/**
+ * Paints the root in a palette of the user's own, in the theme shown,
+ * over its base (applyPalette): each of its colors set on the root's
+ * style, one property at a time (paletteStyle). With none, every color
+ * a palette may paint is taken off the root again. Before applyTheme,
+ * whose meta tags take the background it gives.
+ */
+export function applyCustomColors(custom: CustomPalette | null, theme: Theme) {
+  const style = document.documentElement.style;
+  for (const role of PAINTED_ROLES) style.removeProperty(role);
+  if (custom === null) return;
+  for (const [role, color] of Object.entries(paletteStyle(paintedColors(custom, theme))))
+    style.setProperty(role, color);
+}
+
+/**
+ * Shows the text at a size: the stylesheet scales the root's font size
+ * by the root's data-text-size (index.html sets it before the first
+ * paint), which the default size goes without.
+ */
+export function applyTextSize(size: TextSize) {
+  const root = document.documentElement;
+  if (size === DEFAULT_TEXT_SIZE) delete root.dataset.textSize;
+  else root.dataset.textSize = size;
+}
+
+/**
+ * The query key of how an instance's preferences show the app, its
+ * theme, palette and text size, to refetch them after a write.
+ */
+export function instanceAppearanceKey(instanceUrl: string) {
+  return ["instanceAppearance", instanceUrl];
+}
+
+/** The query key of the palettes the user designed in an instance. */
+export function palettesKey(instanceUrl: string) {
+  return ["palettes", instanceUrl];
 }
 
 interface ThemeState {
@@ -47,6 +118,22 @@ interface ThemeState {
   followInstance(instanceUrl: string | null): void;
   /** Show the choice an instance's preferences hold. */
   adoptTheme(choice: ThemeChoice): void;
+  /** The palette chosen: a built-in one, or the base of the user's own shown over it. */
+  palette: Palette;
+  /** The palette of the user's own shown, over its base; null for none. */
+  customPalette: CustomPalette | null;
+  /** Show the page in another palette from now on. */
+  choosePalette(palette: Palette): void;
+  /** Show the page in a palette of the user's own from now on. */
+  chooseCustomPalette(palette: CustomPalette): void;
+  /** Show the palette an instance's preferences are shown in. */
+  adoptPalette(shown: ShownPalette): void;
+  /** The text size chosen. */
+  textSize: TextSize;
+  /** Show the text at another size from now on. */
+  chooseTextSize(size: TextSize): void;
+  /** Show the text at the size an instance's preferences hold. */
+  adoptTextSize(size: TextSize): void;
 }
 
 /** What a theme state does with what it is not asked to keep. */
@@ -58,6 +145,14 @@ const ThemeContext = createContext<ThemeState>({
   chooseTheme: ignore,
   followInstance: ignore,
   adoptTheme: ignore,
+  palette: DEFAULT_PALETTE,
+  customPalette: null,
+  choosePalette: ignore,
+  chooseCustomPalette: ignore,
+  adoptPalette: ignore,
+  textSize: DEFAULT_TEXT_SIZE,
+  chooseTextSize: ignore,
+  adoptTextSize: ignore,
 });
 
 /** The theme the screens below are shown in, and how to choose another. */
@@ -67,6 +162,14 @@ export function ThemeProvider({
   onChoose,
   onFollowInstance = ignore,
   onAdopt = ignore,
+  palette = DEFAULT_PALETTE,
+  customPalette = null,
+  onChoosePalette = ignore,
+  onChooseCustomPalette = ignore,
+  onAdoptPalette = ignore,
+  textSize = DEFAULT_TEXT_SIZE,
+  onChooseTextSize = ignore,
+  onAdoptTextSize = ignore,
   children,
 }: {
   choice: ThemeChoice;
@@ -75,6 +178,14 @@ export function ThemeProvider({
   onChoose: (choice: ThemeChoice) => void;
   onFollowInstance?: (instanceUrl: string | null) => void;
   onAdopt?: (choice: ThemeChoice) => void;
+  palette?: Palette;
+  customPalette?: CustomPalette | null;
+  onChoosePalette?: (palette: Palette) => void;
+  onChooseCustomPalette?: (palette: CustomPalette) => void;
+  onAdoptPalette?: (shown: ShownPalette) => void;
+  textSize?: TextSize;
+  onChooseTextSize?: (size: TextSize) => void;
+  onAdoptTextSize?: (size: TextSize) => void;
   children: ComponentChildren;
 }) {
   return (
@@ -85,6 +196,14 @@ export function ThemeProvider({
         chooseTheme: onChoose,
         followInstance: onFollowInstance,
         adoptTheme: onAdopt,
+        palette,
+        customPalette,
+        choosePalette: onChoosePalette,
+        chooseCustomPalette: onChooseCustomPalette,
+        adoptPalette: onAdoptPalette,
+        textSize,
+        chooseTextSize: onChooseTextSize,
+        adoptTextSize: onAdoptTextSize,
       }}
     >
       {children}
@@ -98,23 +217,42 @@ export function useTheme(): ThemeState {
 }
 
 /**
- * Ties the theme to the open instance: shows the choice its preferences
- * hold, and has a new choice kept there (once it has preferences).
+ * Ties the theme, the palette and the text size to the open instance:
+ * shows the choices its preferences hold, and has a new choice kept
+ * there (once it has preferences).
  */
 export function useInstanceTheme(useCases: UseCases, instanceUrl: string | null) {
-  const { followInstance, adoptTheme } = useTheme();
+  const { followInstance, adoptTheme, adoptPalette, adoptTextSize } = useTheme();
   // A layout effect, so the instance is let go of as the screen goes (Preact 11 runs a plain effect's cleanup a frame late).
   useLayoutEffect(() => {
     followInstance(instanceUrl);
     return () => followInstance(null);
   }, [instanceUrl]);
-  const query = useQuery({
-    queryKey: instanceThemeKey(instanceUrl ?? ""),
+  const key = instanceAppearanceKey(instanceUrl ?? "");
+  const enabled = instanceUrl !== null;
+  const theme = useQuery({
+    queryKey: [...key, "theme"],
     queryFn: () => useCases.instanceTheme(instanceUrl!),
-    enabled: instanceUrl !== null,
+    enabled,
+  });
+  const palette = useQuery({
+    queryKey: [...key, "palette"],
+    queryFn: () => useCases.instancePalette(instanceUrl!),
+    enabled,
+  });
+  const textSize = useQuery({
+    queryKey: [...key, "textSize"],
+    queryFn: () => useCases.instanceTextSize(instanceUrl!),
+    enabled,
   });
   // Every read counts, an unchanged one too: after a failed write it puts back what the pod holds.
   useEffect(() => {
-    if (query.data !== undefined && query.data !== null) adoptTheme(query.data);
-  }, [query.data, query.dataUpdatedAt]);
+    if (theme.data !== undefined && theme.data !== null) adoptTheme(theme.data);
+  }, [theme.data, theme.dataUpdatedAt]);
+  useEffect(() => {
+    if (palette.data !== undefined && palette.data !== null) adoptPalette(palette.data);
+  }, [palette.data, palette.dataUpdatedAt]);
+  useEffect(() => {
+    if (textSize.data !== undefined && textSize.data !== null) adoptTextSize(textSize.data);
+  }, [textSize.data, textSize.dataUpdatedAt]);
 }

@@ -56,6 +56,30 @@
     "light": "Ljust",
     "dark": "Mörkt"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "De vanliga färgerna, svarsknapparna från rött till grönt."
+    },
+    "highContrast": {
+      "name": "Hög kontrast",
+      "description": "Svart och vitt, med texten och fältens kanter som skarpast."
+    },
+    "colorVision": {
+      "name": "Färgblindvänlig",
+      "description": "Blått, orange och cinnoberrött i stället för rött och grönt."
+    },
+    "parchment": {
+      "name": "Pergament (lite bländning)",
+      "description": "Varma ytor, mörkare än vitt, som bländar mindre."
+    }
+  },
+  "textSize": {
+    "default": "Standard",
+    "large": "Stor",
+    "larger": "Större",
+    "largest": "Störst"
+  },
   "common": {
     "cardCount": {
       "one": "{count} kort",
@@ -144,7 +168,8 @@
     "course": "Kurs",
     "courseReview": "Slutrepetition",
     "groups": "Grupper",
-    "importUrl": "Lägg till från en länk"
+    "importUrl": "Lägg till från en länk",
+    "palette": "Palett"
   },
   "browser": {
     "heading": "Bläddra: {deck}",
@@ -957,7 +982,7 @@
     "countIn": "{what} i {decks}",
     "instanceFormat": "instansformat {version}",
     "catalogueFormat": "en katalog över varje instans kortlekar, som andra appar läser som en DCAT-katalog",
-    "preferencesFormat": "inställningsformat {version}, som sparar svarsskalan, utvecklarläget, vad som ska hända med ogiltiga data, temat och schemaläggaren",
+    "preferencesFormat": "inställningsformat {version}, som sparar svarsskalan, utvecklarläget, vad som ska hända med ogiltiga data, temat, schemaläggaren, färgerna och textstorleken",
     "deckFormat": "kortleksformat {version}, som beskriver kortlekar med standarderna DCAT och SKOS, ger varje kortlek en beskrivning och låter en kortleks titel, beskrivning och nyckelord vara på valfritt språk som du anger",
     "cardFormat": "kortformat {version}, som lägger till bilder på kort, låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder, låter ett korts text vara på valfritt språk som du anger och lägger till en etikett ovanför ett korts framsida",
     "reviewFormat": "repetitionstillståndsformat {version}, som sparar varje studieriktnings tillstånd och dagens ångra-ögonblicksbild",
@@ -1110,6 +1135,21 @@
       "legend": "Utseende",
       "hint": "Gäller direkt. När inställningarna har sparats sparas det i din Pod, så att alla enheter du loggar in på ser likadana ut."
     },
+    "palette": {
+      "legend": "Färger",
+      "hint": "Gäller direkt, i ljust och mörkt tema. När inställningarna har sparats sparas den i din Pod, liksom temat.",
+      "moreContrast": "Din enhet ber om mer kontrast: Hög kontrast kan passa dig.",
+      "ownDescription": "Dina egna färger, byggda på {base}.",
+      "edit": "Redigera",
+      "editLabel": "Redigera {name}",
+      "design": "Skapa en palett",
+      "reset": "Återställ färgerna"
+    },
+    "textSize": {
+      "legend": "Textstorlek",
+      "hint": "Gäller direkt och förstorar webbläsarens egen textstorlek. När inställningarna har sparats sparas den i din Pod, liksom temat.",
+      "sample": "Ett kort i taget, lite varje dag."
+    },
     "heading": "Studieinställningar",
     "loading": "Läser in inställningar…",
     "newCardsPerDay": "Nya kort per dag",
@@ -1164,6 +1204,80 @@
       "hint": "Visar utvecklarverktyg: ditt råa WebID-dokument under appen, och en kontroll av den här instansens dokument mot Solid Memos former."
     },
     "save": "Spara"
+  },
+  "paletteEditor": {
+    "headingNew": "Skapa en palett",
+    "headingEdit": "Redigera en palett",
+    "intro": "Välj de färger du läser bäst. Varje par som bär text mäts medan du väljer: ett par med mindre kontrast än det behöver markeras, och innan det sparas får du frågan.",
+    "name": "Namn",
+    "basedOn": "Bygger på",
+    "basedOnHint": "En färg du lämnar som den är förblir baspalettens.",
+    "light": "Ljust tema",
+    "dark": "Mörkt tema",
+    "clear": {
+      "light": "Tillbaka till basens ljusa färger",
+      "dark": "Tillbaka till basens mörka färger"
+    },
+    "status": {
+      "pass": "Varje par har den kontrast det behöver.",
+      "low": {
+        "one": "{count} par har mindre kontrast än det behöver.",
+        "other": "{count} par har mindre kontrast än de behöver."
+      },
+      "refused": "Texten är för blek för att läsas mot bakgrunden. Välj färger som skiljer sig mer."
+    },
+    "useAnyway": "Använd ändå",
+    "save": "Spara och använd",
+    "saving": "Sparar…",
+    "cancel": "Tillbaka till inställningarna",
+    "loading": "Läser in paletterna…",
+    "preview": {
+      "heading": "Ett korts fråga",
+      "muted": "En ledtråd, i dämpad text",
+      "link": "En länk",
+      "danger": "Fara",
+      "warning": "Varning",
+      "button": "En knapp",
+      "field": "Ett fält"
+    },
+    "contrast": {
+      "light": "Kontrast i ljust tema",
+      "dark": "Kontrast i mörkt tema",
+      "front": "Färg",
+      "back": "På",
+      "ratio": "Kontrast",
+      "needs": "Behöver",
+      "result": "Resultat",
+      "tint": {
+        "12": "tonen av {button}",
+        "24": "tonen av {button} under pekaren"
+      },
+      "ratioValue": "{ratio}:1",
+      "pass": "Räcker",
+      "low": "För lite",
+      "refused": "Oläslig"
+    },
+    "role": {
+      "bg": "Sidans bakgrund",
+      "surface": "Kort och paneler",
+      "surfaceSunken": "Nedsänkta ytor",
+      "surfaceHover": "Ytor under pekaren",
+      "text": "Text",
+      "textMuted": "Dämpad text",
+      "border": "Linjer",
+      "controlBorder": "Fältens kanter",
+      "primary": "Huvudfärg och fokusring",
+      "primaryFill": "Knappar",
+      "primaryHover": "Knappar under pekaren",
+      "primarySoft": "Huvudfärgens ton",
+      "onPrimary": "Text på knappar",
+      "link": "Länkar",
+      "danger": "Faratext",
+      "dangerSoft": "Faratextens ton",
+      "warningText": "Varningstext",
+      "warningSoft": "Varningstextens ton",
+      "grade": "Svarsknapp {grade}"
+    }
   },
   "findable": {
     "heading": "Hittbar för andra appar",
@@ -1385,6 +1499,9 @@
     "authorEmpty": "En upphovsperson behöver ett namn.",
     "authorTwice": "{author} nämns två gånger. Nämn varje upphovsperson en gång.",
     "instanceNameEmpty": "En instans behöver ett namn.",
+    "paletteNameEmpty": "En palett behöver ett namn.",
+    "paletteUnreadable": "Texten är för blek för att läsas mot bakgrunden (mindre än 3:1). Välj färger som skiljer sig mer.",
+    "paletteContrastLow": "Några färger har mindre kontrast än de behöver. Välj andra, eller använd dem ändå.",
     "catalogNeedsDescription": "Katalogen behöver en beskrivning.",
     "noCatalogToUpdate": "Den här instansen har ingen katalog än. Uppdatera instansen i Solid Memo först.",
     "noMetaToUpdate": "Den här instansen har ingen beskrivning att uppdatera. Läs in sidan igen och försök på nytt.",

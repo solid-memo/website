@@ -4,23 +4,35 @@
 
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import {
+  colorOf,
+  contrast,
+  contrastTargets,
+  literalColors,
+  paletteBlocks,
+} from "@solid-memo/domain/testing/contrast";
+
+/** The site's stylesheet, and the palettes it imports from beside it. */
+const SITE = createRequire(import.meta.url).resolve("@solid-memo/ui/style.css");
+const PALETTES = readFileSync(join(dirname(SITE), "palettes.css"), "utf8");
 
 /*
  * The Studio's stylesheet over the site's, as the page has them once
  * the Studio's chunk is in (style.css first, then studio.css), checked
  * through the cascade: it holds under data-surface="studio" alone, so
  * Solid Memo's screens look as they did. The font imports are left out:
- * the test DOM has no packages to fetch.
+ * the test DOM has no packages to fetch; the palettes are put in where
+ * style.css imports them.
  */
 beforeAll(() => {
-  const site = createRequire(import.meta.url).resolve("@solid-memo/ui/style.css");
-  for (const path of [site, join(import.meta.dirname, "studio.css")]) {
+  for (const path of [SITE, join(import.meta.dirname, "studio.css")]) {
     const style = document.createElement("style");
     // On one line each, a selector or a value broken over lines: happy-dom
     // drops a rule whose selector list breaks inside `:not(…)`.
     style.textContent = readFileSync(path, "utf8")
+      .replace('@import "./palettes.css";', () => PALETTES)
       .replace(/^@import .*$/gm, "")
       .replace(/\n\s*/g, " ");
     document.head.append(style);
@@ -315,15 +327,12 @@ describe("the Studio's stylesheet", () => {
 });
 
 /*
- * The colors studio.css draws with, all the site's tokens (style.css),
- * in each theme: every text color it uses on every surface it uses, as
- * any of them may meet. The surfaces that hold no text are left out.
+ * The colors studio.css draws with, all the site's roles (palettes.css),
+ * in each palette's blocks: every text color it uses on every surface it
+ * uses, as any of them may meet. The surfaces that hold no text are left
+ * out.
  */
 describe("the Studio's contrast", () => {
-  const site = readFileSync(
-    createRequire(import.meta.url).resolve("@solid-memo/ui/style.css"),
-    "utf8",
-  );
   const sheet = readFileSync(join(import.meta.dirname, "studio.css"), "utf8").replace(
     /\/\*[\s\S]*?\*\//g,
     "",
@@ -341,16 +350,13 @@ describe("the Studio's contrast", () => {
   const studio = sheet.slice(0, forcedStart) + sheet.slice(forcedEnd);
   const forced = sheet.slice(forcedStart, forcedEnd);
 
-  /** The #rrggbb custom properties the block `selector` in style.css declares, by name. */
-  const tokens = (selector: string): Record<string, string> => {
-    const start = site.indexOf(`${selector} {`);
-    const block = site.slice(start, site.indexOf("}", start));
-    return Object.fromEntries(
-      [...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6});/g)].map((m) => [m[1]!, m[2]!]),
-    );
-  };
-  const light = tokens(":root");
-  const themes = { light, dark: { ...light, ...tokens(':root[data-theme="dark"]') } };
+  /** Each palette block's roles, by its selector, and the ratio its text needs (4.5:1, High contrast's 7:1). */
+  const blocks = paletteBlocks(PALETTES).map(
+    ({ selector, roles, palette }) => [selector, roles, contrastTargets(palette).text] as const,
+  );
+  /** WCAG's contrast ratio of two roles of a block. */
+  const ratio = (roles: Record<string, string>, text: string, surface: string) =>
+    contrast(colorOf(`var(${text})`, roles), colorOf(`var(${surface})`, roles));
 
   /** A stylesheet's rules, as each selector and the declarations it sets. */
   const rulesOf = (css: string) =>
@@ -377,24 +383,24 @@ describe("the Studio's contrast", () => {
     "--zoom-backdrop": ".studio-dialog::backdrop",
   };
 
-  /** WCAG's contrast ratio of two #rrggbb colors. */
-  const contrast = (a: string, b: string): number => {
-    const luminance = (hex: string) => {
-      const [r, g, bl] = [1, 3, 5].map((i) => {
-        const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * r! + 0.7152 * g! + 0.0722 * bl!;
-    };
-    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-    return (high! + 0.05) / (low! + 0.05);
-  };
-
   /** The values `body` gives the properties that color: text, backgrounds, and an SVG shape's fill and line. */
   const colorsOf = (body: string) =>
     [...body.matchAll(/(?:^|[;\s])(?:color|background(?:-color)?|fill|stroke):\s*([^;]+);/g)].map(
       (m) => m[1]!,
     );
+
+  // Larger text scales what is in rem (docs/theme.md, Text size), not what is in px.
+  it("sizes no text in px or by the window alone, and breaks no layout at a width in px", () => {
+    expect(sheet).not.toMatch(/(?:^|[;\s{])font-size:[^;]*\dpx/);
+    expect(sheet).not.toMatch(/(?:^|[;\s{])font-size:[^;]*\dvw(?! \* var\(--text-scale\))/);
+    const queries = [...sheet.matchAll(/@media([^{]*)\{/g)].map((m) => m[1]!.trim());
+    expect(queries.length).toBeGreaterThan(0);
+    for (const query of queries) expect(query).not.toMatch(/\dpx/);
+  });
+
+  it("writes out no color of its own", () => {
+    expect(literalColors(sheet)).toEqual([]);
+  });
 
   it("draws only with the site's tokens, or a mix of two", () => {
     const token = String.raw`var\(--[\w-]+\)`;
@@ -457,9 +463,9 @@ describe("the Studio's contrast", () => {
     }
   });
 
-  it.each(Object.entries(themes))(
-    "keeps every line and shape the graph draws at 3:1 or more on its surface in the %s theme",
-    (_, theme) => {
+  it.each(blocks)(
+    "keeps every line and shape the graph draws at 3:1 or more on its surface in %s",
+    (_, roles) => {
       // A fill an outline in --text bounds, and the gap a node's own line leaves about it (--surface), need none.
       // A term's own edges mixed paler (a mix, unmatched here) are so only by the thousand, an area more than lines; fewer are --warning-text.
       // So are the edges bundled along the tree, drawn again in full, in these, as their node is selected or pointed at.
@@ -477,7 +483,7 @@ describe("the Studio's contrast", () => {
         expect.arrayContaining(["--primary", "--text-muted", "--warning-text"]),
       );
       for (const token of drawn) {
-        expect({ token, enough: contrast(theme[token]!, theme["--surface"]!) >= 3 }).toEqual({
+        expect({ token, enough: ratio(roles, token, "--surface") >= 3 }).toEqual({
           token,
           enough: true,
         });
@@ -493,22 +499,20 @@ describe("the Studio's contrast", () => {
     }
   });
 
-  it.each(Object.entries(themes))(
-    "keeps every text color at 4.5:1 or more on every surface in the %s theme",
-    (_, theme) => {
+  it.each(blocks)(
+    "keeps every text color at the ratio text needs on every surface in %s",
+    (_, roles, needs) => {
       const texts = used("color");
       const surfaces = used("background").filter((surface) => !(surface in TEXTLESS));
       expect(texts).toContain("--text-muted");
       expect(surfaces).toContain("--surface-sunken");
       for (const text of texts) {
         for (const surface of surfaces) {
-          expect({ text, surface, enough: contrast(theme[text]!, theme[surface]!) >= 4.5 }).toEqual(
-            {
-              text,
-              surface,
-              enough: true,
-            },
-          );
+          expect({ text, surface, enough: ratio(roles, text, surface) >= needs }).toEqual({
+            text,
+            surface,
+            enough: true,
+          });
         }
       }
     },

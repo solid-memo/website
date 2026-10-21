@@ -2,6 +2,7 @@ sm:Answer: class
 sm:AnswerModes: scheme
 sm:Card: class
 sm:Chapter: class
+sm:ColorSet: class
 sm:Deck: class
 sm:DeckGroup: class
 sm:DeckSchedule: class
@@ -9,12 +10,15 @@ sm:Distractor: class
 sm:DocumentReceipt: class
 sm:Instance: class
 sm:InvalidDataPolicies: scheme
+sm:Palette: class
+sm:Palettes: scheme
 sm:Preferences: class
 sm:ReviewState: class
 sm:Schedulers: scheme
 sm:Step: class
 sm:StudyDirections: scheme
 sm:TextFormats: scheme
+sm:TextSizes: scheme
 sm:Themes: scheme
 sm:answerMode: property, range skos:Concept, domain sm:Answer
 sm:answerScale: property, range xsd:string, domain sm:Preferences
@@ -29,20 +33,27 @@ sm:backImageDescription: property, range xsd:string, domain sm:Card
 sm:backLabel: property, range xsd:string, domain sm:Card
 sm:backNote: property, range xsd:string, domain sm:Card
 sm:backToFront: concept
+sm:backgroundColor: property, range xsd:string, domain sm:ColorSet
+sm:basedOn: property, range skos:Concept, domain sm:Palette
 sm:bidirectional: concept
 sm:blockInstance: concept
 sm:blockSubject: concept
+sm:borderColor: property, range xsd:string, domain sm:ColorSet
 sm:cardCount: property, range xsd:integer, domain sm:Deck
 sm:cardsDocument: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Deck
 sm:cardsVersion: property, range xsd:string, domain sm:DeckSchedule
 sm:checkedBy: property, range sm:Card, domain sm:Step
 sm:chosenDistractor: property, range sm:Distractor, domain sm:Answer
+sm:colorVisionPalette: concept
 sm:completedChapter: property, range sm:Chapter, domain sm:Deck
 sm:conformedTo: property, range xsd:string, domain sm:DocumentReceipt
+sm:dangerColor: property, range xsd:string, domain sm:ColorSet
+sm:darkColors: property, range sm:ColorSet, domain sm:Palette
 sm:darkTheme: concept
 sm:dayBoundaryHour: property, range xsd:integer, domain sm:Preferences
 sm:deckMaxReviewsPerDay: property, range xsd:integer, domain sm:Deck
 sm:deckNewCardsPerDay: property, range xsd:integer, domain sm:Deck
+sm:defaultTextSize: concept
 sm:desiredRetention: property, range xsd:decimal, domain sm:Preferences
 sm:developerMode: property, range xsd:boolean, domain sm:Preferences
 sm:difficulty: property, range xsd:decimal, domain sm:ReviewState
@@ -54,6 +65,7 @@ sm:documentVersion: property, range xsd:string, domain sm:DocumentReceipt
 sm:due: property, range xsd:string, domain sm:ReviewState
 sm:dueOnDay: property, range xsd:string, domain sm:DeckSchedule
 sm:easeFactor: property, range xsd:decimal, domain sm:ReviewState
+sm:fieldEdgeColor: property, range xsd:string, domain sm:ColorSet
 sm:firstReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
 sm:formatVersion: property, range xsd:integer
 sm:front: property, range xsd:string, domain sm:Card
@@ -63,20 +75,36 @@ sm:frontLabel: property, range xsd:string, domain sm:Card
 sm:frontNote: property, range xsd:string, domain sm:Card
 sm:frontToBack: concept
 sm:fsrs6: concept
+sm:grade0Color: property, range xsd:string, domain sm:ColorSet
+sm:grade1Color: property, range xsd:string, domain sm:ColorSet
+sm:grade2Color: property, range xsd:string, domain sm:ColorSet
+sm:grade3Color: property, range xsd:string, domain sm:ColorSet
+sm:grade4Color: property, range xsd:string, domain sm:ColorSet
+sm:grade5Color: property, range xsd:string, domain sm:ColorSet
 sm:grade: property, range xsd:integer, domain sm:Answer
 sm:gradeMillis: property, range xsd:integer, domain sm:Answer
+sm:highContrastPalette: concept
 sm:intervalDays: property, range xsd:integer, domain sm:ReviewState
 sm:introducedOnDayCount: property, range xsd:integer, domain sm:DeckSchedule
 sm:invalidDataPolicy: property, range skos:Concept, domain sm:Preferences
+sm:largeTextSize: concept
+sm:largerTextSize: concept
+sm:largestTextSize: concept
 sm:lastReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
 sm:latestFormat: property, range xsd:boolean, domain sm:DocumentReceipt
+sm:lightColors: property, range sm:ColorSet, domain sm:Palette
 sm:lightTheme: concept
+sm:linkColor: property, range xsd:string, domain sm:ColorSet
 sm:markdown: concept
 sm:maxReviewsPerDay: property, range xsd:integer, domain sm:Preferences
 sm:multipleChoice: concept
+sm:mutedTextColor: property, range xsd:string, domain sm:ColorSet
 sm:newCardsPerDay: property, range xsd:integer, domain sm:Preferences
 sm:newcomerCourse: property, range http://www.w3.org/ns/dcat#DatasetSeries, domain http://www.w3.org/ns/dcat#Catalog
 sm:nextIntervalDays: property, range xsd:integer, domain sm:Answer
+sm:onPrimaryColor: property, range xsd:string, domain sm:ColorSet
+sm:palette: property, range skos:Concept, domain sm:Preferences
+sm:parchmentPalette: concept
 sm:plainText: concept
 sm:position: property, range xsd:integer
 sm:previousDifficulty: property, range xsd:decimal, domain sm:ReviewState
@@ -86,6 +114,8 @@ sm:previousIntervalDays: property, range xsd:integer, domain sm:ReviewState
 sm:previousLastReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
 sm:previousRepetitions: property, range xsd:integer, domain sm:ReviewState
 sm:previousStability: property, range xsd:decimal, domain sm:ReviewState
+sm:primaryColor: property, range xsd:string, domain sm:ColorSet
+sm:primaryFillColor: property, range xsd:string, domain sm:ColorSet
 sm:priorDue: property, range xsd:string, domain sm:Answer
 sm:priorIntervalDays: property, range xsd:integer, domain sm:Answer
 sm:publishedRelease: property, range http://www.w3.org/ns/dcat#Dataset, domain http://www.w3.org/ns/dcat#Catalog
@@ -110,15 +140,21 @@ sm:scheduler: property, range skos:Concept, domain sm:ReviewState
 sm:schedulerInvitationDismissed: property, range xsd:boolean, domain sm:Preferences
 sm:sm2: concept
 sm:stability: property, range xsd:decimal, domain sm:ReviewState
+sm:standardPalette: concept
 sm:studyDirection: property, range skos:Concept, domain sm:Deck
 sm:studyScheduler: property, range skos:Concept, domain sm:Preferences
+sm:sunkenSurfaceColor: property, range xsd:string, domain sm:ColorSet
+sm:surfaceColor: property, range xsd:string, domain sm:ColorSet
 sm:systemTheme: concept
+sm:textColor: property, range xsd:string, domain sm:ColorSet
 sm:textFormat: property, range skos:Concept
+sm:textSize: property, range skos:Concept, domain sm:Preferences
 sm:theme: property, range skos:Concept, domain sm:Preferences
 sm:theory: property, range xsd:string, domain sm:Step
 sm:unreviewedCount: property, range xsd:integer, domain sm:DeckSchedule
 sm:utcOffsetMinutes: property, range xsd:integer, domain sm:Answer
 sm:warnOnly: concept
+sm:warningColor: property, range xsd:string, domain sm:ColorSet
 topics:arabic: topic
 topics:art: topic
 topics:astronomy: topic

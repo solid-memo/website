@@ -1,0 +1,6 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# CSS text in place of a color.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:textColor "red; background: url(https://evil.example/x)" .

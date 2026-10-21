@@ -77,6 +77,8 @@ describe("PreferencesContainer", () => {
       scheduler: "sm2",
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+      textSize: "default",
     });
   });
 

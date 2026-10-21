@@ -5,29 +5,56 @@
   <meta charset="UTF-8" />
   <!-- What the page may load and run (docs/markdown.md). GitHub Pages sets no
        headers, so the policy is a meta tag, first, before anything it covers.
-       Script only from the site itself, and the theme script below by its
+       Script only from the site itself, and the first-paint script below by its
        hash (src/build.test.ts checks it still matches); no plugins, no
        <base>, no form posted anywhere. Pictures come from pods, so img-src
        stays open; style-src waits on the inline styles of src/ui. -->
   <meta http-equiv="Content-Security-Policy"
-    content="script-src 'self' 'sha256-GA9xjX8xIwJkNnm+B1POrvr6HWF6KTLvZlHcOcEBr3I='; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    content="script-src 'self' 'sha256-o/OkTyg5paAjpiXKPEbN6jdtH/hBgznG3HB8dXsFsCU='; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Spaced-repetition flashcards that live in your own Solid pod." />
   <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)" />
-  <!-- The theme before the first paint, so the page does not flash in the
-       other one: the choice kept on this device (the key
-       localStorageThemePreference.ts keeps it under), else the browser's.
-       The app takes over from here (src/ui/theme.tsx). -->
+  <!-- The theme, the palette and the text size before the first paint,
+       so the page does not flash in other colors or at another size: the
+       choices kept on this device (under the keys of the browser
+       package's localStorage{Theme,Palette,TextSize}Preference.ts), else
+       the browser's. A palette or a text size is set as it is stored, if
+       it is in the form every one is, so a later one needs no change here
+       (or to the hash above). A palette of the user's own has its colors
+       for the theme set on the root (key solid-memo:palette-colors, of
+       localStorageCustomPalettePreference.ts), each only for a role it may
+       set and only if it is #rrggbb. The app takes over from here
+       (src/ui/theme.tsx). -->
   <script>
     (function () {
-      var chosen = null;
-      try {
-        chosen = localStorage.getItem("solid-memo:theme");
-      } catch (e) {}
-      document.documentElement.dataset.theme =
+      var root = document.documentElement;
+      function stored(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch (e) {
+          return null;
+        }
+      }
+      var chosen = stored("solid-memo:theme");
+      root.dataset.theme =
         chosen === "light" || chosen === "dark" ? chosen
         : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      var name = /^[a-z][a-z-]{0,31}$/;
+      var palette = stored("solid-memo:palette");
+      if (palette !== null && name.test(palette)) root.dataset.palette = palette;
+      var size = stored("solid-memo:textSize");
+      if (size !== null && name.test(size)) root.dataset.textSize = size;
+      var role =
+        /^--(bg|surface(-sunken|-hover)?|text(-muted)?|border(-strong)?|control-border|primary(-fill|-hover|-soft)?|on-primary|link(-hover-bg)?|danger(-soft|-border)?|warning-(text|soft|border)|grade-[0-5])$/;
+      try {
+        var colors = JSON.parse(stored("solid-memo:palette-colors"))[root.dataset.theme];
+        for (var key in colors) {
+          var color = colors[key];
+          if (role.test(key) && typeof color === "string" && /^#[0-9a-fA-F]{6}$/.test(color))
+            root.style.setProperty(key, color);
+        }
+      } catch (e) {}
     })();
   </script>
   <!-- Favicons at fixed root URLs (public/), not fingerprinted assets:

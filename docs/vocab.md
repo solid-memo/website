@@ -68,6 +68,8 @@ string, so other applications can look up what it means:
 | `sm:StudyDirections` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:frontToBack`, `sm:backToFront`, `sm:bidirectional` | `sm:studyDirection` on a deck |
 | `sm:InvalidDataPolicies` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:blockInstance`, `sm:blockSubject` (default), `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
 | `sm:Themes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
+| `sm:Palettes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:standardPalette` (default), `sm:highContrastPalette`, `sm:colorVisionPalette`, `sm:parchmentPalette` | `sm:palette` in preferences ([theme.md](theme.md#palettes)) |
+| `sm:TextSizes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:defaultTextSize` (default), `sm:largeTextSize`, `sm:largerTextSize`, `sm:largestTextSize` | `sm:textSize` in preferences ([theme.md](theme.md#text-size)) |
 | `sm:AnswerModes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:recall` (absent means this), `sm:multipleChoice` | `sm:answerMode` on an answer in the [answer log](data-model.md#the-answer-log) |
 | `sm:TextFormats` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:plainText` (absent means this), `sm:markdown` | `sm:textFormat` on a card, a course step or a chapter ([Text formats](#text-formats)) |
 | `sm:Schedulers` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:sm2` (absent means this), `sm:fsrs6` | `sm:scheduler` on a review state ([Review states](#review-states)); `sm:studyScheduler` in preferences and `sm:scheduledWith` on a deck schedule ([FSRS-6](#fsrs-6)) |
@@ -85,7 +87,8 @@ string, so other applications can look up what it means:
   so the mapping between them is data.
 - `npm run generate` renders every scheme into
   `packages/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
-  `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TEXT_FORMATS`, `SCHEDULERS`, `TOPICS`), which the app lists and labels
+  `INVALID_DATA_POLICIES`, `THEMES`, `PALETTES`, `TEXT_SIZES`,
+  `ANSWER_MODES`, `TEXT_FORMATS`, `SCHEDULERS`, `TOPICS`), which the app lists and labels
   from, in the language the user reads; [concepts.ts](../packages/domain/src/concepts.ts) looks concepts up by
   IRI or notation. It renders the EU languages `external.ttl` describes
   too (`EU_LANGUAGES`: each entry's IRI, code and English label), which
@@ -148,14 +151,23 @@ string, so other applications can look up what it means:
   shape, FSRS review-state format 1, beside the concept `sm:fsrs6`; its
   `sm:studyScheduler`, `sm:desiredRetention` and
   `sm:schedulerInvitationDismissed` joined preferences format 5, and `sm:scheduledWith` deck schedule format 2, the next
-  versions of those shapes ([FSRS-6](#fsrs-6)).
+  versions of those shapes ([FSRS-6](#fsrs-6)). 1.22's `sm:palette`
+  and `sm:textSize`, with the schemes `sm:Palettes` and `sm:TextSizes`,
+  joined preferences format 6 ([theme.md](theme.md#where-the-choice-is-kept)).
+  1.23's `sm:Palette` and `sm:ColorSet`, with `sm:basedOn`,
+  `sm:lightColors`, `sm:darkColors` and a property for each color,
+  joined two new shapes, palette and color set format 1
+  ([Palettes of one's own](#palettes-of-ones-own)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
   not know reads the value, keeps it through an edit and treats the text
-  as plain, rather than erasing it or calling the subject invalid. A
+  as plain, rather than erasing it or calling the subject invalid.
+  `sm:palette` is another: a reader keeps a palette it does not know
+  through a save and shows the standard colors, so a later palette, or
+  one of the user's own, needs no new format. A
   scheme whose shape does list its concepts (`sm:studyDirection`,
-  `sm:theme`, `sm:reviewDirection`) is an `iriEnum`, and there a new
+  `sm:theme`, `sm:textSize`, `sm:reviewDirection`) is an `iriEnum`, and there a new
   concept is a new format. `sm:scheduler` lists none either, but a
   concept the app does not know is not taken for the default: it says
   the state's fields belong to another algorithm, so the state is
@@ -379,6 +391,33 @@ SM-2 ones ([#191](https://github.com/solid-memo/website/issues/191)):
   the retention is kept while SM-2 sets the due days, so a switch back
   to FSRS-6 finds the one chosen. It is a share from 0.7 to 0.97; 0.9,
   FSRS-6's default, is what preferences of format 4 are read with.
+
+## Palettes of one's own
+
+1.23 added the terms of a palette the user designs, kept in the
+instance's `palettes.ttl` ([theme.md](theme.md#palettes-of-ones-own)):
+
+| Term | Kind | Domain → range |
+|---|---|---|
+| `sm:Palette` | class, a subclass of `skos:Concept` | |
+| `sm:ColorSet` | class | |
+| `sm:basedOn` | object property | Palette → a concept of `sm:Palettes` |
+| `sm:lightColors`, `sm:darkColors` | object property | Palette → ColorSet |
+| `sm:backgroundColor`, `sm:surfaceColor`, `sm:sunkenSurfaceColor`, `sm:textColor`, `sm:mutedTextColor`, `sm:borderColor`, `sm:fieldEdgeColor`, `sm:primaryColor`, `sm:primaryFillColor`, `sm:onPrimaryColor`, `sm:linkColor`, `sm:dangerColor`, `sm:warningColor`, `sm:grade0Color` … `sm:grade5Color` | datatype property | ColorSet → `xsd:string`, `#rrggbb` |
+
+- **A palette of one's own is a concept.** `sm:palette`'s range is
+  `skos:Concept`, which a term's range never leaves, so `sm:Palette`
+  is a subclass of it: preferences that choose one of the user's
+  palettes keep to the range they always had, and need no new format.
+- **A color is a string, not a CSS value.** Each names one color role
+  of the app's ([theme.md](theme.md#color-roles)), written `#rrggbb`,
+  an opaque color in sRGB; there is no property for text that could be
+  any CSS. A role added later is a new property, and a new format of
+  the color set, whose shape is closed.
+- **Two color sets, not two sets of properties.** A palette's colors in
+  the light theme and in the dark are each a subject of their own,
+  with the same properties, rather than a light and a dark property of
+  each color.
 
 ## The language of text
 

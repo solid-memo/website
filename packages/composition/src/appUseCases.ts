@@ -16,6 +16,7 @@ import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestReposi
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 import { createSolidInstanceGraphReader } from "@solid-memo/solid/solidInstanceGraphReader";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
+import { createSolidPaletteRepository } from "@solid-memo/solid/solidPaletteRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import {
@@ -24,6 +25,9 @@ import {
 } from "@solid-memo/solid/solidReleasePublisher";
 import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
+import { createLocalStorageCustomPalettePreference } from "@solid-memo/browser/localStorageCustomPalettePreference";
+import { createLocalStoragePalettePreference } from "@solid-memo/browser/localStoragePalettePreference";
+import { createLocalStorageTextSizePreference } from "@solid-memo/browser/localStorageTextSizePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
 import { createIndexedDbResourceStore } from "@solid-memo/browser/indexedDbResourceStore";
@@ -126,6 +130,7 @@ export function createAppUseCases({
       indexUrl: libraryIndexUrl ?? `${SITE}decks/index.ttl`,
     }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
+    paletteRepository: createSolidPaletteRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator,
     repairRepository: createSolidRepairRepository({ fetch: podFetch }),
@@ -133,6 +138,9 @@ export function createAppUseCases({
     updateJournal: createLocalStorageUpdateJournal(),
     languagePreference: createLocalStorageLanguagePreference(),
     themePreference: createLocalStorageThemePreference(),
+    palettePreference: createLocalStoragePalettePreference(),
+    customPalettePreference: createLocalStorageCustomPalettePreference(),
+    textSizePreference: createLocalStorageTextSizePreference(),
     writeFence,
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),

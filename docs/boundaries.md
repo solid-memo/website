@@ -202,7 +202,8 @@ pod: its fetch refuses every method but GET and HEAD
   its own that learners never download ([studio.md](studio.md)).
 - The site's stylesheet is `ui`'s `src/style.css`, which
   `apps/web/src/main.tsx` imports; it styles `ui`'s components, and
-  none that only the Studio shows. The Studio's own,
+  none that only the Studio shows. Its colors are the roles of
+  `src/palettes.css`, which it imports itself ([theme.md](theme.md#color-roles)). The Studio's own,
   `apps/studio/src/ui/studio.css`, is imported by its shell alone
   (`shell/StudioShell.tsx`, a relative import inside the package), so
   it ships with the Studio's chunk, and every rule in it holds only

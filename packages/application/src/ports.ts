@@ -5,6 +5,9 @@
 import type { Catalog } from "@solid-memo/domain/catalog";
 import type { Locale } from "@solid-memo/domain/locale";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { CustomPalette } from "@solid-memo/domain/customPalette";
+import type { Palette } from "@solid-memo/domain/palette";
+import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
@@ -663,6 +666,26 @@ export interface PreferencesRepository {
 }
 
 /**
+ * Driven port: the palettes the user designed, in the instance's
+ * palettes document (docs/theme.md, Palettes of one's own).
+ */
+export interface PaletteRepository {
+  /**
+   * The instance's palettes, by their address; none when it has no
+   * palettes document. A palette that does not fit its shape is left
+   * out, and a color its color set does not hold as `#rrggbb` with it
+   * (paletteFromRecord).
+   */
+  listPalettes(instanceUrl: string): Promise<CustomPalette[]>;
+  /**
+   * Write the palette and its two color sets in place, so triples this
+   * app does not know survive, in one save of the document made only if
+   * it is still as it was read (If-Match).
+   */
+  savePalette(instanceUrl: string, palette: CustomPalette): Promise<void>;
+}
+
+/**
  * Driven port: one pod document checked against Solid Memo's shapes
  * (docs/validation.md). A document that does not exist is reported as
  * missing, not failed; any other failure to read it throws.
@@ -831,6 +854,43 @@ export interface ThemePreference {
   /** The chosen theme; "system" when none was chosen (or it was forgotten). */
   chosen(): ThemeChoice;
   choose(choice: ThemeChoice): void;
+}
+
+/**
+ * Driven port: the palette the user chose, kept where the app runs (the
+ * browser), since the first paint needs it before any pod is reached.
+ * Best effort: it may forget, and the app is then in its standard
+ * colors.
+ */
+export interface PalettePreference {
+  /** The chosen palette; "standard" when none was chosen (or it was forgotten). */
+  chosen(): Palette;
+  choose(palette: Palette): void;
+}
+
+/**
+ * Driven port: a copy of the user's own palette being shown, kept where
+ * the app runs (the browser), so that the first paint has its colors
+ * before any pod is reached. Best effort: it may forget, and the app is
+ * then in the palette's base until the instance is read.
+ */
+export interface CustomPalettePreference {
+  /** The palette kept; null when none is (a built-in palette is shown, or it was forgotten). */
+  chosen(): CustomPalette | null;
+  /** Keep this palette, or none. */
+  choose(palette: CustomPalette | null): void;
+}
+
+/**
+ * Driven port: the text size the user chose, kept where the app runs
+ * (the browser), since the first paint needs it before any pod is
+ * reached. Best effort: it may forget, and the text is then the
+ * browser's own size.
+ */
+export interface TextSizePreference {
+  /** The chosen size; "default" when none was chosen (or it was forgotten). */
+  chosen(): TextSize;
+  choose(size: TextSize): void;
 }
 
 /**

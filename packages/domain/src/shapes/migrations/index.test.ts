@@ -10,11 +10,17 @@ import { MIGRATIONS, migrate, stepFor } from "./index";
 const CONTEXT = { subject: "https://pod.example/x.ttl#it" };
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
-/** The concept-valued fields of migrated preferences: the policy that blocks, the browser's theme, SM-2. */
+/**
+ * The concept-valued fields of migrated preferences: the policy that
+ * blocks, the browser's theme, SM-2, the standard colors and the
+ * browser's text size.
+ */
 const MIGRATED_CONCEPTS = {
   invalidDataPolicy: `${SM}blockSubject`,
   theme: `${SM}systemTheme`,
   scheduler: `${SM}sm2`,
+  palette: `${SM}standardPalette`,
+  textSize: `${SM}defaultTextSize`,
 };
 
 const SHAPES = Object.keys(LATEST_VERSION) as ShapeName[];
@@ -348,6 +354,28 @@ describe("migrate", () => {
       scheduler: `${SM}sm2`,
       desiredRetention: 0.9,
       schedulerInvitationDismissed: false,
+      palette: `${SM}standardPalette`,
+      textSize: `${SM}defaultTextSize`,
+    });
+  });
+
+  it("shows format-5 preferences in the standard colors, with the text at the browser's size", () => {
+    const v5 = {
+      newCardsPerDay: 5,
+      maxReviewsPerDay: 50,
+      dayBoundaryHour: 4,
+      answerScale: "minimal" as const,
+      developerMode: false,
+      invalidDataPolicy: `${SM}warnOnly` as const,
+      theme: `${SM}darkTheme` as const,
+      scheduler: `${SM}fsrs6` as const,
+      desiredRetention: 0.85,
+      schedulerInvitationDismissed: true,
+    };
+    expect(migrate("preferences", { version: 5, data: v5 }, CONTEXT)).toEqual({
+      ...v5,
+      palette: `${SM}standardPalette`,
+      textSize: `${SM}defaultTextSize`,
     });
   });
 

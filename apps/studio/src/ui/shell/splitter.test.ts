@@ -9,6 +9,7 @@ import {
   DETAIL_WIDTH,
   DOCK_HEIGHT,
   draggedSize,
+  scaledPane,
   SPLITTER_STEP,
   splitterKey,
 } from "./splitter";
@@ -29,6 +30,22 @@ describe("clampSize", () => {
   it("starts each pane within its bounds", () => {
     for (const pane of [ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT])
       expect(clampSize(pane.initial, pane)).toBe(pane.initial);
+  });
+});
+
+describe("scaledPane", () => {
+  it("keeps the bounds at the browser's own text size, and makes them as much larger as the text", () => {
+    expect(scaledPane(ASIDE_WIDTH)).toEqual(ASIDE_WIDTH);
+    document.documentElement.style.fontSize = "150%";
+    try {
+      expect(scaledPane(ASIDE_WIDTH)).toEqual({
+        min: ASIDE_WIDTH.min * 1.5,
+        max: ASIDE_WIDTH.max * 1.5,
+        initial: ASIDE_WIDTH.initial,
+      });
+    } finally {
+      document.documentElement.style.fontSize = "";
+    }
   });
 });
 

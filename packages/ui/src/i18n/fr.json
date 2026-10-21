@@ -56,6 +56,30 @@
     "light": "Clair",
     "dark": "Sombre"
   },
+  "palette": {
+    "standard": {
+      "name": "Standard",
+      "description": "Les couleurs habituelles, les boutons de réponse du rouge au vert."
+    },
+    "highContrast": {
+      "name": "Contraste élevé",
+      "description": "Noir et blanc, le texte et les bords des champs aussi nets que possible."
+    },
+    "colorVision": {
+      "name": "Adapté au daltonisme",
+      "description": "Bleu, orange et vermillon à la place du rouge et du vert."
+    },
+    "parchment": {
+      "name": "Parchemin (moins éblouissant)",
+      "description": "Des surfaces chaudes, plus sombres que le blanc, qui éblouissent moins."
+    }
+  },
+  "textSize": {
+    "default": "Par défaut",
+    "large": "Grand",
+    "larger": "Plus grand",
+    "largest": "Très grand"
+  },
   "common": {
     "cardCount": {
       "one": "{count} carte",
@@ -146,7 +170,8 @@
     "course": "Cours",
     "courseReview": "Révision finale",
     "groups": "Groupes",
-    "importUrl": "Ajouter depuis un lien"
+    "importUrl": "Ajouter depuis un lien",
+    "palette": "Palette"
   },
   "browser": {
     "heading": "Parcourir : {deck}",
@@ -1012,7 +1037,7 @@
     "countIn": "{what} dans {decks}",
     "instanceFormat": "le format d’instance {version}",
     "catalogueFormat": "un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT",
-    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence et l’algorithme de planification",
+    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence, l’algorithme de planification, les couleurs et la taille du texte",
     "deckFormat": "le format de paquet {version}, qui décrit les paquets avec les normes DCAT et SKOS, donne une description à chaque paquet et permet d’écrire le titre, la description et les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez",
     "cardFormat": "le format de carte {version}, qui ajoute les images sur les cartes, permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus, permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez et ajoute une étiquette au-dessus du recto d’une carte",
     "reviewFormat": "le format d’état de révision {version}, qui conserve l’état de chaque sens d’étude et l’instantané d’annulation du jour",
@@ -1170,6 +1195,21 @@
       "legend": "Apparence",
       "hint": "S’applique immédiatement. Une fois ces préférences enregistrées, l’apparence est conservée dans votre Pod : tous les appareils sur lesquels vous vous connectez ont le même aspect."
     },
+    "palette": {
+      "legend": "Couleurs",
+      "hint": "S’applique immédiatement, en mode clair comme en mode sombre. Une fois ces préférences enregistrées, ce choix est conservé dans votre Pod, comme l’apparence.",
+      "moreContrast": "Votre appareil demande plus de contraste : Contraste élevé pourrait vous convenir.",
+      "ownDescription": "Vos propres couleurs, d’après {base}.",
+      "edit": "Modifier",
+      "editLabel": "Modifier {name}",
+      "design": "Créer une palette",
+      "reset": "Réinitialiser les couleurs"
+    },
+    "textSize": {
+      "legend": "Taille du texte",
+      "hint": "S’applique immédiatement et agrandit la taille de texte de votre navigateur. Une fois ces préférences enregistrées, elle est conservée dans votre Pod, comme l’apparence.",
+      "sample": "Une carte à la fois, un peu chaque jour."
+    },
     "heading": "Préférences d’étude",
     "loading": "Chargement des préférences…",
     "newCardsPerDay": "Nouvelles cartes par jour",
@@ -1224,6 +1264,81 @@
       "hint": "Affiche les outils de développement : votre document WebID brut sous l’application, et une vérification des documents de cette instance au regard des formes de Solid Memo."
     },
     "save": "Enregistrer"
+  },
+  "paletteEditor": {
+    "headingNew": "Créer une palette",
+    "headingEdit": "Modifier une palette",
+    "intro": "Choisissez les couleurs que vous lisez le mieux. Chaque paire qui porte du texte est mesurée au fil de vos choix : une paire qui a moins de contraste qu’il ne lui en faut est signalée, et l’enregistrer vous demande d’abord confirmation.",
+    "name": "Nom",
+    "basedOn": "D’après",
+    "basedOnHint": "Une couleur que vous laissez telle quelle reste celle de la palette de base.",
+    "light": "Thème clair",
+    "dark": "Thème sombre",
+    "clear": {
+      "light": "Revenir aux couleurs claires de la base",
+      "dark": "Revenir aux couleurs sombres de la base"
+    },
+    "status": {
+      "pass": "Chaque paire a le contraste qu’il lui faut.",
+      "low": {
+        "one": "{count} paire a moins de contraste qu’il ne lui en faut.",
+        "many": "{count} de paires ont moins de contraste qu’il ne leur en faut.",
+        "other": "{count} paires ont moins de contraste qu’il ne leur en faut."
+      },
+      "refused": "Le texte est trop pâle pour être lu sur le fond. Choisissez des couleurs plus éloignées."
+    },
+    "useAnyway": "Utiliser quand même",
+    "save": "Enregistrer et utiliser",
+    "saving": "Enregistrement…",
+    "cancel": "Retour aux préférences",
+    "loading": "Chargement des palettes…",
+    "preview": {
+      "heading": "La question d’une carte",
+      "muted": "Une indication, en texte atténué",
+      "link": "Un lien",
+      "danger": "Danger",
+      "warning": "Avertissement",
+      "button": "Un bouton",
+      "field": "Un champ"
+    },
+    "contrast": {
+      "light": "Contraste dans le thème clair",
+      "dark": "Contraste dans le thème sombre",
+      "front": "Couleur",
+      "back": "Sur",
+      "ratio": "Contraste",
+      "needs": "Il faut",
+      "result": "Résultat",
+      "tint": {
+        "12": "la teinte de {button}",
+        "24": "la teinte de {button} sous le pointeur"
+      },
+      "ratioValue": "{ratio}:1",
+      "pass": "Suffisant",
+      "low": "Insuffisant",
+      "refused": "Illisible"
+    },
+    "role": {
+      "bg": "Fond de la page",
+      "surface": "Cartes et panneaux",
+      "surfaceSunken": "Surfaces en creux",
+      "surfaceHover": "Surfaces sous le pointeur",
+      "text": "Texte",
+      "textMuted": "Texte atténué",
+      "border": "Lignes",
+      "controlBorder": "Bords des champs",
+      "primary": "Couleur principale et anneau de focus",
+      "primaryFill": "Boutons",
+      "primaryHover": "Boutons sous le pointeur",
+      "primarySoft": "Teinte de la couleur principale",
+      "onPrimary": "Texte sur les boutons",
+      "link": "Liens",
+      "danger": "Texte de danger",
+      "dangerSoft": "Teinte du texte de danger",
+      "warningText": "Texte d’avertissement",
+      "warningSoft": "Teinte du texte d’avertissement",
+      "grade": "Bouton de réponse {grade}"
+    }
   },
   "findable": {
     "heading": "Repérable par d’autres applications",
@@ -1451,6 +1566,9 @@
     "authorEmpty": "Un auteur doit avoir un nom.",
     "authorTwice": "{author} est cité deux fois. Citez chaque auteur une seule fois.",
     "instanceNameEmpty": "Une instance doit avoir un nom.",
+    "paletteNameEmpty": "Une palette doit avoir un nom.",
+    "paletteUnreadable": "Le texte est trop pâle pour être lu sur le fond (moins de 3:1). Choisissez des couleurs plus éloignées.",
+    "paletteContrastLow": "Certaines couleurs ont moins de contraste qu’il ne leur en faut. Choisissez-en d’autres, ou utilisez-les quand même.",
     "catalogNeedsDescription": "Le catalogue doit avoir une description.",
     "noCatalogToUpdate": "Cette instance n’a pas encore de catalogue. Mettez d’abord l’instance à jour dans Solid Memo.",
     "noMetaToUpdate": "Cette instance n’a aucune description à mettre à jour. Rechargez la page et réessayez.",

@@ -5,17 +5,40 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import {
+  colorOf,
+  contrast,
+  isPaletteValue,
+  literalColors,
+  contrastTargets,
+  DEFICIENCIES,
+  difference,
+  over,
+  paletteBlocks,
+  type PaletteBlock,
+  uncommented,
+} from "@solid-memo/domain/testing/contrast";
+import { PALETTES as PALETTE_IDS } from "@solid-memo/domain/palette";
+import { builtInColors, CHECKED_PAIRS, PAINTED_ROLES } from "@solid-memo/domain/customPalette";
+import { hexOf } from "@solid-memo/domain/contrast";
+import { DEFAULT_TEXT_SIZE, TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
+
+const read = (name: string) => readFileSync(join(import.meta.dirname, name), "utf8");
+/** The palettes, which style.css imports. */
+const PALETTES = read("palettes.css");
 
 /*
  * The focus indicators in style.css, checked through the cascade itself,
  * since a later or more specific rule can silently take a ring away. The
- * font imports are left out: the test DOM has no packages to fetch. Nor
- * does it know :lang(), so it reads an element marked lang="ko",
- * lang="ar" and so on itself (of the same specificity) for it.
+ * font imports are left out: the test DOM has no packages to fetch; the
+ * palettes are put in where style.css imports them. Nor does it know
+ * :lang(), so it reads an element marked lang="ko", lang="ar" and so on
+ * itself (of the same specificity) for it.
  */
 beforeAll(() => {
   const style = document.createElement("style");
-  style.textContent = readFileSync(join(import.meta.dirname, "style.css"), "utf8")
+  style.textContent = read("style.css")
+    .replace('@import "./palettes.css";', () => PALETTES)
     .replace(/^@import .*$/gm, "")
     .replace(/:lang\(([a-z]+)\)/g, '[lang|="$1"]');
   document.head.append(style);
@@ -293,6 +316,28 @@ describe("reflow", () => {
     expect(styled(html, selector).overflowWrap).toBe("anywhere");
   });
 
+  it.each(["input", "textarea"])(
+    "keeps a %s no wider than what it is in, its width in characters at any text size",
+    (tag) => {
+      expect(styled(`<${tag}></${tag}>`, tag).maxWidth).toBe("100%");
+    },
+  );
+
+  it("lets a card table's column names break, its cells' room cut, on a narrow screen", () => {
+    const narrow = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter(
+        (rule): rule is CSSMediaRule =>
+          rule instanceof CSSMediaRule && rule.conditionText === "(max-width: 30rem)",
+      )
+      .flatMap((rule) => [...rule.cssRules] as CSSStyleRule[])
+      .filter((rule) => rule.selectorText.includes(".card-table"));
+    expect(narrow.map((rule) => rule.style.cssText)).toEqual([
+      "padding-inline: 0.45rem;",
+      "overflow-wrap: anywhere;",
+    ]);
+  });
+
   it("lets a group's header wrap its actions under its name", () => {
     expect(styled(`<div class="deck-group-header"></div>`, "div").flexWrap).toBe("wrap");
     expect(
@@ -337,76 +382,408 @@ describe("reflow", () => {
   });
 });
 
-/** The custom properties a theme block in style.css declares, by name. */
-function tokens(selector: string): Record<string, string> {
-  const css = readFileSync(join(import.meta.dirname, "style.css"), "utf8");
-  const start = css.indexOf(`${selector} {`);
-  const block = css.slice(start, css.indexOf("}", start));
-  return Object.fromEntries(
-    [...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6});/g)].map((m) => [m[1], m[2]]),
+const BLOCKS = paletteBlocks(PALETTES);
+/** Standard's light block, whose roles every block sets. */
+const STANDARD = BLOCKS[0]!;
+
+/*
+ * Larger text (docs/theme.md, Text size): the text is sized in rem, so
+ * the root's font size scales it all, and what the window sizes (vw)
+ * grows with --text-scale. A font size in px would stay as it is, and a
+ * breakpoint in px would not follow the browser's own text size.
+ */
+describe("text size", () => {
+  const css = uncommented(read("style.css"));
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
+    selector: m[1]!.replace(/\s+/g, " ").trim(),
+    body: m[2]!,
+  }));
+
+  it("sizes no text in px but the focus proxy's, which must be 16px", () => {
+    expect(
+      rules
+        .filter(({ body }) => /(?:^|[;\s])font-size:[^;]*\dpx/.test(body))
+        .map(({ selector }) => selector),
+    ).toEqual([".focus-proxy"]);
+  });
+
+  it("breaks no layout at a width in px", () => {
+    const queries = [...css.matchAll(/@media([^{]*)\{/g)].map((m) => m[1]!.trim());
+    expect(queries.length).toBeGreaterThan(0);
+    for (const query of queries) expect(query).not.toMatch(/\dpx/);
+  });
+
+  it("scales the root's font size and --text-scale alike at each larger size, and the default not at all", () => {
+    const steps = rules.filter(({ selector }) => selector.startsWith(":root[data-text-size="));
+    expect(steps.map(({ selector }) => selector)).toEqual(
+      TEXT_SIZES.filter((size) => size !== DEFAULT_TEXT_SIZE).map(
+        (size) => `:root[data-text-size="${size}"]`,
+      ),
+    );
+    for (const [at, { body }] of steps.entries()) {
+      const scale = TEXT_SCALES[TEXT_SIZES[at + 1]!];
+      expect(body).toMatch(new RegExp(`--text-scale:\\s*${scale};`));
+      expect(body).toMatch(new RegExp(`font-size:\\s*${scale * 100}%;`));
+    }
+    expect(TEXT_SCALES[DEFAULT_TEXT_SIZE]).toBe(1);
+  });
+
+  it("grows the text the window sizes with --text-scale, 1 by default", () => {
+    expect(getComputedStyle(document.documentElement).getPropertyValue("--text-scale").trim()).toBe(
+      "1",
+    );
+    const sized = rules.flatMap(({ body }) =>
+      [...body.matchAll(/(?:^|[;\s])font-size:([^;]*vw[^;]*)/g)].map((m) => m[1]!.trim()),
+    );
+    expect(sized.length).toBeGreaterThan(0);
+    for (const value of sized)
+      for (const term of value.match(/[\d.]+vw(?: \* var\(--text-scale\))?/g)!)
+        expect(term).toMatch(/\* var\(--text-scale\)$/);
+  });
+});
+
+describe("palettes", () => {
+  it("starts with Standard, light then dark, and gives every palette both", () => {
+    expect(BLOCKS.slice(0, 2).map(({ palette, theme }) => `${palette} ${theme}`)).toEqual([
+      "standard light",
+      "standard dark",
+    ]);
+    const palettes = new Set(BLOCKS.map(({ palette }) => palette));
+    expect(BLOCKS.map(({ palette, theme }) => `${palette} ${theme}`).sort()).toEqual(
+      [...palettes].flatMap((palette) => [`${palette} dark`, `${palette} light`]).sort(),
+    );
+  });
+
+  it("gives an element marked with a palette that palette's colors, in the page's theme, whatever the page's palette", () => {
+    const root = document.documentElement;
+    root.dataset.palette = "high-contrast";
+    // Put in anew each time: the test DOM keeps an element's computed style once read.
+    const shown = () => {
+      document.body.innerHTML = PALETTE_IDS.map((id) => `<i data-palette="${id}"></i>`).join("");
+      return [...document.querySelectorAll("i")].map((element) =>
+        getComputedStyle(element).getPropertyValue("--bg").trim(),
+      );
+    };
+    const background = (theme: string) =>
+      PALETTE_IDS.map(
+        (id) =>
+          BLOCKS.find((block) => block.palette === id && block.theme === theme)!.roles["--bg"],
+      );
+    try {
+      expect(shown()).toEqual(background("light"));
+      root.dataset.theme = "dark";
+      expect(shown()).toEqual(background("dark"));
+    } finally {
+      delete root.dataset.palette;
+      delete root.dataset.theme;
+    }
+  });
+
+  it("has blocks for each palette the app offers, and for no other", () => {
+    expect([...new Set(BLOCKS.map(({ palette }) => palette))]).toEqual([...PALETTE_IDS]);
+  });
+
+  it.each(BLOCKS.map((block) => [block.selector, block] as const))(
+    "sets every role in %s, each written as a palette's color",
+    (_, block) => {
+      expect(Object.keys(block.roles).sort()).toEqual(Object.keys(STANDARD.roles).sort());
+      for (const [role, value] of Object.entries(block.roles)) {
+        expect({ role, value, allowed: isPaletteValue(value) }).toEqual({
+          role,
+          value,
+          allowed: true,
+        });
+        // A role it names is the block's own.
+        for (const [, named] of value.matchAll(/var\((--[\w-]+)\)/g))
+          expect(Object.keys(block.roles)).toContain(named);
+      }
+    },
   );
+
+  it("knows the forms a palette's colors are written in, and no others", () => {
+    for (const value of [
+      "#16202a",
+      "#16202a0f",
+      "transparent",
+      "var(--primary)",
+      "color-mix(in srgb, var(--accent-yellow) 70%, var(--text))",
+      "0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent)",
+      "inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent), 0 1px 2px #16202a",
+    ])
+      expect(isPaletteValue(value)).toBe(true);
+    for (const value of [
+      "#fff",
+      "#16202a0",
+      "white",
+      "rgb(255 255 255 / 0.5)",
+      "hsl(0 0% 100%)",
+      "color-mix(in oklab, #ffffff, #000000)",
+      "color-mix(in srgb, #ffffff 50%, rgb(0 0 0))",
+      "url(#a)",
+      "",
+    ])
+      expect(isPaletteValue(value)).toBe(false);
+  });
+
+  it("writes out no color of its own outside the palettes", () => {
+    expect(literalColors(read("style.css"))).toEqual([]);
+    expect(literalColors(".a { color: #abc; background: rgb(0 0 0 / 0.5) }")).toEqual([
+      "#abc",
+      "rgb(0 0 0 / 0.5)",
+    ]);
+    // A selector's #id is no color.
+    expect(literalColors("#add { color: var(--text); }")).toEqual([]);
+  });
+});
+
+/** Each palette block, by its selector, as the tests below take them. */
+const EACH_BLOCK = BLOCKS.map((block) => [block.selector, block] as const);
+
+/**
+ * The block with the two pairs below 4.5:1 that docs/accessibility.md
+ * lists among its known gaps, Standard's dark one: text on the primary
+ * color, and muted text on a grade's hovered tint. No other block may
+ * have them.
+ */
+const KNOWN_GAPS = ':root[data-theme="dark"]';
+
+/**
+ * Each pair expectContrast measured of the roles a palette of one's own
+ * paints, as `front back tint`, which its editor must measure too
+ * (CHECKED_PAIRS).
+ */
+const MEASURED = new Set<string>();
+
+/** A pair's key in MEASURED, when its colors are roles a palette of one's own paints. */
+function paintedPair(text: string, surface: string): string | null {
+  const front = /^var\((--[a-z0-9-]+)\)$/.exec(text)?.[1];
+  const plain = /^var\((--[a-z0-9-]+)\)$/.exec(surface);
+  const tint = /^color-mix\(in srgb, var\((--grade-\d)\) (\d+)%, var\(--surface\)\)$/.exec(surface);
+  const back = plain?.[1] ?? tint?.[1];
+  if (front === undefined || back === undefined) return null;
+  if (!PAINTED_ROLES.includes(front) || !PAINTED_ROLES.includes(back)) return null;
+  return `${front} ${back} ${tint?.[2] ?? ""}`;
 }
 
-/** WCAG's contrast ratio of two #rrggbb colors. */
-function contrast(a: string, b: string): number {
-  const luminance = (hex: string) => {
-    const [r, g, bl] = [1, 3, 5].map((i) => {
-      const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
-  };
-  const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-  return (high + 0.05) / (low + 0.05);
+/**
+ * Expects `text` on `surface`, both palette colors in `block`, at `ratio`
+ * or more: by default the ratio text needs in the block's palette.
+ */
+function expectContrast(
+  block: PaletteBlock,
+  text: string,
+  surface: string,
+  ratio = contrastTargets(block.palette).text,
+) {
+  const pair = paintedPair(text, surface);
+  if (pair !== null) MEASURED.add(pair);
+  const color = (value: string) => colorOf(value, block.roles);
+  const under = color(surface);
+  // A see-through surface is laid over the page's background.
+  const opaque = under.a < 1 ? over(under, color("var(--bg)")) : under;
+  expect({ text, surface, enough: contrast(color(text), opaque) >= ratio }).toEqual({
+    text,
+    surface,
+    enough: true,
+  });
 }
 
 describe("contrast", () => {
-  const light = tokens(":root");
-  const themes = { light, dark: { ...light, ...tokens(':root[data-theme="dark"]') } };
   const surfaces = ["--bg", "--surface", "--surface-sunken", "--surface-hover"];
+  const role = (name: string) => `var(${name})`;
 
-  it.each(Object.entries(themes))(
-    "gives text fields an edge of at least 3:1 in the %s theme",
-    (_, theme) => {
-      for (const surface of surfaces) {
-        expect(contrast(theme["--control-border"], theme[surface])).toBeGreaterThanOrEqual(3);
-      }
-    },
-  );
-
-  it.each(Object.entries(themes))(
-    "keeps muted text at 4.5:1 or more in the %s theme",
-    (_, theme) => {
-      for (const surface of surfaces) {
-        expect(contrast(theme["--text-muted"], theme[surface])).toBeGreaterThanOrEqual(4.5);
-      }
-    },
-  );
-
-  it("keeps muted text readable over the light background's blue disc", () => {
-    // --paper-blue, rgba(177, 207, 227, 0.5), laid over --bg.
-    expect(contrast(light["--text-muted"], "#d4e2ea")).toBeGreaterThanOrEqual(4.5);
+  it("computes WCAG's ratio, mixing as CSS does", () => {
+    const roles = { "--white": "#ffffff", "--black": "#000000" };
+    expect(contrast(colorOf("#ffffff", roles), colorOf("#000000", roles))).toBe(21);
+    expect(colorOf("color-mix(in srgb, var(--white), var(--black))", roles)).toEqual({
+      r: 127.5,
+      g: 127.5,
+      b: 127.5,
+      a: 1,
+    });
+    expect(colorOf("color-mix(in srgb, #ffffff 30%, transparent)", roles)).toEqual({
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 0.3,
+    });
+    expect(colorOf("color-mix(in srgb, transparent 20%, #000000 30%)", roles).a).toBeCloseTo(0.3);
+    expect(colorOf("#ffffff80", roles).a).toBe(128 / 255);
+    expect(() => contrast(colorOf("#000000", roles), colorOf("transparent", roles))).toThrow();
+    expect(() => colorOf("var(--none)", roles)).toThrow();
+    expect(() => colorOf("color-mix(in oklab, #ffffff, #000000)", roles)).toThrow();
+    expect(() => colorOf("white", roles)).toThrow();
+    expect(() => paletteBlocks(".a { --bg: #ffffff; }")).toThrow();
+    // A block is for the root and for an element marked with its palette, in that theme.
+    expect(() => paletteBlocks(":root { --bg: #ffffff; }")).toThrow();
+    expect(() =>
+      paletteBlocks(':root[data-theme="dark"], [data-palette="standard"] { --bg: #ffffff; }'),
+    ).toThrow();
+    expect(
+      paletteBlocks(
+        ':root[data-palette="a"][data-theme="dark"], [data-theme="dark"] [data-palette="a"] { --bg: #ffffff; }',
+      ),
+    ).toEqual([
+      {
+        palette: "a",
+        theme: "dark",
+        selector: ':root[data-palette="a"][data-theme="dark"]',
+        roles: { "--bg": "#ffffff" },
+      },
+    ]);
   });
 
-  it.each(Object.entries(themes))(
-    "keeps text on the course for newcomers' card at 4.5:1 or more in the %s theme",
-    (_, theme) => {
-      for (const text of ["--text", "--text-muted"]) {
-        expect(contrast(theme[text], theme["--primary-soft"])).toBeGreaterThanOrEqual(4.5);
+  it("asks more of High contrast: text at 7:1, and fields' edges at 4.5:1", () => {
+    expect(contrastTargets("standard")).toEqual({ text: 4.5, edge: 3 });
+    expect(contrastTargets("high-contrast")).toEqual({ text: 7, edge: 4.5 });
+  });
+
+  it.each(EACH_BLOCK)("gives text fields an edge of the ratio they need in %s", (_, block) => {
+    for (const surface of surfaces)
+      expectContrast(
+        block,
+        "var(--control-border)",
+        role(surface),
+        contrastTargets(block.palette).edge,
+      );
+  });
+
+  it.each(EACH_BLOCK)("keeps text and muted text at the ratio text needs in %s", (_, block) => {
+    for (const text of ["--text", "--text-muted"])
+      for (const surface of [...surfaces, "--primary-soft"])
+        expectContrast(block, role(text), role(surface));
+  });
+
+  it.each(EACH_BLOCK)(
+    "keeps muted text readable over the background's blue disc and the course card's yellow glow in %s",
+    (_, block) => {
+      expectContrast(block, "var(--text-muted)", "var(--paper-blue)");
+      const glow = colorOf("var(--paper-yellow)", block.roles);
+      const card = colorOf("var(--primary-soft)", block.roles);
+      expect(
+        contrast(colorOf("var(--text-muted)", block.roles), over(glow, card)),
+      ).toBeGreaterThanOrEqual(contrastTargets(block.palette).text);
+    },
+  );
+
+  it.each(EACH_BLOCK)(
+    "keeps the text on a primary fill, a link, and danger and warning text at the ratio text needs in %s",
+    (_, block) => {
+      for (const fill of ["--primary-fill", "--primary-hover"])
+        expectContrast(block, "var(--on-primary)", role(fill));
+      for (const surface of [...surfaces, "--primary-soft", "--link-hover-bg"])
+        expectContrast(block, "var(--link)", role(surface));
+      for (const surface of [...surfaces, "--danger-soft"])
+        expectContrast(block, "var(--danger)", role(surface));
+      for (const surface of [...surfaces, "--warning-soft"])
+        expectContrast(block, "var(--warning-text)", role(surface));
+    },
+  );
+
+  it.each(EACH_BLOCK)("keeps the masthead's text at the ratio text needs in %s", (_, block) => {
+    for (const surface of ["--masthead-bg", "--masthead-link-hover-bg"])
+      expectContrast(block, "var(--masthead-text)", role(surface));
+    // The session line, the masthead's text faded (style.css).
+    expectContrast(
+      block,
+      "color-mix(in srgb, var(--masthead-text) 72%, transparent)",
+      "var(--masthead-bg)",
+    );
+    for (const surface of ["--masthead-text", "--masthead-button-hover"])
+      expectContrast(block, "var(--masthead-button-text)", role(surface));
+  });
+
+  // The tints and the hovered tint of style.css's .quality-buttons; the interval under a grade's name is muted.
+  it.each(EACH_BLOCK)(
+    "keeps an answer button's text at the ratio text needs on its grade's tint in %s",
+    (_, block) => {
+      for (let grade = 0; grade <= 5; grade++) {
+        const tint = (percent: number) =>
+          `color-mix(in srgb, var(--grade-${grade}) ${percent}%, var(--surface))`;
+        expectContrast(block, "var(--text)", tint(12));
+        expectContrast(block, "var(--text)", tint(24));
+        expectContrast(block, "var(--text-muted)", tint(12));
+        if (block.selector !== KNOWN_GAPS) expectContrast(block, "var(--text-muted)", tint(24));
       }
     },
   );
 
-  it("keeps muted text readable under the course for newcomers' yellow glow", () => {
-    // --paper-yellow, rgba(232, 171, 20, 0.16) and 0.05 in the dark, laid over --primary-soft.
-    expect(contrast(light["--text-muted"], "#e6e6c6")).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(themes.dark["--text-muted"], "#253923")).toBeGreaterThanOrEqual(4.5);
+  it("has the known gaps in Standard's dark block alone, as docs/accessibility.md says", () => {
+    const gaps = BLOCKS.filter(
+      (block) =>
+        contrast(
+          colorOf("var(--on-primary)", block.roles),
+          colorOf("var(--primary)", block.roles),
+        ) < 4.5,
+    ).map(({ selector }) => selector);
+    expect(gaps).toEqual([KNOWN_GAPS]);
   });
+
+  it.each(EACH_BLOCK.filter(([selector]) => selector !== KNOWN_GAPS))(
+    "keeps the text on the primary color at the ratio text needs in %s, as on the line a dragged deck would land on",
+    (_, block) => {
+      expectContrast(block, "var(--on-primary)", "var(--primary)");
+    },
+  );
+
+  // Last, once the tests above have measured their pairs.
+  it("measures in a palette of one's own every pair it measures here of the roles that palette paints", () => {
+    const checked = new Set(
+      CHECKED_PAIRS.map(({ front, back, tint }) => `${front} ${back} ${tint ?? ""}`),
+    );
+    expect(paintedPair("var(--masthead-text)", "var(--masthead-bg)")).toBeNull();
+    expect(MEASURED.size).toBeGreaterThan(0);
+    expect([...MEASURED].filter((pair) => !checked.has(pair))).toEqual([]);
+  });
+
+  // The colors a palette of the user's own has where it sets none (domain/customPalette.ts).
+  it.each(EACH_BLOCK)(
+    "gives a palette of one's own based on it the colors of %s, opaque",
+    (_, block) => {
+      const colors = Object.fromEntries(
+        PAINTED_ROLES.map((role) => {
+          const color = colorOf(`var(${role})`, block.roles);
+          expect({ role, opaque: color.a === 1 }).toEqual({ role, opaque: true });
+          return [role, hexOf(color)];
+        }),
+      );
+      expect(builtInColors(block.palette as never, block.theme)).toEqual(colors);
+    },
+  );
+
+  it("tells colors apart as each deficiency sees them, Machado's model in OKLab", () => {
+    // Standard's grades 3 and 4: a yellow and a green, far apart to most, close to the red-blind.
+    const yellow = colorOf("#d9b11c", {});
+    const green = colorOf("#7fb13c", {});
+    expect(difference(yellow, yellow)).toBe(0);
+    expect(difference(colorOf("#000000", {}), colorOf("#ffffff", {}))).toBeCloseTo(1, 3);
+    expect(difference(yellow, green)).toBeGreaterThan(0.1);
+    expect(difference(yellow, green, "protanopia")).toBeLessThan(0.05);
+    // Blue-blindness confuses blue and green, not these.
+    expect(difference(yellow, green, "tritanopia")).toBeGreaterThan(0.1);
+  });
+
+  it.each(EACH_BLOCK.filter(([, block]) => block.palette === "color-vision"))(
+    "keeps the answer buttons' neighboring grades apart to every color vision in %s",
+    (_, block) => {
+      for (let grade = 0; grade < 5; grade++) {
+        const [one, two] = [grade, grade + 1].map((g) => colorOf(`var(--grade-${g})`, block.roles));
+        for (const deficiency of [undefined, ...DEFICIENCIES]) {
+          const apart = difference(one!, two!, deficiency);
+          expect({ grade, deficiency, apart: apart >= 0.08 }).toEqual({
+            grade,
+            deficiency,
+            apart: true,
+          });
+        }
+      }
+    },
+  );
 
   it.each(["input", "textarea"])("edges a resting %s with the control border", (tag) => {
     document.body.innerHTML = `<${tag}></${tag}>`;
     expect(getComputedStyle(document.querySelector(tag)!).borderColor).toBe(
-      light["--control-border"],
+      STANDARD.roles["--control-border"],
     );
   });
 

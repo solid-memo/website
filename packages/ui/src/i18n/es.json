@@ -56,6 +56,30 @@
     "light": "Claro",
     "dark": "Oscuro"
   },
+  "palette": {
+    "standard": {
+      "name": "Estándar",
+      "description": "Los colores de siempre, con los botones de respuesta del rojo al verde."
+    },
+    "highContrast": {
+      "name": "Alto contraste",
+      "description": "Blanco y negro, con el texto y los bordes de los campos lo más nítidos posible."
+    },
+    "colorVision": {
+      "name": "Apto para daltónicos",
+      "description": "Azul, naranja y bermellón en lugar de rojo y verde."
+    },
+    "parchment": {
+      "name": "Pergamino (menos deslumbrante)",
+      "description": "Superficies cálidas, más oscuras que el blanco, que deslumbran menos."
+    }
+  },
+  "textSize": {
+    "default": "Predeterminado",
+    "large": "Grande",
+    "larger": "Más grande",
+    "largest": "El más grande"
+  },
   "common": {
     "cardCount": {
       "one": "{count} tarjeta",
@@ -146,7 +170,8 @@
     "course": "Curso",
     "courseReview": "Repaso final",
     "groups": "Grupos",
-    "importUrl": "Añadir desde un enlace"
+    "importUrl": "Añadir desde un enlace",
+    "palette": "Paleta"
   },
   "browser": {
     "heading": "Explorador: {deck}",
@@ -1012,7 +1037,7 @@
     "countIn": "{what} en {decks}",
     "instanceFormat": "el formato de instancia {version}",
     "catalogueFormat": "un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT",
-    "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos, la apariencia y el algoritmo de programación",
+    "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos, la apariencia, el algoritmo de programación, los colores y el tamaño del texto",
     "deckFormat": "el formato de mazo {version}, que describe los mazos con los estándares DCAT y SKOS, da a cada mazo una descripción y permite que el título, la descripción y las palabras clave de un mazo estén en cualquier idioma que indiques",
     "cardFormat": "el formato de tarjeta {version}, que añade imágenes a las tarjetas, permite que un mazo de la biblioteca retire una tarjeta que ya no usa, que el texto de una tarjeta esté en cualquier idioma que indiques y añade una etiqueta sobre el anverso de una tarjeta",
     "reviewFormat": "el formato de estado de repaso {version}, que guarda el estado de cada sentido de estudio y la instantánea para deshacer del día",
@@ -1170,6 +1195,21 @@
       "legend": "Apariencia",
       "hint": "Se aplica al instante. Cuando guardes estas preferencias, se conserva en tu Pod, así que se ve igual en todos los dispositivos donde inicies sesión."
     },
+    "palette": {
+      "legend": "Colores",
+      "hint": "Se aplica al instante, en el tema claro y en el oscuro. Cuando guardes estas preferencias, se conserva en tu Pod, como el tema.",
+      "moreContrast": "Tu dispositivo pide más contraste: Alto contraste puede irte bien.",
+      "ownDescription": "Tus propios colores, basados en {base}.",
+      "edit": "Editar",
+      "editLabel": "Editar {name}",
+      "design": "Diseñar una paleta",
+      "reset": "Restablecer los colores"
+    },
+    "textSize": {
+      "legend": "Tamaño del texto",
+      "hint": "Se aplica al instante y amplía el tamaño de texto de tu navegador. Cuando guardes estas preferencias, se conserva en tu Pod, como el tema.",
+      "sample": "Una tarjeta cada vez, un poco cada día."
+    },
     "heading": "Preferencias de estudio",
     "loading": "Cargando preferencias…",
     "newCardsPerDay": "Tarjetas nuevas por día",
@@ -1224,6 +1264,81 @@
       "hint": "Muestra las herramientas de desarrollador: tu documento WebID sin procesar debajo de la aplicación y una comprobación de los documentos de esta instancia con las formas de Solid Memo."
     },
     "save": "Guardar"
+  },
+  "paletteEditor": {
+    "headingNew": "Diseñar una paleta",
+    "headingEdit": "Editar una paleta",
+    "intro": "Elige los colores con los que mejor lees. Cada par que lleva texto se mide mientras eliges: un par con menos contraste del que necesita se marca, y antes de guardarlo se te pregunta.",
+    "name": "Nombre",
+    "basedOn": "Basada en",
+    "basedOnHint": "Un color que dejes como está sigue siendo el de la paleta base.",
+    "light": "Tema claro",
+    "dark": "Tema oscuro",
+    "clear": {
+      "light": "Volver a los colores claros de la base",
+      "dark": "Volver a los colores oscuros de la base"
+    },
+    "status": {
+      "pass": "Cada par tiene el contraste que necesita.",
+      "low": {
+        "one": "{count} par tiene menos contraste del que necesita.",
+        "many": "{count} de pares tienen menos contraste del que necesitan.",
+        "other": "{count} pares tienen menos contraste del que necesitan."
+      },
+      "refused": "El texto es demasiado tenue para leerse sobre el fondo. Elige colores más distintos entre sí."
+    },
+    "useAnyway": "Usar de todos modos",
+    "save": "Guardar y usar",
+    "saving": "Guardando…",
+    "cancel": "Volver a las preferencias",
+    "loading": "Cargando las paletas…",
+    "preview": {
+      "heading": "La pregunta de una tarjeta",
+      "muted": "Una pista, en texto atenuado",
+      "link": "Un enlace",
+      "danger": "Peligro",
+      "warning": "Aviso",
+      "button": "Un botón",
+      "field": "Un campo"
+    },
+    "contrast": {
+      "light": "Contraste en el tema claro",
+      "dark": "Contraste en el tema oscuro",
+      "front": "Color",
+      "back": "Sobre",
+      "ratio": "Contraste",
+      "needs": "Necesita",
+      "result": "Resultado",
+      "tint": {
+        "12": "el tono de {button}",
+        "24": "el tono de {button} bajo el puntero"
+      },
+      "ratioValue": "{ratio}:1",
+      "pass": "Suficiente",
+      "low": "Insuficiente",
+      "refused": "Ilegible"
+    },
+    "role": {
+      "bg": "Fondo de la página",
+      "surface": "Tarjetas y paneles",
+      "surfaceSunken": "Superficies hundidas",
+      "surfaceHover": "Superficies bajo el puntero",
+      "text": "Texto",
+      "textMuted": "Texto atenuado",
+      "border": "Líneas",
+      "controlBorder": "Bordes de los campos",
+      "primary": "Color principal y anillo de foco",
+      "primaryFill": "Botones",
+      "primaryHover": "Botones bajo el puntero",
+      "primarySoft": "Tono del color principal",
+      "onPrimary": "Texto sobre botones",
+      "link": "Enlaces",
+      "danger": "Texto de peligro",
+      "dangerSoft": "Tono del texto de peligro",
+      "warningText": "Texto de aviso",
+      "warningSoft": "Tono del texto de aviso",
+      "grade": "Botón de respuesta {grade}"
+    }
   },
   "findable": {
     "heading": "Localizable por otras aplicaciones",
@@ -1451,6 +1566,9 @@
     "authorEmpty": "Cada persona autora necesita un nombre.",
     "authorTwice": "{author} aparece dos veces. Nombra a cada persona autora una sola vez.",
     "instanceNameEmpty": "Una instancia necesita un nombre.",
+    "paletteNameEmpty": "Una paleta necesita un nombre.",
+    "paletteUnreadable": "El texto es demasiado tenue para leerse sobre el fondo (menos de 3:1). Elige colores más distintos entre sí.",
+    "paletteContrastLow": "Algunos colores tienen menos contraste del que necesitan. Elige otros o úsalos de todos modos.",
     "catalogNeedsDescription": "El catálogo necesita una descripción.",
     "noCatalogToUpdate": "Esta instancia aún no tiene catálogo. Actualiza primero la instancia en Solid Memo.",
     "noMetaToUpdate": "Esta instancia no tiene ninguna descripción que actualizar. Vuelve a cargar la página e inténtalo de nuevo.",

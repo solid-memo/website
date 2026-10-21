@@ -1,0 +1,6 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# A color written short.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:textColor "#fff" .

@@ -194,6 +194,7 @@
         "packages/ui/src/ui/CardHistory.tsx",
         "packages/ui/src/ui/CourseStatistics.tsx",
         "packages/ui/src/ui/Markdown.tsx",
+        "packages/ui/src/ui/PaletteEditorScreen.tsx",
         "packages/ui/src/ui/StatisticsSections.tsx",
         "packages/ui/src/ui/charts/**",
       ],

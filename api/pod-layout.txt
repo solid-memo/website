@@ -34,5 +34,8 @@ instances: found by a sm:Instance registration at solid:instance in the private 
 instances: found by a sm:Instance registration at solid:instance in the public type index
 instances: found by a sm:Instance registration at solid:instanceContainer in the private type index
 instances: found by a sm:Instance registration at solid:instanceContainer in the public type index
+palettes: each kept in <instance>palettes.ttl#palette-<id>, a sm:Palette
+palettes: its colors in <instance>palettes.ttl#palette-<id>-dark, a sm:ColorSet
+palettes: its colors in <instance>palettes.ttl#palette-<id>-light, a sm:ColorSet
 preferences: kept in <instance>preferences.ttl#it, a sm:Preferences
 release: version 2 of the release "solid" published from an instance in <instance>releases/solid/v2.ttl

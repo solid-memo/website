@@ -1,0 +1,6 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# A color seen through, with an alpha.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:textColor "#ffffff80" .

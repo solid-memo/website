@@ -31,6 +31,7 @@ import { PREFERENCES_1_TO_2 } from "./preferences/1-to-2";
 import { PREFERENCES_2_TO_3 } from "./preferences/2-to-3";
 import { PREFERENCES_3_TO_4 } from "./preferences/3-to-4";
 import { PREFERENCES_4_TO_5 } from "./preferences/4-to-5";
+import { PREFERENCES_5_TO_6 } from "./preferences/5-to-6";
 import { REVIEW_STATE_1_TO_2 } from "./reviewState/1-to-2";
 import type { AnyMigrationStep, MigrationContext } from "./step";
 
@@ -63,6 +64,7 @@ export const MIGRATIONS: readonly AnyMigrationStep[] = [
   PREFERENCES_2_TO_3,
   PREFERENCES_3_TO_4,
   PREFERENCES_4_TO_5,
+  PREFERENCES_5_TO_6,
   REVIEW_STATE_1_TO_2,
 ];
 

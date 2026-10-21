@@ -1,0 +1,7 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# Two text colors.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:textColor "#000000" ,
+                         "#111111" .

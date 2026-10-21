@@ -46,6 +46,11 @@ export const ERROR_TEMPLATES = {
   authorEmpty: "An author needs a name.",
   authorTwice: "{author} is named twice. Name each author once.",
   instanceNameEmpty: "An instance needs a name.",
+  paletteNameEmpty: "A palette needs a name.",
+  paletteUnreadable:
+    "The text is too faint to read on the background (less than 3:1). Choose colors further apart.",
+  paletteContrastLow:
+    "Some colors have less contrast than they need. Choose others, or use them anyway.",
   catalogNeedsDescription: "The catalog needs a description.",
   noCatalogToUpdate: "This instance has no catalog yet. Update the instance in Solid Memo first.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",

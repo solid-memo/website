@@ -18,7 +18,7 @@ import { KeyHelp, Keys } from "./KeyHelp";
 import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs, type WorkItem } from "./prefs";
 import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
 import { RevealAside } from "./revealAside";
-import { ASIDE_WIDTH, DETAIL_WIDTH } from "./splitter";
+import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, scaledPane } from "./splitter";
 import { Splitter } from "./Splitter";
 import { ScreenCommands, useCommandRegistry } from "./useScreenCommands";
 import { useMedia } from "./useMedia";
@@ -145,11 +145,12 @@ export function StudioShell({
   const sidebarRef = useRef<HTMLElement>(null);
   const [asideDrawer, setAsideDrawer] = useState(false);
   const detail = aside?.detail;
-  // A detail is as wide as its own splitter makes it.
+  // A detail is as wide as its own splitter makes it, within bounds as large as the text.
   const width =
     detail === undefined
-      ? ({ key: "asideWidth", size: ASIDE_WIDTH } as const)
-      : ({ key: "detailWidth", size: DETAIL_WIDTH } as const);
+      ? ({ key: "asideWidth", size: scaledPane(ASIDE_WIDTH) } as const)
+      : ({ key: "detailWidth", size: scaledPane(DETAIL_WIDTH) } as const);
+  const asideWidth = clampSize(prefs[width.key], width.size);
   const asideShown =
     aside !== null && (detail !== undefined || (medium ? asideDrawer : prefs.aside));
   const asideToggleRef = useRef<HTMLButtonElement>(null);
@@ -462,7 +463,7 @@ export function StudioShell({
             class="studio-aside"
             aria-label={aside.label}
             hidden={!asideShown}
-            style={medium ? undefined : { width: `${prefs[width.key]}px` }}
+            style={medium ? undefined : { width: `${asideWidth}px` }}
             data-region
             tabIndex={-1}
             // As the sidebar's drawer: a link followed, or Escape, closes it; but Escape in a dialog of it (a question of the outline's) closes the dialog alone.
@@ -483,7 +484,7 @@ export function StudioShell({
                 label={t("studio.shell.resizeAside")}
                 controls={ASIDE_ID}
                 orientation="vertical"
-                value={prefs[width.key]}
+                value={asideWidth}
                 size={width.size}
                 onChange={(value) => choose({ ...prefs, [width.key]: value })}
               />

@@ -98,6 +98,10 @@ words:
   - adms
   - bidi
   - CLDR
+  # CSS's color notations: #rrggbb, #rrggbbaa, color-mix(in srgb, …)
+  - rrggbb
+  - rrggbbaa
+  - srgb
   # A font's table from characters to glyphs
   - cmap
   - commonmark
@@ -134,6 +138,7 @@ words:
   - defunctzombie
   - Deque
   - elkjs
+  - Fernandes
   - flagcdn
   - Forgejo
   - Fredoka
@@ -144,11 +149,15 @@ words:
   - Inrupt
   - ixuz
   - katex
+  - Machado
   - Malgun
+  - Masataka
   - Naskh
   - micr
   - Nextcloud
   - Noto
+  - Okabe
+  - Oliveira
   - Piotr
   - pipx
   - Poznań
@@ -158,11 +167,14 @@ words:
   - roughjs
   - sankey
   - Segoe
+  - Selenized
   - shellcheck
   - skohub
   - solidcommunity
   - solidproject
+  - SRON
   - Tahoma
+  - Warchoł
   - Wiklund
   - Woźniak
   - Zazuko

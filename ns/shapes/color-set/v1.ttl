@@ -1,0 +1,223 @@
+@base <https://solid-memo.com/ns/shapes/color-set/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# A color set, format 1 (vocabulary 1.23): a user's palette's colors in
+# one theme, a subject of the instance's palettes document beside its
+# palette (palette/v1.ttl). Each color is optional, at most one, and an
+# opaque sRGB color written #rrggbb: a color it does not set is the base
+# palette's. Unlike the other shapes, it is closed: the app paints with
+# what a color set says, so a property no color of this format is, a
+# later format's among them, is reported rather than read past.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "ColorSetV1" ;
+    rdfs:comment "Color set format 1: a palette's colors in one theme, each optional and written #rrggbb, and no other property." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:ColorSet ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:message "A color set has the colors of its format and no other property."@en ,
+               "En färguppsättning har sitt formats färger och ingen annan egenskap."@sv ;
+    sh:property <#formatVersion> ,
+                <#backgroundColor> ,
+                <#surfaceColor> ,
+                <#sunkenSurfaceColor> ,
+                <#textColor> ,
+                <#mutedTextColor> ,
+                <#borderColor> ,
+                <#fieldEdgeColor> ,
+                <#primaryColor> ,
+                <#primaryFillColor> ,
+                <#onPrimaryColor> ,
+                <#linkColor> ,
+                <#dangerColor> ,
+                <#warningColor> ,
+                <#grade0Color> ,
+                <#grade1Color> ,
+                <#grade2Color> ,
+                <#grade3Color> ,
+                <#grade4Color> ,
+                <#grade5Color> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#backgroundColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backgroundColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#surfaceColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:surfaceColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#sunkenSurfaceColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:sunkenSurfaceColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#textColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#mutedTextColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:mutedTextColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#borderColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:borderColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#fieldEdgeColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:fieldEdgeColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#primaryColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:primaryColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#primaryFillColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:primaryFillColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#onPrimaryColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:onPrimaryColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#linkColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:linkColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#dangerColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:dangerColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#warningColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:warningColor ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#grade0Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade0Color ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#grade1Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade1Color ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#grade2Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade2Color ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#grade3Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade3Color ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#grade4Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade4Color ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .
+
+<#grade5Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade5Color ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^#[0-9a-fA-F]{6}$" ;
+    sh:message "A color set's color is an opaque sRGB color written #rrggbb, at most one of each."@en ,
+               "En färguppsättnings färg är en ogenomskinlig sRGB-färg skriven #rrggbb, högst en av varje."@sv .

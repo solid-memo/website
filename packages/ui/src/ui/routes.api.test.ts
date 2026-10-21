@@ -60,6 +60,8 @@ const ROUTES: RouteRef[] = [
   { screen: "courseChapter", instanceUrl: INSTANCE, deckUrl: DECK, chapterUrl: CHAPTER },
   { screen: "courseReview", instanceUrl: INSTANCE, deckUrl: DECK, chapterUrl: CHAPTER },
   { screen: "preferences", instanceUrl: INSTANCE },
+  { screen: "palette", instanceUrl: INSTANCE },
+  { screen: "palette", instanceUrl: INSTANCE, paletteUrl: `${INSTANCE}palettes.ttl#palette-1` },
   { screen: "validation", instanceUrl: INSTANCE },
   { screen: "try", libraryDeckUrl: LIBRARY_DECK },
   ...[

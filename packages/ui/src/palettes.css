@@ -1,0 +1,641 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+ * SPDX-FileCopyrightText: 2021 Jan Warchoł
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/*
+ * The palettes (docs/theme.md, Color roles): every color the site draws
+ * with, as roles that style.css and the Studio's studio.css name and
+ * never write out themselves. Each palette is two blocks, its light
+ * theme's and its dark one's, and each block sets every role, so no
+ * palette leans on another's: Standard's are `:root` and
+ * `:root[data-theme="dark"]`, another's `:root[data-palette="…"]` and
+ * `:root[data-palette="…"][data-theme="dark"]`, after them. A palette
+ * without blocks is shown as Standard. Each block is also for an
+ * element inside the page marked with its palette, in the page's theme
+ * (`[data-palette="…"]`, `[data-theme="dark"] [data-palette="…"]`), so
+ * the preferences can show each palette's swatch in its own colors.
+ *
+ * A block holds only colors written as #rrggbb (#rrggbbaa for one seen
+ * through, its alpha in 255ths as the browser keeps it), `transparent`,
+ * a role (`var()`) or a mix of these (`color-mix(in srgb, …)`), and
+ * shadows of them: style.test.ts checks it, and the contrast of the
+ * pairs that hold text, in every block.
+ */
+
+/* Standard, light. */
+:root,
+[data-palette="standard"] {
+  --bg: #f7f6f1;
+  --surface: #ffffff;
+  --surface-sunken: #fbfaf5;
+  --surface-hover: #f1efe6;
+  --text: #16202a;
+  --text-muted: #545c68;
+  --border: #e4e1d5;
+  --border-strong: #cfcbbb;
+  /* A text field's edge: at least 3:1 on every surface it sits on. */
+  --control-border: #858072;
+
+  --primary: #2c6b3d;
+  --primary-fill: #2c6b3d;
+  --primary-hover: #235430;
+  --primary-soft: #e6f1e8;
+  --on-primary: #ffffff;
+  /* A primary button's raised edge: a glint along its top, a shade under it. */
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #25603a;
+  --link-hover-bg: #e4e5e7;
+  --link-hover-border: #9a9fa6;
+
+  --accent-blue: #b1cfe3;
+  --accent-yellow: #e8ab14;
+  --accent-red: #e8432b;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #c42d18;
+  --danger-soft: #fdeee9;
+  --danger-border: #f0c9be;
+  --warning-text: #7a5800;
+  --warning-soft: #fdf4dc;
+  --warning-border: #e6c876;
+
+  /* The answer buttons, Again (0) to Easy (5): tints of these under text. */
+  --grade-0: #d63a25;
+  --grade-1: #e2662a;
+  --grade-2: #e8932a;
+  --grade-3: #d9b11c;
+  --grade-4: #7fb13c;
+  --grade-5: #2f8a4a;
+
+  /* A chart's series, 1 the lightest: steps of the green. */
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  /* The page's discs: the accent blue at 50%, the yellow at 16%. */
+  --paper-blue: #b1cfe380;
+  --paper-yellow: #e8ab1429;
+  /* The glint that sweeps across the course for newcomers: decoration only. */
+  --shine: #ffffff8c;
+
+  --masthead-bg: #16202a;
+  --masthead-text: #f7f6f1;
+  --masthead-border: transparent;
+  --masthead-blue: #9fc3da;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  /* The masthead's buttons: its text color their fill, white under the pointer. */
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  /* The theme toggle: a yellow sun on a pale fill. */
+  --toggle-icon: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
+  --toggle-bg: var(--paper-yellow);
+  --toggle-edge: var(--border-strong);
+  --toggle-hover-edge: var(--accent-yellow);
+
+  --shadow-sm: 0 1px 2px #16202a0f;
+  --shadow: 0 1px 2px #16202a0d, 0 8px 24px -12px #16202a2e;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  /* Under an enlarged picture: the page dimmed, so the picture stands out. */
+  --zoom-backdrop: #16202ad9;
+}
+
+/* Standard, dark. */
+:root[data-theme="dark"],
+[data-theme="dark"] [data-palette="standard"] {
+  --bg: #11171e;
+  --surface: #19212b;
+  --surface-sunken: #151c25;
+  --surface-hover: #232e3b;
+  --text: #ecebe4;
+  --text-muted: #9ba6b2;
+  --border: #2a3644;
+  --border-strong: #3a4859;
+  --control-border: #66788d;
+
+  --primary: #4fae6a;
+  --primary-fill: #2a7340;
+  --primary-hover: #33864b;
+  --primary-soft: #1b3324;
+  --on-primary: #ffffff;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #74cc8e;
+  --link-hover-bg: #3a414b;
+  --link-hover-border: #7d8692;
+
+  --accent-blue: #b1cfe3;
+  --accent-yellow: #e8ab14;
+  --accent-red: #e8432b;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ff8a75;
+  --danger-soft: #38201c;
+  --danger-border: #63302a;
+  --warning-text: #f1d283;
+  --warning-soft: #33280e;
+  --warning-border: #5e4a17;
+
+  --grade-0: #d63a25;
+  --grade-1: #e2662a;
+  --grade-2: #e8932a;
+  --grade-3: #d9b11c;
+  --grade-4: #7fb13c;
+  --grade-5: #2f8a4a;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  /* The accent blue at 7%, the yellow at 5%. */
+  --paper-blue: #b1cfe312;
+  --paper-yellow: #e8ab140d;
+  --shine: #ffffff14;
+
+  --masthead-bg: #1d2937;
+  --masthead-text: #f7f6f1;
+  --masthead-border: #2f3d4e;
+  --masthead-blue: #5d86a3;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  /* The theme toggle: a blue moon on the masthead's navy. */
+  --toggle-icon: var(--masthead-blue);
+  --toggle-bg: var(--masthead-bg);
+  --toggle-edge: var(--masthead-border);
+  --toggle-hover-edge: var(--masthead-blue);
+
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow: 0 1px 2px #0000004d, 0 10px 28px -14px #00000099;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #000000e0;
+}
+
+/*
+ * High contrast, light: black on white, text at 7:1 or more and the
+ * edges of fields at 4.5:1, the page's discs and glint left out, and a
+ * solid focus ring. Its blue, yellow and red are Paul Tol's
+ * high-contrast scheme (docs/theme.md, Palette sources).
+ */
+:root[data-palette="high-contrast"],
+[data-palette="high-contrast"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-sunken: #f3f3f3;
+  --surface-hover: #e8e8e8;
+  --text: #000000;
+  --text-muted: #303030;
+  --border: #6e6e6e;
+  --border-strong: #303030;
+  --control-border: #4d4d4d;
+
+  --primary: #004488;
+  --primary-fill: #004488;
+  --primary-hover: #002d5c;
+  --primary-soft: #e3edf7;
+  --on-primary: #ffffff;
+  --primary-bevel: 0 0 0 1px #000000;
+  --link: #004488;
+  --link-hover-bg: #e3edf7;
+  --link-hover-border: #004488;
+
+  --accent-blue: #004488;
+  --accent-yellow: #ddaa33;
+  --accent-red: #bb5566;
+  --heading-pop: transparent;
+
+  --danger: #8f1029;
+  --danger-soft: #fbeef0;
+  --danger-border: #8f1029;
+  --warning-text: #5c3f00;
+  --warning-soft: #fbf3df;
+  --warning-border: #8a6400;
+
+  --grade-0: #b8211a;
+  --grade-1: #c75a12;
+  --grade-2: #c98a00;
+  --grade-3: #a99000;
+  --grade-4: #5f8f1c;
+  --grade-5: #1f6e35;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: transparent;
+  --paper-yellow: transparent;
+  --shine: transparent;
+
+  --masthead-bg: #000000;
+  --masthead-text: #ffffff;
+  --masthead-border: transparent;
+  --masthead-blue: #77aadd;
+  --masthead-link-hover-bg: #333333;
+  --masthead-link-hover-border: #ffffff;
+  --masthead-button-text: #000000;
+  --masthead-button-hover: #dddddd;
+  --masthead-button-shadow: 0 0 0 1px #ffffff;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: var(--text);
+  --toggle-bg: var(--surface);
+  --toggle-edge: var(--text);
+  --toggle-hover-edge: var(--primary);
+
+  --shadow-sm: 0 0 0 1px var(--border);
+  --shadow: 0 0 0 1px var(--border-strong);
+  --ring: 0 0 0 3px var(--primary);
+  --zoom-backdrop: #000000e6;
+}
+
+/* High contrast, dark: white on black, as the light one is. */
+:root[data-palette="high-contrast"][data-theme="dark"],
+[data-theme="dark"] [data-palette="high-contrast"] {
+  --bg: #000000;
+  --surface: #0f0f0f;
+  --surface-sunken: #080808;
+  --surface-hover: #262626;
+  --text: #ffffff;
+  --text-muted: #d6d6d6;
+  --border: #8c8c8c;
+  --border-strong: #cccccc;
+  --control-border: #a6a6a6;
+
+  --primary: #8ec5ff;
+  --primary-fill: #8ec5ff;
+  --primary-hover: #b8dbff;
+  --primary-soft: #0e2a47;
+  --on-primary: #000000;
+  --primary-bevel: 0 0 0 1px #ffffff;
+  --link: #a6d1ff;
+  --link-hover-bg: #0e2a47;
+  --link-hover-border: #a6d1ff;
+
+  --accent-blue: #77aadd;
+  --accent-yellow: #ddaa33;
+  --accent-red: #bb5566;
+  --heading-pop: transparent;
+
+  --danger: #ffb3bd;
+  --danger-soft: #3d0a12;
+  --danger-border: #ff8090;
+  --warning-text: #ffd97a;
+  --warning-soft: #2e2200;
+  --warning-border: #b38a00;
+
+  --grade-0: #e8432b;
+  --grade-1: #ee7733;
+  --grade-2: #ddaa33;
+  --grade-3: #d9c21c;
+  --grade-4: #8fc24a;
+  --grade-5: #44aa66;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: transparent;
+  --paper-yellow: transparent;
+  --shine: transparent;
+
+  --masthead-bg: #000000;
+  --masthead-text: #ffffff;
+  --masthead-border: #ffffff;
+  --masthead-blue: #77aadd;
+  --masthead-link-hover-bg: #333333;
+  --masthead-link-hover-border: #ffffff;
+  --masthead-button-text: #000000;
+  --masthead-button-hover: #dddddd;
+  --masthead-button-shadow: 0 0 0 1px #ffffff;
+  --logo-shadow: 0 0 0 1px #ffffff;
+
+  --toggle-icon: var(--text);
+  --toggle-bg: var(--surface);
+  --toggle-edge: var(--text);
+  --toggle-hover-edge: var(--primary);
+
+  --shadow-sm: 0 0 0 1px var(--border);
+  --shadow: 0 0 0 1px var(--border-strong);
+  --ring: 0 0 0 3px var(--primary);
+  --zoom-backdrop: #000000e6;
+}
+
+/*
+ * Color-blind friendly, light: Standard's surfaces, with meaning moved
+ * off red and green to blue, orange and vermilion, Masataka Okabe's
+ * and Kei Ito's colors (docs/theme.md, Palette sources), darkened where
+ * they are text. The answer buttons run from vermilion (Again) through
+ * orange, yellow and sky blue to blue (Easy), told apart without red
+ * and green; style.test.ts checks them as each deficiency sees them.
+ */
+:root[data-palette="color-vision"],
+[data-palette="color-vision"] {
+  --bg: #f7f6f1;
+  --surface: #ffffff;
+  --surface-sunken: #fbfaf5;
+  --surface-hover: #f1efe6;
+  --text: #16202a;
+  --text-muted: #545c68;
+  --border: #e4e1d5;
+  --border-strong: #cfcbbb;
+  --control-border: #858072;
+
+  --primary: #00649c;
+  --primary-fill: #00649c;
+  --primary-hover: #004e7a;
+  --primary-soft: #e4f0f7;
+  --on-primary: #ffffff;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #005a8c;
+  --link-hover-bg: #e4e5e7;
+  --link-hover-border: #9a9fa6;
+
+  --accent-blue: #9ccbea;
+  --accent-yellow: #e69f00;
+  --accent-red: #d55e00;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #a84800;
+  --danger-soft: #fbeee5;
+  --danger-border: #efc6a9;
+  --warning-text: #7a5300;
+  --warning-soft: #fdf3dc;
+  --warning-border: #e6c470;
+
+  --grade-0: #d55e00;
+  --grade-1: #e69f00;
+  --grade-2: #f0e442;
+  --grade-3: #56b4e9;
+  --grade-4: #2b93cd;
+  --grade-5: #0072b2;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #9ccbea80;
+  --paper-yellow: #e69f0029;
+  --shine: #ffffff8c;
+
+  --masthead-bg: #16202a;
+  --masthead-text: #f7f6f1;
+  --masthead-border: transparent;
+  --masthead-blue: #9ccbea;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
+  --toggle-bg: var(--paper-yellow);
+  --toggle-edge: var(--border-strong);
+  --toggle-hover-edge: var(--accent-yellow);
+
+  --shadow-sm: 0 1px 2px #16202a0f;
+  --shadow: 0 1px 2px #16202a0d, 0 8px 24px -12px #16202a2e;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #16202ad9;
+}
+
+/* Color-blind friendly, dark: Standard's dark surfaces, light fills under dark text. */
+:root[data-palette="color-vision"][data-theme="dark"],
+[data-theme="dark"] [data-palette="color-vision"] {
+  --bg: #11171e;
+  --surface: #19212b;
+  --surface-sunken: #151c25;
+  --surface-hover: #232e3b;
+  --text: #ecebe4;
+  --text-muted: #b9c2cc;
+  --border: #2a3644;
+  --border-strong: #3a4859;
+  --control-border: #66788d;
+
+  --primary: #56b4e9;
+  --primary-fill: #56b4e9;
+  --primary-hover: #7fc6ef;
+  --primary-soft: #14293a;
+  --on-primary: #000000;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #16202a33;
+  --link: #8dcdf2;
+  --link-hover-bg: #3a414b;
+  --link-hover-border: #7d8692;
+
+  --accent-blue: #9ccbea;
+  --accent-yellow: #e69f00;
+  --accent-red: #d55e00;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ff9b5e;
+  --danger-soft: #3a2216;
+  --danger-border: #6e3a1c;
+  --warning-text: #f0b43c;
+  --warning-soft: #33280e;
+  --warning-border: #5e4a17;
+
+  --grade-0: #d55e00;
+  --grade-1: #e69f00;
+  --grade-2: #f0e442;
+  --grade-3: #56b4e9;
+  --grade-4: #2b93cd;
+  --grade-5: #0072b2;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #9ccbea12;
+  --paper-yellow: #e69f000d;
+  --shine: #ffffff14;
+
+  --masthead-bg: #1d2937;
+  --masthead-text: #f7f6f1;
+  --masthead-border: #2f3d4e;
+  --masthead-blue: #5d86a3;
+  --masthead-link-hover-bg: #4a525d;
+  --masthead-link-hover-border: #8d96a2;
+  --masthead-button-text: #16202a;
+  --masthead-button-hover: #ffffff;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: var(--masthead-blue);
+  --toggle-bg: var(--masthead-bg);
+  --toggle-edge: var(--masthead-border);
+  --toggle-hover-edge: var(--masthead-blue);
+
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow: 0 1px 2px #0000004d, 0 10px 28px -14px #00000099;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #000000e0;
+}
+
+/*
+ * Parchment (low glare), light: warm surfaces darker than white, and
+ * text in a dark slate, raised where Selenized's dimmer text is under
+ * 4.5:1. Its surfaces, text and accents are derived from Jan Warchoł's
+ * Selenized (docs/theme.md, Palette sources).
+ */
+:root[data-palette="parchment"],
+[data-palette="parchment"] {
+  --bg: #ece3cc;
+  --surface: #fbf3db;
+  --surface-sunken: #f4ebd3;
+  --surface-hover: #e4dbc2;
+  --text: #2c3d43;
+  --text-muted: #43555b;
+  --border: #d5cdb6;
+  --border-strong: #bdb49b;
+  --control-border: #7d745e;
+
+  --primary: #3b6600;
+  --primary-fill: #3b6600;
+  --primary-hover: #2e5000;
+  --primary-soft: #e0e3c4;
+  --on-primary: #fbf3db;
+  --primary-bevel: inset 0 1px 0 #fbf3db2e, 0 1px 2px #2c3d4333;
+  --link: #376000;
+  --link-hover-bg: #dcd3ba;
+  --link-hover-border: #909995;
+
+  --accent-blue: #b2c6d2;
+  --accent-yellow: #ad8900;
+  --accent-red: #d2212d;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ad1a25;
+  --danger-soft: #f5e2cc;
+  --danger-border: #e2b4a2;
+  --warning-text: #6e5600;
+  --warning-soft: #f3e7c2;
+  --warning-border: #d6bf75;
+
+  --grade-0: #d2212d;
+  --grade-1: #c25d1e;
+  --grade-2: #b8750f;
+  --grade-3: #ad8900;
+  --grade-4: #7b8f00;
+  --grade-5: #489100;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #b2c6d266;
+  --paper-yellow: #ad89001f;
+  --shine: #fbf3db8c;
+
+  --masthead-bg: #2c3d43;
+  --masthead-text: #fbf3db;
+  --masthead-border: transparent;
+  --masthead-blue: #8fb0c4;
+  --masthead-link-hover-bg: #4a5c62;
+  --masthead-link-hover-border: #909995;
+  --masthead-button-text: #2c3d43;
+  --masthead-button-hover: #fffaeb;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: color-mix(in srgb, var(--accent-yellow) 70%, var(--text));
+  --toggle-bg: var(--paper-yellow);
+  --toggle-edge: var(--border-strong);
+  --toggle-hover-edge: var(--accent-yellow);
+
+  --shadow-sm: 0 1px 2px #2c3d430f;
+  --shadow: 0 1px 2px #2c3d430d, 0 8px 24px -12px #2c3d432e;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #2c3d43d9;
+}
+
+/*
+ * Parchment (low glare), dark: warm brown surfaces under parchment
+ * text, with Selenized's dark accents and light fills under dark text.
+ */
+:root[data-palette="parchment"][data-theme="dark"],
+[data-theme="dark"] [data-palette="parchment"] {
+  --bg: #1d1a15;
+  --surface: #26221b;
+  --surface-sunken: #221e18;
+  --surface-hover: #312c23;
+  --text: #ece3cc;
+  --text-muted: #c2b9a3;
+  --border: #3b3529;
+  --border-strong: #4d4535;
+  --control-border: #857b66;
+
+  --primary: #84c747;
+  --primary-fill: #84c747;
+  --primary-hover: #97d35f;
+  --primary-soft: #28311b;
+  --on-primary: #1d1a15;
+  --primary-bevel: inset 0 1px 0 #ffffff2e, 0 1px 2px #00000033;
+  --link: #9bd466;
+  --link-hover-bg: #403a2e;
+  --link-hover-border: #8f8571;
+
+  --accent-blue: #4695f7;
+  --accent-yellow: #dbb32d;
+  --accent-red: #fa5750;
+  --heading-pop: var(--accent-yellow);
+
+  --danger: #ff7b6e;
+  --danger-soft: #3a201a;
+  --danger-border: #6b3028;
+  --warning-text: #e3bf45;
+  --warning-soft: #33290f;
+  --warning-border: #5e4b17;
+
+  --grade-0: #fa5750;
+  --grade-1: #ed8649;
+  --grade-2: #e39d3a;
+  --grade-3: #dbb32d;
+  --grade-4: #a8b934;
+  --grade-5: #75b938;
+
+  --series-1: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  --series-2: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  --series-3: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  --series-4: var(--primary);
+
+  --paper-blue: #4695f70d;
+  --paper-yellow: #dbb32d0a;
+  --shine: #ece3cc14;
+
+  --masthead-bg: #2b261e;
+  --masthead-text: #ece3cc;
+  --masthead-border: #3b3529;
+  --masthead-blue: #5f88aa;
+  --masthead-link-hover-bg: #4a4234;
+  --masthead-link-hover-border: #8f8571;
+  --masthead-button-text: #1d1a15;
+  --masthead-button-hover: #fbf3db;
+  --masthead-button-shadow: 0 1px 3px #0000004d;
+  --logo-shadow: 0 3px 10px #00000059;
+
+  --toggle-icon: var(--masthead-blue);
+  --toggle-bg: var(--masthead-bg);
+  --toggle-edge: var(--masthead-border);
+  --toggle-hover-edge: var(--masthead-blue);
+
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow: 0 1px 2px #0000004d, 0 10px 28px -14px #00000099;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --zoom-backdrop: #000000e0;
+}

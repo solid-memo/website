@@ -3,14 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import type { AnswerScale } from "./answerScale";
+import { conceptOfPalette, paletteOfConcept } from "./concepts";
 import { DEFAULT_DESIRED_RETENTION, type Scheduler } from "./fsrs";
 import { DEFAULT_INVALID_DATA_POLICY, type InvalidDataPolicy } from "./invalidDataPolicy";
+import { DEFAULT_PALETTE, type Palette } from "./palette";
+import { DEFAULT_TEXT_SIZE, type TextSize } from "./textSize";
 import { DEFAULT_THEME_CHOICE, type ThemeChoice } from "./theme";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 
 /**
  * Format version written on every preferences document this app saves.
- * Format 5 adds the scheduler, the desired retention and the dismissed invitation to FSRS-6; format 4 the theme; format 3 the invalid data policy; format 2 states every field;
+ * Format 6 adds the palette and the text size; format 5 the scheduler, the desired retention and the dismissed invitation to FSRS-6; format 4 the theme; format 3 the invalid data policy; format 2 states every field;
  * format 1 is whatever the unversioned era wrote, each missing field
  * meaning its default.
  */
@@ -52,6 +55,17 @@ export interface StudyPreferences {
    * switch from SM-2 to FSRS-6, so it is not shown again.
    */
   schedulerInvitationDismissed: boolean;
+  /**
+   * The colors the app is shown in: the IRI of a concept of
+   * solid-memo:Palettes, of one of the user's own in the instance's
+   * palettes document (domain/customPalette.ts), or of a palette this
+   * version does not know (a later version's), which is kept as it is
+   * and shown as Standard (shownPalette). Kept on the device too, as
+   * the theme is.
+   */
+  palette: string;
+  /** How large the text is shown. Kept on the device too, as the theme is. */
+  textSize: TextSize;
 }
 
 /** Preferences as a pod holds them, with the format they are stored in. */
@@ -81,6 +95,8 @@ export const DEFAULT_PREFERENCES: StudyPreferences = {
   scheduler: "sm2",
   desiredRetention: DEFAULT_DESIRED_RETENTION,
   schedulerInvitationDismissed: false,
+  palette: conceptOfPalette(DEFAULT_PALETTE),
+  textSize: DEFAULT_TEXT_SIZE,
 };
 
 /**
@@ -112,4 +128,26 @@ export function effectiveAnswerScale(
   prefs: Pick<StudyPreferences, "answerScale" | "scheduler">,
 ): AnswerScale {
   return prefs.scheduler === "fsrs6" ? "minimal" : prefs.answerScale;
+}
+
+/** The palette preferences are shown in: theirs, or Standard for one this version does not know. */
+export function shownPalette(prefs: Pick<StudyPreferences, "palette">): Palette {
+  return paletteOfConcept(prefs.palette) ?? DEFAULT_PALETTE;
+}
+
+/**
+ * The palette preferences keep when the app is shown in `palette`: the
+ * one they hold while it shows as that, so a palette this version does
+ * not know outlives a save, else the concept of the one shown. A palette
+ * of the user's own (`isOwn`, one of the instance's palettes document) is
+ * one it knows, and a choice of a built-in palette replaces it.
+ */
+export function keptPalette(
+  prefs: Pick<StudyPreferences, "palette">,
+  palette: Palette,
+  isOwn: (iri: string) => boolean = () => false,
+): string {
+  return shownPalette(prefs) === palette && !isOwn(prefs.palette)
+    ? prefs.palette
+    : conceptOfPalette(palette);
 }

@@ -1,0 +1,8 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix ex:         <https://example.org/> .
+
+# A property no color is: a color set is closed.
+<#palette-a-light>
+    a solid-memo:ColorSet ;
+    solid-memo:textColor "#000000" ;
+    ex:backgroundImage <https://evil.example/x.png> .

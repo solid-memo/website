@@ -134,7 +134,14 @@ describe.each(SERVERS)("an instance's graph on $name", ({ url: server }) => {
     );
     expect(new Set(documents.map(({ url }) => url))).toEqual(
       new Set(
-        ["meta.ttl", "preferences.ttl", "catalog.ttl", "digest.ttl", "history/2026-10.ttl"]
+        [
+          "meta.ttl",
+          "preferences.ttl",
+          "palettes.ttl",
+          "catalog.ttl",
+          "digest.ttl",
+          "history/2026-10.ttl",
+        ]
           .map((name) => `${instance.url}${name}`)
           .concat(deck.cardsDocumentUrl, deck.reviewsDocumentUrl),
       ),

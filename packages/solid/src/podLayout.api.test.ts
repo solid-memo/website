@@ -10,6 +10,7 @@ import {
   catalogUrlOf,
   digestUrlOf,
   historyUrlOf,
+  paletteUrlOf,
 } from "@solid-memo/domain/instanceLayout";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@solid-memo/domain/release/draftLayout";
 import { releasesContainerOf, releaseUrlIn } from "@solid-memo/domain/release/releasePlace";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
+import { createSolidPaletteRepository } from "./solidPaletteRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { fakePod } from "./testing/fakePod";
@@ -185,6 +187,29 @@ async function preferencesLines(): Promise<string[]> {
   );
 }
 
+/** Where an instance keeps the palettes the user designed, from what saving one writes. */
+async function paletteLines(): Promise<string[]> {
+  const pod = examplePod();
+  await createSolidPaletteRepository({ fetch: pod.fetch }).savePalette(INSTANCE, {
+    url: paletteUrlOf(INSTANCE, "id"),
+    title: { en: "Mine" },
+    basedOn: "standard",
+    light: {},
+    dark: {},
+  });
+  const document = `${INSTANCE}palettes.ttl`;
+  // Each palette's own id.
+  const shown = (subject: string) => named(subject).replace("#palette-id", "#palette-<id>");
+  return [
+    ...subjectsOf(pod, document, `${PREFIXES.sm}Palette`).map(
+      (subject) => `palettes: each kept in ${shown(subject)}, a sm:Palette`,
+    ),
+    ...subjectsOf(pod, document, `${PREFIXES.sm}ColorSet`).map(
+      (subject) => `palettes: its colors in ${shown(subject)}, a sm:ColorSet`,
+    ),
+  ];
+}
+
 /** The ways from a WebID to its type indexes that are followed: a link in each place a profile may keep it. */
 async function typeIndexLinkLines(): Promise<string[]> {
   const elsewhere = `${STORAGE}profile/extended`;
@@ -286,6 +311,7 @@ it("keeps api/pod-layout.txt to where the data is in the pod", async () => {
     ...(await instanceDiscoveryLines()),
     ...(await metaLines()),
     ...(await preferencesLines()),
+    ...(await paletteLines()),
     `catalog: the decks, the deck groups and the links to drafts and releases in ${named(catalogUrlOf(INSTANCE))}, the catalog subject ${named(catalogNodeUrlOf(INSTANCE))}`,
     `answer log: the answers of a study day in October 2026 in ${named(historyUrlOf(INSTANCE, monthOfStudyDay("2026-10-15")))}`,
     `digest: kept in ${named(digestUrlOf(INSTANCE))}`,

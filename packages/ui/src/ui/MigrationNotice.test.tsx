@@ -136,7 +136,7 @@ describe("describeFormats", () => {
         t,
       ),
     ).toBe(
-      "instance format 2 and preferences format 5, which records the answer scale, developer mode, what to do with invalid data, the theme and the scheduler",
+      "instance format 2 and preferences format 6, which records the answer scale, developer mode, what to do with invalid data, the theme, the scheduler, the colors and the text size",
     );
   });
 });

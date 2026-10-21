@@ -1,0 +1,38 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+
+# An instance's palettes document: a palette the user designed on
+# Parchment, its light colors setting a few, its dark ones none; and one
+# based on a palette this version does not know, which reads as Standard.
+<#palette-reading>
+    a solid-memo:Palette ;
+    solid-memo:formatVersion 1 ;
+    dcterms:title "Reading"@en ,
+                  "Läsning"@sv ;
+    solid-memo:basedOn solid-memo:parchmentPalette ;
+    solid-memo:lightColors <#palette-reading-light> ;
+    solid-memo:darkColors <#palette-reading-dark> .
+
+<#palette-reading-light>
+    a solid-memo:ColorSet ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:backgroundColor "#f4ecd8" ;
+    solid-memo:textColor "#2B2118" ;
+    solid-memo:grade0Color "#b3261e" .
+
+<#palette-reading-dark>
+    a solid-memo:ColorSet ;
+    solid-memo:formatVersion 1 .
+
+<#palette-later>
+    a solid-memo:Palette ;
+    dcterms:title "Later"@en ;
+    solid-memo:basedOn solid-memo:sepiaPalette ;
+    solid-memo:lightColors <#palette-later-light> ;
+    solid-memo:darkColors <#palette-later-dark> .
+
+<#palette-later-light>
+    a solid-memo:ColorSet .
+
+<#palette-later-dark>
+    a solid-memo:ColorSet .

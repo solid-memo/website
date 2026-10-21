@@ -2,17 +2,24 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ComponentType } from "preact";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
+import { PALETTES } from "@solid-memo/domain/palette";
+import type { CustomPalette, ShownPalette } from "@solid-memo/domain/customPalette";
+import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
+import { useInstanceTheme, useTheme } from "./theme";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const restored: EstablishedSession = { session, origin: "restored" };
@@ -132,7 +139,10 @@ describe("AppShell", () => {
       fakeBrowserScheme(false);
       const meta = document.createElement("meta");
       meta.name = "theme-color";
-      document.head.append(meta);
+      // The palettes, for the browser's chrome to take the background from.
+      const palettes = document.createElement("style");
+      palettes.textContent = readFileSync(join(import.meta.dirname, "../palettes.css"), "utf8");
+      document.head.append(meta, palettes);
       const useCases = makeUseCases();
       renderApp(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Switch to dark mode" }));
@@ -145,6 +155,7 @@ describe("AppShell", () => {
       await waitFor(() => expect(useCases.chooseTheme).toHaveBeenCalledTimes(2));
       expect(useCases.instanceTheme).not.toHaveBeenCalled();
       meta.remove();
+      palettes.remove();
     });
 
     it("shows the theme the open instance's preferences hold, and keeps a new choice there", async () => {
@@ -195,6 +206,264 @@ describe("AppShell", () => {
       expect(useCases.instanceTheme).toHaveBeenCalledOnce();
       await act(async () => writes[1]());
       await waitFor(() => expect(useCases.instanceTheme).toHaveBeenCalledTimes(2));
+    });
+  });
+
+  describe("palette and text size", () => {
+    afterEach(() => {
+      delete document.documentElement.dataset.palette;
+      delete document.documentElement.dataset.textSize;
+      document.documentElement.removeAttribute("style");
+    });
+
+    const INSTANCE_URL = "https://pod.example/solid-memo/main/";
+    const READING: CustomPalette = {
+      url: `${INSTANCE_URL}palettes.ttl#palette-reading`,
+      title: { en: "Reading" },
+      basedOn: "parchment",
+      light: { "--text": "#2b2118" },
+      dark: { "--text": "#ffffff" },
+    };
+
+    /** A workspace with a button for each palette and each text size, as the preferences have a choice for each. */
+    function AppearanceWorkspace() {
+      const {
+        palette,
+        customPalette,
+        choosePalette,
+        chooseCustomPalette,
+        textSize,
+        chooseTextSize,
+      } = useTheme();
+      return (
+        <main id={MAIN_ID}>
+          <p>{`Palette: ${customPalette === null ? "" : "reading over "}${palette}, text size: ${textSize}`}</p>
+          {PALETTES.map((option) => (
+            <button key={option} type="button" onClick={() => choosePalette(option)}>
+              {option}
+            </button>
+          ))}
+          <button type="button" onClick={() => chooseCustomPalette(READING)}>
+            reading
+          </button>
+          {TEXT_SIZES.map((size) => (
+            <button key={size} type="button" onClick={() => chooseTextSize(size)}>
+              {size}
+            </button>
+          ))}
+        </main>
+      );
+    }
+
+    /** The same, in an open instance, whose preferences keep the choices. */
+    function InstanceAppearanceWorkspace({ useCases }: WorkspaceProps) {
+      useInstanceTheme(useCases, INSTANCE_URL);
+      return <AppearanceWorkspace />;
+    }
+
+    function renderAppearance(
+      overrides: Partial<UseCases>,
+      workspace: ComponentType<WorkspaceProps> = AppearanceWorkspace,
+    ) {
+      const useCases = makeUseCases({
+        restoreSession: vi.fn(async () => ({
+          session: { webId: "https://guest.invalid/profile#me", guest: true as const },
+          origin: "restored" as const,
+        })),
+        ...overrides,
+      });
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      render(
+        <QueryClientProvider client={queryClient}>
+          <AppShell
+            useCases={useCases}
+            source={source}
+            providers={POD_PROVIDERS}
+            identity={SOLID_MEMO}
+            workspace={workspace}
+          />
+        </QueryClientProvider>,
+      );
+      return useCases;
+    }
+
+    it("shows the palette chosen on this device, and keeps a new choice there, the browser's chrome in its background", async () => {
+      vi.spyOn(window, "matchMedia").mockReturnValue({
+        matches: true,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      } as unknown as MediaQueryList);
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      const palettes = document.createElement("style");
+      palettes.textContent = readFileSync(join(import.meta.dirname, "../palettes.css"), "utf8");
+      document.head.append(meta, palettes);
+      const useCases = renderAppearance({ paletteChoice: vi.fn(() => "high-contrast" as const) });
+      expect(await screen.findByText(/^Palette: high-contrast/)).toBeInTheDocument();
+      expect(document.documentElement.dataset.palette).toBe("high-contrast");
+      expect(meta.content).toBe("#000000");
+      // Standard is no attribute at all, as index.html leaves it.
+      fireEvent.click(screen.getByRole("button", { name: "standard" }));
+      expect(useCases.choosePalette).toHaveBeenCalledWith("standard", null);
+      expect(document.documentElement.dataset.palette).toBeUndefined();
+      expect(meta.content).toBe("#11171e");
+      meta.remove();
+      palettes.remove();
+      vi.restoreAllMocks();
+    });
+
+    it("shows the text at the size chosen on this device, and keeps a new choice there", async () => {
+      const useCases = renderAppearance({ textSizeChoice: vi.fn(() => "larger" as const) });
+      expect(await screen.findByText(/text size: larger$/)).toBeInTheDocument();
+      expect(document.documentElement.dataset.textSize).toBe("larger");
+      fireEvent.click(screen.getByRole("button", { name: "largest" }));
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", null);
+      expect(document.documentElement.dataset.textSize).toBe("largest");
+      // The default size is no attribute at all, as index.html leaves it.
+      fireEvent.click(screen.getByRole("button", { name: "default" }));
+      expect(screen.getByText(/text size: default$/)).toBeInTheDocument();
+      expect(document.documentElement.dataset.textSize).toBeUndefined();
+    });
+
+    it("shows the palette and the text size the open instance's preferences hold, and keeps a new choice there", async () => {
+      const useCases = renderAppearance(
+        {
+          instancePalette: vi.fn(async () => ({ palette: "parchment" as const, custom: null })),
+          instanceTextSize: vi.fn(async () => "large" as const),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
+      await waitFor(() => expect(document.documentElement.dataset.palette).toBe("parchment"));
+      expect(document.documentElement.dataset.textSize).toBe("large");
+      vi.mocked(useCases.instancePalette).mockResolvedValue({
+        palette: "high-contrast",
+        custom: null,
+      });
+      fireEvent.click(screen.getByRole("button", { name: "high-contrast" }));
+      expect(useCases.choosePalette).toHaveBeenCalledWith("high-contrast", INSTANCE_URL);
+      // Read back from the pod once written.
+      await waitFor(() => expect(useCases.instancePalette).toHaveBeenCalledTimes(2));
+      vi.mocked(useCases.instanceTextSize).mockResolvedValue("largest");
+      fireEvent.click(screen.getByRole("button", { name: "largest" }));
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", INSTANCE_URL);
+      await waitFor(() => expect(useCases.instanceTextSize).toHaveBeenCalledTimes(3));
+      expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
+    });
+
+    it("paints a palette of the user's own over its base, in the theme shown, and takes its colors off for a built-in one", async () => {
+      const root = document.documentElement;
+      const useCases = renderAppearance(
+        {
+          customPaletteChoice: vi.fn(() => READING),
+          paletteChoice: vi.fn(() => "parchment" as const),
+        },
+        AppearanceWorkspace,
+      );
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      expect(root.dataset.palette).toBe("parchment");
+      expect(root.style.getPropertyValue("--text")).toBe("#2b2118");
+      fireEvent.click(screen.getByRole("button", { name: "standard" }));
+      expect(root.style.getPropertyValue("--text")).toBe("");
+      expect(root.dataset.palette).toBeUndefined();
+      fireEvent.click(screen.getByRole("button", { name: "reading" }));
+      expect(useCases.chooseCustomPalette).toHaveBeenCalledWith(READING, null);
+      expect(root.dataset.palette).toBe("parchment");
+      expect(root.style.getPropertyValue("--text")).toBe("#2b2118");
+    });
+
+    it("paints a palette of the user's own in its dark colors in the dark theme", async () => {
+      renderAppearance({
+        themeChoice: vi.fn(() => "dark" as const),
+        customPaletteChoice: vi.fn(() => READING),
+        paletteChoice: vi.fn(() => "parchment" as const),
+      });
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      expect(document.documentElement.style.getPropertyValue("--text")).toBe("#ffffff");
+    });
+
+    it("shows the palette of the user's own the open instance's preferences name, and paints it again only as it changes", async () => {
+      const root = document.documentElement;
+      const useCases = renderAppearance(
+        {
+          instancePalette: vi.fn(async () => ({
+            palette: "parchment" as const,
+            custom: { ...READING },
+          })),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      await waitFor(() => expect(root.style.getPropertyValue("--text")).toBe("#2b2118"));
+      // Chosen, written and read back the same: not painted again.
+      fireEvent.click(screen.getByRole("button", { name: "reading" }));
+      root.style.setProperty("--text", "#000000");
+      await waitFor(() => expect(useCases.instancePalette).toHaveBeenCalledTimes(2));
+      expect(root.style.getPropertyValue("--text")).toBe("#000000");
+      // Read back changed: painted again.
+      vi.mocked(useCases.instancePalette).mockResolvedValue({
+        palette: "parchment",
+        custom: { ...READING, light: { "--text": "#111111" } },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "reading" }));
+      await waitFor(() => expect(root.style.getPropertyValue("--text")).toBe("#111111"));
+    });
+
+    it("shows no earlier choice that a read begun before a later one brings back", async () => {
+      const reads: ((size: "default" | "large" | "largest") => void)[] = [];
+      const writes: (() => void)[] = [];
+      const useCases = renderAppearance(
+        {
+          instancePalette: vi
+            .fn<() => Promise<ShownPalette>>()
+            .mockResolvedValueOnce({ palette: "parchment", custom: null })
+            .mockResolvedValue({ palette: "high-contrast", custom: null }),
+          instanceTextSize: vi
+            .fn<() => Promise<"default" | "large" | "largest">>()
+            .mockResolvedValueOnce("large")
+            .mockImplementation(() => new Promise((resolve) => reads.push(resolve))),
+          chooseTextSize: vi.fn(() => new Promise<void>((resolve) => writes.push(resolve))),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
+      // The palette is written, and the pod read back, while the text size is chosen.
+      fireEvent.click(screen.getByRole("button", { name: "high-contrast" }));
+      await waitFor(() => expect(reads).toHaveLength(1));
+      fireEvent.click(screen.getByRole("button", { name: "largest" }));
+      // Read before the text size was chosen, it holds another.
+      await act(async () => {
+        reads[0]!("default");
+        // The query tells its observers a moment later.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
+      // Once the text size is written, its own read back is shown.
+      await act(async () => writes[0]!());
+      await waitFor(() => expect(reads).toHaveLength(2));
+      await act(async () => {
+        reads[1]!("largest");
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", INSTANCE_URL);
+      expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
+    });
+
+    it("puts back the pod's palette and text size when a choice cannot be written there", async () => {
+      renderAppearance(
+        {
+          instancePalette: vi.fn(async () => ({ palette: "parchment" as const, custom: null })),
+          instanceTextSize: vi.fn(async () => "large" as const),
+          choosePalette: vi.fn(async () => Promise.reject(new Error("412"))),
+          chooseTextSize: vi.fn(async () => Promise.reject(new Error("412"))),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "color-vision" }));
+      fireEvent.click(screen.getByRole("button", { name: "default" }));
+      expect(screen.getByText("Palette: color-vision, text size: default")).toBeInTheDocument();
+      expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
     });
   });
 
@@ -629,6 +898,8 @@ describe("AppShell", () => {
       fireEvent.click(screen.getByRole("button", { name: "Continue" }));
       expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
       expect(screen.getByText(/Logged in as/)).toHaveTextContent("Logged in as Alice");
+      // Whole in its title, where the Studio's header cuts it short.
+      expect(screen.getByText(/Logged in as/)).toHaveAttribute("title", "Logged in as Alice");
       expect(screen.getByRole("link", { name: "Alice (opens in a new tab)" })).toHaveAttribute(
         "href",
         session.webId,
@@ -732,7 +1003,10 @@ describe("AppShell", () => {
       const useCases = makeUseCases();
       renderApp(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Try it without logging in" }));
-      expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toBeInTheDocument();
+      expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toHaveAttribute(
+        "title",
+        expect.stringMatching(/^You are trying Solid Memo as a guest/),
+      );
       expect(useCases.startGuest).toHaveBeenCalledWith("My study");
       expect(screen.queryByRole("button", { name: "Log out" })).toBeNull();
       expect(useCases.findGuestStudy).not.toHaveBeenCalled();
