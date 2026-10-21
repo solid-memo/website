@@ -356,7 +356,10 @@ not follow the root's font size is kept to a few places, and made to:
   size raises.
 - **Breakpoints** are in `rem`. A media query reads `rem` as the
   browser's own font size, not the root's, so a breakpoint follows the
-  browser's text size but not the page's.
+  browser's text size but not the page's. The deck list's is a
+  container query instead, in `em` of the list, so it follows both:
+  narrower than 17em, a deck's study action and menu go under its name
+  rather than beside it.
 - **The Studio's panes**: a splitter's least and most sizes are in
   pixels for a root font size of 16px, and as much larger as the root's
   font size is ([`splitter.ts`](../apps/studio/src/ui/shell/splitter.ts)).
