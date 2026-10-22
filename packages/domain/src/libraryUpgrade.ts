@@ -249,7 +249,7 @@ export function sameContent(a: CardContent, b: CardContent): boolean {
  * order; none and an empty list alike). Not part of sameContent: the
  * user can neither see nor change them.
  */
-function sameSubjects(a: CardContent, b: CardContent): boolean {
+export function sameSubjects(a: CardContent, b: CardContent): boolean {
   return sameList(a.subjects ?? [], b.subjects ?? []);
 }
 

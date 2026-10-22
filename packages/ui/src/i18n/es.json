@@ -2928,6 +2928,11 @@
           "many": "Cambiadas: {count} de tarjetas",
           "other": "Cambiadas: {count} tarjetas"
         },
+        "about": {
+          "one": "De qué trata: {count} tarjeta",
+          "many": "De qué tratan: {count} de tarjetas",
+          "other": "De qué tratan: {count} tarjetas"
+        },
         "retire": {
           "one": "Retirada: {count} tarjeta",
           "many": "Retiradas: {count} de tarjetas",

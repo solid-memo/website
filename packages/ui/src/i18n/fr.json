@@ -2928,6 +2928,11 @@
           "many": "Cartes modifiées : {count}",
           "other": "Cartes modifiées : {count}"
         },
+        "about": {
+          "one": "Cartes dont le sujet est indiqué : {count}",
+          "many": "Cartes dont le sujet est indiqué : {count}",
+          "other": "Cartes dont le sujet est indiqué : {count}"
+        },
         "retire": {
           "one": "Cartes archivées : {count}",
           "many": "Cartes archivées : {count}",

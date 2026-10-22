@@ -2772,6 +2772,10 @@
           "one": "Ändras: {count} kort",
           "other": "Ändras: {count} kort"
         },
+        "about": {
+          "one": "Vad det handlar om: {count} kort",
+          "other": "Vad de handlar om: {count} kort"
+        },
         "retire": {
           "one": "Tas ur bruk: {count} kort",
           "other": "Tas ur bruk: {count} kort"

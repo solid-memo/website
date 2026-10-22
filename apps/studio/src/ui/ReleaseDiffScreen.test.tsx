@@ -174,6 +174,22 @@ describe("ReleaseDiffScreen", () => {
     ).toBeInTheDocument();
   });
 
+  it("lists a card whose subjects alone change, and says a learner's copy records what it is about", () => {
+    const next = nextVersionDraft(v1(), DRAFT_URL);
+    const draft: ReleaseDraft = {
+      ...next,
+      cards: next.cards.map((node) =>
+        node.id === "q-pods-1a"
+          ? { ...node, data: { ...node.data, subject: ["https://data.example/pods"] } }
+          : node,
+      ),
+    };
+    renderScreen(draft, diffOf(draft));
+    expect(
+      screen.getByText(/^Updating a learner's copy of version 1 records what 1 card is about/),
+    ).toBeInTheDocument();
+  });
+
   it("takes a release or draft that states no version for version 1", () => {
     const previous = v1();
     const unversioned = { ...previous, root: { ...previous.root, version: undefined } };

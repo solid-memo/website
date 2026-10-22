@@ -2772,6 +2772,10 @@
           "one": "Geändert: {count} Karte",
           "other": "Geändert: {count} Karten"
         },
+        "about": {
+          "one": "Worum es geht: {count} Karte",
+          "other": "Worum es geht: {count} Karten"
+        },
         "retire": {
           "one": "Ausgemustert: {count} Karte",
           "other": "Ausgemustert: {count} Karten"

@@ -1354,7 +1354,9 @@ The table is a [`DataTable`](#card-workbench): **j** and **k** move its
 cursor, and the copy at the cursor is shown in the aside (named
 Upgrade, [Layout](#layout)), with the rest of its plan: what history
 is kept, the new releases' notes, and the cards added, changed,
-retired, brought back, removed, and left as the user has them. Which
+given what the release says they are about (`about`, every card of a
+release that changes only that), retired, brought back, removed, and
+left as the user has them. Which
 copy that is lives in the page, not in the URL; on another screen and
 back, none is shown until the cursor moves.
 
@@ -1968,8 +1970,17 @@ it cannot be read. It shows:
   and how many of each kind are as they were. Subjects are matched by
   their ids. A card compares as an upgrade compares it (`sameContent`
   in [libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)),
-  its wrong options aside, which are listed on their own. Retiring a
-  subject is its own change; one retired and changed says both.
+  and by what it is about (its `dcterms:subject`, in any order:
+  `sameSubjects`), which an upgrade writes to a learner's copy too; its
+  wrong options aside, which are listed on their own. A card a release
+  states in a format before card format 7 (a format-4 card compiled
+  from linked data, say) is read with what it is about all the same:
+  the draft keeps it in the card's record, not as a statement beside
+  it, so it is compared, and written once, as card format 7 writes it
+  (`draftFromQuads` in
+  [releaseDraftMapper.ts](../packages/solid/src/mappers/releaseDraftMapper.ts)).
+  Retiring a subject is its own change; one retired and changed says
+  both.
 - **What learners get** (`simulateLearnerUpgrade`): Solid Memo's own
   upgrade plan (`planLibraryUpgrade`) for a learner's copy of the
   release, as an import makes it, the learner having changed nothing.

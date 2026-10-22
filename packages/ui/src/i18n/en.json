@@ -2772,6 +2772,10 @@
           "one": "Changed: {count} card",
           "other": "Changed: {count} cards"
         },
+        "about": {
+          "one": "What it is about: {count} card",
+          "other": "What they are about: {count} cards"
+        },
         "retire": {
           "one": "Retired: {count} card",
           "other": "Retired: {count} cards"

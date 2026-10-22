@@ -35,6 +35,7 @@ const minePlan = {
   change: [],
   remove: [],
   retire: [makeCard(mine, "latvia")],
+  about: [makeCard(mine, "estonia")],
   kept: [makeCard(mine, "sweden")],
   notes: [],
 };
@@ -185,11 +186,17 @@ describe("LibraryCopiesScreen", () => {
     expect(plan).toHaveTextContent(
       "a retired card is kept, but no longer studied. 1 card you changed is left as you have it.",
     );
+    expect(plan).toHaveTextContent("Release 2: updating records what 1 card is about");
     expect(
       within(plan)
         .getAllByRole("heading")
         .map((heading) => heading.textContent),
-    ).toEqual(["My capitals", "Retired: 1 card", "Left as you have it: 1 card"]);
+    ).toEqual([
+      "My capitals",
+      "What it is about: 1 card",
+      "Retired: 1 card",
+      "Left as you have it: 1 card",
+    ]);
   });
 
   it("says beside the table what it would do for a copy not to update, and how to show one", () => {

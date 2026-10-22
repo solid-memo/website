@@ -124,6 +124,36 @@ describe("draftFromQuads", () => {
     expect(draft.published).toEqual({ ids: {}, activities: [] });
   });
 
+  it("moves what a card stamped below format 7 is about into its record, which writes it once", async () => {
+    const quads = await quadsOfTurtle(
+      `${PREFIXES}
+<> a solid-memo:Deck , dcat:Dataset ; solid-memo:formatVersion 1 ; dcterms:title "Jobs"@en ;
+    solid-memo:studyDirection solid-memo:frontToBack .
+<#old> a solid-memo:Card ; solid-memo:formatVersion 4 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;
+    dcterms:subject <https://data.example/b> , <https://data.example/a> .
+<#new> a solid-memo:Card ; solid-memo:formatVersion 7 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;
+    dcterms:subject <https://data.example/c> .
+`,
+      DRAFT,
+    );
+    const draft = draftFromQuads(quads, DRAFT)!;
+    const subjects = Object.fromEntries(
+      draft.cards.map((node) => [node.id, [...node.data.subject].sort()]),
+    );
+    expect(subjects).toEqual({
+      old: ["https://data.example/a", "https://data.example/b"],
+      new: ["https://data.example/c"],
+    });
+    expect(draft.triples.filter((triple) => triple.predicate.endsWith("/subject"))).toEqual([]);
+    const written = draftQuads(draft).filter(
+      (quad) => quad.subject.value === of("old") && quad.predicate.value.endsWith("/subject"),
+    );
+    expect(written.map((quad) => quad.object.value).sort()).toEqual([
+      "https://data.example/a",
+      "https://data.example/b",
+    ]);
+  });
+
   it("is null without a root this app can read", async () => {
     expect(
       draftFromQuads(await quadsOfTurtle(`${PREFIXES}<#x> a solid-memo:Card .`, DRAFT), DRAFT),

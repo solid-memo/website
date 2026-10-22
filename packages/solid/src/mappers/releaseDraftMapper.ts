@@ -37,7 +37,7 @@ import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import { graphsOf } from "../linearDataset";
 import { readRecord, readVersioned, recordThing } from "../records";
-import { SM } from "../vocab";
+import { DCTERMS, SM } from "../vocab";
 
 /**
  * A release's draft between its documents and the domain's ReleaseDraft
@@ -169,12 +169,18 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
   const dataset = datasetOf(quads);
   /** For each shaped subject, the predicates its shape owns, and the types. */
   const owned = new Map<string, { predicates: Set<string>; types: Set<string> }>();
-  const own = (subject: string, descriptor: ShapeDescriptor, types: readonly string[] = []) =>
+  const own = (
+    subject: string,
+    descriptor: ShapeDescriptor,
+    types: readonly string[] = [],
+    predicates: readonly string[] = [],
+  ) =>
     owned.set(subject, {
       predicates: new Set([
         ...descriptor.fields.map((field) => field.predicate),
         ...descriptor.absent,
         SM.formatVersion,
+        ...predicates,
       ]),
       types: new Set([descriptor.targetClass, ...descriptor.additionalTypes, ...types]),
     });
@@ -202,8 +208,19 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
     const { list, shape } = kinds[0]!;
     const read = readVersioned(thing, shape);
     if (read === null) continue;
-    own(subject, (SHAPES[shape] as Record<number, ShapeDescriptor>)[read.record.version]!);
-    nodes[list]!.push({ id, data: migrate(shape, read.record, { subject }) });
+    const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[read.record.version]!;
+    const data = migrate(shape, read.record, { subject });
+    // What a card stamped below format 7 is about (`dcterms:subject`, as a
+    // release compiled from linked data states it on format-4 cards) goes
+    // into its record, not the raw triples: the latest card shape writes
+    // it, once, and the release diff and a learner's upgrade compare it.
+    if (shape === "card" && read.record.version < 7) {
+      own(subject, descriptor, [], [DCTERMS.subject]);
+      nodes[list]!.push({ id, data: { ...data, subject: getUrlAll(thing, DCTERMS.subject) } });
+      continue;
+    }
+    own(subject, descriptor);
+    nodes[list]!.push({ id, data });
   }
   const triples = quads
     .filter((quad) => {
