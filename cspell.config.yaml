@@ -16,9 +16,11 @@ files:
   - packages/ui/src/i18n/en.json
   - docs/*.ttl
 useGitignore: true
-# Words in Arabic script are examples of Arabic, not English to check.
+# Words in Arabic script are examples of Arabic, not English to check,
+# and a security advisory's id (GHSA-xxxx-xxxx-xxxx) is an identifier.
 ignoreRegExpList:
   - "/[\\u0600-\\u06ff]+/gu"
+  - "/\\bGHSA(?:-[23456789cfghjmpqrvwx]{4}){3}\\b/g"
 # .github/ holds Markdown too (the pull request template).
 enableGlobDot: true
 ignorePaths:
