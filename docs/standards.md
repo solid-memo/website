@@ -77,7 +77,8 @@ says which, and why each one does not stand in the way of reuse.
 | [UUID](https://www.rfc-editor.org/rfc/rfc9562) | RFC 9562, version 4 | IETF RFC (Proposed Standard) | The names of new decks and cards, `deck-<uuid>` and `card-<uuid>`, which end up in IRIs in the pod, and the guest's pod's ETags, through `crypto.randomUUID()` ([`solidDeckRepository.ts`](../packages/solid/src/solidDeckRepository.ts), [`appUseCases.ts`](../packages/composition/src/appUseCases.ts)) | Yes |
 | [Content Security Policy](https://www.w3.org/TR/CSP3/) | Level 3 | W3C Working Draft | The policy meta tag in [`apps/web/index.html`](../apps/web/index.html), checked by [`build.test.ts`](../apps/web/src/build.test.ts) ([markdown.md](markdown.md)); and the docs' pages, whose policy [`docsSite.ts`](../packages/markdown/tooling/docsSite.ts) writes and `checkPage` holds them to ([markdown.md](markdown.md#the-docs-as-a-site)) | Yes |
 | [Media Queries](https://www.w3.org/TR/mediaqueries-5/) | Level 5 | W3C Working Draft | `prefers-color-scheme` for the theme and `prefers-reduced-motion` for motion ([`theme.tsx`](../packages/ui/src/ui/theme.tsx), [`motion.ts`](../packages/ui/src/ui/motion.ts), [`style.css`](../packages/ui/src/style.css)) | Yes |
-| [SVG](https://www.w3.org/TR/SVG11/) | 1.1 (Second Edition) | W3C Recommendation | The docs' diagrams, drawn by the build into `docs/diagrams/` and held by `checkSvg` to what Mermaid writes ([`diagrams.ts`](../packages/markdown/tooling/diagrams.ts), [markdown.md](markdown.md#a-drawing-is-safe-to-serve)) | Yes |
+| [CSS Color](https://www.w3.org/TR/css-color-4/) | Level 4 | W3C Candidate Recommendation | A palette of one's own: each color an opaque sRGB color in the hexadecimal `#rrggbb` form, which the color set's shape [`ns/shapes/color-set/v1.ttl`](../ns/shapes/color-set/v1.ttl) requires and [`customPalette.ts`](../packages/domain/src/customPalette.ts) reads ([theme.md](theme.md#palettes-of-ones-own)) | Yes |
+| [SVG](https://www.w3.org/TR/SVG11/) | 1.1 (Second Edition) | W3C Recommendation | The docs' diagrams, drawn by the build into `docs/diagrams/` and held by `checkSvg` to what Mermaid writes ([`diagrams.ts`](../packages/markdown/tooling/diagrams.ts), [markdown.md](markdown.md#a-drawing-is-safe-to-serve)); the Studio's graph ([`GraphView.tsx`](../apps/studio/src/ui/graph/GraphView.tsx), [studio.md](studio.md#graph)); and the statistics charts ([`BarChart.tsx`](../packages/ui/src/ui/charts/BarChart.tsx), [`LineChart.tsx`](../packages/ui/src/ui/charts/LineChart.tsx), [statistics.md](statistics.md)) | Yes |
 | [WOFF](https://www.w3.org/TR/WOFF2/) | 2.0 | W3C Recommendation | The app's self-hosted fonts ([vendor-code.md](vendor-code.md)), and Fredoka, embedded in each of the docs' diagrams ([markdown.md](markdown.md#the-diagrams-font)) | Yes |
 | [IndexedDB](https://www.w3.org/TR/IndexedDB/) | 3.0 | W3C specification | The guest's pod: [`indexedDbResourceStore.ts`](../packages/browser/src/indexedDbResourceStore.ts) ([guest-mode.md](guest-mode.md)) | Yes |
 | [Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html) | HTML Living Standard | WHATWG standard | Choices kept on the device ([privacy.md](privacy.md#in-the-browser)) | Yes |
@@ -85,6 +86,8 @@ says which, and why each one does not stand in the way of reuse.
 | [Open Graph](https://ogp.me/) | — | De facto, published by Meta | Link previews in [`apps/web/index.html`](../apps/web/index.html) | Yes (de facto) |
 | [Sitemaps](https://www.sitemaps.org/protocol.html) | 0.9 | De facto, by the major search engines | `sitemap.xml`, written by the build ([`siteMap.ts`](../packages/vocab/tooling/siteMap.ts)) | Yes (de facto) |
 | [robots.txt](https://www.rfc-editor.org/rfc/rfc9309) | RFC 9309 | IETF RFC | `robots.txt`, written by the build ([`siteMap.ts`](../packages/vocab/tooling/siteMap.ts)) | Yes |
+| [GraphQL](https://spec.graphql.org/October2021/) | October 2021 | Specification by the GraphQL Foundation (Joint Development Foundation) | The query that reads every version of the JobTech taxonomy for the taxonomy deck: [`taxonomy_deck.py`](../scripts/taxonomy_deck.py) ([deck-library.md](deck-library.md#the-taxonomy-deck)) | Yes |
+| [JSON](https://www.rfc-editor.org/rfc/rfc8259) | RFC 8259 | IETF Internet Standard (STD 90) | The taxonomy's answers, read by [`taxonomy_deck.py`](../scripts/taxonomy_deck.py), and the normalized snapshot whose checksum the deck's provenance records ([deck-library.md](deck-library.md#the-taxonomy-deck)) | Yes |
 | [WCAG](https://www.w3.org/TR/WCAG22/) | 2.2 | W3C Recommendation | The target, level AA, of the web app and the Studio, which the journeys check every screen they visit against with axe ([accessibility.md](accessibility.md)); among it, the Studio's minimum target size and single-key shortcuts that can be turned off ([studio.md](studio.md#layout)) | Yes |
 
 The app is built on the web platform as a whole: HTML, CSS, the DOM,
@@ -103,6 +106,7 @@ Licenses in deck metadata are named by their own IRIs, such as
 | [SPDX License List](https://spdx.org/licenses/) | current release, unpinned | Linux Foundation reference data | License identifiers in the files' `SPDX-License-Identifier` headers and in [`LICENSES/`](../LICENSES/); `dcterms:license <https://spdx.org/licenses/MIT>` on the topics scheme ([vocab.md](vocab.md#license)) | Yes |
 | [publiccode.yml](https://yml.publiccode.tools/) | `publiccodeYmlVersion: "0"` | Specification by Developers Italia, de facto | [`publiccode.yml`](../publiccode.yml), checked by the publiccode.yml parser in CI ([testing.md](testing.md)) | Yes (de facto) |
 | [Citation File Format](https://citation-file-format.github.io/) | 1.2.0 | Specification by its authors, de facto | [`CITATION.cff`](../CITATION.cff), its version and date set by each release ([releasing.md](releasing.md#what-a-release-does)) | Yes (de facto) |
+| [Zenodo deposit metadata](https://developers.zenodo.org/#representation) | — | Zenodo's own format, de facto | [`.zenodo.json`](../.zenodo.json), the metadata Zenodo gives each archived release, in place of `CITATION.cff` ([releasing.md](releasing.md#what-a-release-does)) | Yes (de facto) |
 | [Semantic Versioning](https://semver.org/spec/v2.0.0.html) | 2.0.0 | Specification by its authors, de facto | The app's versions, from 1.0.0, each chosen by semantic-release from the commits' types ([releasing.md](releasing.md#the-scheme)) | Yes (de facto) |
 | [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) | 1.0.0 | Specification by its authors, de facto | Every commit message from version 1.0.0 on, checked by commitlint in CI ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)) | Yes (de facto) |
 | [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html) | 2.1 | Code of conduct by its authors, de facto | [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md) | Yes (de facto) |
@@ -156,9 +160,9 @@ way of others working with Solid Memo's code or data.
   and another scheduler can be added beside them.
 - **Open Graph** and **Sitemaps** are de facto web conventions for link
   previews and search engines. Nothing in the app depends on them.
-- **publiccode.yml, the Citation File Format, Semantic Versioning,
-  Conventional Commits, the Contributor Covenant and EditorConfig** are
-  de facto
+- **publiccode.yml, the Citation File Format, Zenodo's deposit
+  metadata, Semantic Versioning, Conventional Commits, the Contributor
+  Covenant and EditorConfig** are de facto
   conventions for the repository and its metadata, each published by its
   authors for anyone to use. They describe the project to people and
   tools; nothing in the app or its data depends on them.
