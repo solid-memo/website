@@ -993,6 +993,11 @@
       "many": "cambia {count} de tarjetas",
       "other": "cambia {count} tarjetas"
     },
+    "about": {
+      "one": "registra de qué trata {count} tarjeta",
+      "many": "registra de qué tratan {count} de tarjetas",
+      "other": "registra de qué tratan {count} tarjetas"
+    },
     "retires": {
       "one": "retira {count} tarjeta",
       "many": "retira {count} de tarjetas",

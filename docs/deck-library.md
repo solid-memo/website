@@ -239,7 +239,11 @@ in two decks. A card about several things names each.
 - **A learner's copy keeps the subjects** from card format 7 on, which
   names `dcterms:subject`: an import reads it from each card whatever
   format the release states (the taxonomy deck's cards are at format 4),
-  and writes it on the copy's card, where every edit keeps it. What the
+  and writes it on the copy's card, where every edit keeps it. A newer
+  release that changes only subjects is offered to a copy as an upgrade
+  of its own, which gives every card the release's subjects, and to a
+  copy imported before card format 7, which lost them
+  ([migrations.md](migrations.md#catching-up-with-the-library)). What the
   release says of the things themselves is not copied.
 - **The app shows none of it yet**, and never fetches from these sources
   while someone studies. A Studio draft keeps it, as it keeps every

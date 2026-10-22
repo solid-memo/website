@@ -40,6 +40,7 @@ const plan: LibraryUpgradePlan = {
   retire: [],
   restore: [],
   remove: [],
+  about: [],
   kept: [],
   applied: [],
   gone: [],

@@ -944,6 +944,10 @@
       "one": "ändert {count} Karte",
       "other": "ändert {count} Karten"
     },
+    "about": {
+      "one": "hält fest, worum es in {count} Karte geht",
+      "other": "hält fest, worum es in {count} Karten geht"
+    },
     "retires": {
       "one": "mustert {count} Karte aus",
       "other": "mustert {count} Karten aus"

@@ -993,6 +993,11 @@
       "many": "modifie {count} de cartes",
       "other": "modifie {count} cartes"
     },
+    "about": {
+      "one": "indique de quoi parle {count} carte",
+      "many": "indique de quoi parlent {count} de cartes",
+      "other": "indique de quoi parlent {count} cartes"
+    },
     "retires": {
       "one": "archive {count} carte",
       "many": "archive {count} de cartes",

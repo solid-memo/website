@@ -895,6 +895,9 @@
     "changes": {
       "other": "카드 {count}장 변경"
     },
+    "about": {
+      "other": "카드 {count}장의 주제 기록"
+    },
     "retires": {
       "other": "카드 {count}장 사용 중지"
     },

@@ -107,6 +107,7 @@ describe("planLibraryUpgrade", () => {
       retire: [],
       restore: [],
       remove: [podCard("is", "Reykjavik")],
+      about: [],
       kept: [podCard("fi", "Helsinki, my note"), podCard("lv", "Riga, mine")],
       // A card the copy already has as the release adds it.
       applied: [podCard("mine", "Mine")],
@@ -884,6 +885,183 @@ describe("upgradedCards", () => {
   });
 });
 
+describe("what cards are about (subjects) in an upgrade", () => {
+  const WD = "http://www.wikidata.org/entity/";
+  const about =
+    (...subjects: string[]) =>
+    <T extends LibraryCard | Card>(card: T): T => ({
+      ...card,
+      subjects: subjects.map((id) => `${WD}${id}`),
+    });
+  const was = release(1, [
+    about("Q1754")(libraryCard("se", "Stockholm")),
+    libraryCard("dk", "Copenhagen"),
+    { ...libraryCard("yu", "Belgrade"), retired: true },
+  ]);
+  /** The next release: the same cards, but for what they are about. */
+  const now = release(2, [
+    about("Q1754", "Q34")(libraryCard("se", "Stockholm")),
+    about("Q1748")(libraryCard("dk", "Copenhagen")),
+    about("Q3711")({ ...libraryCard("yu", "Belgrade"), retired: true }),
+  ]);
+  const plan = (cards: readonly Card[], to = now, from = was) =>
+    planLibraryUpgrade({ deck, cards, from, to, releases });
+
+  it("offers a release that changes only what cards are about, to a copy that lost them, and moves the deck to it", () => {
+    // As the taxonomy deck's release 3 was to its release 2, for a copy an app before card format 7 imported and the
+    // user then edited a card of: every card, retired too, takes the release's subjects, its text as the user has it.
+    const copy = [
+      podCard("se", "Stockholm"),
+      podCard("dk", "Copenhagen, my note"),
+      { ...podCard("yu", "Belgrade"), retired: true as const },
+    ];
+    const offer = plan(copy)!;
+    expect(offer).toMatchObject({
+      releaseUrl: now.url,
+      add: [],
+      change: [],
+      retire: [],
+      restore: [],
+      remove: [],
+      kept: [],
+      applied: [],
+      about: [
+        about("Q1754", "Q34")(podCard("se", "Stockholm")),
+        about("Q1748")(podCard("dk", "Copenhagen, my note")),
+        about("Q3711")({ ...podCard("yu", "Belgrade"), retired: true as const }),
+      ],
+    });
+    expect(upgradedCards(offer)).toEqual(offer.about);
+    expect(applyLibraryUpgrade(deck, offer)).toEqual({ ...deck, sourceUrl: now.url });
+    // Once written, the copy is as the release has it: planned again it only moves the deck, then offers nothing.
+    const written = upgradedCards(offer) as Card[];
+    const again = plan(written)!;
+    expect(again.about).toEqual([]);
+    expect(again.applied.map((card) => card.id)).toEqual(["se", "dk", "yu"]);
+    expect(upgradedCards(again)).toEqual([]);
+    expect(
+      planLibraryUpgrade({
+        deck: applyLibraryUpgrade(deck, offer),
+        cards: written,
+        from: now,
+        to: { ...now, version: "3" },
+        releases,
+      }),
+    ).toBeNull();
+  });
+
+  it("gives a copy the newer release's subjects where it has the older release's, and takes none in the release as their removal", () => {
+    const later = release(2, [
+      about("Q34")(libraryCard("se", "Stockholm")),
+      libraryCard("dk", "Copenhagen"),
+      { ...libraryCard("yu", "Belgrade"), retired: true },
+    ]);
+    const offer = plan([about("Q1754")(podCard("se", "Stockholm"))], later, was)!;
+    expect(offer.about).toEqual([about("Q34")(podCard("se", "Stockholm"))]);
+    const dropped = release(2, [libraryCard("se", "Stockholm"), ...was.cards.slice(1)]);
+    const removal = plan([about("Q1754")(podCard("se", "Stockholm"))], dropped, was)!;
+    expect(removal.about).toEqual([podCard("se", "Stockholm")]);
+    expect(removal.about[0]).not.toHaveProperty("subjects");
+  });
+
+  it("compares subjects in any order, and takes a copy that has the newer release's as applied", () => {
+    const reordered = release(2, [about("Q34", "Q1754")(libraryCard("se", "Stockholm"))]);
+    const from = release(1, [about("Q1754", "Q34")(libraryCard("se", "Stockholm"))]);
+    expect(plan([about("Q1754", "Q34")(podCard("se", "Stockholm"))], reordered, from)).toBeNull();
+    const ahead = about("Q1754", "Q34")(podCard("se", "Stockholm"));
+    expect(plan([ahead])).toMatchObject({ about: [], applied: [ahead] });
+  });
+
+  it("writes a changed card as the release has it, subjects and all, and gives a card the user changed the release's subjects", () => {
+    const changed = release(2, [
+      about("Q1754", "Q34")(libraryCard("se", "Stockholm!")),
+      about("Q1748")(libraryCard("dk", "København")),
+      { ...libraryCard("yu", "Belgrade"), retired: true },
+    ]);
+    const offer = plan([podCard("se", "Stockholm"), podCard("dk", "Copenhagen, mine")], changed)!;
+    expect(offer).toMatchObject({
+      change: [about("Q1754", "Q34")(libraryCard("se", "Stockholm!"))],
+      kept: [podCard("dk", "Copenhagen, mine")],
+      about: [about("Q1748")(podCard("dk", "Copenhagen, mine"))],
+    });
+    expect(upgradedCards(offer).map((card) => card.id)).toEqual(["se", "dk"]);
+  });
+
+  it("writes, and does not count as applied, a card already as the release has it but for its subjects", () => {
+    // An upgrade cut off by an app before card format 7: the content and retirement are the newer release's, the
+    // subjects lost. The card is written for them, so it is not one the upgrade writes nothing to.
+    const changed = release(2, [
+      about("Q1754")(libraryCard("se", "Stockholm!")),
+      about("Q3711")(libraryCard("yu", "Belgrade")),
+    ]);
+    const from = release(1, [
+      libraryCard("se", "Stockholm"),
+      { ...libraryCard("yu", "Belgrade"), retired: true },
+    ]);
+    const offer = plan([podCard("se", "Stockholm!"), podCard("yu", "Belgrade")], changed, from)!;
+    expect(offer).toMatchObject({
+      change: [],
+      restore: [],
+      applied: [],
+      about: [
+        about("Q1754")(podCard("se", "Stockholm!")),
+        about("Q3711")(podCard("yu", "Belgrade")),
+      ],
+    });
+  });
+
+  it("leaves a copy whose subjects are its own, which only another app could have written", () => {
+    expect(plan([about("Q1")(podCard("dk", "Copenhagen"))])).toBeNull();
+  });
+
+  it("removes a card the release drops though the copy lost its subjects", () => {
+    const dropped = release(2, was.cards.slice(1));
+    expect(plan([podCard("se", "Stockholm")], dropped)).toMatchObject({
+      remove: [podCard("se", "Stockholm")],
+      about: [],
+    });
+  });
+
+  it("writes a card retired or brought back once, with the release's subjects and retirement", () => {
+    const flipped = release(2, [
+      about("Q1754")({ ...libraryCard("se", "Stockholm"), retired: true }),
+      about("Q3711")(libraryCard("yu", "Belgrade")),
+    ]);
+    const offer = plan(
+      [podCard("se", "Stockholm"), { ...podCard("yu", "Belgrade"), retired: true }],
+      flipped,
+      release(1, [
+        libraryCard("se", "Stockholm"),
+        { ...libraryCard("yu", "Belgrade"), retired: true },
+      ]),
+    )!;
+    expect(offer.retire.map((card) => card.id)).toEqual(["se"]);
+    expect(offer.restore.map((card) => card.id)).toEqual(["yu"]);
+    expect(upgradedCards(offer)).toEqual([
+      about("Q1754")({ ...podCard("se", "Stockholm"), retired: true }),
+      about("Q3711")(podCard("yu", "Belgrade")),
+    ]);
+  });
+
+  it("offers a course's deck a release that changes what a question not reached is about", () => {
+    const reached = [about("Q1754")(podCard("se", "Stockholm"))];
+    const only = release(2, [
+      was.cards[0],
+      about("Q1748")(libraryCard("dk", "Copenhagen")),
+      was.cards[2],
+    ]);
+    expect(
+      planLibraryUpgrade({ deck, cards: reached, from: was, to: only, releases, course: true }),
+    ).toMatchObject({ about: [], unreached: true });
+  });
+
+  it("is no part of a card's content", () => {
+    expect(sameContent(about("Q1")(podCard("se", "Stockholm")), podCard("se", "Stockholm"))).toBe(
+      true,
+    );
+  });
+});
+
 describe("applyLibraryUpgrade", () => {
   it("moves the copy to the newer release, and to its direction when that changes", () => {
     const plan = {
@@ -896,6 +1074,7 @@ describe("applyLibraryUpgrade", () => {
       retire: [],
       restore: [],
       remove: [],
+      about: [],
       kept: [],
       applied: [],
       gone: [],

@@ -944,6 +944,10 @@
       "one": "ändrar {count} kort",
       "other": "ändrar {count} kort"
     },
+    "about": {
+      "one": "anger vad {count} kort handlar om",
+      "other": "anger vad {count} kort handlar om"
+    },
     "retires": {
       "one": "tar {count} kort ur bruk",
       "other": "tar {count} kort ur bruk"

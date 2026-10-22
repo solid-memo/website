@@ -726,9 +726,10 @@ changes reach only what the user left as the library had it:
 | Retired | Anything | Retires it: kept, with its review states, but no longer studied |
 | Retired before, in use again | Retired | Brings it back, with the review states it had |
 | Removed | As the old release had it | Removes it, and its review states |
+| What it is about changed | Its subjects as an older release had them, or none | Writes the release's subjects, the user's content and retirement kept |
 | Anything | Removed by the user | Leaves it removed |
 | Removed | Not there any more | Nothing to write but dropping the review states left of it; the deck still moves to the release |
-| Added, changed, retired or in use again | Already as the new release has it: content and retirement, or, changed by the user, retirement | Nothing to write, but the deck still moves to the release |
+| Added, changed, retired, in use again or about other things | Already as the new release has it: content and retirement, or, changed by the user, retirement; or its subjects | Nothing to write, but the deck still moves to the release |
 
 Retiring is not a change of the card's content, so it applies to cards
 the user changed too: nothing of theirs is lost. A library release never
@@ -756,8 +757,8 @@ compared by `sameOutline` in
 [domain/course.ts](../packages/domain/src/course.ts)): the upgrade
 writes no card, and moving the deck to the release brings it. So is a
 release that changes only questions the learner has not reached
-(`LibraryUpgradePlan.unreached`): their content, wrong options or
-retirement, which the deck meets as the release it names has them. The
+(`LibraryUpgradePlan.unreached`): their content, wrong options,
+subjects or retirement, which the deck meets as the release it names has them. The
 course's page offers the upgrade too, as the deck's page does.
 
 A card's [text format](vocab.md#text-formats) is part of its content
@@ -772,6 +773,22 @@ newer release then brings the marker back, whether or not it changes
 the card otherwise. A copy that states a format other than the
 release's, `sm:plainText` against `sm:markdown` included, was changed
 by the user and is kept.
+
+What a card is about (its subjects, `dcterms:subject`, card format 7;
+[deck-library.md](deck-library.md#what-a-card-is-about)) is the
+library's, not the user's: the app neither shows nor edits it. It is
+no part of the card's content, so it changes nothing above; instead a
+release that changes it gives the copy's card the release's subjects,
+whatever the user did to the card's text, and a release that changes
+nothing else is an offer of its own (`LibraryUpgradePlan.about`, which
+the notice words as recording what the cards are about). Subjects
+compare as sets. The same exception as for the text format tells an
+older app's doing from the user's: a copy without subjects, as an app
+before card format 7 imports or writes it, has lost them and takes the
+release's. A copy with subjects of its own, which only another app
+could have written, is left as it is. A changed card is written as the
+release has it, subjects and all, and a card retired or brought back
+is written once, with the release's subjects and retirement.
 
 A new study direction is taken up when the copy is still studied the old
 release's way. So are the deck's title, description, keywords and
@@ -793,7 +810,7 @@ languages, the same way, once a session when its page opens
 Nothing is offered for a release that is not newer, uses a card format
 this app does not know, or would change nothing. A copy with cards
 already as the newer release has them — content and retirement, or, for
-a card the user changed, retirement (`applied`: an upgrade cut off after
+a card the user changed, retirement; or subjects (`applied`: an upgrade cut off after
 writing them, or the user's own edits alike) — is still offered the
 release, which moves its entry and writes nothing to those cards: a deck
 left naming the older release would have a later upgrade take the newer

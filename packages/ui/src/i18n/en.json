@@ -944,6 +944,10 @@
       "one": "changes {count} card",
       "other": "changes {count} cards"
     },
+    "about": {
+      "one": "records what {count} card is about",
+      "other": "records what {count} cards are about"
+    },
     "retires": {
       "one": "retires {count} card",
       "other": "retires {count} cards"

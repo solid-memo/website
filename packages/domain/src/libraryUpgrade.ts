@@ -29,9 +29,11 @@ export type DeckDetail = "direction" | "title" | "description" | "keywords" | "t
  * applied only to cards the user has left as the library had them.
  * Retiring a card is not a change of its content: the library's
  * retirements apply to every card, since a retired card is kept, with
- * its review state, and only leaves study. Review history is kept, but
- * for cards the upgrade removes — which releases did before they could
- * retire a card.
+ * its review state, and only leaves study. What a card is about (its
+ * subjects) is the library's too: the user can neither see nor change
+ * it, so the copy takes the release's whatever the user did to the
+ * card's content. Review history is kept, but for cards the upgrade
+ * removes — which releases did before they could retire a card.
  */
 export interface LibraryUpgradePlan {
   /** The release the copy came from, and the one it moves to. */
@@ -57,6 +59,16 @@ export interface LibraryUpgradePlan {
   /** Cards the library removed that the user has not changed. */
   remove: Card[];
   /**
+   * Cards whose subjects the library changed, which the upgrade does not
+   * otherwise change (see `change`), with the newer release's subjects
+   * (none left out): where the copy has a release's before the newer
+   * one, or none — an app that predates card format 7 drops them as it
+   * imports or writes the card, which is not the user's doing. Retired or
+   * not, their content as the user has it. A copy with subjects of its
+   * own, which only another app could have written, is left as it is.
+   */
+  about: Card[];
+  /**
    * Cards the library changed or removed that the user has changed too,
    * and cards it added that the copy has otherwise than the release (an
    * upgrade cut off half-way wrote them, and the user changed them since):
@@ -67,7 +79,7 @@ export interface LibraryUpgradePlan {
    * Cards the upgrade writes nothing to that the copy already has as the
    * newer release changed them — added, changed, retired or brought
    * back: content and retirement, or, for a card whose content the user
-   * changed (`kept` too), its retirement. An upgrade cut off after it
+   * changed (`kept` too), its retirement; or its subjects. An upgrade cut off after it
    * wrote the cards, before it moved the deck's entry, left them so (or
    * the user made them so). They are an offer of their own: the deck
    * still names the older release, and moving it to the newer keeps a
@@ -120,7 +132,7 @@ export interface LibraryUpgradePlan {
   /**
    * Set when the deck is a course's and the newer release changed a
    * question the learner has not reached, which the deck therefore lacks:
-   * its content, its wrong options or its retirement. As with `outline`,
+   * its content, its wrong options, its subjects or its retirement. As with `outline`,
    * nothing is written; the deck meets the question as the release it
    * names has it, so moving it there is an offer of its own.
    */
@@ -230,6 +242,15 @@ export function sameContent(a: CardContent, b: CardContent): boolean {
     sameText(a.backLabel, b.backLabel) &&
     sameText(a.backNote, b.backNote)
   );
+}
+
+/**
+ * Whether two cards are about the same things (their subjects, in any
+ * order; none and an empty list alike). Not part of sameContent: the
+ * user can neither see nor change them.
+ */
+function sameSubjects(a: CardContent, b: CardContent): boolean {
+  return sameList(a.subjects ?? [], b.subjects ?? []);
 }
 
 /**
@@ -354,6 +375,7 @@ export function planLibraryUpgrade({
   const remove: Card[] = [];
   const kept: Card[] = [];
   const applied: Card[] = [];
+  const about: Card[] = [];
   const gone: string[] = [];
   let unreached = false;
   /** The copy's card against the newer release's: `old` the one the copy came from (absent for one a later release adds). */
@@ -370,9 +392,27 @@ export function planLibraryUpgrade({
     if (retiresAnew) (retired ? retire : restore).push(mine);
     if (action === "change") change.push(next);
     else if (action === "kept") kept.push(mine);
-    // Nothing to write, but already as the newer release changed it: its content, or its retirement.
+    // A changed card is written as the release has it, subjects and all. Else the release's subjects, whatever the
+    // user did to the content, where the copy has none (an older app dropped them) or an earlier release's.
+    const subjectsApplied = sameSubjects(mine, next);
+    const writesAbout =
+      action !== "change" &&
+      !subjectsApplied &&
+      ((mine.subjects ?? []).length === 0 || earlier.some((card) => sameSubjects(mine, card)));
+    if (writesAbout) {
+      const { subjects: _subjects, ...content } = mine;
+      about.push(next.subjects === undefined ? content : { ...content, subjects: next.subjects });
+    }
+    // Nothing to write, but already as the newer release changed it: its content, its retirement or its subjects.
+    // A card written for its subjects is not one: `about` writes it.
     const retirementApplied = old !== undefined && retired !== (old.retired === true);
-    if (action !== "change" && !retiresAnew && (action === "applied" || retirementApplied))
+    const aboutApplied = subjectsApplied && old !== undefined && !sameSubjects(old, next);
+    if (
+      action !== "change" &&
+      !retiresAnew &&
+      !writesAbout &&
+      (action === "applied" || retirementApplied || aboutApplied)
+    )
       applied.push(mine);
   };
   // Every card of the releases, the copy's own release's first, in the order they list them.
@@ -394,14 +434,16 @@ export function planLibraryUpgrade({
     else if (
       old !== undefined &&
       course &&
-      (!sameContent(old, next) || (old.retired === true) !== (next.retired === true))
+      (!sameContent(old, next) ||
+        !sameSubjects(old, next) ||
+        (old.retired === true) !== (next.retired === true))
     ) {
       unreached = true;
     }
   }
   const direction =
     to.direction !== from.direction && deck.direction === from.direction ? to.direction : undefined;
-  const about = {
+  const texts = {
     title: upgradedText(deck.title, from.title, to.title),
     // The app's default description is not the user's: it gives way to the release's.
     description:
@@ -414,7 +456,7 @@ export function planLibraryUpgrade({
     keywords: upgradedKeywords(deck.keywords, from.keywords, to.keywords),
     themes: upgradedList(deck.themes, from.themes, to.themes),
   };
-  const aboutChanged = Object.values(about).some((value) => value !== undefined);
+  const textsChanged = Object.values(texts).some((value) => value !== undefined);
   const outlineChanged = outlines !== undefined && !sameOutline(outlines.from, outlines.to);
   // What of the deck itself the newer release changed and the copy already has as it has it.
   const appliedAbout = (
@@ -438,13 +480,14 @@ export function planLibraryUpgrade({
       retire.length +
       restore.length +
       remove.length +
+      about.length +
       applied.length +
       appliedAbout.length ===
       0 &&
     // A course's deck lacks every card the learner has not reached: one the release removed is no sign of an upgrade.
     (course || gone.length === 0) &&
     direction === undefined &&
-    !aboutChanged &&
+    !textsChanged &&
     !outlineChanged &&
     !unreached
   ) {
@@ -464,30 +507,42 @@ export function planLibraryUpgrade({
     retire,
     restore,
     remove,
+    about,
     kept,
     applied,
     gone,
     appliedAbout,
     ...(direction === undefined ? {} : { direction }),
-    ...Object.fromEntries(Object.entries(about).filter(([, value]) => value !== undefined)),
+    ...Object.fromEntries(Object.entries(texts).filter(([, value]) => value !== undefined)),
     ...(outlineChanged ? { outline: true as const } : {}),
     ...(unreached ? { unreached: true as const } : {}),
   };
 }
 
 /**
- * The cards the upgrade writes: the added and changed ones as the release
- * has them, and the retired and restored ones as the copy has them, with
- * their retirement changed. A changed card already carries the
- * release's retirement.
+ * The cards the upgrade writes, each once: the added and changed ones as
+ * the release has them, those of `about` with the release's subjects, and
+ * the retired and restored ones as the copy has them — or as `about` has
+ * them — with their retirement changed. A changed card already carries
+ * the release's subjects and retirement.
  */
 export function upgradedCards(plan: LibraryUpgradePlan): (LibraryCard | Card)[] {
-  const changed = new Set(plan.change.map((card) => card.id));
+  const cards = new Map<string, LibraryCard | Card>(
+    [...plan.add, ...plan.change].map((card) => [card.id, card]),
+  );
+  const changed = new Set(cards.keys());
+  const subjects = new Map(plan.about.map((card) => [card.id, card]));
+  // A card of `about` is never one of `change`, which already carries the release's subjects.
+  for (const card of plan.about) cards.set(card.id, card);
   const flagged = [
-    ...plan.retire.map((card): Card => ({ ...card, retired: true })),
-    ...plan.restore.map(({ retired: _retired, ...card }): Card => card),
-  ].filter((card) => !changed.has(card.id));
-  return [...plan.add, ...plan.change, ...flagged];
+    ...plan.retire.map((card): Card => ({ ...(subjects.get(card.id) ?? card), retired: true })),
+    ...plan.restore.map((card): Card => {
+      const { retired: _retired, ...rest } = subjects.get(card.id) ?? card;
+      return rest;
+    }),
+  ];
+  for (const card of flagged) if (!changed.has(card.id)) cards.set(card.id, card);
+  return [...cards.values()];
 }
 
 /**
