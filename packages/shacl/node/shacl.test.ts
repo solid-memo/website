@@ -193,6 +193,10 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}frontLabel`,
     message: 'Language "sv" has been used by 2 values',
   },
+  "card/v7/invalid/literal-subject.ttl": {
+    path: `${DC}subject`,
+    message: "What a card is about is an IRI",
+  },
   "deck/v1/invalid/missing-title.ttl": { path: `${DC}title`, message: "Less than 1 values" },
   "deck/v2/invalid/bad-direction.ttl": {
     path: `${SM}direction`,
@@ -585,7 +589,7 @@ describe("the shapes over the fixtures", async () => {
     await expect(
       validateTurtleDocument("x.ttl", parseTurtle(turtle, base("x.ttl")), engine, "pod"),
     ).rejects.toThrow(
-      "x.ttl:\n  <https://pod.example/x.ttl#se> is card format 7; this app knows formats 1–6.",
+      "x.ttl:\n  <https://pod.example/x.ttl#se> is card format 8; this app knows formats 1–7.",
     );
   });
 

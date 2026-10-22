@@ -57,12 +57,13 @@ const a = card("a", {
     { id: "a-d1", text: { sv: "x" } },
     { id: "a-d3", text: { sv: "y" }, retired: true },
   ],
+  subjects: ["http://www.wikidata.org/entity/Q34"],
 });
 const b = card("b", { retired: true });
 const sourceStates = [state("a"), state("a", "back-to-front"), state("b", "back-to-front")];
 
 describe("planCardTransfer", () => {
-  it("moves cards under their ids, with their distractors and review states, in the source's order", () => {
+  it("moves cards under their ids, with their distractors, what they are about and review states, in the source's order", () => {
     const plan = planCardTransfer(
       { url: SOURCE, cards: [a, b, card("c")], states: sourceStates },
       { url: TARGET, cards: [], states: [] },

@@ -149,7 +149,7 @@ describe("draftLibraryContent", () => {
           { id: "q-a-1a-d1", text: { en: "No 1" } },
           { id: "q-a-1a-d2", text: { en: "No 2" }, note: { en: "Why" } },
         ],
-        formatVersion: 6,
+        formatVersion: 7,
         retired: true,
       },
     ]);

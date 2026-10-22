@@ -41,6 +41,23 @@ describe("validateCardContent", () => {
     });
   });
 
+  it("keeps what the card is about, as the input states it or as the saved card has it", () => {
+    const subjects = ["http://www.wikidata.org/entity/Q34"];
+    const saved = { front: { en: "Sweden" }, back: { en: "Stockholm" }, subjects };
+    expect(
+      validateCardContent({ front: { en: "Sweden " }, back: { en: "Stockholm" } }, saved),
+    ).toEqual({ ok: true, content: saved });
+    const others = ["http://www.wikidata.org/entity/Q1754"];
+    expect(validateCardContent({ ...saved, subjects: others }, saved)).toEqual({
+      ok: true,
+      content: { ...saved, subjects: others },
+    });
+    expect(validateCardContent({ front: { en: "a" }, back: { en: "b" } })).toEqual({
+      ok: true,
+      content: { front: { en: "a" }, back: { en: "b" } },
+    });
+  });
+
   it("keeps the spaces a formatted text starts with, a Markdown code block, through an edit of another field", () => {
     const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
     const PLAIN = "https://solid-memo.com/ns/vocab/v1.ttl#plainText";

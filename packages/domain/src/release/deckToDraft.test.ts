@@ -39,6 +39,7 @@ const cards: Card[] = [
     createdAt: "2026-01-02T00:00:00.000Z",
     formatVersion: 5,
     distractors: [{ id: "turtle-d1", text: { en: "Oslo" }, retired: true }],
+    subjects: ["http://www.wikidata.org/entity/Q34"],
   },
   {
     id: "c2",
@@ -84,7 +85,7 @@ describe("deckToDraft", () => {
     ]);
   });
 
-  it("keeps every card under its id, retired ones too, with its wrong options", () => {
+  it("keeps every card under its id, retired ones too, with its wrong options and what it is about", () => {
     const { draft } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(draft.cards).toEqual([
       {
@@ -94,11 +95,18 @@ describe("deckToDraft", () => {
           back: { en: "Stockholm" },
           created: "2026-01-02T00:00:00.000Z",
           distractor: [`${DRAFT}#turtle-d1`],
+          subject: ["http://www.wikidata.org/entity/Q34"],
         },
       },
       {
         id: "c2",
-        data: { front: { en: "Norway" }, back: { en: "Oslo" }, deprecated: true, distractor: [] },
+        data: {
+          front: { en: "Norway" },
+          back: { en: "Oslo" },
+          deprecated: true,
+          distractor: [],
+          subject: [],
+        },
       },
     ]);
     expect(draft.distractors).toEqual([

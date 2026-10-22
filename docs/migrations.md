@@ -106,6 +106,23 @@ a format-6 card with the format-5 shape, without its front label, and
 does not write over it ([Versions](#versions)), so updating stays the
 user's choice.
 
+Card format 7 keeps what a card is about (`dcterms:subject`, the IRIs
+of the things its source names), so a learner's copy of a library
+release keeps them as the release states them
+([deck-library.md](deck-library.md#what-a-card-is-about)). The version
+moved because card format 6 was published without the term: an app
+that wrote format 6 kept it as a triple its shape does not name as it
+rewrote a card in place, but dropped it whenever it copied a card into a
+new subject (an import, or a move or copy into another deck). A
+format-6 card has none, so the step to
+format 7 changes nothing but the version (`card/6-to-7`). Library
+releases compiled from linked data state the term on cards of older
+formats (the taxonomy deck's version 3, at card format 4), so the app
+reads it from a card whatever format the card states, and the format
+update of a card another app gave subjects keeps them. An import writes
+every card at 7. An app from before format 7 reads a format-7 card with
+the format-6 shape and does not write over it ([Versions](#versions)).
+
 [Deck groups](data-model.md#deck-groups) (deck group format 1) need no
 migration: groups are new subjects, and a deck's `sm:position` and the
 catalog's `dcat:catalog` belong to no shape, so the deck and catalog
@@ -424,6 +441,7 @@ flowchart LR
     v3 -->|card/3-to-4<br/>text stays untagged| v4["CardV4"]
     v4 -->|card/4-to-5<br/>restamped: nothing guessed| v5["CardV5"]
     v5 -->|card/5-to-6<br/>no front label yet: nothing to change| v6["CardV6"]
+    v6 -->|card/6-to-7<br/>subjects read from the card| v7["CardV7"]
     d1["DeckV1"] -->|deck/1-to-2<br/>direction: front-to-back| d2["DeckV2"]
     d2 -->|deck/2-to-3<br/>DCAT dataset: direction concept,<br/>default description, creator agents| d3["DeckV3"]
     d3 -->|deck/3-to-4<br/>title and description tagged English| d4["DeckV4"]

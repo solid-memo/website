@@ -639,7 +639,7 @@ describe("importDeck", () => {
     const sweden = getThing(cards, `${imported.cardsDocumentUrl}#sweden`)!;
     expect(getStringNoLocale(sweden, SM.front)).toBe("Sweden");
     expect(getStringNoLocale(sweden, SM.back)).toBe("Stockholm");
-    expect(getInteger(sweden, SM.formatVersion)).toBe(6);
+    expect(getInteger(sweden, SM.formatVersion)).toBe(7);
     const afghanistan = getThing(cards, `${imported.cardsDocumentUrl}#afghanistan`)!;
     expect(getStringNoLocale(afghanistan, SM.front)).toBeNull();
     expect(getUrl(afghanistan, SM.frontImage)).toBe(FLAG);
@@ -1027,7 +1027,7 @@ describe("addCard", () => {
       front: { "": "火" },
       back: { "": "fire" },
       createdAt: "2026-09-21T10:00:00.000Z",
-      formatVersion: 6,
+      formatVersion: 7,
     });
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
@@ -1035,7 +1035,7 @@ describe("addCard", () => {
     expect(getStringNoLocale(thing, SM.front)).toBe("火");
     expect(getStringNoLocale(thing, SM.back)).toBe("fire");
     expect(getUrl(thing, SM.frontImage)).toBeNull();
-    expect(getInteger(thing, SM.formatVersion)).toBe(6);
+    expect(getInteger(thing, SM.formatVersion)).toBe(7);
     // The document itself says whose cards it holds.
     expect(
       getUrlAll(getThing(saved as SolidDataset, deck.cardsDocumentUrl)!, DCTERMS.isPartOf),
@@ -1138,7 +1138,7 @@ describe("updateCard", () => {
       front: { "": "수영하다" },
       back: { "": "to swim" },
       frontImageUrl: FLAG,
-      formatVersion: 6,
+      formatVersion: 7,
     });
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
@@ -1147,8 +1147,23 @@ describe("updateCard", () => {
     expect(getStringNoLocale(thing, SM.back)).toBe("to swim");
     expect(getUrl(thing, SM.frontImage)).toBe(FLAG);
     expect(getUrl(thing, SM.backImage)).toBeNull();
-    expect(getInteger(thing, SM.formatVersion)).toBe(6);
+    expect(getInteger(thing, SM.formatVersion)).toBe(7);
     expect(getStringNoLocale(thing, "https://other.example/vocab#note")).toBe("kept");
+  });
+
+  it("keeps what a card is about when the edit states nothing of it", async () => {
+    const subjects = ["http://www.wikidata.org/entity/Q34"];
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+
+    const updated = await makeRepository().updateCard(
+      deck,
+      { ...card, subjects },
+      { front: { "": "水" }, back: { "": "water" } },
+    );
+
+    expect(updated.subjects).toEqual(subjects);
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getUrlAll(getThing(saved, card.url)!, DCTERMS.subject)).toEqual(subjects);
   });
 
   it("keeps a card's distractors when the edit states none, and replaces them when it does", async () => {
@@ -1345,7 +1360,7 @@ describe("upgradeCards", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
         setThing(mockSolidDatasetFrom(deck.cardsDocumentUrl), stored(card, 1)),
-        stored(other, 6),
+        stored(other, 7),
       ),
     );
 
@@ -1355,16 +1370,33 @@ describe("upgradeCards", () => {
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
     const upgraded = getThing(saved as SolidDataset, card.url)!;
-    expect(getInteger(upgraded, SM.formatVersion)).toBe(6);
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
     expect(getStringNoLocale(upgraded, SM.front)).toBe("水");
     expect(getStringNoLocale(upgraded, SM.back)).toBe("water");
     expect(getStringNoLocale(upgraded, "https://other.example/vocab#note")).toBe("kept");
     expect(checkWrite).toHaveBeenCalledWith(saved, [card.url], "pod");
   });
 
+  it("keeps what a format-6 card is about, which its format does not name, as it rewrites it", async () => {
+    const subject = "http://www.wikidata.org/entity/Q34";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(deck.cardsDocumentUrl),
+        buildThing(stored(card, 6)).addUrl(DCTERMS.subject, subject).build(),
+      ),
+    );
+
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
+
+    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const upgraded = getThing(saved as SolidDataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getUrlAll(upgraded, DCTERMS.subject)).toEqual([subject]);
+  });
+
   it("writes nothing when no card is outdated, or there is no cards document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(mockSolidDatasetFrom(deck.cardsDocumentUrl), stored(other, 6)),
+      setThing(mockSolidDatasetFrom(deck.cardsDocumentUrl), stored(other, 7)),
     );
     await expect(makeRepository().upgradeCards(deck)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
@@ -1426,7 +1458,7 @@ describe("stateCardLanguages", () => {
     expect(getStringWithLocale(first, SM.front, "ja")).toBe("水");
     expect(getStringWithLocale(first, SM.back, "en")).toBe("water");
     expect(getStringNoLocale(first, SM.front)).toBeNull();
-    expect(getInteger(first, SM.formatVersion)).toBe(6);
+    expect(getInteger(first, SM.formatVersion)).toBe(7);
     expect(getDatetime(first, DCTERMS.created)).toEqual(new Date("2026-01-02T03:04:05.000Z"));
     expect(getStringNoLocale(first, VOCAB_NOTE)).toBe("kept");
     // A side that states its language is left as it is.

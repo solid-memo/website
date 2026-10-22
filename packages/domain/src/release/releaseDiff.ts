@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { LATEST_VERSION, type CardV6 } from "@solid-memo/vocab/types.generated";
+import { LATEST_VERSION, type CardV7 } from "@solid-memo/vocab/types.generated";
 import type { Card, Deck } from "../deck.ts";
 import { cardContentFromRecord } from "../deckRecord.ts";
 import { sameKeywords } from "../keywords.ts";
@@ -102,7 +102,7 @@ function comparable(data: object): string {
  * own, and when it was made. A card without text on a side, which no
  * learner gets, compares by its record.
  */
-function sameCard(a: CardV6, b: CardV6): boolean {
+function sameCard(a: CardV7, b: CardV7): boolean {
   const before = cardContentFromRecord(a);
   const after = cardContentFromRecord(b);
   if (before === null || after === null) {
@@ -115,7 +115,7 @@ function sameCard(a: CardV6, b: CardV6): boolean {
 
 /** Whether a subject's record says the same in both, its retirement aside. */
 function sameSubject(kind: ReleaseKind, a: object, b: object): boolean {
-  return kind === "card" ? sameCard(a as CardV6, b as CardV6) : comparable(a) === comparable(b);
+  return kind === "card" ? sameCard(a as CardV7, b as CardV7) : comparable(a) === comparable(b);
 }
 
 /** How a subject of the draft differs from the release's (`was`, absent when the release lacks it); null when it does not. */

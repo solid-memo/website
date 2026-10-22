@@ -4,7 +4,7 @@
 
 import type {
   AgentV1,
-  CardV6,
+  CardV7,
   DistractorV1,
   DistributionV1,
   DraftChapterV1,
@@ -72,7 +72,7 @@ export interface ReleaseDraft {
   readonly distributions: readonly DraftNode<DistributionV1>[];
   readonly chapters: readonly DraftNode<DraftChapterV1>[];
   readonly steps: readonly DraftNode<DraftStepV1>[];
-  readonly cards: readonly DraftNode<CardV6>[];
+  readonly cards: readonly DraftNode<CardV7>[];
   readonly distractors: readonly DraftNode<DistractorV1>[];
   /** Every other statement of the release, in order. */
   readonly triples: readonly DraftTriple[];
@@ -237,8 +237,12 @@ export type ChapterText = Pick<DraftChapterV1, "title" | "description" | "textFo
 /** A step's own text: its theory and how it is written. */
 export type StepText = Pick<DraftStepV1, "theory" | "textFormat">;
 
-/** A card's content, without its distractors and whether it is retired, which their own changes make. */
-export type CardText = Omit<CardV6, "distractor" | "deprecated">;
+/**
+ * A card's content, without its distractors and whether it is retired,
+ * which their own changes make, and what it is about, which no change
+ * makes: an edit keeps it.
+ */
+export type CardText = Omit<CardV7, "distractor" | "deprecated" | "subject">;
 
 /** A wrong option's text and note. */
 export type DistractorText = Omit<DistractorV1, "deprecated">;
@@ -447,7 +451,11 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
     case "moveStep":
       return moveStep(draft, change.id, change.chapter, change.to);
     case "addCard":
-      return addNode(draft, "cards", change.id, { ...defined(change.card), distractor: [] });
+      return addNode(draft, "cards", change.id, {
+        ...defined(change.card),
+        distractor: [],
+        subject: [],
+      });
     case "editCard":
       return editNode(draft, "cards", change.id, (data) => ({
         ...defined(change.card),
@@ -456,6 +464,7 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
           : { created: data.created }),
         ...(data.deprecated === true ? { deprecated: true } : {}),
         distractor: data.distractor,
+        subject: data.subject,
       }));
     case "addQuestion":
       return addQuestion(draft, change.card, change.place);
@@ -518,7 +527,7 @@ type NodeLists = {
   distributions: DistributionV1;
   chapters: DraftChapterV1;
   steps: DraftStepV1;
-  cards: CardV6;
+  cards: CardV7;
   distractors: DistractorV1;
 };
 

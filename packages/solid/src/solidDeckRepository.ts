@@ -41,7 +41,7 @@ import {
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { isDeckOutdated, isOutdated, upgradeCard, upgradeDeck } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
-import { CARD_V6 } from "@solid-memo/vocab/descriptors.generated";
+import { CARD_V7 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
 import {
   getSolidDatasetOrNull,
@@ -296,9 +296,10 @@ export function createSolidDeckRepository({
       }
       // An edit that does not state distractors (the card editor's, while its wrong options are
       // unchanged) keeps the card's,
-      // and one that does not state a text format keeps the card's too.
+      // and one that does not state a text format, or what the card is about, keeps the card's too.
       const distractors = content.distractors ?? card.distractors;
       const textFormat = content.textFormat ?? card.textFormat;
+      const subjects = content.subjects ?? card.subjects;
       const updated: Card = {
         id: card.id,
         url: card.url,
@@ -306,6 +307,7 @@ export function createSolidDeckRepository({
         ...content,
         ...(distractors === undefined ? {} : { distractors }),
         ...(textFormat === undefined ? {} : { textFormat }),
+        ...(subjects === undefined ? {} : { subjects }),
         formatVersion: CARD_FORMAT_VERSION,
         ...(card.retired === true ? { retired: true } : {}),
       };
@@ -737,7 +739,7 @@ export function createSolidDeckRepository({
   ): ThingPersisted {
     return recordThing(
       `${deck.cardsDocumentUrl}#${card.id}`,
-      CARD_V6,
+      CARD_V7,
       cardToRecord(card, card.createdAt ?? now().toISOString(), deck.cardsDocumentUrl),
       existing,
     );

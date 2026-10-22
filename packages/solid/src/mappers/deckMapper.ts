@@ -44,6 +44,7 @@ import {
   DISTRACTOR_V1,
   DISTRIBUTION_V1,
 } from "@solid-memo/vocab/descriptors.generated";
+import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import { readVersioned, recordThing, removeUnlessNewer, unlessNewer } from "../records";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
@@ -307,15 +308,33 @@ function withoutStrayAgents(dataset: SolidDataset, documentUrl: string): SolidDa
  * fits its format's shape, or a side has neither text nor a picture.
  */
 export function toCard(thing: Thing, dataset: SolidDataset): Card | null {
-  const read = readVersioned(thing, "card");
+  const read = readCard(thing);
   if (read === null) return null;
-  const data = migrate("card", read.record, { subject: asUrl(thing) });
   return cardFromRecord(
     asUrl(thing),
     read.storedVersion,
-    data,
-    distractorsOf(dataset, data.distractor),
+    read.data,
+    distractorsOf(dataset, read.data.distractor),
   );
+}
+
+/**
+ * A card subject read with the shape of its stored format and brought up
+ * to the latest; null as for readVersioned. What the card is about
+ * (`dcterms:subject`) is read from the card itself whatever format it
+ * states: a library release compiled from linked data states it on
+ * format-4 cards, and an app's first write of an older card in format 7
+ * would otherwise delete what another app wrote of it.
+ */
+export function readCard(thing: Thing): { storedVersion: number; data: CardV7 } | null {
+  const read = readVersioned(thing, "card");
+  if (read === null) return null;
+  const data = migrate("card", read.record, { subject: asUrl(thing) });
+  if (read.record.version >= 7) return { storedVersion: read.storedVersion, data };
+  return {
+    storedVersion: read.storedVersion,
+    data: { ...data, subject: getUrlAll(thing, DCTERMS.subject) },
+  };
 }
 
 /** Every card of a cards document. */

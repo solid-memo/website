@@ -102,7 +102,7 @@ describe("draftFromQuads", () => {
       { id: "ch-a-1", data: { chapter: of("ch-a"), checkedBy: [of("q1")] } },
     ]);
     expect(draft.cards).toEqual([
-      { id: "q1", data: { front: { en: "Q" }, back: { en: "A" }, distractor: [] } },
+      { id: "q1", data: { front: { en: "Q" }, back: { en: "A" }, distractor: [], subject: [] } },
     ]);
     expect(draft.distractors).toEqual([{ id: "q1-d1", data: { text: { en: "No" } } }]);
     expect(draft.distributions).toEqual([{ id: "turtle", data: { accessUrl: DRAFT } }]);

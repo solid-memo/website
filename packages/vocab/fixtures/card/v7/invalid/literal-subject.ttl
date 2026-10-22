@@ -1,0 +1,9 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+
+<#sweden>
+    a solid-memo:Card ;
+    dcterms:subject "Q34" ;
+    solid-memo:front "Sweden"@en ;
+    solid-memo:back "Stockholm"@en ;
+    solid-memo:formatVersion 7 .

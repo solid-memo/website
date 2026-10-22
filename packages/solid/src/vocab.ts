@@ -54,6 +54,11 @@ export const DCTERMS = {
   LicenseDocument: "http://purl.org/dc/terms/LicenseDocument",
   /** On a deck's cards document itself (`<>`): the deck's catalog entry, whose cards it holds. */
   isPartOf: "http://purl.org/dc/terms/isPartOf",
+  /**
+   * On a card, a thing it is about, by the IRI its source gives it (card
+   * format 7; a library release states it on older cards too).
+   */
+  subject: "http://purl.org/dc/terms/subject",
 } as const;
 
 export const RDF = {

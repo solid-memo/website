@@ -127,7 +127,7 @@ describe("a card of the draft", () => {
       ...course,
       cards: [
         { id: "odd", data: card("odd", { distractor: [of("gone")], deprecated: true }) },
-        { id: "empty", data: { back: { en: "b" }, distractor: [] } },
+        { id: "empty", data: { back: { en: "b" }, distractor: [], subject: [] } },
       ],
       distractors: [...course.distractors, { id: "blank", data: { text: {} } }],
     };
@@ -215,7 +215,10 @@ describe("the table of a draft's cards", () => {
       ...course,
       cards: [
         ...course.cards,
-        { id: "q-sv", data: { front: { "sv-fi": "Hej" }, back: { "": "42" }, distractor: [] } },
+        {
+          id: "q-sv",
+          data: { front: { "sv-fi": "Hej" }, back: { "": "42" }, distractor: [], subject: [] },
+        },
       ],
       chapters: course.chapters.map((node) =>
         node.id === "ch-b"
@@ -294,7 +297,12 @@ describe("the table of a draft's cards", () => {
           cards: [
             {
               id: "pic",
-              data: { frontImage: "https://x.example/a.png", back: { en: "b" }, distractor: [] },
+              data: {
+                frontImage: "https://x.example/a.png",
+                back: { en: "b" },
+                distractor: [],
+                subject: [],
+              },
             },
           ],
         },
@@ -318,6 +326,7 @@ describe("the table of a draft's cards", () => {
               frontImage: "https://x.example/a.png",
               backImage: "https://x.example/b.png",
               distractor: [],
+              subject: [],
             },
           },
         ],

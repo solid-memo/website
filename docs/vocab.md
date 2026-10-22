@@ -157,7 +157,10 @@ string, so other applications can look up what it means:
   1.23's `sm:Palette` and `sm:ColorSet`, with `sm:basedOn`,
   `sm:lightColors`, `sm:darkColors` and a property for each color,
   joined two new shapes, palette and color set format 1
-  ([Palettes of one's own](#palettes-of-ones-own)).
+  ([Palettes of one's own](#palettes-of-ones-own)). A shape may take a
+  term of another vocabulary too, which is no `sm:` term and so moves no
+  vocabulary version: card format 7 took `dcterms:subject`, what a card
+  is about ([deck-library.md](deck-library.md#what-a-card-is-about)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does

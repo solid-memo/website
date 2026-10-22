@@ -123,9 +123,13 @@ describe("DraftCardsScreen", () => {
             frontImage: "https://x.example/a.png",
             backImage: "https://x.example/b.png",
             distractor: [],
+            subject: [],
           },
         },
-        { id: "q-lost", data: { front: { en: "Lost" }, back: { en: "Yes" }, distractor: [] } },
+        {
+          id: "q-lost",
+          data: { front: { en: "Lost" }, back: { en: "Yes" }, distractor: [], subject: [] },
+        },
       ],
     });
     expect(

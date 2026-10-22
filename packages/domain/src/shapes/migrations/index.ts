@@ -13,6 +13,7 @@ import { CARD_2_TO_3 } from "./card/2-to-3";
 import { CARD_3_TO_4 } from "./card/3-to-4";
 import { CARD_4_TO_5 } from "./card/4-to-5";
 import { CARD_5_TO_6 } from "./card/5-to-6";
+import { CARD_6_TO_7 } from "./card/6-to-7";
 import { DECK_1_TO_2 } from "./deck/1-to-2";
 import { DECK_2_TO_3 } from "./deck/2-to-3";
 import { DECK_3_TO_4 } from "./deck/3-to-4";
@@ -46,6 +47,7 @@ export const MIGRATIONS: readonly AnyMigrationStep[] = [
   CARD_3_TO_4,
   CARD_4_TO_5,
   CARD_5_TO_6,
+  CARD_6_TO_7,
   DECK_1_TO_2,
   DECK_2_TO_3,
   DECK_3_TO_4,

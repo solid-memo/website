@@ -167,6 +167,7 @@ describe("card records", () => {
       backImage: FLAG,
       created: "2026-09-21T10:00:00.000Z",
       distractor: [],
+      subject: [],
     });
     expect(cardFromRecord(`${CARDS}#se`, 2, record)).toEqual({
       id: "se",
@@ -187,12 +188,14 @@ describe("card records", () => {
       back: { "": "Sweden" },
       frontImage: FLAG,
       distractor: [],
+      subject: [],
     });
     expect(
       cardFromRecord(`${CARDS}#se`, 1, {
         back: { "": "Sweden" },
         frontImage: FLAG,
         distractor: [],
+        subject: [],
       }),
     ).toEqual({
       id: "se",
@@ -207,10 +210,15 @@ describe("card records", () => {
 
   it("round-trip a card of text only", () => {
     const record = cardToRecord({ front: { "": "Sweden" }, back: { "": "Stockholm" } }, "", CARDS);
-    expect(record).toEqual({ front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [] });
+    expect(record).toEqual({
+      front: { "": "Sweden" },
+      back: { "": "Stockholm" },
+      distractor: [],
+      subject: [],
+    });
     expect(
       cardToRecord({ front: { "": "Sweden" }, back: {}, backImageUrl: FLAG }, "", CARDS),
-    ).toEqual({ front: { "": "Sweden" }, backImage: FLAG, distractor: [] });
+    ).toEqual({ front: { "": "Sweden" }, backImage: FLAG, distractor: [], subject: [] });
     expect(cardFromRecord(`${CARDS}#se`, 2, record)).toEqual({
       id: "se",
       url: `${CARDS}#se`,
@@ -219,6 +227,27 @@ describe("card records", () => {
       createdAt: "",
       formatVersion: 2,
     });
+  });
+
+  it("round-trip what a card is about, sorted, and leave the field out when it names nothing", () => {
+    const record = cardToRecord(
+      {
+        front: { en: "Sweden" },
+        back: { en: "Stockholm" },
+        subjects: ["http://www.wikidata.org/entity/Q34", "http://www.wikidata.org/entity/Q1754"],
+      },
+      "",
+      CARDS,
+    );
+    expect(record.subject).toEqual([
+      "http://www.wikidata.org/entity/Q34",
+      "http://www.wikidata.org/entity/Q1754",
+    ]);
+    expect(cardContentFromRecord(record)!.subjects).toEqual([
+      "http://www.wikidata.org/entity/Q1754",
+      "http://www.wikidata.org/entity/Q34",
+    ]);
+    expect(cardContentFromRecord({ ...record, subject: [] })!).not.toHaveProperty("subjects");
   });
 
   it("round-trip the notes under each side and the label above each", () => {
@@ -231,7 +260,7 @@ describe("card records", () => {
       backNote: { en: "Version 30." },
     };
     const record = cardToRecord(content, "", CARDS);
-    expect(record).toEqual({ ...content, distractor: [] });
+    expect(record).toEqual({ ...content, distractor: [], subject: [] });
     expect(cardFromRecord(`${CARDS}#a`, 3, record)).toMatchObject(content);
   });
 
@@ -255,6 +284,7 @@ describe("card records", () => {
       backImage: content.backImageUrl,
       backImageDescription: content.backImageDescription,
       distractor: [],
+      subject: [],
     });
     expect(cardFromRecord(`${CARDS}#se`, 4, record)).toMatchObject(content);
   });
@@ -270,6 +300,7 @@ describe("card records", () => {
       back: { "": "Belgrade" },
       deprecated: true,
       distractor: [],
+      subject: [],
     });
     expect(cardFromRecord(`${CARDS}#yu`, 3, record)).toMatchObject({ id: "yu", retired: true });
     expect(cardFromRecord(`${CARDS}#yu`, 3, { ...record, deprecated: false })).not.toHaveProperty(
@@ -281,11 +312,17 @@ describe("card records", () => {
   });
 
   it("have no content when a side has neither text nor a picture", () => {
-    expect(cardContentFromRecord({ back: { "": "Sweden" }, distractor: [] })).toBeNull();
-    expect(cardContentFromRecord({ front: { "": "Sweden" }, distractor: [] })).toBeNull();
-    expect(cardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" }, distractor: [] })).toBeNull();
     expect(
-      libraryCardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" }, distractor: [] }),
+      cardContentFromRecord({ back: { "": "Sweden" }, distractor: [], subject: [] }),
+    ).toBeNull();
+    expect(
+      cardContentFromRecord({ front: { "": "Sweden" }, distractor: [], subject: [] }),
+    ).toBeNull();
+    expect(
+      cardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" }, distractor: [], subject: [] }),
+    ).toBeNull();
+    expect(
+      libraryCardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" }, distractor: [], subject: [] }),
     ).toBeNull();
   });
 
@@ -295,6 +332,7 @@ describe("card records", () => {
         front: { "": "Sweden" },
         back: { "": "Stockholm" },
         distractor: [],
+        subject: [],
       }),
     ).toEqual({
       id: "se",
@@ -308,6 +346,7 @@ describe("card records", () => {
         back: { "": "Belgrade" },
         deprecated: true,
         distractor: [],
+        subject: [],
       }),
     ).toEqual({
       id: "yu",
@@ -356,6 +395,7 @@ describe("a card's text format", () => {
       front: { en: "**Staged**" },
       back: { zxx: "`git diff --staged`" },
       distractor: [],
+      subject: [],
       textFormat: MARKDOWN,
     });
     expect(cardFromRecord(`${CARDS}#q`, 5, record)).toMatchObject({
@@ -372,7 +412,7 @@ describe("a card's text format", () => {
       textFormat: "https://example.org/formats#asciidoc",
     });
     expect(
-      cardContentFromRecord({ front: { en: "a" }, back: { en: "b" }, distractor: [] }),
+      cardContentFromRecord({ front: { en: "a" }, back: { en: "b" }, distractor: [], subject: [] }),
     ).not.toHaveProperty("textFormat");
   });
 });

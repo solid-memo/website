@@ -92,7 +92,10 @@ describe("ReleaseDiffScreen", () => {
             ? { ...node, data: { ...node.data, front: { en: "Where is data?" } } }
             : node,
         ),
-        { id: "q-new", data: { front: { en: "New" }, back: { en: "Yes" }, distractor: [] } },
+        {
+          id: "q-new",
+          data: { front: { en: "New" }, back: { en: "Yes" }, distractor: [], subject: [] },
+        },
       ],
       distractors: next.distractors.map((node) => ({
         ...node,
