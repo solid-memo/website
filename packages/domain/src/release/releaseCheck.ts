@@ -302,16 +302,7 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
     id !== null && nodes.some((node) => node.id === id);
   const { field, code } = problem;
   if (has(draft.chapters)) {
-    const chapterField: ChapterField | undefined =
-      field === DCTERMS_TITLE
-        ? "title"
-        : field === DCTERMS_DESCRIPTION
-          ? "description"
-          : field === SM.reviewQuestion
-            ? "review"
-            : code === "stepPositions" || code === "chapterWithoutStep"
-              ? "steps"
-              : undefined;
+    const chapterField = chapterFieldOf(field, code);
     return {
       screen: "chapter",
       chapter: id!,
@@ -324,12 +315,7 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
     return { screen: "step", step: id!, ...(stepField === undefined ? {} : { field: stepField }) };
   }
   if (has(draft.cards)) {
-    const cardField: QuestionField | undefined =
-      field === SM.distractor
-        ? "distractors"
-        : field === undefined
-          ? undefined
-          : CARD_FIELDS[field];
+    const cardField = questionFieldOf(field);
     return {
       screen: "question",
       card: id!,
@@ -347,6 +333,31 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
     return { screen: "release", field: making ? "making" : "checks" };
   }
   if (problem.subject !== draft.url) return { screen: "draft" };
+  return releaseItselfTarget(field, code);
+}
+
+/** A chapter's field a problem is at, by its predicate or, for its steps, its code. */
+function chapterFieldOf(
+  field: ReleaseProblem["field"],
+  code: ReleaseProblem["code"],
+): ChapterField | undefined {
+  if (field === DCTERMS_TITLE) return "title";
+  if (field === DCTERMS_DESCRIPTION) return "description";
+  if (field === SM.reviewQuestion) return "review";
+  return code === "stepPositions" || code === "chapterWithoutStep" ? "steps" : undefined;
+}
+
+/** A question's field a problem is at, by its predicate. */
+function questionFieldOf(field: ReleaseProblem["field"]): QuestionField | undefined {
+  if (field === SM.distractor) return "distractors";
+  return field === undefined ? undefined : CARD_FIELDS[field];
+}
+
+/** Where to show a problem of the release itself: the release screen's part, or the overview's. */
+function releaseItselfTarget(
+  field: ReleaseProblem["field"],
+  code: ReleaseProblem["code"],
+): ProblemTarget {
   const releaseField = field === undefined ? undefined : RELEASE_SCREEN_FIELDS[field];
   if (releaseField !== undefined) return { screen: "release", field: releaseField };
   const draftField: DraftField | undefined =

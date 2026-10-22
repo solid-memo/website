@@ -38,54 +38,12 @@ const POSITION = `${SCHEMA_NS}position`;
  */
 export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
   const { url, chapters, steps } = model;
-  const problems: ReleaseProblem[] = [];
-  const inUse = (subject: ReleaseSubject) => !subject.retired;
+  const problems: ReleaseProblem[] = outlineProblems(model);
   const cards = new Map(model.cards.map((card) => [card.iri, card]));
   const distractors = new Map(model.distractors.filter((d) => d.typed).map((d) => [d.iri, d]));
-  const chapterIris = chapters.map((chapter) => chapter.iri);
 
-  const course = model.types.includes(`${SCHEMA_NS}Course`);
-  if (!course && chapters.length + steps.length > 0)
-    problems.push(problem(url, { code: "outlineWithoutCourse", params: {} }));
-  if (course && chapters.length === 0)
-    problems.push(problem(url, { code: "courseWithoutChapter", params: {} }));
-  const direction = model.studyDirection;
-  if (course && (direction.length !== 1 || direction[0].value !== SM.frontToBack)) {
-    problems.push(
-      problem(
-        url,
-        { code: "courseDirection", params: { stated: direction } },
-        { field: SM.studyDirection },
-      ),
-    );
-  }
-
-  for (const chapter of chapters) {
-    const parts = chapter.isPartOf;
-    if (parts.some((part) => part !== url)) {
-      problems.push(
-        problem(
-          chapter.iri,
-          { code: "chapterPartOf", params: { parts } },
-          { field: IS_PART_OF, related: parts },
-        ),
-      );
-    }
-  }
-  for (const step of steps) {
-    for (const part of step.isPartOf.filter((part) => !chapterIris.includes(part))) {
-      problems.push(
-        problem(
-          step.iri,
-          { code: "stepPartOf", params: { part } },
-          { field: IS_PART_OF, related: [part] },
-        ),
-      );
-    }
-  }
-
-  // The cards the steps and chapters in use ask, each with the steps that check it and the chapters that review it.
-  const asked = new Map<string, { card: ReleaseCard; checkedBy: string[]; reviewedBy: string[] }>();
+  // The cards the steps and chapters in use ask, by IRI.
+  const asked = new Map<string, Asked>();
   const ask = (asker: string, named: readonly string[], field: string) => {
     for (const card of named) {
       const found = cards.get(card);
@@ -136,55 +94,7 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
     }
   }
 
-  for (const [iri, { card, checkedBy, reviewedBy }] of asked) {
-    if (checkedBy.length > 1) {
-      problems.push(
-        problem(
-          iri,
-          { code: "checkedTwice", params: { steps: checkedBy } },
-          { related: checkedBy },
-        ),
-      );
-    }
-    if (checkedBy.length > 0 && reviewedBy.length > 0) {
-      problems.push(
-        problem(
-          iri,
-          { code: "checkedAndReviewed", params: { steps: checkedBy, chapters: reviewedBy } },
-          { related: [...checkedBy, ...reviewedBy] },
-        ),
-      );
-    }
-    const back = languagesOf(card.back);
-    if (back.length === 0)
-      problems.push(problem(iri, { code: "noBack", params: {} }, { field: SM.back }));
-    const options = card.distractors
-      .filter((d) => d.kind === "iri")
-      .map((d) => distractors.get(d.value))
-      .filter((d): d is ReleaseDistractor => d !== undefined && inUse(d));
-    if (options.length < LEAST_DISTRACTORS) {
-      problems.push(
-        problem(
-          iri,
-          { code: "fewDistractors", params: { count: options.length, least: LEAST_DISTRACTORS } },
-          { field: SM.distractor },
-        ),
-      );
-    }
-    for (const option of options) {
-      const text = new Set(languagesOf(option.text));
-      const missing = back.filter((language) => !text.has(language));
-      if (missing.length > 0) {
-        problems.push(
-          problem(
-            option.iri,
-            { code: "distractorLanguages", params: { card: iri, missing } },
-            { field: SM.distractorText, related: [iri] },
-          ),
-        );
-      }
-    }
-  }
+  for (const [iri, entry] of asked) problems.push(...askedProblems(iri, entry, distractors));
 
   // Members of the same list that share a schema:position.
   const clashes = (members: readonly { iri: string; positions: readonly string[] }[]) => {
@@ -217,6 +127,119 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
     }
     if (inUse(chapter) && ofChapter.length === 0)
       problems.push(problem(chapter.iri, { code: "chapterWithoutStep", params: {} }));
+  }
+  return problems;
+}
+
+/** Whether a chapter, step or distractor is in use: not retired. */
+function inUse(subject: ReleaseSubject): boolean {
+  return !subject.retired;
+}
+
+/**
+ * The problems of a course's outline: a course with no chapter or the
+ * wrong study direction, chapters and steps without a course, and what
+ * chapters and steps are part of.
+ */
+function outlineProblems(model: ReleaseModel): ReleaseProblem[] {
+  const { url, chapters, steps } = model;
+  const problems: ReleaseProblem[] = [];
+  const chapterIris = chapters.map((chapter) => chapter.iri);
+
+  const course = model.types.includes(`${SCHEMA_NS}Course`);
+  if (!course && chapters.length + steps.length > 0)
+    problems.push(problem(url, { code: "outlineWithoutCourse", params: {} }));
+  if (course && chapters.length === 0)
+    problems.push(problem(url, { code: "courseWithoutChapter", params: {} }));
+  const direction = model.studyDirection;
+  if (course && (direction.length !== 1 || direction[0].value !== SM.frontToBack)) {
+    problems.push(
+      problem(
+        url,
+        { code: "courseDirection", params: { stated: direction } },
+        { field: SM.studyDirection },
+      ),
+    );
+  }
+
+  for (const chapter of chapters) {
+    const parts = chapter.isPartOf;
+    if (parts.some((part) => part !== url)) {
+      problems.push(
+        problem(
+          chapter.iri,
+          { code: "chapterPartOf", params: { parts } },
+          { field: IS_PART_OF, related: parts },
+        ),
+      );
+    }
+  }
+  for (const step of steps) {
+    for (const part of step.isPartOf.filter((part) => !chapterIris.includes(part))) {
+      problems.push(
+        problem(
+          step.iri,
+          { code: "stepPartOf", params: { part } },
+          { field: IS_PART_OF, related: [part] },
+        ),
+      );
+    }
+  }
+  return problems;
+}
+
+/** A card the steps and chapters in use ask, with the steps that check it and the chapters that review it. */
+type Asked = { card: ReleaseCard; checkedBy: string[]; reviewedBy: string[] };
+
+/** The problems of a card a course asks: checked twice, checked and reviewed, no back, too few distractors or ones missing its back's languages. */
+function askedProblems(
+  iri: string,
+  { card, checkedBy, reviewedBy }: Asked,
+  distractors: ReadonlyMap<string, ReleaseDistractor>,
+): ReleaseProblem[] {
+  const problems: ReleaseProblem[] = [];
+  if (checkedBy.length > 1) {
+    problems.push(
+      problem(iri, { code: "checkedTwice", params: { steps: checkedBy } }, { related: checkedBy }),
+    );
+  }
+  if (checkedBy.length > 0 && reviewedBy.length > 0) {
+    problems.push(
+      problem(
+        iri,
+        { code: "checkedAndReviewed", params: { steps: checkedBy, chapters: reviewedBy } },
+        { related: [...checkedBy, ...reviewedBy] },
+      ),
+    );
+  }
+  const back = languagesOf(card.back);
+  if (back.length === 0)
+    problems.push(problem(iri, { code: "noBack", params: {} }, { field: SM.back }));
+  const options = card.distractors
+    .filter((d) => d.kind === "iri")
+    .map((d) => distractors.get(d.value))
+    .filter((d): d is ReleaseDistractor => d !== undefined && inUse(d));
+  if (options.length < LEAST_DISTRACTORS) {
+    problems.push(
+      problem(
+        iri,
+        { code: "fewDistractors", params: { count: options.length, least: LEAST_DISTRACTORS } },
+        { field: SM.distractor },
+      ),
+    );
+  }
+  for (const option of options) {
+    const text = new Set(languagesOf(option.text));
+    const missing = back.filter((language) => !text.has(language));
+    if (missing.length > 0) {
+      problems.push(
+        problem(
+          option.iri,
+          { code: "distractorLanguages", params: { card: iri, missing } },
+          { field: SM.distractorText, related: [iri] },
+        ),
+      );
+    }
   }
   return problems;
 }

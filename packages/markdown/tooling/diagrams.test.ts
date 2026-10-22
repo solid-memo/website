@@ -103,40 +103,46 @@ function cmapCodePoints(cmap: Uint8Array): Set<number> {
   for (let index = 0; index < view.getUint16(2); index++) {
     const start = view.getUint32(4 + index * 8 + 4);
     const format = view.getUint16(start);
-    if (format === 12) {
-      for (let group = 0; group < view.getUint32(start + 12); group++) {
-        const at = start + 16 + group * 12;
-        const [first, last, glyph] = [
-          view.getUint32(at),
-          view.getUint32(at + 4),
-          view.getUint32(at + 8),
-        ];
-        for (let code = first; code <= last; code++)
-          if (glyph + code - first !== 0) points.add(code);
-      }
-    } else if (format === 4) {
-      const segments = view.getUint16(start + 6) / 2;
-      const ends = start + 14;
-      const starts = ends + segments * 2 + 2;
-      const deltas = starts + segments * 2;
-      const offsets = deltas + segments * 2;
-      for (let segment = 0; segment < segments; segment++) {
-        const first = view.getUint16(starts + segment * 2);
-        const last = view.getUint16(ends + segment * 2);
-        const delta = view.getUint16(deltas + segment * 2);
-        const rangeOffset = view.getUint16(offsets + segment * 2);
-        for (let code = first; code <= last && code !== 0xffff; code++) {
-          let glyph = code;
-          if (rangeOffset !== 0) {
-            glyph = view.getUint16(offsets + segment * 2 + rangeOffset + (code - first) * 2);
-            if (glyph === 0) continue;
-          }
-          if ((glyph + delta) % 65536 !== 0) points.add(code);
-        }
-      }
-    }
+    if (format === 12) addFormat12(view, start, points);
+    else if (format === 4) addFormat4(view, start, points);
   }
   return points;
+}
+
+/** Adds the code points of a format 12 subtable at `start` to `points`. */
+function addFormat12(view: DataView, start: number, points: Set<number>): void {
+  for (let group = 0; group < view.getUint32(start + 12); group++) {
+    const at = start + 16 + group * 12;
+    const [first, last, glyph] = [
+      view.getUint32(at),
+      view.getUint32(at + 4),
+      view.getUint32(at + 8),
+    ];
+    for (let code = first; code <= last; code++) if (glyph + code - first !== 0) points.add(code);
+  }
+}
+
+/** Adds the code points of a format 4 subtable at `start` to `points`. */
+function addFormat4(view: DataView, start: number, points: Set<number>): void {
+  const segments = view.getUint16(start + 6) / 2;
+  const ends = start + 14;
+  const starts = ends + segments * 2 + 2;
+  const deltas = starts + segments * 2;
+  const offsets = deltas + segments * 2;
+  for (let segment = 0; segment < segments; segment++) {
+    const first = view.getUint16(starts + segment * 2);
+    const last = view.getUint16(ends + segment * 2);
+    const delta = view.getUint16(deltas + segment * 2);
+    const rangeOffset = view.getUint16(offsets + segment * 2);
+    for (let code = first; code <= last && code !== 0xffff; code++) {
+      let glyph = code;
+      if (rangeOffset !== 0) {
+        glyph = view.getUint16(offsets + segment * 2 + rangeOffset + (code - first) * 2);
+        if (glyph === 0) continue;
+      }
+      if ((glyph + delta) % 65536 !== 0) points.add(code);
+    }
+  }
 }
 
 describe("FONT_CHARS", () => {

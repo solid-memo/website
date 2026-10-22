@@ -200,29 +200,35 @@ function turtleLines(source: string): string[] {
   let open: string | null = null;
   return source.split("\n").map((line) => {
     const own = open === null ? line : "";
-    let quote = open;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i]!;
-      if (quote !== null) {
-        if (c === "\\") i++;
-        else if (line.startsWith(quote, i)) {
-          i += quote.length - 1;
-          quote = null;
-        }
-      } else if (c === "\\")
-        i++; // An escape in a prefixed name, `ex:a\#b`: its `#` begins no comment.
-      else if (c === "#") break;
-      else if (c === "<") {
-        const end = line.indexOf(">", i);
-        i = end === -1 ? line.length : end;
-      } else if (c === '"' || c === "'") {
-        quote = line.startsWith(c.repeat(3), i) ? c.repeat(3) : c;
-        i += quote.length - 1;
-      }
-    }
+    const quote = quoteAtEnd(line, open);
     open = quote?.length === 3 ? quote : null;
     return own;
   });
+}
+
+/** The string delimiter still open at a line's end, given the one open as it begins. */
+function quoteAtEnd(line: string, openAtStart: string | null): string | null {
+  let quote = openAtStart;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i]!;
+    if (quote !== null) {
+      if (c === "\\") i++;
+      else if (line.startsWith(quote, i)) {
+        i += quote.length - 1;
+        quote = null;
+      }
+    } else if (c === "\\")
+      i++; // An escape in a prefixed name, `ex:a\#b`: its `#` begins no comment.
+    else if (c === "#") break;
+    else if (c === "<") {
+      const end = line.indexOf(">", i);
+      i = end === -1 ? line.length : end;
+    } else if (c === '"' || c === "'") {
+      quote = line.startsWith(c.repeat(3), i) ? c.repeat(3) : c;
+      i += quote.length - 1;
+    }
+  }
+  return quote;
 }
 
 /**

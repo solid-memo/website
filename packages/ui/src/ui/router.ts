@@ -362,9 +362,8 @@ export function studioHref(instanceUrl: string): string {
   return `#${STUDIO_PATH}${params({ instance: instanceUrl })}`;
 }
 
-/** The palette editor's route: a palette of the user's own, or a new one; null without an instance. */
-function paletteRoute(instanceUrl: string | null, paletteUrl: string | null): RouteRef | null {
-  if (instanceUrl === null) return null;
+/** The palette editor's route: a palette of the user's own, or a new one. */
+function paletteRoute(instanceUrl: string, paletteUrl: string | null): RouteRef {
   return paletteUrl === null
     ? { screen: "palette", instanceUrl }
     : { screen: "palette", instanceUrl, paletteUrl };
@@ -389,18 +388,63 @@ export function parseHash(hash: string): RouteRef | null {
       if (!STORAGE_SOURCES.includes(source)) return null;
       return { screen: "instanceCreator", storageUrl, source };
     }
+    case "/try":
+      return deckUrl === null ? null : { screen: "try", libraryDeckUrl: deckUrl };
+    default:
+      return instanceUrl === null ? null : parseInstanceRoute(path, query, instanceUrl, deckUrl);
+  }
+}
+
+/**
+ * The routes of an instance (parseHash), once its `instance` is known;
+ * null for anything that isn't one of them.
+ */
+function parseInstanceRoute(
+  path: string | undefined,
+  query: URLSearchParams,
+  instanceUrl: string,
+  deckUrl: string | null,
+): RouteRef | null {
+  switch (path) {
     case "/decks":
-      return instanceUrl === null ? null : { screen: "home", instanceUrl };
+      return { screen: "home", instanceUrl };
     case "/new-deck":
-      return instanceUrl === null ? null : { screen: "deckCreator", instanceUrl };
+      return { screen: "deckCreator", instanceUrl };
     case "/library":
-      return instanceUrl === null ? null : { screen: "library", instanceUrl };
+      return { screen: "library", instanceUrl };
+    case "/import-url": {
+      const url = query.get("url");
+      return url === null
+        ? { screen: "importUrl", instanceUrl }
+        : { screen: "importUrl", instanceUrl, url };
+    }
+    case "/preferences":
+      return { screen: "preferences", instanceUrl };
+    case "/palette":
+      return paletteRoute(instanceUrl, query.get("palette"));
+    case "/statistics":
+      return { screen: "statistics", instanceUrl, ...parseStatisticsParams(query) };
+    case "/validate":
+      return { screen: "validation", instanceUrl };
+    default:
+      return deckUrl === null ? null : parseDeckRoute(path, query, instanceUrl, deckUrl);
+  }
+}
+
+/**
+ * The routes of a deck, the user's own or the library's (parseInstanceRoute),
+ * once its `deck` is known; null for anything that isn't one of them.
+ */
+function parseDeckRoute(
+  path: string | undefined,
+  query: URLSearchParams,
+  instanceUrl: string,
+  deckUrl: string,
+): RouteRef | null {
+  switch (path) {
     case "/library-deck":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "libraryDeck", instanceUrl, libraryDeckUrl: deckUrl };
+      return { screen: "libraryDeck", instanceUrl, libraryDeckUrl: deckUrl };
     case "/library-browse": {
-      if (instanceUrl === null || deckUrl === null) return null;
       const page = parsePage(query.get("page"));
       const ref = {
         screen: "libraryBrowser",
@@ -411,32 +455,19 @@ export function parseHash(hash: string): RouteRef | null {
     }
     case "/library-card": {
       const cardId = query.get("card");
-      return instanceUrl === null || deckUrl === null || cardId === null
+      return cardId === null
         ? null
         : { screen: "libraryCard", instanceUrl, libraryDeckUrl: deckUrl, cardId };
     }
     case "/library-preview":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "libraryPreview", instanceUrl, libraryDeckUrl: deckUrl };
-    case "/import-url": {
-      if (instanceUrl === null) return null;
-      const url = query.get("url");
-      return url === null
-        ? { screen: "importUrl", instanceUrl }
-        : { screen: "importUrl", instanceUrl, url };
-    }
+      return { screen: "libraryPreview", instanceUrl, libraryDeckUrl: deckUrl };
     case "/deck":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "deckDetail", instanceUrl, deckUrl };
+      return { screen: "deckDetail", instanceUrl, deckUrl };
     case "/deck-preferences":
-      if (instanceUrl === null || deckUrl === null) return null;
       return query.get("section") === "languages"
         ? { screen: "deckPreferences", instanceUrl, deckUrl, section: "languages" }
         : { screen: "deckPreferences", instanceUrl, deckUrl };
     case "/browse": {
-      if (instanceUrl === null || deckUrl === null) return null;
       const page = parsePage(query.get("page"));
       const languages = query.get("languages") as BrowserLanguageFilter | null;
       return {
@@ -450,46 +481,24 @@ export function parseHash(hash: string): RouteRef | null {
       };
     }
     case "/new-card":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "cardCreator", instanceUrl, deckUrl };
+      return { screen: "cardCreator", instanceUrl, deckUrl };
     case "/card": {
       const cardUrl = query.get("card");
-      return instanceUrl === null || deckUrl === null || cardUrl === null
-        ? null
-        : { screen: "card", instanceUrl, deckUrl, cardUrl };
+      return cardUrl === null ? null : { screen: "card", instanceUrl, deckUrl, cardUrl };
     }
     case "/study":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "study", instanceUrl, deckUrl };
+      return { screen: "study", instanceUrl, deckUrl };
     case "/course":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "course", instanceUrl, deckUrl };
+      return { screen: "course", instanceUrl, deckUrl };
     case "/course-chapter":
     case "/course-review": {
       const chapterUrl = query.get("chapter");
-      if (instanceUrl === null || deckUrl === null || chapterUrl === null) return null;
+      if (chapterUrl === null) return null;
       const screen = path === "/course-chapter" ? "courseChapter" : "courseReview";
       return { screen, instanceUrl, deckUrl, chapterUrl };
     }
-    case "/preferences":
-      return instanceUrl === null ? null : { screen: "preferences", instanceUrl };
-    case "/palette":
-      return paletteRoute(instanceUrl, query.get("palette"));
-    case "/statistics":
-      return instanceUrl === null
-        ? null
-        : { screen: "statistics", instanceUrl, ...parseStatisticsParams(query) };
     case "/deck-statistics":
-      return instanceUrl === null || deckUrl === null
-        ? null
-        : { screen: "deckStatistics", instanceUrl, deckUrl, ...parseStatisticsParams(query) };
-    case "/validate":
-      return instanceUrl === null ? null : { screen: "validation", instanceUrl };
-    case "/try":
-      return deckUrl === null ? null : { screen: "try", libraryDeckUrl: deckUrl };
+      return { screen: "deckStatistics", instanceUrl, deckUrl, ...parseStatisticsParams(query) };
     default:
       return null;
   }

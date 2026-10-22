@@ -311,6 +311,46 @@ function sameDistractors(a: CardContent, b: CardContent): boolean {
   );
 }
 
+/** The deck's own texts an upgrade from `from` to `to` changes, each undefined where it changes nothing. */
+function upgradedTexts(deck: Deck, from: LibraryDeckContent, to: LibraryDeckContent) {
+  return {
+    title: upgradedText(deck.title, from.title, to.title),
+    // The app's default description is not the user's: it gives way to the release's.
+    description:
+      deck.description !== undefined &&
+      isDefaultDeckDescription(deck.description, [deck.title, from.title])
+        ? to.description === undefined || sameText(deck.description, to.description)
+          ? undefined
+          : to.description
+        : upgradedText(deck.description, from.description, to.description),
+    keywords: upgradedKeywords(deck.keywords, from.keywords, to.keywords),
+    themes: upgradedList(deck.themes, from.themes, to.themes),
+  };
+}
+
+/** What of the deck itself the newer release changed and the copy already has as it has it. */
+function appliedDeckDetails(
+  deck: Deck,
+  from: LibraryDeckContent,
+  to: LibraryDeckContent,
+): DeckDetail[] {
+  return (
+    [
+      ["direction", to.direction !== from.direction && deck.direction === to.direction],
+      ["title", !sameText(from.title, to.title) && sameText(deck.title, to.title)],
+      [
+        "description",
+        !sameText(from.description, to.description) && sameText(deck.description, to.description),
+      ],
+      [
+        "keywords",
+        !sameKeywords(from.keywords, to.keywords) && sameKeywords(deck.keywords, to.keywords),
+      ],
+      ["themes", !sameList(from.themes, to.themes) && sameList(deck.themes ?? [], to.themes)],
+    ] as const
+  ).flatMap(([detail, isApplied]): DeckDetail[] => (isApplied ? [detail] : []));
+}
+
 /**
  * What upgrading the copy to the newer release would do; null — no
  * offer — when the release is not newer, uses a card format this app
@@ -443,37 +483,10 @@ export function planLibraryUpgrade({
   }
   const direction =
     to.direction !== from.direction && deck.direction === from.direction ? to.direction : undefined;
-  const texts = {
-    title: upgradedText(deck.title, from.title, to.title),
-    // The app's default description is not the user's: it gives way to the release's.
-    description:
-      deck.description !== undefined &&
-      isDefaultDeckDescription(deck.description, [deck.title, from.title])
-        ? to.description === undefined || sameText(deck.description, to.description)
-          ? undefined
-          : to.description
-        : upgradedText(deck.description, from.description, to.description),
-    keywords: upgradedKeywords(deck.keywords, from.keywords, to.keywords),
-    themes: upgradedList(deck.themes, from.themes, to.themes),
-  };
+  const texts = upgradedTexts(deck, from, to);
   const textsChanged = Object.values(texts).some((value) => value !== undefined);
   const outlineChanged = outlines !== undefined && !sameOutline(outlines.from, outlines.to);
-  // What of the deck itself the newer release changed and the copy already has as it has it.
-  const appliedAbout = (
-    [
-      ["direction", to.direction !== from.direction && deck.direction === to.direction],
-      ["title", !sameText(from.title, to.title) && sameText(deck.title, to.title)],
-      [
-        "description",
-        !sameText(from.description, to.description) && sameText(deck.description, to.description),
-      ],
-      [
-        "keywords",
-        !sameKeywords(from.keywords, to.keywords) && sameKeywords(deck.keywords, to.keywords),
-      ],
-      ["themes", !sameList(from.themes, to.themes) && sameList(deck.themes ?? [], to.themes)],
-    ] as const
-  ).flatMap(([detail, isApplied]): DeckDetail[] => (isApplied ? [detail] : []));
+  const appliedAbout = appliedDeckDetails(deck, from, to);
   if (
     add.length +
       change.length +

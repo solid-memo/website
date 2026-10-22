@@ -228,26 +228,8 @@ export function CardWorkbenchScreen({
         false,
       ),
     );
-  const editSaid =
-    lastEdit === null
-      ? ""
-      : t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, {
-          count: lastEdit.plan.save.length + lastEdit.plan.remove.length,
-        }) +
-        (lastEdit.plan.skipped.length > 0
-          ? ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}`
-          : "");
-  const reviewSaid =
-    reviewDone === null
-      ? ""
-      : reviewDone.count === 0
-        ? t("studio.cardBulk.notStudied")
-        : reviewDone.edit.kind === "reset"
-          ? t("studio.cardBulk.done.reset", { count: reviewDone.count })
-          : t("studio.cardBulk.done.reschedule", {
-              count: reviewDone.count,
-              due: formatDate(reviewDone.edit.due),
-            });
+  const editSaid = editText(lastEdit, { t });
+  const reviewSaid = reviewText(reviewDone, { t, formatDate });
   // The Studio's activity keeps what each status line said.
   useActivity(lastEdit, () => editSaid);
   useActivity(undone, () => t("studio.cardBulk.undone"));
@@ -462,15 +444,7 @@ export function CardWorkbenchScreen({
               CARD_PAGE_SIZES.map((size) => [String(size), String(size)]),
             )}
             <p class="hint">{t("studio.cards.shown", { shown: rows.length, count: total })}</p>
-            <p class="hint">
-              {lapsesFailed
-                ? t("studio.cards.lapsesFailed")
-                : lapses === undefined
-                  ? t("studio.cards.lapsesLoading")
-                  : lapses.since === null
-                    ? t("studio.cards.lapsesNone")
-                    : t("studio.cards.lapsesSince", { month: formatMonth(lapses.since) })}
-            </p>
+            <p class="hint">{lapsesText(lapses, lapsesFailed, { t, formatMonth })}</p>
           </div>
           {rows.length === 0 ? (
             <p>{t("studio.cards.noMatch")}</p>
@@ -518,12 +492,7 @@ export function CardWorkbenchScreen({
                   onChoose: setChosen,
                 }}
                 current={current}
-                around={{
-                  ...(page.firstIndex === 0 ? {} : { previous: rows[page.firstIndex - 1]! }),
-                  ...(page.firstIndex + shown.length === rows.length
-                    ? {}
-                    : { next: rows[page.firstIndex + shown.length]! }),
-                }}
+                around={around(rows, page.firstIndex, shown.length)}
                 onMove={onMove === undefined ? undefined : (row) => onMove(row.card)}
                 onOpen={(row) => onOpen(row.card)}
               />
@@ -583,6 +552,54 @@ export function CardWorkbenchScreen({
       )}
     </section>
   );
+}
+
+/** What the status line says of the last edit made: how many cards it changed, and how many it skipped. */
+function editText(lastEdit: CardEditMade | null, { t }: Pick<I18n, "t">): string {
+  if (lastEdit === null) return "";
+  const { save, remove, skipped } = lastEdit.plan;
+  const done = t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, {
+    count: save.length + remove.length,
+  });
+  return (
+    done + (skipped.length > 0 ? ` ${t("studio.cardBulk.skipped", { count: skipped.length })}` : "")
+  );
+}
+
+/** What the status line says of the last edit of review states: how many cards it changed, and how. */
+function reviewText(
+  reviewDone: ReviewEditMade | null,
+  { t, formatDate }: Pick<I18n, "t" | "formatDate">,
+): string {
+  if (reviewDone === null) return "";
+  if (reviewDone.count === 0) return t("studio.cardBulk.notStudied");
+  return reviewDone.edit.kind === "reset"
+    ? t("studio.cardBulk.done.reset", { count: reviewDone.count })
+    : t("studio.cardBulk.done.reschedule", {
+        count: reviewDone.count,
+        due: formatDate(reviewDone.edit.due),
+      });
+}
+
+/** What the row of filters says of the lapses: since when they are counted, or why they are not. */
+function lapsesText(
+  lapses: LapseIndex | undefined,
+  failed: boolean,
+  { t, formatMonth }: Pick<I18n, "t" | "formatMonth">,
+): string {
+  if (failed) return t("studio.cards.lapsesFailed");
+  if (lapses === undefined) return t("studio.cards.lapsesLoading");
+  return lapses.since === null
+    ? t("studio.cards.lapsesNone")
+    : t("studio.cards.lapsesSince", { month: formatMonth(lapses.since) });
+}
+
+/** The rows either side of a page of `count` rows from `first`, left out at the ends of `rows`. */
+function around(rows: readonly CardRow[], first: number, count: number) {
+  return {
+    ...(first === 0 ? {} : { previous: rows[first - 1]! }),
+    ...(first + count === rows.length ? {} : { next: rows[first + count]! }),
+  };
 }
 
 /** What a move or copy did: how many cards went where, how many got a new id, how many were there already. */

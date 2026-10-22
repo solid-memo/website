@@ -332,57 +332,72 @@ export class Statistics extends Screen {
    */
   async expectStatistics(expected: ExpectedStatistics): Promise<void> {
     await this.intent("Check the statistics", async () => {
-      await this.openTab("activity");
-      if (expected.answers !== undefined) await this.expectIntroduced();
-      if (expected.today !== undefined) await this.expectToday(expected.today);
-      if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
-      if (expected.hours !== undefined) await this.expectHours(expected.hours);
-      if (expected.thisWeek !== undefined) await this.expectThisWeek(expected.thisWeek);
-
-      await this.openTab("memory");
-      for (const key of ["young", "mature"] as const) {
-        const recall = expected[key];
-        if (recall !== undefined) await this.expectRecall(key, recall);
-      }
-      if (expected.buttons !== undefined) await this.expectButtons(expected.buttons);
-      if (expected.recallByInterval !== undefined)
-        await this.expectRecallByInterval(expected.recallByInterval);
-
-      await this.openTab("cards");
-      if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
-      if (expected.overdue !== undefined)
-        await this.expectValue("overdue", String(expected.overdue));
-      if (expected.maturityByDeck !== undefined)
-        await this.expectMaturityByDeck(expected.maturityByDeck);
-
+      await this.expectActivityTab(expected);
+      await this.expectMemoryTab(expected);
+      await this.expectCardsTab(expected);
       // What is hard is read with where the cards stand, so after it is shown.
       await this.openTab("memory");
       if (expected.leeches !== undefined) await this.expectLeeches(expected.leeches);
-
-      await this.openTab("overview");
-      const counts = {
-        answers: expected.answers,
-        studyDays: expected.studyDays,
-        cards: expected.cards,
-        cardsYouKnow: expected.cardsYouKnow,
-      } as const;
-      for (const [key, count] of Object.entries(counts)) {
-        if (count !== undefined) await this.expectValue(key as StatisticsTile, String(count));
-      }
-      const streaks = {
-        currentStreak: expected.currentStreak,
-        longestStreak: expected.longestStreak,
-      } as const;
-      for (const [key, days] of Object.entries(streaks)) {
-        if (days !== undefined)
-          await this.expectValue(
-            key as StatisticsTile,
-            this.t("statistics.dayCount", { count: days }),
-          );
-      }
-      if (expected.coverage !== undefined) await this.expectCoverage();
-      if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
+      await this.expectOverviewTab(expected);
     });
+  }
+
+  /** The activity tab's part of `expectStatistics`. */
+  private async expectActivityTab(expected: ExpectedStatistics): Promise<void> {
+    await this.openTab("activity");
+    if (expected.answers !== undefined) await this.expectIntroduced();
+    if (expected.today !== undefined) await this.expectToday(expected.today);
+    if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
+    if (expected.hours !== undefined) await this.expectHours(expected.hours);
+    if (expected.thisWeek !== undefined) await this.expectThisWeek(expected.thisWeek);
+  }
+
+  /** The memory tab's part of `expectStatistics`, but for what is hard. */
+  private async expectMemoryTab(expected: ExpectedStatistics): Promise<void> {
+    await this.openTab("memory");
+    for (const key of ["young", "mature"] as const) {
+      const recall = expected[key];
+      if (recall !== undefined) await this.expectRecall(key, recall);
+    }
+    if (expected.buttons !== undefined) await this.expectButtons(expected.buttons);
+    if (expected.recallByInterval !== undefined)
+      await this.expectRecallByInterval(expected.recallByInterval);
+  }
+
+  /** The cards tab's part of `expectStatistics`. */
+  private async expectCardsTab(expected: ExpectedStatistics): Promise<void> {
+    await this.openTab("cards");
+    if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
+    if (expected.overdue !== undefined) await this.expectValue("overdue", String(expected.overdue));
+    if (expected.maturityByDeck !== undefined)
+      await this.expectMaturityByDeck(expected.maturityByDeck);
+  }
+
+  /** The overview's part of `expectStatistics`. */
+  private async expectOverviewTab(expected: ExpectedStatistics): Promise<void> {
+    await this.openTab("overview");
+    const counts = {
+      answers: expected.answers,
+      studyDays: expected.studyDays,
+      cards: expected.cards,
+      cardsYouKnow: expected.cardsYouKnow,
+    } as const;
+    for (const [key, count] of Object.entries(counts)) {
+      if (count !== undefined) await this.expectValue(key as StatisticsTile, String(count));
+    }
+    const streaks = {
+      currentStreak: expected.currentStreak,
+      longestStreak: expected.longestStreak,
+    } as const;
+    for (const [key, days] of Object.entries(streaks)) {
+      if (days !== undefined)
+        await this.expectValue(
+          key as StatisticsTile,
+          this.t("statistics.dayCount", { count: days }),
+        );
+    }
+    if (expected.coverage !== undefined) await this.expectCoverage();
+    if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
   }
 
   /**

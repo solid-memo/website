@@ -5,13 +5,27 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { EDIT_CELL } from "./EditableCell";
 import { rangeToggled, stepCursor, toggled, NO_SELECTION, type Selection } from "./tableModel";
-import { shortcutOf } from "./shortcuts";
+import { shortcutOf, type ShortcutId } from "./shortcuts";
 import { useScreenKeys } from "./useShortcuts";
 
 /** How a table's rows are selected: which are, and the selection to make. */
 export interface RowSelection {
   chosen: Selection;
   onChoose: (chosen: Selection) => void;
+}
+
+/**
+ * Edits a row's cell (F2): the one the focus is in, if it can be edited, else
+ * the row's first that can; false when none can.
+ */
+function editCell(row: Element, target: Element): boolean {
+  const own = row.contains(target)
+    ? target.closest("td, th")!.querySelector("[data-cell-edit]")
+    : null;
+  const cell = own ?? row.querySelector("[data-cell-edit]");
+  if (cell === null) return false;
+  cell.dispatchEvent(new Event(EDIT_CELL));
+  return true;
 }
 
 /**
@@ -117,6 +131,101 @@ export function useRowKeys({
     onCursor(key);
   }
 
+  /** Moves the cursor a row down or up (j, k), or false when there is no row to move it to. */
+  function step(from: number, by: 1 | -1): boolean {
+    const next = stepCursor(from, keys.length, by);
+    if (next === -1) return false;
+    // From either end beside the table, the row beyond it.
+    const beyond =
+      next !== from || current === undefined || onMove === undefined
+        ? undefined
+        : by === 1
+          ? around?.next
+          : around?.previous;
+    if (beyond !== undefined) {
+      anchor.current = beyond;
+      show(beyond);
+      return true;
+    }
+    anchor.current = keys[next]!;
+    move(next);
+    return true;
+  }
+
+  /**
+   * Moves the cursor a row down or up (Shift+J, Shift+K), selecting every row
+   * from the anchor to it, or false when the rows are not selected or there is
+   * no row to act on.
+   */
+  function extend(at: number, by: 1 | -1): boolean {
+    if (select === undefined || at === -1) return false;
+    const next = stepCursor(at, keys.length, by);
+    const from = keys.indexOf(anchor.current ?? "");
+    select.onChoose(rangeToggled(select.chosen, keys, from === -1 ? at : from, next, true));
+    if (from === -1) anchor.current = keys[at]!;
+    move(next);
+    return true;
+  }
+
+  /** Selects a row or not (x), or false when the rows are not selected or there is no row to act on. */
+  function choose(at: number): boolean {
+    if (select === undefined || at === -1) return false;
+    anchor.current = keys[at]!;
+    select.onChoose(toggled(select.chosen, [keys[at]!], !select.chosen.has(keys[at]!)));
+    return true;
+  }
+
+  /** Opens a row (Enter), or false when there is none to open or the focus is on a link or button. */
+  function open(target: EventTarget | null, at: number): boolean {
+    // The row's link opens the row itself, and its buttons do what they do.
+    if (
+      onOpen === undefined ||
+      at === -1 ||
+      target instanceof HTMLAnchorElement ||
+      target instanceof HTMLButtonElement
+    )
+      return false;
+    onOpen(at);
+    return true;
+  }
+
+  /** Clears the selection (Escape), or false when there is none. */
+  function clear(): boolean {
+    if (select === undefined || select.chosen.size === 0) return false;
+    select.onChoose(NO_SELECTION);
+    return true;
+  }
+
+  /**
+   * Acts on a table's key, on the row the focus is in (`focused`) or the one
+   * x, Enter and the extending keys act on (`at`), or false when it does not.
+   */
+  function act(
+    shortcut: ShortcutId | null,
+    target: EventTarget | null,
+    focused: number,
+    at: number,
+  ): boolean {
+    switch (shortcut) {
+      case "down":
+      case "up":
+        return step(focused !== -1 ? focused : cursor, shortcut === "down" ? 1 : -1);
+      case "extendDown":
+      case "extendUp":
+        return extend(at, shortcut === "extendDown" ? 1 : -1);
+      case "select":
+        return choose(at);
+      case "open":
+        return open(target, at);
+      case "clear":
+        return clear();
+      case "edit":
+        return at !== -1 && editCell(body.current!.children[at]!, target as Element);
+      default:
+        return false;
+    }
+  }
+
   useScreenKeys((event, key) => {
     if (!enabled) return;
     const focused = [...body.current!.children].findIndex((row) =>
@@ -125,75 +234,7 @@ export function useRowKeys({
     const onBody = document.activeElement === document.body;
     // The row x, Enter and the extending keys act on.
     const at = focused !== -1 ? focused : onBody ? cursor : -1;
-    const shortcut = shortcutOf(key, "table");
-    switch (shortcut) {
-      case "down":
-      case "up": {
-        const from = focused !== -1 ? focused : cursor;
-        const next = stepCursor(from, keys.length, shortcut === "down" ? 1 : -1);
-        if (next === -1) return;
-        // From either end beside the table, the row beyond it.
-        const beyond =
-          next !== from || current === undefined || onMove === undefined
-            ? undefined
-            : shortcut === "down"
-              ? around?.next
-              : around?.previous;
-        if (beyond !== undefined) {
-          anchor.current = beyond;
-          show(beyond);
-          break;
-        }
-        anchor.current = keys[next]!;
-        move(next);
-        break;
-      }
-      case "extendDown":
-      case "extendUp": {
-        if (select === undefined || at === -1) return;
-        const next = stepCursor(at, keys.length, shortcut === "extendDown" ? 1 : -1);
-        const from = keys.indexOf(anchor.current ?? "");
-        select.onChoose(rangeToggled(select.chosen, keys, from === -1 ? at : from, next, true));
-        if (from === -1) anchor.current = keys[at]!;
-        move(next);
-        break;
-      }
-      case "select":
-        if (select === undefined || at === -1) return;
-        anchor.current = keys[at]!;
-        select.onChoose(toggled(select.chosen, [keys[at]!], !select.chosen.has(keys[at]!)));
-        break;
-      case "open":
-        // The row's link opens the row itself, and its buttons do what they do.
-        if (
-          onOpen === undefined ||
-          at === -1 ||
-          event.target instanceof HTMLAnchorElement ||
-          event.target instanceof HTMLButtonElement
-        )
-          return;
-        onOpen(at);
-        break;
-      case "clear":
-        if (select === undefined || select.chosen.size === 0) return;
-        select.onChoose(NO_SELECTION);
-        break;
-      case "edit": {
-        if (at === -1) return;
-        const row = body.current!.children[at]!;
-        const target = event.target as Element;
-        // The cell the focus is in, if it can be edited; else the row's first that can.
-        const own = row.contains(target)
-          ? target.closest("td, th")!.querySelector("[data-cell-edit]")
-          : null;
-        const cell = own ?? row.querySelector("[data-cell-edit]");
-        if (cell === null) return;
-        cell.dispatchEvent(new Event(EDIT_CELL));
-        break;
-      }
-      default:
-        return;
-    }
+    if (!act(shortcutOf(key, "table"), event.target, focused, at)) return;
     event.preventDefault();
   });
 

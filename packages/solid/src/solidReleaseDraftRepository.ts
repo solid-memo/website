@@ -257,38 +257,7 @@ export function createSolidReleaseDraftRepository({
       const read = reads.get(before.url);
       // Read since at another version (an edit made meanwhile), or never: `before` is not what the documents were.
       if (read?.version !== version) throw new AppError("changedElsewhere", { url: before.url });
-      const was = draftEntries(before);
-      const now = draftEntries(after);
-      /** For each document, the entries that leave it and those that come or change in it. */
-      const touched = new Map<
-        string,
-        { gone: DraftEntry[]; made: { entry: DraftEntry; was?: DraftEntry }[] }
-      >();
-      const at = (document: string) => {
-        let changes = touched.get(document);
-        if (changes === undefined) {
-          changes = { gone: [], made: [] };
-          touched.set(document, changes);
-        }
-        return changes;
-      };
-      for (const key of new Set([...was.keys(), ...now.keys()])) {
-        const old = was.get(key);
-        const next = now.get(key);
-        if (old !== undefined && next !== undefined && sameEntry(old, next)) continue;
-        if (
-          old !== undefined &&
-          (next === undefined || old.document !== next.document || old.subject !== next.subject)
-        )
-          at(old.document).gone.push(old);
-        if (next !== undefined)
-          at(next.document).made.push({
-            entry: next,
-            ...(old?.document === next.document && old.subject === next.subject
-              ? { was: old }
-              : {}),
-          });
-      }
+      const touched = changesByDocument(draftEntries(before), draftEntries(after));
       // New documents first, so no subject is ever named from where it is not yet; then the others, the release document last.
       const order = [...touched.keys()].sort(
         (a, b) =>
@@ -296,25 +265,8 @@ export function createSolidReleaseDraftRepository({
           Number(a === before.url) - Number(b === before.url),
       );
       for (const url of order) {
-        const changes = touched.get(url)!;
-        const gone = changes.gone.map(inDocument);
-        const made = changes.made.map(({ entry, was }) => ({
-          entry: inDocument(entry),
-          ...(was === undefined ? {} : { was: inDocument(was) }),
-        }));
         const stored = read.documents.get(url);
-        let dataset: SolidDataset = stored ?? createSolidDataset();
-        const blank = [
-          ...gone,
-          ...made.flatMap(({ entry, was }) => [entry, ...(was === undefined ? [] : [was])]),
-        ].some(involvesBlank);
-        for (const entry of gone)
-          if (!entry.subject.startsWith("_:")) dataset = removeUnlessNewer(dataset, entry.subject);
-        for (const { entry, was } of made) {
-          if (!entry.subject.startsWith("_:"))
-            dataset = setThing(dataset, rewritten(getThing(dataset, entry.subject), entry, was));
-        }
-        if (blank) dataset = withBlankNodes(dataset, gone, made);
+        const { dataset, made } = changedDocument(stored, touched.get(url)!);
         await checkWrite(dataset, shapedSubjects(made.map(({ entry }) => entry)), "draft");
         if (
           stored !== undefined &&
@@ -541,6 +493,79 @@ async function deleteDocuments(
   return kept;
 }
 
+/** An entry that comes or changes in its document, and what it was there before when it changed. */
+interface MadeEntry {
+  entry: DraftEntry;
+  was?: DraftEntry;
+}
+
+/** For a document, the entries that leave it and those that come or change in it. */
+interface DocumentChanges {
+  gone: DraftEntry[];
+  made: MadeEntry[];
+}
+
+/** For each document, what changes in it from the draft's entries `was` to those `now`. */
+function changesByDocument(
+  was: ReadonlyMap<string, DraftEntry>,
+  now: ReadonlyMap<string, DraftEntry>,
+): Map<string, DocumentChanges> {
+  const touched = new Map<string, DocumentChanges>();
+  const at = (document: string) => {
+    let changes = touched.get(document);
+    if (changes === undefined) {
+      changes = { gone: [], made: [] };
+      touched.set(document, changes);
+    }
+    return changes;
+  };
+  for (const key of new Set([...was.keys(), ...now.keys()])) {
+    const old = was.get(key);
+    const next = now.get(key);
+    if (old !== undefined && next !== undefined && sameEntry(old, next)) continue;
+    if (
+      old !== undefined &&
+      (next === undefined || old.document !== next.document || old.subject !== next.subject)
+    )
+      at(old.document).gone.push(old);
+    if (next !== undefined)
+      at(next.document).made.push({
+        entry: next,
+        ...(old?.document === next.document && old.subject === next.subject ? { was: old } : {}),
+      });
+  }
+  return touched;
+}
+
+/**
+ * A document as read (`stored`, or none when it is new) with its
+ * changes made, and what comes or changes in it as the document names
+ * its blank nodes.
+ */
+function changedDocument(
+  stored: SolidDataset | undefined,
+  changes: DocumentChanges,
+): { dataset: SolidDataset; made: MadeEntry[] } {
+  const gone = changes.gone.map(inDocument);
+  const made = changes.made.map(({ entry, was }) => ({
+    entry: inDocument(entry),
+    ...(was === undefined ? {} : { was: inDocument(was) }),
+  }));
+  let dataset: SolidDataset = stored ?? createSolidDataset();
+  const blank = [
+    ...gone,
+    ...made.flatMap(({ entry, was }) => [entry, ...(was === undefined ? [] : [was])]),
+  ].some(involvesBlank);
+  for (const entry of gone)
+    if (!entry.subject.startsWith("_:")) dataset = removeUnlessNewer(dataset, entry.subject);
+  for (const { entry, was } of made) {
+    if (!entry.subject.startsWith("_:"))
+      dataset = setThing(dataset, rewritten(getThing(dataset, entry.subject), entry, was));
+  }
+  if (blank) dataset = withBlankNodes(dataset, gone, made);
+  return { dataset, made };
+}
+
 /** The subjects of entries their shapes describe: what the write check checks. */
 function shapedSubjects(entries: readonly DraftEntry[]): string[] {
   return entries.filter((entry) => entry.shaped !== undefined).map((entry) => entry.subject);
@@ -615,7 +640,7 @@ function inDocument(entry: DraftEntry): DraftEntry {
 function withBlankNodes(
   dataset: SolidDataset,
   gone: readonly DraftEntry[],
-  made: readonly { entry: DraftEntry; was?: DraftEntry }[],
+  made: readonly MadeEntry[],
 ): SolidDataset {
   const before = new Set(
     [...gone, ...made.flatMap(({ was }) => (was === undefined ? [] : [was]))]

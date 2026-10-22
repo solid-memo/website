@@ -16,7 +16,7 @@ import { CommandPalette } from "./CommandPalette";
 import { HiddenColumns } from "./DataTable";
 import { KeyHelp, Keys } from "./KeyHelp";
 import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs, type WorkItem } from "./prefs";
-import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
+import { keysOf, nextRegion, sectionRoute, type Section, type ShortcutId } from "./shortcuts";
 import { RevealAside } from "./revealAside";
 import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, scaledPane } from "./splitter";
 import { Splitter } from "./Splitter";
@@ -276,18 +276,12 @@ export function StudioShell({
       case "help":
         setHelp(true);
         return true;
-      case "filter": {
-        const filter = document.querySelector<HTMLElement>('main [aria-keyshortcuts="/"]');
-        if (filter === null) return false;
-        filter.focus();
-        return true;
-      }
+      case "filter":
+        return focusFilter();
       case "nextRegion":
-      case "previousRegion": {
-        const regions = [...document.querySelectorAll<HTMLElement>("[data-region]:not([hidden])")];
-        nextRegion(regions, document.activeElement, shortcut === "nextRegion" ? 1 : -1)!.focus();
+      case "previousRegion":
+        focusRegion(shortcut === "nextRegion" ? 1 : -1);
         return true;
-      }
       case "toggleSidebar":
         if (sidebar === null) return false;
         toggleSidebar();
@@ -311,13 +305,7 @@ export function StudioShell({
         return true;
       }
       default: {
-        if (shortcut.startsWith("tab.")) {
-          const tab = tabs[Number(shortcut.slice("tab.".length)) - 1];
-          if (tab === undefined) return false;
-          go(tab.route);
-          return true;
-        }
-        const route = sectionRoute(shortcut.slice("go.".length) as Section, instance?.url ?? null);
+        const route = chordRoute(shortcut, tabs, instance);
         if (route === null) return false;
         go(route);
         return true;
@@ -590,6 +578,33 @@ export function StudioShell({
 /** Before a region is hidden: the focus in it goes to the button that shows it again, not to the page's body. */
 function keepFocus(region: HTMLElement | null, button: HTMLElement | null) {
   if (region?.contains(document.activeElement)) button!.focus();
+}
+
+/** Goes to the screen's filter (the field whose `aria-keyshortcuts` is "/"), if it has one. */
+function focusFilter(): boolean {
+  const filter = document.querySelector<HTMLElement>('main [aria-keyshortcuts="/"]');
+  if (filter === null) return false;
+  filter.focus();
+  return true;
+}
+
+/** Goes to the next region shown (`step` 1) or the one before (-1). */
+function focusRegion(step: 1 | -1) {
+  const regions = [...document.querySelectorAll<HTMLElement>("[data-region]:not([hidden])")];
+  nextRegion(regions, document.activeElement, step)!.focus();
+}
+
+/** Where a numbered tab's key (`tab.`) or a `g` chord (`go.`) goes; null for nowhere. */
+function chordRoute(
+  shortcut: ShortcutId,
+  tabs: readonly ContextTab[],
+  instance: Instance | null,
+): StudioRoute | null {
+  if (shortcut.startsWith("tab.")) {
+    const tab = tabs[Number(shortcut.slice("tab.".length)) - 1];
+    return tab === undefined ? null : tab.route;
+  }
+  return sectionRoute(shortcut.slice("go.".length) as Section, instance?.url ?? null);
 }
 
 /**

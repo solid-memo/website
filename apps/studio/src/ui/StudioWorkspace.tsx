@@ -6,7 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
-import type { Card } from "@solid-memo/domain/deck";
+import type { Card, Deck } from "@solid-memo/domain/deck";
+import type { Instance } from "@solid-memo/domain/instance";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import type { CardEdits } from "@solid-memo/ui/CardScreen";
 import { AskFirst } from "@solid-memo/ui/askFirst";
@@ -128,64 +129,39 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   // The card the list was last put at the page of.
   const placed = useRef<string | null>(null);
 
-  const instancesQuery = useQuery({
-    queryKey: ["instances", session.webId],
-    queryFn: () => useCases.listInstances(session),
-  });
-  const instances = instancesQuery.data;
-  const instanceUrl = route === null ? null : instanceOfRoute(route);
-  const activeInstance =
-    instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
-  const deckUrl =
-    route?.screen === "cards" ||
-    route?.screen === "card" ||
-    route?.screen === "about" ||
-    route?.screen === "schedule"
-      ? route.deckUrl
-      : route?.screen === "health"
-        ? (route.deckUrl ?? null)
-        : null;
-  const decksQuery = useQuery({
-    queryKey: ["decks", instanceUrl],
-    queryFn: () => useCases.listDecks(instanceUrl!),
-    enabled: deckUrl !== null && activeInstance !== null,
-  });
-  const activeDeck =
-    deckUrl === null ? null : (decksQuery.data?.find((deck) => deck.url === deckUrl) ?? null);
-  const cardUrl = route?.screen === "card" ? route.cardUrl : null;
-  // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
-  const cardsQuery = useQuery({
-    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
-    queryFn: () => useCases.listCards(activeDeck!),
-    enabled: cardUrl !== null && activeDeck !== null,
-  });
-  const activeCard =
-    cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
-  // What the card's editor holds, for the editor shown next of the same card on the same tab (beside its deck's cards, or alone):
-  // another card, or another tab and back (its edits saved or discarded on the way), starts afresh.
-  const cardTab = route?.screen === "card" ? (route.tab ?? "content") : null;
-  const cardEdits = useMemo<{ current: CardEdits | null }>(
-    () => ({ current: null }),
-    [cardUrl, cardTab],
-  );
-  const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
-  // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
-  const draftQuery = useQuery({
-    queryKey: draftKey(draftUrl ?? ""),
-    queryFn: () => useCases.getReleaseDraft(draftUrl!),
-    enabled: draftUrl !== null && activeInstance !== null,
-    staleTime: Infinity,
-  });
-  const activeDraft = draftUrl === null ? null : (draftQuery.data ?? null);
-  const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);
+  const {
+    instancesQuery,
+    instances,
+    instanceUrl,
+    activeInstance,
+    deckUrl,
+    decksQuery,
+    activeDeck,
+    cardUrl,
+    cardsQuery,
+    activeCard,
+    cardEdits,
+    draftUrl,
+    draftQuery,
+    activeDraft,
+    draftSubject,
+  } = useRouteReads(useCases, session, route);
   const mine = useInstancePrefs(activeInstance?.url ?? null);
   // The deck or the draft the route is about, as the sidebar lists those opened last.
-  const opened: WorkItem | null =
-    deckUrl !== null
-      ? { kind: "deck", url: deckUrl }
-      : draftUrl !== null
-        ? { kind: "draft", url: draftUrl }
-        : null;
+  const opened = openedOf(deckUrl, draftUrl);
+  const open: Open = {
+    instanceUrl,
+    instance: activeInstance,
+    deckUrl,
+    deck: activeDeck,
+    decksRead: decksQuery.data !== undefined,
+    cardUrl,
+    card: activeCard,
+    cardsRead: cardsQuery.data !== undefined,
+    draftUrl,
+    draft: activeDraft,
+    subject: draftSubject,
+  };
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
@@ -198,24 +174,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   // user does not have: the picker. Neither is a Back stop.
   useEffect(() => {
     if (instances === undefined) return;
-    if (route === null) {
-      replace(
-        instances.length === 1
-          ? { screen: "home", instanceUrl: instances[0]!.url }
-          : { screen: "instances" },
-      );
-    } else if (instanceUrl !== null && !instances.some((i) => i.url === instanceUrl)) {
-      replace({ screen: "instances" });
-    } else if (deckUrl !== null && decksQuery.data !== undefined && activeDeck === null) {
-      // A deck the instance does not have (deleted, perhaps): its decks.
-      replace({ screen: "home", instanceUrl: instanceUrl! });
-    } else if (cardUrl !== null && cardsQuery.data !== undefined && activeCard === null) {
-      // A card the deck does not have (removed, perhaps): the deck's cards.
-      replace(workbenchOf(route as CardRoute));
-    } else if (activeDraft !== null && draftSubject === false) {
-      // A chapter, step or card the draft does not have (deleted, perhaps): the draft's overview.
-      replace({ screen: "draft", draftUrl: draftUrl! });
-    }
+    const to = redirectOf(route, instances, open);
+    if (to !== null) replace(to);
   }, [route, instances, decksQuery.data, cardsQuery.data, draftQuery.data]);
 
   // A card beside its deck's cards, once the list has it: the list at its page, once for each card.
@@ -226,22 +186,18 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     if (at.query!.page !== ((route as CardRoute).query ?? DEFAULT_CARD_QUERY).page) replace(at);
   }, [split, cardUrl, order]);
 
-  const waiting = instancesQuery.error ? (
-    <ErrorMessage error={errorText(instancesQuery.error)} />
-  ) : deckUrl !== null && decksQuery.error ? (
-    <ErrorMessage error={errorText(decksQuery.error)} />
-  ) : cardUrl !== null && cardsQuery.error ? (
-    <ErrorMessage error={errorText(cardsQuery.error)} />
-  ) : draftUrl !== null && activeDraft === null && draftQuery.error ? (
-    <ErrorMessage error={errorText(draftQuery.error)} />
-  ) : route === null ||
-    instances === undefined ||
-    (instanceUrl !== null && activeInstance === null) ||
-    (deckUrl !== null && activeDeck === null) ||
-    (cardUrl !== null && activeCard === null) ||
-    (draftUrl !== null && (activeDraft === null || draftSubject === false)) ? (
-    <Loading label={t("workspace.loadingInstances")} />
-  ) : null;
+  const failed = errorOf([
+    [true, instancesQuery.error],
+    [deckUrl !== null, decksQuery.error],
+    [cardUrl !== null, cardsQuery.error],
+    [draftUrl !== null && activeDraft === null, draftQuery.error],
+  ]);
+  const waiting =
+    failed !== null ? (
+      <ErrorMessage error={errorText(failed)} />
+    ) : route === null || instances === undefined || unread(open) ? (
+      <Loading label={t("workspace.loadingInstances")} />
+    ) : null;
   const crumbs =
     waiting === null
       ? crumbsOf(
@@ -862,6 +818,78 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   );
 }
 
+/**
+ * What the route has open, read: the user's instances, and of the open
+ * instance, its decks for a deck's screen, the deck's cards for a card's,
+ * and the draft for a draft's; with what the card's editor holds
+ * (CardEdits), kept for the same card on the same tab.
+ */
+function useRouteReads(
+  useCases: WorkspaceProps["useCases"],
+  session: WorkspaceProps["session"],
+  route: StudioRoute | null,
+) {
+  const instancesQuery = useQuery({
+    queryKey: ["instances", session.webId],
+    queryFn: () => useCases.listInstances(session),
+  });
+  const instances = instancesQuery.data;
+  const instanceUrl = route === null ? null : instanceOfRoute(route);
+  const activeInstance =
+    instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
+  const deckUrl = deckUrlOf(route);
+  const decksQuery = useQuery({
+    queryKey: ["decks", instanceUrl],
+    queryFn: () => useCases.listDecks(instanceUrl!),
+    enabled: deckUrl !== null && activeInstance !== null,
+  });
+  const activeDeck =
+    deckUrl === null ? null : (decksQuery.data?.find((deck) => deck.url === deckUrl) ?? null);
+  const cardUrl = route?.screen === "card" ? route.cardUrl : null;
+  // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
+  const cardsQuery = useQuery({
+    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
+    queryFn: () => useCases.listCards(activeDeck!),
+    enabled: cardUrl !== null && activeDeck !== null,
+  });
+  const activeCard =
+    cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
+  // What the card's editor holds, for the editor shown next of the same card on the same tab (beside its deck's cards, or alone):
+  // another card, or another tab and back (its edits saved or discarded on the way), starts afresh.
+  const cardTab = route?.screen === "card" ? (route.tab ?? "content") : null;
+  const cardEdits = useMemo<{ current: CardEdits | null }>(
+    () => ({ current: null }),
+    [cardUrl, cardTab],
+  );
+  const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
+  // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
+  const draftQuery = useQuery({
+    queryKey: draftKey(draftUrl ?? ""),
+    queryFn: () => useCases.getReleaseDraft(draftUrl!),
+    enabled: draftUrl !== null && activeInstance !== null,
+    staleTime: Infinity,
+  });
+  const activeDraft = draftUrl === null ? null : (draftQuery.data ?? null);
+  const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);
+  return {
+    instancesQuery,
+    instances,
+    instanceUrl,
+    activeInstance,
+    deckUrl,
+    decksQuery,
+    activeDeck,
+    cardUrl,
+    cardsQuery,
+    activeCard,
+    cardEdits,
+    draftUrl,
+    draftQuery,
+    activeDraft,
+    draftSubject,
+  };
+}
+
 /** What each aside is named, as its region. */
 const ASIDE_LABELS = {
   outline: "studio.draft.outline",
@@ -869,6 +897,91 @@ const ASIDE_LABELS = {
   plan: "studio.library.plan",
   node: "studio.graph.node.label",
 } as const;
+
+/** What the route has open, by its URL and as read (null while it is not, or when it names none). */
+interface Open {
+  instanceUrl: string | null;
+  instance: Instance | null;
+  deckUrl: string | null;
+  deck: Deck | null;
+  // Whether the instance's decks, and the deck's cards, are read.
+  decksRead: boolean;
+  cardUrl: string | null;
+  card: Card | null;
+  cardsRead: boolean;
+  draftUrl: string | null;
+  draft: ReleaseDraft | null;
+  // Whether the chapter, step or card of the draft the route names is there (subjectOf).
+  subject: boolean | null;
+}
+
+/** The deck a route is about, if it is about one. */
+function deckUrlOf(route: StudioRoute | null): string | null {
+  switch (route?.screen) {
+    case "cards":
+    case "card":
+    case "about":
+    case "schedule":
+      return route.deckUrl;
+    case "health":
+      return route.deckUrl ?? null;
+    default:
+      return null;
+  }
+}
+
+/** The deck or the draft the route is about, as the sidebar lists those opened last. */
+function openedOf(deckUrl: string | null, draftUrl: string | null): WorkItem | null {
+  if (deckUrl !== null) return { kind: "deck", url: deckUrl };
+  if (draftUrl !== null) return { kind: "draft", url: draftUrl };
+  return null;
+}
+
+/**
+ * Where a route the instances read do not let open goes instead: with no
+ * route, the only instance's decks, else the picker; for an instance the
+ * user does not have, the picker; null when it opens.
+ */
+function redirectOf(
+  route: StudioRoute | null,
+  instances: readonly Instance[],
+  open: Open,
+): StudioRoute | null {
+  const { instanceUrl, deckUrl, cardUrl, draftUrl } = open;
+  if (route === null)
+    return instances.length === 1
+      ? { screen: "home", instanceUrl: instances[0]!.url }
+      : { screen: "instances" };
+  if (instanceUrl !== null && !instances.some((i) => i.url === instanceUrl))
+    return { screen: "instances" };
+  // A deck the instance does not have (deleted, perhaps): its decks.
+  if (deckUrl !== null && open.decksRead && open.deck === null)
+    return { screen: "home", instanceUrl: instanceUrl! };
+  // A card the deck does not have (removed, perhaps): the deck's cards.
+  if (cardUrl !== null && open.cardsRead && open.card === null)
+    return workbenchOf(route as CardRoute);
+  // A chapter, step or card the draft does not have (deleted, perhaps): the draft's overview.
+  if (open.draft !== null && open.subject === false)
+    return { screen: "draft", draftUrl: draftUrl! };
+  return null;
+}
+
+/** The first error of a read the route needs, each with whether it does. */
+function errorOf(
+  reads: readonly (readonly [needed: boolean, error: Error | null])[],
+): Error | null {
+  return reads.find(([needed, error]) => needed && error !== null)?.[1] ?? null;
+}
+
+/** Whether something the route has open is not read yet, or not there (a draft's subject). */
+function unread(open: Open): boolean {
+  return (
+    (open.instanceUrl !== null && open.instance === null) ||
+    (open.deckUrl !== null && open.deck === null) ||
+    (open.cardUrl !== null && open.card === null) ||
+    (open.draftUrl !== null && (open.draft === null || open.subject === false))
+  );
+}
 
 type HomeRoute = Extract<StudioRoute, { screen: "home" }>;
 type GraphRoute = Extract<StudioRoute, { screen: "graph" }>;

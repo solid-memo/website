@@ -14,6 +14,52 @@ const SEPTEMBER = `${HISTORY}2026-09.ttl`;
 const DECK = `${INSTANCE}catalog.ttl#deck-1`;
 const OTHER = `${INSTANCE}catalog.ttl#deck-2`;
 
+/** Answers a GET or HEAD: a document's lines, or what a container lists. */
+function serveRead(
+  documents: Map<string, Set<string>>,
+  versions: Map<string, number>,
+  url: string,
+  headers: Headers,
+): Response {
+  const contained = [...documents.keys()].filter((doc) => doc.startsWith(url) && url.endsWith("/"));
+  const lines = url.endsWith("/")
+    ? contained.map((doc) => `<${url}> <http://www.w3.org/ns/ldp#contains> <${doc}> .`)
+    : [...(documents.get(url) ?? [])];
+  if (!url.endsWith("/") && !documents.has(url)) return new Response("", { status: 404 });
+  if (url.endsWith("/") && contained.length === 0) return new Response("", { status: 404 });
+  const etag = `"v${versions.get(url) ?? 0}"`;
+  if (headers.get("If-None-Match") === etag)
+    return new Response(null, { status: 304, headers: { ETag: etag } });
+  const response = new Response(lines.join("\n"), {
+    headers: { "Content-Type": "text/turtle", ETag: etag },
+  });
+  Object.defineProperty(response, "url", { value: url });
+  return response;
+}
+
+/** Applies a PATCH's INSERT DATA and DELETE DATA, if its If-Match holds. */
+function applyPatch(
+  documents: Map<string, Set<string>>,
+  versions: Map<string, number>,
+  url: string,
+  headers: Headers,
+  body: string,
+): Response {
+  const ifMatch = headers.get("If-Match");
+  if (ifMatch !== null && ifMatch !== `"v${versions.get(url) ?? 0}"`)
+    return new Response("", { status: 412 });
+  const triples = documents.get(url) ?? new Set<string>();
+  for (const [, operation, block] of body.matchAll(/(INSERT|DELETE) DATA \{\n([\s\S]*?)\n\};/g)) {
+    for (const line of block!.split("\n")) {
+      if (operation === "INSERT") triples.add(line);
+      else triples.delete(line);
+    }
+  }
+  documents.set(url, triples);
+  versions.set(url, (versions.get(url) ?? 0) + 1);
+  return new Response("", { status: 205 });
+}
+
 /**
  * A pod as far as the answer log needs one: documents as N-Triples lines,
  * which SPARQL Update INSERT DATA and DELETE DATA patches change, an
@@ -36,37 +82,8 @@ function pod() {
       failNext = null;
       return new Response("", { status });
     }
-    if (method === "GET" || method === "HEAD") {
-      const contained = [...documents.keys()].filter(
-        (doc) => doc.startsWith(url) && url.endsWith("/"),
-      );
-      const lines = url.endsWith("/")
-        ? contained.map((doc) => `<${url}> <http://www.w3.org/ns/ldp#contains> <${doc}> .`)
-        : [...(documents.get(url) ?? [])];
-      if (!url.endsWith("/") && !documents.has(url)) return new Response("", { status: 404 });
-      if (url.endsWith("/") && contained.length === 0) return new Response("", { status: 404 });
-      const etag = `"v${versions.get(url) ?? 0}"`;
-      if (headers.get("If-None-Match") === etag)
-        return new Response(null, { status: 304, headers: { ETag: etag } });
-      const response = new Response(lines.join("\n"), {
-        headers: { "Content-Type": "text/turtle", ETag: etag },
-      });
-      Object.defineProperty(response, "url", { value: url });
-      return response;
-    }
-    const ifMatch = headers.get("If-Match");
-    if (ifMatch !== null && ifMatch !== `"v${versions.get(url) ?? 0}"`)
-      return new Response("", { status: 412 });
-    const triples = documents.get(url) ?? new Set<string>();
-    for (const [, operation, block] of body.matchAll(/(INSERT|DELETE) DATA \{\n([\s\S]*?)\n\};/g)) {
-      for (const line of block!.split("\n")) {
-        if (operation === "INSERT") triples.add(line);
-        else triples.delete(line);
-      }
-    }
-    documents.set(url, triples);
-    versions.set(url, (versions.get(url) ?? 0) + 1);
-    return new Response("", { status: 205 });
+    if (method === "GET" || method === "HEAD") return serveRead(documents, versions, url, headers);
+    return applyPatch(documents, versions, url, headers, body);
   }) as typeof globalThis.fetch;
   return {
     fetch,
