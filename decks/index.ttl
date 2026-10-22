@@ -6496,10 +6496,11 @@
                  "balises"@fr ,
                  "WHATWG"@fr ;
     dcat:first <https://solid-memo.com/decks/html-elements/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/html-elements/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/html-elements/v1.ttl> ,
-                    <https://solid-memo.com/decks/html-elements/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/html-elements/v2.ttl> .
+                    <https://solid-memo.com/decks/html-elements/v2.ttl> ,
+                    <https://solid-memo.com/decks/html-elements/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/html-elements/v3.ttl> .
 
 <https://solid-memo.com/decks/html-elements/v1.ttl>
     a dcat:Dataset ;
@@ -6512,6 +6513,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/html-elements/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "HTML elements"@en ,
+                  "HTML-element"@sv ,
+                  "HTML 요소"@ko ,
+                  "HTML-Elemente"@de ,
+                  "Elementos HTML"@es ,
+                  "Éléments HTML"@fr ;
+    dcterms:description "55 everyday elements of HTML, the markup language of the web: the front says in plain words what an element is for, in English and Swedish, and the back gives its tag, such as <a> or <main>. Covers the document and its metadata, sections, text, lists, images and media, tables and forms; obsolete elements are left out. Based on the WHATWG HTML Living Standard (CC BY 4.0), with every card checked against MDN Web Docs and Wikidata."@en ,
+                        "55 vanliga element i HTML, webbens märkspråk: på framsidan står med vanliga ord vad ett element används till, på engelska och svenska, och på baksidan dess tagg, till exempel <a> eller <main>. Täcker dokumentet och dess metadata, avsnitt, text, listor, bilder och media, tabeller och formulär; föråldrade element är utelämnade. Bygger på WHATWG:s HTML Living Standard (CC BY 4.0), och varje kort är kontrollerat mot MDN Web Docs och Wikidata."@sv ,
+                        "웹의 마크업 언어인 HTML에서 자주 쓰는 요소 55개입니다. 앞면에는 요소가 무엇에 쓰이는지 쉬운 말로 영어와 스웨덴어로 적혀 있고, 뒷면에는 <a>나 <main> 같은 태그가 있습니다. 문서와 메타데이터, 섹션, 텍스트, 목록, 이미지와 미디어, 표, 폼을 다루며, 더 이상 쓰지 않는 요소는 뺐습니다. WHATWG HTML Living Standard(CC BY 4.0)를 바탕으로 하고, 모든 카드를 MDN Web Docs와 Wikidata로 확인했습니다."@ko ,
+                        "55 alltägliche Elemente von HTML, der Auszeichnungssprache des Webs: Auf der Vorderseite steht in einfachen Worten, wofür ein Element da ist, auf Englisch und Schwedisch, und auf der Rückseite sein Tag, etwa <a> oder <main>. Behandelt das Dokument und seine Metadaten, Abschnitte, Text, Listen, Bilder und Medien, Tabellen und Formulare; veraltete Elemente sind weggelassen. Beruht auf dem WHATWG HTML Living Standard (CC BY 4.0), und jede Karte ist anhand von MDN Web Docs und Wikidata geprüft."@de ,
+                        "55 elementos habituales de HTML, el lenguaje de marcado de la web: el anverso explica con palabras sencillas para qué sirve un elemento, en inglés y en sueco, y el reverso da su etiqueta, como <a> o <main>. Abarca el documento y sus metadatos, secciones, texto, listas, imágenes y multimedia, tablas y formularios; se omiten los elementos obsoletos. Basado en el HTML Living Standard del WHATWG (CC BY 4.0), con cada tarjeta comprobada en MDN Web Docs y Wikidata."@es ,
+                        "55 éléments courants de HTML, le langage de balisage du Web : le recto indique en termes simples à quoi sert un élément, en anglais et en suédois, et le verso donne sa balise, par exemple <a> ou <main>. Couvre le document et ses métadonnées, les sections, le texte, les listes, les images et médias, les tableaux et les formulaires ; les éléments obsolètes sont exclus. Fondé sur le HTML Living Standard du WHATWG (CC BY 4.0), chaque carte étant vérifiée sur MDN Web Docs et Wikidata."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/html-elements/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "HTML elements"@en ,
@@ -6520,7 +6539,7 @@
                   "HTML-Elemente"@de ,
                   "Elementos HTML"@es ,
                   "Éléments HTML"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/html-elements/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/html-elements/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:description "55 everyday elements of HTML, the markup language of the web: the front says in plain words what an element is for, in English and Swedish, and the back gives its tag, such as <a> or <main>. Covers the document and its metadata, sections, text, lists, images and media, tables and forms; obsolete elements are left out. Based on the WHATWG HTML Living Standard (CC BY 4.0), with every card checked against MDN Web Docs and Wikidata."@en ,
                         "55 vanliga element i HTML, webbens märkspråk: på framsidan står med vanliga ord vad ett element används till, på engelska och svenska, och på baksidan dess tagg, till exempel <a> eller <main>. Täcker dokumentet och dess metadata, avsnitt, text, listor, bilder och media, tabeller och formulär; föråldrade element är utelämnade. Bygger på WHATWG:s HTML Living Standard (CC BY 4.0), och varje kort är kontrollerat mot MDN Web Docs och Wikidata."@sv ,
@@ -6530,7 +6549,7 @@
                         "55 éléments courants de HTML, le langage de balisage du Web : le recto indique en termes simples à quoi sert un élément, en anglais et en suédois, et le verso donne sa balise, par exemple <a> ou <main>. Couvre le document et ses métadonnées, les sections, le texte, les listes, les images et médias, les tableaux et les formulaires ; les éléments obsolètes sont exclus. Fondé sur le HTML Living Standard du WHATWG (CC BY 4.0), chaque carte étant vérifiée sur MDN Web Docs et Wikidata."@fr ;
     prov:wasDerivedFrom <https://html.spec.whatwg.org/multipage/> ,
                         <https://www.wikidata.org/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/html-elements/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/html-elements/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -6573,23 +6592,28 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/html-elements/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/html-elements/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Elements, attributes and markup are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#html-elements> ;
     dcat:isVersionOf <#html-elements> ;
-    dcat:distribution <https://solid-memo.com/decks/html-elements/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/html-elements/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/html-elements/v3.ttl#turtle> ;
     solid-memo:cardCount 55 .
 
-<https://solid-memo.com/decks/html-elements/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/html-elements/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/html-elements/v2.ttl#compilation>
+<https://solid-memo.com/decks/html-elements/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/html-elements/v3.ttl#compilation>
     a prov:Activity .
 
 <https://html.spec.whatwg.org/multipage/>
@@ -6602,10 +6626,10 @@
     dcterms:creator "Mozilla Contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> .
 
-<https://solid-memo.com/decks/html-elements/v2.ttl#turtle>
+<https://solid-memo.com/decks/html-elements/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/html-elements/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/html-elements/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/html-elements/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
