@@ -12390,10 +12390,11 @@
                  "méthodes de chaîne"@fr ,
                  "listes"@fr ;
     dcat:first <https://solid-memo.com/decks/python-built-ins/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/python-built-ins/v1.ttl> ,
-                    <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/python-built-ins/v2.ttl> .
+                    <https://solid-memo.com/decks/python-built-ins/v2.ttl> ,
+                    <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/python-built-ins/v3.ttl> .
 
 <https://solid-memo.com/decks/python-built-ins/v1.ttl>
     a dcat:Dataset ;
@@ -12406,6 +12407,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/python-built-ins/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Python built-in functions"@en ,
+                  "Inbyggda funktioner i Python"@sv ,
+                  "Python 내장 함수"@ko ,
+                  "Eingebaute Funktionen in Python"@de ,
+                  "Funciones integradas de Python"@es ,
+                  "Fonctions natives de Python"@fr ;
+    dcterms:description "50 everyday Python 3 built-in functions and operations, as of Python 3.14. Front: a task in plain words in English and Swedish; back: the Python expression that does it, using names such as xs (a list), s (a string) and d (a dict). Covers len, range, enumerate, zip, sorted, sum, min, max, round, the type conversions, print, input, open, any, all, map, filter, f-strings, slicing, list comprehensions, dict.get, string methods and in. Strings are written in double quotes. Every expression was run with Python 3.14.4 and checked against the official Python documentation."@en ,
+                        "50 vardagliga inbyggda funktioner och operationer i Python 3, enligt version 3.14. Framsida: en uppgift med vanliga ord på engelska och svenska; baksida: Python-uttrycket som utför den, med namn som xs (en lista), s (en sträng) och d (ett dict-objekt). Omfattar len, range, enumerate, zip, sorted, sum, min, max, round, typomvandlingarna, print, input, open, any, all, map, filter, f-strängar, slicing, list comprehensions, dict.get, strängmetoder och in. Strängar skrivs med dubbla citattecken. Varje uttryck har körts med Python 3.14.4 och kontrollerats mot Pythons officiella dokumentation."@sv ,
+                        "Python 3.14 기준으로 일상적으로 쓰는 Python 3 내장 함수와 연산 50개. 앞면: 영어와 스웨덴어로 쉽게 풀어 쓴 작업, 뒷면: 그 작업을 하는 Python 식으로, xs(리스트), s(문자열), d(딕셔너리) 같은 이름을 쓴다. len, range, enumerate, zip, sorted, sum, min, max, round, 형 변환, print, input, open, any, all, map, filter, f-문자열, 슬라이싱, 리스트 컴프리헨션, dict.get, 문자열 메서드, in을 다룬다. 문자열은 큰따옴표로 쓴다. 모든 식은 Python 3.14.4로 실행하고 Python 공식 문서와 대조해 확인했다."@ko ,
+                        "50 alltägliche eingebaute Funktionen und Operationen von Python 3, Stand Python 3.14. Vorderseite: eine Aufgabe in einfachen Worten auf Englisch und Schwedisch; Rückseite: der Python-Ausdruck, der sie erledigt, mit Namen wie xs (eine Liste), s (ein String) und d (ein Dict). Behandelt len, range, enumerate, zip, sorted, sum, min, max, round, die Typumwandlungen, print, input, open, any, all, map, filter, f-Strings, Slicing, List Comprehensions, dict.get, String-Methoden und in. Strings stehen in doppelten Anführungszeichen. Jeder Ausdruck wurde mit Python 3.14.4 ausgeführt und anhand der offiziellen Python-Dokumentation geprüft."@de ,
+                        "50 funciones y operaciones integradas de Python 3 de uso cotidiano, según Python 3.14. Anverso: una tarea en palabras sencillas en inglés y en sueco; reverso: la expresión de Python que la realiza, con nombres como xs (una lista), s (una cadena) y d (un diccionario). Incluye len, range, enumerate, zip, sorted, sum, min, max, round, las conversiones de tipo, print, input, open, any, all, map, filter, las f-strings, el slicing, las listas por comprensión, dict.get, los métodos de cadena e in. Las cadenas se escriben entre comillas dobles. Cada expresión se ejecutó con Python 3.14.4 y se comprobó con la documentación oficial de Python."@es ,
+                        "50 fonctions et opérations natives courantes de Python 3, à jour pour Python 3.14. Recto : une tâche décrite avec des mots simples en anglais et en suédois ; verso : l’expression Python qui l’accomplit, avec des noms comme xs (une liste), s (une chaîne) et d (un dictionnaire). Couvre len, range, enumerate, zip, sorted, sum, min, max, round, les conversions de type, print, input, open, any, all, map, filter, les f-strings, le découpage en tranches, les listes en compréhension, dict.get, les méthodes de chaîne et in. Les chaînes sont écrites entre guillemets doubles. Chaque expression a été exécutée avec Python 3.14.4 et vérifiée avec la documentation officielle de Python."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/python-built-ins/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Python built-in functions"@en ,
@@ -12414,7 +12433,7 @@
                   "Eingebaute Funktionen in Python"@de ,
                   "Funciones integradas de Python"@es ,
                   "Fonctions natives de Python"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/python-built-ins/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/python-built-ins/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "50 everyday Python 3 built-in functions and operations, as of Python 3.14. Front: a task in plain words in English and Swedish; back: the Python expression that does it, using names such as xs (a list), s (a string) and d (a dict). Covers len, range, enumerate, zip, sorted, sum, min, max, round, the type conversions, print, input, open, any, all, map, filter, f-strings, slicing, list comprehensions, dict.get, string methods and in. Strings are written in double quotes. Every expression was run with Python 3.14.4 and checked against the official Python documentation."@en ,
                         "50 vardagliga inbyggda funktioner och operationer i Python 3, enligt version 3.14. Framsida: en uppgift med vanliga ord på engelska och svenska; baksida: Python-uttrycket som utför den, med namn som xs (en lista), s (en sträng) och d (ett dict-objekt). Omfattar len, range, enumerate, zip, sorted, sum, min, max, round, typomvandlingarna, print, input, open, any, all, map, filter, f-strängar, slicing, list comprehensions, dict.get, strängmetoder och in. Strängar skrivs med dubbla citattecken. Varje uttryck har körts med Python 3.14.4 och kontrollerats mot Pythons officiella dokumentation."@sv ,
@@ -12422,8 +12441,8 @@
                         "50 alltägliche eingebaute Funktionen und Operationen von Python 3, Stand Python 3.14. Vorderseite: eine Aufgabe in einfachen Worten auf Englisch und Schwedisch; Rückseite: der Python-Ausdruck, der sie erledigt, mit Namen wie xs (eine Liste), s (ein String) und d (ein Dict). Behandelt len, range, enumerate, zip, sorted, sum, min, max, round, die Typumwandlungen, print, input, open, any, all, map, filter, f-Strings, Slicing, List Comprehensions, dict.get, String-Methoden und in. Strings stehen in doppelten Anführungszeichen. Jeder Ausdruck wurde mit Python 3.14.4 ausgeführt und anhand der offiziellen Python-Dokumentation geprüft."@de ,
                         "50 funciones y operaciones integradas de Python 3 de uso cotidiano, según Python 3.14. Anverso: una tarea en palabras sencillas en inglés y en sueco; reverso: la expresión de Python que la realiza, con nombres como xs (una lista), s (una cadena) y d (un diccionario). Incluye len, range, enumerate, zip, sorted, sum, min, max, round, las conversiones de tipo, print, input, open, any, all, map, filter, las f-strings, el slicing, las listas por comprensión, dict.get, los métodos de cadena e in. Las cadenas se escriben entre comillas dobles. Cada expresión se ejecutó con Python 3.14.4 y se comprobó con la documentación oficial de Python."@es ,
                         "50 fonctions et opérations natives courantes de Python 3, à jour pour Python 3.14. Recto : une tâche décrite avec des mots simples en anglais et en suédois ; verso : l’expression Python qui l’accomplit, avec des noms comme xs (une liste), s (une chaîne) et d (un dictionnaire). Couvre len, range, enumerate, zip, sorted, sum, min, max, round, les conversions de type, print, input, open, any, all, map, filter, les f-strings, le découpage en tranches, les listes en compréhension, dict.get, les méthodes de chaîne et in. Les chaînes sont écrites entre guillemets doubles. Chaque expression a été exécutée avec Python 3.14.4 et vérifiée avec la documentation officielle de Python."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/python-built-ins/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/python-built-ins/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/python-built-ins/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/python-built-ins/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -12461,26 +12480,31 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/python-built-ins/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/python-built-ins/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Functions, names and values are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#python-built-ins> ;
     dcat:isVersionOf <#python-built-ins> ;
-    dcat:distribution <https://solid-memo.com/decks/python-built-ins/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/python-built-ins/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/python-built-ins/v3.ttl#turtle> ;
     solid-memo:cardCount 50 .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#compilation>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#test-runs>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#test-runs>
     dcterms:title "Test run of every card's expression with Python 3.14.4 (CPython)" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -12494,10 +12518,10 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#turtle>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
