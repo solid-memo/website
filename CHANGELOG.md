@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [5.3.2](https://github.com/solid-memo/website/compare/v5.3.1...v5.3.2) (2026-10-22)
+
+### Bug Fixes
+
+* **decks:** ask nine more Solid questions for one answer ([cf74ac8](https://github.com/solid-memo/website/commit/cf74ac81e1ab6bb04383a25a1500fc12ecdb29fb)), closes [#231](https://github.com/solid-memo/website/issues/231)
+* **decks:** ask the hash WebID review question for one answer ([209ad1c](https://github.com/solid-memo/website/commit/209ad1c7c581fef13aec786995990a7b4382cecd)), closes [#231](https://github.com/solid-memo/website/issues/231)
+* **decks:** ask two driving theory questions for one answer ([99d2b8f](https://github.com/solid-memo/website/commit/99d2b8f7712bf670630cbd66587f5f0013f94909)), closes [#231](https://github.com/solid-memo/website/issues/231)
+* **decks:** ask two public code questions for one answer ([e78d6f9](https://github.com/solid-memo/website/commit/e78d6f95300fd71140d847ec343f6641a0d9e4a2)), closes [#231](https://github.com/solid-memo/website/issues/231)
+
 ## [5.3.1](https://github.com/solid-memo/website/compare/v5.3.0...v5.3.1) (2026-10-21)
 
 ### Bug Fixes
