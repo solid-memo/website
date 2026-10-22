@@ -21,6 +21,22 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.0.0](https://github.com/solid-memo/website/compare/v5.4.0...v6.0.0) (2026-10-22)
+
+### ⚠ BREAKING CHANGES
+
+* **ns:** cards are written in card format 7. An older version of Solid Memo reads a format-7 card without what it is about and refuses to save over it, so after this version updates a pod, a tab or device still on an older version cannot edit those cards until it is reloaded. A library release with format-7 cards needs this version to be imported.
+
+### Features
+
+* **decks:** describe each famous painting for screen readers ([4fc68f4](https://github.com/solid-memo/website/commit/4fc68f4f12d618dc29940423cec228097cfe0b9b)), closes [#234](https://github.com/solid-memo/website/issues/234)
+* **decks:** describe each flag for screen readers ([5bf52b1](https://github.com/solid-memo/website/commit/5bf52b120658f54767139d21356c75f98118a037)), closes [#234](https://github.com/solid-memo/website/issues/234)
+* **decks:** describe each Rijksmuseum picture for screen readers ([dda6fdb](https://github.com/solid-memo/website/commit/dda6fdb3ed20979a25da6e5df251fe60f0bb63ef)), closes [#234](https://github.com/solid-memo/website/issues/234)
+* **domain:** ask the library for a description of every picture ([7c760d2](https://github.com/solid-memo/website/commit/7c760d200b55d94cbbd682234a046ac0b4a4049c)), closes [#234](https://github.com/solid-memo/website/issues/234)
+* **domain:** offer a library release that changes only what cards are about ([2e2fba5](https://github.com/solid-memo/website/commit/2e2fba50bfef667e4e0ac8897ee6c040d6222249)), closes [#236](https://github.com/solid-memo/website/issues/236)
+* **ns:** keep what a card is about, in card format 7 ([d16a2cd](https://github.com/solid-memo/website/commit/d16a2cd6756634fa9c0080af960c54c521d5c181)), closes [#236](https://github.com/solid-memo/website/issues/236)
+* **studio:** show what cards are about in a copy's update and a release's changes ([111cb70](https://github.com/solid-memo/website/commit/111cb70b42ea65ab96ea7e51a4a38e18925a7e34)), closes [#236](https://github.com/solid-memo/website/issues/236)
+
 ## [5.4.0](https://github.com/solid-memo/website/compare/v5.3.2...v5.4.0) (2026-10-22)
 
 ### Features
