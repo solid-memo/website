@@ -3148,6 +3148,8 @@
       "backLabel": "Beschriftung der Rückseite",
       "frontNote": "Anmerkung zur Vorderseite",
       "backNote": "Anmerkung zur Rückseite",
+      "frontImageDescription": "Beschreibung des Bildes auf der Vorderseite",
+      "backImageDescription": "Beschreibung des Bildes auf der Rückseite",
       "distractor": "Falsche Antwortmöglichkeiten",
       "distractorText": "Falsche Antwortmöglichkeit",
       "distractorNote": "Warum sie falsch ist",
@@ -3199,6 +3201,7 @@
         "other": "{count} Teile auf {language}"
       },
       "missingLanguage": "{field}: kein Text auf {language}.",
+      "missingImageDescription": "{field}: keine Beschreibung auf {language}. Ohne sie sagt ein Screenreader nur, dass dort ein Bild ist.",
       "missingTheme": "Themen: {theme} fehlt.",
       "missingContact": "Kontakt: Der der Bibliothek, {contact}, ist nicht angegeben. Eine Veröffentlichung für die Bibliothek nennt ihn, keine E-Mail-Adresse.",
       "emailNamed": "Nennt eine E-Mail-Adresse: Eine Veröffentlichung für die Bibliothek nennt keine E-Mail-Adresse, nur den Kontakt der Bibliothek.",

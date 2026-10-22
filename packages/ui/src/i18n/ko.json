@@ -2972,6 +2972,8 @@
       "backLabel": "뒷면 레이블",
       "frontNote": "앞면 아래 메모",
       "backNote": "뒷면 아래 메모",
+      "frontImageDescription": "앞면 그림 설명",
+      "backImageDescription": "뒷면 그림 설명",
       "distractor": "오답 선택지",
       "distractorText": "오답 선택지",
       "distractorNote": "틀린 이유",
@@ -3021,6 +3023,7 @@
         "other": "{language}에서 {count}부분"
       },
       "missingLanguage": "{field}: {language} 텍스트가 없어요.",
+      "missingImageDescription": "{field}: {language} 설명이 없어요. 설명이 없으면 화면 낭독기는 그림이 있다는 것만 읽어요.",
       "missingTheme": "주제: {theme}이(가) 없어요.",
       "missingContact": "연락처: 라이브러리 연락처 {contact}이(가) 없어요. 라이브러리용 릴리스는 이메일이 아니라 이 연락처를 적어요.",
       "emailNamed": "이메일이 있어요: 라이브러리용 릴리스에는 누구의 이메일도 넣지 않고 라이브러리 연락처만 적어요.",

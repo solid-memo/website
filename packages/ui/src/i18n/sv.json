@@ -3148,6 +3148,8 @@
       "backLabel": "Baksidans etikett",
       "frontNote": "Anteckning under framsidan",
       "backNote": "Anteckning under baksidan",
+      "frontImageDescription": "Beskrivning av bilden på framsidan",
+      "backImageDescription": "Beskrivning av bilden på baksidan",
       "distractor": "Felaktiga alternativ",
       "distractorText": "Felaktigt alternativ",
       "distractorNote": "Varför det är fel",
@@ -3199,6 +3201,7 @@
         "other": "{count} delar på {language}"
       },
       "missingLanguage": "{field}: ingen text på {language}.",
+      "missingImageDescription": "{field}: ingen beskrivning på {language}. Utan den säger en skärmläsare bara att det finns en bild.",
       "missingTheme": "Teman: saknar {theme}.",
       "missingContact": "Kontakt: bibliotekets, {contact}, anges inte. En utgåva för biblioteket anger den, inte en e-postadress.",
       "emailNamed": "Anger en e-postadress: en utgåva för biblioteket anger ingens e-postadress, bara bibliotekets kontakt.",

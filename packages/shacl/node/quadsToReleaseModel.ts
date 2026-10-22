@@ -104,6 +104,10 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     backLabel: texts(iri, sm("backLabel")),
     frontNote: texts(iri, sm("frontNote")),
     backNote: texts(iri, sm("backNote")),
+    frontImage: named(iri, sm("frontImage")),
+    backImage: named(iri, sm("backImage")),
+    frontImageDescription: texts(iri, sm("frontImageDescription")),
+    backImageDescription: texts(iri, sm("backImageDescription")),
     distractors: objects(iri, sm("distractor")),
   }));
   const distractor = (iri: string, isTyped: boolean): ReleaseDistractor => ({

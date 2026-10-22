@@ -82,6 +82,15 @@ publisher still in the index:
   `dcterms:publisher <…/decks/index.ttl#solid-memo>`, a
   `dcat:distribution <#turtle>` pointing at the file itself, and from
   version 2 `dcat:prev` and `dcat:previousVersion` `<…/<name>/v<N-1>.ttl>`.
+- **A picture on a card is described** (`sm:frontImageDescription`,
+  `sm:backImageDescription`) in English and in every other language the
+  card's text is in, so a screen reader can say what it shows; without
+  one it says only that there is a picture, and where the picture is the
+  question the card cannot be studied without sight. The description
+  says what a sighted learner sees and never gives the answer away: "Three
+  vertical stripes, green, white and red", not the country.
+  `npm run library:check` asks it of each deck's newest version
+  ([Checks](#checks)).
 - **A published card is never removed, but retired**: keep it and add
   `owl:deprecated true` (card format 3 and later). Copies of the deck
   keep it and its review history, but no longer study it; a later
@@ -444,6 +453,13 @@ what the versions make. Both check:
   it: when the app gains a language, every deck fails until a new
   version adds it, while the versions before stay frozen. The Studio's
   check for the library asks the same of a draft (`repoPolicy`);
+- that each picture on a card of a deck's newest version is described
+  in English and in every other language the card's text is in, by its
+  primary subtag (`missingImageDescription`, by `LIBRARY_LANGUAGES`
+  too): text in `sv-se` asks a description in `sv`, and untagged text
+  asks none. It is a library rule for the same reason, held to the
+  newest version alone, and the Studio's check for the library asks it
+  of a draft too;
 - a course's outline, by the [course rules](#course-rules);
 - the index's course for newcomers (`newcomerProblems`): at most one, an
   IRI, a deck of the library (one of the catalog's `dcat:dataset`s),
@@ -474,7 +490,7 @@ the Studio can run them in the browser as the command does:
 | `continuityRules.ts` | A version against the one before it. |
 | `courseRules.ts` | The [course rules](#course-rules); and what a release needs that its draft may lack (`readinessProblems`), which the Studio's check adds. |
 | `markdownFields.ts` | Which fields are Markdown, and by which rule; the check itself is passed in, since the domain reads no Markdown. |
-| `curationRules.ts` | A `LibraryPolicy`: what a library asks beyond the data. `repoPolicy` asks a title, description and keywords in every language the app speaks (`LIBRARY_LANGUAGES`, from `LOCALES`) and the theme `EDUC`; `podPolicy` asks nothing. |
+| `curationRules.ts` | A `LibraryPolicy`: what a library asks beyond the data. `repoPolicy` asks a title, description and keywords in every language the app speaks and each picture on a card described (`LIBRARY_LANGUAGES`, from `LOCALES`) and the theme `EDUC`; `podPolicy` asks nothing. |
 | `seriesEntry.ts` | What the index says of a deck. |
 | `releaseCheck.ts` | The Studio's release check: the rules a policy runs, where a library publishes a release (`libraryReleaseUrl`, `librarySeriesUrl`, which this command uses too), and where each problem is fixed. |
 | `draftModel.ts` | A Studio draft as a release model, at its own address or another. |

@@ -178,6 +178,23 @@ describe("draftReleaseModel", () => {
     expect(model.activities).toEqual([{ iri: of("old"), generating: false }]);
   });
 
+  it("reads a card's pictures and their descriptions", () => {
+    const deck = deckDraft();
+    const data = {
+      ...deck.cards[0]!.data,
+      frontImage: "https://img.example/map.svg",
+      backImage: "https://img.example/flag.svg",
+      backImageDescription: { en: "Three stripes" },
+    };
+    const [card] = draftReleaseModel({ ...deck, cards: [{ id: "w1", data }] }).cards;
+    expect(card).toMatchObject({
+      frontImage: ["https://img.example/map.svg"],
+      backImage: ["https://img.example/flag.svg"],
+      frontImageDescription: [],
+      backImageDescription: [{ value: "Three stripes", language: "en" }],
+    });
+  });
+
   it("reads a chapter or step without a place, chapter or course as having none", () => {
     const draft = courseDraft();
     const loose = {

@@ -121,6 +121,8 @@ export interface MarkdownFinding {
 export type CurationProblem =
   /** No text in a language the policy asks of the title, description or keywords (`field`). */
   | { code: "missingLanguage"; params: { language: string } }
+  /** A card's picture without a description (`field`) in a language the policy asks of it. */
+  | { code: "missingImageDescription"; params: { language: string } }
   | { code: "missingTheme"; params: { theme: string } }
   /** No contact point (dcat:contactPoint) that is a vcard:Kind naming the policy's `contact` (vcard:hasURL). */
   | { code: "missingContact"; params: { contact: string } }

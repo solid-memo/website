@@ -1249,6 +1249,25 @@ describe("languageProblems", () => {
     ]);
   });
 
+  it("names each language a card's picture has no description in", () => {
+    const turtle = `${releaseText("capitals", 2, NORWAY)}
+<#flag> a <${SM}Card> ;
+    <${SM}formatVersion> 4 ;
+    <${SM}frontImage> <https://example.org/flag.svg> ;
+    <${SM}frontImageDescription> "A red flag with a blue cross"@en ;
+    <${SM}back> "Norway"@en , "Norge"@sv .
+`;
+    const pictured: DeckRelease = {
+      deck: "capitals",
+      version: 2,
+      turtle,
+      quads: parseTurtle(turtle, `${DECKS}capitals/v2.ttl`),
+    };
+    expect(languageProblems(pictured)).toEqual([
+      `${L}: <#flag> has a picture without solid-memo:frontImageDescription in sv: a library deck describes each picture in English and in every language its card's text is in, without giving the answer away, so a screen reader can say what it shows.`,
+    ]);
+  });
+
   it("is asked of each deck's newest version, not of the frozen ones before it", async () => {
     const languages = ["en", "sv"];
     const older = [release("capitals", 1, { languages }), release("capitals", 2, NORWAY)];
