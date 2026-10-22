@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -13454,12 +13454,13 @@
                  "JSON-LD"@fr ,
                  "Linked Web Storage"@fr ;
     dcat:first <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ,
                     <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> ,
                     <https://solid-memo.com/decks/solid-fundamentals/v3.ttl> ,
-                    <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> .
+                    <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ,
+                    <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> .
 
 <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>
     a dcat:Dataset ;
@@ -13500,6 +13501,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/solid-fundamentals/v4.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Solid fundamentals"@en ,
+                  "Grunderna i Solid"@sv ,
+                  "Solid 기초"@ko ,
+                  "Solid-Grundlagen"@de ,
+                  "Fundamentos de Solid"@es ,
+                  "Les bases de Solid"@fr ;
+    dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
+                        "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ,
+                        "Solid로 앱을 만들고 싶은 사람을 위한 Solid 코스입니다. Solid가 왜 있는지, 그 바탕인 링크드 데이터와 RDF, 어휘, Pod와 컨테이너, 리소스 읽기와 쓰기, 신원과 로그인, 접근 제어와 공유, 알림, 앱의 데이터 설계, 앱의 구축·보안·배포, 최소한의 앱과 Solid Memo 자체를 한 부분씩 읽어 보기, Solid의 미해결 문제, 그리고 Solid의 뒤를 이을 수도 있는 Linked Web Storage 초안을 다룹니다. 17개 챕터는 짧은 단계로 이루어지며, 각 단계는 필요한 곳에 코드와 표를 곁들인 이론 한 부분과 그 뒤의 객관식 문제로 되어 있습니다. 챕터마다 마지막에 복습이 있고, 답한 문제는 모두 덱의 카드가 됩니다. 내용은 Solid 명세, RDF 관련 W3C 표준, 서버와 라이브러리의 문서와 코드, Community Solid Server 7.2에 기록한 요청에서 가져왔으며 2026년 10월 기준입니다."@ko ,
+                        "Ein Kurs über Solid für alle, die damit Apps bauen wollen: warum es Solid gibt, Linked Data und RDF, auf denen es aufbaut, Vokabulare, Pods und Container, Ressourcen lesen und schreiben, Identität und Anmeldung, Zugriffskontrolle und Teilen, Benachrichtigungen, die Daten einer App entwerfen, eine App bauen, absichern und veröffentlichen, eine minimale App und Solid Memo selbst Stück für Stück gelesen, die offenen Probleme von Solid und die Entwürfe von Linked Web Storage, das Solid ablösen könnte. 17 Kapitel aus kurzen Schritten, jeder ein Stück Theorie, mit Code und Tabellen, wo sie helfen, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Die Fakten stammen aus den Solid-Spezifikationen, den W3C-Standards rund um RDF, der Dokumentation und dem Code der Server und Bibliotheken und aus Anfragen, die auf Community Solid Server 7.2 aufgezeichnet wurden, Stand Oktober 2026."@de ,
+                        "Un curso sobre Solid para quien quiere crear aplicaciones con él: por qué existe Solid, los datos enlazados y RDF en los que se basa, los vocabularios, los Pods y los contenedores, leer y escribir recursos, la identidad y el inicio de sesión, el control de acceso y el uso compartido, las notificaciones, el diseño de los datos de una aplicación, cómo crear, proteger y publicar una aplicación, una aplicación mínima y el propio Solid Memo leídos pieza a pieza, los problemas abiertos de Solid y los borradores de Linked Web Storage, que podría sucederle. 17 capítulos de pasos breves, cada uno un fragmento de teoría, con código y tablas donde ayudan, seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. Los datos proceden de las especificaciones de Solid, los estándares del W3C en torno a RDF, la documentación y el código de los servidores y bibliotecas, y peticiones registradas en Community Solid Server 7.2, a fecha de octubre de 2026."@es ,
+                        "Un cours sur Solid pour ceux qui veulent créer des applications avec : pourquoi Solid existe, les données liées et RDF sur lesquels il repose, les vocabulaires, les Pods et les conteneurs, la lecture et l’écriture de ressources, l’identité et la connexion, le contrôle d’accès et le partage, les notifications, la conception des données d’une application, la création, la sécurisation et la publication d’une application, une application minimale et Solid Memo lui-même lus pièce par pièce, les problèmes ouverts de Solid et les brouillons de Linked Web Storage, qui pourrait lui succéder. 17 chapitres de courtes étapes, chacune un morceau de théorie, avec du code et des tableaux là où ils aident, suivi de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Les faits proviennent des spécifications Solid, des standards du W3C autour de RDF, de la documentation et du code des serveurs et des bibliothèques, et de requêtes enregistrées sur Community Solid Server 7.2, en octobre 2026."@fr ;
+    dcat:version "4" ;
+    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "20 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." .
+
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ,
       <https://schema.org/Course> ;
@@ -13509,7 +13528,7 @@
                   "Solid-Grundlagen"@de ,
                   "Fundamentos de Solid"@es ,
                   "Les bases de Solid"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
                         "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ,
@@ -13765,7 +13784,7 @@
                         <https://www.w3.org/standards/history/lws10-core/> ,
                         <https://www.w3.org/standards/history/rdf12-concepts/> ,
                         <https://zenodo.org/records/7641620> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#compilation> ;
     dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ,
@@ -13856,28 +13875,28 @@
                  "Linked Web Storage"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "4" ;
-    dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v3.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v3.ttl> ;
-    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "20 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "5" ;
+    dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "10 more questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#solid-fundamentals> ;
     dcat:isVersionOf <#solid-fundamentals> ;
-    dcat:contactPoint <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#turtle> ;
     solid-memo:cardCount 466 .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#anton-wiklund>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#contact>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#compilation>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#compilation>
     a prov:Activity .
 
 <http://xmlns.com/foaf/spec/>
@@ -14872,10 +14891,10 @@
     dcterms:title "node-solid-server v6.0.0" ;
     dcterms:creator "node-solid-server project" .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#turtle>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -15651,11 +15670,12 @@
                  "base de code"@fr ,
                  "standards ouverts"@fr ;
     dcat:first <https://solid-memo.com/decks/standard-for-public-code/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ;
+    dcat:last <https://solid-memo.com/decks/standard-for-public-code/v4.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/standard-for-public-code/v1.ttl> ,
                     <https://solid-memo.com/decks/standard-for-public-code/v2.ttl> ,
-                    <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> .
+                    <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ,
+                    <https://solid-memo.com/decks/standard-for-public-code/v4.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/standard-for-public-code/v4.ttl> .
 
 <https://solid-memo.com/decks/standard-for-public-code/v1.ttl>
     a dcat:Dataset ;
@@ -15694,6 +15714,24 @@
     adms:versionNotes "2 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." .
 
 <https://solid-memo.com/decks/standard-for-public-code/v3.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Standard for Public Code"@en ,
+                  "Standard for Public Code"@sv ,
+                  "Standard for Public Code (공공 코드 표준)"@ko ,
+                  "Standard for Public Code"@de ,
+                  "Standard for Public Code"@es ,
+                  "Standard for Public Code"@fr ;
+    dcterms:description "Learn the Standard for Public Code, the open set of criteria that helps public organizations develop and maintain software and policy together so that others can reuse them. The course starts with what public code is, who the Standard is for, and how its MUST, SHOULD and OPTIONAL requirements are worded and checked, then works through all 16 criteria in the Standard's own order: from code in the open and bundled policy, through reuse, contributors, version control and review, documentation and language, open standards and continuous integration, to licensing, findability, style and maturity. 9 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English only. The facts come from the Standard's published text, as of version 0.8.1 of the Standard (April 2025), and from RFC 2119 for the meaning of its keywords, checked in October 2026."@en ,
+                        "Lär dig Standard for Public Code, den öppna uppsättning kriterier som hjälper offentliga organisationer att tillsammans utveckla och underhålla programvara och policy så att andra kan återanvända dem. Kursen börjar med vad offentlig kod (public code) är, vem standarden är till för och hur dess krav, MUST, SHOULD och OPTIONAL, formuleras och bedöms, och går sedan igenom alla 16 kriterier i standardens egen ordning: från kod som utvecklas öppet och policy som hålls samman med koden, via återanvändning, bidragsgivare, versionshantering och granskning, dokumentation och språk, öppna standarder och kontinuerlig integration, till licensiering, sökbarhet, stil och mognad. 9 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska. Fakta kommer från standardens publicerade text, så som den var i version 0.8.1 av standarden (april 2025), och från RFC 2119 för vad dess nyckelord betyder, kontrollerade i oktober 2026."@sv ,
+                        "Standard for Public Code(공공 코드 표준)를 배웁니다. 공공 조직이 소프트웨어와 정책을 함께 개발하고 유지해 다른 곳에서도 재사용할 수 있도록 돕는 공개된 기준 모음입니다. 코스는 공공 코드(public code)가 무엇인지, 이 표준이 누구를 위한 것인지, MUST, SHOULD, OPTIONAL 요구 사항이 어떻게 쓰이고 평가되는지로 시작해, 16개 기준 전체를 표준 자체의 순서대로 다룹니다. 코드를 공개적으로 개발하고 정책을 코드와 함께 묶는 것에서 시작해 재사용, 기여자, 버전 관리와 리뷰, 문서와 언어, 개방형 표준과 지속적 통합을 거쳐 라이선스, 찾기 쉬움, 스타일, 성숙도까지 이어집니다. 짧은 단계로 이루어진 챕터 9개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제입니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 코스는 영어로만 제공됩니다. 내용은 표준 0.8.1 버전(2025년 4월)의 공개된 본문과, 키워드의 의미에 관해서는 RFC 2119에서 가져왔으며 2026년 10월에 확인했습니다."@ko ,
+                        "Lerne den Standard for Public Code kennen, die offene Sammlung von Kriterien, die öffentlichen Organisationen hilft, Software und Policy gemeinsam zu entwickeln und zu pflegen, damit andere sie wiederverwenden können. Der Kurs beginnt damit, was Public Code ist, für wen der Standard gedacht ist und wie seine Anforderungen, MUST, SHOULD und OPTIONAL, formuliert und geprüft werden, und arbeitet dann alle 16 Kriterien in der Reihenfolge des Standards selbst durch: von offen entwickeltem Code und mit ihm gebündelter Policy über Wiederverwendung, Mitwirkende, Versionsverwaltung und Review, Dokumentation und Sprache, offene Standards und Continuous Integration bis zu Lizenzierung, Auffindbarkeit, Stil und Reife. 9 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist nur auf Englisch verfügbar. Die Fakten stammen aus dem veröffentlichten Text des Standards, Stand Version 0.8.1 des Standards (April 2025), und für die Bedeutung seiner Schlüsselwörter aus RFC 2119, geprüft im Oktober 2026."@de ,
+                        "Aprende el Standard for Public Code, el conjunto abierto de criterios que ayuda a las organizaciones públicas a desarrollar y mantener juntas software y políticas para que otros puedan reutilizarlos. El curso empieza explicando qué es el código público, a quién va dirigido el estándar y cómo se redactan y se comprueban sus requisitos MUST, SHOULD y OPTIONAL, y luego recorre los 16 criterios en el orden del propio estándar: desde el código desarrollado en abierto y las políticas que lo acompañan, pasando por la reutilización, los colaboradores, el control de versiones y la revisión, la documentación y el lenguaje, los estándares abiertos y la integración continua, hasta las licencias, la facilidad para encontrar el código, el estilo y la madurez. 9 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso solo está en inglés. Los datos proceden del texto publicado del estándar, en su versión 0.8.1 (abril de 2025), y de la RFC 2119 para el significado de sus palabras clave, comprobados en octubre de 2026."@es ,
+                        "Découvrez le Standard for Public Code, l’ensemble ouvert de critères qui aide les organisations publiques à développer et maintenir ensemble logiciels et politiques publiques afin que d’autres puissent les réutiliser. Le cours commence par ce qu’est le code public, à qui s’adresse le standard et comment ses exigences MUST, SHOULD et OPTIONAL sont formulées et vérifiées, puis parcourt les 16 critères dans l’ordre du standard lui-même : du code développé de manière ouverte et des politiques regroupées avec lui, en passant par la réutilisation, les contributeurs, la gestion de versions et la revue, la documentation et la langue, les standards ouverts et l’intégration continue, jusqu’aux licences, à la facilité de trouver le code, au style et à la maturité. 9 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours n’existe qu’en anglais. Les informations proviennent du texte publié du standard, dans sa version 0.8.1 (avril 2025), et de la RFC 2119 pour le sens de ses mots-clés, vérifiées en octobre 2026."@fr ;
+    dcat:version "3" ;
+    dcterms:issued "2026-10-17T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "The review template is taught as a form for recording a verdict on every requirement, without the release's outdated note that the Foundation for Public Code's stewards use it; its question is asked without a steward, and every chapter, step, card and wrong option keeps its id." .
+
+<https://solid-memo.com/decks/standard-for-public-code/v4.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ,
       <https://schema.org/Course> ;
@@ -15703,7 +15741,7 @@
                   "Standard for Public Code"@de ,
                   "Standard for Public Code"@es ,
                   "Standard for Public Code"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/standard-for-public-code/v3.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/standard-for-public-code/v4.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "Learn the Standard for Public Code, the open set of criteria that helps public organizations develop and maintain software and policy together so that others can reuse them. The course starts with what public code is, who the Standard is for, and how its MUST, SHOULD and OPTIONAL requirements are worded and checked, then works through all 16 criteria in the Standard's own order: from code in the open and bundled policy, through reuse, contributors, version control and review, documentation and language, open standards and continuous integration, to licensing, findability, style and maturity. 9 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English only. The facts come from the Standard's published text, as of version 0.8.1 of the Standard (April 2025), and from RFC 2119 for the meaning of its keywords, checked in October 2026."@en ,
                         "Lär dig Standard for Public Code, den öppna uppsättning kriterier som hjälper offentliga organisationer att tillsammans utveckla och underhålla programvara och policy så att andra kan återanvända dem. Kursen börjar med vad offentlig kod (public code) är, vem standarden är till för och hur dess krav, MUST, SHOULD och OPTIONAL, formuleras och bedöms, och går sedan igenom alla 16 kriterier i standardens egen ordning: från kod som utvecklas öppet och policy som hålls samman med koden, via återanvändning, bidragsgivare, versionshantering och granskning, dokumentation och språk, öppna standarder och kontinuerlig integration, till licensiering, sökbarhet, stil och mognad. 9 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska. Fakta kommer från standardens publicerade text, så som den var i version 0.8.1 av standarden (april 2025), och från RFC 2119 för vad dess nyckelord betyder, kontrollerade i oktober 2026."@sv ,
@@ -15714,7 +15752,7 @@
     prov:wasDerivedFrom <https://github.com/standard-for-public-code/standard-for-public-code/tree/0.8.1> ,
                         <https://www.standardforpubliccode.org/> ,
                         <https://www.rfc-editor.org/rfc/rfc2119> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/standard-for-public-code/v3.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/standard-for-public-code/v4.ttl#compilation> ;
     dcterms:created "2026-10-12T00:00:00Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -15769,34 +15807,34 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 6 ;
-    dcat:version "3" ;
-    dcat:prev <https://solid-memo.com/decks/standard-for-public-code/v2.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/standard-for-public-code/v2.ttl> ;
-    dcterms:issued "2026-10-17T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "The review template is taught as a form for recording a verdict on every requirement, without the release's outdated note that the Foundation for Public Code's stewards use it; its question is asked without a steward, and every chapter, step, card and wrong option keeps its id." ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "2 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#standard-for-public-code> ;
     dcat:isVersionOf <#standard-for-public-code> ;
-    dcat:contactPoint <https://solid-memo.com/decks/standard-for-public-code/v3.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/standard-for-public-code/v3.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/standard-for-public-code/v4.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/standard-for-public-code/v4.ttl#turtle> ;
     solid-memo:cardCount 82 .
 
-<https://solid-memo.com/decks/standard-for-public-code/v3.ttl#anton-wiklund>
+<https://solid-memo.com/decks/standard-for-public-code/v4.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/standard-for-public-code/v3.ttl#contact>
+<https://solid-memo.com/decks/standard-for-public-code/v4.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
-<https://solid-memo.com/decks/standard-for-public-code/v3.ttl#turtle>
+<https://solid-memo.com/decks/standard-for-public-code/v4.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/standard-for-public-code/v3.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/standard-for-public-code/v4.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/standard-for-public-code/v4.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
-<https://solid-memo.com/decks/standard-for-public-code/v3.ttl#compilation>
+<https://solid-memo.com/decks/standard-for-public-code/v4.ttl#compilation>
     a prov:Activity .
 
 <https://github.com/standard-for-public-code/standard-for-public-code/tree/0.8.1>
@@ -16314,11 +16352,30 @@
                  "도로 표지판"@ko ,
                  "스웨덴"@ko ;
     dcat:first <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
-    dcat:hasVersion <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> .
+    dcat:last <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ,
+                    <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl> .
 
 <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Körkort B: teori"@sv ,
+                  "Swedish Driving License B: Theory"@en ,
+                  "Schwedischer Führerschein B: Theorie"@de ,
+                  "Permiso de conducir sueco B: teoría"@es ,
+                  "Permis de conduire suédois B : théorie"@fr ,
+                  "스웨덴 운전면허 B: 이론"@ko ;
+    dcterms:description "Trafikregler och vägmärken för körkort B i 16 kapitel, från grunderna och vägmärkenas språk till vad du gör vid en trafikolycka. Skrivna med egna ord utifrån trafikförordningen, vägmärkesförordningen och andra författningar, i lydelse t.o.m. SFS 2026:1052 respektive 2025:268. Inofficiell; ersätter inte Transportstyrelsens eller Trafikverkets material."@sv ,
+                        "Traffic rules and road signs for the Swedish B license in 16 chapters, from the basics and the language of road signs to what to do at a traffic accident. Written in our own words from the Traffic Ordinance, the Road Signs Ordinance and other statutes, as amended up to SFS 2026:1052 and 2025:268. Unofficial; it does not replace the material of Transportstyrelsen or Trafikverket."@en ,
+                        "Verkehrsregeln und Verkehrszeichen für den schwedischen Führerschein der Klasse B in 16 Kapiteln, von den Grundlagen und der Sprache der Verkehrszeichen bis zum Verhalten bei einem Verkehrsunfall. In eigenen Worten nach der Straßenverkehrsverordnung (trafikförordningen), der Verkehrszeichenverordnung (vägmärkesförordningen) und weiteren Vorschriften, in der Fassung bis SFS 2026:1052 bzw. 2025:268. Inoffiziell; ersetzt nicht das Material von Transportstyrelsen oder Trafikverket."@de ,
+                        "Normas de tráfico y señales viales para el permiso de conducir sueco de clase B en 16 capítulos, desde lo básico y el lenguaje de las señales hasta qué hacer en un accidente de tráfico. Escritas con nuestras propias palabras a partir de la ordenanza de tráfico (trafikförordningen), la ordenanza de señales viales (vägmärkesförordningen) y otras normas, en su redacción hasta SFS 2026:1052 y 2025:268. No oficial; no sustituye el material de Transportstyrelsen ni de Trafikverket."@es ,
+                        "Règles de circulation et panneaux routiers pour le permis de conduire suédois de catégorie B en 16 chapitres, des bases et du langage des panneaux jusqu'à la conduite à tenir lors d'un accident de la route. Rédigés avec nos propres mots à partir de l'ordonnance sur la circulation (trafikförordningen), de l'ordonnance sur la signalisation routière (vägmärkesförordningen) et d'autres textes, dans leur version jusqu'à SFS 2026:1052 et 2025:268. Non officiel ; ne remplace pas les documents de Transportstyrelsen ou de Trafikverket."@fr ,
+                        "스웨덴 B종 운전면허를 위한 교통 규칙과 도로 표지판을 16개 장으로 다룹니다. 기본 원칙과 도로 표지판의 언어부터 교통사고가 났을 때 할 일까지 담았습니다. 교통령(trafikförordningen), 도로표지령(vägmärkesförordningen) 등 법령의 SFS 2026:1052 및 2025:268 개정까지의 내용을 바탕으로 직접 쓴 글입니다. 비공식 자료이며 Transportstyrelsen이나 Trafikverket의 자료를 대신하지 않습니다."@ko ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." .
+
+<https://solid-memo.com/decks/swedish-driving-theory/v2.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ,
       <https://schema.org/Course> ;
@@ -16328,7 +16385,7 @@
                   "Permiso de conducir sueco B: teoría"@es ,
                   "Permis de conduire suédois B : théorie"@fr ,
                   "스웨덴 운전면허 B: 이론"@ko ;
-    dcterms:creator <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "Trafikregler och vägmärken för körkort B i 16 kapitel, från grunderna och vägmärkenas språk till vad du gör vid en trafikolycka. Skrivna med egna ord utifrån trafikförordningen, vägmärkesförordningen och andra författningar, i lydelse t.o.m. SFS 2026:1052 respektive 2025:268. Inofficiell; ersätter inte Transportstyrelsens eller Trafikverkets material."@sv ,
                         "Traffic rules and road signs for the Swedish B license in 16 chapters, from the basics and the language of road signs to what to do at a traffic accident. Written in our own words from the Traffic Ordinance, the Road Signs Ordinance and other statutes, as amended up to SFS 2026:1052 and 2025:268. Unofficial; it does not replace the material of Transportstyrelsen or Trafikverket."@en ,
@@ -16355,7 +16412,7 @@
                         <https://road-safety.transport.ec.europa.eu/document/download/c1bc212c-170f-4c68-a5a4-cad17035befb_en?filename=ERSO-TR-alcohol_drugs_2026.pdf> ,
                         <https://road-safety.transport.ec.europa.eu/european-road-safety-observatory/statistics-and-analysis-archive/post-impact-care/first-link-chain-help_en> ,
                         <https://www.eea.europa.eu/en/analysis/publications/explaining-road-transport-emissions> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#compilation> ;
     dcterms:created "2026-10-19T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
     dcat:keyword "körkort"@sv ,
@@ -16386,32 +16443,34 @@
                      <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 6 ;
-    dcat:version "1" ;
-    dcterms:issued "2026-10-19T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "First release." ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "2 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#swedish-driving-theory> ;
     dcat:isVersionOf <#swedish-driving-theory> ;
-    dcat:contactPoint <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#turtle> ;
     solid-memo:cardCount 301 .
 
-<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#anton-wiklund>
+<https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#contact>
+<https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
-<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#turtle>
+<https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/swedish-driving-theory/v1.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/swedish-driving-theory/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
-<https://solid-memo.com/decks/swedish-driving-theory/v1.ttl#compilation>
+<https://solid-memo.com/decks/swedish-driving-theory/v2.ttl#compilation>
     a prov:Activity .
 
 <https://data.riksdagen.se/dokument/sfs-1998-1276.text>
