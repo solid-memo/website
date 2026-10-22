@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -19723,10 +19723,11 @@
                  "drapeaux"@fr ,
                  "géographie"@fr ;
     dcat:first <https://solid-memo.com/decks/world-flags/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/world-flags/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/world-flags/v1.ttl> ,
-                    <https://solid-memo.com/decks/world-flags/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-flags/v2.ttl> .
+                    <https://solid-memo.com/decks/world-flags/v2.ttl> ,
+                    <https://solid-memo.com/decks/world-flags/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-flags/v3.ttl> .
 
 <https://solid-memo.com/decks/world-flags/v1.ttl>
     a dcat:Dataset ;
@@ -19739,6 +19740,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/world-flags/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "World flags"@en ,
+                  "Världens flaggor"@sv ,
+                  "세계의 국기"@ko ,
+                  "Flaggen der Welt"@de ,
+                  "Banderas del mundo"@es ,
+                  "Drapeaux du monde"@fr ;
+    dcterms:description "The flag of every country and territory on the front, its name in English and Swedish on the back. The list follows Flagpedia's index; the flag images are public-domain SVGs served by Flagpedia's CDN, each in its official aspect ratio. The Swedish names come from Wikidata, as in the capitals deck."@en ,
+                        "Flaggan för varje land och territorium på framsidan, dess namn på engelska och svenska på baksidan. Listan följer Flagpedias index; flaggbilderna är SVG-filer i allmän egendom från Flagpedias CDN, var och en i sina officiella proportioner. De svenska namnen är hämtade från Wikidata, som i kortleken om huvudstäder."@sv ,
+                        "앞면에 모든 나라와 지역의 깃발, 뒷면에 영어와 스웨덴어로 된 그 이름이 있습니다. 목록은 Flagpedia의 색인을 따르며, 깃발 이미지는 Flagpedia의 CDN에서 제공하는 퍼블릭 도메인 SVG로, 각각 공식 가로세로 비율입니다. 스웨덴어 이름은 수도 덱과 마찬가지로 위키데이터에서 가져왔습니다."@ko ,
+                        "Die Flagge jedes Landes und Gebiets auf der Vorderseite, sein Name auf Englisch und Schwedisch auf der Rückseite. Die Liste folgt dem Index von Flagpedia; die Flaggenbilder sind gemeinfreie SVG-Dateien vom CDN von Flagpedia, jede in ihrem offiziellen Seitenverhältnis. Die schwedischen Namen stammen aus Wikidata, wie im Stapel zu den Hauptstädten."@de ,
+                        "La bandera de cada país y territorio en el anverso, su nombre en inglés y en sueco en el reverso. La lista sigue el índice de Flagpedia; las imágenes de las banderas son SVG de dominio público servidos por la CDN de Flagpedia, cada una en su proporción oficial. Los nombres en sueco proceden de Wikidata, como en el mazo de capitales."@es ,
+                        "Le drapeau de chaque pays et territoire au recto, son nom en anglais et en suédois au verso. La liste suit l’index de Flagpedia ; les images des drapeaux sont des SVG du domaine public servis par le CDN de Flagpedia, chacune dans ses proportions officielles. Les noms suédois proviennent de Wikidata, comme dans le paquet sur les capitales."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/world-flags/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "World flags"@en ,
@@ -19747,7 +19766,7 @@
                   "Flaggen der Welt"@de ,
                   "Banderas del mundo"@es ,
                   "Drapeaux du monde"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/world-flags/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/world-flags/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "The flag of every country and territory on the front, its name in English and Swedish on the back. The list follows Flagpedia's index; the flag images are public-domain SVGs served by Flagpedia's CDN, each in its official aspect ratio. The Swedish names come from Wikidata, as in the capitals deck."@en ,
                         "Flaggan för varje land och territorium på framsidan, dess namn på engelska och svenska på baksidan. Listan följer Flagpedias index; flaggbilderna är SVG-filer i allmän egendom från Flagpedias CDN, var och en i sina officiella proportioner. De svenska namnen är hämtade från Wikidata, som i kortleken om huvudstäder."@sv ,
@@ -19758,7 +19777,7 @@
     prov:wasDerivedFrom <https://flagpedia.net/index> ,
                         <https://flagcdn.com> ;
     dcterms:created "2026-09-22T21:00:10.236Z"^^xsd:dateTime ;
-    dcterms:modified "2026-10-04T04:34:28.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
     dcat:keyword "countries"@en ,
@@ -19782,21 +19801,26 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/world-flags/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/world-flags/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each flag is described, in English and Swedish, so a screen reader can say what it shows: its stripes, colors and emblems, never the country; no card's front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#world-flags> ;
     dcat:isVersionOf <#world-flags> ;
-    dcat:distribution <https://solid-memo.com/decks/world-flags/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/world-flags/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/world-flags/v3.ttl#turtle> ;
     solid-memo:cardCount 254 .
 
-<https://solid-memo.com/decks/world-flags/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/world-flags/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/world-flags/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://flagpedia.net/index>
     dcterms:title "Flagpedia: flags of all countries" ;
@@ -19807,10 +19831,10 @@
     dcterms:creator "Flagpedia.net" ;
     dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
-<https://solid-memo.com/decks/world-flags/v2.ttl#turtle>
+<https://solid-memo.com/decks/world-flags/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/world-flags/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/world-flags/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/world-flags/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
