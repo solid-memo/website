@@ -3937,11 +3937,12 @@
                  "peintures"@fr ,
                  "tableaux"@fr ;
     dcat:first <https://solid-memo.com/decks/famous-paintings/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcat:last <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/famous-paintings/v1.ttl> ,
                     <https://solid-memo.com/decks/famous-paintings/v2.ttl> ,
-                    <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-paintings/v3.ttl> .
+                    <https://solid-memo.com/decks/famous-paintings/v3.ttl> ,
+                    <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-paintings/v4.ttl> .
 
 <https://solid-memo.com/decks/famous-paintings/v1.ttl>
     a dcat:Dataset ;
@@ -3972,6 +3973,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/famous-paintings/v3.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Famous paintings"@en ,
+                  "Berömda målningar"@sv ,
+                  "유명한 그림"@ko ,
+                  "Berühmte Gemälde"@de ,
+                  "Pinturas famosas"@es ,
+                  "Peintures célèbres"@fr ;
+    dcterms:description "150 of the world's most famous paintings, ranked by how many Wikipedias have an article about them: the painting on the front, its title, painter and date on the back, in English, Swedish, Korean, German, Spanish and French. Only paintings long out of copyright are included. Titles, painters and dates from Wikidata, a title as that language's Wikipedia gives it where Wikidata's label is missing or differs; the pictures are public-domain reproductions on Wikimedia Commons, shown from there."@en ,
+                        "150 av världens mest berömda målningar, rangordnade efter hur många Wikipedior som har en artikel om dem: målningen på framsidan, dess titel, målare och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Bara målningar vars upphovsrätt sedan länge har gått ut finns med. Titlar, målare och dateringar från Wikidata, en titel som det språkets Wikipedia skriver den där Wikidatas etikett saknas eller skiljer sig; bilderna är reproduktioner i allmän egendom på Wikimedia Commons och visas därifrån."@sv ,
+                        "위키백과 몇 개 언어판에 문서가 있는지로 순위를 매긴 세계에서 가장 유명한 그림 150점입니다. 앞면에는 그림, 뒷면에는 제목, 화가, 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 저작권이 만료된 지 오래된 그림만 들어 있습니다. 제목, 화가, 제작 시기는 위키데이터에서 가져왔고, 위키데이터의 레이블이 없거나 다른 제목은 그 언어 위키백과의 제목을 따랐으며, 그림은 위키미디어 공용에 있는 퍼블릭 도메인 복제본을 그곳에서 불러와 보여 줍니다."@ko ,
+                        "150 der berühmtesten Gemälde der Welt, geordnet danach, wie viele Wikipedias einen Artikel über sie haben: das Gemälde auf der Vorderseite, sein Titel, Maler und Entstehungsdatum auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Nur Gemälde, deren Urheberrecht längst abgelaufen ist, sind dabei. Titel, Maler und Datierungen aus Wikidata, ein Titel so, wie ihn die Wikipedia der jeweiligen Sprache nennt, wo die Bezeichnung in Wikidata fehlt oder abweicht; die Bilder sind gemeinfreie Reproduktionen auf Wikimedia Commons und werden von dort angezeigt."@de ,
+                        "150 de las pinturas más famosas del mundo, ordenadas por cuántas Wikipedias tienen un artículo sobre ellas: la pintura en el anverso, y su título, pintor y fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Solo se incluyen pinturas cuyos derechos de autor expiraron hace mucho. Títulos, pintores y fechas de Wikidata, con el título que da la Wikipedia de cada idioma cuando la etiqueta de Wikidata falta o difiere; las imágenes son reproducciones de dominio público en Wikimedia Commons y se muestran desde allí."@es ,
+                        "150 des peintures les plus célèbres au monde, classées selon le nombre de Wikipédias qui leur consacrent un article : la peinture au recto, son titre, son peintre et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Seules les peintures depuis longtemps tombées dans le domaine public sont incluses. Titres, peintres et dates de Wikidata, le titre étant celui de la Wikipédia de chaque langue là où le libellé de Wikidata manque ou diffère ; les images sont des reproductions du domaine public sur Wikimedia Commons, affichées depuis ce site."@fr ;
+    dcat:version "3" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each back, the painting's title, painter and date, in Swedish, Korean, German, Spanish and French as well as English; no picture or card was added or removed. The English back of A Philosopher Lecturing on the Orrery no longer calls the philosopher a journalist, a vandalised Wikidata label." .
+
+<https://solid-memo.com/decks/famous-paintings/v4.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Famous paintings"@en ,
@@ -3980,7 +3999,7 @@
                   "Berühmte Gemälde"@de ,
                   "Pinturas famosas"@es ,
                   "Peintures célèbres"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/famous-paintings/v3.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/famous-paintings/v4.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "150 of the world's most famous paintings, ranked by how many Wikipedias have an article about them: the painting on the front, its title, painter and date on the back, in English, Swedish, Korean, German, Spanish and French. Only paintings long out of copyright are included. Titles, painters and dates from Wikidata, a title as that language's Wikipedia gives it where Wikidata's label is missing or differs; the pictures are public-domain reproductions on Wikimedia Commons, shown from there."@en ,
                         "150 av världens mest berömda målningar, rangordnade efter hur många Wikipedior som har en artikel om dem: målningen på framsidan, dess titel, målare och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Bara målningar vars upphovsrätt sedan länge har gått ut finns med. Titlar, målare och dateringar från Wikidata, en titel som det språkets Wikipedia skriver den där Wikidatas etikett saknas eller skiljer sig; bilderna är reproduktioner i allmän egendom på Wikimedia Commons och visas därifrån."@sv ,
@@ -3990,7 +4009,7 @@
                         "150 des peintures les plus célèbres au monde, classées selon le nombre de Wikipédias qui leur consacrent un article : la peinture au recto, son titre, son peintre et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Seules les peintures depuis longtemps tombées dans le domaine public sont incluses. Titres, peintres et dates de Wikidata, le titre étant celui de la Wikipédia de chaque langue là où le libellé de Wikidata manque ou diffère ; les images sont des reproductions du domaine public sur Wikimedia Commons, affichées depuis ce site."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ,
                         <https://commons.wikimedia.org/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-paintings/v3.ttl#generation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-paintings/v4.ttl#generation> ;
     dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:art ;
@@ -4022,23 +4041,28 @@
                      <http://publications.europa.eu/resource/authority/language/SPA> ,
                      <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "3" ;
-    dcat:prev <https://solid-memo.com/decks/famous-paintings/v2.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/famous-paintings/v2.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Each back, the painting's title, painter and date, in Swedish, Korean, German, Spanish and French as well as English; no picture or card was added or removed. The English back of A Philosopher Lecturing on the Orrery no longer calls the philosopher a journalist, a vandalised Wikidata label." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each painting is described, in all six languages, so a screen reader can say what it shows, never the title or painter asked for; no card’s front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#famous-paintings> ;
     dcat:isVersionOf <#famous-paintings> ;
-    dcat:distribution <https://solid-memo.com/decks/famous-paintings/v3.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/famous-paintings/v4.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/famous-paintings/v4.ttl#turtle> ;
     solid-memo:cardCount 150 .
 
-<https://solid-memo.com/decks/famous-paintings/v3.ttl#anton-wiklund>
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/famous-paintings/v3.ttl#generation>
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#generation>
     a prov:Activity .
 
 <https://github.com/antwika/solid-memo/blob/76808f3908ad008b2562beae2a28354cfa4ca518/packages/deck-library/scripts/generate_deck_of_famous_paintings.py>
@@ -4050,10 +4074,10 @@
     dcterms:creator "Wikimedia Commons contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
-<https://solid-memo.com/decks/famous-paintings/v3.ttl#turtle>
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
