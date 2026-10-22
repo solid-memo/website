@@ -233,7 +233,7 @@ describe("a guest's study", () => {
     });
     for (const subject of [old.url, unstated.url, standIn.url])
       await restamp(guestStore, subject, 4);
-    // A deck of the current formats beside it (deck 6, card 6), with a note in Finnish only: valid at 6, not at 4.
+    // A deck of the current formats beside it (deck 6, card 7), with a note in Finnish only: valid at 7, not at 4.
     const current = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
     const finnish = await useCases.addCard(current, {
       front: { fi: "Suomi" },
@@ -243,7 +243,7 @@ describe("a guest's study", () => {
       `<${finnish.url}> <${SM_NS}frontNote> "Pääkaupunki vuodesta 1812."@fi .`,
     ]);
     // Both directions are held to: the Finnish note fails format 4, and a
-    // format-4 subject fails format 6 on its stated version alone (each
+    // format-4 subject fails format 7 on its stated version alone (each
     // shape has sh:hasValue on solid-memo:formatVersion), so a check that
     // held every subject to one format, the latest or 4, would not conform.
     expect((await useCases.checkInstance(guestInstance!.url)).conforms).toBe(true);
@@ -262,7 +262,7 @@ describe("a guest's study", () => {
     for (const subject of [old.url, unstated.url, standIn.url])
       expect(stated(subject), subject).toContain('"4"');
     expect(stated(current.url)).toContain('"6"');
-    expect(stated(finnish.url)).toContain('"6"');
+    expect(stated(finnish.url)).toContain('"7"');
     // The text is as the guest's pod had it: nothing tagged, nothing dropped.
     expect(triples).toEqual(
       expect.arrayContaining([

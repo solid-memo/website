@@ -895,6 +895,9 @@
     "changes": {
       "other": "카드 {count}장 변경"
     },
+    "about": {
+      "other": "카드 {count}장의 주제 기록"
+    },
     "retires": {
       "other": "카드 {count}장 사용 중지"
     },
@@ -952,7 +955,7 @@
     "catalogueFormat": "다른 앱이 DCAT 카탈로그로 읽는 인스턴스별 덱 카탈로그",
     "preferencesFormat": "답변 척도, 개발자 모드, 잘못된 데이터 처리 방식, 화면 모드, 일정 알고리즘, 색상, 글자 크기를 기록하는 설정 형식 {version}",
     "deckFormat": "DCAT·SKOS 표준으로 덱을 설명하고, 모든 덱에 설명을 붙이며, 덱의 제목·설명·키워드를 지정한 어떤 언어로든 쓸 수 있게 하는 덱 형식 {version}",
-    "cardFormat": "카드에 그림을 추가하고, 라이브러리 덱이 더 이상 쓰지 않는 카드를 사용 중지할 수 있게 하며, 카드 텍스트를 지정한 어떤 언어로든 쓸 수 있게 하며, 카드 앞면 위에 레이블을 추가하는 카드 형식 {version}",
+    "cardFormat": "카드에 그림을 추가하고, 라이브러리 덱이 더 이상 쓰지 않는 카드를 사용 중지할 수 있게 하며, 카드 텍스트를 지정한 어떤 언어로든 쓸 수 있게 하고, 카드 앞면 위에 레이블을 추가하며, 카드가 무엇에 관한 것인지 보존하는 카드 형식 {version}",
     "reviewFormat": "학습 방향별 상태와 그날의 실행 취소 스냅샷을 보관하는 복습 상태 형식 {version}",
     "itemInstanceRecord": "인스턴스 레코드",
     "itemCatalogue": "덱 카탈로그",
@@ -2612,6 +2615,9 @@
         },
         "change": {
           "other": "변경: 카드 {count}장"
+        },
+        "about": {
+          "other": "주제 기록: 카드 {count}장"
         },
         "retire": {
           "other": "사용 중지: 카드 {count}장"

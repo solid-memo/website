@@ -10,7 +10,7 @@ import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
 import type {
   AgentV1,
-  CardV6,
+  CardV7,
   DeckV6,
   DistractorV1,
   DistributionV1,
@@ -96,11 +96,12 @@ export function deckDistribution(deck: Deck): { url: string; record: Distributio
 /**
  * The content of a card record, with the distractors it names as the
  * document has them (the reader resolves them: a record holds only their
- * IRIs); null when a side has neither text nor a picture — the one rule
- * of the card shape a record cannot carry.
+ * IRIs) and what it is about in sorted order; null when a side has
+ * neither text nor a picture — the one rule of the card shape a record
+ * cannot carry.
  */
 export function cardContentFromRecord(
-  data: CardV6,
+  data: CardV7,
   distractors: readonly Distractor[] = [],
 ): CardContent | null {
   const front = data.front ?? {};
@@ -124,13 +125,14 @@ export function cardContentFromRecord(
     ...(data.backNote === undefined ? {} : { backNote: data.backNote }),
     ...(distractors.length === 0 ? {} : { distractors }),
     ...(data.textFormat === undefined ? {} : { textFormat: data.textFormat }),
+    ...(data.subject.length === 0 ? {} : { subjects: [...data.subject].sort() }),
   };
 }
 
 export function cardFromRecord(
   url: string,
   storedVersion: number,
-  data: CardV6,
+  data: CardV7,
   distractors: readonly Distractor[] = [],
 ): Card | null {
   const content = cardContentFromRecord(data, distractors);
@@ -149,7 +151,7 @@ export function cardFromRecord(
 export function libraryCardFromRecord(
   url: string,
   storedVersion: number,
-  data: CardV6,
+  data: CardV7,
   distractors: readonly Distractor[] = [],
 ): LibraryCard | null {
   const content = cardContentFromRecord(data, distractors);
@@ -157,7 +159,7 @@ export function libraryCardFromRecord(
   return { id: fragmentIdOf(url), ...content, formatVersion: storedVersion, ...retiredOf(data) };
 }
 
-function retiredOf(data: CardV6): { retired?: true } {
+function retiredOf(data: CardV7): { retired?: true } {
   return data.deprecated === true ? { retired: true } : {};
 }
 
@@ -171,7 +173,7 @@ export function cardToRecord(
   card: CardContent & { retired?: true },
   createdAt: string,
   documentUrl: string,
-): CardV6 {
+): CardV7 {
   return {
     ...(isEmptyText(card.front) ? {} : { front: card.front }),
     ...(isEmptyText(card.back) ? {} : { back: card.back }),
@@ -191,6 +193,7 @@ export function cardToRecord(
     ...(card.retired === true ? { deprecated: true } : {}),
     distractor: (card.distractors ?? []).map((distractor) => `${documentUrl}#${distractor.id}`),
     ...(card.textFormat === undefined ? {} : { textFormat: card.textFormat }),
+    subject: card.subjects ?? [],
   };
 }
 

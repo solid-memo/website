@@ -105,7 +105,7 @@ export function sameCardChanges(a: LibraryUpgradePlan, b: LibraryUpgradePlan): b
   return (
     a.releaseUrl === b.releaseUrl &&
     a.direction === b.direction &&
-    (["add", "change", "retire", "restore", "remove"] as const).every(
+    (["add", "change", "retire", "restore", "remove", "about"] as const).every(
       (key) => ids(a[key]) === ids(b[key]),
     )
   );

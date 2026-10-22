@@ -102,7 +102,7 @@ describe("draftFromQuads", () => {
       { id: "ch-a-1", data: { chapter: of("ch-a"), checkedBy: [of("q1")] } },
     ]);
     expect(draft.cards).toEqual([
-      { id: "q1", data: { front: { en: "Q" }, back: { en: "A" }, distractor: [] } },
+      { id: "q1", data: { front: { en: "Q" }, back: { en: "A" }, distractor: [], subject: [] } },
     ]);
     expect(draft.distractors).toEqual([{ id: "q1-d1", data: { text: { en: "No" } } }]);
     expect(draft.distributions).toEqual([{ id: "turtle", data: { accessUrl: DRAFT } }]);
@@ -122,6 +122,36 @@ describe("draftFromQuads", () => {
     );
     expect(kept).not.toContain(`${DRAFT} type`);
     expect(draft.published).toEqual({ ids: {}, activities: [] });
+  });
+
+  it("moves what a card stamped below format 7 is about into its record, which writes it once", async () => {
+    const quads = await quadsOfTurtle(
+      `${PREFIXES}
+<> a solid-memo:Deck , dcat:Dataset ; solid-memo:formatVersion 1 ; dcterms:title "Jobs"@en ;
+    solid-memo:studyDirection solid-memo:frontToBack .
+<#old> a solid-memo:Card ; solid-memo:formatVersion 4 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;
+    dcterms:subject <https://data.example/b> , <https://data.example/a> .
+<#new> a solid-memo:Card ; solid-memo:formatVersion 7 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;
+    dcterms:subject <https://data.example/c> .
+`,
+      DRAFT,
+    );
+    const draft = draftFromQuads(quads, DRAFT)!;
+    const subjects = Object.fromEntries(
+      draft.cards.map((node) => [node.id, [...node.data.subject].sort()]),
+    );
+    expect(subjects).toEqual({
+      old: ["https://data.example/a", "https://data.example/b"],
+      new: ["https://data.example/c"],
+    });
+    expect(draft.triples.filter((triple) => triple.predicate.endsWith("/subject"))).toEqual([]);
+    const written = draftQuads(draft).filter(
+      (quad) => quad.subject.value === of("old") && quad.predicate.value.endsWith("/subject"),
+    );
+    expect(written.map((quad) => quad.object.value).sort()).toEqual([
+      "https://data.example/a",
+      "https://data.example/b",
+    ]);
   });
 
   it("is null without a root this app can read", async () => {

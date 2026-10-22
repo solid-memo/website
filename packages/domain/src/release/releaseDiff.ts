@@ -2,12 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { LATEST_VERSION, type CardV6 } from "@solid-memo/vocab/types.generated";
+import { LATEST_VERSION, type CardV7 } from "@solid-memo/vocab/types.generated";
 import type { Card, Deck } from "../deck.ts";
 import { cardContentFromRecord } from "../deckRecord.ts";
 import { sameKeywords } from "../keywords.ts";
 import { sameText } from "../langText.ts";
-import { planLibraryUpgrade, sameContent, type LibraryUpgradePlan } from "../libraryUpgrade.ts";
+import {
+  planLibraryUpgrade,
+  sameContent,
+  sameSubjects,
+  type LibraryUpgradePlan,
+} from "../libraryUpgrade.ts";
 import { draftLibraryContent, draftLibraryDeck } from "./draftListing.ts";
 import { canonical, type DraftNode, type ReleaseDraft } from "./releaseDraft.ts";
 import type { ReleaseKind } from "./releaseModel.ts";
@@ -98,11 +103,12 @@ function comparable(data: object): string {
 
 /**
  * Whether a card says the same in both, as an upgrade compares them
- * (sameContent): its wrong options aside, which are subjects of their
- * own, and when it was made. A card without text on a side, which no
- * learner gets, compares by its record.
+ * (sameContent, and what it is about: sameSubjects, which an upgrade
+ * writes to a learner's copy too): its wrong options aside, which are
+ * subjects of their own, and when it was made. A card without text on a
+ * side, which no learner gets, compares by its record.
  */
-function sameCard(a: CardV6, b: CardV6): boolean {
+function sameCard(a: CardV7, b: CardV7): boolean {
   const before = cardContentFromRecord(a);
   const after = cardContentFromRecord(b);
   if (before === null || after === null) {
@@ -110,12 +116,12 @@ function sameCard(a: CardV6, b: CardV6): boolean {
     const { distractor: _b, created: _bc, ...now } = b;
     return comparable(was) === comparable(now);
   }
-  return sameContent(before, after);
+  return sameContent(before, after) && sameSubjects(before, after);
 }
 
 /** Whether a subject's record says the same in both, its retirement aside. */
 function sameSubject(kind: ReleaseKind, a: object, b: object): boolean {
-  return kind === "card" ? sameCard(a as CardV6, b as CardV6) : comparable(a) === comparable(b);
+  return kind === "card" ? sameCard(a as CardV7, b as CardV7) : comparable(a) === comparable(b);
 }
 
 /** How a subject of the draft differs from the release's (`was`, absent when the release lacks it); null when it does not. */

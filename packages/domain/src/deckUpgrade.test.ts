@@ -56,6 +56,7 @@ const plan: LibraryUpgradePlan = {
   retire: [podCard("dk", "Copenhagen")],
   restore: [podCard("is", "Reykjavik", true)],
   remove: [podCard("lv", "Riga")],
+  about: [],
   kept: [],
   applied: [],
   gone: [],
@@ -101,6 +102,7 @@ describe("sameCardChanges", () => {
     expect(sameCardChanges(plan, { ...plan, releaseUrl: "other" })).toBe(false);
     expect(sameCardChanges(plan, { ...plan, direction: "bidirectional" })).toBe(false);
     expect(sameCardChanges(plan, { ...plan, remove: [] })).toBe(false);
+    expect(sameCardChanges(plan, { ...plan, about: [podCard("fi", "Helsinki")] })).toBe(false);
     expect(
       sameCardChanges(plan, { ...plan, add: [libraryCard("ax", "Mariehamn"), ...plan.add] }),
     ).toBe(false);

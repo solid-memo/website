@@ -944,6 +944,10 @@
       "one": "ändert {count} Karte",
       "other": "ändert {count} Karten"
     },
+    "about": {
+      "one": "hält fest, worum es in {count} Karte geht",
+      "other": "hält fest, worum es in {count} Karten geht"
+    },
     "retires": {
       "one": "mustert {count} Karte aus",
       "other": "mustert {count} Karten aus"
@@ -1010,7 +1014,7 @@
     "catalogueFormat": "einen Katalog der Stapel jeder Instanz, den andere Apps als DCAT-Katalog lesen",
     "preferencesFormat": "das Einstellungsformat {version}, das die Antwortskala, den Entwicklermodus, den Umgang mit ungültigen Daten, das Erscheinungsbild, den Planungsalgorithmus, die Farben und die Textgröße speichert",
     "deckFormat": "das Stapelformat {version}, das Stapel mit den Standards DCAT und SKOS beschreibt, jedem Stapel eine Beschreibung gibt und Titel, Beschreibung und Schlagwörter eines Stapels in jeder Sprache erlaubt, die du angibst",
-    "cardFormat": "das Kartenformat {version}, das Bilder auf Karten ermöglicht, einem Bibliotheksstapel erlaubt, eine nicht mehr genutzte Karte auszumustern, den Text einer Karte in jeder Sprache erlaubt, die du angibst, und eine Beschriftung über der Vorderseite einer Karte hinzufügt",
+    "cardFormat": "das Kartenformat {version}, das Bilder auf Karten ermöglicht, einem Bibliotheksstapel erlaubt, eine nicht mehr genutzte Karte auszumustern, den Text einer Karte in jeder Sprache erlaubt, die du angibst, eine Beschriftung über der Vorderseite einer Karte hinzufügt und festhält, worum es bei einer Karte geht",
     "reviewFormat": "das Format {version} für Wiederholungsstände, das den Stand jeder Lernrichtung und den Rückgängig-Schnappschuss des Tages speichert",
     "itemInstanceRecord": "Instanzeintrag",
     "itemCatalogue": "Katalog der Stapel",
@@ -2767,6 +2771,10 @@
         "change": {
           "one": "Geändert: {count} Karte",
           "other": "Geändert: {count} Karten"
+        },
+        "about": {
+          "one": "Worum es geht: {count} Karte",
+          "other": "Worum es geht: {count} Karten"
         },
         "retire": {
           "one": "Ausgemustert: {count} Karte",

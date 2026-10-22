@@ -52,6 +52,7 @@ describe("CourseContainer", () => {
       retire: [],
       restore: [],
       remove: [],
+      about: [],
       kept: [],
       applied: [],
       gone: [],

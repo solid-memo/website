@@ -487,6 +487,29 @@ describe("toLibraryDeckContent", () => {
     });
   });
 
+  it("reads what a release's card is about, though its format, 4, does not name it", () => {
+    const dataset = deckDocument(
+      thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals")),
+      thing(`${DOC}#se`, (t) =>
+        t
+          .addIri(RDF.type, SM.Card)
+          .addUrl(DCTERMS.subject, "http://www.wikidata.org/entity/Q34")
+          .addStringWithLocale(SM.front, "Sweden", "en")
+          .addStringWithLocale(SM.back, "Stockholm", "en")
+          .addInteger(SM.formatVersion, 4),
+      ),
+    );
+    expect(toLibraryDeckContent(DOC, dataset).cards).toEqual([
+      {
+        id: "se",
+        front: { en: "Sweden" },
+        back: { en: "Stockholm" },
+        subjects: ["http://www.wikidata.org/entity/Q34"],
+        formatVersion: 4,
+      },
+    ]);
+  });
+
   it("refuses a card in a newer format than it writes", () => {
     const dataset = deckDocument(
       thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals")),
@@ -495,11 +518,11 @@ describe("toLibraryDeckContent", () => {
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
           .addStringNoLocale(SM.back, "Stockholm")
-          .addInteger(SM.formatVersion, 7),
+          .addInteger(SM.formatVersion, 8),
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
-      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 7\nlatest: 6`,
+      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 8\nlatest: 7`,
     );
   });
 

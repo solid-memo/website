@@ -92,7 +92,10 @@ describe("ReleaseDiffScreen", () => {
             ? { ...node, data: { ...node.data, front: { en: "Where is data?" } } }
             : node,
         ),
-        { id: "q-new", data: { front: { en: "New" }, back: { en: "Yes" }, distractor: [] } },
+        {
+          id: "q-new",
+          data: { front: { en: "New" }, back: { en: "Yes" }, distractor: [], subject: [] },
+        },
       ],
       distractors: next.distractors.map((node) => ({
         ...node,
@@ -168,6 +171,22 @@ describe("ReleaseDiffScreen", () => {
     renderScreen(draft, diffOf(draft, previous));
     expect(
       screen.getByText("Updating a learner's copy of version 1 updates only retired cards."),
+    ).toBeInTheDocument();
+  });
+
+  it("lists a card whose subjects alone change, and says a learner's copy records what it is about", () => {
+    const next = nextVersionDraft(v1(), DRAFT_URL);
+    const draft: ReleaseDraft = {
+      ...next,
+      cards: next.cards.map((node) =>
+        node.id === "q-pods-1a"
+          ? { ...node, data: { ...node.data, subject: ["https://data.example/pods"] } }
+          : node,
+      ),
+    };
+    renderScreen(draft, diffOf(draft));
+    expect(
+      screen.getByText(/^Updating a learner's copy of version 1 records what 1 card is about/),
     ).toBeInTheDocument();
   });
 

@@ -993,6 +993,11 @@
       "many": "cambia {count} de tarjetas",
       "other": "cambia {count} tarjetas"
     },
+    "about": {
+      "one": "registra de qué trata {count} tarjeta",
+      "many": "registra de qué tratan {count} de tarjetas",
+      "other": "registra de qué tratan {count} tarjetas"
+    },
     "retires": {
       "one": "retira {count} tarjeta",
       "many": "retira {count} de tarjetas",
@@ -1068,7 +1073,7 @@
     "catalogueFormat": "un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT",
     "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos, la apariencia, el algoritmo de programación, los colores y el tamaño del texto",
     "deckFormat": "el formato de mazo {version}, que describe los mazos con los estándares DCAT y SKOS, da a cada mazo una descripción y permite que el título, la descripción y las palabras clave de un mazo estén en cualquier idioma que indiques",
-    "cardFormat": "el formato de tarjeta {version}, que añade imágenes a las tarjetas, permite que un mazo de la biblioteca retire una tarjeta que ya no usa, que el texto de una tarjeta esté en cualquier idioma que indiques y añade una etiqueta sobre el anverso de una tarjeta",
+    "cardFormat": "el formato de tarjeta {version}, que añade imágenes a las tarjetas, permite que un mazo de la biblioteca retire una tarjeta que ya no usa, que el texto de una tarjeta esté en cualquier idioma que indiques, añade una etiqueta sobre el anverso de una tarjeta y conserva de qué trata una tarjeta",
     "reviewFormat": "el formato de estado de repaso {version}, que guarda el estado de cada sentido de estudio y la instantánea para deshacer del día",
     "itemInstanceRecord": "Registro de la instancia",
     "itemCatalogue": "Catálogo de los mazos",
@@ -2922,6 +2927,11 @@
           "one": "Cambiada: {count} tarjeta",
           "many": "Cambiadas: {count} de tarjetas",
           "other": "Cambiadas: {count} tarjetas"
+        },
+        "about": {
+          "one": "De qué trata: {count} tarjeta",
+          "many": "De qué tratan: {count} de tarjetas",
+          "other": "De qué tratan: {count} tarjetas"
         },
         "retire": {
           "one": "Retirada: {count} tarjeta",

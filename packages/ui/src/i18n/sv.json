@@ -944,6 +944,10 @@
       "one": "ändrar {count} kort",
       "other": "ändrar {count} kort"
     },
+    "about": {
+      "one": "anger vad {count} kort handlar om",
+      "other": "anger vad {count} kort handlar om"
+    },
     "retires": {
       "one": "tar {count} kort ur bruk",
       "other": "tar {count} kort ur bruk"
@@ -1010,7 +1014,7 @@
     "catalogueFormat": "en katalog över varje instans kortlekar, som andra appar läser som en DCAT-katalog",
     "preferencesFormat": "inställningsformat {version}, som sparar svarsskalan, utvecklarläget, vad som ska hända med ogiltiga data, temat, schemaläggaren, färgerna och textstorleken",
     "deckFormat": "kortleksformat {version}, som beskriver kortlekar med standarderna DCAT och SKOS, ger varje kortlek en beskrivning och låter en kortleks titel, beskrivning och nyckelord vara på valfritt språk som du anger",
-    "cardFormat": "kortformat {version}, som lägger till bilder på kort, låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder, låter ett korts text vara på valfritt språk som du anger och lägger till en etikett ovanför ett korts framsida",
+    "cardFormat": "kortformat {version}, som lägger till bilder på kort, låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder, låter ett korts text vara på valfritt språk som du anger, lägger till en etikett ovanför ett korts framsida och behåller vad ett kort handlar om",
     "reviewFormat": "repetitionstillståndsformat {version}, som sparar varje studieriktnings tillstånd och dagens ångra-ögonblicksbild",
     "itemInstanceRecord": "Instanspost",
     "itemCatalogue": "Katalog över kortlekarna",
@@ -2767,6 +2771,10 @@
         "change": {
           "one": "Ändras: {count} kort",
           "other": "Ändras: {count} kort"
+        },
+        "about": {
+          "one": "Vad det handlar om: {count} kort",
+          "other": "Vad de handlar om: {count} kort"
         },
         "retire": {
           "one": "Tas ur bruk: {count} kort",

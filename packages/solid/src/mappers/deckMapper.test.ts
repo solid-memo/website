@@ -360,6 +360,24 @@ describe("toCard", () => {
     expect(cardOf(thing)!.formatVersion).toBe(2);
   });
 
+  it("reads what a card is about, sorted, whatever format it states", () => {
+    const about = (version: number) =>
+      cardOf(
+        cardThing((t) =>
+          t
+            .addIri(RDF.type, SM.Card)
+            .addStringNoLocale(SM.front, "Sweden")
+            .addStringNoLocale(SM.back, "Stockholm")
+            .addUrl(DCTERMS.subject, "http://www.wikidata.org/entity/Q34")
+            .addUrl(DCTERMS.subject, "http://www.wikidata.org/entity/Q1754")
+            .addInteger(SM.formatVersion, version),
+        ),
+      )!.subjects;
+    const subjects = ["http://www.wikidata.org/entity/Q1754", "http://www.wikidata.org/entity/Q34"];
+    expect(about(6)).toEqual(subjects);
+    expect(about(7)).toEqual(subjects);
+  });
+
   it("reads pictures on either side, with or without text", () => {
     const thing = cardThing((t) =>
       t

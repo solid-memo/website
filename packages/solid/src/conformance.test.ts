@@ -372,6 +372,12 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       back: { en: "Zagreb" },
       distractor: [],
     },
+    7: {
+      front: { en: "Croatia", sv: "Kroatien" },
+      back: { en: "Zagreb" },
+      distractor: [],
+      subject: ["http://www.wikidata.org/entity/Q224", "http://www.wikidata.org/entity/Q1435"],
+    },
   },
   chapter: {
     1: {

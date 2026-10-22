@@ -33,6 +33,7 @@ const plan: LibraryUpgradePlan = {
   retire: [],
   restore: [],
   remove: [card("is")],
+  about: [],
   kept: [card("fi")],
   applied: [],
   gone: [],
@@ -94,6 +95,24 @@ describe("describeChanges", () => {
       ),
     ).toBe("retires 1 card and brings back 2 cards");
     expect(describeChanges({ ...plan, add: [retired], change: [], remove: [] }, en)).toBe(
+      "updates cards you no longer study",
+    );
+  });
+
+  it("says the update records what cards are about, counting only those the user studies", () => {
+    const only = { ...plan, add: [], change: [], remove: [] };
+    const retired = { ...card("yu"), retired: true as const };
+    expect(describeChanges({ ...only, about: [card("se"), card("dk"), retired] }, en)).toBe(
+      "records what 2 cards are about",
+    );
+    expect(describeChanges({ ...plan, about: [card("fi")] }, en)).toBe(
+      "adds 1 card, changes 2 cards, records what 1 card is about and removes 1 card",
+    );
+    expect(describeChanges({ ...only, about: [card("se")] }, createI18n("sv"))).toBe(
+      "anger vad 1 kort handlar om",
+    );
+    // Only retired cards: what the user studies is not touched.
+    expect(describeChanges({ ...only, about: [retired] }, en)).toBe(
       "updates cards you no longer study",
     );
   });

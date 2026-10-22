@@ -361,6 +361,7 @@ describe("applyChanges", () => {
       front: { en: "New?" },
       back: { en: "Yes" },
       distractor: [],
+      subject: [],
     });
   });
 
@@ -535,7 +536,7 @@ describe("applyChanges", () => {
     await pod.put(
       CARDS,
       (await pod.text(CARDS)).replace(
-        /(<[^>]*#q-loose>[^.]*?)<https:\/\/solid-memo.com\/ns\/vocab\/v1.ttl#formatVersion> "6"/,
+        /(<[^>]*#q-loose>[^.]*?)<https:\/\/solid-memo.com\/ns\/vocab\/v1.ttl#formatVersion> "7"/,
         '$1<https://solid-memo.com/ns/vocab/v1.ttl#formatVersion> "9"',
       ),
     );
@@ -781,7 +782,7 @@ describe("readRelease and parseRelease", () => {
     await expect(read(at)).rejects.toMatchObject({ code: "libraryDeckTooNew" });
     await pod.put(
       at,
-      `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <${SM}formatVersion> 6 . <#c> a <${SM}Card> ; <${SM}formatVersion> 7 .`,
+      `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <${SM}formatVersion> 6 . <#c> a <${SM}Card> ; <${SM}formatVersion> 8 .`,
     );
     await expect(read(at)).rejects.toMatchObject({ code: "libraryCardTooNew" });
   });

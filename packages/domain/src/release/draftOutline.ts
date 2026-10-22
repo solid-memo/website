@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { CardV6, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
+import type { CardV7, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
 import type { CardContent, Distractor } from "../deck.ts";
 import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../deckRecord.ts";
 import { sameText, type LangText } from "../langText.ts";
@@ -121,12 +121,17 @@ export function draftCardOf(draft: ReleaseDraft, id: string): DraftCard | null {
     : { id, content, retired: node.data.deprecated === true, created: node.data.created ?? "" };
 }
 
-/** A card's content as a change states it: its record, without its wrong options and whether it is retired, which their own changes make. */
+/**
+ * A card's content as a change states it: its record, without its wrong
+ * options and whether it is retired, which their own changes make, and
+ * what it is about, which an edit keeps.
+ */
 export function cardTextOf(content: CardContent, created: string): CardText {
   // The document is no matter here: the wrong options are left out.
   const {
     distractor: _distractors,
     deprecated: _retired,
+    subject: _subjects,
     ...text
   } = cardToRecord(content, created, "");
   return text;
@@ -178,7 +183,7 @@ export function distractorChanges(
 /** What the table of a draft's cards shows of each. */
 export interface DraftCardRow {
   id: string;
-  card: CardV6;
+  card: CardV7;
   /** Where it is asked; null when nowhere. */
   place: QuestionPlace | null;
   /** From how many places it is asked: more than one is a mistake a release cannot make. */

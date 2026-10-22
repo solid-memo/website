@@ -10,7 +10,8 @@ import { useI18n, type I18n, type ErrorText } from "./i18n";
 /**
  * "adds 1 card, changes 2 cards, retires 1 card and removes 1 card", of
  * what the plan does to the cards the user studies: a card that is added
- * or changed retired is out of sight. Cards, and what the deck says of
+ * or changed retired, or one retired whose subjects change, is out of
+ * sight; what a card is about is said to be recorded. Cards, and what the deck says of
  * itself, already as the release has them (an upgrade cut off half-way)
  * are said to be kept so; a course's chapters, steps and theory, and
  * the questions the learner has not reached, when they change, are said
@@ -24,9 +25,11 @@ export function describeChanges(
 ): string {
   const added = activeCards(plan.add).length;
   const changed = activeCards(plan.change).length;
+  const about = activeCards(plan.about).length;
   const parts = [
     ...(added > 0 ? [t("libraryUpgradeNotice.adds", { count: added })] : []),
     ...(changed > 0 ? [t("libraryUpgradeNotice.changes", { count: changed })] : []),
+    ...(about > 0 ? [t("libraryUpgradeNotice.about", { count: about })] : []),
     ...(plan.retire.length > 0
       ? [t("libraryUpgradeNotice.retires", { count: plan.retire.length })]
       : []),

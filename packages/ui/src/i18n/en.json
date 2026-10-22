@@ -944,6 +944,10 @@
       "one": "changes {count} card",
       "other": "changes {count} cards"
     },
+    "about": {
+      "one": "records what {count} card is about",
+      "other": "records what {count} cards are about"
+    },
     "retires": {
       "one": "retires {count} card",
       "other": "retires {count} cards"
@@ -1010,7 +1014,7 @@
     "catalogueFormat": "a catalog of each instance's decks, which other apps read as a DCAT catalog",
     "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data, the theme, the scheduler, the colors and the text size",
     "deckFormat": "deck format {version}, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state",
-    "cardFormat": "card format {version}, which adds pictures on cards, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state and adds a label above a card's front",
+    "cardFormat": "card format {version}, which adds pictures on cards, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state, adds a label above a card's front and keeps what a card is about",
     "reviewFormat": "review-state format {version}, which keeps each study direction's state and the day's undo snapshot",
     "itemInstanceRecord": "Instance record",
     "itemCatalogue": "Catalog of the decks",
@@ -2767,6 +2771,10 @@
         "change": {
           "one": "Changed: {count} card",
           "other": "Changed: {count} cards"
+        },
+        "about": {
+          "one": "What it is about: {count} card",
+          "other": "What they are about: {count} cards"
         },
         "retire": {
           "one": "Retired: {count} card",

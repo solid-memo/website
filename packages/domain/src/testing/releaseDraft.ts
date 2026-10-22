@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { CardV6 } from "@solid-memo/vocab/types.generated";
+import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   blankDraft,
@@ -24,8 +24,8 @@ export const NOW = "2026-10-10T10:00:00.000Z";
 const PROV = "http://www.w3.org/ns/prov#";
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
-export function card(front: string, extra: Partial<CardV6> = {}): CardV6 {
-  return { front: { en: front }, back: { en: `${front}!` }, distractor: [], ...extra };
+export function card(front: string, extra: Partial<CardV7> = {}): CardV7 {
+  return { front: { en: front }, back: { en: `${front}!` }, distractor: [], subject: [], ...extra };
 }
 
 /** A statement of the draft naming an IRI. */

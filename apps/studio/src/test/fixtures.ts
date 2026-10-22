@@ -86,6 +86,7 @@ export function makePlan(deck: Deck): LibraryUpgradePlan {
     retire: [],
     restore: [],
     remove: [makeCard(deck, "latvia")],
+    about: [],
     kept: [],
     applied: [],
     gone: [],

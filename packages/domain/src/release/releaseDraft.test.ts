@@ -416,7 +416,7 @@ describe("applyDraftChange", () => {
       });
       expect(draft.cards.at(-1)).toEqual({
         id: "w2",
-        data: { front: { sv: "två" }, back: { en: "two" }, distractor: [] },
+        data: { front: { sv: "två" }, back: { en: "two" }, distractor: [], subject: [] },
       });
       const course = made(
         courseDraft(),
@@ -429,6 +429,7 @@ describe("applyDraftChange", () => {
         created: NOW,
         deprecated: true,
         distractor: [of("q-a-1a-d1"), of("q-a-1a-d2")],
+        subject: [],
       });
       const recreated = made(courseDraft(), {
         kind: "editCard",
@@ -439,7 +440,25 @@ describe("applyDraftChange", () => {
         back: { en: "B" },
         created: "2026-01-01T00:00:00.000Z",
         distractor: [],
+        subject: [],
       });
+    });
+
+    it("keeps what a card is about through an edit of its content", () => {
+      const subject = ["http://www.wikidata.org/entity/Q34"];
+      const draft = courseDraft();
+      const about = {
+        ...draft,
+        cards: draft.cards.map((node, at) =>
+          at === 0 ? { ...node, data: { ...node.data, subject } } : node,
+        ),
+      };
+      const edited = made(about, {
+        kind: "editCard",
+        id: "q-a-1a",
+        card: { front: { en: "New" }, back: { en: "Yes" } },
+      });
+      expect(edited.cards[0]!.data.subject).toEqual(subject);
     });
 
     it("asks a card from one place only", () => {

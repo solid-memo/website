@@ -669,11 +669,11 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
   }, 60_000);
 
   it.each([
-    // At either format, decks and cards are outdated: cards are at 6 since vocabulary 1.20.
+    // At either format, decks and cards are outdated: cards are at 7 since they name what they are about.
     { format: 4 as const, cardCount: 4 },
     { format: 5 as const, cardCount: 4 },
   ])(
-    "moves format-$format decks and cards to format 6 with their text unchanged: stand-ins, English-tagged Swedish, unstated sides and untagged keywords kept",
+    "moves format-$format decks to format 6 and cards to format 7 with their text unchanged: stand-ins, English-tagged Swedish, unstated sides and untagged keywords kept",
     async ({ format, cardCount }) => {
       const pod = await seedOldPod(server, format);
       const documents = ["catalog.ttl", "decks/deck-1.ttl", "decks/deck-2.ttl"].map(
@@ -694,7 +694,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       const outcome = await useCases.updateInstance(session, pod.instance);
       expect(outcome, JSON.stringify(outcome)).toMatchObject({ failed: [] });
 
-      // Every deck and every card is at format 6 (the creator and
+      // Every deck is at format 6 and every card at 7 (the creator and
       // distributions, unstamped before, at their first), conforming, with
       // nothing left to update…
       expect(await statedFormats(pod.source, documents)).toEqual({
@@ -703,10 +703,10 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         "<instance>/catalog.ttl#deck-1-cards": "1",
         "<instance>/catalog.ttl#deck-2": "6",
         "<instance>/catalog.ttl#deck-2-cards": "1",
-        "<instance>/decks/deck-1.ttl#sol": "6",
-        "<instance>/decks/deck-1.ttl#luna": "6",
-        "<instance>/decks/deck-2.ttl#se": "6",
-        "<instance>/decks/deck-2.ttl#no": "6",
+        "<instance>/decks/deck-1.ttl#sol": "7",
+        "<instance>/decks/deck-1.ttl#luna": "7",
+        "<instance>/decks/deck-2.ttl#se": "7",
+        "<instance>/decks/deck-2.ttl#no": "7",
       });
       expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
       expect(await useCases.planMigration(pod.source)).toMatchObject({

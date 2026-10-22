@@ -60,6 +60,14 @@ import { isHttpUrl } from "./webId";
  * 3 added one above the back, so a card studied both ways says what is
  * asked. Format 5 was published without it, and a published shape is
  * never edited; a format-5 card has none, so nothing else changes.
+ *
+ * Card format 7 keeps what a card is about (`dcterms:subject`, the IRIs
+ * of the things its source names), so a copy of a library release keeps
+ * them as the release states them. Format 6 was published without the
+ * term, so an app that wrote format 6 dropped it as it copied a card (an
+ * import, or a move or copy into another deck), though it kept it on a
+ * card it rewrote in place; a format-6 card has none, so nothing else
+ * changes.
  */
 export const DECK_FORMAT_VERSION: number = LATEST_VERSION.deck;
 export const CARD_FORMAT_VERSION: number = LATEST_VERSION.card;
@@ -289,6 +297,13 @@ export interface CardContent {
    * descriptions. Absent means plain text, shown as written.
    */
   textFormat?: string;
+  /**
+   * What the card is about (`dcterms:subject`, card format 7): the IRIs
+   * of the things its library release names, such as a Wikidata item,
+   * sorted. Kept from the release, never shown or edited; absent when
+   * the card names none.
+   */
+  subjects?: readonly string[];
 }
 
 /**
@@ -404,13 +419,15 @@ export function isFormatted(textFormat: string | undefined): boolean {
  * and a picture's description are always in a stated language, English
  * or not. The card's distractors, when the input states them, are tidied
  * as their own editor does (tidiedDistractor), their ids and retirement
- * kept; none stated keeps the card's (DeckRepository.updateCard).
+ * kept; none stated keeps the card's (DeckRepository.updateCard). What
+ * the card is about is kept as the input states it, or as `saved` has it.
  */
 export function validateCardContent(
   input: CardContent,
   saved?: CardContent,
 ): CardContentValidation {
   const formatted = isFormatted(input.textFormat ?? saved?.textFormat);
+  const subjects = input.subjects ?? saved?.subjects;
   const front = tidiedSideText(input.front, formatted);
   const back = tidiedSideText(input.back, formatted);
   const frontImageUrl = normalizeImageUrl(input.frontImageUrl);
@@ -480,6 +497,7 @@ export function validateCardContent(
       ...(own.backNote === undefined ? {} : { backNote: own.backNote }),
       ...(input.distractors === undefined ? {} : { distractors }),
       ...(input.textFormat === undefined ? {} : { textFormat: input.textFormat }),
+      ...(subjects === undefined ? {} : { subjects }),
     },
   };
 }

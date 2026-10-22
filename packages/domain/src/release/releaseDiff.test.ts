@@ -115,6 +115,31 @@ describe("releaseDiff", () => {
     ]);
   });
 
+  it("takes what a card is about as a change, in any order", () => {
+    const about = (subject: string[]) => (data: ReturnType<typeof card>) => ({ ...data, subject });
+    const release = v1({
+      ...courseDraft(),
+      cards: edit(
+        courseDraft().cards,
+        "q-a-1a",
+        about(["https://a.example/", "https://b.example/"]),
+      ),
+    });
+    const next = nextVersionDraft(release, DRAFT);
+    const reordered = {
+      ...next,
+      cards: edit(next.cards, "q-a-1a", about(["https://b.example/", "https://a.example/"])),
+    };
+    expect(releaseDiff(release, reordered).subjects).toEqual([]);
+    const changed = {
+      ...next,
+      cards: edit(next.cards, "q-a-1a", about(["https://a.example/"])),
+    };
+    expect(releaseDiff(release, changed).subjects).toEqual([
+      { kind: "card", id: "q-a-1a", status: "changed" },
+    ]);
+  });
+
   it("names what the release says of itself that the draft changes", () => {
     const release = v1();
     const next = nextVersionDraft(release, DRAFT);
@@ -212,6 +237,21 @@ describe("simulateLearnerUpgrade", () => {
     const plan = simulateLearnerUpgrade(release, draft).plan!;
     expect(plan.add.map((one) => one.id)).toEqual(["w2"]);
     expect(plan.title).toEqual({ en: "More words" });
+  });
+
+  it("records what a learner's cards are about when only that changes", () => {
+    const release = v1(deckDraft());
+    const next = nextVersionDraft(release, DRAFT);
+    const subject = ["https://data.example/concept"];
+    const draft = {
+      ...next,
+      cards: next.cards.map((node) => ({ ...node, data: { ...node.data, subject } })),
+    };
+    const plan = simulateLearnerUpgrade(release, draft).plan!;
+    expect(plan.change).toEqual([]);
+    expect(plan.about.map((one) => [one.id, one.subjects])).toEqual(
+      next.cards.map((node) => [node.id, subject]),
+    );
   });
 
   it("says what progress a draft that drops cards and chapters would lose", () => {

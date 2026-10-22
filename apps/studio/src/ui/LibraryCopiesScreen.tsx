@@ -49,7 +49,7 @@ export interface BatchResult {
 }
 
 /** The kinds of change an upgrade makes to cards, in the order the diff lists them. */
-const CHANGES = ["add", "change", "retire", "restore", "remove", "kept"] as const;
+const CHANGES = ["add", "change", "about", "retire", "restore", "remove", "kept"] as const;
 
 /**
  * The instance's decks copied from a library release, as a table: the

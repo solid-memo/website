@@ -303,7 +303,8 @@ data.
 │                        IRIs, optional sm:frontImageDescription/
 │                        backImageDescription (a picture's alt text),
 │                        sm:frontNote/backNote under each
-│                        side and sm:frontLabel/backLabel above it, each
+│                        side and sm:frontLabel/backLabel above it,
+│                        dcterms:subject (what it is about), each
 │                        with sm:formatVersion; a retired card
 │                        (owl:deprecated true) is kept but not studied;
 │                        a card names its wrong options
@@ -541,7 +542,11 @@ graph LR
   the labels and the card's distractors, never the pictures'
   descriptions. Without it the text is plain. The app keeps the marker
   through every edit and copy, an import or a course question joining
-  the deck included. An edit trims plain text; text in any other
+  the deck included. A card copied from a library release keeps what
+  it is about, `dcterms:subject` (card format 7,
+  [deck-library.md](deck-library.md#what-a-card-is-about)): the app
+  neither shows nor edits it, and every edit and copy keeps it. An edit
+  trims plain text; text in any other
   format loses only the blank lines before it and the white space
   after it, so the spaces that start a Markdown code block survive an
   edit of another field. Wherever a side is

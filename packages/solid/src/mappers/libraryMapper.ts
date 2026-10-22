@@ -28,7 +28,7 @@ import type {
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { readVersioned, storedVersionOf } from "../records";
-import { agentNamesOf, distractorsOf } from "./deckMapper";
+import { agentNamesOf, distractorsOf, readCard } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
 import { courseOutlineFromRecords, type CourseOutline } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
@@ -285,13 +285,12 @@ function toLibraryCard(url: string, thing: Thing, dataset: SolidDataset): Librar
       latest: LATEST_VERSION.card,
     });
   }
-  const read = readVersioned(thing, "card");
+  const read = readCard(thing);
   if (read === null) return null;
-  const data = migrate("card", read.record, { subject: asUrl(thing) });
   return libraryCardFromRecord(
     asUrl(thing),
     formatVersion,
-    data,
-    distractorsOf(dataset, data.distractor),
+    read.data,
+    distractorsOf(dataset, read.data.distractor),
   );
 }

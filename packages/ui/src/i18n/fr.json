@@ -993,6 +993,11 @@
       "many": "modifie {count} de cartes",
       "other": "modifie {count} cartes"
     },
+    "about": {
+      "one": "indique de quoi parle {count} carte",
+      "many": "indique de quoi parlent {count} de cartes",
+      "other": "indique de quoi parlent {count} cartes"
+    },
     "retires": {
       "one": "archive {count} carte",
       "many": "archive {count} de cartes",
@@ -1068,7 +1073,7 @@
     "catalogueFormat": "un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT",
     "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence, l’algorithme de planification, les couleurs et la taille du texte",
     "deckFormat": "le format de paquet {version}, qui décrit les paquets avec les normes DCAT et SKOS, donne une description à chaque paquet et permet d’écrire le titre, la description et les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez",
-    "cardFormat": "le format de carte {version}, qui ajoute les images sur les cartes, permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus, permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez et ajoute une étiquette au-dessus du recto d’une carte",
+    "cardFormat": "le format de carte {version}, qui ajoute les images sur les cartes, permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus, permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez, ajoute une étiquette au-dessus du recto d’une carte et conserve ce dont traite une carte",
     "reviewFormat": "le format d’état de révision {version}, qui conserve l’état de chaque sens d’étude et l’instantané d’annulation du jour",
     "itemInstanceRecord": "Fiche de l’instance",
     "itemCatalogue": "Catalogue des paquets",
@@ -2922,6 +2927,11 @@
           "one": "Cartes modifiées : {count}",
           "many": "Cartes modifiées : {count}",
           "other": "Cartes modifiées : {count}"
+        },
+        "about": {
+          "one": "Cartes dont le sujet est indiqué : {count}",
+          "many": "Cartes dont le sujet est indiqué : {count}",
+          "other": "Cartes dont le sujet est indiqué : {count}"
         },
         "retire": {
           "one": "Cartes archivées : {count}",

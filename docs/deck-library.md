@@ -46,7 +46,7 @@ A version is one `sm:Deck` (also a `dcat:Dataset`), the document
 itself (`<>`), in library deck format 5 (`LibraryDeckV5`,
 [shapes.md](shapes.md)) or, from vocabulary 1.18, format 6
 (`LibraryDeckV6`, the same properties), with its cards as hash-fragment
-subjects in card format 4, 5 or 6. A version stays at the format it was
+subjects in card format 4, 5, 6 or 7. A version stays at the format it was
 published in; a new one is written at format 6, its series and
 publisher still in the index:
 
@@ -245,12 +245,19 @@ in two decks. A card about several things names each.
 - **The index leaves it out**, as it leaves the cards out: neither a
   card's `dcterms:subject` nor what the release says of the things the
   cards are about, unless the release names that thing as a source.
+- **A learner's copy keeps the subjects** from card format 7 on, which
+  names `dcterms:subject`: an import reads it from each card whatever
+  format the release states (the taxonomy deck's cards are at format 4),
+  and writes it on the copy's card, where every edit keeps it. A newer
+  release that changes only subjects is offered to a copy as an upgrade
+  of its own, which gives every card the release's subjects, and to a
+  copy imported before card format 7, which lost them
+  ([migrations.md](migrations.md#catching-up-with-the-library)). What the
+  release says of the things themselves is not copied.
 - **The app shows none of it yet**, and never fetches from these sources
   while someone studies. A Studio draft keeps it, as it keeps every
   triple of an imported release
-  ([testing.md](testing.md#strategy-per-layer), the round trip), but a learner's
-  copy does not: the app copies a card from what it reads of it, and no
-  card format has the term yet.
+  ([testing.md](testing.md#strategy-per-layer), the round trip).
 - **A deck compiled from linked data keeps its IDs** from its next
   version on: the taxonomy deck, whose script writes them, and the
   decks compiled from Wikidata, such as `famous-paintings` and
@@ -763,7 +770,7 @@ flowchart LR
   description and keeping the other languages, which an import copies
   as they are (every tag, nothing guessed or added), and names creators
   from the agents in the index. An import writes the user's copy at the
-  latest formats (deck format 6, card format 6), whatever format the
+  latest formats (deck format 6, card format 7), whatever format the
   release was frozen at: a release's keywords keep their tags, and a
   format-4 release's untagged keywords stay untagged, their language
   unknown. A series or release
