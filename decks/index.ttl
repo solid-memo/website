@@ -18512,10 +18512,11 @@
                  "POSIX"@fr ,
                  "terminal"@fr ;
     dcat:first <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ,
-                    <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> .
+                    <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ,
+                    <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> .
 
 <https://solid-memo.com/decks/unix-shell-commands/v1.ttl>
     a dcat:Dataset ;
@@ -18528,6 +18529,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/unix-shell-commands/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Unix shell commands"@en ,
+                  "Unix-skalkommandon"@sv ,
+                  "Unix 셸 명령어"@ko ,
+                  "Unix-Shell-Befehle"@de ,
+                  "Comandos de la shell de Unix"@es ,
+                  "Commandes du shell Unix"@fr ;
+    dcterms:description "55 everyday Unix and Linux shell commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <file> or <dir>. Covers moving around the directory tree, files and directories, viewing and searching files (grep, find), permissions, processes and jobs, tar archives, pipes and redirection, disk usage and networking basics. POSIX commands and options are preferred; notes say where a command is GNU, XSI or Linux-specific. Every command was run with dash and bash on Linux (uutils and GNU coreutils) and checked against the POSIX.1-2024 specification and the GNU manuals."@en ,
+                        "55 vardagliga skalkommandon för Unix och Linux: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <file> eller <dir>. Omfattar förflyttning i katalogträdet, filer och kataloger, att visa och söka i filer (grep, find), rättigheter, processer och jobb, tar-arkiv, rör (pipes) och omdirigering, diskanvändning och grundläggande nätverkskommandon. POSIX-kommandon och POSIX-flaggor föredras; anteckningar talar om när ett kommando är specifikt för GNU, XSI eller Linux. Varje kommando har körts med dash och bash på Linux (uutils och GNU coreutils) och kontrollerats mot specifikationen POSIX.1-2024 och GNU:s handböcker."@sv ,
+                        "날마다 쓰는 Unix·Linux 셸 명령어 55개입니다. 앞면은 할 일을 영어와 스웨덴어의 쉬운 말로 설명하고, 뒷면은 그 일을 하는 명령어로, <file>이나 <dir> 같은 자리 표시자가 들어 있습니다. 디렉터리 트리 이동, 파일과 디렉터리, 파일 보기와 검색(grep, find), 권한, 프로세스와 작업, tar 아카이브, 파이프와 리디렉션, 디스크 사용량, 네트워크 기초를 다룹니다. POSIX 명령어와 옵션을 우선하며, 명령어가 GNU, XSI 또는 Linux 전용이면 메모로 알려 줍니다. 모든 명령어는 Linux에서 dash와 bash(uutils와 GNU coreutils)로 실행해 보았고, POSIX.1-2024 명세와 GNU 매뉴얼로 확인했습니다."@ko ,
+                        "55 alltägliche Shell-Befehle für Unix und Linux: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <file> oder <dir>. Behandelt werden das Bewegen im Verzeichnisbaum, Dateien und Verzeichnisse, das Anzeigen und Durchsuchen von Dateien (grep, find), Berechtigungen, Prozesse und Jobs, tar-Archive, Pipes und Umleitung, Speicherplatzbelegung und Netzwerkgrundlagen. POSIX-Befehle und -Optionen werden bevorzugt; Anmerkungen sagen, wo ein Befehl GNU-, XSI- oder Linux-spezifisch ist. Jeder Befehl wurde mit dash und bash unter Linux (uutils und GNU coreutils) ausgeführt und anhand der Spezifikation POSIX.1-2024 und der GNU-Handbücher geprüft."@de ,
+                        "55 comandos cotidianos de la shell de Unix y Linux: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es el comando que la realiza, con marcadores de posición como <file> o <dir>. Abarca moverse por el árbol de directorios, archivos y directorios, ver archivos y buscar en ellos (grep, find), permisos, procesos y trabajos, archivos tar, tuberías y redirección, uso del disco y nociones básicas de redes. Se prefieren los comandos y opciones POSIX; las notas indican cuándo un comando es propio de GNU, XSI o Linux. Cada comando se ejecutó con dash y bash en Linux (uutils y GNU coreutils) y se comprobó con la especificación POSIX.1-2024 y los manuales de GNU."@es ,
+                        "55 commandes du shell Unix et Linux de tous les jours : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des marqueurs comme <file> ou <dir>. Le paquet couvre les déplacements dans l’arborescence des répertoires, les fichiers et répertoires, l’affichage et la recherche dans les fichiers (grep, find), les droits, les processus et les tâches, les archives tar, les tubes et la redirection, l’utilisation du disque et les bases du réseau. Les commandes et options POSIX sont privilégiées ; des notes indiquent quand une commande est propre à GNU, à XSI ou à Linux. Chaque commande a été exécutée avec dash et bash sous Linux (uutils et GNU coreutils) et vérifiée dans la spécification POSIX.1-2024 et les manuels GNU."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Unix shell commands"@en ,
@@ -18536,7 +18555,7 @@
                   "Unix-Shell-Befehle"@de ,
                   "Comandos de la shell de Unix"@es ,
                   "Commandes du shell Unix"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "55 everyday Unix and Linux shell commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <file> or <dir>. Covers moving around the directory tree, files and directories, viewing and searching files (grep, find), permissions, processes and jobs, tar archives, pipes and redirection, disk usage and networking basics. POSIX commands and options are preferred; notes say where a command is GNU, XSI or Linux-specific. Every command was run with dash and bash on Linux (uutils and GNU coreutils) and checked against the POSIX.1-2024 specification and the GNU manuals."@en ,
                         "55 vardagliga skalkommandon för Unix och Linux: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <file> eller <dir>. Omfattar förflyttning i katalogträdet, filer och kataloger, att visa och söka i filer (grep, find), rättigheter, processer och jobb, tar-arkiv, rör (pipes) och omdirigering, diskanvändning och grundläggande nätverkskommandon. POSIX-kommandon och POSIX-flaggor föredras; anteckningar talar om när ett kommando är specifikt för GNU, XSI eller Linux. Varje kommando har körts med dash och bash på Linux (uutils och GNU coreutils) och kontrollerats mot specifikationen POSIX.1-2024 och GNU:s handböcker."@sv ,
@@ -18544,8 +18563,8 @@
                         "55 alltägliche Shell-Befehle für Unix und Linux: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <file> oder <dir>. Behandelt werden das Bewegen im Verzeichnisbaum, Dateien und Verzeichnisse, das Anzeigen und Durchsuchen von Dateien (grep, find), Berechtigungen, Prozesse und Jobs, tar-Archive, Pipes und Umleitung, Speicherplatzbelegung und Netzwerkgrundlagen. POSIX-Befehle und -Optionen werden bevorzugt; Anmerkungen sagen, wo ein Befehl GNU-, XSI- oder Linux-spezifisch ist. Jeder Befehl wurde mit dash und bash unter Linux (uutils und GNU coreutils) ausgeführt und anhand der Spezifikation POSIX.1-2024 und der GNU-Handbücher geprüft."@de ,
                         "55 comandos cotidianos de la shell de Unix y Linux: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es el comando que la realiza, con marcadores de posición como <file> o <dir>. Abarca moverse por el árbol de directorios, archivos y directorios, ver archivos y buscar en ellos (grep, find), permisos, procesos y trabajos, archivos tar, tuberías y redirección, uso del disco y nociones básicas de redes. Se prefieren los comandos y opciones POSIX; las notas indican cuándo un comando es propio de GNU, XSI o Linux. Cada comando se ejecutó con dash y bash en Linux (uutils y GNU coreutils) y se comprobó con la especificación POSIX.1-2024 y los manuales de GNU."@es ,
                         "55 commandes du shell Unix et Linux de tous les jours : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des marqueurs comme <file> ou <dir>. Le paquet couvre les déplacements dans l’arborescence des répertoires, les fichiers et répertoires, l’affichage et la recherche dans les fichiers (grep, find), les droits, les processus et les tâches, les archives tar, les tubes et la redirection, l’utilisation du disque et les bases du réseau. Les commandes et options POSIX sont privilégiées ; des notes indiquent quand une commande est propre à GNU, à XSI ou à Linux. Chaque commande a été exécutée avec dash et bash sous Linux (uutils et GNU coreutils) et vérifiée dans la spécification POSIX.1-2024 et les manuels GNU."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -18590,29 +18609,34 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Commands, options, operators and placeholders are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#unix-shell-commands> ;
     dcat:isVersionOf <#unix-shell-commands> ;
-    dcat:distribution <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#turtle> ;
     solid-memo:cardCount 55 .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://www.gnu.org/licenses/fdl-1.3.html>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#compilation>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#test-runs>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#test-runs>
     dcterms:title "Test runs of every command with dash 0.5.12 and bash 5.3.9 on Ubuntu 26.04 (uutils coreutils 0.8.0 and GNU coreutils 9.7) in a throwaway directory" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -18662,10 +18686,10 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#turtle>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
