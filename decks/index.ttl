@@ -5802,10 +5802,11 @@
                  "branches"@fr ,
                  "commits"@fr ;
     dcat:first <https://solid-memo.com/decks/git-commands/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/git-commands/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/git-commands/v1.ttl> ,
-                    <https://solid-memo.com/decks/git-commands/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/git-commands/v2.ttl> .
+                    <https://solid-memo.com/decks/git-commands/v2.ttl> ,
+                    <https://solid-memo.com/decks/git-commands/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/git-commands/v3.ttl> .
 
 <https://solid-memo.com/decks/git-commands/v1.ttl>
     a dcat:Dataset ;
@@ -5818,6 +5819,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/git-commands/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Git commands"@en ,
+                  "Git-kommandon"@sv ,
+                  "Git 명령어"@ko ,
+                  "Git-Befehle"@de ,
+                  "Comandos de Git"@es ,
+                  "Commandes Git"@fr ;
+    dcterms:description "56 everyday Git commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <branch> or <file>. Uses the current commands Git recommends (git switch and git restore rather than git checkout, git config set), with older equivalents in notes. Every command was run with Git 2.53.0 in a test repository and checked against the official Git reference manual."@en ,
+                        "56 vardagliga Git-kommandon: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <branch> eller <file>. Använder de aktuella kommandon som Git rekommenderar (git switch och git restore i stället för git checkout, git config set), med äldre motsvarigheter i anteckningar. Varje kommando har körts med Git 2.53.0 i ett testarkiv och kontrollerats mot Gits officiella referenshandbok."@sv ,
+                        "일상적으로 쓰는 Git 명령어 56개: 앞면은 할 일을 영어와 스웨덴어의 쉬운 말로 설명하고, 뒷면은 그 일을 하는 명령어이며 <branch>나 <file> 같은 자리 표시자가 들어간다. Git이 권장하는 현재 명령어(git checkout 대신 git switch와 git restore, git config set)를 쓰고, 예전 명령어는 메모에 있다. 모든 명령어는 테스트 저장소에서 Git 2.53.0으로 실행해 보고 공식 Git 레퍼런스 매뉴얼로 확인했다."@ko ,
+                        "56 alltägliche Git-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <branch> oder <file>. Verwendet die aktuellen Befehle, die Git empfiehlt (git switch und git restore statt git checkout, git config set), mit älteren Entsprechungen in Anmerkungen. Jeder Befehl wurde mit Git 2.53.0 in einem Test-Repository ausgeführt und mit dem offiziellen Git-Referenzhandbuch abgeglichen."@de ,
+                        "56 comandos de Git de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, y el reverso es el comando que la realiza, con marcadores de posición como <branch> o <file>. Usa los comandos actuales que recomienda Git (git switch y git restore en lugar de git checkout, git config set), con los equivalentes antiguos en notas. Cada comando se ejecutó con Git 2.53.0 en un repositorio de prueba y se comprobó con el manual de referencia oficial de Git."@es ,
+                        "56 commandes Git du quotidien : le recto décrit une tâche avec des mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des espaces réservés comme <branch> ou <file>. Utilise les commandes actuelles que Git recommande (git switch et git restore plutôt que git checkout, git config set), avec les anciens équivalents dans des notes. Chaque commande a été exécutée avec Git 2.53.0 dans un dépôt de test et vérifiée sur le manuel de référence officiel de Git."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/git-commands/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Git commands"@en ,
@@ -5826,7 +5845,7 @@
                   "Git-Befehle"@de ,
                   "Comandos de Git"@es ,
                   "Commandes Git"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/git-commands/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/git-commands/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "56 everyday Git commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <branch> or <file>. Uses the current commands Git recommends (git switch and git restore rather than git checkout, git config set), with older equivalents in notes. Every command was run with Git 2.53.0 in a test repository and checked against the official Git reference manual."@en ,
                         "56 vardagliga Git-kommandon: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <branch> eller <file>. Använder de aktuella kommandon som Git rekommenderar (git switch och git restore i stället för git checkout, git config set), med äldre motsvarigheter i anteckningar. Varje kommando har körts med Git 2.53.0 i ett testarkiv och kontrollerats mot Gits officiella referenshandbok."@sv ,
@@ -5834,8 +5853,8 @@
                         "56 alltägliche Git-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <branch> oder <file>. Verwendet die aktuellen Befehle, die Git empfiehlt (git switch und git restore statt git checkout, git config set), mit älteren Entsprechungen in Anmerkungen. Jeder Befehl wurde mit Git 2.53.0 in einem Test-Repository ausgeführt und mit dem offiziellen Git-Referenzhandbuch abgeglichen."@de ,
                         "56 comandos de Git de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, y el reverso es el comando que la realiza, con marcadores de posición como <branch> o <file>. Usa los comandos actuales que recomienda Git (git switch y git restore en lugar de git checkout, git config set), con los equivalentes antiguos en notas. Cada comando se ejecutó con Git 2.53.0 en un repositorio de prueba y se comprobó con el manual de referencia oficial de Git."@es ,
                         "56 commandes Git du quotidien : le recto décrit une tâche avec des mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des espaces réservés comme <branch> ou <file>. Utilise les commandes actuelles que Git recommande (git switch et git restore plutôt que git checkout, git config set), avec les anciens équivalents dans des notes. Chaque commande a été exécutée avec Git 2.53.0 dans un dépôt de test et vérifiée sur le manuel de référence officiel de Git."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/git-commands/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/git-commands/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/git-commands/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/git-commands/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -5873,29 +5892,34 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/git-commands/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/git-commands/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Commands, options and placeholders are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#git-commands> ;
     dcat:isVersionOf <#git-commands> ;
-    dcat:distribution <https://solid-memo.com/decks/git-commands/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/git-commands/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/git-commands/v3.ttl#turtle> ;
     solid-memo:cardCount 56 .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/git-commands/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/git-commands/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#compilation>
+<https://solid-memo.com/decks/git-commands/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#test-runs>
+<https://solid-memo.com/decks/git-commands/v3.ttl#test-runs>
     dcterms:title "Test run of every command with Git 2.53.0 in a throwaway repository" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -5915,10 +5939,10 @@
     dcterms:creator "Peter Krefting and the Git project" ;
     dcterms:license <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#turtle>
+<https://solid-memo.com/decks/git-commands/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/git-commands/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/git-commands/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/git-commands/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -6472,10 +6496,11 @@
                  "balises"@fr ,
                  "WHATWG"@fr ;
     dcat:first <https://solid-memo.com/decks/html-elements/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/html-elements/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/html-elements/v1.ttl> ,
-                    <https://solid-memo.com/decks/html-elements/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/html-elements/v2.ttl> .
+                    <https://solid-memo.com/decks/html-elements/v2.ttl> ,
+                    <https://solid-memo.com/decks/html-elements/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/html-elements/v3.ttl> .
 
 <https://solid-memo.com/decks/html-elements/v1.ttl>
     a dcat:Dataset ;
@@ -6488,6 +6513,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/html-elements/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "HTML elements"@en ,
+                  "HTML-element"@sv ,
+                  "HTML 요소"@ko ,
+                  "HTML-Elemente"@de ,
+                  "Elementos HTML"@es ,
+                  "Éléments HTML"@fr ;
+    dcterms:description "55 everyday elements of HTML, the markup language of the web: the front says in plain words what an element is for, in English and Swedish, and the back gives its tag, such as <a> or <main>. Covers the document and its metadata, sections, text, lists, images and media, tables and forms; obsolete elements are left out. Based on the WHATWG HTML Living Standard (CC BY 4.0), with every card checked against MDN Web Docs and Wikidata."@en ,
+                        "55 vanliga element i HTML, webbens märkspråk: på framsidan står med vanliga ord vad ett element används till, på engelska och svenska, och på baksidan dess tagg, till exempel <a> eller <main>. Täcker dokumentet och dess metadata, avsnitt, text, listor, bilder och media, tabeller och formulär; föråldrade element är utelämnade. Bygger på WHATWG:s HTML Living Standard (CC BY 4.0), och varje kort är kontrollerat mot MDN Web Docs och Wikidata."@sv ,
+                        "웹의 마크업 언어인 HTML에서 자주 쓰는 요소 55개입니다. 앞면에는 요소가 무엇에 쓰이는지 쉬운 말로 영어와 스웨덴어로 적혀 있고, 뒷면에는 <a>나 <main> 같은 태그가 있습니다. 문서와 메타데이터, 섹션, 텍스트, 목록, 이미지와 미디어, 표, 폼을 다루며, 더 이상 쓰지 않는 요소는 뺐습니다. WHATWG HTML Living Standard(CC BY 4.0)를 바탕으로 하고, 모든 카드를 MDN Web Docs와 Wikidata로 확인했습니다."@ko ,
+                        "55 alltägliche Elemente von HTML, der Auszeichnungssprache des Webs: Auf der Vorderseite steht in einfachen Worten, wofür ein Element da ist, auf Englisch und Schwedisch, und auf der Rückseite sein Tag, etwa <a> oder <main>. Behandelt das Dokument und seine Metadaten, Abschnitte, Text, Listen, Bilder und Medien, Tabellen und Formulare; veraltete Elemente sind weggelassen. Beruht auf dem WHATWG HTML Living Standard (CC BY 4.0), und jede Karte ist anhand von MDN Web Docs und Wikidata geprüft."@de ,
+                        "55 elementos habituales de HTML, el lenguaje de marcado de la web: el anverso explica con palabras sencillas para qué sirve un elemento, en inglés y en sueco, y el reverso da su etiqueta, como <a> o <main>. Abarca el documento y sus metadatos, secciones, texto, listas, imágenes y multimedia, tablas y formularios; se omiten los elementos obsoletos. Basado en el HTML Living Standard del WHATWG (CC BY 4.0), con cada tarjeta comprobada en MDN Web Docs y Wikidata."@es ,
+                        "55 éléments courants de HTML, le langage de balisage du Web : le recto indique en termes simples à quoi sert un élément, en anglais et en suédois, et le verso donne sa balise, par exemple <a> ou <main>. Couvre le document et ses métadonnées, les sections, le texte, les listes, les images et médias, les tableaux et les formulaires ; les éléments obsolètes sont exclus. Fondé sur le HTML Living Standard du WHATWG (CC BY 4.0), chaque carte étant vérifiée sur MDN Web Docs et Wikidata."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/html-elements/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "HTML elements"@en ,
@@ -6496,7 +6539,7 @@
                   "HTML-Elemente"@de ,
                   "Elementos HTML"@es ,
                   "Éléments HTML"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/html-elements/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/html-elements/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:description "55 everyday elements of HTML, the markup language of the web: the front says in plain words what an element is for, in English and Swedish, and the back gives its tag, such as <a> or <main>. Covers the document and its metadata, sections, text, lists, images and media, tables and forms; obsolete elements are left out. Based on the WHATWG HTML Living Standard (CC BY 4.0), with every card checked against MDN Web Docs and Wikidata."@en ,
                         "55 vanliga element i HTML, webbens märkspråk: på framsidan står med vanliga ord vad ett element används till, på engelska och svenska, och på baksidan dess tagg, till exempel <a> eller <main>. Täcker dokumentet och dess metadata, avsnitt, text, listor, bilder och media, tabeller och formulär; föråldrade element är utelämnade. Bygger på WHATWG:s HTML Living Standard (CC BY 4.0), och varje kort är kontrollerat mot MDN Web Docs och Wikidata."@sv ,
@@ -6506,7 +6549,7 @@
                         "55 éléments courants de HTML, le langage de balisage du Web : le recto indique en termes simples à quoi sert un élément, en anglais et en suédois, et le verso donne sa balise, par exemple <a> ou <main>. Couvre le document et ses métadonnées, les sections, le texte, les listes, les images et médias, les tableaux et les formulaires ; les éléments obsolètes sont exclus. Fondé sur le HTML Living Standard du WHATWG (CC BY 4.0), chaque carte étant vérifiée sur MDN Web Docs et Wikidata."@fr ;
     prov:wasDerivedFrom <https://html.spec.whatwg.org/multipage/> ,
                         <https://www.wikidata.org/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/html-elements/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/html-elements/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -6549,23 +6592,28 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/html-elements/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/html-elements/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Elements, attributes and markup are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#html-elements> ;
     dcat:isVersionOf <#html-elements> ;
-    dcat:distribution <https://solid-memo.com/decks/html-elements/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/html-elements/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/html-elements/v3.ttl#turtle> ;
     solid-memo:cardCount 55 .
 
-<https://solid-memo.com/decks/html-elements/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/html-elements/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/html-elements/v2.ttl#compilation>
+<https://solid-memo.com/decks/html-elements/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/html-elements/v3.ttl#compilation>
     a prov:Activity .
 
 <https://html.spec.whatwg.org/multipage/>
@@ -6578,10 +6626,10 @@
     dcterms:creator "Mozilla Contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> .
 
-<https://solid-memo.com/decks/html-elements/v2.ttl#turtle>
+<https://solid-memo.com/decks/html-elements/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/html-elements/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/html-elements/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/html-elements/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/html-elements/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -12366,10 +12414,11 @@
                  "méthodes de chaîne"@fr ,
                  "listes"@fr ;
     dcat:first <https://solid-memo.com/decks/python-built-ins/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/python-built-ins/v1.ttl> ,
-                    <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/python-built-ins/v2.ttl> .
+                    <https://solid-memo.com/decks/python-built-ins/v2.ttl> ,
+                    <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/python-built-ins/v3.ttl> .
 
 <https://solid-memo.com/decks/python-built-ins/v1.ttl>
     a dcat:Dataset ;
@@ -12382,6 +12431,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/python-built-ins/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Python built-in functions"@en ,
+                  "Inbyggda funktioner i Python"@sv ,
+                  "Python 내장 함수"@ko ,
+                  "Eingebaute Funktionen in Python"@de ,
+                  "Funciones integradas de Python"@es ,
+                  "Fonctions natives de Python"@fr ;
+    dcterms:description "50 everyday Python 3 built-in functions and operations, as of Python 3.14. Front: a task in plain words in English and Swedish; back: the Python expression that does it, using names such as xs (a list), s (a string) and d (a dict). Covers len, range, enumerate, zip, sorted, sum, min, max, round, the type conversions, print, input, open, any, all, map, filter, f-strings, slicing, list comprehensions, dict.get, string methods and in. Strings are written in double quotes. Every expression was run with Python 3.14.4 and checked against the official Python documentation."@en ,
+                        "50 vardagliga inbyggda funktioner och operationer i Python 3, enligt version 3.14. Framsida: en uppgift med vanliga ord på engelska och svenska; baksida: Python-uttrycket som utför den, med namn som xs (en lista), s (en sträng) och d (ett dict-objekt). Omfattar len, range, enumerate, zip, sorted, sum, min, max, round, typomvandlingarna, print, input, open, any, all, map, filter, f-strängar, slicing, list comprehensions, dict.get, strängmetoder och in. Strängar skrivs med dubbla citattecken. Varje uttryck har körts med Python 3.14.4 och kontrollerats mot Pythons officiella dokumentation."@sv ,
+                        "Python 3.14 기준으로 일상적으로 쓰는 Python 3 내장 함수와 연산 50개. 앞면: 영어와 스웨덴어로 쉽게 풀어 쓴 작업, 뒷면: 그 작업을 하는 Python 식으로, xs(리스트), s(문자열), d(딕셔너리) 같은 이름을 쓴다. len, range, enumerate, zip, sorted, sum, min, max, round, 형 변환, print, input, open, any, all, map, filter, f-문자열, 슬라이싱, 리스트 컴프리헨션, dict.get, 문자열 메서드, in을 다룬다. 문자열은 큰따옴표로 쓴다. 모든 식은 Python 3.14.4로 실행하고 Python 공식 문서와 대조해 확인했다."@ko ,
+                        "50 alltägliche eingebaute Funktionen und Operationen von Python 3, Stand Python 3.14. Vorderseite: eine Aufgabe in einfachen Worten auf Englisch und Schwedisch; Rückseite: der Python-Ausdruck, der sie erledigt, mit Namen wie xs (eine Liste), s (ein String) und d (ein Dict). Behandelt len, range, enumerate, zip, sorted, sum, min, max, round, die Typumwandlungen, print, input, open, any, all, map, filter, f-Strings, Slicing, List Comprehensions, dict.get, String-Methoden und in. Strings stehen in doppelten Anführungszeichen. Jeder Ausdruck wurde mit Python 3.14.4 ausgeführt und anhand der offiziellen Python-Dokumentation geprüft."@de ,
+                        "50 funciones y operaciones integradas de Python 3 de uso cotidiano, según Python 3.14. Anverso: una tarea en palabras sencillas en inglés y en sueco; reverso: la expresión de Python que la realiza, con nombres como xs (una lista), s (una cadena) y d (un diccionario). Incluye len, range, enumerate, zip, sorted, sum, min, max, round, las conversiones de tipo, print, input, open, any, all, map, filter, las f-strings, el slicing, las listas por comprensión, dict.get, los métodos de cadena e in. Las cadenas se escriben entre comillas dobles. Cada expresión se ejecutó con Python 3.14.4 y se comprobó con la documentación oficial de Python."@es ,
+                        "50 fonctions et opérations natives courantes de Python 3, à jour pour Python 3.14. Recto : une tâche décrite avec des mots simples en anglais et en suédois ; verso : l’expression Python qui l’accomplit, avec des noms comme xs (une liste), s (une chaîne) et d (un dictionnaire). Couvre len, range, enumerate, zip, sorted, sum, min, max, round, les conversions de type, print, input, open, any, all, map, filter, les f-strings, le découpage en tranches, les listes en compréhension, dict.get, les méthodes de chaîne et in. Les chaînes sont écrites entre guillemets doubles. Chaque expression a été exécutée avec Python 3.14.4 et vérifiée avec la documentation officielle de Python."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/python-built-ins/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Python built-in functions"@en ,
@@ -12390,7 +12457,7 @@
                   "Eingebaute Funktionen in Python"@de ,
                   "Funciones integradas de Python"@es ,
                   "Fonctions natives de Python"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/python-built-ins/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/python-built-ins/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "50 everyday Python 3 built-in functions and operations, as of Python 3.14. Front: a task in plain words in English and Swedish; back: the Python expression that does it, using names such as xs (a list), s (a string) and d (a dict). Covers len, range, enumerate, zip, sorted, sum, min, max, round, the type conversions, print, input, open, any, all, map, filter, f-strings, slicing, list comprehensions, dict.get, string methods and in. Strings are written in double quotes. Every expression was run with Python 3.14.4 and checked against the official Python documentation."@en ,
                         "50 vardagliga inbyggda funktioner och operationer i Python 3, enligt version 3.14. Framsida: en uppgift med vanliga ord på engelska och svenska; baksida: Python-uttrycket som utför den, med namn som xs (en lista), s (en sträng) och d (ett dict-objekt). Omfattar len, range, enumerate, zip, sorted, sum, min, max, round, typomvandlingarna, print, input, open, any, all, map, filter, f-strängar, slicing, list comprehensions, dict.get, strängmetoder och in. Strängar skrivs med dubbla citattecken. Varje uttryck har körts med Python 3.14.4 och kontrollerats mot Pythons officiella dokumentation."@sv ,
@@ -12398,8 +12465,8 @@
                         "50 alltägliche eingebaute Funktionen und Operationen von Python 3, Stand Python 3.14. Vorderseite: eine Aufgabe in einfachen Worten auf Englisch und Schwedisch; Rückseite: der Python-Ausdruck, der sie erledigt, mit Namen wie xs (eine Liste), s (ein String) und d (ein Dict). Behandelt len, range, enumerate, zip, sorted, sum, min, max, round, die Typumwandlungen, print, input, open, any, all, map, filter, f-Strings, Slicing, List Comprehensions, dict.get, String-Methoden und in. Strings stehen in doppelten Anführungszeichen. Jeder Ausdruck wurde mit Python 3.14.4 ausgeführt und anhand der offiziellen Python-Dokumentation geprüft."@de ,
                         "50 funciones y operaciones integradas de Python 3 de uso cotidiano, según Python 3.14. Anverso: una tarea en palabras sencillas en inglés y en sueco; reverso: la expresión de Python que la realiza, con nombres como xs (una lista), s (una cadena) y d (un diccionario). Incluye len, range, enumerate, zip, sorted, sum, min, max, round, las conversiones de tipo, print, input, open, any, all, map, filter, las f-strings, el slicing, las listas por comprensión, dict.get, los métodos de cadena e in. Las cadenas se escriben entre comillas dobles. Cada expresión se ejecutó con Python 3.14.4 y se comprobó con la documentación oficial de Python."@es ,
                         "50 fonctions et opérations natives courantes de Python 3, à jour pour Python 3.14. Recto : une tâche décrite avec des mots simples en anglais et en suédois ; verso : l’expression Python qui l’accomplit, avec des noms comme xs (une liste), s (une chaîne) et d (un dictionnaire). Couvre len, range, enumerate, zip, sorted, sum, min, max, round, les conversions de type, print, input, open, any, all, map, filter, les f-strings, le découpage en tranches, les listes en compréhension, dict.get, les méthodes de chaîne et in. Les chaînes sont écrites entre guillemets doubles. Chaque expression a été exécutée avec Python 3.14.4 et vérifiée avec la documentation officielle de Python."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/python-built-ins/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/python-built-ins/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/python-built-ins/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/python-built-ins/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -12437,26 +12504,31 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/python-built-ins/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/python-built-ins/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Functions, names and values are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#python-built-ins> ;
     dcat:isVersionOf <#python-built-ins> ;
-    dcat:distribution <https://solid-memo.com/decks/python-built-ins/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/python-built-ins/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/python-built-ins/v3.ttl#turtle> ;
     solid-memo:cardCount 50 .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#compilation>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#test-runs>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#test-runs>
     dcterms:title "Test run of every card's expression with Python 3.14.4 (CPython)" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -12470,10 +12542,10 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/python-built-ins/v2.ttl#turtle>
+<https://solid-memo.com/decks/python-built-ins/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/python-built-ins/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -15484,10 +15556,11 @@
                  "SQLite"@fr ,
                  "PostgreSQL"@fr ;
     dcat:first <https://solid-memo.com/decks/sql-basics/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/sql-basics/v1.ttl> ,
-                    <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/sql-basics/v2.ttl> .
+                    <https://solid-memo.com/decks/sql-basics/v2.ttl> ,
+                    <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/sql-basics/v3.ttl> .
 
 <https://solid-memo.com/decks/sql-basics/v1.ttl>
     a dcat:Dataset ;
@@ -15500,6 +15573,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/sql-basics/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "SQL basics"@en ,
+                  "Grundläggande SQL"@sv ,
+                  "SQL 기초"@ko ,
+                  "SQL-Grundlagen"@de ,
+                  "SQL básico"@es ,
+                  "Les bases de SQL"@fr ;
+    dcterms:description "48 everyday SQL statements: the front describes a task in plain words in English and Swedish, the back is the one statement that does it, on three example tables (customers, products and orders) and in one style: upper-case keywords, AS for aliases, <> for not equal and a closing semicolon. Every statement runs unchanged in both SQLite and PostgreSQL, so rows are limited with LIMIT; FETCH FIRST, which SQLite rejects, is given in a note. Each was run in SQLite 3.53 and PostgreSQL 16 and checked against both projects' documentation."@en ,
+                        "48 vardagliga SQL-satser: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan den sats som utför den, mot tre exempeltabeller (customers, products och orders) och i en enda stil: nyckelord med versaler, AS för alias, <> för ”inte lika med” och avslutande semikolon. Varje sats fungerar oförändrad i både SQLite och PostgreSQL, så antalet rader begränsas med LIMIT; FETCH FIRST, som SQLite inte godtar, nämns i en anteckning. Alla har körts i SQLite 3.53 och PostgreSQL 16 och kontrollerats mot båda projektens dokumentation."@sv ,
+                        "일상적인 SQL 문 48개입니다. 앞면에는 할 일이 영어와 스웨덴어로 쉽게 설명되어 있고, 뒷면에는 그 일을 하는 SQL 문 하나가 있습니다. 예제 테이블 세 개(customers, products, orders)를 대상으로 하며, 한 가지 스타일을 따릅니다: 키워드는 대문자, 별칭에는 AS, 같지 않음에는 <>, 끝에는 세미콜론. 모든 문은 SQLite와 PostgreSQL에서 그대로 실행되므로 행 수는 LIMIT로 제한하고, SQLite가 받아들이지 않는 FETCH FIRST는 메모로 알려 줍니다. 모두 SQLite 3.53과 PostgreSQL 16에서 실행했고 두 프로젝트의 문서로 확인했습니다."@ko ,
+                        "48 alltägliche SQL-Anweisungen: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist die eine Anweisung, die sie erledigt, auf drei Beispieltabellen (customers, products und orders) und in einem einheitlichen Stil: Schlüsselwörter in Großbuchstaben, AS für Aliasse, <> für ungleich und ein abschließendes Semikolon. Jede Anweisung läuft unverändert sowohl in SQLite als auch in PostgreSQL, deshalb werden Zeilen mit LIMIT begrenzt; FETCH FIRST, das SQLite ablehnt, steht in einer Anmerkung. Jede wurde in SQLite 3.53 und PostgreSQL 16 ausgeführt und mit der Dokumentation beider Projekte abgeglichen."@de ,
+                        "48 sentencias SQL de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es la sentencia que la realiza, sobre tres tablas de ejemplo (customers, products y orders) y con un único estilo: palabras clave en mayúsculas, AS para los alias, <> para distinto de y un punto y coma final. Cada sentencia funciona sin cambios tanto en SQLite como en PostgreSQL, así que las filas se limitan con LIMIT; FETCH FIRST, que SQLite rechaza, se indica en una nota. Cada una se ejecutó en SQLite 3.53 y PostgreSQL 16 y se comprobó con la documentación de ambos proyectos."@es ,
+                        "48 requêtes SQL courantes : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la requête qui l’accomplit, sur trois tables d’exemple (customers, products et orders) et dans un seul style : mots-clés en majuscules, AS pour les alias, <> pour différent de et un point-virgule final. Chaque requête s’exécute telle quelle dans SQLite comme dans PostgreSQL, si bien que les lignes sont limitées avec LIMIT ; FETCH FIRST, que SQLite refuse, figure dans une note. Chacune a été exécutée dans SQLite 3.53 et PostgreSQL 16 et vérifiée dans la documentation des deux projets."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/sql-basics/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "SQL basics"@en ,
@@ -15508,7 +15599,7 @@
                   "SQL-Grundlagen"@de ,
                   "SQL básico"@es ,
                   "Les bases de SQL"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/sql-basics/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/sql-basics/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "48 everyday SQL statements: the front describes a task in plain words in English and Swedish, the back is the one statement that does it, on three example tables (customers, products and orders) and in one style: upper-case keywords, AS for aliases, <> for not equal and a closing semicolon. Every statement runs unchanged in both SQLite and PostgreSQL, so rows are limited with LIMIT; FETCH FIRST, which SQLite rejects, is given in a note. Each was run in SQLite 3.53 and PostgreSQL 16 and checked against both projects' documentation."@en ,
                         "48 vardagliga SQL-satser: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan den sats som utför den, mot tre exempeltabeller (customers, products och orders) och i en enda stil: nyckelord med versaler, AS för alias, <> för ”inte lika med” och avslutande semikolon. Varje sats fungerar oförändrad i både SQLite och PostgreSQL, så antalet rader begränsas med LIMIT; FETCH FIRST, som SQLite inte godtar, nämns i en anteckning. Alla har körts i SQLite 3.53 och PostgreSQL 16 och kontrollerats mot båda projektens dokumentation."@sv ,
@@ -15516,8 +15607,8 @@
                         "48 alltägliche SQL-Anweisungen: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist die eine Anweisung, die sie erledigt, auf drei Beispieltabellen (customers, products und orders) und in einem einheitlichen Stil: Schlüsselwörter in Großbuchstaben, AS für Aliasse, <> für ungleich und ein abschließendes Semikolon. Jede Anweisung läuft unverändert sowohl in SQLite als auch in PostgreSQL, deshalb werden Zeilen mit LIMIT begrenzt; FETCH FIRST, das SQLite ablehnt, steht in einer Anmerkung. Jede wurde in SQLite 3.53 und PostgreSQL 16 ausgeführt und mit der Dokumentation beider Projekte abgeglichen."@de ,
                         "48 sentencias SQL de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es la sentencia que la realiza, sobre tres tablas de ejemplo (customers, products y orders) y con un único estilo: palabras clave en mayúsculas, AS para los alias, <> para distinto de y un punto y coma final. Cada sentencia funciona sin cambios tanto en SQLite como en PostgreSQL, así que las filas se limitan con LIMIT; FETCH FIRST, que SQLite rechaza, se indica en una nota. Cada una se ejecutó en SQLite 3.53 y PostgreSQL 16 y se comprobó con la documentación de ambos proyectos."@es ,
                         "48 requêtes SQL courantes : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la requête qui l’accomplit, sur trois tables d’exemple (customers, products et orders) et dans un seul style : mots-clés en majuscules, AS pour les alias, <> pour différent de et un point-virgule final. Chaque requête s’exécute telle quelle dans SQLite comme dans PostgreSQL, si bien que les lignes sont limitées avec LIMIT ; FETCH FIRST, que SQLite refuse, figure dans une note. Chacune a été exécutée dans SQLite 3.53 et PostgreSQL 16 et vérifiée dans la documentation des deux projets."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/sql-basics/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/sql-basics/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/sql-basics/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/sql-basics/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -15554,26 +15645,31 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/sql-basics/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/sql-basics/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Statements, keywords and names are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#sql-basics> ;
     dcat:isVersionOf <#sql-basics> ;
-    dcat:distribution <https://solid-memo.com/decks/sql-basics/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/sql-basics/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/sql-basics/v3.ttl#turtle> ;
     solid-memo:cardCount 48 .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#compilation>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/sql-basics/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#test-runs>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#test-runs>
     dcterms:title "Test run of every statement in SQLite 3.53.1 and PostgreSQL 16.2 on a small example database" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -15595,10 +15691,10 @@
     dcterms:creator "Swedish Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#turtle>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -18547,10 +18643,11 @@
                  "POSIX"@fr ,
                  "terminal"@fr ;
     dcat:first <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ,
-                    <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> .
+                    <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ,
+                    <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> .
 
 <https://solid-memo.com/decks/unix-shell-commands/v1.ttl>
     a dcat:Dataset ;
@@ -18563,6 +18660,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/unix-shell-commands/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Unix shell commands"@en ,
+                  "Unix-skalkommandon"@sv ,
+                  "Unix 셸 명령어"@ko ,
+                  "Unix-Shell-Befehle"@de ,
+                  "Comandos de la shell de Unix"@es ,
+                  "Commandes du shell Unix"@fr ;
+    dcterms:description "55 everyday Unix and Linux shell commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <file> or <dir>. Covers moving around the directory tree, files and directories, viewing and searching files (grep, find), permissions, processes and jobs, tar archives, pipes and redirection, disk usage and networking basics. POSIX commands and options are preferred; notes say where a command is GNU, XSI or Linux-specific. Every command was run with dash and bash on Linux (uutils and GNU coreutils) and checked against the POSIX.1-2024 specification and the GNU manuals."@en ,
+                        "55 vardagliga skalkommandon för Unix och Linux: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <file> eller <dir>. Omfattar förflyttning i katalogträdet, filer och kataloger, att visa och söka i filer (grep, find), rättigheter, processer och jobb, tar-arkiv, rör (pipes) och omdirigering, diskanvändning och grundläggande nätverkskommandon. POSIX-kommandon och POSIX-flaggor föredras; anteckningar talar om när ett kommando är specifikt för GNU, XSI eller Linux. Varje kommando har körts med dash och bash på Linux (uutils och GNU coreutils) och kontrollerats mot specifikationen POSIX.1-2024 och GNU:s handböcker."@sv ,
+                        "날마다 쓰는 Unix·Linux 셸 명령어 55개입니다. 앞면은 할 일을 영어와 스웨덴어의 쉬운 말로 설명하고, 뒷면은 그 일을 하는 명령어로, <file>이나 <dir> 같은 자리 표시자가 들어 있습니다. 디렉터리 트리 이동, 파일과 디렉터리, 파일 보기와 검색(grep, find), 권한, 프로세스와 작업, tar 아카이브, 파이프와 리디렉션, 디스크 사용량, 네트워크 기초를 다룹니다. POSIX 명령어와 옵션을 우선하며, 명령어가 GNU, XSI 또는 Linux 전용이면 메모로 알려 줍니다. 모든 명령어는 Linux에서 dash와 bash(uutils와 GNU coreutils)로 실행해 보았고, POSIX.1-2024 명세와 GNU 매뉴얼로 확인했습니다."@ko ,
+                        "55 alltägliche Shell-Befehle für Unix und Linux: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <file> oder <dir>. Behandelt werden das Bewegen im Verzeichnisbaum, Dateien und Verzeichnisse, das Anzeigen und Durchsuchen von Dateien (grep, find), Berechtigungen, Prozesse und Jobs, tar-Archive, Pipes und Umleitung, Speicherplatzbelegung und Netzwerkgrundlagen. POSIX-Befehle und -Optionen werden bevorzugt; Anmerkungen sagen, wo ein Befehl GNU-, XSI- oder Linux-spezifisch ist. Jeder Befehl wurde mit dash und bash unter Linux (uutils und GNU coreutils) ausgeführt und anhand der Spezifikation POSIX.1-2024 und der GNU-Handbücher geprüft."@de ,
+                        "55 comandos cotidianos de la shell de Unix y Linux: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es el comando que la realiza, con marcadores de posición como <file> o <dir>. Abarca moverse por el árbol de directorios, archivos y directorios, ver archivos y buscar en ellos (grep, find), permisos, procesos y trabajos, archivos tar, tuberías y redirección, uso del disco y nociones básicas de redes. Se prefieren los comandos y opciones POSIX; las notas indican cuándo un comando es propio de GNU, XSI o Linux. Cada comando se ejecutó con dash y bash en Linux (uutils y GNU coreutils) y se comprobó con la especificación POSIX.1-2024 y los manuales de GNU."@es ,
+                        "55 commandes du shell Unix et Linux de tous les jours : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des marqueurs comme <file> ou <dir>. Le paquet couvre les déplacements dans l’arborescence des répertoires, les fichiers et répertoires, l’affichage et la recherche dans les fichiers (grep, find), les droits, les processus et les tâches, les archives tar, les tubes et la redirection, l’utilisation du disque et les bases du réseau. Les commandes et options POSIX sont privilégiées ; des notes indiquent quand une commande est propre à GNU, à XSI ou à Linux. Chaque commande a été exécutée avec dash et bash sous Linux (uutils et GNU coreutils) et vérifiée dans la spécification POSIX.1-2024 et les manuels GNU."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Unix shell commands"@en ,
@@ -18571,7 +18686,7 @@
                   "Unix-Shell-Befehle"@de ,
                   "Comandos de la shell de Unix"@es ,
                   "Commandes du shell Unix"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "55 everyday Unix and Linux shell commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <file> or <dir>. Covers moving around the directory tree, files and directories, viewing and searching files (grep, find), permissions, processes and jobs, tar archives, pipes and redirection, disk usage and networking basics. POSIX commands and options are preferred; notes say where a command is GNU, XSI or Linux-specific. Every command was run with dash and bash on Linux (uutils and GNU coreutils) and checked against the POSIX.1-2024 specification and the GNU manuals."@en ,
                         "55 vardagliga skalkommandon för Unix och Linux: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <file> eller <dir>. Omfattar förflyttning i katalogträdet, filer och kataloger, att visa och söka i filer (grep, find), rättigheter, processer och jobb, tar-arkiv, rör (pipes) och omdirigering, diskanvändning och grundläggande nätverkskommandon. POSIX-kommandon och POSIX-flaggor föredras; anteckningar talar om när ett kommando är specifikt för GNU, XSI eller Linux. Varje kommando har körts med dash och bash på Linux (uutils och GNU coreutils) och kontrollerats mot specifikationen POSIX.1-2024 och GNU:s handböcker."@sv ,
@@ -18579,8 +18694,8 @@
                         "55 alltägliche Shell-Befehle für Unix und Linux: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <file> oder <dir>. Behandelt werden das Bewegen im Verzeichnisbaum, Dateien und Verzeichnisse, das Anzeigen und Durchsuchen von Dateien (grep, find), Berechtigungen, Prozesse und Jobs, tar-Archive, Pipes und Umleitung, Speicherplatzbelegung und Netzwerkgrundlagen. POSIX-Befehle und -Optionen werden bevorzugt; Anmerkungen sagen, wo ein Befehl GNU-, XSI- oder Linux-spezifisch ist. Jeder Befehl wurde mit dash und bash unter Linux (uutils und GNU coreutils) ausgeführt und anhand der Spezifikation POSIX.1-2024 und der GNU-Handbücher geprüft."@de ,
                         "55 comandos cotidianos de la shell de Unix y Linux: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es el comando que la realiza, con marcadores de posición como <file> o <dir>. Abarca moverse por el árbol de directorios, archivos y directorios, ver archivos y buscar en ellos (grep, find), permisos, procesos y trabajos, archivos tar, tuberías y redirección, uso del disco y nociones básicas de redes. Se prefieren los comandos y opciones POSIX; las notas indican cuándo un comando es propio de GNU, XSI o Linux. Cada comando se ejecutó con dash y bash en Linux (uutils y GNU coreutils) y se comprobó con la especificación POSIX.1-2024 y los manuales de GNU."@es ,
                         "55 commandes du shell Unix et Linux de tous les jours : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des marqueurs comme <file> ou <dir>. Le paquet couvre les déplacements dans l’arborescence des répertoires, les fichiers et répertoires, l’affichage et la recherche dans les fichiers (grep, find), les droits, les processus et les tâches, les archives tar, les tubes et la redirection, l’utilisation du disque et les bases du réseau. Les commandes et options POSIX sont privilégiées ; des notes indiquent quand une commande est propre à GNU, à XSI ou à Linux. Chaque commande a été exécutée avec dash et bash sous Linux (uutils et GNU coreutils) et vérifiée dans la spécification POSIX.1-2024 et les manuels GNU."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -18625,29 +18740,34 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Commands, options, operators and placeholders are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#unix-shell-commands> ;
     dcat:isVersionOf <#unix-shell-commands> ;
-    dcat:distribution <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/unix-shell-commands/v3.ttl#turtle> ;
     solid-memo:cardCount 55 .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://www.gnu.org/licenses/fdl-1.3.html>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#compilation>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#test-runs>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#test-runs>
     dcterms:title "Test runs of every command with dash 0.5.12 and bash 5.3.9 on Ubuntu 26.04 (uutils coreutils 0.8.0 and GNU coreutils 9.7) in a throwaway directory" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -18697,10 +18817,10 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/unix-shell-commands/v2.ttl#turtle>
+<https://solid-memo.com/decks/unix-shell-commands/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/unix-shell-commands/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -19288,11 +19408,30 @@
                  "ligne de commande"@fr ,
                  "édition"@fr ;
     dcat:first <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
-    dcat:hasVersion <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/vim-commands/v1.ttl> .
+    dcat:last <https://solid-memo.com/decks/vim-commands/v2.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/vim-commands/v1.ttl> ,
+                    <https://solid-memo.com/decks/vim-commands/v2.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/vim-commands/v2.ttl> .
 
 <https://solid-memo.com/decks/vim-commands/v1.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Vim commands"@en ,
+                  "Vim-kommandon"@sv ,
+                  "Vim 명령어"@ko ,
+                  "Vim-Befehle"@de ,
+                  "Comandos de Vim"@es ,
+                  "Commandes Vim"@fr ;
+    dcterms:description "65 everyday Vim commands: the front describes a task in plain words, the back is what you type in Vim, written as Vim's own help writes keys (CTRL-R, <Esc>) with placeholders such as {char} or {file}. Every task starts in Normal mode. Covers the modes, saving and quitting, moving around, editing, searching and replacing, marks and macros, windows, buffers and tab pages, with synonyms and pitfalls in the notes. Every command was run in Vim 9.1, with and without its defaults.vim, and checked against Vim's built-in help."@en ,
+                        "65 vardagliga Vim-kommandon: på framsidan en uppgift beskriven med vanliga ord, på baksidan det du skriver i Vim, återgivet så som Vims egen hjälp skriver tangenter (CTRL-R, <Esc>) med platshållare som {char} eller {file}. Varje uppgift börjar i normalläge. Täcker lägena, att spara och avsluta, förflyttning, redigering, sökning och ersättning, markeringar och makron, fönster, buffertar och flikar, med synonymer och fallgropar i anteckningarna. Varje kommando har körts i Vim 9.1, med och utan dess defaults.vim, och kontrollerats mot Vims inbyggda hjälp."@sv ,
+                        "일상적으로 쓰는 Vim 명령어 65개입니다. 앞면에는 할 일이 쉬운 말로 적혀 있고, 뒷면에는 Vim에서 입력하는 키가 Vim 도움말이 키를 쓰는 방식(CTRL-R, <Esc>) 그대로 {char}나 {file} 같은 자리 표시자와 함께 적혀 있습니다. 모든 작업은 노멀 모드에서 시작합니다. 모드, 저장과 종료, 이동, 편집, 검색과 바꾸기, 마크와 매크로, 창, 버퍼, 탭 페이지를 다루며, 같은 일을 하는 다른 명령과 주의할 점은 메모에 있습니다. 모든 명령어는 Vim 9.1에서 defaults.vim을 쓸 때와 쓰지 않을 때 모두 실행해 보았고, Vim 내장 도움말로 확인했습니다."@ko ,
+                        "65 alltägliche Vim-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten, die Rückseite ist das, was man in Vim tippt, so geschrieben, wie Vims eigene Hilfe Tasten schreibt (CTRL-R, <Esc>), mit Platzhaltern wie {char} oder {file}. Jede Aufgabe beginnt im Normalmodus. Behandelt die Modi, Speichern und Beenden, Bewegen im Text, Bearbeiten, Suchen und Ersetzen, Marken und Makros, Fenster, Puffer und Reiter, mit Synonymen und Stolperfallen in den Anmerkungen. Jeder Befehl wurde in Vim 9.1 ausgeführt, mit und ohne dessen defaults.vim, und mit Vims eingebauter Hilfe abgeglichen."@de ,
+                        "65 comandos de Vim de uso diario: el anverso describe una tarea con palabras sencillas y el reverso es lo que se escribe en Vim, con las teclas escritas como en la propia ayuda de Vim (CTRL-R, <Esc>) y marcadores de posición como {char} o {file}. Todas las tareas empiezan en modo Normal. Abarca los modos, guardar y salir, moverse por el texto, editar, buscar y sustituir, marcas y macros, ventanas, búferes y pestañas, con sinónimos y errores frecuentes en las notas. Cada comando se ejecutó en Vim 9.1, con y sin su defaults.vim, y se comprobó con la ayuda integrada de Vim."@es ,
+                        "65 commandes Vim du quotidien : le recto décrit une tâche avec des mots simples, le verso est ce que l’on tape dans Vim, noté à la manière de l’aide de Vim (CTRL-R, <Esc>), avec des espaces réservés comme {char} ou {file}. Chaque tâche part du mode Normal. Le paquet couvre les modes, l’enregistrement et la sortie, les déplacements, l’édition, la recherche et le remplacement, les marques et les macros, les fenêtres, les tampons et les onglets, avec des synonymes et des pièges dans les notes. Chaque commande a été exécutée dans Vim 9.1, avec et sans son defaults.vim, et vérifiée dans l’aide intégrée de Vim."@fr ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." .
+
+<https://solid-memo.com/decks/vim-commands/v2.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Vim commands"@en ,
@@ -19301,7 +19440,7 @@
                   "Vim-Befehle"@de ,
                   "Comandos de Vim"@es ,
                   "Commandes Vim"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/vim-commands/v1.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/vim-commands/v2.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "65 everyday Vim commands: the front describes a task in plain words, the back is what you type in Vim, written as Vim's own help writes keys (CTRL-R, <Esc>) with placeholders such as {char} or {file}. Every task starts in Normal mode. Covers the modes, saving and quitting, moving around, editing, searching and replacing, marks and macros, windows, buffers and tab pages, with synonyms and pitfalls in the notes. Every command was run in Vim 9.1, with and without its defaults.vim, and checked against Vim's built-in help."@en ,
                         "65 vardagliga Vim-kommandon: på framsidan en uppgift beskriven med vanliga ord, på baksidan det du skriver i Vim, återgivet så som Vims egen hjälp skriver tangenter (CTRL-R, <Esc>) med platshållare som {char} eller {file}. Varje uppgift börjar i normalläge. Täcker lägena, att spara och avsluta, förflyttning, redigering, sökning och ersättning, markeringar och makron, fönster, buffertar och flikar, med synonymer och fallgropar i anteckningarna. Varje kommando har körts i Vim 9.1, med och utan dess defaults.vim, och kontrollerats mot Vims inbyggda hjälp."@sv ,
@@ -19309,8 +19448,8 @@
                         "65 alltägliche Vim-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten, die Rückseite ist das, was man in Vim tippt, so geschrieben, wie Vims eigene Hilfe Tasten schreibt (CTRL-R, <Esc>), mit Platzhaltern wie {char} oder {file}. Jede Aufgabe beginnt im Normalmodus. Behandelt die Modi, Speichern und Beenden, Bewegen im Text, Bearbeiten, Suchen und Ersetzen, Marken und Makros, Fenster, Puffer und Reiter, mit Synonymen und Stolperfallen in den Anmerkungen. Jeder Befehl wurde in Vim 9.1 ausgeführt, mit und ohne dessen defaults.vim, und mit Vims eingebauter Hilfe abgeglichen."@de ,
                         "65 comandos de Vim de uso diario: el anverso describe una tarea con palabras sencillas y el reverso es lo que se escribe en Vim, con las teclas escritas como en la propia ayuda de Vim (CTRL-R, <Esc>) y marcadores de posición como {char} o {file}. Todas las tareas empiezan en modo Normal. Abarca los modos, guardar y salir, moverse por el texto, editar, buscar y sustituir, marcas y macros, ventanas, búferes y pestañas, con sinónimos y errores frecuentes en las notas. Cada comando se ejecutó en Vim 9.1, con y sin su defaults.vim, y se comprobó con la ayuda integrada de Vim."@es ,
                         "65 commandes Vim du quotidien : le recto décrit une tâche avec des mots simples, le verso est ce que l’on tape dans Vim, noté à la manière de l’aide de Vim (CTRL-R, <Esc>), avec des espaces réservés comme {char} ou {file}. Chaque tâche part du mode Normal. Le paquet couvre les modes, l’enregistrement et la sortie, les déplacements, l’édition, la recherche et le remplacement, les marques et les macros, les fenêtres, les tampons et les onglets, avec des synonymes et des pièges dans les notes. Chaque commande a été exécutée dans Vim 9.1, avec et sans son defaults.vim, et vérifiée dans l’aide intégrée de Vim."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/vim-commands/v1.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/vim-commands/v1.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/vim-commands/v2.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/vim-commands/v2.ttl#compilation> ;
     dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -19352,31 +19491,33 @@
                      <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 6 ;
-    dcat:version "1" ;
-    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "First release." ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Keys and commands are written as Markdown code, so they show in a code font and browser translation leaves them alone; no card's wording changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#vim-commands> ;
     dcat:isVersionOf <#vim-commands> ;
-    dcat:contactPoint <https://solid-memo.com/decks/vim-commands/v1.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/vim-commands/v1.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/vim-commands/v2.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/vim-commands/v2.ttl#turtle> ;
     solid-memo:cardCount 65 .
 
-<https://solid-memo.com/decks/vim-commands/v1.ttl#anton-wiklund>
+<https://solid-memo.com/decks/vim-commands/v2.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/vim-commands/v1.ttl#contact>
+<https://solid-memo.com/decks/vim-commands/v2.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://github.com/vim/vim/blob/master/LICENSE>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/vim-commands/v1.ttl#compilation>
+<https://solid-memo.com/decks/vim-commands/v2.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/vim-commands/v1.ttl#test-runs>
+<https://solid-memo.com/decks/vim-commands/v2.ttl#test-runs>
     dcterms:title "Test run of every command in Vim 9.1, headless, with and without defaults.vim" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -19391,10 +19532,10 @@
     dcterms:creator "The Vim project and its translators" ;
     dcterms:license <https://github.com/vim/vim/blob/master/LICENSE> .
 
-<https://solid-memo.com/decks/vim-commands/v1.ttl#turtle>
+<https://solid-memo.com/decks/vim-commands/v2.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/vim-commands/v2.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/vim-commands/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
