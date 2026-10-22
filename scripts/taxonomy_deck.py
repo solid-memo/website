@@ -72,7 +72,17 @@ METHOD
     X (In use) -> "Nytt yrke" / "Added in taxonomy version N, …"
 
   The answer is always Swedish, like the names: "Nytt yrke" (a new
-  occupation), "Ingen ersättare" (no replacement). The notes and the label
+  occupation), "Ingen ersättare" (no replacement).
+
+  Each card names the concepts it is about by their IRIs, as the taxonomy
+  gives them (http://data.jobtechdev.se/taxonomy/concept/<id>): an outdated
+  name the concepts that had it, a new name the live concepts that have it,
+  as dcterms:subject. A replaced concept's successors, the ones its back
+  names, follow the cards as dcterms:isReplacedBy of the concept, not of the
+  card: the back keeps their names, which a learner reads, and the IRIs let
+  a later version be checked against the taxonomy card by card
+  (docs/deck-library.md#what-a-card-is-about). A retired card keeps the
+  subjects it was published with. The notes and the label
   are in English and Swedish, and the app shows the reader's language.
 
   One card per name: a new name that later goes out of use keeps its card,
@@ -85,7 +95,8 @@ METHOD
   a live concept has. Concepts that had the same outdated name share one card.
 
   The deck is cumulative, and meant to grow by one version per taxonomy
-  version: a later run adds cards and changes backs, so an imported copy keeps
+  version (or by one that covers the same versions as the previous one, when
+  the script has changed what it writes of them): a later run adds cards and changes backs, so an imported copy keeps
   its reviews when it is upgraded. A card of the previous version that no
   rule makes any longer (say, a name back in use as it was in the first
   version) is never removed but retired (owl:deprecated true), as it was last
@@ -186,6 +197,7 @@ from pathlib import Path
 API = "https://taxonomy.api.jobtechdev.se/v1/taxonomy"
 TAXONOMY = f"{API}/#Taxonomi"  # the dataset's IRI in Arbetsförmedlingen's DCAT catalog
 USER_AGENT = "SolidMemoDeckGenerator/1.0 (https://github.com/solid-memo/website)"
+CONCEPT = "http://data.jobtechdev.se/taxonomy/concept/"  # a concept's IRI is this and its id, as the API's `uri` gives it
 CONCEPT_TYPE = "occupation-name"
 QUERY = (
     '{ concepts(type: "%s", version: "%d", include_deprecated: true) '
@@ -335,7 +347,10 @@ class Card:
     replacements: list[str]  # labels
     version: int  # the taxonomy version it records
     kind: str = "replaced"  # a key of CARD_KINDS
-    concept_ids: list[str] = field(default_factory=list)
+    concept_ids: list[str] = field(default_factory=list)  # what it is about: its dcterms:subject
+    # A deprecated concept of concept_ids -> the concepts its back names as
+    # replacing it, as dcterms:isReplacedBy.
+    successors: dict[str, list[str]] = field(default_factory=dict)
     added: list[str] = field(default_factory=list)  # synonyms, for kind "synonym_added"
     removed: list[str] = field(default_factory=list)  # synonyms, for kind "synonym_removed"
     replaces: list[str] = field(default_factory=list)  # outdated names, for kind "new"
@@ -503,6 +518,7 @@ def build_cards(snaps: dict[int, dict[str, Concept]], since: int,
 
         # What the concept is called today.
         went = None  # the version it was deprecated in, if it is
+        successors: list[str] = []  # the concepts the back names, if it is deprecated
         if not now.deprecated:
             current = [now.label]
             if any(cid in snaps[v] and snaps[v][cid].deprecated for v in range(since, to)):
@@ -519,6 +535,7 @@ def build_cards(snaps: dict[int, dict[str, Concept]], since: int,
                 for rid in now.replaced_by:
                     if rid in latest and not latest[rid].deprecated:
                         current.append(latest[rid].label)
+                        successors.append(rid)
                     else:
                         errors.append(f"  {now.label!r} ({cid}) is replaced by {rid}, "
                                       f"which is not a live concept in version {to}")
@@ -526,6 +543,7 @@ def build_cards(snaps: dict[int, dict[str, Concept]], since: int,
             else:  # the taxonomy has dropped its replacement: name the last one it gave
                 last = next((v for v in range(to - 1, went - 1, -1) if snaps[v][cid].replaced_by), None)
                 current = labels_in(last, snaps[last][cid].replaced_by) if last is not None else []
+                successors = [r for r in snaps[last][cid].replaced_by if r in snaps[last]] if last is not None else []
                 if current:
                     met["replacement_missing"].append(f"{last_live}: none in version {to}, "
                                                       f"{' · '.join(current)} in version {last}")
@@ -577,6 +595,7 @@ def build_cards(snaps: dict[int, dict[str, Concept]], since: int,
             then = ({"renamed_to": snaps[v][cid].label, "deprecated_in": went}
                     if now.deprecated and not by_deprecation else {})
             candidates[label].append(Card(card_id(label), label, current, v, kind=kind, concept_ids=[cid],
+                                          successors={cid: successors} if successors else {},
                                           added=added, removed=removed, **then))
 
     # A name more than one concept had. Usually a hand-over: the taxonomy
@@ -604,6 +623,7 @@ def build_cards(snaps: dict[int, dict[str, Concept]], since: int,
             card.renamed_to, card.deprecated_in = None, None  # two paths: the note gives the first date only
             card.version = min(card.version, other.version)
             card.concept_ids.append(other.concept_ids[0])
+            card.successors.update(other.successors)
         cards[label] = card
         if card.renamed_to is not None:  # counted once the card is settled: a hand-over drops a concept's
             met["renamed_then_replaced"].append(f"{label} → {card.renamed_to} (version {card.version}) → "
@@ -625,7 +645,8 @@ def build_cards(snaps: dict[int, dict[str, Concept]], since: int,
         came = max(v for v in range(since, to + 1) if key in live_keys[v] and key not in live_keys[v - 1])
         replaces = sorted({c.front for c in cards.values() if c.kind != "new" and label in c.replacements},
                           key=by_name)
-        cards[label] = Card(card_id(label), label, [], came, kind="new", replaces=replaces)
+        have = sorted(cid for cid, c in latest.items() if not c.deprecated and c.label == label)
+        cards[label] = Card(card_id(label), label, [], came, kind="new", concept_ids=have, replaces=replaces)
 
     result = sorted(cards.values(), key=lambda c: (by_name(c.front), c.id))
     for what, values in (("front", [c.front for c in result]), ("id", [c.id for c in result])):
@@ -862,6 +883,7 @@ class Released:
     back: Back
     created: str | None  # xsd:dateTime
     retired: bool
+    subjects: list[str] = field(default_factory=list)  # IRIs, its dcterms:subject
 
 
 TTL_ESCAPES = {"t": "\t", "b": "\b", "n": "\n", "r": "\r", "f": "\f"}
@@ -948,8 +970,10 @@ def previous_version(deck: Path) -> Previous | None:
                     re.findall(r'"((?:[^"\\]|\\.)*)"@([a-z-]+)', found.group(1))} if found else {}
         back = Back(texts("solid-memo:frontNote"), texts("solid-memo:backLabel"),
                     value("solid-memo:back") or "", texts("solid-memo:backNote"))
+        about = re.search(r"^    dcterms:subject ((?:.|\n {6,})*?) [;.]$", block, re.M)
         cards[m.group(1)] = Released(value("solid-memo:front") or "", back, value("dcterms:created"),
-                                     bool(re.search(r"^    owl:deprecated true", block, re.M)))
+                                     bool(re.search(r"^    owl:deprecated true", block, re.M)),
+                                     re.findall(r"<([^>]+)>", about.group(1)) if about else [])
     return Previous(path, number, text, cards)
 
 
@@ -958,7 +982,8 @@ def retired_cards(cards: list[Card], previous: Previous) -> dict[str, Released]:
     retired as that version had them: never removed, so a copy keeps them and
     their reviews. A card retired before stays retired."""
     now = {c.id for c in cards}
-    return {i: Released(r.front, r.back, r.created, True) for i, r in previous.cards.items() if i not in now}
+    return {i: Released(r.front, r.back, r.created, True, r.subjects) for i, r in previous.cards.items()
+            if i not in now}
 
 
 def version_notes(cards: list[Card], retired: dict[str, Released], *, versions: dict[int, str], to: int,
@@ -992,10 +1017,16 @@ def version_notes(cards: list[Card], retired: dict[str, Released], *, versions: 
     restored = [c.front for c in cards if c.id in old and old[c.id].retired]
     backs = [c for c in cards if c.id in old and not old[c.id].retired and (c.kind == "new") == was_new(c.id)
              and old[c.id].back != back_of(c, versions)]
+    relinked = [c for c in cards if c.id in old and old[c.id].subjects != [concept_iri(i) for i in sorted(c.concept_ids)]]
     added = f"versions {was + 1} to {to}" if to - was > 1 else f"version {to}"
-    return (f"Adds taxonomy {added} ({versions[to][:10]}) to the deck's version {previous.number}, which covered "
-            f"taxonomy versions {start} to {was}: {summary(now_different, retiring, restored)}; "
-            f"{plural(len(backs), 'back')} updated. The whole deck now has {plural(len(cards), 'card')} in "
+    what = (f"Makes the deck's version {previous.number}, which covered taxonomy versions {start} to {was}, again "
+            f"from the same versions" if to == was else
+            f"Adds taxonomy {added} ({versions[to][:10]}) to the deck's version {previous.number}, which covered "
+            f"taxonomy versions {start} to {was}")
+    links = (f"; {plural(len(relinked), 'card')} naming other taxonomy concepts than before as what "
+             f"{'it is' if len(relinked) == 1 else 'they are'} about (dcterms:subject)" if relinked else "")
+    return (f"{what}: {summary(now_different, retiring, restored)}; "
+            f"{plural(len(backs), 'back')} updated{links}. The whole deck now has {plural(len(cards), 'card')} in "
             f"use: {summary(cards, [], [])}" + (f"; and {plural(len(retired), 'retired card')}." if retired else "."))
 
 
@@ -1061,13 +1092,19 @@ SITE = "https://solid-memo.com/decks"
 CONTACT = "https://github.com/solid-memo/website/issues"
 
 
+def concept_iri(cid: str) -> str:
+    return f"{CONCEPT}{cid}"
+
+
 def card_lines(cards: list[Card], retired: dict[str, Released], versions: dict[int, str]) -> list[str]:
-    """The cards, in use and retired, in the order of their names, each after an empty line."""
-    written = [(card.id, card.front, back_of(card, versions), xsd_datetime(versions[card.version]), False)
-               for card in cards]
-    written += [(i, r.front, r.back, r.created, True) for i, r in retired.items()]
+    """The cards, in use and retired, in the order of their names, each after an empty line;
+    then, in id order, each concept a card in use is about that its back names successors of,
+    with those successors (dcterms:isReplacedBy)."""
+    written = [(card.id, card.front, back_of(card, versions), xsd_datetime(versions[card.version]), False,
+                [concept_iri(cid) for cid in sorted(card.concept_ids)]) for card in cards]
+    written += [(i, r.front, r.back, r.created, True, r.subjects) for i, r in retired.items()]
     out: list[str] = []
-    for card_id_, front, back, created, is_retired in sorted(written, key=lambda w: (by_name(w[1]), w[0])):
+    for card_id_, front, back, created, is_retired, subjects in sorted(written, key=lambda w: (by_name(w[1]), w[0])):
         out += [
             "",
             f"<#{card_id_}>",
@@ -1075,6 +1112,8 @@ def card_lines(cards: list[Card], retired: dict[str, Released], versions: dict[i
             "    solid-memo:formatVersion 4 ;",  # format 4: the names tagged as Swedish
             *([f'    dcterms:created "{created}"^^xsd:dateTime ;'] if created else []),
             *(["    owl:deprecated true ;"] if is_retired else []),
+            *([f"    dcterms:subject {aligned('dcterms:subject', [f'<{s}>' for s in subjects])} ;"]
+              if subjects else []),
             f"    solid-memo:front {ttl_str(front)}@sv ;",
             *([f"    solid-memo:frontNote {tagged(back.front_note, 'solid-memo:frontNote')} ;"]
               if back.front_note else []),
@@ -1083,6 +1122,10 @@ def card_lines(cards: list[Card], retired: dict[str, Released], versions: dict[i
             f"    solid-memo:back {ttl_str(back.text)}@sv" + (" ;" if back.note else " ."),
             *([f"    solid-memo:backNote {tagged(back.note, 'solid-memo:backNote')} ."] if back.note else []),
         ]
+    successors = {cid: ids for card in cards for cid, ids in card.successors.items()}
+    for cid in sorted(successors):
+        objects = [f"<{concept_iri(r)}>" for r in sorted(successors[cid])]
+        out += ["", f"<{concept_iri(cid)}>", f"    dcterms:isReplacedBy {aligned('dcterms:isReplacedBy', objects)} ."]
     return out
 
 
@@ -1278,7 +1321,7 @@ def main() -> None:
     to = recorded[-1] if args.verify else args.to if args.to is not None else max(versions)
     if to not in versions:
         ap.error(f"taxonomy version {to} does not exist: the newest is {max(versions)}")
-    if not args.verify and to <= recorded[-1]:
+    if not args.verify and to < recorded[-1]:
         sys.exit(f"{previous.path.name} already covers taxonomy version {recorded[-1]}: there is nothing to add")
     snaps, checksums = {}, {}
     for v in range(start, to + 1):
@@ -1292,8 +1335,11 @@ def main() -> None:
     since = start + 1  # the first version whose changes can be seen
     cards, left_out, met = build_cards(snaps, since, to)
     retired = retired_cards(cards, previous)
+    made = "\n".join(card_lines(cards, retired, versions)).strip("\n")
+    if not args.verify and to == recorded[-1] and made == previous.card_section:
+        sys.exit(f"{previous.path.name} already covers taxonomy version {to}, and its cards would come out the same: "
+                 "there is nothing to add")
     if args.verify:
-        made = "\n".join(card_lines(cards, retired, versions)).strip("\n")
         if made != previous.card_section:
             diff = difflib.unified_diff(previous.card_section.splitlines(), made.splitlines(),
                                         previous.path.name, "made again", lineterm="", n=1)

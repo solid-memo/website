@@ -317,6 +317,16 @@ that no rule makes any longer. It writes the rest of what
 by default today in UTC), the version notes, the publisher, the series,
 the [contact](#contact) and the Turtle distribution.
 
+Each card names the taxonomy concepts it is about, as
+`dcterms:subject <http://data.jobtechdev.se/taxonomy/concept/<id>>`
+([What a card is about](#what-a-card-is-about)): an outdated name the
+concepts that had it, a new name the live concepts that have it. A
+replaced concept, after the cards, `dcterms:isReplacedBy` the concepts
+its card's back names, which keeps their names. A retired card keeps the
+subjects it was published with. A run may cover the same taxonomy
+versions as `v<N>.ttl` when the script now writes something else of
+them, and refuses when the cards would come out the same.
+
 A version is reproducible. Its [provenance](#provenance) records the
 script at the commit it ran from, with its SHA-256 and the Python and
 Unicode versions, the command line, and every taxonomy version read,
