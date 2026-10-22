@@ -198,6 +198,55 @@ record out (every `rdfs:comment`, and the activities but for the
 compilation's type, which DCAT-AP asks for); the app shows the deck's
 sources and license on its page, and the version file has the rest.
 
+## What a card is about
+
+A card compiled from linked data names the thing it is about, by the
+IRI its source gives it, as `dcterms:subject`:
+
+```turtle
+<#sweden>
+    a solid-memo:Card ;
+    dcterms:subject <http://www.wikidata.org/entity/Q34> ;
+    …
+```
+
+So a later version can be made again from the source and checked
+against it card by card, not by labels, which change; new languages can
+be taken from the source's own labels; and the same thing can be found
+in two decks. A card about several things names each.
+
+- **The term.** `dcterms:subject` has no domain, so it fits a card.
+  `schema:about` does not (its domain is a creative work), `owl:sameAs`
+  would make the card *be* the thing, and `prov:wasDerivedFrom` already
+  names, on a pod's deck, the release it came from.
+- **The IRI** is the thing's, not a page about it: Wikidata's concept
+  form, `http://www.wikidata.org/entity/Q34`, not
+  `https://www.wikidata.org/wiki/Q34`. It is on one of the namespaces
+  the library knows, `ABOUT_NAMESPACES` in
+  [deckLibrary.ts](../packages/shacl/node/deckLibrary.ts): Wikidata's,
+  the [labor market taxonomy's](#the-taxonomy-deck)
+  (`http://data.jobtechdev.se/taxonomy/concept/`) and the
+  Rijksmuseum collection's (`https://id.rijksmuseum.nl/`). `npm run library:check` names any other
+  (`aboutProblems`, [Checks](#checks)); a deck compiled from another
+  source adds its namespace there first.
+- **What the source says of the thing** may follow the cards, as the
+  thing's own statements: the taxonomy deck states, of a replaced
+  concept, `dcterms:isReplacedBy` each concept that replaces it. The
+  card's text still says it; the IRIs are for the tools.
+- **The index leaves it out**, as it leaves the cards out: neither a
+  card's `dcterms:subject` nor what the release says of the things the
+  cards are about, unless the release names that thing as a source.
+- **The app shows none of it yet**, and never fetches from these sources
+  while someone studies. A Studio draft keeps it, as it keeps every
+  triple of an imported release
+  ([testing.md](testing.md#strategy-per-layer), the round trip), but a learner's
+  copy does not: the app copies a card from what it reads of it, and no
+  card format has the term yet.
+- **A deck compiled from linked data keeps its IDs** from its next
+  version on: the taxonomy deck, whose script writes them, and the
+  decks compiled from Wikidata, such as `famous-paintings` and
+  `capitals-of-the-world`, their QIDs.
+
 ## Publishing a new version
 
 A published version is never edited or removed, only followed by the
@@ -451,6 +500,10 @@ what the versions make. Both check:
   name even when there is no such deck, so a typo in `NEWCOMER_COURSE`
   is reported, not dropped;
 - text in Markdown, by the [Markdown rules](#markdown-rules);
+- what each card is about (`aboutProblems`): every `dcterms:subject`
+  of a card an IRI on one of `ABOUT_NAMESPACES`
+  ([What a card is about](#what-a-card-is-about)). No published version
+  states one that is not, so the rule holds every version;
 - every literal of a version and of the index in Unicode normalization
   form C, composed (`normalizationProblems`): "é" not written as "e"
   and a combining accent, nor "사람" as five jamo, as text copied from a

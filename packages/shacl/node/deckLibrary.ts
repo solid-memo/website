@@ -70,7 +70,8 @@ import {
  * SKOS with the reference data, each deck's newest version in every
  * language the app speaks (languageProblems), a course's outline (courseProblems), its
  * text written in Markdown (markdownProblems), every literal in Unicode
- * NFC (normalizationProblems), and that no version drops
+ * NFC (normalizationProblems), what each card is about on a namespace
+ * the library knows (aboutProblems), and that no version drops
  * a card, chapter, step or distractor of the one before it. With
  * `--base <git ref>`, a version published at that ref must be there
  * still, byte for byte: a published version is never edited or removed,
@@ -97,6 +98,18 @@ export const DECKS_BASE = `${SITE}decks/`;
 export const INDEX_FILE = "index.ttl";
 export const INDEX_URL = `${DECKS_BASE}${INDEX_FILE}`;
 export const PUBLISHER_URL = `${INDEX_URL}#solid-memo`;
+
+/**
+ * The namespaces a card's dcterms:subject, the thing it is about, may be
+ * on (docs/deck-library.md, What a card is about): the sources the
+ * library's decks are compiled from, by the form of IRI each gives its
+ * things. Wikidata's is its concept form, not its pages' https://…/wiki/.
+ */
+export const ABOUT_NAMESPACES = [
+  "http://www.wikidata.org/entity/",
+  "http://data.jobtechdev.se/taxonomy/concept/",
+  "https://id.rijksmuseum.nl/",
+];
 
 /** The deck whose series the index names the course for newcomers (solid-memo:newcomerCourse); undefined names none. See docs/deck-library.md. */
 export const NEWCOMER_COURSE: string | undefined = "getting-started";
@@ -210,6 +223,8 @@ function n3Term(term: ReleaseTerm): Quad_Object {
  * course), plus sm:cardCount, the cards it has in use — so the library
  * can be listed from the index alone. The releases must be sorted by
  * deck then version.
+ * Nor does it keep what the release says of the things its cards are
+ * about (aboutOnly), which only the cards need.
  * The catalog names `newcomerCourse`'s series the course for newcomers
  * (solid-memo:newcomerCourse), even when there is no such deck, which
  * newcomerProblems then reports.
@@ -277,7 +292,12 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
     }
 
     const kept = keptInIndex(modelOf(latest));
-    out.push(...latest.quads.filter((q) => kept(q.subject.value, q.predicate.value)));
+    const about = aboutOnly(latest.quads);
+    out.push(
+      ...latest.quads.filter(
+        (q) => kept(q.subject.value, q.predicate.value) && !about.has(q.subject.value),
+      ),
+    );
     add(entry.last, `${SM_NS}cardCount`, literal(String(entry.cardCount), iri(`${XSD}integer`)));
   }
   return writeIndex(distinct(out));
@@ -446,6 +466,60 @@ export function normalizationProblems(
   return problems;
 }
 
+/** The subjects typed solid-memo:Card. */
+function cardsOf(quads: readonly Quad[]): Set<string> {
+  return new Set(
+    quads
+      .filter((q) => q.predicate.value === RDF_TYPE && q.object.value === `${SM_NS}Card`)
+      .map((q) => q.subject.value),
+  );
+}
+
+/**
+ * The things the release's cards are about (their dcterms:subject) that
+ * it names as nothing else: not a source it was derived from, which the
+ * index describes.
+ */
+function aboutOnly(quads: readonly Quad[]): Set<string> {
+  const cards = cardsOf(quads);
+  const sources = new Set(
+    quads.filter((q) => q.predicate.value === `${PROV}wasDerivedFrom`).map((q) => q.object.value),
+  );
+  return new Set(
+    quads
+      .filter((q) => q.predicate.value === `${DCTERMS}subject` && cards.has(q.subject.value))
+      .map((q) => q.object.value)
+      .filter((about) => !sources.has(about)),
+  );
+}
+
+/**
+ * What a release's cards say they are about (dcterms:subject), held to
+ * the library's rule: an IRI on one of ABOUT_NAMESPACES, so a card links
+ * the thing in the source it was compiled from, never a page about it or
+ * a text (docs/deck-library.md, What a card is about).
+ */
+export function aboutProblems(release: DeckRelease): string[] {
+  const label = labelOf(release.deck, release.version);
+  const url = releaseUrlOf(release.deck, release.version);
+  const cards = cardsOf(release.quads);
+  return release.quads
+    .filter((q) => q.predicate.value === `${DCTERMS}subject` && cards.has(q.subject.value))
+    .filter(
+      (q) =>
+        q.object.termType !== "NamedNode" ||
+        !ABOUT_NAMESPACES.some((namespace) => q.object.value.startsWith(namespace)),
+    )
+    .map((q) => {
+      const card = q.subject.value.startsWith(`${url}#`)
+        ? `<${q.subject.value.slice(url.length)}>`
+        : `<${q.subject.value}>`;
+      const value =
+        q.object.termType === "Literal" ? JSON.stringify(q.object.value) : `<${q.object.value}>`;
+      return `${label}: ${card} states dcterms:subject ${value}: what a card is about is an IRI on one of the namespaces the library knows (${ABOUT_NAMESPACES.join(", ")}).`;
+    });
+}
+
 /**
  * What the shapes cannot say about the course the index offers to
  * newcomers (solid-memo:newcomerCourse on its catalog, which no shape
@@ -541,7 +615,8 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
  * never another kind of subject's), the languages of a deck's newest
  * version (languageProblems), its course outline (courseProblems),
  * its text written in Markdown (markdownProblems), its literals in
- * Unicode NFC (normalizationProblems), and Solid Memo's shapes, DCAT-AP
+ * Unicode NFC (normalizationProblems), what its cards are about
+ * (aboutProblems), and Solid Memo's shapes, DCAT-AP
  * (a release with the index beside it, where its series and publisher
  * are described) and SKOS, with the reference data; then the index's
  * course for newcomers (newcomerProblems), its literals in NFC, and the
@@ -574,6 +649,7 @@ export async function validateLibrary(
     if (newest) problems.push(...languageProblems(release));
     problems.push(
       ...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads),
+      ...aboutProblems(release),
     );
     problems.push(
       ...(await problemsOf(

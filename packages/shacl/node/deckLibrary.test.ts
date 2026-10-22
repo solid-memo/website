@@ -10,6 +10,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
+  ABOUT_NAMESPACES,
+  aboutProblems,
   baseProblems,
   buildIndex,
   contactProblems,
@@ -153,6 +155,19 @@ function release(deck: string, version: number, fixture?: Fixture): DeckRelease 
   const turtle = releaseText(deck, version, fixture);
   return { deck, version, turtle, quads: parseTurtle(turtle, `${DECKS}${deck}/v${version}.ttl`) };
 }
+
+/** A release of the capitals deck with this Turtle after it: what its cards are about, say. */
+function capitalsWith(extra: string): DeckRelease {
+  const turtle = `${releaseText("capitals", 1)}\n${extra}\n`;
+  return {
+    deck: "capitals",
+    version: 1,
+    turtle,
+    quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`),
+  };
+}
+
+const Q34 = "http://www.wikidata.org/entity/Q34";
 
 const NORWAY: Fixture = { cards: { se: ["Sweden", "Stockholm"], no: ["Norway", "Oslo"] } };
 const CAPITALS = [release("capitals", 1), release("capitals", 2, NORWAY)];
@@ -360,6 +375,19 @@ describe("buildIndex", () => {
         )
         .map((q) => q.object.value),
     ).toEqual(["1"]);
+  });
+
+  it("leaves out what the current release says of the things its cards are about, but not of its sources", () => {
+    const source = "http://www.wikidata.org/entity/Q5119";
+    const made = capitalsWith(`<#se> <${DCTERMS}subject> <${Q34}> , <${source}> .
+<${Q34}> <${DCTERMS}isReplacedBy> <http://www.wikidata.org/entity/Q1> .
+<> <http://www.w3.org/ns/prov#wasDerivedFrom> <${source}> .
+<${source}> <${DCTERMS}title> "Capital" .`);
+    const built = parseTurtle(buildIndex([made]), INDEX);
+    expect(built.filter((q) => q.subject.value === Q34)).toEqual([]);
+    expect(built.filter((q) => q.subject.value === source).map((q) => q.object.value)).toEqual([
+      "Capital",
+    ]);
   });
 
   it("leaves out how the current release was made: its activities and every comment", () => {
@@ -1257,6 +1285,43 @@ describe("languageProblems", () => {
     const problems = await validateLibrary(newest, buildIndex(newest), validators);
     expect(problems).toContain(lacks("dcterms:title", "ko"));
     expect(problems.every((problem) => problem.startsWith(`${L}: has no `))).toBe(true);
+  });
+});
+
+describe("aboutProblems", () => {
+  const L = "decks/capitals/v1.ttl";
+  const KNOWN = ABOUT_NAMESPACES.join(", ");
+
+  it("accepts a card about a thing of a source the library knows, several too", () => {
+    const things = ABOUT_NAMESPACES.map((namespace) => `<${namespace}1>`).join(" , ");
+    expect(aboutProblems(capitalsWith(`<#se> <${DCTERMS}subject> ${things} .`))).toEqual([]);
+  });
+
+  it("names a card about a page, a text or a thing elsewhere, but not what another subject is about", () => {
+    const made =
+      capitalsWith(`<#se> <${DCTERMS}subject> <https://www.wikidata.org/wiki/Q34> , "Sweden" , <https://example.org/se> .
+<> <${DCTERMS}subject> <https://example.org/geography> .`);
+    expect(aboutProblems(made)).toEqual([
+      `${L}: <#se> states dcterms:subject <https://www.wikidata.org/wiki/Q34>: what a card is about is an IRI on one of the namespaces the library knows (${KNOWN}).`,
+      `${L}: <#se> states dcterms:subject "Sweden": what a card is about is an IRI on one of the namespaces the library knows (${KNOWN}).`,
+      `${L}: <#se> states dcterms:subject <https://example.org/se>: what a card is about is an IRI on one of the namespaces the library knows (${KNOWN}).`,
+    ]);
+  });
+
+  it("names a card of another document by its whole IRI", () => {
+    const made = capitalsWith(
+      `<https://example.org/cards#se> a <${SM}Card> ; <${DCTERMS}subject> "Sweden" .`,
+    );
+    expect(aboutProblems(made)).toEqual([
+      `${L}: <https://example.org/cards#se> states dcterms:subject "Sweden": what a card is about is an IRI on one of the namespaces the library knows (${KNOWN}).`,
+    ]);
+  });
+
+  it("is part of the library's validation", async () => {
+    const made = capitalsWith(`<#se> <${DCTERMS}subject> "Sweden" .`);
+    expect(await validateLibrary([made], buildIndex([made]), validators)).toContain(
+      `${L}: <#se> states dcterms:subject "Sweden": what a card is about is an IRI on one of the namespaces the library knows (${KNOWN}).`,
+    );
   });
 });
 
