@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -13454,12 +13454,13 @@
                  "JSON-LD"@fr ,
                  "Linked Web Storage"@fr ;
     dcat:first <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ,
                     <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> ,
                     <https://solid-memo.com/decks/solid-fundamentals/v3.ttl> ,
-                    <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> .
+                    <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ,
+                    <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> .
 
 <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>
     a dcat:Dataset ;
@@ -13500,6 +13501,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/solid-fundamentals/v4.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Solid fundamentals"@en ,
+                  "Grunderna i Solid"@sv ,
+                  "Solid 기초"@ko ,
+                  "Solid-Grundlagen"@de ,
+                  "Fundamentos de Solid"@es ,
+                  "Les bases de Solid"@fr ;
+    dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
+                        "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ,
+                        "Solid로 앱을 만들고 싶은 사람을 위한 Solid 코스입니다. Solid가 왜 있는지, 그 바탕인 링크드 데이터와 RDF, 어휘, Pod와 컨테이너, 리소스 읽기와 쓰기, 신원과 로그인, 접근 제어와 공유, 알림, 앱의 데이터 설계, 앱의 구축·보안·배포, 최소한의 앱과 Solid Memo 자체를 한 부분씩 읽어 보기, Solid의 미해결 문제, 그리고 Solid의 뒤를 이을 수도 있는 Linked Web Storage 초안을 다룹니다. 17개 챕터는 짧은 단계로 이루어지며, 각 단계는 필요한 곳에 코드와 표를 곁들인 이론 한 부분과 그 뒤의 객관식 문제로 되어 있습니다. 챕터마다 마지막에 복습이 있고, 답한 문제는 모두 덱의 카드가 됩니다. 내용은 Solid 명세, RDF 관련 W3C 표준, 서버와 라이브러리의 문서와 코드, Community Solid Server 7.2에 기록한 요청에서 가져왔으며 2026년 10월 기준입니다."@ko ,
+                        "Ein Kurs über Solid für alle, die damit Apps bauen wollen: warum es Solid gibt, Linked Data und RDF, auf denen es aufbaut, Vokabulare, Pods und Container, Ressourcen lesen und schreiben, Identität und Anmeldung, Zugriffskontrolle und Teilen, Benachrichtigungen, die Daten einer App entwerfen, eine App bauen, absichern und veröffentlichen, eine minimale App und Solid Memo selbst Stück für Stück gelesen, die offenen Probleme von Solid und die Entwürfe von Linked Web Storage, das Solid ablösen könnte. 17 Kapitel aus kurzen Schritten, jeder ein Stück Theorie, mit Code und Tabellen, wo sie helfen, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Die Fakten stammen aus den Solid-Spezifikationen, den W3C-Standards rund um RDF, der Dokumentation und dem Code der Server und Bibliotheken und aus Anfragen, die auf Community Solid Server 7.2 aufgezeichnet wurden, Stand Oktober 2026."@de ,
+                        "Un curso sobre Solid para quien quiere crear aplicaciones con él: por qué existe Solid, los datos enlazados y RDF en los que se basa, los vocabularios, los Pods y los contenedores, leer y escribir recursos, la identidad y el inicio de sesión, el control de acceso y el uso compartido, las notificaciones, el diseño de los datos de una aplicación, cómo crear, proteger y publicar una aplicación, una aplicación mínima y el propio Solid Memo leídos pieza a pieza, los problemas abiertos de Solid y los borradores de Linked Web Storage, que podría sucederle. 17 capítulos de pasos breves, cada uno un fragmento de teoría, con código y tablas donde ayudan, seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. Los datos proceden de las especificaciones de Solid, los estándares del W3C en torno a RDF, la documentación y el código de los servidores y bibliotecas, y peticiones registradas en Community Solid Server 7.2, a fecha de octubre de 2026."@es ,
+                        "Un cours sur Solid pour ceux qui veulent créer des applications avec : pourquoi Solid existe, les données liées et RDF sur lesquels il repose, les vocabulaires, les Pods et les conteneurs, la lecture et l’écriture de ressources, l’identité et la connexion, le contrôle d’accès et le partage, les notifications, la conception des données d’une application, la création, la sécurisation et la publication d’une application, une application minimale et Solid Memo lui-même lus pièce par pièce, les problèmes ouverts de Solid et les brouillons de Linked Web Storage, qui pourrait lui succéder. 17 chapitres de courtes étapes, chacune un morceau de théorie, avec du code et des tableaux là où ils aident, suivi de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Les faits proviennent des spécifications Solid, des standards du W3C autour de RDF, de la documentation et du code des serveurs et des bibliothèques, et de requêtes enregistrées sur Community Solid Server 7.2, en octobre 2026."@fr ;
+    dcat:version "4" ;
+    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "20 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." .
+
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ,
       <https://schema.org/Course> ;
@@ -13509,7 +13528,7 @@
                   "Solid-Grundlagen"@de ,
                   "Fundamentos de Solid"@es ,
                   "Les bases de Solid"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
                         "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ,
@@ -13765,7 +13784,7 @@
                         <https://www.w3.org/standards/history/lws10-core/> ,
                         <https://www.w3.org/standards/history/rdf12-concepts/> ,
                         <https://zenodo.org/records/7641620> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#compilation> ;
     dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ,
@@ -13856,28 +13875,28 @@
                  "Linked Web Storage"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "4" ;
-    dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v3.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v3.ttl> ;
-    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "20 questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "5" ;
+    dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "The review question on fetching a WebID with a hash is asked so that it has one answer when studied flip-and-grade, without its options; one wrong option is retired and replaced, and every chapter, step and card keeps its id." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#solid-fundamentals> ;
     dcat:isVersionOf <#solid-fundamentals> ;
-    dcat:contactPoint <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v4.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v5.ttl#turtle> ;
     solid-memo:cardCount 466 .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#anton-wiklund>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#contact>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#compilation>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#compilation>
     a prov:Activity .
 
 <http://xmlns.com/foaf/spec/>
@@ -14872,10 +14891,10 @@
     dcterms:title "node-solid-server v6.0.0" ;
     dcterms:creator "node-solid-server project" .
 
-<https://solid-memo.com/decks/solid-fundamentals/v4.ttl#turtle>
+<https://solid-memo.com/decks/solid-fundamentals/v5.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v5.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
