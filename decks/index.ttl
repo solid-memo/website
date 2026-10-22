@@ -15489,10 +15489,11 @@
                  "SQLite"@fr ,
                  "PostgreSQL"@fr ;
     dcat:first <https://solid-memo.com/decks/sql-basics/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/sql-basics/v1.ttl> ,
-                    <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/sql-basics/v2.ttl> .
+                    <https://solid-memo.com/decks/sql-basics/v2.ttl> ,
+                    <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/sql-basics/v3.ttl> .
 
 <https://solid-memo.com/decks/sql-basics/v1.ttl>
     a dcat:Dataset ;
@@ -15505,6 +15506,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/sql-basics/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "SQL basics"@en ,
+                  "Grundläggande SQL"@sv ,
+                  "SQL 기초"@ko ,
+                  "SQL-Grundlagen"@de ,
+                  "SQL básico"@es ,
+                  "Les bases de SQL"@fr ;
+    dcterms:description "48 everyday SQL statements: the front describes a task in plain words in English and Swedish, the back is the one statement that does it, on three example tables (customers, products and orders) and in one style: upper-case keywords, AS for aliases, <> for not equal and a closing semicolon. Every statement runs unchanged in both SQLite and PostgreSQL, so rows are limited with LIMIT; FETCH FIRST, which SQLite rejects, is given in a note. Each was run in SQLite 3.53 and PostgreSQL 16 and checked against both projects' documentation."@en ,
+                        "48 vardagliga SQL-satser: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan den sats som utför den, mot tre exempeltabeller (customers, products och orders) och i en enda stil: nyckelord med versaler, AS för alias, <> för ”inte lika med” och avslutande semikolon. Varje sats fungerar oförändrad i både SQLite och PostgreSQL, så antalet rader begränsas med LIMIT; FETCH FIRST, som SQLite inte godtar, nämns i en anteckning. Alla har körts i SQLite 3.53 och PostgreSQL 16 och kontrollerats mot båda projektens dokumentation."@sv ,
+                        "일상적인 SQL 문 48개입니다. 앞면에는 할 일이 영어와 스웨덴어로 쉽게 설명되어 있고, 뒷면에는 그 일을 하는 SQL 문 하나가 있습니다. 예제 테이블 세 개(customers, products, orders)를 대상으로 하며, 한 가지 스타일을 따릅니다: 키워드는 대문자, 별칭에는 AS, 같지 않음에는 <>, 끝에는 세미콜론. 모든 문은 SQLite와 PostgreSQL에서 그대로 실행되므로 행 수는 LIMIT로 제한하고, SQLite가 받아들이지 않는 FETCH FIRST는 메모로 알려 줍니다. 모두 SQLite 3.53과 PostgreSQL 16에서 실행했고 두 프로젝트의 문서로 확인했습니다."@ko ,
+                        "48 alltägliche SQL-Anweisungen: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist die eine Anweisung, die sie erledigt, auf drei Beispieltabellen (customers, products und orders) und in einem einheitlichen Stil: Schlüsselwörter in Großbuchstaben, AS für Aliasse, <> für ungleich und ein abschließendes Semikolon. Jede Anweisung läuft unverändert sowohl in SQLite als auch in PostgreSQL, deshalb werden Zeilen mit LIMIT begrenzt; FETCH FIRST, das SQLite ablehnt, steht in einer Anmerkung. Jede wurde in SQLite 3.53 und PostgreSQL 16 ausgeführt und mit der Dokumentation beider Projekte abgeglichen."@de ,
+                        "48 sentencias SQL de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es la sentencia que la realiza, sobre tres tablas de ejemplo (customers, products y orders) y con un único estilo: palabras clave en mayúsculas, AS para los alias, <> para distinto de y un punto y coma final. Cada sentencia funciona sin cambios tanto en SQLite como en PostgreSQL, así que las filas se limitan con LIMIT; FETCH FIRST, que SQLite rechaza, se indica en una nota. Cada una se ejecutó en SQLite 3.53 y PostgreSQL 16 y se comprobó con la documentación de ambos proyectos."@es ,
+                        "48 requêtes SQL courantes : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la requête qui l’accomplit, sur trois tables d’exemple (customers, products et orders) et dans un seul style : mots-clés en majuscules, AS pour les alias, <> pour différent de et un point-virgule final. Chaque requête s’exécute telle quelle dans SQLite comme dans PostgreSQL, si bien que les lignes sont limitées avec LIMIT ; FETCH FIRST, que SQLite refuse, figure dans une note. Chacune a été exécutée dans SQLite 3.53 et PostgreSQL 16 et vérifiée dans la documentation des deux projets."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/sql-basics/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "SQL basics"@en ,
@@ -15513,7 +15532,7 @@
                   "SQL-Grundlagen"@de ,
                   "SQL básico"@es ,
                   "Les bases de SQL"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/sql-basics/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/sql-basics/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "48 everyday SQL statements: the front describes a task in plain words in English and Swedish, the back is the one statement that does it, on three example tables (customers, products and orders) and in one style: upper-case keywords, AS for aliases, <> for not equal and a closing semicolon. Every statement runs unchanged in both SQLite and PostgreSQL, so rows are limited with LIMIT; FETCH FIRST, which SQLite rejects, is given in a note. Each was run in SQLite 3.53 and PostgreSQL 16 and checked against both projects' documentation."@en ,
                         "48 vardagliga SQL-satser: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan den sats som utför den, mot tre exempeltabeller (customers, products och orders) och i en enda stil: nyckelord med versaler, AS för alias, <> för ”inte lika med” och avslutande semikolon. Varje sats fungerar oförändrad i både SQLite och PostgreSQL, så antalet rader begränsas med LIMIT; FETCH FIRST, som SQLite inte godtar, nämns i en anteckning. Alla har körts i SQLite 3.53 och PostgreSQL 16 och kontrollerats mot båda projektens dokumentation."@sv ,
@@ -15521,8 +15540,8 @@
                         "48 alltägliche SQL-Anweisungen: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist die eine Anweisung, die sie erledigt, auf drei Beispieltabellen (customers, products und orders) und in einem einheitlichen Stil: Schlüsselwörter in Großbuchstaben, AS für Aliasse, <> für ungleich und ein abschließendes Semikolon. Jede Anweisung läuft unverändert sowohl in SQLite als auch in PostgreSQL, deshalb werden Zeilen mit LIMIT begrenzt; FETCH FIRST, das SQLite ablehnt, steht in einer Anmerkung. Jede wurde in SQLite 3.53 und PostgreSQL 16 ausgeführt und mit der Dokumentation beider Projekte abgeglichen."@de ,
                         "48 sentencias SQL de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es la sentencia que la realiza, sobre tres tablas de ejemplo (customers, products y orders) y con un único estilo: palabras clave en mayúsculas, AS para los alias, <> para distinto de y un punto y coma final. Cada sentencia funciona sin cambios tanto en SQLite como en PostgreSQL, así que las filas se limitan con LIMIT; FETCH FIRST, que SQLite rechaza, se indica en una nota. Cada una se ejecutó en SQLite 3.53 y PostgreSQL 16 y se comprobó con la documentación de ambos proyectos."@es ,
                         "48 requêtes SQL courantes : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la requête qui l’accomplit, sur trois tables d’exemple (customers, products et orders) et dans un seul style : mots-clés en majuscules, AS pour les alias, <> pour différent de et un point-virgule final. Chaque requête s’exécute telle quelle dans SQLite comme dans PostgreSQL, si bien que les lignes sont limitées avec LIMIT ; FETCH FIRST, que SQLite refuse, figure dans une note. Chacune a été exécutée dans SQLite 3.53 et PostgreSQL 16 et vérifiée dans la documentation des deux projets."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/sql-basics/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/sql-basics/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/sql-basics/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/sql-basics/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -15559,26 +15578,31 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/sql-basics/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/sql-basics/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Statements, keywords and names are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#sql-basics> ;
     dcat:isVersionOf <#sql-basics> ;
-    dcat:distribution <https://solid-memo.com/decks/sql-basics/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/sql-basics/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/sql-basics/v3.ttl#turtle> ;
     solid-memo:cardCount 48 .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#compilation>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/sql-basics/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#test-runs>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#test-runs>
     dcterms:title "Test run of every statement in SQLite 3.53.1 and PostgreSQL 16.2 on a small example database" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -15600,10 +15624,10 @@
     dcterms:creator "Swedish Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/sql-basics/v2.ttl#turtle>
+<https://solid-memo.com/decks/sql-basics/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/sql-basics/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/sql-basics/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
