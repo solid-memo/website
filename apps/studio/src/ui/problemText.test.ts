@@ -184,6 +184,14 @@ describe("problemMessage", () => {
       "Title: no text in English.",
     );
     expect(
+      say(
+        { code: "missingImageDescription", params: { language: "sv" } },
+        SM.frontImageDescription,
+      ),
+    ).toBe(
+      "Description of the front picture: no description in Swedish. Without one, a screen reader says only that there is a picture.",
+    );
+    expect(
       say({
         code: "missingTheme",
         params: { theme: "http://publications.europa.eu/resource/authority/data-theme/EDUC" },

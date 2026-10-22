@@ -50,6 +50,11 @@ export interface ReleaseCard extends ReleaseSubject {
   backLabel: ReleaseText[];
   frontNote: ReleaseText[];
   backNote: ReleaseText[];
+  /** The pictures it shows (solid-memo:frontImage, backImage), by IRI. */
+  frontImage: string[];
+  backImage: string[];
+  frontImageDescription: ReleaseText[];
+  backImageDescription: ReleaseText[];
   /** What it names by solid-memo:distractor, whatever each is. */
   distractors: ReleaseTerm[];
 }

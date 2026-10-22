@@ -48,6 +48,8 @@ const FIELDS: Readonly<Record<string, string>> = {
   [SM.backLabel]: "backLabel",
   [SM.frontNote]: "frontNote",
   [SM.backNote]: "backNote",
+  [SM.frontImageDescription]: "frontImageDescription",
+  [SM.backImageDescription]: "backImageDescription",
   [SM.distractor]: "distractor",
   [SM.distractorText]: "distractorText",
   [SM.distractorNote]: "distractorNote",
@@ -214,6 +216,7 @@ export function problemMessage(
       return t(key, { field, counts: counts.join(", ") });
     }
     case "missingLanguage":
+    case "missingImageDescription":
       return t(key, { field, language: language(problem.params.language) });
     case "missingTheme":
       return t(key, {

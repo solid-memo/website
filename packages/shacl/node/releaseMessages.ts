@@ -84,7 +84,7 @@ function markdownText(problem: MarkdownProblem): string {
 }
 
 /**
- * The problems worded here: all but curation (save a language the
+ * The problems worded here: all but curation (save the languages the
  * library asks, which the command checks of each deck's newest version), readiness and the shapes'
  * results (the Studio's: the library's command words what the shapes
  * find as the shapes do), `versionNotNext`, and the Studio's own parts
@@ -92,7 +92,7 @@ function markdownText(problem: MarkdownProblem): string {
  */
 export type WordedProblem = Exclude<
   ReleaseProblem,
-  | Exclude<CurationProblem, { code: "missingLanguage" }>
+  | Exclude<CurationProblem, { code: "missingLanguage" | "missingImageDescription" }>
   | ReadinessProblem
   | ShapeProblem
   | UnreadProblem
@@ -189,6 +189,8 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
     }
     case "missingLanguage":
       return `${at}has no ${nameOf(problem.field!)} in ${problem.params.language}: a library deck's title, description and keywords come in every language the app speaks, so its next version adds them.`;
+    case "missingImageDescription":
+      return `${at}${subject} has a picture without ${nameOf(problem.field!)} in ${problem.params.language}: a library deck describes each picture in English and in every language its card's text is in, without giving the answer away, so a screen reader can say what it shows.`;
     case "theoryChunks": {
       const counts = problem.params.counts.map(
         ({ language, chunks }) =>

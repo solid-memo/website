@@ -4,9 +4,10 @@
 
 import { expect, it } from "vitest";
 import { LOCALES } from "../locale";
-import { at, iri, model, RELEASE, text } from "../testing/releaseModel";
+import { at, card, iri, model, RELEASE, text } from "../testing/releaseModel";
 import { curationProblems, LIBRARY_CONTACT, podPolicy, repoPolicy } from "./curationRules";
 
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 const KIND = "http://www.w3.org/2006/vcard/ns#Kind";
 const contact = (url: string, types = [KIND]) => ({
@@ -102,6 +103,46 @@ it("asks the library's contact, a vcard:Kind, and no one's email", () => {
       field: "http://xmlns.com/foaf/0.1/mbox",
     })),
   );
+});
+
+it("asks a description of each picture in English and every language its card's text is in", () => {
+  const picture = "https://example.com/flag.svg";
+  const pictured = {
+    ...curated,
+    cards: [
+      card("described", {
+        frontImage: [picture],
+        frontImageDescription: [text("Three stripes", "en-gb"), text("Tre ränder", "sv")],
+        back: [text("Answer"), text("Svar", "sv-se")],
+      }),
+      card("bare", {
+        frontLabel: [text("Fråga", "sv")],
+        backNote: [text("Note", "")],
+        backImage: [picture],
+        backImageDescription: [text("Ränder", "sv"), text("Stripes", "")],
+      }),
+      card("unpictured", {
+        frontImageDescription: [],
+        back: [text("답", "ko")],
+      }),
+    ],
+  };
+  expect(
+    curationProblems(pictured, repoPolicy).map(({ code, subject, field, params }) => ({
+      code,
+      subject,
+      field,
+      params,
+    })),
+  ).toEqual([
+    {
+      code: "missingImageDescription",
+      subject: at("bare"),
+      field: `${SM}backImageDescription`,
+      params: { language: "en" },
+    },
+  ]);
+  expect(curationProblems(pictured, podPolicy)).toEqual([]);
 });
 
 it("asks nothing of a release in a pod, an email included", () => {

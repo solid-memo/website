@@ -3324,6 +3324,8 @@
       "backLabel": "Étiquette du verso",
       "frontNote": "Note sous le recto",
       "backNote": "Note sous le verso",
+      "frontImageDescription": "Description de l’image du recto",
+      "backImageDescription": "Description de l’image du verso",
       "distractor": "Mauvaises réponses",
       "distractorText": "Mauvaise réponse",
       "distractorNote": "Pourquoi elle est fausse",
@@ -3377,6 +3379,7 @@
         "other": "{count} parties en {language}"
       },
       "missingLanguage": "{field} : aucun texte en {language}.",
+      "missingImageDescription": "{field} : aucune description en {language}. Sans elle, un lecteur d’écran dit seulement qu’il y a une image.",
       "missingTheme": "Thèmes : {theme} est manquant.",
       "missingContact": "Contact : celui de la bibliothèque, {contact}, n'est pas indiqué. Une publication pour la bibliothèque l'indique, pas une adresse e-mail.",
       "emailNamed": "Indique une adresse e-mail : une publication pour la bibliothèque n'indique l'adresse e-mail de personne, seulement le contact de la bibliothèque.",

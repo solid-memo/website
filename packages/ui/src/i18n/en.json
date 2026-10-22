@@ -3148,6 +3148,8 @@
       "backLabel": "Label of the back",
       "frontNote": "Note under the front",
       "backNote": "Note under the back",
+      "frontImageDescription": "Description of the front picture",
+      "backImageDescription": "Description of the back picture",
       "distractor": "Wrong options",
       "distractorText": "Wrong option",
       "distractorNote": "Why it is wrong",
@@ -3199,6 +3201,7 @@
         "other": "{count} parts in {language}"
       },
       "missingLanguage": "{field}: no text in {language}.",
+      "missingImageDescription": "{field}: no description in {language}. Without one, a screen reader says only that there is a picture.",
       "missingTheme": "Themes: {theme} is missing.",
       "missingContact": "Contact: the library's, {contact}, is not stated. A release for the library names it, not an email.",
       "emailNamed": "Names an email: a release for the library names no one's email, only the library's contact.",

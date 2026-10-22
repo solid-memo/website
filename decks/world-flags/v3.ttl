@@ -1,0 +1,2634 @@
+@base <https://solid-memo.com/decks/world-flags/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "World flags"@en ,
+                  "Världens flaggor"@sv ,
+                  "세계의 국기"@ko ,
+                  "Flaggen der Welt"@de ,
+                  "Banderas del mundo"@es ,
+                  "Drapeaux du monde"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The flag of every country and territory on the front, its name in English and Swedish on the back. The list follows Flagpedia's index; the flag images are public-domain SVGs served by Flagpedia's CDN, each in its official aspect ratio. The Swedish names come from Wikidata, as in the capitals deck."@en ,
+                        "Flaggan för varje land och territorium på framsidan, dess namn på engelska och svenska på baksidan. Listan följer Flagpedias index; flaggbilderna är SVG-filer i allmän egendom från Flagpedias CDN, var och en i sina officiella proportioner. De svenska namnen är hämtade från Wikidata, som i kortleken om huvudstäder."@sv ,
+                        "앞면에 모든 나라와 지역의 깃발, 뒷면에 영어와 스웨덴어로 된 그 이름이 있습니다. 목록은 Flagpedia의 색인을 따르며, 깃발 이미지는 Flagpedia의 CDN에서 제공하는 퍼블릭 도메인 SVG로, 각각 공식 가로세로 비율입니다. 스웨덴어 이름은 수도 덱과 마찬가지로 위키데이터에서 가져왔습니다."@ko ,
+                        "Die Flagge jedes Landes und Gebiets auf der Vorderseite, sein Name auf Englisch und Schwedisch auf der Rückseite. Die Liste folgt dem Index von Flagpedia; die Flaggenbilder sind gemeinfreie SVG-Dateien vom CDN von Flagpedia, jede in ihrem offiziellen Seitenverhältnis. Die schwedischen Namen stammen aus Wikidata, wie im Stapel zu den Hauptstädten."@de ,
+                        "La bandera de cada país y territorio en el anverso, su nombre en inglés y en sueco en el reverso. La lista sigue el índice de Flagpedia; las imágenes de las banderas son SVG de dominio público servidos por la CDN de Flagpedia, cada una en su proporción oficial. Los nombres en sueco proceden de Wikidata, como en el mazo de capitales."@es ,
+                        "Le drapeau de chaque pays et territoire au recto, son nom en anglais et en suédois au verso. La liste suit l’index de Flagpedia ; les images des drapeaux sont des SVG du domaine public servis par le CDN de Flagpedia, chacune dans ses proportions officielles. Les noms suédois proviennent de Wikidata, comme dans le paquet sur les capitales."@fr ;
+    prov:wasDerivedFrom <https://flagpedia.net/index> ,
+                        <https://flagcdn.com> ;
+    dcterms:created "2026-09-22T21:00:10.236Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "countries"@en ,
+                 "flags"@en ,
+                 "geography"@en ,
+                 "länder"@sv ,
+                 "flaggor"@sv ,
+                 "geografi"@sv ,
+                 "나라"@ko ,
+                 "국기"@ko ,
+                 "지리"@ko ,
+                 "Länder"@de ,
+                 "Flaggen"@de ,
+                 "Geografie"@de ,
+                 "países"@es ,
+                 "banderas"@es ,
+                 "geografía"@es ,
+                 "pays"@fr ,
+                 "drapeaux"@fr ,
+                 "géographie"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each flag is described, in English and Swedish, so a screen reader can say what it shows: its stripes, colors and emblems, never the country; no card's front or back was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#world-flags> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#world-flags> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://flagpedia.net/index>
+    dcterms:title "Flagpedia: flags of all countries" ;
+    dcterms:creator "Flagpedia.net" .
+
+<https://flagcdn.com>
+    dcterms:title "Flag CDN" ;
+    dcterms:creator "Flagpedia.net" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<#afghanistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/af.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, black, red and green, with a white emblem of a mosque framed by sheaves of wheat in the center"@en ,
+                                     "Tre lodräta ränder, svart, röd och grön, med ett vitt emblem av en moské inramad av vetekärvar i mitten"@sv ;
+    solid-memo:back "Afghanistan"@en ,
+                    "Afghanistan"@sv .
+
+<#aland-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ax.svg> ;
+    solid-memo:frontImageDescription "Blue field with a red Nordic cross edged in yellow"@en ,
+                                     "Blå duk med ett rött nordiskt kors med gul kant"@sv ;
+    solid-memo:back "Åland Islands"@en ,
+                    "Åland"@sv .
+
+<#albania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/al.svg> ;
+    solid-memo:frontImageDescription "Red field with a black double-headed eagle in the center"@en ,
+                                     "Röd duk med en svart dubbelhövdad örn i mitten"@sv ;
+    solid-memo:back "Albania"@en ,
+                    "Albanien"@sv .
+
+<#algeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dz.svg> ;
+    solid-memo:frontImageDescription "Two vertical halves, green and white, with a red crescent and a red five-pointed star in the center"@en ,
+                                     "Två lodräta halvor, grön och vit, med en röd halvmåne och en röd femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Algeria"@en ,
+                    "Algeriet"@sv .
+
+<#american-samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/as.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a red-edged white triangle pointing toward the left, holding a brown eagle with a white head that grips a club and a whisk"@en ,
+                                     "Mörkblå duk med en vit triangel med röd kant som pekar åt vänster, med en brun örn med vitt huvud som håller en klubba och en vippa"@sv ;
+    solid-memo:back "American Samoa"@en ,
+                    "Amerikanska Samoa"@sv .
+
+<#andorra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ad.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, blue, yellow and red, the middle one wider with a coat of arms in its center"@en ,
+                                     "Tre lodräta ränder, blå, gul och röd, där den mittersta är bredare och bär ett vapen i mitten"@sv ;
+    solid-memo:back "Andorra"@en ,
+                    "Andorra"@sv .
+
+<#angola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ao.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, red over black, with a yellow emblem of half a cogwheel, a machete and a star in the center"@en ,
+                                     "Två vågräta ränder, röd över svart, med ett gult emblem av ett halvt kugghjul, en machete och en stjärna i mitten"@sv ;
+    solid-memo:back "Angola"@en ,
+                    "Angola"@sv .
+
+<#anguilla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ai.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with the British flag in the upper left and, on the right, a white shield with three orange dolphins in a circle above a light blue band"@en ,
+                                     "Mörkblå duk med den brittiska flaggan uppe till vänster och till höger en vit sköld med tre orange delfiner i en ring ovanför ett ljusblått fält"@sv ;
+    solid-memo:back "Anguilla"@en ,
+                    "Anguilla"@sv .
+
+<#antarctica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/aq.svg> ;
+    solid-memo:frontImageDescription "Light blue field with a white map of a large, roughly round landmass in the center"@en ,
+                                     "Ljusblå duk med en vit karta över en stor, ungefär rund landmassa i mitten"@sv ;
+    solid-memo:back "Antarctica"@en ,
+                    "Antarktis"@sv .
+
+<#antigua-and-barbuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ag.svg> ;
+    solid-memo:frontImageDescription "Red field with a downward-pointing triangle of black, blue and white bands from the top, and a yellow rising sun in the black band"@en ,
+                                     "Röd duk med en nedåtpekande triangel av svarta, blå och vita band uppifrån, och en gul uppgående sol i det svarta bandet"@sv ;
+    solid-memo:back "Antigua and Barbuda"@en ,
+                    "Antigua och Barbuda"@sv .
+
+<#argentina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ar.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, light blue, white and light blue, with a yellow sun with a face in the center"@en ,
+                                     "Tre vågräta ränder, ljusblå, vit och ljusblå, med en gul sol med ansikte i mitten"@sv ;
+    solid-memo:back "Argentina"@en ,
+                    "Argentina"@sv .
+
+<#armenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/am.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, dark blue and orange"@en ,
+                                     "Tre vågräta ränder, röd, mörkblå och orange"@sv ;
+    solid-memo:back "Armenia"@en ,
+                    "Armenien"@sv .
+
+<#aruba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/aw.svg> ;
+    solid-memo:frontImageDescription "Light blue field with two thin yellow horizontal stripes near the bottom and a white-edged red four-pointed star in the upper left"@en ,
+                                     "Ljusblå duk med två smala gula vågräta ränder nertill och en röd fyruddig stjärna med vit kant uppe till vänster"@sv ;
+    solid-memo:back "Aruba"@en ,
+                    "Aruba"@sv .
+
+<#australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/au.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with the British flag in the upper left, a large white seven-pointed star below it and five white stars on the right"@en ,
+                                     "Mörkblå duk med den brittiska flaggan uppe till vänster, en stor vit sjuuddig stjärna under den och fem vita stjärnor till höger"@sv ;
+    solid-memo:back "Australia"@en ,
+                    "Australien"@sv .
+
+<#austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/at.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and red"@en ,
+                                     "Tre vågräta ränder, röd, vit och röd"@sv ;
+    solid-memo:back "Austria"@en ,
+                    "Österrike"@sv .
+
+<#azerbaijan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/az.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, light blue, red and green, with a white crescent and a white eight-pointed star in the center"@en ,
+                                     "Tre vågräta ränder, ljusblå, röd och grön, med en vit halvmåne och en vit åttauddig stjärna i mitten"@sv ;
+    solid-memo:back "Azerbaijan"@en ,
+                    "Azerbajdzjan"@sv .
+
+<#the-bahamas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bs.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, turquoise, yellow and turquoise, with a black triangle pointing in from the left"@en ,
+                                     "Tre vågräta ränder, turkos, gul och turkos, med en svart triangel som pekar in från vänster"@sv ;
+    solid-memo:back "Bahamas"@en ,
+                    "Bahamas"@sv .
+
+<#bahrain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bh.svg> ;
+    solid-memo:frontImageDescription "Red field with a white band on the left that meets the red in a zigzag edge of five white points"@en ,
+                                     "Röd duk med ett vitt fält till vänster som möter det röda i en sicksackkant med fem vita uddar"@sv ;
+    solid-memo:back "Bahrain"@en ,
+                    "Bahrain"@sv .
+
+<#bangladesh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bd.svg> ;
+    solid-memo:frontImageDescription "Dark green field with a red disc just left of center"@en ,
+                                     "Mörkgrön duk med en röd skiva strax till vänster om mitten"@sv ;
+    solid-memo:back "Bangladesh"@en ,
+                    "Bangladesh"@sv .
+
+<#barbados>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bb.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, yellow and dark blue, with a black trident head in the center"@en ,
+                                     "Tre lodräta ränder, mörkblå, gul och mörkblå, med ett svart treuddshuvud i mitten"@sv ;
+    solid-memo:back "Barbados"@en ,
+                    "Barbados"@sv .
+
+<#belarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/by.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, a wide red over a narrow green, with a white vertical band at the left bearing a red ornamental pattern"@en ,
+                                     "Två vågräta ränder, en bred röd över en smal grön, med ett vitt lodrätt band till vänster med ett rött ornamentmönster"@sv ;
+    solid-memo:back "Belarus"@en ,
+                    "Belarus"@sv .
+
+<#belgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/be.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, black, yellow and red"@en ,
+                                     "Tre lodräta ränder, svart, gul och röd"@sv ;
+    solid-memo:back "Belgium"@en ,
+                    "Belgien"@sv .
+
+<#belize>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bz.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a red stripe at top and bottom and a white disc in the center holding a coat of arms of two men beside a shield under a tree, ringed by a green wreath"@en ,
+                                     "Mörkblå duk med en röd rand upptill och nertill och en vit skiva i mitten med ett vapen av två män vid en sköld under ett träd, omgiven av en grön krans"@sv ;
+    solid-memo:back "Belize"@en ,
+                    "Belize"@sv .
+
+<#benin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bj.svg> ;
+    solid-memo:frontImageDescription "A vertical green stripe on the left and two horizontal stripes, yellow over red, on the right"@en ,
+                                     "En lodrät grön rand till vänster och två vågräta ränder, gul över röd, till höger"@sv ;
+    solid-memo:back "Benin"@en ,
+                    "Benin"@sv .
+
+<#bermuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bm.svg> ;
+    solid-memo:frontImageDescription "Red field with the British flag in the upper left and, on the right, a shield with a red lion holding a smaller shield showing a sinking ship"@en ,
+                                     "Röd duk med den brittiska flaggan uppe till vänster och till höger en sköld med ett rött lejon som håller en mindre sköld med ett sjunkande skepp"@sv ;
+    solid-memo:back "Bermuda"@en ,
+                    "Bermuda"@sv .
+
+<#bhutan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bt.svg> ;
+    solid-memo:frontImageDescription "Divided diagonally, yellow in the upper left and orange in the lower right, with a white dragon along the dividing line"@en ,
+                                     "Diagonalt delad, gul uppe till vänster och orange nere till höger, med en vit drake längs delningslinjen"@sv ;
+    solid-memo:back "Bhutan"@en ,
+                    "Bhutan"@sv .
+
+<#bolivia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bo.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, yellow and green, with a coat of arms in the center"@en ,
+                                     "Tre vågräta ränder, röd, gul och grön, med ett vapen i mitten"@sv ;
+    solid-memo:back "Bolivia"@en ,
+                    "Bolivia"@sv .
+
+<#bosnia-and-herzegovina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ba.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a yellow right triangle and a diagonal row of white stars along its long side"@en ,
+                                     "Mörkblå duk med en gul rätvinklig triangel och en diagonal rad vita stjärnor längs dess långsida"@sv ;
+    solid-memo:back "Bosnia and Herzegovina"@en ,
+                    "Bosnien och Hercegovina"@sv .
+
+<#botswana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bw.svg> ;
+    solid-memo:frontImageDescription "Light blue field with a black horizontal stripe edged in white across the middle"@en ,
+                                     "Ljusblå duk med en svart vågrät rand med vita kanter tvärs över mitten"@sv ;
+    solid-memo:back "Botswana"@en ,
+                    "Botswana"@sv .
+
+<#bouvet-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bv.svg> ;
+    solid-memo:frontImageDescription "Red field with a dark blue Nordic cross edged in white"@en ,
+                                     "Röd duk med ett mörkblått nordiskt kors med vit kant"@sv ;
+    solid-memo:back "Bouvet Island"@en ,
+                    "Bouvetön"@sv .
+
+<#brazil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/br.svg> ;
+    solid-memo:frontImageDescription "Green field with a yellow diamond holding a dark blue globe of white stars crossed by a white curved band with text"@en ,
+                                     "Grön duk med en gul romb med ett mörkblått klot av vita stjärnor, korsat av ett vitt böjt band med text"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#british-indian-ocean-territory>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/io.svg> ;
+    solid-memo:frontImageDescription "White field with wavy dark blue horizontal lines, a red, white and dark blue flag of crosses in the upper left and a palm tree above a yellow crown on the right"@en ,
+                                     "Vit duk med vågiga mörkblå vågräta linjer, en röd, vit och mörkblå flagga med kors uppe till vänster och en palm ovanför en gul krona till höger"@sv ;
+    solid-memo:back "British Indian Ocean Territory"@en ,
+                    "Brittiska territoriet i Indiska oceanen"@sv .
+
+<#brunei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bn.svg> ;
+    solid-memo:frontImageDescription "Yellow field crossed diagonally by a white and a black stripe, with a red emblem of a crescent, a parasol and two raised hands in the center"@en ,
+                                     "Gul duk korsad diagonalt av en vit och en svart rand, med ett rött emblem av en halvmåne, ett parasoll och två upplyfta händer i mitten"@sv ;
+    solid-memo:back "Brunei"@en ,
+                    "Brunei"@sv .
+
+<#bulgaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bg.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, white, green and red"@en ,
+                                     "Tre vågräta ränder, vit, grön och röd"@sv ;
+    solid-memo:back "Bulgaria"@en ,
+                    "Bulgarien"@sv .
+
+<#burkina-faso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bf.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, red over green, with a yellow five-pointed star in the center"@en ,
+                                     "Två vågräta ränder, röd över grön, med en gul femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Burkina Faso"@en ,
+                    "Burkina Faso"@sv .
+
+<#burundi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bi.svg> ;
+    solid-memo:frontImageDescription "A white diagonal cross dividing red top and bottom triangles from green side triangles, with a white disc in the center holding three green-edged red stars"@en ,
+                                     "Ett vitt diagonalkors som skiljer röda trianglar upptill och nertill från gröna trianglar på sidorna, med en vit skiva i mitten med tre röda stjärnor med grön kant"@sv ;
+    solid-memo:back "Burundi"@en ,
+                    "Burundi"@sv .
+
+<#cambodia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kh.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, dark blue, a wider red and dark blue, with a white temple with three towers in the center"@en ,
+                                     "Tre vågräta ränder, mörkblå, en bredare röd och mörkblå, med ett vitt tempel med tre torn i mitten"@sv ;
+    solid-memo:back "Cambodia"@en ,
+                    "Kambodja"@sv .
+
+<#cameroon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cm.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, red and yellow, with a yellow five-pointed star in the center"@en ,
+                                     "Tre lodräta ränder, grön, röd och gul, med en gul femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Cameroon"@en ,
+                    "Kamerun"@sv .
+
+<#canada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ca.svg> ;
+    solid-memo:frontImageDescription "Three vertical bands, red, a wider white and red, with a red eleven-pointed maple leaf in the center"@en ,
+                                     "Tre lodräta fält, rött, ett bredare vitt och rött, med ett rött lönnlöv med elva uddar i mitten"@sv ;
+    solid-memo:back "Canada"@en ,
+                    "Kanada"@sv .
+
+<#cape-verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cv.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a narrow white, red and white horizontal band below the middle and a ring of ten yellow stars toward the left"@en ,
+                                     "Mörkblå duk med ett smalt vitt, rött och vitt vågrätt band under mitten och en ring av tio gula stjärnor åt vänster"@sv ;
+    solid-memo:back "Cape Verde"@en ,
+                    "Kap Verde"@sv .
+
+<#caribbean-netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bq.svg> ;
+    solid-memo:frontImageDescription "White field with a yellow triangle in the upper left corner, a blue triangle filling the lower right half, and a black compass ring around a red six-pointed star"@en ,
+                                     "Vit duk med en gul triangel i övre vänstra hörnet, en blå triangel som fyller nedre högra halvan och en svart kompassring kring en röd sexuddig stjärna"@sv ;
+    solid-memo:back "Caribbean Netherlands"@en ,
+                    "Karibiska Nederländerna"@sv .
+
+<#cayman-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ky.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with the British flag in the upper left and a shield on the right with a yellow lion on red above wavy blue and white lines with three green stars, topped by a turtle"@en ,
+                                     "Mörkblå duk med den brittiska flaggan uppe till vänster och en sköld till höger med ett gult lejon på rött ovanför vågiga blå och vita linjer med tre gröna stjärnor, krönt av en sköldpadda"@sv ;
+    solid-memo:back "Cayman Islands"@en ,
+                    "Caymanöarna"@sv .
+
+<#the-central-african-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cf.svg> ;
+    solid-memo:frontImageDescription "Four horizontal stripes, dark blue, white, green and yellow, crossed by a vertical red stripe in the middle, with a yellow star in the upper left"@en ,
+                                     "Fyra vågräta ränder, mörkblå, vit, grön och gul, korsade av en lodrät röd rand i mitten, med en gul stjärna uppe till vänster"@sv ;
+    solid-memo:back "Central African Republic"@en ,
+                    "Centralafrikanska republiken"@sv .
+
+<#chad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/td.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, yellow and red"@en ,
+                                     "Tre lodräta ränder, mörkblå, gul och röd"@sv ;
+    solid-memo:back "Chad"@en ,
+                    "Tchad"@sv .
+
+<#chile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cl.svg> ;
+    solid-memo:frontImageDescription "Two horizontal halves, white over red, with a dark blue square in the upper left holding a white five-pointed star"@en ,
+                                     "Två vågräta halvor, vit över röd, med en mörkblå kvadrat uppe till vänster med en vit femuddig stjärna"@sv ;
+    solid-memo:back "Chile"@en ,
+                    "Chile"@sv .
+
+<#the-people-s-republic-of-china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cn.svg> ;
+    solid-memo:frontImageDescription "Red field with a large yellow five-pointed star and an arc of four smaller yellow stars in the upper left"@en ,
+                                     "Röd duk med en stor gul femuddig stjärna och en båge av fyra mindre gula stjärnor uppe till vänster"@sv ;
+    solid-memo:back "China"@en ,
+                    "Kina"@sv .
+
+<#christmas-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cx.svg> ;
+    solid-memo:frontImageDescription "Divided diagonally, green in the upper right and blue in the lower left, with five white stars on the blue, a yellow bird on the green and a yellow disc holding a green map in the center"@en ,
+                                     "Diagonalt delad, grön uppe till höger och blå nere till vänster, med fem vita stjärnor på det blå, en gul fågel på det gröna och en gul skiva med en grön karta i mitten"@sv ;
+    solid-memo:back "Christmas Island"@en ,
+                    "Julön"@sv .
+
+<#cocos-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cc.svg> ;
+    solid-memo:frontImageDescription "Green field with a palm tree on a yellow disc in the upper left, a yellow crescent in the center and five yellow stars on the right"@en ,
+                                     "Grön duk med en palm på en gul skiva uppe till vänster, en gul halvmåne i mitten och fem gula stjärnor till höger"@sv ;
+    solid-memo:back "Cocos Islands"@en ,
+                    "Kokosöarna"@sv .
+
+<#colombia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/co.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, yellow taking the top half, then dark blue and red"@en ,
+                                     "Tre vågräta ränder, gul över hela övre halvan, sedan mörkblå och röd"@sv ;
+    solid-memo:back "Colombia"@en ,
+                    "Colombia"@sv .
+
+<#the-comoros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/km.svg> ;
+    solid-memo:frontImageDescription "Four horizontal stripes, yellow, white, red and dark blue, with a green triangle at the left holding a white crescent and four white stars"@en ,
+                                     "Fyra vågräta ränder, gul, vit, röd och mörkblå, med en grön triangel till vänster med en vit halvmåne och fyra vita stjärnor"@sv ;
+    solid-memo:back "Comoros"@en ,
+                    "Komorerna"@sv .
+
+<#the-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cg.svg> ;
+    solid-memo:frontImageDescription "Divided diagonally by a yellow band from lower left to upper right, green in the upper left and red in the lower right"@en ,
+                                     "Diagonalt delad av ett gult band från nedre vänstra till övre högra hörnet, grön uppe till vänster och röd nere till höger"@sv ;
+    solid-memo:back "Republic of the Congo"@en ,
+                    "Kongo-Brazzaville"@sv .
+
+<#the-democratic-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cd.svg> ;
+    solid-memo:frontImageDescription "Light blue field with a yellow-edged red diagonal stripe from lower left to upper right and a yellow star in the upper left"@en ,
+                                     "Ljusblå duk med en röd diagonal rand med gula kanter från nedre vänstra till övre högra hörnet och en gul stjärna uppe till vänster"@sv ;
+    solid-memo:back "DR Congo"@en ,
+                    "Kongo-Kinshasa"@sv .
+
+<#cook-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ck.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with the British flag in the upper left and a ring of fifteen white stars on the right"@en ,
+                                     "Mörkblå duk med den brittiska flaggan uppe till vänster och en ring av femton vita stjärnor till höger"@sv ;
+    solid-memo:back "Cook Islands"@en ,
+                    "Cooköarna"@sv .
+
+<#costa-rica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cr.svg> ;
+    solid-memo:frontImageDescription "Five horizontal stripes, dark blue, white, a double-width red, white and dark blue, with a coat of arms in a white oval on the red, left of center"@en ,
+                                     "Fem vågräta ränder, mörkblå, vit, en dubbelt så bred röd, vit och mörkblå, med ett vapen i en vit oval på det röda, till vänster om mitten"@sv ;
+    solid-memo:back "Costa Rica"@en ,
+                    "Costa Rica"@sv .
+
+<#cote-d-ivoire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ci.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, orange, white and green"@en ,
+                                     "Tre lodräta ränder, orange, vit och grön"@sv ;
+    solid-memo:back "Côte d'Ivoire"@en ,
+                    "Elfenbenskusten"@sv .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hr.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and dark blue, with a red and white checkered shield topped by a crown of five small shields in the center"@en ,
+                                     "Tre vågräta ränder, röd, vit och mörkblå, med en rödvitrutig sköld krönt av fem små sköldar i mitten"@sv ;
+    solid-memo:back "Croatia"@en ,
+                    "Kroatien"@sv .
+
+<#cuba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cu.svg> ;
+    solid-memo:frontImageDescription "Five horizontal stripes alternating dark blue and white, with a red triangle at the left holding a white five-pointed star"@en ,
+                                     "Fem vågräta ränder, omväxlande mörkblå och vita, med en röd triangel till vänster med en vit femuddig stjärna"@sv ;
+    solid-memo:back "Cuba"@en ,
+                    "Kuba"@sv .
+
+<#curacao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cw.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a narrow yellow horizontal stripe below the middle and two white five-pointed stars in the upper left, one smaller than the other"@en ,
+                                     "Mörkblå duk med en smal gul vågrät rand under mitten och två vita femuddiga stjärnor uppe till vänster, den ena mindre än den andra"@sv ;
+    solid-memo:back "Curaçao"@en ,
+                    "Curaçao"@sv .
+
+<#cyprus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cy.svg> ;
+    solid-memo:frontImageDescription "White field with a copper-colored map of an island in the center above two crossed green olive branches"@en ,
+                                     "Vit duk med en kopparfärgad karta över en ö i mitten ovanför två korsade gröna olivkvistar"@sv ;
+    solid-memo:back "Cyprus"@en ,
+                    "Cypern"@sv .
+
+<#the-czech-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cz.svg> ;
+    solid-memo:frontImageDescription "Two horizontal halves, white over red, with a dark blue triangle pointing in from the left"@en ,
+                                     "Två vågräta halvor, vit över röd, med en mörkblå triangel som pekar in från vänster"@sv ;
+    solid-memo:back "Czechia"@en ,
+                    "Tjeckien"@sv .
+
+<#denmark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dk.svg> ;
+    solid-memo:frontImageDescription "Red field with a white Nordic cross"@en ,
+                                     "Röd duk med ett vitt nordiskt kors"@sv ;
+    solid-memo:back "Denmark"@en ,
+                    "Danmark"@sv .
+
+<#djibouti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dj.svg> ;
+    solid-memo:frontImageDescription "Two horizontal halves, light blue over green, with a white triangle at the left holding a red five-pointed star"@en ,
+                                     "Två vågräta halvor, ljusblå över grön, med en vit triangel till vänster med en röd femuddig stjärna"@sv ;
+    solid-memo:back "Djibouti"@en ,
+                    "Djibouti"@sv .
+
+<#dominica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dm.svg> ;
+    solid-memo:frontImageDescription "Green field with a cross of yellow, black and white stripes and a red disc in the center holding a purple and green parrot inside a ring of ten green stars"@en ,
+                                     "Grön duk med ett kors av gula, svarta och vita ränder och en röd skiva i mitten med en lila och grön papegoja inom en ring av tio gröna stjärnor"@sv ;
+    solid-memo:back "Dominica"@en ,
+                    "Dominica"@sv .
+
+<#the-dominican-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/do.svg> ;
+    solid-memo:frontImageDescription "A white cross dividing the field into four rectangles, dark blue and red on top, red and dark blue below, with a coat of arms in the center"@en ,
+                                     "Ett vitt kors som delar duken i fyra rektanglar, mörkblå och röd upptill, röd och mörkblå nertill, med ett vapen i mitten"@sv ;
+    solid-memo:back "Dominican Republic"@en ,
+                    "Dominikanska republiken"@sv .
+
+<#ecuador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ec.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, yellow taking the top half, then dark blue and red, with a coat of arms topped by a condor in the center"@en ,
+                                     "Tre vågräta ränder, gul över hela övre halvan, sedan mörkblå och röd, med ett vapen krönt av en kondor i mitten"@sv ;
+    solid-memo:back "Ecuador"@en ,
+                    "Ecuador"@sv .
+
+<#egypt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/eg.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and black, with a gold eagle in the center"@en ,
+                                     "Tre vågräta ränder, röd, vit och svart, med en guldfärgad örn i mitten"@sv ;
+    solid-memo:back "Egypt"@en ,
+                    "Egypten"@sv .
+
+<#el-salvador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sv.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, dark blue, white and dark blue, with an emblem of a triangle with five volcanoes inside a green wreath and a ring of gold text"@en ,
+                                     "Tre vågräta ränder, mörkblå, vit och mörkblå, med ett emblem av en triangel med fem vulkaner inom en grön krans och en ring av guldtext"@sv ;
+    solid-memo:back "El Salvador"@en ,
+                    "El Salvador"@sv .
+
+<#england>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-eng.svg> ;
+    solid-memo:frontImageDescription "White field with a red upright cross"@en ,
+                                     "Vit duk med ett rött upprätt kors"@sv ;
+    solid-memo:back "England"@en ,
+                    "England"@sv .
+
+<#equatorial-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gq.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, white and red, with a blue triangle at the left and a shield with a tree under six yellow stars in the center"@en ,
+                                     "Tre vågräta ränder, grön, vit och röd, med en blå triangel till vänster och en sköld med ett träd under sex gula stjärnor i mitten"@sv ;
+    solid-memo:back "Equatorial Guinea"@en ,
+                    "Ekvatorialguinea"@sv .
+
+<#eritrea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/er.svg> ;
+    solid-memo:frontImageDescription "A red triangle pointing from the left to the right edge between a green upper and a light blue lower triangle, with a yellow olive wreath and branch on the red"@en ,
+                                     "En röd triangel som pekar från vänster till högra kanten mellan en grön övre och en ljusblå nedre triangel, med en gul olivkrans och olivkvist på det röda"@sv ;
+    solid-memo:back "Eritrea"@en ,
+                    "Eritrea"@sv .
+
+<#estonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ee.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, blue, black and white"@en ,
+                                     "Tre vågräta ränder, blå, svart och vit"@sv ;
+    solid-memo:back "Estonia"@en ,
+                    "Estland"@sv .
+
+<#swaziland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sz.svg> ;
+    solid-memo:frontImageDescription "Horizontal stripes of blue, yellow, a wide red, yellow and blue, with a black and white shield over two spears and a staff across the middle"@en ,
+                                     "Vågräta ränder i blått, gult, ett brett rött, gult och blått, med en svartvit sköld över två spjut och en stav tvärs över mitten"@sv ;
+    solid-memo:back "Eswatini"@en ,
+                    "Eswatini"@sv .
+
+<#ethiopia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/et.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, yellow and red, with a blue disc in the center holding a yellow five-pointed star with rays"@en ,
+                                     "Tre vågräta ränder, grön, gul och röd, med en blå skiva i mitten med en gul femuddig stjärna med strålar"@sv ;
+    solid-memo:back "Ethiopia"@en ,
+                    "Etiopien"@sv .
+
+<#falkland-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fk.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with the British flag in the upper left and a shield on the right with a white ram above a sailing ship on wavy blue and white lines"@en ,
+                                     "Mörkblå duk med den brittiska flaggan uppe till vänster och en sköld till höger med en vit bagge ovanför ett segelfartyg på vågiga blå och vita linjer"@sv ;
+    solid-memo:back "Falkland Islands"@en ,
+                    "Falklandsöarna"@sv .
+
+<#faroe-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fo.svg> ;
+    solid-memo:frontImageDescription "White field with a red Nordic cross edged in blue"@en ,
+                                     "Vit duk med ett rött nordiskt kors med blå kant"@sv ;
+    solid-memo:back "Faroe Islands"@en ,
+                    "Färöarna"@sv .
+
+<#fiji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fj.svg> ;
+    solid-memo:frontImageDescription "Light blue field with the British flag in the upper left and a shield on the right with a red cross, a yellow lion across the top and pictures of plants and a dove"@en ,
+                                     "Ljusblå duk med den brittiska flaggan uppe till vänster och en sköld till höger med ett rött kors, ett gult lejon upptill och bilder av växter och en duva"@sv ;
+    solid-memo:back "Fiji"@en ,
+                    "Fiji"@sv .
+
+<#finland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fi.svg> ;
+    solid-memo:frontImageDescription "White field with a blue Nordic cross"@en ,
+                                     "Vit duk med ett blått nordiskt kors"@sv ;
+    solid-memo:back "Finland"@en ,
+                    "Finland"@sv .
+
+<#france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fr.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, white and red"@en ,
+                                     "Tre lodräta ränder, mörkblå, vit och röd"@sv ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#french-guiana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gf.svg> ;
+    solid-memo:frontImageDescription "Divided diagonally, green in the upper right and yellow in the lower left, with a red five-pointed star in the center"@en ,
+                                     "Diagonalt delad, grön uppe till höger och gul nere till vänster, med en röd femuddig stjärna i mitten"@sv ;
+    solid-memo:back "French Guiana"@en ,
+                    "Franska Guyana"@sv .
+
+<#french-polynesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pf.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, a double-width white and red, with a disc in the center showing a maroon canoe above a yellow sun and blue and white waves"@en ,
+                                     "Tre vågräta ränder, röd, en dubbelt så bred vit och röd, med en skiva i mitten med en vinröd kanot ovanför en gul sol och blå och vita vågor"@sv ;
+    solid-memo:back "French Polynesia"@en ,
+                    "Franska Polynesien"@sv .
+
+<#french-southern-and-antarctic-lands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tf.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a small blue, white and red vertical tricolor in the upper left and, on the right, a white monogram of letters above an arc of five white stars"@en ,
+                                     "Mörkblå duk med en liten blå, vit och röd lodrät trikolor uppe till vänster och till höger ett vitt monogram av bokstäver ovanför en båge av fem vita stjärnor"@sv ;
+    solid-memo:back "French Southern and Antarctic Lands"@en ,
+                    "Franska sydterritorierna"@sv .
+
+<#gabon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ga.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, yellow and blue"@en ,
+                                     "Tre vågräta ränder, grön, gul och blå"@sv ;
+    solid-memo:back "Gabon"@en ,
+                    "Gabon"@sv .
+
+<#the-gambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gm.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, blue and green, separated by narrow white stripes"@en ,
+                                     "Tre vågräta ränder, röd, blå och grön, åtskilda av smala vita ränder"@sv ;
+    solid-memo:back "Gambia"@en ,
+                    "Gambia"@sv .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ge.svg> ;
+    solid-memo:frontImageDescription "White field with a large red cross and a small red cross in each of the four quarters"@en ,
+                                     "Vit duk med ett stort rött kors och ett litet rött kors i vart och ett av de fyra fälten"@sv ;
+    solid-memo:back "Georgia"@en ,
+                    "Georgien"@sv .
+
+<#germany>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/de.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, red and yellow"@en ,
+                                     "Tre vågräta ränder, svart, röd och gul"@sv ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#ghana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gh.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, yellow and green, with a black five-pointed star in the center"@en ,
+                                     "Tre vågräta ränder, röd, gul och grön, med en svart femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Ghana"@en ,
+                    "Ghana"@sv .
+
+<#gibraltar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gi.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, a wide white over a narrow red, with a red three-towered castle and a yellow key hanging below it"@en ,
+                                     "Två vågräta ränder, en bred vit över en smal röd, med en röd borg med tre torn och en gul nyckel som hänger under den"@sv ;
+    solid-memo:back "Gibraltar"@en ,
+                    "Gibraltar"@sv .
+
+<#greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gr.svg> ;
+    solid-memo:frontImageDescription "Nine horizontal stripes alternating blue and white, with a blue square in the upper left holding a white cross"@en ,
+                                     "Nio vågräta ränder, omväxlande blå och vita, med en blå kvadrat uppe till vänster med ett vitt kors"@sv ;
+    solid-memo:back "Greece"@en ,
+                    "Grekland"@sv .
+
+<#greenland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gl.svg> ;
+    solid-memo:frontImageDescription "Two horizontal halves, white over red, with a disc left of center that is red on top and white below"@en ,
+                                     "Två vågräta halvor, vit över röd, med en skiva till vänster om mitten som är röd upptill och vit nertill"@sv ;
+    solid-memo:back "Greenland"@en ,
+                    "Grönland"@sv .
+
+<#grenada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gd.svg> ;
+    solid-memo:frontImageDescription "Red border with three yellow stars at top and bottom around a field divided diagonally into yellow and green triangles, with a yellow star on a red disc in the center and a nutmeg on the left"@en ,
+                                     "Röd bård med tre gula stjärnor upptill och nertill kring ett fält delat diagonalt i gula och gröna trianglar, med en gul stjärna på en röd skiva i mitten och en muskotnöt till vänster"@sv ;
+    solid-memo:back "Grenada"@en ,
+                    "Grenada"@sv .
+
+<#guadeloupe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gp.svg> ;
+    solid-memo:frontImageDescription "Black field with a dark blue band at the top holding three yellow lilies, and below it a yellow sun behind green stalks of sugarcane"@en ,
+                                     "Svart duk med ett mörkblått band upptill med tre gula liljor, och nedanför en gul sol bakom gröna sockerrörsstänglar"@sv ;
+    solid-memo:back "Guadeloupe"@en ,
+                    "Guadeloupe"@sv .
+
+<#guam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gu.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a red border and a red-edged oval in the center showing a palm tree on a beach, a sailing canoe on the water and red text"@en ,
+                                     "Mörkblå duk med röd bård och en oval med röd kant i mitten som visar en palm på en strand, en segelkanot på vattnet och röd text"@sv ;
+    solid-memo:back "Guam"@en ,
+                    "Guam"@sv .
+
+<#guatemala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gt.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, light blue, white and light blue, with an emblem of a green long-tailed bird on a scroll above crossed rifles and swords inside a laurel wreath"@en ,
+                                     "Tre lodräta ränder, ljusblå, vit och ljusblå, med ett emblem av en grön fågel med lång stjärt på en skriftrulle ovanför korsade gevär och svärd inom en lagerkrans"@sv ;
+    solid-memo:back "Guatemala"@en ,
+                    "Guatemala"@sv .
+
+<#guernsey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gg.svg> ;
+    solid-memo:frontImageDescription "White field with a red upright cross and a yellow cross inside it"@en ,
+                                     "Vit duk med ett rött upprätt kors och ett gult kors inuti det"@sv ;
+    solid-memo:back "Guernsey"@en ,
+                    "Guernsey"@sv .
+
+<#guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gn.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, red, yellow and green"@en ,
+                                     "Tre lodräta ränder, röd, gul och grön"@sv ;
+    solid-memo:back "Guinea"@en ,
+                    "Guinea"@sv .
+
+<#guinea-bissau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gw.svg> ;
+    solid-memo:frontImageDescription "A vertical red stripe on the left holding a black star, and two horizontal stripes, yellow over green, on the right"@en ,
+                                     "En lodrät röd rand till vänster med en svart stjärna, och två vågräta ränder, gul över grön, till höger"@sv ;
+    solid-memo:back "Guinea-Bissau"@en ,
+                    "Guinea-Bissau"@sv .
+
+<#guyana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gy.svg> ;
+    solid-memo:frontImageDescription "Green field with a white-edged yellow triangle pointing from the left to the right edge, and a black-edged red triangle on top of it"@en ,
+                                     "Grön duk med en gul triangel med vit kant som pekar från vänster till högra kanten, och en röd triangel med svart kant ovanpå den"@sv ;
+    solid-memo:back "Guyana"@en ,
+                    "Guyana"@sv .
+
+<#haiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ht.svg> ;
+    solid-memo:frontImageDescription "Two horizontal halves, dark blue over red, with a white rectangle in the center holding a coat of arms of a palm tree, cannons and flags"@en ,
+                                     "Två vågräta halvor, mörkblå över röd, med en vit rektangel i mitten med ett vapen av en palm, kanoner och flaggor"@sv ;
+    solid-memo:back "Haiti"@en ,
+                    "Haiti"@sv .
+
+<#heard-island-and-mcdonald-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hm.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with the British flag in the upper left, a large white seven-pointed star below it and five white stars on the right"@en ,
+                                     "Mörkblå duk med den brittiska flaggan uppe till vänster, en stor vit sjuuddig stjärna under den och fem vita stjärnor till höger"@sv ;
+    solid-memo:back "Heard Island and McDonald Islands"@en ,
+                    "Heard- och McDonaldöarna"@sv .
+
+<#honduras>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hn.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, light blue, white and light blue, with five light blue stars in the center"@en ,
+                                     "Tre vågräta ränder, ljusblå, vit och ljusblå, med fem ljusblå stjärnor i mitten"@sv ;
+    solid-memo:back "Honduras"@en ,
+                    "Honduras"@sv .
+
+<#hong-kong>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hk.svg> ;
+    solid-memo:frontImageDescription "Red field with a white five-petaled flower in the center, each petal with a small red star"@en ,
+                                     "Röd duk med en vit blomma med fem kronblad i mitten, varje kronblad med en liten röd stjärna"@sv ;
+    solid-memo:back "Hong Kong"@en ,
+                    "Hongkong"@sv .
+
+<#hungary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hu.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and green"@en ,
+                                     "Tre vågräta ränder, röd, vit och grön"@sv ;
+    solid-memo:back "Hungary"@en ,
+                    "Ungern"@sv .
+
+<#iceland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/is.svg> ;
+    solid-memo:frontImageDescription "Blue field with a red Nordic cross edged in white"@en ,
+                                     "Blå duk med ett rött nordiskt kors med vit kant"@sv ;
+    solid-memo:back "Iceland"@en ,
+                    "Island"@sv .
+
+<#india>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/in.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, orange, white and green, with a dark blue spoked wheel in the center"@en ,
+                                     "Tre vågräta ränder, orange, vit och grön, med ett mörkblått ekerhjul i mitten"@sv ;
+    solid-memo:back "India"@en ,
+                    "Indien"@sv .
+
+<#indonesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/id.svg> ;
+    solid-memo:frontImageDescription "Two horizontal halves, red over white"@en ,
+                                     "Två vågräta halvor, röd över vit"@sv ;
+    solid-memo:back "Indonesia"@en ,
+                    "Indonesien"@sv .
+
+<#iran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ir.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, white and red, with a red emblem in the center and bands of small white script along the edges of the white stripe"@en ,
+                                     "Tre vågräta ränder, grön, vit och röd, med ett rött emblem i mitten och band av liten vit skrift längs kanterna av den vita randen"@sv ;
+    solid-memo:back "Iran"@en ,
+                    "Iran"@sv .
+
+<#iraq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/iq.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and black, with green Arabic script in the center"@en ,
+                                     "Tre vågräta ränder, röd, vit och svart, med grön arabisk skrift i mitten"@sv ;
+    solid-memo:back "Iraq"@en ,
+                    "Irak"@sv .
+
+<#ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ie.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, white and orange"@en ,
+                                     "Tre lodräta ränder, grön, vit och orange"@sv ;
+    solid-memo:back "Ireland"@en ,
+                    "Irland"@sv .
+
+<#isle-of-man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/im.svg> ;
+    solid-memo:frontImageDescription "Red field with three armored legs joined at the thigh, wheeling in the center"@en ,
+                                     "Röd duk med tre bepansrade ben förenade vid låren, som snurrar i mitten"@sv ;
+    solid-memo:back "Isle of Man"@en ,
+                    "Isle of Man"@sv .
+
+<#israel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/il.svg> ;
+    solid-memo:frontImageDescription "White field with two horizontal blue stripes and a blue six-pointed star outlined by two triangles in the center"@en ,
+                                     "Vit duk med två vågräta blå ränder och en blå sexuddig stjärna formad av två trianglar i mitten"@sv ;
+    solid-memo:back "Israel"@en ,
+                    "Israel"@sv .
+
+<#italy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/it.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, white and red"@en ,
+                                     "Tre lodräta ränder, grön, vit och röd"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#jamaica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/jm.svg> ;
+    solid-memo:frontImageDescription "A yellow diagonal cross dividing the field into green triangles at top and bottom and black triangles at left and right"@en ,
+                                     "Ett gult diagonalkors som delar duken i gröna trianglar upptill och nertill och svarta trianglar till vänster och höger"@sv ;
+    solid-memo:back "Jamaica"@en ,
+                    "Jamaica"@sv .
+
+<#japan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/jp.svg> ;
+    solid-memo:frontImageDescription "White field with a red disc in the center"@en ,
+                                     "Vit duk med en röd skiva i mitten"@sv ;
+    solid-memo:back "Japan"@en ,
+                    "Japan"@sv .
+
+<#jersey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/je.svg> ;
+    solid-memo:frontImageDescription "White field with a red diagonal cross and a red shield with three yellow lions under a yellow crown at the top"@en ,
+                                     "Vit duk med ett rött diagonalkors och en röd sköld med tre gula lejon under en gul krona upptill"@sv ;
+    solid-memo:back "Jersey"@en ,
+                    "Jersey"@sv .
+
+<#jordan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/jo.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, white and green, with a red triangle at the left holding a white seven-pointed star"@en ,
+                                     "Tre vågräta ränder, svart, vit och grön, med en röd triangel till vänster med en vit sjuuddig stjärna"@sv ;
+    solid-memo:back "Jordan"@en ,
+                    "Jordanien"@sv .
+
+<#kazakhstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kz.svg> ;
+    solid-memo:frontImageDescription "Light blue field with a yellow sun above a soaring yellow eagle in the center and a yellow ornamental band along the left edge"@en ,
+                                     "Ljusblå duk med en gul sol ovanför en svävande gul örn i mitten och ett gult ornamentband längs vänsterkanten"@sv ;
+    solid-memo:back "Kazakhstan"@en ,
+                    "Kazakstan"@sv .
+
+<#kenya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ke.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, red and green, separated by narrow white stripes, with a red, black and white shield over two crossed white spears in the center"@en ,
+                                     "Tre vågräta ränder, svart, röd och grön, åtskilda av smala vita ränder, med en röd, svart och vit sköld över två korsade vita spjut i mitten"@sv ;
+    solid-memo:back "Kenya"@en ,
+                    "Kenya"@sv .
+
+<#kiribati>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ki.svg> ;
+    solid-memo:frontImageDescription "Red upper half with a yellow bird flying over a rising yellow sun, and wavy blue and white stripes in the lower half"@en ,
+                                     "Röd övre halva med en gul fågel som flyger över en gul uppgående sol, och vågiga blå och vita ränder i nedre halvan"@sv ;
+    solid-memo:back "Kiribati"@en ,
+                    "Kiribati"@sv .
+
+<#north-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kp.svg> ;
+    solid-memo:frontImageDescription "Horizontal stripes of blue, a wide red and blue, separated by narrow white stripes, with a white disc holding a red five-pointed star left of center"@en ,
+                                     "Vågräta ränder i blått, ett brett rött och blått, åtskilda av smala vita ränder, med en vit skiva med en röd femuddig stjärna till vänster om mitten"@sv ;
+    solid-memo:back "North Korea"@en ,
+                    "Nordkorea"@sv .
+
+<#south-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kr.svg> ;
+    solid-memo:frontImageDescription "White field with a red and blue swirled circle in the center and four black groups of bars around it"@en ,
+                                     "Vit duk med en röd och blå virvlad cirkel i mitten och fyra svarta grupper av streck runt den"@sv ;
+    solid-memo:back "South Korea"@en ,
+                    "Sydkorea"@sv .
+
+<#kosovo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/xk.svg> ;
+    solid-memo:frontImageDescription "Dark blue field with a gold map of a landlocked territory in the center below an arc of six white stars"@en ,
+                                     "Mörkblå duk med en guldfärgad karta över ett landområde i mitten under en båge av sex vita stjärnor"@sv ;
+    solid-memo:back "Kosovo"@en ,
+                    "Kosovo"@sv .
+
+<#kuwait>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kw.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, white and red, with a black trapezoid at the left"@en ,
+                                     "Tre vågräta ränder, grön, vit och röd, med en svart trapets till vänster"@sv ;
+    solid-memo:back "Kuwait"@en ,
+                    "Kuwait"@sv .
+
+<#kyrgyzstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kg.svg> ;
+    solid-memo:frontImageDescription "Red field with a yellow sun of many rays in the center around a red ring crossed by red lines"@en ,
+                                     "Röd duk med en gul sol med många strålar i mitten kring en röd ring korsad av röda linjer"@sv ;
+    solid-memo:back "Kyrgyzstan"@en ,
+                    "Kirgizistan"@sv .
+
+<#laos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/la.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, a double-width dark blue and red, with a white disc in the center"@en ,
+                                     "Tre vågräta ränder, röd, en dubbelt så bred mörkblå och röd, med en vit skiva i mitten"@sv ;
+    solid-memo:back "Laos"@en ,
+                    "Laos"@sv .
+
+<#latvia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lv.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, maroon, a narrow white and maroon"@en ,
+                                     "Tre vågräta ränder, vinröd, en smal vit och vinröd"@sv ;
+    solid-memo:back "Latvia"@en ,
+                    "Lettland"@sv .
+
+<#lebanon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lb.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, a double-width white and red, with a green cedar tree in the center"@en ,
+                                     "Tre vågräta ränder, röd, en dubbelt så bred vit och röd, med en grön ceder i mitten"@sv ;
+    solid-memo:back "Lebanon"@en ,
+                    "Libanon"@sv .
+
+<#lesotho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ls.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, dark blue, a wider white and green, with a black conical hat in the center"@en ,
+                                     "Tre vågräta ränder, mörkblå, en bredare vit och grön, med en svart konisk hatt i mitten"@sv ;
+    solid-memo:back "Lesotho"@en ,
+                    "Lesotho"@sv .
+
+<#liberia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lr.svg> ;
+    solid-memo:frontImageDescription "Eleven horizontal stripes, red and white, with a dark blue square canton holding one white star"@en ,
+                                     "Elva vågräta ränder i rött och vitt, med en mörkblå kvadratisk kanton med en vit stjärna"@sv ;
+    solid-memo:back "Liberia"@en ,
+                    "Liberia"@sv .
+
+<#libya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ly.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, a wider black and green, with a white crescent and star in the middle"@en ,
+                                     "Tre vågräta ränder, röd, en bredare svart och grön, med en vit halvmåne och stjärna i mitten"@sv ;
+    solid-memo:back "Libya"@en ,
+                    "Libyen"@sv .
+
+<#liechtenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/li.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, dark blue over red, with a yellow crown in the upper hoist corner"@en ,
+                                     "Två vågräta ränder, mörkblå över röd, med en gul krona i övre hörnet vid stången"@sv ;
+    solid-memo:back "Liechtenstein"@en ,
+                    "Liechtenstein"@sv .
+
+<#lithuania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lt.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, yellow, green and red"@en ,
+                                     "Tre vågräta ränder, gul, grön och röd"@sv ;
+    solid-memo:back "Lithuania"@en ,
+                    "Litauen"@sv .
+
+<#luxembourg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lu.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and light blue"@en ,
+                                     "Tre vågräta ränder, röd, vit och ljusblå"@sv ;
+    solid-memo:back "Luxembourg"@en ,
+                    "Luxemburg"@sv .
+
+<#macau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mo.svg> ;
+    solid-memo:frontImageDescription "A green field with a white lotus flower above a bridge and white waves, under an arc of five yellow stars"@en ,
+                                     "Ett grönt fält med en vit lotusblomma ovanför en bro och vita vågor, under en båge av fem gula stjärnor"@sv ;
+    solid-memo:back "Macau"@en ,
+                    "Macao"@sv .
+
+<#madagascar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mg.svg> ;
+    solid-memo:frontImageDescription "A white vertical band at the hoist, beside two horizontal stripes, red over green"@en ,
+                                     "Ett vitt lodrätt fält vid stången bredvid två vågräta ränder, röd över grön"@sv ;
+    solid-memo:back "Madagascar"@en ,
+                    "Madagaskar"@sv .
+
+<#malawi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mw.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, red and green, with a red rising sun with many rays in the black stripe"@en ,
+                                     "Tre vågräta ränder, svart, röd och grön, med en röd uppgående sol med många strålar i den svarta randen"@sv ;
+    solid-memo:back "Malawi"@en ,
+                    "Malawi"@sv .
+
+<#malaysia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/my.svg> ;
+    solid-memo:frontImageDescription "Fourteen horizontal stripes, red and white, with a dark blue canton holding a yellow crescent and a yellow fourteen-pointed star"@en ,
+                                     "Fjorton vågräta ränder i rött och vitt, med en mörkblå kanton med en gul halvmåne och en gul fjortonuddig stjärna"@sv ;
+    solid-memo:back "Malaysia"@en ,
+                    "Malaysia"@sv .
+
+<#maldives>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mv.svg> ;
+    solid-memo:frontImageDescription "A red field with a large green rectangle in the middle holding a white crescent"@en ,
+                                     "Ett rött fält med en stor grön rektangel i mitten med en vit halvmåne"@sv ;
+    solid-memo:back "Maldives"@en ,
+                    "Maldiverna"@sv .
+
+<#mali>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ml.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, yellow and red"@en ,
+                                     "Tre lodräta ränder, grön, gul och röd"@sv ;
+    solid-memo:back "Mali"@en ,
+                    "Mali"@sv .
+
+<#malta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mt.svg> ;
+    solid-memo:frontImageDescription "Two vertical halves, white and red, with a small grey cross edged in red in the upper hoist corner"@en ,
+                                     "Två lodräta halvor, vit och röd, med ett litet grått kors med röd kant i övre hörnet vid stången"@sv ;
+    solid-memo:back "Malta"@en ,
+                    "Malta"@sv .
+
+<#the-marshall-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mh.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with two diagonal stripes, orange and white, widening from the lower hoist to the upper fly, and a white star with many points in the upper hoist"@en ,
+                                     "Ett mörkblått fält med två diagonala ränder, orange och vit, som vidgas från nedre stånghörnet mot övre yttre hörnet, och en vit månguddig stjärna uppe vid stången"@sv ;
+    solid-memo:back "Marshall Islands"@en ,
+                    "Marshallöarna"@sv .
+
+<#martinique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mq.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, green over black, with a red triangle at the hoist"@en ,
+                                     "Två vågräta ränder, grön över svart, med en röd triangel vid stången"@sv ;
+    solid-memo:back "Martinique"@en ,
+                    "Martinique"@sv .
+
+<#mauritania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mr.svg> ;
+    solid-memo:frontImageDescription "A green field with thin red stripes along the top and bottom and a yellow star above an upturned yellow crescent"@en ,
+                                     "Ett grönt fält med smala röda ränder upptill och nedtill och en gul stjärna ovanför en uppåtvänd gul halvmåne"@sv ;
+    solid-memo:back "Mauritania"@en ,
+                    "Mauretanien"@sv .
+
+<#mauritius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mu.svg> ;
+    solid-memo:frontImageDescription "Four horizontal stripes, red, dark blue, yellow and green"@en ,
+                                     "Fyra vågräta ränder, röd, mörkblå, gul och grön"@sv ;
+    solid-memo:back "Mauritius"@en ,
+                    "Mauritius"@sv .
+
+<#mayotte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/yt.svg> ;
+    solid-memo:frontImageDescription "A white field with red lettering above a central emblem: a blue and red shield with a white crescent and yellow flowers, held by two grey seahorses"@en ,
+                                     "Ett vitt fält med röd text ovanför ett vapen i mitten: en blå och röd sköld med en vit halvmåne och gula blommor, hållen av två grå sjöhästar"@sv ;
+    solid-memo:back "Mayotte"@en ,
+                    "Mayotte"@sv .
+
+<#mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mx.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, white and red, with a brown eagle on a cactus eating a snake in the middle"@en ,
+                                     "Tre lodräta ränder, grön, vit och röd, med en brun örn på en kaktus som äter en orm i mitten"@sv ;
+    solid-memo:back "Mexico"@en ,
+                    "Mexiko"@sv .
+
+<#micronesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fm.svg> ;
+    solid-memo:frontImageDescription "A light blue field with four white stars set in a diamond in the middle"@en ,
+                                     "Ett ljusblått fält med fyra vita stjärnor placerade i en romb i mitten"@sv ;
+    solid-memo:back "Micronesia"@en ,
+                    "Mikronesien"@sv .
+
+<#moldova>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/md.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, yellow and red, with a brown eagle holding a cross and a red and blue shield in the middle"@en ,
+                                     "Tre lodräta ränder, mörkblå, gul och röd, med en brun örn som håller ett kors och en röd och blå sköld i mitten"@sv ;
+    solid-memo:back "Moldova"@en ,
+                    "Moldavien"@sv .
+
+<#monaco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mc.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, red over white"@en ,
+                                     "Två vågräta ränder, röd över vit"@sv ;
+    solid-memo:back "Monaco"@en ,
+                    "Monaco"@sv .
+
+<#mongolia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mn.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, red, dark blue and red, with a yellow stacked symbol of flame, sun, moon and shapes in the hoist stripe"@en ,
+                                     "Tre lodräta ränder, röd, mörkblå och röd, med en gul staplad symbol av låga, sol, måne och former i randen vid stången"@sv ;
+    solid-memo:back "Mongolia"@en ,
+                    "Mongoliet"@sv .
+
+<#montenegro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/me.svg> ;
+    solid-memo:frontImageDescription "A red field with a yellow border and a yellow double-headed eagle with a crown, holding a shield with a lion"@en ,
+                                     "Ett rött fält med gul kant och en gul dubbelhövdad örn med krona som bär en sköld med ett lejon"@sv ;
+    solid-memo:back "Montenegro"@en ,
+                    "Montenegro"@sv .
+
+<#montserrat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ms.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and a shield in the fly showing a woman in green holding a cross beside a harp"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och en sköld i den yttre delen med en kvinna i grönt som håller ett kors bredvid en harpa"@sv ;
+    solid-memo:back "Montserrat"@en ,
+                    "Montserrat"@sv .
+
+<#morocco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ma.svg> ;
+    solid-memo:frontImageDescription "A red field with a green five-pointed star drawn as interlaced lines in the middle"@en ,
+                                     "Ett rött fält med en grön femuddig stjärna ritad med sammanflätade linjer i mitten"@sv ;
+    solid-memo:back "Morocco"@en ,
+                    "Marocko"@sv .
+
+<#mozambique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mz.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, black and yellow, edged in white, with a red triangle at the hoist holding a yellow star, a book and a crossed rifle and hoe"@en ,
+                                     "Tre vågräta ränder, grön, svart och gul, med vita kanter och en röd triangel vid stången med en gul stjärna, en bok och ett gevär i kors med en hacka"@sv ;
+    solid-memo:back "Mozambique"@en ,
+                    "Moçambique"@sv .
+
+<#myanmar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mm.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, yellow, green and red, with a large white five-pointed star in the middle"@en ,
+                                     "Tre vågräta ränder, gul, grön och röd, med en stor vit femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Myanmar"@en ,
+                    "Myanmar"@sv .
+
+<#namibia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/na.svg> ;
+    solid-memo:frontImageDescription "A red diagonal band edged in white from the lower hoist to the upper fly, a dark blue upper triangle with a yellow sun and a green lower triangle"@en ,
+                                     "Ett rött diagonalt band med vita kanter från nedre stånghörnet till övre yttre hörnet, en mörkblå övre triangel med en gul sol och en grön nedre triangel"@sv ;
+    solid-memo:back "Namibia"@en ,
+                    "Namibia"@sv .
+
+<#nauru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nr.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with a thin yellow horizontal line across the middle and a white twelve-pointed star below it near the hoist"@en ,
+                                     "Ett mörkblått fält med en smal gul vågrät linje genom mitten och en vit tolvuddig stjärna under den nära stången"@sv ;
+    solid-memo:back "Nauru"@en ,
+                    "Nauru"@sv .
+
+<#nepal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/np.svg> ;
+    solid-memo:frontImageDescription "Two stacked red pennant triangles with a dark blue border, a white moon in the upper and a white sun in the lower"@en ,
+                                     "Två staplade röda vimpeltrianglar med mörkblå kant, en vit måne i den övre och en vit sol i den nedre"@sv ;
+    solid-memo:back "Nepal"@en ,
+                    "Nepal"@sv .
+
+<#the-netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nl.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and dark blue"@en ,
+                                     "Tre vågräta ränder, röd, vit och mörkblå"@sv ;
+    solid-memo:back "Netherlands"@en ,
+                    "Nederländerna"@sv .
+
+<#new-caledonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nc.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, dark blue, red and green, with a large yellow disc holding a black carved spire shape, toward the hoist"@en ,
+                                     "Tre vågräta ränder, mörkblå, röd och grön, med en stor gul skiva med en svart snidad spirform, närmare stången"@sv ;
+    solid-memo:back "New Caledonia"@en ,
+                    "Nya Kaledonien"@sv .
+
+<#new-zealand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nz.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and four red stars edged in white in the fly"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och fyra röda stjärnor med vit kant i den yttre delen"@sv ;
+    solid-memo:back "New Zealand"@en ,
+                    "Nya Zeeland"@sv .
+
+<#nicaragua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ni.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, blue, white and blue, with a triangle emblem of volcanoes, a rainbow and a cap inside a ring of lettering in the middle"@en ,
+                                     "Tre vågräta ränder, blå, vit och blå, med ett triangulärt emblem med vulkaner, en regnbåge och en mössa inom en ring av text i mitten"@sv ;
+    solid-memo:back "Nicaragua"@en ,
+                    "Nicaragua"@sv .
+
+<#niger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ne.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, orange, white and green, with an orange disc in the middle"@en ,
+                                     "Tre vågräta ränder, orange, vit och grön, med en orange skiva i mitten"@sv ;
+    solid-memo:back "Niger"@en ,
+                    "Niger"@sv .
+
+<#nigeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ng.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, white and green"@en ,
+                                     "Tre lodräta ränder, grön, vit och grön"@sv ;
+    solid-memo:back "Nigeria"@en ,
+                    "Nigeria"@sv .
+
+<#niue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nu.svg> ;
+    solid-memo:frontImageDescription "A yellow field with the red, white and blue crosses in the canton, carrying five yellow stars, the middle one on a dark blue disc"@en ,
+                                     "Ett gult fält med röda, vita och blå kors i kantonen, som bär fem gula stjärnor, den mittersta på en mörkblå skiva"@sv ;
+    solid-memo:back "Niue"@en ,
+                    "Niue"@sv .
+
+<#norfolk-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nf.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, a wider white and green, with a green pine tree in the middle"@en ,
+                                     "Tre lodräta ränder, grön, en bredare vit och grön, med en grön tall i mitten"@sv ;
+    solid-memo:back "Norfolk Island"@en ,
+                    "Norfolkön"@sv .
+
+<#macedonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mk.svg> ;
+    solid-memo:frontImageDescription "A red field with a yellow sun whose eight broadening rays reach the edges"@en ,
+                                     "Ett rött fält med en gul sol vars åtta breddade strålar når kanterna"@sv ;
+    solid-memo:back "North Macedonia"@en ,
+                    "Nordmakedonien"@sv .
+
+<#northern-ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-nir.svg> ;
+    solid-memo:frontImageDescription "A white field with a red cross and, in the middle, a white six-pointed star holding a red hand, under a yellow crown"@en ,
+                                     "Ett vitt fält med ett rött kors och i mitten en vit sexuddig stjärna med en röd hand, under en gul krona"@sv ;
+    solid-memo:back "Northern Ireland"@en ,
+                    "Nordirland"@sv .
+
+<#northern-mariana-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mp.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with a white star on a grey stone pillar, inside a ring of colored flowers"@en ,
+                                     "Ett mörkblått fält med en vit stjärna på en grå stenpelare, inom en krans av färgglada blommor"@sv ;
+    solid-memo:back "Northern Mariana Islands"@en ,
+                    "Nordmarianerna"@sv .
+
+<#norway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/no.svg> ;
+    solid-memo:frontImageDescription "A red field with a dark blue cross edged in white, set toward the hoist"@en ,
+                                     "Ett rött fält med ett mörkblått kors med vit kant, förskjutet mot stången"@sv ;
+    solid-memo:back "Norway"@en ,
+                    "Norge"@sv .
+
+<#oman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/om.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, white, red and green, with a red vertical band at the hoist bearing a white emblem of a curved dagger and crossed swords"@en ,
+                                     "Tre vågräta ränder, vit, röd och grön, med ett rött lodrätt fält vid stången med ett vitt emblem av en krökt dolk och korslagda svärd"@sv ;
+    solid-memo:back "Oman"@en ,
+                    "Oman"@sv .
+
+<#pakistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pk.svg> ;
+    solid-memo:frontImageDescription "A dark green field with a white vertical band at the hoist and a white crescent and star"@en ,
+                                     "Ett mörkgrönt fält med ett vitt lodrätt fält vid stången och en vit halvmåne och stjärna"@sv ;
+    solid-memo:back "Pakistan"@en ,
+                    "Pakistan"@sv .
+
+<#palau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pw.svg> ;
+    solid-memo:frontImageDescription "A light blue field with a large yellow disc set slightly toward the hoist"@en ,
+                                     "Ett ljusblått fält med en stor gul skiva något förskjuten mot stången"@sv ;
+    solid-memo:back "Palau"@en ,
+                    "Palau"@sv .
+
+<#palestine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ps.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, white and green, with a red triangle at the hoist"@en ,
+                                     "Tre vågräta ränder, svart, vit och grön, med en röd triangel vid stången"@sv ;
+    solid-memo:back "Palestine"@en ,
+                    "Palestina"@sv .
+
+<#panama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pa.svg> ;
+    solid-memo:frontImageDescription "Four quarters: white with a dark blue star, red, dark blue, and white with a red star"@en ,
+                                     "Fyra fält: vitt med en mörkblå stjärna, rött, mörkblått och vitt med en röd stjärna"@sv ;
+    solid-memo:back "Panama"@en ,
+                    "Panama"@sv .
+
+<#papua-new-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pg.svg> ;
+    solid-memo:frontImageDescription "Divided diagonally: a black lower hoist triangle with five white stars and a red upper fly triangle with a yellow bird with long plumes"@en ,
+                                     "Diagonalt delad: en svart nedre triangel vid stången med fem vita stjärnor och en röd övre yttre triangel med en gul fågel med långa plymer"@sv ;
+    solid-memo:back "Papua New Guinea"@en ,
+                    "Papua Nya Guinea"@sv .
+
+<#paraguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/py.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and dark blue, with a round emblem of a yellow star in a green wreath in the middle"@en ,
+                                     "Tre vågräta ränder, röd, vit och mörkblå, med ett runt emblem med en gul stjärna i en grön krans i mitten"@sv ;
+    solid-memo:back "Paraguay"@en ,
+                    "Paraguay"@sv .
+
+<#peru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pe.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, red, white and red"@en ,
+                                     "Tre lodräta ränder, röd, vit och röd"@sv ;
+    solid-memo:back "Peru"@en ,
+                    "Peru"@sv .
+
+<#the-philippines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ph.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, dark blue over red, with a white triangle at the hoist holding a yellow sun with eight rays and three yellow stars"@en ,
+                                     "Två vågräta ränder, mörkblå över röd, med en vit triangel vid stången med en gul sol med åtta strålar och tre gula stjärnor"@sv ;
+    solid-memo:back "Philippines"@en ,
+                    "Filippinerna"@sv .
+
+<#pitcairn-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pn.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and a green and blue shield with a yellow anchor in the fly"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och en grön och blå sköld med ett gult ankare i den yttre delen"@sv ;
+    solid-memo:back "Pitcairn Islands"@en ,
+                    "Pitcairnöarna"@sv .
+
+<#poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pl.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, white over red"@en ,
+                                     "Två vågräta ränder, vit över röd"@sv ;
+    solid-memo:back "Poland"@en ,
+                    "Polen"@sv .
+
+<#portugal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pt.svg> ;
+    solid-memo:frontImageDescription "Two vertical parts, a narrower green at the hoist and red, with a yellow armillary sphere and a red and white shield on the divide"@en ,
+                                     "Två lodräta fält, ett smalare grönt vid stången och rött, med en gul armillarsfär och en röd och vit sköld på gränsen"@sv ;
+    solid-memo:back "Portugal"@en ,
+                    "Portugal"@sv .
+
+<#puerto-rico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pr.svg> ;
+    solid-memo:frontImageDescription "Five horizontal stripes, red and white, with a blue triangle at the hoist holding one white star"@en ,
+                                     "Fem vågräta ränder i rött och vitt, med en blå triangel vid stången med en vit stjärna"@sv ;
+    solid-memo:back "Puerto Rico"@en ,
+                    "Puerto Rico"@sv .
+
+<#qatar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/qa.svg> ;
+    solid-memo:frontImageDescription "A maroon field with a white vertical band at the hoist joined by a serrated edge of nine points"@en ,
+                                     "Ett vinrött fält med ett vitt lodrätt fält vid stången, avgränsat av en sågtandad kant med nio spetsar"@sv ;
+    solid-memo:back "Qatar"@en ,
+                    "Qatar"@sv .
+
+<#reunion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/re.svg> ;
+    solid-memo:frontImageDescription "A blue field with a red triangle rising from the bottom edge and yellow rays fanning out from its tip"@en ,
+                                     "Ett blått fält med en röd triangel som reser sig från nederkanten och gula strålar som utgår från dess spets"@sv ;
+    solid-memo:back "Réunion"@en ,
+                    "Réunion"@sv .
+
+<#romania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ro.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, yellow and red"@en ,
+                                     "Tre lodräta ränder, mörkblå, gul och röd"@sv ;
+    solid-memo:back "Romania"@en ,
+                    "Rumänien"@sv .
+
+<#russia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ru.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, white, blue and red"@en ,
+                                     "Tre vågräta ränder, vit, blå och röd"@sv ;
+    solid-memo:back "Russia"@en ,
+                    "Ryssland"@sv .
+
+<#rwanda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/rw.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, a wide light blue, yellow and green, with a yellow sun with many rays in the upper fly"@en ,
+                                     "Tre vågräta ränder, en bred ljusblå, gul och grön, med en gul sol med många strålar i övre yttre hörnet"@sv ;
+    solid-memo:back "Rwanda"@en ,
+                    "Rwanda"@sv .
+
+<#saint-barthelemy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bl.svg> ;
+    solid-memo:frontImageDescription "A white field with a coat of arms in the middle: a shield under a crown, between two brown birds, above a ribbon with lettering"@en ,
+                                     "Ett vitt fält med ett vapen i mitten: en sköld under en krona, mellan två bruna fåglar, ovanför ett band med text"@sv ;
+    solid-memo:back "Saint Barthélemy"@en ,
+                    "Saint-Barthélemy"@sv .
+
+<#saint-helena-ascension-and-tristan-da-cunha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sh.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and a shield showing a bird on yellow above a sailing ship by a rocky coast"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och en sköld i den yttre delen med en fågel på gult ovanför ett segelfartyg vid en klippig kust"@sv ;
+    solid-memo:back "Saint Helena, Ascension and Tristan da Cunha"@en ,
+                    "Sankta Helena, Ascension och Tristan da Cunha"@sv .
+
+<#saint-kitts-and-nevis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kn.svg> ;
+    solid-memo:frontImageDescription "A black diagonal band edged in yellow from the lower hoist to the upper fly, with two white stars, a green upper triangle and a red lower triangle"@en ,
+                                     "Ett svart diagonalt band med gula kanter från nedre stånghörnet till övre yttre hörnet, med två vita stjärnor, en grön övre triangel och en röd nedre triangel"@sv ;
+    solid-memo:back "Saint Kitts and Nevis"@en ,
+                    "Saint Kitts och Nevis"@sv .
+
+<#saint-lucia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lc.svg> ;
+    solid-memo:frontImageDescription "A light blue field with a black triangle edged in white and a yellow triangle in front of it in the middle"@en ,
+                                     "Ett ljusblått fält med en svart triangel med vit kant och en gul triangel framför den i mitten"@sv ;
+    solid-memo:back "Saint Lucia"@en ,
+                    "Saint Lucia"@sv .
+
+<#saint-martin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mf.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, white and red"@en ,
+                                     "Tre lodräta ränder, mörkblå, vit och röd"@sv ;
+    solid-memo:back "Saint Martin"@en ,
+                    "Saint-Martin"@sv .
+
+<#saint-pierre-and-miquelon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pm.svg> ;
+    solid-memo:frontImageDescription "A yellow three-masted sailing ship on blue and white waves under a blue sky, with a vertical band at the hoist holding three small flags or emblems"@en ,
+                                     "Ett gult tremastat segelfartyg på blåa och vita vågor under en blå himmel, med ett lodrätt fält vid stången med tre små flaggor eller emblem"@sv ;
+    solid-memo:back "Saint Pierre and Miquelon"@en ,
+                    "Saint-Pierre och Miquelon"@sv .
+
+<#saint-vincent-and-the-grenadines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vc.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, dark blue, a wider yellow and green, with three green diamonds in a V shape in the middle"@en ,
+                                     "Tre lodräta ränder, mörkblå, en bredare gul och grön, med tre gröna romber i V-form i mitten"@sv ;
+    solid-memo:back "Saint Vincent and the Grenadines"@en ,
+                    "Saint Vincent och Grenadinerna"@sv .
+
+<#samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ws.svg> ;
+    solid-memo:frontImageDescription "A red field with a dark blue canton holding five white stars, one smaller than the rest"@en ,
+                                     "Ett rött fält med en mörkblå kanton med fem vita stjärnor, en mindre än de andra"@sv ;
+    solid-memo:back "Samoa"@en ,
+                    "Samoa"@sv .
+
+<#san-marino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sm.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, white over light blue, with a coat of arms of three towers on green hills under a crown, in a wreath"@en ,
+                                     "Två vågräta ränder, vit över ljusblå, med ett vapen med tre torn på gröna kullar under en krona, inom en krans"@sv ;
+    solid-memo:back "San Marino"@en ,
+                    "San Marino"@sv .
+
+<#sao-tome-and-principe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/st.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, a wider yellow and green, with a red triangle at the hoist and two black stars on the yellow"@en ,
+                                     "Tre vågräta ränder, grön, en bredare gul och grön, med en röd triangel vid stången och två svarta stjärnor på det gula"@sv ;
+    solid-memo:back "São Tomé and Príncipe"@en ,
+                    "São Tomé och Príncipe"@sv .
+
+<#saudi-arabia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sa.svg> ;
+    solid-memo:frontImageDescription "A green field with a line of white flowing script above a white horizontal sword"@en ,
+                                     "Ett grönt fält med en rad vit slingrande skrift ovanför ett vitt vågrätt svärd"@sv ;
+    solid-memo:back "Saudi Arabia"@en ,
+                    "Saudiarabien"@sv .
+
+<#scotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-sct.svg> ;
+    solid-memo:frontImageDescription "A blue field with a white diagonal cross"@en ,
+                                     "Ett blått fält med ett vitt diagonalkors"@sv ;
+    solid-memo:back "Scotland"@en ,
+                    "Skottland"@sv .
+
+<#senegal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sn.svg> ;
+    solid-memo:frontImageDescription "Three vertical stripes, green, yellow and red, with a green star in the middle"@en ,
+                                     "Tre lodräta ränder, grön, gul och röd, med en grön stjärna i mitten"@sv ;
+    solid-memo:back "Senegal"@en ,
+                    "Senegal"@sv .
+
+<#serbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/rs.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, dark blue and white, with a coat of arms of a white double-headed eagle on a red shield under a crown, toward the hoist"@en ,
+                                     "Tre vågräta ränder, röd, mörkblå och vit, med ett vapen med en vit dubbelhövdad örn på en röd sköld under en krona, närmare stången"@sv ;
+    solid-memo:back "Serbia"@en ,
+                    "Serbien"@sv .
+
+<#the-seychelles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sc.svg> ;
+    solid-memo:frontImageDescription "Five oblique bands fanning out from the lower hoist corner, dark blue, yellow, red, white and green"@en ,
+                                     "Fem sneda band som strålar ut från nedre hörnet vid stången, mörkblått, gult, rött, vitt och grönt"@sv ;
+    solid-memo:back "Seychelles"@en ,
+                    "Seychellerna"@sv .
+
+<#sierra-leone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sl.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, white and blue"@en ,
+                                     "Tre vågräta ränder, grön, vit och blå"@sv ;
+    solid-memo:back "Sierra Leone"@en ,
+                    "Sierra Leone"@sv .
+
+<#singapore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sg.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, red over white, with a white crescent and five white stars in a ring in the upper hoist"@en ,
+                                     "Två vågräta ränder, röd över vit, med en vit halvmåne och fem vita stjärnor i en ring uppe vid stången"@sv ;
+    solid-memo:back "Singapore"@en ,
+                    "Singapore"@sv .
+
+<#sint-maarten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sx.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, red over dark blue, with a white triangle at the hoist holding a shield with a building, a sun and a bird"@en ,
+                                     "Två vågräta ränder, röd över mörkblå, med en vit triangel vid stången med en sköld med en byggnad, en sol och en fågel"@sv ;
+    solid-memo:back "Sint Maarten"@en ,
+                    "Sint Maarten"@sv .
+
+<#slovakia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sk.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, white, blue and red, with a red shield bearing a white double cross on three blue hills, toward the hoist"@en ,
+                                     "Tre vågräta ränder, vit, blå och röd, med en röd sköld med ett vitt dubbelkors på tre blå kullar, närmare stången"@sv ;
+    solid-memo:back "Slovakia"@en ,
+                    "Slovakien"@sv .
+
+<#slovenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/si.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, white, blue and red, with a red-edged blue shield showing a white three-peaked mountain, wavy lines and three yellow stars in the upper hoist"@en ,
+                                     "Tre vågräta ränder, vit, blå och röd, med en blå sköld med röd kant som visar ett vitt berg med tre toppar, vågiga linjer och tre gula stjärnor uppe vid stången"@sv ;
+    solid-memo:back "Slovenia"@en ,
+                    "Slovenien"@sv .
+
+<#the-solomon-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sb.svg> ;
+    solid-memo:frontImageDescription "A thin yellow diagonal stripe from the lower hoist to the upper fly, a blue upper triangle with five white stars and a green lower triangle"@en ,
+                                     "En smal gul diagonal rand från nedre stånghörnet till övre yttre hörnet, en blå övre triangel med fem vita stjärnor och en grön nedre triangel"@sv ;
+    solid-memo:back "Solomon Islands"@en ,
+                    "Salomonöarna"@sv .
+
+<#somalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/so.svg> ;
+    solid-memo:frontImageDescription "A light blue field with a white five-pointed star in the middle"@en ,
+                                     "Ett ljusblått fält med en vit femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Somalia"@en ,
+                    "Somalia"@sv .
+
+<#south-africa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/za.svg> ;
+    solid-memo:frontImageDescription "A green Y shape edged in white and yellow, lying on its side, with red above, blue below and a black triangle at the hoist"@en ,
+                                     "En liggande grön Y-form med vita och gula kanter, med rött ovanför, blått nedanför och en svart triangel vid stången"@sv ;
+    solid-memo:back "South Africa"@en ,
+                    "Sydafrika"@sv .
+
+<#south-georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gs.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and a shield with a lion holding a torch, flanked by a seal and a penguin"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och en sköld i den yttre delen med ett lejon som håller en fackla, flankerad av en säl och en pingvin"@sv ;
+    solid-memo:back "South Georgia"@en ,
+                    "Sydgeorgien"@sv .
+
+<#south-sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ss.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, red and green, separated by thin white stripes, with a light blue triangle at the hoist holding a yellow star"@en ,
+                                     "Tre vågräta ränder, svart, röd och grön, åtskilda av smala vita ränder, med en ljusblå triangel vid stången med en gul stjärna"@sv ;
+    solid-memo:back "South Sudan"@en ,
+                    "Sydsudan"@sv .
+
+<#spain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/es.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, a double-width yellow and red, with a crowned coat of arms between two pillars, toward the hoist"@en ,
+                                     "Tre vågräta ränder, röd, en dubbelt så bred gul och röd, med ett krönt vapen mellan två pelare, närmare stången"@sv ;
+    solid-memo:back "Spain"@en ,
+                    "Spanien"@sv .
+
+<#sri-lanka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lk.svg> ;
+    solid-memo:frontImageDescription "A maroon panel with a yellow lion holding a sword and four leaves in the corners, beside two vertical stripes, green and orange, at the hoist, all within a yellow border"@en ,
+                                     "Ett vinrött fält med ett gult lejon som håller ett svärd och fyra blad i hörnen, bredvid två lodräta ränder, grön och orange, vid stången, allt inom en gul kant"@sv ;
+    solid-memo:back "Sri Lanka"@en ,
+                    "Sri Lanka"@sv .
+
+<#sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sd.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and black, with a green triangle at the hoist"@en ,
+                                     "Tre vågräta ränder, röd, vit och svart, med en grön triangel vid stången"@sv ;
+    solid-memo:back "Sudan"@en ,
+                    "Sudan"@sv .
+
+<#suriname>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sr.svg> ;
+    solid-memo:frontImageDescription "Five horizontal stripes, green, white, a wide red, white and green, with a yellow star in the middle"@en ,
+                                     "Fem vågräta ränder, grön, vit, en bred röd, vit och grön, med en gul stjärna i mitten"@sv ;
+    solid-memo:back "Suriname"@en ,
+                    "Surinam"@sv .
+
+<#svalbard-and-jan-mayen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sj.svg> ;
+    solid-memo:frontImageDescription "A red field with a dark blue cross edged in white, set toward the hoist"@en ,
+                                     "Ett rött fält med ett mörkblått kors med vit kant, förskjutet mot stången"@sv ;
+    solid-memo:back "Svalbard and Jan Mayen"@en ,
+                    "Svalbard och Jan Mayen"@sv .
+
+<#sweden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/se.svg> ;
+    solid-memo:frontImageDescription "A blue field with a yellow cross set toward the hoist"@en ,
+                                     "Ett blått fält med ett gult kors förskjutet mot stången"@sv ;
+    solid-memo:back "Sweden"@en ,
+                    "Sverige"@sv .
+
+<#switzerland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ch.svg> ;
+    solid-memo:frontImageDescription "A square red field with a white cross with equal arms in the middle"@en ,
+                                     "Ett kvadratiskt rött fält med ett vitt likarmat kors i mitten"@sv ;
+    solid-memo:back "Switzerland"@en ,
+                    "Schweiz"@sv .
+
+<#syria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sy.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, green, white and black, with three red stars in a row on the white"@en ,
+                                     "Tre vågräta ränder, grön, vit och svart, med tre röda stjärnor i rad på det vita"@sv ;
+    solid-memo:back "Syria"@en ,
+                    "Syrien"@sv .
+
+<#the-republic-of-china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tw.svg> ;
+    solid-memo:frontImageDescription "A red field with a dark blue canton holding a white sun with twelve rays"@en ,
+                                     "Ett rött fält med en mörkblå kanton med en vit sol med tolv strålar"@sv ;
+    solid-memo:back "Taiwan"@en ,
+                    "Taiwan"@sv .
+
+<#tajikistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tj.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, a wider white and green, with a yellow crown under an arc of seven yellow stars in the middle"@en ,
+                                     "Tre vågräta ränder, röd, en bredare vit och grön, med en gul krona under en båge av sju gula stjärnor i mitten"@sv ;
+    solid-memo:back "Tajikistan"@en ,
+                    "Tadzjikistan"@sv .
+
+<#tanzania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tz.svg> ;
+    solid-memo:frontImageDescription "A black diagonal band edged in yellow from the lower hoist to the upper fly, a green upper triangle and a light blue lower triangle"@en ,
+                                     "Ett svart diagonalt band med gula kanter från nedre stånghörnet till övre yttre hörnet, en grön övre triangel och en ljusblå nedre triangel"@sv ;
+    solid-memo:back "Tanzania"@en ,
+                    "Tanzania"@sv .
+
+<#thailand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/th.svg> ;
+    solid-memo:frontImageDescription "Five horizontal stripes, red, white, a double-width dark blue, white and red"@en ,
+                                     "Fem vågräta ränder, röd, vit, en dubbelt så bred mörkblå, vit och röd"@sv ;
+    solid-memo:back "Thailand"@en ,
+                    "Thailand"@sv .
+
+<#east-timor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tl.svg> ;
+    solid-memo:frontImageDescription "A red field with a yellow arrowhead and a smaller black triangle at the hoist, the black holding a white star"@en ,
+                                     "Ett rött fält med en gul pilspets och en mindre svart triangel vid stången, där den svarta har en vit stjärna"@sv ;
+    solid-memo:back "Timor-Leste"@en ,
+                    "Östtimor"@sv .
+
+<#togo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tg.svg> ;
+    solid-memo:frontImageDescription "Five horizontal stripes, green and yellow alternating, with a red canton holding a white star"@en ,
+                                     "Fem vågräta ränder, omväxlande gröna och gula, med en röd kanton med en vit stjärna"@sv ;
+    solid-memo:back "Togo"@en ,
+                    "Togo"@sv .
+
+<#tokelau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tk.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with a yellow stylized canoe sweeping across, and four white stars at the hoist"@en ,
+                                     "Ett mörkblått fält med en gul stiliserad kanot som sveper tvärs över, och fyra vita stjärnor vid stången"@sv ;
+    solid-memo:back "Tokelau"@en ,
+                    "Tokelau"@sv .
+
+<#tonga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/to.svg> ;
+    solid-memo:frontImageDescription "A red field with a white canton holding a red cross"@en ,
+                                     "Ett rött fält med en vit kanton med ett rött kors"@sv ;
+    solid-memo:back "Tonga"@en ,
+                    "Tonga"@sv .
+
+<#trinidad-and-tobago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tt.svg> ;
+    solid-memo:frontImageDescription "A red field with a black diagonal band edged in white from the upper hoist to the lower fly"@en ,
+                                     "Ett rött fält med ett svart diagonalt band med vita kanter från övre stånghörnet till nedre yttre hörnet"@sv ;
+    solid-memo:back "Trinidad and Tobago"@en ,
+                    "Trinidad och Tobago"@sv .
+
+<#tunisia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tn.svg> ;
+    solid-memo:frontImageDescription "A red field with a white disc in the middle holding a red crescent and red star"@en ,
+                                     "Ett rött fält med en vit skiva i mitten med en röd halvmåne och en röd stjärna"@sv ;
+    solid-memo:back "Tunisia"@en ,
+                    "Tunisien"@sv .
+
+<#turkey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tr.svg> ;
+    solid-memo:frontImageDescription "A red field with a white crescent and a white star, toward the hoist"@en ,
+                                     "Ett rött fält med en vit halvmåne och en vit stjärna, närmare stången"@sv ;
+    solid-memo:back "Turkey"@en ,
+                    "Turkiet"@sv .
+
+<#turkmenistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tm.svg> ;
+    solid-memo:frontImageDescription "A green field with a red vertical stripe near the hoist holding five carpet patterns above crossed olive branches, and a white crescent and five white stars beside it"@en ,
+                                     "Ett grönt fält med en röd lodrät rand nära stången med fem mattmönster ovanför korslagda olivkvistar, och en vit halvmåne och fem vita stjärnor bredvid"@sv ;
+    solid-memo:back "Turkmenistan"@en ,
+                    "Turkmenistan"@sv .
+
+<#turks-and-caicos-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tc.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and a yellow shield in the fly with a shell, a lobster and a cactus"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och en gul sköld i den yttre delen med ett snäckskal, en hummer och en kaktus"@sv ;
+    solid-memo:back "Turks and Caicos Islands"@en ,
+                    "Turks- och Caicosöarna"@sv .
+
+<#tuvalu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tv.svg> ;
+    solid-memo:frontImageDescription "A light blue field with the red, white and blue crosses in the canton and nine yellow stars scattered in the fly"@en ,
+                                     "Ett ljusblått fält med röda, vita och blå kors i kantonen och nio gula stjärnor utspridda i den yttre delen"@sv ;
+    solid-memo:back "Tuvalu"@en ,
+                    "Tuvalu"@sv .
+
+<#uganda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ug.svg> ;
+    solid-memo:frontImageDescription "Six horizontal stripes, black, yellow and red repeated, with a white disc in the middle holding a grey crested crane"@en ,
+                                     "Sex vågräta ränder, svart, gul och röd upprepade, med en vit skiva i mitten med en grå trana med tofs"@sv ;
+    solid-memo:back "Uganda"@en ,
+                    "Uganda"@sv .
+
+<#ukraine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ua.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, blue over yellow"@en ,
+                                     "Två vågräta ränder, blå över gul"@sv ;
+    solid-memo:back "Ukraine"@en ,
+                    "Ukraina"@sv .
+
+<#the-united-arab-emirates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ae.svg> ;
+    solid-memo:frontImageDescription "A red vertical band at the hoist beside three horizontal stripes, green, white and black"@en ,
+                                     "Ett rött lodrätt fält vid stången bredvid tre vågräta ränder, grön, vit och svart"@sv ;
+    solid-memo:back "United Arab Emirates"@en ,
+                    "Förenade arabemiraten"@sv .
+
+<#the-united-kingdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with a red cross edged in white over red and white diagonal crosses"@en ,
+                                     "Ett mörkblått fält med ett rött kors med vit kant över röda och vita diagonalkors"@sv ;
+    solid-memo:back "United Kingdom"@en ,
+                    "Storbritannien"@sv .
+
+<#the-united-states>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/us.svg> ;
+    solid-memo:frontImageDescription "Thirteen horizontal stripes, red and white, with a dark blue canton holding fifty small white stars"@en ,
+                                     "Tretton vågräta ränder i rött och vitt, med en mörkblå kanton med femtio små vita stjärnor"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#united-states-minor-outlying-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/um.svg> ;
+    solid-memo:frontImageDescription "Thirteen horizontal stripes, red and white, with a dark blue canton holding fifty small white stars"@en ,
+                                     "Tretton vågräta ränder i rött och vitt, med en mörkblå kanton med femtio små vita stjärnor"@sv ;
+    solid-memo:back "United States Minor Outlying Islands"@en ,
+                    "Förenta staternas mindre öar i Oceanien och Västindien"@sv .
+
+<#uruguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/uy.svg> ;
+    solid-memo:frontImageDescription "Nine horizontal stripes, white and blue, with a white canton holding a yellow sun with a face"@en ,
+                                     "Nio vågräta ränder i vitt och blått, med en vit kanton med en gul sol med ansikte"@sv ;
+    solid-memo:back "Uruguay"@en ,
+                    "Uruguay"@sv .
+
+<#uzbekistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/uz.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, light blue, white and green, divided by thin red lines, with a white crescent and twelve white stars in the upper hoist"@en ,
+                                     "Tre vågräta ränder, ljusblå, vit och grön, åtskilda av smala röda linjer, med en vit halvmåne och tolv vita stjärnor uppe vid stången"@sv ;
+    solid-memo:back "Uzbekistan"@en ,
+                    "Uzbekistan"@sv .
+
+<#vanuatu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vu.svg> ;
+    solid-memo:frontImageDescription "Red over green with a black triangle at the hoist, a yellow-edged black Y shape on its side, and a yellow curled tusk with two leaves in the triangle"@en ,
+                                     "Rött över grönt med en svart triangel vid stången, en liggande svart Y-form med gul kant och en gul böjd bete med två blad i triangeln"@sv ;
+    solid-memo:back "Vanuatu"@en ,
+                    "Vanuatu"@sv .
+
+<#the-vatican-city>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/va.svg> ;
+    solid-memo:frontImageDescription "A square flag of two vertical halves, yellow and white, with crossed gold and silver keys under a tall triple crown on the white"@en ,
+                                     "En kvadratisk flagga i två lodräta halvor, gul och vit, med korslagda nycklar i guld och silver under en hög trippelkrona på det vita"@sv ;
+    solid-memo:back "Vatican City"@en ,
+                    "Vatikanstaten"@sv .
+
+<#venezuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ve.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, yellow, dark blue and red, with an arc of eight white stars on the blue"@en ,
+                                     "Tre vågräta ränder, gul, mörkblå och röd, med en båge av åtta vita stjärnor på det blå"@sv ;
+    solid-memo:back "Venezuela"@en ,
+                    "Venezuela"@sv .
+
+<#vietnam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vn.svg> ;
+    solid-memo:frontImageDescription "A red field with a large yellow five-pointed star in the middle"@en ,
+                                     "Ett rött fält med en stor gul femuddig stjärna i mitten"@sv ;
+    solid-memo:back "Vietnam"@en ,
+                    "Vietnam"@sv .
+
+<#british-virgin-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vg.svg> ;
+    solid-memo:frontImageDescription "A dark blue field with the red, white and blue crosses in the canton and a green shield in the fly with a woman in white holding a lamp, among gold lamps"@en ,
+                                     "Ett mörkblått fält med röda, vita och blå kors i kantonen och en grön sköld i den yttre delen med en kvinna i vitt som håller en lampa, bland guldlampor"@sv ;
+    solid-memo:back "British Virgin Islands"@en ,
+                    "Brittiska Jungfruöarna"@sv .
+
+<#united-states-virgin-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vi.svg> ;
+    solid-memo:frontImageDescription "A white field with a yellow eagle holding arrows and a branch, a red, white and blue shield on its breast, between two blue letters"@en ,
+                                     "Ett vitt fält med en gul örn som håller pilar och en kvist, med en röd, vit och blå sköld på bröstet, mellan två blå bokstäver"@sv ;
+    solid-memo:back "United States Virgin Islands"@en ,
+                    "Amerikanska Jungfruöarna"@sv .
+
+<#wales>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-wls.svg> ;
+    solid-memo:frontImageDescription "Two horizontal stripes, white over green, with a large red dragon striding across both"@en ,
+                                     "Två vågräta ränder, vit över grön, med en stor röd drake som kliver över båda"@sv ;
+    solid-memo:back "Wales"@en ,
+                    "Wales"@sv .
+
+<#wallis-and-futuna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/wf.svg> ;
+    solid-memo:frontImageDescription "A red field with a white-edged canton of dark blue, white and red vertical stripes and a white cross of four triangles in the fly"@en ,
+                                     "Ett rött fält med en vitkantad kanton med lodräta ränder i mörkblått, vitt och rött och ett vitt kors av fyra trianglar i den yttre delen"@sv ;
+    solid-memo:back "Wallis and Futuna"@en ,
+                    "Wallis- och Futunaöarna"@sv .
+
+<#western-sahara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/eh.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, black, white and green, with a red triangle at the hoist and a red crescent and star on the white"@en ,
+                                     "Tre vågräta ränder, svart, vit och grön, med en röd triangel vid stången och en röd halvmåne och stjärna på det vita"@sv ;
+    solid-memo:back "Western Sahara"@en ,
+                    "Västsahara"@sv .
+
+<#yemen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ye.svg> ;
+    solid-memo:frontImageDescription "Three horizontal stripes, red, white and black"@en ,
+                                     "Tre vågräta ränder, röd, vit och svart"@sv ;
+    solid-memo:back "Yemen"@en ,
+                    "Jemen"@sv .
+
+<#zambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/zm.svg> ;
+    solid-memo:frontImageDescription "A green field with a block of three vertical stripes, red, black and orange, at the lower fly, and an orange eagle above it"@en ,
+                                     "Ett grönt fält med ett block av tre lodräta ränder, röd, svart och orange, i nedre yttre hörnet, och en orange örn ovanför"@sv ;
+    solid-memo:back "Zambia"@en ,
+                    "Zambia"@sv .
+
+<#zimbabwe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/zw.svg> ;
+    solid-memo:frontImageDescription "Seven horizontal stripes, green, yellow, red, black, red, yellow and green, with a black-edged white triangle at the hoist holding a red star and a yellow bird"@en ,
+                                     "Sju vågräta ränder, grön, gul, röd, svart, röd, gul och grön, med en vit triangel med svart kant vid stången med en röd stjärna och en gul fågel"@sv ;
+    solid-memo:back "Zimbabwe"@en ,
+                    "Zimbabwe"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

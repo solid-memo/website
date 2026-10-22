@@ -80,6 +80,10 @@ export function card(id: string, extra: Partial<ReleaseCard> = {}): ReleaseCard 
     backLabel: [],
     frontNote: [],
     backNote: [],
+    frontImage: [],
+    backImage: [],
+    frontImageDescription: [],
+    backImageDescription: [],
     distractors: [],
     ...extra,
   };

@@ -96,6 +96,10 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     backLabel: texts(node.data.backLabel),
     frontNote: texts(node.data.frontNote),
     backNote: texts(node.data.backNote),
+    frontImage: one(node.data.frontImage).map((term) => term.value),
+    backImage: one(node.data.backImage).map((term) => term.value),
+    frontImageDescription: texts(node.data.frontImageDescription),
+    backImageDescription: texts(node.data.backImageDescription),
     distractors: iris(node.data.distractor),
   }));
   const distractors: ReleaseDistractor[] = draft.distractors.map((node) => ({

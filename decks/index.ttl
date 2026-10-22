@@ -3937,11 +3937,12 @@
                  "peintures"@fr ,
                  "tableaux"@fr ;
     dcat:first <https://solid-memo.com/decks/famous-paintings/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcat:last <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/famous-paintings/v1.ttl> ,
                     <https://solid-memo.com/decks/famous-paintings/v2.ttl> ,
-                    <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-paintings/v3.ttl> .
+                    <https://solid-memo.com/decks/famous-paintings/v3.ttl> ,
+                    <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-paintings/v4.ttl> .
 
 <https://solid-memo.com/decks/famous-paintings/v1.ttl>
     a dcat:Dataset ;
@@ -3972,6 +3973,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/famous-paintings/v3.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Famous paintings"@en ,
+                  "Berömda målningar"@sv ,
+                  "유명한 그림"@ko ,
+                  "Berühmte Gemälde"@de ,
+                  "Pinturas famosas"@es ,
+                  "Peintures célèbres"@fr ;
+    dcterms:description "150 of the world's most famous paintings, ranked by how many Wikipedias have an article about them: the painting on the front, its title, painter and date on the back, in English, Swedish, Korean, German, Spanish and French. Only paintings long out of copyright are included. Titles, painters and dates from Wikidata, a title as that language's Wikipedia gives it where Wikidata's label is missing or differs; the pictures are public-domain reproductions on Wikimedia Commons, shown from there."@en ,
+                        "150 av världens mest berömda målningar, rangordnade efter hur många Wikipedior som har en artikel om dem: målningen på framsidan, dess titel, målare och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Bara målningar vars upphovsrätt sedan länge har gått ut finns med. Titlar, målare och dateringar från Wikidata, en titel som det språkets Wikipedia skriver den där Wikidatas etikett saknas eller skiljer sig; bilderna är reproduktioner i allmän egendom på Wikimedia Commons och visas därifrån."@sv ,
+                        "위키백과 몇 개 언어판에 문서가 있는지로 순위를 매긴 세계에서 가장 유명한 그림 150점입니다. 앞면에는 그림, 뒷면에는 제목, 화가, 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 저작권이 만료된 지 오래된 그림만 들어 있습니다. 제목, 화가, 제작 시기는 위키데이터에서 가져왔고, 위키데이터의 레이블이 없거나 다른 제목은 그 언어 위키백과의 제목을 따랐으며, 그림은 위키미디어 공용에 있는 퍼블릭 도메인 복제본을 그곳에서 불러와 보여 줍니다."@ko ,
+                        "150 der berühmtesten Gemälde der Welt, geordnet danach, wie viele Wikipedias einen Artikel über sie haben: das Gemälde auf der Vorderseite, sein Titel, Maler und Entstehungsdatum auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Nur Gemälde, deren Urheberrecht längst abgelaufen ist, sind dabei. Titel, Maler und Datierungen aus Wikidata, ein Titel so, wie ihn die Wikipedia der jeweiligen Sprache nennt, wo die Bezeichnung in Wikidata fehlt oder abweicht; die Bilder sind gemeinfreie Reproduktionen auf Wikimedia Commons und werden von dort angezeigt."@de ,
+                        "150 de las pinturas más famosas del mundo, ordenadas por cuántas Wikipedias tienen un artículo sobre ellas: la pintura en el anverso, y su título, pintor y fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Solo se incluyen pinturas cuyos derechos de autor expiraron hace mucho. Títulos, pintores y fechas de Wikidata, con el título que da la Wikipedia de cada idioma cuando la etiqueta de Wikidata falta o difiere; las imágenes son reproducciones de dominio público en Wikimedia Commons y se muestran desde allí."@es ,
+                        "150 des peintures les plus célèbres au monde, classées selon le nombre de Wikipédias qui leur consacrent un article : la peinture au recto, son titre, son peintre et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Seules les peintures depuis longtemps tombées dans le domaine public sont incluses. Titres, peintres et dates de Wikidata, le titre étant celui de la Wikipédia de chaque langue là où le libellé de Wikidata manque ou diffère ; les images sont des reproductions du domaine public sur Wikimedia Commons, affichées depuis ce site."@fr ;
+    dcat:version "3" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each back, the painting's title, painter and date, in Swedish, Korean, German, Spanish and French as well as English; no picture or card was added or removed. The English back of A Philosopher Lecturing on the Orrery no longer calls the philosopher a journalist, a vandalised Wikidata label." .
+
+<https://solid-memo.com/decks/famous-paintings/v4.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Famous paintings"@en ,
@@ -3980,7 +3999,7 @@
                   "Berühmte Gemälde"@de ,
                   "Pinturas famosas"@es ,
                   "Peintures célèbres"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/famous-paintings/v3.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/famous-paintings/v4.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "150 of the world's most famous paintings, ranked by how many Wikipedias have an article about them: the painting on the front, its title, painter and date on the back, in English, Swedish, Korean, German, Spanish and French. Only paintings long out of copyright are included. Titles, painters and dates from Wikidata, a title as that language's Wikipedia gives it where Wikidata's label is missing or differs; the pictures are public-domain reproductions on Wikimedia Commons, shown from there."@en ,
                         "150 av världens mest berömda målningar, rangordnade efter hur många Wikipedior som har en artikel om dem: målningen på framsidan, dess titel, målare och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Bara målningar vars upphovsrätt sedan länge har gått ut finns med. Titlar, målare och dateringar från Wikidata, en titel som det språkets Wikipedia skriver den där Wikidatas etikett saknas eller skiljer sig; bilderna är reproduktioner i allmän egendom på Wikimedia Commons och visas därifrån."@sv ,
@@ -3990,7 +4009,7 @@
                         "150 des peintures les plus célèbres au monde, classées selon le nombre de Wikipédias qui leur consacrent un article : la peinture au recto, son titre, son peintre et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Seules les peintures depuis longtemps tombées dans le domaine public sont incluses. Titres, peintres et dates de Wikidata, le titre étant celui de la Wikipédia de chaque langue là où le libellé de Wikidata manque ou diffère ; les images sont des reproductions du domaine public sur Wikimedia Commons, affichées depuis ce site."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ,
                         <https://commons.wikimedia.org/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-paintings/v3.ttl#generation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-paintings/v4.ttl#generation> ;
     dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:art ;
@@ -4022,23 +4041,28 @@
                      <http://publications.europa.eu/resource/authority/language/SPA> ,
                      <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "3" ;
-    dcat:prev <https://solid-memo.com/decks/famous-paintings/v2.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/famous-paintings/v2.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Each back, the painting's title, painter and date, in Swedish, Korean, German, Spanish and French as well as English; no picture or card was added or removed. The English back of A Philosopher Lecturing on the Orrery no longer calls the philosopher a journalist, a vandalised Wikidata label." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each painting is described, in all six languages, so a screen reader can say what it shows, never the title or painter asked for; no card’s front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#famous-paintings> ;
     dcat:isVersionOf <#famous-paintings> ;
-    dcat:distribution <https://solid-memo.com/decks/famous-paintings/v3.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/famous-paintings/v4.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/famous-paintings/v4.ttl#turtle> ;
     solid-memo:cardCount 150 .
 
-<https://solid-memo.com/decks/famous-paintings/v3.ttl#anton-wiklund>
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/famous-paintings/v3.ttl#generation>
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#generation>
     a prov:Activity .
 
 <https://github.com/antwika/solid-memo/blob/76808f3908ad008b2562beae2a28354cfa4ca518/packages/deck-library/scripts/generate_deck_of_famous_paintings.py>
@@ -4050,10 +4074,10 @@
     dcterms:creator "Wikimedia Commons contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
-<https://solid-memo.com/decks/famous-paintings/v3.ttl#turtle>
+<https://solid-memo.com/decks/famous-paintings/v4.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/famous-paintings/v3.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/famous-paintings/v4.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -12612,11 +12636,30 @@
                  "arts décoratifs"@fr ,
                  "Amsterdam"@fr ;
     dcat:first <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
-    dcat:hasVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> .
+    dcat:last <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ,
+                    <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl> .
 
 <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Rijksmuseum collection"@en ,
+                  "Rijksmuseums samlingar"@sv ,
+                  "암스테르담 국립미술관 소장품"@ko ,
+                  "Sammlung des Rijksmuseums"@de ,
+                  "Colección del Rijksmuseum"@es ,
+                  "Collection du Rijksmuseum"@fr ;
+    dcterms:description "93 highlights of the Rijksmuseum in Amsterdam, the museum’s own “Top 100” as its linked open data lists it: the object on the front; its title, maker (or, for an anonymous work, where it was made) and date on the back, in English, Swedish, Korean, German, Spanish and French. Paintings, sculpture, silver, furniture, Delftware, a dolls’ house, a ship model and an aeroplane. Paintings already in the library’s Famous paintings deck and works still in copyright are left out, and the parts of one work, such as the ten weepers from the tomb of Isabella of Bourbon, are one card. Objects, makers, dates and pictures from the Rijksmuseum’s Linked Art data (metadata CC0, pictures in the public domain), names in the other languages from Wikidata and Wikipedia."@en ,
+                        "93 höjdpunkter ur Rijksmuseum i Amsterdam, museets egen ”Top 100” som dess länkade öppna data anger den: föremålet på framsidan; dess titel, upphovsperson (eller, för ett anonymt verk, var det tillverkades) och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Målningar, skulptur, silver, möbler, delftporslin, ett dockskåp, en fartygsmodell och ett flygplan. Målningar som redan finns i bibliotekets kortlek Berömda målningar och verk som fortfarande är upphovsrättsskyddade ingår inte, och delarna av ett verk, som de tio sörjande figurerna från Isabella av Bourbons gravmonument, är ett kort. Föremål, upphovspersoner, dateringar och bilder från Rijksmuseums Linked Art-data (metadata CC0, bilderna i public domain), namn på de andra språken från Wikidata och Wikipedia."@sv ,
+                        "암스테르담 국립미술관이 링크드 오픈 데이터에 직접 올려 둔 ‘Top 100’에서 고른 대표 소장품 93점입니다. 앞면에는 작품 사진, 뒷면에는 제목, 제작자(작자 미상인 작품은 제작지), 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 회화, 조각, 은 공예품, 가구, 델프트 도자기, 인형의 집, 선박 모형, 비행기까지 들어 있습니다. 라이브러리의 ‘유명한 그림’ 덱에 이미 있는 그림과 아직 저작권이 남아 있는 작품은 빠졌고, 부르봉의 이사벨라 묘의 애도자상 열 점처럼 한 작품을 이루는 부분들은 카드 한 장으로 묶었습니다. 작품, 제작자, 제작 시기, 사진은 암스테르담 국립미술관의 Linked Art 데이터(메타데이터 CC0, 사진은 퍼블릭 도메인)에서, 다른 언어의 이름은 위키데이터와 위키백과에서 가져왔습니다."@ko ,
+                        "93 Höhepunkte des Rijksmuseums in Amsterdam, die „Top 100“ des Museums selbst, wie seine Linked Open Data sie aufführen: das Objekt auf der Vorderseite; sein Titel, sein Urheber (oder, bei einem anonymen Werk, wo es entstand) und seine Datierung auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Gemälde, Skulpturen, Silber, Möbel, Delfter Fayence, ein Puppenhaus, ein Schiffsmodell und ein Flugzeug. Gemälde, die schon im Stapel „Berühmte Gemälde“ der Bibliothek stehen, und noch urheberrechtlich geschützte Werke fehlen; die Teile eines Werks, etwa die zehn Klagenden vom Prunkgrab Isabellas von Bourbon, sind eine Karte. Objekte, Urheber, Datierungen und Bilder aus den Linked-Art-Daten des Rijksmuseums (Metadaten CC0, Bilder gemeinfrei), Namen in den anderen Sprachen aus Wikidata und Wikipedia."@de ,
+                        "93 obras destacadas del Rijksmuseum de Ámsterdam, el «Top 100» del propio museo tal como lo recogen sus datos abiertos enlazados: el objeto en el anverso; su título, su autor (o, en una obra anónima, dónde se hizo) y su fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Pinturas, escultura, platería, muebles, loza de Delft, una casa de muñecas, una maqueta de barco y un avión. Se dejan fuera las pinturas que ya están en el mazo Pinturas famosas de la biblioteca y las obras aún protegidas por derechos de autor, y las partes de una misma obra, como los diez plorantes de la tumba de Isabel de Borbón, son una sola tarjeta. Objetos, autores, fechas e imágenes de los datos Linked Art del Rijksmuseum (metadatos CC0, imágenes de dominio público); los nombres en las demás lenguas, de Wikidata y Wikipedia."@es ,
+                        "93 chefs-d’œuvre du Rijksmuseum d’Amsterdam, le « Top 100 » du musée lui-même tel que ses données ouvertes liées le donnent : l’objet au recto ; son titre, son auteur (ou, pour une œuvre anonyme, son lieu de fabrication) et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Peintures, sculptures, orfèvrerie, mobilier, faïence de Delft, une maison de poupée, une maquette de navire et un avion. Les peintures déjà présentes dans le paquet Peintures célèbres de la bibliothèque et les œuvres encore protégées par le droit d’auteur sont écartées, et les parties d’une même œuvre, comme les dix pleurants du tombeau d’Isabelle de Bourbon, forment une seule carte. Objets, auteurs, dates et images des données Linked Art du Rijksmuseum (métadonnées CC0, images dans le domaine public) ; noms dans les autres langues tirés de Wikidata et de Wikipédia."@fr ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." .
+
+<https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Rijksmuseum collection"@en ,
@@ -12625,7 +12668,7 @@
                   "Sammlung des Rijksmuseums"@de ,
                   "Colección del Rijksmuseum"@es ,
                   "Collection du Rijksmuseum"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "93 highlights of the Rijksmuseum in Amsterdam, the museum’s own “Top 100” as its linked open data lists it: the object on the front; its title, maker (or, for an anonymous work, where it was made) and date on the back, in English, Swedish, Korean, German, Spanish and French. Paintings, sculpture, silver, furniture, Delftware, a dolls’ house, a ship model and an aeroplane. Paintings already in the library’s Famous paintings deck and works still in copyright are left out, and the parts of one work, such as the ten weepers from the tomb of Isabella of Bourbon, are one card. Objects, makers, dates and pictures from the Rijksmuseum’s Linked Art data (metadata CC0, pictures in the public domain), names in the other languages from Wikidata and Wikipedia."@en ,
                         "93 höjdpunkter ur Rijksmuseum i Amsterdam, museets egen ”Top 100” som dess länkade öppna data anger den: föremålet på framsidan; dess titel, upphovsperson (eller, för ett anonymt verk, var det tillverkades) och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Målningar, skulptur, silver, möbler, delftporslin, ett dockskåp, en fartygsmodell och ett flygplan. Målningar som redan finns i bibliotekets kortlek Berömda målningar och verk som fortfarande är upphovsrättsskyddade ingår inte, och delarna av ett verk, som de tio sörjande figurerna från Isabella av Bourbons gravmonument, är ett kort. Föremål, upphovspersoner, dateringar och bilder från Rijksmuseums Linked Art-data (metadata CC0, bilderna i public domain), namn på de andra språken från Wikidata och Wikipedia."@sv ,
@@ -12638,7 +12681,7 @@
                         <https://www.wikidata.org/> ,
                         <https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ,
                         <https://www.wikipedia.org/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#compilation> ;
     dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:art ,
@@ -12693,20 +12736,27 @@
                      <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 6 ;
-    dcat:version "1" ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "First release." ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each card’s picture is described, in all six languages, so a screen reader can say what it shows, never the title, maker or place asked for; no card’s front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#rijksmuseum-collection> ;
     dcat:isVersionOf <#rijksmuseum-collection> ;
-    dcat:distribution <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#turtle> ;
     solid-memo:cardCount 93 .
 
-<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#anton-wiklund>
+<https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#compilation>
+<https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#compilation>
     a prov:Activity .
 
 <https://id.rijksmuseum.nl/260213>
@@ -12724,10 +12774,10 @@
     dcterms:creator "Wikimedia Commons contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
-<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#turtle>
+<https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -19947,10 +19997,11 @@
                  "drapeaux"@fr ,
                  "géographie"@fr ;
     dcat:first <https://solid-memo.com/decks/world-flags/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/world-flags/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/world-flags/v1.ttl> ,
-                    <https://solid-memo.com/decks/world-flags/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-flags/v2.ttl> .
+                    <https://solid-memo.com/decks/world-flags/v2.ttl> ,
+                    <https://solid-memo.com/decks/world-flags/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-flags/v3.ttl> .
 
 <https://solid-memo.com/decks/world-flags/v1.ttl>
     a dcat:Dataset ;
@@ -19963,6 +20014,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/world-flags/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "World flags"@en ,
+                  "Världens flaggor"@sv ,
+                  "세계의 국기"@ko ,
+                  "Flaggen der Welt"@de ,
+                  "Banderas del mundo"@es ,
+                  "Drapeaux du monde"@fr ;
+    dcterms:description "The flag of every country and territory on the front, its name in English and Swedish on the back. The list follows Flagpedia's index; the flag images are public-domain SVGs served by Flagpedia's CDN, each in its official aspect ratio. The Swedish names come from Wikidata, as in the capitals deck."@en ,
+                        "Flaggan för varje land och territorium på framsidan, dess namn på engelska och svenska på baksidan. Listan följer Flagpedias index; flaggbilderna är SVG-filer i allmän egendom från Flagpedias CDN, var och en i sina officiella proportioner. De svenska namnen är hämtade från Wikidata, som i kortleken om huvudstäder."@sv ,
+                        "앞면에 모든 나라와 지역의 깃발, 뒷면에 영어와 스웨덴어로 된 그 이름이 있습니다. 목록은 Flagpedia의 색인을 따르며, 깃발 이미지는 Flagpedia의 CDN에서 제공하는 퍼블릭 도메인 SVG로, 각각 공식 가로세로 비율입니다. 스웨덴어 이름은 수도 덱과 마찬가지로 위키데이터에서 가져왔습니다."@ko ,
+                        "Die Flagge jedes Landes und Gebiets auf der Vorderseite, sein Name auf Englisch und Schwedisch auf der Rückseite. Die Liste folgt dem Index von Flagpedia; die Flaggenbilder sind gemeinfreie SVG-Dateien vom CDN von Flagpedia, jede in ihrem offiziellen Seitenverhältnis. Die schwedischen Namen stammen aus Wikidata, wie im Stapel zu den Hauptstädten."@de ,
+                        "La bandera de cada país y territorio en el anverso, su nombre en inglés y en sueco en el reverso. La lista sigue el índice de Flagpedia; las imágenes de las banderas son SVG de dominio público servidos por la CDN de Flagpedia, cada una en su proporción oficial. Los nombres en sueco proceden de Wikidata, como en el mazo de capitales."@es ,
+                        "Le drapeau de chaque pays et territoire au recto, son nom en anglais et en suédois au verso. La liste suit l’index de Flagpedia ; les images des drapeaux sont des SVG du domaine public servis par le CDN de Flagpedia, chacune dans ses proportions officielles. Les noms suédois proviennent de Wikidata, comme dans le paquet sur les capitales."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/world-flags/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "World flags"@en ,
@@ -19971,7 +20040,7 @@
                   "Flaggen der Welt"@de ,
                   "Banderas del mundo"@es ,
                   "Drapeaux du monde"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/world-flags/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/world-flags/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "The flag of every country and territory on the front, its name in English and Swedish on the back. The list follows Flagpedia's index; the flag images are public-domain SVGs served by Flagpedia's CDN, each in its official aspect ratio. The Swedish names come from Wikidata, as in the capitals deck."@en ,
                         "Flaggan för varje land och territorium på framsidan, dess namn på engelska och svenska på baksidan. Listan följer Flagpedias index; flaggbilderna är SVG-filer i allmän egendom från Flagpedias CDN, var och en i sina officiella proportioner. De svenska namnen är hämtade från Wikidata, som i kortleken om huvudstäder."@sv ,
@@ -19982,7 +20051,7 @@
     prov:wasDerivedFrom <https://flagpedia.net/index> ,
                         <https://flagcdn.com> ;
     dcterms:created "2026-09-22T21:00:10.236Z"^^xsd:dateTime ;
-    dcterms:modified "2026-10-04T04:34:28.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
     dcat:keyword "countries"@en ,
@@ -20006,21 +20075,26 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/world-flags/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/world-flags/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each flag is described, in English and Swedish, so a screen reader can say what it shows: its stripes, colors and emblems, never the country; no card's front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#world-flags> ;
     dcat:isVersionOf <#world-flags> ;
-    dcat:distribution <https://solid-memo.com/decks/world-flags/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/world-flags/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/world-flags/v3.ttl#turtle> ;
     solid-memo:cardCount 254 .
 
-<https://solid-memo.com/decks/world-flags/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/world-flags/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/world-flags/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://flagpedia.net/index>
     dcterms:title "Flagpedia: flags of all countries" ;
@@ -20031,10 +20105,10 @@
     dcterms:creator "Flagpedia.net" ;
     dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
-<https://solid-memo.com/decks/world-flags/v2.ttl#turtle>
+<https://solid-memo.com/decks/world-flags/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/world-flags/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/world-flags/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/world-flags/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/world-flags/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 

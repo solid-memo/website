@@ -1,0 +1,1887 @@
+@base <https://solid-memo.com/decks/rijksmuseum-collection/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Rijksmuseum collection"@en ,
+                  "Rijksmuseums samlingar"@sv ,
+                  "암스테르담 국립미술관 소장품"@ko ,
+                  "Sammlung des Rijksmuseums"@de ,
+                  "Colección del Rijksmuseum"@es ,
+                  "Collection du Rijksmuseum"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "93 highlights of the Rijksmuseum in Amsterdam, the museum’s own “Top 100” as its linked open data lists it: the object on the front; its title, maker (or, for an anonymous work, where it was made) and date on the back, in English, Swedish, Korean, German, Spanish and French. Paintings, sculpture, silver, furniture, Delftware, a dolls’ house, a ship model and an aeroplane. Paintings already in the library’s Famous paintings deck and works still in copyright are left out, and the parts of one work, such as the ten weepers from the tomb of Isabella of Bourbon, are one card. Objects, makers, dates and pictures from the Rijksmuseum’s Linked Art data (metadata CC0, pictures in the public domain), names in the other languages from Wikidata and Wikipedia."@en ,
+                        "93 höjdpunkter ur Rijksmuseum i Amsterdam, museets egen ”Top 100” som dess länkade öppna data anger den: föremålet på framsidan; dess titel, upphovsperson (eller, för ett anonymt verk, var det tillverkades) och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Målningar, skulptur, silver, möbler, delftporslin, ett dockskåp, en fartygsmodell och ett flygplan. Målningar som redan finns i bibliotekets kortlek Berömda målningar och verk som fortfarande är upphovsrättsskyddade ingår inte, och delarna av ett verk, som de tio sörjande figurerna från Isabella av Bourbons gravmonument, är ett kort. Föremål, upphovspersoner, dateringar och bilder från Rijksmuseums Linked Art-data (metadata CC0, bilderna i public domain), namn på de andra språken från Wikidata och Wikipedia."@sv ,
+                        "암스테르담 국립미술관이 링크드 오픈 데이터에 직접 올려 둔 ‘Top 100’에서 고른 대표 소장품 93점입니다. 앞면에는 작품 사진, 뒷면에는 제목, 제작자(작자 미상인 작품은 제작지), 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 회화, 조각, 은 공예품, 가구, 델프트 도자기, 인형의 집, 선박 모형, 비행기까지 들어 있습니다. 라이브러리의 ‘유명한 그림’ 덱에 이미 있는 그림과 아직 저작권이 남아 있는 작품은 빠졌고, 부르봉의 이사벨라 묘의 애도자상 열 점처럼 한 작품을 이루는 부분들은 카드 한 장으로 묶었습니다. 작품, 제작자, 제작 시기, 사진은 암스테르담 국립미술관의 Linked Art 데이터(메타데이터 CC0, 사진은 퍼블릭 도메인)에서, 다른 언어의 이름은 위키데이터와 위키백과에서 가져왔습니다."@ko ,
+                        "93 Höhepunkte des Rijksmuseums in Amsterdam, die „Top 100“ des Museums selbst, wie seine Linked Open Data sie aufführen: das Objekt auf der Vorderseite; sein Titel, sein Urheber (oder, bei einem anonymen Werk, wo es entstand) und seine Datierung auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Gemälde, Skulpturen, Silber, Möbel, Delfter Fayence, ein Puppenhaus, ein Schiffsmodell und ein Flugzeug. Gemälde, die schon im Stapel „Berühmte Gemälde“ der Bibliothek stehen, und noch urheberrechtlich geschützte Werke fehlen; die Teile eines Werks, etwa die zehn Klagenden vom Prunkgrab Isabellas von Bourbon, sind eine Karte. Objekte, Urheber, Datierungen und Bilder aus den Linked-Art-Daten des Rijksmuseums (Metadaten CC0, Bilder gemeinfrei), Namen in den anderen Sprachen aus Wikidata und Wikipedia."@de ,
+                        "93 obras destacadas del Rijksmuseum de Ámsterdam, el «Top 100» del propio museo tal como lo recogen sus datos abiertos enlazados: el objeto en el anverso; su título, su autor (o, en una obra anónima, dónde se hizo) y su fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Pinturas, escultura, platería, muebles, loza de Delft, una casa de muñecas, una maqueta de barco y un avión. Se dejan fuera las pinturas que ya están en el mazo Pinturas famosas de la biblioteca y las obras aún protegidas por derechos de autor, y las partes de una misma obra, como los diez plorantes de la tumba de Isabel de Borbón, son una sola tarjeta. Objetos, autores, fechas e imágenes de los datos Linked Art del Rijksmuseum (metadatos CC0, imágenes de dominio público); los nombres en las demás lenguas, de Wikidata y Wikipedia."@es ,
+                        "93 chefs-d’œuvre du Rijksmuseum d’Amsterdam, le « Top 100 » du musée lui-même tel que ses données ouvertes liées le donnent : l’objet au recto ; son titre, son auteur (ou, pour une œuvre anonyme, son lieu de fabrication) et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Peintures, sculptures, orfèvrerie, mobilier, faïence de Delft, une maison de poupée, une maquette de navire et un avion. Les peintures déjà présentes dans le paquet Peintures célèbres de la bibliothèque et les œuvres encore protégées par le droit d’auteur sont écartées, et les parties d’une même œuvre, comme les dix pleurants du tombeau d’Isabelle de Bourbon, forment une seule carte. Objets, auteurs, dates et images des données Linked Art du Rijksmuseum (métadonnées CC0, images dans le domaine public) ; noms dans les autres langues tirés de Wikidata et de Wikipédia."@fr ;
+    prov:wasDerivedFrom <https://id.rijksmuseum.nl/260213> ,
+                        <https://iiif.micr.io/> ,
+                        <https://www.wikidata.org/> ,
+                        <https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ,
+                        <https://www.wikipedia.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ,
+               topic:history ;
+    dcat:keyword "Rijksmuseum"@en ,
+                 "museums"@en ,
+                 "art"@en ,
+                 "art history"@en ,
+                 "Dutch art"@en ,
+                 "decorative arts"@en ,
+                 "Amsterdam"@en ,
+                 "Rijksmuseum"@sv ,
+                 "museer"@sv ,
+                 "konst"@sv ,
+                 "konsthistoria"@sv ,
+                 "nederländsk konst"@sv ,
+                 "konsthantverk"@sv ,
+                 "Amsterdam"@sv ,
+                 "암스테르담 국립미술관"@ko ,
+                 "박물관"@ko ,
+                 "미술"@ko ,
+                 "미술사"@ko ,
+                 "네덜란드 미술"@ko ,
+                 "공예"@ko ,
+                 "암스테르담"@ko ,
+                 "Rijksmuseum"@de ,
+                 "Museen"@de ,
+                 "Kunst"@de ,
+                 "Kunstgeschichte"@de ,
+                 "niederländische Kunst"@de ,
+                 "Kunsthandwerk"@de ,
+                 "Amsterdam"@de ,
+                 "Rijksmuseum"@es ,
+                 "museos"@es ,
+                 "arte"@es ,
+                 "historia del arte"@es ,
+                 "arte neerlandés"@es ,
+                 "artes decorativas"@es ,
+                 "Ámsterdam"@es ,
+                 "Rijksmuseum"@fr ,
+                 "musées"@fr ,
+                 "art"@fr ,
+                 "histoire de l’art"@fr ,
+                 "art néerlandais"@fr ,
+                 "arts décoratifs"@fr ,
+                 "Amsterdam"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each card’s picture is described, in all six languages, so a screen reader can say what it shows, never the title, maker or place asked for; no card’s front or back was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#rijksmuseum-collection> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#rijksmuseum-collection> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): selected and described from the Rijksmuseum's linked open data,
+# its backs in six languages written and checked against the sources, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://id.rijksmuseum.nl/260213> ,
+              <https://iiif.micr.io/> ,
+              <https://www.wikidata.org/> ,
+              <https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ,
+              <https://www.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "Selection: the Rijksmuseum’s own “Top 100” set (https://id.rijksmuseum.nl/260213), 133 object records, read through the museum’s Search API and Linked Art resolver on 2026-10-10. Left out: the five that are already in the library’s Famous paintings deck (The Night Watch SK-C-5, The Milkmaid SK-A-2344, The Jewish Bride SK-C-216, The Little Street SK-A-2860, Woman Reading a Letter SK-C-251, matched by their Wikidata items’ inventory numbers) and the four whose pictures are in copyright (Jan Schoonhoven’s Dish Relief SK-A-5007, Carel Visser’s Eight Stacked Beams BK-2008-4, Karel Appel’s Square Man SK-A-5002, Gerrit Rietveld’s armchair for Til Brugman BK-2010-1). Records that are parts of one work became one card, under the record of the whole or of its first part: the ten weepers of Isabella of Bourbon (BK-AM-33-A to J, under BK-AM-33), the two flower pyramids and the tiers of the second (BK-2004-4-B and its parts, under BK-2004-4-A), five Javanese court officials (NG-2010-37 to 41), the wine fountain and its cooler (BK-1963-64, -65), two toilet caskets (BK-2009-255-1, -2), two temple guardians (AK-RAK-2007-1-A, -B), the two halves of Piero di Cosimo’s portraits of the Sangallos (SK-C-1367, -1368) and Jamnitzer’s table ornament and its plaque (BK-17040-A, -A-1). That leaves 93 cards. Each card’s id is the object number of the record it uses, in lower case."@en ,
+                 "Front: the object’s picture, from the Rijksmuseum’s IIIF image service (one, Van Gogh’s Self-portrait, from Wikimedia Commons). There is no picture description: any description of these objects would either name them or say nothing a sighted learner does not see."@en ,
+                 "Back: “title — maker, date”, as in the Famous paintings deck. The English title is the museum’s brief English title, or the name it is known by where the brief title gives one (“… Known as ‘The Merry Drinker’”). The maker is the museum’s maker statement, with “signed by artist” and “mentioned on object” dropped and “attributed to” and “workshop of” kept; for an anonymous work the place where the record says it was made stands in its place. Dates follow the record, written in each language’s way (c., ca, um, vers, 년경). In Swedish, Korean, German, Spanish and French, the title is the object’s Wikidata label where it is a genuine title in that language, else the title that language’s Wikipedia gives it, else a translation of the museum’s English title checked against its Dutch one; makers and places are their Wikidata labels in that language, or the form that language’s Wikipedia uses where the label is an unusual variant; Korean names Wikidata does not give are transliterated by the Korean rules for Dutch (외래어 표기법). Three cards have a back note: the clock and gunpowder horn left on Novaya Zemlya, the ten weepers, and the series of five Javanese court officials."@en ,
+                 "Licensing: the deck’s content comes from the Rijksmuseum’s records (CC0 1.0 metadata, pictures marked public domain), Wikidata (CC0 1.0) and one public-domain picture on Wikimedia Commons, so the deck is CC0 1.0 like the rest of the library. Wikipedia (CC BY-SA 4.0) gave only the titles of works and forms of names, which are facts, and was otherwise used to verify. As the Rijksmuseum asks, though it does not require it, the deck credits it as the source of its data and pictures."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and pictures: every record’s rights, every picture URL, overlap with the library"@en ;
+    rdfs:comment "Scope: the 133 records of the Top 100 set, the 93 cards made from them, their pictures and the deck metadata."@en ,
+                 "Outcome: every one of the 124 records the cards use states CC0 1.0 for its data and the Public Domain Mark 1.0 for its picture (checked by a script over the records’ JSON-LD); the four In Copyright records and the five already in Famous paintings were left out; each of the 93 picture URLs was fetched and returned a JPEG (HTTP 200)."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Backs in six languages (AI): written, then checked by a second AI agent"@en ;
+    rdfs:comment "Scope: every card’s back, in English, Swedish, Korean, German, Spanish and French, in six batches: each batch written by an AI agent from the Rijksmuseum’s records, Wikidata and Wikipedia by the rules in the compilation’s comments, then checked by a second AI agent told to find what is wrong (a title that is not the established one in its language, a name in an unusual form, a date or qualifier that is wrong, a merged card that does not name the whole, unnatural Korean) and to correct it."@en ,
+                 "Outcome: 31 corrections, among them the common forms of makers’ names where a Wikidata label was an unusual variant (Jan Willem Pieneman, Jacob van Ruisdael), dates given exactly by the museum that had been written “circa”, Korean names transliterated by the Dutch rules (판피아넌, 혼더쿠터르, 피스허르, 흐레호르, 세자르), genuine German titles in place of coined ones (Die Goldene Bucht in der Herengracht; Klagende vom Prunkgrab der Isabella von Bourbon), and one card the first agent had left out (the silver cabinet, BK-R-4927). The compiler then made the German Rembrandt “Rembrandt van Rijn” on every card, as in Famous paintings."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: picture descriptions in six languages (AI)"@en ;
+    rdfs:comment "Scope: a description of every card’s picture, in English, Swedish, Korean, German, Spanish and French, for screen readers: written in three batches by AI agents that looked at each picture, saying what a sighted learner sees and never the title, maker or place asked for, then read again against the backs, and by a script that found words of a card’s back in its descriptions, which were replaced; the release checked by the library checker; not a human review."@en .
+
+<https://id.rijksmuseum.nl/260213>
+    dcterms:title "Rijksmuseum: Top 100 (a set of its collection’s linked open data)" ;
+    dcterms:creator "Rijksmuseum" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Content source: the selection (the set’s 133 object records), each card’s object, title, maker or place of making and date, from the records’ Linked Art JSON-LD at https://id.rijksmuseum.nl/ (Search API https://data.rijksmuseum.nl/search/collection?memberOfSetId=https://id.rijksmuseum.nl/260213, read 2026-10-10). Every one of the 124 records the cards use states its own rights: its data record “subject_to” CC0 1.0, its picture (VisualItem) the Public Domain Mark 1.0. The Rijksmuseum’s data policy (https://data.rijksmuseum.nl/policy, read 2026-10-10): “For much of the information and data on the collection website, you will find a Public Domain or Creative Commons Zero (CC0) Public Domain Dedication under the copyright notice, meaning you can use the material freely”; “In some cases, copyright does apply. If so, a Creative Commons BY 4.0 (CC BY 4.0) licence is indicated”; “We kindly ask that when using our information and data, you credit the Rijksmuseum … even if this is not required.” The four records of the set whose pictures are “In Copyright” (rightsstatements.org InC 1.0) were left out."@en .
+
+<https://iiif.micr.io/>
+    dcterms:title "Rijksmuseum pictures (IIIF Image API, served by Micrio)" ;
+    dcterms:creator "Rijksmuseum" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "Content source: the picture on each card but one, hotlinked from the IIIF image service that the Rijksmuseum’s records name as their pictures’ access point (DigitalObject access_point, e.g. https://iiif.micr.io/PJEZO/full/max/0/default.jpg), at most 1280 pixels on a side. Each picture’s VisualItem is classified with the Public Domain Mark 1.0 (“Public Domain”) in the record, read 2026-10-10."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Content source: the names of makers and places in Swedish, Korean, German, Spanish and French (their labels, reached through the Wikidata links in the Rijksmuseum’s records), and objects’ titles in those languages where an object has a Wikidata item (found by its inventory number, P217 qualified by collection P195 Rijksmuseum, Q190804) with a genuine title as its label. Wikidata’s structured data is CC0 1.0 (https://www.wikidata.org/wiki/Wikidata:Licensing)."@en .
+
+<https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg>
+    dcterms:title "Zelfportret Rijksmuseum SK-A-3262.jpeg (Wikimedia Commons)" ;
+    dcterms:creator "Wikimedia Commons contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "Content source: the picture of Vincent van Gogh’s Self-portrait (SK-A-3262), whose Rijksmuseum record states a public-domain picture but names no access point; File:Zelfportret Rijksmuseum SK-A-3262.jpeg, marked “Public domain” on Commons with the Rijksmuseum’s collection page as its credit, read 2026-10-10."@en .
+
+<https://www.wikipedia.org/>
+    dcterms:title "Wikipedia (English, Swedish, Korean, German, Spanish and French)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Verification, and the established title of a work or form of a name in a language where Wikidata had none or a wrong one: an article’s title only (a name, not a creative expression), never text from an article. Wikipedia’s text is CC BY-SA 4.0 (https://en.wikipedia.org/wiki/Wikipedia:Copyrights)."@en .
+
+<#ak-mak-187>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/LAXcK/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A bronze four-armed figure dancing on one leg inside a ring of flames, one foot on a small crouching figure, on a stepped pedestal"@en ,
+                                     "En fyrarmad bronsfigur som dansar på ett ben inuti en ring av lågor, med ena foten på en liten hopkrupen figur, på en trappstegsformad sockel"@sv ,
+                                     "불꽃 고리 안에서 한쪽 다리로 춤추며 웅크린 작은 인물을 밟고 선, 계단식 받침 위의 팔 넷 달린 청동 인물상"@ko ,
+                                     "Eine vierarmige Bronzefigur, die auf einem Bein in einem Flammenkranz tanzt, einen Fuß auf einer kleinen kauernden Gestalt, auf einem gestuften Sockel"@de ,
+                                     "Una figura de bronce de cuatro brazos que baila sobre una pierna dentro de un aro de llamas, con un pie sobre una pequeña figura agachada, en un pedestal escalonado"@es ,
+                                     "Une figure en bronze à quatre bras dansant sur une jambe dans un cercle de flammes, un pied posé sur une petite figure accroupie, sur un socle à degrés"@fr ;
+    solid-memo:back "Shiva Nataraja — Tamil Nadu, India, c. 1100–1200"@en ,
+                    "Shiva Nataraja — Tamil Nadu, Indien, ca 1100–1200"@sv ,
+                    "시바 나타라자 — 타밀나두주, 인도, 1100–1200년경"@ko ,
+                    "Shiva Nataraja — Tamil Nadu, Indien, um 1100–1200"@de ,
+                    "Shiva Nataraja — Tamil Nadu, India, c. 1100–1200"@es ,
+                    "Shiva Nataraja — Tamil Nadu, Inde, vers 1100–1200"@fr .
+
+<#ak-mak-84>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/blmqI/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A carved wooden figure with worn red and gold paint, seated at ease with one knee raised and an arm resting on it, wearing a tall crown and a chain necklace"@en ,
+                                     "En snidad träfigur med sliten röd och guldfärgad bemålning, som sitter avslappnat med ena knät uppdraget och armen vilande på det, med hög krona och kedjehalsband"@sv ,
+                                     "한쪽 무릎을 세우고 그 위에 팔을 걸친 채 편안히 앉은, 높은 관과 사슬 목걸이를 한, 붉은색과 금색 칠이 바랜 나무 조각상"@ko ,
+                                     "Eine geschnitzte Holzfigur mit abgeriebener roter und goldener Bemalung, entspannt sitzend mit angehobenem Knie und darauf ruhendem Arm, mit hoher Krone und Kettenhalsband"@de ,
+                                     "Una figura de madera tallada con restos de pintura roja y dorada, sentada con soltura, una rodilla levantada y el brazo apoyado en ella, con una corona alta y un collar de cadena"@es ,
+                                     "Une figure en bois sculpté aux restes de peinture rouge et dorée, assise avec nonchalance, un genou relevé et le bras posé dessus, coiffée d'une haute couronne et portant un collier en chaîne"@fr ;
+    solid-memo:back "Guanyin — Shanxi, China, c. 1100–1200"@en ,
+                    "Guanyin — Shanxi, Kina, ca 1100–1200"@sv ,
+                    "관음보살 — 산시성, 중국, 1100–1200년경"@ko ,
+                    "Guanyin — Shanxi, China, um 1100–1200"@de ,
+                    "Guanyin — Shanxi, China, c. 1100–1200"@es ,
+                    "Guanyin — Shanxi, Chine, vers 1100–1200"@fr .
+
+<#ak-mak-240>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/YEdtC/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A gray stone figure seated cross-legged before an arched halo-shaped slab, with a tall crown and jeweled collar, its forearms broken off, on a lotus base"@en ,
+                                     "En grå stenfigur som sitter med korslagda ben framför en välvd, glorialik platta, med hög krona och smyckad krage, underarmarna avslagna, på en lotusformad sockel"@sv ,
+                                     "아치형 광배 모양 판 앞에 가부좌로 앉은, 높은 관과 장식 목깃을 하고 아래팔이 떨어져 나간, 연꽃 받침 위의 회색 석조 인물상"@ko ,
+                                     "Eine graue Steinfigur im Schneidersitz vor einer gewölbten, heiligenscheinartigen Platte, mit hoher Krone und juwelenbesetztem Kragen, die Unterarme abgebrochen, auf einem Lotossockel"@de ,
+                                     "Una figura de piedra gris sentada con las piernas cruzadas ante una losa arqueada en forma de aureola, con corona alta y collar enjoyado, los antebrazos rotos, sobre una base de loto"@es ,
+                                     "Une figure de pierre grise assise jambes croisées devant une dalle cintrée en forme d'auréole, coiffée d'une haute couronne, au collier orné, les avant-bras brisés, sur un socle en lotus"@fr ;
+    solid-memo:back "The Bodhisattva Manjushri — Candi Plaosan, Indonesia, c. 800–900"@en ,
+                    "Bodhisattvan Manjushri — Candi Plaosan, Indonesien, ca 800–900"@sv ,
+                    "문수보살 — 플라오산 사원, 인도네시아, 800–900년경"@ko ,
+                    "Der Bodhisattva Manjushri — Candi Plaosan, Indonesien, um 800–900"@de ,
+                    "El bodhisattva Manjushri — Candi Plaosan, Indonesia, c. 800–900"@es ,
+                    "Le bodhisattva Manjushri — Candi Plaosan, Indonésie, vers 800–900"@fr .
+
+<#sk-a-1115>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GebpD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A crowd of mounted officers in red coats and plumed hats around a man in a dark coat on a chestnut horse, wounded men on the ground, under a smoky sky"@en ,
+                                     "En skara beridna officerare i röda rockar och fjäderprydda hattar kring en man i mörk rock på en fux, sårade män på marken, under en rökfylld himmel"@sv ,
+                                     "연기 자욱한 하늘 아래, 밤색 말을 탄 어두운 외투의 남자를 둘러싼 붉은 군복과 깃털 모자 차림의 기마 장교들과 땅에 쓰러진 부상자들"@ko ,
+                                     "Eine Menge berittener Offiziere in roten Röcken und mit Federhüten um einen Mann in dunklem Mantel auf einem Fuchs, Verwundete am Boden, unter einem verrauchten Himmel"@de ,
+                                     "Una multitud de oficiales a caballo con casacas rojas y sombreros con plumas en torno a un hombre de abrigo oscuro sobre un caballo alazán, heridos en el suelo, bajo un cielo de humo"@es ,
+                                     "Une foule d'officiers à cheval en habits rouges et chapeaux à plumet autour d'un homme en manteau sombre sur un cheval alezan, des blessés au sol, sous un ciel enfumé"@fr ;
+    solid-memo:back "The Battle of Waterloo — Jan Willem Pieneman, 1824"@en ,
+                    "Slaget vid Waterloo — Jan Willem Pieneman, 1824"@sv ,
+                    "워털루 전투 — 얀 빌럼 피네만, 1824년"@ko ,
+                    "Die Schlacht bei Waterloo — Jan Willem Pieneman, 1824"@de ,
+                    "La batalla de Waterloo — Jan Willem Pieneman, 1824"@es ,
+                    "La bataille de Waterloo — Jan Willem Pieneman, 1824"@fr .
+
+<#sk-c-1367>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/DokhU/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Two framed panels side by side: an old man in a black cap and black clothes, and an old man in a red hat and brown, facing each other before landscapes, a sheet of music on the ledge"@en ,
+                                     "Två inramade paneler sida vid sida: en gammal man i svart mössa och svarta kläder och en gammal man i röd hatt och brunt, vända mot varandra framför landskap, ett notblad på bröstvärnet"@sv ,
+                                     "나란히 놓인 두 액자 판: 검은 모자에 검은 옷을 입은 노인과 붉은 모자에 갈색 옷을 입은 노인이 풍경을 배경으로 서로 마주 보고, 난간에 악보 한 장"@ko ,
+                                     "Zwei gerahmte Tafeln nebeneinander: ein alter Mann mit schwarzer Kappe in Schwarz und ein alter Mann mit rotem Hut in Braun, einander zugewandt vor Landschaften, ein Notenblatt auf der Brüstung"@de ,
+                                     "Dos tablas enmarcadas una junto a otra: un anciano con gorro y ropa negros y un anciano con sombrero rojo y ropa marrón, mirándose ante sendos paisajes, una hoja de música en el antepecho"@es ,
+                                     "Deux panneaux encadrés côte à côte : un vieil homme en bonnet et habits noirs et un vieil homme en chapeau rouge et vêtements bruns, face à face devant des paysages, une partition sur l'appui"@fr ;
+    solid-memo:back "Portraits of Giuliano and Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@en ,
+                    "Porträtt av Giuliano och Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@sv ,
+                    "줄리아노 다 상갈로와 프란체스코 잠베르티 다 상갈로의 초상 — 피에로 디 코시모, 1482–1485년"@ko ,
+                    "Bildnisse von Giuliano und Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@de ,
+                    "Retratos de Giuliano y Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@es ,
+                    "Portraits de Giuliano et Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@fr .
+
+<#sk-a-742>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zcGWb/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A ruined stone building with an arched gateway on a hill among palm trees, lush tropical plants and animals in the foreground, a wide plain stretching to the horizon"@en ,
+                                     "En förfallen stenbyggnad med valvport på en kulle bland palmer, frodiga tropiska växter och djur i förgrunden, en vid slätt som sträcker sig mot horisonten"@sv ,
+                                     "야자나무 사이 언덕 위의 아치형 문이 있는 허물어진 석조 건물, 앞쪽의 무성한 열대 식물과 동물들, 지평선까지 펼쳐진 넓은 평원"@ko ,
+                                     "Ein verfallenes Steingebäude mit Torbogen auf einem Hügel zwischen Palmen, üppige tropische Pflanzen und Tiere im Vordergrund, eine weite Ebene bis zum Horizont"@de ,
+                                     "Un edificio de piedra en ruinas con una portada en arco sobre una colina entre palmeras, plantas tropicales exuberantes y animales en primer plano, una amplia llanura hasta el horizonte"@es ,
+                                     "Un bâtiment de pierre en ruine avec un portail en arc sur une colline parmi des palmiers, plantes tropicales luxuriantes et animaux au premier plan, une vaste plaine jusqu'à l'horizon"@fr ;
+    solid-memo:back "View of Olinda, Brazil — Frans Post, 1662"@en ,
+                    "Vy över Olinda, Brasilien — Frans Post, 1662"@sv ,
+                    "브라질 올린다 풍경 — 프란스 포스트, 1662년"@ko ,
+                    "Blick auf Olinda — Frans Post, 1662"@de ,
+                    "Vista de Olinda, Brasil — Frans Post, 1662"@es ,
+                    "Vue d'Olinda, Brésil — Frans Post, 1662"@fr .
+
+<#sk-c-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/cWWQE/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Five men in broad black hats and white collars around a table draped with a red patterned carpet and an open book, a bareheaded sixth man behind them"@en ,
+                                     "Fem män i breda svarta hattar och vita kragar kring ett bord täckt av en röd mönstrad matta och en uppslagen bok, en sjätte barhuvad man bakom dem"@sv ,
+                                     "붉은 무늬 양탄자를 덮고 펼친 책을 놓은 탁자를 둘러싼, 챙 넓은 검은 모자와 흰 깃 차림의 남자 다섯, 그 뒤에 모자를 쓰지 않은 여섯째 남자"@ko ,
+                                     "Fünf Männer mit breiten schwarzen Hüten und weißen Kragen um einen mit rotem gemustertem Teppich bedeckten Tisch mit aufgeschlagenem Buch, dahinter ein sechster Mann ohne Hut"@de ,
+                                     "Cinco hombres con anchos sombreros negros y cuellos blancos en torno a una mesa cubierta con una alfombra roja estampada y un libro abierto, detrás un sexto hombre sin sombrero"@es ,
+                                     "Cinq hommes en larges chapeaux noirs et cols blancs autour d'une table couverte d'un tapis rouge à motifs et d'un livre ouvert, un sixième homme tête nue derrière eux"@fr ;
+    solid-memo:back "The Syndics — Rembrandt, 1662"@en ,
+                    "Klädesvävarskråets föreståndare i Amsterdam — Rembrandt, 1662"@sv ,
+                    "직물 길드 이사회 — 렘브란트, 1662년"@ko ,
+                    "Die Vorsteher der Tuchmacherzunft — Rembrandt van Rijn, 1662"@de ,
+                    "Los síndicos de los pañeros — Rembrandt, 1662"@es ,
+                    "Le Syndic de la guilde des drapiers — Rembrandt, 1662"@fr .
+
+<#sk-a-4691>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/YfhED/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young man with a mass of wild curly hair, his eyes in deep shadow, light falling on his cheek and neck, against a plain gray wall"@en ,
+                                     "En ung man med en yvig massa lockigt hår, ögonen i djup skugga, ljuset som faller på kind och hals, mot en enkel grå vägg"@sv ,
+                                     "덥수룩한 곱슬머리에 눈이 짙은 그늘에 가려지고 뺨과 목에 빛이 떨어지는, 밋밋한 회색 벽 앞의 젊은 남자"@ko ,
+                                     "Ein junger Mann mit wilder Lockenmähne, die Augen in tiefem Schatten, Licht auf Wange und Hals, vor einer schlichten grauen Wand"@de ,
+                                     "Un joven con una mata de pelo rizado y revuelto, los ojos en sombra profunda, la luz cayendo sobre la mejilla y el cuello, ante una pared gris lisa"@es ,
+                                     "Un jeune homme à la tignasse bouclée, les yeux plongés dans l'ombre, la lumière tombant sur la joue et le cou, devant un mur gris uni"@fr ;
+    solid-memo:back "Self-portrait — Rembrandt, c. 1628"@en ,
+                    "Självporträtt — Rembrandt, ca 1628"@sv ,
+                    "자화상 — 렘브란트, 1628년경"@ko ,
+                    "Selbstporträt mit zerzaustem Haar — Rembrandt van Rijn, um 1628"@de ,
+                    "Autorretrato — Rembrandt, c. 1628"@es ,
+                    "Autoportrait aux cheveux ébouriffés — Rembrandt, vers 1628"@fr .
+
+<#sk-c-597>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/FeurF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young lady with long reddish hair, pearls and a wide scalloped lace collar over a black-and-gold gown, standing in a dark arched opening holding a fan"@en ,
+                                     "En ung dam med långt rödaktigt hår, pärlor och en bred uddad spetskrage över en svart och guldfärgad klänning, stående i en mörk välvd öppning med en solfjäder i handen"@sv ,
+                                     "어두운 아치형 문간에 부채를 들고 선, 긴 붉은빛 머리에 진주를 두르고 검정과 금색 드레스 위로 넓은 물결 모양 레이스 깃을 단 젊은 귀부인"@ko ,
+                                     "Eine junge Dame mit langem rötlichem Haar, Perlen und einem breiten gezackten Spitzenkragen über einem schwarz-goldenen Kleid, in einer dunklen Bogenöffnung stehend, einen Fächer haltend"@de ,
+                                     "Una joven dama de largo cabello rojizo, perlas y un ancho cuello de encaje festoneado sobre un vestido negro y dorado, de pie en un oscuro vano en arco con un abanico"@es ,
+                                     "Une jeune dame aux longs cheveux roux, parée de perles et d'un large col de dentelle festonné sur une robe noir et or, debout dans une baie cintrée sombre, un éventail à la main"@fr ;
+    solid-memo:back "Portrait of a Woman, Probably Maria Trip — Rembrandt, 1639"@en ,
+                    "Porträtt av en kvinna, troligen Maria Trip — Rembrandt, 1639"@sv ,
+                    "마리아 트립으로 추정되는 여인의 초상 — 렘브란트, 1639년"@ko ,
+                    "Porträt von Maria Trip — Rembrandt van Rijn, 1639"@de ,
+                    "Retrato de Maria Trip — Rembrandt, 1639"@es ,
+                    "Portrait de Maria Trip — Rembrandt, 1639"@fr .
+
+<#sk-a-4050>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/wqcDn/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "An older man in a striped cloth turban and brown cloak, eyebrows raised, holding a thick open book in the light against a dark background"@en ,
+                                     "En äldre man i randig tygturban och brun mantel, med höjda ögonbryn, som håller en tjock uppslagen bok i ljuset mot en mörk bakgrund"@sv ,
+                                     "어두운 배경 앞에서 빛을 받는 두꺼운 펼친 책을 든, 줄무늬 천 터번과 갈색 망토 차림에 눈썹을 치켜올린 나이 든 남자"@ko ,
+                                     "Ein älterer Mann mit gestreiftem Stoffturban und braunem Umhang, die Brauen gehoben, ein dickes aufgeschlagenes Buch im Licht haltend, vor dunklem Hintergrund"@de ,
+                                     "Un hombre mayor con turbante de tela a rayas y manto marrón, las cejas alzadas, sosteniendo un grueso libro abierto a la luz sobre un fondo oscuro"@es ,
+                                     "Un homme âgé en turban de tissu rayé et manteau brun, sourcils levés, tenant un gros livre ouvert dans la lumière sur un fond sombre"@fr ;
+    solid-memo:back "Self-portrait as the Apostle Paul — Rembrandt, 1661"@en ,
+                    "Självporträtt som aposteln Paulus — Rembrandt, 1661"@sv ,
+                    "사도 바울로 분한 자화상 — 렘브란트, 1661년"@ko ,
+                    "Selbstporträt als Apostel Paulus — Rembrandt van Rijn, 1661"@de ,
+                    "Autorretrato como el apóstol Pablo — Rembrandt, 1661"@es ,
+                    "Autoportrait en apôtre Paul — Rembrandt, 1661"@fr .
+
+<#sk-c-211>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/XWEFp/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall round brick tower with four sails on a riverbank under towering gray clouds, a sailboat on the water, a wooden quay and three small figures on a path"@en ,
+                                     "Ett högt runt tegeltorn med fyra vingar vid en flodstrand under väldiga grå moln, en segelbåt på vattnet, en träkaj och tre små gestalter på en stig"@sv ,
+                                     "거대한 회색 구름 아래 강기슭에 선 날개 넷 달린 높고 둥근 벽돌 탑, 물 위의 돛단배, 나무 선창, 길 위의 작은 인물 셋"@ko ,
+                                     "Ein hoher runder Backsteinturm mit vier Flügeln an einem Flussufer unter mächtigen grauen Wolken, ein Segelboot auf dem Wasser, ein hölzerner Kai und drei kleine Gestalten auf einem Weg"@de ,
+                                     "Una alta torre redonda de ladrillo con cuatro aspas a orillas de un río bajo enormes nubes grises, un velero en el agua, un muelle de madera y tres pequeñas figuras en un camino"@es ,
+                                     "Une haute tour ronde en brique à quatre ailes au bord d'un fleuve sous d'immenses nuages gris, un voilier sur l'eau, un quai en bois et trois petites silhouettes sur un chemin"@fr ;
+    solid-memo:back "The Windmill at Wijk bij Duurstede — Jacob van Ruisdael, c. 1668–1670"@en ,
+                    "Väderkvarnen vid Wijk bij Duurstede — Jacob van Ruisdael, ca 1668–1670"@sv ,
+                    "베이크 베이 뒤르스테더의 풍차 — 야코프 판 라위스달, 1668–1670년경"@ko ,
+                    "Die Mühle von Wijk — Jacob van Ruisdael, um 1668–1670"@de ,
+                    "El molino de Wijk bij Duurstede — Jacob van Ruisdael, c. 1668–1670"@es ,
+                    "Le Moulin près de Wijk bij Duurstede — Jacob van Ruisdael, vers 1668–1670"@fr .
+
+<#sk-c-217>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/fjTNG/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A bright whitewashed nave with round columns, arches and a wooden roof frame, low wooden pews, a pulpit with a canopy, a few seated people and a stone slab in front"@en ,
+                                     "Ett ljust vitkalkat mittskepp med runda pelare, valvbågar och en trätakstol, låga träbänkar, en predikstol med baldakin, några sittande människor och en stenplatta i förgrunden"@sv ,
+                                     "둥근 기둥과 아치, 나무 지붕 틀이 있는 밝은 흰 회칠의 신랑, 낮은 나무 신도석, 덮개 달린 설교단, 앉아 있는 몇 사람, 앞쪽의 돌판"@ko ,
+                                     "Ein helles, weiß gekalktes Mittelschiff mit runden Säulen, Bögen und hölzernem Dachstuhl, niedrige Holzbänke, eine Kanzel mit Schalldeckel, einige sitzende Menschen und eine Steinplatte vorn"@de ,
+                                     "Una nave luminosa encalada con columnas redondas, arcos y armadura de madera, bancos bajos de madera, un púlpito con tornavoz, unas pocas personas sentadas y una losa de piedra delante"@es ,
+                                     "Une nef claire blanchie à la chaux avec colonnes rondes, arcades et charpente en bois, bancs bas en bois, une chaire à abat-voix, quelques personnes assises et une dalle de pierre au premier plan"@fr ;
+    solid-memo:back "Interior of the Sint-Odulphuskerk in Assendelft — Pieter Jansz. Saenredam, 1649"@en ,
+                    "Interiör från Sint-Odulphuskerk i Assendelft — Pieter Saenredam, 1649"@sv ,
+                    "아센델프트 성 오둘푸스 교회 내부 — 피터르 산레담, 1649년"@ko ,
+                    "Das Innere der Sint Odulphuskerk zu Assendelft — Pieter Jansz. Saenredam, 1649"@de ,
+                    "Interior de la Sint-Odulphuskerk en Assendelft — Pieter Jansz Saenredam, 1649"@es ,
+                    "Intérieur de la Sint-Odulphuskerk à Assendelft — Pieter Jansz Saenredam, 1649"@fr .
+
+<#sk-a-372>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VGOCe/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young woman in a dark green pearl-trimmed gown and striped shawl holding an ornate lidded jar, seated under a tree before jagged rocky mountains"@en ,
+                                     "En ung kvinna i mörkgrön pärlbesatt klänning och randig sjal som håller en utsmyckad burk med lock, sittande under ett träd framför taggiga klippberg"@sv ,
+                                     "뾰족한 바위산을 배경으로 나무 아래 앉아 화려한 뚜껑 달린 단지를 든, 진주로 장식한 짙은 녹색 드레스와 줄무늬 숄 차림의 젊은 여인"@ko ,
+                                     "Eine junge Frau in dunkelgrünem, perlenbesetztem Kleid und gestreiftem Tuch, die ein verziertes Deckelgefäß hält, unter einem Baum sitzend vor zerklüfteten Felsbergen"@de ,
+                                     "Una joven con vestido verde oscuro adornado con perlas y chal a rayas que sostiene un tarro ornamentado con tapa, sentada bajo un árbol ante montañas rocosas escarpadas"@es ,
+                                     "Une jeune femme en robe vert sombre ornée de perles et châle rayé tenant un pot couvert richement décoré, assise sous un arbre devant des montagnes rocheuses déchiquetées"@fr ;
+    solid-memo:back "Mary Magdalene — Jan van Scorel, c. 1530"@en ,
+                    "Maria Magdalena — Jan van Scorel, ca 1530"@sv ,
+                    "막달라 마리아 — 얀 반 스코렐, 1530년경"@ko ,
+                    "Maria Magdalena — Jan van Scorel, um 1530"@de ,
+                    "María Magdalena — Jan van Scorel, c. 1530"@es ,
+                    "Marie-Madeleine — Jan van Scorel, vers 1530"@fr .
+
+<#sk-c-229>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/SbsFC/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A crowded room around a table: an old man raising a glass, adults singing and playing pipes and violin, a mother with a baby, children and a dog, a boy at the window"@en ,
+                                     "Ett fullsatt rum kring ett bord: en gammal man som höjer ett glas, vuxna som sjunger och spelar pipa och fiol, en mor med ett spädbarn, barn och en hund, en pojke i fönstret"@sv ,
+                                     "탁자 주위로 북적이는 방: 잔을 든 노인, 노래하며 피리와 바이올린을 연주하는 어른들, 아기를 안은 어머니, 아이들과 개, 창가의 소년"@ko ,
+                                     "Ein voller Raum um einen Tisch: ein alter Mann, der ein Glas hebt, Erwachsene, die singen und Flöte und Geige spielen, eine Mutter mit Säugling, Kinder und ein Hund, ein Junge am Fenster"@de ,
+                                     "Una sala abarrotada en torno a una mesa: un anciano alzando una copa, adultos que cantan y tocan flautas y violín, una madre con un bebé, niños y un perro, un muchacho en la ventana"@es ,
+                                     "Une pièce bondée autour d'une table : un vieil homme levant son verre, des adultes chantant et jouant de la flûte et du violon, une mère avec un bébé, des enfants et un chien, un garçon à la fenêtre"@fr ;
+    solid-memo:back "The Merry Family — Jan Steen, 1668"@en ,
+                    "Den glada familjen — Jan Steen, 1668"@sv ,
+                    "즐거운 가족 — 얀 스테인, 1668년"@ko ,
+                    "Die fröhliche Familie — Jan Steen, 1668"@de ,
+                    "La familia feliz — Jan Steen, 1668"@es ,
+                    "La Joyeuse Famille — Jan Steen, 1668"@fr .
+
+<#sk-a-2005>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kYesm/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A procession past a pale building: a man carrying a tray on his head, turbaned boys ahead, and veiled women in colorful robes following with a small child"@en ,
+                                     "Ett tåg förbi en ljus byggnad: en man som bär en bricka på huvudet, pojkar i turban framför och beslöjade kvinnor i färgglada dräkter som följer efter med ett litet barn"@sv ,
+                                     "옅은 색 건물 앞을 지나는 행렬: 머리에 쟁반을 인 남자, 앞장선 터번 쓴 소년들, 어린아이를 데리고 뒤따르는 화려한 옷의 베일 쓴 여인들"@ko ,
+                                     "Ein Zug an einem hellen Gebäude vorbei: ein Mann mit einem Tablett auf dem Kopf, Jungen mit Turbanen voran und verschleierte Frauen in bunten Gewändern mit einem kleinen Kind dahinter"@de ,
+                                     "Un cortejo junto a un edificio claro: un hombre con una bandeja sobre la cabeza, muchachos con turbante delante y mujeres veladas con túnicas de colores detrás con un niño pequeño"@es ,
+                                     "Un cortège longeant un bâtiment clair : un homme portant un plateau sur la tête, des garçons en turban devant, et des femmes voilées en robes colorées suivant avec un petit enfant"@fr ;
+    solid-memo:back "The First Day of School — Jean Baptiste Vanmour, c. 1720–1737"@en ,
+                    "Första skoldagen — Jean-Baptiste Vanmour, ca 1720–1737"@sv ,
+                    "등교 첫날 — 장바티스트 반무르, 1720–1737년경"@ko ,
+                    "Der erste Schultag — Jean Baptiste Vanmour, um 1720–1737"@de ,
+                    "El primer día de escuela — Jean-Baptiste van Mour, c. 1720–1737"@es ,
+                    "Le Premier Jour d'école — Jean-Baptiste van Mour, vers 1720–1737"@fr .
+
+<#sk-a-3011>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VkxAm/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A woman in a wide blue mantle seated low on a cushion, holding a curly-haired child on her lap and a lily stem, before a patterned gold background"@en ,
+                                     "En kvinna i vid blå mantel som sitter lågt på en kudde med ett lockigt barn i knät och en liljestjälk i handen, framför en mönstrad guldbakgrund"@sv ,
+                                     "무늬 있는 금빛 배경 앞에서 방석 위에 낮게 앉아 곱슬머리 아기를 무릎에 안고 백합 줄기를 든, 넓은 파란 망토 차림의 여인"@ko ,
+                                     "Eine Frau in weitem blauem Mantel, tief auf einem Kissen sitzend, ein lockiges Kind auf dem Schoß und einen Lilienstängel in der Hand, vor gemustertem Goldgrund"@de ,
+                                     "Una mujer con un amplio manto azul sentada a ras de un cojín, con un niño de pelo rizado en el regazo y un tallo de azucena, ante un fondo dorado con motivos"@es ,
+                                     "Une femme en ample manteau bleu assise bas sur un coussin, tenant sur ses genoux un enfant aux cheveux bouclés et une tige de lys, devant un fond d'or à motifs"@fr ;
+    solid-memo:back "Madonna of Humility — Fra Angelico, c. 1440"@en ,
+                    "Ödmjukhetens madonna — Fra Angelico, ca 1440"@sv ,
+                    "겸손의 성모 — 프라 안젤리코, 1440년경"@ko ,
+                    "Demutsmadonna — Fra Angelico, um 1440"@de ,
+                    "Virgen de la Humildad — Fra Angelico, c. 1440"@es ,
+                    "Vierge d'humilité — Fra Angelico, vers 1440"@fr .
+
+<#sk-a-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/hZepb/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A large white bird with wings spread wide and beak open, hissing as it stands over a nest of eggs at the water's edge, a dog swimming toward it"@en ,
+                                     "En stor vit fågel med vingarna vitt utbredda och näbben öppen, som väser där den står över ett bo med ägg vid vattenbrynet, en hund som simmar mot den"@sv ,
+                                     "물가의 알 둥지 위에 서서 날개를 활짝 펴고 부리를 벌려 쉭쉭대는 커다란 흰 새와 그쪽으로 헤엄쳐 오는 개"@ko ,
+                                     "Ein großer weißer Vogel mit weit ausgebreiteten Flügeln und offenem Schnabel, fauchend über einem Nest mit Eiern am Wasserrand, ein Hund schwimmt auf ihn zu"@de ,
+                                     "Un gran pájaro blanco con las alas desplegadas y el pico abierto, bufando sobre un nido con huevos a la orilla del agua, un perro nadando hacia él"@es ,
+                                     "Un grand oiseau blanc aux ailes largement déployées, bec ouvert, sifflant au-dessus d'un nid d'œufs au bord de l'eau, un chien nageant vers lui"@fr ;
+    solid-memo:back "The Threatened Swan — Jan Asselijn, c. 1650"@en ,
+                    "Den hotade svanen — Jan Asselijn, ca 1650"@sv ,
+                    "위협받는 백조 — 얀 아설레인, 1650년경"@ko ,
+                    "Der bedrohte Schwan — Jan Asselijn, um 1650"@de ,
+                    "El cisne amenazado — Jan Asselijn, c. 1650"@es ,
+                    "Le Cygne menacé — Jan Asselyn, vers 1650"@fr .
+
+<#sk-a-1718>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/aXnzA/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Crowds of small figures on a frozen river among bare trees and snowy-roofed houses, a sled and a boat frozen in place, under a hazy pale sky"@en ,
+                                     "Myller av små gestalter på en frusen flod bland kala träd och snötäckta hustak, en släde och en fastfrusen båt, under en disig blek himmel"@sv ,
+                                     "흐릿하고 옅은 하늘 아래, 앙상한 나무와 눈 덮인 지붕의 집들 사이 얼어붙은 강 위의 수많은 작은 사람들, 썰매 하나와 꼼짝없이 얼어붙은 배"@ko ,
+                                     "Scharen kleiner Gestalten auf einem zugefrorenen Fluss zwischen kahlen Bäumen und schneebedeckten Dächern, ein Schlitten und ein festgefrorenes Boot, unter einem dunstigen blassen Himmel"@de ,
+                                     "Multitud de figuras pequeñas sobre un río helado entre árboles desnudos y casas con tejados nevados, un trineo y una barca atrapada, bajo un cielo pálido y brumoso"@es ,
+                                     "Une foule de petites silhouettes sur une rivière gelée parmi des arbres dénudés et des maisons aux toits enneigés, un traîneau et une barque immobilisée, sous un ciel pâle et brumeux"@fr ;
+    solid-memo:back "Winter Landscape with Ice Skaters — Hendrick Avercamp, c. 1608"@en ,
+                    "Vinterlandskap med skridskoåkare — Hendrick Avercamp, ca 1608"@sv ,
+                    "스케이트 타는 사람들이 있는 겨울 풍경 — 헨드릭 아베르캄프, 1608년경"@ko ,
+                    "Winterlandschaft mit Schlittschuhläufern — Hendrick Avercamp, um 1608"@de ,
+                    "Paisaje invernal con patinadores sobre hielo — Hendrick Avercamp, c. 1608"@es ,
+                    "Paysage d'hiver avec patineurs — Hendrick Avercamp, vers 1608"@fr .
+
+<#sk-a-799>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/hoBLZ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall bouquet of red-and-white streaked tulips, roses and smaller blooms in a glass vase on a stone ledge, a lizard and a snail beside it, against a brown wall"@en ,
+                                     "En hög bukett rödvitt flammiga tulpaner, rosor och mindre blommor i en glasvas på en stenhylla, en ödla och en snigel bredvid, mot en brun vägg"@sv ,
+                                     "갈색 벽 앞 돌 선반 위 유리 화병에 꽂힌 붉은 줄무늬 흰 튤립과 장미, 작은 꽃들의 높은 꽃다발, 그 옆의 도마뱀과 달팽이"@ko ,
+                                     "Ein hoher Strauß rot-weiß geflammter Tulpen, Rosen und kleinerer Blüten in einer Glasvase auf einer Steinkante, daneben eine Eidechse und eine Schnecke, vor brauner Wand"@de ,
+                                     "Un alto ramo de tulipanes con vetas rojas y blancas, rosas y otras más pequeñas en un jarrón de vidrio sobre un saliente de piedra, junto a una lagartija y un caracol, ante una pared marrón"@es ,
+                                     "Un haut bouquet de tulipes striées de rouge et de blanc, de roses et d’autres plus petites dans un vase de verre sur un rebord de pierre, un lézard et un escargot à côté, devant un mur brun"@fr ;
+    solid-memo:back "Floral Still Life — Hans Bollongier, 1639"@en ,
+                    "Blomsterstilleben — Hans Bollongier, 1639"@sv ,
+                    "꽃 정물 — 한스 볼롱히르, 1639년"@ko ,
+                    "Blumenstillleben — Hans Bollongier, 1639"@de ,
+                    "Bodegón de flores — Hans Bollongier, 1639"@es ,
+                    "Nature morte aux fleurs — Hans Bollongier, 1639"@fr .
+
+<#sk-a-404>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/RxOuM/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A woman in a shimmering silver satin gown seen from behind, facing a seated man in a buff coat who raises his hand and an older woman drinking, a red curtained bed behind"@en ,
+                                     "En kvinna i skimrande silverfärgad satinklänning sedd bakifrån, vänd mot en sittande man i läderkyller som lyfter handen och en äldre kvinna som dricker, en röd förhängd säng bakom"@sv ,
+                                     "뒷모습을 보인 은빛 공단 드레스의 여인과 그녀를 향해 손을 든 가죽 조끼 차림의 앉은 남자, 무언가를 마시는 나이 든 여인, 뒤편의 붉은 휘장 침대"@ko ,
+                                     "Eine Frau in schimmerndem silbernem Satinkleid von hinten, vor einem sitzenden Mann im Lederkoller, der die Hand hebt, und einer trinkenden älteren Frau, dahinter ein Bett mit roten Vorhängen"@de ,
+                                     "Una mujer con un brillante vestido de raso plateado vista de espaldas, frente a un hombre sentado con coleto de cuero que alza la mano y una mujer mayor que bebe, detrás una cama con cortinas rojas"@es ,
+                                     "Une femme en robe de satin argenté chatoyant vue de dos, face à un homme assis en pourpoint de buffle qui lève la main et à une femme plus âgée qui boit, un lit aux rideaux rouges derrière"@fr ;
+    solid-memo:back "The Paternal Admonition — Gerard ter Borch, c. 1654–1655"@en ,
+                    "Den faderliga förmaningen — Gerhard Terborch, ca 1654–1655"@sv ,
+                    "아버지의 훈계 — 헤라르트 테르보르흐, 1654–1655년경"@ko ,
+                    "Galante Konversation — Gerard ter Borch, um 1654–1655"@de ,
+                    "Conversación galante — Gerard ter Borch, c. 1654–1655"@es ,
+                    "La Remontrance paternelle — Gerard ter Borch, vers 1654–1655"@fr .
+
+<#sk-c-109>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/PpsTW/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Tall trees on a rocky slope in golden evening light, travelers with laden mules crossing a wooden footbridge over a waterfall, mountains in the distance"@en ,
+                                     "Höga träd på en klippig sluttning i gyllene kvällsljus, resande med lastade mulor som korsar en gångbro av trä över ett vattenfall, berg i fjärran"@sv ,
+                                     "황금빛 저녁 햇살 속 바위 비탈의 키 큰 나무들, 폭포 위 나무 다리를 건너는 짐 실은 노새와 나그네들, 멀리 보이는 산"@ko ,
+                                     "Hohe Bäume an einem felsigen Hang im goldenen Abendlicht, Reisende mit beladenen Maultieren auf einem hölzernen Steg über einem Wasserfall, Berge in der Ferne"@de ,
+                                     "Árboles altos en una ladera rocosa bajo la luz dorada del atardecer, viajeros con mulas cargadas cruzando una pasarela de madera sobre una cascada, montañas a lo lejos"@es ,
+                                     "De grands arbres sur une pente rocheuse dans la lumière dorée du soir, des voyageurs avec des mulets chargés franchissant une passerelle en bois au-dessus d'une cascade, des montagnes au loin"@fr ;
+    solid-memo:back "Italian Landscape with a Draughtsman — Jan Both, c. 1650–1652"@en ,
+                    "Italienskt landskap med en tecknare — Jan Both, ca 1650–1652"@sv ,
+                    "그림 그리는 사람이 있는 이탈리아 풍경 — 얀 봇, 1650–1652년경"@ko ,
+                    "Italienische Landschaft mit Zeichner — Jan Both, um 1650–1652"@de ,
+                    "Paisaje italiano con un dibujante — Jan Both, c. 1650–1652"@es ,
+                    "Paysage italien avec un dessinateur — Jan Both, vers 1650–1652"@fr .
+
+<#sk-a-3584>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/cQMKz/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young woman lying across patterned rugs and cushions, wrapped in a long pale robe with red blossom sprigs, an orange sash, before a dark decorated screen"@en ,
+                                     "En ung kvinna som ligger utsträckt över mönstrade mattor och kuddar, insvept i en lång ljus dräkt med röda blomkvistar och ett orange skärp, framför en mörk dekorerad skärm"@sv ,
+                                     "어둡게 장식된 병풍 앞, 무늬 있는 양탄자와 쿠션 위에 비스듬히 누운, 붉은 꽃가지 무늬의 긴 옅은 색 옷에 주황 띠를 두른 젊은 여인"@ko ,
+                                     "Eine junge Frau, über gemusterte Teppiche und Kissen hingestreckt, gehüllt in ein langes helles Gewand mit roten Blütenzweigen und orangefarbener Schärpe, vor einem dunklen verzierten Wandschirm"@de ,
+                                     "Una joven tendida sobre alfombras y cojines estampados, envuelta en una larga túnica clara con ramitas de flores rojas y un fajín naranja, ante un biombo oscuro decorado"@es ,
+                                     "Une jeune femme allongée sur des tapis et coussins à motifs, enveloppée dans une longue robe claire à brins fleuris rouges et ceinture orange, devant un paravent sombre décoré"@fr ;
+    solid-memo:back "Girl in a White Kimono — George Hendrik Breitner, 1894"@en ,
+                    "Flicka i vit kimono — George Hendrik Breitner, 1894"@sv ,
+                    "흰 기모노를 입은 소녀 — 헤오르허 헨드릭 브라이트너, 1894년"@ko ,
+                    "Mädchen in weißem Kimono — George Hendrik Breitner, 1894"@de ,
+                    "Chica en kimono blanco — George Hendrik Breitner, 1894"@es ,
+                    "Fille en kimono blanc — George Hendrik Breitner, 1894"@fr .
+
+<#sk-a-3580>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/RXguV/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A snowy street crossing lined with brick canal houses, a woman in black holding a child's hand, a veiled woman in an orange fur-trimmed coat in front, a small dog"@en ,
+                                     "En snöig gatukorsning kantad av kanalhus i tegel, en kvinna i svart som håller ett barn i handen, en beslöjad kvinna i orange pälsbrämad kappa i förgrunden, en liten hund"@sv ,
+                                     "벽돌 운하 주택이 늘어선 눈 덮인 거리, 아이 손을 잡은 검은 옷의 여인, 앞쪽의 베일을 쓰고 모피 장식 주황 외투를 입은 여인, 작은 개 한 마리"@ko ,
+                                     "Eine verschneite Straßenquerung zwischen Backstein-Grachtenhäusern, eine Frau in Schwarz mit einem Kind an der Hand, vorn eine verschleierte Frau in orangefarbenem pelzbesetztem Mantel, ein kleiner Hund"@de ,
+                                     "Un cruce nevado bordeado de casas de ladrillo junto a un canal, una mujer de negro de la mano de una niña, delante una mujer con velo y abrigo naranja ribeteado de piel, un perrito"@es ,
+                                     "Un passage enneigé bordé de maisons de brique le long d'un canal, une femme en noir tenant un enfant par la main, au premier plan une femme voilée en manteau orange bordé de fourrure, un petit chien"@fr ;
+    solid-memo:back "The Singel Bridge at the Paleisstraat in Amsterdam — George Hendrik Breitner, 1896–1898"@en ,
+                    "Singelbron vid Paleisstraat i Amsterdam — George Hendrik Breitner, 1896–1898"@sv ,
+                    "암스테르담 팔레이스스트라트의 싱얼 다리 — 헤오르허 헨드릭 브라이트너, 1896–1898년"@ko ,
+                    "Die Singelbrücke bei der Paleisstraat in Amsterdam — George Hendrik Breitner, 1896–1898"@de ,
+                    "El puente del Singel junto a la Paleisstraat en Ámsterdam — George Hendrik Breitner, 1896–1898"@es ,
+                    "Le Pont du Singel près de la Paleisstraat à Amsterdam — George Hendrik Breitner, 1896–1898"@fr .
+
+<#sk-a-1365>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/cOyAv/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A gray pen drawing of dozens of tall sailing warships on a choppy sea, clouds of smoke rising from the fleets, wreckage floating in front"@en ,
+                                     "En grå pennteckning av dussintals höga segelkrigsfartyg på ett krusigt hav, rökmoln som stiger från flottorna, vrakdelar som flyter i förgrunden"@sv ,
+                                     "출렁이는 바다 위 수십 척의 높은 돛 달린 군함, 함대에서 피어오르는 연기 구름, 앞쪽에 떠다니는 잔해를 그린 회색 펜 그림"@ko ,
+                                     "Eine graue Federzeichnung Dutzender hoher Segelkriegsschiffe auf bewegter See, Rauchwolken über den Flotten, Wrackteile treiben im Vordergrund"@de ,
+                                     "Un dibujo a pluma en gris de decenas de altos buques de guerra a vela en un mar picado, nubes de humo sobre las flotas, restos flotando delante"@es ,
+                                     "Un dessin à la plume en gris de dizaines de hauts vaisseaux de guerre à voiles sur une mer agitée, des nuages de fumée au-dessus des flottes, des épaves flottant au premier plan"@fr ;
+    solid-memo:back "The Battle of Terheide — Willem van de Velde the Elder, 1657"@en ,
+                    "Slaget vid Terheide — Willem van de Velde den äldre, 1657"@sv ,
+                    "테르헤이더 해전 — 대 빌럼 판더펠더, 1657년"@ko ,
+                    "Die Schlacht von Terheide — Willem van de Velde der Ältere, 1657"@de ,
+                    "La batalla de Terheide — Willem van de Velde el Viejo, 1657"@es ,
+                    "La Bataille de Terheide — Willem Van de Velde l'Ancien, 1657"@fr .
+
+<#sk-a-3064>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GYQQk/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A fair-haired young child with a pearl necklace and wide lace collar, in a pale silk dress with gold trim, holding a white feather fan against a brown background"@en ,
+                                     "Ett ljushårigt litet barn med pärlhalsband och bred spetskrage, i en ljus sidenklänning med guldbårder, som håller en vit fjäderviska mot en brun bakgrund"@sv ,
+                                     "갈색 배경 앞에서 흰 깃털 부채를 든, 진주 목걸이와 넓은 레이스 깃에 금색 장식의 옅은 비단 드레스를 입은 금발의 어린아이"@ko ,
+                                     "Ein blondes kleines Kind mit Perlenkette und breitem Spitzenkragen, in hellem Seidenkleid mit Goldborte, einen weißen Federfächer haltend, vor braunem Hintergrund"@de ,
+                                     "Una criatura de pelo claro con collar de perlas y ancho cuello de encaje, con un vestido de seda claro con galones dorados, sosteniendo un abanico de plumas blancas ante un fondo marrón"@es ,
+                                     "Un jeune enfant aux cheveux blonds avec collier de perles et large col de dentelle, en robe de soie claire galonnée d'or, tenant un éventail de plumes blanches devant un fond brun"@fr ;
+    solid-memo:back "Portrait of a Girl Dressed in Blue — Johannes Cornelisz Verspronck, 1641"@en ,
+                    "Porträtt av en flicka klädd i blått — Johannes Cornelisz. Verspronck, 1641"@sv ,
+                    "파란 옷을 입은 소녀의 초상 — 요하너스 페르스프롱크, 1641년"@ko ,
+                    "Mädchen in blauem Kleid — Jan Cornelisz Verspronck, 1641"@de ,
+                    "Retrato de una niña vestida de azul — Johannes Corneliszoon Verspronck, 1641"@es ,
+                    "Portrait d'une petite fille en bleu — Jan Cornelisz. Verspronck, 1641"@fr .
+
+<#sk-a-4688>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/FDLZM/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Tall trees with flat spreading crowns casting long shadows across a sunlit meadow, small figures on the grass, wooded hills under a soft evening sky"@en ,
+                                     "Höga träd med platta, utbredda kronor som kastar långa skuggor över en solbelyst äng, små gestalter i gräset, skogklädda kullar under en mild kvällshimmel"@sv ,
+                                     "부드러운 저녁 하늘 아래, 햇살 비치는 풀밭에 긴 그림자를 드리운 납작하게 퍼진 수관의 키 큰 나무들, 풀밭 위의 작은 사람들, 숲 덮인 언덕"@ko ,
+                                     "Hohe Bäume mit flachen, ausladenden Kronen, die lange Schatten über eine sonnige Wiese werfen, kleine Gestalten im Gras, bewaldete Hügel unter einem sanften Abendhimmel"@de ,
+                                     "Árboles altos de copas planas y extendidas que proyectan largas sombras sobre un prado soleado, pequeñas figuras en la hierba, colinas boscosas bajo un suave cielo de atardecer"@es ,
+                                     "De grands arbres aux cimes plates et étalées projetant de longues ombres sur une prairie ensoleillée, de petites silhouettes dans l'herbe, des collines boisées sous un doux ciel du soir"@fr ;
+    solid-memo:back "Italian Landscape with Umbrella Pines — Hendrik Voogd, 1807"@en ,
+                    "Italienskt landskap med pinjer — Hendrik Voogd, 1807"@sv ,
+                    "우산소나무가 있는 이탈리아 풍경 — 헨드릭 포흐트, 1807년"@ko ,
+                    "Italienische Landschaft mit Mittelmeerkiefern — Hendrik Voogd, 1807"@de ,
+                    "Paisaje italiano con pinos piñoneros — Hendrik Voogd, 1807"@es ,
+                    "Paysage italien avec pins parasols — Hendrik Voogd, 1807"@fr .
+
+<#sk-a-447>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/uaBGu/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Two crowds on opposite riverbanks under a rainbow, boats full of men in black and in colored robes pulling naked swimmers out of the water"@en ,
+                                     "Två folkmassor på var sin flodstrand under en regnbåge, båtar fulla av män i svart och i färgade dräkter som drar upp nakna simmare ur vattnet"@sv ,
+                                     "무지개 아래 강 양쪽 기슭의 두 군중, 검은 옷과 색색 예복 차림의 남자들로 가득한 배들이 물속의 벌거벗은 사람들을 건져 올리는 장면"@ko ,
+                                     "Zwei Menschenmengen an gegenüberliegenden Flussufern unter einem Regenbogen, Boote voller Männer in Schwarz und in farbigen Gewändern ziehen nackte Schwimmer aus dem Wasser"@de ,
+                                     "Dos multitudes en orillas opuestas de un río bajo un arcoíris, barcas llenas de hombres de negro y con túnicas de colores que sacan del agua a nadadores desnudos"@es ,
+                                     "Deux foules sur les rives opposées d'un fleuve sous un arc-en-ciel, des barques remplies d'hommes en noir et en robes colorées tirant hors de l'eau des nageurs nus"@fr ;
+    solid-memo:back "Fishing for Souls — Adriaen van de Venne, 1614"@en ,
+                    "Själafisket — Adriaen van de Venne, 1614"@sv ,
+                    "영혼 낚시 — 아드리안 판더펜너, 1614년"@ko ,
+                    "Seelenfischerei — Adriaen Pietersz. van de Venne, 1614"@de ,
+                    "La pesca de almas — Adriaen van de Venne, 1614"@es ,
+                    "La Pêche aux âmes — Adriaen Pietersz van de Venne, 1614"@fr .
+
+<#sk-a-500>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/QTcEa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Several women holding babies and small children seated in a tall columned nave, bearded men standing behind, an altar with figures at the far end"@en ,
+                                     "Flera kvinnor med spädbarn och små barn sittande i ett högt mittskepp med pelare, skäggiga män stående bakom, ett altare med gestalter längst bort"@sv ,
+                                     "높은 기둥이 늘어선 신랑에 아기와 어린아이를 안고 앉은 여러 여인들, 뒤에 선 수염 난 남자들, 맨 안쪽에 사람들이 모인 제단"@ko ,
+                                     "Mehrere Frauen mit Säuglingen und kleinen Kindern, sitzend in einem hohen Säulenschiff, bärtige Männer stehend dahinter, ein Altar mit Figuren am hinteren Ende"@de ,
+                                     "Varias mujeres con bebés y niños pequeños sentadas en una alta nave con columnas, hombres barbudos de pie detrás, un altar con figuras al fondo"@es ,
+                                     "Plusieurs femmes tenant des bébés et de jeunes enfants assises dans une haute nef à colonnes, des hommes barbus debout derrière, un autel entouré de figures au fond"@fr ;
+    solid-memo:back "The Holy Kinship — workshop of Geertgen tot Sint Jans, c. 1495"@en ,
+                    "Den heliga släkten — Geertgen tot Sint Jans verkstad, ca 1495"@sv ,
+                    "성 친족 — 헤르트헌 토트 신트 얀스 공방, 1495년경"@ko ,
+                    "Die Heilige Sippe — Werkstatt des Geertgen tot Sint Jans, um 1495"@de ,
+                    "La Sagrada Parentela — taller de Geertgen tot Sint Jans, c. 1495"@es ,
+                    "La Sainte Parenté — atelier de Gérard de Saint-Jean, vers 1495"@fr .
+
+<#sk-a-1065>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VkWeX/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A girl in a pale blue high-waisted dress seated beside a keyboard instrument, turning toward two small boys, one tugging at the back of her chair"@en ,
+                                     "En flicka i ljusblå klänning med hög midja som sitter bredvid ett klaverinstrument och vänder sig mot två små pojkar, varav en drar i hennes stolsrygg"@sv ,
+                                     "건반 악기 옆에 앉아 의자 등받이를 잡아당기는 한 아이를 포함한 두 어린 소년 쪽으로 몸을 돌린, 하이웨이스트의 옅은 파란 드레스를 입은 소녀"@ko ,
+                                     "Ein Mädchen in hellblauem, hoch tailliertem Kleid neben einem Tasteninstrument, sich zwei kleinen Jungen zuwendend, von denen einer an ihrer Stuhllehne zerrt"@de ,
+                                     "Una muchacha con vestido azul claro de talle alto sentada junto a un instrumento de teclado, volviéndose hacia dos niños pequeños, uno de los cuales tira del respaldo de su silla"@es ,
+                                     "Une jeune fille en robe bleu pâle à taille haute assise près d'un instrument à clavier, se tournant vers deux petits garçons dont l'un tire le dossier de sa chaise"@fr ;
+    solid-memo:back "Piano Practice Interrupted — Willem Bartel van der Kooi, 1813"@en ,
+                    "Det avbrutna pianospelet — Willem Bartel van der Kooi, 1813"@sv ,
+                    "중단된 피아노 연습 — 빌럼 바르털 판데르코이, 1813년"@ko ,
+                    "Das unterbrochene Klavierspiel — Willem Bartel van der Kooi, 1813"@de ,
+                    "La práctica de piano interrumpida — Willem Bartel van der Kooi, 1813"@es ,
+                    "L'Exercice de piano interrompu — Willem Bartel van der Kooi, 1813"@fr .
+
+<#sk-a-1451>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/PvtVH/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A crowded room heaped with game birds hanging and lying, meat, vegetables and fruit, a woman turning a spit, a seated woman plucking a bird, a small scene through an arch behind"@en ,
+                                     "Ett trångt rum fullt av hängande och liggande fåglar, kött, grönsaker och frukt, en kvinna som vänder ett spett, en sittande kvinna som plockar en fågel, en liten scen genom en valvbåge bakom"@sv ,
+                                     "매달리거나 놓인 사냥한 새들과 고기, 채소, 과일이 쌓인 북적이는 방, 꼬챙이를 돌리는 여인, 앉아서 새 깃털을 뽑는 여인, 뒤편 아치 너머의 작은 장면"@ko ,
+                                     "Ein voller Raum mit hängendem und liegendem Federwild, Fleisch, Gemüse und Obst, eine Frau dreht einen Bratspieß, eine sitzende Frau rupft einen Vogel, hinten eine kleine Szene durch einen Bogen"@de ,
+                                     "Una estancia repleta de aves de caza colgadas y tendidas, carne, verduras y fruta, una mujer que gira un asador, otra sentada desplumando un ave, una pequeña escena tras un arco al fondo"@es ,
+                                     "Une pièce encombrée de gibier à plumes pendu et posé, de viande, de légumes et de fruits, une femme tournant une broche, une femme assise plumant un oiseau, une petite scène sous une arcade au fond"@fr ;
+    solid-memo:back "The Well-stocked Kitchen — Joachim Beuckelaer, 1566"@en ,
+                    "Det välförsedda köket — Joachim Beuckelaer, 1566"@sv ,
+                    "풍성한 부엌 — 요아힘 뵈컬라르, 1566년"@ko ,
+                    "Die gut bestückte Küche — Joachim Beuckelaer, 1566"@de ,
+                    "La cocina bien surtida — Joachim Beuckelaer, 1566"@es ,
+                    "La Cuisine bien garnie — Joachim Bueckelaer, 1566"@fr .
+
+<#sk-a-2099>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/OHDPD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A bundle of pale white stalks with purple-tinged tips tied with a thin cord, on a cracked stone ledge against a black background, one stalk lying apart"@en ,
+                                     "Ett knippe bleka vita stänglar med lila skiftande toppar, hopbundna med ett tunt snöre, på en sprucken stenhylla mot svart bakgrund, en stängel som ligger för sig själv"@sv ,
+                                     "검은 배경 앞 금 간 돌 선반 위, 가는 끈으로 묶은 끝이 보랏빛을 띤 하얀 줄기 다발과 따로 놓인 줄기 하나"@ko ,
+                                     "Ein Bündel blasser weißer Stangen mit violett angehauchten Spitzen, mit einer dünnen Schnur gebunden, auf einer rissigen Steinkante vor schwarzem Grund, eine Stange liegt einzeln daneben"@de ,
+                                     "Un manojo de tallos blancos y pálidos con puntas violáceas atado con un cordel fino, sobre un saliente de piedra agrietado ante un fondo negro, un tallo suelto aparte"@es ,
+                                     "Une botte de tiges blanches et pâles aux pointes violacées liée d'une fine ficelle, sur un rebord de pierre fendu devant un fond noir, une tige isolée à côté"@fr ;
+    solid-memo:back "Still Life with Asparagus — Adriaen Coorte, 1697"@en ,
+                    "Stilleben med sparris — Adriaen Coorte, 1697"@sv ,
+                    "아스파라거스 정물 — 아드리안 코르터, 1697년"@ko ,
+                    "Stillleben mit Spargelbund — Adriaen Coorte, 1697"@de ,
+                    "Bodegón con espárragos — Adriaen Coorte, 1697"@es ,
+                    "Nature morte aux asperges — Adriaen Coorte, 1697"@fr .
+
+<#sk-a-128>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/CizGD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Muscular nude men seizing babies from screaming mothers in a crowded scene before a castle with round towers, small bodies lying in the foreground"@en ,
+                                     "Muskulösa nakna män som sliter spädbarn från skrikande mödrar i ett myller framför en borg med runda torn, små kroppar i förgrunden"@sv ,
+                                     "둥근 탑이 있는 성 앞, 비명 지르는 어머니들에게서 아기를 빼앗는 근육질의 벌거벗은 남자들과 앞쪽에 쓰러진 작은 몸들"@ko ,
+                                     "Muskulöse nackte Männer, die schreienden Müttern Säuglinge entreißen, ein Gedränge vor einer Burg mit runden Türmen, kleine Körper im Vordergrund"@de ,
+                                     "Hombres desnudos y musculosos que arrancan bebés a madres que gritan, ante un castillo de torres redondas, con pequeños cuerpos en primer plano"@es ,
+                                     "Des hommes nus et musclés arrachant des bébés à des mères hurlantes devant un château à tours rondes, de petits corps étendus au premier plan"@fr ;
+    solid-memo:back "The Massacre of the Innocents — Cornelis van Haarlem, 1590"@en ,
+                    "Barnamordet i Betlehem — Cornelis van Haarlem, 1590"@sv ,
+                    "영아 학살 — 코르넬리스 판 하를럼, 1590년"@ko ,
+                    "Der bethlehemitische Kindermord — Cornelis van Haarlem, 1590"@de ,
+                    "Matanza de los Inocentes — Cornelis van Haarlem, 1590"@es ,
+                    "Le Massacre des Innocents — Cornelis Cornelisz van Haarlem, 1590"@fr .
+
+<#sk-a-1405>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/DLGpa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A man in a large soft black cap and fur-trimmed coat, half-turned, looking sideways, with a small folded note bearing a monogram and a date"@en ,
+                                     "En man i stor mjuk svart mössa och pälsbrämad rock, halvt vänd med blicken åt sidan, bredvid en liten vikt lapp med monogram och årtal"@sv ,
+                                     "크고 부드러운 검은 모자와 모피 장식 외투를 입고 몸을 반쯤 돌려 옆을 보는 남자, 옆에 모노그램과 연도가 적힌 작은 접힌 쪽지"@ko ,
+                                     "Ein Mann mit großer weicher schwarzer Mütze und pelzbesetztem Mantel, halb abgewandt, seitwärts blickend, daneben ein kleiner gefalteter Zettel mit Monogramm und Jahreszahl"@de ,
+                                     "Un hombre con un gran gorro negro y blando y abrigo ribeteado de piel, medio girado y mirando de reojo, junto a una notita doblada con un monograma y una fecha"@es ,
+                                     "Un homme coiffé d’un grand bonnet noir souple, en manteau bordé de fourrure, de trois quarts et regardant de côté, près d’un petit billet plié portant un monogramme et une date"@fr ;
+    solid-memo:back "Portrait of Jacob Cornelisz van Oostsanen — workshop of Jacob Cornelisz van Oostsanen, c. 1533"@en ,
+                    "Porträtt av Jacob Corneliszoon van Oostzanen — Jacob Corneliszoon van Oostzanens verkstad, ca 1533"@sv ,
+                    "야코프 코르넬리스 판 오스트사넌의 초상 — 야코프 코르넬리스 판 오스트사넌 공방, 1533년경"@ko ,
+                    "Porträt des Jacob Cornelisz van Oostsanen — Werkstatt des Jacob Cornelisz. van Oostsanen, um 1533"@de ,
+                    "Retrato de Jacob Cornelisz van Oostsanen — taller de Jacob Cornelisz. van Oostsanen, c. 1533"@es ,
+                    "Portrait de Jacob Cornelisz van Oostsanen — atelier de Jacob Cornelisz van Oostsanen, vers 1533"@fr .
+
+<#sk-a-4821>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/MbBYj/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A table with a white damask cloth over red, a stack of large round yellow wheels with rinds, a bowl of fruit, grapes, olives, bread rolls, nuts, a pewter jug and a halved apple"@en ,
+                                     "Ett bord med vit damastduk över röd, en trave stora runda gula hjul med kant, en fruktskål, vindruvor, oliver, frallor, nötter, en tennkanna och ett halverat äpple"@sv ,
+                                     "붉은 천 위에 흰 다마스크 천을 깐 탁자, 껍질 있는 크고 둥근 노란 원통 더미, 과일 그릇, 포도, 올리브, 빵, 견과, 백랍 주전자, 반으로 자른 사과"@ko ,
+                                     "Ein Tisch mit weißem Damasttuch über Rot, ein Stapel großer runder gelber Laibe mit Rinde, eine Obstschale, Trauben, Oliven, Brötchen, Nüsse, ein Zinnkrug und ein halbierter Apfel"@de ,
+                                     "Una mesa con mantel blanco adamascado sobre otro rojo, una pila de grandes ruedas amarillas con corteza, un frutero, uvas, aceitunas, panecillos, nueces, una jarra de peltre y una manzana partida"@es ,
+                                     "Une table couverte d’une nappe damassée blanche sur un tapis rouge, une pile de grandes meules jaunes à croûte, une coupe de fruits, du raisin, des olives, des petits pains, des noix, un pichet d’étain et une pomme coupée"@fr ;
+    solid-memo:back "Still Life with Cheese — Floris van Dyck, c. 1615"@en ,
+                    "Stilleben med ostar — Floris Claesz. van Dyck, ca 1615"@sv ,
+                    "치즈가 있는 정물 — 플로리스 판 데이크, 1615년경"@ko ,
+                    "Stillleben mit Käse — Floris van Dyck, um 1615"@de ,
+                    "Bodegón con quesos — Floris Claesz van Dijck, c. 1615"@es ,
+                    "Nature morte aux fromages — Floris Claesz van Dijck, vers 1615"@fr .
+
+<#sk-a-4118>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/uMHxo/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Two men on horseback at the water’s edge in golden evening light, one horse drinking, a tall hill on the right, cows resting and a boy in red"@en ,
+                                     "Två män till häst vid vattenbrynet i gyllene kvällsljus, en häst som dricker, en hög kulle till höger, vilande kor och en pojke i rött"@sv ,
+                                     "황금빛 저녁 햇살 속 물가에서 말을 탄 두 남자, 물을 마시는 말 한 마리, 오른쪽의 높은 언덕, 쉬고 있는 소들과 빨간 옷의 소년"@ko ,
+                                     "Zwei Männer zu Pferd am Wasser im goldenen Abendlicht, ein Pferd trinkt, rechts ein hoher Hügel, ruhende Kühe und ein Junge in Rot"@de ,
+                                     "Dos hombres a caballo a la orilla del agua con luz dorada de atardecer, un caballo bebiendo, una colina alta a la derecha, vacas echadas y un muchacho de rojo"@es ,
+                                     "Deux hommes à cheval au bord de l’eau dans une lumière dorée du soir, un cheval qui boit, une haute colline à droite, des vaches couchées et un garçon en rouge"@fr ;
+    solid-memo:back "River Landscape with Riders — Aelbert Cuyp, c. 1653–1657"@en ,
+                    "Flodlandskap med ryttare — Aelbert Cuyp, ca 1653–1657"@sv ,
+                    "기수들이 있는 강 풍경 — 알버르트 카위프, 1653–1657년경"@ko ,
+                    "Flusslandschaft mit Reitern — Aelbert Jacobsz. Cuyp, um 1653–1657"@de ,
+                    "Paisaje fluvial con jinetes — Albert Jacobsz. Cuyp, c. 1653–1657"@es ,
+                    "Paysage fluvial avec cavaliers — Albert Cuyp, vers 1653–1657"@fr .
+
+<#sk-a-1505>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/HNwWx/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A brown wooden windmill beside a still canal that mirrors it, flat green meadows, a man on the towpath and a big sky of white clouds"@en ,
+                                     "En brun väderkvarn av trä vid en stilla kanal som speglar den, platta gröna ängar, en man på dragvägen och en stor himmel med vita moln"@sv ,
+                                     "잔잔한 운하에 비친 갈색 목조 풍차, 평평한 초록 목초지, 둑길 위의 남자와 흰 구름이 가득한 넓은 하늘"@ko ,
+                                     "Eine braune hölzerne Windmühle an einem stillen Kanal, der sie spiegelt, flache grüne Wiesen, ein Mann auf dem Treidelpfad und ein weiter Himmel mit weißen Wolken"@de ,
+                                     "Un molino de viento de madera marrón junto a un canal quieto que lo refleja, prados verdes y llanos, un hombre en el camino de sirga y un gran cielo de nubes blancas"@es ,
+                                     "Un moulin à vent en bois brun au bord d’un canal immobile qui le reflète, des prés verts et plats, un homme sur le chemin de halage et un grand ciel de nuages blancs"@fr ;
+    solid-memo:back "In the Month of July — Paul Joseph Constantin Gabriël, c. 1889"@en ,
+                    "I juli månad — Paul Joseph Constantin Gabriël, ca 1889"@sv ,
+                    "7월에 — 파울 요제프 콘스탄틴 하브리엘, 1889년경"@ko ,
+                    "Im Monat Juli — Paul Joseph Constantin Gabriël, um 1889"@de ,
+                    "En el mes de julio — Paul Joseph Constantin Gabriël, c. 1889"@es ,
+                    "Au mois de juillet — Paul Joseph Constantin Gabriël, vers 1889"@fr .
+
+<#sk-a-2963>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GRbAZ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A stout man with tousled dark hair and sideburns, hands in his pockets, in a black coat with a red sash and open white collar, against a dark ground with an inscription at lower left"@en ,
+                                     "En korpulent man med rufsigt mörkt hår och polisonger, händerna i fickorna, i svart rock med rött skärp och öppen vit krage, mot mörk bakgrund med inskription nere till vänster"@sv ,
+                                     "헝클어진 검은 머리와 구레나룻, 주머니에 손을 넣고 빨간 띠와 열린 흰 깃이 있는 검은 외투를 입은 건장한 남자, 어두운 배경 왼쪽 아래의 글귀"@ko ,
+                                     "Ein kräftiger Mann mit zerzaustem dunklem Haar und Koteletten, Hände in den Taschen, in schwarzem Rock mit roter Schärpe und offenem weißem Kragen, vor dunklem Grund mit Inschrift unten links"@de ,
+                                     "Un hombre corpulento de pelo oscuro revuelto y patillas, con las manos en los bolsillos, levita negra, faja roja y cuello blanco abierto, sobre fondo oscuro con una inscripción abajo a la izquierda"@es ,
+                                     "Un homme corpulent aux cheveux sombres ébouriffés et aux favoris, les mains dans les poches, en redingote noire avec ceinture rouge et col blanc ouvert, sur fond sombre avec une inscription en bas à gauche"@fr ;
+    solid-memo:back "Portrait of Don Ramón Satué — Francisco Goya, 1823"@en ,
+                    "Porträtt av don Ramón Satué — Francisco de Goya, 1823"@sv ,
+                    "돈 라몬 사투에의 초상 — 프란시스코 데 고야, 1823년"@ko ,
+                    "Don Ramón Satué — Francisco de Goya, 1823"@de ,
+                    "Retrato de Don Ramón Satué — Francisco de Goya, 1823"@es ,
+                    "Portrait de Don Ramón Satué — Francisco de Goya, 1823"@fr .
+
+<#sk-a-1796>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GzjAh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Elegantly dressed men and women in ruffs gathered in a park, making music and eating around a table, a pale villa behind, dogs and a monkey in front"@en ,
+                                     "Elegant klädda män och kvinnor med pipkragar samlade i en park, som musicerar och äter kring ett bord, en ljus villa bakom, hundar och en apa framför"@sv ,
+                                     "주름 깃을 단 화려한 차림의 남녀가 공원에 모여 탁자 주위에서 음악을 연주하고 먹는 모습, 뒤로 밝은 저택, 앞쪽에 개들과 원숭이"@ko ,
+                                     "Elegant gekleidete Männer und Frauen mit Halskrausen in einem Park, musizierend und essend um einen Tisch, dahinter eine helle Villa, vorn Hunde und ein Affe"@de ,
+                                     "Hombres y mujeres elegantes con gorgueras reunidos en un parque, tocando música y comiendo alrededor de una mesa, una villa clara al fondo, perros y un mono delante"@es ,
+                                     "Des hommes et des femmes élégants à fraise réunis dans un parc, jouant de la musique et mangeant autour d’une table, une villa claire au fond, des chiens et un singe devant"@fr ;
+    solid-memo:back "The Fête champêtre — Dirck Hals, 1627"@en ,
+                    "Fest i det gröna — Dirck Hals, 1627"@sv ,
+                    "야외 연회 — 디르크 할스, 1627년"@ko ,
+                    "Fest im Freien — Dirck Hals, 1627"@de ,
+                    "La fiesta campestre — Dirck Hals, 1627"@es ,
+                    "La Fête champêtre — Dirck Hals, 1627"@fr .
+
+<#sk-a-133>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kMSwz/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A man in a wide black hat and a smiling woman in a large white millstone ruff, both in black, sitting together under a tree, her hand on his shoulder, a garden with a fountain beyond"@en ,
+                                     "En man i bred svart hatt och en leende kvinna med stor vit kvarnstenskrage, båda i svart, sittande intill varandra under ett träd, hennes hand på hans axel, en trädgård med fontän bortom"@sv ,
+                                     "챙 넓은 검은 모자의 남자와 큰 흰색 맷돌 모양 주름 깃의 미소 짓는 여자가 검은 옷 차림으로 나무 아래 나란히 앉은 모습, 그의 어깨에 얹은 그녀의 손, 뒤로 분수가 있는 정원"@ko ,
+                                     "Ein Mann mit breitem schwarzem Hut und eine lächelnde Frau mit großer weißer Mühlsteinkrause, beide in Schwarz, nebeneinander unter einem Baum sitzend, ihre Hand auf seiner Schulter, dahinter ein Garten mit Brunnen"@de ,
+                                     "Un hombre con sombrero negro de ala ancha y una mujer sonriente con gran gorguera blanca de rueda, ambos de negro, sentados juntos bajo un árbol, la mano de ella en su hombro, y al fondo un jardín con fuente"@es ,
+                                     "Un homme au large chapeau noir et une femme souriante à grande fraise blanche en meule, tous deux en noir, assis côte à côte sous un arbre, la main de la femme sur l’épaule de l’homme, un jardin avec fontaine au loin"@fr ;
+    solid-memo:back "Portrait of a Married Couple, Likely Isaac Abrahamsz Massa and Beatrix van der Laen — Frans Hals, c. 1622"@en ,
+                    "Porträtt av ett äkta par, troligen Isaac Abrahamsz Massa och Beatrix van der Laen — Frans Hals, ca 1622"@sv ,
+                    "이사크 아브라함스 마사와 베아트릭스 판 데르 란으로 추정되는 부부의 초상 — 프란스 할스, 1622년경"@ko ,
+                    "Porträt eines Paares, wahrscheinlich Isaac Massa und Beatrix van der Laen — Frans Hals, um 1622"@de ,
+                    "Retrato de boda de Isaac Massa y Beatrix van der Laen — Frans Hals, c. 1622"@es ,
+                    "Portrait de mariage probablement d'Isaac Massa et Beatrix van der Laen — Frans Hals, vers 1622"@fr .
+
+<#sk-a-135>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/CgrHr/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A laughing man with rosy cheeks in a wide black hat, white lace collar and ochre jerkin, raising an open hand and holding a glass of wine, in loose quick brushstrokes"@en ,
+                                     "En skrattande man med röda kinder i bred svart hatt, vit spetskrage och ockragul jacka, som höjer en öppen hand och håller ett vinglas, i lösa snabba penseldrag"@sv ,
+                                     "챙 넓은 검은 모자, 흰 레이스 깃, 황토색 조끼 차림에 볼이 붉은 웃는 남자, 펼친 손을 들고 포도주 잔을 쥔 모습, 빠르고 느슨한 붓질"@ko ,
+                                     "Ein lachender Mann mit roten Wangen in breitem schwarzem Hut, weißem Spitzenkragen und ockerfarbenem Wams, eine offene Hand erhoben, ein Weinglas haltend, in lockeren schnellen Pinselstrichen"@de ,
+                                     "Un hombre risueño de mejillas sonrosadas con sombrero negro de ala ancha, cuello blanco de encaje y jubón ocre, alzando una mano abierta y sosteniendo un vaso de vino, en pinceladas sueltas y rápidas"@es ,
+                                     "Un homme rieur aux joues rouges, au large chapeau noir, col de dentelle blanc et pourpoint ocre, levant une main ouverte et tenant un verre de vin, en touches rapides et libres"@fr ;
+    solid-memo:back "The Merry Drinker — Frans Hals, c. 1628–1630"@en ,
+                    "Den uppsluppne vindrickaren — Frans Hals, ca 1628–1630"@sv ,
+                    "유쾌한 술꾼 — 프란스 할스, 1628–1630년경"@ko ,
+                    "Der fröhliche Trinker — Frans Hals, um 1628–1630"@de ,
+                    "El alegre bebedor — Frans Hals, c. 1628–1630"@es ,
+                    "Le Joyeux Buveur — Frans Hals, vers 1628–1630"@fr .
+
+<#sk-a-4830>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/UjEro/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A table with a crumpled white cloth, pewter plates of oysters and a bread roll, a green glass of white wine, a tall golden covered goblet, a toppled silver tazza, a pewter jug and a half-peeled lemon"@en ,
+                                     "Ett bord med skrynklig vit duk, tenntallrikar med ostron och en fralla, ett grönt glas med vitt vin, en hög guldpokal med lock, en vält silverskål på fot, en tennkanna och en halvskalad citron"@sv ,
+                                     "구겨진 흰 식탁보의 탁자, 굴과 빵을 담은 백랍 접시, 백포도주가 든 초록 유리잔, 뚜껑 달린 키 큰 금빛 고블릿, 넘어진 은 굽 접시, 백랍 주전자와 반쯤 껍질을 벗긴 레몬"@ko ,
+                                     "Ein Tisch mit zerknittertem weißem Tuch, Zinntellern mit Austern und einem Brötchen, einem grünen Glas Weißwein, einem hohen goldenen Deckelpokal, einer umgekippten silbernen Tazza, einem Zinnkrug und einer halb geschälten Zitrone"@de ,
+                                     "Una mesa con mantel blanco arrugado, platos de peltre con ostras y un panecillo, un vaso verde de vino blanco, un alto cáliz dorado con tapa, una tazza de plata volcada, una jarra de peltre y un limón a medio pelar"@es ,
+                                     "Une table à nappe blanche froissée, des assiettes d’étain avec des huîtres et un petit pain, un verre vert de vin blanc, une haute coupe à couvercle couleur or, une tazza d’argent renversée, un pichet d’étain et un citron à demi pelé"@fr ;
+    solid-memo:back "Still Life with a Gilt Cup — Willem Claesz. Heda, 1635"@en ,
+                    "Stilleben med förgylld pokal — Willem Claeszoon Heda, 1635"@sv ,
+                    "도금한 잔이 있는 정물 — 빌럼 클라스 헤다, 1635년"@ko ,
+                    "Stilleben mit vergoldetem Pokal — Willem Claesz Heda, 1635"@de ,
+                    "Bodegón con copa dorada — Willem Heda, 1635"@es ,
+                    "Nature morte au gobelet doré — Willem Claesz. Heda, 1635"@fr .
+
+<#sk-c-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/stWFo/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A long canvas of a large company of men in plumed hats and sashes around a white-clothed table, eating and drinking, a big blue banner, a drum in front and a silver drinking horn"@en ,
+                                     "En lång duk med ett stort sällskap män i plymhattar och skärp kring ett vitdukat bord, som äter och dricker, en stor blå fana, en trumma framför och ett dryckeshorn i silver"@sv ,
+                                     "흰 식탁보를 깐 탁자 주위에서 먹고 마시는 깃털 모자와 띠 차림의 많은 남자들을 담은 긴 화폭, 큰 파란 깃발, 앞쪽의 북과 은 뿔잔"@ko ,
+                                     "Eine lange Leinwand mit einer großen Gesellschaft von Männern mit Federhüten und Schärpen um einen weiß gedeckten Tisch, essend und trinkend, ein großes blaues Banner, vorn eine Trommel und ein silbernes Trinkhorn"@de ,
+                                     "Un lienzo alargado con un gran grupo de hombres con sombreros de plumas y fajas en torno a una mesa de mantel blanco, comiendo y bebiendo, un gran estandarte azul, un tambor delante y un cuerno de plata para beber"@es ,
+                                     "Une longue toile montrant une nombreuse assemblée d’hommes à chapeaux à plumes et écharpes autour d’une table nappée de blanc, mangeant et buvant, une grande bannière bleue, un tambour devant et une corne à boire en argent"@fr ;
+    solid-memo:back "Banquet at the Crossbowmen’s Guild in Celebration of the Treaty of Münster — Bartholomeus van der Helst, 1648"@en ,
+                    "Bankett i armborstskyttarnas gille för att fira freden i Münster — Bartholomeus van der Helst, 1648"@sv ,
+                    "뮌스터 조약을 기념하는 석궁수 길드의 연회 — 바르톨로메우스 판 데르 헬스트, 1648년"@ko ,
+                    "Schützenmahlzeit zur Feier des Friedens von Münster — Bartholomeus van der Helst, 1648"@de ,
+                    "Banquete en el gremio de ballesteros para celebrar la Paz de Münster — Bartholomeus van der Helst, 1648"@es ,
+                    "Banquet de la guilde des arbalétriers pour célébrer la paix de Münster — Bartholomeus van der Helst, 1648"@fr .
+
+<#sk-a-147>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/Qhoba/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A very stout young man with a round face and shoulder-length curly brown hair, in a lace collar, holding gloves, a red velvet cloak draped over one arm, hand on hip"@en ,
+                                     "En mycket korpulent ung man med runt ansikte och axellångt lockigt brunt hår, i spetskrage, med handskar i handen och en röd sammetsmantel över ena armen, handen i sidan"@sv ,
+                                     "둥근 얼굴에 어깨까지 오는 곱슬 갈색 머리, 레이스 깃을 달고 장갑을 쥔 매우 뚱뚱한 젊은 남자, 한쪽 팔에 걸친 붉은 벨벳 망토와 허리에 얹은 손"@ko ,
+                                     "Ein sehr beleibter junger Mann mit rundem Gesicht und schulterlangem lockigem braunem Haar, mit Spitzenkragen, Handschuhe haltend, einen roten Samtmantel über dem Arm, die Hand in der Hüfte"@de ,
+                                     "Un joven muy corpulento de cara redonda y pelo castaño rizado hasta los hombros, con cuello de encaje, unos guantes en la mano, una capa de terciopelo rojo sobre un brazo y la mano en la cadera"@es ,
+                                     "Un jeune homme très corpulent au visage rond et aux cheveux bruns bouclés jusqu’aux épaules, col de dentelle, des gants à la main, un manteau de velours rouge drapé sur un bras, la main sur la hanche"@fr ;
+    solid-memo:back "Portrait of Gerard Andriesz Bicker — Bartholomeus van der Helst, c. 1642"@en ,
+                    "Porträtt av Gerard Andriesz Bicker — Bartholomeus van der Helst, ca 1642"@sv ,
+                    "헤라르트 안드리스 비커르의 초상 — 바르톨로메우스 판 데르 헬스트, 1642년경"@ko ,
+                    "Bildnis des Gerard Andriesz. Bicker — Bartholomeus van der Helst, um 1642"@de ,
+                    "Retrato de Gerard Andriesz Bicker — Bartholomeus van der Helst, c. 1642"@es ,
+                    "Portrait de Gerard Andriesz Bicker — Bartholomeus van der Helst, vers 1642"@fr .
+
+<#sk-a-175>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/BaFQb/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A large white pelican in front of a pond with ducks, beside a crowned crane, a cassowary and a flamingo in a park, a yellow bird flying under a stormy sky"@en ,
+                                     "En stor vit pelikan framför en damm med änder, bredvid en krontrana, en kasuar och en flamingo i en park, en gul fågel som flyger under en stormig himmel"@sv ,
+                                     "오리들이 있는 연못 앞의 커다란 흰 펠리컨, 그 옆의 관두루미, 화식조, 홍학이 있는 정원, 폭풍 하늘 아래 날아가는 노란 새"@ko ,
+                                     "Ein großer weißer Pelikan vor einem Teich mit Enten, daneben ein Kronenkranich, ein Kasuar und ein Flamingo in einem Park, ein gelber Vogel fliegt unter stürmischem Himmel"@de ,
+                                     "Un gran pelícano blanco ante un estanque con patos, junto a una grulla coronada, un casuario y un flamenco en un parque, y un pájaro amarillo volando bajo un cielo tormentoso"@es ,
+                                     "Un grand pélican blanc devant un étang aux canards, près d’une grue couronnée, d’un casoar et d’un flamant dans un parc, un oiseau jaune volant sous un ciel d’orage"@fr ;
+    solid-memo:back "The Floating Feather — Melchior d'Hondecoeter, c. 1680"@en ,
+                    "Den flytande fjädern — Melchior d'Hondecoeter, ca 1680"@sv ,
+                    "물에 뜬 깃털 — 멜히오르 더 혼더쿠터르, 1680년경"@ko ,
+                    "Die schwimmende Feder — Melchior de Hondecoeter, um 1680"@de ,
+                    "La pluma flotante — Melchior d'Hondecoeter, c. 1680"@es ,
+                    "La Plume flottante — Melchior de Hondecoeter, vers 1680"@fr .
+
+<#sk-a-180>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/LAWVX/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A laughing bearded man in a feathered cap leaning out of a window, raising a glass in one hand and holding a violin and bow in the other, a patterned carpet behind"@en ,
+                                     "En skrattande skäggig man i fjäderprydd mössa som lutar sig ut genom ett fönster, höjer ett glas i ena handen och håller en fiol och stråke i den andra, en mönstrad matta bakom"@sv ,
+                                     "깃털 모자를 쓰고 창밖으로 몸을 내민 웃는 수염 난 남자, 한 손에 잔을 들고 다른 손에 현악기와 활을 쥔 모습, 뒤로 무늬 있는 양탄자"@ko ,
+                                     "Ein lachender bärtiger Mann mit Federbarett, der sich aus einem Fenster lehnt, in einer Hand ein erhobenes Glas, in der anderen eine Violine mit Bogen, dahinter ein gemusterter Teppich"@de ,
+                                     "Un hombre barbudo y risueño con gorro de plumas asomado a una ventana, alzando una copa en una mano y sosteniendo un instrumento de cuerda con su arco en la otra, con una alfombra estampada detrás"@es ,
+                                     "Un homme barbu et rieur au bonnet à plumes, penché à une fenêtre, levant un verre d’une main et tenant de l’autre un instrument à cordes et son archet, un tapis à motifs derrière lui"@fr ;
+    solid-memo:back "The Merry Fiddler — Gerard van Honthorst, 1623"@en ,
+                    "Den glade fiolspelaren — Gerard van Honthorst, 1623"@sv ,
+                    "유쾌한 바이올린 연주자 — 헤라르트 판 혼트호르스트, 1623년"@ko ,
+                    "Der lustige Musikant — Gerrit van Honthorst, 1623"@de ,
+                    "El alegre violinista — Gerard van Honthorst, 1623"@es ,
+                    "Le Joyeux Violoniste — Gerrit van Honthorst, 1623"@fr .
+
+<#sk-a-2382>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/nnjuR/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Four small kids wading barefoot in shallow water at a beach, the eldest carrying a baby on her back, one pulling a toy sailboat on a string"@en ,
+                                     "Fyra småttingar som vadar barfota i grunt vatten vid en strand, den äldsta med en bebis på ryggen, en som drar en leksaksbåt med segel i ett snöre"@sv ,
+                                     "해변의 얕은 물에서 맨발로 걷는 꼬마 넷, 아기를 업은 맏이와 줄에 매단 장난감 돛단배를 끄는 꼬마"@ko ,
+                                     "Vier Knirpse, die barfuß im flachen Wasser an einem Strand waten, die Älteste mit einem Baby auf dem Rücken, einer zieht ein Spielzeugsegelboot an einer Schnur"@de ,
+                                     "Cuatro pequeños que caminan descalzos por el agua poco profunda de una playa, la mayor con un bebé a la espalda y otro tirando de un velero de juguete con una cuerda"@es ,
+                                     "Quatre petits pataugeant pieds nus dans l’eau peu profonde d’une plage, l’aînée portant un bébé sur le dos, un autre tirant un voilier jouet au bout d’une ficelle"@fr ;
+    solid-memo:back "Children of the Sea — Jozef Israëls, 1872"@en ,
+                    "Havets barn — Jozef Israëls, 1872"@sv ,
+                    "바다의 아이들 — 요제프 이스라엘스, 1872년"@ko ,
+                    "Kinder der See — Jozef Israëls, 1872"@de ,
+                    "Hijos del mar — Jozef Israëls, 1872"@es ,
+                    "Enfants de la mer — Jozef Israëls, 1872"@fr .
+
+<#sk-a-3841>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/YMqmF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A three-panel altarpiece in a black arched frame, crowds feasting, drinking and dancing in a mountain landscape under a dark cloud of smoke over a peak"@en ,
+                                     "En altartavla i tre delar i svart välvd ram, folkmassor som festar, dricker och dansar i ett berglandskap under ett mörkt rökmoln över en topp"@sv ,
+                                     "검은 아치형 틀의 세 폭 제단화, 산봉우리 위 어두운 연기구름 아래 산악 풍경 속에서 잔치를 벌이고 마시며 춤추는 군중"@ko ,
+                                     "Ein dreiteiliger Altar in schwarzem Bogenrahmen, Menschenmengen, die in einer Berglandschaft unter einer dunklen Rauchwolke über einem Gipfel schmausen, trinken und tanzen"@de ,
+                                     "Un retablo de tres tablas en marco negro de arco, multitudes que festejan, beben y bailan en un paisaje de montaña bajo una oscura nube de humo sobre una cumbre"@es ,
+                                     "Un retable à trois volets dans un cadre noir cintré, des foules qui festoient, boivent et dansent dans un paysage de montagne sous un sombre nuage de fumée au-dessus d’un sommet"@fr ;
+    solid-memo:back "Worship of the Golden Calf — Lucas van Leyden, c. 1530"@en ,
+                    "Tillbedjan av guldkalven — Lucas van Leyden, ca 1530"@sv ,
+                    "황금 송아지 숭배 — 루카스 판 레이던, 1530년경"@ko ,
+                    "Anbetung des Goldenen Kalbs — Lucas van Leyden, um 1530"@de ,
+                    "La adoración del becerro de oro — Lucas van Leyden, c. 1530"@es ,
+                    "L'Adoration du Veau d'or — Lucas van Leyden, vers 1530"@fr .
+
+<#sk-a-2815>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ogTdF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A long row of panels in one frame, each a town street scene of people handing out bread, drink and clothes, visiting prisoners and burying a coffin, a line of text below each"@en ,
+                                     "En lång rad tavlor i en ram, var och en en gatuscen i en stad där folk delar ut bröd, dryck och kläder, besöker fångar och begraver en kista, med en textrad under varje"@sv ,
+                                     "한 틀 안에 길게 늘어선 패널들, 각각 빵과 음료와 옷을 나눠 주고 갇힌 이들을 찾아가며 관을 묻는 도시 거리 장면, 각 패널 아래 한 줄의 글"@ko ,
+                                     "Eine lange Reihe von Tafeln in einem Rahmen, jede eine Straßenszene einer Stadt, in der Brot, Getränke und Kleider verteilt, Gefangene besucht und ein Sarg begraben werden, unter jeder eine Textzeile"@de ,
+                                     "Una larga hilera de tablas en un marco, cada una una escena callejera donde se reparte pan, bebida y ropa, se visita a presos y se entierra un ataúd, con una línea de texto debajo de cada una"@es ,
+                                     "Une longue rangée de panneaux dans un même cadre, chacun une scène de rue où l’on distribue pain, boisson et vêtements, visite des prisonniers et enterre un cercueil, une ligne de texte sous chacun"@fr ;
+    solid-memo:back "The Seven Works of Mercy — Master of Alkmaar, 1504"@en ,
+                    "De sju barmhärtighetsgärningarna — Mästaren från Alkmaar, 1504"@sv ,
+                    "자비의 일곱 가지 행위 — 알크마르의 거장, 1504년"@ko ,
+                    "Die sieben Werke der Barmherzigkeit — Meister von Alkmaar, 1504"@de ,
+                    "Las siete obras de misericordia — Maestro de Alkmaar, 1504"@es ,
+                    "Les sept œuvres de miséricorde — Maître d'Alkmaar, 1504"@fr .
+
+<#sk-a-3059>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zdALf/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A woman in a black cap holding a pale, listless toddler in a yellow top on her lap, an earthenware pot on a stool and a dark framed picture on the wall"@en ,
+                                     "En kvinna i svart huva med en blek, slö parvel i gul tröja i knät, en lerkruka på en pall och en mörk inramad bild på väggen"@sv ,
+                                     "검은 두건을 쓴 여자의 무릎에 안긴 노란 윗옷의 창백하고 힘없는 꼬마, 걸상 위의 토기 단지와 벽에 걸린 어두운 액자"@ko ,
+                                     "Eine Frau mit schwarzer Haube, auf dem Schoß ein blasser, matter Knirps in gelbem Hemd, ein irdener Topf auf einem Schemel und ein dunkles gerahmtes Bild an der Wand"@de ,
+                                     "Una mujer con cofia negra que sostiene en su regazo a un pequeño pálido y decaído de blusa amarilla, una olla de barro en un taburete y un cuadro oscuro enmarcado en la pared"@es ,
+                                     "Une femme en coiffe noire tenant sur ses genoux un tout-petit pâle et apathique en haut jaune, un pot en terre sur un tabouret et un tableau sombre encadré au mur"@fr ;
+    solid-memo:back "The Sick Child — Gabriël Metsu, c. 1664–1666"@en ,
+                    "Det sjuka barnet — Gabriël Metsu, ca 1664–1666"@sv ,
+                    "아픈 아이 — 가브리엘 메취, 1664–1666년경"@ko ,
+                    "Das kranke Kind — Gabriël Metsu, um 1664–1666"@de ,
+                    "La niña enferma — Gabriël Metsu, c. 1664–1666"@es ,
+                    "L'Enfant malade — Gabriël Metsu, vers 1664–1666"@fr .
+
+<#sk-a-3148>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/HTgKF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A bearded man with a slight mustache and kind tired eyes, in a black skullcap, a high white lace ruff, a fur collar and a black doublet with gold braid"@en ,
+                                     "En skäggig man med tunn mustasch och vänliga trötta ögon, i svart kalott, hög vit pipkrage, pälskrage och svart jacka med guldsnoddar"@sv ,
+                                     "옅은 콧수염과 다정하고 지친 눈의 수염 난 남자, 검은 챙 없는 모자, 높은 흰 레이스 주름 깃, 모피 깃과 금실 장식의 검은 상의"@ko ,
+                                     "Ein bärtiger Mann mit schmalem Schnurrbart und freundlichen, müden Augen, mit schwarzer Kappe, hoher weißer Spitzenkrause, Pelzkragen und schwarzem Wams mit Goldborten"@de ,
+                                     "Un hombre barbado de bigote fino y ojos amables y cansados, con gorro negro ceñido, alta gorguera blanca de encaje, cuello de piel y jubón negro con galones dorados"@es ,
+                                     "Un homme barbu à fine moustache, aux yeux doux et las, en calotte noire, haute fraise de dentelle blanche, col de fourrure et pourpoint noir à galons d’or"@fr ;
+    solid-memo:back "Portrait of William I, Prince of Orange — Adriaen Thomasz. Key, c. 1579"@en ,
+                    "Porträtt av Vilhelm I av Oranien — Adriaen Thomasz Key, ca 1579"@sv ,
+                    "오라녀 공 빌럼 1세의 초상 — 아드리안 토마스 케이, 1579년경"@ko ,
+                    "Prinz Wilhelm I. von Oranien — Adriaen Thomasz Key, um 1579"@de ,
+                    "Retrato de Guillermo de Orange — Adriaen Thomasz Key, c. 1579"@es ,
+                    "Guillaume Ier d'Orange-Nassau — Adriaen Thomasz. Key, vers 1579"@fr .
+
+<#sk-a-3262>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Zelfportret_Rijksmuseum_SK-A-3262.jpeg/1280px-Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ;
+    solid-memo:frontImageDescription "A man with a red beard and green eyes in a grey felt hat and brown coat, in short thick dabs of color against a streaky blue-green background"@en ,
+                                     "En man med rött skägg och gröna ögon i grå filthatt och brun rock, i korta tjocka färgklickar mot en strimmig blågrön bakgrund"@sv ,
+                                     "회색 펠트 모자와 갈색 외투 차림의 붉은 수염에 초록 눈을 한 남자, 줄무늬 진 청록색 배경 위의 짧고 두꺼운 물감 터치"@ko ,
+                                     "Ein Mann mit rotem Bart und grünen Augen, grauer Kopfbedeckung und braunem Mantel, in kurzen, dicken Farbtupfen vor einem streifigen blaugrünen Grund"@de ,
+                                     "Un hombre de barba pelirroja y ojos verdes, con sombrero de fieltro gris y chaqueta marrón, en pinceladas cortas y gruesas sobre un fondo azul verdoso rayado"@es ,
+                                     "Un homme à barbe rousse et aux yeux verts, chapeau de feutre gris et veste brune, en touches courtes et épaisses sur un fond bleu-vert strié"@fr ;
+    solid-memo:back "Self-portrait — Vincent van Gogh, 1887"@en ,
+                    "Självporträtt — Vincent van Gogh, 1887"@sv ,
+                    "자화상 — 빈센트 반 고흐, 1887년"@ko ,
+                    "Selbstbildnis mit grauem Filzhut — Vincent van Gogh, 1887"@de ,
+                    "Autorretrato — Vincent van Gogh, 1887"@es ,
+                    "Autoportrait — Vincent van Gogh, 1887"@fr .
+
+<#sk-a-3948>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/IaBPB/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young man in a white wig and grey-green coat seated at a table with an open music book, holding up a sheet of paper, a cello leaning beside him and a globe at left"@en ,
+                                     "En ung man i vit peruk och gråbrun-grön rock som sitter vid ett bord med en uppslagen notbok och håller upp ett papper, en cello lutad intill och en jordglob till vänster"@sv ,
+                                     "흰 가발과 회녹색 외투 차림으로 펼친 악보가 놓인 탁자에 앉아 종이 한 장을 든 젊은 남자, 옆에 기대 놓은 첼로와 왼쪽의 지구본"@ko ,
+                                     "Ein junger Mann mit weißer Perücke und graugrünem Rock, an einem Tisch mit aufgeschlagenem Notenbuch sitzend, ein Blatt Papier haltend, daneben ein angelehntes Cello und links ein Globus"@de ,
+                                     "Un joven con peluca blanca y casaca gris verdosa sentado ante una mesa con un libro de música abierto, sosteniendo una hoja, con un violonchelo apoyado al lado y un globo terráqueo a la izquierda"@es ,
+                                     "Un jeune homme en perruque blanche et habit gris-vert, assis à une table avec un livre de musique ouvert, tenant une feuille, un violoncelle appuyé près de lui et un globe à gauche"@fr ;
+    solid-memo:back "Portrait of a Member of the Van der Mersch Family — Cornelis Troost, 1736"@en ,
+                    "Porträtt av en medlem av familjen Van der Mersch — Cornelis Troost, 1736"@sv ,
+                    "판데르메르스 가문 일원의 초상 — 코르넬리스 트로스트, 1736년"@ko ,
+                    "Bildnis eines Mitglieds der Familie Van der Mersch — Cornelis Troost, 1736"@de ,
+                    "Retrato de un miembro de la familia Van der Mersch — Cornelis Troost, 1736"@es ,
+                    "Portrait d'un membre de la famille Van der Mersch — Cornelis Troost, 1736"@fr .
+
+<#sk-a-4100>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/CCSup/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A high room hung floor to ceiling with gilt-framed paintings, a woman in a white dress seated before an easel, gentlemen in tailcoats and wigs, one in a red coat gesturing"@en ,
+                                     "Ett högt rum med förgyllt inramade målningar från golv till tak, en kvinna i vit klänning sittande framför ett staffli, herrar i frack och peruk, en i röd rock som gestikulerar"@sv ,
+                                     "바닥부터 천장까지 금빛 액자의 그림이 걸린 높은 방, 이젤 앞에 앉은 흰 드레스의 여자, 연미복과 가발 차림의 신사들, 손짓하는 빨간 코트의 남자"@ko ,
+                                     "Ein hoher Raum, vom Boden bis zur Decke mit goldgerahmten Bildern behängt, eine Frau in weißem Kleid vor einer Staffelei sitzend, Herren in Fräcken und Perücken, einer in rotem Rock gestikulierend"@de ,
+                                     "Una sala alta cubierta de suelo a techo con cuadros de marcos dorados, una mujer de vestido blanco sentada ante un caballete, caballeros con casaca y peluca, uno de rojo gesticulando"@es ,
+                                     "Une haute pièce couverte du sol au plafond de tableaux à cadres dorés, une femme en robe blanche assise devant un chevalet, des messieurs en habit et perruque, l’un en habit rouge gesticulant"@fr ;
+    solid-memo:back "The Art Gallery of Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@en ,
+                    "Jan Gildemeester Jansz galleri — Adriaan de Lelie, 1794–1795"@sv ,
+                    "얀 힐더메이스터르 얀스의 화랑 — 아드리안 더 렐리, 1794–1795년"@ko ,
+                    "Die Gemäldegalerie von Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@de ,
+                    "La galería de arte de Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@es ,
+                    "La galerie de peinture de Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@fr .
+
+<#bk-1963-64>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/AxxMT/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A large polished silver urn on a flared foot, with a stepped domed lid, scrolled handles with rings, a small tap at the front and embossed figures around an oval cartouche"@en ,
+                                     "En stor polerad silverurna på utsvängd fot, med trappstegsformat kupoligt lock, svängda handtag med ringar, en liten kran framtill och drivna figurer kring en oval kartusch"@sv ,
+                                     "벌어진 받침 위의 크고 윤나는 은 항아리, 층진 둥근 뚜껑, 고리 달린 소용돌이 손잡이, 앞쪽의 작은 꼭지와 타원형 문장 주위의 돋을새김 인물들"@ko ,
+                                     "Eine große polierte Silberurne auf ausgestelltem Fuß, mit gestuftem gewölbtem Deckel, geschwungenen Henkeln mit Ringen, einem kleinen Hahn vorn und getriebenen Figuren um eine ovale Kartusche"@de ,
+                                     "Una gran urna de plata pulida sobre pie abocinado, con tapa abovedada escalonada, asas de volutas con anillas, un pequeño grifo delante y figuras repujadas alrededor de una cartela oval"@es ,
+                                     "Une grande urne d’argent poli sur un pied évasé, au couvercle bombé à gradins, aux anses à volutes avec anneaux, un petit robinet à l’avant et des figures repoussées autour d’un cartouche ovale"@fr ;
+    solid-memo:back "Wine fountain and cooler — attributed to Alger Mensma, 1731–1732"@en ,
+                    "Vinfontän och vinkylare — tillskriven Alger Mensma, 1731–1732"@sv ,
+                    "와인 분수와 냉각기 — 알허르 멘스마 추정, 1731–1732년"@ko ,
+                    "Weinbrunnen und Kühlbecken — Alger Mensma zugeschrieben, 1731–1732"@de ,
+                    "Fuente de vino y enfriador — atribuido a Alger Mensma, 1731–1732"@es ,
+                    "Fontaine à vin et rafraîchissoir — attribué à Alger Mensma, 1731–1732"@fr .
+
+<#bk-1976-75>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/MMCGa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A small gilded silver vessel of soft, melting, fleshy curves like a shell or lobe, a curling spout on top and a crouching figure at the base on a round foot"@en ,
+                                     "Ett litet förgyllt silverkärl i mjuka, flytande, köttiga former som ett snäckskal eller en flik, en ringlande pip upptill och en hukande figur vid basen på rund fot"@sv ,
+                                     "조개나 귓불처럼 부드럽게 녹아내리는 살결 같은 곡선의 작은 도금 은 그릇, 위쪽의 말려 올라간 주둥이와 둥근 받침 위에 웅크린 인물"@ko ,
+                                     "Ein kleines vergoldetes Silbergefäß aus weichen, zerfließenden, fleischigen Formen wie eine Muschel oder ein Lappen, oben eine sich rollende Tülle, unten eine kauernde Figur auf rundem Fuß"@de ,
+                                     "Una pequeña vasija de plata dorada de curvas blandas, fluidas y carnosas como una concha o un lóbulo, con un pico enroscado arriba y una figura agachada en la base sobre un pie redondo"@es ,
+                                     "Un petit récipient en argent doré aux courbes molles, fondantes et charnues comme une coquille ou un lobe, un bec enroulé en haut et une figure accroupie à la base sur un pied rond"@fr ;
+    solid-memo:back "Lidded ewer — Adam van Vianen, 1614"@en ,
+                    "Kanna med lock — Adam van Vianen, 1614"@sv ,
+                    "뚜껑 달린 주전자 — 아담 판피아넌, 1614년"@ko ,
+                    "Deckelkanne — Adam van Vianen, 1614"@de ,
+                    "Jarra con tapa — Adam van Vianen, 1614"@es ,
+                    "Aiguière — Adam van Vianen, 1614"@fr .
+
+<#bk-17040-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zIapp/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall gilded silver piece: a standing woman on a base of plants and small animals carries a wide dish on her head, crowned by a blue enamel vase with a spray of metal flowers"@en ,
+                                     "Ett högt föremål i förgyllt silver: en stående kvinna på en sockel av växter och små djur bär ett brett fat på huvudet, krönt av en blå emaljvas med en bukett metallblommor"@sv ,
+                                     "키 큰 도금 은 작품, 식물과 작은 동물로 된 받침 위에 선 여인이 머리에 넓은 접시를 이고, 그 위에 금속 꽃다발을 꽂은 파란 법랑 꽃병"@ko ,
+                                     "Ein hohes Stück aus vergoldetem Silber: eine stehende Frau auf einem Sockel aus Pflanzen und kleinen Tieren trägt eine breite Schale auf dem Kopf, bekrönt von einer blauen Emailvase mit einem Strauß Metallblumen"@de ,
+                                     "Una alta pieza de plata dorada: una mujer de pie sobre una base de plantas y animalitos lleva en la cabeza una fuente ancha, coronada por un jarrón de esmalte azul con un ramo de flores de metal"@es ,
+                                     "Une haute pièce en argent doré : une femme debout sur une base de plantes et de petits animaux porte sur la tête un large plat, surmonté d’un vase d’émail bleu garni d’un bouquet de fleurs en métal"@fr ;
+    solid-memo:back "Table ornament — Wenzel Jamnitzer, 1549"@en ,
+                    "Bordsprydnad — Wenzel Jamnitzer, 1549"@sv ,
+                    "식탁 장식 — 벤첼 얌니처, 1549년"@ko ,
+                    "Merkelscher Tafelaufsatz — Wenzel Jamnitzer, 1549"@de ,
+                    "Centro de mesa — Wenzel Jamnitzer, 1549"@es ,
+                    "Surtout de table — Wenzel Jamnitzer, 1549"@fr .
+
+<#bk-nm-3888>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/OEGeX/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A carved oak standing woman with long wavy hair and a deeply folded mantle, holding a book and a curly-haired infant who clutches a bunch of grapes"@en ,
+                                     "En stående kvinna skuren i ek, med långt vågigt hår och djupt veckad mantel, som håller en bok och en lockig bebis som griper en druvklase"@sv ,
+                                     "물결치는 긴 머리와 깊게 주름진 망토의 참나무 조각 여인 입상, 책과 함께 포도송이를 쥔 곱슬머리 아기를 안은 모습"@ko ,
+                                     "Eine stehende Frau aus Eichenholz mit langem welligem Haar und tief gefaltetem Mantel, die ein Buch und einen lockigen Säugling hält, der eine Weintraube umklammert"@de ,
+                                     "Una mujer de pie tallada en roble, de largo pelo ondulado y manto de pliegues profundos, que sostiene un libro y a un bebé de pelo rizado que aprieta un racimo de uvas"@es ,
+                                     "Une femme debout sculptée dans le chêne, aux longs cheveux ondulés et au manteau aux plis profonds, tenant un livre et un bébé bouclé qui serre une grappe de raisin"@fr ;
+    solid-memo:back "Virgin and Child — Adriaen van Wesel, c. 1470–1480"@en ,
+                    "Madonna med barnet — Adriaen van Wesel, ca 1470–1480"@sv ,
+                    "성모자 — 아드리안 판베설, 1470–1480년경"@ko ,
+                    "Maria mit dem Kind — Adriaen van Wesel, um 1470–1480"@de ,
+                    "Virgen con el Niño — Adriaen van Wesel, c. 1470–1480"@es ,
+                    "Vierge à l'Enfant — Adriaen van Wesel, vers 1470–1480"@fr .
+
+<#bk-nm-88>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zNhuj/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Two carved oak figures in long robes embracing, a woman in a headscarf and a man in a turban-like cap leaning in to kiss her"@en ,
+                                     "Två figurer skurna i ek i långa dräkter som omfamnar varandra, en kvinna i huvudduk och en man i turbanliknande mössa som lutar sig fram för att kyssa henne"@sv ,
+                                     "긴 옷을 입고 서로 껴안은 참나무 조각 두 인물, 머릿수건을 쓴 여자와 그녀에게 입 맞추려 몸을 기울인 터번 같은 모자의 남자"@ko ,
+                                     "Zwei Figuren aus Eichenholz in langen Gewändern, die sich umarmen, eine Frau mit Kopftuch und ein Mann mit turbanartiger Kappe, der sich vorbeugt, um sie zu küssen"@de ,
+                                     "Dos figuras de roble tallado con largas túnicas abrazándose, una mujer con pañuelo en la cabeza y un hombre con gorro como un turbante que se inclina para besarla"@es ,
+                                     "Deux figures en chêne sculpté en longues robes qui s’étreignent, une femme en foulard et un homme au bonnet en forme de turban qui se penche pour l’embrasser"@fr ;
+    solid-memo:back "The Meeting of Joachim and Anna — Master of Joachim and Anne, c. 1470"@en ,
+                    "Mötet mellan Joakim och Anna — Mästaren av Joakim och Anna, ca 1470"@sv ,
+                    "요아킴과 안나의 만남 — 요아킴과 안나의 거장, 1470년경"@ko ,
+                    "Treffen der heiligen Joachim und Anna an der Goldenen Pforte — Meister von Joachim und Anna, um 1470"@de ,
+                    "El encuentro de Joaquín y Ana — Maestro de Joaquín y Ana, c. 1470"@es ,
+                    "La Rencontre de Joachim et Anne — Maître de Joachim et Anne, vers 1470"@fr .
+
+<#bk-18305>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kfrUn/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A white marble bust of a heavy-faced man with long curling hair and a small mustache, a lace collar, one hand on his chest gripping a draped cloak, a short inscription on the base"@en ,
+                                     "En byst i vit marmor av en man med tungt ansikte, långt lockigt hår och liten mustasch, spetskrage, ena handen på bröstet som griper en draperad mantel, en kort inskription på sockeln"@sv ,
+                                     "긴 곱슬머리와 작은 콧수염의 무거운 얼굴을 한 남자의 흰 대리석 흉상, 레이스 깃, 가슴에 얹어 늘어진 망토를 움켜쥔 손, 받침의 짧은 명문"@ko ,
+                                     "Eine weiße Marmorbüste eines Mannes mit schwerem Gesicht, langem lockigem Haar und kleinem Schnurrbart, Spitzenkragen, eine Hand auf der Brust, die einen drapierten Mantel fasst, eine kurze Inschrift am Sockel"@de ,
+                                     "Un busto de mármol blanco de un hombre de rostro pesado, largo pelo rizado y bigote fino, cuello de encaje y una mano en el pecho asiendo una capa drapeada, con una breve inscripción en la base"@es ,
+                                     "Un buste en marbre blanc d’un homme au visage lourd, aux longs cheveux bouclés et à petite moustache, col de dentelle, une main sur la poitrine serrant un manteau drapé, une courte inscription sur le socle"@fr ;
+    solid-memo:back "Portrait of Andries de Graeff — Artus Quellinus the Elder, 1661"@en ,
+                    "Porträtt av Andries de Graeff — Artus Quellinus, 1661"@sv ,
+                    "안드리스 더 흐라프의 초상 — 아르투스 크벨리누스, 1661년"@ko ,
+                    "Porträtbüste von Andries de Graeff — Artus Quellinus I., 1661"@de ,
+                    "Retrato de Andries de Graeff — Artus Quellinus, 1661"@es ,
+                    "Portrait d'Andries de Graeff — Artus Quellinus, 1661"@fr .
+
+<#bk-nm-13150>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GlNVH/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A terracotta head of a man with closed eyes, long wavy hair and a thin curled mustache, a band of ornament at the neck, as if lying at rest"@en ,
+                                     "Ett huvud i terrakotta av en man med slutna ögon, långt vågigt hår och tunn uppsnodd mustasch, en ornamentrand vid halsen, som om han låg i vila"@sv ,
+                                     "감은 눈, 물결치는 긴 머리, 가늘게 말린 콧수염의 남자 테라코타 두상, 목의 장식 띠, 잠든 듯 누운 모습"@ko ,
+                                     "Ein Terrakottakopf eines Mannes mit geschlossenen Augen, langem welligem Haar und dünnem gezwirbeltem Schnurrbart, ein Ornamentband am Hals, wie ruhend liegend"@de ,
+                                     "Una cabeza de terracota de un hombre con los ojos cerrados, largo pelo ondulado y bigote fino y rizado, con una banda ornamental en el cuello, como si yaciera en reposo"@es ,
+                                     "Une tête en terre cuite d’un homme aux yeux fermés, aux longs cheveux ondulés et à fine moustache recourbée, une bande ornementale au cou, comme couché au repos"@fr ;
+    solid-memo:back "Portrait of Michiel de Ruyter — Rombout Verhulst, 1677–1681"@en ,
+                    "Porträtt av Michiel de Ruyter — Rombout Verhulst, 1677–1681"@sv ,
+                    "미힐 더 라위터르의 초상 — 롬바우트 페르휠스트, 1677–1681년"@ko ,
+                    "Bildnis des Michiel de Ruyter — Rombout Verhulst, 1677–1681"@de ,
+                    "Retrato de Michiel de Ruyter — Rombout Verhulst, 1677–1681"@es ,
+                    "Portrait de Michiel de Ruyter — Rombout Verhulst, 1677–1681"@fr .
+
+<#bk-1963-101>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/oRVzW/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A white marble winged little boy perched on a rock among roses, finger to his lips, smiling slyly, reaching with his other hand toward an arrow"@en ,
+                                     "En liten bevingad pojke i vit marmor uppflugen på en klippa bland rosor, med fingret mot läpparna och ett listigt leende, den andra handen sträckt mot en pil"@sv ,
+                                     "장미 사이 바위 위의 날개 달린 흰 대리석 어린 소년, 입술에 손가락을 대고 짓궂게 웃으며 다른 손을 화살 쪽으로 뻗은 모습"@ko ,
+                                     "Ein kleiner geflügelter Junge aus weißem Marmor, auf einem Felsen zwischen Rosen hockend, den Finger an den Lippen, verschmitzt lächelnd, die andere Hand nach einem Pfeil ausgestreckt"@de ,
+                                     "Un niñito alado de mármol blanco encaramado en una roca entre rosas, con un dedo en los labios y sonrisa pícara, alargando la otra mano hacia una flecha"@es ,
+                                     "Un petit garçon ailé en marbre blanc juché sur un rocher parmi des roses, un doigt sur les lèvres, souriant malicieusement, l’autre main tendue vers une flèche"@fr ;
+    solid-memo:back "Seated Cupid — Étienne Maurice Falconet, 1757"@en ,
+                    "Sittande Amor — Étienne Maurice Falconet, 1757"@sv ,
+                    "앉아 있는 큐피드 — 에티엔 모리스 팔코네, 1757년"@ko ,
+                    "Sitzender Amor — Étienne-Maurice Falconet, 1757"@de ,
+                    "Cupido sentado — Étienne-Maurice Falconet, 1757"@es ,
+                    "L'Amour menaçant — Étienne Maurice Falconet, 1757"@fr .
+
+<#bk-1976-49>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/hcKgh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A small painted clay figure of a plump man in a dark blue coat with gold frogging and a red waistcoat, sitting on a black rock-like seat, a tricorn hat beside him"@en ,
+                                     "En liten målad lerfigur av en fyllig man i mörkblå rock med guldsnören och röd väst, sittande på en svart klippliknande sits, med en trekantig hatt bredvid"@sv ,
+                                     "금색 장식 끈의 짙은 파란 외투와 빨간 조끼를 입고 검은 바위 같은 자리에 앉은 통통한 남자의 작은 채색 점토상, 옆의 삼각모"@ko ,
+                                     "Eine kleine bemalte Tonfigur eines rundlichen Mannes in dunkelblauem Rock mit goldenen Verschnürungen und roter Weste, auf einem schwarzen felsartigen Sitz, daneben ein Dreispitz"@de ,
+                                     "Una pequeña figura de barro pintado de un hombre rollizo con casaca azul oscuro de alamares dorados y chaleco rojo, sentado en un asiento negro como una roca, con un tricornio a su lado"@es ,
+                                     "Une petite figurine d’argile peinte d’un homme rondelet en habit bleu foncé à brandebourgs dorés et gilet rouge, assis sur un siège noir en forme de rocher, un tricorne à côté de lui"@fr ;
+    solid-memo:back "A Dutch Merchant, Possibly Andreas Everardus van Braam Houckgeest — attributed to Chitqua, c. 1770"@en ,
+                    "Nederländsk köpman, möjligen Andreas Everardus van Braam Houckgeest — tillskriven Chitqua, ca 1770"@sv ,
+                    "안드레아스 에버라르뒤스 판브람 하우크헤이스트로 추정되는 네덜란드 상인 — 치트콰 추정, 1770년경"@ko ,
+                    "Niederländischer Kaufmann, möglicherweise Andreas Everardus van Braam Houckgeest — Chitqua zugeschrieben, um 1770"@de ,
+                    "Mercader neerlandés, posiblemente Andreas Everardus van Braam Houckgeest — atribuido a Chitqua, c. 1770"@es ,
+                    "Marchand néerlandais, peut-être Andreas Everardus van Braam Houckgeest — attribué à Chitqua, vers 1770"@fr .
+
+<#sk-a-5003>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/vYQLC/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A sunlit canal lined with tall brick and pale stone houses, a few people on the quay, under a blue sky with white clouds"@en ,
+                                     "En solbelyst kanal kantad av höga hus i tegel och ljus sten, några människor på kajen, under en blå himmel med vita moln"@sv ,
+                                     "파란 하늘과 흰 구름 아래, 높은 벽돌집과 밝은 석조 집들이 늘어선 햇살 가득한 운하와 부두 위의 몇몇 사람"@ko ,
+                                     "Ein sonnenbeschienener Kanal, gesäumt von hohen Häusern aus Backstein und hellem Stein, einige Menschen am Kai, unter blauem Himmel mit weißen Wolken"@de ,
+                                     "Un canal soleado bordeado de altas casas de ladrillo y piedra clara, unas pocas personas en el muelle, bajo un cielo azul con nubes blancas"@es ,
+                                     "Un canal ensoleillé bordé de hautes maisons de brique et de pierre claire, quelques personnes sur le quai, sous un ciel bleu aux nuages blancs"@fr ;
+    solid-memo:back "View of the Golden Bend in the Herengracht — Gerrit Berckheyde, 1671–1672"@en ,
+                    "Vy över Gyllene kröken i Herengracht — Gerrit Berckheyde, 1671–1672"@sv ,
+                    "헤렌흐라흐트의 황금 굽이 풍경 — 헤릿 베르크헤이더, 1671–1672년"@ko ,
+                    "Die Goldene Bucht in der Herengracht, Amsterdam, vom Osten gesehen — Gerrit Adriaenszoon Berckheyde, 1671–1672"@de ,
+                    "Vista de la Curva Dorada en el Herengracht — Gerrit Adriaensz. Berckheyde, 1671–1672"@es ,
+                    "Amsterdam, la courbure d'or dans le Herengracht — Gerrit Berckheyde, 1671–1672"@fr .
+
+<#bk-kog-656>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/TLaTa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "An oak case on four tall legs with a shelf below, its front of narrow panels carved in pierced tracery and two drawers"@en ,
+                                     "En ekmöbel på fyra höga ben med en hylla nedtill, fronten av smala paneler med genombrutet snidat masverk och två lådor"@sv ,
+                                     "아래에 선반이 있는 네 개의 높은 다리 위 참나무 함, 투각 장식 조각이 된 좁은 판들과 서랍 두 개가 있는 앞면"@ko ,
+                                     "Ein Eichenkasten auf vier hohen Beinen mit einem Bord darunter, die Front aus schmalen Feldern mit durchbrochenem Maßwerk und zwei Schubladen"@de ,
+                                     "Un mueble de roble sobre cuatro patas altas con un estante abajo, el frente de paneles estrechos tallados con tracería calada y dos cajones"@es ,
+                                     "Un meuble en chêne sur quatre hauts pieds avec une tablette en bas, la façade en panneaux étroits sculptés de remplages ajourés et deux tiroirs"@fr ;
+    solid-memo:back "Cabinet of a Militia Company — Alkmaar, c. 1520–1530"@en ,
+                    "Skåp tillhörande ett skyttegille — Alkmaar, ca 1520–1530"@sv ,
+                    "민병대의 수납장 — 알크마르, 1520–1530년경"@ko ,
+                    "Schrank einer Schützengilde — Alkmaar, um 1520–1530"@de ,
+                    "Armario de una milicia cívica — Alkmaar, c. 1520–1530"@es ,
+                    "Armoire d'une compagnie de milice — Alkmaar, vers 1520–1530"@fr .
+
+<#bk-nm-1315>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/TqmcR/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall carved dark wood seat with armrests and curved legs, green velvet back embroidered with a crowned coat of arms held by two lions, crowns on the crest"@en ,
+                                     "En hög snidad sittplats i mörkt trä med armstöd och svängda ben, ryggen i grön sammet broderad med ett krönt vapen hållet av två lejon, kronor upptill"@sv ,
+                                     "팔걸이와 휘어진 다리가 있는 높은 조각 장식의 짙은 나무 좌석, 두 마리 사자가 받친 왕관 문장이 수놓인 녹색 벨벳 등받이와 꼭대기의 왕관들"@ko ,
+                                     "Ein hoher geschnitzter Sitz aus dunklem Holz mit Armlehnen und geschwungenen Beinen, die Rückenlehne aus grünem Samt mit einem gekrönten, von zwei Löwen gehaltenen Wappen bestickt, Kronen am Aufsatz"@de ,
+                                     "Un asiento alto de madera oscura tallada con brazos y patas curvas, respaldo de terciopelo verde bordado con un escudo coronado sostenido por dos leones, coronas en el remate"@es ,
+                                     "Un haut fauteuil en bois sombre sculpté à accotoirs et pieds galbés, dossier de velours vert brodé d’armoiries couronnées tenues par deux lions, des couronnes au sommet"@fr ;
+    solid-memo:back "Stadtholder’s chair — Gerrit Hutte, 1747"@en ,
+                    "Ståthållarens stol — Gerrit Hutte, 1747"@sv ,
+                    "스타트허우더의 의자 — 헤릿 휘터, 1747년"@ko ,
+                    "Stuhl des Statthalters — Gerrit Hutte, 1747"@de ,
+                    "Silla del estatúder — Gerrit Hutte, 1747"@es ,
+                    "Siège du stathouder — Gerrit Hutte, 1747"@fr .
+
+<#ng-kog-1208>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kdHuD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A worn wooden trunk with a domed lid, dark peeling paint, long iron straps down the front and two iron lock plates"@en ,
+                                     "En sliten trälåda med välvt lock, mörk flagnande färg, långa järnband längs framsidan och två låsbleck i järn"@sv ,
+                                     "둥근 뚜껑과 벗겨진 짙은 칠, 앞면을 따라 내려오는 긴 쇠띠와 쇠 자물쇠판 두 개가 있는 낡은 나무 궤짝"@ko ,
+                                     "Ein abgenutzter Holzkasten mit gewölbtem Deckel, dunkler abblätternder Farbe, langen Eisenbändern an der Front und zwei eisernen Schlossblechen"@de ,
+                                     "Un baúl de madera desgastado con tapa abombada, pintura oscura descascarada, largos flejes de hierro en el frente y dos cerraduras de hierro"@es ,
+                                     "Une malle en bois usée au couvercle bombé, à la peinture sombre écaillée, avec de longues bandes de fer sur la façade et deux plaques de serrure en fer"@fr ;
+    solid-memo:back "Book chest of Hugo de Groot — Northern Netherlands, c. 1600–1615"@en ,
+                    "Hugo Grotius bokkista — Norra Nederländerna, ca 1600–1615"@sv ,
+                    "휘호 그로티우스의 책 상자 — 북부 네덜란드, 1600–1615년경"@ko ,
+                    "Bücherkiste des Hugo Grotius — Nördliche Niederlande, um 1600–1615"@de ,
+                    "Arcón de libros de Hugo Grocio — Países Bajos septentrionales, c. 1600–1615"@es ,
+                    "Coffre à livres de Hugo Grotius — Pays-Bas septentrionaux, vers 1600–1615"@fr .
+
+<#sk-a-4981>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/QQWEh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A man in black with a wide hat seated on house steps beside a girl in a satin dress, while an old woman with a cane and a boy approach"@en ,
+                                     "En man i svart med bred hatt sittande på en hustrappa bredvid en flicka i satinklänning, medan en gammal kvinna med käpp och en pojke närmar sig"@sv ,
+                                     "넓은 모자를 쓴 검은 옷의 남자가 공단 드레스를 입은 소녀 옆 집 계단에 앉아 있고, 지팡이를 짚은 노파와 소년이 다가오는 장면"@ko ,
+                                     "Ein Mann in Schwarz mit breitem Hut auf Haustreppenstufen sitzend neben einem Mädchen in Satinkleid, während eine alte Frau mit Stock und ein Junge herantreten"@de ,
+                                     "Un hombre de negro con sombrero ancho sentado en la escalinata de una casa junto a una niña con vestido de satén, mientras se acercan una anciana con bastón y un niño"@es ,
+                                     "Un homme en noir au large chapeau assis sur les marches d’une maison à côté d’une fillette en robe de satin, tandis qu’approchent une vieille femme à canne et un garçon"@fr ;
+    solid-memo:back "The Burgomaster of Delft and his Daughter — Jan Steen, 1655"@en ,
+                    "Borgmästaren i Delft och hans dotter — Jan Steen, 1655"@sv ,
+                    "델프트의 시장과 그의 딸 — 얀 스테인, 1655년"@ko ,
+                    "Der Bürgermeister von Delft und seine Tochter — Jan Steen, 1655"@de ,
+                    "Retrato doble de Adolf y Catharina Croeser — Jan Steen, 1655"@es ,
+                    "Portrait d'Adolf et Catharina Croeser — Jan Steen, 1655"@fr .
+
+<#bk-nm-1010>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/vacBr/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall tortoiseshell-veneered cabinet on carved legs, its glass doors open on three floors of tiny furnished rooms with a kitchen, a canopy bed and painted walls"@en ,
+                                     "Ett högt sköldpaddsfanerat skåp på snidade ben, glasdörrarna öppna mot tre våningar små möblerade rum med kök, himmelssäng och målade väggar"@sv ,
+                                     "조각 다리 위의 귀갑 무늬 베니어 높은 장, 열린 유리문 안으로 부엌과 닫집 침대, 그림 벽이 있는 3층의 작은 가구 딸린 방들"@ko ,
+                                     "Ein hoher, mit Schildpatt furnierter Schrank auf geschnitzten Beinen, die Glastüren offen auf drei Etagen winziger möblierter Zimmer mit Küche, Himmelbett und bemalten Wänden"@de ,
+                                     "Un alto armario chapado en carey sobre patas talladas, con las puertas de cristal abiertas a tres pisos de diminutas estancias amuebladas con cocina, cama con dosel y paredes pintadas"@es ,
+                                     "Un grand meuble plaqué d’écaille sur pieds sculptés, ses portes vitrées ouvertes sur trois étages de minuscules pièces meublées avec cuisine, lit à baldaquin et murs peints"@fr ;
+    solid-memo:back "Dolls’ house of Petronella Oortman — Amsterdam, c. 1686–1710"@en ,
+                    "Petronella Oortmans dockhus — Amsterdam, ca 1686–1710"@sv ,
+                    "페트로넬라 오르트만의 인형의 집 — 암스테르담, 1686–1710년경"@ko ,
+                    "Puppenhaus von Petronella Oortman — Amsterdam, um 1686–1710"@de ,
+                    "Casa de muñecas de Petronella Oortman — Ámsterdam, c. 1686–1710"@es ,
+                    "Maison de poupée de Petronella Oortman — Amsterdam, vers 1686–1710"@fr .
+
+<#sk-c-149>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/SgpJY/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A woman in a red jacket combing through a kneeling child’s hair beside a curtained box bed, in a tiled room, a small dog facing a sunlit doorway"@en ,
+                                     "En kvinna i röd jacka som går igenom håret på ett knäböjande barn bredvid en draperad sängalkov, i ett rum med klinkergolv, en liten hund vänd mot en solig dörröppning"@sv ,
+                                     "커튼 달린 붙박이 침대 옆, 타일 바닥 방에서 무릎 꿇은 아이의 머리카락을 살피는 붉은 웃옷의 여자와 햇빛 든 문간을 바라보는 작은 개"@ko ,
+                                     "Eine Frau in roter Jacke, die das Haar eines knienden Kindes durchsucht, neben einem Alkovenbett mit Vorhang, in einem gefliesten Raum, ein kleiner Hund zur sonnigen Tür gewandt"@de ,
+                                     "Una mujer con chaqueta roja revisando el pelo de un niño arrodillado junto a una cama alcoba con cortinas, en una sala embaldosada, un perrito mirando una puerta soleada"@es ,
+                                     "Une femme en veste rouge examinant les cheveux d’un enfant agenouillé près d’un lit clos à rideaux, dans une pièce carrelée, un petit chien tourné vers une porte ensoleillée"@fr ;
+    solid-memo:back "A Mother's Duty — Pieter de Hooch, c. 1660–1661"@en ,
+                    "En moders plikt — Pieter de Hooch, ca 1660–1661"@sv ,
+                    "어머니의 의무 — 피터르 더호흐, 1660–1661년경"@ko ,
+                    "Mutterpflichten — Pieter de Hooch, um 1660–1661"@de ,
+                    "El deber de una madre — Pieter de Hooch, c. 1660–1661"@es ,
+                    "Le Devoir d'une mère — Pieter de Hooch, vers 1660–1661"@fr .
+
+<#bk-2009-255-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/idsLZ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A box with a curved, sloping lid on a four-legged stand, dark tortoiseshell inlaid with brass scrolls, gilt masks and female figures on the legs"@en ,
+                                     "En låda med svängt, sluttande lock på ett fyrbent stativ, mörk sköldpadd med inlagda mässingsrankor, förgyllda maskaroner och kvinnofigurer på benen"@sv ,
+                                     "네 다리 받침대 위에 놓인 둥글게 경사진 뚜껑의 함, 황동 소용돌이 무늬를 상감한 짙은 귀갑과 다리의 도금 가면 및 여인상"@ko ,
+                                     "Ein Kasten mit geschwungenem, schrägem Deckel auf einem vierbeinigen Gestell, dunkles Schildpatt mit eingelegten Messingranken, vergoldete Masken und Frauenfiguren an den Beinen"@de ,
+                                     "Una caja de tapa curva e inclinada sobre un soporte de cuatro patas, carey oscuro con volutas de latón incrustadas, mascarones dorados y figuras femeninas en las patas"@es ,
+                                     "Une boîte au couvercle galbé et incliné sur un piètement à quatre pieds, écaille sombre incrustée de rinceaux de laiton, mascarons dorés et figures féminines sur les pieds"@fr ;
+    solid-memo:back "Two toilet caskets — André-Charles Boulle, c. 1685–1690"@en ,
+                    "Två toalettskrin — André Charles Boulle, ca 1685–1690"@sv ,
+                    "화장품 상자 두 개 — 앙드레샤를 불, 1685–1690년경"@ko ,
+                    "Zwei Toilettenkästen — André-Charles Boulle, um 1685–1690"@de ,
+                    "Dos cofres de tocador — André-Charles Boulle, c. 1685–1690"@es ,
+                    "Deux coffrets de toilette — André-Charles Boulle, vers 1685–1690"@fr .
+
+<#ng-mc-651>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/BsWYL/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A large wooden three-masted warship with loose cream sails, rigging, a gilded stern and rows of red-rimmed gun ports, on stands in a gallery"@en ,
+                                     "Ett stort tremastat örlogsfartyg i trä med lösa krämvita segel, tackling, förgylld akter och rader av rödkantade kanonportar, på stöd i en utställningssal"@sv ,
+                                     "전시실 받침대 위의 큰 나무 세 돛대 군함, 늘어진 크림색 돛과 삭구, 도금된 선미와 붉은 테두리 포문의 줄"@ko ,
+                                     "Ein großes hölzernes Dreimast-Kriegsschiff mit losen cremefarbenen Segeln, Takelage, vergoldetem Heck und Reihen rot umrandeter Stückpforten, auf Stützen in einem Saal"@de ,
+                                     "Un gran buque de guerra de madera de tres palos con velas color crema sueltas, jarcia, popa dorada e hileras de portas de cañón con borde rojo, sobre soportes en una sala"@es ,
+                                     "Un grand vaisseau de guerre en bois à trois mâts, voiles crème lâches, gréement, poupe dorée et rangées de sabords bordés de rouge, sur des supports dans une salle"@fr ;
+    solid-memo:back "Model of the William Rex — Adriaen de Vriend and others, 1698"@en ,
+                    "Modell av William Rex — Adriaen de Vriend med flera, 1698"@sv ,
+                    "윌리엄 렉스호 모형 — 아드리안 더프린트 외, 1698년"@ko ,
+                    "Modell der William Rex — Adriaen de Vriend und andere, 1698"@de ,
+                    "Modelo del William Rex — Adriaen de Vriend y otros, 1698"@es ,
+                    "Maquette du William Rex — Adriaen de Vriend et autres, 1698"@fr .
+
+<#bk-16676>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/TBYBP/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "An inlaid walnut writing cabinet opened out, its fall front down, side drawers and lacquer-like panels swung out, gilt mounts and a checkered footrest"@en ,
+                                     "En intarsiaprydd skrivmöbel i valnöt, uppfälld, med nedfälld skrivklaff, utsvängda sidolådor och lackliknande paneler, förgyllda beslag och ett schackrutigt fotstöd"@sv ,
+                                     "펼쳐 연 상감 호두나무 필기용 가구, 내려진 덮개판과 옆으로 펼쳐진 서랍 및 칠기 같은 판, 도금 장식과 바둑판무늬 발받침"@ko ,
+                                     "Ein intarsiertes Schreibmöbel aus Nussbaum, aufgeklappt, mit heruntergelassener Klappe, ausgeschwenkten Seitenschüben und lackähnlichen Tafeln, vergoldeten Beschlägen und schachbrettartiger Fußstütze"@de ,
+                                     "Un mueble de escribir de nogal con marquetería, desplegado, con la tapa abatida, cajones laterales y paneles como de laca girados hacia fuera, bronces dorados y reposapiés ajedrezado"@es ,
+                                     "Un meuble à écrire en noyer marqueté, déployé, abattant baissé, tiroirs latéraux et panneaux façon laque pivotés vers l’extérieur, bronzes dorés et repose-pieds en damier"@fr ;
+    solid-memo:back "Desk — Abraham Roentgen, c. 1758–1760"@en ,
+                    "Skrivbord — Abraham Roentgen, ca 1758–1760"@sv ,
+                    "책상 — 아브라함 뢴트겐, 1758–1760년경"@ko ,
+                    "Schreibtisch — Abraham Roentgen, um 1758–1760"@de ,
+                    "Escritorio — Abraham Roentgen, c. 1758–1760"@es ,
+                    "Bureau — Abraham Roentgen, vers 1758–1760"@fr .
+
+<#bk-15613>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/mGZIO/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A pale grey interior with draped curtains, a crystal chandelier, wall mirrors, white plaster reliefs over a double door and a large patterned carpet"@en ,
+                                     "En ljusgrå interiör med draperade gardiner, en kristallkrona, väggspeglar, vita stuckreliefer över en dubbeldörr och en stor mönstrad matta"@sv ,
+                                     "드리운 커튼, 크리스털 샹들리에, 벽 거울, 양문 위 흰 회반죽 부조와 커다란 무늬 카펫이 있는 옅은 회색 실내"@ko ,
+                                     "Ein hellgrauer Innenraum mit drapierten Vorhängen, einem Kristalllüster, Wandspiegeln, weißen Stuckreliefs über einer Doppeltür und einem großen gemusterten Teppich"@de ,
+                                     "Un interior gris pálido con cortinas drapeadas, una araña de cristal, espejos murales, relieves de yeso blanco sobre una puerta doble y una gran alfombra estampada"@es ,
+                                     "Un intérieur gris pâle aux rideaux drapés, avec un lustre en cristal, des miroirs muraux, des reliefs de stuc blanc au-dessus d’une porte double et un grand tapis à motifs"@fr ;
+    solid-memo:back "Haarlem Reception Room — Abraham van der Hart, c. 1793–1795"@en ,
+                    "Mottagningsrum från Haarlem — Abraham van der Hart, ca 1793–1795"@sv ,
+                    "하를럼의 응접실 — 아브라함 판데르하르트, 1793–1795년경"@ko ,
+                    "Haarlemer Empfangszimmer — Abraham van der Hart, um 1793–1795"@de ,
+                    "Sala de recepción de Haarlem — Abraham van der Hart, c. 1793–1795"@es ,
+                    "Salon de réception de Haarlem — Abraham van der Hart, vers 1793–1795"@fr .
+
+<#ng-444>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/iQNAf/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A striped wooden box with its lid open, lined with red cloth, holding small square blue-and-white flasks with silver caps, one flask standing outside"@en ,
+                                     "En randig trälåda med öppet lock, fodrad med rött tyg, med små fyrkantiga blåvita flakonger med silverlock, en av dem stående utanför"@sv ,
+                                     "붉은 천을 댄 뚜껑 열린 줄무늬 나무 함, 은 마개가 달린 작은 사각 청화 용기들이 들어 있고 하나는 밖에 서 있음"@ko ,
+                                     "Ein gestreifter Holzkasten mit offenem Deckel, mit rotem Stoff ausgeschlagen, mit kleinen viereckigen blau-weißen Flakons mit Silberkappen, einer davon daneben stehend"@de ,
+                                     "Un estuche de madera veteada con la tapa abierta, forrada de tela roja, con pequeños frascos cuadrados azules y blancos de tapón de plata, uno de pie fuera"@es ,
+                                     "Une boîte en bois veiné au couvercle ouvert, doublée de tissu rouge, contenant de petites fioles carrées bleu et blanc à bouchons d’argent, l’une posée à côté"@fr ;
+    solid-memo:back "Chest with nine porcelain bottles — Japan and Batavia, c. 1680–1700"@en ,
+                    "Kista med nio porslinsflaskor — Japan och Batavia, ca 1680–1700"@sv ,
+                    "도자기 병 아홉 개가 든 상자 — 일본·바타비아, 1680–1700년경"@ko ,
+                    "Kiste mit neun Porzellanflaschen — Japan und Batavia, um 1680–1700"@de ,
+                    "Caja con nueve botellas de porcelana — Japón y Batavia, c. 1680–1700"@es ,
+                    "Coffret à neuf flacons de porcelaine — Japon et Batavia, vers 1680–1700"@fr .
+
+<#bk-1994-34>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/rOKEq/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "An oval looking glass in a gilt frame of fruit and flowers, held at each side by a gilt standing woman in flowing robes, on a gilt base"@en ,
+                                     "Ett ovalt glas i förgylld ram av frukter och blommor, hållet på var sida av en förgylld stående kvinna i fladdrande dräkt, på en förgylld sockel"@sv ,
+                                     "과일과 꽃 장식의 도금 테에 끼운 타원형 유리, 양옆에서 흘러내리는 옷을 입은 도금 여인상이 받치고 도금 받침 위에 놓임"@ko ,
+                                     "Ein ovales Glas in vergoldetem Rahmen aus Früchten und Blumen, zu beiden Seiten von einer stehenden vergoldeten Frau in wallendem Gewand gehalten, auf vergoldetem Sockel"@de ,
+                                     "Un cristal oval en un marco dorado de frutas y flores, sostenido a cada lado por una mujer dorada de pie con túnica ondeante, sobre una base dorada"@es ,
+                                     "Une glace ovale dans un cadre doré de fruits et de fleurs, tenue de chaque côté par une femme debout dorée en robe flottante, sur un socle doré"@fr ;
+    solid-memo:back "Toilet Mirror — Joseph Germain Dutalis and Louis Royer, 1828–1829"@en ,
+                    "Toalettspegel — Joseph Germain Dutalis och Louis Royer, 1828–1829"@sv ,
+                    "화장 거울 — 조제프 제르맹 뒤탈리스와 루이 루아예, 1828–1829년"@ko ,
+                    "Toilettenspiegel — Joseph Germain Dutalis und Louis Royer, 1828–1829"@de ,
+                    "Espejo de tocador — Joseph Germain Dutalis y Louis Royer, 1828–1829"@es ,
+                    "Miroir de toilette — Joseph Germain Dutalis et Louis Royer, 1828–1829"@fr .
+
+<#bk-1995-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ksSSO/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall grey veined marble fireplace with a white oval carving of a seated couple above, flanked by two small child statues, between two tapestries"@en ,
+                                     "En hög öppen spis i grå ådrad marmor med en vit oval skulptering av ett sittande par ovanför, flankerad av två små barnstatyer, mellan två gobelänger"@sv ,
+                                     "두 태피스트리 사이에 선 높은 회색 줄무늬 대리석 화덕, 위쪽에 앉은 남녀를 새긴 흰 타원형 조각와 양옆의 작은 아이 조각상 두 개"@ko ,
+                                     "Eine hohe Feuerstelle aus grau geädertem Marmor mit einer weißen ovalen Schnitzerei eines sitzenden Paares darüber, flankiert von zwei kleinen Kinderfiguren, zwischen zwei Wandteppichen"@de ,
+                                     "Un alto hogar de mármol gris veteado con una talla oval blanca de una pareja sentada encima, flanqueado por dos pequeñas estatuas de niños, entre dos tapices"@es ,
+                                     "Un haut foyer en marbre gris veiné surmonté d’une sculpture ovale blanche d’un couple assis, flanqué de deux petites statues d’enfants, entre deux tapisseries"@fr ;
+    solid-memo:back "Mantelpiece with relief of Paris and Oenone — Jan Baptist Xavery, 1739"@en ,
+                    "Spisel med relief av Paris och Oinone — Jan Baptist Xavery, 1739"@sv ,
+                    "파리스와 오이노네 부조가 있는 벽난로 — 얀 밥티스트 크사베리, 1739년"@ko ,
+                    "Kamin mit Relief von Paris und Oinone — Jan Baptist Xavery, 1739"@de ,
+                    "Chimenea con relieve de Paris y Enone — Jan Baptist Xavery, 1739"@es ,
+                    "Cheminée avec relief de Pâris et Œnone — Jean Baptiste Xavery, 1739"@fr .
+
+<#bk-17496>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/vSFQx/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A large white glazed ceramic bird with a hooked beak and scale-patterned head, long dark wing and tail feathers with yellow, gripping a tree stump"@en ,
+                                     "En stor vitglaserad keramikfågel med krokig näbb och fjällmönstrat huvud, långa mörka ving- och stjärtfjädrar med gult, som griper om en trädstubbe"@sv ,
+                                     "갈고리 부리와 비늘 무늬 머리, 노란빛이 섞인 길고 짙은 날개·꼬리 깃털을 지닌 채 나무 그루터기를 움켜쥔 큰 흰 유약 도자기 새"@ko ,
+                                     "Ein großer weiß glasierter Keramikvogel mit Hakenschnabel und schuppig gemustertem Kopf, langen dunklen Flügel- und Schwanzfedern mit Gelb, der einen Baumstumpf umklammert"@de ,
+                                     "Un gran pájaro de cerámica vidriada blanca con pico ganchudo y cabeza de dibujo escamado, largas plumas oscuras de alas y cola con amarillo, aferrado a un tocón"@es ,
+                                     "Un grand oiseau en céramique émaillée blanche au bec crochu et à la tête à motif d’écailles, aux longues plumes sombres d’ailes et de queue avec du jaune, agrippé à une souche"@fr ;
+    solid-memo:back "Blue Parrot — Meissen Manufactory, 1731"@en ,
+                    "Blå papegoja — Porslinsmanufakturen i Meissen, 1731"@sv ,
+                    "파란 앵무새 — 마이센 자기 제작소, 1731년"@ko ,
+                    "Blauer Papagei — Porzellanmanufaktur Meissen, 1731"@de ,
+                    "Loro azul — Manufactura de Meissen, 1731"@es ,
+                    "Perroquet bleu — Manufacture de Meissen, 1731"@fr .
+
+<#bk-1983-15>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/Wdqmv/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A pale green glass goblet on a ribbed foot, its stem studded with raw prunts, the bowl engraved with flowing calligraphic lettering"@en ,
+                                     "En ljusgrön glasbägare på räfflad fot, skaftet besatt med glasnoppor, kupan graverad med svepande kalligrafisk skrift"@sv ,
+                                     "줄무늬 받침 위의 연녹색 유리잔, 유리 돌기가 박힌 몸대와 흐르는 듯한 서체 글씨가 새겨진 잔 부분"@ko ,
+                                     "Ein blassgrüner Glaspokal auf geripptem Fuß, der Schaft mit Nuppen besetzt, die Kuppa mit schwungvoller kalligrafischer Schrift graviert"@de ,
+                                     "Una copa de vidrio verde pálido sobre pie estriado, el fuste tachonado de botones de vidrio, el cáliz grabado con letras caligráficas fluidas"@es ,
+                                     "Un gobelet en verre vert pâle sur pied côtelé, la tige garnie de pastilles, la coupe gravée d’une écriture calligraphique fluide"@fr ;
+    solid-memo:back "Roemer with a poem to Constantijn Huygens — Anna Visscher, 1619"@en ,
+                    "Remmare med en dikt till Constantijn Huygens — Anna Roemers Visscher, 1619"@sv ,
+                    "콘스탄테인 하위헌스에게 바치는 시가 새겨진 뢰머 잔 — 안나 루머르스 피스허르, 1619년"@ko ,
+                    "Römer mit einem Gedicht an Constantijn Huygens — Anna Visscher, 1619"@de ,
+                    "Roemer con un poema a Constantijn Huygens — Anna Visscher, 1619"@es ,
+                    "Roemer avec un poème à Constantin Huygens — Anna Visscher, 1619"@fr .
+
+<#bk-r-4927>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/gdKOP/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A tall two-part wooden piece topped by three spired pinnacles, with turned bobbin columns and glass doors behind pierced pointed-arch tracery"@en ,
+                                     "En hög tvådelad möbel i trä krönt av tre spiror, med svarvade pärlstavskolonner och glasdörrar bakom genombrutet spetsbågigt masverk"@sv ,
+                                     "세 개의 뾰족탑으로 꼭대기를 장식한 높은 2단 나무 가구, 구슬 모양으로 깎은 기둥들과 투각 첨두아치 장식 뒤의 유리문"@ko ,
+                                     "Ein hohes zweiteiliges Holzmöbel, bekrönt von drei Turmspitzen, mit gedrechselten Perlstabsäulen und Glastüren hinter durchbrochenem Spitzbogenmaßwerk"@de ,
+                                     "Un alto mueble de madera en dos cuerpos coronado por tres pináculos, con columnas torneadas de cuentas y puertas de vidrio tras tracería calada de arcos apuntados"@es ,
+                                     "Un haut meuble en bois à deux corps couronné de trois pinacles, avec des colonnes tournées en chapelet et des portes vitrées derrière un remplage ajouré en arcs brisés"@fr ;
+    solid-memo:back "Silver cabinet — Jan Adolf Hillebrand, 1844"@en ,
+                    "Silverskåp — Jan Adolf Hillebrand, 1844"@sv ,
+                    "은식기 장식장 — 얀 아돌프 힐레브란트, 1844년"@ko ,
+                    "Silberschrank — Jan Adolf Hillebrand, 1844"@de ,
+                    "Armario para la plata — Jan Adolf Hillebrand, 1844"@es ,
+                    "Armoire à argenterie — Jan Adolf Hillebrand, 1844"@fr .
+
+<#bk-2000-17>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/QoNdD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A painted terracotta bust of a bearded man with short dark hair and bare shoulders, his head turned slightly, gazing to the side"@en ,
+                                     "En målad terrakottabyst av en skäggig man med kort mörkt hår och bara axlar, huvudet lätt vridet, blicken åt sidan"@sv ,
+                                     "짧은 검은 머리와 수염, 드러난 어깨의 남자를 표현한 채색 테라코타 흉상, 고개를 살짝 돌려 옆을 응시함"@ko ,
+                                     "Eine bemalte Terrakottabüste eines bärtigen Mannes mit kurzem dunklem Haar und nackten Schultern, den Kopf leicht gedreht, zur Seite blickend"@de ,
+                                     "Un busto de terracota pintada de un hombre barbudo de pelo corto oscuro y hombros desnudos, con la cabeza algo girada, mirando a un lado"@es ,
+                                     "Un buste en terre cuite peinte d’un homme barbu aux cheveux courts sombres et aux épaules nues, la tête légèrement tournée, le regard de côté"@fr ;
+    solid-memo:back "Self-portrait — Johan Gregor van der Schardt, c. 1573–1580"@en ,
+                    "Självporträtt — Johann Gregor van der Schardt, ca 1573–1580"@sv ,
+                    "자화상 — 요한 흐레호르 판데르스하르트, 1573–1580년경"@ko ,
+                    "Selbstporträt — Johan Gregor van der Schardt, um 1573–1580"@de ,
+                    "Autorretrato — Johan Gregor van der Schardt, c. 1573–1580"@es ,
+                    "Autoportrait — Johann Gregor van der Schardt, vers 1573–1580"@fr .
+
+<#sk-c-1672>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/wEuxE/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A seated woman in a deep red velvet gown with a white lace collar, gold chain and ochre shawl, holding a book, a brown and white dog looking up at her"@en ,
+                                     "En sittande kvinna i djupröd sammetsklänning med vit spetskrage, guldkedja och ockragul sjal, med en bok i handen, en brun och vit hund som ser upp på henne"@sv ,
+                                     "흰 레이스 깃과 금목걸이, 황토색 숄을 두른 짙은 붉은 벨벳 드레스 차림으로 책을 든 채 앉은 여인과 그녀를 올려다보는 갈색·흰색 개"@ko ,
+                                     "Eine sitzende Frau in tiefrotem Samtkleid mit weißem Spitzenkragen, Goldkette und ockerfarbenem Schal, ein Buch haltend, ein braun-weißer Hund blickt zu ihr auf"@de ,
+                                     "Una mujer sentada con vestido de terciopelo rojo oscuro, cuello de encaje blanco, cadena de oro y chal ocre, sosteniendo un libro, un perro marrón y blanco que la mira"@es ,
+                                     "Une femme assise en robe de velours rouge profond, col de dentelle blanche, chaîne d’or et châle ocre, tenant un livre, un chien brun et blanc levant les yeux vers elle"@fr ;
+    solid-memo:back "Portrait of Alida Christina Assink — Jan Adam Kruseman, 1833"@en ,
+                    "Porträtt av Alida Christina Assink — Jan Adam Kruseman, 1833"@sv ,
+                    "알리다 크리스티나 아신크의 초상 — 얀 아담 크뤼서만, 1833년"@ko ,
+                    "Porträt der Alida Christina Assink — Jan Adam Kruseman, 1833"@de ,
+                    "Retrato de Alida Christina Assink — Jan Adam Kruseman, 1833"@es ,
+                    "Portrait d'Alida Christina Assink — Jan Adam Kruseman, 1833"@fr .
+
+<#ng-nm-7687>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ffVgY/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A rusted iron box frame with corner posts, a green bronze bell on top and gear wheels showing through a round hole in the side"@en ,
+                                     "En rostig järnram formad som en låda med hörnstolpar, en grönaktig bjällra i brons överst och kugghjul synliga genom ett runt hål i sidan"@sv ,
+                                     "모서리 기둥이 있는 녹슨 쇠 상자 틀, 꼭대기의 녹청 낀 청동 종과 옆면 둥근 구멍으로 보이는 톱니바퀴"@ko ,
+                                     "Ein rostiges kastenförmiges Eisengestell mit Eckpfosten, oben eine grünliche Bronzeglocke und Zahnräder, die durch ein rundes Loch in der Seite sichtbar sind"@de ,
+                                     "Un armazón de hierro oxidado en forma de caja con postes en las esquinas, una campana de bronce verdosa arriba y ruedas dentadas visibles por un agujero redondo lateral"@es ,
+                                     "Un bâti en fer rouillé en forme de boîte à montants d’angle, une cloche de bronze verdâtre au sommet et des roues dentées visibles par un trou rond sur le côté"@fr ;
+    solid-memo:back "Clock and gunpowder horn — c. 1590–1596"@en ,
+                    "Ur och kruthorn — ca 1590–1596"@sv ,
+                    "시계와 화약통 — 1590–1596년경"@ko ,
+                    "Uhr und Pulverhorn — um 1590–1596"@de ,
+                    "Reloj y cuerno de pólvora — c. 1590–1596"@es ,
+                    "Horloge et corne à poudre — vers 1590–1596"@fr ;
+    solid-memo:backNote "Left behind by Willem Barentsz's crew in their winter house on Novaya Zemlya in 1597."@en ,
+                        "Kvarlämnade av Willem Barentsz besättning i deras vinterhus på Novaja Zemlja 1597."@sv ,
+                        "1597년 빌럼 바렌츠 탐험대가 노바야제믈랴의 겨울 오두막에 남기고 떠난 것."@ko ,
+                        "1597 von der Mannschaft Willem Barentsz' in ihrem Winterhaus auf Nowaja Semlja zurückgelassen."@de ,
+                        "Abandonados en 1597 por la tripulación de Willem Barentsz en su refugio invernal de Nueva Zembla."@es ,
+                        "Laissés en 1597 par l'équipage de Willem Barentsz dans leur maison d'hivernage de Nouvelle-Zemble."@fr .
+
+<#bk-2004-4-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/xpwiQ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A very tall blue-and-white glazed earthenware tower of stacked tiers with spouts at each corner, topped by a small bust, on crouching animal feet"@en ,
+                                     "Ett mycket högt torn i blåvit glaserad fajans av staplade våningar med pipar i varje hörn, krönt av en liten byst, på hukande djurfötter"@sv ,
+                                     "층층이 쌓아 올리고 모서리마다 주둥이가 달린 매우 높은 청화 유약 도기 탑, 꼭대기의 작은 흉상과 웅크린 동물 모양의 발"@ko ,
+                                     "Ein sehr hoher blau-weiß glasierter Fayenceturm aus gestapelten Etagen mit Tüllen an jeder Ecke, bekrönt von einer kleinen Büste, auf kauernden Tierfüßen"@de ,
+                                     "Una torre altísima de loza vidriada azul y blanca en pisos apilados con picos en cada esquina, rematada por un pequeño busto, sobre patas de animales agazapados"@es ,
+                                     "Une très haute tour en faïence bleu et blanc à étages empilés munis de becs à chaque angle, surmontée d’un petit buste, sur des pieds en animaux accroupis"@fr ;
+    solid-memo:back "Flower pyramid — attributed to De Metaale Pot, c. 1692–1700"@en ,
+                    "Blompyramid — tillskriven De Metaale Pot, ca 1692–1700"@sv ,
+                    "꽃 피라미드 — 더 메탈러 폿 추정, 1692–1700년경"@ko ,
+                    "Blumenpyramide — De Metaale Pot zugeschrieben, um 1692–1700"@de ,
+                    "Pirámide de flores — atribuida a De Metaale Pot, c. 1692–1700"@es ,
+                    "Pyramide à fleurs — attribuée à De Metaale Pot, vers 1692–1700"@fr .
+
+<#ng-2005-24>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/uRTEh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A box scene of small painted figures under an open thatched shelter, women in patterned wraps and headscarves, a man in a red coat, painted trees behind"@en ,
+                                     "En scen i en låda med små målade figurer under ett öppet halmtak, kvinnor i mönstrade svepningar och huvuddukar, en man i röd rock, målade träd bakom"@sv ,
+                                     "트인 초가 지붕 아래 작은 채색 인형들을 담은 상자 속 장면, 무늬 천을 두르고 머릿수건을 쓴 여인들과 붉은 코트의 남자, 뒤편의 그려진 나무들"@ko ,
+                                     "Eine Kastenszene mit kleinen bemalten Figuren unter einem offenen Strohdach, Frauen in gemusterten Tüchern und Kopftüchern, ein Mann in rotem Rock, gemalte Bäume dahinter"@de ,
+                                     "Una escena en caja con pequeñas figuras pintadas bajo un cobertizo abierto de paja, mujeres con telas estampadas y pañuelos en la cabeza, un hombre de casaca roja, árboles pintados detrás"@es ,
+                                     "Une scène en boîte de petites figurines peintes sous un abri ouvert au toit de chaume, des femmes en pagnes à motifs et foulards, un homme en habit rouge, des arbres peints au fond"@fr ;
+    solid-memo:back "Diorama of a Du, a Dance Celebration on the Plantation — Gerrit Schouten, 1830"@en ,
+                    "Diorama av en du, en dansfest på plantagen — Gerrit Schouten, 1830"@sv ,
+                    "농장의 춤 축제 '두'를 담은 디오라마 — 헤릿 스하우턴, 1830년"@ko ,
+                    "Diorama eines Du, eines Tanzfestes auf der Plantage — Gerrit Schouten, 1830"@de ,
+                    "Diorama de un du, una fiesta de baile en la plantación — Gerrit Schouten, 1830"@es ,
+                    "Diorama d'un du, fête dansante sur la plantation — Gerrit Schouten, 1830"@fr .
+
+<#bk-am-33>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/WMEyE/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "Ten small dark bronze standing figures of men and women in long folded robes, tall pointed headdresses and hats"@en ,
+                                     "Tio små stående figurer i mörk brons, män och kvinnor i långa veckade dräkter, höga spetsiga huvudbonader och hattar"@sv ,
+                                     "주름진 긴 옷에 높고 뾰족한 머리쓰개와 모자를 쓴 남녀를 표현한 작은 짙은 청동 입상 열 개"@ko ,
+                                     "Zehn kleine stehende Figuren aus dunkler Bronze, Männer und Frauen in langen gefalteten Gewändern, hohen spitzen Hauben und Hüten"@de ,
+                                     "Diez pequeñas figuras de pie de bronce oscuro, hombres y mujeres con largas túnicas plegadas, altos tocados puntiagudos y sombreros"@es ,
+                                     "Dix petites figures debout en bronze sombre, hommes et femmes en longues robes plissées, hautes coiffes pointues et chapeaux"@fr ;
+    solid-memo:back "Weepers from the tomb of Isabella of Bourbon — attributed to the Borman workshop and Renier van Thienen, c. 1475–1476"@en ,
+                    "Sörjande från Isabella av Bourbons gravmonument — tillskrivna Bormanverkstaden och Renier van Thienen, ca 1475–1476"@sv ,
+                    "이자벨 드 부르봉 묘의 애도자상 — 보르만 공방·레니르 판 티넌 추정, 1475–1476년경"@ko ,
+                    "Klagende vom Prunkgrab der Isabella von Bourbon — der Borman-Werkstatt und Renier van Thienen zugeschrieben, um 1475–1476"@de ,
+                    "Plorantes de la tumba de Isabel de Borbón — atribuidos al taller Borman y a Renier van Thienen, c. 1475–1476"@es ,
+                    "Pleurants du tombeau d'Isabelle de Bourbon — attribués à l'atelier Borman et à Renier van Thienen, vers 1475–1476"@fr ;
+    solid-memo:backNote "Ten bronze mourning figures from her tomb in Antwerp."@en ,
+                        "Tio sörjande bronsfigurer från hennes grav i Antwerpen."@sv ,
+                        "안트베르펜에 있던 그녀의 묘를 장식한 청동 애도자상 10점."@ko ,
+                        "Zehn bronzene Trauerfiguren von ihrem Grabmal in Antwerpen."@de ,
+                        "Diez figuras dolientes de bronce de su tumba en Amberes."@es ,
+                        "Dix figures de deuil en bronze de son tombeau à Anvers."@fr .
+
+<#ak-rak-2007-1-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/WAxob/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A carved wooden muscular figure with a topknot and fierce scowl, bare chest, a billowing wrapped skirt, one arm raised, its paint worn and flaking"@en ,
+                                     "En snidad muskulös träfigur med hårknut och vilt bister min, bar överkropp, en fladdrande lindad kjol, ena armen höjd, färgen sliten och flagnande"@sv ,
+                                     "상투를 틀고 사납게 찌푸린 얼굴의 근육질 목조상, 드러난 가슴과 휘날리는 두른 치마, 한 팔을 들어 올렸으며 채색이 닳고 벗겨짐"@ko ,
+                                     "Eine geschnitzte muskulöse Holzfigur mit Haarknoten und grimmigem Blick, nacktem Oberkörper, wehendem gewickeltem Rock, einen Arm erhoben, die Bemalung abgenutzt und abblätternd"@de ,
+                                     "Una figura musculosa de madera tallada con moño alto y ceño feroz, torso desnudo, falda envolvente ondeante, un brazo alzado, la pintura gastada y desconchada"@es ,
+                                     "Une figure musclée en bois sculpté au chignon haut et à la mine féroce, torse nu, jupe drapée gonflée, un bras levé, la peinture usée et écaillée"@fr ;
+    solid-memo:back "Pair of temple guardians — Japan, c. 1300–1400"@en ,
+                    "Par tempelväktare — Japan, ca 1300–1400"@sv ,
+                    "인왕상 한 쌍 — 일본, 1300–1400년경"@ko ,
+                    "Paar Tempelwächter — Japan, um 1300–1400"@de ,
+                    "Pareja de guardianes del templo — Japón, c. 1300–1400"@es ,
+                    "Paire de gardiens de temple — Japon, vers 1300–1400"@fr .
+
+<#sk-a-5005>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/txKxF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young person in a white off-the-shoulder dress, face shaded by a very wide flat striped brim, holding up a small basket of leaves against the sky"@en ,
+                                     "En ung person i vit klänning som lämnar axlarna bara, ansiktet skuggat av ett mycket brett, platt randigt brätte, som håller upp en liten korg med blad mot himlen"@sv ,
+                                     "어깨가 드러난 흰 드레스를 입고 아주 넓고 납작한 줄무늬 챙에 얼굴이 그늘진 채, 하늘을 배경으로 잎이 담긴 작은 바구니를 들어 올린 젊은 사람"@ko ,
+                                     "Eine junge Person in weißem schulterfreiem Kleid, das Gesicht im Schatten einer sehr breiten flachen gestreiften Krempe, die ein Körbchen mit Blättern vor dem Himmel hochhält"@de ,
+                                     "Una persona joven con vestido blanco de hombros descubiertos, el rostro a la sombra de un ala muy ancha, plana y rayada, que alza una cestita de hojas contra el cielo"@es ,
+                                     "Une jeune personne en robe blanche aux épaules dénudées, le visage à l’ombre d’un très large bord plat rayé, levant une petite corbeille de feuilles sur fond de ciel"@fr ;
+    solid-memo:back "Woman in a Large Hat — Caesar van Everdingen, c. 1650"@en ,
+                    "Kvinna med stor hatt — Caesar van Everdingen, ca 1650"@sv ,
+                    "큰 모자를 쓴 여인 — 세자르 판 에버르딩언, 1650년경"@ko ,
+                    "Mädchen mit großem Hut — Caesar van Everdingen, um 1650"@de ,
+                    "Mujer con sombrero grande — Caesar van Everdingen, c. 1650"@es ,
+                    "Femme au grand chapeau — Caesar van Everdingen, vers 1650"@fr .
+
+<#ng-2010-37>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VrGYo/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A standing man with a mustache and long braid, a tall black cap, bare chest, a dark patterned cloth wrapped at the waist, red patterned trousers, holding a red cloth"@en ,
+                                     "En stående man med mustasch och lång fläta, hög svart mössa, bar överkropp, ett mörkt mönstrat tyg lindat om midjan, rödmönstrade byxor och en röd duk i handen"@sv ,
+                                     "콧수염과 긴 땋은 머리에 높은 검은 모자를 쓰고, 드러난 가슴에 짙은 무늬 천을 허리에 두르고 붉은 무늬 바지를 입은 채 붉은 천을 든 서 있는 남자"@ko ,
+                                     "Ein stehender Mann mit Schnurrbart und langem Zopf, hoher schwarzer Kappe, nacktem Oberkörper, einem dunklen gemusterten Tuch um die Hüfte, rot gemusterter Hose und einem roten Tuch in der Hand"@de ,
+                                     "Un hombre de pie con bigote y larga trenza, alto gorro negro, torso desnudo, una tela oscura estampada ceñida a la cintura, pantalón rojo estampado y un paño rojo en la mano"@es ,
+                                     "Un homme debout à moustache et longue tresse, haut bonnet noir, torse nu, un tissu sombre à motifs noué à la taille, pantalon rouge à motifs, tenant un tissu rouge"@fr ;
+    solid-memo:back "Javanese Court Officials — Java, c. 1820–1870"@en ,
+                    "Javanesiska hovtjänstemän — Java, ca 1820–1870"@sv ,
+                    "자와 궁정 관리들 — 자와, 1820–1870년경"@ko ,
+                    "Javanische Hofbeamte — Java, um 1820–1870"@de ,
+                    "Funcionarios de la corte javanesa — Java, c. 1820–1870"@es ,
+                    "Fonctionnaires de la cour javanaise — Java, vers 1820–1870"@fr ;
+    solid-memo:backNote "A series of five portraits of Javanese court officials."@en ,
+                        "En serie med fem porträtt av javanesiska hovtjänstemän."@sv ,
+                        "자와 궁정 관리 다섯 명의 초상 연작."@ko ,
+                        "Eine Serie von fünf Bildnissen javanischer Hofbeamter."@de ,
+                        "Una serie de cinco retratos de funcionarios de la corte javanesa."@es ,
+                        "Une série de cinq portraits de fonctionnaires de la cour javanaise."@fr .
+
+<#ng-2011-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/AJtuL/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A small single-engine biplane with a wooden propeller, a black round engine cowling, cream fabric wings with large black lettering and spoked wheels"@en ,
+                                     "Ett litet enmotorigt biplan med träpropeller, svart rund motorkåpa, krämvita tygvingar med stora svarta bokstäver och ekerhjul"@sv ,
+                                     "나무 프로펠러와 검고 둥근 엔진 덮개, 큰 검은 글자가 적힌 크림색 천 날개와 바퀴를 지닌 작은 단발 복엽기"@ko ,
+                                     "Ein kleiner einmotoriger Doppeldecker mit Holzpropeller, schwarzer runder Motorhaube, cremefarbenen Stoffflügeln mit großer schwarzer Beschriftung und Rädern"@de ,
+                                     "Un pequeño biplano monomotor con hélice de madera, capó negro redondo, alas de tela crema con grandes letras negras y ruedas"@es ,
+                                     "Un petit biplan monomoteur à hélice en bois, capot rond noir, ailes de toile crème portant de grandes lettres noires et roues"@fr ;
+    solid-memo:back "FK 23 Bantam — Frederick Koolhoven, 1918"@en ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@sv ,
+                    "FK 23 밴텀 — 프레데릭 콜호번, 1918년"@ko ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@de ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@es ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@fr .
+
+<#bk-1985-10>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/lnTHp/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A walnut case with two doors on a stand, carved with garlands of fruit, flowers and shell niches, raised on scrolling legs with carved heads"@en ,
+                                     "En valnötsmöbel med två dörrar på ett stativ, snidad med girlander av frukt, blommor och snäcknischer, på svängda ben med snidade huvuden"@sv ,
+                                     "받침대 위의 두 문짝 호두나무 가구, 과일·꽃 화환과 조개 모양 벽감이 조각되어 있고 조각된 얼굴이 달린 소용돌이 다리 위에 놓임"@ko ,
+                                     "Ein zweitüriger Nussbaumkasten auf einem Gestell, geschnitzt mit Girlanden aus Früchten, Blumen und Muschelnischen, auf geschwungenen Beinen mit geschnitzten Köpfen"@de ,
+                                     "Un mueble de nogal de dos puertas sobre un soporte, tallado con guirnaldas de frutas, flores y hornacinas de concha, sobre patas en voluta con cabezas talladas"@es ,
+                                     "Un meuble en noyer à deux portes sur un piétement, sculpté de guirlandes de fruits, de fleurs et de niches en coquille, sur des pieds à volutes ornés de têtes sculptées"@fr ;
+    solid-memo:back "Layette Cupboard — Amsterdam, c. 1660–1670"@en ,
+                    "Skåp för babyutstyrsel — Amsterdam, ca 1660–1670"@sv ,
+                    "배내옷 장 — 암스테르담, 1660–1670년경"@ko ,
+                    "Babywäscheschrank — Amsterdam, um 1660–1670"@de ,
+                    "Armario para canastilla — Ámsterdam, c. 1660–1670"@es ,
+                    "Armoire à layette — Amsterdam, vers 1660–1670"@fr .
+
+<#sk-a-5033>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ydvFQ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young man standing full-length in black with a wide-brimmed hat, a broad lace collar, large lace rosettes on his shoes, holding a glove"@en ,
+                                     "En ung man stående i helfigur i svart med bredbrättad hatt, bred spetskrage och stora spetsrosetter på skorna, med en handske i handen"@sv ,
+                                     "챙 넓은 모자와 넓은 레이스 깃, 신발의 큰 레이스 장미 장식을 한 검은 옷차림으로 장갑을 든 채 서 있는 젊은 남자의 전신"@ko ,
+                                     "Ein junger Mann in ganzer Figur stehend, in Schwarz mit breitkrempigem Hut, breitem Spitzenkragen und großen Spitzenrosetten an den Schuhen, einen Handschuh haltend"@de ,
+                                     "Un joven de cuerpo entero, de pie, vestido de negro con sombrero de ala ancha, amplio cuello de encaje y grandes rosetas de encaje en los zapatos, sosteniendo un guante"@es ,
+                                     "Un jeune homme debout en pied, vêtu de noir, chapeau à larges bords, large col de dentelle et grandes rosettes de dentelle aux chaussures, tenant un gant"@fr ;
+    solid-memo:back "Portrait of Marten Soolmans — Rembrandt, 1634"@en ,
+                    "Porträtt av Marten Soolmans — Rembrandt, 1634"@sv ,
+                    "마르턴 솔만스의 초상 — 렘브란트, 1634년"@ko ,
+                    "Porträt von Marten Soolmans — Rembrandt van Rijn, 1634"@de ,
+                    "Retrato de Marten Soolmans — Rembrandt, 1634"@es ,
+                    "Portrait de Marten Soolmans — Rembrandt, 1634"@fr .
+
+<#bk-1975-81>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/LQvPg/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A large two-tier ebony piece with rippled moldings, twisted columns inlaid with mother-of-pearl vines, and flower panels of pearl shell on the doors"@en ,
+                                     "En stor tvåvånings ebenholtsmöbel med vågiga lister, vridna kolonner med inlagda pärlemorrankor och blompaneler i pärlemor på dörrarna"@sv ,
+                                     "물결무늬 쇠시리와 자개 덩굴을 상감한 꼬인 기둥, 문짝에 자개 꽃 장식판이 있는 큰 2단 흑단 가구"@ko ,
+                                     "Ein großes zweigeschossiges Ebenholzmöbel mit Wellenleisten, gedrehten Säulen mit eingelegten Perlmuttranken und Blumenfeldern aus Perlmutt an den Türen"@de ,
+                                     "Un gran mueble de ébano en dos cuerpos con molduras onduladas, columnas salomónicas con zarcillos de nácar incrustados y paneles de flores de nácar en las puertas"@es ,
+                                     "Un grand meuble en ébène à deux corps aux moulures ondées, colonnes torses incrustées de rinceaux de nacre et panneaux de fleurs en nacre sur les portes"@fr ;
+    solid-memo:back "Cupboard — Herman Doomer, c. 1635–1645"@en ,
+                    "Skåp — Herman Doomer, ca 1635–1645"@sv ,
+                    "수납장 — 헤르만 도머르, 1635–1645년경"@ko ,
+                    "Schrank — Herman Doomer, um 1635–1645"@de ,
+                    "Armario — Herman Doomer, c. 1635–1645"@es ,
+                    "Armoire — Herman Doomer, vers 1635–1645"@fr .
+
+<#sk-c-1768>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/WjxgV/full/!1280,1280/0/default.jpg> ;
+    solid-memo:frontImageDescription "A young woman standing full-length in black with a wide lace collar, a dark veil, pearls and a gold chain, holding a black feather fan"@en ,
+                                     "En ung kvinna stående i helfigur i svart med bred spetskrage, mörk slöja, pärlor och guldkedja, med en svart fjäderfläkt i handen"@sv ,
+                                     "넓은 레이스 깃과 검은 베일, 진주와 금줄을 두른 검은 옷차림으로 검은 깃털 부채를 든 채 서 있는 젊은 여인의 전신"@ko ,
+                                     "Eine junge Frau in ganzer Figur stehend, in Schwarz mit breitem Spitzenkragen, dunklem Schleier, Perlen und Goldkette, einen schwarzen Federfächer haltend"@de ,
+                                     "Una joven de cuerpo entero, de pie, vestida de negro con amplio cuello de encaje, velo oscuro, perlas y cadena de oro, sosteniendo un abanico negro de plumas"@es ,
+                                     "Une jeune femme debout en pied, vêtue de noir, large col de dentelle, voile sombre, perles et chaîne d’or, tenant un éventail de plumes noires"@fr ;
+    solid-memo:back "Portrait of Oopjen Coppit — Rembrandt, 1634"@en ,
+                    "Porträtt av Oopjen Coppit — Rembrandt, 1634"@sv ,
+                    "오프연 코핏의 초상 — 렘브란트, 1634년"@ko ,
+                    "Porträt von Oopjen Coppit — Rembrandt van Rijn, 1634"@de ,
+                    "Retrato de Oopjen Coppit — Rembrandt, 1634"@es ,
+                    "Portrait d'Oopjen Coppit — Rembrandt, 1634"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

@@ -68,7 +68,7 @@ import {
  * index and the releases, each deck's versions numbered 1, 2, …), each
  * release's metadata against its path, Solid Memo's shapes, DCAT-AP and
  * SKOS with the reference data, each deck's newest version in every
- * language the app speaks (languageProblems), a course's outline (courseProblems), its
+ * language the app speaks and its pictures described (languageProblems), a course's outline (courseProblems), its
  * text written in Markdown (markdownProblems), every literal in Unicode
  * NFC (normalizationProblems), what each card is about on a namespace
  * the library knows (aboutProblems), and that no version drops
@@ -585,9 +585,11 @@ export function contactProblems(release: DeckRelease): string[] {
 /**
  * What a deck's newest version lacks of the languages the library asks
  * (LIBRARY_LANGUAGES in @solid-memo/domain/release/curationRules): a
- * title, a description and keywords in every language the app speaks.
- * Only the newest version is held to it: a language the app gains is
- * added by a new version, and the versions before it stay frozen.
+ * title, a description and keywords in every language the app speaks,
+ * and a description of each picture on a card in English and in every
+ * language the card's text is in. Only the newest version is held to
+ * it: a language the app gains is added by a new version, and the
+ * versions before it stay frozen.
  */
 export function languageProblems(release: DeckRelease): string[] {
   return messagesOf(

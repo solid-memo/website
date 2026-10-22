@@ -3324,6 +3324,8 @@
       "backLabel": "Etiqueta del reverso",
       "frontNote": "Nota del anverso",
       "backNote": "Nota del reverso",
+      "frontImageDescription": "Descripción de la imagen del anverso",
+      "backImageDescription": "Descripción de la imagen del reverso",
       "distractor": "Opciones incorrectas",
       "distractorText": "Opción incorrecta",
       "distractorNote": "Por qué es incorrecta",
@@ -3377,6 +3379,7 @@
         "other": "{count} partes en {language}"
       },
       "missingLanguage": "{field}: no hay texto en {language}.",
+      "missingImageDescription": "{field}: no hay descripción en {language}. Sin ella, un lector de pantalla solo dice que hay una imagen.",
       "missingTheme": "Temas: falta {theme}.",
       "missingContact": "Contacto: no se indica el de la biblioteca, {contact}. Una publicación para la biblioteca lo indica, no un correo electrónico.",
       "emailNamed": "Indica un correo electrónico: una publicación para la biblioteca no indica el correo de nadie, solo el contacto de la biblioteca.",
