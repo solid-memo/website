@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-22T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -5802,10 +5802,11 @@
                  "branches"@fr ,
                  "commits"@fr ;
     dcat:first <https://solid-memo.com/decks/git-commands/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/git-commands/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/git-commands/v1.ttl> ,
-                    <https://solid-memo.com/decks/git-commands/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/git-commands/v2.ttl> .
+                    <https://solid-memo.com/decks/git-commands/v2.ttl> ,
+                    <https://solid-memo.com/decks/git-commands/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/git-commands/v3.ttl> .
 
 <https://solid-memo.com/decks/git-commands/v1.ttl>
     a dcat:Dataset ;
@@ -5818,6 +5819,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/git-commands/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Git commands"@en ,
+                  "Git-kommandon"@sv ,
+                  "Git 명령어"@ko ,
+                  "Git-Befehle"@de ,
+                  "Comandos de Git"@es ,
+                  "Commandes Git"@fr ;
+    dcterms:description "56 everyday Git commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <branch> or <file>. Uses the current commands Git recommends (git switch and git restore rather than git checkout, git config set), with older equivalents in notes. Every command was run with Git 2.53.0 in a test repository and checked against the official Git reference manual."@en ,
+                        "56 vardagliga Git-kommandon: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <branch> eller <file>. Använder de aktuella kommandon som Git rekommenderar (git switch och git restore i stället för git checkout, git config set), med äldre motsvarigheter i anteckningar. Varje kommando har körts med Git 2.53.0 i ett testarkiv och kontrollerats mot Gits officiella referenshandbok."@sv ,
+                        "일상적으로 쓰는 Git 명령어 56개: 앞면은 할 일을 영어와 스웨덴어의 쉬운 말로 설명하고, 뒷면은 그 일을 하는 명령어이며 <branch>나 <file> 같은 자리 표시자가 들어간다. Git이 권장하는 현재 명령어(git checkout 대신 git switch와 git restore, git config set)를 쓰고, 예전 명령어는 메모에 있다. 모든 명령어는 테스트 저장소에서 Git 2.53.0으로 실행해 보고 공식 Git 레퍼런스 매뉴얼로 확인했다."@ko ,
+                        "56 alltägliche Git-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <branch> oder <file>. Verwendet die aktuellen Befehle, die Git empfiehlt (git switch und git restore statt git checkout, git config set), mit älteren Entsprechungen in Anmerkungen. Jeder Befehl wurde mit Git 2.53.0 in einem Test-Repository ausgeführt und mit dem offiziellen Git-Referenzhandbuch abgeglichen."@de ,
+                        "56 comandos de Git de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, y el reverso es el comando que la realiza, con marcadores de posición como <branch> o <file>. Usa los comandos actuales que recomienda Git (git switch y git restore en lugar de git checkout, git config set), con los equivalentes antiguos en notas. Cada comando se ejecutó con Git 2.53.0 en un repositorio de prueba y se comprobó con el manual de referencia oficial de Git."@es ,
+                        "56 commandes Git du quotidien : le recto décrit une tâche avec des mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des espaces réservés comme <branch> ou <file>. Utilise les commandes actuelles que Git recommande (git switch et git restore plutôt que git checkout, git config set), avec les anciens équivalents dans des notes. Chaque commande a été exécutée avec Git 2.53.0 dans un dépôt de test et vérifiée sur le manuel de référence officiel de Git."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/git-commands/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Git commands"@en ,
@@ -5826,7 +5845,7 @@
                   "Git-Befehle"@de ,
                   "Comandos de Git"@es ,
                   "Commandes Git"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/git-commands/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/git-commands/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "56 everyday Git commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <branch> or <file>. Uses the current commands Git recommends (git switch and git restore rather than git checkout, git config set), with older equivalents in notes. Every command was run with Git 2.53.0 in a test repository and checked against the official Git reference manual."@en ,
                         "56 vardagliga Git-kommandon: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <branch> eller <file>. Använder de aktuella kommandon som Git rekommenderar (git switch och git restore i stället för git checkout, git config set), med äldre motsvarigheter i anteckningar. Varje kommando har körts med Git 2.53.0 i ett testarkiv och kontrollerats mot Gits officiella referenshandbok."@sv ,
@@ -5834,8 +5853,8 @@
                         "56 alltägliche Git-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <branch> oder <file>. Verwendet die aktuellen Befehle, die Git empfiehlt (git switch und git restore statt git checkout, git config set), mit älteren Entsprechungen in Anmerkungen. Jeder Befehl wurde mit Git 2.53.0 in einem Test-Repository ausgeführt und mit dem offiziellen Git-Referenzhandbuch abgeglichen."@de ,
                         "56 comandos de Git de uso diario: el anverso describe una tarea con palabras sencillas en inglés y en sueco, y el reverso es el comando que la realiza, con marcadores de posición como <branch> o <file>. Usa los comandos actuales que recomienda Git (git switch y git restore en lugar de git checkout, git config set), con los equivalentes antiguos en notas. Cada comando se ejecutó con Git 2.53.0 en un repositorio de prueba y se comprobó con el manual de referencia oficial de Git."@es ,
                         "56 commandes Git du quotidien : le recto décrit une tâche avec des mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des espaces réservés comme <branch> ou <file>. Utilise les commandes actuelles que Git recommande (git switch et git restore plutôt que git checkout, git config set), avec les anciens équivalents dans des notes. Chaque commande a été exécutée avec Git 2.53.0 dans un dépôt de test et vérifiée sur le manuel de référence officiel de Git."@fr ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/git-commands/v2.ttl#test-runs> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/git-commands/v2.ttl#compilation> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/git-commands/v3.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/git-commands/v3.ttl#compilation> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -5873,29 +5892,34 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/git-commands/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/git-commands/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Commands, options and placeholders are written as Markdown code, so they show in a code font and browser translation leaves them alone (card format 5); no card's wording changed. The release names the library's contact instead of an email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#git-commands> ;
     dcat:isVersionOf <#git-commands> ;
-    dcat:distribution <https://solid-memo.com/decks/git-commands/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/git-commands/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/git-commands/v3.ttl#turtle> ;
     solid-memo:cardCount 56 .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/git-commands/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/git-commands/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#compilation>
+<https://solid-memo.com/decks/git-commands/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#test-runs>
+<https://solid-memo.com/decks/git-commands/v3.ttl#test-runs>
     dcterms:title "Test run of every command with Git 2.53.0 in a throwaway repository" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
@@ -5915,10 +5939,10 @@
     dcterms:creator "Peter Krefting and the Git project" ;
     dcterms:license <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> .
 
-<https://solid-memo.com/decks/git-commands/v2.ttl#turtle>
+<https://solid-memo.com/decks/git-commands/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/git-commands/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/git-commands/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/git-commands/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/git-commands/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
