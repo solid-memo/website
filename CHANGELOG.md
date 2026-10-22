@@ -21,6 +21,20 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [5.4.0](https://github.com/solid-memo/website/compare/v5.3.2...v5.4.0) (2026-10-22)
+
+### Features
+
+* **decks:** let a library card name what it is about ([8d9280b](https://github.com/solid-memo/website/commit/8d9280b44cd3fe6c17fd216d3acdcab98dd8402c)), closes [#236](https://github.com/solid-memo/website/issues/236)
+* **decks:** link the taxonomy deck's cards to the concepts they are about ([767878d](https://github.com/solid-memo/website/commit/767878dc7f81fd948219788286dba49eaaf84240)), closes [#236](https://github.com/solid-memo/website/issues/236)
+* **decks:** name the taxonomy concepts each card is about ([88d348e](https://github.com/solid-memo/website/commit/88d348edab5d57b7adf92c0078971c80f3cf1765)), closes [#236](https://github.com/solid-memo/website/issues/236)
+* **decks:** write Git commands as code in Markdown ([3f9810c](https://github.com/solid-memo/website/commit/3f9810c1a7d9c92fdac4a402fdca7646d15fcd02)), closes [#235](https://github.com/solid-memo/website/issues/235)
+* **decks:** write HTML elements and attributes as code in Markdown ([d4ff6d0](https://github.com/solid-memo/website/commit/d4ff6d065cecc5ac4ba6b0b43e4c596fe8e2548b)), closes [#235](https://github.com/solid-memo/website/issues/235)
+* **decks:** write Python names and values as code in Markdown ([1d05741](https://github.com/solid-memo/website/commit/1d05741bf1dac27bd2d65f308468a2ff5f44acd8)), closes [#235](https://github.com/solid-memo/website/issues/235)
+* **decks:** write shell commands as code in Markdown ([b626463](https://github.com/solid-memo/website/commit/b62646340ac15354a239bea42da1d5a2804ddc60)), closes [#235](https://github.com/solid-memo/website/issues/235)
+* **decks:** write SQL statements and names as code in Markdown ([4d75a95](https://github.com/solid-memo/website/commit/4d75a95da32f4160b31f2c6302977444caae5b7d)), closes [#235](https://github.com/solid-memo/website/issues/235)
+* **decks:** write Vim keys and commands as code in Markdown ([13bc0d1](https://github.com/solid-memo/website/commit/13bc0d111d47cc72df8f7218c09f39065eb76285)), closes [#235](https://github.com/solid-memo/website/issues/235)
+
 ## [5.3.2](https://github.com/solid-memo/website/compare/v5.3.1...v5.3.2) (2026-10-22)
 
 ### Bug Fixes
