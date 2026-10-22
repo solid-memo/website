@@ -21,6 +21,9 @@ The fake taxonomy:
   - Dataskyddsombud is a new occupation in version 4;
   - Kock never changes, so it is never a card.
 
+Each card names the concepts it is about (dcterms:subject), and Aktiemäklare's
+concept the one replacing it (dcterms:isReplacedBy).
+
 Run:  npm run test:crosscheck  (or python3 -m unittest discover -s scripts)
 """
 
@@ -364,11 +367,75 @@ class NextVersion(Deck):
         self.assertIn("v2.ttl: its 6 cards come out byte for byte the same from taxonomy versions "
                       "1 to 4", err)
 
+    def test_names_the_concepts_each_card_is_about(self) -> None:
+        about = {r.front: r.subjects for r in self.v2.cards.values()}
+        self.assertEqual(about, {
+            "Aktiemäklare": [f"{td.CONCEPT}aktie"],
+            "Dataskyddsombud": [f"{td.CONCEPT}data"],
+            "Finansmäklare": [f"{td.CONCEPT}finans"],
+            "Hamnarbetare": [f"{td.CONCEPT}hamn"],  # retired, as v1 had it
+            "Maskinskötare": [f"{td.CONCEPT}motor"],
+            "Motorman": [f"{td.CONCEPT}motor"],
+        })
+        self.assertIn(f"    dcterms:subject <{td.CONCEPT}aktie> ;\n",
+                      self.block(f"<#{td.card_id('Aktiemäklare')}>"))
+
+    def test_names_what_replaces_a_concept_on_the_concept_and_keeps_the_names_on_the_back(self) -> None:
+        self.assertEqual(self.block(f"<{td.CONCEPT}aktie>"),
+                         f"<{td.CONCEPT}aktie>\n    dcterms:isReplacedBy <{td.CONCEPT}finans> .")
+        self.assertEqual(self.text.count("dcterms:isReplacedBy"), 1)
+        self.assertEqual(self.v2.cards[td.card_id("Aktiemäklare")].back.text, "Finansmäklare")
+        self.assertLess(self.text.index(f"\n<{td.CONCEPT}aktie>\n"), self.text.index(td.DISTRIBUTION))
+
+
+class SameVersions(Deck):
+    """A version made from the taxonomy versions the previous one covers, by a script that writes
+    more of them: here v1 as a script that named no concepts made it."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        text = self.v1.read_text(encoding="utf-8")
+        start = text.index("\n<#", text.index("<#taxonomy-version-3>"))
+        cards, end = text[start:text.index(td.DISTRIBUTION)], text.index(td.DISTRIBUTION)
+        cards = "".join(line for line in cards.splitlines(keepends=True) if "dcterms:subject" not in line)
+        cards = cards[:cards.index(f"\n\n<{td.CONCEPT}")] + "\n"
+        self.v1.write_text(text[:start] + cards + text[end:], encoding="utf-8")
+        self.assertNotIn(td.CONCEPT, self.v1.read_text(encoding="utf-8"))
+        self.notes_file = self.root / "notes.txt"
+        self.run_script("--to", "3", "--issued", "2026-11-02", "--allow-uncommitted",
+                        "--cache-dir", str(self.cache), "--notes-file", str(self.notes_file))
+        self.v2 = td.previous_version(self.deck)
+
+    def test_names_the_concepts_and_keeps_every_card(self) -> None:
+        self.assertEqual(self.v2.taxonomy_versions, [1, 2, 3])
+        self.assertEqual(sorted(self.v2.cards), sorted(td.previous_version(self.deck).cards))
+        self.assertTrue(all(r.subjects and not r.retired for r in self.v2.cards.values()))
+
+    def test_says_so_in_its_notes(self) -> None:
+        notes = self.notes_file.read_text(encoding="utf-8")
+        self.assertTrue(notes.startswith(
+            "Makes the deck's version 1, which covered taxonomy versions 1 to 3, again from the same "
+            "versions: 0 new names and 0 changed names; 0 backs updated; 5 cards naming other taxonomy "
+            "concepts than before as what they are about (dcterms:subject). The whole deck now has 5 cards "
+            "in use:"), notes)
+
+    def test_cards_come_out_the_same_again(self) -> None:
+        _, err = self.run_script("--verify", "--cache-dir", str(self.cache))
+        self.assertIn("v2.ttl: its 5 cards come out byte for byte the same from taxonomy versions "
+                      "1 to 3", err)
+
 
 class Refusals(Deck):
-    def test_refuses_a_version_the_deck_already_covers(self) -> None:
+    def test_refuses_a_version_whose_cards_come_out_the_same(self) -> None:
         with self.assertRaises(SystemExit) as stop:
             self.run_script("--to", "3", "--allow-uncommitted", "--cache-dir", str(self.cache))
+        self.assertEqual(stop.exception.code, "v1.ttl already covers taxonomy version 3, and its cards "
+                         "would come out the same: there is nothing to add")
+        self.assertFalse((self.deck / "v2.ttl").exists())
+
+    def test_refuses_a_version_older_than_the_deck_covers(self) -> None:
+        with self.assertRaises(SystemExit) as stop:
+            self.run_script("--to", "2", "--allow-uncommitted", "--cache-dir", str(self.cache))
         self.assertEqual(stop.exception.code,
                          "v1.ttl already covers taxonomy version 3: there is nothing to add")
         self.assertFalse((self.deck / "v2.ttl").exists())

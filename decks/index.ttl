@@ -16719,10 +16719,11 @@
                  "Suède"@fr ,
                  "Arbetsförmedlingen"@fr ;
     dcat:first <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v1.ttl> ,
-                    <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> .
+                    <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ,
+                    <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl> .
 
 <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v1.ttl>
     a dcat:Dataset ;
@@ -16735,6 +16736,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Swedish labour market taxonomy: new and changed occupation names"@en ,
+                  "Arbetsmarknadstaxonomin: nya och ändrade yrkesbenämningar"@sv ,
+                  "스웨덴 노동시장 분류 체계: 새 직업명과 바뀐 직업명"@ko ,
+                  "Schwedische Arbeitsmarkttaxonomie: neue und geänderte Berufsbezeichnungen"@de ,
+                  "Taxonomía del mercado laboral sueco: nombres de ocupaciones nuevos y modificados"@es ,
+                  "Taxonomie suédoise du marché du travail : intitulés de métiers nouveaux et modifiés"@fr ;
+    dcterms:description "Occupation names that are new or have changed in the labour market taxonomy of the Swedish Public Employment Service (Arbetsförmedlingen) since 2021-03-05. The front shows a name, the back whether it is still in use and what it is today: its current name, its replacement or that it is new, with the version and date of the change. One release per taxonomy version."@en ,
+                        "Yrkesbenämningar som är nya eller har ändrats i Arbetsförmedlingens arbetsmarknadstaxonomi sedan 2021-03-05. Framsidan visar en benämning, baksidan om den fortfarande används och vad den är i dag: dess nuvarande namn, vad som ersätter den eller att den är ny, med version och datum för ändringen. En utgåva per taxonomiversion."@sv ,
+                        "스웨덴 공공고용서비스(Arbetsförmedlingen)의 노동시장 분류 체계에서 2021-03-05 이후 새로 생기거나 바뀐 직업명. 앞면에는 직업명이, 뒷면에는 그 이름이 아직 쓰이는지와 지금은 무엇인지(현재 이름, 그 이름을 대체한 것, 또는 새 이름이라는 사실)가 변경된 버전과 날짜와 함께 나온다. 분류 체계 버전마다 릴리스가 하나씩 있다."@ko ,
+                        "Berufsbezeichnungen, die in der Arbeitsmarkttaxonomie der schwedischen Arbeitsverwaltung (Arbetsförmedlingen) seit dem 2021-03-05 neu sind oder sich geändert haben. Die Vorderseite zeigt eine Bezeichnung, die Rückseite, ob sie noch verwendet wird und was sie heute ist: ihr aktueller Name, ihr Ersatz oder dass sie neu ist, mit Version und Datum der Änderung. Eine Ausgabe pro Taxonomieversion."@de ,
+                        "Nombres de ocupaciones nuevos o modificados en la taxonomía del mercado laboral del Servicio Público de Empleo de Suecia (Arbetsförmedlingen) desde el 2021-03-05. El anverso muestra un nombre; el reverso, si sigue en uso y qué es hoy: su nombre actual, lo que lo sustituye o que es nuevo, con la versión y la fecha del cambio. Una versión del mazo por cada versión de la taxonomía."@es ,
+                        "Les intitulés de métiers nouveaux ou modifiés dans la taxonomie du marché du travail du service public de l’emploi suédois (Arbetsförmedlingen) depuis le 2021-03-05. Le recto montre un intitulé ; le verso indique s’il est toujours utilisé et ce qu’il est aujourd’hui : son intitulé actuel, ce qui le remplace ou le fait qu’il est nouveau, avec la version et la date du changement. Une version du paquet par version de la taxonomie."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Swedish labour market taxonomy: new and changed occupation names"@en ,
@@ -16743,7 +16762,7 @@
                   "Schwedische Arbeitsmarkttaxonomie: neue und geänderte Berufsbezeichnungen"@de ,
                   "Taxonomía del mercado laboral sueco: nombres de ocupaciones nuevos y modificados"@es ,
                   "Taxonomie suédoise du marché du travail : intitulés de métiers nouveaux et modifiés"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "Occupation names that are new or have changed in the labour market taxonomy of the Swedish Public Employment Service (Arbetsförmedlingen) since 2021-03-05. The front shows a name, the back whether it is still in use and what it is today: its current name, its replacement or that it is new, with the version and date of the change. One release per taxonomy version."@en ,
                         "Yrkesbenämningar som är nya eller har ändrats i Arbetsförmedlingens arbetsmarknadstaxonomi sedan 2021-03-05. Framsidan visar en benämning, baksidan om den fortfarande används och vad den är i dag: dess nuvarande namn, vad som ersätter den eller att den är ny, med version och datum för ändringen. En utgåva per taxonomiversion."@sv ,
@@ -16752,7 +16771,7 @@
                         "Nombres de ocupaciones nuevos o modificados en la taxonomía del mercado laboral del Servicio Público de Empleo de Suecia (Arbetsförmedlingen) desde el 2021-03-05. El anverso muestra un nombre; el reverso, si sigue en uso y qué es hoy: su nombre actual, lo que lo sustituye o que es nuevo, con la versión y la fecha del cambio. Una versión del mazo por cada versión de la taxonomía."@es ,
                         "Les intitulés de métiers nouveaux ou modifiés dans la taxonomie du marché du travail du service public de l’emploi suédois (Arbetsförmedlingen) depuis le 2021-03-05. Le recto montre un intitulé ; le verso indique s’il est toujours utilisé et ce qu’il est aujourd’hui : son intitulé actuel, ce qui le remplace ou le fait qu’il est nouveau, avec la version et la date du changement. Une version du paquet par version de la taxonomie."@fr ;
     prov:wasDerivedFrom <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#generation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#generation> ;
     dcterms:modified "2026-08-12T12:30:58.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:labour-market ;
@@ -16790,38 +16809,43 @@
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ;
+    dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Makes the deck's version 2, which covered taxonomy versions 1 to 31, again from the same versions: 0 new names and 0 changed names; 0 backs updated; 3010 cards naming other taxonomy concepts than before as what they are about (dcterms:subject). The whole deck now has 3010 cards in use: 803 new names and 2207 changed names (1876 replaced, 89 renamed, 79 with a synonym added, 163 with a synonym removed)." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#swedish-labour-market-taxonomy-occupation-names> ;
     dcat:isVersionOf <#swedish-labour-market-taxonomy-occupation-names> ;
-    dcat:distribution <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#turtle> ;
     solid-memo:cardCount 3010 .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
     a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#generation>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#generation>
     a prov:Activity .
 
-<https://github.com/antwika/solid-memo/blob/1da3bb49e19d2eb001098356ac74b50f3638d56a/packages/deck-library/scripts/generate_deck_of_swedish_labour_market_taxonomy_occupation_names.py>
+<https://github.com/solid-memo/website/blob/88d348edab5d57b7adf92c0078971c80f3cf1765/scripts/taxonomy_deck.py>
     a prov:SoftwareAgent ;
-    dcterms:title "generate_deck_of_swedish_labour_market_taxonomy_occupation_names.py" ;
-    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "265be80e9c380a454c2157330232f96833b54b79284de27e5d8254778de17eb0"^^xsd:hexBinary ] .
+    dcterms:title "taxonomy_deck.py" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "66b64dd961bb41f9f729cc2aa3633919a9b4f602b3e11b8bcfc51f46b15582fb"^^xsd:hexBinary ] .
 
 <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi>
     dcterms:title "Arbetsmarknadstaxonomi" ;
     dcterms:creator "Arbetsförmedlingen" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-1>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-1>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 1: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16830,7 +16854,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%221%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "2bee827528ad168d77421cda24de5afacd0e44b8cc8e2f6c9c81388444431e8b"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-2>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-2>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 2: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16839,7 +16863,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%222%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "2d39a70529cb675fe7620b44f07d4a6899e77ede1082a5a0f1d162c37a13d9e2"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-3>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-3>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 3: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16848,7 +16872,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%223%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "751486f1ec6630bffef73341f4e1a9cb4d423e2c905f13a8bb457f2de67401ad"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-4>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-4>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 4: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16857,7 +16881,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%224%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "f90815b629bcf076dc7a716bc3da0a0e28e263296fa2b45bf8c7d4daf5c6cd90"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-5>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-5>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 5: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16866,7 +16890,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%225%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "641c0c537c38328caab51ce232ae7a97a8b3b509dc29c17207a78ff48cd456e0"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-6>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-6>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 6: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16875,7 +16899,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%226%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "7b1fd835411f962892a772f52f7c895218e390aacae4e97530c3d44ffa578299"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-7>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-7>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 7: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16884,7 +16908,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%227%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "7b1fd835411f962892a772f52f7c895218e390aacae4e97530c3d44ffa578299"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-8>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-8>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 8: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16893,7 +16917,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%228%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "592521817455c0c2195bcd42fce25a7f82b54c0691754b664bd318ebfb09a423"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-9>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-9>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 9: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16902,7 +16926,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%229%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "592521817455c0c2195bcd42fce25a7f82b54c0691754b664bd318ebfb09a423"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-10>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-10>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 10: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16911,7 +16935,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2210%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "5cad4888ce076e06fbc97d050743a4f1e8126069c8dadae72578da1570829d53"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-11>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-11>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 11: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16920,7 +16944,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2211%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "c542d2c6b387f32e8254ef42282051aadfb19a6bf17d0322cf32739ab17f547d"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-12>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-12>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 12: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16929,7 +16953,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2212%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "1f3b57bc8d2a31055dccc0f410854af58a9b58090b04832c892ffcf470ed5f8e"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-13>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-13>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 13: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16938,7 +16962,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2213%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "1f3b57bc8d2a31055dccc0f410854af58a9b58090b04832c892ffcf470ed5f8e"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-14>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-14>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 14: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16947,7 +16971,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2214%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "dbc35ddfec775cb9b1cc31bc2b22cffa38a0bbd0116f4d0a2f812382abe76881"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-15>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-15>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 15: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16956,7 +16980,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2215%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "2e1298683da26bd65524ce87dbe390169d3813010649ee29ce268de9e47f99ea"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-16>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-16>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 16: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16965,7 +16989,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2216%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "bc9f118d3b3a4ca1b15e0ac5bccf753444dbfdc41fcbc7afc5114d6957b885a2"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-17>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-17>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 17: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16974,7 +16998,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2217%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "42b1f29f64c3a2d12f55c1f0284224f0b961afdaf84db49349e8a6d39e09241c"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-18>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-18>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 18: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16983,7 +17007,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2218%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "49ef23f8821e9e3095f22aff64a3da35e7da8072a2f868e0981f90dfb78fe810"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-19>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-19>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 19: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -16992,7 +17016,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2219%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "7fe2aae461b996f42eaf3f4192e807e3daea127238f68dc69a5184615f363456"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-20>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-20>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 20: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17001,7 +17025,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2220%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "314e09a7acb3a9931338acbbb37baa7a55f83fc73012020dd87a33f6a56e53c0"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-21>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-21>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 21: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17010,7 +17034,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2221%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "1eef158517e25b8a82d982291c8e146a6e79ba6564ca85713fc330ea1b949957"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-22>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-22>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 22: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17019,7 +17043,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2222%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "58bf5937acfa743589fcad28b06ae8a2e51b937383b3c39399e0f776910d87a4"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-23>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-23>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 23: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17028,7 +17052,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2223%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "abc9278cf30e5d11685314a9ff9940b519b866cbba8b5f1fe998856bb45e35c8"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-24>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-24>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 24: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17037,7 +17061,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2224%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d79fce4db1a1cbbd0ab88904f7ab326141d92a8d3af181271603de2871d17f1"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-25>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-25>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 25: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17046,7 +17070,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2225%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "36afcd8ffffac6092eb074602ff3326eb146b156dce416701a0fd5043e5ff56c"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-26>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-26>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 26: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17055,7 +17079,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2226%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "33b5b9f27eba816e8d013099faf3a621e08f7014548a5fa11535c2c03ab78378"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-27>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-27>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 27: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17064,7 +17088,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2227%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "b6c4d995ba04928ffb47614081f9ee13077b495aa86db799b873d3ccc47ceae3"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-28>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-28>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 28: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17073,7 +17097,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2228%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "66c2719242ed13e7db715884d8bcf2af043b4ddff128e40f9edaad43081f56d4"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-29>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-29>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 29: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17082,7 +17106,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2229%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "e359394030179ed800162c5144dc5a91b6230e02d75d5ac3ad8372f66184eec6"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-30>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-30>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 30: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17091,7 +17115,7 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2230%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "2bdc82285b3c6271ad7c70e1e07fd866b0f240b840f4f7fe48f5997f2a0e0085"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#taxonomy-version-31>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#taxonomy-version-31>
     a prov:Entity ;
     dcterms:title "Arbetsmarknadstaxonomi version 31: occupation-name concepts, deprecated ones included" ;
     dcterms:isVersionOf <https://taxonomy.api.jobtechdev.se/v1/taxonomy/#Taxonomi> ;
@@ -17100,10 +17124,10 @@
     <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://taxonomy.api.jobtechdev.se/v1/taxonomy/graphql?query=%7B+concepts%28type%3A+%22occupation-name%22%2C+version%3A+%2231%22%2C+include_deprecated%3A+true%29+%7B+id+preferred_label+deprecated+replaced_by+%7B+id+preferred_label+%7D+%7D+%7D> ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "a60535912225edcda3c734e258cd43e3c7fd885087af194c7f20d61f87435c67"^^xsd:hexBinary ] .
 
-<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#turtle>
+<https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
