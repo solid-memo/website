@@ -378,7 +378,7 @@
     dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
     dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
     dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "The review question on fetching a WebID with a hash is asked so that it has one answer when studied flip-and-grade, without its options; one wrong option is retired and replaced, and every chapter, step and card keeps its id." ;
+    adms:versionNotes "10 more questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
     dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
     dcat:inSeries <https://solid-memo.com/decks/index.ttl#solid-fundamentals> ;
     dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#solid-fundamentals> ;
@@ -740,9 +740,9 @@
 <#review-8>
     a prov:Activity ;
     prov:endedAtTime "2026-10-22T00:00:00Z"^^xsd:dateTime ;
-    rdfs:label "Version 5: one more question that works as a flip card (AI)"@en ;
-    rdfs:comment "Scope: the review question on fetching a WebID with a hash, reported in the library's issue tracker as making sense only with its options in view; rewritten by an AI agent so that its front alone asks for one answer, its options a balanced two-by-two of the path requested and who picks out the triples; the release compared with version 4 and checked by the library checker; not a human review."@en ,
-                 "Outcome: one question is asked anew, its back reworded to answer it with its meaning kept; one wrong option that no longer fitted is retired and one new one added. Every chapter, step and card keeps its id."@en .
+    rdfs:label "Version 5: more questions that work as flip cards too (AI)"@en ;
+    rdfs:comment "Scope: the review question on fetching a WebID with a hash, reported in the library's issue tracker as making sense only with its options in view, and then every question of the course read again by AI agents as it is later studied flip-and-grade, its front alone with no options, for questions whose answer is one of several valid ones, that make sense only with their options or that do not ask for what the back answers; each finding put to three more AI agents, and kept when two upheld it. The questions upheld were rewritten by an AI agent and each revision checked by three others, for recall from the front alone, for the multiple choice (one correct option; wrong options plausible, of the same form and length and wrong for the new question) and for its facts against the step's theory, and rewritten until all three passed; the release compared with version 4 and checked by the library checker; not a human review."@en ,
+                 "Outcome: of 466 questions, 10 are asked anew (7 with a back reworded to answer the new question, its meaning kept); 14 wrong options that no longer fitted are retired and 14 new ones added, and 10 kept ones are reworded to the new question with the same wrong claim. Every chapter, step and card keeps its id."@en .
 
 <http://xmlns.com/foaf/spec/>
     dcterms:title "FOAF Vocabulary Specification 0.99" ;
@@ -2340,33 +2340,42 @@ Solid was not the first attempt. The 2016 paper cites Diaspora, Musubi and WebBo
     a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
-    solid-memo:front "Which idea did Tim Berners-Lee's 2009 Design Issues note \"Socially Aware Cloud Storage\" propose, foreshadowing Solid?"@en ;
-    solid-memo:back "Keep users' data in storage that is separate from the apps"@en ;
-    solid-memo:backNote "The note proposed separating apps from storage, identifying people with URLs and controlling who may access what, which became Solid's core idea."@en ;
+    solid-memo:front "Tim Berners-Lee's 2009 Design Issues note \"Socially Aware Cloud Storage\" foreshadowed Solid. Where did it propose keeping users' data, relative to the apps that use it?"@en ;
+    solid-memo:back "In storage that is separate from the apps"@en ;
+    solid-memo:backNote "The note proposed separating apps from storage. It also proposed identifying people with URLs and controlling who may access what. Separate storage became Solid's core idea."@en ;
     solid-memo:distractor <#q-why-solid-5a-d1> ,
                           <#q-why-solid-5a-d2> ,
-                          <#q-why-solid-5a-d3> .
+                          <#q-why-solid-5a-d3> ,
+                          <#q-why-solid-5a-d4> .
 
 <#q-why-solid-5a-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Let anyone write to any data on the web, like a wiki"@en ;
+    solid-memo:distractorText "In a shared data wiki that anyone on the web can write to"@en ;
     solid-memo:distractorNote "His \"Read-Write Linked Data\" note of the same month says one does not want a data wiki anyone can write to."@en .
 
 <#q-why-solid-5a-d2>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Give each app its own private database for better privacy"@en ;
+    solid-memo:distractorText "Inside each app, in its own private database"@en ;
     solid-memo:distractorNote "That is the data silo the note wanted to move away from."@en .
 
 <#q-why-solid-5a-d3>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Replace HTTP with a new protocol designed for writing data"@en ;
     solid-memo:distractorNote "His 2009 notes reuse HTTP for writing data."@en .
+
+<#q-why-solid-5a-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "On the same server that runs the apps"@en ;
+    solid-memo:distractorNote "The note proposed separating apps from storage, not keeping them together."@en .
 
 <#q-why-solid-5b>
     a solid-memo:Card ;
@@ -4017,17 +4026,20 @@ data tends to avoid them."""@en ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:textFormat solid-memo:markdown ;
-    solid-memo:front "A note app writes `<#note1> ex:author <https://alice.example/profile/card#me> .` into Alice's Solid pod (`ex:` stands for some vocabulary). Which Linked Data idea does this one triple show best?"@en ;
-    solid-memo:back "A global IRI for Alice, used as a link to her profile"@en ;
-    solid-memo:backNote "Reusing Alice's WebID as the object both names her globally and links the note to her profile (Linked Data rules 1, 2 and 4)."@en ;
+    solid-memo:front "A note app writes `<#note1> ex:author <https://alice.example/profile/card#me> .` into Alice's Solid pod (`ex:` stands for some vocabulary). What two things does using Alice's WebID as the object, rather than a literal such as `\"Alice\"`, give the note?"@en ;
+    solid-memo:back "A global name for Alice, and a link to her profile"@en ;
+    solid-memo:backNote "Alice's WebID is an HTTP IRI, so reusing it as the object both names her globally and links the note to her profile (Linked Data rules 1, 2 and 4). A literal such as `\"Alice\"` is only a data value: it names no one globally and cannot be followed."@en ;
     solid-memo:distractor <#q-web-of-data-r02-d1> ,
                           <#q-web-of-data-r02-d2> ,
-                          <#q-web-of-data-r02-d3> .
+                          <#q-web-of-data-r02-d3> ,
+                          <#q-web-of-data-r02-d4> ,
+                          <#q-web-of-data-r02-d5> .
 
 <#q-web-of-data-r02-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "A blank node standing for an unnamed author"@en ;
     solid-memo:distractorNote "Both terms are IRIs; nothing in the triple is a blank node."@en .
 
@@ -4035,15 +4047,30 @@ data tends to avoid them."""@en ;
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "A copy of Alice's profile stored in the note document"@en ;
+    solid-memo:distractorText "A global name for Alice, and a copy of her profile"@en ;
     solid-memo:distractorNote "The triple only names Alice; her profile stays in her own document, reached by following the link."@en .
 
 <#q-web-of-data-r02-d3>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Data that must be open because it uses HTTP URIs"@en ;
     solid-memo:distractorNote "HTTP URIs make data linkable, not public; pod data is usually access-controlled."@en .
+
+<#q-web-of-data-r02-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A local name for Alice, and a link to her profile"@en ;
+    solid-memo:distractorNote "A WebID is a global name, not one valid only in this pod: the same IRI means Alice in every document and pod, so any app can reuse it."@en .
+
+<#q-web-of-data-r02-d5>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A local name for Alice, and a copy of her profile"@en ;
+    solid-memo:distractorNote "A WebID is a global name, not one valid only in this pod. And the triple only names Alice: her profile stays in her own document."@en .
 
 <#q-web-of-data-r03>
     a solid-memo:Card ;
@@ -11556,17 +11583,20 @@ Without an `Origin` header, CSS 7.2 answered `Access-Control-Allow-Origin: *` in
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:textFormat solid-memo:markdown ;
-    solid-memo:front "Bob's browser app sends a GET for Alice's note on a Solid pod that uses Web Access Control (WAC), and gets 403 with no `WAC-Allow` header. Which conclusion and next step fit?"@en ;
+    solid-memo:front "Bob's browser app sends a GET for Alice's note on a Solid pod that uses Web Access Control (WAC), and gets 403 with no `WAC-Allow` header. What does the 403 tell the app about Bob, and should the app send him through login again or tell him he lacks access?"@en ;
     solid-memo:back "Bob is logged in but not allowed; tell him he lacks access to the note"@en ;
-    solid-memo:backNote "403 means authenticated but not authorized. On CSS 7.2 (2026), errors carry no `WAC-Allow` header; CORS never blocks Solid apps, and an ACL is found by its link and needs Control to read."@en ;
+    solid-memo:backNote "403 means authenticated but not authorized: the server knew who he was, so logging in again as Bob gets the same answer. Missing or unusable credentials give 401 (or a hiding 404). On CSS 7.2 (2026), errors carry no `WAC-Allow` header."@en ;
     solid-memo:distractor <#q-wac-r04-d1> ,
                           <#q-wac-r04-d2> ,
-                          <#q-wac-r04-d3> .
+                          <#q-wac-r04-d3> ,
+                          <#q-wac-r04-d4> ,
+                          <#q-wac-r04-d5> .
 
 <#q-wac-r04-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "The browser's CORS policy blocked it; retry from another origin"@en ;
     solid-memo:distractorNote "Solid servers never block through CORS, and a CORS block would hide the status from the app altogether."@en .
 
@@ -11581,8 +11611,23 @@ Without an `Origin` header, CSS 7.2 answered `Access-Control-Allow-Origin: *` in
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "GET the note's URL plus `.acl` to find which rule is missing"@en ;
     solid-memo:distractorNote "That builds the ACL URL by string, and reading an ACL needs Control, which a reader rarely has."@en .
+
+<#q-wac-r04-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Bob is logged in but not allowed; send him through login again"@en ;
+    solid-memo:distractorNote "The server already knew him; a new login as Bob brings the same identity and the same 403."@en .
+
+<#q-wac-r04-d5>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Bob's token has expired; tell him he lacks access to the note"@en ;
+    solid-memo:distractorNote "A missing or unusable token gives 401 (or a hiding 404); 403 means the server knew who he was."@en .
 
 <#q-wac-r05>
     a solid-memo:Card ;
@@ -12977,33 +13022,42 @@ The universal access API (Step 9.5) can't help: it never names an app."""@en ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:textFormat solid-memo:markdown ;
-    solid-memo:front "Which statement best describes the state of app permissions in Solid as of October 2026?"@en ;
+    solid-memo:front "As of October 2026, are Solid's ways of restricting what an app may access complete or only partial, and does any of them work on every Solid server?"@en ;
     solid-memo:back "Only partial solutions exist, none on every server"@en ;
     solid-memo:backNote "`acl:origin`, trusted apps, ACP client matchers, access grants and SAI each cover part of the problem, and none works everywhere; LWS is working on a standard answer."@en ;
     solid-memo:distractor <#q-sharing-r02-d1> ,
                           <#q-sharing-r02-d2> ,
-                          <#q-sharing-r02-d3> .
+                          <#q-sharing-r02-d3> ,
+                          <#q-sharing-r02-d4> .
 
 <#q-sharing-r02-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "ACP client matchers are now supported by most Solid servers"@en ;
-    solid-memo:distractorNote "WAC is still the more widely deployed language, and it has no client matchers."@en .
+    solid-memo:distractorText "ACP client matchers solve it fully, on most servers"@en ;
+    solid-memo:distractorNote "Client matchers work only on ACP servers, and WAC, which has no client matchers, is still the more widely deployed language."@en .
 
 <#q-sharing-r02-d2>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "The Solid Protocol's 2024 version added a standard app grant"@en ;
-    solid-memo:distractorNote "The Protocol defines no app-permission mechanism; LWS is working on one."@en .
+    solid-memo:distractorText "The Protocol's 2024 app grant solves it fully, on every server"@en ;
+    solid-memo:distractorNote "The Solid Protocol defines no app-permission mechanism; LWS is working on one."@en .
 
 <#q-sharing-r02-d3>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Apps can never be restricted; only users can be"@en ;
     solid-memo:distractorNote "ACP client matchers restrict apps by client ID where ACP is used."@en .
+
+<#q-sharing-r02-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only partial solutions exist, but `acl:origin` works on every server"@en ;
+    solid-memo:distractorNote "`acl:origin` is a WAC rule, and it is not client identification: other clients can send any `Origin` value. No fix works on every server."@en .
 
 <#q-sharing-r03>
     a solid-memo:Card ;
@@ -13108,17 +13162,21 @@ The universal access API (Step 9.5) can't help: it never names an app."""@en ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:textFormat solid-memo:markdown ;
-    solid-memo:front "Alice's Solid app shares a note with Bob on a WAC pod and then tells him about it. Which sequence is right?"@en ;
+    solid-memo:front "Alice's Solid app shares a note with Bob on a WAC pod and then tells him about it. What does it do, in order, how does it find each URL, and what does it check before writing the ACL? And how does Bob's app then confirm the share?"@en ;
     solid-memo:back "Follow `rel=\"acl\"`, check `control` in `WAC-Allow`, write the ACL, find Bob's `ldp:inbox`, POST an `Announce`; Bob's app then GETs the note with his login"@en ;
     solid-memo:backNote "Discover the ACL and check Control, then grant; discover the inbox and announce. The recipient verifies by asking the pod, not by trusting the message."@en ;
     solid-memo:distractor <#q-sharing-r06-d1> ,
                           <#q-sharing-r06-d2> ,
-                          <#q-sharing-r06-d3> .
+                          <#q-sharing-r06-d3> ,
+                          <#q-sharing-r06-d4> ,
+                          <#q-sharing-r06-d5> ,
+                          <#q-sharing-r06-d6> .
 
 <#q-sharing-r06-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Find Bob's `ldp:inbox`, POST an `Announce`, then follow `rel=\"acl\"`, check `control` in `WAC-Allow` and write the ACL; Bob's app then GETs the note"@en ;
     solid-memo:distractorNote "The message would announce a share that doesn't exist yet; grant first, then tell."@en .
 
@@ -13126,6 +13184,7 @@ The universal access API (Step 9.5) can't help: it never names an app."""@en ;
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Follow `rel=\"acl\"`, check `control` in `WAC-Allow`, write the ACL, POST an `Announce`; Bob's app trusts it because its `actor` is Alice's WebID"@en ;
     solid-memo:distractorNote "The sender writes `actor`; Bob's app must check by fetching the note."@en .
 
@@ -13133,8 +13192,30 @@ The universal access API (Step 9.5) can't help: it never names an app."""@en ;
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Add `.acl` to the note's URL, write the ACL, POST an `Announce` to `inbox/` at the root of Bob's pod; Bob's app then GETs the note with his login"@en ;
     solid-memo:distractorNote "Both URLs must be discovered: the ACL through `rel=\"acl\"`, the inbox through `ldp:inbox`."@en .
+
+<#q-sharing-r06-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Add `inbox/` to Bob's pod URL, POST an `Announce`, then add `.acl` to the note's URL, check `control` in `WAC-Allow`, write the ACL; Bob's app then GETs the note"@en ;
+    solid-memo:distractorNote "Two errors. The message would announce a share that doesn't exist yet; grant first, then tell. And both URLs must be discovered, not guessed: the ACL through `rel=\"acl\"`, the inbox through `ldp:inbox`."@en .
+
+<#q-sharing-r06-d5>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Find Bob's `ldp:inbox`, POST an `Announce`, then follow `rel=\"acl\"`, check `control` in `WAC-Allow`, write the ACL; Bob's app trusts the `actor`, Alice's WebID"@en ;
+    solid-memo:distractorNote "Two errors. The message would announce a share that doesn't exist yet; grant first, then tell. And the sender writes `actor`; Bob's app should check by fetching the note."@en .
+
+<#q-sharing-r06-d6>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Add `.acl` to the note's URL, check `control` in `WAC-Allow`, write the ACL, add `inbox/` to Bob's pod URL, POST an `Announce`; Bob's app trusts the `actor`"@en ;
+    solid-memo:distractorNote "Two errors. Both URLs must be discovered, not guessed: the ACL through `rel=\"acl\"`, the inbox through `ldp:inbox`. And the sender writes `actor`; Bob's app should check by fetching the note."@en .
 
 <#q-sharing-r07>
     a solid-memo:Card ;
@@ -14697,24 +14778,27 @@ HTTP/1.1 205 Reset Content
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:textFormat solid-memo:markdown ;
-    solid-memo:front "Your Solid app adds a registration to the user's existing private type index, which other apps also use. Which request is the safe choice?"@en ;
-    solid-memo:back "An insert-only N3 Patch with `<#reg-notes-9f3c1a> a solid:TypeRegistration; …`."@en ;
-    solid-memo:backNote "An insert-only patch adds to the index without touching other apps' registrations, and a fragment no one else is likely to pick keeps yours separate. On CSS 7.2 (2026), which follows Protocol 0.11, blank nodes in inserts are rejected, so a fragment IRI is also the portable choice."@en ;
+    solid-memo:front "Your Solid app adds a registration to the private type index in the user's CSS 7.2 pod, which other apps also use. What kind of request should it send, and what kind of subject should the new registration get?"@en ;
+    solid-memo:back "An insert-only N3 Patch, and a fragment unlikely to clash, such as `<#reg-notes-9f3c1a>`."@en ;
+    solid-memo:backNote "An insert-only patch adds to the index without touching other apps' registrations and needs no `If-Match`. An insert into an existing subject merges with it, so a fragment no one else is likely to pick keeps yours separate. Not a blank node: CSS 7.2 rejects those in inserts with `422`."@en ;
     solid-memo:distractor <#q-interop-5b-d1> ,
                           <#q-interop-5b-d2> ,
-                          <#q-interop-5b-d3> .
+                          <#q-interop-5b-d3> ,
+                          <#q-interop-5b-d4> ,
+                          <#q-interop-5b-d5> .
 
 <#q-interop-5b-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "A PUT of the index holding only your `<#reg-notes-9f3c1a>` registration."@en ;
-    solid-memo:distractorNote "It replaces the document, deleting other apps' registrations."@en .
+    solid-memo:distractorText "A PUT of the index with only your registration, and a fragment unlikely to clash, such as `<#reg-notes-9f3c1a>`."@en ;
+    solid-memo:distractorNote "A PUT replaces the document, deleting other apps' registrations."@en .
 
 <#q-interop-5b-d2>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "An insert-only N3 Patch with `<#notes> a solid:TypeRegistration; …`."@en ;
     solid-memo:distractorNote "Another app may already use `<#notes>`, and your triples would merge into its registration."@en .
 
@@ -14722,8 +14806,23 @@ HTTP/1.1 205 Reset Content
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "A POST of `<#reg-notes-9f3c1a> a solid:TypeRegistration; …` to the index's URL."@en ;
     solid-memo:distractorNote "POST creates a new resource in a container; the index is a document."@en .
+
+<#q-interop-5b-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "An insert-only N3 Patch, and a blank node, which no other app's IRI can clash with."@en ;
+    solid-memo:distractorNote "CSS 7.2 rejects blank nodes in inserts with `422`, so the patch fails."@en .
+
+<#q-interop-5b-d5>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A PUT of the index with only your registration, and a blank node, which no other app's IRI can clash with."@en ;
+    solid-memo:distractorNote "A PUT replaces the document, deleting other apps' registrations."@en .
 
 <#q-interop-5c>
     a solid-memo:Card ;
@@ -18075,9 +18174,9 @@ Once live, you can ask for a listing in the app catalogue on solidproject.org.
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:textFormat solid-memo:markdown ;
-    solid-memo:front "An attacker's literal in a Solid pod, `<img src=x onerror=\"…\">`, ran as script in your web app. Which measure would have prevented it?"@en ;
-    solid-memo:back "Rendering literals with `textContent`"@en ;
-    solid-memo:backNote "Escaping output stops the injection; DPoP and memory-only tokens don't, and CSP is a second line of defence."@en ;
+    solid-memo:front "An attacker's literal in a Solid pod, `<img src=x onerror=\"…\">`, ran as script in your web app. What is the first defense against injected markup like this, with a strict CSP only the second?"@en ;
+    solid-memo:back "Escaping literals by rendering them with `textContent`"@en ;
+    solid-memo:backNote "Escaping output stops the injection: `textContent` shows the characters as text, so the markup never runs. DPoP and memory-only tokens don't stop it, and CSP only backs escaping up."@en ;
     solid-memo:distractor <#q-security-r02-d1> ,
                           <#q-security-r02-d2> ,
                           <#q-security-r02-d3> .
@@ -22620,24 +22719,26 @@ Solid's own governance is young: the Open Data Institute (ODI) has been its stew
     a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
-    solid-memo:front "Inrupt has large weight in the Solid ecosystem, and its products add their own features. What does that mean for a Solid app builder?"@en ;
-    solid-memo:back "Check whether a feature is in a CG spec or only in Inrupt's products"@en ;
+    solid-memo:front "Inrupt, an influential vendor, adds its own features on top of Solid. Before a Solid app relies on such a feature, what should its builder check?"@en ;
+    solid-memo:back "Whether the feature is in a CG spec or only in Inrupt's products"@en ;
     solid-memo:backNote "The ODI stewards Solid and the W3C Solid Community Group publishes the specs; Inrupt is one influential vendor, so features like Access Grants are not portable Solid."@en ;
     solid-memo:distractor <#q-difficulties-8b-d1> ,
                           <#q-difficulties-8b-d2> ,
-                          <#q-difficulties-8b-d3> .
+                          <#q-difficulties-8b-d3> ,
+                          <#q-difficulties-8b-d4> .
 
 <#q-difficulties-8b-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Follow Inrupt's docs, since Inrupt approves every Solid spec version"@en ;
+    solid-memo:distractorText "Whether Inrupt has approved the feature as standard Solid or not yet"@en ;
     solid-memo:distractorNote "The specs belong to the W3C Solid Community Group; Inrupt is one participant."@en .
 
 <#q-difficulties-8b-d2>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Avoid Inrupt's libraries, since they only work with Inrupt's servers"@en ;
     solid-memo:distractorNote "Many of its libraries work with any server; only its extensions need ESS."@en .
 
@@ -22645,8 +22746,15 @@ Solid's own governance is young: the Open Data Institute (ODI) has been its stew
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Ignore the difference, since the ODI certifies every Inrupt feature"@en ;
+    solid-memo:distractorText "Whether the ODI has certified the feature or left it uncertified"@en ;
     solid-memo:distractorNote "The ODI is Solid's steward, not a certifier of vendor features."@en .
+
+<#q-difficulties-8b-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Whether the feature is in Inrupt's server or only in its SDK"@en ;
+    solid-memo:distractorNote "Inrupt's server and its SDK are both its own products; what decides portability is whether a CG spec defines the feature."@en .
 
 <#ch-difficulties-9>
     a solid-memo:Step ,
@@ -22705,33 +22813,42 @@ Adoption raises harder questions. Platforms earn money by holding data, and pods
     a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-08T00:00:00.000Z"^^xsd:dateTime ;
-    solid-memo:front "Which pattern describes Solid adoption as of 2026?"@en ;
-    solid-memo:back "Top-down deployments by governments and enterprises"@en ;
-    solid-memo:backNote "Real deployments such as Flanders' Athumi run with governance bodies behind them; consumer adoption is still an open question."@en ;
+    solid-memo:front "As of 2026, who drives the Solid deployments that exist, and do they come from the top down or from the bottom up?"@en ;
+    solid-memo:back "Governments and enterprises, from the top down"@en ;
+    solid-memo:backNote "Real deployments such as Flanders' Athumi run with governance bodies behind them. Wider adoption is still an open question about business models."@en ;
     solid-memo:distractor <#q-difficulties-9b-d1> ,
                           <#q-difficulties-9b-d2> ,
-                          <#q-difficulties-9b-d3> .
+                          <#q-difficulties-9b-d3> ,
+                          <#q-difficulties-9b-d4> .
 
 <#q-difficulties-9b-d1>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Mass sign-ups by consumers choosing their own pod provider"@en ;
-    solid-memo:distractorNote "Practitioners such as Leigh Dodds (2024) still doubt what Solid solves for users; live deployments come from institutions."@en .
+    solid-memo:distractorText "Consumers choosing their own pod providers, from the bottom up"@en ;
+    solid-memo:distractorNote "Consumer adoption is still an open question. The deployments that exist come from governments and enterprises, from the top down."@en .
 
 <#q-difficulties-9b-d2>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Large social platforms moving their user data into pods"@en ;
-    solid-memo:distractorNote "No major platform has done so, and business models are an open question."@en .
+    solid-memo:distractorText "Large social platforms moving user data into pods, from the top down"@en ;
+    solid-memo:distractorNote "Platforms earn money by holding data, so why they would adopt pods is an open question. The deployments that exist come from governments and enterprises."@en .
 
 <#q-difficulties-9b-d3>
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
+    owl:deprecated true ;
     solid-memo:distractorText "Research projects only, with no live deployments"@en ;
     solid-memo:distractorNote "Flanders' Athumi, for example, is a live government deployment."@en .
+
+<#q-difficulties-9b-d4>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Governments and enterprises, from the bottom up"@en ;
+    solid-memo:distractorNote "The deployments are run by governments and enterprises, but they are top-down, with governance bodies behind them."@en .
 
 <#q-difficulties-r01>
     a solid-memo:Card ;

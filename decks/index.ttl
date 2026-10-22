@@ -13880,7 +13880,7 @@
     dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
     dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v4.ttl> ;
     dcterms:issued "2026-10-22T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "The review question on fetching a WebID with a hash is asked so that it has one answer when studied flip-and-grade, without its options; one wrong option is retired and replaced, and every chapter, step and card keeps its id." ;
+    adms:versionNotes "10 more questions are asked so that each has one answer when studied flip-and-grade, without its options; wrong options that no longer fit are retired and replaced, and every chapter, step and card keeps its id." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#solid-fundamentals> ;
     dcat:isVersionOf <#solid-fundamentals> ;
