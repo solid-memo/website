@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import type { QueryClient } from "@tanstack/react-query";
-import type { StatisticsRange as RangeRead, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { StatisticsRange as RangeRead } from "@solid-memo/application/statistics";
 import type { StatisticsRange } from "./router";
 
 /**

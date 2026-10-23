@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeckInsight } from "@solid-memo/application/useCases";
+import type { DeckInsight } from "@solid-memo/application/statistics";
 import { LEECH_LAPSES } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { useCardText } from "@solid-memo/ui/cardLanguage";

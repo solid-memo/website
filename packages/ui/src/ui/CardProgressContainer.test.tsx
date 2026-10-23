@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { CardProgressReport, DeckProgress } from "@solid-memo/application/useCases";
+import type { CardProgressReport, DeckProgress } from "@solid-memo/application/statistics";
 import type { Deck } from "@solid-memo/domain/deck";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import type { ReviewState } from "@solid-memo/domain/review";

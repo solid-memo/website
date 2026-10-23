@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type {
+  AnswerLog,
   DigestRepository,
   LanguagePreference,
   CustomPalettePreference,
@@ -16,6 +17,7 @@ import type {
 import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
 
+const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
 
 const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
@@ -60,6 +62,17 @@ const NO_DIGESTS: DigestRepository = {
   updateDigest: async () => undefined,
 };
 
+const NO_ANSWER_LOG: AnswerLog = {
+  append: nothing,
+  appendAll: nothing,
+  months: none,
+  readMonth: none,
+  // Never asked: a log without months has none to read.
+  readMonthSince: nothing as unknown as AnswerLog["readMonthSince"],
+  removeDay: nothing,
+  removeAnswer: nothing,
+};
+
 /**
  * A port that keeps nothing and does nothing, or refuses, for each port
  * a test has no use for: a test spreads NO_PORTS, then gives the ports
@@ -67,6 +80,7 @@ const NO_DIGESTS: DigestRepository = {
  * their own, so a missing one is a type error (packages/composition/).
  */
 export const NO_PORTS = {
+  answerLog: NO_ANSWER_LOG,
   digestRepository: NO_DIGESTS,
   deckArchive: NO_DECK_ARCHIVE,
   fileExchange: NO_FILE_EXCHANGE,

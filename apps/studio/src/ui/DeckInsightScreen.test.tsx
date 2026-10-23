@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
-import type { DeckInsight } from "@solid-memo/application/useCases";
+import type { DeckInsight } from "@solid-memo/application/statistics";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { DeckInsightScreen } from "./DeckInsightScreen";

@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { CourseStatistics } from "@solid-memo/application/useCases";
+import type { CourseStatistics } from "@solid-memo/application/statistics";
 import type { Deck } from "@solid-memo/domain/deck";
 import { courseDeck, courseInstance, courseLibraryDeck, RELEASE } from "../test/course";
 import { makeUseCasesFake } from "../test/useCasesFake";

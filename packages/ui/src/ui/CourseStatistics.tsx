@@ -4,7 +4,8 @@
 
 import { useId } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
-import type { CourseStatistics, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { CourseStatistics } from "@solid-memo/application/statistics";
 import type { ChapterState } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";

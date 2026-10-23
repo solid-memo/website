@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { vi } from "vitest";
-import type { DeckProgress, StatisticsReport, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { DeckProgress, StatisticsReport } from "@solid-memo/application/statistics";
 import type { StudySessionQueue } from "@solid-memo/application/study";
 import type { Answer } from "@solid-memo/domain/answer";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";

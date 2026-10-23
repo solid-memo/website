@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useId } from "preact/hooks";
-import type { DeckProgress } from "@solid-memo/application/useCases";
+import type { DeckProgress } from "@solid-memo/application/statistics";
 import { LEECH_LAPSES, type HardCard } from "@solid-memo/domain/cardHistory";
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
 import { CardLanguage } from "./cardLanguage";
