@@ -12,6 +12,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { InstanceAboutScreen } from "./InstanceAboutScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The instance screen's data: the instance's catalog (UseCases.readCatalog).
@@ -44,7 +45,7 @@ export function InstanceAboutContainer({
     mutationFn: (write: () => Promise<unknown>) => write(),
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["instances"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allInstances() }),
         queryClient.invalidateQueries({ queryKey: ["catalog", instance.url] }),
       ]),
   });

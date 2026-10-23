@@ -68,7 +68,7 @@ export function DeckAboutContainer({
   });
   // The same query as Solid Memo's course screens, so a change shows there.
   const courseQuery = useQuery({
-    queryKey: ["course", deck.url],
+    queryKey: queryKeys.course(deck.url),
     queryFn: () => useCases.getCourse(deck),
     enabled: isCourse,
   });
@@ -136,7 +136,7 @@ export function DeckAboutContainer({
       }
       onStateLanguages={(languages) => stateLanguages.mutate(languages)}
       onCompletedChapters={(edit) =>
-        void run(() => useCases.setCompletedChapters(deck, edit), [["course", deck.url]])
+        void run(() => useCases.setCompletedChapters(deck, edit), [queryKeys.course(deck.url)])
       }
     />
   );

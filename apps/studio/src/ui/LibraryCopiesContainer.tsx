@@ -94,7 +94,7 @@ export function LibraryCopiesContainer({
                 outcome.changed
                   ? refreshUpgradedDeck(queryClient, instance.url, deck)
                   : queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-                queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.libraryUpgrade(deck.url) }),
               ]),
         ),
       );

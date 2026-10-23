@@ -26,6 +26,7 @@ import { usePanelFocus } from "./panelFocus";
 import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { routeToHash } from "./router";
 import { StepProgress } from "./StepProgress";
+import { queryKeys } from "./queryKeys";
 
 /** What each step of the move into a new instance does, as the progress line names it. */
 function stepLabels(t: I18n["t"]): Record<GuestTransferStep, string> {
@@ -127,13 +128,13 @@ function GuestStudyOfferStage({
   const [progress, setProgress] = useState<KeepProgress | null>(null);
 
   const studyQuery = useQuery({
-    queryKey: ["guestStudy"],
+    queryKey: queryKeys.guestStudy(),
     queryFn: () => useCases.findGuestStudy(),
   });
 
   const discard = useMutation({
     mutationFn: () => useCases.discardGuest(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["guestStudy"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.guestStudy() }),
   });
 
   /** The move is over: say how, and open the instance it went into. */
@@ -387,7 +388,7 @@ function GuestKeepForm({
 }) {
   const { t } = useI18n();
   const instancesQuery = useQuery({
-    queryKey: ["instances", session.webId],
+    queryKey: queryKeys.instances(session.webId),
     queryFn: () => useCases.listInstances(session),
   });
   // Back after a move that threw once under way: the steps gave way, and the
@@ -496,7 +497,7 @@ function GuestMergeFields({
   const [chosen, setChosen] = useState<string | null>(null);
   const target = instances.find((instance) => instance.url === chosen) ?? instances[0]!;
   const planQuery = useQuery({
-    queryKey: ["guestMergePlan", guestInstance.url, target.url],
+    queryKey: queryKeys.guestMergePlan(guestInstance.url, target.url),
     queryFn: () => useCases.planGuestMerge(guestInstance, target),
   });
   const [skipped, setSkipped] = useState<ReadonlySet<string>>(new Set());
@@ -619,11 +620,11 @@ function GuestTransferFields({
 }) {
   const { t } = useI18n();
   const storagesQuery = useQuery({
-    queryKey: ["storages", session.webId],
+    queryKey: queryKeys.storages(session.webId),
     queryFn: () => useCases.listStorages(session),
   });
   const optionsQuery = useQuery({
-    queryKey: ["registrationOptions", session.webId],
+    queryKey: queryKeys.registrationOptions(session.webId),
     queryFn: () => useCases.getRegistrationOptions(session),
   });
   const storages = storagesQuery.data ?? [];

@@ -39,7 +39,7 @@ export function InstancePickerContainer({
   const webId = session.webId;
 
   const registrationOptionsQuery = useQuery({
-    queryKey: ["registrationOptions", webId],
+    queryKey: queryKeys.registrationOptions(webId),
     queryFn: () => useCases.getRegistrationOptions(session),
   });
 
@@ -47,7 +47,7 @@ export function InstancePickerContainer({
     mutationFn: (args: { url: string; target: RegistrationTarget }) =>
       useCases.attachInstanceByUrl(session, args.url, args.target),
     onSuccess: async (instance) => {
-      await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.instances(webId) });
       onOpen(instance);
     },
   });
@@ -57,7 +57,7 @@ export function InstancePickerContainer({
     onSuccess: async (_, instance) => {
       queryClient.removeQueries({ queryKey: queryKeys.decks(instance.url) });
       queryClient.removeQueries({ queryKey: queryKeys.preferences(instance.url) });
-      await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.instances(webId) });
     },
   });
 

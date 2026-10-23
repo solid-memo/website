@@ -9,6 +9,7 @@ import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * "Findable by other apps" in Preferences (docs/data-model.md "Discovery
@@ -29,7 +30,7 @@ export function FindableContainer({
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
-  const queryKey = ["dataClassRegistrations", instance.url];
+  const queryKey = queryKeys.dataClassRegistrations(instance.url);
   const registrationsQuery = useQuery({
     queryKey,
     queryFn: () => useCases.dataClassRegistrations(session, instance),

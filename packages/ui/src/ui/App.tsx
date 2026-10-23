@@ -341,7 +341,7 @@ function AppContent({
   }, [useCases, queryClient]);
 
   const accountQuery = useQuery({
-    queryKey: ["account", session?.webId],
+    queryKey: queryKeys.account(session?.webId),
     queryFn: () => useCases.discoverAccount(session!),
     enabled: session !== null && connecting,
   });

@@ -34,7 +34,7 @@ import { queryKeys } from "./queryKeys";
  */
 export function libraryUpgradeQuery(useCases: UseCases, deck: Deck) {
   return {
-    queryKey: ["libraryUpgrade", deck.url, deck.sourceUrl, deck.cardsDocumentUrl],
+    queryKey: queryKeys.libraryUpgradePlan(deck.url, deck.sourceUrl, deck.cardsDocumentUrl),
     queryFn: () => useCases.planLibraryUpgrade(deck),
     staleTime: Infinity,
   };
@@ -51,7 +51,7 @@ export function refreshUpgradedDeck(
     queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
     queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
     queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) }),
-    queryClient.invalidateQueries({ queryKey: ["migration", instanceUrl] }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.migration(instanceUrl) }),
     // A course's deck now follows the newer release, and its outline with it.
     queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
   ]);
@@ -93,7 +93,7 @@ export function LibraryUpgradeContainer({
   });
 
   useQuery({
-    queryKey: ["releaseLanguages", deck.url, deck.sourceUrl],
+    queryKey: queryKeys.releaseLanguages(deck.url, deck.sourceUrl),
     queryFn: async () => {
       const updated = await useCases.addReleaseLanguages(deck);
       if (updated !== null) await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
@@ -111,7 +111,7 @@ export function LibraryUpgradeContainer({
     step: "read",
     done: 0,
   });
-  const mutationKey = ["libraryUpgrade", deck.url];
+  const mutationKey = queryKeys.libraryUpgrade(deck.url);
   const upgradeMutation = useMutation({
     mutationKey,
     mutationFn: async (plan: LibraryUpgradePlan) => {
@@ -123,7 +123,7 @@ export function LibraryUpgradeContainer({
           queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-          queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.libraryUpgrade(deck.url) }),
           ...(outcome.changed
             ? [
                 queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),

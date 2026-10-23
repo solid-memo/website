@@ -265,7 +265,7 @@ export function Workspace({
   const webId = session.webId;
 
   const instancesQuery = useQuery({
-    queryKey: ["instances", webId],
+    queryKey: queryKeys.instances(webId),
     queryFn: () => useCases.listInstances(session),
   });
   const instances = instancesQuery.data;
@@ -381,7 +381,7 @@ export function Workspace({
 
   const needsLibraryCard = libraryCardId !== null && activeLibraryDeck !== null;
   const libraryCardsQuery = useQuery({
-    queryKey: ["libraryCards", activeLibraryDeck?.url],
+    queryKey: queryKeys.libraryCards(activeLibraryDeck?.url),
     queryFn: () => useCases.listLibraryCards(activeLibraryDeck!),
     enabled: needsLibraryCard,
   });
@@ -533,7 +533,7 @@ export function Workspace({
     route?.screen === "validation";
 
   const storagesQuery = useQuery({
-    queryKey: ["storages", webId],
+    queryKey: queryKeys.storages(webId),
     queryFn: () => useCases.listStorages(session),
     enabled: route?.screen === "storagePicker",
   });
@@ -549,7 +549,7 @@ export function Workspace({
   }, [route, storagesQuery.data]);
 
   const registrationOptionsQuery = useQuery({
-    queryKey: ["registrationOptions", webId],
+    queryKey: queryKeys.registrationOptions(webId),
     queryFn: () => useCases.getRegistrationOptions(session),
     enabled: route?.screen === "instanceCreator",
   });
@@ -575,7 +575,7 @@ export function Workspace({
       // A new instance has no decks, so its list offers the library's course for
       // newcomers (NewcomerCourseContainer): read from now, it comes with the list.
       void queryClient.prefetchQuery(libraryIndexQuery(useCases));
-      await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.instances(webId) });
       navigate({ screen: "home", instanceUrl: instance.url });
     },
   });

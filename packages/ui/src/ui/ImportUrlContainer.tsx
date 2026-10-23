@@ -42,7 +42,7 @@ export function ImportUrlContainer({
   const queryClient = useQueryClient();
 
   const releaseQuery = useQuery({
-    queryKey: ["releaseFromLink", url],
+    queryKey: queryKeys.releaseFromLink(url),
     queryFn: () => useCases.readReleaseFromLink(url!),
     enabled: url !== undefined,
     refetchOnWindowFocus: false,
@@ -51,7 +51,7 @@ export function ImportUrlContainer({
 
   // A library release reached by its link is still the library's to fix (UseCases.reportPlace).
   const reportQuery = useQuery({
-    queryKey: ["reportPlace", release?.url],
+    queryKey: queryKeys.reportPlace(release?.url),
     queryFn: () => useCases.reportPlace(release!.url),
     enabled: release !== undefined,
     staleTime: Infinity,

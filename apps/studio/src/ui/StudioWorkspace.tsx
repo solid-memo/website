@@ -834,7 +834,7 @@ function useRouteReads(
   route: StudioRoute | null,
 ) {
   const instancesQuery = useQuery({
-    queryKey: ["instances", session.webId],
+    queryKey: queryKeys.instances(session.webId),
     queryFn: () => useCases.listInstances(session),
   });
   const instances = instancesQuery.data;
