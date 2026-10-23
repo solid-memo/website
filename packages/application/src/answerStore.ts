@@ -23,7 +23,7 @@ import {
   type ResponseTimes,
 } from "@solid-memo/domain/answer";
 import type { ReviewStateRepository, AnswerLog } from "./ports";
-import type { GradeBasis, RecordedReview } from "./useCases";
+import type { GradeBasis, RecordedReview } from "./study";
 import type { PreferenceStore } from "./preferenceStore";
 
 /** What sets each prompt's due day, by the scheduler the preferences name (effectiveStates). */

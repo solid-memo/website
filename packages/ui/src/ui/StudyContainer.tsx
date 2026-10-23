@@ -4,12 +4,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type {
-  GradeBasis,
-  ReviewUndo,
-  StudySessionQueue,
-  UseCases,
-} from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { GradeBasis, ReviewUndo, StudySessionQueue } from "@solid-memo/application/study";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
