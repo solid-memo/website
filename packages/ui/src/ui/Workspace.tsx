@@ -297,7 +297,7 @@ export function Workspace({
   }, [instanceUrl, instances]);
 
   const decksQuery = useQuery({
-    queryKey: ["decks", instanceUrl],
+    queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: needsDeck,
   });
@@ -484,7 +484,7 @@ export function Workspace({
   // as their counts are.
   const onHome = activeInstance !== null && route?.screen === "home";
   const homeTreeQuery = useQuery({
-    queryKey: ["decks", instanceUrl, "tree"],
+    queryKey: queryKeys.deckTree(instanceUrl),
     queryFn: () => useCases.listDeckTree(instanceUrl!),
     enabled: onHome,
     refetchOnWindowFocus: false,
@@ -495,7 +495,7 @@ export function Workspace({
   useEffect(() => {
     if (instanceUrl === null || homeTreeQuery.data === undefined) return;
     const decks = decksOf(homeTreeQuery.data.children);
-    queryClient.setQueryData(["decks", instanceUrl], decks);
+    queryClient.setQueryData(queryKeys.decks(instanceUrl), decks);
     for (const deck of decks) {
       void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
     }
@@ -517,7 +517,7 @@ export function Workspace({
     arrangementSetAside: arrangementIsSetAside,
   } = check;
   const decksOfCheck = useQuery({
-    queryKey: ["decks", instanceUrl],
+    queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: invalidReport !== null && policy === "block-subject",
   });

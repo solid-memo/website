@@ -843,7 +843,7 @@ function useRouteReads(
     instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
   const deckUrl = deckUrlOf(route);
   const decksQuery = useQuery({
-    queryKey: ["decks", instanceUrl],
+    queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: deckUrl !== null && activeInstance !== null,
   });

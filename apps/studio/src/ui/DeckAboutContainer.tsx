@@ -85,7 +85,9 @@ export function DeckAboutContainer({
     mutationFn: ({ write }: Save) => write(),
     onSuccess: async (_written, { touches = [] }) => {
       await Promise.all(
-        [["decks"], ...touches].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+        [queryKeys.allDecks(), ...touches].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
       );
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },

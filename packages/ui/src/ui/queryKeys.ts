@@ -33,7 +33,7 @@ export const queryKeys = {
   /** An instance's decks: under allDecks. */
   decks: (instanceUrl: string | null) => [...queryKeys.allDecks(), instanceUrl],
   /** An instance's decks as the user arranged them: under decks, so whatever refreshes them refreshes it too. */
-  deckTree: (instanceUrl: string) => [...queryKeys.decks(instanceUrl), "tree"],
+  deckTree: (instanceUrl: string | null) => [...queryKeys.decks(instanceUrl), "tree"],
 
   /** Every deck's cards. */
   allCards: () => ["cards"],

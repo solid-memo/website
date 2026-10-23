@@ -236,7 +236,7 @@ export function CardWorkbenchContainer({
     onSettled: async (_plan, _error, { transfer }) => {
       await Promise.all([
         reread([deck, transfer.to]),
-        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
       ]);
     },
   });

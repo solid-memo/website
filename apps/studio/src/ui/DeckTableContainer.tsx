@@ -154,7 +154,7 @@ export function DeckTableContainer({
     onError: (error) => setFailure(error),
     onSettled: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
       ]),
   });

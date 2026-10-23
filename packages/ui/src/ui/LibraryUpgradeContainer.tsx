@@ -48,7 +48,7 @@ export function refreshUpgradedDeck(
 ): Promise<unknown> {
   queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
   return Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["decks"] }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
     queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
     queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) }),
     queryClient.invalidateQueries({ queryKey: ["migration", instanceUrl] }),
@@ -96,7 +96,7 @@ export function LibraryUpgradeContainer({
     queryKey: ["releaseLanguages", deck.url, deck.sourceUrl],
     queryFn: async () => {
       const updated = await useCases.addReleaseLanguages(deck);
-      if (updated !== null) await queryClient.invalidateQueries({ queryKey: ["decks"] });
+      if (updated !== null) await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       return updated !== null;
     },
     enabled: deck.sourceUrl !== undefined,
@@ -122,7 +122,7 @@ export function LibraryUpgradeContainer({
         if (outcome.changed)
           queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ["decks"] }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
           queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),
           ...(outcome.changed
             ? [

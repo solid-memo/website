@@ -60,7 +60,7 @@ export function StudioSidebar({
   const decksId = useId();
   const draftsId = useId();
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const draftsQuery = useQuery({

@@ -84,7 +84,7 @@ export function DeckPreferencesContainer({
   const saveMutation = useMutation({
     mutationFn: (pace: DeckPace) => useCases.setDeckPace(deck, pace),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["decks"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       onDone();
     },
@@ -92,7 +92,7 @@ export function DeckPreferencesContainer({
 
   const renameMutation = useMutation({
     mutationFn: (title: LangText) => useCases.renameDeck(deck, title),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["decks"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
   });
 
   const stateLanguagesMutation = useMutation({
@@ -106,7 +106,7 @@ export function DeckPreferencesContainer({
     // and the statistics' cards (hardest cards, confused options, leeches) from the deck in their report.
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["decks"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
         queryClient.invalidateQueries({ queryKey: ["cardProgress"] }),
       ]),
   });
@@ -114,7 +114,7 @@ export function DeckPreferencesContainer({
   const removeMutation = useMutation({
     mutationFn: () => useCases.removeDeck(deck),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["decks"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       onDeckRemoved();
     },
   });

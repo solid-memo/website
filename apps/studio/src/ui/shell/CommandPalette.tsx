@@ -68,7 +68,9 @@ export function CommandPalette({
   const [all] = useState(() => {
     const instanceUrl = route === null ? null : instanceOfRoute(route);
     const decks =
-      instanceUrl === null ? undefined : queryClient.getQueryData<Deck[]>(["decks", instanceUrl]);
+      instanceUrl === null
+        ? undefined
+        : queryClient.getQueryData<Deck[]>(queryKeys.decks(instanceUrl));
     const deck = route === null ? undefined : decks?.find((each) => each.url === deckOf(route));
     const cards =
       deck === undefined

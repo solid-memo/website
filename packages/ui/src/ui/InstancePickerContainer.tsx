@@ -9,6 +9,7 @@ import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import { useI18n } from "./i18n";
 import { InstancePicker } from "./InstancePicker";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The instance picker over the use cases: where the user may register an
@@ -54,7 +55,7 @@ export function InstancePickerContainer({
   const deleteInstanceMutation = useMutation({
     mutationFn: (instance: Instance) => useCases.deleteInstance(session, instance),
     onSuccess: async (_, instance) => {
-      queryClient.removeQueries({ queryKey: ["decks", instance.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.decks(instance.url) });
       queryClient.removeQueries({ queryKey: ["preferences", instance.url] });
       await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
     },

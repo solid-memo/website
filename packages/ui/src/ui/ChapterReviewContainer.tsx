@@ -73,7 +73,7 @@ export function ChapterReviewContainer({
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
-        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
       ]),
   });
   // Passed to mutate, not to useMutation, so that it is dropped once the

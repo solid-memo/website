@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { isCopyOf, releaseUrlOf, type LibraryDeck } from "@solid-memo/domain/library";
 import { useI18n } from "./i18n";
 import { ImportUrlScreen } from "./ImportUrlScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns adding a release from a link (UseCases.readReleaseFromLink, then
@@ -57,7 +58,7 @@ export function ImportUrlContainer({
   });
 
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const imported =
@@ -66,7 +67,7 @@ export function ImportUrlContainer({
   const addMutation = useMutation({
     mutationFn: (shown: LibraryDeck) => useCases.importReleaseFromUrl(instance.url, shown),
     onSuccess: async (added, shown) => {
-      await queryClient.invalidateQueries({ queryKey: ["decks", instance.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) });
       if (shown.isCourse === true) onCourseStarted(added);
       else onDone();
     },

@@ -152,7 +152,7 @@ export function useDeckTreeEditor(
    */
   const refresh = () =>
     queryClient.invalidateQueries({
-      queryKey: ["decks"],
+      queryKey: queryKeys.allDecks(),
       predicate: (query) => pending() === 1 || query.queryHash !== hashKey(treeKey),
     });
 

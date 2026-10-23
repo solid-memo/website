@@ -19,6 +19,7 @@ import { UnclaimedDecksNotice } from "@solid-memo/ui/UnclaimedDecksNotice";
 import { deckHealthQuery, HealthBadge } from "./HealthBadge";
 import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./HealthScreen";
 import { useConfirm } from "./shell/ConfirmDialog";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The health screen's data: with a deck, its health (UseCases.checkDeck)
@@ -180,7 +181,7 @@ function InstanceHealthContainer({
     staleTime: Infinity,
   });
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const error = reportQuery.error ?? decksQuery.error;

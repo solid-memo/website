@@ -58,13 +58,13 @@ export function BrowserContainer({
 
   const describeDeckMutation = useMutation({
     mutationFn: (about: DeckAbout) => useCases.describeDeck(deck, about),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["decks"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
   });
 
   const setDirectionMutation = useMutation({
     mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["decks"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
