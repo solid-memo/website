@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import { useDraftEditor } from "./draftEditor";
 import { revisionOf } from "./releaseCheck";
 import { ReleaseDiffScreen, type ReleaseDiffLinks } from "./ReleaseDiffScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * A draft against the release it follows, over the draft as its editor
@@ -25,7 +26,7 @@ export function ReleaseDiffContainer({
   const editor = useDraftEditor(useCases, draftUrl);
   const draft = editor.draft!;
   const diff = useQuery({
-    queryKey: ["releaseDiff", draft.url, revisionOf(draft)],
+    queryKey: queryKeys.releaseDiff(draft.url, revisionOf(draft)),
     queryFn: () => useCases.diffReleaseDraft(draft),
     placeholderData: keepPreviousData,
     staleTime: Infinity,

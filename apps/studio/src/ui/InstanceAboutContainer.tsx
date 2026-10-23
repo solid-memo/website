@@ -38,7 +38,7 @@ export function InstanceAboutContainer({
   const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
   const catalogQuery = useQuery({
-    queryKey: ["catalog", instance.url],
+    queryKey: queryKeys.catalog(instance.url),
     queryFn: () => useCases.readCatalog(instance.url),
   });
   const save = useMutation({
@@ -46,7 +46,7 @@ export function InstanceAboutContainer({
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.allInstances() }),
-        queryClient.invalidateQueries({ queryKey: ["catalog", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.catalog(instance.url) }),
       ]),
   });
 

@@ -40,7 +40,7 @@ export function DeckInsightContainer({
   const insightQuery = useQuery({
     // The preferences and the deck's own pace are in the key: an insight
     // read under another cap or study day is not shown as this one's.
-    queryKey: ["deckInsight", deck.url, deck.maxReviewsPerDay, prefs],
+    queryKey: queryKeys.deckInsight(deck.url, deck.maxReviewsPerDay, prefs),
     queryFn: () => useCases.deckInsight(instance.url, deck, new Date(), prefs!),
     enabled: prefs !== undefined,
   });

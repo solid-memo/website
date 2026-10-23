@@ -118,7 +118,7 @@ export function CardWorkbenchContainer({
   // Only a deck that may be changed takes cards.
   const others = decks.filter((other) => other.url !== deck.url && check.readOnly(other) === null);
   const answersQuery = useQuery({
-    queryKey: ["answerLog", instance.url],
+    queryKey: queryKeys.answerLog(instance.url),
     queryFn: () => useCases.loadAnswerLog(instance.url),
   });
   const answers = answersQuery.data;
