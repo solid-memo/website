@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
-import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
 import type {
   LanguagePreference,
   CustomPalettePreference,
@@ -11,7 +9,11 @@ import type {
   PaletteRepository,
   TextSizePreference,
   ThemePreference,
+  DeckArchive,
+  FileExchange,
 } from "../ports";
+import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
+import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
 
 const none = async (): Promise<never[]> => [];
 
@@ -41,6 +43,17 @@ const NO_TEXT_SIZE_PREFERENCE: TextSizePreference = {
   choose: () => undefined,
 };
 
+const NO_DECK_ARCHIVE: DeckArchive = {
+  exportDeck: async () => {
+    throw new Error("This app keeps no deck archive.");
+  },
+  readDeckFile: async () => {
+    throw new Error("This app keeps no deck archive.");
+  },
+};
+
+const NO_FILE_EXCHANGE: FileExchange = { save: () => undefined, open: async () => null };
+
 /**
  * A port that keeps nothing and does nothing, or refuses, for each port
  * a test has no use for: a test spreads NO_PORTS, then gives the ports
@@ -48,6 +61,8 @@ const NO_TEXT_SIZE_PREFERENCE: TextSizePreference = {
  * their own, so a missing one is a type error (packages/composition/).
  */
 export const NO_PORTS = {
+  deckArchive: NO_DECK_ARCHIVE,
+  fileExchange: NO_FILE_EXCHANGE,
   languagePreference: NO_LANGUAGE_PREFERENCE,
   themePreference: NO_THEME_PREFERENCE,
   palettePreference: NO_PALETTE_PREFERENCE,
