@@ -8,9 +8,10 @@ import { Screen } from "./Screen.ts";
 
 /**
  * A course as the learner has it: its title, how many chapters are done,
- * "Start the course" (or "Continue") and its chapters, under its deck in
- * the breadcrumbs; played with Solid Memo's course screens, in the app or
- * in a Studio trial. Back from a chapter just completed, it cheers it.
+ * "Start the course" (or "Continue") with Deck library after it in the
+ * app, and its chapters, under its deck in the breadcrumbs; played with
+ * Solid Memo's course screens, in the app or in a Studio trial. Back
+ * from a chapter just completed, it cheers it.
  */
 export class Course extends Screen {
   heading(title: string): Locator {
@@ -59,7 +60,8 @@ export class Course extends Screen {
 
   /**
    * The page cheers the chapter just completed: the word takes the focus,
-   * the chapter is done, and Continue goes on to the next.
+   * the chapter is done, and Continue goes on to the next, Deck library
+   * after it.
    */
   async expectCheered(chapter: string): Promise<void> {
     const word = this.page.getByText(this.t("course.chapterCompleted", { chapter }), {
@@ -75,6 +77,22 @@ export class Course extends Screen {
         .getByRole("main")
         .getByRole("link", { name: this.t("course.continue"), exact: true }),
     ).toBeVisible();
+    await this.expectLibraryAfter("course.continue");
+  }
+
+  /**
+   * The page's secondary Deck library button comes right after its way on
+   * or back (`after`, "Continue", "Start the course" or "Back to decks").
+   */
+  async expectLibraryAfter(after: string): Promise<void> {
+    const main = this.page.getByRole("main");
+    const way = main.getByRole("link", { name: this.t(after), exact: true });
+    const library = main.getByRole("link", { name: this.t("deckList.libraryLink"), exact: true });
+    await expect(library).toBeVisible();
+    // The next link after the way on, in reading and Tab order.
+    await expect(way.locator("xpath=following-sibling::a[1]")).toHaveText(
+      this.t("deckList.libraryLink"),
+    );
   }
 
   /**

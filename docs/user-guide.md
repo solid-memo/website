@@ -118,7 +118,9 @@ The deck list is home. From the top:
   a new one.
 - **Your courses**: each course you have added and not finished,
   started or not, how many of its chapters are done, and a button to
-  start it or go on where you left off
+  start it or go on where you left off. Courses run alongside your other
+  decks: you can add more from the deck library at any time. While all
+  your decks are courses, the strip points to the **Deck library**
   ([courses.md](courses.md#the-learners-flow)).
 - **Try FSRS-6**: while your instance schedules with SM-2, an
   invitation to switch to FSRS-6, the recommended scheduler: its
@@ -275,7 +277,8 @@ shared link, or from the newcomer offer on an empty deck list
 ([courses.md](courses.md)).
 
 - **The course's page** lists its chapters, each locked, open or done,
-  and a button to go on where you left off.
+  and a button to go on where you left off, with **Deck library** after
+  it: you need not finish a course before adding other decks.
 - **A chapter** goes a step at a time. First you read a short piece of
   theory, sometimes in parts ("Part 2 of 3"). Then "Check your
   understanding" asks its questions, with the theory hidden: choose an
@@ -515,7 +518,7 @@ screenshot of each.
 | Showing a deck's cards in another language than the app's, and back | full-learner | 20c–20d |
 | Checking the instance (developer mode) | full-learner | 21 |
 | A card in Markdown | [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts) | 04–07 |
-| The course for newcomers, from an empty deck list | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–05 |
+| The course for newcomers, from an empty deck list, and the way to the deck library beside it | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–07 |
 | A course's first chapter and its final review | [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts) | 03–08 |
 | A course's answers and chapters in the statistics, and its most-confused options | course-chapter | 09–10 |
 | Adding a course from a link and playing it | [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts), second journey | 03–05 |

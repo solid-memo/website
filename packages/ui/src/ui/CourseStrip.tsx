@@ -12,7 +12,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import { chapterHref } from "./CourseContainer";
 import { courseKey } from "./courseKey";
 import { useCourseLinks } from "./courseLinks";
-import { CourseIcon } from "./icons";
+import { CourseIcon, LibraryIcon } from "./icons";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
@@ -37,9 +37,19 @@ export interface CourseStripEntry {
  * above the deck list, so going on with one is never a menu away: under
  * a heading that says what they are and why they are there, each with
  * its title (to the course's page), how many chapters are done, and a
- * button to go on where they left off.
+ * button to go on where they left off. The heading's hint says courses
+ * run alongside other decks; while the learner has nothing but courses,
+ * a line under them points to the deck library (`libraryHref`), so a
+ * course is never taken for all there is to learn.
  */
-export function CourseStrip({ entries }: { entries: readonly CourseStripEntry[] }) {
+export function CourseStrip({
+  entries,
+  libraryHref,
+}: {
+  entries: readonly CourseStripEntry[];
+  /** The deck library, pointed to while every deck is a course; no line without it. */
+  libraryHref?: string;
+}) {
   const { t, readerText } = useI18n();
   const headingId = useId();
   if (entries.length === 0) return null;
@@ -76,6 +86,15 @@ export function CourseStrip({ entries }: { entries: readonly CourseStripEntry[] 
           </li>
         ))}
       </ul>
+      {libraryHref !== undefined && (
+        <div class="course-strip-library">
+          <p>{t("deckList.coursesLibrary")}</p>
+          <a class="button" href={libraryHref}>
+            <LibraryIcon />
+            {t("deckList.libraryLink")}
+          </a>
+        </div>
+      )}
     </aside>
   );
 }
@@ -109,11 +128,14 @@ export function CourseStripContainer({
   useCases,
   instance,
   decks,
+  libraryHref,
 }: {
   useCases: UseCases;
   instance: Instance;
   /** The decks that are courses, in the list's order. */
   decks: readonly Deck[];
+  /** The deck library, while the instance has no deck that is not a course (CourseStrip). */
+  libraryHref?: string;
 }) {
   const links = useCourseLinks();
   const queryClient = useQueryClient();
@@ -151,5 +173,5 @@ export function CourseStripContainer({
       });
     }
   }, [shown]);
-  return <CourseStrip entries={entries} />;
+  return <CourseStrip entries={entries} libraryHref={libraryHref} />;
 }

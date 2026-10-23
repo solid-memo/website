@@ -4389,7 +4389,7 @@ p[role="status"]:not(.loading) {
   color: var(--primary);
 }
 
-.course-strip .button {
+.course-strip li .button {
   grid-column: 2;
   grid-row: 1 / span 3;
 }
@@ -4397,6 +4397,17 @@ p[role="status"]:not(.loading) {
 .course-strip li .hint {
   padding-left: 1.75rem;
   font-size: 0.85rem;
+}
+
+/* The way to the deck library, under the courses while they are all the
+   learner has: its words, and the button under them. */
+.course-strip-library {
+  padding: 0.5rem 0 0.4rem;
+  border-top: 1px solid var(--border);
+}
+
+.course-strip-library p {
+  margin: 0 0 0.5rem;
 }
 
 .course-strip progress {
@@ -4413,7 +4424,7 @@ p[role="status"]:not(.loading) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .course-strip .button {
+  .course-strip li .button {
     grid-column: 1;
     grid-row: 4;
     justify-self: start;

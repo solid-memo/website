@@ -30,7 +30,10 @@ describe("NewcomerCourseOffer", () => {
     renderOffer();
     const offer = screen.getByRole("complementary", { name: "Solid fundamentals" });
     expect(offer).toHaveTextContent("New here?");
-    expect(offer).toHaveTextContent("Every question you answer becomes a card in your deck.");
+    // Not a gate before the library: other decks can be added alongside.
+    expect(offer).toHaveTextContent(
+      "A course made for newcomers. Every question you answer becomes a card in your deck. You don't have to finish it before adding other decks from the deck library.",
+    );
     expect(offer).toHaveTextContent("Course · 5 cards");
     expect(within(offer).getByRole("link", { name: "About this course" })).toHaveAttribute(
       "href",

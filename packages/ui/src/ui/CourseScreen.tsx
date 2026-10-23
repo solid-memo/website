@@ -14,7 +14,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import type { CompletedChapter } from "./CourseContainer";
 import { Confetti } from "./Confetti";
 import { DataText } from "./DataText";
-import { CheckIcon } from "./icons";
+import { CheckIcon, LibraryIcon } from "./icons";
 import { useI18n, type I18n } from "./i18n";
 import { linkify } from "./linkify";
 import { ReaderText } from "./ReaderText";
@@ -43,17 +43,19 @@ const SPARKLES = 8;
  * chapter's description may be in Markdown (its `textFormat`); its title
  * is always plain. Once every chapter is done, the course says it is
  * finished, with a link back to the decks where there are any (none in
- * the Studio's trial). A notice (a newer release of the course on offer)
- * goes under the blurb.
+ * the Studio's trial). Beside the way on, or back, a secondary button
+ * leads to the deck library where there is one, since a course runs
+ * alongside other decks. A notice (a newer release of the course on
+ * offer) goes under the blurb.
  *
  * Coming back from a chapter just completed, the page cheers: a word
  * that the chapter is done, above the button on, which takes the focus
  * (marked `data-arrival` for useScreenFocus), so a screen reader reads it
- * and Tab goes on to Continue; the chapter's Done badge pops with a
- * burst of sparkles; and when it was the course's last chapter left,
- * confetti shooters pop from the bottom of the page (Confetti). The
- * motion is decoration only (style.css), and none of it plays with
- * motion reduced.
+ * and Tab goes on to Continue, the library after it; the chapter's Done
+ * badge pops with a burst of sparkles; and when it was the course's
+ * last chapter left, confetti shooters pop from the bottom of the page
+ * (Confetti). The motion is decoration only (style.css), and none of it
+ * plays with motion reduced.
  */
 export function CourseScreen({
   title,
@@ -64,6 +66,7 @@ export function CourseScreen({
   chapterHref,
   continueHref,
   decksHref,
+  libraryHref,
   justCompleted,
   notice,
 }: {
@@ -79,6 +82,8 @@ export function CourseScreen({
   continueHref?: string;
   /** The instance's deck list, which a finished course links back to; no link without one. */
   decksHref?: string;
+  /** The deck library, offered after the way on or back; no button without one. */
+  libraryHref?: string;
   /** The chapter the learner has just completed, to cheer about. */
   justCompleted?: CompletedChapter;
   /** Shown under the blurb: the offer of a newer release. */
@@ -87,6 +92,13 @@ export function CourseScreen({
   const { t, tx, readerText, readerLang } = useI18n();
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
   const doneCount = progress.chapters.filter((chapter) => chapter.state === "done").length;
+  const library =
+    libraryHref === undefined ? null : (
+      <a class="button" href={libraryHref}>
+        <LibraryIcon />
+        {t("deckList.libraryLink")}
+      </a>
+    );
   return (
     <>
       <section class="course">
@@ -120,11 +132,14 @@ export function CourseScreen({
               <CheckIcon />
               {t("course.finished")}
             </p>
-            {decksHref !== undefined && (
+            {(decksHref !== undefined || library !== null) && (
               <div class="actions">
-                <a class="button primary" href={decksHref}>
-                  {t("course.backToDecks")}
-                </a>
+                {decksHref !== undefined && (
+                  <a class="button primary" href={decksHref}>
+                    {t("course.backToDecks")}
+                  </a>
+                )}
+                {library}
               </div>
             )}
           </>
@@ -133,6 +148,7 @@ export function CourseScreen({
             <a class="button primary" href={continueHref}>
               {started ? t("course.continue") : t("course.start")}
             </a>
+            {library}
           </div>
         )}
         <ol class="course-chapters">

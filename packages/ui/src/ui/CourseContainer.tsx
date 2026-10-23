@@ -73,6 +73,7 @@ export function CourseContainer({
         current === undefined ? undefined : chapterHref(links, instanceUrl, course, current)
       }
       decksHref={links.decksHref?.(instanceUrl)}
+      libraryHref={links.libraryHref?.(instanceUrl)}
       justCompleted={justCompleted}
       notice={
         <LibraryUpgradeContainer useCases={useCases} instance={instance} deck={course.deck} />
