@@ -5,6 +5,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { StatisticsRange as RangeRead, UseCases } from "@solid-memo/application/useCases";
 import type { StatisticsRange } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * How long the statistics and card progress read are shown again without
@@ -28,9 +29,9 @@ export function keepStudyFiguresFresh(queryClient: QueryClient): () => void {
   return queryClient.getMutationCache().subscribe((event) => {
     if (event.type !== "updated") return;
     if (event.action.type !== "success" && event.action.type !== "error") return;
-    void queryClient.invalidateQueries({ queryKey: ["statistics"] });
-    void queryClient.invalidateQueries({ queryKey: ["cardProgress"] });
-    void queryClient.invalidateQueries({ queryKey: ["cardAnswers"] });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.allStatistics() });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.allCardAnswers() });
   });
 }
 
@@ -64,10 +65,10 @@ export function statisticsQuery(
   return {
     queryKey:
       deckUrl !== undefined
-        ? ["statistics", instanceUrl, deckUrl, range]
+        ? queryKeys.deckStatistics(instanceUrl, deckUrl, range)
         : range === "12m"
-          ? ["statistics", instanceUrl]
-          : ["statistics", instanceUrl, "range", range],
+          ? queryKeys.statistics(instanceUrl)
+          : queryKeys.statisticsOfRange(instanceUrl, range),
     queryFn: () =>
       useCases.getStatistics(
         instanceUrl,

@@ -108,7 +108,7 @@ export function DeckPreferencesContainer({
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-        queryClient.invalidateQueries({ queryKey: ["cardProgress"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() }),
       ]),
   });
 

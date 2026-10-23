@@ -106,7 +106,7 @@ export function CardInspectorContainer({
   const release = useDeckRelease(useCases, deck);
   const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
   const answersQuery = useQuery({
-    queryKey: ["cardAnswers", deck.url, card.id],
+    queryKey: queryKeys.cardAnswers(deck.url, card.id),
     queryFn: () => useCases.cardAnswers(instanceUrlOfDeck(deck.url), deck, card.id),
     enabled: tab === "history" || tab === "distractors",
   });

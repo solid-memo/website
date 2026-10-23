@@ -14,6 +14,7 @@ import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { courseHref } from "./router";
 import { STATISTICS_STALE_MS } from "./studyFigures";
+import { queryKeys } from "./queryKeys";
 
 /**
  * How the learner's courses have gone: each course, a link to its page,
@@ -115,12 +116,10 @@ export function CourseStatisticsContainer({
   const { isCourse } = useCopies(useCases, decks);
   const courses = decks.filter(isCourse);
   const query = useQuery({
-    queryKey: [
-      "statistics",
+    queryKey: queryKeys.courseStatistics(
       instance.url,
-      "courses",
       courses.map((deck) => [deck.url, deck.sourceUrl, deck.completedChapters ?? []]),
-    ],
+    ),
     queryFn: () => useCases.getCourseStatistics(instance.url, new Date(), courses),
     enabled: courses.length > 0,
     staleTime: STATISTICS_STALE_MS,

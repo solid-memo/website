@@ -37,7 +37,7 @@ export function CardHistoryContainer({
 }) {
   const { t } = useI18n();
   const answersQuery = useQuery({
-    queryKey: ["cardAnswers", deck.url, card.id],
+    queryKey: queryKeys.cardAnswers(deck.url, card.id),
     queryFn: () => useCases.cardAnswers(instanceUrl, deck, card.id),
     staleTime: STATISTICS_STALE_MS,
   });
