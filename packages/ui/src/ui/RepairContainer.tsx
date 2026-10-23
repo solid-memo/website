@@ -38,7 +38,7 @@ export function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
 export function useRepairMutation(
   useCases: UseCases,
   instanceUrl: string,
-  checkKey: readonly unknown[] = ["validation", instanceUrl],
+  checkKey: readonly unknown[] = queryKeys.validation(instanceUrl),
 ) {
   const queryClient = useQueryClient();
   return useMutation({

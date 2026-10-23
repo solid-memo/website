@@ -10,6 +10,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The decks whose documents do not say they are the decks' own, outside
@@ -37,7 +38,7 @@ export function UnclaimedDecksNotice({
     mutationFn: (deckUrl: string) => useCases.claimDeckDocuments(instanceUrl, deckUrl),
     onSuccess: async () => {
       setConfirming(null);
-      await queryClient.invalidateQueries({ queryKey: ["validation", instanceUrl] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.validation(instanceUrl) });
     },
   });
   if (decks.length === 0) return null;

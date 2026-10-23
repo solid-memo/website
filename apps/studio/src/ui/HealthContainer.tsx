@@ -174,9 +174,9 @@ function InstanceHealthContainer({
   deckHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const { repairs, dialog } = useRepairs(useCases, instance, ["validation", instance.url]);
+  const { repairs, dialog } = useRepairs(useCases, instance, queryKeys.validation(instance.url));
   const reportQuery = useQuery({
-    queryKey: ["validation", instance.url],
+    queryKey: queryKeys.validation(instance.url),
     queryFn: () => useCases.checkInstance(instance.url),
     staleTime: Infinity,
   });

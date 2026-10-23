@@ -9,6 +9,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { summaryClass, summaryOf, ValidationScreen } from "./ValidationScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Developer tool: the instance's documents checked against Solid Memo's
@@ -24,7 +25,7 @@ export function ValidationContainer({
 }) {
   const { t, errorText } = useI18n();
   const reportQuery = useQuery({
-    queryKey: ["validation", instance.url],
+    queryKey: queryKeys.validation(instance.url),
     queryFn: () => useCases.validateInstance(instance.url),
     staleTime: Infinity,
   });

@@ -62,7 +62,7 @@ export function DraftsContainer({
     Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instance.url) }),
       // The instance's check covers its drafts' documents too.
-      queryClient.invalidateQueries({ queryKey: ["validation", instance.url] }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.validation(instance.url) }),
     ]);
   const forget = (draft: ReleaseDraftSummary) =>
     queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(draft.url) });
