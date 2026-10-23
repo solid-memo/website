@@ -57,7 +57,7 @@ export function DeckAboutContainer({
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   // After the preferences' own query, which reads them.

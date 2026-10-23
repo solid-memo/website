@@ -77,7 +77,7 @@ export function DeckPreferencesContainer({
   );
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
 

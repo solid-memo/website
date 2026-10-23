@@ -185,7 +185,7 @@ export function AppShell({
           queryKey: queryKeys.instanceAppearance(instanceUrl),
         });
         void queryClient.invalidateQueries({
-          queryKey: ["preferences", instanceUrl],
+          queryKey: queryKeys.preferences(instanceUrl),
         });
       });
   }

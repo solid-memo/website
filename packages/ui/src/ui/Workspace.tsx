@@ -462,7 +462,7 @@ export function Workspace({
   ]);
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl!),
     enabled: activeInstance !== null,
   });

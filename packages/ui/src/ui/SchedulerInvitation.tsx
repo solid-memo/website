@@ -98,7 +98,7 @@ export function SchedulerInvitationContainer({
   } | null>(null);
   // The preferences screen's key: a save there, or this switch, shows here at once.
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
     refetchOnWindowFocus: false,
   });
@@ -123,7 +123,8 @@ export function SchedulerInvitationContainer({
   });
   const dismissMutation = useMutation({
     mutationFn: () => useCases.dismissSchedulerInvitation(instance.url),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["preferences", instance.url] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.preferences(instance.url) }),
   });
 
   if (progress !== null) return <SchedulerSwitchProgress progress={progress} />;

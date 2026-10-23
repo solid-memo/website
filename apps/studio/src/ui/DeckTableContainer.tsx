@@ -113,7 +113,7 @@ export function DeckTableContainer({
     refetchOnWindowFocus: false,
   });
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   const check = useDataCheck(useCases, instance.url);

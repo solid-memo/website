@@ -15,6 +15,7 @@ import {
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
+import { queryKeys } from "./queryKeys";
 
 /** What the check of an instance, made when it is opened, lets the screens change (docs/validation.md). */
 export interface DataCheck {
@@ -52,7 +53,7 @@ export type ReadOnlyReason = "checking" | "blocked" | "setAside";
  */
 export function useDataCheck(useCases: UseCases, instanceUrl: string | null): DataCheck {
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl!),
     enabled: instanceUrl !== null,
   });

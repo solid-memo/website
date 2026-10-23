@@ -117,7 +117,7 @@ export function CardScheduleContainer({
   });
   const instanceUrl = instanceUrlOfDeck(deck.url);
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl),
   });
   const editMutation = useMutation({

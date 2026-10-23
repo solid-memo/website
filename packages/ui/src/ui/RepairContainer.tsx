@@ -12,6 +12,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n, type I18n } from "./i18n";
 import { summaryOf, ValidationScreen, ViolationMessage } from "./ValidationScreen";
+import { queryKeys } from "./queryKeys";
 
 /** What a repair does, for the user: "Give the deck the default description". */
 export function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
@@ -44,8 +45,14 @@ export function useRepairMutation(
     mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) =>
       useCases.applyRepairs(repairs),
     onSuccess: async () => {
-      for (const key of ["decks", "cards", "reviews", "preferences", "migration"]) {
-        await queryClient.invalidateQueries({ queryKey: [key] });
+      for (const queryKey of [
+        queryKeys.allDecks(),
+        queryKeys.allCards(),
+        queryKeys.allReviews(),
+        queryKeys.allPreferences(),
+        queryKeys.allMigrations(),
+      ]) {
+        await queryClient.invalidateQueries({ queryKey });
       }
       await queryClient.invalidateQueries({ queryKey: checkKey });
     },

@@ -46,7 +46,7 @@ export function CardHistoryContainer({
     queryFn: () => useCases.listDeckReviewStates(deck),
   });
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl),
   });
   if (answersQuery.error || reviewsQuery.error)

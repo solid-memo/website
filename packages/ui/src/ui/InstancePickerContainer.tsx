@@ -56,7 +56,7 @@ export function InstancePickerContainer({
     mutationFn: (instance: Instance) => useCases.deleteInstance(session, instance),
     onSuccess: async (_, instance) => {
       queryClient.removeQueries({ queryKey: queryKeys.decks(instance.url) });
-      queryClient.removeQueries({ queryKey: ["preferences", instance.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.preferences(instance.url) });
       await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
     },
   });
