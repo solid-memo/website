@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import { isCopyOf, type LibraryDeck } from "@solid-memo/domain/library";
+import { libraryIndexQuery } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { forgetLibrarySelection, LibraryScreen } from "./LibraryScreen";
@@ -31,10 +32,7 @@ export function LibraryContainer({
   // Per instance: another instance's library is a fresh list.
   const memoryKey = `library:${instance.url}`;
 
-  const libraryQuery = useQuery({
-    queryKey: ["library"],
-    queryFn: () => useCases.listLibraryDecks(),
-  });
+  const libraryQuery = useQuery(libraryIndexQuery(useCases));
 
   const decksQuery = useQuery({
     queryKey: ["decks", instance.url],

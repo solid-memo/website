@@ -698,6 +698,15 @@ another index at build time ([configuration.md](configuration.md)):
 VITE_LIBRARY_INDEX_URL=https://example.org/decks/index.ttl npm run dev
 ```
 
+The index is read once a page
+([solidDeckLibrary.ts](../packages/solid/src/solidDeckLibrary.ts)): the
+deck list, the upgrade offers, the Studio's update badges and a
+release's place all share that one read, and its decks are made of it
+once too. It comes with the site, or from `VITE_LIBRARY_INDEX_URL` at
+build time, so it changes only with a deploy, and a page's lifetime is
+a safe scope. A failed read is not kept, so the next one tries again.
+Each release is kept the same way.
+
 The library conforms to the shapes in [shapes.md](shapes.md):
 `CatalogV1`, `LibraryDeckSeriesV3`, and `LibraryDeckV5` or
 `LibraryDeckV6`, each release against its own format's shape. The app
@@ -826,9 +835,9 @@ flowchart LR
   user changed and their review history
   ([migrations.md](migrations.md#catching-up-with-the-library)). The
   deck list says "New release" after the copy's name, so the offer is
-  not missed by a learner who studies from the list. The list reads the
-  index for it once a page, not each time it shows, since the index
-  changes only with a deploy.
+  not missed by a learner who studies from the list. The list and the
+  offer read the index once a page, as every reader of it does
+  ([Reading it](#reading-it)).
 
 ### From a link
 

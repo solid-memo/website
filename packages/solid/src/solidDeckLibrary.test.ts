@@ -70,6 +70,42 @@ describe("listLibraryDecks", () => {
   });
 });
 
+describe("the index", () => {
+  function indexDocument() {
+    return setThing(
+      mockSolidDatasetFrom(INDEX),
+      buildThing(createThing({ url: INDEX }))
+        .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
+        .build(),
+    );
+  }
+
+  it("is read once, for every reader of it, concurrent or later", async () => {
+    vi.mocked(getSolidDataset).mockResolvedValue(indexDocument());
+    const library = makeLibrary();
+    const [decks, view, sameDecks] = await Promise.all([
+      library.listLibraryDecks(),
+      library.readLibraryIndex(),
+      library.listLibraryDecks(),
+    ]);
+    expect(sameDecks).toBe(decks);
+    expect(await library.listLibraryDecks()).toBe(decks);
+    expect(await library.readLibraryIndex()).toBe(view);
+    expect(getSolidDataset).toHaveBeenCalledTimes(1);
+  });
+
+  it("is read again after a failed read", async () => {
+    vi.mocked(getSolidDataset)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(indexDocument());
+    const library = makeLibrary();
+    await expect(library.readLibraryIndex()).rejects.toThrow("offline");
+    await expect(library.listLibraryDecks()).resolves.toEqual([]);
+    await expect(library.readLibraryIndex()).resolves.toMatchObject({ url: INDEX });
+    expect(getSolidDataset).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("readLibraryIndex", () => {
   it("reads what the index says that places a release", async () => {
     const index = setThing(

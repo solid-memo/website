@@ -337,8 +337,7 @@ export function Workspace({
 
   const needsLibraryDeck = libraryDeckUrl !== null && activeInstance !== null;
   const libraryQuery = useQuery({
-    queryKey: ["library"],
-    queryFn: () => useCases.listLibraryDecks(),
+    ...libraryIndexQuery(useCases),
     enabled: needsLibraryDeck || route?.screen === "try",
   });
   // A library deck's page is addressed by its series, which outlives
@@ -575,10 +574,7 @@ export function Workspace({
     onSuccess: async (instance) => {
       // A new instance has no decks, so its list offers the library's course for
       // newcomers (NewcomerCourseContainer): read from now, it comes with the list.
-      void queryClient.prefetchQuery({
-        queryKey: ["library"],
-        queryFn: () => useCases.listLibraryDecks(),
-      });
+      void queryClient.prefetchQuery(libraryIndexQuery(useCases));
       await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
       navigate({ screen: "home", instanceUrl: instance.url });
     },

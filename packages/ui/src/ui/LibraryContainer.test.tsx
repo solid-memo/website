@@ -4,7 +4,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LibraryContainer } from "./LibraryContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -88,6 +88,25 @@ describe("LibraryContainer", () => {
       "href",
       `#/library-preview?instance=${encodeURIComponent(instance.url)}&deck=${encodeURIComponent(capitals.seriesUrl)}`,
     );
+  });
+
+  it("reads the library once a page, not again when shown again or the window is focused", async () => {
+    const listLibraryDecks = vi.fn(async () => [capitals, rivers]);
+    const useCases = makeUseCasesFake({ listLibraryDecks });
+    const { queryClient } = renderContainer(useCases);
+    expect(await screen.findByRole("checkbox", { name: "Capitals" })).toBeInTheDocument();
+    cleanup();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <LibraryContainer useCases={useCases} instance={instance} onDone={vi.fn()} />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole("checkbox", { name: "Capitals" })).toBeInTheDocument();
+    focusManager.setFocused(false);
+    focusManager.setFocused(true);
+    focusManager.setFocused(undefined);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(listLibraryDecks).toHaveBeenCalledOnce();
   });
 
   it("shows an error when the library cannot be read", async () => {

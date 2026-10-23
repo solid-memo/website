@@ -6,6 +6,7 @@ import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { SolidDataset } from "@inrupt/solid-client";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 import { AppError } from "@solid-memo/domain/appError";
 import { catalogLinks } from "./catalogLinks";
 import { getSolidDatasetLinear } from "./linearDataset";
@@ -50,6 +51,14 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
   const releases = new Map<string, Promise<SolidDataset>>();
   const contents = new Map<string, Promise<LibraryDeckContent>>();
   const outlines = new Map<string, Promise<CourseOutline>>();
+  const indexes = new Map<string, Promise<SolidDataset>>();
+  const decks = new Map<string, Promise<LibraryDeck[]>>();
+  const views = new Map<string, Promise<LibraryIndexView>>();
+
+  /** The index's document, read once. */
+  function index(): Promise<SolidDataset> {
+    return kept(indexes, indexUrl, () => getSolidDatasetLinear(indexUrl, { fetch }));
+  }
 
   /** The release's document, read once. */
   function release(url: string): Promise<SolidDataset> {
@@ -57,12 +66,14 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
   }
 
   return {
-    async listLibraryDecks(): Promise<LibraryDeck[]> {
-      return toLibraryDecks(await getSolidDatasetLinear(indexUrl, { fetch }));
+    listLibraryDecks() {
+      return kept(decks, indexUrl, () => index().then(toLibraryDecks));
     },
 
-    async readLibraryIndex() {
-      return toLibraryIndexView(indexUrl, await getSolidDatasetLinear(indexUrl, { fetch }));
+    readLibraryIndex() {
+      return kept(views, indexUrl, () =>
+        index().then((dataset) => toLibraryIndexView(indexUrl, dataset)),
+      );
     },
 
     fetchLibraryDeck(url) {

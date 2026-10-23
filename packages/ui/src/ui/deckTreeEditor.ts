@@ -239,9 +239,11 @@ export function useDeckTreeEditor(
 
 /**
  * The library's index of decks, as the deck list tells its copies by it
- * (useCopies). The index changes only with a deploy: read once a page,
- * not each time the list shows, so the index Workspace reads beside the
- * deck list's arrangement serves the list.
+ * (useCopies), and as the library screen, a library deck's page and the
+ * try page show it: every ["library"] query is this one. The index
+ * changes only with a deploy: read once a page, not each time a screen
+ * shows or the window is focused, so the index Workspace reads beside
+ * the deck list's arrangement serves the list.
  */
 export function libraryIndexQuery(useCases: UseCases) {
   return {
