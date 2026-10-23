@@ -5,6 +5,7 @@
 #/course-chapter?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1&chapter=https%3A%2F%2Flibrary.example%2Fdecks%2Fsolid%2Fv1.ttl%23chapter-1
 #/course-review?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1&chapter=https%3A%2F%2Flibrary.example%2Fdecks%2Fsolid%2Fv1.ttl%23chapter-1
 #/course?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1
+#/cram?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1
 #/deck-preferences?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1
 #/deck-preferences?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1&section=languages
 #/deck-statistics?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1

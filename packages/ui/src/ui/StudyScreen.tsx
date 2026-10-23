@@ -77,6 +77,10 @@ function answerButtons(
  * A study session, card by card (StudyCard). A card of a release, in a
  * deck copied from it, says where a mistake in it is reported (`report`):
  * a deck the learner wrote has none, and nor has a card they added.
+ *
+ * A cram (`cram`, CramContainer) is headed as one and says, the whole
+ * session, that nothing in it is recorded; its end says so too, and
+ * offers to cram the same cards again.
  */
 export function StudyScreen({
   deckName,
@@ -95,6 +99,7 @@ export function StudyScreen({
   onAnswer,
   onUndo,
   onExit,
+  cram,
 }: {
   deckName: string;
   /** The language the deck's name is in, when not the page's (readerLang). */
@@ -131,8 +136,11 @@ export function StudyScreen({
   /** Take back the session's last answer; absent when there is none to. */
   onUndo?: () => void;
   onExit: () => void;
+  /** A cram, which records nothing, and how it starts over; absent for a study session. */
+  cram?: { onAgain: () => void };
 }) {
   const { t, tx } = useI18n();
+  const noticeId = useId();
   const endRef = useRef<HTMLParagraphElement>(null);
   const finished = prompt === null;
 
@@ -181,11 +189,15 @@ export function StudyScreen({
 
   const progress = t("study.position", { position, total });
   const said = putBack ? t("study.putBack") : undone ? t("study.undone") : null;
+  const end =
+    cram === undefined
+      ? t(total === 0 ? "study.nothingToday" : "study.finished")
+      : t(total === 0 ? "cram.nothing" : "cram.finished");
   return (
     <section onKeyDown={onKeyDown}>
       <header>
         <h2>
-          {tx("study.heading", {
+          {tx(cram === undefined ? "study.heading" : "cram.heading", {
             deck: (
               <a href={deckHref} lang={deckLang}>
                 {deckName}
@@ -196,6 +208,13 @@ export function StudyScreen({
         {/* At the end it is the next step, under the end message. */}
         {!finished && endButton}
       </header>
+      {/* There all along, and said once, as the description of the first
+          question, where the focus goes when a cram begins. */}
+      {cram !== undefined && (
+        <p class="hint" id={noticeId}>
+          {t("cram.notice")}
+        </p>
+      )}
       {/* One status line, mounted for the whole session so screen readers
           hear each change: the position, a card put back and an answer
           undone. It is the only
@@ -208,10 +227,13 @@ export function StudyScreen({
       {finished && (
         <>
           <p ref={endRef} tabIndex={-1}>
-            {total === 0 ? t("study.nothingToday") : t("study.finished")}
+            {end}
           </p>
           <div class="study-end">
             {endButton}
+            {cram !== undefined && total > 0 && (
+              <button onClick={cram.onAgain}>{t("cram.again")}</button>
+            )}
             {undoButton}
           </div>
         </>
@@ -220,6 +242,7 @@ export function StudyScreen({
         <StudyCard
           key={position}
           prompt={prompt}
+          describedBy={cram !== undefined && position === 1 ? noticeId : undefined}
           intervals={intervals}
           answerScale={answerScale}
           busy={busy}
@@ -249,7 +272,7 @@ export function StudyScreen({
  * once revealed, the grades a Tab after it (or after its picture's
  * button, when it has a picture). Neither is named, so a screen reader
  * reads the card's text on taking the focus; the position is said by the
- * status line.
+ * status line. The question is described by `describedBy`, when given.
  *
  * While the focus is in the card, Space reveals and a grade's key answers,
  * as a hint under the card says. The keys work only there, so they never
@@ -269,12 +292,15 @@ export function StudyScreen({
  */
 function StudyCard({
   prompt,
+  describedBy,
   intervals,
   answerScale,
   busy,
   onAnswer,
 }: {
   prompt: Prompt;
+  /** The id of what the question is described by. */
+  describedBy: string | undefined;
   intervals: Readonly<Record<ReviewQuality, number>> | undefined;
   answerScale: AnswerScale;
   busy: boolean;
@@ -332,7 +358,7 @@ function StudyCard({
 
   return (
     <div class="practice-card" onKeyDown={onKeyDown}>
-      <div ref={questionRef} class="study-face" tabIndex={-1}>
+      <div ref={questionRef} class="study-face" tabIndex={-1} aria-describedby={describedBy}>
         <CardFace {...question} note={revealed ? question.note : undefined} role="question" />
       </div>
       {revealed ? (

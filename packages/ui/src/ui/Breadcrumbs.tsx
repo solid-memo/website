@@ -161,6 +161,8 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
       return [decks, deck, browser, { label: names.card, lang: names.cardLang, route }];
     case "study":
       return [decks, deck, { label: t("breadcrumbs.study"), route }];
+    case "cram":
+      return [decks, deck, { label: t("breadcrumbs.cram"), route }];
     case "deckStatistics":
       return [decks, deck, { label: t("breadcrumbs.statistics"), route }];
   }

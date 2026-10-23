@@ -63,6 +63,9 @@ export type RouteRef =
   | { screen: "card"; instanceUrl: string; deckUrl: string; cardUrl: string }
   /** A study session over the deck's due and new prompts. */
   | { screen: "study"; instanceUrl: string; deckUrl: string }
+  /** The deck's leeches crammed, as often as the learner likes: nothing
+      is recorded, so no due date, statistic or leech changes. */
+  | { screen: "cram"; instanceUrl: string; deckUrl: string }
   /** The course a deck is the learner's copy of: its chapters and progress. */
   | { screen: "course"; instanceUrl: string; deckUrl: string }
   /** One chapter of the deck's course, its steps taken in turn. `chapterUrl`
@@ -235,6 +238,8 @@ export function routeToHash(ref: RouteRef): string {
         instance: ref.instanceUrl,
         deck: ref.deckUrl,
       })}`;
+    case "cram":
+      return `#/cram${params({ instance: ref.instanceUrl, deck: ref.deckUrl })}`;
     case "course":
       return `#/course${params({ instance: ref.instanceUrl, deck: ref.deckUrl })}`;
     case "courseChapter":
@@ -331,6 +336,11 @@ export function libraryPreviewHref(instanceUrl: string, libraryDeckUrl: string):
  */
 export function deckHref(instanceUrl: string, deckUrl: string): string {
   return routeToHash({ screen: "deckDetail", instanceUrl, deckUrl });
+}
+
+/** Hash URL of a cram of a deck's leeches: what "Cram the leeches" under its hardest cards links to. */
+export function cramHref(instanceUrl: string, deckUrl: string): string {
+  return routeToHash({ screen: "cram", instanceUrl, deckUrl });
 }
 
 /** Hash URL of the course a deck is the learner's copy of. */
@@ -488,6 +498,8 @@ function parseDeckRoute(
     }
     case "/study":
       return { screen: "study", instanceUrl, deckUrl };
+    case "/cram":
+      return { screen: "cram", instanceUrl, deckUrl };
     case "/course":
       return { screen: "course", instanceUrl, deckUrl };
     case "/course-chapter":

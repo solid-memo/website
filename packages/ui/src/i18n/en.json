@@ -164,6 +164,7 @@
     "browser": "Browser",
     "cardCreator": "New card",
     "study": "Study",
+    "cram": "Cram",
     "statistics": "Statistics",
     "course": "Course",
     "courseReview": "Final review",
@@ -1452,6 +1453,14 @@
       "easy": "Easy"
     }
   },
+  "cram": {
+    "heading": "Cram: {deck}",
+    "notice": "Nothing is recorded here: your answers don't change any due date, your statistics, or which cards are leeches.",
+    "finished": "Cram finished — nothing was recorded.",
+    "nothing": "This deck has no leeches to cram.",
+    "again": "Cram again",
+    "preparing": "Preparing the leeches…"
+  },
   "validation": {
     "heading": "Validation of {name}",
     "validating": "Validating…",
@@ -1898,6 +1907,8 @@
     },
     "noLeeches": "No leeches: no card was forgotten that often.",
     "leechIn": "{forgotten}, in {deck}",
+    "cramLeeches": "Cram the leeches",
+    "cramLeechesHint": "Practice them now, as often as you like. Nothing is recorded, so their due dates stay the same.",
     "courses": "Your courses",
     "coursesHint": "The chapters you have completed in each course, and how you answered each chapter's questions over the last 12 months: the share right of each question's first answer of the day.",
     "chapter": "Chapter",

@@ -164,6 +164,7 @@
     "browser": "Bläddra",
     "cardCreator": "Nytt kort",
     "study": "Studera",
+    "cram": "Nöta",
     "statistics": "Statistik",
     "course": "Kurs",
     "courseReview": "Slutrepetition",
@@ -1452,6 +1453,14 @@
       "easy": "Lätt"
     }
   },
+  "cram": {
+    "heading": "Nöta: {deck}",
+    "notice": "Inget sparas här: dina svar ändrar inte när korten ska repeteras, din statistik eller vilka kort som är blodiglar.",
+    "finished": "Nötpasset är klart — inget sparades.",
+    "nothing": "Den här kortleken har inga blodiglar att nöta.",
+    "again": "Nöt igen",
+    "preparing": "Förbereder blodiglarna…"
+  },
   "validation": {
     "heading": "Kontroll av {name}",
     "validating": "Kontrollerar…",
@@ -1898,6 +1907,8 @@
     },
     "noLeeches": "Inga blodiglar: inget kort har glömts så ofta.",
     "leechIn": "{forgotten}, i {deck}",
+    "cramLeeches": "Nöt blodiglarna",
+    "cramLeechesHint": "Öva på dem nu, så ofta du vill. Inget sparas: de ska repeteras samma dag som förut.",
     "courses": "Dina kurser",
     "coursesHint": "Kapitlen du har klarat i varje kurs, och hur du svarat på varje kapitels frågor de senaste 12 månaderna: andelen rätt av det första svaret för dagen på varje fråga.",
     "chapter": "Kapitel",

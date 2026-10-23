@@ -164,6 +164,7 @@
     "browser": "Kartenverwaltung",
     "cardCreator": "Neue Karte",
     "study": "Lernen",
+    "cram": "Pauken",
     "statistics": "Statistik",
     "course": "Kurs",
     "courseReview": "Abschlusswiederholung",
@@ -1452,6 +1453,14 @@
       "easy": "Einfach"
     }
   },
+  "cram": {
+    "heading": "{deck} pauken",
+    "notice": "Hier wird nichts gespeichert: Deine Antworten ändern weder, wann Karten fällig sind, noch deine Statistik oder welche Karten Problemkarten sind.",
+    "finished": "Pauken beendet – nichts wurde gespeichert.",
+    "nothing": "Dieser Stapel hat keine Problemkarten zum Pauken.",
+    "again": "Noch einmal pauken",
+    "preparing": "Die Problemkarten werden vorbereitet…"
+  },
   "validation": {
     "heading": "Prüfung von „{name}“",
     "validating": "Wird geprüft…",
@@ -1898,6 +1907,8 @@
     },
     "noLeeches": "Keine Problemkarten: Keine Karte wurde so oft vergessen.",
     "leechIn": "{forgotten}, in {deck}",
+    "cramLeeches": "Problemkarten pauken",
+    "cramLeechesHint": "Übe sie jetzt, so oft du willst. Nichts wird gespeichert: Die Karten bleiben an denselben Tagen fällig.",
     "courses": "Deine Kurse",
     "coursesHint": "Die Kapitel, die du in jedem Kurs abgeschlossen hast, und wie du die Fragen jedes Kapitels in den letzten 12 Monaten beantwortet hast: der Anteil richtiger Antworten unter der ersten Antwort des Tages auf jede Frage.",
     "chapter": "Kapitel",

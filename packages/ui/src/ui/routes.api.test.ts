@@ -56,6 +56,7 @@ const ROUTES: RouteRef[] = [
   { screen: "cardCreator", instanceUrl: INSTANCE, deckUrl: DECK },
   { screen: "card", instanceUrl: INSTANCE, deckUrl: DECK, cardUrl: CARD },
   { screen: "study", instanceUrl: INSTANCE, deckUrl: DECK },
+  { screen: "cram", instanceUrl: INSTANCE, deckUrl: DECK },
   { screen: "course", instanceUrl: INSTANCE, deckUrl: DECK },
   { screen: "courseChapter", instanceUrl: INSTANCE, deckUrl: DECK, chapterUrl: CHAPTER },
   { screen: "courseReview", instanceUrl: INSTANCE, deckUrl: DECK, chapterUrl: CHAPTER },

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
+import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 
 /**
  * The library release a deck was copied from (UseCases.deckRelease): null
@@ -36,6 +37,34 @@ export function useDeckReleaseQuery(
   return deck.sourceUrl === undefined
     ? { release: null, error: null }
     : { release: query.data, error: query.error };
+}
+
+/**
+ * Where a mistake in the release a deck was copied from is reported
+ * (UseCases.reportPlace), the release, and the ids of its cards, the
+ * only ones a study screen reports (StudyScreen's `report`): undefined
+ * for a deck from no release, and while either is read or when it cannot
+ * be. Read once, as a release never changes; a card the learner added is
+ * theirs to fix.
+ */
+export function useReportTarget(
+  useCases: UseCases,
+  deck: Deck,
+): { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> } | undefined {
+  const reportQuery = useQuery({
+    queryKey: ["reportPlace", deck.sourceUrl],
+    queryFn: () => useCases.reportPlace(deck.sourceUrl!),
+    enabled: deck.sourceUrl !== undefined,
+    staleTime: Infinity,
+  });
+  const release = useDeckRelease(useCases, deck);
+  return reportQuery.data === undefined || release === null || release === undefined
+    ? undefined
+    : {
+        place: reportQuery.data,
+        releaseUrl: deck.sourceUrl!,
+        cardIds: new Set(release.cards.map((card) => card.id)),
+      };
 }
 
 /**

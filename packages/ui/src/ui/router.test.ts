@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
 import {
   courseHref,
+  cramHref,
   deckHref,
   decksHref,
   deckStatisticsHref,
@@ -120,6 +121,11 @@ const roundTrips: RouteRef[] = [
   },
   {
     screen: "study",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
+  },
+  {
+    screen: "cram",
     instanceUrl: "https://pod.example/solid-memo/a/",
     deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
   },
@@ -263,6 +269,8 @@ describe("routeToHash / parseHash", () => {
     "#/study",
     "#/study?instance=a",
     "#/study?deck=b",
+    "#/cram",
+    "#/cram?deck=b",
     "#/course?instance=a",
     "#/course?deck=b",
     "#/course-chapter?instance=a&deck=b",
@@ -321,6 +329,17 @@ describe("deckHref", () => {
     const href = deckHref("https://pod.example/a/", "https://pod.example/a/c#d");
     expect(parseHash(href)).toEqual({
       screen: "deckDetail",
+      instanceUrl: "https://pod.example/a/",
+      deckUrl: "https://pod.example/a/c#d",
+    });
+  });
+});
+
+describe("cramHref", () => {
+  it("is the hash URL of a cram of the deck's leeches", () => {
+    const href = cramHref("https://pod.example/a/", "https://pod.example/a/c#d");
+    expect(parseHash(href)).toEqual({
+      screen: "cram",
       instanceUrl: "https://pod.example/a/",
       deckUrl: "https://pod.example/a/c#d",
     });
