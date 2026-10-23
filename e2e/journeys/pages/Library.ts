@@ -34,12 +34,16 @@ export class Library extends Screen {
     return this.page.getByRole("main").getByRole("link", { name: title, exact: true });
   }
 
-  /** From Decks, the link "Deck library". */
+  /**
+   * From Decks, the link "Deck library" under the list: the last one, as
+   * the strip of courses has one too while every deck is a course.
+   */
   async open(): Promise<void> {
     await this.intent("Open the deck library", async () => {
       await this.page
         .getByRole("main")
         .getByRole("link", { name: this.t("deckList.libraryLink"), exact: true })
+        .last()
         .click();
       await this.expectOpen();
     });

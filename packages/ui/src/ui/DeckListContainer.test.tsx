@@ -13,7 +13,7 @@ import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTr
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
 import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
-import { courseHref, deckHref, routeToHash } from "./router";
+import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 
 const instance: Instance = {
@@ -203,6 +203,8 @@ describe("DeckListContainer", () => {
       courseHref(instance.url, going.url),
     );
     expect(strip).toHaveTextContent("0 of 2 chapters done");
+    // A deck that is not a course is on the list: the strip does not point to the library.
+    expect(within(strip).queryByRole("link", { name: "Deck library" })).toBeNull();
     await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalledTimes(3));
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(setAside);
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(deck);
@@ -239,6 +241,29 @@ describe("DeckListContainer", () => {
 
     await waitFor(() => expect(strip).toHaveTextContent("1 of 2 chapters done"));
     expect(useCases.getCourseSummary).toHaveBeenCalledOnce();
+  });
+
+  it("points to the deck library from the strip while every deck is a course, whichever", async () => {
+    const going: Deck = { ...deck, title: { en: "Solid" }, sourceUrl: courseLibraryDeck.url };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [going]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
+    });
+    const { queryClient } = renderContainer(useCases);
+    const strip = await screen.findByRole("complementary", { name: "Your courses" });
+    expect(strip).toHaveTextContent(/Looking for something to learn\?/);
+    expect(within(strip).getByRole("link", { name: "Deck library" })).toHaveAttribute(
+      "href",
+      libraryHref(instance.url),
+    );
+
+    // A deck that is not a course joins the list: the line goes.
+    vi.mocked(useCases.listDecks).mockResolvedValue([going, deck]);
+    await queryClient.invalidateQueries({ queryKey: ["decks", instance.url] });
+    await screen.findByRole("link", { name: "Kanji N5" });
+    expect(within(strip).queryByRole("link", { name: "Deck library" })).toBeNull();
+    expect(strip).not.toHaveTextContent(/Looking for something to learn/);
   });
 
   it("shows no strip of courses when no deck is a course", async () => {

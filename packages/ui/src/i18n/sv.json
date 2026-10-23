@@ -313,11 +313,11 @@
     },
     "start": "Börja kursen",
     "continue": "Fortsätt",
-    "finished": "Du har gått klart kursen. Dess kort finns i din kortlek, att studera som alla andra.",
+    "finished": "Du har gått klart kursen. Dess kort finns i din kortlek, att studera som alla andra. Hitta vad du vill lära dig härnäst i kortleksbiblioteket.",
     "backToDecks": "Tillbaka till kortlekarna",
     "chapterCompleted": "Bra jobbat! Du är klar med {chapter}.",
     "courseCompleted": "Grattis! Det var sista kapitlet: du har gått klart hela kursen.",
-    "continueOrStop": "Fortsätt med nästa kapitel när du är redo, eller sluta här så länge: det du har gjort sparas.",
+    "continueOrStop": "Fortsätt med nästa kapitel när du är redo, eller sluta här så länge: det du har gjort sparas. Under tiden kan du lägga till kortlekar från kortleksbiblioteket och studera dem också.",
     "chapterNumber": "Kapitel {number}:",
     "locked": "Låst",
     "open": "Öppet",
@@ -485,7 +485,8 @@
   },
   "deckList": {
     "courses": "Dina kurser",
-    "coursesHint": "Kurserna du har lagt till och inte gjort klart än.",
+    "coursesHint": "Kurserna du har lagt till och inte gjort klart än. Du tar dem vid sidan av dina andra kortlekar: du behöver inte gå klart en innan du lägger till fler från kortleksbiblioteket.",
+    "coursesLibrary": "Letar du efter något att lära dig? I kortleksbiblioteket finns färdiga kortlekar och kurser om språk, geografi, naturvetenskap, datorer och mycket mer. Lägg till en nu och studera den vid sidan av din kurs.",
     "continueCourseNamed": "Fortsätt {course}",
     "startCourseNamed": "Börja kursen {course}",
     "courseProgress": "Avklarade kapitel",
@@ -613,7 +614,7 @@
   },
   "newcomerCourse": {
     "eyebrow": "Ny här?",
-    "pitch": "Börja här: en kurs för dig som är ny. Varje fråga du svarar på blir ett kort i din kortlek.",
+    "pitch": "En kurs för dig som är ny. Varje fråga du svarar på blir ett kort i din kortlek. Du behöver inte gå klart den innan du lägger till andra kortlekar från kortleksbiblioteket.",
     "start": "Börja kursen",
     "about": "Om kursen"
   },

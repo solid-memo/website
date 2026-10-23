@@ -313,11 +313,11 @@
     },
     "start": "Start the course",
     "continue": "Continue",
-    "finished": "You have finished this course. Its cards are in your deck, to study like any other.",
+    "finished": "You have finished this course. Its cards are in your deck, to study like any other. Find what to learn next in the deck library.",
     "backToDecks": "Back to decks",
     "chapterCompleted": "Well done! You have completed {chapter}.",
     "courseCompleted": "Congratulations! That was the last chapter: you have completed the whole course.",
-    "continueOrStop": "Go on with the next chapter when you are ready, or stop here for now: your progress is kept.",
+    "continueOrStop": "Go on with the next chapter when you are ready, or stop here for now: your progress is kept. Meanwhile, you can add decks from the deck library and study them too.",
     "chapterNumber": "Chapter {number}:",
     "locked": "Locked",
     "open": "Open",
@@ -485,7 +485,8 @@
   },
   "deckList": {
     "courses": "Your courses",
-    "coursesHint": "The courses you have added and not finished yet.",
+    "coursesHint": "The courses you have added and not finished yet. They run alongside your other decks: you don't need to finish one before adding more from the deck library.",
+    "coursesLibrary": "Looking for something to learn? The deck library has ready-made decks and courses on languages, geography, science, computing and more. Add one now and study it alongside your course.",
     "continueCourseNamed": "Continue {course}",
     "startCourseNamed": "Start the course {course}",
     "courseProgress": "Chapters done",
@@ -613,7 +614,7 @@
   },
   "newcomerCourse": {
     "eyebrow": "New here?",
-    "pitch": "Start here: a course made for newcomers. Every question you answer becomes a card in your deck.",
+    "pitch": "A course made for newcomers. Every question you answer becomes a card in your deck. You don't have to finish it before adding other decks from the deck library.",
     "start": "Start the course",
     "about": "About this course"
   },

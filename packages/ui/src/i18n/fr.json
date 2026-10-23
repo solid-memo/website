@@ -318,11 +318,11 @@
     },
     "start": "Commencer le cours",
     "continue": "Continuer",
-    "finished": "Vous avez terminé ce cours. Ses cartes sont dans votre paquet, à étudier comme les autres.",
+    "finished": "Vous avez terminé ce cours. Ses cartes sont dans votre paquet, à étudier comme les autres. Trouvez quoi apprendre ensuite dans la bibliothèque de paquets.",
     "backToDecks": "Retour aux paquets",
     "chapterCompleted": "Bravo ! Vous avez terminé {chapter}.",
     "courseCompleted": "Félicitations ! C’était le dernier chapitre : vous avez terminé tout le cours.",
-    "continueOrStop": "Passez au chapitre suivant quand vous le souhaitez, ou arrêtez-vous là pour l’instant : votre progression est conservée.",
+    "continueOrStop": "Passez au chapitre suivant quand vous le souhaitez, ou arrêtez-vous là pour l’instant : votre progression est conservée. En attendant, vous pouvez ajouter des paquets depuis la bibliothèque de paquets et les étudier aussi.",
     "chapterNumber": "Chapitre {number} :",
     "locked": "Verrouillé",
     "open": "Ouvert",
@@ -496,7 +496,8 @@
   },
   "deckList": {
     "courses": "Vos cours",
-    "coursesHint": "Les cours que vous avez ajoutés et pas encore terminés.",
+    "coursesHint": "Les cours que vous avez ajoutés et pas encore terminés. Ils se suivent en parallèle de vos autres paquets : inutile d’en terminer un avant d’en ajouter d’autres depuis la bibliothèque de paquets.",
+    "coursesLibrary": "Vous cherchez quelque chose à apprendre ? La bibliothèque de paquets propose des paquets et des cours prêts à l’emploi sur les langues, la géographie, les sciences, l’informatique et bien plus. Ajoutez-en un maintenant et étudiez-le en parallèle de votre cours.",
     "continueCourseNamed": "Continuer {course}",
     "startCourseNamed": "Commencer le cours {course}",
     "courseProgress": "Chapitres terminés",
@@ -637,7 +638,7 @@
   },
   "newcomerCourse": {
     "eyebrow": "Vous débutez ?",
-    "pitch": "Commencez ici : un cours pour bien débuter. Chaque question à laquelle vous répondez devient une carte de votre paquet.",
+    "pitch": "Un cours pour bien débuter. Chaque question à laquelle vous répondez devient une carte de votre paquet. Inutile de le terminer avant d’ajouter d’autres paquets depuis la bibliothèque de paquets.",
     "start": "Commencer le cours",
     "about": "À propos de ce cours"
   },

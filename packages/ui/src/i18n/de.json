@@ -313,11 +313,11 @@
     },
     "start": "Kurs starten",
     "continue": "Weiter",
-    "finished": "Du hast diesen Kurs abgeschlossen. Seine Karten sind in deinem Stapel und lassen sich wie alle anderen lernen.",
+    "finished": "Du hast diesen Kurs abgeschlossen. Seine Karten sind in deinem Stapel und lassen sich wie alle anderen lernen. Was du als Nächstes lernen möchtest, findest du in der Stapelbibliothek.",
     "backToDecks": "Zurück zu den Stapeln",
     "chapterCompleted": "Gut gemacht! Du hast das Kapitel „{chapter}“ abgeschlossen.",
     "courseCompleted": "Glückwunsch! Das war das letzte Kapitel: Du hast den ganzen Kurs abgeschlossen.",
-    "continueOrStop": "Mach mit dem nächsten Kapitel weiter, wenn du so weit bist, oder hör hier erst einmal auf: Dein Fortschritt bleibt erhalten.",
+    "continueOrStop": "Mach mit dem nächsten Kapitel weiter, wenn du so weit bist, oder hör hier erst einmal auf: Dein Fortschritt bleibt erhalten. In der Zwischenzeit kannst du Stapel aus der Stapelbibliothek hinzufügen und sie ebenfalls lernen.",
     "chapterNumber": "Kapitel {number}:",
     "locked": "Gesperrt",
     "open": "Offen",
@@ -485,7 +485,8 @@
   },
   "deckList": {
     "courses": "Deine Kurse",
-    "coursesHint": "Die Kurse, die du hinzugefügt und noch nicht abgeschlossen hast.",
+    "coursesHint": "Die Kurse, die du hinzugefügt und noch nicht abgeschlossen hast. Sie laufen neben deinen anderen Stapeln: Du musst keinen abschließen, bevor du weitere aus der Stapelbibliothek hinzufügst.",
+    "coursesLibrary": "Suchst du etwas zum Lernen? Die Stapelbibliothek hat fertige Stapel und Kurse zu Sprachen, Geografie, Naturwissenschaften, Informatik und mehr. Füge jetzt einen hinzu und lerne ihn neben deinem Kurs.",
     "continueCourseNamed": "{course} fortsetzen",
     "startCourseNamed": "Kurs {course} starten",
     "courseProgress": "Erledigte Kapitel",
@@ -613,7 +614,7 @@
   },
   "newcomerCourse": {
     "eyebrow": "Neu hier?",
-    "pitch": "Fang hier an: ein Kurs für alle, die neu dabei sind. Jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel.",
+    "pitch": "Ein Kurs für alle, die neu dabei sind. Jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Du musst ihn nicht abschließen, bevor du andere Stapel aus der Stapelbibliothek hinzufügst.",
     "start": "Kurs starten",
     "about": "Über diesen Kurs"
   },

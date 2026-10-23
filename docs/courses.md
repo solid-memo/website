@@ -162,7 +162,15 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    chapters done and a button to go on where the learner left off; a
    course deck's menu leads to its page too. The strip it is in is
    headed "Your courses", with a line saying these are the courses
-   added and not finished yet. Each course in it has its deck's title,
+   added and not finished yet, and that they run alongside the other
+   decks: one need not be finished before more are added from the deck
+   library. While the instance has no deck that is not a course, a line
+   under the courses says the deck library has ready-made decks and
+   courses to study alongside, with a secondary Deck library button; it
+   goes once a deck that is not a course is on the list, or with the
+   strip itself once every course is finished. This is a fact
+   about the instance's decks, whatever the courses are: the app names
+   no course. Each course in it has its deck's title,
    and is read only as far as the strip needs (`getCourseSummary`: the
    release's outline and the deck's answers, not its cards), as soon as
    the deck list's arrangement is in: the library's index, which tells
@@ -209,7 +217,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    to go on or stop there. A learner who has left the review while it
    was saved stays where they went, and nothing is cheered. The page cheers the chapter just completed:
    a word that it is done, which takes the focus, so a screen reader
-   reads it and Tab goes on to Continue, now to the next chapter. The
+   reads it and Tab goes on to Continue, now to the next chapter, and
+   then to Deck library. The word says the learner can go on or stop,
+   and meanwhile add decks from the deck library and study them too. The
    chapter's Done badge pops with a burst of sparkles. When that was
    the course's last chapter left, the word says the course is
    complete and three confetti shooters along the bottom of the page
@@ -219,8 +229,12 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    learner goes elsewhere: a reload or a later visit does not show it
    again. The motion is decoration only, hidden from screen readers,
    and none of it plays when the reader asks for reduced motion.
-5. **Afterward.** A finished course says so on its page, with a link
-   back to the decks. The cards are studied like any deck's, by
+5. **Afterward.** A finished course says so on its page, and that what
+   to learn next is in the deck library, with a link back to the decks
+   and a secondary Deck library button after it. Before then, the page
+   has the button after Continue: a course runs alongside other decks.
+   The Studio's trial, with no list or library to go to, has neither.
+   The cards are studied like any deck's, by
    flip-and-grade ([srs.md](srs.md)). A chapter can be retaken at any
    time, as practice: a chapter whose steps are all done opens at its
    first step, and each step shows its theory again. No single earlier
@@ -246,7 +260,9 @@ else offers nothing.
 
 - **Where it shows.** On the deck list of an instance that has no decks
   (empty groups do not count), right under the Decks heading, a card
-  offers the course: its title, what it is, its card count, "Start the
+  offers the course: its title, what it is (a course for newcomers,
+  each question answered a card, and no need to finish it before adding
+  other decks from the deck library), its card count, "Start the
   course" and a link to its library page (`NewcomerCourseContainer`,
   `NewcomerCourseOffer`). It is a labeled landmark, not a section with
   a heading, and takes no focus, but comes next after the heading the

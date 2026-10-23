@@ -318,11 +318,11 @@
     },
     "start": "Empezar el curso",
     "continue": "Continuar",
-    "finished": "Has terminado este curso. Sus tarjetas están en tu mazo, para estudiarlas como cualquier otra.",
+    "finished": "Has terminado este curso. Sus tarjetas están en tu mazo, para estudiarlas como cualquier otra. Encuentra qué aprender a continuación en la biblioteca de mazos.",
     "backToDecks": "Volver a los mazos",
     "chapterCompleted": "¡Buen trabajo! Has completado {chapter}.",
     "courseCompleted": "¡Felicidades! Ese era el último capítulo: has completado el curso entero.",
-    "continueOrStop": "Sigue con el siguiente capítulo cuando quieras, o déjalo aquí por ahora: tu progreso se conserva.",
+    "continueOrStop": "Sigue con el siguiente capítulo cuando quieras, o déjalo aquí por ahora: tu progreso se conserva. Mientras tanto, puedes añadir mazos desde la biblioteca de mazos y estudiarlos también.",
     "chapterNumber": "Capítulo {number}:",
     "locked": "Bloqueado",
     "open": "Abierto",
@@ -496,7 +496,8 @@
   },
   "deckList": {
     "courses": "Tus cursos",
-    "coursesHint": "Los cursos que has añadido y aún no has terminado.",
+    "coursesHint": "Los cursos que has añadido y aún no has terminado. Van a la par de tus otros mazos: no necesitas terminar uno para añadir más desde la biblioteca de mazos.",
+    "coursesLibrary": "¿Buscas algo que aprender? La biblioteca de mazos tiene mazos y cursos listos sobre idiomas, geografía, ciencias, informática y mucho más. Añade uno ahora y estúdialo junto con tu curso.",
     "continueCourseNamed": "Continuar {course}",
     "startCourseNamed": "Empezar el curso {course}",
     "courseProgress": "Capítulos completados",
@@ -637,7 +638,7 @@
   },
   "newcomerCourse": {
     "eyebrow": "¿Primera vez aquí?",
-    "pitch": "Comienza aquí: un curso para quien empieza. Cada pregunta que respondes se convierte en una tarjeta de tu mazo.",
+    "pitch": "Un curso para quien empieza. Cada pregunta que respondes se convierte en una tarjeta de tu mazo. No tienes que terminarlo antes de añadir otros mazos desde la biblioteca de mazos.",
     "start": "Empezar el curso",
     "about": "Sobre este curso"
   },

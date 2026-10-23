@@ -13,7 +13,8 @@ import type { Answers } from "../pages/CourseQuestion.ts";
  * questions without it, each answer adding its card to the deck; the
  * word before the final review; the review, where a question answered
  * wrongly comes back until it is answered right; and back on the
- * course's page, the chapter cheered, done, and the next one open; the
+ * course's page, the chapter cheered, done, and the next one open, the
+ * deck library after the way on; the
  * statistics, which count its answers apart from recall and show the
  * chapter done with its graded answers; and the
  * course's deck, which names the wrong options chosen. It is
@@ -71,7 +72,7 @@ test("work through a course's first chapter and its final review @course", async
   });
 
   await app.step(
-    "08 · Back at the course: the chapter is cheered and done, the next one open",
+    "08 · Back at the course: the chapter is cheered and done, the next one open, the library after it",
     async () => {
       await app.course.expectShown(course);
       await app.course.expectCheered(chapter);

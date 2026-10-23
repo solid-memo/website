@@ -11,7 +11,9 @@ import { Screen } from "./Screen.ts";
  * groups, each row a link to the deck's page, what it offers today ("Study
  * {deck}" or "Done for today") and its actions menu (DeckGroups); under
  * them, Create deck and Deck library (Library.open). With no decks yet,
- * the library's course for newcomers is offered under the heading. A
+ * the library's course for newcomers is offered under the heading; the
+ * strip of courses above them points to the library too while every deck
+ * is a course. A
  * learner on SM-2 is invited above the list to switch to FSRS-6, until
  * they switch or answer Not now.
  */
@@ -97,6 +99,43 @@ export class DeckList extends Screen {
   /** The strip of courses to go on with, above the list. */
   get courseStrip(): Locator {
     return this.page.getByRole("complementary", { name: this.t("deckList.courses"), exact: true });
+  }
+
+  /**
+   * The strip says its courses run alongside other decks and, while every
+   * deck is a course, points to the deck library (`shown`), or does not.
+   */
+  async expectStripLibrary(shown: boolean): Promise<void> {
+    await this.intent(
+      `Check the strip of courses ${shown ? "points" : "does not point"} to the deck library`,
+      async () => {
+        await expect(this.courseStrip).toContainText(this.t("deckList.coursesHint"));
+        const line = this.courseStrip.getByText(this.t("deckList.coursesLibrary"), {
+          exact: true,
+        });
+        const button = this.courseStrip.getByRole("link", {
+          name: this.t("deckList.libraryLink"),
+          exact: true,
+        });
+        if (shown) {
+          await expect(line).toBeVisible();
+          await expect(button).toBeVisible();
+        } else {
+          await expect(line).toBeHidden();
+          await expect(button).toBeHidden();
+        }
+      },
+    );
+  }
+
+  /** The strip's Deck library button opens the library. */
+  async openLibraryFromStrip(): Promise<void> {
+    await this.intent("Open the deck library from the strip of courses", async () => {
+      await this.courseStrip
+        .getByRole("link", { name: this.t("deckList.libraryLink"), exact: true })
+        .click();
+      await this.app.library.expectOpen();
+    });
   }
 
   /** The strip offers to continue the course, started and not finished; its title opens its page. */

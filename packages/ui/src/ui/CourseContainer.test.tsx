@@ -10,7 +10,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { CourseContainer } from "./CourseContainer";
 import { CourseLinksContext, type CourseLinks } from "./courseLinks";
-import { decksHref, routeToHash } from "./router";
+import { decksHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseDeck, courseInstance, makeCourse } from "../test/course";
 import { makeUseCasesFake } from "../test/useCasesFake";
 
@@ -162,16 +162,60 @@ describe("CourseContainer", () => {
     );
     expect(screen.getByText(/^You have finished this course/)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Back to decks" })).toBeNull();
+    // Nor a library to add decks from: no button to it, and no empty row of actions.
+    expect(screen.queryByRole("link", { name: "Deck library" })).toBeNull();
+    expect(document.querySelector(".actions")).toBeNull();
+  });
+
+  it("offers the deck library after the way on, as a secondary button", () => {
+    render(<Page course={makeCourse(["q-1"])} />);
+    const continueLink = screen.getByRole("link", { name: "Continue" });
+    const library = screen.getByRole("link", { name: "Deck library" });
+    expect(library).toHaveAttribute("href", libraryHref(instanceUrl));
+    expect(library).not.toHaveClass("primary");
+    expect(continueLink.nextElementSibling).toBe(library);
+  });
+
+  it("offers the deck library where the course links say, and none where they give no library", () => {
+    const links: CourseLinks = {
+      courseHref: (_instance, deckUrl) => `#/trial/${deckUrl}`,
+      chapterHref: (_instance, _deck, chapterUrl) => `#/trial/${chapterUrl}`,
+      reviewHref: (_instance, _deck, chapterUrl) => `#/trial/review/${chapterUrl}`,
+      libraryHref: (instance) => `#/trial/library/${instance}`,
+    };
+    const { unmount } = render(
+      <CourseLinksContext.Provider value={links}>
+        <Page course={makeCourse()} />
+      </CourseLinksContext.Provider>,
+    );
+    expect(screen.getByRole("link", { name: "Deck library" })).toHaveAttribute(
+      "href",
+      `#/trial/library/${instanceUrl}`,
+    );
+    unmount();
+    // Finished, with no list to go back to: the library alone.
+    render(
+      <CourseLinksContext.Provider value={links}>
+        <Page course={makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2])} />
+      </CourseLinksContext.Provider>,
+    );
+    expect(screen.queryByRole("link", { name: "Back to decks" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Deck library" })).toBeInTheDocument();
   });
 
   it("says the course is finished once every chapter is, with the way back to the decks", () => {
     const course = makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2]);
     render(<Page course={{ ...course, release: { ...course.release, description: undefined } }} />);
-    expect(screen.getByText(/^You have finished this course/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Back to decks" })).toHaveAttribute(
-      "href",
-      decksHref(instanceUrl),
+    expect(screen.getByText(/^You have finished this course/)).toHaveTextContent(
+      "You have finished this course. Its cards are in your deck, to study like any other. Find what to learn next in the deck library.",
     );
+    const back = screen.getByRole("link", { name: "Back to decks" });
+    expect(back).toHaveAttribute("href", decksHref(instanceUrl));
+    // The library after it, secondary.
+    const library = screen.getByRole("link", { name: "Deck library" });
+    expect(back.nextElementSibling).toBe(library);
+    expect(library).toHaveAttribute("href", libraryHref(instanceUrl));
+    expect(library).not.toHaveClass("primary");
     expect(screen.queryByRole("link", { name: "Continue" })).toBeNull();
     expect(screen.queryByText("A course on Solid.")).toBeNull();
     // Nothing to cheer about: no chapter was just completed.
@@ -190,7 +234,9 @@ describe("CourseContainer", () => {
       .closest(".course-cheer")!;
     // The page focuses it as the learner arrives, so it is read first, and Tab goes on to Continue.
     expect(cheer).toHaveAttribute("data-arrival");
-    expect(cheer).toHaveTextContent(/Go on with the next chapter when you are ready, or stop here/);
+    expect(cheer).toHaveTextContent(
+      "Go on with the next chapter when you are ready, or stop here for now: your progress is kept. Meanwhile, you can add decks from the deck library and study them too.",
+    );
     expect(cheer.compareDocumentPosition(screen.getByRole("link", { name: "Continue" }))).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );

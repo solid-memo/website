@@ -4,7 +4,7 @@
 
 import { createContext } from "preact";
 import { useContext } from "preact/hooks";
-import { courseHref, decksHref, routeToHash } from "./router";
+import { courseHref, decksHref, libraryHref, routeToHash } from "./router";
 
 /**
  * Where a course's screens link to its chapters: Solid Memo's own course
@@ -21,6 +21,8 @@ export interface CourseLinks {
   reviewHref(instanceUrl: string, deckUrl: string, chapterUrl: string): string;
   /** The instance's deck list, which a finished course links back to; none where there is no list to go back to. */
   decksHref?(instanceUrl: string): string;
+  /** The deck library, which a course's page points to beside its way on; none where there is no library to add decks from. */
+  libraryHref?(instanceUrl: string): string;
 }
 
 /** Solid Memo's course routes. */
@@ -31,6 +33,7 @@ export const APP_COURSE_LINKS: CourseLinks = {
   reviewHref: (instanceUrl, deckUrl, chapterUrl) =>
     routeToHash({ screen: "courseReview", instanceUrl, deckUrl, chapterUrl }),
   decksHref,
+  libraryHref,
 };
 
 export const CourseLinksContext = createContext<CourseLinks>(APP_COURSE_LINKS);

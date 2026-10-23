@@ -32,14 +32,15 @@ import {
  *
  * A deck copied from a course (docs/courses.md) is continued from the
  * strip of courses above the list, while it is unfinished, and from its
- * menu. A copy of a release added from a link says the host it came
- * from, and a copy the library has a newer release of says so, its row
- * leading to the deck's page, which offers the upgrade (useCopies). An
- * instance with no decks (groups aside) is offered the library's course
- * for newcomers under the list's heading (NewcomerCourseContainer),
- * which opens once started. A learner still on SM-2 is invited to switch
- * to FSRS-6 above the list (SchedulerInvitationContainer), until they
- * switch or answer "Not now".
+ * menu; while every deck is a course, the strip points to the deck
+ * library too, whatever the courses are. A copy of a release added from
+ * a link says the host it came from, and a copy the library has a newer
+ * release of says so, its row leading to the deck's page, which offers
+ * the upgrade (useCopies). An instance with no decks (groups aside) is
+ * offered the library's course for newcomers under the list's heading
+ * (NewcomerCourseContainer), which opens once started. A learner still
+ * on SM-2 is invited to switch to FSRS-6 above the list
+ * (SchedulerInvitationContainer), until they switch or answer "Not now".
  */
 export function DeckListContainer({
   useCases,
@@ -84,6 +85,7 @@ export function DeckListContainer({
         useCases={useCases}
         instance={instance}
         decks={decks.filter((deck) => isCourse(deck) && !isSetAside(deck))}
+        libraryHref={decks.every(isCourse) ? libraryHref(instance.url) : undefined}
       />
       <SchedulerInvitationContainer useCases={useCases} instance={instance} />
       <DeckListScreen
