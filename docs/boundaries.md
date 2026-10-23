@@ -183,8 +183,8 @@ pod: its fetch refuses every method but GET and HEAD
 
 ## Further rules
 
-- UI components never import ports or adapters. They receive `UseCases`
-  as a prop.
+- UI components never import ports or adapters. They receive `UseCases`,
+  or the slices of it they use, as a prop.
 - Generated files (`packages/vocab/src/*.generated.ts`) are never edited
   by hand: change the vocabulary or the shapes in `ns/` and run
   `npm run generate` ([shapes.md](shapes.md), [vocab.md](vocab.md)).
@@ -193,7 +193,9 @@ pod: its fetch refuses every method but GET and HEAD
   them. Imports between packages go through `exports` and carry no
   extension.
 - Only `composition` wires the layers together
-  ([appUseCases.ts](../packages/composition/src/appUseCases.ts)). The
+  ([appUseCases.ts](../packages/composition/src/appUseCases.ts), and a
+  Studio trial's [trialUseCases.ts](../packages/composition/src/trialUseCases.ts)),
+  every port, or a "none" it means, such as a trial's `NO_DEVICE`. The
   site's `apps/web/src/main.tsx` calls `@solid-memo/composition`, with
   what is its own (its name, where it is served, the build's values),
   and renders its components.

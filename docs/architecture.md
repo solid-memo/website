@@ -112,6 +112,24 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
   which the site's `apps/web/src/main.tsx` calls, and passed to its top
   component (`App`) as a prop, and from there to Solid Memo's screens
   and the Studio's alike.
+- Slices — `UseCases` is the intersection of one interface per feature:
+  the session and the guest (`session`), the instances, the
+  preferences, the decks, the cards, the deck library, where a mistake
+  is reported (`mistakeReports`), the courses, study, the statistics,
+  the instance checks (`instanceChecks`), and the Studio's drafts,
+  publishing, instance graph and trial. Each is made in
+  `packages/application/src/<feature>.ts` by `create<Feature>UseCases`,
+  from only the ports it uses, each required; what several share is a
+  store of its own, made once: the preferences
+  ([preferenceStore.ts](../packages/application/src/preferenceStore.ts)),
+  the answers on their way to the log and read from it
+  ([answerStore.ts](../packages/application/src/answerStore.ts)) and the
+  digest ([digestStore.ts](../packages/application/src/digestStore.ts)).
+  `createUseCases` makes the stores and composes every slice; its
+  `Dependencies` has no port that falls back to doing nothing, so a
+  port the composition root forgets is a type error. A Studio trial
+  composes only the slices it plays (`createTrialUseCases`,
+  `TrialUseCases`), and the screens it is played in take only those.
 - Ports ([ports.ts](../packages/application/src/ports.ts)) — narrow
   interfaces (one per external capability) implemented by factories in
   `packages/solid/src/` and `packages/browser/src/`.

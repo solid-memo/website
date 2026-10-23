@@ -303,7 +303,7 @@ the preferences and has not answered "Not now" is invited once more.
 
 The preferences screen, where FSRS-6 is listed first and marked
 Recommended, and the deck list's invitation save a change of scheduler
-through `switchScheduler` ([useCases.ts](../packages/application/src/useCases.ts));
+through `switchScheduler` ([preferences.ts](../packages/application/src/preferences.ts));
 a plain save of the preferences (`savePreferences`) keeps the scheduler
 stored, so FSRS-6 is never turned on without its states.
 
@@ -413,9 +413,9 @@ rates the same answer with `ratingOfChoice`, Good when right and Again
 when wrong ([FSRS-6](#fsrs-6)), so under FSRS-6 the "grade 3" below is
 SM-2's, and FSRS-6's rating of it Good. The grade then goes through the same
 transition as a study review (`gradePrompt` in
-[grading.ts](../packages/domain/src/grading.ts), which `applyGrade` in
-[useCases.ts](../packages/application/src/useCases.ts) applies, as
-`recordReview` does). Course answers are front→back.
+[grading.ts](../packages/domain/src/grading.ts), which the answer
+store's `grade` in [answerStore.ts](../packages/application/src/answerStore.ts)
+applies, as `recordReview` does). Course answers are front→back.
 
 Whether an answer is graded at all depends on the card's state
 (`courseAnswerEffect`), its due day the one the scheduler in use set
@@ -512,7 +512,7 @@ random position (`requeueCard`) — never as the very next card, unless it is
 the only card left, in which case it simply repeats until it passes. The
 "Card x of y" counter grows with each repeat. Each answer runs the
 `recordReview` use case
-([useCases.ts](../packages/application/src/useCases.ts)): take the card's
+([study.ts](../packages/application/src/study.ts)): take the card's
 state as `reviews/<deckId>.ttl` holds it when written (or start from the
 initial SM-2 state), apply the transition (`gradePrompt`: SM-2's, and
 FSRS-6's too while it sets the due days), compute the next due day,

@@ -14,7 +14,8 @@ as a prop and knows no adapter.
   `@solid-memo/ui/i18n/<locale>.json`, the messages
   ([i18n.md](../../docs/i18n.md)).
 - `@solid-memo/ui/test/*`: the test setup and a fake `UseCases`, for
-  the apps' tests.
+  the apps' tests, and `@solid-memo/ui/test/fakes/<slice>`, the fake of
+  one slice of it.
 
 ## Boundaries
 

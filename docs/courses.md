@@ -14,7 +14,7 @@ creator's pod say, is the same: a learner adds it
 [from a link](deck-library.md#from-a-link) to its release, and plays it
 as one from the library, its outline read from that address. The pure parts are in
 [domain/course.ts](../packages/domain/src/course.ts); the use cases are
-in [useCases.ts](../packages/application/src/useCases.ts).
+in [courses.ts](../packages/application/src/courses.ts).
 
 ## The model
 

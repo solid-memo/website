@@ -1883,10 +1883,9 @@ Memo's own course screens (its page, a chapter's steps, its final
 review), a deck with Solid Memo's study. It is the draft's Trial tab.
 
 It is played in a sandbox, so nothing done in it reaches the user's
-pod. The use case is `openTrial(draft, instanceUrl)`
-([useCases.ts](../packages/application/src/useCases.ts)), which sets the
-sandbox up with `startTrial`
-([trial.ts](../packages/application/src/trial.ts)):
+pod. The use case is `openTrial(draft, instanceUrl)`, which sets the
+sandbox up with `startTrial`, both in
+[trial.ts](../packages/application/src/trial.ts):
 
 - **A pod of its own.** Each trial has a new pod, kept in memory, at
   `https://trial.solid-memo.invalid/` (`TRIAL_ORIGIN` in

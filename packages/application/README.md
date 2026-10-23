@@ -10,10 +10,20 @@ interfaces; the adapters conform to them.
 
 - `ports`: the driven ports, such as the session gateway, the
   repositories, the release publisher and the file exchange.
-- `useCases`: the `UseCases` the UI receives, built over the ports.
-- `releaseDrafts`, `releasePublishing`, `trial` and `instanceGraph`: the
-  Studio's drafts, publishing a release, test-playing a draft, and an
-  instance read as a graph ([studio.md](../../docs/studio.md)).
+- `useCases`: the `UseCases` the UI receives, every slice in one, and
+  `createUseCases`, which builds them over the ports, each required.
+- The slices, each `create<Feature>UseCases` and its
+  `<Feature>UseCases`, from only the ports it uses: `session`,
+  `instances`, `preferences`, `decks`, `cards`, `library`,
+  `mistakeReports`, `courses`, `study`, `statistics` and
+  `instanceChecks`; and the Studio's `releaseDrafts`,
+  `releasePublishing`, `instanceGraph` and `trial` (test-playing a
+  draft, and `TrialUseCases`, the slices a trial plays)
+  ([studio.md](../../docs/studio.md)).
+- `preferenceStore`, `answerStore` and `digestStore`: what the slices
+  share, made once by `createUseCases`; `writes` and `progress`, their
+  helpers.
+- `testing/*`: the fixtures, the fake ports and `NO_PORTS`, for tests.
 
 ## Boundaries
 
@@ -26,7 +36,7 @@ that performs I/O goes behind a port here, with its adapter elsewhere
 
 ```sh
 npx turbo run typecheck test --filter=@solid-memo/application   # 100% coverage
-npm run test:unit -- packages/application/src/useCases.test.ts   # one file, from the root
+npm run test:unit -- packages/application/src/decks.test.ts   # one file, from the root
 ```
 
 ## Status

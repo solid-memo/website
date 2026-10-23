@@ -924,8 +924,8 @@ documented exclusions:
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`,
-  `@solid-memo/ui/test/fakes/*`,
-  `@solid-memo/browser/testing/fakeLocks`), not product code.
+  `@solid-memo/ui/test/fakes/*`, `@solid-memo/browser/testing/fakeLocks`,
+  `@solid-memo/application/testing/noPorts`), not product code.
 - `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
   logic is unit-tested (what they make of a server's answers, the
   journeys' time zone, seed, text and CI summary), but no threshold
@@ -960,7 +960,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | Layer | Seam | Technique |
 |---|---|---|
 | Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. What runs over a whole deck or log is timed at two sizes, in the CPU time of its own process, not against the clock (CI runs the tests, coverage on, many times slower than a laptop): eight times the input must take less than four times as long as an eighth of it done eight times over, which a linear pass meets (about one) and work growing with the input does not (about eight) — `queryCards` over 5,000 cards, `lapseIndex`, `chainIndexOf` and `statisticsOf` over years of answers, `instanceGraphOf` over an instance's cards and answers (`growth` in `src/testing/growth.ts`), and, in the Studio, the graph's layout and routes over a deck's cards. |
-| Application | ports | Inject fake port objects (`vi.fn` per method). No module mocking. |
+| Application | ports | Inject fake port objects (`vi.fn` per method): the fixtures and fake ports in [fakePorts.ts](../packages/application/src/testing/fakePorts.ts), and `NO_PORTS` ([noPorts.ts](../packages/application/src/testing/noPorts.ts)) for the ports a test has no use for, which the tests of other packages spread too. Each slice is tested in its own `<feature>.test.ts`, the stores the slices share in theirs. No module mocking. |
 | UI | `UseCases` prop | Render with a fake `UseCases`: `makeUseCasesFake` ([useCasesFake.ts](../packages/ui/src/test/useCasesFake.ts)) makes every slice's fake ([test/fakes/](../packages/ui/src/test/fakes/)) in one object, so each calls the others through it; a screen that takes a slice (the trial's) can be given that slice's fake alone. Assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
 | Infrastructure I/O shells | injected `fetch` + `vi.mock` | Mock `@inrupt/*` module functions; assert the shell orchestrates fetch → map → return. |
