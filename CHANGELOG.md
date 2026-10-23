@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.3.3](https://github.com/solid-memo/website/compare/v6.3.2...v6.3.3) (2026-10-23)
+
+### Performance Improvements
+
+* **studio:** bring the Studio's messages with its chunk ([467e4c4](https://github.com/solid-memo/website/commit/467e4c4c41634456ff332248a113d7cbb4c52a0a)), closes [#257](https://github.com/solid-memo/website/issues/257)
+* **ui:** fetch only the language the page speaks ([98c1867](https://github.com/solid-memo/website/commit/98c1867f6255b66e7929049e329307e032c0d19e)), closes [#257](https://github.com/solid-memo/website/issues/257)
+
 ## [6.3.2](https://github.com/solid-memo/website/compare/v6.3.1...v6.3.2) (2026-10-23)
 
 ### Performance Improvements
