@@ -6,6 +6,7 @@ import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
+import { preferableCardLanguages } from "@solid-memo/domain/deckCardLanguage";
 import { deckLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckPace } from "@solid-memo/domain/deckPace";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -25,7 +26,11 @@ import { useDeckReleaseQuery } from "./deckRelease";
  * The deck's cards, and the release it was copied from, tell which of its
  * text does not say its language (deckLanguages): stating it rewrites the
  * cards and reads them again; when either cannot be read, the section
- * says so. A link to the screen's Languages section
+ * says so. The cards also tell which languages the deck's cards can be
+ * shown in first; choosing one saves it on the deck and stays, and the
+ * screens showing its cards follow the deck list read again, the
+ * statistics their report read again. A link to
+ * the screen's Languages section
  * opens it there (`section`).
  */
 export function DeckPreferencesContainer({
@@ -65,6 +70,11 @@ export function DeckPreferencesContainer({
     [cardsQuery.data, release],
   );
 
+  const cardLanguages = useMemo(
+    () => (cardsQuery.data === undefined ? undefined : preferableCardLanguages(cardsQuery.data)),
+    [cardsQuery.data],
+  );
+
   const preferencesQuery = useQuery({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
@@ -87,6 +97,17 @@ export function DeckPreferencesContainer({
   const stateLanguagesMutation = useMutation({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+  });
+
+  const cardLanguageMutation = useMutation({
+    mutationFn: (language: string | null) => useCases.setDeckCardLanguage(deck, language),
+    // The deck's card language is on the deck: every screen of its cards reads it from the deck list,
+    // and the statistics' cards (hardest cards, confused options, leeches) from the deck in their report.
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["decks"] }),
+        queryClient.invalidateQueries({ queryKey: ["cardProgress"] }),
+      ]),
   });
 
   const removeMutation = useMutation({
@@ -115,23 +136,27 @@ export function DeckPreferencesContainer({
       languagesUnreadable={
         languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null
       }
+      cardLanguages={cardLanguages}
       stated={stateLanguagesMutation.data ?? null}
       busy={
         saveMutation.isPending ||
         renameMutation.isPending ||
         removeMutation.isPending ||
-        stateLanguagesMutation.isPending
+        stateLanguagesMutation.isPending ||
+        cardLanguageMutation.isPending
       }
       error={
         errorText(saveMutation.error) ??
         errorText(renameMutation.error) ??
         errorText(removeMutation.error) ??
-        errorText(stateLanguagesMutation.error)
+        errorText(stateLanguagesMutation.error) ??
+        errorText(cardLanguageMutation.error)
       }
       onSave={(pace) => saveMutation.mutate(pace)}
       onRename={(title) => renameMutation.mutate(title)}
       onRemove={() => removeMutation.mutate()}
       onStateLanguages={(languages) => stateLanguagesMutation.mutate(languages)}
+      onSetCardLanguage={(language) => cardLanguageMutation.mutate(language)}
     />
   );
 }

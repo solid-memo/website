@@ -672,6 +672,13 @@
     "emptyHint": "Un campo vacío usa tus {link}.",
     "studyPreferencesLink": "preferencias de estudio",
     "saveButton": "Guardar preferencias",
+    "cardLanguage": {
+      "label": "Idioma de las tarjetas",
+      "default": "El idioma de la app",
+      "hint": "El idioma en que se muestran primero las tarjetas de este mazo, dondequiera que aparezcan. Una tarjeta sin texto en ese idioma se muestra como siempre. El nombre y la descripción del mazo no cambian.",
+      "none": "Las tarjetas de este mazo no indican ningún idioma para elegir.",
+      "save": "Guardar idioma de las tarjetas"
+    },
     "languages": {
       "heading": "Idiomas",
       "loading": "Comprobando los idiomas de las tarjetas…",

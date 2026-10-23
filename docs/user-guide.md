@@ -162,7 +162,8 @@ many are new, with a **Study** button. It also shows:
   ([Cramming the leeches](#cramming-the-leeches)).
 
 Its buttons lead to **Preferences** (the deck's name, its own daily
-limits, and the languages of its text), the **Browser** (its cards),
+limits, the language its cards are shown in first, and the languages
+of its text), the **Browser** (its cards),
 and **Open in Studio**.
 
 ## Studying
@@ -370,7 +371,9 @@ of your answers, and nothing turns them off
 | Developer mode | Shows developer tools: your WebID document, and a check of the instance against Solid Memo's data shapes. |
 
 Press **Save**. A deck's own preferences can set different daily limits
-for that deck; an empty field there follows these.
+for that deck; an empty field there follows these. They can also show
+the deck's cards in another language than the app's
+([Languages](#languages)).
 
 Under the settings (not for a guest), **Findable by other apps** shows
 whether other Solid apps can find your decks and study through the type
@@ -389,6 +392,17 @@ it is in, so a screen reader reads it in that language. A deck's
 name, its description and a card can have translations, and you see
 the one in your language when there is one. A deck's page says when
 some of its text does not say its language, with a link to settle it.
+
+A deck whose cards are in several languages can show them in the one
+you choose, whatever language the app is in: on the deck's
+**Preferences**, choose it under **Card language** and press **Save
+card language**. The list offers the languages the deck's cards are
+in. Its cards are then shown in that language wherever they appear:
+when you study or cram, in the Browser, in a course's questions and in
+the Studio. A card without text in it is shown as usual, and the deck's
+name and description stay in your language. **The app's language**
+goes back to the usual. The choice is kept with the deck in your Pod,
+so it follows you to every device.
 
 Text in a language written right to left, such as Arabic, runs right to
 left: on a card, in a deck's name, and inside a sentence in English

@@ -646,6 +646,13 @@
     "emptyHint": "Ett tomt fält följer dina {link}.",
     "studyPreferencesLink": "studieinställningar",
     "saveButton": "Spara inställningar",
+    "cardLanguage": {
+      "label": "Kortens språk",
+      "default": "Appens språk",
+      "hint": "Språket som kortlekens kort i första hand visas på, var de än syns. Ett kort utan text på det språket visas som vanligt. Kortlekens namn och beskrivning påverkas inte.",
+      "none": "Kortlekens kort anger inget språk att välja.",
+      "save": "Spara kortens språk"
+    },
     "languages": {
       "heading": "Språk",
       "loading": "Kontrollerar kortens språk…",

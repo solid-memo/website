@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { Deck } from "./deck";
-import { cardLanguageTag, withCardLanguage } from "./deckCardLanguage";
+import type { Card, Deck } from "./deck";
+import { cardLanguageTag, preferableCardLanguages, withCardLanguage } from "./deckCardLanguage";
 
 const deck: Deck = {
   id: "deck-1",
@@ -17,6 +17,17 @@ const deck: Deck = {
   direction: "front-to-back",
   authors: [],
 };
+
+function card(id: string, front: Card["front"], back: Card["back"]): Card {
+  return {
+    id,
+    url: `https://pod.example/d.ttl#${id}`,
+    front,
+    back,
+    createdAt: "2026-10-01T10:00:00.000Z",
+    formatVersion: 7,
+  };
+}
 
 describe("cardLanguageTag", () => {
   it("is the tag as the app stores it", () => {
@@ -49,5 +60,17 @@ describe("withCardLanguage", () => {
   it("refuses a tag that names no language, and text in no language", () => {
     expect(() => withCardLanguage(deck, "Swedish")).toThrow("“Swedish” is not a language code.");
     expect(() => withCardLanguage(deck, "zxx")).toThrow("“zxx” is not a language code.");
+  });
+});
+
+describe("preferableCardLanguages", () => {
+  it("offers the cards' stated languages, without untagged text or text in no language", () => {
+    const cards = [
+      card("a", { en: "house", sv: "hus" }, { sv: "hus" }),
+      card("b", { "": "untagged" }, { zxx: "404" }),
+      card("c", { "en-gb": "colour" }, { fr: "couleur" }),
+    ];
+    expect(preferableCardLanguages(cards)).toEqual(["en", "en-gb", "fr", "sv"]);
+    expect(preferableCardLanguages([])).toEqual([]);
   });
 });

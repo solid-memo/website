@@ -584,9 +584,11 @@ graph LR
   undo it, and only `setCardLanguage` sets or removes it, on the entry
   as it is then (If-Match), as `completeChapter` adds a chapter. A new
   entry (an import, a guest's deck moved) is written with the deck's,
-  and a reader drops a value that names no language. A library release
-  never sets it, a library upgrade keeps the copy's, and a release
-  drafted from the deck leaves it behind.
+  and a reader drops a value that names no language. Chosen on the
+  deck's own Preferences page (`#/deck-preferences`), from the
+  languages its cards state. A library release never sets it, a
+  library upgrade keeps the copy's, and a release drafted from the deck
+  leaves it behind.
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, saying which version of its class's
   [shape](shapes.md) it conforms to: instance 1, decks 3 (DCAT),

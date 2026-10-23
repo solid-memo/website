@@ -35,6 +35,8 @@ function renderScreen(overrides: Partial<Parameters<typeof DeckPreferencesScreen
     onRemove: vi.fn(),
     languages: SETTLED,
     onStateLanguages: vi.fn(),
+    cardLanguages: ["en", "sv"],
+    onSetCardLanguage: vi.fn(),
     ...overrides,
   };
   render(<DeckPreferencesScreen {...props} />);
@@ -171,6 +173,8 @@ describe("DeckPreferencesScreen", () => {
       onRemove: vi.fn(),
       languages: SETTLED,
       onStateLanguages: vi.fn(),
+      cardLanguages: [],
+      onSetCardLanguage: vi.fn(),
     };
     const { rerender } = render(<DeckPreferencesScreen {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Rename deck" }));
@@ -233,6 +237,19 @@ describe("DeckPreferencesScreen", () => {
     vi.unstubAllGlobals();
   });
 
+  it("chooses the language the deck's cards are shown in, between the limits and the languages section", () => {
+    const props = renderScreen({ deck: { ...deck, cardLanguage: "sv" } });
+    const select = screen.getByRole("combobox", { name: "Card language" });
+    expect(select).toHaveValue("sv");
+    expect(
+      select.closest("form")!.compareDocumentPosition(screen.getByLabelText("New cards per day")),
+    ).toBe(Node.DOCUMENT_POSITION_PRECEDING);
+    fireEvent.input(select, { target: { value: "en" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save card language" }));
+    expect(props.onSetCardLanguage).toHaveBeenCalledWith("en");
+    expect(props.onSave).not.toHaveBeenCalled();
+  });
+
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
@@ -248,6 +265,8 @@ describe("DeckPreferencesScreen", () => {
           onRemove={vi.fn()}
           languages={SETTLED}
           onStateLanguages={vi.fn()}
+          cardLanguages={[]}
+          onSetCardLanguage={vi.fn()}
         />
       </I18nProvider>,
     );
@@ -275,6 +294,8 @@ describe("DeckPreferencesScreen", () => {
           onRemove={vi.fn()}
           languages={SETTLED}
           onStateLanguages={vi.fn()}
+          cardLanguages={[]}
+          onSetCardLanguage={vi.fn()}
         />
       </I18nProvider>,
     );
@@ -307,6 +328,8 @@ describe("DeckPreferencesScreen", () => {
           onRemove={vi.fn()}
           languages={SETTLED}
           onStateLanguages={vi.fn()}
+          cardLanguages={[]}
+          onSetCardLanguage={vi.fn()}
         />
       </I18nProvider>,
     );

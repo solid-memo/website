@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "./appError";
-import type { Deck } from "./deck";
+import { cardLanguages, UNSTATED } from "./cardQuery";
+import type { Card, Deck } from "./deck";
 import { canonicalTag, NO_LANGUAGE } from "./languageTag";
 
 /**
@@ -35,4 +36,13 @@ export function withCardLanguage(deck: Deck, language: string | null): Deck {
   const tag = cardLanguageTag(language);
   if (tag === undefined) throw new AppError("textLanguageInvalid", { tag: language });
   return { ...rest, cardLanguage: tag };
+}
+
+/**
+ * The languages a deck's cards can be shown in first: the stated tags of
+ * their fronts and backs, in order, without untagged text and text in no
+ * language.
+ */
+export function preferableCardLanguages(cards: readonly Card[]): string[] {
+  return cardLanguages(cards).filter((tag) => tag !== UNSTATED && tag !== NO_LANGUAGE);
 }
