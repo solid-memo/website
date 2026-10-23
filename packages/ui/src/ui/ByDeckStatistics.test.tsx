@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/preact";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
-import { statisticsReportOf } from "../test/useCasesFake";
+import { statisticsReportOf } from "../test/fakes/statistics";
 import { ByDeckStatistics } from "./ByDeckStatistics";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";

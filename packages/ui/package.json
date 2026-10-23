@@ -32,6 +32,7 @@
     "./retryable": "./src/ui/retryable.ts",
     "./test/setup": "./src/test/setup.ts",
     "./test/useCasesFake": "./src/test/useCasesFake.ts",
+    "./test/fakes/*": "./src/test/fakes/*.ts",
     "./test/course": "./src/test/course.ts",
     "./*": "./src/ui/*.tsx"
   },

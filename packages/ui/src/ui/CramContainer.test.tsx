@@ -12,7 +12,8 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import { deckProgressOf, makeUseCasesFake } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { deckProgressOf } from "../test/fakes/statistics";
 import { CramContainer } from "./CramContainer";
 import { RepoUrl } from "./ReportMistake";
 

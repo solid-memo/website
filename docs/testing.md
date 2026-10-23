@@ -924,6 +924,7 @@ documented exclusions:
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`,
+  `@solid-memo/ui/test/fakes/*`,
   `@solid-memo/browser/testing/fakeLocks`), not product code.
 - `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
   logic is unit-tested (what they make of a server's answers, the
@@ -960,7 +961,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 |---|---|---|
 | Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. What runs over a whole deck or log is timed at two sizes, in the CPU time of its own process, not against the clock (CI runs the tests, coverage on, many times slower than a laptop): eight times the input must take less than four times as long as an eighth of it done eight times over, which a linear pass meets (about one) and work growing with the input does not (about eight) — `queryCards` over 5,000 cards, `lapseIndex`, `chainIndexOf` and `statisticsOf` over years of answers, `instanceGraphOf` over an instance's cards and answers (`growth` in `src/testing/growth.ts`), and, in the Studio, the graph's layout and routes over a deck's cards. |
 | Application | ports | Inject fake port objects (`vi.fn` per method). No module mocking. |
-| UI | `UseCases` prop | Render with a fake `UseCases`; assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
+| UI | `UseCases` prop | Render with a fake `UseCases`: `makeUseCasesFake` ([useCasesFake.ts](../packages/ui/src/test/useCasesFake.ts)) makes every slice's fake ([test/fakes/](../packages/ui/src/test/fakes/)) in one object, so each calls the others through it; a screen that takes a slice (the trial's) can be given that slice's fake alone. Assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
 | Infrastructure I/O shells | injected `fetch` + `vi.mock` | Mock `@inrupt/*` module functions; assert the shell orchestrates fetch → map → return. |
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set), exactly as the browser reads them. |

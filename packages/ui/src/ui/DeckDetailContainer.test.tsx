@@ -12,7 +12,8 @@ import type { StudySessionQueue } from "@solid-memo/application/study";
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { Instance } from "@solid-memo/domain/instance";
-import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { QUEUE_DEFAULTS } from "../test/fakes/study";
 
 const deck: Deck = {
   id: "deck-1",

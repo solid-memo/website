@@ -13,7 +13,8 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTree";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
-import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 

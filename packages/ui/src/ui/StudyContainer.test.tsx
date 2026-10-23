@@ -17,7 +17,9 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { previewIntervals } from "@solid-memo/domain/grading";
-import { makeUseCasesFake, statisticsReportOf, QUEUE_DEFAULTS } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { statisticsReportOf } from "../test/fakes/statistics";
+import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { RepoUrl } from "./ReportMistake";
 
 const instance: Instance = {
