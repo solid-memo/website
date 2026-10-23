@@ -88,6 +88,11 @@ variables or parameters, no case falling through to the next in a
 - **Errors the user may see** are an `AppError` with a code, whose text
   every language has ([appError.ts](../packages/domain/src/appError.ts));
   an error only a programming mistake can cause stays a plain `Error`.
+  A read that fails with an `AppError` or a lasting 4xx from the pod
+  (any but 408 and 429, such as 401, 403 or 404) is shown at once, not
+  retried. A network failure, a plain `Error`, or a 5xx, 408 or 429,
+  an `AppError` carrying one in `vars.status` too, is tried three times
+  more first ([retryable.ts](../packages/ui/src/ui/retryable.ts)).
 - **Avoid `any`**, and use a non-null assertion (`!`) only where the code just
   made sure of the value, or in a test.
 - **Tests** sit beside the module they test, as `name.test.ts`, and keep

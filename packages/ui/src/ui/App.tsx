@@ -344,7 +344,6 @@ function AppContent({
     queryKey: ["account", session?.webId],
     queryFn: () => useCases.discoverAccount(session!),
     enabled: session !== null && connecting,
-    retry: false,
   });
 
   async function startLogin(login: () => Promise<void>) {
