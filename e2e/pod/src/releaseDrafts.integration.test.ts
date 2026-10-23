@@ -23,6 +23,7 @@ import { describe, expect, inject, it } from "vitest";
 import { SITE } from "@solid-memo/vocab/tooling/sources";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import {
   draftContainerOf,
   draftDocuments,
@@ -59,6 +60,7 @@ function page(podFetch: typeof globalThis.fetch = fetch) {
     randomId: () => crypto.randomUUID(),
   };
   return createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,

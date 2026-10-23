@@ -24,6 +24,7 @@ import { beforeAll, describe, expect, inject, it } from "vitest";
 import { Parser, Writer, type Quad } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Instance } from "@solid-memo/domain/instance";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
@@ -431,6 +432,7 @@ function app(
   });
   const checkWrite = validator.checkSubjects;
   const useCases: UseCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,

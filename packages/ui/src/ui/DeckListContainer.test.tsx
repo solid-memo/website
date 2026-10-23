@@ -6,13 +6,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckListContainer } from "./DeckListContainer";
-import type { StudySessionQueue, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { StudySessionQueue } from "@solid-memo/application/study";
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTree";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
-import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 

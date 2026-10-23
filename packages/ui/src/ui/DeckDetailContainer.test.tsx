@@ -7,11 +7,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { routeToHash } from "./router";
-import type { StudySessionQueue, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { StudySessionQueue } from "@solid-memo/application/study";
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { Instance } from "@solid-memo/domain/instance";
-import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { QUEUE_DEFAULTS } from "../test/fakes/study";
 
 const deck: Deck = {
   id: "deck-1",

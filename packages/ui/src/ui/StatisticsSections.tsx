@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { StatisticsReport } from "@solid-memo/application/useCases";
+import type { StatisticsReport } from "@solid-memo/application/statistics";
 import type { Deck } from "@solid-memo/domain/deck";
 import { daysBetween, RECENT_DAYS } from "@solid-memo/domain/studyPatterns";
 import { ActivityCalendar } from "./charts/ActivityCalendar";

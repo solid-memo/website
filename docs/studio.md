@@ -1893,21 +1893,28 @@ Memo's own course screens (its page, a chapter's steps, its final
 review), a deck with Solid Memo's study. It is the draft's Trial tab.
 
 It is played in a sandbox, so nothing done in it reaches the user's
-pod. The use case is `openTrial(draft, instanceUrl)`
-([useCases.ts](../packages/application/src/useCases.ts)), which sets the
-sandbox up with `startTrial`
-([trial.ts](../packages/application/src/trial.ts)):
+pod. The use case is `openTrial(draft, instanceUrl)`, which sets the
+sandbox up with `startTrial`, both in
+[trial.ts](../packages/application/src/trial.ts):
 
 - **A pod of its own.** Each trial has a new pod, kept in memory, at
   `https://trial.solid-memo.invalid/` (`TRIAL_ORIGIN` in
   [release/trial.ts](../packages/domain/src/release/trial.ts)), which
   never resolves. `createTrialUseCases`
   ([trialUseCases.ts](../packages/composition/src/trialUseCases.ts))
-  wires the same Solid adapters and use cases over it as the page's own
+  wires the same Solid adapters over it as the page's own
   (`routedFetch`). Any other request goes to the page's pods, through a
   fence that refuses every method but GET and HEAD (`readOnlyFetch`): a
-  trial never writes to a real pod. It has no login, and none of the
-  device's language, theme or update journal.
+  trial never writes to a real pod.
+- **Only what a trial plays.** Over them, the trial composes only the
+  slices of the use cases a trial supports (`TrialUseCases` in
+  [trial.ts](../packages/application/src/trial.ts)): its instance, its
+  preferences, the course or the deck it plays, the library's upgrade
+  and study. It has no login, no guest, no drafts and no statistics.
+  It keeps none of the device's language, theme, palette or text size,
+  which it says with a "none" of its own (`NO_DEVICE`), and a mistake
+  in the draft, the author's own, is reported nowhere: the trial gives
+  `reportPlace` its own answer in place of the mistake reports' slice.
 - **The draft as a library.** The trial's library is the draft alone,
   as the editor keeps it, made afresh at each read
   (`createDraftDeckLibrary` in

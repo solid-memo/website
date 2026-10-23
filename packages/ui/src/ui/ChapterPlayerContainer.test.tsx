@@ -5,7 +5,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { Course, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { Course } from "@solid-memo/application/courses";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { Clock } from "./courseLinks";

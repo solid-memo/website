@@ -11,7 +11,7 @@ import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { DRAFT, playableCourseDraft } from "@solid-memo/domain/testing/releaseDraft";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createAppUseCases } from "./appUseCases";
-import { createTrialUseCases, NO_LOGIN, readOnlyFetch } from "./trialUseCases";
+import { createTrialUseCases, NO_DEVICE, readOnlyFetch } from "./trialUseCases";
 
 const SERVED = "http://localhost:5173/";
 
@@ -60,18 +60,24 @@ describe("readOnlyFetch", () => {
   });
 });
 
-describe("NO_LOGIN", () => {
-  it("has no session, and logs no one in or out", async () => {
-    expect(await NO_LOGIN.restore()).toBeNull();
-    NO_LOGIN.onSessionExpired(() => undefined)();
-    for (const refused of [
-      NO_LOGIN.discoverOidcIssuer("x"),
-      NO_LOGIN.login("x"),
-      NO_LOGIN.loginWithIssuer("x"),
-      NO_LOGIN.logout(),
-    ]) {
-      await expect(refused).rejects.toThrow("no login");
-    }
+describe("NO_DEVICE", () => {
+  it("keeps no choice of how the app is shown, and no palettes", async () => {
+    const { languagePreference, themePreference, palettePreference, customPalettePreference } =
+      NO_DEVICE;
+    languagePreference.choose("sv");
+    themePreference.choose("dark");
+    palettePreference.choose("parchment");
+    customPalettePreference.choose({} as never);
+    NO_DEVICE.textSizePreference.choose("larger");
+    expect(languagePreference.chosen()).toBeNull();
+    expect(themePreference.chosen()).toBe("system");
+    expect(palettePreference.chosen()).toBe("standard");
+    expect(customPalettePreference.chosen()).toBeNull();
+    expect(NO_DEVICE.textSizePreference.chosen()).toBe("default");
+    await expect(NO_DEVICE.paletteRepository.listPalettes(TRIAL_ORIGIN)).resolves.toEqual([]);
+    await expect(
+      NO_DEVICE.paletteRepository.savePalette(TRIAL_ORIGIN, {} as never),
+    ).rejects.toThrow("A trial keeps no palettes.");
   });
 });
 
@@ -134,7 +140,6 @@ describe("createTrialUseCases", () => {
     const question = course.cards["q-a-1a"]!;
     await useCases.answerCourseQuestion(played.url, deck, question, { correct: true }, new Date());
     expect((await useCases.getCourse(deck)).answeredCardIds).toEqual(["q-a-1a"]);
-    expect((await useCases.checkInstance(played.url)).conforms).toBe(true);
 
     // Another trial starts afresh.
     const again = await app.openTrial(draft, instance!.url);

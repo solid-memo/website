@@ -5,13 +5,15 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { CardProgressReport, DeckProgress, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { CardProgressReport, DeckProgress } from "@solid-memo/application/statistics";
 import type { HardCard } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import { deckProgressOf, makeUseCasesFake } from "../test/useCasesFake";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { deckProgressOf } from "../test/fakes/statistics";
 import { CramContainer } from "./CramContainer";
 import { RepoUrl } from "./ReportMistake";
 

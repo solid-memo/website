@@ -5,7 +5,8 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
-import type { StatisticsReport, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { StatisticsReport } from "@solid-memo/application/statistics";
 import { mergeCardProgress } from "@solid-memo/domain/cardProgress";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";

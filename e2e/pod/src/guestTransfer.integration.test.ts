@@ -17,6 +17,7 @@ import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
@@ -151,6 +152,7 @@ function app() {
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
   const useCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     deckLibrary: library,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),

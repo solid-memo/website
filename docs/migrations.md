@@ -496,7 +496,7 @@ and nothing is kept beside the documents: no copy, no backup. A document
 that cannot be updated now is left as it is, readable, and the update
 goes on with the others; run again, it updates what is still outdated
 ([instanceUpdate.ts](../packages/domain/src/instanceUpdate.ts),
-`updateInstance` in [useCases.ts](../packages/application/src/useCases.ts)).
+`updateInstance` in [instances.ts](../packages/application/src/instances.ts)).
 
 ```mermaid
 flowchart TD
@@ -855,7 +855,7 @@ deck is. A failure stops it where it is, nothing put back; planned
 again, the upgrade is offered and finishes
 ([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),
 `applyLibraryUpgrade` in
-[useCases.ts](../packages/application/src/useCases.ts)). The deck keeps
+[library.ts](../packages/application/src/library.ts)). The deck keeps
 its URL, its documents theirs and its cards their ids, so the answer
 log still names them (statistics count a card by its deck and id, not
 by its document), and so does any link another app made.

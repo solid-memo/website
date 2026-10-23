@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useLayoutEffect, useRef } from "preact/hooks";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { StudyUseCases } from "@solid-memo/application/study";
 import type { Deck } from "@solid-memo/domain/deck";
 
 /**
@@ -13,7 +13,11 @@ import type { Deck } from "@solid-memo/domain/deck";
  * end does (StudyContainer), when the screen goes away or (best effort)
  * the page is hidden. Returns what to call after each answer graded.
  */
-export function useKeepSchedule(useCases: UseCases, instanceUrl: string, deck: Deck): () => void {
+export function useKeepSchedule(
+  useCases: StudyUseCases,
+  instanceUrl: string,
+  deck: Deck,
+): () => void {
   const answered = useRef(0);
   const latest = useRef(deck);
   latest.current = deck;

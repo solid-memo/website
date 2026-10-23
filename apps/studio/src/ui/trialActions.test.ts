@@ -5,7 +5,8 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Trial } from "@solid-memo/application/trial";
 import type { Prompt } from "@solid-memo/domain/deck";
-import { makeUseCasesFake, QUEUE_DEFAULTS } from "@solid-memo/ui/test/useCasesFake";
+import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
+import { QUEUE_DEFAULTS } from "@solid-memo/ui/test/fakes/study";
 import {
   CH1,
   courseCards,

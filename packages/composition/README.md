@@ -13,7 +13,8 @@ the use cases over them.
   passes what is its own: its name, where it is served, and the build's
   values.
 - `trialUseCases`: `createTrialUseCases`, the sandbox a Studio trial
-  plays a draft in ([studio.md](../../docs/studio.md#the-trial)).
+  plays a draft in, only the slices a trial plays over a pod of its own
+  ([studio.md](../../docs/studio.md#the-trial)).
 
 ## Boundaries
 

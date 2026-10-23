@@ -16,6 +16,7 @@
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Deck } from "@solid-memo/domain/deck";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
@@ -50,6 +51,7 @@ function page() {
     randomId: () => crypto.randomUUID(),
   };
   return createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,

@@ -4,7 +4,8 @@
 
 import { useId } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
-import type { CardProgressReport, DeckProgress, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { CardProgressReport, DeckProgress } from "@solid-memo/application/statistics";
 import { shiftStudyDay } from "@solid-memo/domain/answer";
 import {
   mergeCardProgress,

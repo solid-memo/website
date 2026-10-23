@@ -19,6 +19,7 @@ import { beforeAll, describe, expect, inject, it } from "vitest";
 import { Parser } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import { defaultCatalogDescription } from "@solid-memo/domain/catalog";
 import type { CourseOutline } from "@solid-memo/domain/course";
@@ -125,6 +126,7 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
     randomId: () => crypto.randomUUID(),
   };
   return createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: library,
