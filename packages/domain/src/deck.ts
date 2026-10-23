@@ -467,17 +467,8 @@ export function validateCardContent(
   if (isEmptyText(back) && backImageUrl === undefined) {
     return { ok: false, error: new AppError("cardBackEmpty") };
   }
-  const distractors: Distractor[] = [];
-  for (const distractor of input.distractors ?? []) {
-    const tidy = tidiedDistractor(distractor, formatted);
-    if (!tidy.ok) return { ok: false, error: tidy.error };
-    distractors.push({
-      id: distractor.id,
-      text: tidy.text,
-      ...(tidy.note === undefined ? {} : { note: tidy.note }),
-      ...(distractor.retired ? { retired: true } : {}),
-    });
-  }
+  const distractors = tidiedDistractors(input.distractors ?? [], formatted);
+  if (!Array.isArray(distractors)) return distractors;
   return {
     ok: true,
     content: {
@@ -500,6 +491,25 @@ export function validateCardContent(
       ...(subjects === undefined ? {} : { subjects }),
     },
   };
+}
+
+/** A card's distractors tidied as their own editor does, ids and retirement kept; the first one's error, if any. */
+function tidiedDistractors(
+  input: readonly Distractor[],
+  formatted: boolean,
+): Distractor[] | CardContentValidation {
+  const distractors: Distractor[] = [];
+  for (const distractor of input) {
+    const tidy = tidiedDistractor(distractor, formatted);
+    if (!tidy.ok) return { ok: false, error: tidy.error };
+    distractors.push({
+      id: distractor.id,
+      text: tidy.text,
+      ...(tidy.note === undefined ? {} : { note: tidy.note }),
+      ...(distractor.retired ? { retired: true } : {}),
+    });
+  }
+  return distractors;
 }
 
 function needsLanguage(part: CardTextPart): CardContentValidation {

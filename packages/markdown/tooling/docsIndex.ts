@@ -102,6 +102,153 @@ function written(subject: string): string {
   return subject.startsWith(DOCS_BASE) ? `<${subject.slice(DOCS_BASE.length)}>` : `<${subject}>`;
 }
 
+/** Lists a problem of the index at a line. */
+type Report = (line: number | null, what: string) => void;
+
+/** Each subject's values, by property. */
+type Subjects = Map<string, Map<string, Term[]>>;
+
+/** What a reading of the index works from: the subjects, and where problems go. */
+type Reading = { subjects: Subjects; at: Report };
+
+type Read = { position: number | null; line: number | null };
+type ReadPage = Omit<IndexedPage, "position"> & Read & { group: string | null };
+type ReadGroup = Omit<DocsGroup, "pages"> & Read & { pages: ReadPage[] };
+
+/** The quads' values by subject and property; a named graph or a blank node is a problem. */
+function subjectsOf(quads: ReturnType<typeof parseTurtle>, at: Report): Subjects {
+  const subjects: Subjects = new Map();
+  for (const quad of quads) {
+    // N3 also reads TriG, whose named graphs (`<g> { … }`) Turtle does not have.
+    if (quad.graph.termType !== "DefaultGraph") {
+      at(null, "a named graph (`<g> { … }`), which Turtle does not have");
+      continue;
+    }
+    if (quad.subject.termType !== "NamedNode") {
+      at(null, "a blank node: name every subject (`<>`, `<#group>` or `<page.md>`)");
+      continue;
+    }
+    const properties = subjects.get(quad.subject.value) ?? new Map<string, Term[]>();
+    subjects.set(quad.subject.value, properties);
+    properties.set(quad.predicate.value, [
+      ...(properties.get(quad.predicate.value) ?? []),
+      quad.object,
+    ]);
+  }
+  return subjects;
+}
+
+/** A subject's one value of a property; null, with a problem, when it has none or several. */
+function oneValue(
+  { subjects, at }: Reading,
+  subject: string,
+  line: number | null,
+  predicate: string,
+): Term | null {
+  const values = subjects.get(subject)!.get(predicate) ?? [];
+  if (values.length === 1) return values[0]!;
+  at(
+    line,
+    `${written(subject)} has ${values.length === 0 ? "no" : "more than one"} ${SHORT[predicate]}: it needs exactly one`,
+  );
+  return null;
+}
+
+/** A text in English; null, with a problem, for anything else. */
+function englishOf(
+  reading: Reading,
+  subject: string,
+  line: number | null,
+  predicate: string,
+): string | null {
+  const value = oneValue(reading, subject, line, predicate);
+  if (value === null) return null;
+  if (value.termType === "Literal" && value.language === "en") return value.value;
+  reading.at(line, `${written(subject)}'s ${SHORT[predicate]} is not text in English ("…"@en)`);
+  return null;
+}
+
+/** A position, a whole number from 0; null, with a problem, for anything else. */
+function positionOf(reading: Reading, subject: string, line: number | null): number | null {
+  const value = oneValue(reading, subject, line, POSITION);
+  if (value === null) return null;
+  if (
+    value.termType === "Literal" &&
+    value.datatype.value === XSD_INTEGER &&
+    /^\d+$/.test(value.value)
+  )
+    return Number(value.value);
+  reading.at(line, `${written(subject)}'s schema:position is not a whole number from 0`);
+  return null;
+}
+
+/** Whether a subject is typed as its kind and has only that kind's properties, each problem listed. */
+function checkShape(
+  { subjects, at }: Reading,
+  subject: string,
+  line: number | null,
+  kind: keyof typeof KINDS,
+) {
+  const { type, properties } = KINDS[kind];
+  const values = subjects.get(subject)!;
+  for (const predicate of values.keys()) {
+    if (!properties.includes(predicate))
+      at(line, `${written(subject)} has <${predicate}>, which a ${kind} of the docs does not have`);
+  }
+  const types = values.get(RDF_TYPE) ?? [];
+  if (types.length !== 1 || types[0]!.value !== type)
+    at(line, `${written(subject)} is not typed ${SHORT[type]} alone`);
+}
+
+/** A group (`<#id>`) as read, its pages still to be added. */
+function readGroup(reading: Reading, text: string, subject: string, id: string): ReadGroup {
+  const line = subjectLine(text, `<#${id}>`);
+  checkShape(reading, subject, line, "group");
+  if (!GROUP_ID.test(id))
+    reading.at(line, `<#${id}>: a group's id is lowercase words and hyphens, as a heading's is`);
+  const part = oneValue(reading, subject, line, IS_PART_OF);
+  if (part !== null && (part.termType !== "NamedNode" || part.value !== DOCS_BASE))
+    reading.at(line, `<#${id}> is not part of the docs themselves (schema:isPartOf <>)`);
+  return {
+    id,
+    title: englishOf(reading, subject, line, TITLE) ?? "",
+    pages: [],
+    line,
+    position: positionOf(reading, subject, line),
+  };
+}
+
+/** A page (`<relative>`) as read, with the group it says it is part of. */
+function readPage(reading: Reading, text: string, subject: string, relative: string): ReadPage {
+  const line = subjectLine(text, `<${relative}>`);
+  checkShape(reading, subject, line, "page");
+  const part = oneValue(reading, subject, line, IS_PART_OF);
+  if (part !== null && part.termType !== "NamedNode")
+    reading.at(line, `<${relative}>'s schema:isPartOf is not a group (\`<#group>\`)`);
+  const abstract = englishOf(reading, subject, line, ABSTRACT);
+  return {
+    name: relative,
+    summary: abstract === null ? [] : summaryOf(abstract, `<${relative}>`, line, reading.at),
+    line,
+    group: part?.termType === "NamedNode" ? part.value : null,
+    position: positionOf(reading, subject, line),
+  };
+}
+
+/** Items by position, a shared position a problem. */
+function ordered<T extends Read>(items: T[], name: (item: T) => string, at: Report): T[] {
+  // One without a position, a problem already, goes last, so it is still listed.
+  const sorted = items
+    .filter((item) => item.position !== null)
+    .sort((a, b) => a.position! - b.position!);
+  sorted.forEach((item, index) => {
+    const before = sorted[index - 1];
+    if (before !== undefined && before.position === item.position)
+      at(item.line, `${name(item)} has the position of ${name(before)}, ${item.position}`);
+  });
+  return [...sorted, ...items.filter((item) => item.position === null)];
+}
+
 /**
  * The index read from its Turtle, and what is wrong with it. The index is
  * null when the Turtle does not parse; otherwise it holds what could be
@@ -126,120 +273,29 @@ export function readDocsIndex(text: string): {
     return { index: null, problems };
   }
 
-  const subjects = new Map<string, Map<string, Term[]>>();
-  for (const quad of quads) {
-    // N3 also reads TriG, whose named graphs (`<g> { … }`) Turtle does not have.
-    if (quad.graph.termType !== "DefaultGraph") {
-      at(null, "a named graph (`<g> { … }`), which Turtle does not have");
-      continue;
-    }
-    if (quad.subject.termType !== "NamedNode") {
-      at(null, "a blank node: name every subject (`<>`, `<#group>` or `<page.md>`)");
-      continue;
-    }
-    const properties = subjects.get(quad.subject.value) ?? new Map<string, Term[]>();
-    subjects.set(quad.subject.value, properties);
-    properties.set(quad.predicate.value, [
-      ...(properties.get(quad.predicate.value) ?? []),
-      quad.object,
-    ]);
-  }
-
-  /** A subject's one value of a property; null, with a problem, when it has none or several. */
-  const one = (subject: string, line: number | null, predicate: string): Term | null => {
-    const values = subjects.get(subject)!.get(predicate) ?? [];
-    if (values.length === 1) return values[0]!;
-    at(
-      line,
-      `${written(subject)} has ${values.length === 0 ? "no" : "more than one"} ${SHORT[predicate]}: it needs exactly one`,
-    );
-    return null;
-  };
-  /** A text in English; null, with a problem, for anything else. */
-  const english = (subject: string, line: number | null, predicate: string): string | null => {
-    const value = one(subject, line, predicate);
-    if (value === null) return null;
-    if (value.termType === "Literal" && value.language === "en") return value.value;
-    at(line, `${written(subject)}'s ${SHORT[predicate]} is not text in English ("…"@en)`);
-    return null;
-  };
-  /** A position, a whole number from 0; null, with a problem, for anything else. */
-  const position = (subject: string, line: number | null): number | null => {
-    const value = one(subject, line, POSITION);
-    if (value === null) return null;
-    if (
-      value.termType === "Literal" &&
-      value.datatype.value === XSD_INTEGER &&
-      /^\d+$/.test(value.value)
-    )
-      return Number(value.value);
-    at(line, `${written(subject)}'s schema:position is not a whole number from 0`);
-    return null;
-  };
-  /** Whether a subject is typed as its kind and has only that kind's properties, each problem listed. */
-  const shaped = (subject: string, line: number | null, kind: keyof typeof KINDS) => {
-    const { type, properties } = KINDS[kind];
-    const values = subjects.get(subject)!;
-    for (const predicate of values.keys()) {
-      if (!properties.includes(predicate))
-        at(
-          line,
-          `${written(subject)} has <${predicate}>, which a ${kind} of the docs does not have`,
-        );
-    }
-    const types = values.get(RDF_TYPE) ?? [];
-    if (types.length !== 1 || types[0]!.value !== type)
-      at(line, `${written(subject)} is not typed ${SHORT[type]} alone`);
-  };
+  const subjects = subjectsOf(quads, at);
+  const reading: Reading = { subjects, at };
 
   const docs = subjects.has(DOCS_BASE) ? DOCS_BASE : null;
   const docsLine = subjectLine(text, "<>");
   let title = "";
   if (docs === null) at(null, "the docs themselves (`<>`) are missing, with their title");
   else {
-    shaped(docs, docsLine, "docs");
-    title = english(docs, docsLine, TITLE) ?? "";
+    checkShape(reading, docs, docsLine, "docs");
+    title = englishOf(reading, docs, docsLine, TITLE) ?? "";
   }
 
-  type Read = { position: number | null; line: number | null };
-  type ReadPage = Omit<IndexedPage, "position"> & Read & { group: string | null };
-  const groups = new Map<string, Omit<DocsGroup, "pages"> & Read & { pages: ReadPage[] }>();
+  const groups = new Map<string, ReadGroup>();
   const pages: ReadPage[] = [];
   for (const subject of subjects.keys()) {
     if (subject === DOCS_BASE) continue;
     const relative = subject.startsWith(DOCS_BASE) ? subject.slice(DOCS_BASE.length) : null;
     if (relative?.startsWith("#")) {
-      const id = relative.slice(1);
-      const line = subjectLine(text, `<#${id}>`);
-      shaped(subject, line, "group");
-      if (!GROUP_ID.test(id))
-        at(line, `<#${id}>: a group's id is lowercase words and hyphens, as a heading's is`);
-      const part = one(subject, line, IS_PART_OF);
-      if (part !== null && (part.termType !== "NamedNode" || part.value !== DOCS_BASE))
-        at(line, `<#${id}> is not part of the docs themselves (schema:isPartOf <>)`);
-      groups.set(subject, {
-        id,
-        title: english(subject, line, TITLE) ?? "",
-        pages: [],
-        line,
-        position: position(subject, line),
-      });
+      groups.set(subject, readGroup(reading, text, subject, relative.slice(1)));
       continue;
     }
     if (relative !== null && PAGE_NAME.test(relative)) {
-      const line = subjectLine(text, `<${relative}>`);
-      shaped(subject, line, "page");
-      const part = one(subject, line, IS_PART_OF);
-      if (part !== null && part.termType !== "NamedNode")
-        at(line, `<${relative}>'s schema:isPartOf is not a group (\`<#group>\`)`);
-      const abstract = english(subject, line, ABSTRACT);
-      pages.push({
-        name: relative,
-        summary: abstract === null ? [] : summaryOf(abstract, `<${relative}>`, line, at),
-        line,
-        group: part?.termType === "NamedNode" ? part.value : null,
-        position: position(subject, line),
-      });
+      pages.push(readPage(reading, text, subject, relative));
       continue;
     }
     at(
@@ -255,29 +311,17 @@ export function readDocsIndex(text: string): {
       at(page.line, `<${page.name}> is part of ${written(page.group)}, which is not a group`);
     else group.pages.push(page);
   }
-  const ordered = <T extends Read>(items: T[], name: (item: T) => string): T[] => {
-    // One without a position, a problem already, goes last, so it is still listed.
-    const sorted = items
-      .filter((item) => item.position !== null)
-      .sort((a, b) => a.position! - b.position!);
-    sorted.forEach((item, index) => {
-      const before = sorted[index - 1];
-      if (before !== undefined && before.position === item.position)
-        at(item.line, `${name(item)} has the position of ${name(before)}, ${item.position}`);
-    });
-    return [...sorted, ...items.filter((item) => item.position === null)];
-  };
   const index: DocsIndex = {
     title,
     line: docsLine,
     named: pages.map(({ name, line }) => ({ name, line })),
-    groups: ordered([...groups.values()], (group) => `<#${group.id}>`).map((group) => {
+    groups: ordered([...groups.values()], (group) => `<#${group.id}>`, at).map((group) => {
       if (group.pages.length === 0) at(group.line, `<#${group.id}> has no pages`);
       return {
         id: group.id,
         title: group.title,
         line: group.line,
-        pages: ordered(group.pages, (page) => `<${page.name}>`).map(
+        pages: ordered(group.pages, (page) => `<${page.name}>`, at).map(
           ({ name, summary, position, line }) => ({ name, summary, position: position ?? 0, line }),
         ),
       };
@@ -287,12 +331,7 @@ export function readDocsIndex(text: string): {
 }
 
 /** A summary read as the docs' Markdown: one line of phrasing, with no link and no break. */
-function summaryOf(
-  text: string,
-  subject: string,
-  line: number | null,
-  at: (line: number | null, what: string) => void,
-): MdInline[] {
+function summaryOf(text: string, subject: string, line: number | null, at: Report): MdInline[] {
   let blocks: DocBlock[];
   try {
     blocks = parseDocument(text);

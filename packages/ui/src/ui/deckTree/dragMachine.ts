@@ -72,24 +72,8 @@ export function dragReducer(state: DragState, event: DragInput): DragState {
         touch: event.pointerType !== "mouse",
         origin: event.point,
       };
-    case "move": {
-      if (state.phase === "idle" || event.pointerId !== state.pointerId) return state;
-      if (state.phase === "pending") {
-        const distance = Math.hypot(event.point.x - state.origin.x, event.point.y - state.origin.y);
-        if (state.touch) return distance > TOUCH_SLOP_PX ? IDLE : state;
-        return distance >= MOUSE_SLOP_PX ? lifted(state, event.point) : state;
-      }
-      if (state.layout === null) return { ...state, pointer: event.point };
-      const hit = hitTest(state.layout, event.y, state.source);
-      const target = hit.kind === "combine" ? hit.target : null;
-      const dwell =
-        target === null
-          ? null
-          : state.dwell?.target === target
-            ? state.dwell
-            : { target, armed: false };
-      return { ...state, pointer: event.point, hit, dwell };
-    }
+    case "move":
+      return moved(state, event);
     case "hold":
       return state.phase === "pending" ? lifted(state, state.origin) : state;
     case "measured":
@@ -102,6 +86,26 @@ export function dragReducer(state: DragState, event: DragInput): DragState {
     case "cancel":
       return IDLE;
   }
+}
+
+/** A move of the pointer: a pending press lifts or gives up, a drag says where it would land. */
+function moved(state: DragState, event: Extract<DragInput, { type: "move" }>): DragState {
+  if (state.phase === "idle" || event.pointerId !== state.pointerId) return state;
+  if (state.phase === "pending") {
+    const distance = Math.hypot(event.point.x - state.origin.x, event.point.y - state.origin.y);
+    if (state.touch) return distance > TOUCH_SLOP_PX ? IDLE : state;
+    return distance >= MOUSE_SLOP_PX ? lifted(state, event.point) : state;
+  }
+  if (state.layout === null) return { ...state, pointer: event.point };
+  const hit = hitTest(state.layout, event.y, state.source);
+  const target = hit.kind === "combine" ? hit.target : null;
+  const dwell =
+    target === null
+      ? null
+      : state.dwell?.target === target
+        ? state.dwell
+        : { target, armed: false };
+  return { ...state, pointer: event.point, hit, dwell };
 }
 
 function lifted(state: Extract<DragState, { phase: "pending" }>, pointer: Point): DragState {

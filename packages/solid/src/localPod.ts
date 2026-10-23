@@ -17,6 +17,14 @@ export interface LocalPodDeps {
   newEtag: () => string;
 }
 
+/** A request to the pod, as handle takes it. */
+interface PodRequest {
+  url: string;
+  method: string;
+  headers: Headers;
+  body: BodyInit | null;
+}
+
 /**
  * A Solid pod kept on this device, as a fetch (docs/guest-mode.md): the
  * guest's pod, which the app's Solid adapters read and write as they do
@@ -46,39 +54,16 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
     return store.exclusive(() => handle({ url, method, headers, body: init?.body ?? null }));
   };
 
-  async function handle(request: {
-    url: string;
-    method: string;
-    headers: Headers;
-    body: BodyInit | null;
-  }) {
+  async function handle(request: PodRequest) {
     const { url, method, headers } = request;
     const current = await store.get(url);
-    if (method === "GET" || method === "HEAD") {
-      if (current === undefined) return answer(url, 404);
-      if (headers.get("If-None-Match") === current.etag)
-        return answer(url, 304, null, { ETag: current.etag });
-      const { body, contentType } = await representationOf(url, current);
-      return answer(url, 200, method === "HEAD" ? null : body, {
-        "Content-Type": contentType,
-        ETag: current.etag,
-        Link: linksOf(url, current),
-      });
-    }
+    if (method === "GET" || method === "HEAD") return read(url, method, headers, current);
     if (method !== "PUT" && method !== "PATCH" && method !== "DELETE") return answer(url, 405);
     const ifMatch = headers.get("If-Match");
     if (ifMatch !== null && ifMatch !== current?.etag) return answer(url, 412);
     if (headers.get("If-None-Match") === "*" && current !== undefined) return answer(url, 412);
 
-    if (method === "DELETE") {
-      if (current === undefined) return answer(url, 404);
-      if (url === root) return answer(url, 405);
-      if (current.kind === "container" && (await childrenOf(url)).length > 0)
-        return answer(url, 409);
-      await store.delete(url);
-      await touch(parentOf(url)!);
-      return answer(url, 205);
-    }
+    if (method === "DELETE") return remove(url, current);
 
     if (url.endsWith("/")) {
       if (method !== "PUT" || current !== undefined) return answer(url, 409);
@@ -86,29 +71,66 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
       return answer(url, 201);
     }
 
-    const contentType = headers.get("Content-Type") ?? "";
-    const text = typeof request.body === "string" ? request.body : null;
-    let next: StoredResource;
-    if (method === "PATCH") {
-      if (!contentType.startsWith("application/sparql-update") || text === null)
-        return answer(url, 415);
-      if (current !== undefined && current.kind !== "rdf") return answer(url, 409);
-      const triples = await patched(url, current?.triples ?? [], text);
-      if (triples === null) return answer(url, 400);
-      next = { kind: "rdf", etag: newEtag(), triples };
-    } else if (contentType.startsWith("text/turtle")) {
-      const triples = await parsed(url, text ?? "");
-      if (triples === null) return answer(url, 400);
-      next = { kind: "rdf", etag: newEtag(), triples: [...triples] };
-    } else {
-      next = { kind: "file", etag: newEtag(), contentType, bytes: await bytesOf(request.body) };
-    }
+    const next = await written(request, current);
+    if (next instanceof Response) return next;
     if (current === undefined) {
       await create(url, next);
       return answer(url, 201);
     }
     await store.set(url, next);
     return answer(url, 205);
+  }
+
+  /** A GET or HEAD of the resource. */
+  async function read(
+    url: string,
+    method: string,
+    headers: Headers,
+    current: StoredResource | undefined,
+  ): Promise<Response> {
+    if (current === undefined) return answer(url, 404);
+    if (headers.get("If-None-Match") === current.etag)
+      return answer(url, 304, null, { ETag: current.etag });
+    const { body, contentType } = await representationOf(url, current);
+    return answer(url, 200, method === "HEAD" ? null : body, {
+      "Content-Type": contentType,
+      ETag: current.etag,
+      Link: linksOf(url, current),
+    });
+  }
+
+  /** A DELETE of a document or an empty container; never of the root. */
+  async function remove(url: string, current: StoredResource | undefined): Promise<Response> {
+    if (current === undefined) return answer(url, 404);
+    if (url === root) return answer(url, 405);
+    if (current.kind === "container" && (await childrenOf(url)).length > 0) return answer(url, 409);
+    await store.delete(url);
+    await touch(parentOf(url)!);
+    return answer(url, 205);
+  }
+
+  /** The document a PUT or PATCH leaves; the error answer when it leaves none. */
+  async function written(
+    request: PodRequest,
+    current: StoredResource | undefined,
+  ): Promise<StoredResource | Response> {
+    const { url, method, headers } = request;
+    const contentType = headers.get("Content-Type") ?? "";
+    const text = typeof request.body === "string" ? request.body : null;
+    if (method === "PATCH") {
+      if (!contentType.startsWith("application/sparql-update") || text === null)
+        return answer(url, 415);
+      if (current !== undefined && current.kind !== "rdf") return answer(url, 409);
+      const triples = await patched(url, current?.triples ?? [], text);
+      if (triples === null) return answer(url, 400);
+      return { kind: "rdf", etag: newEtag(), triples };
+    }
+    if (contentType.startsWith("text/turtle")) {
+      const triples = await parsed(url, text ?? "");
+      if (triples === null) return answer(url, 400);
+      return { kind: "rdf", etag: newEtag(), triples: [...triples] };
+    }
+    return { kind: "file", etag: newEtag(), contentType, bytes: await bytesOf(request.body) };
   }
 
   /** Store a new resource, and any container missing above it; their containers change. */
@@ -189,45 +211,56 @@ async function patched(
  * Update, in order, each with its triples as written; null for any other
  * update. Braces inside IRIs, strings and comments do not end a block.
  */
-export function dataBlocks(
-  update: string,
-): { operation: "INSERT" | "DELETE"; data: string }[] | null {
-  const blocks: { operation: "INSERT" | "DELETE"; data: string }[] = [];
+export function dataBlocks(update: string): DataBlock[] | null {
+  const blocks: DataBlock[] = [];
   let at = 0;
   for (;;) {
     while (at < update.length && /[\s;]/.test(update[at]!)) at++;
     if (at === update.length) return blocks;
     const opening = /^(INSERT|DELETE)\s+DATA\s*\{/i.exec(update.slice(at));
     if (opening === null) return null;
-    at += opening[0].length;
-    const start = at;
-    let quote: string | null = null;
-    for (; at < update.length; at++) {
-      const c = update[at]!;
-      if (quote !== null) {
-        if (c === "\\") at++;
-        else if (update.startsWith(quote, at)) {
-          at += quote.length - 1;
-          quote = null;
-        }
-      } else if (c === "<") {
-        at = update.indexOf(">", at);
-        if (at === -1) return null;
-      } else if (c === '"' || c === "'") {
-        quote = update.startsWith(c.repeat(3), at) ? c.repeat(3) : c;
-        at += quote.length - 1;
-      } else if (c === "#") {
-        const end = update.indexOf("\n", at);
-        at = end === -1 ? update.length : end;
-      } else if (c === "}") break;
-    }
-    if (at >= update.length) return null;
+    const start = at + opening[0].length;
+    const end = blockEnd(update, start);
+    if (end === null) return null;
     blocks.push({
       operation: opening[1]!.toUpperCase() as "INSERT" | "DELETE",
-      data: update.slice(start, at),
+      data: update.slice(start, end),
     });
-    at++;
+    at = end + 1;
   }
+}
+
+interface DataBlock {
+  operation: "INSERT" | "DELETE";
+  data: string;
+}
+
+/**
+ * Where the block whose triples start at `from` ends: the index of its
+ * closing brace, past IRIs, strings and comments; null when it never ends.
+ */
+function blockEnd(update: string, from: number): number | null {
+  let quote: string | null = null;
+  for (let at = from; at < update.length; at++) {
+    const c = update[at]!;
+    if (quote !== null) {
+      if (c === "\\") at++;
+      else if (update.startsWith(quote, at)) {
+        at += quote.length - 1;
+        quote = null;
+      }
+    } else if (c === "<") {
+      at = update.indexOf(">", at);
+      if (at === -1) return null;
+    } else if (c === '"' || c === "'") {
+      quote = update.startsWith(c.repeat(3), at) ? c.repeat(3) : c;
+      at += quote.length - 1;
+    } else if (c === "#") {
+      const end = update.indexOf("\n", at);
+      at = end === -1 ? update.length : end;
+    } else if (c === "}") return at;
+  }
+  return null;
 }
 
 /** The container a resource is in; null for the root of its origin. */

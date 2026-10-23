@@ -18,7 +18,11 @@ import {
 /** A screen's own keys, given the key as the keymap names it (keyOf): the screen takes one with `preventDefault`. */
 export type ScreenKeyHandler = (event: KeyboardEvent, key: string) => void;
 
-type Register = (handler: { current: ScreenKeyHandler }) => () => void;
+type ScreenRef = { current: ScreenKeyHandler };
+
+type Run = (shortcut: ShortcutId) => boolean;
+
+type Register = (handler: ScreenRef) => () => void;
 
 /** How a screen hands its keys to the Studio's one listener (useShortcuts); outside the Studio, nothing takes them. */
 export const ScreenKeys = createContext<Register>(() => () => undefined);
@@ -33,6 +37,33 @@ export function useScreenKeys(handler: ScreenKeyHandler): void {
 
 const STUDIO_KEYS = SHORTCUTS.filter((shortcut) => shortcut.scope === "studio");
 const TYPING_KEYS = STUDIO_KEYS.filter((shortcut) => shortcut.whileTyping);
+
+/**
+ * A key under a dialog open is the dialog's, but Ctrl+K (Cmd+K), which
+ * closes it and then opens the palette. Returns whether a dialog had it.
+ */
+function dialogKey(event: KeyboardEvent, key: string, palette: { current: Run }): boolean {
+  // A key goes to an element: the one focused, else the page's body, under a dialog open too.
+  const dialog =
+    (event.target as Element).closest("dialog") ?? document.querySelector("dialog[open]");
+  if (dialog === null) return false;
+  if (shortcutOf(key, "studio") === "palette") {
+    event.preventDefault();
+    // Once it has closed, and its owner stopped showing it.
+    dialog.addEventListener("close", () => palette.current("palette"), { once: true });
+    dialog.close();
+  }
+  return true;
+}
+
+/** Hands the key to the screens' own keys, the last registered first; returns whether one took it. */
+function screenTook(event: KeyboardEvent, key: string, handlers: Set<ScreenRef>): boolean {
+  for (const screen of [...handlers].reverse()) {
+    screen.current(event, key);
+    if (event.defaultPrevented) return true;
+  }
+  return false;
+}
 
 /**
  * The Studio's one listener of keys, on the document. A key goes first
@@ -53,11 +84,8 @@ const TYPING_KEYS = STUDIO_KEYS.filter((shortcut) => shortcut.whileTyping);
  * is not `g g`). Returns how screens register: give it to them in
  * ScreenKeys.
  */
-export function useShortcuts(
-  run: (shortcut: ShortcutId) => boolean,
-  characterKeys = true,
-): Register {
-  const screens = useRef(new Set<{ current: ScreenKeyHandler }>());
+export function useShortcuts(run: Run, characterKeys = true): Register {
+  const screens = useRef(new Set<ScreenRef>());
   const chord = useRef<Chord | null>(null);
   const runRef = useRef(run);
   runRef.current = run;
@@ -68,28 +96,13 @@ export function useShortcuts(
     const listener = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
       const key = keyOf(event);
-      // A key goes to an element: the one focused, else the page's body, under a dialog open too.
-      const dialog =
-        (event.target as Element).closest("dialog") ?? document.querySelector("dialog[open]");
-      if (dialog !== null) {
-        if (shortcutOf(key, "studio") !== "palette") return;
-        event.preventDefault();
-        // Once it has closed, and its owner stopped showing it.
-        dialog.addEventListener("close", () => runRef.current("palette"), { once: true });
-        dialog.close();
-        return;
-      }
+      if (dialogKey(event, key, runRef)) return;
       if (document.querySelector('[role="menu"]') !== null) return;
       if (!characters.current && isCharacterKey(key)) return;
       const typing = isTyping(event.target);
-      if (!typing) {
-        for (const screen of [...screens.current].reverse()) {
-          screen.current(event, key);
-          if (event.defaultPrevented) {
-            chord.current = null;
-            return;
-          }
-        }
+      if (!typing && screenTook(event, key, screens.current)) {
+        chord.current = null;
+        return;
       }
       if (event.repeat) return;
       const pressed = pressKey(

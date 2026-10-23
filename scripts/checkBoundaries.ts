@@ -147,68 +147,41 @@ export type Manifest = {
 /** A workspace package: its folder from the root, its manifest, and its source by path. */
 export type Workspace = { dir: string; manifest: Manifest; files: Record<string, string> };
 
-/** What one source file of a workspace package imports against its boundaries. */
-function fileProblems(
-  workspace: Workspace,
+/**
+ * What one import of another workspace package, `other`, breaks (fileProblems):
+ * its layer may not use it, only some files or only a dynamic import() may,
+ * or package.json does not declare it.
+ */
+function workspaceImportProblems(
+  where: string,
+  name: string,
   file: string,
-  text: string,
-  sharedTooling: ReadonlySet<string>,
+  statement: string,
+  other: string,
+  declared: ReadonlySet<string>,
 ): string[] {
-  const { dir, manifest } = workspace;
   const problems: string[] = [];
-  const short = manifest.name.replace("@solid-memo/", "");
-  const allowed = LAYERS[short]!;
-  const declared = new Set([
-    ...Object.keys(manifest.dependencies ?? {}),
-    ...Object.keys(manifest.devDependencies ?? {}),
-  ]);
-  const where = `${dir}/${file}`;
-  const test = isTestFile(file);
-  for (const [statement, specifier] of text.matchAll(IMPORT)) {
-    if (specifier!.startsWith(".")) {
-      const target = join(dirname(file), specifier!);
-      // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
-      const shared =
-        /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
-      if (target.startsWith("..") && !shared)
-        problems.push(`${where}: "${specifier}" reaches outside the package.`);
-      continue;
-    }
-    if (specifier!.startsWith("node:")) {
-      // Builtins need no declaration; whether they may run here is checked below.
-    } else if (specifier!.startsWith("@solid-memo/")) {
-      const other = packageName(specifier!).replace("@solid-memo/", "");
-      if (other !== short && !allowed.includes(other)) {
-        problems.push(`${where}: ${manifest.name} may not import @solid-memo/${other}.`);
-      }
-      const only = ONLY_FROM[short]?.[other];
-      if (only !== undefined && !only.test(file)) {
-        problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
-      }
-      if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement!)) {
-        problems.push(`${where}: may import @solid-memo/${other} only with a dynamic import().`);
-      }
-      if (other !== short && !declared.has(`@solid-memo/${other}`)) {
-        problems.push(
-          `${where}: imports @solid-memo/${other}, which package.json does not declare.`,
-        );
-      }
-    } else {
-      const name = packageName(specifier!);
-      const shared = (test || file === "vite.config.ts") && sharedTooling.has(name);
-      if (!declared.has(name) && !shared && !declared.has(`@types/${name}`)) {
-        problems.push(`${where}: imports ${name}, which package.json does not declare.`);
-      }
-    }
-    if (
-      BROWSER[short]?.test(file) &&
-      !test &&
-      NODE_ONLY.some((pattern) => pattern.test(specifier!))
-    ) {
-      problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
-    }
+  const short = name.replace("@solid-memo/", "");
+  if (other !== short && !LAYERS[short]!.includes(other)) {
+    problems.push(`${where}: ${name} may not import @solid-memo/${other}.`);
   }
-  for (const [, braces, namespace, specifier] of test ? [] : text.matchAll(NAMED_IMPORT)) {
+  const only = ONLY_FROM[short]?.[other];
+  if (only !== undefined && !only.test(file)) {
+    problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
+  }
+  if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement)) {
+    problems.push(`${where}: may import @solid-memo/${other} only with a dynamic import().`);
+  }
+  if (other !== short && !declared.has(`@solid-memo/${other}`)) {
+    problems.push(`${where}: imports @solid-memo/${other}, which package.json does not declare.`);
+  }
+  return problems;
+}
+
+/** The vendor exports a file imports that VENDOR_ONLY_FROM keeps to other files (fileProblems). */
+function vendorImportProblems(where: string, short: string, file: string, text: string): string[] {
+  const problems: string[] = [];
+  for (const [, braces, namespace, specifier] of text.matchAll(NAMED_IMPORT)) {
     for (const rule of VENDOR_ONLY_FROM) {
       if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
       const names =
@@ -231,6 +204,58 @@ function fileProblems(
       }
     }
   }
+  return problems;
+}
+
+/** What one source file of a workspace package imports against its boundaries. */
+function fileProblems(
+  workspace: Workspace,
+  file: string,
+  text: string,
+  sharedTooling: ReadonlySet<string>,
+): string[] {
+  const { dir, manifest } = workspace;
+  const problems: string[] = [];
+  const short = manifest.name.replace("@solid-memo/", "");
+  const declared = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.devDependencies ?? {}),
+  ]);
+  const where = `${dir}/${file}`;
+  const test = isTestFile(file);
+  for (const [statement, specifier] of text.matchAll(IMPORT)) {
+    if (specifier!.startsWith(".")) {
+      const target = join(dirname(file), specifier!);
+      // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
+      const shared =
+        /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
+      if (target.startsWith("..") && !shared)
+        problems.push(`${where}: "${specifier}" reaches outside the package.`);
+      continue;
+    }
+    if (specifier!.startsWith("node:")) {
+      // Builtins need no declaration; whether they may run here is checked below.
+    } else if (specifier!.startsWith("@solid-memo/")) {
+      const other = packageName(specifier!).replace("@solid-memo/", "");
+      problems.push(
+        ...workspaceImportProblems(where, manifest.name, file, statement!, other, declared),
+      );
+    } else {
+      const name = packageName(specifier!);
+      const shared = (test || file === "vite.config.ts") && sharedTooling.has(name);
+      if (!declared.has(name) && !shared && !declared.has(`@types/${name}`)) {
+        problems.push(`${where}: imports ${name}, which package.json does not declare.`);
+      }
+    }
+    if (
+      BROWSER[short]?.test(file) &&
+      !test &&
+      NODE_ONLY.some((pattern) => pattern.test(specifier!))
+    ) {
+      problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
+    }
+  }
+  if (!test) problems.push(...vendorImportProblems(where, short, file, text));
   return problems;
 }
 

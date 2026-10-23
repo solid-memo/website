@@ -5,7 +5,7 @@
 import { Fragment, type ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { Course, UseCases } from "@solid-memo/application/useCases";
 import { cardName, cardNameText } from "./DataText";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { CourseChapter } from "@solid-memo/domain/course";
@@ -35,7 +35,7 @@ import { InstancePickerContainer } from "./InstancePickerContainer";
 import { FindableContainer } from "./FindableContainer";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { UnclaimedDecksNotice } from "./UnclaimedDecksNotice";
-import { useDataCheck } from "./dataCheck";
+import { type DataCheck, useDataCheck } from "./dataCheck";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
 import { LibraryCardScreen } from "./LibraryCardScreen";
 import { LibraryContainer } from "./LibraryContainer";
@@ -96,6 +96,142 @@ function crumbNamesOf(
   };
 }
 
+/** What the route names, each null when it names none (or there is no route yet). */
+function routeAddresses(route: RouteRef | null) {
+  return {
+    instanceUrl: route !== null && "instanceUrl" in route ? route.instanceUrl : null,
+    deckUrl: route !== null && "deckUrl" in route ? route.deckUrl : null,
+    cardUrl: route?.screen === "card" ? route.cardUrl : null,
+    libraryDeckUrl:
+      route?.screen === "libraryDeck" ||
+      route?.screen === "libraryBrowser" ||
+      route?.screen === "libraryCard" ||
+      route?.screen === "libraryPreview" ||
+      route?.screen === "try"
+        ? route.libraryDeckUrl
+        : null,
+    libraryCardId: route?.screen === "libraryCard" ? route.cardId : null,
+    chapterUrl:
+      route?.screen === "courseChapter" || route?.screen === "courseReview"
+        ? route.chapterUrl
+        : null,
+  };
+}
+
+/**
+ * What a lookup the route needs finds in what it has read: null when the
+ * route does not need it, until it is read, and when it is not there.
+ */
+function lookedUp<T>(needed: boolean, read: T[] | undefined, isIt: (item: T) => boolean) {
+  return needed ? (read?.find(isIt) ?? null) : null;
+}
+
+/**
+ * Where the route's chapter is in the course's outline (-1 when it is not,
+ * or there is no course), and the chapter, null unless it is there and open.
+ */
+function openChapterOf(course: Course | null, chapterUrl: string | null) {
+  const chapterIndex =
+    course === null ? -1 : course.outline.chapters.findIndex((c) => c.url === chapterUrl);
+  const activeChapter =
+    chapterIndex >= 0 && course!.progress.chapters[chapterIndex]!.state !== "locked"
+      ? course!.outline.chapters[chapterIndex]!
+      : null;
+  return { chapterIndex, activeChapter };
+}
+
+/**
+ * The screen as the data check lets it show: while the check holds it
+ * back, that it checks, or nothing once its notice says why; for a deck
+ * the check set aside, that it is; otherwise the screen itself.
+ */
+function checkedScreen(
+  held: boolean,
+  reported: boolean,
+  deckSetAside: boolean,
+  t: I18n["t"],
+  screen: () => ComponentChildren,
+) {
+  if (held) {
+    return reported ? null : <Loading label={t("workspace.checkingData")} />;
+  }
+  return deckSetAside ? <p class="hint">{t("workspace.deckSetAside")}</p> : screen();
+}
+
+/**
+ * What the screen shows while a lookup the route needs loads or fails:
+ * its error, or the loading label while what it looks up is missing;
+ * null when the route does not need it or it is there.
+ */
+function lookupWaiting(
+  needed: boolean,
+  query: { error: unknown },
+  missing: boolean,
+  loadingLabel: string,
+  errorText: I18n["errorText"],
+) {
+  if (!needed) return null;
+  if (query.error) {
+    return <ErrorMessage error={errorText(query.error)} />;
+  }
+  return missing ? <Loading label={loadingLabel} /> : null;
+}
+
+/**
+ * On a link to a library deck (#/try), the deck: undefined until the
+ * library is read (and off that route), null when it does not have it;
+ * and whether that is settled, the library read or failed.
+ */
+function triedOf(
+  onTry: boolean,
+  library: { data: LibraryDeck[] | undefined; isError: boolean },
+  isAddressed: (deck: LibraryDeck) => boolean,
+) {
+  const triedDeck =
+    onTry && library.data !== undefined ? (library.data.find(isAddressed) ?? null) : undefined;
+  const triedSettled = onTry && (triedDeck !== undefined || library.isError);
+  return { triedDeck, triedSettled };
+}
+
+/**
+ * The open instance's notices, above the breadcrumbs: its migration, a
+ * data check that failed, what the check found, and its unclaimed decks.
+ */
+function instanceNotices(
+  useCases: UseCases,
+  session: Session,
+  instance: Instance,
+  check: DataCheck,
+  checkedDecks: Deck[] | undefined,
+  tx: I18n["tx"],
+  errorText: I18n["errorText"],
+) {
+  return (
+    <>
+      <MigrationContainer useCases={useCases} session={session} instance={instance} />
+      {check.error && (
+        // A div: the error may bring its technical details, a block.
+        <div class="warning">{tx("workspace.checkFailed", { error: errorText(check.error) })}</div>
+      )}
+      {check.report !== null && (
+        <DataCheckNotice
+          useCases={useCases}
+          instance={instance}
+          report={check.report}
+          policy={check.policy}
+          setAside={(checkedDecks ?? []).filter(check.isSetAside).map((deck) => deck.title)}
+          arrangementSetAside={check.arrangementSetAside}
+        />
+      )}
+      <UnclaimedDecksNotice
+        useCases={useCases}
+        instanceUrl={instance.url}
+        decks={check.unclaimed}
+      />
+    </>
+  );
+}
+
 /**
  * The signed-in app: the site header, closed by the open instance's bar,
  * then the main content, from the notices and breadcrumbs to the screen.
@@ -125,13 +261,12 @@ export function Workspace({
   });
   const instances = instancesQuery.data;
 
-  const instanceUrl = route !== null && "instanceUrl" in route ? route.instanceUrl : null;
-  const activeInstance =
-    instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
+  const { instanceUrl, deckUrl, cardUrl, libraryDeckUrl, libraryCardId, chapterUrl } =
+    routeAddresses(route);
+  const activeInstance = lookedUp(instanceUrl !== null, instances, (i) => i.url === instanceUrl);
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
-  const deckUrl = route !== null && "deckUrl" in route ? route.deckUrl : null;
   const needsDeck = deckUrl !== null && activeInstance !== null;
 
   useEffect(() => {
@@ -157,7 +292,7 @@ export function Workspace({
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: needsDeck,
   });
-  const activeDeck = needsDeck ? (decksQuery.data?.find((d) => d.url === deckUrl) ?? null) : null;
+  const activeDeck = lookedUp(needsDeck, decksQuery.data, (d) => d.url === deckUrl);
 
   useEffect(() => {
     if (!needsDeck || decksQuery.data === undefined) return;
@@ -172,14 +307,13 @@ export function Workspace({
     if (!isCanonicalStatisticsHash(window.location.hash)) replace(route);
   }, [route]);
 
-  const cardUrl = route?.screen === "card" ? route.cardUrl : null;
   const needsCard = cardUrl !== null && activeDeck !== null;
   const cardsQuery = useQuery({
     queryKey: ["cards", activeDeck?.cardsDocumentUrl],
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: needsCard,
   });
-  const activeCard = needsCard ? (cardsQuery.data?.find((c) => c.url === cardUrl) ?? null) : null;
+  const activeCard = lookedUp(needsCard, cardsQuery.data, (c) => c.url === cardUrl);
 
   useEffect(() => {
     if (!needsCard || cardsQuery.data === undefined) return;
@@ -192,14 +326,6 @@ export function Workspace({
     }
   }, [needsCard, cardsQuery.data, cardUrl, instanceUrl, deckUrl]);
 
-  const libraryDeckUrl =
-    route?.screen === "libraryDeck" ||
-    route?.screen === "libraryBrowser" ||
-    route?.screen === "libraryCard" ||
-    route?.screen === "libraryPreview" ||
-    route?.screen === "try"
-      ? route.libraryDeckUrl
-      : null;
   const needsLibraryDeck = libraryDeckUrl !== null && activeInstance !== null;
   const libraryQuery = useQuery({
     queryKey: ["library"],
@@ -210,9 +336,7 @@ export function Workspace({
   // releases; an address of one of its releases still finds it.
   const isAddressed = (d: LibraryDeck) =>
     d.seriesUrl === libraryDeckUrl || d.releases.some((r) => r.url === libraryDeckUrl);
-  const activeLibraryDeck = needsLibraryDeck
-    ? (libraryQuery.data?.find(isAddressed) ?? null)
-    : null;
+  const activeLibraryDeck = lookedUp(needsLibraryDeck, libraryQuery.data, isAddressed);
 
   useEffect(() => {
     if (!needsLibraryDeck || libraryQuery.data === undefined) return;
@@ -232,11 +356,7 @@ export function Workspace({
   useEffect(() => {
     if (route?.screen !== "try" && route?.screen !== "library") setTriedUnknown(false);
   }, [route]);
-  const triedDeck =
-    route?.screen === "try" && libraryQuery.data !== undefined
-      ? (libraryQuery.data.find(isAddressed) ?? null)
-      : undefined;
-  const triedSettled = route?.screen === "try" && (triedDeck !== undefined || libraryQuery.isError);
+  const { triedDeck, triedSettled } = triedOf(route?.screen === "try", libraryQuery, isAddressed);
   const openTried = (instance: Instance) => {
     if (triedDeck === null) setTriedUnknown(true);
     replace(
@@ -251,16 +371,17 @@ export function Workspace({
     else if (instances.length === 0) replace({ screen: "storagePicker" });
   }, [triedSettled, instances]);
 
-  const libraryCardId = route?.screen === "libraryCard" ? route.cardId : null;
   const needsLibraryCard = libraryCardId !== null && activeLibraryDeck !== null;
   const libraryCardsQuery = useQuery({
     queryKey: ["libraryCards", activeLibraryDeck?.url],
     queryFn: () => useCases.listLibraryCards(activeLibraryDeck!),
     enabled: needsLibraryCard,
   });
-  const activeLibraryCard = needsLibraryCard
-    ? (libraryCardsQuery.data?.find((c) => c.id === libraryCardId) ?? null)
-    : null;
+  const activeLibraryCard = lookedUp(
+    needsLibraryCard,
+    libraryCardsQuery.data,
+    (c) => c.id === libraryCardId,
+  );
 
   useEffect(() => {
     if (!needsLibraryCard || libraryCardsQuery.data === undefined) return;
@@ -291,16 +412,7 @@ export function Workspace({
     enabled: needsCourse && activeDeck.sourceUrl !== undefined,
   });
   const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
-  const chapterUrl =
-    route?.screen === "courseChapter" || route?.screen === "courseReview" ? route.chapterUrl : null;
-  const chapterIndex =
-    activeCourse === null
-      ? -1
-      : activeCourse.outline.chapters.findIndex((c) => c.url === chapterUrl);
-  const activeChapter =
-    chapterIndex >= 0 && activeCourse!.progress.chapters[chapterIndex]!.state !== "locked"
-      ? activeCourse!.outline.chapters[chapterIndex]!
-      : null;
+  const { chapterIndex, activeChapter } = openChapterOf(activeCourse, chapterUrl);
   const reviewTooSoon =
     route?.screen === "courseReview" &&
     activeChapter !== null &&
@@ -481,63 +593,53 @@ export function Workspace({
     if (instancesQuery.error) {
       return <ErrorMessage error={errorText(instancesQuery.error)} />;
     }
-    if (route === null || instances === undefined) {
+    if (
+      route === null ||
+      instances === undefined ||
+      (instanceUrl !== null && activeInstance === null)
+    ) {
       return <Loading label={t("workspace.loadingInstances")} />;
     }
-    if (instanceUrl !== null && activeInstance === null) {
-      return <Loading label={t("workspace.loadingInstances")} />;
-    }
-    if (needsDeck) {
-      if (decksQuery.error) {
-        return <ErrorMessage error={errorText(decksQuery.error)} />;
-      }
-      if (decksQuery.data === undefined) {
-        return <Loading label={t("workspace.loadingDeck")} />;
-      }
-      if (activeDeck === null) {
-        return <Loading label={t("workspace.loadingDeck")} />;
-      }
-    }
-    if (needsCard) {
-      if (cardsQuery.error) {
-        return <ErrorMessage error={errorText(cardsQuery.error)} />;
-      }
-      if (activeCard === null) {
-        return <Loading label={t("workspace.loadingCard")} />;
-      }
-    }
-    if (needsCourse) {
-      if (courseQuery.error) {
-        return <ErrorMessage error={errorText(courseQuery.error)} />;
-      }
-      if (
-        activeCourse === null ||
-        (chapterUrl !== null && activeChapter === null) ||
-        reviewTooSoon
-      ) {
-        return <Loading label={t("workspace.loadingCourse")} />;
-      }
-    }
-    if (needsLibraryDeck) {
-      if (libraryQuery.error) {
-        return <ErrorMessage error={errorText(libraryQuery.error)} />;
-      }
-      if (activeLibraryDeck === null) {
-        return <Loading label={t("workspace.loadingLibrary")} />;
-      }
-    }
-    if (route.screen === "try" && (!triedSettled || instances.length < 2)) {
-      return <Loading label={t("workspace.loadingLibrary")} />;
-    }
-    if (needsLibraryCard) {
-      if (libraryCardsQuery.error) {
-        return <ErrorMessage error={errorText(libraryCardsQuery.error)} />;
-      }
-      if (activeLibraryCard === null) {
-        return <Loading label={t("workspace.loadingCard")} />;
-      }
-    }
-    return null;
+    return (
+      lookupWaiting(
+        needsDeck,
+        decksQuery,
+        decksQuery.data === undefined || activeDeck === null,
+        t("workspace.loadingDeck"),
+        errorText,
+      ) ??
+      lookupWaiting(
+        needsCard,
+        cardsQuery,
+        activeCard === null,
+        t("workspace.loadingCard"),
+        errorText,
+      ) ??
+      lookupWaiting(
+        needsCourse,
+        courseQuery,
+        activeCourse === null || (chapterUrl !== null && activeChapter === null) || reviewTooSoon,
+        t("workspace.loadingCourse"),
+        errorText,
+      ) ??
+      lookupWaiting(
+        needsLibraryDeck,
+        libraryQuery,
+        activeLibraryDeck === null,
+        t("workspace.loadingLibrary"),
+        errorText,
+      ) ??
+      (route.screen === "try" && (!triedSettled || instances.length < 2) ? (
+        <Loading label={t("workspace.loadingLibrary")} />
+      ) : null) ??
+      lookupWaiting(
+        needsLibraryCard,
+        libraryCardsQuery,
+        activeLibraryCard === null,
+        t("workspace.loadingCard"),
+        errorText,
+      )
+    );
   })();
 
   // Only called once nothing is waiting, so the route and instances are there.
@@ -918,15 +1020,9 @@ export function Workspace({
   const deckWaits = activeDeck !== null && checkUnsettled;
   const shown =
     waiting ??
-    (blocked || deckWaits ? (
-      invalidReport === null ? (
-        <Loading label={t("workspace.checkingData")} />
-      ) : null
-    ) : deckSetAside ? (
-      <p class="hint">{t("workspace.deckSetAside")}</p>
-    ) : (
-      screenFor(route!, instances!)
-    ));
+    checkedScreen(blocked || deckWaits, invalidReport !== null, deckSetAside, t, () =>
+      screenFor(route!, instances!),
+    );
 
   return (
     <>
@@ -937,32 +1033,17 @@ export function Workspace({
       <main id={MAIN_ID} tabIndex={-1} class="workspace">
         {children}
         {session.guest !== true && <GuestStudyOffer useCases={useCases} session={session} />}
-        {waiting === null && activeInstance !== null && (
-          <>
-            <MigrationContainer useCases={useCases} session={session} instance={activeInstance} />
-            {check.error && (
-              // A div: the error may bring its technical details, a block.
-              <div class="warning">
-                {tx("workspace.checkFailed", { error: errorText(check.error) })}
-              </div>
-            )}
-            {invalidReport !== null && (
-              <DataCheckNotice
-                useCases={useCases}
-                instance={activeInstance}
-                report={invalidReport}
-                policy={policy}
-                setAside={(decksOfCheck.data ?? []).filter(isSetAside).map((deck) => deck.title)}
-                arrangementSetAside={arrangementIsSetAside}
-              />
-            )}
-            <UnclaimedDecksNotice
-              useCases={useCases}
-              instanceUrl={activeInstance.url}
-              decks={check.unclaimed}
-            />
-          </>
-        )}
+        {waiting === null &&
+          activeInstance !== null &&
+          instanceNotices(
+            useCases,
+            session,
+            activeInstance,
+            check,
+            decksOfCheck.data,
+            tx,
+            errorText,
+          )}
         {waiting === null && <Breadcrumbs crumbs={crumbs} />}
         <div ref={screenRef} class="screen">
           {shown}

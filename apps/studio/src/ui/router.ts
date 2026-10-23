@@ -228,13 +228,7 @@ export function studioRouteToHash(route: StudioRoute): string {
     case "cards":
       return `#${STUDIO_PATH}/cards${hashParams({ deck: route.deckUrl, ...(route.query === undefined ? {} : queryToParams(route.query)) })}`;
     case "card":
-      return `#${STUDIO_PATH}/card${hashParams({
-        deck: route.deckUrl,
-        card: route.cardUrl,
-        ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }),
-        ...(route.field === undefined ? {} : { field: route.field }),
-        ...(route.query === undefined ? {} : besideParams(route.query)),
-      })}`;
+      return `#${STUDIO_PATH}/card${hashParams(cardParams(route))}`;
     case "about":
       return `#${STUDIO_PATH}/about${hashParams({ deck: route.deckUrl })}`;
     case "schedule":
@@ -277,15 +271,7 @@ export function studioRouteToHash(route: StudioRoute): string {
         ...(route.review === true ? { part: "review" } : {}),
       })}`;
     case "draftCards":
-      return `#${STUDIO_PATH}/draft-cards${hashParams({
-        draft: route.draftUrl,
-        ...(route.filter === undefined ? {} : { filter: route.filter }),
-        ...(route.language === undefined ? {} : { lang: route.language }),
-        ...(route.sort === undefined
-          ? {}
-          : { sort: route.sort.key, ...(route.sort.descending ? { order: "desc" } : {}) }),
-        ...(route.page === undefined || route.page === 1 ? {} : { page: String(route.page) }),
-      })}`;
+      return `#${STUDIO_PATH}/draft-cards${hashParams(draftCardsParams(route))}`;
     case "transfer":
       // A `deck` each: hashParams takes one value a name.
       return `#${STUDIO_PATH}/transfer?${new URLSearchParams([
@@ -364,24 +350,32 @@ export function parseStudioHash(hash: string): StudioRoute | null {
         ? { screen: "health", instanceUrl }
         : { screen: "health", instanceUrl, deckUrl };
     }
-    case "/about": {
-      const deckUrl = query.get("deck");
+    case "/about":
+    case "/schedule":
+    case "/cards":
+    case "/card":
+      return deckRouteOf(path!.slice(STUDIO_PATH.length), query);
+    default:
+      return null;
+  }
+}
+
+/** A deck's route, from its path and query; null without a deck's URL, or a card's on the card's screen. */
+function deckRouteOf(path: string, query: URLSearchParams): StudioRoute | null {
+  const deckUrl = query.get("deck");
+  switch (path) {
+    case "/about":
       return deckUrl === null ? null : { screen: "about", deckUrl };
-    }
-    case "/schedule": {
-      const deckUrl = query.get("deck");
+    case "/schedule":
       return deckUrl === null ? null : { screen: "schedule", deckUrl };
-    }
     case "/cards": {
-      const deckUrl = query.get("deck");
       if (deckUrl === null) return null;
       const cardQuery = queryFromParams(query);
       return isDefaultQuery(cardQuery)
         ? { screen: "cards", deckUrl }
         : { screen: "cards", deckUrl, query: cardQuery };
     }
-    case "/card": {
-      const deckUrl = query.get("deck");
+    default: {
       const cardUrl = query.get("card");
       if (deckUrl === null || cardUrl === null) return null;
       const tab = CARD_TABS.find((known) => known !== "content" && known === query.get("tab"));
@@ -396,8 +390,6 @@ export function parseStudioHash(hash: string): StudioRoute | null {
         ...(isDefaultQuery(beside) ? {} : { query: beside }),
       };
     }
-    default:
-      return null;
   }
 }
 
@@ -475,6 +467,33 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
       };
     }
   }
+}
+
+/** A card's route as its hash's parameters: the tab and field when not the default ones, and the workbench's query beside it. */
+function cardParams(route: CardRoute): Record<string, string> {
+  return {
+    deck: route.deckUrl,
+    card: route.cardUrl,
+    ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }),
+    ...(route.field === undefined ? {} : { field: route.field }),
+    ...(route.query === undefined ? {} : besideParams(route.query)),
+  };
+}
+
+/** The route of a draft's cards as a table. */
+type DraftCardsRoute = Extract<StudioRoute, { screen: "draftCards" }>;
+
+/** A draft's cards' route as its hash's parameters: those of how they are looked at that are not the default. */
+function draftCardsParams(route: DraftCardsRoute): Record<string, string> {
+  return {
+    draft: route.draftUrl,
+    ...(route.filter === undefined ? {} : { filter: route.filter }),
+    ...(route.language === undefined ? {} : { lang: route.language }),
+    ...(route.sort === undefined
+      ? {}
+      : { sort: route.sort.key, ...(route.sort.descending ? { order: "desc" } : {}) }),
+    ...(route.page === undefined || route.page === 1 ? {} : { page: String(route.page) }),
+  };
 }
 
 /**

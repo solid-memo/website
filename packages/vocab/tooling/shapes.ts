@@ -194,6 +194,9 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
     });
 }
 
+/** The objects of a property shape for one SHACL predicate (its local name). */
+type ShapeObjects = (predicate: string) => Quad_Object[];
+
 /**
  * A property shape as a field: `{ absent }` for a predicate the subject
  * must not have (sh:maxCount 0), which the writer removes;
@@ -211,7 +214,7 @@ function parseProperty(
   version: number,
   fail: (message: string) => never,
 ): ShapeField | "formatVersion" | { type: string } | { absent: string } | { fixed: FixedValue } {
-  const of = (predicate: string) => objectsOf(quads, shape, `${SH}${predicate}`);
+  const of: ShapeObjects = (predicate) => objectsOf(quads, shape, `${SH}${predicate}`);
   const path = of("path")[0];
   if (path === undefined || path.termType !== "NamedNode") {
     fail(`<${shape}> has no sh:path IRI.`);
@@ -222,17 +225,7 @@ function parseProperty(
   const inList = of("in")[0];
   const values = inList === undefined ? undefined : listMembers(quads, inList);
   if (predicate === `${SM_NS}formatVersion`) {
-    const stated =
-      version === 1
-        ? values?.map((v) => Number(v.value))
-        : of("hasValue").map((v) => Number(v.value));
-    if (stated?.length !== 1 || stated[0] !== version) {
-      fail(
-        version === 1
-          ? "format 1 asserts its version with sh:in ( 1 )."
-          : `format ${version} asserts its version with sh:hasValue ${version}.`,
-      );
-    }
+    checkFormatVersion(of, values, version, fail);
     return "formatVersion";
   }
   if (predicate === RDF_TYPE) {
@@ -250,6 +243,65 @@ function parseProperty(
     }
     return { fixed: { predicate, value: fixed.value } };
   }
+  const kind = fieldKind(quads, of, shape, values, fail);
+  const name = of("name")[0]?.value ?? localName(predicate);
+  // A text with one value per language (sh:uniqueLang true) is one field
+  // however many languages it is in: required or not. Without
+  // sh:uniqueLang it holds several values per language ("many").
+  const textual = kind === "text" || kind === "anyText";
+  const uniqueLang = of("uniqueLang")[0]?.value === "true";
+  if (textual && !uniqueLang && maxCount !== undefined) {
+    fail(
+      `<${shape}> limits a text with several values per language; drop sh:maxCount or add sh:uniqueLang true.`,
+    );
+  }
+  const cardinality = fieldCardinality(textual, uniqueLang, minCount, maxCount);
+  if (cardinality === "many" && !textual && kind !== "string" && kind !== "iri") {
+    fail(`<${shape}> repeats a ${kind}; only strings, IRIs and texts may repeat.`);
+  }
+  return {
+    name,
+    predicate,
+    kind: values === undefined ? kind : kind === "iri" ? "iriEnum" : "enum",
+    cardinality,
+    ...(values === undefined ? {} : { values: values.map((v) => v.value) }),
+  };
+}
+
+/**
+ * Checks the version assertion: format 1 states its version with
+ * sh:in ( 1 ), later formats with sh:hasValue.
+ */
+function checkFormatVersion(
+  of: ShapeObjects,
+  values: Quad_Object[] | undefined,
+  version: number,
+  fail: (message: string) => never,
+): void {
+  const stated =
+    version === 1
+      ? values?.map((v) => Number(v.value))
+      : of("hasValue").map((v) => Number(v.value));
+  if (stated?.length !== 1 || stated[0] !== version) {
+    fail(
+      version === 1
+        ? "format 1 asserts its version with sh:in ( 1 )."
+        : `format ${version} asserts its version with sh:hasValue ${version}.`,
+    );
+  }
+}
+
+/**
+ * A field's term kind, from its sh:datatype, sh:nodeKind sh:IRI or sh:or,
+ * checked against its sh:in values (`values`) if it has any.
+ */
+function fieldKind(
+  quads: readonly Quad[],
+  of: ShapeObjects,
+  shape: string,
+  values: Quad_Object[] | undefined,
+  fail: (message: string) => never,
+): TermKind {
   const datatype = of("datatype")[0]?.value;
   const nodeKind = of("nodeKind")[0]?.value;
   const alternatives = of("or")[0];
@@ -266,38 +318,25 @@ function parseProperty(
   if (values?.some((v) => (v.termType === "NamedNode") !== (kind === "iri"))) {
     fail(`<${shape}> lists sh:in values of another kind than the field's.`);
   }
-  const name = of("name")[0]?.value ?? localName(predicate);
-  // A text with one value per language (sh:uniqueLang true) is one field
-  // however many languages it is in: required or not. Without
-  // sh:uniqueLang it holds several values per language ("many").
-  const textual = kind === "text" || kind === "anyText";
-  const uniqueLang = of("uniqueLang")[0]?.value === "true";
-  if (textual && !uniqueLang && maxCount !== undefined) {
-    fail(
-      `<${shape}> limits a text with several values per language; drop sh:maxCount or add sh:uniqueLang true.`,
-    );
+  return kind!;
+}
+
+/**
+ * How many values a field holds: a text by sh:uniqueLang and sh:minCount,
+ * anything else by sh:maxCount and sh:minCount.
+ */
+function fieldCardinality(
+  textual: boolean,
+  uniqueLang: boolean,
+  minCount: number,
+  maxCount: number | undefined,
+): Cardinality {
+  if (textual) {
+    if (!uniqueLang) return "many";
+    return minCount >= 1 ? "one" : "optional";
   }
-  const cardinality: Cardinality = textual
-    ? uniqueLang
-      ? minCount >= 1
-        ? "one"
-        : "optional"
-      : "many"
-    : maxCount === undefined
-      ? "many"
-      : minCount >= 1
-        ? "one"
-        : "optional";
-  if (cardinality === "many" && !textual && kind !== "string" && kind !== "iri") {
-    fail(`<${shape}> repeats a ${kind}; only strings, IRIs and texts may repeat.`);
-  }
-  return {
-    name,
-    predicate,
-    kind: values === undefined ? kind! : kind === "iri" ? "iriEnum" : "enum",
-    cardinality,
-    ...(values === undefined ? {} : { values: values.map((v) => v.value) }),
-  };
+  if (maxCount === undefined) return "many";
+  return minCount >= 1 ? "one" : "optional";
 }
 
 /**

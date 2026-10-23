@@ -2875,6 +2875,59 @@ export function createUseCases({
     }
   }
 
+  /** Throw unless the guest's study conforms, none of it written by a newer version of this app. */
+  async function ensureGuestStudyReadable(source: string): Promise<void> {
+    const report = await validateInstance(source);
+    if (!report.conforms) throw new AppError("guestStudyInvalid", { count: report.violationCount });
+    if (
+      report.documents.some((document) =>
+        document.subjects.some((subject) => subject.status === "newer"),
+      )
+    ) {
+      throw new AppError("guestStudyTooNew");
+    }
+  }
+
+  /**
+   * The copy of a guest's deck or draft that a run from this device made
+   * before (its journal note under `key`), when the note's stamp is `stamp`
+   * and the copy is still among `existing`; otherwise a new copy, noted.
+   */
+  async function journaledGuestCopy<T extends { url: string }>(
+    key: string,
+    stamp: string,
+    existing: readonly T[],
+    copy: () => Promise<T>,
+  ): Promise<T> {
+    const note = decodeGuestMergeNote(updateJournal.staging(key));
+    const before =
+      note?.stamp === stamp ? existing.find((candidate) => candidate.url === note.url) : undefined;
+    if (before !== undefined) return before;
+    const made = await copy();
+    updateJournal.begin(key, encodeGuestMergeNote({ url: made.url, stamp }));
+    return made;
+  }
+
+  /**
+   * Throw unless the guest's study still lists the same documents (`listed`
+   * lists them as they were listed), each at the version it was read at.
+   */
+  async function ensureGuestStudyUnchanged(
+    listed: () => Promise<string[]>,
+    resources: readonly string[],
+    versions: ReadonlyMap<string, string | null>,
+    onChecked: () => void,
+  ): Promise<void> {
+    if ((await listed()).join("\n") !== resources.join("\n"))
+      throw new AppError("guestStudyChanged");
+    onChecked();
+    for (const [url, version] of versions) {
+      if ((await instanceCopier.versionOf(url)) !== version)
+        throw new AppError("guestStudyChanged", { url });
+      onChecked();
+    }
+  }
+
   async function createInstance(
     session: Session,
     {
@@ -3122,16 +3175,7 @@ export function createUseCases({
         progress.start(2);
         const resources = await listed();
         const versions = await versionsOf(resources);
-        const report = await validateInstance(source);
-        if (!report.conforms)
-          throw new AppError("guestStudyInvalid", { count: report.violationCount });
-        if (
-          report.documents.some((document) =>
-            document.subjects.some((subject) => subject.status === "newer"),
-          )
-        ) {
-          throw new AppError("guestStudyTooNew");
-        }
+        await ensureGuestStudyReadable(source);
         progress.stepped();
         const [decks, tree, months, targetDecks, targetTree, guestDrafts, targetDrafts] =
           await Promise.all([
@@ -3157,16 +3201,10 @@ export function createUseCases({
         for (const deck of chosen) {
           const key = guestMergeKey(deck.url, targetUrl);
           const stamp = guestDeckStamp(deck, (url) => versions.get(url) ?? "");
-          const note = decodeGuestMergeNote(updateJournal.staging(key));
           // Added from this device before, its entry and documents unchanged since: there it is.
-          let merged =
-            note?.stamp === stamp
-              ? targetDecks.find((candidate) => candidate.url === note.url)
-              : undefined;
-          if (merged === undefined) {
-            merged = await addGuestDeck(deck, targetUrl);
-            updateJournal.begin(key, encodeGuestMergeNote({ url: merged.url, stamp }));
-          }
+          const merged = await journaledGuestCopy(key, stamp, targetDecks, () =>
+            addGuestDeck(deck, targetUrl),
+          );
           notes.push(key);
           into.set(deck.url, merged);
           added.push(merged);
@@ -3203,16 +3241,10 @@ export function createUseCases({
             .filter(([url]) => url.startsWith(container))
             .map(([url, version]) => `${url} ${version}`)
             .join("\n");
-          const note = decodeGuestMergeNote(updateJournal.staging(key));
           // Copied from this device before, its documents unchanged since, and the copy still there: there it is.
-          let copy =
-            note?.stamp === stamp
-              ? targetDrafts.find((candidate) => candidate.url === note.url)
-              : undefined;
-          if (copy === undefined) {
-            copy = await drafts.copyReleaseDraft(draft.url, targetUrl);
-            updateJournal.begin(key, encodeGuestMergeNote({ url: copy.url, stamp }));
-          }
+          const copy = await journaledGuestCopy(key, stamp, targetDrafts, () =>
+            drafts.copyReleaseDraft(draft.url, targetUrl),
+          );
           notes.push(key);
           copied.push(copy);
           progress.stepped();
@@ -3220,14 +3252,7 @@ export function createUseCases({
 
         // Listing the guest's study again, then each of its documents: what was added is what it holds.
         progress.finished("verify", versions.size + 1);
-        if ((await listed()).join("\n") !== resources.join("\n"))
-          throw new AppError("guestStudyChanged");
-        progress.stepped();
-        for (const [url, version] of versions) {
-          if ((await instanceCopier.versionOf(url)) !== version)
-            throw new AppError("guestStudyChanged", { url });
-          progress.stepped();
-        }
+        await ensureGuestStudyUnchanged(listed, resources, versions, () => progress.stepped());
       } catch (error) {
         return { ok: false, instance: target, step: progress.step(), error, added, copied };
       } finally {

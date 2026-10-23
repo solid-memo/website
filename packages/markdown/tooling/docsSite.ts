@@ -425,85 +425,100 @@ function headingIds(text: string): Set<string> {
 async function resolveLinks(
   page: Page,
   pages: Map<string, Page>,
-  { io, repoUrl, ref }: DocsSiteOptions,
+  options: DocsSiteOptions,
 ): Promise<DocsProblem[]> {
   const problems: DocsProblem[] = [];
   const outside = new Map<string, Set<string>>();
   for (const [block] of everyBlock(page.blocks)) {
     for (const url of everyLink(phrasing(block))) {
       if (page.hrefs.has(url)) continue;
-      const refused = (what: string) => {
-        problems.push({ file: page.file, line: lineOf(page.text, url), what });
+      const resolved = await linkHref(url, page, pages, options, outside);
+      if ("href" in resolved) {
+        page.hrefs.set(url, resolved.href);
+      } else {
+        problems.push({ file: page.file, line: lineOf(page.text, url), what: resolved.refused });
         page.hrefs.set(url, "");
-      };
-      const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(url);
-      if (scheme !== null) {
-        if (!/^https?$/i.test(scheme[1]!))
-          refused(`a link to "${url}": only http: and https: addresses are kept`);
-        else if (!URL.canParse(url)) refused(`a link to "${url}", which is not a web address`);
-        else page.hrefs.set(url, url);
-        continue;
       }
-      if (url.startsWith("/")) {
-        refused(`a link to "${url}" from the root: write it relative to the page`);
-        continue;
-      }
-      const hash = url.indexOf("#");
-      const path = hash < 0 ? url : url.slice(0, hash);
-      const fragment = hash < 0 ? null : url.slice(hash + 1);
-      let id: string | null = null;
-      try {
-        id = fragment === null ? null : decodeURIComponent(fragment);
-        decodeURIComponent(path);
-      } catch {
-        refused(`a link to "${url}", which is not a valid address`);
-        continue;
-      }
-      if (path === "") {
-        if (![...page.ids.values()].includes(id)) refused(`a link to "#${id}": no such heading`);
-        else page.hrefs.set(url, url);
-        continue;
-      }
-      const target = posix
-        .normalize(posix.join("docs", decodeURIComponent(path)))
-        .replace(/(.)\/$/, "$1");
-      if (target === ".." || target.startsWith("../")) {
-        refused(`a link to "${url}", which leads out of the repository`);
-        continue;
-      }
-      const pageName = /^docs\/([^/]+\.md)$/.exec(target)?.[1];
-      if (pageName !== undefined) {
-        const other = pages.get(pageName);
-        if (other === undefined) refused(`a link to "${url}": no such page`);
-        else if (id !== null && ![...other.ids.values()].includes(id))
-          refused(`a link to "${url}": ${pageName} has no such heading`);
-        else
-          page.hrefs.set(
-            url,
-            `${pageHref(page, pageName)}${fragment === null ? "" : `#${fragment}`}`,
-          );
-        continue;
-      }
-      const kind = await io.kind(target === "." ? "" : target);
-      if (kind === null) {
-        refused(`a link to "${url}": the repository has no ${target}`);
-        continue;
-      }
-      if (id !== null && kind === "file" && target.endsWith(".md")) {
-        if (!outside.has(target)) outside.set(target, headingIds((await io.read(target))!));
-        if (!outside.get(target)!.has(id)) {
-          refused(`a link to "${url}": ${target} has no such heading`);
-          continue;
-        }
-      }
-      const where = target === "." ? "" : `/${target}`;
-      page.hrefs.set(
-        url,
-        `${repoUrl}/${kind === "folder" ? "tree" : "blob"}/${ref}${where}${fragment === null ? "" : `#${fragment}`}`,
-      );
     }
   }
   return problems;
+}
+
+/** Where a link leads on the site (resolveLinks), or why it is refused. */
+type LinkHref = { href: string } | { refused: string };
+
+/** Where one link of a page leads (resolveLinks); `outside` keeps the heading ids of Markdown outside docs/ read so far. */
+async function linkHref(
+  url: string,
+  page: Page,
+  pages: Map<string, Page>,
+  options: DocsSiteOptions,
+  outside: Map<string, Set<string>>,
+): Promise<LinkHref> {
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(url);
+  if (scheme !== null) {
+    if (!/^https?$/i.test(scheme[1]!))
+      return { refused: `a link to "${url}": only http: and https: addresses are kept` };
+    if (!URL.canParse(url)) return { refused: `a link to "${url}", which is not a web address` };
+    return { href: url };
+  }
+  if (url.startsWith("/"))
+    return { refused: `a link to "${url}" from the root: write it relative to the page` };
+  const hash = url.indexOf("#");
+  const path = hash < 0 ? url : url.slice(0, hash);
+  const fragment = hash < 0 ? null : url.slice(hash + 1);
+  let id: string | null = null;
+  try {
+    id = fragment === null ? null : decodeURIComponent(fragment);
+    decodeURIComponent(path);
+  } catch {
+    return { refused: `a link to "${url}", which is not a valid address` };
+  }
+  if (path === "") {
+    if (![...page.ids.values()].includes(id))
+      return { refused: `a link to "#${id}": no such heading` };
+    return { href: url };
+  }
+  const target = posix
+    .normalize(posix.join("docs", decodeURIComponent(path)))
+    .replace(/(.)\/$/, "$1");
+  if (target === ".." || target.startsWith("../"))
+    return { refused: `a link to "${url}", which leads out of the repository` };
+  const pageName = /^docs\/([^/]+\.md)$/.exec(target)?.[1];
+  if (pageName !== undefined) {
+    const other = pages.get(pageName);
+    if (other === undefined) return { refused: `a link to "${url}": no such page` };
+    if (id !== null && ![...other.ids.values()].includes(id))
+      return { refused: `a link to "${url}": ${pageName} has no such heading` };
+    return { href: `${pageHref(page, pageName)}${fragment === null ? "" : `#${fragment}`}` };
+  }
+  return repositoryHref(url, target, id, fragment, options, outside);
+}
+
+/**
+ * Where a link to anything else in the repository leads (linkHref): its
+ * address on the repository's host at the built commit, when it is there
+ * and, for Markdown, has the heading.
+ */
+async function repositoryHref(
+  url: string,
+  target: string,
+  id: string | null,
+  fragment: string | null,
+  { io, repoUrl, ref }: DocsSiteOptions,
+  outside: Map<string, Set<string>>,
+): Promise<LinkHref> {
+  const kind = await io.kind(target === "." ? "" : target);
+  if (kind === null) return { refused: `a link to "${url}": the repository has no ${target}` };
+  if (id !== null && kind === "file" && target.endsWith(".md")) {
+    if (!outside.has(target)) outside.set(target, headingIds((await io.read(target))!));
+    if (!outside.get(target)!.has(id))
+      return { refused: `a link to "${url}": ${target} has no such heading` };
+  }
+  const where = target === "." ? "" : `/${target}`;
+  return {
+    href: `${repoUrl}/${kind === "folder" ? "tree" : "blob"}/${ref}${where}${fragment === null ? "" : `#${fragment}`}`,
+  };
 }
 
 /** A page's address from another page: relative, `./` for itself. */
@@ -735,6 +750,44 @@ function addressProblem(address: string, external: boolean): string | null {
 }
 
 /**
+ * A tag's attributes by name, their values decoded (checkPage); why
+ * they are refused instead: one a page does not have, one twice, or a
+ * character reference escapeHtml does not write.
+ */
+function tagValues(name: string, attributes: string): Map<string, string> | string {
+  const values = new Map<string, string>();
+  for (const [, attribute, raw = ""] of attributes.matchAll(/\s+([a-z-]+)(?:="([^"]*)")?/g)) {
+    if (!PAGE_ATTRIBUTES.has(attribute!)) return `has an attribute ${attribute} on <${name}>`;
+    if (values.has(attribute!)) return `has the attribute ${attribute} twice on <${name}>`;
+    if (/&(?!(?:amp|lt|gt|quot|#39);)/.test(raw))
+      return `has a character reference other than escapeHtml's on <${name}>`;
+    values.set(
+      attribute!,
+      raw.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => DECODED[entity]!),
+    );
+  }
+  return values;
+}
+
+/** Why the addresses a tag names are refused (checkPage); null when they are not. */
+function tagAddressProblem(
+  name: string,
+  values: Map<string, string>,
+  policy: boolean,
+): string | null {
+  for (const attribute of ["href", "src", "srcset"]) {
+    const address = values.get(attribute);
+    if (address === undefined) continue;
+    if (!policy) return "names an address before its Content Security Policy";
+    // A link, or the page's canonical address, may name another site; nothing else.
+    const external = name === "a" || (name === "link" && values.get("rel") === "canonical");
+    const refused = addressProblem(address, external);
+    if (refused !== null) return `has ${refused}`;
+  }
+  return null;
+}
+
+/**
  * Why a page, its HTML as written, is not safe to serve on the app's
  * origin; null when it is (docs/markdown.md, The docs as a site). It
  * checks the pages renderDocsSite writes, and an earlier release's
@@ -782,37 +835,37 @@ export function checkPage(html: string): string | null {
       if (attributes !== "") return `has a closing tag with attributes (</${name}>)`;
       continue;
     }
-    const values = new Map<string, string>();
-    for (const [, attribute, raw = ""] of attributes.matchAll(/\s+([a-z-]+)(?:="([^"]*)")?/g)) {
-      if (!PAGE_ATTRIBUTES.has(attribute!)) return `has an attribute ${attribute} on <${name}>`;
-      if (values.has(attribute!)) return `has the attribute ${attribute} twice on <${name}>`;
-      if (/&(?!(?:amp|lt|gt|quot|#39);)/.test(raw))
-        return `has a character reference other than escapeHtml's on <${name}>`;
-      values.set(
-        attribute!,
-        raw.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => DECODED[entity]!),
-      );
-    }
-    for (const attribute of ["href", "src", "srcset"]) {
-      const address = values.get(attribute);
-      if (address === undefined) continue;
-      if (!policy) return "names an address before its Content Security Policy";
-      // A link, or the page's canonical address, may name another site; nothing else.
-      const external = name === "a" || (name === "link" && values.get("rel") === "canonical");
-      const refused = addressProblem(address, external);
-      if (refused !== null) return `has ${refused}`;
-    }
-    const equiv = values.get("http-equiv");
-    if (equiv !== undefined) {
-      if (equiv.toLowerCase() !== "content-security-policy")
-        return `has a <meta http-equiv="${equiv}">`;
-      const directives = (values.get("content") ?? "").split(";").map((part) => part.trim());
-      if (!directives.includes("default-src 'none'") || !directives.includes("script-src 'none'"))
-        return "has a Content Security Policy that lets something load or run without naming it";
-      policy = true;
-    }
+    const values = openTagValues(name, attributes, policy);
+    if (typeof values === "string") return values;
+    if (values.has("http-equiv")) policy = true;
   }
   return policy ? null : "has no Content Security Policy";
+}
+
+/**
+ * An opening tag's attribute values (tagValues), or why the tag is
+ * refused (checkPage): an address it may not name (tagAddressProblem),
+ * or an `http-equiv` other than a Content Security Policy that starts
+ * from nothing and runs no script.
+ */
+function openTagValues(
+  name: string,
+  attributes: string,
+  policy: boolean,
+): Map<string, string> | string {
+  const values = tagValues(name, attributes);
+  if (typeof values === "string") return values;
+  const refused = tagAddressProblem(name, values, policy);
+  if (refused !== null) return refused;
+  const equiv = values.get("http-equiv");
+  if (equiv !== undefined) {
+    if (equiv.toLowerCase() !== "content-security-policy")
+      return `has a <meta http-equiv="${equiv}">`;
+    const directives = (values.get("content") ?? "").split(";").map((part) => part.trim());
+    if (!directives.includes("default-src 'none'") || !directives.includes("script-src 'none'"))
+      return "has a Content Security Policy that lets something load or run without naming it";
+  }
+  return values;
 }
 
 /**

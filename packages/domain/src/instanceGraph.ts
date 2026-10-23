@@ -5,7 +5,7 @@
 import { SITE } from "@solid-memo/vocab/ns";
 import { ensureTrailingSlash, isDocumentIn } from "./instanceLayout";
 import { KNOWN_LICENSES } from "./license";
-import { DCTERMS_NS, SCHEMA_NS } from "./release/releaseModel";
+import { DCTERMS_NS, type ReleaseText, SCHEMA_NS } from "./release/releaseModel";
 import { RDF_TYPE, type DraftTriple } from "./release/releaseDraft";
 import { documentUrlOf } from "./subjectUrl";
 
@@ -206,6 +206,17 @@ function leafKind(
   return "outsideLeaf";
 }
 
+/** A literal a document states, its language and datatype only when it has them. */
+function literalOf(predicate: string, object: ReleaseText, document: string): GraphLiteral {
+  return {
+    predicate,
+    value: object.value,
+    ...(object.language === "" ? {} : { language: object.language }),
+    ...(PLAIN_TEXT.has(object.datatype) ? {} : { datatype: object.datatype }),
+    document,
+  };
+}
+
 /** The graph of an instance's documents as read: see InstanceGraph. */
 export function instanceGraphOf({
   instanceUrl,
@@ -259,13 +270,7 @@ export function instanceGraphOf({
     for (const { subject, predicate, object } of triples) {
       const from = nodeOf(idOf(subject, url));
       if (object.kind === "literal") {
-        from.literals.push({
-          predicate,
-          value: object.value,
-          ...(object.language === "" ? {} : { language: object.language }),
-          ...(PLAIN_TEXT.has(object.datatype) ? {} : { datatype: object.datatype }),
-          document: url,
-        });
+        from.literals.push(literalOf(predicate, object, url));
         continue;
       }
       const to = nodeOf(idOf(object.kind === "blank" ? `_:${object.value}` : object.value, url));

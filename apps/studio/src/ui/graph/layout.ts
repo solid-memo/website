@@ -201,11 +201,13 @@ function sortedOf(graph: InstanceGraph): InstanceGraph {
   };
 }
 
-/** The tree over the nodes of `sorted`, a graph in order: see the module's comment, 1. */
-function treeOf({ nodes, edges }: InstanceGraph): Tree {
+/** What each node of a graph in order hangs under, by its edges: its holder, its first linker and its chosen parent; and what links to each term. */
+function hangsOf(
+  { nodes, edges }: InstanceGraph,
+  index: ReadonlyMap<string, Index>,
+  term: (at: Index) => boolean,
+) {
   const n = nodes.length;
-  const index = new Map(nodes.map((node, at) => [node.id, at]));
-  const term = (at: Index) => nodes[at]!.kind === "vocabularyLeaf";
   const holder = new Int32Array(n).fill(-1);
   const linker = new Int32Array(n).fill(-1);
   const chosen = new Int32Array(n).fill(-1);
@@ -232,6 +234,16 @@ function treeOf({ nodes, edges }: InstanceGraph): Tree {
       chosen[child] = parent;
     }
   }
+  return { holder, linker, chosen, linkers };
+}
+
+/** The tree over the nodes of `sorted`, a graph in order: see the module's comment, 1. */
+function treeOf(sorted: InstanceGraph): Tree {
+  const { nodes } = sorted;
+  const n = nodes.length;
+  const index = new Map(nodes.map((node, at) => [node.id, at]));
+  const term = (at: Index) => nodes[at]!.kind === "vocabularyLeaf";
+  const { holder, linker, chosen, linkers } = hangsOf(sorted, index, term);
   const tops = nodes.flatMap((node, at) =>
     (node.kind === "container" || node.kind === "document") && holder[at] === -1 ? [at] : [],
   );
@@ -374,15 +386,15 @@ function measure(tree: Tree, pre: readonly Index[]) {
   return { size, hub, core };
 }
 
-/** Where the nodes go, and the routing points: see the module's comment, 2 to 4. */
-function place(tree: Tree): Placed & { positions: Map<string, Point> } {
-  const { nodes, root, children } = tree;
-  const n = nodes.length;
-  const total = tree.parent.length;
-  const pre = preorder(children, root);
-  const { size, hub, core } = measure(tree, pre);
-  const band = hub.map((isHub, at) => (isHub && !core[at] ? 1 : 0));
-  // As many rows as the band is about an eighth as deep as it is round, and a unit is long.
+/** As many rows as the band is about an eighth as deep as it is round, and a unit is long. */
+function bandRows(
+  tree: Tree,
+  pre: readonly Index[],
+  size: Int32Array,
+  hub: Uint8Array,
+  core: Uint8Array,
+  band: Uint8Array,
+): number {
   let bandSlots = 0;
   let longest = 1;
   for (const at of pre) {
@@ -390,15 +402,36 @@ function place(tree: Tree): Placed & { positions: Map<string, Point> } {
     bandSlots++;
     if (band[tree.parent[at]!]) longest = Math.max(longest, Math.min(ROWS_FOR_UNITS, size[at]!));
   }
-  const rows = Math.max(longest, Math.round(Math.sqrt(bandSlots / (8 * Math.PI))));
-  const columnsOf = (units: readonly Index[]) =>
-    fill(
-      units.map((unit) => size[unit]!),
-      rows,
-      noop,
-    );
+  return Math.max(longest, Math.round(Math.sqrt(bandSlots / (8 * Math.PI))));
+}
 
-  // Each band hub's parts, its depth among hubs, and its width in columns, bottom up.
+/** A band hub's children outside the core: each band hub alone, each run of units together. */
+function partsOf(children: readonly Index[], core: Uint8Array, band: Uint8Array): Part[] {
+  const list: Part[] = [];
+  let run: Index[] | null = null;
+  for (const child of children) {
+    if (core[child]) continue;
+    if (band[child]) {
+      run = null;
+      list.push({ hub: child });
+    } else if (run === null) {
+      run = [child];
+      list.push({ units: run });
+    } else run.push(child);
+  }
+  return list;
+}
+
+/** Each band hub's parts, its depth among hubs, and its width in columns, bottom up. */
+function hubParts(
+  tree: Tree,
+  pre: readonly Index[],
+  core: Uint8Array,
+  band: Uint8Array,
+  columnsOf: (units: readonly Index[]) => number,
+) {
+  const { root, children } = tree;
+  const total = tree.parent.length;
   const parts: Part[][] = [];
   const hubDepth = new Int32Array(total);
   const width = new Float64Array(total);
@@ -412,24 +445,33 @@ function place(tree: Tree): Placed & { positions: Map<string, Point> } {
   for (let p = pre.length - 1; p >= 0; p--) {
     const at = pre[p]!;
     if (!band[at]) continue;
-    const list: Part[] = [];
-    let run: Index[] | null = null;
-    for (const child of children[at]!) {
-      if (core[child]) continue;
-      if (band[child]) {
-        run = null;
-        list.push({ hub: child });
-      } else if (run === null) {
-        run = [child];
-        list.push({ units: run });
-      } else run.push(child);
-    }
+    const list = partsOf(children[at]!, core, band);
     parts[at] = list;
     outer[at] = list.every((part) => "units" in part) ? 1 : 0;
     let columns = (GAPS[hubDepth[at]!] ?? 0) * Math.max(0, list.length - 1);
     for (const part of list) columns += "hub" in part ? width[part.hub]! : columnsOf(part.units);
     width[at] = Math.max(at === root ? 1 : MIN_HUB, columns);
   }
+  return { parts, hubDepth, width, outer, deepest };
+}
+
+/** Where the nodes go, and the routing points: see the module's comment, 2 to 4. */
+function place(tree: Tree): Placed & { positions: Map<string, Point> } {
+  const { nodes, root, children } = tree;
+  const n = nodes.length;
+  const total = tree.parent.length;
+  const pre = preorder(children, root);
+  const { size, hub, core } = measure(tree, pre);
+  const band = hub.map((isHub, at) => (isHub && !core[at] ? 1 : 0));
+  const rows = bandRows(tree, pre, size, hub, core, band);
+  const columnsOf = (units: readonly Index[]) =>
+    fill(
+      units.map((unit) => size[unit]!),
+      rows,
+      noop,
+    );
+
+  const { parts, hubDepth, width, outer, deepest } = hubParts(tree, pre, core, band, columnsOf);
   const coreNodes = pre.filter((at) => core[at]);
   const coreSeats = coreNodes.length + coreNodes.filter((at) => !core[tree.parent[at]!]).length;
   const coreNeeds = (coreSeats * CORE_SPACING) / (2 * Math.PI);
@@ -712,21 +754,9 @@ function router(tree: Tree, placed: Placed): (edge: GraphEdge) => Route {
     for (let at = child; at !== parent; at = up[at]!) parts.push(linked(up[at]!, at));
     return parts;
   };
-  return (edge) => {
-    let a = index.get(edge.from)!;
-    let b = index.get(edge.to)!;
-    if (parent[b] === a) return routed(chain(a, b), true, a, b);
-    if (parent[a] === b) return routed(chain(b, a), true, b, a);
-    if (a === b) return { parts: [linked(a, b)], tree: false };
-    // To a term, of thousands perhaps: up the tree to the hub under the widest, and on from it, those of a document's nodes in the same few parts.
-    if (term(a) !== term(b)) {
-      let at = term(a) ? b : a;
-      const parts: string[] = [];
-      for (; up[at] !== -1 && !wide[up[at]!]; at = up[at]!) parts.push(linked(up[at]!, at));
-      parts.push(linked(term(a) ? a : b, at));
-      return { parts, tree: false };
-    }
-    const [start, end] = [a, b];
+  /** Into `head`, the path up the tree from `from` to where it meets the one from `to`, and down that to `to`. */
+  const walk = (from: number, to: number) => {
+    let [a, b] = [from, to];
     head.length = 0;
     tail.length = 0;
     while (depth[a]! > depth[b]!) {
@@ -744,16 +774,9 @@ function router(tree: Tree, placed: Placed): (edge: GraphEdge) => Route {
       b = up[b]!;
     }
     head.push(a, ...tail.reverse());
-    // Up the tree from each end to its block or hub, as the tree's edges go; bundled between those, the same curve for all that join the same two.
-    let first = 0;
-    while (first < head.length - 1 && !trunk[head[first]!]) first++;
-    let last = head.length - 1;
-    while (last > first && !trunk[head[last]!]) last--;
-    if (last === first) [first, last] = [0, head.length - 1];
-    const parts = chain(head[first]!, start);
-    const between = head.slice(first, last + 1);
-    if (between[0]! > between.at(-1)!) between.reverse();
-    // Past a hub as wide as half the drawing or more, the middle above all: it is far from most of what it holds; and past one it would turn back at, the curve looping.
+  };
+  /** The points of `between` a bundle's curve goes through: past a hub as wide as half the drawing or more, the middle above all: it is far from most of what it holds; and past one it would turn back at, the curve looping. */
+  const throughOf = (between: number[]) => {
     const through = [between[0]!];
     for (let k = 1; k < between.length; k++) {
       const at = between[k]!;
@@ -761,13 +784,40 @@ function router(tree: Tree, placed: Placed): (edge: GraphEdge) => Route {
         continue;
       through.push(at);
     }
+    return through;
+  };
+  return (edge) => {
+    const a = index.get(edge.from)!;
+    const b = index.get(edge.to)!;
+    if (parent[b] === a) return routed(chain(a, b), true, a, b);
+    if (parent[a] === b) return routed(chain(b, a), true, b, a);
+    if (a === b) return { parts: [linked(a, b)], tree: false };
+    // To a term, of thousands perhaps: up the tree to the hub under the widest, and on from it, those of a document's nodes in the same few parts.
+    if (term(a) !== term(b)) {
+      let at = term(a) ? b : a;
+      const parts: string[] = [];
+      for (; up[at] !== -1 && !wide[up[at]!]; at = up[at]!) parts.push(linked(up[at]!, at));
+      parts.push(linked(term(a) ? a : b, at));
+      return { parts, tree: false };
+    }
+    walk(a, b);
+    // Up the tree from each end to its block or hub, as the tree's edges go; bundled between those, the same curve for all that join the same two.
+    let first = 0;
+    while (first < head.length - 1 && !trunk[head[first]!]) first++;
+    let last = head.length - 1;
+    while (last > first && !trunk[head[last]!]) last--;
+    if (last === first) [first, last] = [0, head.length - 1];
+    const parts = chain(head[first]!, a);
+    const between = head.slice(first, last + 1);
+    if (between[0]! > between.at(-1)!) between.reverse();
+    const through = throughOf(between);
     parts.push(
       spline(
         through.map((at) => x[at]!),
         through.map((at) => y[at]!),
       ),
     );
-    return routed(chain(head[last]!, end, parts), false, start, end);
+    return routed(chain(head[last]!, b, parts), false, a, b);
   };
 }
 

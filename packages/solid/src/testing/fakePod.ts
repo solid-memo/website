@@ -13,7 +13,7 @@ import { triplesOf } from "../ntriples";
  * If-None-Match: * where a document is. Every request is recorded.
  */
 export function fakePod() {
-  const documents = new Map<string, { triples: Set<string>; etag: string }>();
+  const documents = new Map<string, Doc>();
   const requests: {
     method: string;
     url: string;
@@ -28,11 +28,32 @@ export function fakePod() {
   /** While set, reads wait for it. */
   let held: Promise<void> | null = null;
 
+  /**
+   * The answer planned with failNext for this request, used up once;
+   * undefined lets the request through (a planned 412 without a
+   * condition to fail).
+   */
+  const planned = (
+    method: string,
+    url: string,
+    headers: Headers,
+    answer: Answer,
+  ): Response | undefined => {
+    const failure = failures.findIndex((f) => f.method === method && f.url === url);
+    if (failure === -1) return undefined;
+    const [{ status, before }] = failures.splice(failure, 1);
+    before?.();
+    if (status !== 412) return answer(status, "failed");
+    if (headers.get("If-Match") !== null || headers.get("If-None-Match") === "*")
+      return answer(412);
+    return undefined;
+  };
+
   const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     const method = (init?.method ?? "GET").toUpperCase();
     const headers = new Headers(init?.headers);
-    const answer = (
+    const answer: Answer = (
       status: number,
       body: string | null = null,
       extra: Record<string, string> = {},
@@ -51,24 +72,11 @@ export function fakePod() {
       Object.defineProperty(response, "url", { value: url });
       return response;
     };
-    const failure = failures.findIndex((f) => f.method === method && f.url === url);
-    if (failure !== -1) {
-      const [{ status, before }] = failures.splice(failure, 1);
-      before?.();
-      if (status !== 412) return answer(status, "failed");
-      if (headers.get("If-Match") !== null || headers.get("If-None-Match") === "*")
-        return answer(412);
-    }
+    const failed = planned(method, url, headers, answer);
+    if (failed !== undefined) return failed;
     if ((method === "GET" || method === "HEAD") && held !== null) await held;
     const doc = documents.get(url);
-    if (method === "GET" || method === "HEAD") {
-      if (doc === undefined) return answer(404, "");
-      if (headers.get("If-None-Match") === doc.etag) return answer(304, null, { ETag: doc.etag });
-      return answer(200, [...doc.triples].join("\n"), {
-        "Content-Type": "text/turtle",
-        ETag: doc.etag,
-      });
-    }
+    if (method === "GET" || method === "HEAD") return read(doc, headers, answer);
     const ifMatch = headers.get("If-Match");
     if (ifMatch !== null && ifMatch !== doc?.etag) return answer(412);
     if (headers.get("If-None-Match") === "*" && doc !== undefined) return answer(412);
@@ -78,18 +86,7 @@ export function fakePod() {
       return answer(201);
     }
     if (method === "PATCH") {
-      const triples = new Set(doc?.triples);
-      let mode: "insert" | "delete" | null = null;
-      for (const line of body.split("\n")) {
-        if (line.startsWith("INSERT DATA")) mode = "insert";
-        else if (line.startsWith("DELETE DATA")) mode = "delete";
-        else if (line.endsWith(" .")) {
-          const triple = resolved(url, line);
-          if (mode === "insert") triples.add(triple);
-          else triples.delete(triple);
-        }
-      }
-      documents.set(url, { triples, etag: nextEtag() });
+      documents.set(url, { triples: patched(url, doc?.triples, body), etag: nextEtag() });
       return answer(205);
     }
     if (method === "DELETE") {
@@ -134,6 +131,38 @@ export function fakePod() {
       requests.length = 0;
     },
   };
+}
+
+/** A document of the pod and its current version. */
+type Doc = { triples: Set<string>; etag: string };
+
+/** Records the request and makes its response. */
+type Answer = (status: number, body?: string | null, extra?: Record<string, string>) => Response;
+
+/** A GET or HEAD of the document: 404 without one, 304 when If-None-Match names it. */
+function read(doc: Doc | undefined, headers: Headers, answer: Answer): Response {
+  if (doc === undefined) return answer(404, "");
+  if (headers.get("If-None-Match") === doc.etag) return answer(304, null, { ETag: doc.etag });
+  return answer(200, [...doc.triples].join("\n"), {
+    "Content-Type": "text/turtle",
+    ETag: doc.etag,
+  });
+}
+
+/** The triples with the PATCH's INSERT DATA and DELETE DATA lines applied. */
+function patched(url: string, before: Set<string> | undefined, body: string): Set<string> {
+  const triples = new Set(before);
+  let mode: "insert" | "delete" | null = null;
+  for (const line of body.split("\n")) {
+    if (line.startsWith("INSERT DATA")) mode = "insert";
+    else if (line.startsWith("DELETE DATA")) mode = "delete";
+    else if (line.endsWith(" .")) {
+      const triple = resolved(url, line);
+      if (mode === "insert") triples.add(triple);
+      else triples.delete(triple);
+    }
+  }
+  return triples;
 }
 
 /** A PATCH line with its relative IRIs (`<#x>`) made absolute. */

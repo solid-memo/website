@@ -232,26 +232,40 @@ function checkBlock(
       const end = opened[1]!.indexOf("}");
       description = (end < 0 ? opened[1]! : opened[1]!.slice(0, end)).trim();
       inDescription = end < 0;
-    } else {
-      const trimmed = line.trim();
-      if (trimmed.startsWith("%%{")) {
-        at(index, "a directive (%%{…}%%), which would change how the diagram is drawn");
-      } else if (type === undefined && trimmed !== "" && !trimmed.startsWith("%%")) {
-        type = trimmed.split(/\s+/)[0]!;
-        if (!DIAGRAM_TYPES.includes(type))
-          at(index, `a "${type}" diagram: the docs draw only ${DIAGRAM_TYPES.join(", ")}`);
-      }
-      for (const char of new Set(line)) {
-        if (!FONT_CHARS.has(char.codePointAt(0)!))
-          at(index, `${describe(char)} is not in the diagrams' font`);
-      }
-    }
+    } else type = checkDrawnLine(line, type, (what) => at(index, what));
   }
   description = description.trim();
   if (type === undefined) at(-1, "an empty diagram");
   if (title === "") at(-1, "no accTitle: the drawing's alternative text");
   if (description === "") at(-1, "no accDescr: the sentence that says what the diagram shows");
   return problems.length === before ? { title, description } : null;
+}
+
+/**
+ * The diagram's type after a line that is drawn (checkBlock): its first
+ * word, on the first such line that is not empty or a comment. Its
+ * problems go to `report`: a directive, a type the docs do not draw,
+ * characters not in FONT_CHARS.
+ */
+function checkDrawnLine(
+  line: string,
+  typeSoFar: string | undefined,
+  report: (what: string) => void,
+): string | undefined {
+  let type = typeSoFar;
+  const trimmed = line.trim();
+  if (trimmed.startsWith("%%{")) {
+    report("a directive (%%{…}%%), which would change how the diagram is drawn");
+  } else if (type === undefined && trimmed !== "" && !trimmed.startsWith("%%")) {
+    type = trimmed.split(/\s+/)[0]!;
+    if (!DIAGRAM_TYPES.includes(type))
+      report(`a "${type}" diagram: the docs draw only ${DIAGRAM_TYPES.join(", ")}`);
+  }
+  for (const char of new Set(line)) {
+    if (!FONT_CHARS.has(char.codePointAt(0)!))
+      report(`${describe(char)} is not in the diagrams' font`);
+  }
+  return type;
 }
 
 /** A character as a message names it: itself and its code point. */
@@ -411,21 +425,14 @@ export function checkSvg(svg: string): string | null {
   let at = 0;
   while (at < svg.length) {
     const lt = svg.indexOf("<", at);
-    const text = svg.slice(at, lt < 0 ? svg.length : lt);
-    if (text !== "") {
-      if (open.length === 0 && text.trim() !== "") return "has text outside its root";
-      const decoded = decodeXml(text);
-      if (decoded === null) return "has a character reference other than XML's own five";
-      if (open.at(-1) === "style") css.push(decoded);
-    }
+    const misplaced = textProblem(svg.slice(at, lt < 0 ? svg.length : lt), open, css);
+    if (misplaced !== null) return misplaced;
     if (lt < 0) break;
-    if (lt === rootEnd) {
-      const comment = NOTICE.exec(svg.slice(lt));
-      if (comment !== null) {
-        notice = true;
-        at = lt + comment[0].length;
-        continue;
-      }
+    const comment = noticeAt(svg, lt, rootEnd);
+    if (comment !== null) {
+      notice = true;
+      at = lt + comment.length;
+      continue;
     }
     SVG_TAG.lastIndex = lt;
     const tag = SVG_TAG.exec(svg);
@@ -434,9 +441,8 @@ export function checkSvg(svg: string): string | null {
     const [, closing, name, attributes, empty] = tag;
     if (!SVG_ELEMENTS.has(name!)) return `has a <${name}> element`;
     if (closing === "/") {
-      if (attributes !== "" || empty === "/")
-        return `has a closing tag that is not plain (</${name}>)`;
-      if (open.pop() !== name) return `closes <${name}> out of order`;
+      const unclosed = closingProblem(name!, attributes!, empty!, open);
+      if (unclosed !== null) return unclosed;
       continue;
     }
     if (open.at(-1) === "style") return "has a style that holds markup";
@@ -450,6 +456,41 @@ export function checkSvg(svg: string): string | null {
   }
   if (open.length > 0) return `leaves <${open.at(-1)}> open`;
   return stylesProblem(css, notice);
+}
+
+/** The font's notice (fontNotice) at `lt`, or null when there is none: it is only read right after the root's opening tag (checkSvg). */
+function noticeAt(svg: string, lt: number, rootEnd: number): string | null {
+  if (lt !== rootEnd) return null;
+  return NOTICE.exec(svg.slice(lt))?.[0] ?? null;
+}
+
+/**
+ * Why the text before a tag (or the end) may not be served, or null when
+ * it may (checkSvg): none outside the root, and only XML's own character
+ * references. A style's text is added to `css`, read.
+ */
+function textProblem(text: string, open: readonly string[], css: string[]): string | null {
+  if (text === "") return null;
+  if (open.length === 0 && text.trim() !== "") return "has text outside its root";
+  const decoded = decodeXml(text);
+  if (decoded === null) return "has a character reference other than XML's own five";
+  if (open.at(-1) === "style") css.push(decoded);
+  return null;
+}
+
+/**
+ * Why a closing tag may not be served, or null when it may and it has
+ * closed the innermost open element (checkSvg): plain, and in order.
+ */
+function closingProblem(
+  name: string,
+  attributes: string,
+  empty: string,
+  open: string[],
+): string | null {
+  if (attributes !== "" || empty === "/") return `has a closing tag that is not plain (</${name}>)`;
+  if (open.pop() !== name) return `closes <${name}> out of order`;
+  return null;
 }
 
 /**
