@@ -17,6 +17,7 @@ import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { ResourceStore } from "@solid-memo/application/ports";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalPod } from "./localPod";
@@ -123,6 +124,7 @@ async function app(site: typeof fetch = siteFetch, store = createMemoryResourceS
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
   const useCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: createSolidDeckLibrary({ fetch: site, indexUrl: `${SITE}decks/index.ttl` }),

@@ -16,6 +16,7 @@
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
@@ -147,6 +148,7 @@ function app() {
   const reviewStateRepository = createSolidReviewStateRepository(deps);
   const answerLog = createSolidAnswerLog({ fetch, checkWrite });
   const useCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: library,

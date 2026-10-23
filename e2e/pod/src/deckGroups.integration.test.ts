@@ -20,6 +20,7 @@
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { TreeNode } from "@solid-memo/domain/deckTree";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -58,6 +59,7 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
     randomId: () => crypto.randomUUID(),
   };
   return createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,

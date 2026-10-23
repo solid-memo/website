@@ -4,7 +4,9 @@
 
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { TrialSandbox } from "@solid-memo/application/trial";
-import { createUseCases } from "@solid-memo/application/useCases";
+import { createUseCases, type Dependencies } from "@solid-memo/application/useCases";
+import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
+import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { createDraftDeckLibrary } from "@solid-memo/solid/draftDeckLibrary";
@@ -62,6 +64,7 @@ export function createTrialUseCases(
   const randomId = () => crypto.randomUUID();
   const useCases = createUseCases({
     sessionGateway: NO_LOGIN,
+    ...NO_DEVICE,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch }),
     storageGateway: createSolidStorageGateway({ fetch }),
     instanceRepository: createSolidInstanceRepository({ fetch, checkWrite, now, randomId }),
@@ -112,4 +115,32 @@ export const NO_LOGIN: SessionGateway = {
   login: noLogin,
   loginWithIssuer: noLogin,
   logout: noLogin,
+};
+
+/**
+ * What the device keeps of how the app is shown, none of which is a
+ * trial's: the page's language, theme, palette and text size are the
+ * page's, so a trial keeps no choice of them, and it has no palettes of
+ * its own.
+ */
+export const NO_DEVICE: Pick<
+  Dependencies,
+  | "languagePreference"
+  | "themePreference"
+  | "palettePreference"
+  | "customPalettePreference"
+  | "textSizePreference"
+  | "paletteRepository"
+> = {
+  languagePreference: { chosen: () => null, choose: () => undefined },
+  themePreference: { chosen: () => "system", choose: () => undefined },
+  palettePreference: { chosen: () => DEFAULT_PALETTE, choose: () => undefined },
+  customPalettePreference: { chosen: () => null, choose: () => undefined },
+  textSizePreference: { chosen: () => DEFAULT_TEXT_SIZE, choose: () => undefined },
+  paletteRepository: {
+    listPalettes: async () => [],
+    savePalette: async () => {
+      throw new Error("A trial keeps no palettes.");
+    },
+  },
 };

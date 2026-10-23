@@ -20,6 +20,7 @@ import type { Answer } from "@solid-memo/domain/answer";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
@@ -83,6 +84,7 @@ function page() {
     return response;
   };
   const useCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,

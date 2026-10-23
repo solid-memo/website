@@ -20,6 +20,7 @@ import { beforeAll, describe, expect, inject, it, vi } from "vitest";
 import { Parser, Writer } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryCard, LibraryDeckContent } from "@solid-memo/domain/library";
@@ -212,6 +213,7 @@ function app(
   const deckRepository = createSolidDeckRepository(deps);
   const reviewStateRepository = createSolidReviewStateRepository(deps);
   const useCases: UseCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: options.deckLibrary ?? library,

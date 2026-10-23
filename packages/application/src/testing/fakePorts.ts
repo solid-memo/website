@@ -4,7 +4,11 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { vi } from "vitest";
+import { NO_PORTS } from "./noPorts";
+import type { Answer } from "@solid-memo/domain/answer";
 import type {
+  AnswerLog,
+  Since,
   DeckLibrary,
   DeckRepository,
   InstanceRepository,
@@ -259,6 +263,7 @@ export function makeDeps() {
     watch: vi.fn(),
   };
   return {
+    ...NO_PORTS,
     sessionGateway,
     webIdDocumentRepository,
     storageGateway,
@@ -274,4 +279,52 @@ export function makeDeps() {
     now: () => new Date("2026-09-28T10:00:00.000Z"),
     newId: () => "0f3a",
   };
+}
+
+/** An answer log kept in memory, by study month. */
+export function memoryLog() {
+  const byMonth = new Map<string, Answer[]>();
+  /** Each month's version: how often it changed. */
+  const versions = new Map<string, number>();
+  const changed = (month: string) => versions.set(month, (versions.get(month) ?? 0) + 1);
+  const log = {
+    append: vi.fn(async (_instanceUrl: string, answer: Answer) => {
+      const month = answer.studyDay.slice(0, 7);
+      byMonth.set(month, [...(byMonth.get(month) ?? []), answer]);
+      changed(month);
+    }),
+    appendAll: vi.fn(async () => undefined),
+    months: vi.fn(async () => [...byMonth.keys()].sort()),
+    readMonth: vi.fn(async (_instanceUrl: string, month: string) => byMonth.get(month) ?? []),
+    readMonthSince: vi.fn(
+      async (
+        _instanceUrl: string,
+        month: string,
+        version: string | undefined,
+      ): Promise<Since<Answer[]>> => {
+        const now = `v${versions.get(month) ?? 0}`;
+        return version === now
+          ? { unchanged: true }
+          : { unchanged: false, value: byMonth.get(month) ?? [], version: now };
+      },
+    ),
+    removeDay: vi.fn(async (_instanceUrl: string, deckUrl: string, studyDay: string) => {
+      for (const [month, answers] of byMonth) {
+        byMonth.set(
+          month,
+          answers.filter((a) => a.deckUrl !== deckUrl || a.studyDay !== studyDay),
+        );
+        changed(month);
+      }
+    }),
+    removeAnswer: vi.fn(async (_instanceUrl: string, studyDay: string, id: string) => {
+      const month = studyDay.slice(0, 7);
+      byMonth.set(
+        month,
+        (byMonth.get(month) ?? []).filter((a) => a.id !== id),
+      );
+      changed(month);
+    }),
+  } satisfies AnswerLog;
+  return { log, byMonth };
 }

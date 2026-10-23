@@ -23,6 +23,7 @@ import { describe, expect, inject, it } from "vitest";
 import { SITE } from "@solid-memo/vocab/tooling/sources";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import { releasesContainerOf, releaseUrlIn } from "@solid-memo/domain/release/releasePlace";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -55,6 +56,7 @@ function page(network: typeof globalThis.fetch = globalThis.fetch) {
   const checkWrite = shapeValidator.checkSubjects;
   const deps = { fetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
   return createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     // The site's library from this repository; any other release where it is published, read as anyone.

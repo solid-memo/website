@@ -171,3 +171,5 @@ export function createDigestStore({
     recordSchedule,
   };
 }
+
+export type DigestStore = ReturnType<typeof createDigestStore>;

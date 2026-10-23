@@ -21,6 +21,7 @@ import {
   type GradeBasis,
   type StudySessionQueue,
 } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { reviewKeyOf, type ReviewQuality, type ReviewState } from "@solid-memo/domain/review";
@@ -87,6 +88,7 @@ function page() {
   const deckRepository = createSolidDeckRepository(deps);
   const reviewStateRepository = createSolidReviewStateRepository({ fetch: podFetch, checkWrite });
   const useCases = createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,

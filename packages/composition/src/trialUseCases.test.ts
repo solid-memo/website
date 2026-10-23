@@ -11,7 +11,7 @@ import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { DRAFT, playableCourseDraft } from "@solid-memo/domain/testing/releaseDraft";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createAppUseCases } from "./appUseCases";
-import { createTrialUseCases, NO_LOGIN, readOnlyFetch } from "./trialUseCases";
+import { createTrialUseCases, NO_DEVICE, NO_LOGIN, readOnlyFetch } from "./trialUseCases";
 
 const SERVED = "http://localhost:5173/";
 
@@ -72,6 +72,27 @@ describe("NO_LOGIN", () => {
     ]) {
       await expect(refused).rejects.toThrow("no login");
     }
+  });
+});
+
+describe("NO_DEVICE", () => {
+  it("keeps no choice of how the app is shown, and no palettes", async () => {
+    const { languagePreference, themePreference, palettePreference, customPalettePreference } =
+      NO_DEVICE;
+    languagePreference.choose("sv");
+    themePreference.choose("dark");
+    palettePreference.choose("parchment");
+    customPalettePreference.choose({} as never);
+    NO_DEVICE.textSizePreference.choose("larger");
+    expect(languagePreference.chosen()).toBeNull();
+    expect(themePreference.chosen()).toBe("system");
+    expect(palettePreference.chosen()).toBe("standard");
+    expect(customPalettePreference.chosen()).toBeNull();
+    expect(NO_DEVICE.textSizePreference.chosen()).toBe("default");
+    await expect(NO_DEVICE.paletteRepository.listPalettes(TRIAL_ORIGIN)).resolves.toEqual([]);
+    await expect(
+      NO_DEVICE.paletteRepository.savePalette(TRIAL_ORIGIN, {} as never),
+    ).rejects.toThrow("A trial keeps no palettes.");
   });
 });
 

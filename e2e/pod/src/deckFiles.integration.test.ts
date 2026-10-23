@@ -19,6 +19,7 @@ import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
+import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { FileExchange } from "@solid-memo/application/ports";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_FORMATS } from "@solid-memo/domain/deckFile";
@@ -67,6 +68,7 @@ function page(fileExchange: FileExchange = files()) {
     randomId: () => crypto.randomUUID(),
   };
   return createUseCases({
+    ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
     deckLibrary: undefined as never,
