@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.2.0](https://github.com/solid-memo/website/compare/v6.1.0...v6.2.0) (2026-10-23)
+
+### Features
+
+* **studio:** show a deck's cards in the language chosen for it ([7f36d91](https://github.com/solid-memo/website/commit/7f36d91e0f290889191b5ff49f7b8d4c59b838dd)), closes [#252](https://github.com/solid-memo/website/issues/252)
+* **ui:** choose a deck's card language on its preferences page ([d0ae098](https://github.com/solid-memo/website/commit/d0ae098e1e4d54602931b9a4efa6908cae18d414)), closes [#252](https://github.com/solid-memo/website/issues/252)
+* **ui:** show a deck's cards in the language chosen for it ([9254af3](https://github.com/solid-memo/website/commit/9254af3f17f0cdafe2e5206c27bd1816e64b8552)), closes [#252](https://github.com/solid-memo/website/issues/252)
+* **vocab:** keep a deck's card language in the pod, in vocabulary 1.24 ([a759916](https://github.com/solid-memo/website/commit/a759916a6bcfefea8ecae71cd74ed1c22e315f42)), closes [#252](https://github.com/solid-memo/website/issues/252)
+
 ## [6.1.0](https://github.com/solid-memo/website/compare/v6.0.2...v6.1.0) (2026-10-23)
 
 ### Features
