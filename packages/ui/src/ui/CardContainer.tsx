@@ -10,6 +10,7 @@ import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardScreen, type CardEdits } from "./CardScreen";
 import { publishedDistractorIds, useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the edit/remove mutations of one card's page. The card itself is
@@ -77,7 +78,7 @@ export function CardContainer({
         queryKey: ["cards", deck.cardsDocumentUrl],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["reviews", deck.reviewsDocumentUrl],
+        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
       onRemoved();

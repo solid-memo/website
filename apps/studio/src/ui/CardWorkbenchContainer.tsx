@@ -27,6 +27,7 @@ import {
 } from "./CardWorkbenchScreen";
 import type { CardTransfer } from "./TransferCardsDialog";
 import type { SavedView } from "./shell/views";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The card workbench's data: the deck's cards and review states, read as
@@ -106,7 +107,7 @@ export function CardWorkbenchContainer({
     queryFn: () => useCases.listCards(deck),
   });
   const reviewsQuery = useQuery({
-    queryKey: ["reviews", deck.reviewsDocumentUrl],
+    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
     queryFn: () => useCases.listDeckReviewStates(deck),
   });
   const preferencesQuery = useQuery({
@@ -185,7 +186,7 @@ export function CardWorkbenchContainer({
     await Promise.all(
       touched.flatMap((each) => [
         queryClient.invalidateQueries({ queryKey: ["cards", each.cardsDocumentUrl] }),
-        queryClient.invalidateQueries({ queryKey: ["reviews", each.reviewsDocumentUrl] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.reviews(each.reviewsDocumentUrl) }),
       ]),
     );
   };

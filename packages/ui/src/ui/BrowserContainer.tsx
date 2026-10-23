@@ -14,6 +14,7 @@ import { useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import type { BrowserLanguageFilter } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the card list and the deck/card mutations for the Browser view.
@@ -83,7 +84,7 @@ export function BrowserContainer({
         queryKey: ["cards", deck.cardsDocumentUrl],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["reviews", deck.reviewsDocumentUrl],
+        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
     },

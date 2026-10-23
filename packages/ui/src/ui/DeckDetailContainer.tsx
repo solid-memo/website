@@ -17,6 +17,7 @@ import { Loading } from "./Loading";
 import { routeToHash, studioHref } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the card count, today's study queue and the day reset for one deck.
@@ -70,7 +71,7 @@ export function DeckDetailContainer({
     mutationFn: () => useCases.resetStudyDay(instance.url, deck, new Date()),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["reviews", deck.reviewsDocumentUrl],
+        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
       await queryClient.invalidateQueries({
         queryKey: ["studyQueue", deck.url],

@@ -11,6 +11,7 @@ import { CardHistory } from "./CardHistory";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { STATISTICS_STALE_MS } from "./studyFigures";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Reads a card's answers from the whole answer log (with the Studio's
@@ -41,7 +42,7 @@ export function CardHistoryContainer({
     staleTime: STATISTICS_STALE_MS,
   });
   const reviewsQuery = useQuery({
-    queryKey: ["reviews", deck.reviewsDocumentUrl],
+    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
     queryFn: () => useCases.listDeckReviewStates(deck),
   });
   const preferencesQuery = useQuery({

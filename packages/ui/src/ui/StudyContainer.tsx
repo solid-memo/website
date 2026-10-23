@@ -29,6 +29,7 @@ import { useClock } from "./courseLinks";
 import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /** A study session as it stands. */
 interface Session {
@@ -192,10 +193,7 @@ export function StudyContainer({
 
   /** A prompt's state as an answer or an undo left it, for the screens that show it. */
   function keepState(key: ReviewKey, state: ReviewState | null) {
-    queryClient.setQueryData(
-      ["reviews", deck.reviewsDocumentUrl, key.cardId, key.direction],
-      state,
-    );
+    queryClient.setQueryData(queryKeys.reviewState(deck.reviewsDocumentUrl, key), state);
   }
 
   useLayoutEffect(
@@ -208,7 +206,7 @@ export function StudyContainer({
   async function handleExit() {
     keepSchedule();
     await queryClient.invalidateQueries({
-      queryKey: ["reviews", deck.reviewsDocumentUrl],
+      queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
     });
     onExit();
   }

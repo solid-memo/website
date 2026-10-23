@@ -50,7 +50,7 @@ export function refreshUpgradedDeck(
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: ["decks"] }),
     queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
-    queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) }),
     queryClient.invalidateQueries({ queryKey: ["migration", instanceUrl] }),
     // A course's deck now follows the newer release, and its outline with it.
     queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
@@ -126,7 +126,9 @@ export function LibraryUpgradeContainer({
           ...(outcome.changed
             ? [
                 queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
-                queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
+                queryClient.invalidateQueries({
+                  queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
+                }),
               ]
             : []),
         ]);
