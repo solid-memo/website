@@ -8,17 +8,8 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import type {
   AnswerLog,
   DigestRepository,
-  DeckLibrary,
   DeckRepository,
-  InstanceRepository,
-  PreferencesRepository,
   ReviewStateRepository,
-  SessionGateway,
-  StorageGateway,
-  WebIdDocumentRepository,
-  ShapeValidator,
-  RepairRepository,
-  InstanceCopier,
   GuestPod,
   ReleaseDraftRepository,
   Since,
@@ -57,12 +48,9 @@ import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { fsrsInterval, fsrsReview, memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
 import type { SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
-import type { PromptStates } from "@solid-memo/domain/grading";
-import type { FsrsState, ReviewState, ReviewStates } from "@solid-memo/domain/review";
+import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
-import { defaultCatalogDescription, type Catalog } from "@solid-memo/domain/catalog";
-import type { Session } from "@solid-memo/domain/session";
-import type { Storage } from "@solid-memo/domain/storage";
+import { defaultCatalogDescription } from "@solid-memo/domain/catalog";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
@@ -76,247 +64,20 @@ import type { CourseOutline } from "@solid-memo/domain/course";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import type { Locale } from "@solid-memo/domain/locale";
 
-const session: Session = { webId: "https://alice.example/profile/card#me" };
-const document: WebIdDocument = {
-  url: "https://alice.example/profile/card",
-  subjects: [],
-};
-const storage: Storage = { url: "https://alice.example/", source: "profile" };
-const catalog: Catalog = {
-  title: "Main",
-  description: "My decks.",
-  publisher: { webId: session.webId, name: "Alice" },
-};
-/** A deck's states, SM-2's alone: no FSRS-6 state beside them. */
-const sm2s = (sm2: ReviewState[]): ReviewStates => ({ sm2, fsrs: [] });
-/** A prompt's states, SM-2's alone. */
-const promptOf = (sm2: ReviewState | null): PromptStates => ({ sm2, fsrs: null });
-
-const instance: Instance = {
-  url: "https://alice.example/solid-memo/main/",
-  name: "Main",
-};
-const deck: Deck = {
-  id: "deck-1",
-  url: `${instance.url}catalog.ttl#deck-1`,
-  title: { en: "Kanji N5" },
-  cardsDocumentUrl: `${instance.url}decks/deck-1.ttl`,
-  reviewsDocumentUrl: `${instance.url}reviews/deck-1.ttl`,
-  direction: "front-to-back",
-  createdAt: "2026-09-21T10:00:00.000Z",
-  formatVersion: DECK_FORMAT_VERSION,
-  authors: [],
-};
-const card: Card = {
-  id: "card-1",
-  url: `${deck.cardsDocumentUrl}#card-1`,
-  front: { "": "水" },
-  back: { "": "water" },
-  createdAt: "2026-09-21T10:00:00.000Z",
-  formatVersion: 1,
-};
-const libraryDeck: LibraryDeck = {
-  url: "https://solid-memo.com/decks/capitals/v1.ttl",
-  ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
-  title: { en: "Capitals" },
-  cardCount: 1,
-  authors: ["Anton Wiklund"],
-  license: "https://creativecommons.org/publicdomain/zero/1.0/",
-  direction: "front-to-back",
-  sources: [],
-};
-const libraryContent: LibraryDeckContent = {
-  url: libraryDeck.url,
-  title: { en: "Capitals" },
-  formatVersion: 1,
-  authors: ["Anton Wiklund"],
-  license: "https://creativecommons.org/publicdomain/zero/1.0/",
-  direction: "front-to-back",
-  version: "1",
-  seriesUrl: "https://solid-memo.com/decks/index.ttl#capitals",
-  themes: [],
-  keywords: {},
-  cards: [{ id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 }],
-};
-
-function makeDeps() {
-  const sessionGateway: SessionGateway = {
-    restore: vi.fn(async () => ({ session, origin: "login" as const })),
-    discoverOidcIssuer: vi.fn(async () => "https://issuer.example"),
-    login: vi.fn(async () => undefined),
-    loginWithIssuer: vi.fn(async () => undefined),
-    logout: vi.fn(async () => undefined),
-    onSessionExpired: vi.fn(() => () => undefined),
-  };
-  const webIdDocumentRepository: WebIdDocumentRepository = {
-    fetchWebIdDocument: vi.fn(async () => document),
-  };
-  const storageGateway: StorageGateway = {
-    discoverStorages: vi.fn(async () => [storage]),
-    probeStorage: vi.fn(async () => storage),
-  };
-  const instanceRepository: InstanceRepository = {
-    listInstances: vi.fn(async () => [instance]),
-    getRegistrationOptions: vi.fn(async () => ({
-      privateIndexExists: true,
-      publicIndexExists: false,
-    })),
-    createInstance: vi.fn(async () => instance),
-    attachInstance: vi.fn(async () => instance),
-    deleteInstance: vi.fn(async () => ({
-      keptFolder: null,
-      keptReleases: false,
-      keptDocuments: [],
-    })),
-    readMeta: vi.fn(async () => null),
-    saveMeta: vi.fn(async () => undefined),
-    renameRegistrations: vi.fn(async () => undefined),
-    upgradeMeta: vi.fn(async () => true),
-    readDataClassRegistrations: vi.fn(async () => ({
-      registrations: [],
-      privateIndexMissing: false,
-      unreadableIndexes: [],
-    })),
-    registerDataClasses: vi.fn(async () => undefined),
-  };
-  const deckRepository: DeckRepository = {
-    listDecks: vi.fn(async () => [deck]),
-    readCatalog: vi.fn(async () => catalog),
-    saveCatalog: vi.fn(async () => undefined),
-    createDeck: vi.fn(async () => deck),
-    renameDeck: vi.fn(async () => deck),
-    saveDeck: vi.fn(async (saved) => saved),
-    saveDecks: vi.fn(async (saved) => [...saved]),
-    removeDeck: vi.fn(async () => ({ keptDocuments: [] })),
-    removeDecks: vi.fn(async () => ({ keptDocuments: [] })),
-    readDeckTree: vi.fn(async () => ({
-      children: [{ kind: "deck" as const, deck }],
-      readOnly: false,
-    })),
-    editDeckTree: vi.fn(async () => ({
-      children: [{ kind: "deck" as const, deck }],
-      readOnly: false,
-    })),
-    listCards: vi.fn(async () => [card]),
-    addCard: vi.fn(async () => card),
-    updateCard: vi.fn(async () => card),
-    removeCard: vi.fn(async () => undefined),
-    upgradeCards: vi.fn(async () => true),
-    stateCardLanguages: vi.fn(async (_deck, ids) => ids.length),
-    applyCardChanges: vi.fn(async () => undefined),
-    importDeck: vi.fn(async () => deck),
-    addDeck: vi.fn(async (added) => added),
-    readCardsSince: vi.fn(async (d) => ({
-      unchanged: false as const,
-      value: await deckRepository.listCards(d),
-      version: null,
-    })),
-    readDeck: vi.fn(async () => deck),
-    upgradeDecks: vi.fn(async () => true),
-    upgradeDeckEntry: vi.fn(async (_current, next) => next),
-    deleteDocument: vi.fn(async () => undefined),
-    unclaimedDocuments: vi.fn(async () => []),
-    claimDocuments: vi.fn(async () => undefined),
-    completeChapter: vi.fn(async (completed, chapterUrl) => ({
-      ...completed,
-      completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
-    })),
-    setCompletedChapters: vi.fn(async (edited) => edited),
-    setCardLanguage: vi.fn(async (edited, language) =>
-      language === null ? edited : { ...edited, cardLanguage: language },
-    ),
-    registerDeck: vi.fn(async (registered) => registered),
-  };
-  const deckLibrary: DeckLibrary = {
-    listLibraryDecks: vi.fn(async () => [libraryDeck]),
-    fetchLibraryDeck: vi.fn(async () => libraryContent),
-    fetchCourseOutline: vi.fn(async (releaseUrl) => ({ releaseUrl, chapters: [] })),
-    readLibraryIndex: vi.fn(async () => ({
-      url: "https://site.example/decks/index.ttl",
-      publisher: null,
-      releases: [],
-    })),
-    readRelease: vi.fn(async (url: string): Promise<LibraryDeck> => {
-      throw new AppError("releaseUnreadable", { url });
-    }),
-    publishedBeside: vi.fn(async (): Promise<string[] | null> => null),
-  };
-  const preferencesRepository: PreferencesRepository = {
-    getPreferences: vi.fn(async () => null),
-    savePreferences: vi.fn(async () => undefined),
-    upgradePreferences: vi.fn(async () => true),
-  };
-  const reviewStateRepository: ReviewStateRepository = {
-    listReviewStates: vi.fn(async (): Promise<ReviewStates> => ({ sm2: [], fsrs: [] })),
-    getReviewState: vi.fn(async (): Promise<PromptStates> => ({ sm2: null, fsrs: null })),
-    // As the real one does: the grade applied to the state stored, which getReviewState gives.
-    gradeReviewState: vi.fn(async (deck, key, grade) => {
-      const current = await reviewStateRepository.getReviewState(deck, key);
-      return { state: grade(current), current };
-    }),
-    createReviewStates: vi.fn(async () => undefined),
-    applyReviewChanges: vi.fn(async () => undefined),
-    upgradeReviewStates: vi.fn(async () => true),
-    // As the real one does: the states made of those stored, which listReviewStates gives.
-    writeFsrsStates: vi.fn(async (d, edit) => {
-      edit(await reviewStateRepository.listReviewStates(d));
-    }),
-    readReviewStatesSince: vi.fn(async (d) => ({
-      unchanged: false as const,
-      value: await reviewStateRepository.listReviewStates(d),
-      version: null,
-    })),
-  };
-  const shapeValidator: ShapeValidator = {
-    validateDocument: vi.fn(async (url) => ({
-      url,
-      status: "checked" as const,
-      subjects: [],
-    })),
-    validateDocumentSince: vi.fn(async (url) => ({
-      unchanged: false as const,
-      value: await shapeValidator.validateDocument(url),
-      version: null,
-    })),
-    validateRelease: vi.fn(async () => []),
-  };
-  const repairRepository: RepairRepository = {
-    applyRepairs: vi.fn(async () => undefined),
-  };
-  const instanceCopier: InstanceCopier = {
-    listResources: vi.fn(async () => [`${instance.url}decks/`, `${instance.url}meta.ttl`]),
-    ensureAbsent: vi.fn(async () => undefined),
-    createContainer: vi.fn(async () => undefined),
-    copyResource: vi.fn(async (from: string) => `version of ${from}`),
-    isUnchanged: vi.fn(async () => true),
-    versionOf: vi.fn(async (url: string): Promise<string | null> => `version of ${url}`),
-    mentions: vi.fn(async () => false),
-    deleteRecursively: vi.fn(async () => undefined),
-  };
-  const updateJournal = {
-    begin: vi.fn(),
-    end: vi.fn(),
-    staging: vi.fn((_sourceUrl: string): string | null => null),
-    run: vi.fn((_sourceUrl: string): (() => void) => vi.fn()),
-    watch: vi.fn(),
-  };
-  return {
-    sessionGateway,
-    webIdDocumentRepository,
-    storageGateway,
-    instanceRepository,
-    deckRepository,
-    deckLibrary,
-    preferencesRepository,
-    reviewStateRepository,
-    shapeValidator,
-    repairRepository,
-    instanceCopier,
-    updateJournal,
-    now: () => new Date("2026-09-28T10:00:00.000Z"),
-    newId: () => "0f3a",
-  };
-}
+import {
+  session,
+  document,
+  storage,
+  catalog,
+  sm2s,
+  promptOf,
+  instance,
+  deck,
+  card,
+  libraryDeck,
+  libraryContent,
+  makeDeps,
+} from "./testing/fakePorts";
 
 describe("createUseCases", () => {
   describe("language", () => {
@@ -1154,87 +915,6 @@ describe("createUseCases", () => {
     expect(deps.instanceRepository.getRegistrationOptions).toHaveBeenCalledWith(session.webId);
   });
 
-  it("describeDeck saves the deck's description in the languages given, topics and keywords, refusing an empty description", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    await useCases.describeDeck(deck, {
-      description: { en: " Kanji. " },
-      topics: [],
-      keywords: { en: ["kanji"] },
-    });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({
-      ...deck,
-      description: { en: "Kanji." },
-      keywords: { en: ["kanji"] },
-    });
-    // Only the language the user stated: no English stands in for it.
-    await useCases.describeDeck(deck, { description: { sv: "Kanji." }, topics: [], keywords: {} });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...deck,
-      description: { sv: "Kanji." },
-    });
-    await expect(
-      useCases.describeDeck(deck, { description: { en: "" }, topics: [], keywords: {} }),
-    ).rejects.toThrow("A deck needs a description.");
-  });
-
-  it("describeDeck saves keywords under the canonical form of each stated language, refusing a tag that names no language and new untagged keywords", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    const legacy = { ...deck, keywords: { "": ["kanji"] } };
-    await useCases.describeDeck(legacy, {
-      description: { en: "Kanji." },
-      topics: [],
-      keywords: { "": ["kanji"], "JA-jp": ["漢字"], iw: ["קאנג'י"], he: ["כתב"] },
-    });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...deck,
-      description: { en: "Kanji." },
-      keywords: { "": ["kanji"], "ja-jp": ["漢字"], he: ["קאנג'י", "כתב"] },
-    });
-    await expect(
-      useCases.describeDeck(deck, {
-        description: { en: "Kanji." },
-        topics: [],
-        keywords: { Swedish: ["kanji"] },
-      }),
-    ).rejects.toThrow("“Swedish” is not a language code.");
-    await expect(
-      useCases.describeDeck(legacy, {
-        description: { en: "Kanji." },
-        topics: [],
-        keywords: { "": ["kanji", "N5"] },
-      }),
-    ).rejects.toThrow("Choose the language of the keywords.");
-  });
-
-  it("describeDeck keeps the keyword tags the deck already has as stored, checking only the ones the user states", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    // Tags another app wrote: ones the app would refuse ("und", "en-x-custom")
-    // or re-tag ("iw") if the user chose them.
-    const stored = { ...deck, keywords: { und: ["foo"], "en-x-custom": ["bar"], iw: ["קאנג'י"] } };
-    await useCases.describeDeck(stored, {
-      description: { en: "Only the description changed." },
-      topics: [],
-      keywords: { und: ["foo"], "EN-x-Custom": ["bar"], iw: ["קאנג'י"], he: ["כתב"] },
-    });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...deck,
-      description: { en: "Only the description changed." },
-      keywords: { und: ["foo"], "en-x-custom": ["bar"], iw: ["קאנג'י"], he: ["כתב"] },
-    });
-    // A tag the deck does not have is still checked.
-    await expect(
-      useCases.describeDeck(stored, {
-        description: { en: "Kanji." },
-        topics: [],
-        keywords: { "fr-x-custom": ["baz"] },
-      }),
-    ).rejects.toThrow("“fr-x-custom” is not a language code.");
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(1);
-  });
-
   describe("stateCardLanguages", () => {
     const cardOf = (id: string, content: Partial<Card>): Card => ({
       ...card,
@@ -1598,54 +1278,6 @@ describe("createUseCases", () => {
     expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(deck);
   });
 
-  it("setDeckPace saves the deck's own daily limits, refusing one that is not a whole number", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    await useCases.setDeckPace({ ...deck, maxReviewsPerDay: 50 }, { newCardsPerDay: 5 });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({ ...deck, newCardsPerDay: 5 });
-    await expect(useCases.setDeckPace(deck, { newCardsPerDay: 1.5 })).rejects.toThrow(
-      "A daily limit is a whole number, 0 or more.",
-    );
-  });
-
-  it("setDeckCardLanguage saves the deck's card language or clears it, refusing one that names no language", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    await useCases.setDeckCardLanguage(deck, "SV");
-    expect(deps.deckRepository.setCardLanguage).toHaveBeenLastCalledWith(deck, "sv");
-    const swedish = { ...deck, cardLanguage: "sv" };
-    await useCases.setDeckCardLanguage(swedish, null);
-    expect(deps.deckRepository.setCardLanguage).toHaveBeenLastCalledWith(swedish, null);
-    await expect(useCases.setDeckCardLanguage(deck, "Swedish")).rejects.toThrow(
-      "“Swedish” is not a language code.",
-    );
-    expect(deps.deckRepository.setCardLanguage).toHaveBeenCalledTimes(2);
-    // Edited on the entry as it is now, never by a save of the deck as read.
-    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
-  });
-
-  it("sets several decks' direction or pace in one save, and removes several decks at once", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    const other = { ...deck, id: "deck-2", url: `${deck.url}-2`, newCardsPerDay: 9 };
-    await expect(useCases.setDecksDirection([deck, other], "back-to-front")).resolves.toEqual([
-      { ...deck, direction: "back-to-front" },
-      { ...other, direction: "back-to-front" },
-    ]);
-    await useCases.setDecksPace([deck, other], { maxReviewsPerDay: 40 });
-    expect(deps.deckRepository.saveDecks).toHaveBeenLastCalledWith([
-      { ...deck, maxReviewsPerDay: 40 },
-      { ...deck, id: "deck-2", url: `${deck.url}-2`, maxReviewsPerDay: 40 },
-    ]);
-    expect(deps.deckRepository.saveDecks).toHaveBeenCalledTimes(2);
-    await expect(useCases.setDecksPace([deck], { newCardsPerDay: -1 })).rejects.toThrow(
-      "A daily limit is a whole number, 0 or more.",
-    );
-    expect(deps.deckRepository.saveDecks).toHaveBeenCalledTimes(2);
-    await useCases.removeDecks([deck, other]);
-    expect(deps.deckRepository.removeDecks).toHaveBeenCalledWith([deck, other]);
-  });
-
   it("createInstance trims inputs and passes the WebID", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
@@ -1790,89 +1422,9 @@ describe("createUseCases", () => {
     });
   });
 
-  it("deck tree use cases name a new group with a fresh id, and tidy a group's name", async () => {
+  it("card use cases delegate to the deck repository", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-
-    await expect(useCases.listDeckTree(instance.url)).resolves.toEqual({
-      children: [{ kind: "deck", deck }],
-      readOnly: false,
-    });
-    expect(deps.deckRepository.readDeckTree).toHaveBeenCalledWith(instance.url);
-
-    const group = useCases.newDeckGroup(instance.url, { sv: " Språk " });
-    expect(group).toEqual({ url: `${instance.url}catalog.ttl#group-0f3a`, title: { sv: "Språk" } });
-    expect(() => useCases.newDeckGroup(instance.url, { en: " " })).toThrow(
-      "A deck group needs a name",
-    );
-
-    const combine = { kind: "combine" as const, dragged: deck.url, target: `${deck.url}-2`, group };
-    await expect(useCases.editDeckTree(instance.url, combine)).resolves.toEqual({
-      children: [{ kind: "deck", deck }],
-      readOnly: false,
-    });
-    expect(deps.deckRepository.editDeckTree).toHaveBeenLastCalledWith(instance.url, combine);
-    await useCases.editDeckTree(instance.url, {
-      kind: "rename",
-      group: group.url,
-      title: { en: " Languages ", sv: "" },
-    });
-    expect(deps.deckRepository.editDeckTree).toHaveBeenLastCalledWith(instance.url, {
-      kind: "rename",
-      group: group.url,
-      title: { en: "Languages" },
-    });
-    await expect(
-      useCases.editDeckTree(instance.url, { kind: "rename", group: group.url, title: {} }),
-    ).rejects.toThrow("A deck group needs a name");
-    expect(deps.deckRepository.editDeckTree).toHaveBeenCalledTimes(2);
-  });
-
-  it("deck use cases delegate to the deck repository", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-
-    await expect(useCases.listDecks(instance.url)).resolves.toEqual([deck]);
-    expect(deps.deckRepository.listDecks).toHaveBeenCalledWith(instance.url);
-
-    await useCases.createDeck(instance.url, { en: " Kanji N5 " });
-    expect(deps.deckRepository.createDeck).toHaveBeenCalledWith(instance.url, { en: "Kanji N5" });
-    // A name in the language the user stated, and only in it: no English stands in for it.
-    await useCases.createDeck(instance.url, { sv: "Huvudstäder", en: " " });
-    expect(deps.deckRepository.createDeck).toHaveBeenLastCalledWith(instance.url, {
-      sv: "Huvudstäder",
-    });
-    await expect(useCases.createDeck(instance.url, { sv: " " })).rejects.toThrow(
-      "A deck needs a name",
-    );
-    await expect(useCases.createDeck(instance.url, { "": "Kanji" })).rejects.toThrow(
-      "cannot be untagged",
-    );
-    // Tags as the pod reads them: lower case.
-    await useCases.createDeck(instance.url, { "pt-BR": "Capitais" });
-    expect(deps.deckRepository.createDeck).toHaveBeenLastCalledWith(instance.url, {
-      "pt-br": "Capitais",
-    });
-
-    // The name in every language it is to have: one left out is removed.
-    await useCases.renameDeck(deck, { ja: " 漢字 N4 ", en: "Kanji N4" });
-    expect(deps.deckRepository.renameDeck).toHaveBeenCalledWith(deck, {
-      ja: "漢字 N4",
-      en: "Kanji N4",
-    });
-    await expect(useCases.renameDeck(deck, {})).rejects.toThrow("A deck needs a name");
-
-    await expect(useCases.setDeckDirection(deck, "bidirectional")).resolves.toEqual({
-      ...deck,
-      direction: "bidirectional",
-    });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({
-      ...deck,
-      direction: "bidirectional",
-    });
-
-    await useCases.removeDeck(deck);
-    expect(deps.deckRepository.removeDeck).toHaveBeenCalledWith(deck);
 
     await expect(useCases.listCards(deck)).resolves.toEqual([card]);
     expect(deps.deckRepository.listCards).toHaveBeenCalledWith(deck);
@@ -7914,56 +7466,6 @@ describe("courses", () => {
 describe("metadata", () => {
   const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
   const changed = () => new AppError("changedElsewhere", { url: "x" });
-
-  describe("setDeckProvenance", () => {
-    it("gives the deck, as its entry says now, its authors and license", async () => {
-      const deps = makeDeps();
-      const now = { ...deck, title: { en: "Renamed elsewhere" } };
-      vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(now);
-      const useCases = createUseCases(deps);
-      await expect(
-        useCases.setDeckProvenance(deck, { authors: [" Ada "], license: CC0 }),
-      ).resolves.toEqual({
-        ...now,
-        authors: ["Ada"],
-        license: CC0,
-      });
-      expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(deck.url);
-    });
-
-    it("reads and makes the edit again while the catalog changes elsewhere, three times in all", async () => {
-      const deps = makeDeps();
-      vi.mocked(deps.deckRepository.saveDeck)
-        .mockRejectedValueOnce(changed())
-        .mockRejectedValueOnce(changed());
-      const useCases = createUseCases(deps);
-      await expect(useCases.setDeckProvenance(deck, { authors: ["Ada"] })).resolves.toMatchObject({
-        authors: ["Ada"],
-      });
-      expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(3);
-      vi.mocked(deps.deckRepository.saveDeck).mockRejectedValue(changed());
-      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({
-        code: "changedElsewhere",
-      });
-      expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(6);
-    });
-
-    it("refuses a deck that is gone, and stops at once on another failure", async () => {
-      const deps = makeDeps();
-      vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
-      const useCases = createUseCases(deps);
-      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({
-        code: "deckGone",
-      });
-      await expect(
-        useCases.setDeckProvenance(deck, { authors: [], license: "https://example.org/x" }),
-      ).rejects.toMatchObject({
-        code: "licenseUnknown",
-      });
-      expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
-    });
-  });
 
   describe("renameInstance", () => {
     const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 2 };
