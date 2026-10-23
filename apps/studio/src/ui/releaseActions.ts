@@ -6,8 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
-import { draftKey } from "./draftEditor";
-import { draftsKey } from "./DraftsContainer";
+import { queryKeys } from "./queryKeys";
 
 /**
  * What the release screen and the releases screen share (docs/studio.md,
@@ -15,16 +14,6 @@ import { draftsKey } from "./DraftsContainer";
  * one is public, making one public again, and starting the next version
  * of one.
  */
-
-/** The query of the releases an instance published. */
-export function publishedKey(instanceUrl: string): readonly unknown[] {
-  return ["publishedReleases", instanceUrl];
-}
-
-/** The query of whether a release is public. */
-export function publicKey(url: string): readonly unknown[] {
-  return ["releasePublic", url];
-}
 
 /** Make a release public again, as `webId`; then it, and the instance's releases, are asked afresh. */
 export function useMakePublic(useCases: UseCases, instanceUrl: string, webId: string) {
@@ -36,8 +25,8 @@ export function useMakePublic(useCases: UseCases, instanceUrl: string, webId: st
     },
     onSettled: (_done, _error, url) =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: publicKey(url) }),
-        queryClient.invalidateQueries({ queryKey: publishedKey(instanceUrl) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.releasePublic(url) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.publishedReleases(instanceUrl) }),
       ]),
   });
 }
@@ -59,9 +48,10 @@ export function useStartNextVersion(
     mutationFn: async (url: string) =>
       (await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }))!,
     onSuccess: (created) => {
-      queryClient.removeQueries({ queryKey: draftKey(created.draft.url) });
+      queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(created.draft.url) });
       onStarted(created);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: draftsKey(instanceUrl) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instanceUrl) }),
   });
 }

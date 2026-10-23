@@ -12,6 +12,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useTheme } from "./theme";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The invitation to switch from SM-2 to FSRS-6, above the deck list:
@@ -97,7 +98,7 @@ export function SchedulerInvitationContainer({
   } | null>(null);
   // The preferences screen's key: a save there, or this switch, shows here at once.
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
     refetchOnWindowFocus: false,
   });
@@ -114,7 +115,7 @@ export function SchedulerInvitationContainer({
     },
     onSuccess: async (outcome, preferences) => {
       await queryClient.invalidateQueries();
-      queryClient.removeQueries({ queryKey: ["studyQueue"] });
+      queryClient.removeQueries({ queryKey: queryKeys.allStudyQueues() });
       setProgress(null);
       setEnded({ outcome, preferences });
     },
@@ -122,7 +123,8 @@ export function SchedulerInvitationContainer({
   });
   const dismissMutation = useMutation({
     mutationFn: () => useCases.dismissSchedulerInvitation(instance.url),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["preferences", instance.url] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.preferences(instance.url) }),
   });
 
   if (progress !== null) return <SchedulerSwitchProgress progress={progress} />;

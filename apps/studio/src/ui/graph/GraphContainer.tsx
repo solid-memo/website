@@ -25,13 +25,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { RevealAside } from "../shell/revealAside";
 import { GraphNodePane } from "./GraphNodePane";
 import { GraphScreen } from "./GraphScreen";
-
-/** The query key of an instance's graph, as `webId` reads it. */
-export const graphKey = (instanceUrl: string, webId: string) => [
-  "instanceGraph",
-  instanceUrl,
-  webId,
-];
+import { queryKeys } from "../queryKeys";
 
 export function GraphContainer({
   useCases,
@@ -52,7 +46,7 @@ export function GraphContainer({
   const revealAside = useContext(RevealAside);
   const [progress, setProgress] = useState<{ read: number; total: number } | null>(null);
   const graphQuery = useQuery({
-    queryKey: graphKey(instance.url, webId),
+    queryKey: queryKeys.instanceGraph(instance.url, webId),
     queryFn: () =>
       useCases.readInstanceGraph(instance.url, webId, {
         onProgress: (read, total) => setProgress({ read, total }),
@@ -96,7 +90,7 @@ export function GraphNodeContainer({
   onSelect: (id: string) => void;
 }) {
   const graphQuery = useQuery<InstanceGraph>({
-    queryKey: graphKey(instance.url, webId),
+    queryKey: queryKeys.instanceGraph(instance.url, webId),
     queryFn: skipToken,
   });
   return (

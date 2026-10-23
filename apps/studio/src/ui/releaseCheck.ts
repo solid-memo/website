@@ -12,6 +12,7 @@ import {
 } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { releaseMarkdownCheck } from "@solid-memo/ui/markdownCache";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The release check of a draft as the Studio's screens run it (docs/
@@ -53,7 +54,7 @@ export function useReleaseCheck(
   policy: CheckPolicy,
 ) {
   return useQuery<ReleaseCheck>({
-    queryKey: ["releaseCheck", draft?.url, policy, draft === null ? 0 : revisionOf(draft)],
+    queryKey: queryKeys.releaseCheck(draft?.url, policy, draft === null ? 0 : revisionOf(draft)),
     queryFn: () => useCases.checkReleaseDraft(draft!, markdownCheck, policy),
     enabled: draft !== null,
     placeholderData: (previous, previousQuery) =>
@@ -79,7 +80,7 @@ export function publishErrors(check: Pick<ReleaseCheck, "rules" | "drops" | "mar
 /** What the shapes say of the version of the draft they were asked of (`asked`); nothing until they are. */
 export function useShapeCheck(useCases: UseCases, asked: ReleaseDraft | null, policy: CheckPolicy) {
   return useQuery<ReleaseProblem[]>({
-    queryKey: ["releaseShapes", asked?.url, policy, asked === null ? 0 : revisionOf(asked)],
+    queryKey: queryKeys.releaseShapes(asked?.url, policy, asked === null ? 0 : revisionOf(asked)),
     queryFn: async () =>
       (await useCases.checkReleaseDraft(asked!, markdownCheck, policy, { shapes: true })).shapes!,
     enabled: asked !== null,

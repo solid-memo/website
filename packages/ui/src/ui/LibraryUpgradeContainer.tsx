@@ -16,7 +16,6 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { DeckUpgradeOutcome, StepPart } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
-import { courseKey } from "./courseKey";
 import { useI18n } from "./i18n";
 import { LibraryUpgradeNotice } from "./LibraryUpgradeNotice";
 import {
@@ -25,6 +24,7 @@ import {
   DeckUpgradeProgress,
   type DeckUpgradeScreenStep,
 } from "./DeckUpgrade";
+import { queryKeys } from "./queryKeys";
 
 /**
  * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
@@ -34,7 +34,7 @@ import {
  */
 export function libraryUpgradeQuery(useCases: UseCases, deck: Deck) {
   return {
-    queryKey: ["libraryUpgrade", deck.url, deck.sourceUrl, deck.cardsDocumentUrl],
+    queryKey: queryKeys.libraryUpgradePlan(deck.url, deck.sourceUrl, deck.cardsDocumentUrl),
     queryFn: () => useCases.planLibraryUpgrade(deck),
     staleTime: Infinity,
   };
@@ -46,14 +46,14 @@ export function refreshUpgradedDeck(
   instanceUrl: string,
   deck: Deck,
 ): Promise<unknown> {
-  queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+  queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
   return Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["decks"] }),
-    queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
-    queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
-    queryClient.invalidateQueries({ queryKey: ["migration", instanceUrl] }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.migration(instanceUrl) }),
     // A course's deck now follows the newer release, and its outline with it.
-    queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
   ]);
 }
 
@@ -93,10 +93,10 @@ export function LibraryUpgradeContainer({
   });
 
   useQuery({
-    queryKey: ["releaseLanguages", deck.url, deck.sourceUrl],
+    queryKey: queryKeys.releaseLanguages(deck.url, deck.sourceUrl),
     queryFn: async () => {
       const updated = await useCases.addReleaseLanguages(deck);
-      if (updated !== null) await queryClient.invalidateQueries({ queryKey: ["decks"] });
+      if (updated !== null) await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       return updated !== null;
     },
     enabled: deck.sourceUrl !== undefined,
@@ -111,7 +111,7 @@ export function LibraryUpgradeContainer({
     step: "read",
     done: 0,
   });
-  const mutationKey = ["libraryUpgrade", deck.url];
+  const mutationKey = queryKeys.libraryUpgrade(deck.url);
   const upgradeMutation = useMutation({
     mutationKey,
     mutationFn: async (plan: LibraryUpgradePlan) => {
@@ -119,14 +119,17 @@ export function LibraryUpgradeContainer({
       const outcome = await useCases.applyLibraryUpgrade(deck, plan, setProgress);
       if (!outcome.ok) {
         // The offer is looked at again, with the deck as it now is; a deck the upgrade changed in part is read again.
-        if (outcome.changed) queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+        if (outcome.changed)
+          queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ["decks"] }),
-          queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.libraryUpgrade(deck.url) }),
           ...(outcome.changed
             ? [
-                queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
-                queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+                queryClient.invalidateQueries({
+                  queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
+                }),
               ]
             : []),
         ]);

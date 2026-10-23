@@ -11,9 +11,9 @@ import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { draftsKey } from "./DraftsContainer";
-import { publishedKey, useMakePublic, useStartNextVersion } from "./releaseActions";
+import { useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasesScreen } from "./ReleasesScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The releases screen's data: the releases the instance published, each
@@ -44,12 +44,12 @@ export function ReleasesContainer({
   const { t, errorText } = useI18n();
   const check = useDataCheck(useCases, instance.url);
   const releasesQuery = useQuery({
-    queryKey: publishedKey(instance.url),
+    queryKey: queryKeys.publishedReleases(instance.url),
     queryFn: () => useCases.listPublishedReleases(instance.url),
   });
   // Drafts that cannot be read say nothing of their release: they are no source of one.
   const draftsQuery = useQuery({
-    queryKey: draftsKey(instance.url),
+    queryKey: queryKeys.releaseDrafts(instance.url),
     queryFn: () => useCases.listReleaseDrafts(instance.url),
   });
   const publicMutation = useMakePublic(useCases, instance.url, webId);

@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The partial copy that moving the guest's study into the user's Pod
@@ -30,7 +31,7 @@ export function InterruptedMoveContainer({
   const queryClient = useQueryClient();
 
   const leftoverQuery = useQuery({
-    queryKey: ["interruptedMove", instance.url],
+    queryKey: queryKeys.interruptedMove(instance.url),
     queryFn: () => useCases.findInterruptedGuestMove(instance),
     staleTime: Infinity,
   });
@@ -38,7 +39,7 @@ export function InterruptedMoveContainer({
   const removeMutation = useMutation({
     mutationFn: () => useCases.removeInterruptedGuestMove(instance),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["interruptedMove", instance.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.interruptedMove(instance.url) });
     },
   });
 

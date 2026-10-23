@@ -30,6 +30,7 @@ import {
   type StudioRoute,
 } from "./router";
 import type { WorkspaceProblems } from "./shell/BottomDock";
+import { queryKeys } from "./queryKeys";
 
 /** A deck's health as the badges and its health screen check it, with what its Markdown check finds. */
 type Health = DeckHealth<MarkdownProblem>;
@@ -78,7 +79,7 @@ export function useWorkspaceProblems(
   const health = useQuery<Health>({
     queryKey:
       deck === null
-        ? ["validation", null]
+        ? queryKeys.validation(null)
         : deckHealthQuery(useCases, queryClient, instanceUrlOfDeck(deck.url), deck).queryKey,
     queryFn: skipToken,
   });

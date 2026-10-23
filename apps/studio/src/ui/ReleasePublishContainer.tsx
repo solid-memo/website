@@ -9,11 +9,11 @@ import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { draftKey, type DraftEditor } from "./draftEditor";
-import { draftsKey } from "./DraftsContainer";
+import type { DraftEditor } from "./draftEditor";
 import { markdownCheck, publishErrors, useReleaseCheck } from "./releaseCheck";
-import { publicKey, publishedKey, useMakePublic, useStartNextVersion } from "./releaseActions";
+import { useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublishScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The release screen's publishing, over the draft as its editor keeps it
@@ -49,19 +49,20 @@ export function ReleasePublishContainer({
   const rules = useReleaseCheck(useCases, draft, "pod");
   const released = draft.root.releasedAs;
   const publicQuery = useQuery({
-    queryKey: publicKey(released ?? ""),
+    queryKey: queryKeys.releasePublic(released ?? ""),
     queryFn: () => useCases.isReleasePublic(released!),
     enabled: released !== undefined,
   });
   const publishMutation = useMutation({
     scope: { id: catalogScope(instanceUrl) },
     mutationFn: (url: string) => useCases.publishRelease(draft.url, url, markdownCheck),
-    onSuccess: (published) => queryClient.setQueryData(publicKey(published.url), published.public),
+    onSuccess: (published) =>
+      queryClient.setQueryData(queryKeys.releasePublic(published.url), published.public),
     onSettled: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: draftKey(draft.url) }),
-        queryClient.invalidateQueries({ queryKey: draftsKey(instanceUrl) }),
-        queryClient.invalidateQueries({ queryKey: publishedKey(instanceUrl) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.releaseDraft(draft.url) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instanceUrl) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.publishedReleases(instanceUrl) }),
       ]),
   });
   const publicMutation = useMakePublic(useCases, instanceUrl, webId);

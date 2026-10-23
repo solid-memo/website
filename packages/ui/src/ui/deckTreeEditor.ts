@@ -26,6 +26,7 @@ import { isCopyOf, libraryCopiesOf, releaseHost } from "@solid-memo/domain/libra
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { useI18n, type ErrorText } from "./i18n";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The mutation scope of every write of an instance's catalog document:
@@ -34,11 +35,6 @@ import { collapsedGroups, rememberCollapsed } from "./remembered";
  */
 export function catalogScope(instanceUrl: string): string {
   return `deckTree ${instanceUrl}`;
-}
-
-/** The query key of an instance's arrangement: under its decks', so whatever refreshes them refreshes it too. */
-export function deckTreeKey(instanceUrl: string): unknown[] {
-  return ["decks", instanceUrl, "tree"];
 }
 
 /** Every group's URL in the nodes, at any depth. */
@@ -77,7 +73,7 @@ export interface DeckTreeEditor {
  * edits, wherever it is edited: Solid Memo's deck list
  * (DeckListContainer) and the Studio's Groups screen.
  *
- * The arrangement is queried under deckTreeKey, not again when the
+ * The arrangement is queried under queryKeys.deckTree, not again when the
  * window regains focus, which would undo edits still on their way. An
  * edit is shown at once and written in turn after the ones before it
  * (catalogScope), each against the pod as it is then. One that fails
@@ -104,7 +100,7 @@ export function useDeckTreeEditor(
 ): { treeQuery: UseQueryResult<DeckTree>; editor: DeckTreeEditor | undefined } {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
-  const treeKey = deckTreeKey(instance.url);
+  const treeKey = queryKeys.deckTree(instance.url);
   const treeQuery = useQuery({
     queryKey: treeKey,
     queryFn: () => useCases.listDeckTree(instance.url),
@@ -156,7 +152,7 @@ export function useDeckTreeEditor(
    */
   const refresh = () =>
     queryClient.invalidateQueries({
-      queryKey: ["decks"],
+      queryKey: queryKeys.allDecks(),
       predicate: (query) => pending() === 1 || query.queryHash !== hashKey(treeKey),
     });
 
@@ -240,14 +236,14 @@ export function useDeckTreeEditor(
 /**
  * The library's index of decks, as the deck list tells its copies by it
  * (useCopies), and as the library screen, a library deck's page and the
- * try page show it: every ["library"] query is this one. The index
+ * try page show it: every queryKeys.library() query is this one. The index
  * changes only with a deploy: read once a page, not each time a screen
  * shows or the window is focused, so the index Workspace reads beside
  * the deck list's arrangement serves the list.
  */
 export function libraryIndexQuery(useCases: UseCases) {
   return {
-    queryKey: ["library"],
+    queryKey: queryKeys.library(),
     queryFn: () => useCases.listLibraryDecks(),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
@@ -258,11 +254,11 @@ export function libraryIndexQuery(useCases: UseCases) {
  * What the decks that are copies are copies of: which are copies of a
  * course (docs/courses.md), and where those added from a link came from.
  * The library says which of its decks are courses, read once some deck
- * is a copy (only then, and once a page: ["library"], which never goes
+ * is a copy (only then, and once a page: queryKeys.library(), which never goes
  * stale, since the index changes only with a deploy). A copy whose series the
  * library does not list is of a release added from a link
  * (docs/deck-library.md, From a link): `linkedHost` names the host it
- * came from, and its own release, read once (["deckRelease"]), says
+ * came from, and its own release, read once (queryKeys.deckRelease), says
  * whether it is a course. `newerRelease` tells a copy the library has a
  * newer release of, as its index tells (libraryCopiesOf), reading no
  * release: the deck's page says what upgrading would change
@@ -291,7 +287,7 @@ export function useCopies(
         );
   const releaseQueries = useQueries({
     queries: linked.map((deck) => ({
-      queryKey: ["deckRelease", deck.sourceUrl],
+      queryKey: queryKeys.deckRelease(deck.sourceUrl),
       queryFn: () => useCases.deckRelease(deck),
       staleTime: Infinity,
       refetchOnWindowFocus: false,

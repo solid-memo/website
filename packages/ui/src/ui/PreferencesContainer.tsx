@@ -14,7 +14,7 @@ import { Loading } from "./Loading";
 import { PreferencesScreen } from "./PreferencesScreen";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useI18n } from "./i18n";
-import { instanceAppearanceKey, palettesKey } from "./theme";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the preferences query/mutation for one instance. Saved with the
@@ -46,12 +46,12 @@ export function PreferencesContainer({
   const [submitted, setSubmitted] = useState<StudyPreferences | null>(null);
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   // The palettes the user designed: none offered while they cannot be read.
   const palettesQuery = useQuery({
-    queryKey: palettesKey(instance.url),
+    queryKey: queryKeys.palettes(instance.url),
     queryFn: () => useCases.listPalettes(instance.url),
   });
 
@@ -77,11 +77,13 @@ export function PreferencesContainer({
       // A switch changes the due days, which every view of the decks shows: all of it is read again.
       if (outcome !== null) await queryClient.invalidateQueries();
       else {
-        await queryClient.invalidateQueries({ queryKey: ["preferences", instance.url] });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.preferences(instance.url) });
         // The first save puts the theme, the palette and the text size into the instance's preferences.
-        await queryClient.invalidateQueries({ queryKey: instanceAppearanceKey(instance.url) });
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.instanceAppearance(instance.url),
+        });
       }
-      queryClient.removeQueries({ queryKey: ["studyQueue"] });
+      queryClient.removeQueries({ queryKey: queryKeys.allStudyQueues() });
       setProgress(null);
       if (outcome === null || preferences.scheduler === "sm2") onBack();
       else setEnded({ outcome, save: { preferences, stored } });

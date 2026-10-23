@@ -9,7 +9,6 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { composing } from "@solid-memo/ui/composing";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { draftsKey } from "../DraftsContainer";
 import { instanceOfRoute, type StudioRoute } from "../router";
 import {
   buildCommands,
@@ -23,6 +22,7 @@ import { Keys } from "./KeyHelp";
 import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { keyOf, shortcutOf } from "./shortcuts";
 import { deckOf, type ContextTab } from "./workspaceLayout";
+import { queryKeys } from "../queryKeys";
 
 /**
  * Quick open and the commands, in a dialog (Ctrl+K): a field to type
@@ -68,16 +68,18 @@ export function CommandPalette({
   const [all] = useState(() => {
     const instanceUrl = route === null ? null : instanceOfRoute(route);
     const decks =
-      instanceUrl === null ? undefined : queryClient.getQueryData<Deck[]>(["decks", instanceUrl]);
+      instanceUrl === null
+        ? undefined
+        : queryClient.getQueryData<Deck[]>(queryKeys.decks(instanceUrl));
     const deck = route === null ? undefined : decks?.find((each) => each.url === deckOf(route));
     const cards =
       deck === undefined
         ? undefined
-        : queryClient.getQueryData<Card[]>(["cards", deck.cardsDocumentUrl]);
+        : queryClient.getQueryData<Card[]>(queryKeys.cards(deck.cardsDocumentUrl));
     const drafts =
       instanceUrl === null
         ? undefined
-        : queryClient.getQueryData<ReleaseDraftSummary[]>(draftsKey(instanceUrl));
+        : queryClient.getQueryData<ReleaseDraftSummary[]>(queryKeys.releaseDrafts(instanceUrl));
     return buildCommands(
       {
         instances,

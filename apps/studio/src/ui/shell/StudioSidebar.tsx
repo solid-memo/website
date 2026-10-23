@@ -13,12 +13,12 @@ import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { draftsKey } from "../DraftsContainer";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import { sameItem, type WorkItem } from "./prefs";
 import { ProblemCount } from "./ProblemCount";
 import { draftNameOf } from "./titles";
 import { deckOf, sectionHome, sectionOf, SIDEBAR_SECTIONS } from "./workspaceLayout";
+import { queryKeys } from "../queryKeys";
 
 /**
  * The sidebar's content, in the shell's `nav` (StudioShell): first the
@@ -60,11 +60,11 @@ export function StudioSidebar({
   const decksId = useId();
   const draftsId = useId();
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const draftsQuery = useQuery({
-    queryKey: draftsKey(instance.url),
+    queryKey: queryKeys.releaseDrafts(instance.url),
     queryFn: () => useCases.listReleaseDrafts(instance.url),
   });
   const problems = useInstanceCheck(instance.url)?.violationCount ?? 0;
@@ -219,13 +219,13 @@ export function StudioSidebar({
 }
 
 /**
- * The instance's check (the query of ["validation", url], useDataCheck)
+ * The instance's check (the query of queryKeys.validation(url), useDataCheck)
  * as the screens made it, as it changes: undefined until one has. It is
  * read from the cache, never asked for.
  */
 function useInstanceCheck(instanceUrl: string): ValidationReport | undefined {
   const queryClient = useQueryClient();
-  const read = () => queryClient.getQueryData<ValidationReport>(["validation", instanceUrl]);
+  const read = () => queryClient.getQueryData<ValidationReport>(queryKeys.validation(instanceUrl));
   const [report, setReport] = useState(read);
   useEffect(() => {
     setReport(read());

@@ -38,7 +38,6 @@ import { LibraryCopiesContainer, LibraryPlanContainer } from "./LibraryCopiesCon
 import { TransferContainer } from "./TransferContainer";
 import { ChapterEditorContainer } from "./ChapterEditorContainer";
 import { DraftCardsContainer } from "./DraftCardsContainer";
-import { draftKey } from "./draftEditor";
 import { DraftOverviewContainer } from "./DraftOverviewContainer";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { ListingPreviewContainer } from "./ListingPreviewContainer";
@@ -81,6 +80,7 @@ import {
   type CardRoute,
   type StudioRoute,
 } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The signed-in Studio: in its shell (StudioShell), with the open
@@ -834,7 +834,7 @@ function useRouteReads(
   route: StudioRoute | null,
 ) {
   const instancesQuery = useQuery({
-    queryKey: ["instances", session.webId],
+    queryKey: queryKeys.instances(session.webId),
     queryFn: () => useCases.listInstances(session),
   });
   const instances = instancesQuery.data;
@@ -843,7 +843,7 @@ function useRouteReads(
     instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
   const deckUrl = deckUrlOf(route);
   const decksQuery = useQuery({
-    queryKey: ["decks", instanceUrl],
+    queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: deckUrl !== null && activeInstance !== null,
   });
@@ -852,7 +852,7 @@ function useRouteReads(
   const cardUrl = route?.screen === "card" ? route.cardUrl : null;
   // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
   const cardsQuery = useQuery({
-    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
+    queryKey: queryKeys.cards(activeDeck?.cardsDocumentUrl),
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: cardUrl !== null && activeDeck !== null,
   });
@@ -868,7 +868,7 @@ function useRouteReads(
   const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
   // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
   const draftQuery = useQuery({
-    queryKey: draftKey(draftUrl ?? ""),
+    queryKey: queryKeys.releaseDraft(draftUrl ?? ""),
     queryFn: () => useCases.getReleaseDraft(draftUrl!),
     enabled: draftUrl !== null && activeInstance !== null,
     staleTime: Infinity,

@@ -19,7 +19,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { setAsideDecks } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
-import { catalogScope, deckTreeKey, useCopies } from "@solid-memo/ui/deckTreeEditor";
+import { catalogScope, useCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -27,6 +27,7 @@ import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
 import { HealthBadge } from "./HealthBadge";
 import { UpdateBadge } from "./UpdateBadge";
 import type { HomeQuery, HomeView, SavedView } from "./shell/views";
+import { queryKeys } from "./queryKeys";
 
 /** A bulk action on the selected decks. */
 type Bulk =
@@ -107,19 +108,19 @@ export function DeckTableContainer({
   const queryClient = useQueryClient();
   const [failure, setFailure] = useState<unknown>(null);
   const treeQuery = useQuery({
-    queryKey: deckTreeKey(instance.url),
+    queryKey: queryKeys.deckTree(instance.url),
     queryFn: () => useCases.listDeckTree(instance.url),
     refetchOnWindowFocus: false,
   });
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   const check = useDataCheck(useCases, instance.url);
   const decks = decksOf(treeQuery.data?.children ?? []);
   const cardQueries = useQueries({
     queries: decks.map((deck) => ({
-      queryKey: ["cards", deck.cardsDocumentUrl],
+      queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       queryFn: () => useCases.listCards(deck),
     })),
   });
@@ -153,8 +154,8 @@ export function DeckTableContainer({
     onError: (error) => setFailure(error),
     onSettled: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
-        queryClient.invalidateQueries({ queryKey: ["studyQueue"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
       ]),
   });
   const run = (bulk: Bulk) =>

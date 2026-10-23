@@ -10,27 +10,22 @@ import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
-import { catalogScope, deckTreeKey } from "@solid-memo/ui/deckTreeEditor";
+import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { draftKey } from "./draftEditor";
 import { DraftsScreen } from "./DraftsScreen";
-
-/** The query of an instance's drafts: the sidebar and the drafts screen share it. */
-export function draftsKey(instanceUrl: string): readonly unknown[] {
-  return ["releaseDrafts", instanceUrl];
-}
+import { queryKeys } from "./queryKeys";
 
 /**
- * The drafts screen's data: the instance's drafts (draftsKey) and its
+ * The drafts screen's data: the instance's drafts (queryKeys.releaseDrafts) and its
  * decks as the user arranged them (Home's query), to start a draft of
  * one. Making a draft or deleting one writes the catalog, so it waits
  * its turn with the other writes of the catalog (catalogScope), and the
  * drafts are read afresh after it. Both are held until the instance's
  * data check is done, and while the catalog is set aside
  * (useDataCheck). A deleted draft's URL is a new draft's when one of
- * its name is made, so what was read at a draft's URL (draftKey) is
+ * its name is made, so what was read at a draft's URL (queryKeys.releaseDraft) is
  * forgotten when one is deleted, and when one is made. A draft made is
  * opened (`onCreated`) once the screen has said so, unless it was made of
  * a copy of a release: the screen then offers to start that release's
@@ -56,21 +51,21 @@ export function DraftsContainer({
   const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
   const draftsQuery = useQuery({
-    queryKey: draftsKey(instance.url),
+    queryKey: queryKeys.releaseDrafts(instance.url),
     queryFn: () => useCases.listReleaseDrafts(instance.url),
   });
   const treeQuery = useQuery({
-    queryKey: deckTreeKey(instance.url),
+    queryKey: queryKeys.deckTree(instance.url),
     queryFn: () => useCases.listDeckTree(instance.url),
   });
   const reread = () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: draftsKey(instance.url) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instance.url) }),
       // The instance's check covers its drafts' documents too.
-      queryClient.invalidateQueries({ queryKey: ["validation", instance.url] }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.validation(instance.url) }),
     ]);
   const forget = (draft: ReleaseDraftSummary) =>
-    queryClient.removeQueries({ queryKey: draftKey(draft.url) });
+    queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(draft.url) });
   const createMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
     mutationFn: (from: NewDraft) => useCases.createReleaseDraft(instance.url, from),

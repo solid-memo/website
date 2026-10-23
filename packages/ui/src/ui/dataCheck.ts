@@ -15,6 +15,7 @@ import {
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
+import { queryKeys } from "./queryKeys";
 
 /** What the check of an instance, made when it is opened, lets the screens change (docs/validation.md). */
 export interface DataCheck {
@@ -47,17 +48,17 @@ export type ReadOnlyReason = "checking" | "blocked" | "setAside";
 
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
- * query as Solid Memo's workspace makes (["validation", url]), so it is
+ * query as Solid Memo's workspace makes (queryKeys.validation(url)), so it is
  * made once, and made again after a repair; and the policy it is held to.
  */
 export function useDataCheck(useCases: UseCases, instanceUrl: string | null): DataCheck {
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl!),
     enabled: instanceUrl !== null,
   });
   const checkQuery = useQuery({
-    queryKey: ["validation", instanceUrl],
+    queryKey: queryKeys.validation(instanceUrl),
     queryFn: () => useCases.checkInstance(instanceUrl!),
     enabled: instanceUrl !== null,
     staleTime: Infinity,

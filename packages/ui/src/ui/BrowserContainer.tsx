@@ -14,6 +14,7 @@ import { useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import type { BrowserLanguageFilter } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the card list and the deck/card mutations for the Browser view.
@@ -51,20 +52,20 @@ export function BrowserContainer({
   const release = useDeckRelease(useCases, deck);
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
 
   const describeDeckMutation = useMutation({
     mutationFn: (about: DeckAbout) => useCases.describeDeck(deck, about),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["decks"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
   });
 
   const setDirectionMutation = useMutation({
     mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["decks"] });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 
@@ -80,12 +81,12 @@ export function BrowserContainer({
     mutationFn: (card: Card) => useCases.removeCard(deck, card),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["cards", deck.cardsDocumentUrl],
+        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       });
       await queryClient.invalidateQueries({
-        queryKey: ["reviews", deck.reviewsDocumentUrl],
+        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 

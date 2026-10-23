@@ -27,6 +27,7 @@ import {
 } from "./CardWorkbenchScreen";
 import type { CardTransfer } from "./TransferCardsDialog";
 import type { SavedView } from "./shell/views";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The card workbench's data: the deck's cards and review states, read as
@@ -102,22 +103,22 @@ export function CardWorkbenchContainer({
   const [reviewDone, setReviewDone] = useState<ReviewEditMade | null>(null);
   const [transferDone, setTransferDone] = useState<TransferMade | null>(null);
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const reviewsQuery = useQuery({
-    queryKey: ["reviews", deck.reviewsDocumentUrl],
+    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
     queryFn: () => useCases.listDeckReviewStates(deck),
   });
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   const check = useDataCheck(useCases, instance.url);
   // Only a deck that may be changed takes cards.
   const others = decks.filter((other) => other.url !== deck.url && check.readOnly(other) === null);
   const answersQuery = useQuery({
-    queryKey: ["answerLog", instance.url],
+    queryKey: queryKeys.answerLog(instance.url),
     queryFn: () => useCases.loadAnswerLog(instance.url),
   });
   const answers = answersQuery.data;
@@ -181,11 +182,12 @@ export function CardWorkbenchContainer({
   );
   const reread = async (touched: readonly Deck[] = [deck]) => {
     // The study counts go at once: a screen opened while the rest is read again counts afresh.
-    for (const each of touched) queryClient.removeQueries({ queryKey: ["studyQueue", each.url] });
+    for (const each of touched)
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(each.url) });
     await Promise.all(
       touched.flatMap((each) => [
-        queryClient.invalidateQueries({ queryKey: ["cards", each.cardsDocumentUrl] }),
-        queryClient.invalidateQueries({ queryKey: ["reviews", each.reviewsDocumentUrl] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.cards(each.cardsDocumentUrl) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.reviews(each.reviewsDocumentUrl) }),
       ]),
     );
   };
@@ -234,7 +236,7 @@ export function CardWorkbenchContainer({
     onSettled: async (_plan, _error, { transfer }) => {
       await Promise.all([
         reread([deck, transfer.to]),
-        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
       ]);
     },
   });

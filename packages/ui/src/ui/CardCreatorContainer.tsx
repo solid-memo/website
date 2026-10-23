@@ -9,6 +9,7 @@ import type { CardContent, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardCreatorScreen } from "./CardCreatorScreen";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the add-card mutation. Deliberately stays on the page after a
@@ -31,7 +32,7 @@ export function CardCreatorContainer({
   const queryClient = useQueryClient();
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
@@ -40,9 +41,9 @@ export function CardCreatorContainer({
     mutationFn: (content: CardContent) => useCases.addCard(deck, content),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["cards", deck.cardsDocumentUrl],
+        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 

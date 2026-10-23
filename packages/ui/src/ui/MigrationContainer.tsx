@@ -16,6 +16,7 @@ import {
   InstanceUpdateResult,
 } from "./InstanceUpdate";
 import { MigrationNotice } from "./MigrationNotice";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Checks an instance for documents in an older format and, when there
@@ -48,7 +49,7 @@ export function MigrationContainer({
   const [unfinished, setUnfinished] = useState<UpdateOutcome | null>(null);
 
   const planQuery = useQuery({
-    queryKey: ["migration", instance.url],
+    queryKey: queryKeys.migration(instance.url),
     queryFn: () => useCases.planMigration(instance.url),
     staleTime: Infinity,
   });

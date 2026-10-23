@@ -10,6 +10,7 @@ import { isCopyOf, type LibraryDeck } from "@solid-memo/domain/library";
 import { LibraryDeckScreen } from "./LibraryDeckScreen";
 import { libraryPreviewHref, routeToHash, tryHref } from "./router";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns one library deck's page and its import; returns to the deck list
@@ -39,7 +40,7 @@ export function LibraryDeckContainer({
   const queryClient = useQueryClient();
 
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const imported = (decksQuery.data ?? []).some((podDeck) => isCopyOf(podDeck, deck));
@@ -48,7 +49,7 @@ export function LibraryDeckContainer({
     mutationFn: () => useCases.importLibraryDeck(instance.url, deck),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["decks", instance.url],
+        queryKey: queryKeys.decks(instance.url),
       });
       onDone();
     },
@@ -57,7 +58,7 @@ export function LibraryDeckContainer({
   const startMutation = useMutation({
     mutationFn: () => useCases.startCourse(instance.url, deck),
     onSuccess: async (started) => {
-      await queryClient.invalidateQueries({ queryKey: ["decks", instance.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) });
       onCourseStarted(started);
     },
   });

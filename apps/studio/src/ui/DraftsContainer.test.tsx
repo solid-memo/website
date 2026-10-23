@@ -10,10 +10,10 @@ import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { DraftsContainer, draftsKey } from "./DraftsContainer";
-import { draftKey } from "./draftEditor";
+import { DraftsContainer } from "./DraftsContainer";
 import { courseDraft, instanceA, invalidReport, makeDeck } from "../test/fixtures";
 import { answer } from "../test/dialogs";
+import { queryKeys } from "./queryKeys";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const solid: ReleaseDraftSummary = {
@@ -67,7 +67,7 @@ describe("DraftsContainer", () => {
       kind: "fromDeck",
       deck: kanji,
     });
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: draftsKey(instanceA.url) });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDrafts(instanceA.url) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["validation", instanceA.url] });
     expect(onCreated).not.toHaveBeenCalled();
   });
@@ -116,20 +116,20 @@ describe("DraftsContainer", () => {
       listReleaseDrafts: vi.fn(async () => [solid]),
       createReleaseDraft: vi.fn(async () => ({ draft: solid })),
     });
-    queryClient.setQueryData(draftKey(solid.url), courseDraft());
+    queryClient.setQueryData(queryKeys.releaseDraft(solid.url), courseDraft());
     const { onCreated } = renderContainer(useCases, queryClient);
     fireEvent.click(
       await screen.findByRole("button", { name: "Delete the draft Solid, version 1" }),
     );
     answer("Delete the draft", "Delete");
     expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();
-    expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
+    expect(queryClient.getQueryData(queryKeys.releaseDraft(solid.url))).toBeUndefined();
     // Read in another tab meanwhile, say: a new draft at the URL is not that one.
-    queryClient.setQueryData(draftKey(solid.url), courseDraft());
+    queryClient.setQueryData(queryKeys.releaseDraft(solid.url), courseDraft());
     fireEvent.click(screen.getByRole("radio", { name: "A deck of this instance" }));
     fireEvent.click(screen.getByRole("button", { name: "Create the draft" }));
     expect(await screen.findByText("Created the draft Solid, version 1.")).toBeInTheDocument();
-    expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
+    expect(queryClient.getQueryData(queryKeys.releaseDraft(solid.url))).toBeUndefined();
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith({ draft: solid }));
   });
 

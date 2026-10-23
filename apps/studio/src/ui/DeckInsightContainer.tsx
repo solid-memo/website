@@ -10,6 +10,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { DeckInsightScreen } from "./DeckInsightScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * A deck's schedule screen's data: the instance's preferences (the
@@ -32,14 +33,14 @@ export function DeckInsightContainer({
 }) {
   const { t, errorText } = useI18n();
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   const prefs = preferencesQuery.data;
   const insightQuery = useQuery({
     // The preferences and the deck's own pace are in the key: an insight
     // read under another cap or study day is not shown as this one's.
-    queryKey: ["deckInsight", deck.url, deck.maxReviewsPerDay, prefs],
+    queryKey: queryKeys.deckInsight(deck.url, deck.maxReviewsPerDay, prefs),
     queryFn: () => useCases.deckInsight(instance.url, deck, new Date(), prefs!),
     enabled: prefs !== undefined,
   });

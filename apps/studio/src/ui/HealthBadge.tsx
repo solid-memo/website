@@ -10,6 +10,7 @@ import { healthProblemCount, withDeckReport } from "@solid-memo/domain/deckHealt
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { deckTextCheck } from "@solid-memo/ui/markdownCache";
+import { queryKeys } from "./queryKeys";
 
 /**
  * A deck's health (UseCases.checkDeck), the Markdown read by the markdown
@@ -31,12 +32,12 @@ export function deckHealthQuery(
   deck: Deck,
 ) {
   return {
-    queryKey: ["validation", instanceUrl, "deck", deck.url, deck.cardsDocumentUrl],
+    queryKey: queryKeys.deckHealth(instanceUrl, deck.url, deck.cardsDocumentUrl),
     queryFn: async ({ signal }: { signal: AbortSignal }) => {
       const health = await useCases.checkDeck(instanceUrl, deck, deckTextCheck());
       if (signal.aborted) return health;
       queryClient.setQueryData<ValidationReport>(
-        ["validation", instanceUrl],
+        queryKeys.validation(instanceUrl),
         (report) => report && withDeckReport(report, deck, health.report),
       );
       return health;

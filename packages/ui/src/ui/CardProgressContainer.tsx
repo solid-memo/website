@@ -23,6 +23,7 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { ReaderText } from "./ReaderText";
 import { STATISTICS_STALE_MS } from "./studyFigures";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Where the cards stand now, read from the decks' cards and review states
@@ -76,7 +77,7 @@ export function useCardProgress(
   enabled = true,
 ) {
   return useQuery({
-    queryKey: ["cardProgress", instance.url, deck?.url],
+    queryKey: queryKeys.deckCardProgress(instance.url, deck?.url),
     queryFn: () =>
       useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
     staleTime: STATISTICS_STALE_MS,

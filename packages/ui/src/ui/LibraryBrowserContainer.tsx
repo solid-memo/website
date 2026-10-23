@@ -9,6 +9,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { LibraryBrowserScreen } from "./LibraryBrowserScreen";
 import { Loading } from "./Loading";
+import { queryKeys } from "./queryKeys";
 
 /** Fetches a library deck's cards for the read-only card list. */
 export function LibraryBrowserContainer({
@@ -31,7 +32,7 @@ export function LibraryBrowserContainer({
 }) {
   const { t, errorText } = useI18n();
   const cardsQuery = useQuery({
-    queryKey: ["libraryCards", deck.url],
+    queryKey: queryKeys.libraryCards(deck.url),
     queryFn: () => useCases.listLibraryCards(deck),
   });
 

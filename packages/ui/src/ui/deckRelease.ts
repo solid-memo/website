@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The library release a deck was copied from (UseCases.deckRelease): null
@@ -30,7 +31,7 @@ export function useDeckReleaseQuery(
 ): { release: LibraryDeckContent | null | undefined; error: Error | null } {
   const sourceUrl = deck?.sourceUrl;
   const query = useQuery({
-    queryKey: ["deckRelease", sourceUrl],
+    queryKey: queryKeys.deckRelease(sourceUrl),
     queryFn: () => useCases.deckRelease(deck!),
     enabled: sourceUrl !== undefined,
     staleTime: Infinity,
@@ -54,7 +55,7 @@ export function useReportTarget(
 ): { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> } | undefined {
   const sourceUrl = deck?.sourceUrl;
   const reportQuery = useQuery({
-    queryKey: ["reportPlace", sourceUrl],
+    queryKey: queryKeys.reportPlace(sourceUrl),
     queryFn: () => useCases.reportPlace(sourceUrl!),
     enabled: sourceUrl !== undefined,
     staleTime: Infinity,

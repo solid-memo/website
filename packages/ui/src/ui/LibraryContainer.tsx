@@ -12,6 +12,7 @@ import { useI18n } from "./i18n";
 import { forgetLibrarySelection, LibraryScreen } from "./LibraryScreen";
 import { Loading } from "./Loading";
 import { importUrlHref, libraryDeckHref, libraryPreviewHref } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the library listing and the import mutation for one instance;
@@ -35,7 +36,7 @@ export function LibraryContainer({
   const libraryQuery = useQuery(libraryIndexQuery(useCases));
 
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const podDecks = decksQuery.data ?? [];
@@ -50,11 +51,11 @@ export function LibraryContainer({
       // The checked decks are in now; the next visit starts with none.
       forgetLibrarySelection(memoryKey);
       await queryClient.invalidateQueries({
-        queryKey: ["decks", instance.url],
+        queryKey: queryKeys.decks(instance.url),
       });
       onDone();
     },
-    onError: () => queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+    onError: () => queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
   });
 
   if (libraryQuery.error) {

@@ -19,6 +19,7 @@ import { UnclaimedDecksNotice } from "@solid-memo/ui/UnclaimedDecksNotice";
 import { deckHealthQuery, HealthBadge } from "./HealthBadge";
 import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./HealthScreen";
 import { useConfirm } from "./shell/ConfirmDialog";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The health screen's data: with a deck, its health (UseCases.checkDeck)
@@ -131,7 +132,7 @@ function DeckHealthContainer({
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
   const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const error = healthQuery.error ?? cardsQuery.error;
@@ -173,14 +174,14 @@ function InstanceHealthContainer({
   deckHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const { repairs, dialog } = useRepairs(useCases, instance, ["validation", instance.url]);
+  const { repairs, dialog } = useRepairs(useCases, instance, queryKeys.validation(instance.url));
   const reportQuery = useQuery({
-    queryKey: ["validation", instance.url],
+    queryKey: queryKeys.validation(instance.url),
     queryFn: () => useCases.checkInstance(instance.url),
     staleTime: Infinity,
   });
   const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
+    queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
   const error = reportQuery.error ?? decksQuery.error;

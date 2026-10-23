@@ -11,6 +11,7 @@ import { libraryIndexQuery } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { NewcomerCourseOffer } from "./NewcomerCourseOffer";
 import { libraryDeckHref } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The course the library offers newcomers (its index names it,
@@ -36,12 +37,12 @@ export function NewcomerCourseContainer({
   const startMutation = useMutation({
     mutationFn: (course: LibraryDeck) => useCases.startCourse(instance.url, course),
     onSuccess: async (started) => {
-      await queryClient.invalidateQueries({ queryKey: ["decks", instance.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) });
       // The course screen finds its deck among the instance's decks, which nothing
       // on the deck list reads (Workspace fills them in from the arrangement, later).
       // A prefetch never throws: the course is started, and a failed read is the course screen's to make again.
       await queryClient.prefetchQuery({
-        queryKey: ["decks", instance.url],
+        queryKey: queryKeys.decks(instance.url),
         queryFn: () => useCases.listDecks(instance.url),
       });
       onCourseStarted(started);

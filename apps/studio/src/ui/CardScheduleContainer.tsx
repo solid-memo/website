@@ -24,6 +24,7 @@ import {
   type FsrsSchedule,
   type ScheduleEditMade,
 } from "./CardScheduleScreen";
+import { queryKeys } from "./queryKeys";
 
 const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
 
@@ -111,12 +112,12 @@ export function CardScheduleContainer({
   const queryClient = useQueryClient();
   const [done, setDone] = useState<ScheduleEditMade | null>(null);
   const reviewsQuery = useQuery({
-    queryKey: ["reviews", deck.reviewsDocumentUrl],
+    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
     queryFn: () => useCases.listDeckReviewStates(deck),
   });
   const instanceUrl = instanceUrlOfDeck(deck.url);
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl),
   });
   const editMutation = useMutation({
@@ -128,8 +129,8 @@ export function CardScheduleContainer({
     onSuccess: (_count, edit) => setDone(edit),
     onSettled: async () => {
       // The study counts go at once: a screen opened while the states are read again counts afresh.
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
-      await queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) });
     },
   });
 

@@ -23,6 +23,7 @@ import {
   type PlanState,
 } from "./LibraryCopiesScreen";
 import { libraryUpdatesQuery } from "./UpdateBadge";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The library copies screen's data: the instance's copies of library
@@ -92,8 +93,8 @@ export function LibraryCopiesContainer({
             : Promise.all([
                 outcome.changed
                   ? refreshUpgradedDeck(queryClient, instance.url, deck)
-                  : queryClient.invalidateQueries({ queryKey: ["decks"] }),
-                queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),
+                  : queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.libraryUpgrade(deck.url) }),
               ]),
         ),
       );

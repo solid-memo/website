@@ -8,6 +8,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
 import { DeckCreatorScreen } from "./DeckCreatorScreen";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /** Owns the create-deck mutation; returns to the deck list on success. */
 export function DeckCreatorContainer({
@@ -27,7 +28,7 @@ export function DeckCreatorContainer({
     mutationFn: (title: LangText) => useCases.createDeck(instance.url, title),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["decks", instance.url],
+        queryKey: queryKeys.decks(instance.url),
       });
       onDone();
     },

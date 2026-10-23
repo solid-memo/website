@@ -12,7 +12,8 @@ import { Loading } from "./Loading";
 import { PaletteEditorScreen } from "./PaletteEditorScreen";
 import { routeToHash } from "./router";
 import { useI18n } from "./i18n";
-import { palettesKey, useTheme } from "./theme";
+import { useTheme } from "./theme";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the editor of a palette of the user's own: reads the instance's
@@ -36,14 +37,14 @@ export function PaletteEditorContainer({
   const queryClient = useQueryClient();
   const { chooseCustomPalette } = useTheme();
   const palettesQuery = useQuery({
-    queryKey: palettesKey(instance.url),
+    queryKey: queryKeys.palettes(instance.url),
     queryFn: () => useCases.listPalettes(instance.url),
   });
   const saveMutation = useMutation({
     mutationFn: ({ draft, useAnyway }: { draft: PaletteDraft; useAnyway: boolean }) =>
       useCases.savePalette(instance.url, draft, { useAnyway }),
     onSuccess: async (saved) => {
-      await queryClient.invalidateQueries({ queryKey: palettesKey(instance.url) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.palettes(instance.url) });
       chooseCustomPalette(saved);
       onDone();
     },

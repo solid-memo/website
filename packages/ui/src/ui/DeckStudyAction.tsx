@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { CheckIcon } from "./icons";
 import { LoadingDots } from "./Loading";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * What a deck-list row offers for its deck today, with how much is left
@@ -78,7 +79,7 @@ export function DeckStudyAction({
  */
 export function studyCountsQuery(useCases: UseCases, instanceUrl: string, deck: Deck) {
   return {
-    queryKey: ["studyQueue", deck.url, "counts"],
+    queryKey: queryKeys.studyCounts(deck.url),
     queryFn: () => useCases.getStudyCounts(instanceUrl, deck, new Date()),
     staleTime: 30_000,
     refetchOnWindowFocus: false,

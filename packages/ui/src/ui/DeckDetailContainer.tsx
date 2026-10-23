@@ -17,6 +17,7 @@ import { Loading } from "./Loading";
 import { routeToHash, studioHref } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the card count, today's study queue and the day reset for one deck.
@@ -43,7 +44,7 @@ export function DeckDetailContainer({
 }) {
   const { t, errorText } = useI18n();
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
 
@@ -58,7 +59,7 @@ export function DeckDetailContainer({
   );
 
   const queueQuery = useQuery({
-    queryKey: ["studyQueue", deck.url],
+    queryKey: queryKeys.studyQueue(deck.url),
     queryFn: () => useCases.getStudyQueue(instance.url, deck, new Date()),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
@@ -70,13 +71,13 @@ export function DeckDetailContainer({
     mutationFn: () => useCases.resetStudyDay(instance.url, deck, new Date()),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["reviews", deck.reviewsDocumentUrl],
+        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
       await queryClient.invalidateQueries({
-        queryKey: ["studyQueue", deck.url],
+        queryKey: queryKeys.studyQueue(deck.url),
       });
-      await queryClient.invalidateQueries({ queryKey: ["statistics", instance.url] });
-      await queryClient.invalidateQueries({ queryKey: ["cardProgress", instance.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.statistics(instance.url) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.cardProgress(instance.url) });
     },
   });
 

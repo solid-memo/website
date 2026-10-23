@@ -643,7 +643,8 @@ deck-list row read the deck's queue for today:
 | nothing | "All cards have been studied" | "Nothing to study today" |
 | unknown (loading / unreadable) | loading or error | no suggestion |
 
-Rows load independently and share the `["studyQueue", deckUrl]` cache entry
+Rows load independently and share the deck's study queue's cache entry
+(`queryKeys.studyQueue(deckUrl)`, [architecture.md](architecture.md#query-keys))
 with the deck page. Concurrent reads of the instance's preferences are
 shared (one request for all rows) but never cached beyond the request.
 

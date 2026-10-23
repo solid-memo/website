@@ -17,6 +17,7 @@ import { Loading } from "./Loading";
 import { deckHref, routeToHash } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns a deck's preferences: reads the instance's (which the deck falls
@@ -57,7 +58,7 @@ export function DeckPreferencesContainer({
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
 
@@ -76,27 +77,28 @@ export function DeckPreferencesContainer({
   );
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
 
   const saveMutation = useMutation({
     mutationFn: (pace: DeckPace) => useCases.setDeckPace(deck, pace),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["decks"] });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       onDone();
     },
   });
 
   const renameMutation = useMutation({
     mutationFn: (title: LangText) => useCases.renameDeck(deck, title),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["decks"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
   });
 
   const stateLanguagesMutation = useMutation({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
   });
 
   const cardLanguageMutation = useMutation({
@@ -105,15 +107,15 @@ export function DeckPreferencesContainer({
     // and the statistics' cards (hardest cards, confused options, leeches) from the deck in their report.
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["decks"] }),
-        queryClient.invalidateQueries({ queryKey: ["cardProgress"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() }),
       ]),
   });
 
   const removeMutation = useMutation({
     mutationFn: () => useCases.removeDeck(deck),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["decks"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       onDeckRemoved();
     },
   });

@@ -16,6 +16,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { DeckAboutScreen } from "./DeckAboutScreen";
+import { queryKeys } from "./queryKeys";
 
 /** One save of the screen: the write, and the queries it changes beside the decks'. */
 interface Save {
@@ -56,18 +57,18 @@ export function DeckAboutContainer({
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instance.url],
+    queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
   // After the preferences' own query, which reads them.
   const readOnly = useDataCheck(useCases, instance.url).readOnly(deck);
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   // The same query as Solid Memo's course screens, so a change shows there.
   const courseQuery = useQuery({
-    queryKey: ["course", deck.url],
+    queryKey: queryKeys.course(deck.url),
     queryFn: () => useCases.getCourse(deck),
     enabled: isCourse,
   });
@@ -84,14 +85,17 @@ export function DeckAboutContainer({
     mutationFn: ({ write }: Save) => write(),
     onSuccess: async (_written, { touches = [] }) => {
       await Promise.all(
-        [["decks"], ...touches].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+        [queryKeys.allDecks(), ...touches].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
       );
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
   const stateLanguages = useMutation({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
   });
   const run = (write: Save["write"], touches?: QueryKey[]) =>
     save.mutateAsync({ write, touches }).then(
@@ -132,7 +136,7 @@ export function DeckAboutContainer({
       }
       onStateLanguages={(languages) => stateLanguages.mutate(languages)}
       onCompletedChapters={(edit) =>
-        void run(() => useCases.setCompletedChapters(deck, edit), [["course", deck.url]])
+        void run(() => useCases.setCompletedChapters(deck, edit), [queryKeys.course(deck.url)])
       }
     />
   );

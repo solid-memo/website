@@ -36,7 +36,6 @@ import {
   applyTheme,
   browserTheme,
   DARK_QUERY,
-  instanceAppearanceKey,
   ThemeProvider,
 } from "./theme";
 import { ThemeToggle } from "./ThemeToggle";
@@ -44,6 +43,7 @@ import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
 import { parseHash, STUDIO_PATH } from "./router";
 import { keepStudyFiguresFresh } from "./studyFigures";
+import { queryKeys } from "./queryKeys";
 
 /** What an app built on AppShell calls itself, as messages in the user's language. */
 export interface AppIdentity {
@@ -182,10 +182,10 @@ export function AppShell({
         settledChoice.current = count;
         if (instanceUrl === null) return;
         void queryClient.invalidateQueries({
-          queryKey: instanceAppearanceKey(instanceUrl),
+          queryKey: queryKeys.instanceAppearance(instanceUrl),
         });
         void queryClient.invalidateQueries({
-          queryKey: ["preferences", instanceUrl],
+          queryKey: queryKeys.preferences(instanceUrl),
         });
       });
   }
@@ -341,7 +341,7 @@ function AppContent({
   }, [useCases, queryClient]);
 
   const accountQuery = useQuery({
-    queryKey: ["account", session?.webId],
+    queryKey: queryKeys.account(session?.webId),
     queryFn: () => useCases.discoverAccount(session!),
     enabled: session !== null && connecting,
   });

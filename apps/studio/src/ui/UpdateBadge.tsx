@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useSeen } from "./HealthBadge";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The instance's copies of library releases (UseCases.listLibraryUpdates):
@@ -17,7 +18,7 @@ import { useSeen } from "./HealthBadge";
  */
 export function libraryUpdatesQuery(useCases: UseCases, instanceUrl: string) {
   return {
-    queryKey: ["decks", instanceUrl, "libraryUpdates"],
+    queryKey: queryKeys.libraryUpdates(instanceUrl),
     queryFn: () => useCases.listLibraryUpdates(instanceUrl),
     staleTime: Infinity,
   };

@@ -22,7 +22,6 @@ import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
 import { CourseContainer, type CompletedChapter } from "./CourseContainer";
 import { courseStripQuery } from "./CourseStrip";
-import { courseKey } from "./courseKey";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
@@ -71,6 +70,7 @@ import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
 import { MAIN_ID } from "./SkipLink";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The breadcrumbs' names of what the route has open, each "" (or no
@@ -265,7 +265,7 @@ export function Workspace({
   const webId = session.webId;
 
   const instancesQuery = useQuery({
-    queryKey: ["instances", webId],
+    queryKey: queryKeys.instances(webId),
     queryFn: () => useCases.listInstances(session),
   });
   const instances = instancesQuery.data;
@@ -297,7 +297,7 @@ export function Workspace({
   }, [instanceUrl, instances]);
 
   const decksQuery = useQuery({
-    queryKey: ["decks", instanceUrl],
+    queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: needsDeck,
   });
@@ -318,7 +318,7 @@ export function Workspace({
 
   const needsCard = cardUrl !== null && activeDeck !== null;
   const cardsQuery = useQuery({
-    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
+    queryKey: queryKeys.cards(activeDeck?.cardsDocumentUrl),
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: needsCard,
   });
@@ -381,7 +381,7 @@ export function Workspace({
 
   const needsLibraryCard = libraryCardId !== null && activeLibraryDeck !== null;
   const libraryCardsQuery = useQuery({
-    queryKey: ["libraryCards", activeLibraryDeck?.url],
+    queryKey: queryKeys.libraryCards(activeLibraryDeck?.url),
     queryFn: () => useCases.listLibraryCards(activeLibraryDeck!),
     enabled: needsLibraryCard,
   });
@@ -415,7 +415,7 @@ export function Workspace({
     route?.screen === "courseReview";
   const needsCourse = isCourseRoute && activeDeck !== null;
   const courseQuery = useQuery({
-    queryKey: courseKey(deckUrl!),
+    queryKey: queryKeys.course(deckUrl!),
     queryFn: () => useCases.getCourse(activeDeck!),
     enabled: needsCourse && activeDeck.sourceUrl !== undefined,
   });
@@ -462,7 +462,7 @@ export function Workspace({
   ]);
 
   const preferencesQuery = useQuery({
-    queryKey: ["preferences", instanceUrl],
+    queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl!),
     enabled: activeInstance !== null,
   });
@@ -484,7 +484,7 @@ export function Workspace({
   // as their counts are.
   const onHome = activeInstance !== null && route?.screen === "home";
   const homeTreeQuery = useQuery({
-    queryKey: ["decks", instanceUrl, "tree"],
+    queryKey: queryKeys.deckTree(instanceUrl),
     queryFn: () => useCases.listDeckTree(instanceUrl!),
     enabled: onHome,
     refetchOnWindowFocus: false,
@@ -495,7 +495,7 @@ export function Workspace({
   useEffect(() => {
     if (instanceUrl === null || homeTreeQuery.data === undefined) return;
     const decks = decksOf(homeTreeQuery.data.children);
-    queryClient.setQueryData(["decks", instanceUrl], decks);
+    queryClient.setQueryData(queryKeys.decks(instanceUrl), decks);
     for (const deck of decks) {
       void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
     }
@@ -517,7 +517,7 @@ export function Workspace({
     arrangementSetAside: arrangementIsSetAside,
   } = check;
   const decksOfCheck = useQuery({
-    queryKey: ["decks", instanceUrl],
+    queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: invalidReport !== null && policy === "block-subject",
   });
@@ -533,7 +533,7 @@ export function Workspace({
     route?.screen === "validation";
 
   const storagesQuery = useQuery({
-    queryKey: ["storages", webId],
+    queryKey: queryKeys.storages(webId),
     queryFn: () => useCases.listStorages(session),
     enabled: route?.screen === "storagePicker",
   });
@@ -549,7 +549,7 @@ export function Workspace({
   }, [route, storagesQuery.data]);
 
   const registrationOptionsQuery = useQuery({
-    queryKey: ["registrationOptions", webId],
+    queryKey: queryKeys.registrationOptions(webId),
     queryFn: () => useCases.getRegistrationOptions(session),
     enabled: route?.screen === "instanceCreator",
   });
@@ -575,7 +575,7 @@ export function Workspace({
       // A new instance has no decks, so its list offers the library's course for
       // newcomers (NewcomerCourseContainer): read from now, it comes with the list.
       void queryClient.prefetchQuery(libraryIndexQuery(useCases));
-      await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.instances(webId) });
       navigate({ screen: "home", instanceUrl: instance.url });
     },
   });

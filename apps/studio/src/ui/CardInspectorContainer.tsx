@@ -27,6 +27,7 @@ import { CardScheduleContainer } from "./CardScheduleContainer";
 import { ReadOnlyScope } from "./ReadOnly";
 import type { CardTab } from "./router";
 import { useActivityLog } from "./shell/activity";
+import { queryKeys } from "./queryKeys";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
 export function releaseLinkOf(
@@ -40,7 +41,7 @@ export function releaseLinkOf(
 
 /**
  * The card inspector's data: the card (resolved by the workspace from
- * the ["cards", …] query, so a save shows here once that query is read
+ * the queryKeys.cards query, so a save shows here once that query is read
  * afresh) and the release its deck was copied from, if any, which says
  * how the card stands to it and which wrong options it published (never
  * deleted). The content tab is Solid Memo's card editor (CardContainer,
@@ -105,7 +106,7 @@ export function CardInspectorContainer({
   const release = useDeckRelease(useCases, deck);
   const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
   const answersQuery = useQuery({
-    queryKey: ["cardAnswers", deck.url, card.id],
+    queryKey: queryKeys.cardAnswers(deck.url, card.id),
     queryFn: () => useCases.cardAnswers(instanceUrlOfDeck(deck.url), deck, card.id),
     enabled: tab === "history" || tab === "distractors",
   });
@@ -123,8 +124,8 @@ export function CardInspectorContainer({
     mutationFn: (distractors: Distractor[]) =>
       useCases.updateCard(deck, card, { ...card, distractors }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       logSaved();
     },
   });

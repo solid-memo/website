@@ -121,6 +121,26 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
   package from the SHACL [shapes](shapes.md); the migration chain in
   `packages/domain/src/shapes/migrations/` is hand-written.
 
+## Query keys
+
+The screens cache what they read from a pod with TanStack Query, each
+read under a query key, and a write refreshes what it changed by those
+keys. Every key is made by a function of one module:
+[packages/ui/src/ui/queryKeys.ts](../packages/ui/src/ui/queryKeys.ts)
+for those Solid Memo's screens use, the Studio's too, and
+[apps/studio/src/ui/queryKeys.ts](../apps/studio/src/ui/queryKeys.ts)
+for those only the Studio reads, built on the first. A new key goes
+there, never into a screen as an array written out, which
+`npm run check:keys` refuses ([testing.md](testing.md#the-repositorys-own-checks)).
+
+A key whose first items are another's sits under it: refreshing or
+dropping the shorter key reaches it too. The decks' arrangement
+(`queryKeys.deckTree`) sits under the instance's decks, so whatever
+refreshes the decks refreshes it, and a deck's study counts
+(`queryKeys.studyCounts`) under its study queue, so whatever drops the
+queue drops them. Each function's comment says which key it sits
+under, and the modules' tests check that it does.
+
 ## Why
 
 - Vendor code stays swappable and upgradeable in isolation (see

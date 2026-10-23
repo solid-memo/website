@@ -9,10 +9,10 @@ import { choicesOf, finalReviewQueue, type CourseChapter } from "@solid-memo/dom
 import type { Instance } from "@solid-memo/domain/instance";
 import { useCourseAnswer } from "./ChapterPlayerContainer";
 import { ChapterReviewScreen, type Completion } from "./ChapterReviewScreen";
-import { courseKey } from "./courseKey";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useCourseLinks } from "./courseLinks";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns one final review of a chapter: it starts when the learner says
@@ -72,8 +72,8 @@ export function ChapterReviewContainer({
     },
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
-        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
       ]),
   });
   // Passed to mutate, not to useMutation, so that it is dropped once the
