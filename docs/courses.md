@@ -107,7 +107,8 @@ domain's
   (`finalReviewQueue`).
 - The options of a question are the card's back and each of its
   distractors, shuffled (`choicesOf`). The text is shown in the reader's
-  language.
+  language, or in the deck's card language first when the learner chose
+  one ([i18n.md](i18n.md#which-language)).
 - A retired chapter or step (`owl:deprecated true`) is left out of the
   outline (`courseOutlineFromRecords`), with every step of a retired
   chapter.

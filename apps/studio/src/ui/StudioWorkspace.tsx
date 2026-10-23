@@ -12,6 +12,7 @@ import type { WorkspaceProps } from "@solid-memo/ui/App";
 import type { CardEdits } from "@solid-memo/ui/CardScreen";
 import { AskFirst } from "@solid-memo/ui/askFirst";
 import { Breadcrumbs } from "@solid-memo/ui/Breadcrumbs";
+import { CardLanguage } from "@solid-memo/ui/cardLanguage";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -106,7 +107,7 @@ import {
  * can be published (PublishState).
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
-  const { t, errorText, readerText } = useI18n();
+  const { t, errorText, readerText, cardReader } = useI18n();
   const { route, change, navigate, replace } = useStudioRoute();
   const medium = useMedia(MEDIUM);
   // A card beside its deck's cards, on a screen wide enough for both.
@@ -203,7 +204,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       ? crumbsOf(
           route!,
           { deck: activeDeck, card: activeCard, draft: activeDraft },
-          { t, readerText },
+          { t, readerText, cardReader },
         )
       : [];
   // The page the trail ends at: "Decks – Solid Memo Studio".
@@ -810,7 +811,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         )}
         <div ref={screenRef} class="screen">
           <UnsavedEdits.Provider value={unsaved.report}>
-            {waiting ?? screenFor(route!)}
+            {/* A deck's screens show its cards in its card language first; no deck's, as usual. */}
+            <CardLanguage language={activeDeck?.cardLanguage}>
+              {waiting ?? screenFor(route!)}
+            </CardLanguage>
           </UnsavedEdits.Provider>
         </div>
       </StudioShell>

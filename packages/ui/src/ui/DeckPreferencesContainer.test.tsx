@@ -99,6 +99,53 @@ describe("DeckPreferencesContainer", () => {
     expect(onDone).not.toHaveBeenCalled();
   });
 
+  it("offers the languages the deck's cards state, saves the one chosen on the deck and stays", async () => {
+    const card: Card = {
+      id: "c1",
+      url: `${deck.cardsDocumentUrl}#c1`,
+      front: { en: "water", sv: "vatten", "": "水" },
+      back: { zxx: "H2O" },
+      createdAt: "",
+      formatVersion: 7,
+    };
+    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [card]) });
+    const { onDone, queryClient } = renderContainer(useCases, { ...deck, cardLanguage: "sv" });
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+    const select = await screen.findByRole("combobox", { name: "Card language" });
+    await waitFor(() =>
+      expect(Array.from(select.querySelectorAll("option")).map((o) => o.value)).toEqual([
+        "",
+        "en",
+        "sv",
+      ]),
+    );
+    expect(select).toHaveValue("sv");
+    fireEvent.input(select, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save card language" }));
+    await waitFor(() =>
+      expect(useCases.setDeckCardLanguage).toHaveBeenCalledWith(
+        { ...deck, cardLanguage: "sv" },
+        null,
+      ),
+    );
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] }));
+    // The statistics name cards by the deck in their report, read before the choice.
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cardProgress"] });
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it("shows why the card language could not be saved", async () => {
+    renderContainer(
+      makeUseCasesFake({
+        setDeckCardLanguage: vi.fn(async () => {
+          throw new AppError("textLanguageInvalid", { tag: "xx-" });
+        }),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Save card language" }));
+    expect(await screen.findByText(/is not a language code/)).toBeInTheDocument();
+  });
+
   it("renames the deck and refreshes every deck list, staying on the page", async () => {
     const useCases = makeUseCasesFake();
     const { onDone, queryClient } = renderContainer(useCases);

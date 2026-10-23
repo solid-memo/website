@@ -672,6 +672,13 @@
     "emptyHint": "Un champ vide reprend vos {link}.",
     "studyPreferencesLink": "préférences d’étude",
     "saveButton": "Enregistrer les préférences",
+    "cardLanguage": {
+      "label": "Langue des cartes",
+      "default": "La langue de l’application",
+      "hint": "La langue dans laquelle les cartes de ce paquet s’affichent en priorité, où qu’elles apparaissent. Une carte sans texte dans cette langue s’affiche comme d’habitude. Le nom et la description du paquet ne changent pas.",
+      "none": "Les cartes de ce paquet n’indiquent aucune langue à choisir.",
+      "save": "Enregistrer la langue des cartes"
+    },
     "languages": {
       "heading": "Langues",
       "loading": "Vérification des langues des cartes…",

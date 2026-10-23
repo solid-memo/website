@@ -373,6 +373,16 @@ export interface DeckRepository {
    * throws deckGone when it has no entry.
    */
   setCompletedChapters(deck: Deck, edit: CompletedChaptersEdit): Promise<Deck>;
+  /**
+   * Set the deck's card language (`sm:deckCardLanguage`, a lower-case
+   * tag already checked), or remove it for null, on its catalog entry as
+   * it is now, as completeChapter edits it: one save, If-Match, a few
+   * attempts, then changedElsewhere. Every other write of the entry keeps
+   * it as stored, so a deck read before it changed cannot undo it. The
+   * same language writes nothing. Returns the deck as its entry says
+   * then; throws deckGone when it has no entry.
+   */
+  setCardLanguage(deck: Deck, language: string | null): Promise<Deck>;
 }
 
 /** Driven port: the app's read-only library of ready-made decks. */

@@ -646,6 +646,13 @@
     "emptyHint": "An empty field defaults to your {link}.",
     "studyPreferencesLink": "study preferences",
     "saveButton": "Save preferences",
+    "cardLanguage": {
+      "label": "Card language",
+      "default": "The app's language",
+      "hint": "The language this deck's cards are shown in first, wherever they appear. A card without text in it is shown as usual. The deck's name and description are not affected.",
+      "none": "This deck's cards state no language to choose.",
+      "save": "Save card language"
+    },
     "languages": {
       "heading": "Languages",
       "loading": "Checking the languages of the cards…",

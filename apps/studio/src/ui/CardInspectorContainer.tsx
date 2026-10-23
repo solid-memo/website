@@ -13,6 +13,7 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { untouched } from "@solid-memo/domain/libraryUpgrade";
 import { CardContainer } from "@solid-memo/ui/CardContainer";
 import type { CardEdits } from "@solid-memo/ui/CardScreen";
+import { useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { publishedDistractorIds, useDeckRelease } from "@solid-memo/ui/deckRelease";
@@ -96,9 +97,10 @@ export function CardInspectorContainer({
   onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
   keep?: { current: CardEdits | null };
 }) {
-  const { t, errorText, readerText } = useI18n();
+  const { t, errorText } = useI18n();
+  const { cardText } = useCardText();
   const log = useActivityLog();
-  const logSaved = () => log(t("studio.card.saved", { card: cardName(card, readerText) }));
+  const logSaved = () => log(t("studio.card.saved", { card: cardName(card, cardText) }));
   const queryClient = useQueryClient();
   const release = useDeckRelease(useCases, deck);
   const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);

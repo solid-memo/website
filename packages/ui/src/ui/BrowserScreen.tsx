@@ -7,6 +7,7 @@ import type { DeckAbout } from "@solid-memo/domain/deckAbout";
 import { hasUnstatedSide } from "@solid-memo/domain/deckLanguages";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { CardRowBack, CardRowFront } from "./CardFace";
+import { useCardText } from "./cardLanguage";
 import { cardName } from "./DataText";
 import { DeckAboutSection } from "./DeckAboutSection";
 import { ErrorMessage } from "./ErrorMessage";
@@ -84,7 +85,8 @@ export function BrowserScreen({
   /** List the cards of another language filter, from the first page. */
   onLanguageFilterChange: (filter: BrowserLanguageFilter | undefined) => void;
 }) {
-  const { t, tx, readerText, directionLabel } = useI18n();
+  const { t, tx, directionLabel } = useI18n();
+  const { cardText } = useCardText();
   const { listed: unfiltered, toggle } = useRetiredCards(cards);
   const unstated = new Set(toSettle.filter(hasUnstatedSide).map((card) => card.url));
   const unstatedCards = unfiltered.filter((card) => unstated.has(card.url));
@@ -119,7 +121,7 @@ export function BrowserScreen({
 
   function handleRemove(card: Card) {
     if (busy) return;
-    const label = cardName(card, readerText);
+    const label = cardName(card, cardText);
     if (window.confirm(t("browser.removeConfirm", { card: label }))) {
       removing.current = { url: card.url, page: currentPage, row: pageCards.indexOf(card), label };
       setRemoved("");
@@ -252,7 +254,7 @@ export function BrowserScreen({
                     <button
                       class="danger icon"
                       aria-label={t("browser.removeCardLabel", {
-                        card: cardName(card, readerText),
+                        card: cardName(card, cardText),
                       })}
                       title={t("browser.removeButton")}
                       onClick={() => handleRemove(card)}

@@ -13,6 +13,7 @@ import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { ReaderText } from "./ReaderText";
+import { DeckCardLanguageForm } from "./DeckCardLanguageForm";
 import { DeckLanguagesSection } from "./DeckLanguagesSection";
 import {
   draftOf,
@@ -59,7 +60,9 @@ function limitUnit(t: I18n["t"], limit: Limit, count: number): string {
  * The name is edited in every language it has, each the user's to state
  * (LangTextField).
  *
- * Below the limits, the deck's text whose language is not settled
+ * Below the limits, the language the deck's cards are shown in first
+ * (DeckCardLanguageForm), from those its cards state, saved on its own
+ * as the screen stays. Below that, the deck's text whose language is not settled
  * (DeckLanguagesSection): its untagged card sides, stated here in bulk.
  * A link may open the screen there (`section`).
  *
@@ -74,6 +77,7 @@ export function DeckPreferencesScreen({
   preferencesHref,
   languages,
   languagesUnreadable = null,
+  cardLanguages,
   section,
   stated = null,
   busy,
@@ -82,6 +86,7 @@ export function DeckPreferencesScreen({
   onRename,
   onRemove,
   onStateLanguages,
+  onSetCardLanguage,
 }: {
   deck: Deck;
   /** URL of the deck's page; its name links there. */
@@ -94,6 +99,8 @@ export function DeckPreferencesScreen({
   languages: DeckLanguages | undefined;
   /** Why the deck's languages could not be checked (its cards or library release unread); null when they could. */
   languagesUnreadable?: ErrorText | null;
+  /** The languages the deck's cards state, to show them in first (preferableCardLanguages); undefined while they are read. */
+  cardLanguages: readonly string[] | undefined;
   /** The part of the screen a link opened it at: its heading takes the focus. */
   section?: "languages";
   /** How many cards the last statement of languages changed; null before any. */
@@ -106,6 +113,8 @@ export function DeckPreferencesScreen({
   onRemove: () => void;
   /** State the language of the deck's untagged card fronts and backs. */
   onStateLanguages: (languages: StatedLanguages) => void;
+  /** Show the deck's cards in this language first; null for the app's. */
+  onSetCardLanguage: (language: string | null) => void;
 }) {
   const { t, tx, locale, readerText, errorText } = useI18n();
   /** The deck-name draft while renaming; null otherwise. */
@@ -290,6 +299,12 @@ export function DeckPreferencesScreen({
           {t("deckPreferences.saveButton")}
         </button>
       </form>
+      <DeckCardLanguageForm
+        value={deck.cardLanguage}
+        languages={cardLanguages}
+        busy={busy}
+        onSave={onSetCardLanguage}
+      />
       <DeckLanguagesSection
         deck={deck}
         languages={languages}

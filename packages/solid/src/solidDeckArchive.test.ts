@@ -28,14 +28,17 @@ async function podWithDeck() {
   });
   const reviews = createSolidReviewStateRepository({ fetch: pod.fetch });
   const created = await repository.createDeck(INSTANCE, { en: "Capitals", sv: "Huvudstäder" });
-  const deck = await repository.saveDeck({
-    ...created,
-    authors: ["Anton <anton@example.com>"],
-    license: "https://creativecommons.org/licenses/by/4.0/",
-    description: { en: "Capitals of Europe.", sv: "Europas huvudstäder." },
-    keywords: { en: ["capitals"], sv: ["huvudstäder"] },
-    newCardsPerDay: 5,
-  });
+  const deck = await repository.setCardLanguage(
+    await repository.saveDeck({
+      ...created,
+      authors: ["Anton <anton@example.com>"],
+      license: "https://creativecommons.org/licenses/by/4.0/",
+      description: { en: "Capitals of Europe.", sv: "Europas huvudstäder." },
+      keywords: { en: ["capitals"], sv: ["huvudstäder"] },
+      newCardsPerDay: 5,
+    }),
+    "sv",
+  );
   const cards: Card[] = [
     {
       id: "card-se",
@@ -143,6 +146,7 @@ describe("createSolidDeckArchive", () => {
       });
       expect(read.fsrsReviews).toHaveLength(1);
       expect(read.deck.completedChapters).toEqual([CHAPTER]);
+      expect(read.deck.cardLanguage).toBe("sv");
       expect(read.cards.find((card) => card.id === "card-se")!.distractors).toHaveLength(2);
     });
   }
@@ -153,6 +157,8 @@ describe("createSolidDeckArchive", () => {
     const text = await archive.exportDeck(deck, { format: "turtle", withProgress: false });
     expect(text).not.toContain("position");
     expect(text).not.toContain("completedChapter");
+    // The card language is the learner's choice of how the deck reads, not progress: it goes along.
+    expect(text).toContain("deckCardLanguage");
     expect(text).not.toContain(deck.reviewsDocumentUrl + "#");
     const read = await archive.readDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
     const { completedChapters: _, ...withoutProgress } = deck;

@@ -10,6 +10,7 @@ import {
   getUrlAll,
   setThing,
   type SolidDataset,
+  type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -28,6 +29,7 @@ import {
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { editCompletedChapters as completedChaptersAfter } from "@solid-memo/domain/course";
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
+import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import {
   cardsContainerOf,
   catalogUrlOf,
@@ -194,12 +196,7 @@ export function createSolidDeckRepository({
         const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
         if (getThing(dataset, deck.url) !== null)
           throw new PreconditionFailedError(deck.url, "absent");
-        // sm:completedChapter is no shape's: added beside the entry, as completeChapter adds it.
-        let updated = withDeck(dataset, written);
-        const entry = buildThing(getThing(updated, deck.url)!);
-        for (const chapter of deck.completedChapters ?? [])
-          entry.addIri(SM.completedChapter, chapter);
-        updated = setThing(updated, entry.build());
+        const updated = withOwnTerms(withDeck(dataset, written), deck);
         try {
           // If-Match the read above: the catalog changed elsewhere meanwhile is read and the entry added again.
           await save(catalogUrl, updated, deckSubjects(written));
@@ -421,6 +418,22 @@ export function createSolidDeckRepository({
       );
     },
 
+    setCardLanguage(deck, language) {
+      return editEntry(deck, (stored) =>
+        stored.cardLanguage === (language ?? undefined)
+          ? null
+          : {
+              edit: (entry) => {
+                const cleared = entry.removeAll(SM.deckCardLanguage);
+                return language === null
+                  ? cleared
+                  : cleared.addStringNoLocale(SM.deckCardLanguage, language);
+              },
+              deck: withCardLanguage(stored, language),
+            },
+      );
+    },
+
     async removeCard(deck, card): Promise<void> {
       guard.assertUsable(deck);
       const cards = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
@@ -461,17 +474,54 @@ export function createSolidDeckRepository({
 
   /**
    * Change the chapters a course's deck completed (sm:completedChapter):
-   * what `change` adds and removes of them as the entry has them now, in
-   * ONE save made only if the catalog document is as it was read
-   * (If-Match), else read and changed again, TREE_ATTEMPTS times in all.
-   * No change (null) writes nothing. sm:completedChapter is no shape's
-   * (like a deck's sm:position): a learner's completion checks nothing a
-   * shape owns, while an edit in the Studio (`checked`) has the entry
-   * checked as any other edit of it is.
+   * what `change` adds and removes of them as the entry has them now
+   * (editEntry). No change (null) writes nothing. sm:completedChapter is
+   * no shape's (like a deck's sm:position): a learner's completion checks
+   * nothing a shape owns, while an edit in the Studio (`checked`) has the
+   * entry checked as any other edit of it is.
    */
-  async function editCompletedChapters(
+  function editCompletedChapters(
     deck: Deck,
     change: (completed: readonly string[]) => { add: string[]; remove: string[] } | null,
+    checked = false,
+  ): Promise<Deck> {
+    return editEntry(
+      deck,
+      (stored) => {
+        const completed = stored.completedChapters ?? [];
+        const changed = change(completed);
+        if (changed === null) return null;
+        const after = [...completed.filter((url) => !changed.remove.includes(url)), ...changed.add];
+        const { completedChapters: _, ...rest } = stored;
+        return {
+          edit: (entry) => {
+            let builder = entry;
+            for (const url of changed.remove) builder = builder.removeUrl(SM.completedChapter, url);
+            for (const url of changed.add) builder = builder.addIri(SM.completedChapter, url);
+            return builder;
+          },
+          deck: after.length === 0 ? rest : { ...rest, completedChapters: after },
+        };
+      },
+      checked,
+    );
+  }
+
+  /**
+   * Edit a deck's catalog entry as it is now, for a term no shape owns
+   * and withDeck keeps as stored: `change` is given the deck the entry
+   * says, and returns how to edit the entry and the deck it then says, or
+   * null for no change, which writes nothing. ONE save made only if the
+   * catalog document is as it was read (If-Match), else read and changed
+   * again, TREE_ATTEMPTS times in all; `checked` has the entry checked
+   * first. Throws deckGone when the deck has no entry.
+   */
+  async function editEntry(
+    deck: Deck,
+    change: (stored: Deck) => {
+      edit: (entry: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>;
+      deck: Deck;
+    } | null,
     checked = false,
   ): Promise<Deck> {
     const catalogUrl = documentUrlOf(deck.url);
@@ -482,20 +532,15 @@ export function createSolidDeckRepository({
           ? undefined
           : toDecks(dataset, catalogUrl).find((candidate) => candidate.url === deck.url);
       if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
-      const completed = stored.completedChapters ?? [];
-      const changed = change(completed);
+      const changed = change(stored);
       if (changed === null) return stored;
-      let builder = buildThing(unlessNewer(getThing(dataset!, deck.url)!));
-      for (const url of changed.remove) builder = builder.removeUrl(SM.completedChapter, url);
-      for (const url of changed.add) builder = builder.addIri(SM.completedChapter, url);
-      const updated = setThing(dataset!, builder.build());
+      const entry = changed.edit(buildThing(unlessNewer(getThing(dataset!, deck.url)!)));
+      const updated = setThing(dataset!, entry.build());
       if (checked) await checkWrite(updated, [deck.url], "pod");
       try {
         // A PATCH of the triples changed, If-Match the read above.
         await saveDataset(catalogUrl, updated, fetch);
-        const after = [...completed.filter((url) => !changed.remove.includes(url)), ...changed.add];
-        const { completedChapters: _, ...rest } = stored;
-        return after.length === 0 ? rest : { ...rest, completedChapters: after };
+        return changed.deck;
       } catch (error) {
         if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
       }
@@ -710,19 +755,30 @@ export function createSolidDeckRepository({
 
   /**
    * Add a deck's catalog entry, with the chapters of a course it
-   * completed; refused (alreadyExists) when the catalog has one of its URL.
+   * completed and its card language; refused (alreadyExists) when the catalog has one of its URL.
    */
   async function registerDeck(deck: Deck): Promise<Deck> {
     const catalogUrl = documentUrlOf(deck.url);
     const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
     if (getThing(dataset, deck.url) !== null)
       throw new AppError("alreadyExists", { url: deck.url });
-    const written = withDeck(dataset, deck);
-    let builder = buildThing(getThing(written, deck.url)!);
+    await save(catalogUrl, withOwnTerms(withDeck(dataset, deck), deck), deckSubjects(deck));
+    return deck;
+  }
+
+  /**
+   * A new entry with what the deck says of the terms no shape owns, which
+   * withDeck keeps as stored: the chapters a course completed
+   * (sm:completedChapter, as completeChapter adds one) and the card
+   * language (sm:deckCardLanguage, as setCardLanguage sets it).
+   */
+  function withOwnTerms(dataset: SolidDataset, deck: Deck): SolidDataset {
+    let builder = buildThing(getThing(dataset, deck.url)!);
     for (const url of deck.completedChapters ?? [])
       builder = builder.addIri(SM.completedChapter, url);
-    await save(catalogUrl, setThing(written, builder.build()), deckSubjects(deck));
-    return deck;
+    if (deck.cardLanguage !== undefined)
+      builder = builder.addStringNoLocale(SM.deckCardLanguage, deck.cardLanguage);
+    return setThing(dataset, builder.build());
   }
 
   /**

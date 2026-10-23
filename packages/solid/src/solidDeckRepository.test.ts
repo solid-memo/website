@@ -353,6 +353,7 @@ describe("addDeck", () => {
     createdAt: "2026-01-02T03:04:05.000Z",
     sourceUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl",
     completedChapters: ["https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid"],
+    cardLanguage: "sv",
   };
 
   it("adds the deck's entry as it is, at its own URLs, with its chapters completed, beside the decks there, checked first", async () => {
@@ -371,6 +372,7 @@ describe("addDeck", () => {
     expect(getUrl(thing, SM.cardsDocument)).toBe(added.cardsDocumentUrl);
     expect(getUrl(thing, PROV_WAS_DERIVED_FROM)).toBe(added.sourceUrl);
     expect(getUrlAll(thing, SM.completedChapter)).toEqual(added.completedChapters);
+    expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
     expect(getDatetime(thing, DCTERMS.created)?.toISOString()).toBe("2026-01-02T03:04:05.000Z");
     expect(getThing(saved as SolidDataset, deck.url)).not.toBeNull();
   });
@@ -508,6 +510,21 @@ describe("upgradeDecks", () => {
       expect.arrayContaining([deck.url, `${CATALOG}#catalog`, catalog.publisher.webId]),
     );
     expect(subjects).not.toContain(`${CATALOG}#deck-2`);
+  });
+
+  it("keeps an outdated entry's card language", async () => {
+    const old = catalogWithDeck();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        old,
+        buildThing(getThing(old, deck.url)!).addStringNoLocale(SM.deckCardLanguage, "ko").build(),
+      ),
+    );
+    await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(true);
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as SolidDataset;
+    const entry = getThing(saved, deck.url)!;
+    expect(getInteger(entry, SM.formatVersion)).toBe(6);
+    expect(getStringNoLocale(entry, SM.deckCardLanguage)).toBe("ko");
   });
 
   it("keeps a catalog the document has, and writes nothing when nothing is outdated", async () => {
@@ -820,6 +837,27 @@ describe("saveDeck", () => {
     const thing = getThing(dataset as SolidDataset, deck.url)!;
     expect(getInteger(thing, SM.deckNewCardsPerDay)).toBe(5);
     expect(getInteger(thing, SM.deckMaxReviewsPerDay)).toBeNull();
+  });
+
+  it("keeps the entry's card language whatever the deck says, so a deck read before it changed cannot undo it", async () => {
+    const stored = catalogWithDeck();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        stored,
+        buildThing(getThing(stored, deck.url)!)
+          .addStringNoLocale(SM.deckCardLanguage, "sv")
+          .build(),
+      ),
+    );
+    await makeRepository().saveDeck(deck);
+    await makeRepository().saveDeck({ ...deck, cardLanguage: "ko" });
+    for (const [, dataset] of vi.mocked(saveSolidDatasetAt).mock.calls) {
+      const thing = getThing(dataset as SolidDataset, deck.url)!;
+      expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
+    }
+    await expect(makeRepository().listDecks(INSTANCE)).resolves.toMatchObject([
+      { cardLanguage: "sv" },
+    ]);
   });
 
   it("rejects when the deck is gone", async () => {

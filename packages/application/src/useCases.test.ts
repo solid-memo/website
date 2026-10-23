@@ -222,6 +222,9 @@ function makeDeps() {
       completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
     })),
     setCompletedChapters: vi.fn(async (edited) => edited),
+    setCardLanguage: vi.fn(async (edited, language) =>
+      language === null ? edited : { ...edited, cardLanguage: language },
+    ),
     registerDeck: vi.fn(async (registered) => registered),
   };
   const deckLibrary: DeckLibrary = {
@@ -1603,6 +1606,22 @@ describe("createUseCases", () => {
     await expect(useCases.setDeckPace(deck, { newCardsPerDay: 1.5 })).rejects.toThrow(
       "A daily limit is a whole number, 0 or more.",
     );
+  });
+
+  it("setDeckCardLanguage saves the deck's card language or clears it, refusing one that names no language", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    await useCases.setDeckCardLanguage(deck, "SV");
+    expect(deps.deckRepository.setCardLanguage).toHaveBeenLastCalledWith(deck, "sv");
+    const swedish = { ...deck, cardLanguage: "sv" };
+    await useCases.setDeckCardLanguage(swedish, null);
+    expect(deps.deckRepository.setCardLanguage).toHaveBeenLastCalledWith(swedish, null);
+    await expect(useCases.setDeckCardLanguage(deck, "Swedish")).rejects.toThrow(
+      "“Swedish” is not a language code.",
+    );
+    expect(deps.deckRepository.setCardLanguage).toHaveBeenCalledTimes(2);
+    // Edited on the entry as it is now, never by a save of the deck as read.
+    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
   });
 
   it("sets several decks' direction or pace in one save, and removes several decks at once", async () => {

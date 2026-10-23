@@ -6,8 +6,9 @@ import { isMarkdown } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import type { LangText } from "@solid-memo/domain/langText";
 import { DataLineContent, DataText, plainDataText } from "./DataText";
+import { useCardText } from "./cardLanguage";
 import { useI18n } from "./i18n";
-import { ReaderText } from "./ReaderText";
+import { CardText } from "./ReaderText";
 import { ZoomableImage } from "./ZoomableImage";
 
 /**
@@ -18,7 +19,7 @@ import { ZoomableImage } from "./ZoomableImage";
  * are loaded; anything else is named rather than shown. A picture is never
  * marked decorative, even beside text: the text need not describe it (a
  * flag under "Which country?"), so its alt is the description the card
- * gives it, in the reader's language, else a name for its side. A tap
+ * gives it, in the reader's language (the deck's card language first, useCardText), else a name for its side. A tap
  * enlarges the picture to the viewport's size and another puts it back
  * (ZoomableImage).
  *
@@ -61,12 +62,13 @@ export function CardFace({
   /** How the card's texts are written (`sm:textFormat`); absent is plain text. */
   textFormat?: string;
 }) {
-  const { t, readerText, readerLang } = useI18n();
+  const { t } = useI18n();
+  const { cardText, cardLang } = useCardText();
   const markdown = isMarkdown(textFormat);
   const role = givenRole ?? (side === "front" ? "question" : "answer");
-  const shownText = readerText(text);
+  const shownText = cardText(text);
   const textLength = [...plainDataText(shownText, markdown)].length;
-  const description = imageDescription === undefined ? "" : readerText(imageDescription);
+  const description = imageDescription === undefined ? "" : cardText(imageDescription);
   const name =
     givenRole === undefined
       ? side === "front"
@@ -90,13 +92,13 @@ export function CardFace({
                   ? t("cardFace.frontPictureAlt")
                   : t("cardFace.backPictureAlt")
             }
-            lang={description !== "" ? readerLang(imageDescription!) : undefined}
+            lang={description !== "" ? cardLang(imageDescription!) : undefined}
           />
         ) : (
           <p class="hint">{t("cardFace.notWebUrl")}</p>
         ))}
       {label !== undefined && (
-        <p class="card-label" lang={readerLang(label)}>
+        <p class="card-label" lang={cardLang(label)}>
           <DataLineContent text={label} markdown={markdown} />
         </p>
       )}
@@ -147,12 +149,13 @@ export function CardRowFront({
   /** How the card's texts are written (`sm:textFormat`); absent is plain text. */
   textFormat?: string;
 }) {
-  const { t, readerText, readerLang } = useI18n();
+  const { t } = useI18n();
+  const { cardText, cardLang } = useCardText();
   const markdown = isMarkdown(textFormat);
   // A Markdown front that shows no text (a rule alone) leaves the picture to name the row.
-  const frontText = plainDataText(readerText(front), markdown);
-  const backText = plainDataText(readerText(back), markdown);
-  const description = imageDescription === undefined ? "" : readerText(imageDescription);
+  const frontText = plainDataText(cardText(front), markdown);
+  const backText = plainDataText(cardText(back), markdown);
+  const description = imageDescription === undefined ? "" : cardText(imageDescription);
   const alt =
     frontText !== ""
       ? ""
@@ -161,7 +164,7 @@ export function CardRowFront({
         : backText !== ""
           ? t("cardFace.pictureFor", { back: backText })
           : t("cardFace.frontPictureAlt");
-  const lang = frontText === "" && description !== "" ? readerLang(imageDescription!) : undefined;
+  const lang = frontText === "" && description !== "" ? cardLang(imageDescription!) : undefined;
   return (
     <>
       <CardThumbnail imageUrl={imageUrl} alt={alt} lang={lang} />
@@ -189,12 +192,13 @@ export function CardRowBack({
   /** How the card's texts are written (`sm:textFormat`); absent is plain text. */
   textFormat?: string;
 }) {
-  const { t, readerText, readerLang } = useI18n();
-  const backText = readerText(back);
-  const description = imageDescription === undefined ? "" : readerText(imageDescription);
+  const { t } = useI18n();
+  const { cardText, cardLang } = useCardText();
+  const backText = cardText(back);
+  const description = imageDescription === undefined ? "" : cardText(imageDescription);
   const alt =
     backText !== "" ? "" : description !== "" ? description : t("cardFace.backPictureAlt");
-  const lang = backText === "" && description !== "" ? readerLang(imageDescription!) : undefined;
+  const lang = backText === "" && description !== "" ? cardLang(imageDescription!) : undefined;
   return (
     <>
       <CardThumbnail imageUrl={imageUrl} alt={alt} lang={lang} />
@@ -212,9 +216,9 @@ export const ROW_TEXT_MAX = 120;
  * characters, for a row holds neither blocks nor links.
  */
 function RowText({ text, markdown }: { text: LangText; markdown: boolean }) {
-  const { readerText, readerLang } = useI18n();
-  if (!markdown) return <ReaderText text={text} breaks />;
-  const shown = plainDataText(readerText(text), true, ROW_TEXT_MAX);
-  const lang = readerLang(text);
+  const { cardText, cardLang } = useCardText();
+  if (!markdown) return <CardText text={text} breaks />;
+  const shown = plainDataText(cardText(text), true, ROW_TEXT_MAX);
+  const lang = cardLang(text);
   return lang === undefined ? <>{shown}</> : <span lang={lang}>{shown}</span>;
 }

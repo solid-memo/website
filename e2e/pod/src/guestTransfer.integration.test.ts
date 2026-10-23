@@ -295,7 +295,10 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       now,
       { recallMillis: 3_400 },
     );
-    const guestCourse = await useCases.completeChapter(started, CHAPTER);
+    const guestCourse = await useCases.setDeckCardLanguage(
+      await useCases.completeChapter(started, CHAPTER),
+      "sv",
+    );
     await useCases.savePreferences(guestInstance!.url, {
       ...DEFAULT_PREFERENCES,
       newCardsPerDay: 3,
@@ -341,7 +344,11 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       { en: "Sweden" },
     ]);
     expect((await useCases.getStudyQueue(target.url, addedCapitals, now)).newPrompts).toEqual([]);
-    expect(addedCourse).toMatchObject({ sourceUrl: RELEASE, completedChapters: [CHAPTER] });
+    expect(addedCourse).toMatchObject({
+      sourceUrl: RELEASE,
+      completedChapters: [CHAPTER],
+      cardLanguage: "sv",
+    });
     const [courseCard] = await useCases.listCards(addedCourse);
     expect(courseCard).toMatchObject({
       id: "q-iri",

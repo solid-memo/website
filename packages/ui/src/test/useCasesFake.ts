@@ -12,6 +12,7 @@ import type {
 import type { Answer } from "@solid-memo/domain/answer";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
+import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { withProvenance } from "@solid-memo/domain/deckProvenance";
 import { editCompletedChapters } from "@solid-memo/domain/course";
 import { describedCatalog } from "@solid-memo/domain/catalog";
@@ -189,6 +190,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     // As the real one does: keywords tidied, and left off when there are none.
     describeDeck: vi.fn(async (deck, about) => withAbout(deck, about)),
     setDeckPace: vi.fn(async (deck, pace) => ({ ...deck, ...pace })),
+    // As the real one does: the tag in lower case, and left off for null.
+    setDeckCardLanguage: vi.fn(async (deck, language) => withCardLanguage(deck, language)),
     // As the real one does: authors tidied, the license one offered.
     setDeckProvenance: vi.fn(async (deck, provenance) => withProvenance(deck, provenance)),
     setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) =>

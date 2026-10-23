@@ -7,6 +7,7 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import { choicesOf } from "@solid-memo/domain/course";
 import type { CardContent } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { CardLanguage } from "./cardLanguage";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
 import { courseCards, noShuffle } from "../test/course";
 import { statusTexts } from "../test/liveRegions";
@@ -114,6 +115,52 @@ describe("CourseQuestion", () => {
     renderQuestion({ answer: { choice: unexplained, effect: "none" } });
     expect(statusTexts()).toEqual(["Not quite."]);
     expect(screen.queryByText(/^Why not:/)).toBeNull();
+  });
+
+  it("asks and explains in the deck's card language first", () => {
+    const bilingual: CardContent = {
+      textFormat: SM.markdown,
+      front: { en: "What does it *answer*?", sv: "Vad *svarar* den?" },
+      frontImageUrl: "https://example.org/server.png",
+      frontImageDescription: { en: "A server", sv: "En server" },
+      frontLabel: { en: "Status", sv: "Statuskod" },
+      back: { en: "`409`" },
+      distractors: [{ id: "d1", text: { en: "`205`" }, note: { en: "Empty.", sv: "Tom." } }],
+    };
+    const bilingualChoices = choicesOf(bilingual, noShuffle);
+    const plain: CardContent = { ...bilingual, textFormat: undefined };
+    const plainChoices = choicesOf(plain, noShuffle);
+    const props = {
+      focusQuestion: false,
+      busy: false,
+      error: null,
+      nextLabel: "Next",
+      onCheck: vi.fn(),
+      onNext: vi.fn(),
+    };
+    render(
+      <CardLanguage language="sv">
+        <CourseQuestion
+          {...props}
+          card={bilingual}
+          choices={bilingualChoices}
+          answer={{ choice: bilingualChoices[1]!, effect: "none" }}
+        />
+        <CourseQuestion
+          {...props}
+          card={plain}
+          choices={plainChoices}
+          answer={{ choice: plainChoices[1]!, effect: "none" }}
+        />
+      </CardLanguage>,
+    );
+    expect(
+      screen.getByRole("radiogroup", { name: "Question: En server Statuskod Vad svarar den?" }),
+    ).toBeInTheDocument();
+    const whys = document.querySelectorAll(".course-why");
+    expect(whys[0]).toHaveTextContent("Why not: Tom.");
+    expect(whys[1]).toHaveTextContent("Why not: Tom.");
+    expect(whys[1]!.querySelector("[lang]")).toHaveAttribute("lang", "sv");
   });
 
   it("shows why an answer could not be saved", () => {

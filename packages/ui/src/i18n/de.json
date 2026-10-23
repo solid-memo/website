@@ -646,6 +646,13 @@
     "emptyHint": "Ein leeres Feld übernimmt den Wert aus deinen {link}.",
     "studyPreferencesLink": "Lerneinstellungen",
     "saveButton": "Einstellungen speichern",
+    "cardLanguage": {
+      "label": "Kartensprache",
+      "default": "Die Sprache der App",
+      "hint": "Die Sprache, in der die Karten dieses Stapels zuerst angezeigt werden, wo auch immer sie erscheinen. Eine Karte ohne Text in dieser Sprache wird wie gewohnt angezeigt. Name und Beschreibung des Stapels bleiben unverändert.",
+      "none": "Die Karten dieses Stapels geben keine Sprache zur Auswahl an.",
+      "save": "Kartensprache speichern"
+    },
     "languages": {
       "heading": "Sprachen",
       "loading": "Sprachen der Karten werden geprüft…",

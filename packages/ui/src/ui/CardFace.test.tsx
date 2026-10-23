@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { CardFace, CardRowBack, CardRowFront, CardThumbnail, ROW_TEXT_MAX } from "./CardFace";
+import { CardLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 
@@ -45,6 +46,31 @@ describe("CardFace", () => {
     expect(screen.getByText("Beruf")).toHaveAttribute("lang", "de");
     render(<CardFace side="back" text={{ "": "water" }} />);
     expect(screen.getByText("water")).not.toHaveAttribute("lang");
+  });
+
+  it("shows the side, its label, note and picture's description in the deck's card language first", () => {
+    render(
+      <CardLanguage language="sv">
+        <CardFace
+          side="front"
+          text={{ en: "nurse", sv: "sjuksköterska" }}
+          imageUrl={FLAG}
+          imageDescription={{ en: "A nurse", sv: "En sjuksköterska" }}
+          label={{ en: "Job", sv: "Yrke" }}
+          note={{ en: "A job" }}
+        />
+        <CardRowFront front={{ en: "house", sv: "hus" }} back={{ en: "a building" }} />
+        <CardRowBack back={{ en: "tree", sv: "träd" }} />
+        <CardRowFront front={{ en: "*cat*", sv: "*katt*" }} back={{}} textFormat={SM.markdown} />
+      </CardLanguage>,
+    );
+    expect(screen.getByText("sjuksköterska")).toHaveAttribute("lang", "sv");
+    expect(screen.getByAltText("En sjuksköterska")).toHaveAttribute("lang", "sv");
+    expect(screen.getByText("Yrke")).toHaveAttribute("lang", "sv");
+    expect(screen.getByText("A job")).not.toHaveAttribute("lang");
+    expect(screen.getByText("hus")).toHaveAttribute("lang", "sv");
+    expect(screen.getByText("träd")).toHaveAttribute("lang", "sv");
+    expect(screen.getByText("katt")).toHaveAttribute("lang", "sv");
   });
 
   it("names the face for screen readers: front and back, or question and answer in study", () => {

@@ -196,6 +196,57 @@ describe("changing the chapters completed in the Studio", () => {
   });
 });
 
+describe("the deck's card language", () => {
+  const LANGUAGE = "<https://solid-memo.com/ns/vocab/v1.ttl#deckCardLanguage>";
+  const languageIn = (pod: ReturnType<typeof fakePod>) =>
+    pod
+      .triples(CATALOG)!
+      .filter((triple) => triple.includes(LANGUAGE))
+      .map((triple) => triple.split(" ")[2]);
+
+  it("sets it on the entry in one write, If-Match the read, replaces it and clears it", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    expect(await repository.setCardLanguage(deck, "sv")).toMatchObject({ cardLanguage: "sv" });
+    expect(writes(pod)).toEqual([
+      expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 }),
+    ]);
+    expect(languageIn(pod)).toEqual(['"sv"']);
+    await repository.setCardLanguage(deck, "ko");
+    expect(await repository.readDeck(deck.url)).toMatchObject({ cardLanguage: "ko" });
+    const cleared = await repository.setCardLanguage(deck, null);
+    expect(cleared).not.toHaveProperty("cardLanguage");
+    expect(languageIn(pod)).toEqual([]);
+  });
+
+  it("writes nothing for the language the entry has, and throws deckGone for a deck it has none of", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await repository.setCardLanguage(deck, "sv");
+    pod.clearRequests();
+    expect(await repository.setCardLanguage(deck, "sv")).toMatchObject({ cardLanguage: "sv" });
+    expect(writes(pod)).toEqual([]);
+    await expect(
+      repository.setCardLanguage({ ...deck, url: `${CATALOG}#gone` }, "sv"),
+    ).rejects.toMatchObject({ code: "deckGone" });
+  });
+
+  it("is kept by every save of a deck read before it was set", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    // Another tab sets it while this one holds the deck as read before.
+    await repository.setCardLanguage(deck, "sv");
+    await repository.renameDeck(deck, { en: "Solid, renamed" });
+    await repository.saveDeck({ ...deck, newCardsPerDay: 5 });
+    expect(languageIn(pod)).toEqual(['"sv"']);
+    expect(await repository.readDeck(deck.url)).toMatchObject({
+      title: { en: "Solid" },
+      newCardsPerDay: 5,
+      cardLanguage: "sv",
+    });
+  });
+});
+
 describe("registerDeck", () => {
   it("adds a deck's entry with the chapters it completed, in one checked write", async () => {
     const pod = await podWithCourse();
@@ -209,11 +260,13 @@ describe("registerDeck", () => {
       id: "deck-2",
       url: `${CATALOG}#deck-2`,
       completedChapters: [`${RELEASE}#ch1`],
+      cardLanguage: "sv",
     };
     expect(await repository.registerDeck(added)).toBe(added);
     expect(await repository.readDeck(added.url)).toMatchObject({
       id: "deck-2",
       completedChapters: [`${RELEASE}#ch1`],
+      cardLanguage: "sv",
     });
     expect(checked[0]).toContain(added.url);
     expect(writes(pod)).toHaveLength(1);

@@ -16,6 +16,7 @@ import {
   plainDataText,
   useProseChunks,
 } from "./DataText";
+import { CardLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
 
 function html(children: preact.ComponentChildren): string {
@@ -47,6 +48,19 @@ describe("DataText", () => {
     expect(html(<DataText text={{ de: "a\n\nb" }} markdown class="card-note" />)).toBe(
       '<div class="md card-note" lang="de"><p>a</p><p>b</p></div>',
     );
+  });
+
+  it("shows card text in the deck's card language first, as DataLine does, but never prose", () => {
+    const text = { en: "house", sv: "hus" };
+    expect(
+      html(
+        <CardLanguage language="sv">
+          <DataText text={text} markdown={false} />
+          <DataLine text={text} markdown />
+          <DataProse text={text} markdown={false} class="theory" />
+        </CardLanguage>,
+      ),
+    ).toBe('<p lang="sv">hus</p><span lang="sv">hus</span><div class="theory"><p>house</p></div>');
   });
 
   it("shows Markdown past the parser's limits as plain text", () => {

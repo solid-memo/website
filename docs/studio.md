@@ -735,7 +735,8 @@ The URL holds how the cards are looked at. The domain applies it
   `interval`, `ease` or `lapses`. A column's name sorts by it, then the other way,
   then back to the deck's order, as on Home. A side sorts by the text
   the table shows the reader (as plain text, when in Markdown), in the
-  order of the UI's language. Case and accents count no more than in
+  deck's card language first when it has one
+  ([i18n.md](i18n.md#which-language)), in the order of the UI's language. Case and accents count no more than in
   the search, unless that language makes a letter of its own of one:
   in Swedish, `ä` comes after `z`. Numbers sort by value. A card
   without the value (one never studied) comes last, either way.
@@ -1490,7 +1491,8 @@ A new draft starts from
   its retired ones and wrong options with it, its authors the
   release's agents, the first its publisher, its themes and EDUC. What
   is the learner's own is left behind: where its documents are, its
-  study caps, its place among the groups, a course's progress. A deck
+  study caps, its card language, its place among the groups, a
+  course's progress. A deck
   copied from a release names it (`prov:wasDerivedFrom`), which is no
   source of the new release: the screen says the deck is based on it,
   and offers to start the next version of that release instead, which

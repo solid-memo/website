@@ -85,9 +85,13 @@ export interface CommandSources {
  */
 export function buildCommands(
   sources: CommandSources,
-  i18n: Pick<I18n, "t" | "readerText">,
+  i18n: Pick<I18n, "t" | "readerText" | "cardReader">,
 ): Command[] {
-  const { t, readerText } = i18n;
+  const { t, readerText, cardReader } = i18n;
+  // The deck shown's cards, named in its card language first, as its screens show them.
+  const { cardText } = cardReader(
+    sources.decks.find((deck) => deck.url === sources.cards?.deckUrl)?.cardLanguage,
+  );
   const at = (group: Command["group"], route: StudioRoute) => ({
     id: `${group}:${studioRouteToHash(route)}`,
     group,
@@ -140,7 +144,7 @@ export function buildCommands(
     ...(sources.cards?.cards ?? []).map(
       (card): Command => ({
         ...at("cards", { screen: "card", deckUrl: sources.cards!.deckUrl, cardUrl: card.url }),
-        label: cardName(card, readerText),
+        label: cardName(card, cardText),
       }),
     ),
   ];

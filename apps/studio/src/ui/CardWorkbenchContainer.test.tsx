@@ -16,6 +16,7 @@ import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { CardLanguage } from "@solid-memo/ui/cardLanguage";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 import { answer, pick } from "../test/dialogs";
@@ -81,6 +82,36 @@ describe("CardWorkbenchContainer", () => {
     expect(useCases.listCards).toHaveBeenCalledWith(deck);
     expect(useCases.listDeckReviewStates).toHaveBeenCalledWith(deck);
     expect(useCases.getPreferences).toHaveBeenCalledWith(instanceA.url);
+  });
+
+  it("sorts by a side as it is shown, in the deck's card language first", async () => {
+    const swedish = { ...deck, cardLanguage: "sv" };
+    const apple = { ...fire, id: "apple", front: { en: "apple", sv: "zebra" } };
+    const banana = { ...fire, id: "banana", front: { en: "banana", sv: "abborre" } };
+    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [apple, banana]) });
+    const query = { ...DEFAULT_CARD_QUERY, sort: { key: "front" as const, descending: false } };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CardLanguage language="sv">
+          <CardWorkbenchContainer
+            useCases={useCases}
+            instance={instanceA}
+            deck={swedish}
+            decks={[swedish]}
+            query={query}
+            onQuery={() => undefined}
+            savedViews={[]}
+            onSavedViews={() => undefined}
+            cardHref={(card) => `#/card?card=${card.id}`}
+            onOpen={() => undefined}
+            healthHref="#/health"
+          />
+        </CardLanguage>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("2 of 2 cards")).toBeInTheDocument();
+    expect(fronts()).toEqual(["abborre", "zebra"]);
   });
 
   it("lists the cards due by the scheduler that sets the due days", async () => {

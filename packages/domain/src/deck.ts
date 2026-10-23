@@ -228,6 +228,16 @@ export interface Deck {
    * there is none.
    */
   completedChapters?: string[];
+  /**
+   * The language the learner wants this deck's card text shown in first
+   * (fronts, backs, notes, labels, picture descriptions, wrong
+   * options), as a lower-case language tag: `sm:deckCardLanguage` on the catalog entry, a triple
+   * outside the deck's shape like `sm:completedChapter`. A card without
+   * text in it falls back to the usual order; the deck's own title,
+   * description and keywords are not affected (see deckCardLanguage.ts).
+   * Absent means the usual order: the app's language, then the browser's.
+   */
+  cardLanguage?: string;
 }
 
 /** What is on a card: its editable content, without identity. */

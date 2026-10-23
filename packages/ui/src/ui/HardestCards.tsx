@@ -6,6 +6,7 @@ import { useId } from "preact/hooks";
 import type { DeckProgress } from "@solid-memo/application/useCases";
 import { LEECH_LAPSES, type HardCard } from "@solid-memo/domain/cardHistory";
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
+import { CardLanguage } from "./cardLanguage";
 import { cardName, cardNameText, DataLine } from "./DataText";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
@@ -14,15 +15,18 @@ import { cramHref, routeToHash } from "./router";
 /** How many of a deck's hardest cards its page lists. */
 export const HARDEST_SHOWN = 10;
 
-/** A card's name, as a link to its page in the app, marked with the language it is in. */
+/**
+ * A card's name, as a link to its page in the app, in its deck's card
+ * language first, marked with the language it is in.
+ */
 function CardLink({ instanceUrl, deck, card }: { instanceUrl: string; deck: Deck; card: Card }) {
-  const { readerText, readerLang } = useI18n();
+  const { cardText, cardLang } = useI18n().cardReader(deck.cardLanguage);
   return (
     <a
       href={routeToHash({ screen: "card", instanceUrl, deckUrl: deck.url, cardUrl: card.url })}
-      lang={readerLang(cardNameText(card, readerText))}
+      lang={cardLang(cardNameText(card, cardText))}
     >
-      {cardName(card, readerText)}
+      {cardName(card, cardText)}
     </a>
   );
 }
@@ -119,8 +123,8 @@ export function HardestCards({
 /**
  * The wrong options chosen most often in a deck's course questions of
  * the last twelve months (confusionsOf), each with its card, a link to
- * its page, and how often. Nothing for a deck without multiple-choice
- * answers.
+ * its page, and how often, both in the deck's card language first.
+ * Nothing for a deck without multiple-choice answers.
  */
 export function ConfusedOptions({
   instanceUrl,
@@ -139,21 +143,23 @@ export function ConfusedOptions({
       {confusions.length === 0 ? (
         <p>{t("statistics.noConfusions")}</p>
       ) : (
-        <ol class="hardest-cards" aria-label={t("statistics.confusions")}>
-          {confusions.slice(0, HARDEST_SHOWN).map(({ card, distractor, picks }) => (
-            <li key={`${card.url} ${distractor.id}`}>
-              <CardLink instanceUrl={instanceUrl} deck={deck} card={card} />{" "}
-              <span class="hint">
-                {tx("statistics.confusedWith", {
-                  option: (
-                    <DataLine text={distractor.text} markdown={isMarkdown(card.textFormat)} />
-                  ),
-                  count: picks,
-                })}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <CardLanguage language={deck.cardLanguage}>
+          <ol class="hardest-cards" aria-label={t("statistics.confusions")}>
+            {confusions.slice(0, HARDEST_SHOWN).map(({ card, distractor, picks }) => (
+              <li key={`${card.url} ${distractor.id}`}>
+                <CardLink instanceUrl={instanceUrl} deck={deck} card={card} />{" "}
+                <span class="hint">
+                  {tx("statistics.confusedWith", {
+                    option: (
+                      <DataLine text={distractor.text} markdown={isMarkdown(card.textFormat)} />
+                    ),
+                    count: picks,
+                  })}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </CardLanguage>
       )}
     </>
   );

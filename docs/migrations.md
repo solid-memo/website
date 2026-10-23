@@ -402,6 +402,20 @@ the palettes a user designs in the instance's `palettes.ttl`
   rules' hash changed: every instance is checked in full once on its
   next opening, `palettes.ttl` among its documents.
 
+A deck's card language (vocabulary 1.24, `sm:deckCardLanguage`, the
+language its card text is shown in first) needs no migration and moved
+no format version:
+
+- **It belongs to no shape**, as `sm:position` and `sm:completedChapter`
+  do, so `DeckV6` is unchanged. Every writer of the deck keeps it: this
+  version sets or removes it only on the entry as it is then
+  (`setCardLanguage`) and keeps it as stored on every other write of
+  the deck, and an older one keeps it as a triple its shape does not
+  own. An older version ignores it and shows
+  card text in the app's language first, as before.
+- **No re-check.** No shape file changed, so the rules' hash did not
+  move, and the check does not read the term.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape

@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { releaseHost, type LibraryCard, type LibraryCopy } from "@solid-memo/domain/library";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
+import { CardLanguage, useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { DeckUpgradeProgress, type DeckUpgradeScreenStep } from "@solid-memo/ui/DeckUpgrade";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -298,14 +299,20 @@ export function LibraryPlanScreen({ row }: { row: CopyRow | null }) {
       <p>
         <UpdateText row={row} />
       </p>
-      {plan !== null && <PlanDetails plan={plan} />}
+      {plan !== null && (
+        // The copy's cards, named in its card language first.
+        <CardLanguage language={row.copy.deck.cardLanguage}>
+          <PlanDetails plan={plan} />
+        </CardLanguage>
+      )}
     </section>
   );
 }
 
 /** Everything an upgrade would do: what it keeps, the releases' notes, and the cards each change touches. */
 function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
-  const { t, readerText } = useI18n();
+  const { t } = useI18n();
+  const { cardText } = useCardText();
   return (
     <div class="studio-diff">
       <p>
@@ -329,7 +336,7 @@ function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
               <h4>{t(`studio.library.cards.${kind}`, { count: cards.length })}</h4>
               <ul>
                 {cards.map((card) => (
-                  <li key={card.id}>{cardName(card, readerText)}</li>
+                  <li key={card.id}>{cardName(card, cardText)}</li>
                 ))}
               </ul>
             </div>

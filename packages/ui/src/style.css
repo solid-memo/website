@@ -3677,6 +3677,23 @@ table.contrast-table tr.refused td:last-child {
   gap: 0.5rem;
 }
 
+/* The deck preferences' card language: a select drawn as the fields
+   are, no wider than the screen, however long a language's name. */
+.deck-card-language select {
+  max-width: 100%;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+}
+
+.deck-card-language .hint {
+  margin: 0 0 0.6rem;
+}
+
 /* The deck preferences' Languages section: a side's picker under its
    legend, with no box of its own, so the picker's own group has the
    width at 320px; space before what follows the State button. */

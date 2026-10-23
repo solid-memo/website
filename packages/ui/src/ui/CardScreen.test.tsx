@@ -5,6 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { CardScreen, type CardEdits } from "./CardScreen";
+import { CardLanguage } from "./cardLanguage";
 import type { Card } from "@solid-memo/domain/deck";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { I18nProvider } from "./i18n";
@@ -99,6 +100,29 @@ describe("CardScreen", () => {
       front: { ja: "水" },
       back: { en: "fire", ja: "みず" },
     });
+  });
+
+  it("edits a side in the deck's card language first, and previews it so, as the card is shown elsewhere", () => {
+    const greeting: Card = {
+      ...card,
+      front: { en: "Hello", ko: "안녕하세요" },
+      textFormat: SM.markdown,
+    };
+    const { container } = render(
+      <CardLanguage language="ko">
+        <CardScreen
+          card={greeting}
+          busy={false}
+          saved={false}
+          error={null}
+          onSave={vi.fn()}
+          onRemove={vi.fn()}
+        />
+      </CardLanguage>,
+    );
+    expect(screen.getByLabelText("Front")).toHaveValue("안녕하세요");
+    expect(container.querySelector(".card-preview .card-front")).toHaveTextContent("안녕하세요");
+    expect(container.querySelector(".card-preview .card-front")).not.toHaveTextContent("Hello");
   });
 
   it("keeps a side saved with no language as it is while it is untouched", () => {

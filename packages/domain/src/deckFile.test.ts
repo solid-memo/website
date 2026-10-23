@@ -56,7 +56,10 @@ const state: ReviewState = {
 
 function content(extra: Partial<DeckFileContent> = {}): DeckFileContent {
   return {
-    deck: deck("deck-a", { completedChapters: ["https://lib.example/c.ttl#ch1"] }),
+    deck: deck("deck-a", {
+      completedChapters: ["https://lib.example/c.ttl#ch1"],
+      cardLanguage: "sv",
+    }),
     cards: [card],
     reviews: [state],
     upgraded: [],
@@ -120,6 +123,7 @@ describe("importedDeck", () => {
       createdAt: "2025-01-02T03:04:05.000Z",
       formatVersion: DECK_FORMAT_VERSION,
       completedChapters: ["https://lib.example/c.ttl#ch1"],
+      cardLanguage: "sv",
     });
     expect(cards).toEqual([
       { ...card, url: `${INSTANCE}decks/deck-a.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION },
