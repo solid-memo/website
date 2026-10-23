@@ -39,7 +39,6 @@ import {
   type RegistrationOptions,
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
-import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import {
   unlikeRelease,
@@ -217,6 +216,7 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { trialProblems } from "@solid-memo/domain/release/trial";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
 import { createLibraryUseCases, type LibraryUseCases } from "./library";
 import { createCourseUseCases, type CourseUseCases } from "./courses";
 import { createPreferenceUseCases, type PreferenceUseCases } from "./preferences";
@@ -228,7 +228,8 @@ import { createAnswerStore, dueStatesOf } from "./answerStore";
 import { createDigestStore, noting, scheduleFrom } from "./digestStore";
 
 export interface UseCases
-  extends LibraryUseCases,
+  extends MistakeReportUseCases,
+    LibraryUseCases,
     CourseUseCases,
     PreferenceUseCases,
     DeckUseCases,
@@ -386,14 +387,6 @@ export interface UseCases
    * removed.
    */
   registerDataClasses(session: Session, instance: Instance): Promise<void>;
-  /**
-   * Where a mistake in the release at `releaseUrl` is reported
-   * (domain/mistakeReport.ts): the library's tracker when the library's
-   * index lists the release, however it was reached (copied, or opened
-   * from a link), else the contact the release names, if any. Writes
-   * nothing.
-   */
-  reportPlace(releaseUrl: string): Promise<ReportPlace>;
   listCards(deck: Deck): Promise<Card[]>;
   /**
    * The deck's review states, every direction's, as stored: SM-2's, and
@@ -1823,6 +1816,7 @@ export function createUseCases({
   });
   return {
     ...drafts,
+    ...createMistakeReportUseCases({ deckLibrary }),
     ...createLibraryUseCases({
       deckLibrary,
       deckRepository,
@@ -2260,12 +2254,6 @@ export function createUseCases({
         instanceUrl: instance.url,
         title: instance.name,
       });
-    },
-    async reportPlace(releaseUrl) {
-      const index = await deckLibrary.readLibraryIndex();
-      if (index.releases.includes(releaseUrl)) return { library: true };
-      const { contact } = await deckLibrary.fetchLibraryDeck(releaseUrl);
-      return contact === undefined ? { library: false } : { library: false, contact };
     },
     listCards(deck) {
       return deckRepository.listCards(deck);
