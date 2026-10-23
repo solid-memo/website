@@ -1,6 +1,7 @@
 {
   "language": {
     "label": "Språk",
+    "unavailable": "Det gick inte att läsa in {language}. Kontrollera anslutningen och försök igen.",
     "button": "Språk: {language}",
     "notStated": "Språk: inte angivet",
     "notStatedShort": "Språk?",

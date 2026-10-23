@@ -1,6 +1,7 @@
 {
   "language": {
     "label": "Langue",
+    "unavailable": "Impossible de charger {language}. Vérifiez votre connexion et réessayez.",
     "button": "Langue : {language}",
     "notStated": "Langue : non indiquée",
     "notStatedShort": "Langue ?",

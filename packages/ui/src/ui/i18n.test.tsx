@@ -4,7 +4,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { AppError, ERROR_TEMPLATES } from "@solid-memo/domain/appError";
 import { createI18n, I18nProvider, useI18n, type MessageKey } from "./i18n";
@@ -422,6 +422,21 @@ describe("violationText", () => {
   it("names a severity", () => {
     expect(createI18n("sv").severityLabel("warning")).toBe("varning");
     expect(createI18n("en").severityLabel("violation")).toBe("violation");
+  });
+});
+
+describe("loadLocale", () => {
+  it("fetches a language's messages, which it speaks in English until then", async () => {
+    // A copy of the module as the page first has it, before any language but English is fetched.
+    vi.resetModules();
+    const fresh = await import("./i18n");
+    expect(fresh.createI18n("sv").t("language.label")).toBe("Language");
+    expect(fresh.createI18n("sv").formatPercent(0.5)).toBe("50\u00a0%");
+    await fresh.loadLocale("sv");
+    expect(fresh.createI18n("sv").t("language.label")).toBe("Språk");
+    expect(fresh.createI18n("ko").t("language.label")).toBe("Language");
+    await fresh.loadLocale("en");
+    expect(fresh.createI18n("en").t("language.label")).toBe("Language");
   });
 });
 

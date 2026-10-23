@@ -165,7 +165,7 @@ describe("App", () => {
       Promise.reject(new TypeError("Failed to fetch dynamically imported module")),
     );
     await waitFor(() =>
-      expect(screen.getByRole("alert")).toHaveTextContent(
+      expect(within(screen.getByRole("main")).getByRole("alert")).toHaveTextContent(
         "The Studio could not be opened. Reload the page to try again.",
       ),
     );

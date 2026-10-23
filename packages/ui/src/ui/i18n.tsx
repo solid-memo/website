@@ -11,11 +11,6 @@ import { isolated, shown, shownTag, type LangText } from "@solid-memo/domain/lan
 import { NO_LANGUAGE } from "@solid-memo/domain/languageTag";
 import { DEFAULT_LOCALE, type Locale } from "@solid-memo/domain/locale";
 import en from "../i18n/en.json";
-import sv from "../i18n/sv.json";
-import ko from "../i18n/ko.json";
-import de from "../i18n/de.json";
-import es from "../i18n/es.json";
-import fr from "../i18n/fr.json";
 
 /**
  * A message with a form per plural category its language's plural rules
@@ -53,7 +48,37 @@ type KeysOf<T, Prefix extends string = ""> = {
 
 export type MessageKey = KeysOf<typeof en>;
 
-const CATALOGS: Record<Locale, Messages> = { en, sv, ko, de, es, fr };
+/**
+ * The other languages' messages, each fetched the first time the page
+ * speaks it: an `import()`, so a chunk of its own, and a visitor fetches
+ * only the language they read (docs/i18n.md). English is at hand from the
+ * start, as the fallback.
+ */
+const OTHER_CATALOGS: Record<Exclude<Locale, "en">, () => Promise<{ default: Messages }>> = {
+  sv: () => import("../i18n/sv.json"),
+  ko: () => import("../i18n/ko.json"),
+  de: () => import("../i18n/de.json"),
+  es: () => import("../i18n/es.json"),
+  fr: () => import("../i18n/fr.json"),
+};
+
+/** The messages of each language fetched so far. */
+const catalogs: Partial<Record<Locale, Messages>> = { en };
+
+/**
+ * Fetch the messages of `locale`, so that `createI18n(locale)` speaks
+ * it; rejects when they cannot be fetched. Until then, it speaks English.
+ */
+export async function loadLocale(locale: Locale): Promise<void> {
+  if (catalogs[locale] !== undefined) return;
+  // English is there from the start, so this is another language.
+  catalogs[locale] = (await OTHER_CATALOGS[locale as Exclude<Locale, "en">]()).default;
+}
+
+/** The message at a dotted key in `locale`; undefined when there is none. */
+function find(locale: Locale, key: string): Message | undefined {
+  return lookup(catalogs[locale] ?? en, key);
+}
 
 function isPlural(node: Message | Messages): node is Plural {
   return typeof node === "object" && typeof node.other === "string";
@@ -209,7 +234,7 @@ export function createI18n(locale: Locale, appName?: string): I18n {
 
   function template(key: string, count: unknown): string {
     if (key === APP_NAME_KEY && appName !== undefined) return appName;
-    const message = lookup(CATALOGS[locale], key) ?? key;
+    const message = find(locale, key) ?? key;
     if (typeof message === "string") return message;
     // The message files' tests give each plural message every form its language names.
     return typeof count === "number" ? message[plurals.select(count)]! : message.other;
@@ -290,7 +315,7 @@ export function createI18n(locale: Locale, appName?: string): I18n {
   function translatedConstraint(violation: Violation): boolean {
     return (
       violation.builtIn === true &&
-      lookup(CATALOGS[locale], `validation.constraint.${violation.constraint}`) !== undefined
+      find(locale, `validation.constraint.${violation.constraint}`) !== undefined
     );
   }
 
@@ -386,12 +411,15 @@ export function createI18n(locale: Locale, appName?: string): I18n {
 }
 
 interface I18nState extends I18n {
-  /** Speak another language from now on. */
-  chooseLocale(locale: Locale): void;
+  /**
+   * Speak another language from now on, once its messages are here;
+   * rejects, the language unchanged, when they cannot be fetched.
+   */
+  chooseLocale(locale: Locale): Promise<void>;
 }
 
 /** Where no language can be chosen: outside a provider, or under one with no `onChoose`. */
-const keepLocale = () => undefined;
+const keepLocale = async () => undefined;
 
 const I18nContext = createContext<I18nState>({
   ...createI18n(DEFAULT_LOCALE),
@@ -408,13 +436,14 @@ export function I18nProvider({
   locale: Locale;
   /** The site's own name, in place of Solid Memo's (see createI18n). */
   appName?: string;
-  onChoose?: (locale: Locale) => void;
+  /** Speak `locale` (once its messages are fetched: AppShell); a promise that rejects when it cannot. */
+  onChoose?: (locale: Locale) => void | Promise<void>;
   children: ComponentChildren;
 }) {
+  const chooseLocale =
+    onChoose === undefined ? keepLocale : async (chosen: Locale) => onChoose(chosen);
   return (
-    <I18nContext.Provider
-      value={{ ...createI18n(locale, appName), chooseLocale: onChoose ?? keepLocale }}
-    >
+    <I18nContext.Provider value={{ ...createI18n(locale, appName), chooseLocale }}>
       {children}
     </I18nContext.Provider>
   );

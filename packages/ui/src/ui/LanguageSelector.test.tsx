@@ -44,4 +44,26 @@ describe("LanguageSelector", () => {
     fireEvent.input(list, { target: { value: "ko" } });
     expect(onChoose).toHaveBeenCalledWith("ko");
   });
+
+  it("says so when a language's messages could not be fetched, until it is chosen again", async () => {
+    const onChoose = vi.fn().mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(
+      <I18nProvider locale="en" onChoose={onChoose}>
+        <LanguageSelector />
+      </I18nProvider>,
+    );
+    const list = screen.getByRole("combobox", { name: "Language" });
+    fireEvent.input(list, { target: { value: "sv" } });
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Svenska could not be loaded. Check your connection and try again.",
+    );
+    expect(screen.getByText("Svenska", { selector: "[role=alert] span" })).toHaveAttribute(
+      "lang",
+      "sv",
+    );
+    // The list goes back to the language spoken.
+    expect(list).toHaveValue("en");
+    fireEvent.input(list, { target: { value: "sv" } });
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
+  });
 });

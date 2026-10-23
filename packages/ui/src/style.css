@@ -344,10 +344,17 @@ main.workspace {
 /* The theme and language choices above every screen: a sun or a moon, then the language list. */
 .top-bar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
   gap: 0.6rem;
   padding-top: 0.5rem;
+}
+
+/* A language that could not be fetched is said below the choices, across the bar. */
+.top-bar > .error {
+  flex-basis: 100%;
+  margin: 0;
 }
 
 /*

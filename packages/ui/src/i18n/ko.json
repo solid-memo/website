@@ -1,6 +1,7 @@
 {
   "language": {
     "label": "언어",
+    "unavailable": "{language}을(를) 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.",
     "button": "언어: {language}",
     "notStated": "언어: 지정 안 됨",
     "notStatedShort": "언어?",

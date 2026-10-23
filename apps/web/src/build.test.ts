@@ -22,8 +22,9 @@ import { siteConfig, siteHtml, siteVersion, type SiteConfig } from "./config";
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
  * no way for data to become markup, the Studio in a chunk of its own,
- * a Content Security Policy that lets the page's own scripts run, and
- * the docs as pages that run none.
+ * each language's messages but English's in one of their own, a Content
+ * Security Policy that lets the page's own scripts run, and the docs as
+ * pages that run none.
  */
 
 /** Ways script can turn a string into markup. */
@@ -53,7 +54,7 @@ const DOCS_PAGES = DOCS_SOURCES.map((name) =>
  * it weighs, with room for a little more. A change that passes it says
  * why the page needs the weight, and raises this in the same commit.
  */
-const UP_FRONT_BUDGET_KB = 640;
+const UP_FRONT_BUDGET_KB = 420;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -155,6 +156,23 @@ describe("the Studio", () => {
     for (const fileName of upFront())
       expect([...chunkNamed(fileName).viteMetadata!.importedCss]).not.toContain(stylesheet);
     expect(html).not.toContain(stylesheet);
+  });
+});
+
+describe("the messages", () => {
+  const catalog = (id: string) => /\/packages\/ui\/src\/i18n\/(\w+)\.json$/.exec(id)?.[1];
+  const catalogsIn = (chunk: Rolldown.OutputChunk) =>
+    Object.keys(chunk.modules).flatMap((id) => catalog(id) ?? []);
+
+  it("come up front in English alone, each other language a chunk of its own, fetched when spoken (docs/i18n.md)", () => {
+    expect([...upFront()].flatMap((fileName) => catalogsIn(chunkNamed(fileName)))).toEqual(["en"]);
+    const others = chunks.filter((chunk) => catalogsIn(chunk).some((locale) => locale !== "en"));
+    expect(others.map(catalogsIn).sort()).toEqual([["de"], ["es"], ["fr"], ["ko"], ["sv"]]);
+    for (const chunk of others) {
+      expect(chunk.isDynamicEntry).toBe(true);
+      expect(upFront().has(chunk.fileName)).toBe(false);
+      expect(html).not.toContain(chunk.fileName);
+    }
   });
 });
 
