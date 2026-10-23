@@ -992,7 +992,8 @@
       "other": "{outdated} are stored in an older format."
     },
     "writes": "Solid Memo now writes {formats}.",
-    "howItWorks": "Updating brings each document up to date on its own, where it is, one after another, each in a single write that your Pod makes whole or not at all. Every document can be read throughout, updated or not; one that cannot be updated now is left as it is, and you can try again. Every address stays the same; deck names, card text, directions, your review history and your settings stay as they are, and a deck without a description gets a short one you can change.",
+    "howItWorks": "Updating brings each document up to date on its own, where it is, one after another, each in a single write that your Pod makes whole or not at all. Every document can be read throughout, updated or not; one that cannot be updated now is left as it is, and you can try again. Every address stays the same; deck names, card text, directions, your review history and your settings stay as they are.",
+    "newDescriptions": "A deck without a description gets a short one you can change.",
     "listAnd": "{rest} and {last}",
     "instanceRecord": "the instance record",
     "instanceCatalogue": "the instance's catalog",
@@ -1012,10 +1013,38 @@
     "countIn": "{what} in {decks}",
     "instanceFormat": "instance format {version}",
     "catalogueFormat": "a catalog of each instance's decks, which other apps read as a DCAT catalog",
-    "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data, the theme, the scheduler, the colors and the text size",
-    "deckFormat": "deck format {version}, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state",
-    "cardFormat": "card format {version}, which adds pictures on cards, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state, adds a label above a card's front and keeps what a card is about",
-    "reviewFormat": "review-state format {version}, which keeps each study direction's state and the day's undo snapshot",
+    "preferencesFormat": "preferences format {version}, which records {added}",
+    "deckFormat": "deck format {version}, which {added}",
+    "cardFormat": "card format {version}, which {added}",
+    "reviewFormat": "review-state format {version}, which {added}",
+    "deckAdded": {
+      "direction": "states which way a deck is studied",
+      "dcat": "describes decks with the DCAT and SKOS standards",
+      "description": "gives every deck a description",
+      "titleLanguages": "lets a deck's title and description be in several languages",
+      "titleWithoutEnglish": "no longer requires English in a deck's title and description",
+      "keywordLanguages": "lets a deck's keywords be in any language you state"
+    },
+    "cardAdded": {
+      "pictures": "adds pictures on cards",
+      "notes": "adds a note under each side and a label above the back",
+      "retired": "lets a library deck retire a card it no longer uses",
+      "textLanguages": "lets a card's text be in any language you state",
+      "notesWithoutEnglish": "no longer requires English in a card's notes and label",
+      "frontLabel": "adds a label above a card's front",
+      "subjects": "keeps what a card is about"
+    },
+    "reviewStateAdded": {
+      "wholeSnapshot": "keeps the day's undo snapshot whole or not at all"
+    },
+    "preferencesAdded": {
+      "everySetting": "every setting",
+      "invalidData": "what to do with invalid data",
+      "theme": "the theme",
+      "scheduler": "the scheduler",
+      "colors": "the colors",
+      "textSize": "the text size"
+    },
     "itemInstanceRecord": "Instance record",
     "itemCatalogue": "Catalog of the decks",
     "itemPreferences": "Preferences",

@@ -992,7 +992,8 @@
       "other": "In einem älteren Format gespeichert: {outdated}."
     },
     "writes": "Solid Memo schreibt jetzt {formats}.",
-    "howItWorks": "Die Aktualisierung bringt jedes Dokument einzeln auf den neuesten Stand, dort, wo es liegt, eines nach dem anderen, jedes in einem einzigen Schreibvorgang, den dein Pod ganz oder gar nicht ausführt. Jedes Dokument bleibt dabei lesbar, ob aktualisiert oder nicht; eines, das sich gerade nicht aktualisieren lässt, bleibt, wie es ist, und du kannst es erneut versuchen. Alle Adressen bleiben gleich; Stapelnamen, Kartentexte, Lernrichtungen, dein Wiederholungsverlauf und deine Einstellungen bleiben, wie sie sind, und ein Stapel ohne Beschreibung bekommt eine kurze, die du ändern kannst.",
+    "howItWorks": "Die Aktualisierung bringt jedes Dokument einzeln auf den neuesten Stand, dort, wo es liegt, eines nach dem anderen, jedes in einem einzigen Schreibvorgang, den dein Pod ganz oder gar nicht ausführt. Jedes Dokument bleibt dabei lesbar, ob aktualisiert oder nicht; eines, das sich gerade nicht aktualisieren lässt, bleibt, wie es ist, und du kannst es erneut versuchen. Alle Adressen bleiben gleich; Stapelnamen, Kartentexte, Lernrichtungen, dein Wiederholungsverlauf und deine Einstellungen bleiben, wie sie sind.",
+    "newDescriptions": "Ein Stapel ohne Beschreibung bekommt eine kurze, die du ändern kannst.",
     "listAnd": "{rest} und {last}",
     "instanceRecord": "der Instanzeintrag",
     "instanceCatalogue": "der Katalog der Instanz",
@@ -1012,10 +1013,38 @@
     "countIn": "{what} in {decks}",
     "instanceFormat": "das Instanzformat {version}",
     "catalogueFormat": "einen Katalog der Stapel jeder Instanz, den andere Apps als DCAT-Katalog lesen",
-    "preferencesFormat": "das Einstellungsformat {version}, das die Antwortskala, den Entwicklermodus, den Umgang mit ungültigen Daten, das Erscheinungsbild, den Planungsalgorithmus, die Farben und die Textgröße speichert",
-    "deckFormat": "das Stapelformat {version}, das Stapel mit den Standards DCAT und SKOS beschreibt, jedem Stapel eine Beschreibung gibt und Titel, Beschreibung und Schlagwörter eines Stapels in jeder Sprache erlaubt, die du angibst",
-    "cardFormat": "das Kartenformat {version}, das Bilder auf Karten ermöglicht, einem Bibliotheksstapel erlaubt, eine nicht mehr genutzte Karte auszumustern, den Text einer Karte in jeder Sprache erlaubt, die du angibst, eine Beschriftung über der Vorderseite einer Karte hinzufügt und festhält, worum es bei einer Karte geht",
-    "reviewFormat": "das Format {version} für Wiederholungsstände, das den Stand jeder Lernrichtung und den Rückgängig-Schnappschuss des Tages speichert",
+    "preferencesFormat": "das Einstellungsformat {version}, das {added} speichert",
+    "deckFormat": "das Stapelformat {version}, das {added}",
+    "cardFormat": "das Kartenformat {version}, das {added}",
+    "reviewFormat": "das Format {version} für Wiederholungsstände, das {added}",
+    "deckAdded": {
+      "direction": "festhält, in welche Richtung ein Stapel gelernt wird",
+      "dcat": "Stapel mit den Standards DCAT und SKOS beschreibt",
+      "description": "jedem Stapel eine Beschreibung gibt",
+      "titleLanguages": "Titel und Beschreibung eines Stapels in mehreren Sprachen erlaubt",
+      "titleWithoutEnglish": "für Titel und Beschreibung eines Stapels kein Englisch mehr verlangt",
+      "keywordLanguages": "die Schlagwörter eines Stapels in jeder Sprache erlaubt, die du angibst"
+    },
+    "cardAdded": {
+      "pictures": "Bilder auf Karten ermöglicht",
+      "notes": "eine Anmerkung zu jeder Seite und eine Beschriftung der Rückseite hinzufügt",
+      "retired": "einem Bibliotheksstapel erlaubt, eine nicht mehr genutzte Karte auszumustern",
+      "textLanguages": "den Text einer Karte in jeder Sprache erlaubt, die du angibst",
+      "notesWithoutEnglish": "für die Anmerkungen und die Beschriftung einer Karte kein Englisch mehr verlangt",
+      "frontLabel": "eine Beschriftung über der Vorderseite einer Karte hinzufügt",
+      "subjects": "festhält, worum es bei einer Karte geht"
+    },
+    "reviewStateAdded": {
+      "wholeSnapshot": "den Rückgängig-Schnappschuss des Tages ganz oder gar nicht speichert"
+    },
+    "preferencesAdded": {
+      "everySetting": "jede Einstellung",
+      "invalidData": "den Umgang mit ungültigen Daten",
+      "theme": "das Erscheinungsbild",
+      "scheduler": "den Planungsalgorithmus",
+      "colors": "die Farben",
+      "textSize": "die Textgröße"
+    },
     "itemInstanceRecord": "Instanzeintrag",
     "itemCatalogue": "Katalog der Stapel",
     "itemPreferences": "Einstellungen",

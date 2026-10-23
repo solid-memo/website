@@ -527,7 +527,13 @@ flowchart TD
   has nothing outdated in it is not read again. The result is cached for
   the session per instance.
 - **The user decides.** The notice names what is outdated and which
-  formats this app now writes; its button opens a confirmation that
+  formats this app now writes, each with what the steps after the
+  oldest version found of that kind added (`oldestFormat` in the plan,
+  the step tables in
+  [MigrationNotice.tsx](../packages/ui/src/ui/MigrationNotice.tsx)):
+  cards one version behind are told only what that version added. It
+  says a deck without a description gets one only when a deck entry
+  older than deck format 3 is outdated. Its button opens a confirmation that
   explains that the documents are updated one by one, each where it is,
   in one write the pod makes whole or not at all and, where the pod
   checks this, only if nothing else changed it since it was read; that
@@ -968,6 +974,11 @@ shared with a friend, and checks that:
    model changed, and the writers that build the record.
 5. Add fixtures under `packages/vocab/fixtures/<class>/v<N+1>/` and the
    conformance fixture; document the version in the table above.
+6. For a deck, card, review state or preferences version, say what the
+   step added: a message under `migrationNotice` in every
+   [message file](i18n.md) and its key at the end of the class's step
+   table in [MigrationNotice.tsx](../packages/ui/src/ui/MigrationNotice.tsx),
+   which the format update notice names.
 
 The chain test, the conformance test, the drift check and the plan and
 notice tests fail until all of that agrees; nothing else needs touching.

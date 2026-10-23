@@ -84,6 +84,17 @@ export interface MigrationPlan {
    * deck format 3): the update describes it as one and registers it.
    */
   catalogMissing: boolean;
+  /**
+   * The oldest format the outdated documents of each kind are stored in,
+   * so the notice names only what the update adds since; the current
+   * format where none of that kind is outdated.
+   */
+  oldestFormat: { deck: number; card: number; reviewState: number; preferences: number };
+}
+
+/** The oldest of the versions, or `current` when there are none. */
+function oldest(versions: number[], current: number): number {
+  return versions.reduce((min, version) => Math.min(min, version), current);
 }
 
 /** Plan the migration of an instance from everything it holds. */
@@ -112,6 +123,30 @@ export function planMigration(input: {
     preferencesOutdated: input.preferences !== null && isPreferencesOutdated(input.preferences),
     instanceOutdated: input.instance !== null && isInstanceOutdated(input.instance),
     catalogMissing: input.catalog === null,
+    oldestFormat: {
+      deck: oldest(
+        decks.filter(({ deckOutdated }) => deckOutdated).map(({ deck }) => deck.formatVersion),
+        DECK_FORMAT_VERSION,
+      ),
+      card: oldest(
+        input.entries.flatMap(({ cards }) =>
+          cards.filter(isOutdated).map(({ formatVersion }) => formatVersion),
+        ),
+        CARD_FORMAT_VERSION,
+      ),
+      reviewState: oldest(
+        input.entries.flatMap(({ reviews }) =>
+          reviews.filter(isReviewStateOutdated).map(({ formatVersion }) => formatVersion),
+        ),
+        REVIEW_STATE_FORMAT_VERSION,
+      ),
+      preferences: oldest(
+        input.preferences !== null && isPreferencesOutdated(input.preferences)
+          ? [input.preferences.formatVersion]
+          : [],
+        PREFERENCES_FORMAT_VERSION,
+      ),
+    },
   };
 }
 

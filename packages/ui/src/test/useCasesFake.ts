@@ -9,14 +9,15 @@ import type {
   UseCases,
 } from "@solid-memo/application/useCases";
 import type { Answer } from "@solid-memo/domain/answer";
-import type { Deck } from "@solid-memo/domain/deck";
+import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
 import { withProvenance } from "@solid-memo/domain/deckProvenance";
 import { editCompletedChapters } from "@solid-memo/domain/course";
 import { describedCatalog } from "@solid-memo/domain/catalog";
 import { deckHealth } from "@solid-memo/domain/deckHealth";
 import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
-import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
+import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 
@@ -298,6 +299,12 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       preferencesOutdated: false,
       instanceOutdated: false,
       catalogMissing: false,
+      oldestFormat: {
+        deck: DECK_FORMAT_VERSION,
+        card: CARD_FORMAT_VERSION,
+        reviewState: REVIEW_STATE_FORMAT_VERSION,
+        preferences: PREFERENCES_FORMAT_VERSION,
+      },
     })),
     updateInstance: vi.fn(async () => ({ updated: [], failed: [] })),
     findInterruptedGuestMove: vi.fn(async () => null),

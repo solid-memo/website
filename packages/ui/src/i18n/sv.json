@@ -992,7 +992,8 @@
       "other": "{outdated} sparas i ett äldre format."
     },
     "writes": "Solid Memo skriver nu {formats}.",
-    "howItWorks": "Uppdateringen gör varje dokument aktuellt för sig, där det ligger, ett i taget, vart och ett i en enda skrivning som din Pod gör helt eller inte alls. Varje dokument går att läsa hela tiden, uppdaterat eller inte; ett som inte kan uppdateras nu lämnas som det är, och du kan försöka igen. Alla adresser förblir desamma; kortleksnamn, korttext, riktningar, din repetitionshistorik och dina inställningar förblir som de är, och en kortlek utan beskrivning får en kort beskrivning som du kan ändra.",
+    "howItWorks": "Uppdateringen gör varje dokument aktuellt för sig, där det ligger, ett i taget, vart och ett i en enda skrivning som din Pod gör helt eller inte alls. Varje dokument går att läsa hela tiden, uppdaterat eller inte; ett som inte kan uppdateras nu lämnas som det är, och du kan försöka igen. Alla adresser förblir desamma; kortleksnamn, korttext, riktningar, din repetitionshistorik och dina inställningar förblir som de är.",
+    "newDescriptions": "En kortlek utan beskrivning får en kort beskrivning som du kan ändra.",
     "listAnd": "{rest} och {last}",
     "instanceRecord": "instansposten",
     "instanceCatalogue": "instansens katalog",
@@ -1012,10 +1013,38 @@
     "countIn": "{what} i {decks}",
     "instanceFormat": "instansformat {version}",
     "catalogueFormat": "en katalog över varje instans kortlekar, som andra appar läser som en DCAT-katalog",
-    "preferencesFormat": "inställningsformat {version}, som sparar svarsskalan, utvecklarläget, vad som ska hända med ogiltiga data, temat, schemaläggaren, färgerna och textstorleken",
-    "deckFormat": "kortleksformat {version}, som beskriver kortlekar med standarderna DCAT och SKOS, ger varje kortlek en beskrivning och låter en kortleks titel, beskrivning och nyckelord vara på valfritt språk som du anger",
-    "cardFormat": "kortformat {version}, som lägger till bilder på kort, låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder, låter ett korts text vara på valfritt språk som du anger, lägger till en etikett ovanför ett korts framsida och behåller vad ett kort handlar om",
-    "reviewFormat": "repetitionstillståndsformat {version}, som sparar varje studieriktnings tillstånd och dagens ångra-ögonblicksbild",
+    "preferencesFormat": "inställningsformat {version}, som sparar {added}",
+    "deckFormat": "kortleksformat {version}, som {added}",
+    "cardFormat": "kortformat {version}, som {added}",
+    "reviewFormat": "repetitionstillståndsformat {version}, som {added}",
+    "deckAdded": {
+      "direction": "anger åt vilket håll en kortlek studeras",
+      "dcat": "beskriver kortlekar med standarderna DCAT och SKOS",
+      "description": "ger varje kortlek en beskrivning",
+      "titleLanguages": "låter en kortleks titel och beskrivning finnas på flera språk",
+      "titleWithoutEnglish": "inte längre kräver engelska i en kortleks titel och beskrivning",
+      "keywordLanguages": "låter en kortleks nyckelord vara på valfritt språk som du anger"
+    },
+    "cardAdded": {
+      "pictures": "lägger till bilder på kort",
+      "notes": "lägger till en anteckning under varje sida och en etikett ovanför baksidan",
+      "retired": "låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder",
+      "textLanguages": "låter ett korts text vara på valfritt språk som du anger",
+      "notesWithoutEnglish": "inte längre kräver engelska i ett korts anteckningar och etikett",
+      "frontLabel": "lägger till en etikett ovanför ett korts framsida",
+      "subjects": "behåller vad ett kort handlar om"
+    },
+    "reviewStateAdded": {
+      "wholeSnapshot": "sparar dagens ångra-ögonblicksbild hel eller inte alls"
+    },
+    "preferencesAdded": {
+      "everySetting": "varje inställning",
+      "invalidData": "vad som ska hända med ogiltiga data",
+      "theme": "temat",
+      "scheduler": "schemaläggaren",
+      "colors": "färgerna",
+      "textSize": "textstorleken"
+    },
     "itemInstanceRecord": "Instanspost",
     "itemCatalogue": "Katalog över kortlekarna",
     "itemPreferences": "Inställningar",

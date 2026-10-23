@@ -1048,7 +1048,8 @@
       "other": "Se guardan en un formato anterior: {outdated}."
     },
     "writes": "Solid Memo ahora escribe {formats}.",
-    "howItWorks": "La actualización pone al día cada documento por separado, donde está, uno tras otro, cada uno en una sola escritura que tu Pod aplica entera o no aplica en absoluto. Todos los documentos se pueden leer en todo momento, estén actualizados o no; uno que no se pueda actualizar ahora se deja como está, y puedes intentarlo de nuevo. Todas las direcciones siguen siendo las mismas; los nombres de los mazos, el texto de las tarjetas, los sentidos de estudio, tu historial de repasos y tus ajustes se quedan como están, y un mazo sin descripción recibe una breve que puedes cambiar.",
+    "howItWorks": "La actualización pone al día cada documento por separado, donde está, uno tras otro, cada uno en una sola escritura que tu Pod aplica entera o no aplica en absoluto. Todos los documentos se pueden leer en todo momento, estén actualizados o no; uno que no se pueda actualizar ahora se deja como está, y puedes intentarlo de nuevo. Todas las direcciones siguen siendo las mismas; los nombres de los mazos, el texto de las tarjetas, los sentidos de estudio, tu historial de repasos y tus ajustes se quedan como están.",
+    "newDescriptions": "Un mazo sin descripción recibe una breve que puedes cambiar.",
     "listAnd": "{rest} y {last}",
     "instanceRecord": "el registro de la instancia",
     "instanceCatalogue": "el catálogo de la instancia",
@@ -1071,10 +1072,38 @@
     "countIn": "{what} en {decks}",
     "instanceFormat": "el formato de instancia {version}",
     "catalogueFormat": "un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT",
-    "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos, la apariencia, el algoritmo de programación, los colores y el tamaño del texto",
-    "deckFormat": "el formato de mazo {version}, que describe los mazos con los estándares DCAT y SKOS, da a cada mazo una descripción y permite que el título, la descripción y las palabras clave de un mazo estén en cualquier idioma que indiques",
-    "cardFormat": "el formato de tarjeta {version}, que añade imágenes a las tarjetas, permite que un mazo de la biblioteca retire una tarjeta que ya no usa, que el texto de una tarjeta esté en cualquier idioma que indiques, añade una etiqueta sobre el anverso de una tarjeta y conserva de qué trata una tarjeta",
-    "reviewFormat": "el formato de estado de repaso {version}, que guarda el estado de cada sentido de estudio y la instantánea para deshacer del día",
+    "preferencesFormat": "el formato de preferencias {version}, que guarda {added}",
+    "deckFormat": "el formato de mazo {version}, que {added}",
+    "cardFormat": "el formato de tarjeta {version}, que {added}",
+    "reviewFormat": "el formato de estado de repaso {version}, que {added}",
+    "deckAdded": {
+      "direction": "indica en qué sentido se estudia un mazo",
+      "dcat": "describe los mazos con los estándares DCAT y SKOS",
+      "description": "da a cada mazo una descripción",
+      "titleLanguages": "permite que el título y la descripción de un mazo estén en varios idiomas",
+      "titleWithoutEnglish": "ya no exige inglés en el título y la descripción de un mazo",
+      "keywordLanguages": "permite que las palabras clave de un mazo estén en cualquier idioma que indiques"
+    },
+    "cardAdded": {
+      "pictures": "añade imágenes a las tarjetas",
+      "notes": "añade una nota bajo cada cara y una etiqueta sobre el reverso",
+      "retired": "permite que un mazo de la biblioteca retire una tarjeta que ya no usa",
+      "textLanguages": "permite que el texto de una tarjeta esté en cualquier idioma que indiques",
+      "notesWithoutEnglish": "ya no exige inglés en las notas y la etiqueta de una tarjeta",
+      "frontLabel": "añade una etiqueta sobre el anverso de una tarjeta",
+      "subjects": "conserva de qué trata una tarjeta"
+    },
+    "reviewStateAdded": {
+      "wholeSnapshot": "guarda la instantánea para deshacer del día completa o no la guarda"
+    },
+    "preferencesAdded": {
+      "everySetting": "cada ajuste",
+      "invalidData": "qué hacer con los datos no válidos",
+      "theme": "la apariencia",
+      "scheduler": "el algoritmo de programación",
+      "colors": "los colores",
+      "textSize": "el tamaño del texto"
+    },
     "itemInstanceRecord": "Registro de la instancia",
     "itemCatalogue": "Catálogo de los mazos",
     "itemPreferences": "Preferencias",

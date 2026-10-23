@@ -10,6 +10,8 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { MigrationPlan } from "@solid-memo/domain/migration";
+import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
+import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import type { UpdateOutcome, UpdateProgress } from "@solid-memo/domain/instanceUpdate";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { AppError } from "@solid-memo/domain/appError";
@@ -35,6 +37,12 @@ const nothing = {
   preferencesOutdated: false,
   instanceOutdated: false,
   catalogMissing: false,
+  oldestFormat: {
+    deck: 1,
+    card: 1,
+    reviewState: REVIEW_STATE_FORMAT_VERSION,
+    preferences: PREFERENCES_FORMAT_VERSION,
+  },
 };
 const session = { webId: "https://alice.example/profile/card#me" };
 const outdated: MigrationPlan = {
