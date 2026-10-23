@@ -87,7 +87,7 @@ export function TransferContainer({
     onSettled: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
-        queryClient.invalidateQueries({ queryKey: ["studyQueue"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
       ]),
   });
 

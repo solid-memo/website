@@ -12,6 +12,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useTheme } from "./theme";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The invitation to switch from SM-2 to FSRS-6, above the deck list:
@@ -114,7 +115,7 @@ export function SchedulerInvitationContainer({
     },
     onSuccess: async (outcome, preferences) => {
       await queryClient.invalidateQueries();
-      queryClient.removeQueries({ queryKey: ["studyQueue"] });
+      queryClient.removeQueries({ queryKey: queryKeys.allStudyQueues() });
       setProgress(null);
       setEnded({ outcome, preferences });
     },

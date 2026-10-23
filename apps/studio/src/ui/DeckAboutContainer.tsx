@@ -16,6 +16,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { DeckAboutScreen } from "./DeckAboutScreen";
+import { queryKeys } from "./queryKeys";
 
 /** One save of the screen: the write, and the queries it changes beside the decks'. */
 interface Save {
@@ -86,7 +87,7 @@ export function DeckAboutContainer({
       await Promise.all(
         [["decks"], ...touches].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       );
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
   const stateLanguages = useMutation({

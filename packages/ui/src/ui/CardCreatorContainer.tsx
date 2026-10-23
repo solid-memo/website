@@ -9,6 +9,7 @@ import type { CardContent, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardCreatorScreen } from "./CardCreatorScreen";
 import { useI18n } from "./i18n";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the add-card mutation. Deliberately stays on the page after a
@@ -42,7 +43,7 @@ export function CardCreatorContainer({
       await queryClient.invalidateQueries({
         queryKey: ["cards", deck.cardsDocumentUrl],
       });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 

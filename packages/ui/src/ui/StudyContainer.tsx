@@ -91,7 +91,7 @@ export function StudyContainer({
   const now = useClock();
 
   const queueQuery = useQuery({
-    queryKey: ["studyQueue", deck.url],
+    queryKey: queryKeys.studyQueue(deck.url),
     queryFn: () => useCases.getStudyQueue(instance.url, deck, now()),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
@@ -198,7 +198,7 @@ export function StudyContainer({
 
   useLayoutEffect(
     () => () => {
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
     [queryClient, deck.url],
   );

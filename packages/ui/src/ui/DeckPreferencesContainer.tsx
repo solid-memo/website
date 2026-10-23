@@ -17,6 +17,7 @@ import { Loading } from "./Loading";
 import { deckHref, routeToHash } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Owns a deck's preferences: reads the instance's (which the deck falls
@@ -84,7 +85,7 @@ export function DeckPreferencesContainer({
     mutationFn: (pace: DeckPace) => useCases.setDeckPace(deck, pace),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["decks"] });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       onDone();
     },
   });

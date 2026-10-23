@@ -27,6 +27,7 @@ import { CardScheduleContainer } from "./CardScheduleContainer";
 import { ReadOnlyScope } from "./ReadOnly";
 import type { CardTab } from "./router";
 import { useActivityLog } from "./shell/activity";
+import { queryKeys } from "./queryKeys";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
 export function releaseLinkOf(
@@ -124,7 +125,7 @@ export function CardInspectorContainer({
       useCases.updateCard(deck, card, { ...card, distractors }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       logSaved();
     },
   });

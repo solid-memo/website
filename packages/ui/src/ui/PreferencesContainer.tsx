@@ -83,7 +83,7 @@ export function PreferencesContainer({
           queryKey: queryKeys.instanceAppearance(instance.url),
         });
       }
-      queryClient.removeQueries({ queryKey: ["studyQueue"] });
+      queryClient.removeQueries({ queryKey: queryKeys.allStudyQueues() });
       setProgress(null);
       if (outcome === null || preferences.scheduler === "sm2") onBack();
       else setEnded({ outcome, save: { preferences, stored } });

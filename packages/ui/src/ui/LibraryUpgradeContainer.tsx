@@ -46,7 +46,7 @@ export function refreshUpgradedDeck(
   instanceUrl: string,
   deck: Deck,
 ): Promise<unknown> {
-  queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+  queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: ["decks"] }),
     queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
@@ -119,7 +119,8 @@ export function LibraryUpgradeContainer({
       const outcome = await useCases.applyLibraryUpgrade(deck, plan, setProgress);
       if (!outcome.ok) {
         // The offer is looked at again, with the deck as it now is; a deck the upgrade changed in part is read again.
-        if (outcome.changed) queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+        if (outcome.changed)
+          queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["decks"] }),
           queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),

@@ -155,7 +155,7 @@ export function DeckTableContainer({
     onSettled: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
-        queryClient.invalidateQueries({ queryKey: ["studyQueue"] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
       ]),
   });
   const run = (bulk: Bulk) =>

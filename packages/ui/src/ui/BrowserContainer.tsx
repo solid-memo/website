@@ -65,7 +65,7 @@ export function BrowserContainer({
     mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["decks"] });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 
@@ -86,7 +86,7 @@ export function BrowserContainer({
       await queryClient.invalidateQueries({
         queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 

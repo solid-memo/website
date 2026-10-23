@@ -59,7 +59,7 @@ export function DeckDetailContainer({
   );
 
   const queueQuery = useQuery({
-    queryKey: ["studyQueue", deck.url],
+    queryKey: queryKeys.studyQueue(deck.url),
     queryFn: () => useCases.getStudyQueue(instance.url, deck, new Date()),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
@@ -74,7 +74,7 @@ export function DeckDetailContainer({
         queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
       await queryClient.invalidateQueries({
-        queryKey: ["studyQueue", deck.url],
+        queryKey: queryKeys.studyQueue(deck.url),
       });
       await queryClient.invalidateQueries({ queryKey: ["statistics", instance.url] });
       await queryClient.invalidateQueries({ queryKey: ["cardProgress", instance.url] });

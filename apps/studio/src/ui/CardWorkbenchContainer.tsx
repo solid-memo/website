@@ -182,7 +182,8 @@ export function CardWorkbenchContainer({
   );
   const reread = async (touched: readonly Deck[] = [deck]) => {
     // The study counts go at once: a screen opened while the rest is read again counts afresh.
-    for (const each of touched) queryClient.removeQueries({ queryKey: ["studyQueue", each.url] });
+    for (const each of touched)
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(each.url) });
     await Promise.all(
       touched.flatMap((each) => [
         queryClient.invalidateQueries({ queryKey: ["cards", each.cardsDocumentUrl] }),

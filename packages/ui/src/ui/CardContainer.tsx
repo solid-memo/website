@@ -66,7 +66,7 @@ export function CardContainer({
       await queryClient.invalidateQueries({
         queryKey: ["cards", deck.cardsDocumentUrl],
       });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       onSaved?.();
     },
   });
@@ -80,7 +80,7 @@ export function CardContainer({
       await queryClient.invalidateQueries({
         queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       onRemoved();
     },
   });

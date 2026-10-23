@@ -59,7 +59,7 @@ export function useCourseAnswer(
       if (effect === "none") return;
       noteGraded();
       void queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });
-      void queryClient.invalidateQueries({ queryKey: ["studyQueue", deck.url] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },
   });
 }

@@ -46,7 +46,7 @@ export function DeckPeekContainer({
   });
   const countsQuery = useQuery(
     deck === null
-      ? { queryKey: ["studyQueue", null, "counts"], queryFn: skipToken }
+      ? { queryKey: queryKeys.studyCounts(null), queryFn: skipToken }
       : studyCountsQuery(useCases, instance.url, deck),
   );
   if (deck === null) return <DeckPeekScreen peek={null} />;

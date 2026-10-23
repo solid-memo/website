@@ -129,7 +129,7 @@ export function CardScheduleContainer({
     onSuccess: (_count, edit) => setDone(edit),
     onSettled: async () => {
       // The study counts go at once: a screen opened while the states are read again counts afresh.
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) });
     },
   });
