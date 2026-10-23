@@ -1092,6 +1092,14 @@ export interface UseCases
    */
   getCourse(deck: Deck): Promise<Course>;
   /**
+   * What the deck list's strip of courses needs of a course: its
+   * release's outline and the cards the learner has answered. The deck
+   * is taken as given, its catalog entry not read again, and the
+   * release's cards are not mapped. A deck that is no library copy is a
+   * mistake of the caller (a plain Error). Writes nothing.
+   */
+  getCourseSummary(deck: Deck): Promise<CourseSummary>;
+  /**
    * Answer one of a course's multiple-choice questions (domain/course.ts
    * choicesOf): what the answer does to the card's schedule follows
    * courseAnswerEffect. A card introduced is first written into the deck,
@@ -1184,6 +1192,9 @@ export interface Course {
   answeredCardIds: string[];
   progress: CourseProgress;
 }
+
+/** What the deck list's strip needs of a course (UseCases.getCourseSummary). */
+export type CourseSummary = Pick<Course, "outline" | "answeredCardIds">;
 
 /**
  * Which answers of the log the statistics are of (UseCases.getStatistics):
@@ -1780,6 +1791,24 @@ export function createUseCases({
   async function importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck> {
     const content = await deckLibrary.fetchLibraryDeck(deck.url);
     return deckRepository.importDeck(instanceUrl, content);
+  }
+
+  function sourceOf(deck: Deck): string {
+    if (deck.sourceUrl === undefined)
+      throw new Error("A course's deck names the release it was copied from");
+    return deck.sourceUrl;
+  }
+
+  async function courseSummary(deck: Deck): Promise<CourseSummary> {
+    const [outline, reviews] = await Promise.all([
+      deckLibrary.fetchCourseOutline(sourceOf(deck)),
+      reviewStateRepository.listReviewStates(deck),
+    ]);
+    // A course asks front to back: a card is answered once it has that state.
+    const answeredCardIds = reviews.sm2
+      .filter((state) => state.direction === "front-to-back")
+      .map((state) => state.cardId);
+    return { outline, answeredCardIds };
   }
 
   async function startCourse(instanceUrl: string, course: LibraryDeck): Promise<Deck> {
@@ -4182,17 +4211,10 @@ export function createUseCases({
     async getCourse(offered) {
       const deck = await deckRepository.readDeck(offered.url);
       if (deck === null) throw new AppError("deckGone", { deck: offered.title });
-      if (deck.sourceUrl === undefined)
-        throw new Error("A course's deck names the release it was copied from");
-      const [release, outline, reviews] = await Promise.all([
-        deckLibrary.fetchLibraryDeck(deck.sourceUrl),
-        deckLibrary.fetchCourseOutline(deck.sourceUrl),
-        reviewStateRepository.listReviewStates(deck),
+      const [release, { outline, answeredCardIds }] = await Promise.all([
+        deckLibrary.fetchLibraryDeck(sourceOf(deck)),
+        courseSummary(deck),
       ]);
-      // A course asks front to back: a card is answered once it has that state.
-      const answeredCardIds = reviews.sm2
-        .filter((state) => state.direction === "front-to-back")
-        .map((state) => state.cardId);
       return {
         deck,
         release,
@@ -4202,6 +4224,7 @@ export function createUseCases({
         progress: courseProgress(outline, answeredCardIds, deck.completedChapters ?? []),
       };
     },
+    getCourseSummary: courseSummary,
     async answerCourseQuestion(instanceUrl, deck, card, choice, now, times = {}) {
       const prompt = {
         cardId: card.id,

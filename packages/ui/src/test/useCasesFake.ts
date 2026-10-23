@@ -210,6 +210,9 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     getCourse: vi.fn(async () => {
       throw new Error("getCourse fake not configured");
     }),
+    getCourseSummary: vi.fn(async () => {
+      throw new Error("getCourseSummary fake not configured");
+    }),
     answerCourseQuestion: vi.fn(async () => ({ effect: "none" as const, state: null })),
     completeChapter: vi.fn(async (deck, chapterUrl) => ({
       ...deck,

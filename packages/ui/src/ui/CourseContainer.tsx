@@ -17,7 +17,7 @@ import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
 export function chapterHref(
   links: CourseLinks,
   instanceUrl: string,
-  course: Course,
+  course: Pick<Course, "deck" | "progress">,
   chapter: CourseChapter,
 ): string {
   const progress = course.progress.chapters.find((entry) => entry.url === chapter.url)!;

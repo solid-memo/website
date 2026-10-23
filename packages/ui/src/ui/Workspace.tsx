@@ -21,11 +21,13 @@ import { CardCreatorContainer } from "./CardCreatorContainer";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
 import { CourseContainer, type CompletedChapter } from "./CourseContainer";
+import { courseStripQuery } from "./CourseStrip";
 import { courseKey } from "./courseKey";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
 import { DeckListContainer } from "./DeckListContainer";
+import { libraryIndexQuery, useCopies } from "./deckTreeEditor";
 import { studyCountsQuery } from "./DeckStudyAction";
 import { ErrorMessage } from "./ErrorMessage";
 import { GuestStudyOffer } from "./GuestStudyOffer";
@@ -466,16 +468,24 @@ export function Workspace({
   // are made, so the check runs again only after a repair or an update.
   // The Studio's screens hold to the same check (useDataCheck).
   const check = useDataCheck(useCases, activeInstance === null ? null : instanceUrl);
-  // The deck list's arrangement (DeckListContainer's query) and counts are
-  // fetched while the instance is checked, not after. Its decks are the
-  // deck lookup's too, so the catalog is read once, and a deck opened
-  // from the list resolves without a refetch.
+  // The deck list's arrangement (DeckListContainer's query), counts and
+  // courses to continue are fetched while the instance is checked, not
+  // after. Its decks are the deck lookup's too, so the catalog is read
+  // once, and a deck opened from the list resolves without a refetch.
+  // The library's index, which tells the courses among them (useCopies),
+  // is read beside the arrangement, not once it is in, so each course's
+  // summary (CourseStrip's) is fetched as soon as the decks are known,
+  // as their counts are.
+  const onHome = activeInstance !== null && route?.screen === "home";
   const homeTreeQuery = useQuery({
     queryKey: ["decks", instanceUrl, "tree"],
     queryFn: () => useCases.listDeckTree(instanceUrl!),
-    enabled: activeInstance !== null && route?.screen === "home",
+    enabled: onHome,
     refetchOnWindowFocus: false,
   });
+  useEffect(() => {
+    if (onHome) void queryClient.prefetchQuery(libraryIndexQuery(useCases));
+  }, [onHome]);
   useEffect(() => {
     if (instanceUrl === null || homeTreeQuery.data === undefined) return;
     const decks = decksOf(homeTreeQuery.data.children);
@@ -484,6 +494,14 @@ export function Workspace({
       void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
     }
   }, [homeTreeQuery.data, instanceUrl]);
+  const homeDecks = decksOf(homeTreeQuery.data?.children ?? []);
+  const { isCourse } = useCopies(useCases, homeDecks);
+  const homeCourses = homeDecks.filter((deck) => isCourse(deck) && !check.isSetAside(deck));
+  useEffect(() => {
+    for (const deck of homeCourses) {
+      void queryClient.prefetchQuery(courseStripQuery(useCases, deck));
+    }
+  }, [homeCourses.map((deck) => `${deck.url} ${deck.sourceUrl}`).join(" ")]);
   // Until the preferences are read, the workspace waits as under "block
   // the instance": a user who chose it never sees data before the check.
   const {

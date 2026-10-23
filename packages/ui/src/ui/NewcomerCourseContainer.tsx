@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
+import { libraryIndexQuery } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { NewcomerCourseOffer } from "./NewcomerCourseOffer";
 import { libraryDeckHref } from "./router";
@@ -30,11 +31,7 @@ export function NewcomerCourseContainer({
 }) {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
-  const libraryQuery = useQuery({
-    queryKey: ["library"],
-    queryFn: () => useCases.listLibraryDecks(),
-    refetchOnWindowFocus: false,
-  });
+  const libraryQuery = useQuery(libraryIndexQuery(useCases));
   // In the options, not mutate's: the refreshed list has the course's deck, so this offer is gone by then.
   const startMutation = useMutation({
     mutationFn: (course: LibraryDeck) => useCases.startCourse(instance.url, course),
