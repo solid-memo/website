@@ -238,6 +238,21 @@ export function useDeckTreeEditor(
 }
 
 /**
+ * The library's index of decks, as the deck list tells its copies by it
+ * (useCopies). The index changes only with a deploy: read once a page,
+ * not each time the list shows, so the index Workspace reads beside the
+ * deck list's arrangement serves the list.
+ */
+export function libraryIndexQuery(useCases: UseCases) {
+  return {
+    queryKey: ["library"],
+    queryFn: () => useCases.listLibraryDecks(),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  };
+}
+
+/**
  * What the decks that are copies are copies of: which are copies of a
  * course (docs/courses.md), and where those added from a link came from.
  * The library says which of its decks are courses, read once some deck
@@ -262,14 +277,7 @@ export function useCopies(
   newerRelease: (deck: Deck) => boolean;
 } {
   const isCopy = decks.some((deck) => deck.sourceUrl !== undefined);
-  const libraryQuery = useQuery({
-    queryKey: ["library"],
-    queryFn: () => useCases.listLibraryDecks(),
-    enabled: isCopy,
-    // The index changes only with a deploy: read once a page, not each time the list shows.
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-  });
+  const libraryQuery = useQuery({ ...libraryIndexQuery(useCases), enabled: isCopy });
   const library = libraryQuery.data;
   const linked =
     library === undefined

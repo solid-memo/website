@@ -14,7 +14,7 @@ import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
 import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { courseHref, deckHref, routeToHash } from "./router";
-import { CH1, CH2, courseLibraryDeck, makeCourse } from "../test/course";
+import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -170,23 +170,22 @@ describe("DeckListContainer", () => {
       sourceUrl: courseLibraryDeck.url,
     });
     const going = copy(2, "Going");
-    const finished = copy(3, "Finished");
+    const finished = { ...copy(3, "Finished"), completedChapters: [CH1, CH2] };
     const setAside = copy(4, "Aside");
     const unreadable = copy(5, "Unreadable");
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck, going, finished, setAside, unreadable]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
-      getCourse: vi.fn(async (d: Deck) => {
+      getCourseSummary: vi.fn(async (d: Deck) => {
         if (d === unreadable) throw new Error("course unreachable");
-        const course =
-          d === finished
-            ? makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2])
-            : makeCourse(["q-1"]);
-        return { ...course, deck: d };
+        return {
+          outline: courseOutline,
+          answeredCardIds: d === finished ? ["q-1", "q-2", "q-3", "r-1", "q-4"] : ["q-1"],
+        };
       }),
     });
     renderContainer(useCases, undefined, (d) => d === setAside);
-    const button = await screen.findByRole("link", { name: "Continue Solid fundamentals" });
+    const button = await screen.findByRole("link", { name: "Continue Going" });
     expect(button).toHaveAttribute(
       "href",
       routeToHash({
@@ -198,14 +197,48 @@ describe("DeckListContainer", () => {
     );
     const strip = screen.getByRole("complementary", { name: "Your courses" });
     expect(within(strip).getAllByRole("listitem")).toHaveLength(1);
-    expect(within(strip).getByRole("link", { name: "Solid fundamentals" })).toHaveAttribute(
+    // The deck's title, as its row says it, not its release's.
+    expect(within(strip).getByRole("link", { name: "Going" })).toHaveAttribute(
       "href",
       courseHref(instance.url, going.url),
     );
     expect(strip).toHaveTextContent("0 of 2 chapters done");
-    await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledTimes(3));
-    expect(useCases.getCourse).not.toHaveBeenCalledWith(setAside);
-    expect(useCases.getCourse).not.toHaveBeenCalledWith(deck);
+    await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalledTimes(3));
+    expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(setAside);
+    expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(deck);
+    // The whole course, with its cards, is read behind the strip, of the course it shows only.
+    await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledWith(going));
+    expect(useCases.getCourse).toHaveBeenCalledOnce();
+  });
+
+  it("moves a course on as its deck is read afresh, its summary not read again", async () => {
+    const going: Deck = { ...deck, title: { en: "Solid" }, sourceUrl: courseLibraryDeck.url };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [going]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourseSummary: vi.fn(async () => ({
+        outline: courseOutline,
+        answeredCardIds: ["q-1", "q-2", "q-3", "r-1"],
+      })),
+    });
+    const { queryClient } = renderContainer(useCases);
+    const strip = await screen.findByRole("complementary", { name: "Your courses" });
+    // Every step of the first chapter done, its completion not yet written: its final review.
+    expect(within(strip).getByRole("link", { name: "Continue Solid" })).toHaveAttribute(
+      "href",
+      routeToHash({
+        screen: "courseReview",
+        instanceUrl: instance.url,
+        deckUrl: going.url,
+        chapterUrl: CH1,
+      }),
+    );
+
+    vi.mocked(useCases.listDecks).mockResolvedValue([{ ...going, completedChapters: [CH1] }]);
+    await queryClient.invalidateQueries({ queryKey: ["decks", instance.url] });
+
+    await waitFor(() => expect(strip).toHaveTextContent("1 of 2 chapters done"));
+    expect(useCases.getCourseSummary).toHaveBeenCalledOnce();
   });
 
   it("shows no strip of courses when no deck is a course", async () => {
@@ -213,7 +246,7 @@ describe("DeckListContainer", () => {
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Kanji N5" });
     expect(screen.queryByRole("complementary", { name: "Your courses" })).toBeNull();
-    expect(useCases.getCourse).not.toHaveBeenCalled();
+    expect(useCases.getCourseSummary).not.toHaveBeenCalled();
   });
 
   it("invites a learner on SM-2 to FSRS-6 above the list", async () => {

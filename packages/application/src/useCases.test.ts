@@ -7629,6 +7629,28 @@ describe("courses", () => {
     await expect(useCases.getCourse(deck)).rejects.toThrow("names the release");
   });
 
+  it("getCourseSummary reads the release's outline beside the deck's answers, and neither the deck again nor the release's cards", async () => {
+    const { deps, useCases } = setup();
+    let outlined: (outline: CourseOutline) => void = () => {};
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockReturnValueOnce(
+      new Promise((resolve) => (outlined = resolve)),
+    );
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValueOnce(
+      sm2s([
+        stateOf(noon, "2026-10-08"),
+        { ...stateOf(noon, "2026-10-08"), cardId: "q-rdf", direction: "back-to-front" },
+      ]),
+    );
+    const summary = useCases.getCourseSummary(courseDeck);
+    expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(RELEASE);
+    expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(courseDeck);
+    outlined(outline);
+    await expect(summary).resolves.toEqual({ outline, answeredCardIds: ["q-iri"] });
+    expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
+    expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+    await expect(useCases.getCourseSummary(deck)).rejects.toThrow("names the release");
+  });
+
   it("answerCourseQuestion writes a card answered for the first time into the deck, then grades it, logging a multiple-choice answer", async () => {
     const { deps, useCases, appended } = setup();
     const answered = await useCases.answerCourseQuestion(

@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useId } from "preact/hooks";
-import { useQueries } from "@tanstack/react-query";
+import { useEffect, useId } from "preact/hooks";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { courseProgress } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -80,11 +81,29 @@ export function CourseStrip({ entries }: { entries: readonly CourseStripEntry[] 
 }
 
 /**
- * Reads each course deck as a course (UseCases.getCourse), under the key
- * the course's own screens read and refresh it by, and shows those still
- * to finish, linked where the course links say (useCourseLinks). A
+ * What the strip needs of a course deck (UseCases.getCourseSummary). Under
+ * the key the course's own screens refresh it by, as one of its own (so
+ * it is never taken for the whole course), with the release it is of;
+ * fresh for a little while, so summaries fetched as the deck list's
+ * arrangement is read (Workspace) serve the strip that follows.
+ */
+export function courseStripQuery(useCases: UseCases, deck: Deck) {
+  return {
+    queryKey: [...courseKey(deck.url), "strip", deck.sourceUrl],
+    queryFn: () => useCases.getCourseSummary(deck),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  };
+}
+
+/**
+ * Reads what the strip needs of each course deck (courseStripQuery) and
+ * shows those still to finish, as far as the deck says (its title and
+ * completed chapters, so a deck read afresh moves the strip on), linked where the course links say (useCourseLinks). A
  * course not yet read, or that cannot be, is left out: the deck list
- * works without it.
+ * works without it. Once a course is shown, the whole of it (getCourse,
+ * under courseKey) is read behind it, so its page and chapter open on
+ * it, as Workspace reads them.
  */
 export function CourseStripContainer({
   useCases,
@@ -97,32 +116,40 @@ export function CourseStripContainer({
   decks: readonly Deck[];
 }) {
   const links = useCourseLinks();
+  const queryClient = useQueryClient();
   const results = useQueries({
-    queries: decks.map((deck) => ({
-      queryKey: courseKey(deck.url),
-      queryFn: () => useCases.getCourse(deck),
-      staleTime: 30_000,
-      refetchOnWindowFocus: false,
-    })),
+    queries: decks.map((deck) => courseStripQuery(useCases, deck)),
   });
-  const entries = results.flatMap(({ data: course }): CourseStripEntry[] => {
-    if (course === undefined) return [];
+  const entries = results.flatMap(({ data: summary }, at): CourseStripEntry[] => {
+    if (summary === undefined) return [];
+    const deck = decks[at]!;
+    const { outline, answeredCardIds } = summary;
+    const progress = courseProgress(outline, answeredCardIds, deck.completedChapters ?? []);
     // None once every chapter is done: a finished course is left out.
-    const current = course.outline.chapters.find(
-      (chapter) => chapter.url === course.progress.currentChapterUrl,
-    );
+    const current = outline.chapters.find((chapter) => chapter.url === progress.currentChapterUrl);
     if (current === undefined) return [];
     return [
       {
-        key: course.deck.url,
-        title: course.release.title,
-        href: links.courseHref(instance.url, course.deck.url),
-        continueHref: chapterHref(links, instance.url, course, current),
-        started: course.answeredCardIds.length > 0,
-        done: course.progress.chapters.filter((chapter) => chapter.state === "done").length,
-        count: course.outline.chapters.length,
+        key: deck.url,
+        title: deck.title,
+        href: links.courseHref(instance.url, deck.url),
+        continueHref: chapterHref(links, instance.url, { deck, progress }, current),
+        started: answeredCardIds.length > 0,
+        done: progress.chapters.filter((chapter) => chapter.state === "done").length,
+        count: outline.chapters.length,
       },
     ];
   });
+  const shown = entries.map((entry) => entry.key).join(" ");
+  useEffect(() => {
+    for (const deck of decks) {
+      if (!shown.split(" ").includes(deck.url)) continue;
+      void queryClient.prefetchQuery({
+        queryKey: courseKey(deck.url),
+        queryFn: () => useCases.getCourse(deck),
+        staleTime: 30_000,
+      });
+    }
+  }, [shown]);
   return <CourseStrip entries={entries} />;
 }

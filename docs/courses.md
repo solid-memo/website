@@ -162,7 +162,11 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    chapters done and a button to go on where the learner left off; a
    course deck's menu leads to its page too. The strip it is in is
    headed "Your courses", with a line saying these are the courses
-   added and not finished yet.
+   added and not finished yet. Each course in it has its deck's title,
+   and is read only as far as the strip needs (`getCourseSummary`: the
+   release's outline and the deck's answers, not its cards), as soon as
+   the deck list's arrangement is in: the library's index, which tells
+   the courses, is read beside the arrangement, not once it is in.
 2. **A step.** A step comes in two phases. First the learner reads the
    theory, with no question shown. Theory in chunks is read one chunk
    at a time, starting at the first: "Part 2 of 3" says where the
@@ -274,6 +278,7 @@ else offers nothing.
 | `startCourse(instanceUrl, course)` | The instance's deck of the course: the copy it has (`isCopyOf`), else a new, empty copy of the current release. |
 | `importReleaseFromUrl(instanceUrl, release)` | A course added from a link is started so too (`readReleaseFromLink` reads and checks it first, [deck-library.md](deck-library.md#from-a-link)). |
 | `getCourse(deck)` | The course as the learner has it: the deck as its entry is now, the release, its outline, its cards by id, the cards answered and the progress. Writes nothing. A deck that is gone throws `deckGone`. |
+| `getCourseSummary(deck)` | What the deck list's strip needs of a course: the outline of the release the deck names and the cards answered. The deck is taken as given, not read again, and the release's cards are not mapped. Writes nothing. |
 | `answerCourseQuestion(instanceUrl, deck, card, choice, now, times?)` | Grades one answer as `courseAnswerEffect` says, logging how long choosing took (`times.recallMillis`). A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
 | `completeChapter(deck, chapterUrl)` | Adds `sm:completedChapter` to the deck's entry. |
 | `setCompletedChapters(deck, edit)` | The Studio's change of the chapters completed: one marked not done (in any release, by its fragment id), or the course restarted, none completed. Answers and review states stay. |

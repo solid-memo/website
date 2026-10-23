@@ -13,12 +13,13 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
+import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { routeToHash, statisticsHref } from "./router";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
-import { CH1, CH2, courseDeck, courseLibraryDeck, makeCourse } from "../test/course";
+import { CH1, CH2, courseDeck, courseLibraryDeck, courseOutline, makeCourse } from "../test/course";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const storageA: Storage = { url: "https://pod.example/", source: "profile" };
@@ -463,6 +464,56 @@ describe("Workspace", () => {
       expect(useCases.listDeckTree).toHaveBeenCalledOnce();
     });
     expect(useCases.listDecks).toHaveBeenCalledOnce();
+  });
+
+  it("reads the library's index beside the home screen's decks, not once they are in", async () => {
+    let listed: (decks: Deck[]) => void = () => {};
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(() => new Promise<Deck[]>((resolve) => (listed = resolve))),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
+    });
+    renderWorkspace(useCases);
+    await waitFor(() => expect(useCases.listLibraryDecks).toHaveBeenCalledOnce());
+    expect(useCases.getCourseSummary).not.toHaveBeenCalled();
+
+    act(() => listed([courseDeck]));
+
+    await screen.findByRole("complementary", { name: "Your courses" });
+    expect(useCases.getCourseSummary).toHaveBeenCalledOnce();
+    expect(useCases.getCourseSummary).toHaveBeenCalledWith(courseDeck);
+    expect(useCases.listLibraryDecks).toHaveBeenCalledOnce();
+  });
+
+  it("reads the courses to continue while the instance is checked, once for the strip", async () => {
+    let checked: () => void = () => {};
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [courseDeck]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
+      getPreferences: vi.fn(async () => ({
+        ...DEFAULT_PREFERENCES,
+        invalidDataPolicy: "block-instance" as const,
+      })),
+      validateInstance: vi.fn(
+        (instanceUrl: string) =>
+          new Promise<ValidationReport>(
+            (resolve) =>
+              (checked = () =>
+                resolve({ instanceUrl, violationCount: 0, conforms: true, documents: [] })),
+          ),
+      ),
+    });
+    renderWorkspace(useCases);
+
+    await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalledWith(courseDeck));
+    expect(screen.queryByRole("heading", { name: "Decks" })).not.toBeInTheDocument();
+    act(() => checked());
+
+    await screen.findByRole("complementary", { name: "Your courses" });
+    expect(useCases.getCourseSummary).toHaveBeenCalledOnce();
   });
 
   it("offers the instance picker with several instances, then opens one", async () => {
@@ -2516,6 +2567,7 @@ describe("Workspace", () => {
         listInstances: vi.fn(async () => [instanceA]),
         listDecks: vi.fn(async () => [courseDeck]),
         getCourse: vi.fn(async () => makeCourse()),
+        getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
         ...overrides,
       });
     }
@@ -2572,7 +2624,11 @@ describe("Workspace", () => {
         routeToHash({ screen: "home", instanceUrl: instanceA.url }),
       );
       renderWorkspace(useCases);
-      fireEvent.click(await screen.findByRole("button", { name: "Start the course" }));
+      const start = await screen.findByRole("button", { name: "Start the course" });
+      // Effects run after the next frame: the list's (Workspace's deck lookup)
+      // has run before a learner's click, though the library's index is in first.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
+      fireEvent.click(start);
 
       expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(courseRoute));
@@ -2723,6 +2779,31 @@ describe("Workspace", () => {
       expect(await screen.findByRole("heading", { name: "Step 2 of 2" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(chapterRoute));
       expect(screen.queryByRole("button", { name: "Start the final review" })).toBeNull();
+    });
+
+    it("opens a course from the strip on the course read behind it, not waiting for it again", async () => {
+      const getCourse = vi
+        .fn<UseCases["getCourse"]>()
+        .mockResolvedValueOnce(makeCourse())
+        .mockReturnValue(new Promise<never>(() => undefined));
+      const useCases = courseUseCases({
+        listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+        getCourse,
+      });
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "home", instanceUrl: instanceA.url }),
+      );
+      renderWorkspace(useCases);
+      const strip = await screen.findByRole("complementary", { name: "Your courses" });
+      await waitFor(() => expect(getCourse).toHaveBeenCalledOnce());
+      await act(() => getCourse.mock.results[0]!.value);
+
+      fireEvent.click(within(strip).getByRole("link", { name: "Solid fundamentals" }));
+
+      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
     });
 
     it("falls back to the deck's page for a deck that is no copy of a course", async () => {
