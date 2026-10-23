@@ -2468,6 +2468,45 @@ describe("Workspace", () => {
       expect(window.location.hash).toContain("#/browse?");
     });
 
+    it("shows and names a card in its deck's card language first, the deck's title as before", async () => {
+      const swedish = {
+        ...deck,
+        title: { en: "Kanji N5", sv: "Kanji N5 (sv)" },
+        cardLanguage: "sv",
+      };
+      const words = { ...card, front: { en: "water", sv: "vatten" }, back: { ja: "水" } };
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({
+          screen: "card",
+          instanceUrl: instanceA.url,
+          deckUrl: deck.url,
+          cardUrl: card.url,
+        }),
+      );
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [swedish]),
+          listCards: vi.fn(async () => [words]),
+        }),
+      );
+      expect(await screen.findByRole("heading", { name: "Card" })).toBeInTheDocument();
+      const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+      expect(trail.getAllByRole("link").map((link) => link.textContent)).toEqual([
+        "Decks",
+        "Kanji N5",
+        "Browser",
+        "vatten",
+      ]);
+      expect(trail.getByRole("link", { name: "vatten" }).closest("[lang]")).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      expect(document.querySelector(".card-front")).toHaveTextContent("vatten");
+    });
+
     it("sends a deep link to an unknown card back to the Browser", async () => {
       window.history.replaceState(
         null,

@@ -314,6 +314,38 @@ describe("CramContainer", () => {
     ]);
   });
 
+  it("shows the card up in its deck's card language first, each deck's own", async () => {
+    const swedish: Deck = { ...capitals, cardLanguage: "sv" };
+    const rivers: Deck = {
+      ...capitals,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      title: { en: "Rivers" },
+      cardsDocumentUrl: `${instance.url}decks/deck-2.ttl`,
+      reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`,
+    };
+    const both = (card: Card) => ({
+      ...card,
+      front: { en: card.front.en, sv: `${card.front.en} (sv)` },
+    });
+    const nile = { ...both(cardOf("r-1", "Nile")), url: `${rivers.cardsDocumentUrl}#r-1` };
+    const useCases = makeUseCasesFake({
+      getCardProgress: vi.fn(async () =>
+        reportOf(
+          progressOf(rivers, [hard(nile, 6, 6)]),
+          progressOf(swedish, [hard(both(france), 4, 8)]),
+        ),
+      ),
+    });
+    renderCram(useCases, null);
+    // Rivers states no card language: its card is in the app's.
+    expect(await screen.findByRole("heading", { name: "Cram: Rivers" })).toBeInTheDocument();
+    expect(screen.getByText("Nile")).toBeInTheDocument();
+    answer("4 — Good");
+    expect(screen.getByRole("heading", { name: "Cram: Capitals" })).toBeInTheDocument();
+    expect(screen.getByText("France (sv)")).toHaveAttribute("lang", "sv");
+  });
+
   it("says when no deck has a leech to cram", async () => {
     const useCases = makeUseCasesFake({
       getCardProgress: vi.fn(async () => reportOf(progressOf(capitals, [hard(spain, 3, 3)]))),

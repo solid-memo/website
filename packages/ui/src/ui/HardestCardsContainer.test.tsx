@@ -117,6 +117,37 @@ describe("HardestCardsContainer", () => {
     );
   });
 
+  it("names each deck's cards in its own card language first, its title as before", async () => {
+    const swedish = { ...rivers, title: { en: "Rivers", sv: "Floder" }, cardLanguage: "sv" };
+    const nilen = cardOf(swedish, "r-1", "Egypt", { front: { en: "Egypt", sv: "Egypten" } });
+    const asked = cardOf(swedish, "q-1", "Spain", {
+      front: { en: "Spain", sv: "Spanien" },
+      distractors: [{ id: "q-1-d1", text: { en: "Barcelona", sv: "Barcelona (sv)" } }],
+    });
+    const useCases = makeUseCasesFake({
+      getCardProgress: vi.fn(async () =>
+        reportOf(
+          progressOf(swedish, {
+            hardest: { reviews: 9, cards: [hard(nilen, 4, 5)] },
+            courseAnswers: 1,
+            confusions: [{ card: asked, distractor: asked.distractors![0]!, picks: 1 }],
+          }),
+          progressOf(capitals, { hardest: { reviews: 8, cards: [hard(paris, 4, 8)] } }),
+        ),
+      ),
+    });
+    withQueries(<HardestCardsContainer useCases={useCases} instance={INSTANCE} />);
+    const leeches = await screen.findByRole("list", { name: "Leeches across your decks" });
+    expect(within(leeches).getByRole("link", { name: "Egypten" })).toHaveAttribute("lang", "sv");
+    expect(within(leeches).getByRole("link", { name: "France" })).not.toHaveAttribute("lang");
+    expect(leeches).toHaveTextContent("a leech, in Rivers");
+    withQueries(<HardestCardsContainer useCases={useCases} instance={INSTANCE} deck={swedish} />);
+    const confused = await screen.findByRole("list", { name: "Most-confused options" });
+    expect(within(confused).getByRole("listitem")).toHaveTextContent(
+      "Spanien confused with Barcelona (sv) 1 time",
+    );
+  });
+
   it("says when no card is a leech, but nothing before the first review", async () => {
     const none = makeUseCasesFake({
       getCardProgress: vi.fn(async () =>

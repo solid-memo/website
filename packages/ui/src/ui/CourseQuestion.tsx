@@ -8,13 +8,14 @@ import type { Choice } from "@solid-memo/domain/course";
 import { isMarkdown, promptSides, type CardContent } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import { CardFace } from "./CardFace";
+import { useCardText } from "./cardLanguage";
 import { DataText, plainDataText } from "./DataText";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { inDataRegion } from "./Markdown";
 import { markdownBlocks } from "./markdownCache";
 import { MultipleChoice } from "./MultipleChoice";
-import { ReaderText } from "./ReaderText";
+import { CardText } from "./ReaderText";
 import { useStopwatch } from "./stopwatch";
 
 /** A question checked: the option chosen, and what the answer did to its card. */
@@ -71,7 +72,8 @@ export function CourseQuestion({
   onCheck: (choice: Choice, recallMillis: number) => void;
   onNext: () => void;
 }) {
-  const { t, readerText } = useI18n();
+  const { t } = useI18n();
+  const { cardText } = useCardText();
   const questionId = useId();
   const nameId = useId();
   const markdown = isMarkdown(card.textFormat);
@@ -81,7 +83,7 @@ export function CourseQuestion({
   const { question, answer: rightAnswer } = promptSides({ card, direction: "front-to-back" });
   const correct = choices.find((choice) => choice.correct)!;
   const checked = answer !== null;
-  const shownQuestion = readerText(question.text);
+  const shownQuestion = cardText(question.text);
   const blocks = markdown ? markdownBlocks(shownQuestion) : null;
   // A question that is one paragraph is all in its name: no description repeats it.
   const singleParagraph = blocks !== null && blocks.length === 1 && blocks[0]!.type === "paragraph";
@@ -91,7 +93,7 @@ export function CourseQuestion({
     if (question.imageUrl === undefined) return [];
     if (!isHttpUrl(question.imageUrl)) return [t("cardFace.notWebUrl")];
     const description =
-      question.imageDescription === undefined ? "" : readerText(question.imageDescription);
+      question.imageDescription === undefined ? "" : cardText(question.imageDescription);
     return [description !== "" ? description : t("cardFace.frontPictureAlt")];
   }
 
@@ -134,7 +136,7 @@ export function CourseQuestion({
             ...pictureName(),
             ...(question.label === undefined
               ? []
-              : [plainDataText(readerText(question.label), true)]),
+              : [plainDataText(cardText(question.label), true)]),
             plainDataText(shownQuestion, true),
           ].join(" ")}
         </span>
@@ -165,7 +167,7 @@ export function CourseQuestion({
               </div>
             ) : (
               <p class="course-why">
-                {t("courseQuestion.why")} <ReaderText text={answer.choice.note} />
+                {t("courseQuestion.why")} <CardText text={answer.choice.note} />
               </p>
             ))}
           <div class="course-right-answer">

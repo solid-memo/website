@@ -6,14 +6,18 @@ import { cardLabel, cardLabelText, isMarkdown, type CardContent } from "@solid-m
 import type { LangText } from "@solid-memo/domain/langText";
 import { labelText } from "@solid-memo/markdown/plainText";
 import { breakable } from "./breakable";
+import { useCardText } from "./cardLanguage";
 import { useI18n, type I18n } from "./i18n";
 import { MarkdownBlocks, MarkdownInlines } from "./Markdown";
 import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache";
 
 /**
- * Text from data — a card's side, a note, a step's theory — in the
- * reader's language, marked with that language when it is not the
- * page's, as ReaderText does (docs/markdown.md). Text not in Markdown
+ * Text from data — a card's side, a note, a chapter's description — in
+ * the reader's language, marked with that language when it is not the
+ * page's, as ReaderText does (docs/markdown.md). Under a deck's
+ * CardLanguage, it is card text, shown in the deck's card language first
+ * (useCardText); so are DataLine and DataLineContent. A chapter's
+ * description is shown outside one. Text not in Markdown
  * (`markdown` false) renders exactly as plain text always has: a
  * paragraph of the text as written, which may wrap after a slash
  * (`breaks`, breakable).
@@ -34,9 +38,9 @@ export function DataText({
   breaks?: boolean;
   class?: string;
 }) {
-  const { readerText, readerLang } = useI18n();
-  const shown = readerText(text);
-  const lang = readerLang(text);
+  const { cardText, cardLang } = useCardText();
+  const shown = cardText(text);
+  const lang = cardLang(text);
   const blocks = markdown ? markdownBlocks(shown) : null;
   if (blocks === null) {
     return (
@@ -62,7 +66,8 @@ export function DataText({
 
 /**
  * Text from data that is prose of its own, such as a step's theory: a
- * `div` of the given class, in the reader's language as DataText is.
+ * `div` of the given class, in the reader's language as ReaderText is
+ * (never a deck's card language: theory is no card's text).
  * Plain text is split into paragraphs at its blank lines; Markdown is
  * shown a chunk at a time, `chunk` (0 first, below useProseChunks), the
  * chunks split at its top-level thematic breaks, which show nothing
@@ -118,16 +123,16 @@ export function useProseChunks(text: LangText, markdown: boolean): number {
  * language.
  */
 export function DataLineContent({ text, markdown }: { text: LangText; markdown: boolean }) {
-  const { readerText } = useI18n();
-  const shown = readerText(text);
+  const { cardText } = useCardText();
+  const shown = cardText(text);
   const phrases = markdown ? markdownPhrases(shown) : null;
   return phrases === null ? <>{breakable(shown)}</> : <MarkdownInlines nodes={phrases} />;
 }
 
 /** DataLineContent in a span marked with its language, when that is not the page's. */
 export function DataLine({ text, markdown }: { text: LangText; markdown: boolean }) {
-  const { readerLang } = useI18n();
-  const lang = readerLang(text);
+  const { cardLang } = useCardText();
+  const lang = cardLang(text);
   const content = <DataLineContent text={text} markdown={markdown} />;
   return lang === undefined ? content : <span lang={lang}>{content}</span>;
 }

@@ -10,6 +10,7 @@ import {
   type CardTextPart,
   type Distractor,
 } from "@solid-memo/domain/deck";
+import { useCardText } from "./cardLanguage";
 import { cardName } from "./DataText";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -113,11 +114,12 @@ export function CardScreen({
   /** Where the editor's edits are kept, by its owner, for the editor shown next of the same card. */
   keep?: { current: CardEdits | null };
 }) {
-  const { t, locale, readerText } = useI18n();
+  const { t } = useI18n();
+  const { cardText, cardLanguages } = useCardText();
   const askFirst = useAskFirst();
   const hints = useMemo(() => cardLanguageHints(languages, deckTitle), [languages, deckTitle]);
-  const startDraft = () =>
-    draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
+  // Each text starts in the language it is shown in elsewhere: the deck's card language first.
+  const startDraft = () => draftOf(card, cardLanguages(), { defaults: hints.defaults });
   const [draft, setDraft] = useState(() => keep?.current?.draft ?? startDraft());
   /** The draft as it started, or as last saved: what is not saved differs from it. */
   const [pristine, setPristine] = useState(keep?.current?.pristine ?? draft);
@@ -192,7 +194,7 @@ export function CardScreen({
     if (busy) return;
     askFirst({
       heading: t("card.removeHeading"),
-      text: t("card.removeConfirm", { card: cardName(card, readerText) }),
+      text: t("card.removeConfirm", { card: cardName(card, cardText) }),
       action: t("card.removeAction"),
       onConfirm: onRemove,
     });

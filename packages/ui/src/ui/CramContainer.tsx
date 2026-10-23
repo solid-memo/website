@@ -16,6 +16,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { leechesOf } from "./HardestCards";
 import { Loading } from "./Loading";
 import { StudyScreen } from "./StudyScreen";
+import { CardLanguage } from "./cardLanguage";
 import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
@@ -65,7 +66,8 @@ function startOf(
  * is refreshed and no cached review state is touched, so no due date,
  * statistic or leech changes. A card stops being a leech only by being
  * studied. Hence no interval is shown for a grade, and nothing can be
- * undone. A deck copied from a release still says where a mistake in a
+ * undone. The card up is shown in its deck's card language first
+ * (CardLanguage), each deck's own when every deck's are crammed. A deck copied from a release still says where a mistake in a
  * card is reported (useReportTarget), which only reads.
  */
 export function CramContainer({
@@ -131,21 +133,23 @@ export function CramContainer({
 
   const { prompts, position, putBack, answerScale } = cram;
   return (
-    <StudyScreen
-      deckName={shown && readerText(shown.title)}
-      deckLang={shown && readerLang(shown.title)}
-      deckHref={shown && deckHref(instance.url, shown.url)}
-      report={report}
-      prompt={up?.prompt ?? null}
-      position={position + 1}
-      total={prompts.length}
-      putBack={putBack}
-      answerScale={answerScale}
-      busy={false}
-      error={null}
-      onAnswer={answer}
-      onExit={onExit}
-      cram={{ onAgain: () => setCram(startOf(cram.leeches, answerScale, random)) }}
-    />
+    <CardLanguage language={shown?.cardLanguage}>
+      <StudyScreen
+        deckName={shown && readerText(shown.title)}
+        deckLang={shown && readerLang(shown.title)}
+        deckHref={shown && deckHref(instance.url, shown.url)}
+        report={report}
+        prompt={up?.prompt ?? null}
+        position={position + 1}
+        total={prompts.length}
+        putBack={putBack}
+        answerScale={answerScale}
+        busy={false}
+        error={null}
+        onAnswer={answer}
+        onExit={onExit}
+        cram={{ onAgain: () => setCram(startOf(cram.leeches, answerScale, random)) }}
+      />
+    </CardLanguage>
   );
 }

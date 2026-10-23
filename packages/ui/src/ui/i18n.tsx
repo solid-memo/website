@@ -71,6 +71,19 @@ function lookup(messages: Messages, key: string): Message | undefined {
 
 const PLACEHOLDER = /\{(\w+)\}/g;
 
+/**
+ * How a deck's card text is shown: as `readerText` and `readerLang`, but
+ * in the deck's card language first when it has one (cardReader).
+ */
+export interface CardReader {
+  /** Card text in the deck's card language when the card has it, else as `readerText`. */
+  cardText(text: LangText): string;
+  /** The language to mark `cardText(text)` with, as `readerLang`. */
+  cardLang(text: LangText): string | undefined;
+  /** The languages card text is shown in, first to last: what a card's editor starts each text in. */
+  cardLanguages(): string[];
+}
+
 /** The app's own text in one language, and the language-dependent formatting. */
 export interface I18n {
   locale: Locale;
@@ -91,6 +104,16 @@ export interface I18n {
    * or unknown (untagged card text).
    */
   readerLang(text: LangText): string | undefined;
+  /**
+   * How the card text of a deck whose card language is `language` is
+   * shown: in that language first, then as `readerText` (this language,
+   * the browser's, English, the first the text has). Only a card's text
+   * follows it (its sides, notes, labels, picture descriptions and
+   * wrong options), never a deck's title, description or keywords.
+   * With no language, the same as `readerText` and `readerLang`. A
+   * component under a deck's CardLanguage takes it with useCardText.
+   */
+  cardReader(language: string | undefined): CardReader;
   /**
    * The language to mark text tagged `tag` with: as `readerLang`, for a
    * tag already known; undefined, too, for text in no language ("zxx"),
@@ -280,6 +303,17 @@ export function createI18n(locale: Locale, appName?: string): I18n {
     },
     readerLang(text) {
       return partLang(shownTag(text, [locale, ...navigator.languages]));
+    },
+    cardReader(language) {
+      const order = () =>
+        language === undefined
+          ? [locale, ...navigator.languages]
+          : [language, locale, ...navigator.languages];
+      return {
+        cardText: (text) => shown(text, order()),
+        cardLang: (text) => partLang(shownTag(text, order())),
+        cardLanguages: order,
+      };
     },
     partLang,
     languageParts,

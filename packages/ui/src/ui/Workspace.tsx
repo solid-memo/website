@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { Fragment, type ComponentChildren } from "preact";
+import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Course, UseCases } from "@solid-memo/application/useCases";
@@ -64,14 +64,19 @@ import {
 } from "./router";
 import { ValidationContainer } from "./ValidationContainer";
 import { WebIdDocumentContainer } from "./WebIdDocumentContainer";
-import { useI18n, type I18n } from "./i18n";
+import { CardLanguage } from "./cardLanguage";
+import { useI18n, type CardReader, type I18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
 import { MAIN_ID } from "./SkipLink";
 
-/** The breadcrumbs' names of what the route has open, each "" (or no language) when nothing is. */
+/**
+ * The breadcrumbs' names of what the route has open, each "" (or no
+ * language) when nothing is: a card of the open deck named in the deck's
+ * card language first (`cards`), the rest as `readerText` names them.
+ */
 function crumbNamesOf(
   open: {
     deck: Deck | null;
@@ -82,16 +87,17 @@ function crumbNamesOf(
   },
   readerText: I18n["readerText"],
   readerLang: I18n["readerLang"],
+  { cardText, cardLang }: CardReader,
 ): CrumbNames {
   const { deck, card, libraryDeck, libraryCard, chapter } = open;
   return {
     deck: deck === null ? "" : readerText(deck.title),
-    card: card === null ? "" : cardName(card, readerText),
+    card: card === null ? "" : cardName(card, cardText),
     libraryDeck: libraryDeck === null ? "" : readerText(libraryDeck.title),
     libraryCard: libraryCard === null ? "" : cardName(libraryCard, readerText),
     chapter: chapter === null ? "" : readerText(chapter.title),
     deckLang: deck === null ? undefined : readerLang(deck.title),
-    cardLang: card === null ? undefined : readerLang(cardNameText(card, readerText)),
+    cardLang: card === null ? undefined : cardLang(cardNameText(card, cardText)),
     libraryDeckLang: libraryDeck === null ? undefined : readerLang(libraryDeck.title),
     libraryCardLang:
       libraryCard === null ? undefined : readerLang(cardNameText(libraryCard, readerText)),
@@ -252,7 +258,7 @@ export function Workspace({
   /** What the main content starts with, above the offer of a guest's study (to a user logged in) and the instance's notices. */
   children?: ComponentChildren;
 }) {
-  const { t, tx, readerText, readerLang, errorText } = useI18n();
+  const { t, tx, readerText, readerLang, cardReader, errorText } = useI18n();
   const queryClient = useQueryClient();
   const { route, change, navigate, replace } = useHashRoute();
   const screenRef = useScreenFocus(route, change);
@@ -593,6 +599,7 @@ export function Workspace({
             },
             readerText,
             readerLang,
+            cardReader(activeDeck?.cardLanguage),
           ),
           t,
         );
@@ -864,35 +871,37 @@ export function Workspace({
         );
       case "browser":
         return (
-          <BrowserContainer
-            useCases={useCases}
-            deck={activeDeck!}
-            deckHref={deckHref(instanceUrl!, deckUrl!)}
-            page={route.page ?? 1}
-            languageFilter={route.languages}
-            addCardHref={routeToHash({
-              screen: "cardCreator",
-              instanceUrl: instanceUrl!,
-              deckUrl: deckUrl!,
-            })}
-            cardHref={(card) =>
-              routeToHash({
-                screen: "card",
+          <CardLanguage language={activeDeck!.cardLanguage}>
+            <BrowserContainer
+              useCases={useCases}
+              deck={activeDeck!}
+              deckHref={deckHref(instanceUrl!, deckUrl!)}
+              page={route.page ?? 1}
+              languageFilter={route.languages}
+              addCardHref={routeToHash({
+                screen: "cardCreator",
                 instanceUrl: instanceUrl!,
                 deckUrl: deckUrl!,
-                cardUrl: card.url,
-              })
-            }
-            onPageChange={(page) => replace({ ...route, page })}
-            onLanguageFilterChange={(languages) =>
-              replace({
-                screen: "browser",
-                instanceUrl: route.instanceUrl,
-                deckUrl: route.deckUrl,
-                ...(languages === undefined ? {} : { languages }),
-              })
-            }
-          />
+              })}
+              cardHref={(card) =>
+                routeToHash({
+                  screen: "card",
+                  instanceUrl: instanceUrl!,
+                  deckUrl: deckUrl!,
+                  cardUrl: card.url,
+                })
+              }
+              onPageChange={(page) => replace({ ...route, page })}
+              onLanguageFilterChange={(languages) =>
+                replace({
+                  screen: "browser",
+                  instanceUrl: route.instanceUrl,
+                  deckUrl: route.deckUrl,
+                  ...(languages === undefined ? {} : { languages }),
+                })
+              }
+            />
+          </CardLanguage>
         );
       case "cardCreator":
         return (
@@ -914,7 +923,7 @@ export function Workspace({
           deckUrl: deckUrl!,
         } as const;
         return (
-          <Fragment key={activeCard!.url}>
+          <CardLanguage key={activeCard!.url} language={activeDeck!.cardLanguage}>
             <CardContainer
               useCases={useCases}
               deck={activeDeck!}
@@ -927,17 +936,19 @@ export function Workspace({
               deck={activeDeck!}
               card={activeCard!}
             />
-          </Fragment>
+          </CardLanguage>
         );
       }
       case "study":
         return (
-          <StudyContainer
-            useCases={useCases}
-            instance={activeInstance!}
-            deck={activeDeck!}
-            onExit={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
-          />
+          <CardLanguage language={activeDeck!.cardLanguage}>
+            <StudyContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              deck={activeDeck!}
+              onExit={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
+            />
+          </CardLanguage>
         );
       case "cram":
         return (
@@ -972,29 +983,32 @@ export function Workspace({
           />
         );
       case "courseChapter":
+        // The cards of the chapter's questions; its title and theory are not card text.
         return (
-          <ChapterPlayerContainer
-            key={route.chapterUrl}
-            useCases={useCases}
-            instance={activeInstance!}
-            course={activeCourse!}
-            chapter={activeChapter!}
-            onReview={() => navigate({ ...route, screen: "courseReview" })}
-          />
+          <CardLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
+            <ChapterPlayerContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              course={activeCourse!}
+              chapter={activeChapter!}
+              onReview={() => navigate({ ...route, screen: "courseReview" })}
+            />
+          </CardLanguage>
         );
       case "courseReview":
         return (
-          <ChapterReviewContainer
-            key={route.chapterUrl}
-            useCases={useCases}
-            instance={activeInstance!}
-            course={activeCourse!}
-            chapter={activeChapter!}
-            onCompleted={(finishedCourse) => {
-              setJustCompleted({ chapterUrl: route.chapterUrl, finishedCourse });
-              navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
-            }}
-          />
+          <CardLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
+            <ChapterReviewContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              course={activeCourse!}
+              chapter={activeChapter!}
+              onCompleted={(finishedCourse) => {
+                setJustCompleted({ chapterUrl: route.chapterUrl, finishedCourse });
+                navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
+              }}
+            />
+          </CardLanguage>
         );
       case "preferences":
         return (

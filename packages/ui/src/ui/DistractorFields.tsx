@@ -17,6 +17,7 @@ import {
 import { shownTag, type LangText } from "@solid-memo/domain/langText";
 import { OPTION, PROSE } from "@solid-memo/markdown/problems";
 import { useAskFirst } from "./askFirst";
+import { useCardText } from "./cardLanguage";
 import { DataLine, plainDataText } from "./DataText";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
@@ -96,7 +97,8 @@ export function DistractorFields({
   /** Nothing, or, for a change saved at once, whether it was saved. */
   onChange: (distractors: Distractor[]) => void | Promise<boolean>;
 }) {
-  const { t, readerText, languageLabel, errorText } = useI18n();
+  const { t, languageLabel, errorText } = useI18n();
+  const { cardText } = useCardText();
   const askFirst = useAskFirst();
   const [editing, setEditing] = useState<Editing | null>(null);
   /** Why the last Delete was refused, until the next change. */
@@ -125,8 +127,7 @@ export function DistractorFields({
       ?.focus();
   }, [missing]);
 
-  const named = (distractor: Distractor) =>
-    plainDataText(readerText(distractor.text), markdown, 60);
+  const named = (distractor: Distractor) => plainDataText(cardText(distractor.text), markdown, 60);
   const editButtonId = (id: string) => `distractor-${id}-edit`;
   const backTag = shownTag(back) ?? null;
 

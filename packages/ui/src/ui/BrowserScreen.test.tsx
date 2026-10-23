@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { BrowserScreen, CARDS_PER_PAGE } from "./BrowserScreen";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import { CardLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
 import { statusTexts } from "../test/liveRegions";
 import { recentLanguages, rememberLanguage } from "./remembered";
@@ -531,6 +532,30 @@ describe("BrowserScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove card 水" }));
     expect(confirm).toHaveBeenCalledWith('Remove the card "水"? This cannot be undone.');
     expect(props.onRemoveCard).toHaveBeenCalledWith(card);
+  });
+
+  it("shows and names the cards in the deck's card language, the deck's title as before", () => {
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    const words: Card = {
+      ...card,
+      front: { en: "house", sv: "hus" },
+      back: { en: "a building", sv: "en byggnad" },
+    };
+    const props = renderProps({
+      deck: { ...deck, title: { en: "Words", sv: "Ord" }, cardLanguage: "sv" },
+      cards: [words],
+    });
+    render(
+      <CardLanguage language="sv">
+        <BrowserScreen {...props} />
+      </CardLanguage>,
+    );
+    expect(screen.getByRole("link", { name: "Words" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "hus" })).toBeInTheDocument();
+    expect(screen.getByText("en byggnad")).toHaveAttribute("lang", "sv");
+    fireEvent.click(screen.getByRole("button", { name: "Remove card hus" }));
+    expect(confirm).toHaveBeenCalledWith('Remove the card "hus"? This cannot be undone.');
   });
 
   it("does not remove a card when the confirmation is declined", () => {
