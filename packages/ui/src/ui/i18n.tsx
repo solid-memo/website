@@ -9,7 +9,7 @@ import type { Violation } from "@solid-memo/domain/validation";
 import { AppError, type ErrorVars } from "@solid-memo/domain/appError";
 import { isolated, shown, shownTag, type LangText } from "@solid-memo/domain/langText";
 import { NO_LANGUAGE } from "@solid-memo/domain/languageTag";
-import { DEFAULT_LOCALE, type Locale } from "@solid-memo/domain/locale";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@solid-memo/domain/locale";
 import en from "../i18n/en.json";
 
 /**
@@ -37,8 +37,9 @@ export type ErrorText = string | VNode;
 const NETWORK_FAILURE = /fetch|network|load failed/i;
 
 /**
- * The key of every message in English, the language every other is
- * checked against: "deckList.heading", a plural message's included.
+ * The key of every message in an English catalog, the language every
+ * other is checked against: "deckList.heading", a plural message's
+ * included.
  */
 type KeysOf<T, Prefix extends string = ""> = {
   [K in keyof T & string]: T[K] extends string | { other: string }
@@ -46,38 +47,91 @@ type KeysOf<T, Prefix extends string = ""> = {
     : KeysOf<T[K], `${Prefix}${K}.`>;
 }[keyof T & string];
 
-export type MessageKey = KeysOf<typeof en>;
-
 /**
- * The other languages' messages, each fetched the first time the page
- * speaks it: an `import()`, so a chunk of its own, and a visitor fetches
- * only the language they read (docs/i18n.md). English is at hand from the
- * start, as the fallback.
+ * The English catalogs whose keys `t` takes, by who holds them: `ui`'s
+ * own here, and the Studio's, which apps/studio adds to this interface,
+ * so its keys are typed wherever the Studio's code is.
  */
-const OTHER_CATALOGS: Record<Exclude<Locale, "en">, () => Promise<{ default: Messages }>> = {
-  sv: () => import("../i18n/sv.json"),
-  ko: () => import("../i18n/ko.json"),
-  de: () => import("../i18n/de.json"),
-  es: () => import("../i18n/es.json"),
-  fr: () => import("../i18n/fr.json"),
-};
-
-/** The messages of each language fetched so far. */
-const catalogs: Partial<Record<Locale, Messages>> = { en };
-
-/**
- * Fetch the messages of `locale`, so that `createI18n(locale)` speaks
- * it; rejects when they cannot be fetched. Until then, it speaks English.
- */
-export async function loadLocale(locale: Locale): Promise<void> {
-  if (catalogs[locale] !== undefined) return;
-  // English is there from the start, so this is another language.
-  catalogs[locale] = (await OTHER_CATALOGS[locale as Exclude<Locale, "en">]()).default;
+export interface EnglishCatalogs {
+  ui: typeof en;
 }
 
-/** The message at a dotted key in `locale`; undefined when there is none. */
+/** The key of every message: `ui`'s, and the Studio's where its code is. */
+export type MessageKey = {
+  [Holder in keyof EnglishCatalogs]: KeysOf<EnglishCatalogs[Holder]>;
+}[keyof EnglishCatalogs];
+
+/**
+ * A set of messages in each of the app's languages: English at hand, the
+ * others each fetched the first time the page speaks it, an `import()`,
+ * so a chunk of its own, and a visitor fetches only the language they
+ * read (docs/i18n.md). `ui`'s own, and the Studio's, which come with its
+ * chunk (addCatalogs).
+ */
+export interface Catalogs {
+  en: Messages;
+  others: Record<Exclude<Locale, "en">, () => Promise<{ default: Messages }>>;
+}
+
+/** A set of catalogs, and its messages in each language fetched so far. */
+interface Source {
+  catalogs: Catalogs;
+  fetched: Partial<Record<Locale, Messages>>;
+}
+
+/** `ui`'s own messages. */
+const UI_CATALOGS: Catalogs = {
+  en,
+  others: {
+    sv: () => import("../i18n/sv.json"),
+    ko: () => import("../i18n/ko.json"),
+    de: () => import("../i18n/de.json"),
+    es: () => import("../i18n/es.json"),
+    fr: () => import("../i18n/fr.json"),
+  },
+};
+
+/** Where a message is looked for, first to last: `ui`'s, then those added. */
+const sources: Source[] = [{ catalogs: UI_CATALOGS, fetched: { en } }];
+
+async function fetchInto(source: Source, locale: Locale): Promise<void> {
+  if (source.fetched[locale] !== undefined) return;
+  // English is there from the start, so this is another language.
+  source.fetched[locale] = (
+    await source.catalogs.others[locale as Exclude<Locale, "en">]()
+  ).default;
+}
+
+/**
+ * Fetch the messages of `locale`, from every set, so that
+ * `createI18n(locale)` speaks it; rejects when they cannot be fetched.
+ * Until then, a set whose messages in it are not here speaks English.
+ */
+export async function loadLocale(locale: Locale): Promise<void> {
+  // A set added meanwhile (the Studio's) is fetched in it too.
+  while (!sources.every((source) => source.fetched[locale] !== undefined))
+    await Promise.all(sources.map((source) => fetchInto(source, locale)));
+}
+
+/**
+ * Add a set of catalogs (the Studio's, once its chunk is here), and fetch
+ * its messages in each language the page has fetched `ui`'s in; rejects
+ * when they cannot be fetched.
+ */
+export async function addCatalogs(catalogs: Catalogs): Promise<void> {
+  const source: Source = { catalogs, fetched: { en: catalogs.en } };
+  sources.push(source);
+  const fetched = LOCALES.filter((locale) => sources[0]!.fetched[locale] !== undefined);
+  await Promise.all(fetched.map((locale) => fetchInto(source, locale)));
+}
+
+/** The message at a dotted key in `locale`, from the first set that has it; undefined when none does. */
 function find(locale: Locale, key: string): Message | undefined {
-  return lookup(catalogs[locale] ?? en, key);
+  for (const { catalogs, fetched } of sources) {
+    const message = lookup(fetched[locale] ?? catalogs.en, key);
+    if (message !== undefined) return message;
+  }
+  return undefined;
 }
 
 function isPlural(node: Message | Messages): node is Plural {

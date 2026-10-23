@@ -22,9 +22,9 @@ import { siteConfig, siteHtml, siteVersion, type SiteConfig } from "./config";
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
  * no way for data to become markup, the Studio in a chunk of its own,
- * each language's messages but English's in one of their own, a Content
- * Security Policy that lets the page's own scripts run, and the docs as
- * pages that run none.
+ * its messages with it, each language's messages but English's in one of
+ * their own, a Content Security Policy that lets the page's own scripts
+ * run, and the docs as pages that run none.
  */
 
 /** Ways script can turn a string into markup. */
@@ -54,7 +54,7 @@ const DOCS_PAGES = DOCS_SOURCES.map((name) =>
  * it weighs, with room for a little more. A change that passes it says
  * why the page needs the weight, and raises this in the same commit.
  */
-const UP_FRONT_BUDGET_KB = 420;
+const UP_FRONT_BUDGET_KB = 405;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -132,10 +132,12 @@ function upFront(): Set<string> {
   return fileNames;
 }
 
-describe("the Studio", () => {
-  const isStudio = (id: string) => id.includes("/apps/studio/src/");
-  const studioChunks = () => chunks.filter((chunk) => Object.keys(chunk.modules).some(isStudio));
+/** The Studio's code: anything under apps/studio but its messages in a language other than English. */
+const isStudio = (id: string) =>
+  id.includes("/apps/studio/src/") && !/\/apps\/studio\/src\/i18n\/(?!en\.)/.test(id);
+const studioChunks = () => chunks.filter((chunk) => Object.keys(chunk.modules).some(isStudio));
 
+describe("the Studio", () => {
   it("is a chunk of its own, which the page fetches only when a Studio route opens (docs/studio.md)", () => {
     const studio = studioChunks();
     expect(studio).toHaveLength(1);
@@ -160,19 +162,38 @@ describe("the Studio", () => {
 });
 
 describe("the messages", () => {
-  const catalog = (id: string) => /\/packages\/ui\/src\/i18n\/(\w+)\.json$/.exec(id)?.[1];
-  const catalogsIn = (chunk: Rolldown.OutputChunk) =>
-    Object.keys(chunk.modules).flatMap((id) => catalog(id) ?? []);
+  /** The languages of the catalogs under `folder` (packages/ui, apps/studio) that a chunk holds. */
+  const catalogsIn = (folder: string, chunk: Rolldown.OutputChunk) =>
+    Object.keys(chunk.modules).flatMap(
+      (id) => new RegExp(`/${folder}/src/i18n/(\\w+)\\.json$`).exec(id)?.[1] ?? [],
+    );
 
-  it("come up front in English alone, each other language a chunk of its own, fetched when spoken (docs/i18n.md)", () => {
-    expect([...upFront()].flatMap((fileName) => catalogsIn(chunkNamed(fileName)))).toEqual(["en"]);
-    const others = chunks.filter((chunk) => catalogsIn(chunk).some((locale) => locale !== "en"));
-    expect(others.map(catalogsIn).sort()).toEqual([["de"], ["es"], ["fr"], ["ko"], ["sv"]]);
+  /** Each chunk holding a catalog under `folder` in a language other than English, by its language. */
+  function otherLanguages(folder: string) {
+    const others = chunks.filter((chunk) =>
+      catalogsIn(folder, chunk).some((locale) => locale !== "en"),
+    );
     for (const chunk of others) {
       expect(chunk.isDynamicEntry).toBe(true);
       expect(upFront().has(chunk.fileName)).toBe(false);
       expect(html).not.toContain(chunk.fileName);
     }
+    return others.map((chunk) => catalogsIn(folder, chunk)).sort();
+  }
+
+  it("come up front in English alone, each other language a chunk of its own, fetched when spoken (docs/i18n.md)", () => {
+    expect(
+      [...upFront()].flatMap((fileName) => catalogsIn("packages/ui", chunkNamed(fileName))),
+    ).toEqual(["en"]);
+    expect(otherLanguages("packages/ui")).toEqual([["de"], ["es"], ["fr"], ["ko"], ["sv"]]);
+  });
+
+  it("of the Studio come with its chunk in English, each other language a chunk of its own (docs/studio.md)", () => {
+    for (const fileName of upFront())
+      expect(catalogsIn("apps/studio", chunkNamed(fileName))).toEqual([]);
+    const withEnglish = chunks.filter((chunk) => catalogsIn("apps/studio", chunk).includes("en"));
+    expect(withEnglish).toEqual(studioChunks());
+    expect(otherLanguages("apps/studio")).toEqual([["de"], ["es"], ["fr"], ["ko"], ["sv"]]);
   });
 });
 

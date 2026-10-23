@@ -25,6 +25,7 @@
     "happy-dom": "^21.0.0"
   },
   "dependencies": {
+    "@solid-memo/studio": "*",
     "@solid-memo/ui": "*"
   }
 }

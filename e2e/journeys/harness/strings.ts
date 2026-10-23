@@ -8,9 +8,16 @@ import ko from "@solid-memo/ui/i18n/ko.json" with { type: "json" };
 import de from "@solid-memo/ui/i18n/de.json" with { type: "json" };
 import es from "@solid-memo/ui/i18n/es.json" with { type: "json" };
 import fr from "@solid-memo/ui/i18n/fr.json" with { type: "json" };
+import studioEn from "@solid-memo/studio/i18n/en.json" with { type: "json" };
+import studioSv from "@solid-memo/studio/i18n/sv.json" with { type: "json" };
+import studioKo from "@solid-memo/studio/i18n/ko.json" with { type: "json" };
+import studioDe from "@solid-memo/studio/i18n/de.json" with { type: "json" };
+import studioEs from "@solid-memo/studio/i18n/es.json" with { type: "json" };
+import studioFr from "@solid-memo/studio/i18n/fr.json" with { type: "json" };
 
 /**
- * The app's own text, as its i18n files have it (packages/ui/src/i18n), so
+ * The app's own text, as its i18n files have it (packages/ui/src/i18n,
+ * and the Studio's, apps/studio/src/i18n), so
  * a journey finds buttons and messages by what the user reads, in any of its
  * languages, and a change of wording changes the journeys with it.
  */
@@ -21,10 +28,30 @@ interface Messages {
   [key: string]: string | Plural | Messages;
 }
 
-const CATALOGS: Record<Locale, Messages> = { en, sv, ko, de, es, fr };
-
 const isPlural = (node: unknown): node is Plural =>
   typeof node === "object" && node !== null && typeof (node as Plural).other === "string";
+
+/** `ui`'s messages and the Studio's in one, as the page has them once the Studio is open. */
+function merged(ui: Messages, studio: Messages): Messages {
+  const both: Messages = { ...ui };
+  for (const [key, value] of Object.entries(studio)) {
+    const mine = both[key];
+    both[key] =
+      typeof mine === "object" && typeof value === "object" && !isPlural(mine)
+        ? merged(mine as Messages, value as Messages)
+        : value;
+  }
+  return both;
+}
+
+const CATALOGS: Record<Locale, Messages> = {
+  en: merged(en, studioEn),
+  sv: merged(sv, studioSv),
+  ko: merged(ko, studioKo),
+  de: merged(de, studioDe),
+  es: merged(es, studioEs),
+  fr: merged(fr, studioFr),
+};
 
 /**
  * The message at the dotted `key` in `locale`, its `{name}` placeholders
@@ -43,7 +70,9 @@ export function text(
     ? node[new Intl.PluralRules(locale).select(Number(vars.count))]
     : node;
   if (typeof message !== "string")
-    throw new Error(`packages/ui/src/i18n/${locale}.json has no message ${key}.`);
+    throw new Error(
+      `${locale}.json has no message ${key}, in packages/ui/src/i18n nor in apps/studio/src/i18n.`,
+    );
   // A number is written as the language writes one ("1,000", "1 000"), as the app does.
   const filled = (value: string | number) =>
     typeof value === "number" ? new Intl.NumberFormat(locale).format(value) : value;

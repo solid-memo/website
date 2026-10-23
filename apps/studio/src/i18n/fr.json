@@ -1,0 +1,1682 @@
+{
+  "studio": {
+    "shell": {
+      "status": "État du Studio",
+      "density": "Densité",
+      "compact": "Compacte",
+      "comfortable": "Confortable",
+      "saving": "Enregistrement du brouillon…",
+      "saved": "Brouillon enregistré",
+      "failed": "Dernière modification non enregistrée",
+      "close": "Fermer",
+      "sidebar": "Barre latérale",
+      "nav": "Studio",
+      "section": {
+        "decks": "Paquets",
+        "groups": "Groupes",
+        "drafts": "Brouillons",
+        "releases": "Publications",
+        "graph": "Graphe",
+        "health": "Santé",
+        "library": "Copies de la bibliothèque",
+        "transfer": "Importation et exportation",
+        "instance": "Nom et catalogue"
+      },
+      "problems": {
+        "one": "{count} problème",
+        "many": "{count} de problèmes",
+        "other": "{count} problèmes"
+      },
+      "filter": "Filtrer les paquets et les brouillons",
+      "deckList": "Paquets",
+      "draftList": "Brouillons",
+      "noDecks": "Aucun paquet.",
+      "noDrafts": "Aucun brouillon.",
+      "version": "v{version}",
+      "switchInstance": "Changer d’instance : {instance}",
+      "allInstances": "Toutes les instances",
+      "resizeAside": "Largeur du volet latéral",
+      "hide": "Masquer",
+      "pinned": "Épinglés",
+      "recent": "Ouverts récemment",
+      "pin": "Épingler {name}",
+      "ready": "Prêt à publier",
+      "blocked": {
+        "one": "{count} problème bloque la publication",
+        "many": "{count} de problèmes bloquent la publication",
+        "other": "{count} problèmes bloquent la publication"
+      },
+      "someBlock": {
+        "one": "{count} problème, dont {blocking} bloquent la publication",
+        "many": "{count} de problèmes, dont {blocking} bloquent la publication",
+        "other": "{count} problèmes, dont {blocking} bloquent la publication"
+      },
+      "released": "Publié"
+    },
+    "tabs": {
+      "deck": "Paquet",
+      "draft": "Brouillon",
+      "cards": "Cartes",
+      "schedule": "Calendrier",
+      "health": "Santé",
+      "about": "À propos",
+      "export": "Exporter",
+      "overview": "Vue d’ensemble",
+      "check": "Vérification",
+      "preview": "Aperçu",
+      "trial": "Essai",
+      "diff": "Modifications",
+      "release": "Publication"
+    },
+    "keys": {
+      "palette": "Rechercher, aller à un endroit ou lancer une commande",
+      "button": "? Touches",
+      "heading": "Raccourcis clavier",
+      "chords": "Les touches affichées côte à côte, comme g d, se pressent l’une après l’autre. Pendant que vous tapez dans un champ, seuls Ctrl+K, F6, Shift+F6, F8 et Shift+F8 fonctionnent.",
+      "characterKeys": "Raccourcis à une seule touche",
+      "characterKeysHint": "Des touches pressées sans Ctrl, comme g d, j, [ ou ?, comme raccourcis. Désactivez-les si la saisie vocale ou une touche pressée par mégarde les déclenche ; Ctrl+K, F6, F8 et les boutons fonctionnent toujours.",
+      "scope": {
+        "studio": "Partout dans le Studio",
+        "table": "Dans un tableau : les cartes, les paquets, les cartes d’un brouillon…"
+      },
+      "help": "Afficher ces raccourcis",
+      "filter": "Aller à la recherche ou au filtre de l’écran",
+      "nextRegion": "Aller à la région suivante : en-tête, barre latérale, contenu principal, volet latéral, panneau, barre d’état",
+      "previousRegion": "Aller à la région précédente",
+      "go": {
+        "decks": "Aller aux paquets",
+        "groups": "Aller aux groupes",
+        "drafts": "Aller aux brouillons",
+        "releases": "Aller aux publications",
+        "health": "Aller au bilan de santé",
+        "library": "Aller aux copies de la bibliothèque",
+        "transfer": "Aller à l’importation et l’exportation",
+        "instances": "Aller aux instances"
+      },
+      "toggleSidebar": "Afficher ou masquer la barre latérale",
+      "toggleAside": "Afficher ou masquer le volet latéral (le plan, le paquet, la mise à jour), ou fermer la carte à côté des cartes",
+      "toggleDock": "Afficher ou masquer le panneau : problèmes et activité",
+      "nextProblem": "Aller au champ du problème suivant",
+      "previousProblem": "Aller au champ du problème précédent",
+      "previousTab": "Aller à l’onglet précédent du paquet ou du brouillon",
+      "nextTab": "Aller à l’onglet suivant du paquet ou du brouillon",
+      "tab": "Aller à un onglet du paquet ou du brouillon par son numéro",
+      "down": "Ligne suivante",
+      "up": "Ligne précédente",
+      "select": "Sélectionner la ligne",
+      "open": "Ouvrir la ligne",
+      "extendDown": "Sélectionner la ligne et aussi la suivante",
+      "extendUp": "Sélectionner la ligne et aussi la précédente",
+      "clear": "Désélectionner tout",
+      "bulk": "Ouvrir les actions des lignes sélectionnées",
+      "edit": "Modifier la cellule : Enter enregistre, Escape annule"
+    },
+    "dock": {
+      "label": "Panneau",
+      "problems": "Problèmes",
+      "problemsCount": "Problèmes ({count})",
+      "activity": "Activité",
+      "resize": "Hauteur du panneau",
+      "noActivity": "Rien n’a encore été fait depuis l’ouverture du Studio.",
+      "repeated": "{text} ×{count}",
+      "noProblemsHere": "Les problèmes d’un paquet ou d’un brouillon sont listés dans ses écrans.",
+      "checking": "Recherche de problèmes…",
+      "none": "Aucun problème trouvé.",
+      "deckData": {
+        "one": "{count} problème dans les données du paquet",
+        "many": "{count} de problèmes dans les données du paquet",
+        "other": "{count} problèmes dans les données du paquet"
+      },
+      "unstated": "{place} : sa langue n’est pas indiquée",
+      "duplicate": "{place} : dit la même chose qu’une autre carte"
+    },
+    "palette": {
+      "button": "Rechercher ou lancer…",
+      "heading": "Ouverture rapide",
+      "label": "Rechercher des paquets, des brouillons, des cartes et des commandes",
+      "none": "Aucun résultat.",
+      "help": "Afficher les raccourcis clavier",
+      "group": {
+        "recent": "Utilisés récemment",
+        "commands": "Commandes",
+        "tabs": "Onglets",
+        "sections": "Sections",
+        "instances": "Instances",
+        "decks": "Paquets",
+        "drafts": "Brouillons",
+        "cards": "Cartes de ce paquet",
+        "pinned": "Épinglés"
+      }
+    },
+    "decks": {
+      "heading": "Paquets",
+      "caption": "Les paquets de {instance}",
+      "loading": "Chargement des paquets…",
+      "empty": "Aucun paquet pour l’instant : créez-en ou importez-en dans {app}.",
+      "filter": "Filtrer par nom ou par groupe",
+      "shown": {
+        "one": "{shown} sur {count} paquet",
+        "many": "{shown} sur {count} de paquets",
+        "other": "{shown} sur {count} paquets"
+      },
+      "noMatch": "Aucun paquet ne correspond à « {filter} ».",
+      "select": "Sélectionner",
+      "selectAll": "Sélectionner tous les paquets affichés",
+      "selectDeck": "Sélectionner {deck}",
+      "title": "Paquet",
+      "group": "Groupe",
+      "direction": "Sens",
+      "newCardsPerDay": "Nouvelles par jour",
+      "maxReviewsPerDay": "Révisions par jour",
+      "due": "À réviser aujourd’hui",
+      "new": "Nouvelles aujourd’hui",
+      "modified": "Dernière modification",
+      "cards": "Cartes",
+      "cardsOf": "cartes de {deck}",
+      "topLevel": "Premier niveau",
+      "followsInstance": "(instance)",
+      "counting": "Comptage…",
+      "unreadable": "Illisible",
+      "badge": {
+        "library": "Bibliothèque",
+        "course": "Cours",
+        "invalid": "Données non valides",
+        "unreadable": "Illisible",
+        "from": "De {host}"
+      },
+      "healthOf": "dans {deck}"
+    },
+    "views": {
+      "label": "Vues",
+      "all": "Tous",
+      "due": "À réviser aujourd’hui",
+      "courses": "Cours",
+      "copies": "Copies de la bibliothèque",
+      "attention": "À examiner",
+      "none": "Aucun paquet dans cette vue.",
+      "cards": {
+        "all": "Toutes",
+        "due": "À réviser",
+        "new": "Nouvelles",
+        "leech": "Sangsues"
+      },
+      "options": "Options de la vue {name}",
+      "rename": "Renommer…",
+      "remove": "Supprimer",
+      "removeHeading": "Supprimer la vue",
+      "removeConfirm": "Supprimer la vue {name} ? Seule la vue disparaît : rien ne change dans votre Pod.",
+      "save": "+ Enregistrer la vue",
+      "saveHeading": "Enregistrer la vue",
+      "renameHeading": "Renommer la vue {name}",
+      "name": "Nom",
+      "nameHint": "Une vue du même nom est remplacée.",
+      "saveButton": "Enregistrer"
+    },
+    "peek": {
+      "label": "Paquet",
+      "none": "Placez-vous sur la ligne d’un paquet ({j}, {k}) pour le voir ici.",
+      "of": "– {deck}"
+    },
+    "bulk": {
+      "label": "Paquets sélectionnés",
+      "selected": {
+        "one": "{count} paquet sélectionné",
+        "many": "{count} de paquets sélectionnés",
+        "other": "{count} paquets sélectionnés"
+      },
+      "move": "Déplacer vers un groupe",
+      "pace": "Définir le rythme",
+      "direction": "Définir le sens d’étude",
+      "remove": "Supprimer",
+      "clear": "Désélectionner tout",
+      "group": "Groupe",
+      "topLevel": "Premier niveau (sans groupe)",
+      "moveReadOnly": "Une version plus récente de Solid Memo a organisé ces groupes : vous ne pouvez donc pas y déplacer de paquets ici.",
+      "newCardsPerDay": "Nouvelles cartes par jour",
+      "maxReviewsPerDay": "Révisions maximum par jour",
+      "paceHint": "Une limite laissée vide suit les préférences de l’instance.",
+      "apply": "Appliquer",
+      "cancel": "Annuler",
+      "removeConfirm": {
+        "one": "Supprimer le paquet {names} et toutes ses cartes ? Cette action est irréversible.",
+        "many": "Supprimer {count} de paquets et toutes leurs cartes : {names} ? Cette action est irréversible.",
+        "other": "Supprimer {count} paquets et toutes leurs cartes : {names} ? Cette action est irréversible."
+      },
+      "moved": {
+        "one": "{count} paquet déplacé vers {group}.",
+        "many": "{count} de paquets déplacés vers {group}.",
+        "other": "{count} paquets déplacés vers {group}."
+      },
+      "paced": {
+        "one": "Rythme de {count} paquet défini.",
+        "many": "Rythme de {count} de paquets défini.",
+        "other": "Rythme de {count} paquets défini."
+      },
+      "directed": {
+        "one": "Sens d’étude de {count} paquet défini.",
+        "many": "Sens d’étude de {count} de paquets défini.",
+        "other": "Sens d’étude de {count} paquets défini."
+      },
+      "removed": {
+        "one": "{count} paquet supprimé.",
+        "many": "{count} de paquets supprimés.",
+        "other": "{count} paquets supprimés."
+      },
+      "export": "Exporter",
+      "moveSetAside": "L’organisation de ces paquets contient des données non valides : vous ne pouvez donc pas déplacer de paquets dans des groupes tant qu’elle n’est pas réparée.",
+      "groups": {
+        "edit": "Modifier",
+        "editCards": "Modifier les cartes sélectionnées",
+        "editDecks": "Modifier les paquets sélectionnés",
+        "schedule": "Calendrier",
+        "scheduleCards": "Planifier les cartes sélectionnées",
+        "transfer": "Déplacer ou copier",
+        "transferCards": "Déplacer ou copier les cartes sélectionnées"
+      }
+    },
+    "groups": {
+      "heading": "Groupes"
+    },
+    "cards": {
+      "crumb": "Cartes de {deck}",
+      "heading": "Cartes : {deck}",
+      "loading": "Chargement des cartes…",
+      "courseHint": "Copie d’un cours : ses cartes sont les questions du cours.",
+      "empty": "Ce paquet n’a pas encore de cartes.",
+      "search": "Rechercher",
+      "field": "Dans",
+      "fields": {
+        "any": "Tout le texte",
+        "front": "Recto",
+        "back": "Verso",
+        "note": "Notes",
+        "label": "Étiquette",
+        "distractor": "Mauvaises réponses"
+      },
+      "lang": "Langue",
+      "anyLang": "Toutes les langues",
+      "unstated": "Aucune langue indiquée",
+      "state": "État",
+      "anyState": "Tous les états",
+      "states": {
+        "live": "Active",
+        "retired": "Archivée",
+        "new": "Nouvelle",
+        "learning": "En apprentissage",
+        "young": "Récente",
+        "mature": "Mature",
+        "due": "À réviser",
+        "leech": "Sangsue : souvent oubliée"
+      },
+      "has": "Contient",
+      "anything": "Peu importe",
+      "features": {
+        "picture": "Une image",
+        "distractors": "Des mauvaises réponses",
+        "markdown": "Du Markdown",
+        "notes": "Des notes"
+      },
+      "pageSize": "Cartes par page",
+      "shown": {
+        "one": "{shown} sur {count} carte",
+        "many": "{shown} sur {count} de cartes",
+        "other": "{shown} sur {count} cartes"
+      },
+      "keys": "Touches : {j} et {k} passent d’une carte à l’autre, {x} en sélectionne une, {enter} l’ouvre, {shiftJ} et {shiftK} sélectionnent aussi la suivante ou la précédente, {escape} vide la sélection, {f2} modifie un recto ou un verso dans sa cellule, et {dot} ouvre les actions des cartes sélectionnées.",
+      "selected": {
+        "one": "{count} carte sélectionnée",
+        "many": "{count} de cartes sélectionnées",
+        "other": "{count} cartes sélectionnées"
+      },
+      "noMatch": "Aucune carte ne correspond.",
+      "caption": "Les cartes de {deck}",
+      "select": "Sélectionner",
+      "selectAll": "Sélectionner toutes les cartes de cette page",
+      "selectCard": "Sélectionner {card}",
+      "column": {
+        "front": "Recto",
+        "back": "Verso",
+        "due": "À réviser",
+        "interval": "Intervalle",
+        "ease": "Facilité",
+        "lapses": "Oublis",
+        "created": "Ajoutée",
+        "id": "Identifiant"
+      },
+      "days": {
+        "one": "{count} jour",
+        "many": "{count} de jours",
+        "other": "{count} jours"
+      },
+      "notStudied": "Pas encore étudiée",
+      "lapsesSince": "Les oublis comptent les révisions oubliées de la carte depuis {month}, le mois de la première réponse du paquet dans le journal. Une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis.",
+      "lapsesNone": "Les oublis comptent les révisions oubliées de la carte : aucune n’est encore enregistrée.",
+      "lapsesLoading": "Lecture du journal des réponses pour les oublis…",
+      "lapsesFailed": "Impossible de lire le journal des réponses : les oublis ne sont donc pas connus."
+    },
+    "columns": {
+      "button": "Colonnes",
+      "label": "Afficher ou masquer des colonnes"
+    },
+    "card": {
+      "heading": "Carte : {card}",
+      "tabs": "Ce que vous modifiez",
+      "tab": {
+        "content": "Contenu",
+        "distractors": "Mauvaises réponses ({count})",
+        "schedule": "Planification",
+        "history": "Historique"
+      },
+      "releaseSame": "Cette carte est telle que dans la publication dont ce paquet a été copié : une publication plus récente la met donc à jour. Une modification l’en détache : les publications plus récentes ne la mettent plus à jour, mais peuvent encore l’archiver.",
+      "releaseChanged": "Cette carte a été modifiée par rapport à la publication dont ce paquet a été copié : les publications plus récentes ne la mettent donc plus à jour, mais peuvent encore l’archiver.",
+      "openInApp": "Ouvrir cette carte dans Solid Memo",
+      "steps": "Cartes de la liste",
+      "previous": "Carte précédente",
+      "next": "Carte suivante",
+      "detail": "Carte",
+      "close": "Fermer la carte",
+      "saved": "Carte {card} enregistrée."
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "Enregistrer vos modifications ?",
+        "text": "Certaines modifications ne sont pas enregistrées. Enregistrez-les avant de continuer, abandonnez-les, ou restez où vous êtes.",
+        "save": "Enregistrer",
+        "discard": "Abandonner",
+        "stay": "Rester"
+      },
+      "cancel": "Annuler",
+      "deleteCards": "Supprimer les cartes sélectionnées",
+      "forgetCards": "Oublier la progression des cartes sélectionnées",
+      "deleteDecks": "Supprimer les paquets sélectionnés",
+      "forgetDirection": "Oublier la progression de la carte",
+      "restartCourse": "Recommencer le cours",
+      "deleteDraft": "Supprimer le brouillon",
+      "deletePart": {
+        "chapter": "Supprimer le chapitre",
+        "step": "Supprimer l’étape",
+        "card": "Supprimer la carte"
+      },
+      "removeData": "Le supprimer de votre Pod"
+    },
+    "schedule": {
+      "loading": "Chargement de la planification…",
+      "notStudiedSo": "Le paquet n’est plus étudié dans ce sens. La progression de la carte dans ce sens est conservée.",
+      "new": "Pas encore étudiée dans ce sens : la carte est nouvelle.",
+      "due": "À réviser",
+      "interval": "Intervalle",
+      "ease": "Facilité",
+      "repetitions": "Bonnes réponses d’affilée",
+      "firstReviewed": "Première révision",
+      "lastReviewed": "Dernière révision",
+      "sm2Heading": "SM-2",
+      "fsrsHeading": "FSRS-6",
+      "stability": "Stabilité",
+      "difficulty": "Difficulté",
+      "difficultyValue": "{value} sur 10",
+      "recall": "Probabilité de rappel maintenant",
+      "fsrsSets": "FSRS-6 fixe les jours de révision, comme le disent les préférences de l’instance ; l’état de SM-2 est tenu à jour à côté.",
+      "sm2Sets": "SM-2 fixe les jours de révision, comme le disent les préférences de l’instance ; l’état de FSRS-6 n’est pas mis à jour entre-temps, et repasser à FSRS-6 le recalcule.",
+      "fsrsEstimated": "FSRS-6 fixe les jours de révision, comme le disent les préférences de l’instance, mais n’a pas d’état à jour de la carte dans ce sens : jusqu’à la prochaine révision, c’est le jour de SM-2 qui compte, puis l’état de FSRS-6 est estimé à partir de celui de SM-2.",
+      "dueLabel": "À réviser le",
+      "reschedule": "Fixer la date de révision",
+      "reset": "Oublier la progression",
+      "resetConfirm": "Oublier la progression de la carte dans ce sens ? Elle redevient nouvelle. Ses réponses restent dans l’historique.",
+      "hint": "Aucune de ces deux actions ne modifie les réponses de la carte : elles restent dans l’historique et les statistiques.",
+      "done": {
+        "reset": "Progression de la carte oubliée dans le sens « {direction} ».",
+        "reschedule": "« {direction} » est maintenant à réviser le {due}."
+      }
+    },
+    "history": {
+      "loading": "Chargement des réponses à la carte…",
+      "empty": "Aucune réponse à cette carte dans ce paquet pour l’instant.",
+      "summary": {
+        "one": "{count} réponse. Oublis : {lapses}.",
+        "many": "{count} de réponses. Oublis : {lapses}.",
+        "other": "{count} réponses. Oublis : {lapses}."
+      },
+      "caption": "Les réponses à la carte, de la plus récente à la plus ancienne",
+      "column": {
+        "when": "Quand",
+        "direction": "Sens",
+        "grade": "Note",
+        "mode": "Mode",
+        "chosen": "Mauvaise réponse choisie"
+      },
+      "mode": {
+        "recall": "De mémoire",
+        "multiple-choice": "Choix multiple"
+      },
+      "unknownOption": "{id} (n’est plus sur la carte)",
+      "hint": "Seules les réponses données dans ce paquet sont listées : une carte déplacée ici depuis un autre paquet recommence son historique. Oublier la progression de la carte conserve ses réponses. Un oubli est une révision oubliée : une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis."
+    },
+    "insight": {
+      "crumb": "Calendrier",
+      "heading": "Calendrier des révisions : {deck}",
+      "loading": "Chargement du calendrier des révisions…",
+      "today": "Révisions aujourd’hui",
+      "week": "Révisions des {count} prochains jours",
+      "scheduled": "Étudiées, chaque sens compté",
+      "leeches": "Sangsues",
+      "forecastHeading": "Révisions à venir",
+      "capDeck": "Au plus {max} révisions par jour, comme le définit ce paquet : ce que le plafond retient attend le jour suivant. Le nombre du jour compte toutes les cartes à réviser au plus tard aujourd’hui.",
+      "capInstance": "Au plus {max} révisions par jour, comme le définissent les préférences de l’instance : ce que le plafond retient attend le jour suivant. Le nombre du jour compte toutes les cartes à réviser au plus tard aujourd’hui.",
+      "forecast": "Révisions des {count} prochains jours",
+      "forecastLabel": "Révisions de chacun des {count} prochains jours, telles que le plafond quotidien les laisse passer.",
+      "forecastDay": "{date} : {reviews} à réviser, {due} arrivant à échéance.",
+      "due": "À échéance",
+      "reviews": "À réviser",
+      "spreadHeading": "Intervalles et facilités",
+      "noneScheduled": "Aucune carte de ce paquet n’est encore étudiée.",
+      "intervals": "Intervalles",
+      "intervalsLabel": "Nombre de cartes par intervalle, chaque sens compté.",
+      "interval": "Intervalle",
+      "eases": "Facilités",
+      "easesLabel": "Nombre de cartes par facilité, chaque sens compté.",
+      "easesNote": "La facilité est celle de SM-2, tenue à jour à chaque révision, quel que soit le planificateur qui fixe les jours de révision.",
+      "ease": "Facilité",
+      "lapsesHeading": "Oublis et sangsues",
+      "lapsesSince": "Les oublis comptent les révisions oubliées depuis {month}, le mois de la première réponse du paquet dans le journal des réponses. Une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis.",
+      "noAnswers": "Le journal des réponses est encore vide.",
+      "leechHint": "Une sangsue est une carte oubliée {count} fois ou plus. Elle continue de coûter des révisions : réécrivez-la, scindez-la ou archivez-la.",
+      "noLeeches": "Aucune sangsue.",
+      "leechLapses": {
+        "one": "oubliée {count} fois",
+        "many": "oubliée {count} de fois",
+        "other": "oubliée {count} fois"
+      },
+      "allLeeches": "Afficher les sangsues parmi les cartes du paquet"
+    },
+    "cardBulk": {
+      "label": "Cartes sélectionnées",
+      "retire": "Archiver",
+      "restore": "Réactiver",
+      "markdownOn": "Écrire en Markdown",
+      "markdownOff": "Écrire en texte brut",
+      "stateLanguage": "Indiquer la langue",
+      "findReplace": "Rechercher et remplacer",
+      "reschedule": "Fixer la date de révision",
+      "reset": "Oublier la progression",
+      "remove": "Supprimer",
+      "removeConfirm": {
+        "one": "Supprimer {count} carte et sa progression ? Vous pouvez annuler jusqu’à votre prochaine modification ou jusqu’à ce que vous quittiez cette page.",
+        "many": "Supprimer {count} de cartes et leur progression ? Vous pouvez annuler jusqu’à votre prochaine modification ou jusqu’à ce que vous quittiez cette page.",
+        "other": "Supprimer {count} cartes et leur progression ? Vous pouvez annuler jusqu’à votre prochaine modification ou jusqu’à ce que vous quittiez cette page."
+      },
+      "resetConfirm": {
+        "one": "Oublier la progression de {count} carte ? Elle redevient nouvelle. Ses réponses restent dans l’historique.",
+        "many": "Oublier la progression de {count} de cartes ? Elles redeviennent nouvelles. Leurs réponses restent dans l’historique.",
+        "other": "Oublier la progression de {count} cartes ? Elles redeviennent nouvelles. Leurs réponses restent dans l’historique."
+      },
+      "dueLabel": "À réviser le",
+      "rescheduleHint": "Une carte pas encore étudiée reste nouvelle.",
+      "notStudied": "Aucune des cartes sélectionnées n’a encore été étudiée.",
+      "nothing": "Aucune des cartes sélectionnées ne changerait.",
+      "tag": "Code de langue",
+      "side": "Pour",
+      "sides": {
+        "both": "Les deux faces",
+        "front": "Le recto",
+        "back": "Le verso"
+      },
+      "stateHint": "Seule une face dont la langue n’est pas encore indiquée change. Son texte reste tel quel.",
+      "find": "Rechercher",
+      "replaceWith": "Remplacer par",
+      "fields": "Dans",
+      "lang": "Dans la langue",
+      "caseSensitive": "Respecter la casse",
+      "wholeWord": "Mots entiers uniquement",
+      "preview": "Aperçu",
+      "previewEmpty": "Saisissez le texte à rechercher. Rien ne change avant votre confirmation.",
+      "noChange": "Aucune des cartes sélectionnées ne contient ce texte.",
+      "changes": {
+        "one": "{count} carte sera modifiée :",
+        "many": "{count} de cartes seront modifiées :",
+        "other": "{count} cartes seront modifiées :"
+      },
+      "skippedHeading": {
+        "one": "{count} carte reste telle quelle :",
+        "many": "{count} de cartes restent telles quelles :",
+        "other": "{count} cartes restent telles quelles :"
+      },
+      "reasons": {
+        "missing": "elle n’est plus dans le paquet",
+        "unchanged": "rien n’y change",
+        "wouldEmpty": "une face ou une mauvaise réponse resterait vide",
+        "unstatedLanguage": "son texte n’indique aucune langue ; indiquez-la d’abord",
+        "invalid": "la carte n’est pas valide en l’état ; corrigez-la dans l’éditeur de carte"
+      },
+      "part": {
+        "front": "Recto",
+        "back": "Verso",
+        "frontNote": "Note sous le recto",
+        "backNote": "Note sous le verso",
+        "frontLabel": "Étiquette du recto",
+        "backLabel": "Étiquette du verso",
+        "distractor": "Mauvaise réponse",
+        "distractorNote": "Note d’une mauvaise réponse"
+      },
+      "removed": "(supprimé)",
+      "confirmReplace": {
+        "one": "Remplacer dans {count} carte",
+        "many": "Remplacer dans {count} de cartes",
+        "other": "Remplacer dans {count} cartes"
+      },
+      "done": {
+        "retire": {
+          "one": "{count} carte archivée.",
+          "many": "{count} de cartes archivées.",
+          "other": "{count} cartes archivées."
+        },
+        "restore": {
+          "one": "{count} carte réactivée.",
+          "many": "{count} de cartes réactivées.",
+          "other": "{count} cartes réactivées."
+        },
+        "remove": {
+          "one": "{count} carte supprimée.",
+          "many": "{count} de cartes supprimées.",
+          "other": "{count} cartes supprimées."
+        },
+        "replaceText": {
+          "one": "Texte remplacé dans {count} carte.",
+          "many": "Texte remplacé dans {count} de cartes.",
+          "other": "Texte remplacé dans {count} cartes."
+        },
+        "markdownOn": {
+          "one": "{count} carte écrite en Markdown.",
+          "many": "{count} de cartes écrites en Markdown.",
+          "other": "{count} cartes écrites en Markdown."
+        },
+        "markdownOff": {
+          "one": "{count} carte écrite en texte brut.",
+          "many": "{count} de cartes écrites en texte brut.",
+          "other": "{count} cartes écrites en texte brut."
+        },
+        "stateLanguage": {
+          "one": "Langue indiquée pour {count} carte.",
+          "many": "Langue indiquée pour {count} de cartes.",
+          "other": "Langue indiquée pour {count} cartes."
+        },
+        "reset": {
+          "one": "Progression de {count} carte oubliée.",
+          "many": "Progression de {count} de cartes oubliée.",
+          "other": "Progression de {count} cartes oubliée."
+        },
+        "reschedule": {
+          "one": "Date de révision de {count} carte fixée au {due}.",
+          "many": "Date de révision de {count} de cartes fixée au {due}.",
+          "other": "Date de révision de {count} cartes fixée au {due}."
+        },
+        "setText": {
+          "one": "Texte de {count} carte enregistré.",
+          "many": "Texte de {count} de cartes enregistré.",
+          "other": "Texte de {count} cartes enregistré."
+        }
+      },
+      "skipped": {
+        "one": "{count} carte est restée telle quelle.",
+        "many": "{count} de cartes sont restées telles quelles.",
+        "other": "{count} cartes sont restées telles quelles."
+      },
+      "undo": "Annuler",
+      "undone": "Annulé : les cartes sont revenues à leur état précédent.",
+      "moveTo": "Déplacer vers un paquet…",
+      "copyTo": "Copier vers un paquet…",
+      "transfer": {
+        "deck": "Vers le paquet",
+        "keepProgress": "Conserver leur progression",
+        "moveHint": "Les cartes quittent ce paquet dès que l’autre paquet les a reçues. Leurs réponses passées restent avec ce paquet : leur historique recommence donc dans l’autre.",
+        "copyHint": "Ce paquet garde les cartes. L’historique des copies commence dans l’autre paquet.",
+        "noDeck": "Cette instance n’a aucun autre paquet où mettre les cartes.",
+        "move": {
+          "one": "Déplacer {count} carte",
+          "many": "Déplacer {count} de cartes",
+          "other": "Déplacer {count} cartes"
+        },
+        "copy": {
+          "one": "Copier {count} carte",
+          "many": "Copier {count} de cartes",
+          "other": "Copier {count} cartes"
+        },
+        "moved": {
+          "one": "{count} carte déplacée vers {deck}.",
+          "many": "{count} de cartes déplacées vers {deck}.",
+          "other": "{count} cartes déplacées vers {deck}."
+        },
+        "copied": {
+          "one": "{count} carte copiée vers {deck}.",
+          "many": "{count} de cartes copiées vers {deck}.",
+          "other": "{count} cartes copiées vers {deck}."
+        },
+        "renamed": {
+          "one": "{count} carte a reçu un nouvel identifiant : le paquet contenait déjà une carte avec cet identifiant.",
+          "many": "{count} de cartes ont reçu un nouvel identifiant : le paquet contenait déjà des cartes avec ces identifiants.",
+          "other": "{count} cartes ont reçu un nouvel identifiant : le paquet contenait déjà des cartes avec ces identifiants."
+        },
+        "present": {
+          "one": "{count} carte s’y trouvait déjà.",
+          "many": "{count} de cartes s’y trouvaient déjà.",
+          "other": "{count} cartes s’y trouvaient déjà."
+        },
+        "heading": {
+          "move": "Déplacer des cartes vers un autre paquet",
+          "copy": "Copier des cartes vers un autre paquet"
+        }
+      }
+    },
+    "license": {
+      "label": "Licence",
+      "none": "Aucune indiquée"
+    },
+    "about": {
+      "crumb": "À propos de {deck}",
+      "heading": "À propos : {deck}",
+      "openInApp": "Ouvrir ce paquet dans Solid Memo",
+      "name": "Nom",
+      "rename": "Renommer",
+      "provenance": "Auteurs et licence",
+      "noProvenance": "Aucun auteur ni aucune licence indiqués.",
+      "editProvenance": "Modifier les auteurs et la licence",
+      "authors": "Auteurs",
+      "authorsHint": "Un nom, ou un nom et une adresse e-mail : Ada Lovelace <ada@example.org>. Laissez une ligne vide pour la supprimer.",
+      "author": "Auteur {number}",
+      "removeAuthor": "Supprimer l’auteur {number}",
+      "addAuthor": "Ajouter un auteur",
+      "saveProvenance": "Enregistrer les auteurs et la licence",
+      "study": "Étude",
+      "saveStudy": "Enregistrer les préférences d’étude",
+      "progress": "Progression du cours",
+      "progressLoading": "Chargement du cours…",
+      "chapter": {
+        "done": "Terminé",
+        "open": "Ouvert",
+        "locked": "Verrouillé"
+      },
+      "notDone": "Marquer comme non terminé",
+      "notDoneLabel": "Marquer {chapter} comme non terminé",
+      "goneChapters": "Chapitres terminés que le cours ne contient plus :",
+      "progressHint": "Vos réponses et votre progression sur les cartes restent inchangées.",
+      "restart": "Recommencer le cours",
+      "restartConfirm": "Recommencer le cours ? Tous les chapitres sont marqués comme non terminés, et le premier s’ouvre à nouveau. Vos réponses et votre progression sur les cartes sont conservées.",
+      "saved": "Enregistré."
+    },
+    "instance": {
+      "crumb": "Nom et catalogue",
+      "heading": "Instance : {instance}",
+      "loading": "Chargement du catalogue…",
+      "preferencesLink": "Préférences d’étude dans Solid Memo",
+      "address": "Adresse",
+      "name": "Nom",
+      "nameLabel": "Nom de l’instance",
+      "nameHint": "Enregistré dans l’instance, dans son catalogue et dans les listes de données de votre Pod, où d’autres applications le trouvent.",
+      "saveName": "Enregistrer le nom",
+      "catalog": "Catalogue",
+      "noCatalog": "Cette instance n’a pas encore de catalogue. Ouvrez-la dans Solid Memo pour la mettre à jour.",
+      "publisher": "Éditeur",
+      "description": "Description",
+      "licenseHint": "La licence sous laquelle les paquets sont proposés, pour les applications qui lisent le catalogue.",
+      "saveCatalog": "Enregistrer le catalogue"
+    },
+    "health": {
+      "crumb": "Santé",
+      "heading": "Bilan de santé de {instance}",
+      "deckHeading": "Bilan de santé de {deck}",
+      "loading": "Vérification…",
+      "checkAgain": "Vérifier à nouveau",
+      "checking": "Vérification…",
+      "summary": {
+        "one": "{count} problème trouvé.",
+        "many": "{count} de problèmes trouvés.",
+        "other": "{count} problèmes trouvés."
+      },
+      "allWell": "Ce paquet ne présente aucun problème.",
+      "dataHeading": "Vérification des données",
+      "dataHint": "La fiche du paquet dans le catalogue et ses documents, vérifiés au regard des formes de Solid Memo.",
+      "held": "Rien dans ce paquet ne peut être modifié tant que ses données ne sont pas réparées : les problèmes ci-dessous sont donc nommés, sans lien vers leurs formulaires. Réparez ici ce qui peut l’être, et supprimez ce qu’aucune réparation ne couvre.",
+      "instanceDataHint": "Les documents de l’instance, vérifiés au regard des formes de Solid Memo. Les documents inchangés depuis leur dernière vérification réussie ne sont pas vérifiés à nouveau.",
+      "deckEntry": "Fiche du paquet",
+      "deckDistribution": "Distribution du paquet",
+      "inDeck": "dans {deck}",
+      "remove": "Supprimer {subject}",
+      "removeHint": "Aucune réparation ne couvre ce cas : corrigez-le dans le document, ou supprimez-le.",
+      "decksHeading": "Paquets",
+      "decksHint": "Chaque paquet est vérifié dès qu’il apparaît à l’écran.",
+      "languagesHeading": "Langues",
+      "languagesFine": "Chaque face de carte indique sa langue.",
+      "unstated": {
+        "one": "{count} face de carte n’indique pas sa langue.",
+        "many": "{count} de faces de carte n’indiquent pas leur langue.",
+        "other": "{count} faces de carte n’indiquent pas leur langue."
+      },
+      "unstatedLink": "Indiquer les langues sur l’écran À propos",
+      "languagesUnchecked": "La publication dont ce paquet a été copié n’a pas pu être lue : on ne sait donc pas de quelles faces il vous revient de régler la langue.",
+      "duplicatesHeading": "Cartes identiques",
+      "duplicatesFine": "Aucune carte en usage n’est identique à une autre.",
+      "duplicatesHint": "Ces cartes ont le même recto et le même verso, dans les mêmes langues, et les mêmes images.",
+      "duplicateGroup": "La même carte {count} fois :",
+      "markdownHeading": "Markdown",
+      "markdownFine": "Le texte écrit en Markdown s’affiche comme son auteur l’a voulu.",
+      "markdownHint": "Ce qui ne s’afficherait pas comme son auteur l’a voulu, dans les cartes écrites en Markdown.",
+      "part": {
+        "front": "recto",
+        "back": "verso",
+        "frontNote": "note sous le recto",
+        "backNote": "note sous le verso",
+        "frontLabel": "étiquette du recto",
+        "backLabel": "étiquette du verso",
+        "frontImageDescription": "description de l’image du recto",
+        "backImageDescription": "description de l’image du verso"
+      },
+      "place": {
+        "card": "{card}",
+        "part": "{card}, {part}",
+        "distractor": "{card}, mauvaise réponse {id}",
+        "distractorText": "{card}, mauvaise réponse {id}",
+        "distractorNote": "{card}, note de la mauvaise réponse {id}",
+        "schedule": "{card}, sa planification"
+      },
+      "language": "{place} ({language})",
+      "badge": {
+        "problems": {
+          "one": "{count} problème",
+          "many": "{count} de problèmes",
+          "other": "{count} problèmes"
+        },
+        "healthy": "Aucun problème",
+        "failed": "Non vérifié"
+      }
+    },
+    "library": {
+      "crumb": "Copies de la bibliothèque",
+      "heading": "Copies de la bibliothèque dans {instance}",
+      "caption": "Les paquets de {instance} copiés de la bibliothèque",
+      "loading": "Consultation de la bibliothèque…",
+      "empty": "Aucun paquet ici n’est une copie d’un paquet de la bibliothèque. Trouvez-en un dans {library}.",
+      "libraryLink": "la bibliothèque de paquets",
+      "browse": "Parcourir la bibliothèque de paquets",
+      "intro": "Chaque paquet copié de la bibliothèque de paquets ou ajouté depuis un lien, la publication dont il provient et la plus récente parue. Mettre à jour un paquet applique les modifications de la publication aux cartes que vous n’avez pas modifiées ; votre historique des révisions est conservé.",
+      "upgrade": {
+        "one": "Mettre à jour {count} paquet",
+        "many": "Mettre à jour {count} de paquets",
+        "other": "Mettre à jour {count} paquets"
+      },
+      "running": "Mise à jour de {deck} ({at} sur {total})",
+      "selectAll": "Sélectionner tous les paquets qui peuvent être mis à jour",
+      "copied": "Copié de",
+      "current": "Dans la bibliothèque",
+      "update": "Mettre à jour",
+      "unknown": "Publication inconnue",
+      "release": "Version {version}",
+      "gone": "N’est plus dans la bibliothèque",
+      "upToDate": "À jour",
+      "planning": "Examen de ce qu’une mise à jour modifierait…",
+      "planFailed": "La version {version} est parue, mais impossible de lire ce qu’elle modifierait.",
+      "nothingToUpdate": "La version {version} est parue, sans rien à mettre à jour dans votre copie.",
+      "changes": "Version {version} : la mise à jour {changes}.",
+      "cards": {
+        "add": {
+          "one": "Cartes ajoutées : {count}",
+          "many": "Cartes ajoutées : {count}",
+          "other": "Cartes ajoutées : {count}"
+        },
+        "change": {
+          "one": "Cartes modifiées : {count}",
+          "many": "Cartes modifiées : {count}",
+          "other": "Cartes modifiées : {count}"
+        },
+        "about": {
+          "one": "Cartes dont le sujet est indiqué : {count}",
+          "many": "Cartes dont le sujet est indiqué : {count}",
+          "other": "Cartes dont le sujet est indiqué : {count}"
+        },
+        "retire": {
+          "one": "Cartes archivées : {count}",
+          "many": "Cartes archivées : {count}",
+          "other": "Cartes archivées : {count}"
+        },
+        "restore": {
+          "one": "Cartes réactivées : {count}",
+          "many": "Cartes réactivées : {count}",
+          "other": "Cartes réactivées : {count}"
+        },
+        "remove": {
+          "one": "Cartes supprimées : {count}",
+          "many": "Cartes supprimées : {count}",
+          "other": "Cartes supprimées : {count}"
+        },
+        "kept": {
+          "one": "Cartes laissées telles que vous les avez : {count}",
+          "many": "Cartes laissées telles que vous les avez : {count}",
+          "other": "Cartes laissées telles que vous les avez : {count}"
+        }
+      },
+      "updated": "{deck} : mis à jour vers la version {version}.",
+      "failed": "{deck} : la mise à jour a échoué à l’étape « {step} » :",
+      "badge": "Version {version} parue",
+      "badgeOf": "pour {deck}",
+      "newerUnknown": "Inconnue : aucun catalogue public de son créateur ne la répertorie",
+      "peek": "Placez-vous sur la ligne d’une copie ({j}, {k}) pour voir ce que sa mise à jour changerait.",
+      "plan": "Mise à jour",
+      "bulk": "Copies sélectionnées",
+      "selected": {
+        "one": "{count} copie sélectionnée",
+        "many": "{count} de copies sélectionnées",
+        "other": "{count} copies sélectionnées"
+      }
+    },
+    "transfer": {
+      "crumb": "Importation et exportation",
+      "heading": "Importation et exportation des paquets de {instance}",
+      "export": "Exportation",
+      "exportIntro": "Enregistrez des paquets sous forme de fichiers, un fichier par paquet, en Turtle ou en JSON-LD : le paquet, ses cartes et leurs mauvaises réponses, et, si vous le souhaitez, votre progression. Toute application qui lit le RDF peut les lire, et Solid Memo peut les importer à nouveau.",
+      "noDecks": "Cette instance n’a encore aucun paquet à exporter.",
+      "decks": "Paquets à exporter",
+      "format": "Format",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "Inclure ma progression : la date de révision de chaque carte et les chapitres de cours que j’ai terminés",
+      "exportButton": {
+        "one": "Exporter {count} paquet",
+        "many": "Exporter {count} de paquets",
+        "other": "Exporter {count} paquets"
+      },
+      "exporting": "Exportation de {deck} ({at} sur {total})…",
+      "exported": {
+        "one": "{count} paquet exporté. Votre navigateur l’enregistre comme téléchargement.",
+        "many": "{count} de paquets transmis à votre navigateur, chacun à enregistrer comme un téléchargement distinct. Il peut vous demander d’autoriser plusieurs téléchargements : ceux qu’il bloque ne sont pas enregistrés.",
+        "other": "{count} paquets transmis à votre navigateur, chacun à enregistrer comme un téléchargement distinct. Il peut vous demander d’autoriser plusieurs téléchargements : ceux qu’il bloque ne sont pas enregistrés."
+      },
+      "import": "Importation",
+      "importIntro": "Ajoutez à {instance} un paquet tiré d’un fichier Turtle ou JSON-LD, comme nouveau paquet. Un fichier d’une ancienne version de Solid Memo est mis à jour pendant sa lecture.",
+      "choose": "Choisir un fichier…",
+      "reading": "Lecture du fichier…",
+      "file": "{name} : {deck}",
+      "cards": {
+        "one": "{count} carte",
+        "many": "{count} de cartes",
+        "other": "{count} cartes"
+      },
+      "states": {
+        "one": "Progression : {count} état de révision",
+        "many": "Progression : {count} d’états de révision",
+        "other": "Progression : {count} états de révision"
+      },
+      "chapters": {
+        "one": "{count} chapitre terminé",
+        "many": "{count} de chapitres terminés",
+        "other": "{count} chapitres terminés"
+      },
+      "upgraded": {
+        "one": "{count} partie du fichier est dans un format plus ancien ; elle est mise à jour.",
+        "many": "{count} de parties du fichier sont dans un format plus ancien ; elles sont mises à jour.",
+        "other": "{count} parties du fichier sont dans un format plus ancien ; elles sont mises à jour."
+      },
+      "dropped": {
+        "one": "{count} partie du fichier est illisible ; elle est écartée.",
+        "many": "{count} de parties du fichier sont illisibles ; elles sont écartées.",
+        "other": "{count} parties du fichier sont illisibles ; elles sont écartées."
+      },
+      "importProgress": "Importer aussi la progression",
+      "importButton": "Importer dans {instance}",
+      "importing": "Importation du paquet…",
+      "imported": "Paquet {deck} importé."
+    },
+    "readOnly": {
+      "checking": "Les données de cette instance sont en cours de vérification. Rien ne peut être modifié avant la fin de la vérification.",
+      "blocked": "Cette instance contient des données non valides, et vos préférences la gardent fermée jusqu’à sa réparation : rien ne peut donc être modifié ici. {repair}",
+      "deck": "Ce paquet contient des données non valides, il est donc mis de côté : il est affiché ici, mais rien ne peut y être modifié avant sa réparation. {repair}",
+      "decks": "Les paquets aux données non valides sont mis de côté : ils ne peuvent être ni sélectionnés ni modifiés avant leur réparation. {repair}",
+      "catalogue": "Le catalogue de l’instance ou l’un de ses groupes contient des données non valides, il est donc mis de côté : rien ne peut y être ajouté ni modifié avant sa réparation. {repair}",
+      "repair": "Réparez ces données sur l’écran Santé.",
+      "repairDecks": "Réparez-les sur l’écran Santé."
+    },
+    "drafts": {
+      "crumb": "Brouillons",
+      "loading": "Lecture des brouillons…",
+      "heading": "Brouillons de publications dans {instance}",
+      "intro": "Un brouillon est un paquet ou un cours que vous rédigez ici, dans votre Pod, avant de le publier pour que d’autres puissent l’ajouter. Il n’existe que dans cette instance, et personne d’autre ne le voit.",
+      "new": "Nouveau brouillon",
+      "from": "Point de départ",
+      "start": {
+        "blankDeck": "Un paquet vide",
+        "blankCourse": "Un cours vide",
+        "fromDeck": "Un paquet de cette instance",
+        "nextVersionOf": "La version suivante d’une publication",
+        "fromFile": "Une publication enregistrée dans un fichier"
+      },
+      "name": "Nom",
+      "deck": "Paquet",
+      "release": "Adresse de la publication",
+      "releaseHint": "Là où se trouve la publication, par exemple un paquet de la bibliothèque (https://solid-memo.com/decks/<name>/v1.ttl) ou une publication dans un Pod. Le brouillon reprend chaque carte, chaque chapitre et chaque étape qu’elle contient.",
+      "fileHint": "Un fichier Turtle ou JSON-LD contenant une publication de paquet ou de cours. Le brouillon la conserve telle quelle.",
+      "create": "Créer le brouillon",
+      "chooseFile": "Choisir un fichier et créer le brouillon…",
+      "creating": "Création du brouillon…",
+      "created": "Le brouillon {draft}, version {version}, a été créé.",
+      "basedOn": "Ce paquet est une copie de la publication {release}. Sa version suivante conserve ce que ses apprenants ont étudié : vous préférerez peut-être la commencer.",
+      "startNext": "Commencer la version suivante de cette publication",
+      "list": "Brouillons",
+      "none": "Cette instance n’a pas encore de brouillon.",
+      "caption": "Brouillons de {instance}",
+      "column": {
+        "name": "Brouillon",
+        "kind": "Type",
+        "version": "Version",
+        "state": "État",
+        "actions": "Actions"
+      },
+      "kind": {
+        "deck": "Paquet",
+        "course": "Cours"
+      },
+      "state": {
+        "writing": "En cours de rédaction",
+        "released": "Publié",
+        "unreadable": "Illisible"
+      },
+      "untitled": "Sans titre ({name})",
+      "summary": "{kind}, version {version}",
+      "delete": "Supprimer",
+      "deleteDraft": "Supprimer le brouillon {draft}, version {version}",
+      "deleteConfirm": "Supprimer le brouillon {draft}, version {version} ? Cette action est irréversible.",
+      "deleting": "Suppression du brouillon {draft}…",
+      "deleted": "Le brouillon {draft}, version {version}, a été supprimé."
+    },
+    "draft": {
+      "untitled": "Brouillon sans titre",
+      "about": "À propos de cette publication",
+      "title": "Titre",
+      "description": "Description",
+      "outline": "Plan",
+      "outlineHint": "Les chapitres, et les étapes de chacun, dans l’ordre où l’apprenant les suit. Faites glisser un élément vers un autre endroit, ou utilisez son menu. Les questions d’une étape sont posées dans l’ordre de leurs identifiants.",
+      "newChapter": "Nouveau chapitre",
+      "chapterTitle": "Titre du chapitre",
+      "addChapter": "Ajouter le chapitre",
+      "retiredChapters": "Chapitres archivés",
+      "questions": "Questions",
+      "cards": "Cartes",
+      "cardCount": {
+        "one": "{count} carte au total.",
+        "many": "{count} de cartes au total.",
+        "other": "{count} cartes au total."
+      },
+      "allCards": "Toutes les cartes",
+      "newCard": "Nouvelle carte",
+      "problems": "Problèmes",
+      "problemsChecking": "Vérification du brouillon…",
+      "problemsNone": "La vérification de la publication ne trouve aucun problème.",
+      "problemsCount": {
+        "one": "La vérification de la publication trouve {count} problème.",
+        "many": "La vérification de la publication trouve {count} de problèmes.",
+        "other": "La vérification de la publication trouve {count} problèmes."
+      }
+    },
+    "outline": {
+      "empty": "Aucun chapitre pour l’instant.",
+      "noSteps": "Aucune étape pour l’instant.",
+      "noTheory": "Aucune théorie pour l’instant.",
+      "stepNumber": "Étape {chapter}.{step}",
+      "stepCount": {
+        "one": "{count} étape",
+        "many": "{count} d’étapes",
+        "other": "{count} étapes"
+      },
+      "actions": "Actions pour {name}",
+      "moveTo": "Déplacer vers le chapitre",
+      "inChapter": "dans {chapter}",
+      "afterChapter": "après {chapter}",
+      "moved": "Déplacé.",
+      "dragCancelled": "Déplacement annulé.",
+      "retired": "Archivé : {name}.",
+      "deleted": "Supprimé : {name}."
+    },
+    "chapter": {
+      "untitled": "Chapitre {id}",
+      "number": "Chapitre {number} sur {count}",
+      "retired": "Chapitre archivé",
+      "title": "Titre",
+      "description": "Description",
+      "steps": "Étapes",
+      "step": "Étape {number}",
+      "stepUp": "Monter {step}",
+      "stepDown": "Descendre {step}",
+      "newStep": "Nouvelle étape",
+      "addStep": "Ajouter l’étape",
+      "retiredSteps": "Étapes archivées",
+      "review": "Révision finale",
+      "reviewHint": "Questions posées uniquement lors de la révision finale du chapitre, après les questions propres à ses étapes.",
+      "newReviewQuestion": "Nouvelle question de révision"
+    },
+    "step": {
+      "inChapter": "Dans",
+      "retired": "Étape archivée",
+      "theory": "Théorie",
+      "questions": "Questions qui la vérifient",
+      "questionsHint": "Posées après la théorie, qui n’est pas affichée pendant qu’on y répond, dans l’ordre de leurs identifiants.",
+      "newQuestion": "Nouvelle question"
+    },
+    "question": {
+      "retired": "Archivée",
+      "place": "Posée",
+      "nowhere": "Nulle part pour l’instant",
+      "atStep": "{chapter}, étape {step}",
+      "atReview": "{chapter}, révision finale",
+      "preview": "Telle que le cours la pose",
+      "again": "Poser à nouveau"
+    },
+    "draftCards": {
+      "crumb": "Cartes",
+      "heading": "Cartes de {draft}",
+      "headingCourse": "Questions de {draft}",
+      "filter": "Afficher",
+      "all": "Toutes les cartes",
+      "filters": {
+        "unasked": "Posées nulle part",
+        "askedTwice": "Posées à deux endroits",
+        "fewDistractors": "Trop peu de mauvaises réponses",
+        "retired": "Archivées"
+      },
+      "language": "Langue",
+      "anyLanguage": "Toutes les langues",
+      "unstated": "Aucune langue indiquée",
+      "count": {
+        "one": "{count} carte",
+        "many": "{count} de cartes",
+        "other": "{count} cartes"
+      },
+      "caption": "Les cartes du brouillon",
+      "column": {
+        "front": "Recto",
+        "back": "Verso",
+        "place": "Posée",
+        "distractors": "Mauvaises réponses",
+        "id": "Identifiant"
+      },
+      "retired": "(archivée)",
+      "askedTimes": "Posée à {count} endroits",
+      "newQuestion": "Nouvelle question, posée nulle part pour l’instant",
+      "retire": {
+        "one": "Archiver {count} carte",
+        "many": "Archiver {count} de cartes",
+        "other": "Archiver {count} cartes"
+      },
+      "restore": {
+        "one": "Réactiver {count} carte",
+        "many": "Réactiver {count} de cartes",
+        "other": "Réactiver {count} cartes"
+      }
+    },
+    "draftEdit": {
+      "saving": "Enregistrement…",
+      "saved": "Toutes les modifications sont enregistrées.",
+      "released": "Ce brouillon a été publié, il est donc figé : rien ne peut y être modifié. Commencez sa version suivante depuis {drafts}.",
+      "releasedLink": "les brouillons",
+      "chooseLanguage": "Pour enregistrer {field}, choisissez la langue du texte.",
+      "id": "Identifiant",
+      "idHint": "Fait partie de son adresse dans la publication et ne change jamais une fois publié. Lettres de A à Z, chiffres, « . », « _ » et « - ».",
+      "idProblem": {
+        "invalid": "Un identifiant se compose de lettres de A à Z, de chiffres, de « . », « _ » et « - », et commence par une lettre ou un chiffre.",
+        "taken": "Ce brouillon, ou une publication antérieure, a déjà cet identifiant."
+      },
+      "addQuestion": "Ajouter la question",
+      "questionEmpty": "Rédigez le recto et le verso.",
+      "askedWhere": "La poser",
+      "askedLast": "Après la dernière question",
+      "askedBefore": "Avant « {name} »",
+      "noIdBetween": "L’assistant ne trouve aucun identifiant qui se classe à cet endroit : saisissez-en un qui convient.",
+      "notAskedThere": "Cet identifiant ne se classe pas à cet endroit : la question ne serait donc pas posée là où l’indique « La poser ». Saisissez-en un qui convient.",
+      "retire": "Archiver",
+      "restore": "Réactiver",
+      "delete": "Supprimer",
+      "published": "Une publication antérieure contient cet élément : la progression d’un apprenant peut donc y faire référence. Il peut être archivé, mais jamais supprimé.",
+      "life": {
+        "chapter": "Archiver ou supprimer le chapitre",
+        "step": "Archiver ou supprimer l’étape",
+        "card": "Archiver ou supprimer la carte"
+      },
+      "deleteConfirm": {
+        "chapter": "Supprimer le chapitre « {name} » et ses étapes ? Ses questions sont conservées, mais ne sont plus posées nulle part.",
+        "step": "Supprimer « {name} » ? Ses questions sont conservées, mais ne sont plus posées nulle part.",
+        "card": "Supprimer la carte « {name} » et ses mauvaises réponses ?"
+      },
+      "refused": {
+        "released": "Ce brouillon a été publié : il n’est plus modifié.",
+        "missing": "« {id} » ne figure plus dans ce brouillon. Il a peut-être été modifié dans un autre onglet.",
+        "published": "« {id} » figure dans une publication antérieure : cet élément peut être archivé, mais jamais supprimé.",
+        "idTaken": "L’identifiant « {id} » est déjà pris, dans ce brouillon ou dans une publication antérieure.",
+        "idInvalid": "« {id} » ne peut pas être un identifiant : lettres de A à Z, chiffres, « . », « _ » et « - », en commençant par une lettre ou un chiffre.",
+        "askedElsewhere": "Cette carte est déjà posée à un autre endroit : déplacez-la plutôt là-bas.",
+        "notACourse": "Seul un cours comporte des chapitres, des étapes et des questions.",
+        "notFrontToBack": "Un cours s’étudie du recto vers le verso.",
+        "carriedActivity": "L’élaboration d’une publication antérieure n’est pas réécrite.",
+        "noAuthors": "Indiquez d’abord un auteur : l’attribution cite les auteurs de la publication.",
+        "unusedSource": "Une source est une source dont la publication est dérivée ou qui a servi à son élaboration : cochez au moins une case."
+      }
+    },
+    "check": {
+      "crumb": "Vérification de la publication",
+      "heading": "Vérification de la publication",
+      "intro": "Toutes les règles auxquelles une publication est soumise, appliquées à ce brouillon comme à la publication qu’il deviendra. Chaque problème renvoie à la partie du brouillon qu’il concerne.",
+      "policy": "Vérifier pour",
+      "policyPod": "Une publication dans votre Pod",
+      "policyLibrary": "La bibliothèque de Solid Memo",
+      "policyHintPod": "Une publication dans un Pod est soumise aux règles de ses données : son cours, ce qu’une publication indique, son Markdown et la publication qui la précède.",
+      "policyHintLibrary": "Un paquet envoyé à la bibliothèque de Solid Memo est aussi soumis à sa sélection éditoriale (titre, description et mots-clés dans chaque langue de l’application, thème Éducation), et placé parmi ses paquets par l’index de la bibliothèque.",
+      "checking": "Vérification du brouillon…",
+      "clear": "Aucun problème trouvé.",
+      "summary": {
+        "one": "{count} problème.",
+        "many": "{count} de problèmes.",
+        "other": "{count} problèmes."
+      },
+      "errors": "Erreurs",
+      "warnings": "Avertissements",
+      "shapesHeading": "Formes",
+      "shapesHint": "Les formes, ainsi que les profils DCAT-AP et SKOS, vérifient la publication en tant que données publiées. Elles prennent du temps sur un brouillon volumineux : elles ne s’exécutent donc que sur demande.",
+      "shapesRun": "Vérifier au regard des formes",
+      "shapesRunning": "Vérification au regard des formes…",
+      "again": "Vérifier à nouveau le brouillon",
+      "shapesAgain": "Vérifier à nouveau",
+      "shapesStale": "Le brouillon a changé depuis : voici les problèmes qu’il présentait alors.",
+      "shapesClear": "Les formes ne trouvent aucun problème.",
+      "shapesCount": {
+        "one": "Les formes trouvent {count} problème, parmi ceux ci-dessus.",
+        "many": "Les formes trouvent {count} de problèmes, parmi ceux ci-dessus.",
+        "other": "Les formes trouvent {count} problèmes, parmi ceux ci-dessus."
+      },
+      "release": "Cette publication",
+      "distractor": "Mauvaise réponse {id}",
+      "badge": {
+        "one": "{count} problème",
+        "many": "{count} de problèmes",
+        "other": "{count} problèmes"
+      },
+      "badgeOf": "dans {name}",
+      "untagged": "texte sans langue",
+      "nothing": "rien",
+      "firstVersion": "rien, puisqu’il s’agit de la première version",
+      "kind": {
+        "card": "une carte",
+        "chapter": "un chapitre",
+        "step": "une étape",
+        "distractor": "une mauvaise réponse"
+      },
+      "profile": "{profile} : {message}"
+    },
+    "field": {
+      "title": "Titre",
+      "description": "Description",
+      "publisher": "Éditeur",
+      "license": "Licence",
+      "version": "Version",
+      "inSeries": "Série de versions",
+      "isVersionOf": "Série dont elle est une version",
+      "distribution": "Distribution",
+      "theme": "Thèmes",
+      "keyword": "Mots-clés",
+      "prev": "Version précédente",
+      "previousVersion": "Version précédente",
+      "studyDirection": "Sens d’étude",
+      "theory": "Théorie",
+      "checkedBy": "Questions",
+      "isPartOf": "Fait partie de",
+      "position": "Position",
+      "reviewQuestion": "Questions de révision",
+      "front": "Recto",
+      "back": "Verso",
+      "frontLabel": "Étiquette du recto",
+      "backLabel": "Étiquette du verso",
+      "frontNote": "Note sous le recto",
+      "backNote": "Note sous le verso",
+      "frontImageDescription": "Description de l’image du recto",
+      "backImageDescription": "Description de l’image du verso",
+      "distractor": "Mauvaises réponses",
+      "distractorText": "Mauvaise réponse",
+      "distractorNote": "Pourquoi elle est fausse",
+      "textFormat": "Format du texte",
+      "versionNotes": "Notes de version",
+      "language": "Langues",
+      "creator": "Auteurs",
+      "comment": "Commentaire",
+      "wasDerivedFrom": "Sources"
+    },
+    "problem": {
+      "notARelease": "{path} ne peut pas accueillir une publication dans la bibliothèque : son nom ne peut contenir que des lettres minuscules, des chiffres et des tirets.",
+      "versionGap": "Les versions de {deck} dans la bibliothèque ne se suivraient pas sans interruption (1, 2, …) : {versions}.",
+      "notOneDeck": "La publication ne décrit pas exactement un paquet, à savoir elle-même. Paquets décrits : {decks}.",
+      "versionMismatch": "Indique la version {stated} ; son emplacement indique {expected}.",
+      "linkMismatch": "{field} : indique {stated} ; son emplacement indique {expected}.",
+      "noLicense": "N’indique aucune licence : un paquet de la bibliothèque indique sous quelle licence il est publié.",
+      "cardsDropped": "Supprime {ids}, que contient {previous}. Une carte n’est jamais supprimée : archivez-la plutôt, pour que les apprenants la conservent avec son historique.",
+      "outlineDropped": "Supprime {ids}, que contient {previous}. Un chapitre, une étape ou une mauvaise réponse n’est jamais supprimé : archivez-le plutôt, pour que les apprenants gardent leur place.",
+      "idReused": "{id} est {now} ici, mais {was} dans {previous} : un identifiant désigne un seul sujet, pour toujours.",
+      "versionNotNext": "La version {version} ne suit pas {previous}, version {previousVersion}.",
+      "outlineWithoutCourse": "A des chapitres ou des étapes, mais n’est pas un cours.",
+      "courseWithoutChapter": "Un cours a au moins un chapitre.",
+      "courseDirection": "Un cours s’étudie du recto au verso ; celui-ci indique {stated}.",
+      "chapterPartOf": "Fait partie de {parts} : un chapitre fait partie de la publication qui le contient.",
+      "stepPartOf": "Fait partie de {part}, qui n’est pas un chapitre de cette publication.",
+      "askedNotACard": "Pose {card}, qui n’est pas une carte de cette publication.",
+      "askedRetired": "Pose {card}, qui est archivée : posez une carte en usage, ou archivez aussi ce qui la pose.",
+      "notADistractor": "Désigne {distractor} comme mauvaise réponse, alors que ce n’est pas une mauvaise réponse de cette publication.",
+      "distractorShared": "Est une mauvaise réponse de {cards} : chaque carte a les siennes.",
+      "checkedTwice": "Est posée par les étapes {steps} : une question est posée par une étape au plus.",
+      "checkedAndReviewed": "Est posée par {steps} et dans la révision de {chapters} : une question est posée à un seul endroit.",
+      "noBack": "N’a pas de texte au verso, la bonne réponse.",
+      "fewDistractors": {
+        "one": "A {count} mauvaise réponse en usage : une question posée par un cours en a au moins {least}.",
+        "many": "A {count} de mauvaises réponses en usage : une question posée par un cours en a au moins {least}.",
+        "other": "A {count} mauvaises réponses en usage : une question posée par un cours en a au moins {least}."
+      },
+      "distractorLanguages": "N’a pas de texte en {missing}, contrairement au verso de {card}.",
+      "chapterPositions": "Les chapitres {chapters} occupent la même position, {position}.",
+      "stepPositions": "Les étapes {steps} occupent la même position, {position}.",
+      "chapterWithoutStep": "N’a aucune étape en usage.",
+      "textFormatMisplaced": "Indique un format de texte, ce que seuls une carte, une étape ou un chapitre peuvent faire.",
+      "textFormatUnknown": "Indique un format de texte inconnu de cette application, {format} : son texte s’affiche en texte brut.",
+      "markdown": "{field}, {language} : {finding}",
+      "theoryEmptyChunk": "{field}, {language} : un séparateur thématique placé au début, à la fin ou juste après un autre crée une partie vide, que l’application ignore. La théorie d’une étape s’affiche partie par partie, découpée à ses séparateurs thématiques : mettez du texte entre deux séparateurs.",
+      "theoryChunks": "{field} : {counts}. La théorie d’une étape a le même nombre de parties dans chaque langue, pour qu’un apprenant qui change de langue ne perde pas sa place.",
+      "theoryChunkCount": {
+        "one": "{count} partie en {language}",
+        "many": "{count} de parties en {language}",
+        "other": "{count} parties en {language}"
+      },
+      "missingLanguage": "{field} : aucun texte en {language}.",
+      "missingImageDescription": "{field} : aucune description en {language}. Sans elle, un lecteur d’écran dit seulement qu’il y a une image.",
+      "missingTheme": "Thèmes : {theme} est manquant.",
+      "missingContact": "Contact : celui de la bibliothèque, {contact}, n'est pas indiqué. Une publication pour la bibliothèque l'indique, pas une adresse e-mail.",
+      "emailNamed": "Indique une adresse e-mail : une publication pour la bibliothèque n'indique l'adresse e-mail de personne, seulement le contact de la bibliothèque.",
+      "required": "{field} : à renseigner.",
+      "previousUnread": "Impossible de lire la publication qu’elle suit, {previous} : rien n’est donc vérifié par rapport à elle. Vérifiez à nouveau plus tard.",
+      "libraryUnread": "Impossible de lire l’index de la bibliothèque : la place du brouillon dans la bibliothèque n’est donc pas vérifiée. Vérifiez à nouveau plus tard.",
+      "shape": "{field} : {message}",
+      "unshaped": "Appartient à une classe Solid Memo qu’aucune forme de cette application ne décrit.",
+      "sourceUndescribed": "N’indique pas {missing} : une source dit ce qu’elle est, à qui elle appartient et à quelles conditions elle a été utilisée.",
+      "usedNotDerived": "A servi à élaborer la publication, qui n’indique pas en être dérivée.",
+      "countDisagrees": "Indique {stated} {what}, mais la publication en compte {counted}."
+    },
+    "preview": {
+      "crumb": "Aperçu dans la bibliothèque",
+      "heading": "Aperçu dans la bibliothèque",
+      "intro": "Cette publication dans la bibliothèque, telle que les apprenants la verront. Rien n’est cliquable ici : c’est une image.",
+      "row": "Dans la liste de la bibliothèque",
+      "page": "Sur sa propre page"
+    },
+    "diff": {
+      "crumb": "Modifications",
+      "heading": "Modifications depuis la version précédente",
+      "intro": "Ce brouillon comparé à la publication qu’il suit : ce qu’il ajoute, modifie, archive et réactive, et ce qu’en recevraient les apprenants qui ont cette publication.",
+      "comparing": "Comparaison du brouillon…",
+      "first": "Ce brouillon est une première version : il ne suit aucune publication, il n’y a donc rien à comparer.",
+      "against": "Comparé à la version {version}, {url}.",
+      "rules": "Règles de la série",
+      "rulesKept": "Il ne supprime rien, ne donne aucun identifiant à un autre type de sujet, et sa version est bien la suivante.",
+      "about": "Ce qu’il dit de lui-même",
+      "aboutSame": "Inchangé.",
+      "aboutChanged": "Modifié : {fields}.",
+      "detail": {
+        "course": "cours ou paquet",
+        "title": "titre",
+        "description": "description",
+        "keywords": "mots-clés",
+        "themes": "thèmes",
+        "direction": "sens d’étude",
+        "license": "licence",
+        "authors": "auteurs",
+        "languages": "langues",
+        "sources": "sources"
+      },
+      "subjects": "Son contenu",
+      "subjectsSame": "Les chapitres, étapes, cartes et mauvaises réponses sont tous inchangés.",
+      "kind": {
+        "chapter": "Chapitres",
+        "step": "Étapes",
+        "card": "Cartes",
+        "distractor": "Mauvaises réponses"
+      },
+      "unchanged": {
+        "one": "{count} sans changement.",
+        "many": "{count} sans changement.",
+        "other": "{count} sans changement."
+      },
+      "status": {
+        "added": "ajout",
+        "changed": "modification",
+        "retired": "archivage",
+        "restored": "réactivation",
+        "retiredChanged": "archivage et modification",
+        "restoredChanged": "réactivation et modification"
+      },
+      "learners": "Ce que reçoivent les apprenants",
+      "notNewer": "Seule une publication plus récente est proposée aux apprenants, et la version {version} ne vient pas après la version {previous}.",
+      "noUpgrade": "La copie d’un apprenant de la version {previous} ne changerait pas.",
+      "upgrade": "La mise à jour de la copie d’un apprenant de la version {previous} {changes}.",
+      "retiredOnly": "met à jour uniquement des cartes archivées",
+      "courseLearner": "La copie considérée ici est celle d’un apprenant qui a atteint toutes les questions. Les apprenants d’un cours reçoivent ses nouvelles questions au fur et à mesure qu’ils les atteignent.",
+      "nothingLost": "Aucun apprenant ne perd sa progression : ce que le brouillon n’utilise plus, il l’archive, et une carte archivée garde son historique.",
+      "lost": "Progression que les apprenants perdraient",
+      "lostCards": {
+        "one": "L’historique des révisions de {count} carte que le brouillon supprime : {ids}.",
+        "many": "L’historique des révisions de {count} de cartes que le brouillon supprime : {ids}.",
+        "other": "L’historique des révisions de {count} cartes que le brouillon supprime : {ids}."
+      },
+      "lostChapters": {
+        "one": "L’achèvement de {count} chapitre que le brouillon supprime : {ids}.",
+        "many": "L’achèvement de {count} de chapitres que le brouillon supprime : {ids}.",
+        "other": "L’achèvement de {count} chapitres que le brouillon supprime : {ids}."
+      }
+    },
+    "trial": {
+      "crumb": "Essai",
+      "heading": "Essai",
+      "intro": "Le brouillon, tel qu’un apprenant l’étudiera, dans un bac à sable propre à cette page : rien de ce que vous faites ici n’atteint votre Pod, et recommencer efface tout.",
+      "opening": "Préparation de l’essai…",
+      "notReady": "Ce brouillon ne peut pas encore être essayé. Corrigez d’abord ces points :",
+      "controls": "Commandes de l’essai",
+      "coursePage": "La page du cours",
+      "chapter": "Chapitre",
+      "jump": "Ouvrir le chapitre",
+      "jumpHint": "Comme un apprenant qui a terminé tous les chapitres précédents.",
+      "answersCourse": "Toutes les questions du chapitre affiché, ou du prochain chapitre à suivre :",
+      "answersDeck": "Toutes les cartes à étudier maintenant :",
+      "allRight": "Répondre juste à tout",
+      "allWrong": "Répondre faux à tout",
+      "days": "Jours d’avance",
+      "advance": "Avancer",
+      "ahead": {
+        "one": "L’essai a {count} jour d’avance.",
+        "many": "L’essai a {count} de jours d’avance.",
+        "other": "L’essai a {count} jours d’avance."
+      },
+      "today": "L’essai est à la date du jour.",
+      "working": "Traitement…",
+      "reset": "Recommencer",
+      "reload": "Recharger le brouillon"
+    },
+    "release": {
+      "crumb": "Publication",
+      "heading": "Métadonnées et provenance de la publication",
+      "intro": "Ce que la publication dit d’elle-même au-delà de sa présentation : qui l’a compilée et comment, et à partir de quoi elle a été faite. Chaque modification est enregistrée dès qu’elle est faite.",
+      "about": "À propos de cette version",
+      "versionNotes": "Notes de version",
+      "versionNotesHint": "Ce qu’est cette version, ou ce qu’elle change, en quelques mots pour les apprenants.",
+      "languages": "Langues",
+      "languagesHint": "Les langues de son contenu, d’après la table des langues de l’UE.",
+      "languageOther": "{iri} (absente de la table)",
+      "themes": "Thèmes",
+      "themesHint": "Ce dont traite la publication : le thème de l’UE que demande la vérification de la publication, et les thèmes sous lesquels la bibliothèque la range.",
+      "themeEducation": "Éducation, culture et sport (EDUC)",
+      "themesRequired": "Thème de données de l’UE (obligatoire)",
+      "themesTopics": "Thèmes de Solid Memo (facultatif)",
+      "themesOther": "Autres thèmes indiqués par la publication",
+      "licenseHint": "Indiquée sous forme de document de licence, comme le demande DCAT-AP.",
+      "contact": "Contact",
+      "contactHint": "Une page web où les lecteurs posent des questions sur la publication ou y signalent une erreur, comme un gestionnaire de tickets. La bibliothèque de Solid Memo demande la sienne, et l'adresse e-mail de personne.",
+      "contactLibrary": "Utiliser le contact de la bibliothèque",
+      "contactInvalid": "Indiquez une adresse web commençant par https:// ou http://.",
+      "publisher": "Éditeur",
+      "publisherNone": "Aucun indiqué",
+      "publisherHint": "Qui diffuse la publication : l’un de ses auteurs, ou l’éditeur qu’elle cite déjà.",
+      "authors": "Auteurs",
+      "authorsHint": "Les personnes qui ont compilé la publication, conservées dans la publication elle-même.",
+      "noAuthors": "Aucun auteur pour l’instant.",
+      "otherAuthors": "Également cités, dans un autre document, et conservés tels quels : {authors}",
+      "authorName": "Nom",
+      "authorEmail": "Adresse e-mail (facultatif)",
+      "saveAuthor": "Enregistrer",
+      "newAuthor": "Nouvel auteur",
+      "addAuthor": "Ajouter l’auteur",
+      "authorEmpty": "Saisissez le nom de l’auteur.",
+      "making": "Élaboration",
+      "attribution": "Attribution",
+      "attributionHint": "Indique qui a compilé la publication, en anglais et en suédois. Rien ici n’indique que quelqu’un l’a relue.",
+      "attributionNone": "Aucune attribution",
+      "attributionNeedsAuthors": "Citez d’abord un auteur : l’attribution nomme les auteurs de la publication.",
+      "makingNotes": "Notes sur l’élaboration",
+      "makingNotesHint": "Chaque paragraphe est conservé comme une note sur l’élaboration de la publication : ses sources, sa structure, sa sélection ou ses licences, par exemple. Un nombre indiqué dans une note (chapitres, étapes, sources ou cartes au total) est vérifié par rapport à la publication.",
+      "sources": "Sources",
+      "sourcesHint": "Ce à partir de quoi la publication a été faite. Chaque source indique ce qu’elle est, à qui elle appartient et à quelles conditions elle a été utilisée : sa licence, ou le justificatif d’une licence. Le Studio affiche son adresse, sans jamais l’ouvrir.",
+      "noSources": "Aucune source pour l’instant.",
+      "sourceIri": "Adresse",
+      "sourceTitle": "Titre",
+      "sourceCreator": "Créateur",
+      "sourceLicense": "Licence (son adresse)",
+      "sourceEvidence": "Justificatif de sa licence",
+      "derivedFrom": "La publication en est dérivée",
+      "used": "Utilisée pour l’élaboration de cette version",
+      "usedEarlier": "Utilisée pour l’élaboration d’une version antérieure.",
+      "sourceOthers": {
+        "one": "{count} autre déclaration la concernant est conservée telle quelle.",
+        "many": "{count} d’autres déclarations la concernant sont conservées telles quelles.",
+        "other": "{count} autres déclarations la concernant sont conservées telles quelles."
+      },
+      "saveSource": "Enregistrer la source",
+      "newSource": "Nouvelle source",
+      "addSource": "Ajouter la source",
+      "sourceInvalid": "Indiquez l’adresse web de la source, commençant par https:// ou http://.",
+      "sourceExists": "La publication cite déjà cette source.",
+      "sourceUnused": "Cochez au moins une case : la publication en est dérivée, ou l’élaboration de cette version l’a utilisée.",
+      "licenseInvalid": "Indiquez l’adresse web de la licence, commençant par https:// ou http://, ou laissez le champ vide.",
+      "checks": "Vérifications",
+      "checksHint": "Les vérifications que la publication a reçues, par une machine (les validateurs, la vérification de la publication) ou par l’IA. Chacune est enregistrée comme n’étant pas une relecture humaine : le Studio n’enregistre aucune relecture humaine.",
+      "noChecks": "Aucune vérification enregistrée pour l’instant.",
+      "checkKind": "Vérifiée par",
+      "checkMachine": "Une machine",
+      "checkAi": "IA",
+      "checkLabel": "Ce qui a été examiné",
+      "checkScope": "Portée",
+      "checkOutcome": "Résultat",
+      "checkEnded": "Terminée le",
+      "checkLanguage": "Rédigée en",
+      "checkLanguageEn": "Anglais",
+      "checkLanguageSv": "Suédois",
+      "checkEmpty": "Indiquez ce qui a été examiné, la portée et le résultat.",
+      "newCheck": "Nouvelle vérification",
+      "addCheck": "Consigner la vérification",
+      "saveCheck": "Enregistrer la vérification",
+      "checkOtherwise": "Rédigée autrement que le Studio ne rédige une vérification : elle peut être supprimée, mais pas modifiée.",
+      "carried": "Des versions antérieures",
+      "carriedHint": "L’élaboration des versions antérieures, conservée telle quelle : une publication n’est jamais réécrite.",
+      "detail": {
+        "title": "son titre",
+        "creator": "son créateur",
+        "licence": "sa licence ou son justificatif"
+      },
+      "counted": {
+        "chapters": "chapitres",
+        "steps": "étapes",
+        "sources": "sources",
+        "cards": "cartes au total"
+      },
+      "edit": "Modifier",
+      "cancel": "Annuler",
+      "remove": "Supprimer",
+      "editOf": "Modifier {name}",
+      "removeOf": "Supprimer {name}"
+    },
+    "publish": {
+      "heading": "Publier",
+      "intro": "Publier écrit la publication dans votre Pod sous la forme d’un seul document Turtle, à une adresse qui ne change jamais, et la rend lisible par tous. Une publication n’est jamais modifiée ensuite : pour la modifier, vous en rédigez la version suivante.",
+      "checking": "Vérification du brouillon…",
+      "noErrors": "La vérification de la publication ne trouve aucune erreur. Au moment de publier, la publication est vérifiée à nouveau, y compris au regard des formes.",
+      "errors": {
+        "one": "La vérification de la publication trouve {count} erreur. Corrigez-la avant de publier.",
+        "many": "La vérification de la publication trouve {count} d’erreurs. Corrigez-les avant de publier.",
+        "other": "La vérification de la publication trouve {count} erreurs. Corrigez-les avant de publier."
+      },
+      "folder": "Dossier de votre Pod",
+      "folderInvalid": "Indiquez l’adresse web du dossier, qui commence par https:// ou http:// et se termine par /.",
+      "address": "La publication sera mise en ligne à l’adresse {url}.",
+      "confirm": "Je comprends que cette publication sera publique : toute personne disposant de son adresse pourra la lire. Une fois publiée, elle ne pourra jamais être modifiée ni retirée ici.",
+      "publish": "Publier dans mon Pod",
+      "publishing": "Vérification et publication…",
+      "waitSaving": "Attente de l’enregistrement de vos modifications…",
+      "guest": "En mode invité, votre travail est conservé dans ce seul navigateur, où personne d’autre ne pourrait lire une publication. Déplacez votre travail dans un Pod pour y publier. En attendant, vous pouvez télécharger la publication sous forme de fichier.",
+      "releasedAt": "Ce brouillon a été publié à l’adresse {url}.",
+      "askingPublic": "Vérification de qui peut la lire…",
+      "public": "Toute personne disposant de son adresse peut la lire.",
+      "private": "Vous seul pouvez la lire : votre Pod ne l’a pas rendue publique. Réessayez, ou rendez-la lisible par tous avec les outils de votre fournisseur de Pod.",
+      "makePublic": "La rendre publique",
+      "makingPublic": "Ouverture de la publication à tous…",
+      "nextHint": "Une publication n’est jamais modifiée. Pour la modifier, commencez sa version suivante : un nouveau brouillon qui conserve tout ce que cette publication a publié.",
+      "downloadHeading": "Téléchargement",
+      "downloadIntro": "Enregistrez la publication sous forme de fichier Turtle, à l’adresse qu’elle aurait dans la bibliothèque de Solid Memo, pour la proposer à la bibliothèque. Rien ne change dans votre Pod.",
+      "download": "Télécharger le .ttl",
+      "downloaded": "Fichier {file} enregistré : la publication y porte l’adresse {url}.",
+      "stepsIntro": "Pour la proposer à la bibliothèque, dans une copie du dépôt Solid Memo :",
+      "stepCopy": "Placez le fichier dans decks/ sous le nom {file}.",
+      "stepLibrary": "Mettez-le en forme et ajoutez-le à l’index de la bibliothèque :",
+      "stepCheck": "Vérifiez-le au regard des règles de la bibliothèque :",
+      "stepAll": "Lancez toutes les vérifications :",
+      "stepPullRequest": "Ouvrez une pull request avec le nouveau fichier et l’index.",
+      "libraryCheck": "Vérifier d’abord le brouillon pour la bibliothèque"
+    },
+    "releases": {
+      "crumb": "Publications",
+      "link": "Publications",
+      "loading": "Lecture des publications…",
+      "heading": "Publications de {instance}",
+      "intro": "Chaque publication est un document de votre Pod, que les apprenants ajoutent par son adresse. Une publication n’est jamais modifiée : pour la changer, commencez sa version suivante.",
+      "none": "Cette instance n’a encore rien publié.",
+      "caption": "Publications de {instance}",
+      "column": {
+        "release": "Publication",
+        "readers": "Lisible par",
+        "draft": "Brouillon",
+        "actions": "Actions"
+      },
+      "filter": "Filtrer par nom ou adresse",
+      "noMatch": "Aucune publication ne correspond à « {filter} ».",
+      "noDraft": "Absente des brouillons de cette instance",
+      "name": "{name}, version {version}",
+      "public": "Tout le monde",
+      "private": "Vous seul",
+      "makePublicOf": "Rendre publique la publication {release}",
+      "copy": "Copier le lien",
+      "copyLink": "Copier le lien {url}",
+      "copied": "Lien copié.",
+      "copyFailed": "Impossible de copier le lien. Sélectionnez son adresse et copiez-la.",
+      "startNext": "Commencer la version suivante",
+      "startNextOf": "Commencer la version suivante de {release}",
+      "starting": "Démarrage de la version suivante…",
+      "drafts": "Brouillons de publications"
+    },
+    "graph": {
+      "crumb": "Graphe",
+      "loading": "Lecture de l’instance…",
+      "reading": {
+        "one": "Lecture de l’instance : {read} sur {count} document…",
+        "many": "Lecture de l’instance : {read} sur {count} de documents…",
+        "other": "Lecture de l’instance : {read} sur {count} documents…"
+      },
+      "heading": "Graphe de {instance}",
+      "intro": "Tout ce que Solid Memo conserve dans cette instance, sous forme de graphe : chaque dossier, document et ressource est un nœud, et chaque lien entre eux une arête. Un lien vers autre chose aboutit à une feuille, qui n’est jamais lue.",
+      "search": "Trouver un nœud",
+      "group": {
+        "vocabulary": "Termes de vocabulaire",
+        "cards": "Cartes",
+        "distractors": "Mauvaises réponses",
+        "reviewStates": "États de révision",
+        "answers": "Réponses",
+        "leaves": "Feuilles"
+      },
+      "neighborsOnly": "Voisins seulement",
+      "neighborsHint": "Sélectionnez un nœud pour ne voir que lui et ses voisins.",
+      "table": "Afficher sous forme de tableau",
+      "found": {
+        "one": "{count} nœud trouvé",
+        "many": "{count} de nœuds trouvés",
+        "other": "{count} nœuds trouvés"
+      },
+      "moreFound": {
+        "one": "et {count} autre : saisissez davantage pour affiner",
+        "many": "et {count} autres : saisissez davantage pour affiner",
+        "other": "et {count} autres : saisissez davantage pour affiner"
+      },
+      "noMatch": "Aucun nœud affiché ne correspond à « {text} ».",
+      "counts": "{nodes} et {edges} affichés",
+      "nodesShown": {
+        "one": "{shown} sur {count} nœud",
+        "many": "{shown} sur {count} de nœuds",
+        "other": "{shown} sur {count} nœuds"
+      },
+      "edgesShown": {
+        "one": "{shown} sur {count} arête",
+        "many": "{shown} sur {count} d’arêtes",
+        "other": "{shown} sur {count} arêtes"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} arête vers un terme de vocabulaire n’est dessinée que pour le nœud sélectionné ou pointé.",
+        "many": "{count} d’arêtes vers des termes de vocabulaire ne sont dessinées que pour le nœud sélectionné ou pointé.",
+        "other": "{count} arêtes vers des termes de vocabulaire ne sont dessinées que pour le nœud sélectionné ou pointé."
+      },
+      "tooLarge": "Cela dessinerait {nodes} nœuds et {edges} arêtes, plus que la page ne dessine de façon fluide. Masquez-en avec les filtres, affichez-le sous forme de tableau ou dessinez-le quand même.",
+      "drawAnyway": "Dessiner quand même",
+      "placing": "Placement des nœuds",
+      "prompt": "Pointez un nœud, ou utilisez les flèches, pour voir ce qu’il est ; Entrée ou un clic l’ouvre, et un clic sur le fond le désélectionne. +, − et 0 agrandissent, réduisent et montrent tout le graphe, et le faire glisser le déplace.",
+      "zoomIn": "Agrandir",
+      "zoomOut": "Réduire",
+      "zoomFit": "Tout le graphe",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "dossier",
+        "document": "document",
+        "absent": "document absent",
+        "unreadable": "document qui n’a pas pu être lu",
+        "resource": "ressource",
+        "missing": "trouvé dans aucun document",
+        "podLeaf": "dans votre Pod, non lu",
+        "outsideLeaf": "hors de votre Pod, non lu",
+        "vocabularyLeaf": "terme de vocabulaire"
+      },
+      "defines": "définit",
+      "nodes": {
+        "caption": "Nœuds du graphe",
+        "label": "Nœud",
+        "kind": "Nature",
+        "document": "Défini dans",
+        "types": "Classes",
+        "pages": "Pages de nœuds"
+      },
+      "edges": {
+        "caption": "Arêtes du graphe",
+        "from": "De",
+        "predicate": "Lien",
+        "to": "Vers",
+        "pages": "Pages d’arêtes"
+      },
+      "node": {
+        "label": "Nœud",
+        "none": "Sélectionnez un nœud du graphe pour voir ce qu’il dit.",
+        "outside": "Non récupéré : hors de votre Pod.",
+        "inPod": "Non récupéré : dans votre Pod, mais pas des données de Solid Memo.",
+        "vocabulary": "Non récupéré : un terme de vocabulaire.",
+        "missing": "Nommé ici, mais trouvé dans aucun document.",
+        "absent": "Ce document n’existe pas.",
+        "unreadable": "Ce document n’a pas pu être lu.",
+        "values": "Valeurs",
+        "statedIn": "indiqué dans {document}",
+        "outgoing": "Liens depuis ce nœud",
+        "incoming": "Liens vers ce nœud",
+        "noLinks": "Aucun.",
+        "showAll": {
+          "one": "Afficher le {count} lien",
+          "many": "Afficher les {count} de liens",
+          "other": "Afficher les {count} liens"
+        }
+      }
+    },
+    "inline": {
+      "field": "{column} de {row}",
+      "cell": "{field} : {value}",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "refused": "Non enregistré : {reason}."
+    }
+  }
+}

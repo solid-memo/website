@@ -82,6 +82,9 @@ import {
   type StudioRoute,
 } from "./router";
 
+// The Studio's messages, which the page adds to its own when it fetches this chunk (apps/web/src/App.tsx).
+export { STUDIO_CATALOGS } from "./catalogs";
+
 /**
  * The signed-in Studio: in its shell (StudioShell), with the open
  * instance's sidebar and a switch to the user's other instances, the

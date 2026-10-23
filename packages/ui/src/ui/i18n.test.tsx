@@ -2,54 +2,19 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { AppError, ERROR_TEMPLATES } from "@solid-memo/domain/appError";
-import { createI18n, I18nProvider, useI18n, type MessageKey } from "./i18n";
+import { keysUsed, pluralForms, shape } from "../test/catalogs";
+import type { Locale } from "@solid-memo/domain/locale";
+import { createI18n, I18nProvider, useI18n, type Catalogs, type MessageKey } from "./i18n";
 import en from "../i18n/en.json";
 import sv from "../i18n/sv.json";
 import ko from "../i18n/ko.json";
 import de from "../i18n/de.json";
 import es from "../i18n/es.json";
 import fr from "../i18n/fr.json";
-
-/** Every message's key, and its placeholders, in a message file; a plural message's marked as one. */
-function shape(messages: object, prefix = ""): Record<string, string[]> {
-  const found: Record<string, string[]> = {};
-  for (const [key, value] of Object.entries(messages)) {
-    const path = `${prefix}${key}`;
-    if (typeof value === "string") {
-      found[path] = [...value.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
-    } else if (typeof value.other === "string") {
-      found[path] = [
-        "(plural)",
-        ...[
-          ...new Set(
-            Object.values(value as Record<string, string>).flatMap((form) =>
-              [...form.matchAll(/\{(\w+)\}/g)].map((m) => m[1]),
-            ),
-          ),
-        ].sort(),
-      ];
-    } else {
-      Object.assign(found, shape(value, `${path}.`));
-    }
-  }
-  return found;
-}
-
-/** The forms each plural message in a message file gives, by key. */
-function pluralForms(messages: object, prefix = ""): Record<string, string[]> {
-  const found: Record<string, string[]> = {};
-  for (const [key, value] of Object.entries(messages)) {
-    if (typeof value === "string") continue;
-    if (typeof value.other === "string") found[`${prefix}${key}`] = Object.keys(value).sort();
-    else Object.assign(found, pluralForms(value, `${prefix}${key}.`));
-  }
-  return found;
-}
 
 describe("the message files", () => {
   it.each([
@@ -81,17 +46,6 @@ describe("the message files", () => {
     },
   );
 });
-
-/** Every message key the app's source asks for (keys are literals by rule). */
-function keysUsed(dir: string): Set<string> {
-  const used = new Set<string>();
-  for (const entry of readdirSync(dir, { withFileTypes: true, recursive: true })) {
-    if (!/\.tsx?$/.test(entry.name) || /\.test\.tsx?$/.test(entry.name)) continue;
-    const source = readFileSync(join(entry.parentPath, entry.name), "utf8");
-    for (const match of source.matchAll(/\btx?\(\s*"([^"]+)"/g)) used.add(match[1]);
-  }
-  return used;
-}
 
 describe("the source", () => {
   it("asks only for messages English has", () => {
@@ -437,6 +391,58 @@ describe("loadLocale", () => {
     expect(fresh.createI18n("ko").t("language.label")).toBe("Language");
     await fresh.loadLocale("en");
     expect(fresh.createI18n("en").t("language.label")).toBe("Language");
+  });
+});
+
+describe("addCatalogs", () => {
+  /** A set of catalogs with one message, `extra.word`, and how often each language was fetched. */
+  function wordCatalogs(words: Record<Locale, string>) {
+    const fetches: Locale[] = [];
+    const fetch = (locale: Exclude<Locale, "en">) => async () => {
+      fetches.push(locale);
+      return { default: { extra: { word: words[locale] } } };
+    };
+    const catalogs: Catalogs = {
+      en: { extra: { word: words.en }, language: { label: "Not ui's" } },
+      others: {
+        sv: fetch("sv"),
+        ko: fetch("ko"),
+        de: fetch("de"),
+        es: fetch("es"),
+        fr: fetch("fr"),
+      },
+    };
+    return { catalogs, fetches };
+  }
+  const WORDS = { en: "word", sv: "ord", ko: "단어", de: "Wort", es: "palabra", fr: "mot" };
+  const word = "extra.word" as MessageKey;
+
+  it("adds messages, fetched in each language fetched, then in each fetched after; `ui`'s come first", async () => {
+    vi.resetModules();
+    const fresh = await import("./i18n");
+    await fresh.loadLocale("sv");
+    const { catalogs, fetches } = wordCatalogs(WORDS);
+    await fresh.addCatalogs(catalogs);
+    expect(fetches).toEqual(["sv"]);
+    expect(fresh.createI18n("sv").t(word)).toBe("ord");
+    expect(fresh.createI18n("en").t(word)).toBe("word");
+    expect(fresh.createI18n("ko").t(word)).toBe("word");
+    expect(fresh.createI18n("sv").t("language.label")).toBe("Språk");
+    await fresh.loadLocale("ko");
+    expect(fresh.createI18n("ko").t(word)).toBe("단어");
+    expect(fetches).toEqual(["sv", "ko"]);
+  });
+
+  it("fetches a set added while a language is on its way in that language too", async () => {
+    vi.resetModules();
+    const fresh = await import("./i18n");
+    const german = fresh.loadLocale("de");
+    const { catalogs, fetches } = wordCatalogs(WORDS);
+    await fresh.addCatalogs(catalogs);
+    expect(fetches).toEqual([]);
+    await german;
+    expect(fetches).toEqual(["de"]);
+    expect(fresh.createI18n("de").t(word)).toBe("Wort");
   });
 });
 
