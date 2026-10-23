@@ -26,7 +26,6 @@ import {
   type LibraryCopy,
 } from "@solid-memo/domain/library";
 import { pickLocale, type Locale } from "@solid-memo/domain/locale";
-import { conceptOfPalette } from "@solid-memo/domain/concepts";
 import {
   checkPalette,
   isReadable,
@@ -83,7 +82,6 @@ import {
   type DeckUpgradeOutcome,
   type DeckUpgradeProgress,
   type DeckUpgradeStep,
-  type StepPart,
 } from "@solid-memo/domain/deckUpgrade";
 import { tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
@@ -100,12 +98,7 @@ import {
   type CardEdit,
   type CardEditPlan,
 } from "@solid-memo/domain/cardBulk";
-import {
-  isOutdated,
-  isReviewStateOutdated,
-  planMigration,
-  type MigrationPlan,
-} from "@solid-memo/domain/migration";
+import { planMigration, type MigrationPlan } from "@solid-memo/domain/migration";
 import type { DeckGroup, DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import {
   catalogUrlOf,
@@ -130,27 +123,15 @@ import {
 } from "@solid-memo/domain/validation";
 import { deckHealth, type DeckHealth, type DeckTextCheck } from "@solid-memo/domain/deckHealth";
 import type { MarkdownFinding } from "@solid-memo/domain/release/problems";
-import {
-  ABSENT_VERSION,
-  emptyDigest,
-  scheduleOf,
-  studyCountsOf,
-  withReceipt,
-  withSchedule,
-  type DeckSchedule,
-  type DocumentReceipt,
-  type InstanceDigest,
-} from "@solid-memo/domain/studyDigest";
+import { ABSENT_VERSION, studyCountsOf, type InstanceDigest } from "@solid-memo/domain/studyDigest";
 import {
   DEFAULT_PREFERENCES,
   keptPalette,
   NEW_INSTANCE_PREFERENCES,
   shownPalette,
-  type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
 import type {
-  DueState,
   FsrsState,
   ReviewKey,
   ReviewQuality,
@@ -181,7 +162,6 @@ import {
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
 import { effectiveStates } from "@solid-memo/domain/fsrs";
-import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
 import {
   SWITCH_STEPS,
   switchedStates,
@@ -190,13 +170,9 @@ import {
   type SwitchStep,
 } from "@solid-memo/domain/schedulerSwitch";
 import {
-  answerIdOf,
   monthOfStudyDay,
-  recordedResponseTimes,
   shiftStudyDay,
-  utcOffsetMinutesAt,
   type Answer,
-  type AnswerMode,
   type ResponseTimes,
 } from "@solid-memo/domain/answer";
 import {
@@ -291,7 +267,6 @@ import type {
   ThemePreference,
   UpdateJournal,
   WriteFence,
-  Since,
   DeckArchive,
   DocumentContext,
   FileExchange,
@@ -312,6 +287,11 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { trialProblems } from "@solid-memo/domain/release/trial";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { again, changedElsewhere, readNow, unsent } from "./writes";
+import { stepReporter } from "./progress";
+import { createPreferenceStore } from "./preferenceStore";
+import { createAnswerStore, dueStatesOf, promptDueOf } from "./answerStore";
+import { createDigestStore, noting, scheduleFrom } from "./digestStore";
 
 export interface UseCases
   extends ReleaseDraftUseCases,
@@ -1405,11 +1385,6 @@ function fenceMovesElsewhere(
  */
 const CARD_EDIT_ATTEMPTS = 3;
 
-/** Whether a write was refused because the document changed since it was read (a 412). */
-function changedElsewhere(error: unknown): boolean {
-  return error instanceof AppError && error.code === "changedElsewhere";
-}
-
 /**
  * Whether a write of a cards document was refused because it changed
  * since it was read, or was made since it was read as absent (a 412).
@@ -1421,41 +1396,12 @@ function cardsChangedElsewhere(error: unknown): boolean {
 }
 
 /**
- * How often an edit of metadata (a deck's provenance, an instance's
- * name, its catalog) is made, in all, while its document keeps
- * changing elsewhere (412).
- */
-const METADATA_ATTEMPTS = 3;
-
-/**
- * Make an edit, a read of its document then a write of it If-Match that
- * read, again while the document keeps changing elsewhere: each attempt
- * reads afresh, so what changed meanwhile is kept.
- */
-async function again<T>(edit: () => Promise<T>): Promise<T> {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      return await edit();
-    } catch (error) {
-      if (!changedElsewhere(error) || attempt === METADATA_ATTEMPTS) throw error;
-    }
-  }
-}
-
-/**
  * A bulk edit's write of a cards document: one PUT of the whole document,
  * which no pod cuts short, made only while the document is at the
  * version read (none to check when the pod gave none).
  */
 function wholeAt(version: string | null): { whole: true; version?: string } {
   return version === null ? { whole: true } : { whole: true, version };
-}
-
-/** A read made without a known version, which always comes with the contents. */
-async function readNow<T>(read: Promise<Since<T>>): Promise<{ value: T; version: string | null }> {
-  const since = await read;
-  if (since.unchanged) throw new Error("A read without a version came back unchanged.");
-  return since;
 }
 
 const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
@@ -1595,76 +1541,12 @@ function deckKeywords(keywords: LangTexts, deck: Deck): LangTexts {
   return canonical;
 }
 
-/**
- * The progress of an update through its `total` steps, reported as it
- * goes: the step it is on, the steps finished and, for a step with more
- * than one unit of work (documents, decks, writes), how far into it.
- */
-function stepReporter<Step extends string>(
-  first: Step,
-  total: number,
-  onProgress: (progress: { step: Step; done: number; total: number; part?: StepPart }) => void,
-) {
-  let step = first;
-  let done = 0;
-  let part: StepPart | undefined;
-  const report = () =>
-    onProgress({ step, done, total, ...(part === undefined ? {} : { part: { ...part } }) });
-  const enter = (next: Step, parts: number | undefined) => {
-    step = next;
-    part = parts === undefined ? undefined : { done: 0, total: parts };
-    report();
-  };
-  return {
-    step: () => step,
-    /** Under way, at the first step, of `parts` units of work when it has more than one. */
-    start(parts?: number) {
-      enter(first, parts);
-    },
-    /** The step is finished: on to `next` (the same, after the last), of `parts` units of work. */
-    finished(next: Step = step, parts?: number) {
-      done += 1;
-      enter(next, parts);
-    },
-    /** `count` of the step's `of` units done; not reported once all are, the step's finish is. */
-    partly(count: number, of = part!.total) {
-      part = { done: count, total: of };
-      if (count < of) report();
-    },
-    /** One more of the step's units done. */
-    stepped() {
-      this.partly(part!.done + 1);
-    },
-  };
-}
-
 /** A document the format update writes, and the writes that bring it up to date, each saying whether it wrote anything. */
 interface UpdateItem {
   document: UpdateDocument;
   writes: (() => Promise<boolean>)[];
 }
 
-/** What sets each prompt's due day, by the scheduler the preferences name (effectiveStates). */
-function dueStatesOf(
-  states: ReviewStates,
-  prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
-) {
-  return effectiveStates(states.sm2, states.fsrs, prefs.scheduler, prefs.dayBoundaryHour);
-}
-
-/** What sets one prompt's due day, of its SM-2 state and its FSRS-6 state (null or absent: none). */
-function promptDueOf(
-  sm2: ReviewState,
-  fsrs: FsrsState | null | undefined,
-  prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
-): DueState {
-  return dueStatesOf({ sm2: [sm2], fsrs: fsrs == null ? [] : [fsrs] }, prefs)[0]!;
-}
-
-/**
- * What the instance grades and schedules with: the scheduler its
- * preferences name, the retention FSRS-6 aims at and the day boundary.
- */
 /**
  * The preferences to save, but for the answer to the invitation to
  * switch to FSRS-6: "Not now", once stored, holds for good, though the
@@ -1680,14 +1562,6 @@ function withInvitationAnswer(
     ...preferences,
     schedulerInvitationDismissed:
       stored.schedulerInvitationDismissed || preferences.schedulerInvitationDismissed,
-  };
-}
-
-function schedulingOf(prefs: StudyPreferences): Scheduling {
-  return {
-    scheduler: prefs.scheduler,
-    desiredRetention: prefs.desiredRetention,
-    dayBoundaryHour: prefs.dayBoundaryHour,
   };
 }
 
@@ -1725,6 +1599,29 @@ export function createUseCases({
   trialSandbox = noTrials,
   instanceGraphReader = NO_INSTANCE_GRAPH,
 }: Dependencies): UseCases {
+  const preferenceStore = createPreferenceStore({
+    preferencesRepository,
+    themePreference,
+    palettePreference,
+    customPalettePreference,
+    textSizePreference,
+  });
+  const answerStore = createAnswerStore({
+    answerLog,
+    reviewStateRepository,
+    preferenceStore,
+    newId,
+  });
+  const digestStore = createDigestStore({
+    digestRepository,
+    deckRepository,
+    reviewStateRepository,
+    shapeValidator,
+    ruleset,
+    preferenceStore,
+    answerStore,
+    now,
+  });
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
 
   /**
@@ -1917,76 +1814,6 @@ export function createUseCases({
     }
   }
 
-  const preferenceReads = new Map<string, Promise<StoredPreferences | null>>();
-
-  /** An instance's stored preferences, one read for callers that ask at once. */
-  function readStoredPreferences(instanceUrl: string): Promise<StoredPreferences | null> {
-    const inFlight = preferenceReads.get(instanceUrl);
-    if (inFlight !== undefined) return inFlight;
-    const read = preferencesRepository
-      .getPreferences(instanceUrl)
-      .finally(() => preferenceReads.delete(instanceUrl));
-    preferenceReads.set(instanceUrl, read);
-    return read;
-  }
-
-  function getPreferences(instanceUrl: string): Promise<StudyPreferences> {
-    return readStoredPreferences(instanceUrl).then(
-      (stored) => stored?.preferences ?? DEFAULT_PREFERENCES,
-    );
-  }
-
-  /**
-   * Each instance's writes of a theme, a palette or a text size, one
-   * after another, so a later choice is never overwritten by an earlier,
-   * nor refused for a version an earlier one changed.
-   */
-  const appearanceWrites = new Map<string, Promise<void>>();
-
-  /**
-   * Write a choice of how the app is shown into an instance's
-   * preferences, once the earlier ones are written: `changed` gives the
-   * preferences with the choice in them, or null when they already hold
-   * it. Nothing is written while the instance has no preferences.
-   */
-  function writeAppearance(
-    instanceUrl: string,
-    changed: (preferences: StudyPreferences) => StudyPreferences | null,
-  ): Promise<void> {
-    const previous = appearanceWrites.get(instanceUrl) ?? Promise.resolve();
-    const write = previous
-      .catch(() => undefined)
-      .then(async () => {
-        const stored = await preferencesRepository.getPreferences(instanceUrl);
-        const next = stored === null ? null : changed(stored.preferences);
-        if (next === null) return;
-        await preferencesRepository.savePreferences(instanceUrl, next);
-        // A read begun before the write holds what it replaced: the next read is made afresh.
-        preferenceReads.delete(instanceUrl);
-      });
-    appearanceWrites.set(instanceUrl, write);
-    return write;
-  }
-
-  /** Once the appearance writes made so far are done, failed ones too: what a save of all the preferences waits for. */
-  function afterAppearanceWrites(instanceUrl: string): Promise<void> {
-    return (appearanceWrites.get(instanceUrl) ?? Promise.resolve()).catch(() => undefined);
-  }
-
-  /**
-   * Keep on this device how saved preferences show the app, for the next
-   * visit's first paint. A palette of the user's own, which the device
-   * keeps as it was chosen, is left as it is.
-   */
-  function keepAppearance(instanceUrl: string, preferences: StudyPreferences) {
-    themePreference.choose(preferences.theme);
-    if (!isPaletteOf(instanceUrl, preferences.palette)) {
-      palettePreference.choose(shownPalette(preferences));
-      customPalettePreference.choose(null);
-    }
-    textSizePreference.choose(preferences.textSize);
-  }
-
   /**
    * The palette saved preferences keep: one of the user's own of the
    * instance as it is, else as keptPalette has it, against what the
@@ -2004,27 +1831,6 @@ export function createUseCases({
   }
 
   /**
-   * The preferences of an instance made now, or saved for the first
-   * time: shown as this device shows the app, its palette of the user's
-   * own among them when it is one of that instance's.
-   */
-  function withDeviceAppearance(
-    preferences: StudyPreferences,
-    instanceUrl: string | null = null,
-  ): StudyPreferences {
-    const custom = customPalettePreference.chosen();
-    return {
-      ...preferences,
-      theme: themePreference.chosen(),
-      palette:
-        custom !== null && instanceUrl !== null && isPaletteOf(instanceUrl, custom.url)
-          ? custom.url
-          : conceptOfPalette(palettePreference.chosen()),
-      textSize: textSizePreference.chosen(),
-    };
-  }
-
-  /**
    * What bringing the instance up to this app's formats would touch: its
    * meta document, preferences and catalog, and every deck's cards and
    * review states. A document still at a version with nothing outdated in
@@ -2037,7 +1843,7 @@ export function createUseCases({
       preferencesRepository.getPreferences(instanceUrl),
       deckRepository.readCatalog(instanceUrl),
       deckRepository.listDecks(instanceUrl),
-      digestOf(instanceUrl),
+      digestStore.of(instanceUrl),
     ]);
     const latestVersion = (url: string) => {
       const receipt = digest.receipts[url];
@@ -2119,69 +1925,6 @@ export function createUseCases({
   }
 
   /**
-   * Whether a write's failure says it was never made: the pod refused it
-   * (412, the document changed or was created elsewhere), or this app did
-   * before sending it (the data would not conform, a newer version of the
-   * app wrote it, a deck's entry no longer as the upgrade read it, a deck's
-   * document not yet said to be the deck's, a deck that cannot be used or an
-   * address the pod fence refuses, say).
-   * Any other failure, an answer lost on the way, may follow a write the
-   * pod made.
-   */
-  function unsent(error: unknown): boolean {
-    return (
-      error instanceof AppError &&
-      [
-        "changedElsewhere",
-        "createdElsewhere",
-        "writtenByNewerApp",
-        "dataNotConforming",
-        "guestStudyBeingMoved",
-        "writeRefused",
-        "deckChangedDuringUpgrade",
-        "deckDocumentUnclaimed",
-        "deckGone",
-      ].includes(error.code)
-    );
-  }
-
-  /**
-   * Each instance's digest as this page knows it: read once, then kept up
-   * to date with what the page learns, which is written back in the
-   * background (a failed write only means the next visit learns it again).
-   */
-  const digests = new Map<string, Promise<InstanceDigest>>();
-
-  function digestOf(instanceUrl: string): Promise<InstanceDigest> {
-    let digest = digests.get(instanceUrl);
-    if (digest === undefined) {
-      digest = digestRepository.readDigest(instanceUrl).then(
-        (stored) => stored ?? emptyDigest(),
-        () => emptyDigest(),
-      );
-      digests.set(instanceUrl, digest);
-    }
-    return digest;
-  }
-
-  function remember(instanceUrl: string, change: (digest: InstanceDigest) => InstanceDigest): void {
-    void digestOf(instanceUrl).then((digest) => {
-      digests.set(instanceUrl, Promise.resolve(change(digest)));
-      return digestRepository
-        .updateDigest(instanceUrl, (stored) => change(stored ?? emptyDigest()))
-        .catch(() => undefined);
-    });
-  }
-
-  function noting(
-    document: string,
-    version: string,
-    facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">,
-  ) {
-    return (digest: InstanceDigest) => withReceipt(digest, document, version, facts);
-  }
-
-  /**
    * Write a bulk edit of the deck's cards (editCards, undoCardEdit): the
    * changes `plan` makes of the cards and review states as they are now,
    * in one conditional write of the cards document, again from a fresh
@@ -2222,7 +1965,7 @@ export function createUseCases({
         });
       }
       // The edit is made: a digest left behind is brought up to date by the next deck list.
-      await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
+      await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
       return changes;
     }
   }
@@ -2249,7 +1992,7 @@ export function createUseCases({
       every: true,
     });
     // The edit is made: a digest left behind is brought up to date by the next deck list.
-    await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
+    await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
     return cards.size;
   }
 
@@ -2316,31 +2059,11 @@ export function createUseCases({
     return plan;
   }
 
-  async function refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void> {
-    await logAnswers();
-    const [prefs, cards, reviews] = await Promise.all([
-      getPreferences(instanceUrl),
-      deckRepository.readCardsSince(deck, undefined),
-      reviewStateRepository.readReviewStatesSince(deck, undefined),
-    ]);
-    if (cards.unchanged || reviews.unchanged) return;
-    noteSchedule(instanceUrl, deck, cards, reviews, prefs, now());
-    // The session changed the reviews document: check it now (it is small), not at the next visit.
-    const checked = await shapeValidator.validateDocumentSince(deck.reviewsDocumentUrl, undefined);
-    if (
-      !checked.unchanged &&
-      checked.version !== null &&
-      summarize(instanceUrl, [checked.value]).conforms
-    ) {
-      remember(
-        instanceUrl,
-        noting(deck.reviewsDocumentUrl, checked.version, { conformedTo: ruleset }),
-      );
-    }
-  }
-
   async function studyCountsAndSchedule(instanceUrl: string, deck: Deck, now: Date) {
-    const [prefs, digest] = await Promise.all([getPreferences(instanceUrl), digestOf(instanceUrl)]);
+    const [prefs, digest] = await Promise.all([
+      preferenceStore.get(instanceUrl),
+      digestStore.of(instanceUrl),
+    ]);
     const studyPrefs = deckPreferences(prefs, deck);
     const kept = digest.schedules[deck.url];
     const [cardsSince, reviewsSince] = await Promise.all([
@@ -2364,7 +2087,7 @@ export function createUseCases({
     // A read without a version to compare is never "unchanged".
     if (cards.unchanged || reviews.unchanged)
       throw new Error("A read without a version to compare came back unchanged.");
-    noteSchedule(instanceUrl, deck, cards, reviews, prefs, now);
+    digestStore.noteSchedule(instanceUrl, deck, cards, reviews, prefs, now);
     const queue = buildStudyQueue({
       cards: cards.value,
       direction: deck.direction,
@@ -2381,64 +2104,6 @@ export function createUseCases({
     return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
   }
 
-  function noteSchedule(
-    instanceUrl: string,
-    deck: Deck,
-    cards: { value: Card[]; version: string | null },
-    reviews: { value: ReviewStates; version: string | null },
-    prefs: StudyPreferences,
-    now: Date,
-  ): void {
-    recordSchedule(
-      instanceUrl,
-      deck,
-      cards,
-      reviews,
-      scheduleFrom(cards, deck, reviews, prefs, now),
-    );
-  }
-
-  /** The deck's schedule from its documents, by the due days of the scheduler in use. */
-  function scheduleFrom(
-    cards: { value: Card[] },
-    deck: Deck,
-    reviews: { value: ReviewStates },
-    prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
-    now: Date,
-  ): DeckSchedule {
-    const { scheduler, dayBoundaryHour } = prefs;
-    return scheduleOf({
-      cards: cards.value,
-      direction: deck.direction,
-      reviews: effectiveStates(reviews.value.sm2, reviews.value.fsrs, scheduler, dayBoundaryHour),
-      scheduler,
-      dayBoundaryHour,
-      now,
-    });
-  }
-
-  /** Keeps a schedule already worked out in the digest, with the receipts the documents earned. */
-  function recordSchedule(
-    instanceUrl: string,
-    deck: Deck,
-    cards: { value: Card[]; version: string | null },
-    reviews: { value: ReviewStates; version: string | null },
-    schedule: DeckSchedule,
-  ): void {
-    const { version: cardsVersion } = cards;
-    const { version: reviewsVersion } = reviews;
-    if (cardsVersion === null || reviewsVersion === null) return;
-    remember(instanceUrl, (digest) => {
-      let next = withSchedule(digest, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
-      if (!cards.value.some(isOutdated))
-        next = withReceipt(next, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
-      if (!reviews.value.sm2.some(isReviewStateOutdated)) {
-        next = withReceipt(next, deck.reviewsDocumentUrl, reviewsVersion, { latestFormat: true });
-      }
-      return next;
-    });
-  }
-
   /**
    * A deck's cards and review states as they are now, with its schedule:
    * the digest's while it is of these documents, else computed afresh and
@@ -2451,7 +2116,7 @@ export function createUseCases({
     prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
   ) {
     const [digest, cards, reviews] = await Promise.all([
-      digestOf(instanceUrl),
+      digestStore.of(instanceUrl),
       readNow(deckRepository.readCardsSince(deck, undefined)),
       readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
     ]);
@@ -2465,7 +2130,7 @@ export function createUseCases({
     });
     if (schedule === null) {
       schedule = scheduleFrom(cards, deck, reviews, prefs, at);
-      recordSchedule(instanceUrl, deck, cards, reviews, schedule);
+      digestStore.recordSchedule(instanceUrl, deck, cards, reviews, schedule);
     }
     return { cards, reviews, schedule };
   }
@@ -2474,7 +2139,7 @@ export function createUseCases({
     const [decks, drafts, digest] = await Promise.all([
       deckRepository.listDecks(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
-      digestOf(instanceUrl),
+      digestStore.of(instanceUrl),
     ]);
     const unclaimed = await unclaimedDecksOf(decks);
     return withUnclaimed(
@@ -2535,7 +2200,7 @@ export function createUseCases({
         );
         if (since.unchanged) return { url, status: "checked", subjects: [] };
         if (since.version !== null && summarize(instanceUrl, [since.value]).conforms) {
-          remember(instanceUrl, noting(url, since.version, { conformedTo: ruleset }));
+          digestStore.remember(instanceUrl, noting(url, since.version, { conformedTo: ruleset }));
         }
         return since.value;
       }),
@@ -2574,80 +2239,6 @@ export function createUseCases({
   }
 
   /**
-   * Answers given but not yet in the log, oldest first. An answer is
-   * added after its review is saved, without holding up study; one that
-   * fails to be added waits here, and the ones after it with it, until
-   * the next answer, the end of the session or the statistics try again.
-   */
-  const unlogged: { instanceUrl: string; answer: Answer }[] = [];
-  let logging: Promise<void> = Promise.resolve();
-
-  function logAnswers(): Promise<void> {
-    logging = logging.then(async () => {
-      while (unlogged.length > 0) {
-        const [next] = unlogged;
-        try {
-          await answerLog.append(next!.instanceUrl, next!.answer);
-        } catch {
-          return;
-        }
-        logWrites += 1;
-        unlogged.shift();
-      }
-    });
-    return logging;
-  }
-
-  /** Each instance's answer log as last read, by month: its answers, and the version they were read at. */
-  const answerMonths = new Map<string, Map<string, { version: string; answers: Answer[] }>>();
-  /**
-   * The reads of a month under way, by instance, month and the writes to
-   * the logs made before they began (logWrites): a read begun before a
-   * write may miss it, so only one begun since is shared.
-   */
-  const monthReads = new Map<string, Promise<Answer[]>>();
-  let logWrites = 0;
-
-  /**
-   * The answers of the log's months that `wanted` keeps, of `listed` (every
-   * month the log has): each month read only when it changed since last
-   * read, and kept with its version. What is kept is added to, never
-   * replaced, so a read of some months and one of all do not undo each
-   * other; a month no longer listed is dropped. A month already being
-   * read since the last write to the logs is not read twice: the
-   * statistics and the cards' progress ask at once.
-   */
-  async function readLogMonths(
-    instanceUrl: string,
-    listed: readonly string[],
-    wanted: (month: string) => boolean,
-  ): Promise<Answer[]> {
-    const known =
-      answerMonths.get(instanceUrl) ?? new Map<string, { version: string; answers: Answer[] }>();
-    answerMonths.set(instanceUrl, known);
-    const still = new Set(listed);
-    for (const month of known.keys()) if (!still.has(month)) known.delete(month);
-    const answers = await Promise.all(
-      listed.filter(wanted).map((month) => {
-        const key = `${instanceUrl}\n${month}\n${logWrites}`;
-        const under = monthReads.get(key);
-        if (under !== undefined) return under;
-        const read = (async () => {
-          const kept = known.get(month);
-          const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
-          if (since.unchanged) return kept!.answers;
-          if (since.version === null) known.delete(month);
-          else known.set(month, { version: since.version, answers: since.value });
-          return since.value;
-        })().finally(() => monthReads.delete(key));
-        monthReads.set(key, read);
-        return read;
-      }),
-    );
-    return answers.flat();
-  }
-
-  /**
    * The answers of a range of the log up to `at` (StatisticsRange), of
    * every deck or of one, answers still waiting to be added to it added
    * first; with the study day it ends on, the months the log lists, the
@@ -2672,9 +2263,9 @@ export function createUseCases({
     firstTimed: Answer | undefined;
     dayBoundaryHour: number;
   }> {
-    await logAnswers();
+    await answerStore.flush();
     const [prefs, logged] = await Promise.all([
-      getPreferences(instanceUrl),
+      preferenceStore.get(instanceUrl),
       answerLog.months(instanceUrl),
     ]);
     const today = studyDayOf(at, prefs.dayBoundaryHour);
@@ -2690,7 +2281,7 @@ export function createUseCases({
     const calendarStart = calendarStartOf(today);
     const from = first === null || !recent || first <= calendarStart ? first : calendarStart;
     const fromMonth = from === null ? null : monthOfStudyDay(from);
-    const read = await readLogMonths(
+    const read = await answerStore.readMonths(
       instanceUrl,
       logged,
       (logMonth) => fromMonth === null || logMonth >= fromMonth,
@@ -2708,82 +2299,6 @@ export function createUseCases({
       firstMonth,
       firstTimed: firstTimedOf(read),
       dayBoundaryHour: prefs.dayBoundaryHour,
-    };
-  }
-
-  async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
-    await logAnswers();
-    return readLogMonths(instanceUrl, await answerLog.months(instanceUrl), () => true);
-  }
-
-  /**
-   * Apply one grade to a prompt of the deck: transition its state (or the
-   * initial one) by SM-2 (gradePrompt), persist it, and queue its answer
-   * for the log, saying how it was given (`how`; a study session says
-   * nothing: recall) and how long it took (`times`), the day it was due
-   * and the device's offset from UTC. The grade is applied to the prompt's state as the
-   * reviews document holds it when written (gradeReviewState), so it
-   * builds on a grade made elsewhere meanwhile; the instance's preferences
-   * are read unless `known` brings them. Resolves to the new state, with
-   * what undoing the answer takes: the state the grade was applied to.
-   */
-  async function applyGrade(
-    instanceUrl: string,
-    deck: Deck,
-    prompt: { cardId: string; cardUrl: string; direction: StudyDirection },
-    quality: ReviewQuality,
-    now: Date,
-    how: { mode?: AnswerMode; chosenDistractor?: string; times: ResponseTimes },
-    known?: GradeBasis,
-  ): Promise<RecordedReview> {
-    const key = { cardId: prompt.cardId, direction: prompt.direction };
-    const prefs = known?.prefs ?? (await getPreferences(instanceUrl));
-    const scheduling = schedulingOf(prefs);
-    const graded = await reviewStateRepository.gradeReviewState(deck, key, (current) =>
-      gradePrompt(
-        key,
-        current,
-        { grade: quality, ...(how.mode === undefined ? {} : { mode: how.mode }) },
-        now,
-        scheduling,
-      ),
-    );
-    const { sm2: state, fsrs } = graded.state;
-    const { sm2: current } = graded.current;
-    // The log's intervals and due day are those of what set the due day: under FSRS-6, its state's.
-    const prior = current === null ? null : promptDueOf(current, graded.current.fsrs, prefs);
-    const next = promptDueOf(state, fsrs, prefs);
-    const id = answerIdOf(state.lastReviewedAt, newId().slice(0, 8));
-    const studyDay = studyDayOf(now, prefs.dayBoundaryHour);
-    unlogged.push({
-      instanceUrl,
-      answer: {
-        id,
-        deckUrl: deck.url,
-        cardUrl: prompt.cardUrl,
-        direction: prompt.direction,
-        grade: quality,
-        answeredAt: state.lastReviewedAt,
-        studyDay,
-        ...(prior === null ? {} : { priorIntervalDays: prior.intervalDays }),
-        nextIntervalDays: next.intervalDays,
-        ...(how.mode === undefined ? {} : { mode: how.mode }),
-        ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
-        ...recordedResponseTimes(how.times),
-        ...(prior === null ? {} : { priorDue: prior.due }),
-        utcOffsetMinutes: utcOffsetMinutesAt(now),
-      },
-    });
-    void logAnswers();
-    return {
-      state,
-      ...(fsrs === undefined ? {} : { fsrs }),
-      undo: {
-        key,
-        before: current,
-        ...(fsrs === undefined ? {} : { fsrs: { before: graded.current.fsrs } }),
-        answer: { id, studyDay },
-      },
     };
   }
 
@@ -2984,7 +2499,7 @@ export function createUseCases({
     // Stated, so FSRS-6 is this instance's own choice, not a default: one with none stored studies by SM-2.
     await preferencesRepository.savePreferences(
       instance.url,
-      withDeviceAppearance(NEW_INSTANCE_PREFERENCES),
+      preferenceStore.withDeviceAppearance(NEW_INSTANCE_PREFERENCES),
     );
     return instance;
   }
@@ -3087,7 +2602,7 @@ export function createUseCases({
       const listed = async () =>
         (await instanceCopier.listResources(source)).filter((url) => url !== digest);
       // Answers still on their way to the guest's log go there first, to move with it.
-      await logAnswers();
+      await answerStore.flush();
       let begun = false;
       let created = false;
       let instance: Instance;
@@ -3203,7 +2718,7 @@ export function createUseCases({
           ),
         );
       // Answers still on their way to the guest's log go there first, to be added with it.
-      await logAnswers();
+      await answerStore.flush();
       const added: Deck[] = [];
       const copied: ReleaseDraftSummary[] = [];
       const notes: string[] = [];
@@ -3246,13 +2761,12 @@ export function createUseCases({
           notes.push(key);
           into.set(deck.url, merged);
           added.push(merged);
-          await answerLog.appendAll(
+          await answerStore.appendAll(
             targetUrl,
             answers
               .filter((answer) => answer.deckUrl === deck.url)
               .map((answer) => mergedAnswer(answer, merged)),
           );
-          logWrites += 1;
           progress.stepped();
         }
 
@@ -3317,7 +2831,7 @@ export function createUseCases({
       return themePreference.chosen();
     },
     async instanceTheme(instanceUrl) {
-      const stored = await readStoredPreferences(instanceUrl);
+      const stored = await preferenceStore.stored(instanceUrl);
       if (stored === null) return null;
       themePreference.choose(stored.preferences.theme);
       return stored.preferences.theme;
@@ -3325,7 +2839,7 @@ export function createUseCases({
     chooseTheme(choice, instanceUrl) {
       themePreference.choose(choice);
       if (instanceUrl === null) return Promise.resolve();
-      return writeAppearance(instanceUrl, (preferences) =>
+      return preferenceStore.writeAppearance(instanceUrl, (preferences) =>
         preferences.theme === choice ? null : { ...preferences, theme: choice },
       );
     },
@@ -3339,7 +2853,7 @@ export function createUseCases({
       return null;
     },
     async instancePalette(instanceUrl) {
-      const stored = await readStoredPreferences(instanceUrl);
+      const stored = await preferenceStore.stored(instanceUrl);
       if (stored === null) return null;
       const iri = stored.preferences.palette;
       // Only the instance's own palettes document is read: the preferences are data, and may name any address.
@@ -3358,7 +2872,7 @@ export function createUseCases({
       palettePreference.choose(palette);
       customPalettePreference.choose(null);
       if (instanceUrl === null) return Promise.resolve();
-      return writeAppearance(instanceUrl, (preferences) => {
+      return preferenceStore.writeAppearance(instanceUrl, (preferences) => {
         const kept = keptPalette(preferences, palette, (iri) => isPaletteOf(instanceUrl, iri));
         return kept === preferences.palette ? null : { ...preferences, palette: kept };
       });
@@ -3366,7 +2880,7 @@ export function createUseCases({
     chooseCustomPalette(palette, instanceUrl) {
       palettePreference.choose(palette.basedOn);
       customPalettePreference.choose(palette);
-      return writeAppearance(instanceUrl, (preferences) =>
+      return preferenceStore.writeAppearance(instanceUrl, (preferences) =>
         preferences.palette === palette.url ? null : { ...preferences, palette: palette.url },
       );
     },
@@ -3394,7 +2908,7 @@ export function createUseCases({
       return textSizePreference.chosen();
     },
     async instanceTextSize(instanceUrl) {
-      const stored = await readStoredPreferences(instanceUrl);
+      const stored = await preferenceStore.stored(instanceUrl);
       if (stored === null) return null;
       textSizePreference.choose(stored.preferences.textSize);
       return stored.preferences.textSize;
@@ -3402,7 +2916,7 @@ export function createUseCases({
     chooseTextSize(size, instanceUrl) {
       textSizePreference.choose(size);
       if (instanceUrl === null) return Promise.resolve();
-      return writeAppearance(instanceUrl, (preferences) =>
+      return preferenceStore.writeAppearance(instanceUrl, (preferences) =>
         preferences.textSize === size ? null : { ...preferences, textSize: size },
       );
     },
@@ -3456,7 +2970,7 @@ export function createUseCases({
     },
     async checkDeck(instanceUrl, deck, text) {
       const [report, cards, release] = await Promise.all([
-        Promise.all([digestOf(instanceUrl), unclaimedDecksOf([deck])]).then(
+        Promise.all([digestStore.of(instanceUrl), unclaimedDecksOf([deck])]).then(
           async ([digest, unclaimed]) => {
             const skipped = new Set(unclaimed.flatMap((one) => one.documents));
             const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
@@ -3787,9 +3301,9 @@ export function createUseCases({
         try {
           const plan = await transferOnce(from, to, ids, options);
           // The cards are where they go: a digest left behind is brought up to date by the next deck list.
-          await refreshStudyDigest(instanceUrl, to).catch(() => undefined);
+          await digestStore.refresh(instanceUrl, to).catch(() => undefined);
           if (options.mode === "move")
-            await refreshStudyDigest(instanceUrl, from).catch(() => undefined);
+            await digestStore.refresh(instanceUrl, from).catch(() => undefined);
           return plan;
         } catch (error) {
           if (!cardsChangedElsewhere(error) || attempt === CARD_EDIT_ATTEMPTS) throw error;
@@ -3845,7 +3359,7 @@ export function createUseCases({
           });
         await deckRepository.registerDeck(deck);
         // The deck is in: a digest left behind is brought up to date by the next deck list.
-        await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
+        await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
         return deck;
       }
     },
@@ -3904,7 +3418,7 @@ export function createUseCases({
       if (staging !== null) await instanceCopier.deleteRecursively(staging);
       updateJournal.end(source);
     },
-    getPreferences,
+    getPreferences: preferenceStore.get,
     async renameInstance(session, instance, typed) {
       const name = instanceName(typed);
       await again(async () => {
@@ -3937,10 +3451,10 @@ export function createUseCases({
       });
     },
     async savePreferences(instanceUrl, preferences) {
-      keepAppearance(instanceUrl, preferences);
+      preferenceStore.keepAppearance(instanceUrl, preferences);
       // Read after a choice still being written, so the save is not refused for the version it made.
-      await afterAppearanceWrites(instanceUrl);
-      const stored = await getPreferences(instanceUrl);
+      await preferenceStore.afterAppearanceWrites(instanceUrl);
+      const stored = await preferenceStore.get(instanceUrl);
       await preferencesRepository.savePreferences(instanceUrl, {
         ...withInvitationAnswer(preferences, stored),
         scheduler: stored.scheduler,
@@ -3953,7 +3467,10 @@ export function createUseCases({
       // Switching to SM-2 writes no deck: its states are up to date already.
       const [answers, listed] =
         preferences.scheduler === "fsrs6"
-          ? await Promise.all([loadAnswerLog(instanceUrl), deckRepository.listDecks(instanceUrl)])
+          ? await Promise.all([
+              answerStore.loadAll(instanceUrl),
+              deckRepository.listDecks(instanceUrl),
+            ])
           : [[], []];
       progress.finished("decks", listed.length > 0 ? listed.length : undefined);
       const outcome: SwitchOutcome = {
@@ -3984,26 +3501,27 @@ export function createUseCases({
       progress.finished("preferences");
       // Saved last, and only once every deck is written: until then SM-2 sets the due days.
       if (outcome.failed.length === 0) {
-        keepAppearance(instanceUrl, preferences);
-        await afterAppearanceWrites(instanceUrl);
-        const stored = await getPreferences(instanceUrl);
+        preferenceStore.keepAppearance(instanceUrl, preferences);
+        await preferenceStore.afterAppearanceWrites(instanceUrl);
+        const stored = await preferenceStore.get(instanceUrl);
         await preferencesRepository.savePreferences(instanceUrl, {
           ...withInvitationAnswer(preferences, stored),
           palette: savedPalette(instanceUrl, stored, preferences),
         });
         outcome.switched = true;
         await Promise.all(
-          listed.map((deck) => refreshStudyDigest(instanceUrl, deck).catch(() => undefined)),
+          listed.map((deck) => digestStore.refresh(instanceUrl, deck).catch(() => undefined)),
         );
       }
       progress.finished();
       return outcome;
     },
     async dismissSchedulerInvitation(instanceUrl) {
-      await afterAppearanceWrites(instanceUrl);
+      await preferenceStore.afterAppearanceWrites(instanceUrl);
       const stored = await preferencesRepository.getPreferences(instanceUrl);
       const preferences =
-        stored?.preferences ?? withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);
+        stored?.preferences ??
+        preferenceStore.withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);
       if (preferences.schedulerInvitationDismissed) return;
       await preferencesRepository.savePreferences(instanceUrl, {
         ...preferences,
@@ -4014,7 +3532,7 @@ export function createUseCases({
       const [cards, reviews, prefs] = await Promise.all([
         deckRepository.listCards(deck),
         reviewStateRepository.listReviewStates(deck),
-        getPreferences(instanceUrl),
+        preferenceStore.get(instanceUrl),
       ]);
       const queue = buildStudyQueue({
         cards,
@@ -4029,9 +3547,9 @@ export function createUseCases({
     getStudyCounts(instanceUrl, deck, now) {
       return studyCountsAndSchedule(instanceUrl, deck, now);
     },
-    refreshStudyDigest,
+    refreshStudyDigest: digestStore.refresh,
     recordReview(instanceUrl, deck, prompt, quality, now, times = {}, known) {
-      return applyGrade(
+      return answerStore.grade(
         instanceUrl,
         deck,
         { cardId: prompt.card.id, cardUrl: prompt.card.url, direction: prompt.direction },
@@ -4050,22 +3568,12 @@ export function createUseCases({
         ...(fsrs === undefined ? {} : { fsrs: back(fsrs.before) }),
       });
       // The answer never happened: off the answers on their way to the log, else out of it.
-      // Answers being added are waited for; any added later start only after this goes on.
-      await logging;
-      const waiting = unlogged.findIndex(
-        (each) => each.instanceUrl === instanceUrl && each.answer.id === answer.id,
-      );
-      if (waiting === -1) {
-        await answerLog.removeAnswer(instanceUrl, answer.studyDay, answer.id);
-        logWrites += 1;
-      } else {
-        unlogged.splice(waiting, 1);
-      }
+      await answerStore.withdraw(instanceUrl, answer);
       return before;
     },
     async resetStudyDay(instanceUrl, deck, now) {
       const [prefs, reviews] = await Promise.all([
-        getPreferences(instanceUrl),
+        preferenceStore.get(instanceUrl),
         reviewStateRepository.listReviewStates(deck),
       ]);
       const reset = resetStudyDay(reviews.sm2, now, prefs.dayBoundaryHour);
@@ -4079,9 +3587,7 @@ export function createUseCases({
           fsrs: { save: fsrs.restore, remove: fsrs.remove },
         });
         // The day never happened: its answers leave the log too, those still on their way first.
-        await logAnswers();
-        await answerLog.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
-        logWrites += 1;
+        await answerStore.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
       }
       return count;
     },
@@ -4101,12 +3607,12 @@ export function createUseCases({
       const { answers, today } = await rangeAnswers(instanceUrl, at, options);
       fileExchange.save(`solid-memo-answers-${today}.csv`, "text/csv", answersCsv(answers));
     },
-    loadAnswerLog,
+    loadAnswerLog: answerStore.loadAll,
     async deckInsight(instanceUrl, deck, at, prefs) {
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const [{ cards, reviews, schedule }, answers] = await Promise.all([
         scheduleNow(instanceUrl, deck, at, prefs),
-        loadAnswerLog(instanceUrl),
+        answerStore.loadAll(instanceUrl),
       ]);
       const { maxReviewsPerDay } = deckPreferences(prefs, deck);
       const states = scheduledStates(cards.value, deck.direction, reviews.value.sm2);
@@ -4129,7 +3635,7 @@ export function createUseCases({
     },
     async getCardProgress(instanceUrl, at, { deck } = {}) {
       const [prefs, decks] = await Promise.all([
-        getPreferences(instanceUrl),
+        preferenceStore.get(instanceUrl),
         deck === undefined ? deckRepository.listDecks(instanceUrl) : [deck],
       ]);
       const today = studyDayOf(at, prefs.dayBoundaryHour);
@@ -4138,9 +3644,9 @@ export function createUseCases({
       // so a log that cannot be read leaves that empty, not the cards' progress.
       const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));
       const logged = (async () => {
-        await logAnswers();
+        await answerStore.flush();
         const byDeck = new Map<string, Answer[]>();
-        for (const answer of await readLogMonths(
+        for (const answer of await answerStore.readMonths(
           instanceUrl,
           await answerLog.months(instanceUrl),
           (month) => month >= firstMonth,
@@ -4188,21 +3694,25 @@ export function createUseCases({
     },
     async cardAnswers(instanceUrl, deck, cardId) {
       return cardAnswers(
-        deckAnswers(await loadAnswerLog(instanceUrl), deck),
+        deckAnswers(await answerStore.loadAll(instanceUrl), deck),
         `${deck.cardsDocumentUrl}#${cardId}`,
       );
     },
     async getCourseStatistics(instanceUrl, at, courses) {
       if (courses.length === 0) return [];
-      await logAnswers();
+      await answerStore.flush();
       const [prefs, logged] = await Promise.all([
-        getPreferences(instanceUrl),
+        preferenceStore.get(instanceUrl),
         answerLog.months(instanceUrl),
       ]);
       const firstMonth = monthOfStudyDay(
         firstDayOfMonths(studyDayOf(at, prefs.dayBoundaryHour), 12),
       );
-      const answers = await readLogMonths(instanceUrl, logged, (month) => month >= firstMonth);
+      const answers = await answerStore.readMonths(
+        instanceUrl,
+        logged,
+        (month) => month >= firstMonth,
+      );
       const results = await Promise.all(
         courses.map(async (deck): Promise<CourseStatistics[]> => {
           if (deck.sourceUrl === undefined)
@@ -4248,7 +3758,7 @@ export function createUseCases({
         direction: "front-to-back" as const,
       };
       const [prefs, current] = await Promise.all([
-        getPreferences(instanceUrl),
+        preferenceStore.get(instanceUrl),
         reviewStateRepository.getReviewState(deck, {
           cardId: card.id,
           direction: prompt.direction,
@@ -4265,7 +3775,7 @@ export function createUseCases({
         choice.correct || choice.distractorId === undefined
           ? undefined
           : `${deck.cardsDocumentUrl}#${choice.distractorId}`;
-      const { state } = await applyGrade(
+      const { state } = await answerStore.grade(
         instanceUrl,
         deck,
         prompt,
@@ -4289,7 +3799,7 @@ export function createUseCases({
     async openTrial(draft, instanceUrl) {
       const problems = trialProblems(draftReleaseModel(draft));
       if (problems.length > 0) return { ok: false, problems };
-      const prefs = await getPreferences(instanceUrl);
+      const prefs = await preferenceStore.get(instanceUrl);
       return { ok: true, trial: await startTrial(trialSandbox(draft), draft, prefs) };
     },
   };
