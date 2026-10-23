@@ -29,10 +29,10 @@ import { dirname, join, relative, resolve } from "node:path";
 /** Which workspace packages each may import. */
 export const LAYERS: Record<string, string[]> = {
   turtle: [],
-  markdown: ["turtle"],
+  markdown: [],
   vocab: ["turtle"],
-  // The site's build, in node: it reads where the repository's folders are from vocab.
-  site: ["vocab", "turtle"],
+  // The site's build, in node: it reads where the repository's folders are from vocab, and renders the docs.
+  site: ["vocab", "turtle", "markdown"],
   domain: ["vocab"],
   application: ["domain", "vocab"],
   shacl: ["domain", "vocab", "turtle", "markdown"],
@@ -43,7 +43,7 @@ export const LAYERS: Record<string, string[]> = {
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
   // The site's page, which shows the Studio at its routes; its build publishes the docs.
-  web: ["application", "domain", "vocab", "ui", "composition", "studio", "markdown", "site"],
+  web: ["application", "domain", "vocab", "ui", "composition", "studio", "site"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
@@ -54,19 +54,16 @@ export const LAYERS: Record<string, string[]> = {
 /** Within a package, files that alone may use some of its allowed packages. */
 export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // Only the app's entry point has the layers wired, and loads the Studio; the build test imports neither.
-  // The docs are rendered by the build, and checked by its test, never in the page.
+  // The site is built, and its docs rendered, by the build, and checked by its tests, never in the page.
   web: {
     composition: /^src\/main\.tsx$/,
     studio: /^src\/main\.tsx$/,
-    markdown: /^(vite\.config\.ts|src\/build\.test\.ts)$/,
     site: /^(vite\.config\.ts|src\/[^/]+\.test\.ts)$/,
   },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
   vocab: { turtle: /^tooling\// },
-  // The docs' build reads their index (docs/docs.ttl); the Markdown the browser shows never does.
-  markdown: { turtle: /^tooling\// },
   // The browser-side engine never needs the node tooling, nor the library check's Markdown rules.
   shacl: { turtle: /^node\//, markdown: /^node\// },
   // The app's messages (packages/ui/src/i18n, apps/studio/src/i18n), which the page objects find text by.

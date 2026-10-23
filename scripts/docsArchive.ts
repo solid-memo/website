@@ -22,20 +22,15 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import { checkSvg, type DrawInputs, fontNotice } from "@solid-memo/markdown/tooling/diagrams";
-import {
-  type DocsIo,
-  type Draw,
-  renderDocsSite,
-  repositoryIo,
-} from "@solid-memo/markdown/tooling/docsSite";
+import { checkSvg, type DrawInputs, fontNotice } from "@solid-memo/site/diagrams";
+import { type DocsIo, type Draw, renderDocsSite, repositoryIo } from "@solid-memo/site/docsSite";
 import {
   CACHE_DIR,
   drawDiagrams,
   drawInputs,
   type Launch,
   launchChromium,
-} from "@solid-memo/markdown/tooling/drawDiagrams";
+} from "@solid-memo/site/drawDiagrams";
 import { loadEnv } from "vite";
 import { siteConfig } from "../apps/web/src/config.ts";
 import { isReleaseVersion } from "./releaseVersion.ts";

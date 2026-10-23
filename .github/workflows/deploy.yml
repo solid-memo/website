@@ -247,7 +247,7 @@ jobs:
           && { { [ ! -f packages/site/src/siteMap.ts ] && [ ! -f packages/vocab/tooling/siteMap.ts ]; } || {
           test -f apps/web/dist/robots.txt
           && { [ ! -s CNAME ] || test -f apps/web/dist/sitemap.xml; }; }; }
-          && { [ ! -f packages/markdown/tooling/publishDocs.ts ] || {
+          && { { [ ! -f packages/site/src/publishDocs.ts ] && [ ! -f packages/markdown/tooling/publishDocs.ts ]; } || {
           test -f apps/web/dist/docs/index.html
           && test -f apps/web/dist/docs/diagrams/OFL-Fredoka.txt
           && compgen -G 'apps/web/dist/docs/diagrams/*.svg' > /dev/null; }; }

@@ -171,7 +171,7 @@ Some colors stay fixed on purpose, whatever the palette:
 
 - the pictures, `illustration.svg` and `favicon.svg`;
 - the static About page (`apps/web/public/about/`) and the docs' own
-  stylesheet (`packages/markdown/tooling/docs.css`), which load no
+  stylesheet (`packages/site/src/docs.css`), which load no
   `palettes.css`;
 - the `theme-color` meta tags written out in `index.html` and the About
   page, which hold Standard's backgrounds for the browser's chrome

@@ -4,4 +4,5 @@
 
 import { packageConfig } from "../../vitest.shared.ts";
 
-export default packageConfig();
+// The type of Mermaid on the drawing page (src/mermaid.d.ts) holds no code.
+export default packageConfig({ exclude: ["src/**/*.d.ts"] });

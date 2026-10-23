@@ -279,9 +279,9 @@ time only, never for data:
 
 ## Diagrams
 
-The docs' Mermaid blocks are drawn to SVG at build time by the package's
-node tooling, [diagrams.ts](../packages/markdown/tooling/diagrams.ts)
-and [drawDiagrams.ts](../packages/markdown/tooling/drawDiagrams.ts):
+The docs' Mermaid blocks are drawn to SVG at build time by the site's
+build, in node, in `@solid-memo/site` (`packages/site/`): [diagrams.ts](../packages/site/src/diagrams.ts)
+and [drawDiagrams.ts](../packages/site/src/drawDiagrams.ts):
 the official Mermaid, in Chromium through Playwright, so a drawing comes
 from the same parser family and layout engine as GitHub's. GitHub runs
 its own Mermaid version, with HTML labels, so a diagram is still checked
@@ -332,7 +332,7 @@ on GitHub after an edit ([style.md](style.md#docs)).
   ([configuration.md](configuration.md#docs_diagrams)); `npm run dev`
   needs none of it ([below](#the-docs-as-a-site)). `npm run check`
   fails under it, by design: the test that draws in the real browser is
-  skipped, and the package's coverage drops below 100%.
+  skipped, and `site`'s coverage drops below 100%.
 
 ### A drawing is safe to serve
 
@@ -388,13 +388,14 @@ repository, so `REUSE.toml` and `LICENSES/` do not name it.
 
 ## The docs as a site
 
-The docs are also rendered to static pages, by the package's node
-tooling: `renderDocsSite` in
-[docsSite.ts](../packages/markdown/tooling/docsSite.ts) reads each page
+The docs are also rendered to static pages, by the site's build in
+`@solid-memo/site`, which reads them with this package's parser:
+`renderDocsSite` in
+[docsSite.ts](../packages/site/src/docsSite.ts) reads each page
 of `docs/` with `parseDocument`, so a page shows as the app would show
 it, and writes it out as HTML with an emitter of its own, which escapes
 every text and has no way to write raw HTML.
-[publishDocs.ts](../packages/markdown/tooling/publishDocs.ts) is the
+[publishDocs.ts](../packages/site/src/publishDocs.ts) is the
 Vite plugin that emits the pages under `docs/` with a build, and in dev
 renders a page anew on each request, so an edit shows on reload. The
 site's build ([vite.config.ts](../apps/web/vite.config.ts)) uses it, so
@@ -438,7 +439,7 @@ site's origin from `CNAME`, for each page's canonical address.
   `<html>`, `<head>` and `<meta>` tags and whitespace before it, so no
   text or element can open the body first and the browser drop it; and
   no address from the site's root or of a scheme other than http(s).
-  Every page the package writes passes it, and the deploy checks an
+  Every page `site` writes passes it, and the deploy checks an
   archived page with it, and a stylesheet with `checkStylesheet` (no
   `@import`, `url(`, `image-set(`, backslash or address in a string),
   before it serves them.
@@ -473,7 +474,7 @@ the index does not list, and anything wrong with the index
 that is not there, out of the repository, from the site's root, or to
 a scheme other than `http:` and `https:`; a diagram's problems
 ([above](#diagrams)); and a Mermaid block in a list or quote, which is
-not drawn. The package's tests render the repository's own docs, so
+not drawn. `site`'s tests render the repository's own docs, so
 `npm run check` fails on any of these.
 
 ### The docs' index
@@ -528,7 +529,7 @@ is committed: it exists in the build and in each release's archive.
   Markdown files. The index is the build's input, not a published
   format, so no vocabulary term marks it as Markdown, and it has no
   shape: `readDocsIndex` in
-  [docsIndex.ts](../packages/markdown/tooling/docsIndex.ts) checks
+  [docsIndex.ts](../packages/site/src/docsIndex.ts) checks
   everything it may say, and refuses any other subject or property.
 
 `npm run check:docs` reads the index too, and checks that it lists

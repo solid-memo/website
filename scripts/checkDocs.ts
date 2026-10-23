@@ -20,7 +20,7 @@ import {
   listingProblems,
   pageBlock,
   readDocsIndex,
-} from "@solid-memo/markdown/tooling/docsIndex";
+} from "@solid-memo/site/docsIndex";
 
 /** The scripts of the root package (`root`) and of each workspace, by its name. */
 export type Scripts = { root: string[]; workspaces: Record<string, string[]> };

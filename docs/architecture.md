@@ -11,7 +11,7 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes), `decks/` (the [deck library](deck-library.md)) and these docs, rendered by `markdown`'s tooling, with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes), `decks/` (the [deck library](deck-library.md)) and these docs, rendered by `site`, with the app ([deployment.md](deployment.md)). |
 | `@solid-memo/studio` | `apps/studio/` | Solid Memo Studio ([studio.md](studio.md)): its screens and router (`src/ui/`), and its entry point, `StudioWorkspace`, which the site's page loads as a chunk of its own at the hashes under `#/studio`. |
 | `@solid-memo/composition` | `packages/composition/` | The composition root (`createAppUseCases` in `src/appUseCases.ts`): every adapter behind its port, the guest's pod, the pod fence and the write fence ([boundaries.md](boundaries.md#the-pod-fence)), the site's documents read from where it is served, and the use cases over them, a Studio trial's sandbox among them (`createTrialUseCases` in `src/trialUseCases.ts`, [studio.md](studio.md#the-trial)). An app passes what is its own: its name, where it is served, the build's values. |
 | `@solid-memo/ui` | `packages/ui/` | The Preact UI: the components and the router (`src/ui/`), the messages in each language (`src/i18n/`), the theme and the styles (`src/style.css`). It receives `UseCases` and knows no adapter. |
@@ -21,9 +21,9 @@ where the layers meet.
 | `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the pod fence, the write fence, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), the drafts of releases and the Turtle a release is written in ([data-model.md](data-model.md#drafts-and-releases)), and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for the browser: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads and opened from the user's disk (`FileExchange`). |
-| `@solid-memo/site` | `packages/site/` | Node-only: the site's build, which only `apps/web`'s `vite.config.ts` and tests use. The values the site is built with (`siteBuild`), its `robots.txt` and sitemap (`siteMap`), and the Vite plugin that publishes `ns/` and `decks/` with it (`publishTurtle`) ([deployment.md](deployment.md)). Imports nothing of `vocab` but `tooling/root`, where the repository's folders are. |
+| `@solid-memo/site` | `packages/site/` | Node-only: the site's build, which only `apps/web`'s `vite.config.ts` and tests, and the root scripts that archive and check the docs, use. The values the site is built with (`siteBuild`), its `robots.txt` and sitemap (`siteMap`), and the Vite plugin that publishes `ns/` and `decks/` with it (`publishTurtle`) ([deployment.md](deployment.md)); and the repository's own docs, read with `markdown`'s parser and rendered to static pages, their links checked and their Mermaid diagrams drawn to SVG in Chromium, with the Vite plugin that publishes them ([markdown.md](markdown.md#the-docs-as-a-site)), their pages listed from their index, `docs/docs.ttl`, which it reads with `turtle`. Imports nothing of `vocab` but `tooling/root`, where the repository's folders are. |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
-| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release; and the repository's own docs, read in the same dialect with their headings kept and rendered by its node tooling (`tooling/`) to static pages, their links checked and their Mermaid diagrams drawn to SVG in Chromium, with the Vite plugin that publishes them ([markdown.md](markdown.md#the-docs-as-a-site)), their pages listed from their index, `docs/docs.ttl`. Imports nothing of the app's but `turtle`, from `tooling/` only, to read that index. |
+| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release; and the repository's own docs, read in the same dialect with their headings kept, which `site` renders. Imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
 | `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows a user takes through the built app, driven in Chromium, Firefox and WebKit with Playwright against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). It imports nothing of the app's but its messages, to find text on screen by. |
 
@@ -48,10 +48,9 @@ graph TD
     web -. "main.tsx only" .-> composition["composition<br/>the composition root"]
     composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
-    web -. "vite.config.ts and its test only" .-> markdown
     web -. "vite.config.ts and tests only" .-> site["site<br/>the site's build"]
     site -. "tooling/root only" .-> vocab
-    site --> turtle
+    site --> turtle & markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
@@ -59,7 +58,6 @@ graph TD
     shacl --> domain & vocab
     shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
-    markdown -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
     journeys["e2e/journeys"] -. "harness/strings.ts only" .-> ui
 ```
@@ -86,7 +84,7 @@ adds it the same way (`e2e/pod`'s the workflows, `site`'s the root's
 file Turbo does not know of changes no input, so CI, which starts from
 `main`'s cache, would reuse `main`'s result and never run the test on
 the change it checks. The one exception is a test that checks only that
-a file the docs link to is there (`markdown`'s and `apps/web`'s), as
+a file the docs link to is there (`site`'s and `apps/web`'s), as
 that could be any file: lychee checks the same links in CI's `docs`
 job, on every run ([testing.md](testing.md#documentation)). The Studio has no build of its own: Solid Memo's
 bundles it ([studio.md](studio.md)).

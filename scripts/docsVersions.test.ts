@@ -16,15 +16,15 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { gzipSync } from "node:zlib";
-import { type DrawInputs, embedFont, fontNotice } from "@solid-memo/markdown/tooling/diagrams";
+import { type DrawInputs, embedFont, fontNotice } from "@solid-memo/site/diagrams";
 import {
   DOCS_CSS,
   type DocsIo,
   type Draw,
   renderDocsSite,
   versionsPage,
-} from "@solid-memo/markdown/tooling/docsSite";
-import { drawInputs } from "@solid-memo/markdown/tooling/drawDiagrams";
+} from "@solid-memo/site/docsSite";
+import { drawInputs } from "@solid-memo/site/drawDiagrams";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   archiveEntries,

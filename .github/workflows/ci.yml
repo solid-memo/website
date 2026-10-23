@@ -125,7 +125,7 @@ jobs:
           key: turbo-check-${{ github.sha }}
           restore-keys: turbo-check-
       - run: npm ci
-      # Chromium, which markdown's tests draw the docs' Mermaid diagrams in
+      # Chromium, which site's tests draw the docs' Mermaid diagrams in
       # (docs/markdown.md).
       - uses: ./.github/actions/chromium
       # Biome's formatting and lint rules (docs/style.md), markdownlint's
@@ -771,7 +771,7 @@ jobs:
             cached "playwright-$RUNNER_OS-$version-$name" || browsers+=("$name")
           done
           # The headless shell check and site draw the docs' diagrams in,
-          # under the chromium action's key, by markdown's playwright.
+          # under the chromium action's key, by site's playwright.
           shell=$(node -p "require('playwright/package.json').version")
           cached "playwright-shell-$RUNNER_OS-$shell" || browsers+=("shell")
           # The system libraries, under this runner's image: a job's may

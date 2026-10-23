@@ -26,7 +26,6 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
-    "@solid-memo/markdown": "*",
     "@solid-memo/site": "*",
     "@testing-library/preact": "^3.2.4",
     "happy-dom": "^21.0.0",

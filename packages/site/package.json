@@ -1,6 +1,6 @@
 {
   "name": "@solid-memo/site",
-  "description": "Node-only build of the Solid Memo site: the values it is built with, its robots.txt and sitemap, and the Vite plugin that publishes ns/ and decks/ with it.",
+  "description": "Node-only build of the Solid Memo site: the values it is built with, its robots.txt and sitemap, the Vite plugin that publishes ns/ and decks/ with it, and the docs rendered to static pages, their diagrams drawn to SVG.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",
@@ -12,12 +12,17 @@
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run --coverage",
     "test:unit": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "browsers": "playwright install --only-shell chromium"
   },
   "devDependencies": {
+    "@fontsource-variable/fredoka": "^5.3.0",
+    "mermaid": "12.2.0",
+    "playwright": "1.64.1",
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@solid-memo/markdown": "*",
     "@solid-memo/turtle": "*",
     "@solid-memo/vocab": "*"
   }

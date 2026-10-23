@@ -6,7 +6,7 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
-import { docsSitePlugin } from "@solid-memo/markdown/tooling/publishDocs";
+import { docsSitePlugin } from "@solid-memo/site/publishDocs";
 import { turtleDirectoryPlugin } from "@solid-memo/site/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { appVersion, commitSha, siteDefines } from "@solid-memo/site/siteBuild";

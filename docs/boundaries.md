@@ -70,9 +70,9 @@ keeps to its boundaries."
 | Package | May import | Only from |
 |---|---|---|
 | `turtle` | — | |
-| `markdown` | `turtle` | `turtle`: `tooling/` only, to read the docs' index ([markdown.md](markdown.md#the-docs-index)) |
+| `markdown` | — | |
 | `vocab` | `turtle` | `turtle`: `tooling/` only |
-| `site` | `vocab`, `turtle` | `vocab`: `tooling/root` alone, where the repository's folders are |
+| `site` | `vocab`, `turtle`, `markdown` | `vocab`: `tooling/root` alone, where the repository's folders are; `turtle` to read the docs' index ([markdown.md](markdown.md#the-docs-index)); `markdown` to read the docs, which it renders ([markdown.md](markdown.md#the-docs-as-a-site)) |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |
 | `shacl` | `domain`, `vocab`, `turtle`, `markdown` | `turtle`, `markdown`: `node/` only |
@@ -80,14 +80,14 @@ keeps to its boundaries."
 | `browser` | `application`, `domain` | |
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
-| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `markdown`, `site` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()`; `markdown`: `vite.config.ts` and `src/build.test.ts` only, its node tooling, which renders the docs ([markdown.md](markdown.md#the-docs-as-a-site)); `site`: `vite.config.ts` and tests only, the site's build |
+| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `site` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()`; `site`: `vite.config.ts` and tests only, the site's build, which renders the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 | `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for the app's messages and the Studio's |
 
 Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
 `solid`, `browser`, `composition`, `ui`, `web` and `studio`; `vocab`'s
-and `markdown`'s `tooling/`, `turtle` and `site` are node-only.
+`tooling/`, `turtle` and `site` are node-only.
 
 ## Vendor libraries
 
@@ -98,14 +98,14 @@ used nowhere else):
 |---|---|---|
 | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents; deck files are written and read with it too ([below](#files-without-a-vendor-library)); its access control (universal access, ACP, the ACL functions) only in `src/solidReleasePublisher.ts` ([below](#access-control)) |
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` to render the page and `App.tsx`, the page; in `studio`, its screens |
-| `@fontsource/*`, `@fontsource-variable/*` | `ui`, `markdown` | in `ui`, `src/style.css` only; in `markdown`, `@fontsource-variable/fredoka` in `tooling/drawDiagrams.ts` only, to embed Fredoka in the docs' diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
+| `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the docs' diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser`, `composition` | tests only: IndexedDB in node, for the guest's pod's store |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness also talks to the Solid server with its request API |
 | `@axe-core/playwright` | `e2e-journeys` | `pages/App.ts` only: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
-| `mermaid`, `playwright` | `markdown` | `tooling/drawDiagrams.ts` only, never in the browser (the check holds both node-only): Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, so Mermaid's packages before 1.0.0 are not shipped ([vendor-code.md](vendor-code.md#maturity)) |
+| `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, never in the browser (the check holds both node-only): Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, so Mermaid's packages before 1.0.0 are not shipped ([vendor-code.md](vendor-code.md#maturity)) |
 
 ## Files without a vendor library
 
