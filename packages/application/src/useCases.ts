@@ -31,57 +31,58 @@ import type {
   ReleasePublisher,
   InstanceGraphReader,
 } from "./ports";
-import { createInstanceGraphUseCases, type InstanceGraphUseCases } from "./instanceGraph";
+import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { createPreferenceStore } from "./preferenceStore";
+import { createAnswerStore } from "./answerStore";
+import { createDigestStore } from "./digestStore";
+import { createSessionUseCases, type SessionUseCases } from "./session";
+import { createInstanceUseCases, type InstanceUseCases } from "./instances";
+import { createPreferenceUseCases, type PreferenceUseCases } from "./preferences";
+import { createDeckUseCases, type DeckUseCases } from "./decks";
+import { createCardUseCases, type CardUseCases } from "./cards";
+import { createLibraryUseCases, type LibraryUseCases } from "./library";
+import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
+import { createCourseUseCases, type CourseUseCases } from "./courses";
+import { createStudyUseCases, type StudyUseCases } from "./study";
+import { createStatisticsUseCases, type StatisticsUseCases } from "./statistics";
+import { createInstanceCheckUseCases, type InstanceCheckUseCases } from "./instanceChecks";
 import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
 import {
   createReleasePublishingUseCases,
   type ReleasePublishingUseCases,
 } from "./releasePublishing";
-import { startTrial, type TrialOpening, type TrialSandbox } from "./trial";
-import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
-import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { trialProblems } from "@solid-memo/domain/release/trial";
-import { createInstanceCheckUseCases, type InstanceCheckUseCases } from "./instanceChecks";
-import { createCardUseCases, type CardUseCases } from "./cards";
-import { createInstanceUseCases, type InstanceUseCases } from "./instances";
-import { createStudyUseCases, type StudyUseCases } from "./study";
-import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
-import { createLibraryUseCases, type LibraryUseCases } from "./library";
-import { createCourseUseCases, type CourseUseCases } from "./courses";
-import { createPreferenceUseCases, type PreferenceUseCases } from "./preferences";
-import { createDeckUseCases, type DeckUseCases } from "./decks";
-import { createPreferenceStore } from "./preferenceStore";
-import { createAnswerStore } from "./answerStore";
-import { createDigestStore } from "./digestStore";
-import { createStatisticsUseCases, type StatisticsUseCases } from "./statistics";
-import { createSessionUseCases, type SessionUseCases } from "./session";
+import { createInstanceGraphUseCases, type InstanceGraphUseCases } from "./instanceGraph";
+import { createTrialOpeningUseCases, type TrialOpeningUseCases, type TrialSandbox } from "./trial";
 
+/**
+ * Every use case the app and the Studio call: the intersection of the
+ * slices, each a feature's use cases made by a factory of its own module
+ * from only the ports it uses. A screen that needs few of them may take
+ * a slice's interface instead, as the trial's screens do (TrialUseCases).
+ */
 export interface UseCases
   extends SessionUseCases,
-    StatisticsUseCases,
-    InstanceCheckUseCases,
-    CardUseCases,
     InstanceUseCases,
-    StudyUseCases,
-    MistakeReportUseCases,
-    LibraryUseCases,
-    CourseUseCases,
     PreferenceUseCases,
     DeckUseCases,
+    CardUseCases,
+    LibraryUseCases,
+    MistakeReportUseCases,
+    CourseUseCases,
+    StudyUseCases,
+    StatisticsUseCases,
+    InstanceCheckUseCases,
     ReleaseDraftUseCases,
     ReleasePublishingUseCases,
-    InstanceGraphUseCases {
-  /**
-   * Test-play the draft (docs/studio.md, The trial), for the user of the
-   * instance at `instanceUrl`: in a new sandbox of its own (trial.ts),
-   * kept in memory, as a learner with the instance's answer scale and
-   * study day. The trial, with the use cases to play it with; or, for a
-   * draft that cannot be played, the problems that keep it from it
-   * (trialProblems), with nothing made.
-   */
-  openTrial(draft: ReleaseDraft, instanceUrl: string): Promise<TrialOpening>;
-}
+    InstanceGraphUseCases,
+    TrialOpeningUseCases {}
 
+/**
+ * Every port the use cases are given, each required: the composition
+ * root wires each one, or a "none" it means (packages/composition/), so
+ * a port it forgets is a type error. Only the clock, fresh ids, the
+ * random source and the ruleset have defaults.
+ */
 export interface Dependencies {
   sessionGateway: SessionGateway;
   /** Uniform [0, 1) source; defaults to Math.random. Injected for tests. */
@@ -128,46 +129,22 @@ export interface Dependencies {
   deckArchive: DeckArchive;
   /** Files on the user's device, saved and opened. */
   fileExchange: FileExchange;
-  /** The drafts of releases in each instance; by default there are none. */
-  releaseDraftRepository?: ReleaseDraftRepository;
-  /** Where releases are published from each instance; by default none is. */
-  releasePublisher?: ReleasePublisher;
-  /** A new sandbox to test-play a draft in, each one empty; by default there is none. */
-  trialSandbox?: (draft: ReleaseDraft) => TrialSandbox;
-  /** Each instance's documents as statements, for its graph; by default none is read. */
-  instanceGraphReader?: InstanceGraphReader;
+  /** The drafts of releases in each instance. */
+  releaseDraftRepository: ReleaseDraftRepository;
+  /** Where releases are published from each instance. */
+  releasePublisher: ReleasePublisher;
+  /** A new sandbox to test-play a draft in, each one empty. */
+  trialSandbox: (draft: ReleaseDraft) => TrialSandbox;
+  /** Each instance's documents as statements, for its graph. */
+  instanceGraphReader: InstanceGraphReader;
 }
 
-const none = async (): Promise<never[]> => [];
-const noDrafts = async () => {
-  throw new Error("This app keeps no drafts.");
-};
-const NO_DRAFTS: ReleaseDraftRepository = {
-  list: none,
-  documents: none,
-  create: noDrafts,
-  read: noDrafts,
-  applyChanges: noDrafts,
-  assemble: noDrafts,
-  readRelease: noDrafts,
-  readLinked: noDrafts,
-  parseRelease: noDrafts,
-  delete: noDrafts,
-};
-const NO_RELEASES: ReleasePublisher = {
-  publish: noDrafts,
-  makePublic: noDrafts,
-  isPublic: noDrafts,
-  listPublished: none,
-};
-const NO_INSTANCE_GRAPH: InstanceGraphReader = {
-  readDocument: async () => {
-    throw new Error("This app reads no instance as a graph.");
-  },
-};
-const noTrials = (): never => {
-  throw new Error("This app plays no trials.");
-};
+/**
+ * The use cases over the ports given: the stores the slices share (the
+ * preferences, the answers on their way to the log and read from it, and
+ * the digest), made once, then each slice over the ports it uses, and the
+ * stores and slices it builds on.
+ */
 export function createUseCases({
   sessionGateway,
   random = Math.random,
@@ -197,10 +174,10 @@ export function createUseCases({
   guestPod,
   deckArchive,
   fileExchange,
-  releaseDraftRepository = NO_DRAFTS,
-  releasePublisher = NO_RELEASES,
-  trialSandbox = noTrials,
-  instanceGraphReader = NO_INSTANCE_GRAPH,
+  releaseDraftRepository,
+  releasePublisher,
+  trialSandbox,
+  instanceGraphReader,
 }: Dependencies): UseCases {
   const preferenceStore = createPreferenceStore({
     preferencesRepository,
@@ -261,7 +238,6 @@ export function createUseCases({
     answerStore,
   });
   return {
-    ...drafts,
     ...createSessionUseCases({
       sessionGateway,
       storageGateway,
@@ -281,45 +257,7 @@ export function createUseCases({
       drafts,
       newId,
     }),
-    ...createStatisticsUseCases({
-      answerLog,
-      deckRepository,
-      reviewStateRepository,
-      deckLibrary,
-      fileExchange,
-      preferenceStore,
-      answerStore,
-      digestStore,
-    }),
-    ...checks,
-    ...createCardUseCases({
-      deckRepository,
-      reviewStateRepository,
-      deckLibrary,
-      deckArchive,
-      fileExchange,
-      digestStore,
-      newId,
-      now,
-    }),
     ...instances,
-    ...createStudyUseCases({
-      deckRepository,
-      reviewStateRepository,
-      preferenceStore,
-      digestStore,
-      answerStore,
-      random,
-    }),
-    ...createMistakeReportUseCases({ deckLibrary }),
-    ...createLibraryUseCases({
-      deckLibrary,
-      deckRepository,
-      reviewStateRepository,
-      shapeValidator,
-      courses,
-    }),
-    ...courses,
     ...createPreferenceUseCases({
       languagePreference,
       themePreference,
@@ -336,6 +274,45 @@ export function createUseCases({
       newId,
     }),
     ...createDeckUseCases({ deckRepository, newId }),
+    ...createCardUseCases({
+      deckRepository,
+      reviewStateRepository,
+      deckLibrary,
+      deckArchive,
+      fileExchange,
+      digestStore,
+      newId,
+      now,
+    }),
+    ...createLibraryUseCases({
+      deckLibrary,
+      deckRepository,
+      reviewStateRepository,
+      shapeValidator,
+      courses,
+    }),
+    ...createMistakeReportUseCases({ deckLibrary }),
+    ...courses,
+    ...createStudyUseCases({
+      deckRepository,
+      reviewStateRepository,
+      preferenceStore,
+      digestStore,
+      answerStore,
+      random,
+    }),
+    ...createStatisticsUseCases({
+      answerLog,
+      deckRepository,
+      reviewStateRepository,
+      deckLibrary,
+      fileExchange,
+      preferenceStore,
+      answerStore,
+      digestStore,
+    }),
+    ...checks,
+    ...drafts,
     ...createReleasePublishingUseCases({
       drafts,
       releaseDraftRepository,
@@ -353,11 +330,6 @@ export function createUseCases({
       releaseDraftRepository,
       releasePublisher,
     }),
-    async openTrial(draft, instanceUrl) {
-      const problems = trialProblems(draftReleaseModel(draft));
-      if (problems.length > 0) return { ok: false, problems };
-      const prefs = await preferenceStore.get(instanceUrl);
-      return { ok: true, trial: await startTrial(trialSandbox(draft), draft, prefs) };
-    },
+    ...createTrialOpeningUseCases({ trialSandbox, preferenceStore }),
   };
 }

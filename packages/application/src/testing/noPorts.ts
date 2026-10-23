@@ -16,6 +16,9 @@ import type {
   WriteFence,
   DeckArchive,
   FileExchange,
+  ReleaseDraftRepository,
+  ReleasePublisher,
+  InstanceGraphReader,
 } from "../ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
@@ -95,6 +98,40 @@ const NO_GUEST_POD: GuestPod = {
   discard: nothing,
 };
 
+const noDrafts = async () => {
+  throw new Error("This app keeps no drafts.");
+};
+
+const NO_DRAFTS: ReleaseDraftRepository = {
+  list: none,
+  documents: none,
+  create: noDrafts,
+  read: noDrafts,
+  applyChanges: noDrafts,
+  assemble: noDrafts,
+  readRelease: noDrafts,
+  readLinked: noDrafts,
+  parseRelease: noDrafts,
+  delete: noDrafts,
+};
+
+const NO_RELEASES: ReleasePublisher = {
+  publish: noDrafts,
+  makePublic: noDrafts,
+  isPublic: noDrafts,
+  listPublished: none,
+};
+
+const noTrials = (): never => {
+  throw new Error("This app plays no trials.");
+};
+
+const NO_INSTANCE_GRAPH: InstanceGraphReader = {
+  readDocument: async () => {
+    throw new Error("This app reads no instance as a graph.");
+  },
+};
+
 /**
  * A port that keeps nothing and does nothing, or refuses, for each port
  * a test has no use for: a test spreads NO_PORTS, then gives the ports
@@ -102,6 +139,10 @@ const NO_GUEST_POD: GuestPod = {
  * their own, so a missing one is a type error (packages/composition/).
  */
 export const NO_PORTS = {
+  releaseDraftRepository: NO_DRAFTS,
+  releasePublisher: NO_RELEASES,
+  trialSandbox: noTrials,
+  instanceGraphReader: NO_INSTANCE_GRAPH,
   updateJournal: NO_JOURNAL,
   writeFence: NO_FENCE,
   guestPod: NO_GUEST_POD,

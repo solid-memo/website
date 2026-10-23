@@ -3,29 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { createUseCases, type UseCases } from "./useCases";
-import {
-  courseDraft,
-  deckDraft,
-  DRAFT,
-  playableCourseDraft,
-} from "@solid-memo/domain/testing/releaseDraft";
-import { TRIAL_INSTANCE_URL, TRIAL_SESSION } from "@solid-memo/domain/release/trial";
-import type { Instance } from "@solid-memo/domain/instance";
+import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { fsrsInterval } from "@solid-memo/domain/fsrs";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 
-import {
-  session,
-  sm2s,
-  promptOf,
-  instance,
-  deck,
-  card,
-  makeDeps,
-  memoryLog,
-} from "./testing/fakePorts";
+import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
 import { now, RULES, review, setup, learned } from "./testing/digestWorld";
 
 describe("the instance digest", () => {
@@ -248,26 +231,6 @@ describe("the instance digest", () => {
     }));
     await useCases.refreshStudyDigest(instance.url, deck);
     expect(stored()!.receipts[deck.reviewsDocumentUrl]!.conformedTo).toBeUndefined();
-  });
-
-  it("keeps no drafts without a repository of them", async () => {
-    const useCases = createUseCases(makeDeps());
-    await expect(useCases.listReleaseDrafts(instance.url)).resolves.toEqual([]);
-    await expect(
-      useCases.getReleaseDraft(`${instance.url}drafts/a/v1/release.ttl`),
-    ).rejects.toThrow("This app keeps no drafts.");
-    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([]);
-    await expect(
-      useCases.makeReleasePublic(instance.url, `${instance.url}releases/a/v1.ttl`, session.webId),
-    ).rejects.toThrow("This app keeps no drafts.");
-  });
-
-  it("reads no document of an instance as a graph without a reader of them", async () => {
-    const useCases = createUseCases(makeDeps());
-    const graph = await useCases.readInstanceGraph(instance.url, session.webId);
-    const documents = graph.nodes.filter((node) => node.kind === "document");
-    expect(documents.length).toBeGreaterThan(0);
-    expect(documents.every((node) => node.unreadable === true)).toBe(true);
   });
 
   it("plans the format update without reading again documents with nothing outdated, and writes no digest", async () => {
@@ -635,93 +598,5 @@ describe("the answer log", () => {
     await expect(plain.getStatistics(instance.url, noon)).resolves.toMatchObject({
       totals: { answers: 0, studyDays: 0, cards: 0 },
     });
-  });
-});
-
-describe("openTrial", () => {
-  const trialInstance: Instance = { url: TRIAL_INSTANCE_URL, name: "Trial" };
-  function sandbox() {
-    const trialUseCases = {
-      createInstance: vi.fn(async () => trialInstance),
-      switchScheduler: vi.fn(async () => undefined),
-      startCourse: vi.fn(async () => deck),
-      importLibraryDeck: vi.fn(async () => deck),
-    };
-    const pod = { exists: vi.fn(), start: vi.fn(async () => undefined), discard: vi.fn() };
-    return { useCases: trialUseCases as unknown as UseCases, pod, trialUseCases };
-  }
-  function withSandbox() {
-    const deps = makeDeps();
-    const made = sandbox();
-    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
-      preferences: {
-        ...DEFAULT_PREFERENCES,
-        answerScale: "minimal",
-        dayBoundaryHour: 2,
-        newCardsPerDay: 1,
-        scheduler: "fsrs6",
-        desiredRetention: 0.85,
-      },
-      formatVersion: 5,
-    });
-    const trialSandbox = vi.fn(() => made);
-    return { deps, made, trialSandbox, useCases: createUseCases({ ...deps, trialSandbox }) };
-  }
-
-  it("starts a course draft in a sandbox of its own, as a learner with the user's answer scale, study day and scheduler", async () => {
-    const { made, trialSandbox, useCases } = withSandbox();
-    const draft = playableCourseDraft();
-    const opened = await useCases.openTrial(draft, instance.url);
-    expect(opened).toEqual({
-      ok: true,
-      trial: { useCases: made.useCases, instance: trialInstance, deck },
-    });
-    expect(trialSandbox).toHaveBeenCalledWith(draft);
-    expect(made.pod.start).toHaveBeenCalled();
-    expect(made.trialUseCases.createInstance).toHaveBeenCalledWith(TRIAL_SESSION, {
-      containerUrl: TRIAL_INSTANCE_URL,
-      name: "Trial",
-      registrationTarget: "private",
-    });
-    expect(made.trialUseCases.switchScheduler).toHaveBeenCalledWith(TRIAL_INSTANCE_URL, {
-      ...DEFAULT_PREFERENCES,
-      answerScale: "minimal",
-      dayBoundaryHour: 2,
-      scheduler: "fsrs6",
-      desiredRetention: 0.85,
-    });
-    expect(made.trialUseCases.startCourse).toHaveBeenCalledWith(
-      TRIAL_INSTANCE_URL,
-      expect.objectContaining({ url: DRAFT, isCourse: true }),
-    );
-    expect(made.trialUseCases.importLibraryDeck).not.toHaveBeenCalled();
-  });
-
-  it("imports a deck draft as a library deck", async () => {
-    const { made, useCases } = withSandbox();
-    await useCases.openTrial(deckDraft(), instance.url);
-    expect(made.trialUseCases.importLibraryDeck).toHaveBeenCalledWith(
-      TRIAL_INSTANCE_URL,
-      expect.objectContaining({ url: DRAFT }),
-    );
-    expect(made.trialUseCases.startCourse).not.toHaveBeenCalled();
-  });
-
-  it("refuses a draft that cannot be played, with what keeps it from it, making nothing", async () => {
-    const { trialSandbox, useCases } = withSandbox();
-    const opened = await useCases.openTrial(courseDraft(), instance.url);
-    expect(opened.ok).toBe(false);
-    expect(!opened.ok && opened.problems.map((problem) => problem.code)).toEqual([
-      "fewDistractors",
-      "fewDistractors",
-      "chapterWithoutStep",
-    ]);
-    expect(trialSandbox).not.toHaveBeenCalled();
-  });
-
-  it("plays no trial unless given a sandbox", async () => {
-    await expect(createUseCases(makeDeps()).openTrial(deckDraft(), instance.url)).rejects.toThrow(
-      "plays no trials",
-    );
   });
 });

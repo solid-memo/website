@@ -2,20 +2,22 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { GuestPod } from "./ports";
+import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
+import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { InstanceUseCases } from "./instances";
+import type { StudyUseCases } from "./study";
+import type { MistakeReportUseCases } from "./mistakeReports";
+import type { LibraryUseCases } from "./library";
+import type { CourseUseCases } from "./courses";
+import type { PreferenceUseCases } from "./preferences";
+import type { PreferenceStore } from "./preferenceStore";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES, type StudyPreferences } from "@solid-memo/domain/preferences";
 import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { TRIAL_INSTANCE_URL, TRIAL_SESSION } from "@solid-memo/domain/release/trial";
-import type { GuestPod } from "./ports";
-import type { CourseUseCases } from "./courses";
-import type { InstanceUseCases } from "./instances";
-import type { LibraryUseCases } from "./library";
-import type { MistakeReportUseCases } from "./mistakeReports";
-import type { PreferenceUseCases } from "./preferences";
-import type { StudyUseCases } from "./study";
+import { TRIAL_INSTANCE_URL, TRIAL_SESSION, trialProblems } from "@solid-memo/domain/release/trial";
 
 /**
  * Test-playing a draft (docs/studio.md, The trial): the draft is played
@@ -90,4 +92,38 @@ export async function startTrial(
     ? await useCases.startCourse(instance.url, offered)
     : await useCases.importLibraryDeck(instance.url, offered);
   return { useCases, instance, deck };
+}
+
+export interface TrialOpeningUseCases {
+  /**
+   * Test-play the draft (docs/studio.md, The trial), for the user of the
+   * instance at `instanceUrl`: in a new sandbox of its own (trial.ts),
+   * kept in memory, as a learner with the instance's answer scale and
+   * study day. The trial, with the use cases to play it with; or, for a
+   * draft that cannot be played, the problems that keep it from it
+   * (trialProblems), with nothing made.
+   */
+  openTrial(draft: ReleaseDraft, instanceUrl: string): Promise<TrialOpening>;
+}
+
+/**
+ * Test-playing a draft (docs/studio.md, The trial), each trial in a new
+ * sandbox of its own, as a learner with the user's answer scale, study
+ * day and scheduler.
+ */
+export function createTrialOpeningUseCases({
+  trialSandbox,
+  preferenceStore,
+}: {
+  trialSandbox: (draft: ReleaseDraft) => TrialSandbox;
+  preferenceStore: Pick<PreferenceStore, "get">;
+}): TrialOpeningUseCases {
+  return {
+    async openTrial(draft, instanceUrl) {
+      const problems = trialProblems(draftReleaseModel(draft));
+      if (problems.length > 0) return { ok: false, problems };
+      const prefs = await preferenceStore.get(instanceUrl);
+      return { ok: true, trial: await startTrial(trialSandbox(draft), draft, prefs) };
+    },
+  };
 }
