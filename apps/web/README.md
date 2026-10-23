@@ -17,7 +17,7 @@ the Vite build that publishes them together with the vocabulary and shapes
   (`about/`) and the Studio's old address (`studio/`).
 - `vite.config.ts`: the build. It also writes `robots.txt` and
   `sitemap.xml`, on the domain in the repository's `CNAME`
-  (`siteMapPlugin`, in `@solid-memo/vocab/tooling/siteMap`), and
+  (`siteMapPlugin`, in `@solid-memo/site/siteMap`), and
   renders the docs to pages under `docs/`, their diagrams drawn in
   Chromium (`docsSitePlugin`, in `@solid-memo/markdown/tooling/publishDocs`,
   [markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
@@ -28,8 +28,9 @@ It exports nothing; no package may import it.
 
 It may import `application`, `domain`, `vocab` and `ui`;
 `composition` from `src/main.tsx` only; `studio` from
-`src/main.tsx` only, with a dynamic `import()`; and `markdown`'s node
-tooling from `vite.config.ts` and `src/build.test.ts` only
+`src/main.tsx` only, with a dynamic `import()`; `markdown`'s node
+tooling from `vite.config.ts` and `src/build.test.ts` only; and
+`site`, the site's build, from `vite.config.ts` and tests only
 ([boundaries.md](../../docs/boundaries.md)).
 
 ## Run and test

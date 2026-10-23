@@ -156,6 +156,42 @@ describe("boundaryProblems", () => {
     ]);
   });
 
+  it("lets the site's config and tests use its build, and nothing in its page", () => {
+    const web = {
+      ...workspace(
+        "web",
+        {
+          "vite.config.ts": 'import { siteMapPlugin } from "@solid-memo/site/siteMap";',
+          "src/aboutPage.test.ts": 'import { siteOrigin } from "@solid-memo/site/siteMap";',
+          "src/App.tsx": 'import { siteOrigin } from "@solid-memo/site/siteMap";',
+        },
+        { "@solid-memo/site": "*" },
+      ),
+      dir: "apps/web",
+    };
+    expect(problems(web)).toEqual([
+      "apps/web/src/App.tsx: only files matching /^(vite\\.config\\.ts|src\\/[^/]+\\.test\\.ts)$/ may import @solid-memo/site.",
+      'apps/web/src/App.tsx: runs in the browser, so may not import "@solid-memo/site/siteMap".',
+    ]);
+  });
+
+  it("fails on an entry point of a package other than those the importer may use", () => {
+    expect(
+      problems(
+        workspace(
+          "site",
+          {
+            "src/siteBuild.ts": 'import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";',
+            "src/siteMap.ts": 'import { run } from "@solid-memo/vocab/tooling/generate";',
+          },
+          { "@solid-memo/vocab": "*" },
+        ),
+      ),
+    ).toEqual([
+      'packages/site/src/siteMap.ts: may import only /^@solid-memo\\/vocab\\/tooling\\/root$/ of @solid-memo/vocab, not "@solid-memo/vocab/tooling/generate".',
+    ]);
+  });
+
   it("fails on a static import of a package that may be loaded only lazily", () => {
     const web = {
       ...workspace(

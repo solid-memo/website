@@ -241,7 +241,7 @@ server says why, once.
 ## What a build computes
 
 These are not settings: the build works them out
-([siteBuild.ts](../packages/vocab/tooling/siteBuild.ts)) and passes
+([siteBuild.ts](../packages/site/src/siteBuild.ts)) and passes
 them to the page, the version in its HTML and the others as constants
 in its script.
 

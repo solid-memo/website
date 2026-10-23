@@ -12,12 +12,13 @@ package and fails on:
 - a relative import that leaves its package;
 - an import of a workspace package its layer may not use (the table
   below), or from a file that may not use it, or a static import of one
-  that may only be loaded lazily;
+  that may only be loaded lazily, or an entry point of one other than
+  those it may use (`site` takes only `tooling/root` of `vocab`);
 - an import of any package its `package.json` does not declare — npm
   hoists every dependency to the root, so an undeclared import would
   otherwise resolve and pass the type check;
-- a node-only import (`node:*`, `n3`, `@solid-memo/turtle`, any
-  package's `tooling/` or `node/` entry) in code that runs in the
+- a node-only import (`node:*`, `n3`, `@solid-memo/turtle`,
+  `@solid-memo/site`, any package's `tooling/` or `node/` entry) in code that runs in the
   browser.
 - an import of `@inrupt/solid-client`'s access control from any file
   but the release publisher's, tests aside
@@ -71,6 +72,7 @@ keeps to its boundaries."
 | `turtle` | — | |
 | `markdown` | `turtle` | `turtle`: `tooling/` only, to read the docs' index ([markdown.md](markdown.md#the-docs-index)) |
 | `vocab` | `turtle` | `turtle`: `tooling/` only |
+| `site` | `vocab`, `turtle` | `vocab`: `tooling/root` alone, where the repository's folders are |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |
 | `shacl` | `domain`, `vocab`, `turtle`, `markdown` | `turtle`, `markdown`: `node/` only |
@@ -78,14 +80,14 @@ keeps to its boundaries."
 | `browser` | `application`, `domain` | |
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
-| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `markdown` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()`; `markdown`: `vite.config.ts` and `src/build.test.ts` only, its node tooling, which renders the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
+| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `markdown`, `site` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()`; `markdown`: `vite.config.ts` and `src/build.test.ts` only, its node tooling, which renders the docs ([markdown.md](markdown.md#the-docs-as-a-site)); `site`: `vite.config.ts` and tests only, the site's build |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 | `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for the app's messages and the Studio's |
 
 Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
 `solid`, `browser`, `composition`, `ui`, `web` and `studio`; `vocab`'s
-and `markdown`'s `tooling/` are node-only.
+and `markdown`'s `tooling/`, `turtle` and `site` are node-only.
 
 ## Vendor libraries
 

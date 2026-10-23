@@ -9,12 +9,13 @@
  * - a relative import stays inside the package;
  * - an import of another workspace package is one its layer may use, and
  *   the package declares it in package.json; some may be imported only
- *   from certain files, or only lazily, with a dynamic import();
+ *   from certain files, only lazily, with a dynamic import(), or only
+ *   at certain entry points;
  * - any other package is declared too (npm hoists everything, so an
  *   undeclared import would still resolve — this is what catches it);
  * - code that runs in the browser imports nothing node-only (node:*, n3,
- *   Mermaid and Playwright, the Turtle tooling, a package's tooling/ or
- *   node/ entry points).
+ *   Mermaid and Playwright, the Turtle tooling, the site's build, a
+ *   package's tooling/ or node/ entry points).
  * - some exports of a vendor package may be imported only from certain
  *   files: `@inrupt/solid-client`'s access control, by the release
  *   publisher alone (docs/boundaries.md, Access control).
@@ -30,6 +31,8 @@ export const LAYERS: Record<string, string[]> = {
   turtle: [],
   markdown: ["turtle"],
   vocab: ["turtle"],
+  // The site's build, in node: it reads where the repository's folders are from vocab.
+  site: ["vocab", "turtle"],
   domain: ["vocab"],
   application: ["domain", "vocab"],
   shacl: ["domain", "vocab", "turtle", "markdown"],
@@ -40,7 +43,7 @@ export const LAYERS: Record<string, string[]> = {
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
   // The site's page, which shows the Studio at its routes; its build publishes the docs.
-  web: ["application", "domain", "vocab", "ui", "composition", "studio", "markdown"],
+  web: ["application", "domain", "vocab", "ui", "composition", "studio", "markdown", "site"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
@@ -56,6 +59,7 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
     composition: /^src\/main\.tsx$/,
     studio: /^src\/main\.tsx$/,
     markdown: /^(vite\.config\.ts|src\/build\.test\.ts)$/,
+    site: /^(vite\.config\.ts|src\/[^/]+\.test\.ts)$/,
   },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
@@ -67,6 +71,12 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   shacl: { turtle: /^node\//, markdown: /^node\// },
   // The app's messages (packages/ui/src/i18n, apps/studio/src/i18n), which the page objects find text by.
   "e2e-journeys": { ui: /^harness\/strings\.ts$/, studio: /^harness\/strings\.ts$/ },
+};
+
+/** Within a package, the entry points of an allowed package that alone it may import. */
+export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
+  // Where the repository's folders are; vocab's generator and data are not the site's build.
+  site: { vocab: /^@solid-memo\/vocab\/tooling\/root$/ },
 };
 
 /**
@@ -120,6 +130,7 @@ export const NODE_ONLY = [
   /^mermaid(\/|$)/,
   /^playwright(\/|$)/,
   /^@solid-memo\/turtle(\/|$)/,
+  /^@solid-memo\/site(\/|$)/,
   /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
 ];
 
@@ -150,13 +161,14 @@ export type Workspace = { dir: string; manifest: Manifest; files: Record<string,
 /**
  * What one import of another workspace package, `other`, breaks (fileProblems):
  * its layer may not use it, only some files or only a dynamic import() may,
- * or package.json does not declare it.
+ * it may use other entry points only, or package.json does not declare it.
  */
 function workspaceImportProblems(
   where: string,
   name: string,
   file: string,
   statement: string,
+  specifier: string,
   other: string,
   declared: ReadonlySet<string>,
 ): string[] {
@@ -168,6 +180,12 @@ function workspaceImportProblems(
   const only = ONLY_FROM[short]?.[other];
   if (only !== undefined && !only.test(file)) {
     problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
+  }
+  const entries = ONLY_ENTRIES[short]?.[other];
+  if (entries !== undefined && !entries.test(specifier)) {
+    problems.push(
+      `${where}: may import only ${entries} of @solid-memo/${other}, not "${specifier}".`,
+    );
   }
   if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement)) {
     problems.push(`${where}: may import @solid-memo/${other} only with a dynamic import().`);
@@ -238,7 +256,15 @@ function fileProblems(
     } else if (specifier!.startsWith("@solid-memo/")) {
       const other = packageName(specifier!).replace("@solid-memo/", "");
       problems.push(
-        ...workspaceImportProblems(where, manifest.name, file, statement!, other, declared),
+        ...workspaceImportProblems(
+          where,
+          manifest.name,
+          file,
+          statement!,
+          specifier!,
+          other,
+          declared,
+        ),
       );
     } else {
       const name = packageName(specifier!);

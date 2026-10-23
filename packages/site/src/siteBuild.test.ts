@@ -5,7 +5,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { VOCAB_ROOT } from "./root.ts";
+import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
 const execFileSync = vi.hoisted(() => vi.fn());
 vi.mock("node:child_process", () => ({ execFileSync }));

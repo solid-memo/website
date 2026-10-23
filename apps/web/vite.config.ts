@@ -7,10 +7,10 @@ import { createRequire } from "node:module";
 import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
 import { docsSitePlugin } from "@solid-memo/markdown/tooling/publishDocs";
-import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
+import { turtleDirectoryPlugin } from "@solid-memo/site/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { appVersion, commitSha, siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
-import { siteMapPlugin, siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
+import { appVersion, commitSha, siteDefines } from "@solid-memo/site/siteBuild";
+import { siteMapPlugin, siteOrigin } from "@solid-memo/site/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 
 /**

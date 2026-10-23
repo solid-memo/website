@@ -159,7 +159,7 @@ data it reads:
 
 Vite copies `ns/`, `decks/` and `vendor/` as they are
 (`turtleDirectoryPlugin` in
-[publishTurtle.ts](../packages/vocab/tooling/publishTurtle.ts)), and
+[publishTurtle.ts](../packages/site/src/publishTurtle.ts)), and
 serves them the same way in `npm run dev` and `npm start`.
 
 Pages serves a `.ttl` file as `text/turtle` with
@@ -276,7 +276,7 @@ takes the domain from that setting only: a `CNAME` file in the
 repository is not read for that. On another host, follow its own steps.
 
 The build reads it, though: `siteMapPlugin` in
-[siteMap.ts](../packages/vocab/tooling/siteMap.ts) writes
+[siteMap.ts](../packages/site/src/siteMap.ts) writes
 `sitemap.xml` and the `Sitemap:` line of `robots.txt` on the domain
 that `CNAME` names, since a sitemap's addresses are absolute. So write
 your domain into `CNAME` too, a bare hostname such as

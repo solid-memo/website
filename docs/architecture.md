@@ -21,6 +21,7 @@ where the layers meet.
 | `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the pod fence, the write fence, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), the drafts of releases and the Turtle a release is written in ([data-model.md](data-model.md#drafts-and-releases)), and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for the browser: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads and opened from the user's disk (`FileExchange`). |
+| `@solid-memo/site` | `packages/site/` | Node-only: the site's build, which only `apps/web`'s `vite.config.ts` and tests use. The values the site is built with (`siteBuild`), its `robots.txt` and sitemap (`siteMap`), and the Vite plugin that publishes `ns/` and `decks/` with it (`publishTurtle`) ([deployment.md](deployment.md)). Imports nothing of `vocab` but `tooling/root`, where the repository's folders are. |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
 | `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release; and the repository's own docs, read in the same dialect with their headings kept and rendered by its node tooling (`tooling/`) to static pages, their links checked and their Mermaid diagrams drawn to SVG in Chromium, with the Vite plugin that publishes them ([markdown.md](markdown.md#the-docs-as-a-site)), their pages listed from their index, `docs/docs.ttl`. Imports nothing of the app's but `turtle`, from `tooling/` only, to read that index. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
@@ -48,6 +49,9 @@ graph TD
     composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
     web -. "vite.config.ts and its test only" .-> markdown
+    web -. "vite.config.ts and tests only" .-> site["site<br/>the site's build"]
+    site -. "tooling/root only" .-> vocab
+    site --> turtle
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
@@ -74,11 +78,11 @@ files (`i18n/<locale>.json`).
 `generate:check`, `format:turtle:check`, `library:check` and `build` in dependency order,
 cached by input. A task's inputs are its package's files and those of the
 packages it depends on; the few that also read `ns/` or `decks/` add them
-in their package's own `turbo.json` (`vocab`, `shacl`, `solid`,
+in their package's own `turbo.json` (`vocab`, `site`, `shacl`, `solid`,
 `composition`, `apps/web` and `apps/studio`), so a deck edit reruns only the tasks that
 read the library. A test that reads any other file outside its package
-adds it the same way (`e2e/pod`'s the workflows, `vocab`'s the root's
-`package.json`, `apps/web`'s the `LICENSE` its About page links to): a
+adds it the same way (`e2e/pod`'s the workflows, `site`'s the root's
+`package.json` and `CNAME`, `apps/web`'s the `LICENSE` its About page links to): a
 file Turbo does not know of changes no input, so CI, which starts from
 `main`'s cache, would reuse `main`'s result and never run the test on
 the change it checks. The one exception is a test that checks only that

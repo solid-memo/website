@@ -1,0 +1,24 @@
+{
+  "name": "@solid-memo/site",
+  "description": "Node-only build of the Solid Memo site: the values it is built with, its robots.txt and sitemap, and the Vite plugin that publishes ns/ and decks/ with it.",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@solid-memo/turtle": "*",
+    "@solid-memo/vocab": "*"
+  }
+}

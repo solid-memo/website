@@ -18,7 +18,7 @@
 # Vendored files are kept byte for byte as their authors publish them (one
 # license there has CRLF line endings): the shapes' ruleset is a hash of
 # every file under vendor/ (shapesRuleset in
-# packages/vocab/tooling/siteBuild.ts), and a changed byte would void the
+# packages/site/src/siteBuild.ts), and a changed byte would void the
 # check receipts in users' pods.
 packages/vocab/vendor/** -text linguist-vendored
 
