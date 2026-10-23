@@ -2,9 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SessionGateway } from "@solid-memo/application/ports";
 import type { TrialSandbox } from "@solid-memo/application/trial";
-import { createUseCases, type Dependencies } from "@solid-memo/application/useCases";
+import { createAnswerStore } from "@solid-memo/application/answerStore";
+import { createCourseUseCases } from "@solid-memo/application/courses";
+import { createDigestStore } from "@solid-memo/application/digestStore";
+import { createInstanceUseCases } from "@solid-memo/application/instances";
+import { createLibraryUseCases } from "@solid-memo/application/library";
+import { createPreferenceStore } from "@solid-memo/application/preferenceStore";
+import { createPreferenceUseCases } from "@solid-memo/application/preferences";
+import { createStudyUseCases } from "@solid-memo/application/study";
+import type { Dependencies } from "@solid-memo/application/useCases";
 import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -18,10 +25,8 @@ import type { ShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator"
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
-import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
@@ -62,26 +67,76 @@ export function createTrialUseCases(
   const checkWrite = validator.checkSubjects;
   const now = () => new Date();
   const randomId = () => crypto.randomUUID();
-  const useCases = createUseCases({
-    sessionGateway: NO_LOGIN,
-    ...NO_DEVICE,
-    webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch }),
-    storageGateway: createSolidStorageGateway({ fetch }),
-    instanceRepository: createSolidInstanceRepository({ fetch, checkWrite, now, randomId }),
-    deckRepository: createSolidDeckRepository({ fetch, checkWrite, now, randomId }),
-    deckLibrary: createDraftDeckLibrary(draft),
-    preferencesRepository: createSolidPreferencesRepository({ fetch, checkWrite }),
-    reviewStateRepository: createSolidReviewStateRepository({ fetch, checkWrite }),
-    shapeValidator: validator,
-    repairRepository: createSolidRepairRepository({ fetch }),
-    instanceCopier: createSolidInstanceCopier({ fetch }),
-    digestRepository: createSolidDigestRepository({ fetch, checkWrite }),
+  const instanceRepository = createSolidInstanceRepository({ fetch, checkWrite, now, randomId });
+  const deckRepository = createSolidDeckRepository({ fetch, checkWrite, now, randomId });
+  const deckLibrary = createDraftDeckLibrary(draft);
+  const preferencesRepository = createSolidPreferencesRepository({ fetch, checkWrite });
+  const reviewStateRepository = createSolidReviewStateRepository({ fetch, checkWrite });
+  const preferenceStore = createPreferenceStore({ preferencesRepository, ...NO_DEVICE });
+  const answerStore = createAnswerStore({
     answerLog: createSolidAnswerLog({ fetch, checkWrite }),
+    reviewStateRepository,
+    preferenceStore,
+    newId: randomId,
+  });
+  const digestStore = createDigestStore({
+    digestRepository: createSolidDigestRepository({ fetch, checkWrite }),
+    deckRepository,
+    reviewStateRepository,
+    shapeValidator: validator,
     ruleset,
+    preferenceStore,
+    answerStore,
+    now,
+  });
+  const courses = createCourseUseCases({
+    deckLibrary,
+    deckRepository,
+    reviewStateRepository,
+    preferenceStore,
+    answerStore,
   });
   return {
-    // The draft is the author's own, unpublished: a mistake in it is reported nowhere, least of all to the library.
-    useCases: { ...useCases, reportPlace: async () => ({ library: false }) },
+    useCases: {
+      ...createInstanceUseCases({
+        storageGateway: createSolidStorageGateway({ fetch }),
+        instanceRepository,
+        deckRepository,
+        preferencesRepository,
+        reviewStateRepository,
+        webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch }),
+        preferenceStore,
+        digestStore,
+      }),
+      ...createPreferenceUseCases({
+        ...NO_DEVICE,
+        preferencesRepository,
+        deckRepository,
+        reviewStateRepository,
+        preferenceStore,
+        answerStore,
+        digestStore,
+        newId: randomId,
+      }),
+      ...courses,
+      ...createLibraryUseCases({
+        deckLibrary,
+        deckRepository,
+        reviewStateRepository,
+        shapeValidator: validator,
+        courses,
+      }),
+      ...createStudyUseCases({
+        deckRepository,
+        reviewStateRepository,
+        preferenceStore,
+        digestStore,
+        answerStore,
+        random: Math.random,
+      }),
+      // The draft is the author's own, unpublished: a mistake in it is reported nowhere, least of all to the library.
+      reportPlace: async () => ({ library: false }),
+    },
     pod: createLocalGuestPod({ fetch: local, store, origin: TRIAL_ORIGIN }),
   };
 }
@@ -102,20 +157,6 @@ export function readOnlyFetch(fetch: typeof globalThis.fetch): typeof globalThis
     return fetch(input, init);
   };
 }
-
-/** A trial has no login: its learner is no one's. */
-const noLogin = async (): Promise<never> => {
-  throw new Error("A trial has no login.");
-};
-
-export const NO_LOGIN: SessionGateway = {
-  restore: async () => null,
-  onSessionExpired: () => () => undefined,
-  discoverOidcIssuer: noLogin,
-  login: noLogin,
-  loginWithIssuer: noLogin,
-  logout: noLogin,
-};
 
 /**
  * What the device keeps of how the app is shown, none of which is a

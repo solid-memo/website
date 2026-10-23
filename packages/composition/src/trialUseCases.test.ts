@@ -11,7 +11,7 @@ import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { DRAFT, playableCourseDraft } from "@solid-memo/domain/testing/releaseDraft";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createAppUseCases } from "./appUseCases";
-import { createTrialUseCases, NO_DEVICE, NO_LOGIN, readOnlyFetch } from "./trialUseCases";
+import { createTrialUseCases, NO_DEVICE, readOnlyFetch } from "./trialUseCases";
 
 const SERVED = "http://localhost:5173/";
 
@@ -57,21 +57,6 @@ describe("readOnlyFetch", () => {
       "(PATCH)",
     );
     expect(pod).not.toHaveBeenCalled();
-  });
-});
-
-describe("NO_LOGIN", () => {
-  it("has no session, and logs no one in or out", async () => {
-    expect(await NO_LOGIN.restore()).toBeNull();
-    NO_LOGIN.onSessionExpired(() => undefined)();
-    for (const refused of [
-      NO_LOGIN.discoverOidcIssuer("x"),
-      NO_LOGIN.login("x"),
-      NO_LOGIN.loginWithIssuer("x"),
-      NO_LOGIN.logout(),
-    ]) {
-      await expect(refused).rejects.toThrow("no login");
-    }
   });
 });
 
@@ -155,7 +140,6 @@ describe("createTrialUseCases", () => {
     const question = course.cards["q-a-1a"]!;
     await useCases.answerCourseQuestion(played.url, deck, question, { correct: true }, new Date());
     expect((await useCases.getCourse(deck)).answeredCardIds).toEqual(["q-a-1a"]);
-    expect((await useCases.checkInstance(played.url)).conforms).toBe(true);
 
     // Another trial starts afresh.
     const again = await app.openTrial(draft, instance!.url);

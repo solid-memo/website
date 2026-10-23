@@ -4,7 +4,9 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { StudyUseCases } from "@solid-memo/application/study";
+import type { LibraryUseCases } from "@solid-memo/application/library";
+import type { MistakeReportUseCases } from "@solid-memo/application/mistakeReports";
 import type { GradeBasis, ReviewUndo, StudySessionQueue } from "@solid-memo/application/study";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
@@ -73,7 +75,7 @@ export function StudyContainer({
   deckLink = deckHref(instance.url, deck.url),
   random = Math.random,
 }: {
-  useCases: UseCases;
+  useCases: StudyUseCases & LibraryUseCases & MistakeReportUseCases;
   instance: Instance;
   deck: Deck;
   onExit: () => void;

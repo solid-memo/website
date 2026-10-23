@@ -10,7 +10,12 @@ import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { TRIAL_INSTANCE_URL, TRIAL_SESSION } from "@solid-memo/domain/release/trial";
 import type { GuestPod } from "./ports";
-import type { UseCases } from "./useCases";
+import type { CourseUseCases } from "./courses";
+import type { InstanceUseCases } from "./instances";
+import type { LibraryUseCases } from "./library";
+import type { MistakeReportUseCases } from "./mistakeReports";
+import type { PreferenceUseCases } from "./preferences";
+import type { StudyUseCases } from "./study";
 
 /**
  * Test-playing a draft (docs/studio.md, The trial): the draft is played
@@ -20,18 +25,31 @@ import type { UseCases } from "./useCases";
  */
 
 /**
+ * The use cases a trial is played with: its instance made, its
+ * preferences set, the draft started as a course or imported as a deck,
+ * then studied as a learner studies a release, a mistake in it reported
+ * nowhere (createTrialUseCases, in the composition root).
+ */
+export type TrialUseCases = InstanceUseCases &
+  PreferenceUseCases &
+  CourseUseCases &
+  LibraryUseCases &
+  StudyUseCases &
+  MistakeReportUseCases;
+
+/**
  * A new trial's pod, for one draft: the use cases over it (whose
  * library is the draft alone), and the pod, to start. Each is a pod of
  * its own, empty.
  */
 export interface TrialSandbox {
-  useCases: UseCases;
+  useCases: TrialUseCases;
   pod: GuestPod;
 }
 
 /** A trial under way: its use cases, and the instance and deck the draft is played in. */
 export interface Trial {
-  useCases: UseCases;
+  useCases: TrialUseCases;
   instance: Instance;
   deck: Deck;
 }

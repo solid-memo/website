@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { LibraryUseCases } from "@solid-memo/application/library";
 import type { Course } from "@solid-memo/application/courses";
 import type { CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -52,7 +52,7 @@ export function CourseContainer({
   course,
   justCompleted,
 }: {
-  useCases: UseCases;
+  useCases: LibraryUseCases;
   instance: Instance;
   course: Course;
   justCompleted?: CompletedChapter;

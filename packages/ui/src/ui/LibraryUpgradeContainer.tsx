@@ -11,7 +11,7 @@ import {
   useQueryClient,
   type QueryClient,
 } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { LibraryUseCases } from "@solid-memo/application/library";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { DeckUpgradeOutcome, StepPart } from "@solid-memo/domain/deckUpgrade";
@@ -32,7 +32,7 @@ import {
  * it to another release, the plan for the deck as it was no longer
  * applies.
  */
-export function libraryUpgradeQuery(useCases: UseCases, deck: Deck) {
+export function libraryUpgradeQuery(useCases: LibraryUseCases, deck: Deck) {
   return {
     queryKey: ["libraryUpgrade", deck.url, deck.sourceUrl, deck.cardsDocumentUrl],
     queryFn: () => useCases.planLibraryUpgrade(deck),
@@ -80,7 +80,7 @@ export function LibraryUpgradeContainer({
   instance,
   deck,
 }: {
-  useCases: UseCases;
+  useCases: LibraryUseCases;
   instance: Instance;
   deck: Deck;
 }) {

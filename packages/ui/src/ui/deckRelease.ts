@@ -3,18 +3,19 @@
 // SPDX-License-Identifier: MIT
 
 import { useQuery } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { LibraryUseCases } from "@solid-memo/application/library";
+import type { MistakeReportUseCases } from "@solid-memo/application/mistakeReports";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 
 /**
- * The library release a deck was copied from (UseCases.deckRelease): null
+ * The library release a deck was copied from (LibraryUseCases.deckRelease): null
  * for a deck not from the library, or no deck, undefined while it is read
  * or when it cannot be. Read once per release: a release never changes.
  */
 export function useDeckRelease(
-  useCases: UseCases,
+  useCases: LibraryUseCases,
   deck: Deck | undefined,
 ): LibraryDeckContent | null | undefined {
   return useDeckReleaseQuery(useCases, deck).release;
@@ -25,7 +26,7 @@ export function useDeckRelease(
  * and why it could not be read (`error`), for a screen that waits on it.
  */
 export function useDeckReleaseQuery(
-  useCases: UseCases,
+  useCases: LibraryUseCases,
   deck: Deck | undefined,
 ): { release: LibraryDeckContent | null | undefined; error: Error | null } {
   const sourceUrl = deck?.sourceUrl;
@@ -42,14 +43,14 @@ export function useDeckReleaseQuery(
 
 /**
  * Where a mistake in the release a deck was copied from is reported
- * (UseCases.reportPlace), the release, and the ids of its cards, the
+ * (MistakeReportUseCases.reportPlace), the release, and the ids of its cards, the
  * only ones a study screen reports (StudyScreen's `report`): undefined
  * for a deck from no release, or no deck, and while either is read or
  * when it cannot be. Read once, as a release never changes; a card the
  * learner added is theirs to fix.
  */
 export function useReportTarget(
-  useCases: UseCases,
+  useCases: LibraryUseCases & MistakeReportUseCases,
   deck: Deck | undefined,
 ): { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> } | undefined {
   const sourceUrl = deck?.sourceUrl;
