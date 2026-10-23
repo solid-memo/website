@@ -16,8 +16,8 @@ import {
   upgradeDeck,
   upgradeReviewState,
 } from "./migration";
-import { DEFAULT_PREFERENCES } from "./preferences";
-import type { ReviewState } from "./review";
+import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "./preferences";
+import { REVIEW_STATE_FORMAT_VERSION, type ReviewState } from "./review";
 
 const deck: Deck = {
   id: "deck-1",
@@ -155,7 +155,7 @@ describe("planMigration", () => {
         entries: [
           {
             deck,
-            cards: [card("a", 1), card("b", CARD_FORMAT_VERSION), card("c", 1)],
+            cards: [card("a", 5), card("b", CARD_FORMAT_VERSION), card("c", 1)],
             reviews: [review("a", 1)],
           },
           { deck: other, cards: [card("d", 1)], reviews: [] },
@@ -177,6 +177,34 @@ describe("planMigration", () => {
       preferencesOutdated: false,
       instanceOutdated: false,
       catalogMissing: false,
+      oldestFormat: {
+        deck: oldDeck.formatVersion,
+        card: 1,
+        reviewState: 1,
+        preferences: PREFERENCES_FORMAT_VERSION,
+      },
+    });
+  });
+
+  it("names the oldest outdated format of each kind, whatever newer data sits beside it", () => {
+    const newer: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION + 1 };
+    const plan = planMigration({
+      instance: null,
+      preferences: { preferences: DEFAULT_PREFERENCES, formatVersion: 4 },
+      catalog,
+      entries: [
+        {
+          deck: newer,
+          cards: [card("a", CARD_FORMAT_VERSION + 1), card("b", 6), card("c", 4)],
+          reviews: [],
+        },
+      ],
+    });
+    expect(plan.oldestFormat).toEqual({
+      deck: DECK_FORMAT_VERSION,
+      card: 4,
+      reviewState: REVIEW_STATE_FORMAT_VERSION,
+      preferences: 4,
     });
   });
 
@@ -214,6 +242,12 @@ describe("planMigration", () => {
       preferencesOutdated: false,
       instanceOutdated: false,
       catalogMissing: false,
+      oldestFormat: {
+        deck: DECK_FORMAT_VERSION,
+        card: CARD_FORMAT_VERSION,
+        reviewState: REVIEW_STATE_FORMAT_VERSION,
+        preferences: PREFERENCES_FORMAT_VERSION,
+      },
     });
     expect(isPlanEmpty(plan)).toBe(true);
     expect(isPlanEmpty(planMigration({ ...nothingElse, entries: [] }))).toBe(true);

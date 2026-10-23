@@ -2369,6 +2369,7 @@ describe("createUseCases", () => {
         reviewCount: 1,
         preferencesOutdated: true,
         instanceOutdated: false,
+        oldestFormat: { deck: DECK_FORMAT_VERSION, card: 1, reviewState: 1, preferences: 1 },
       });
       expect(deps.deckRepository.listDecks).toHaveBeenCalledWith(instance.url);
       expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(2);

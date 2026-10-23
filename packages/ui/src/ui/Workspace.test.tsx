@@ -7,9 +7,15 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import {
+  CARD_FORMAT_VERSION,
+  DECK_FORMAT_VERSION,
+  type Card,
+  type Deck,
+} from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
-import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
+import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
@@ -798,6 +804,12 @@ describe("Workspace", () => {
       preferencesOutdated: outdated,
       instanceOutdated: false,
       catalogMissing: false,
+      oldestFormat: {
+        deck: DECK_FORMAT_VERSION,
+        card: CARD_FORMAT_VERSION,
+        reviewState: REVIEW_STATE_FORMAT_VERSION,
+        preferences: PREFERENCES_FORMAT_VERSION,
+      },
     }));
     const useCases = makeUseCases({
       listInstances: vi.fn(async () => [instanceA]),

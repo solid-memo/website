@@ -6,8 +6,10 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describeFormats, describeOutdated, MigrationNotice } from "./MigrationNotice";
 import { createI18n, I18nProvider } from "./i18n";
-import type { Deck } from "@solid-memo/domain/deck";
+import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import type { MigrationPlan } from "@solid-memo/domain/migration";
+import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
+import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 
 const deck: Deck = {
   id: "deck-1",
@@ -25,7 +27,20 @@ const verbs: Deck = { ...deck, id: "deck-3", url: `${deck.url}3`, title: { en: "
 
 const { t } = createI18n("en");
 
-const nothing = { preferencesOutdated: false, instanceOutdated: false, catalogMissing: false };
+/** Nothing of any kind outdated: each at the format this app writes. */
+const latest = {
+  deck: DECK_FORMAT_VERSION,
+  card: CARD_FORMAT_VERSION,
+  reviewState: REVIEW_STATE_FORMAT_VERSION,
+  preferences: PREFERENCES_FORMAT_VERSION,
+};
+
+const nothing = {
+  preferencesOutdated: false,
+  instanceOutdated: false,
+  catalogMissing: false,
+  oldestFormat: latest,
+};
 
 const plan: MigrationPlan = {
   decks: [
@@ -37,6 +52,7 @@ const plan: MigrationPlan = {
   cardCount: 255,
   reviewCount: 30,
   ...nothing,
+  oldestFormat: { ...latest, deck: 1, card: 1, reviewState: 1 },
 };
 
 function renderNotice(overrides: Partial<Parameters<typeof MigrationNotice>[0]> = {}) {
@@ -81,6 +97,7 @@ describe("describeOutdated", () => {
           preferencesOutdated: true,
           instanceOutdated: true,
           catalogMissing: false,
+          oldestFormat: { ...latest, card: 1, reviewState: 1, preferences: 1 },
         },
         t,
       ),
@@ -99,6 +116,7 @@ describe("a missing catalog", () => {
     preferencesOutdated: false,
     instanceOutdated: false,
     catalogMissing: true,
+    oldestFormat: latest,
   };
 
   it("is named in what is outdated, in the formats, on the list and on the button", () => {
@@ -118,9 +136,9 @@ describe("a missing catalog", () => {
 });
 
 describe("describeFormats", () => {
-  it("names the formats the plan touches, with what each added", () => {
+  it("names the formats the plan touches, with what each added since format 1", () => {
     expect(describeFormats(plan, t)).toBe(
-      "deck format 6, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state, card format 7, which adds pictures on cards, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state, adds a label above a card's front and keeps what a card is about and review-state format 2, which keeps each study direction's state and the day's undo snapshot",
+      "deck format 6, which states which way a deck is studied, describes decks with the DCAT and SKOS standards, gives every deck a description, lets a deck's title and description be in several languages, no longer requires English in a deck's title and description and lets a deck's keywords be in any language you state, card format 7, which adds pictures on cards, adds a note under each side and a label above the back, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state, no longer requires English in a card's notes and label, adds a label above a card's front and keeps what a card is about and review-state format 2, which keeps the day's undo snapshot whole or not at all",
     );
     expect(
       describeFormats(
@@ -132,12 +150,69 @@ describe("describeFormats", () => {
           preferencesOutdated: true,
           instanceOutdated: true,
           catalogMissing: false,
+          oldestFormat: { ...latest, preferences: 1 },
         },
         t,
       ),
     ).toBe(
-      "instance format 2 and preferences format 6, which records the answer scale, developer mode, what to do with invalid data, the theme, the scheduler, the colors and the text size",
+      "instance format 2 and preferences format 6, which records every setting, what to do with invalid data, the theme, the scheduler, the colors and the text size",
     );
+  });
+
+  it("names only what the steps after the oldest version found added", () => {
+    expect(
+      describeFormats(
+        { ...plan, oldestFormat: { deck: 5, card: 6, reviewState: 1, preferences: 1 } },
+        t,
+      ),
+    ).toBe(
+      "deck format 6, which lets a deck's keywords be in any language you state, card format 7, which keeps what a card is about and review-state format 2, which keeps the day's undo snapshot whole or not at all",
+    );
+    expect(
+      describeFormats(
+        {
+          ...plan,
+          deckCount: 0,
+          reviewCount: 0,
+          preferencesOutdated: true,
+          oldestFormat: { ...latest, card: 5, preferences: 4 },
+        },
+        t,
+      ),
+    ).toBe(
+      "preferences format 6, which records the scheduler, the colors and the text size and card format 7, which adds a label above a card's front and keeps what a card is about",
+    );
+  });
+
+  it("reads a version below 1 as format 1, as the data is read", () => {
+    const cardsOnly = { ...plan, deckCount: 0, reviewCount: 0 };
+    expect(describeFormats({ ...cardsOnly, oldestFormat: { ...latest, card: 0 } }, t)).toBe(
+      describeFormats({ ...cardsOnly, oldestFormat: { ...latest, card: 1 } }, t),
+    );
+  });
+
+  it("says what the newest step of every format this app writes added", () => {
+    const behind = {
+      deck: DECK_FORMAT_VERSION - 1,
+      card: CARD_FORMAT_VERSION - 1,
+      reviewState: REVIEW_STATE_FORMAT_VERSION - 1,
+      preferences: PREFERENCES_FORMAT_VERSION - 1,
+    };
+    for (const kind of ["deck", "card", "reviewState", "preferences"] as const) {
+      const described = describeFormats(
+        {
+          ...plan,
+          deckCount: kind === "deck" ? 1 : 0,
+          cardCount: kind === "card" ? 1 : 0,
+          reviewCount: kind === "reviewState" ? 1 : 0,
+          preferencesOutdated: kind === "preferences",
+          oldestFormat: { ...latest, [kind]: behind[kind] },
+        },
+        t,
+      );
+      expect(described).toMatch(/, which \S/);
+      expect(described).not.toMatch(/\s$/);
+    }
   });
 });
 
@@ -159,6 +234,16 @@ describe("MigrationNotice", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Update 3 decks" }));
     expect(props.onMigrate).toHaveBeenCalledOnce();
+  });
+
+  it("says a deck without a description gets one only for decks from before deck format 3", () => {
+    const described = "A deck without a description gets a short one you can change.";
+    const { unmount } = renderNotice();
+    expect(screen.getByRole("region")).toHaveTextContent(described);
+    unmount();
+    renderNotice({ plan: { ...plan, oldestFormat: { ...plan.oldestFormat, deck: 3 } } });
+    expect(screen.getByRole("region")).toHaveTextContent("stay as they are.");
+    expect(screen.getByRole("region")).not.toHaveTextContent(described);
   });
 
   it("phrases a single card in a single deck", () => {
@@ -187,6 +272,7 @@ describe("MigrationNotice", () => {
         preferencesOutdated: true,
         instanceOutdated: true,
         catalogMissing: false,
+        oldestFormat: { ...latest, reviewState: 1, preferences: 1 },
       },
     });
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
@@ -209,6 +295,7 @@ describe("MigrationNotice", () => {
         preferencesOutdated: true,
         instanceOutdated: false,
         catalogMissing: false,
+        oldestFormat: { ...latest, preferences: 1 },
       },
     });
     expect(screen.getByRole("region")).toHaveTextContent(

@@ -9,7 +9,7 @@ import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import { ErrorMessage } from "./ErrorMessage";
 import { usePanelFocus } from "./panelFocus";
-import { useI18n, type I18n, type ErrorText } from "./i18n";
+import { useI18n, type I18n, type ErrorText, type MessageKey } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
 /** "a, b and c". */
@@ -53,24 +53,90 @@ export function describeOutdated(plan: MigrationPlan, t: I18n["t"]): string {
   return list(parts, t);
 }
 
-/** What each format this app writes added, for the formats the plan touches. */
+/**
+ * What each step of a format added, step by step from format 2: the
+ * notice names only the steps after the oldest version it found, so a
+ * document one version behind is not told about what it already has.
+ */
+const DECK_STEPS: readonly (readonly MessageKey[])[] = [
+  ["migrationNotice.deckAdded.direction"],
+  ["migrationNotice.deckAdded.dcat", "migrationNotice.deckAdded.description"],
+  ["migrationNotice.deckAdded.titleLanguages"],
+  ["migrationNotice.deckAdded.titleWithoutEnglish"],
+  ["migrationNotice.deckAdded.keywordLanguages"],
+];
+const CARD_STEPS: readonly (readonly MessageKey[])[] = [
+  ["migrationNotice.cardAdded.pictures"],
+  ["migrationNotice.cardAdded.notes", "migrationNotice.cardAdded.retired"],
+  ["migrationNotice.cardAdded.textLanguages"],
+  ["migrationNotice.cardAdded.notesWithoutEnglish"],
+  ["migrationNotice.cardAdded.frontLabel"],
+  ["migrationNotice.cardAdded.subjects"],
+];
+const REVIEW_STATE_STEPS: readonly (readonly MessageKey[])[] = [
+  ["migrationNotice.reviewStateAdded.wholeSnapshot"],
+];
+const PREFERENCES_STEPS: readonly (readonly MessageKey[])[] = [
+  ["migrationNotice.preferencesAdded.everySetting"],
+  ["migrationNotice.preferencesAdded.invalidData"],
+  ["migrationNotice.preferencesAdded.theme"],
+  ["migrationNotice.preferencesAdded.scheduler"],
+  ["migrationNotice.preferencesAdded.colors", "migrationNotice.preferencesAdded.textSize"],
+];
+
+/** What the steps after format `from` added: "adds a label above a card's front and …". */
+function addedSince(steps: readonly (readonly MessageKey[])[], from: number, t: I18n["t"]): string {
+  // steps[0] is the step to format 2; data stating a version below 1 is read as format 1.
+  return list(
+    steps.slice(Math.max(from, 1) - 1).flatMap((keys) => keys.map((key) => t(key))),
+    t,
+  );
+}
+
+/** What the formats the plan touches added since the oldest version it found of each. */
 export function describeFormats(plan: MigrationPlan, t: I18n["t"]): string {
+  const { oldestFormat } = plan;
   const parts: string[] = [];
   if (plan.instanceOutdated)
     parts.push(t("migrationNotice.instanceFormat", { version: INSTANCE_FORMAT_VERSION }));
   if (plan.catalogMissing) parts.push(t("migrationNotice.catalogueFormat"));
   if (plan.preferencesOutdated) {
-    parts.push(t("migrationNotice.preferencesFormat", { version: PREFERENCES_FORMAT_VERSION }));
+    parts.push(
+      t("migrationNotice.preferencesFormat", {
+        version: PREFERENCES_FORMAT_VERSION,
+        added: addedSince(PREFERENCES_STEPS, oldestFormat.preferences, t),
+      }),
+    );
   }
-  if (plan.deckCount > 0)
-    parts.push(t("migrationNotice.deckFormat", { version: DECK_FORMAT_VERSION }));
-  if (plan.cardCount > 0)
-    parts.push(t("migrationNotice.cardFormat", { version: CARD_FORMAT_VERSION }));
+  if (plan.deckCount > 0) {
+    parts.push(
+      t("migrationNotice.deckFormat", {
+        version: DECK_FORMAT_VERSION,
+        added: addedSince(DECK_STEPS, oldestFormat.deck, t),
+      }),
+    );
+  }
+  if (plan.cardCount > 0) {
+    parts.push(
+      t("migrationNotice.cardFormat", {
+        version: CARD_FORMAT_VERSION,
+        added: addedSince(CARD_STEPS, oldestFormat.card, t),
+      }),
+    );
+  }
   if (plan.reviewCount > 0) {
-    parts.push(t("migrationNotice.reviewFormat", { version: REVIEW_STATE_FORMAT_VERSION }));
+    parts.push(
+      t("migrationNotice.reviewFormat", {
+        version: REVIEW_STATE_FORMAT_VERSION,
+        added: addedSince(REVIEW_STATE_STEPS, oldestFormat.reviewState, t),
+      }),
+    );
   }
   return list(parts, t);
 }
+
+/** Deck format 3 gave every deck a description: a deck from before gets one. */
+const DESCRIBED_DECK_FORMAT = 3;
 
 /** The button label: "Update 3 decks and preferences". */
 function updateLabel(plan: MigrationPlan, t: I18n["t"]): string {
@@ -129,6 +195,9 @@ export function MigrationNotice({
         })}{" "}
         {t("migrationNotice.writes", { formats: describeFormats(plan, t) })}{" "}
         {t("migrationNotice.howItWorks")}
+        {plan.oldestFormat.deck < DESCRIBED_DECK_FORMAT && (
+          <> {t("migrationNotice.newDescriptions")}</>
+        )}
       </p>
       <ul>
         {plan.instanceOutdated && <li>{t("migrationNotice.itemInstanceRecord")}</li>}

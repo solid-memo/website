@@ -1048,7 +1048,8 @@
       "other": "Un ancien format est encore utilisé pour {outdated}."
     },
     "writes": "Solid Memo écrit désormais {formats}.",
-    "howItWorks": "La mise à jour actualise chaque document séparément, là où il se trouve, l’un après l’autre, chacun en une seule écriture que votre Pod applique entièrement ou pas du tout. Chaque document reste lisible tout du long, mis à jour ou non ; un document qui ne peut pas être mis à jour maintenant reste tel quel, et vous pouvez réessayer. Toutes les adresses restent les mêmes ; les noms des paquets, le texte des cartes, les sens d’étude, votre historique des révisions et vos préférences restent inchangés, et un paquet sans description en reçoit une courte, que vous pouvez modifier.",
+    "howItWorks": "La mise à jour actualise chaque document séparément, là où il se trouve, l’un après l’autre, chacun en une seule écriture que votre Pod applique entièrement ou pas du tout. Chaque document reste lisible tout du long, mis à jour ou non ; un document qui ne peut pas être mis à jour maintenant reste tel quel, et vous pouvez réessayer. Toutes les adresses restent les mêmes ; les noms des paquets, le texte des cartes, les sens d’étude, votre historique des révisions et vos préférences restent inchangés.",
+    "newDescriptions": "Un paquet sans description en reçoit une courte, que vous pouvez modifier.",
     "listAnd": "{rest} et {last}",
     "instanceRecord": "la fiche de l’instance",
     "instanceCatalogue": "le catalogue de l’instance",
@@ -1071,10 +1072,38 @@
     "countIn": "{what} dans {decks}",
     "instanceFormat": "le format d’instance {version}",
     "catalogueFormat": "un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT",
-    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence, l’algorithme de planification, les couleurs et la taille du texte",
-    "deckFormat": "le format de paquet {version}, qui décrit les paquets avec les normes DCAT et SKOS, donne une description à chaque paquet et permet d’écrire le titre, la description et les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez",
-    "cardFormat": "le format de carte {version}, qui ajoute les images sur les cartes, permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus, permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez, ajoute une étiquette au-dessus du recto d’une carte et conserve ce dont traite une carte",
-    "reviewFormat": "le format d’état de révision {version}, qui conserve l’état de chaque sens d’étude et l’instantané d’annulation du jour",
+    "preferencesFormat": "le format de préférences {version}, qui enregistre {added}",
+    "deckFormat": "le format de paquet {version}, qui {added}",
+    "cardFormat": "le format de carte {version}, qui {added}",
+    "reviewFormat": "le format d’état de révision {version}, qui {added}",
+    "deckAdded": {
+      "direction": "indique dans quel sens un paquet s’étudie",
+      "dcat": "décrit les paquets avec les normes DCAT et SKOS",
+      "description": "donne une description à chaque paquet",
+      "titleLanguages": "permet d’écrire le titre et la description d’un paquet en plusieurs langues",
+      "titleWithoutEnglish": "n’exige plus l’anglais dans le titre et la description d’un paquet",
+      "keywordLanguages": "permet d’écrire les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez"
+    },
+    "cardAdded": {
+      "pictures": "ajoute les images sur les cartes",
+      "notes": "ajoute une note sous chaque face et une étiquette au-dessus du verso",
+      "retired": "permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus",
+      "textLanguages": "permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez",
+      "notesWithoutEnglish": "n’exige plus l’anglais dans les notes et l’étiquette d’une carte",
+      "frontLabel": "ajoute une étiquette au-dessus du recto d’une carte",
+      "subjects": "conserve ce dont traite une carte"
+    },
+    "reviewStateAdded": {
+      "wholeSnapshot": "conserve l’instantané d’annulation du jour en entier ou pas du tout"
+    },
+    "preferencesAdded": {
+      "everySetting": "chaque préférence",
+      "invalidData": "la conduite à tenir face aux données non valides",
+      "theme": "l’apparence",
+      "scheduler": "l’algorithme de planification",
+      "colors": "les couleurs",
+      "textSize": "la taille du texte"
+    },
     "itemInstanceRecord": "Fiche de l’instance",
     "itemCatalogue": "Catalogue des paquets",
     "itemPreferences": "Préférences",
