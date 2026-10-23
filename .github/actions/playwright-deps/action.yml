@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# The system libraries a Playwright browser needs that the runner image
+# lacks (what `npx playwright install-deps` installs), from GitHub's
+# cache: Ubuntu's mirror stalls often enough, for minutes and at times
+# past a job's timeout, that a job should not have to reach it. The
+# cache holds the packages' .deb files, which apt-get installs with no
+# network. The key is the browser's, the runner image's (ImageOS,
+# ImageVersion), which fixes what is installed already and so which
+# files fit, and playwright-core's version, which fixes the list: a new
+# image or a new Playwright is a new entry.
+#
+# On a miss, the job asks the mirror, each apt-get given three minutes
+# and one more try, so a stall costs minutes rather than the job, and,
+# on main only, saves what it downloaded (a pull request's or the merge
+# queue's copy would be kept under its own ref, never read again). Where
+# main's run skips the jobs that would save it, warm-browsers does
+# (ci.yml), and caches keeps main's newest two entries per browser, a
+# new image being rolled out over days. Run it after npm ci.
+name: Playwright's system libraries
+description: Restores or downloads, and installs, the system libraries a Playwright browser needs.
+inputs:
+  browser:
+    description: The browser whose libraries to install (chromium, firefox or webkit).
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: key
+      shell: bash
+      env:
+        BROWSER: ${{ inputs.browser }}
+      run: |
+        version=$(node -p "require('playwright-core/package.json').version")
+        echo "key=playwright-deps-$BROWSER-${ImageOS:?}-${ImageVersion:?}-$RUNNER_ARCH-$version" >> "$GITHUB_OUTPUT"
+    - id: cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cache/playwright-deps
+        key: ${{ steps.key.outputs.key }}
+    # Playwright's list, less what the image has, which it names after
+    # asking apt (`--dry-run`, which exits 1 when it names any), then
+    # those packages downloaded, the files kept apart from apt's own.
+    - if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        BROWSER: ${{ inputs.browser }}
+      run: |
+        apt() {
+          for try in 1 2; do
+            sudo timeout 180 apt-get -q -o Acquire::Retries=3 "$@" && return
+            echo "::warning::apt-get $1 failed or took over three minutes (try $try of 2)"
+          done
+          return 1
+        }
+        apt update
+        listed=$(npx playwright install-deps --dry-run "$BROWSER") || true
+        case $listed in
+          *"All system dependencies are installed."*) packages=() ;;
+          *"Missing system dependencies"*) mapfile -t packages < <(sed -n 's/^  //p' <<< "$listed") ;;
+          *) echo "$listed"; exit 1 ;;
+        esac
+        echo "Missing: ${#packages[@]} packages"
+        sudo apt-get clean
+        if (( ${#packages[@]} )); then
+          apt install -y --no-install-recommends --download-only "${packages[@]}"
+        fi
+        mkdir -p ~/.cache/playwright-deps
+        find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-deps {} +
+        # So the entry is never empty, and says what it holds.
+        printf '%s\n' "${packages[@]}" > ~/.cache/playwright-deps/packages.txt
+    # apt-get, not dpkg -i, so a package another must be installed before
+    # (Pre-Depends) is. The files named are what it installs, their
+    # dependencies installed already or among them. Its sources are
+    # hidden from it: the image's lists name many of the same versions,
+    # and apt would fetch those from the mirror first, falling back to the
+    # file only once that failed. (--no-download would refuse even the
+    # files when the lists are missing.)
+    - shell: bash
+      run: |
+        shopt -s nullglob
+        debs=(~/.cache/playwright-deps/*.deb)
+        echo "Installing ${#debs[@]} packages"
+        if (( ${#debs[@]} )); then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::SourceList=/dev/null -o Dir::Etc::SourceParts=/dev/null \
+            install -y -q --no-install-recommends "${debs[@]}"
+        fi
+    - if: steps.cache.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cache/playwright-deps
+        key: ${{ steps.key.outputs.key }}

@@ -165,7 +165,8 @@ jobs:
 
   # Main's older Turbo caches, deleted once check or reuse has saved its
   # own, which was built on them, and they would count toward the
-  # repository's 10 GB until GitHub's 7 days are up. A job of its own, so
+  # repository's 10 GB until GitHub's 7 days are up; with them, the
+  # older entries of two other caches that only grow. A job of its own, so
   # the only token that can delete caches is in a job that runs none of
   # the repository's code; and one that may fail without failing the run,
   # which release.yml and deploy.yml wait for. Deterministic.
@@ -190,6 +191,32 @@ jobs:
         run: |
           gh cache list --ref refs/heads/main --key turbo-check- --sort created_at --order desc --limit 100 \
             --json id --jq '.[1:][].id' | xargs -r -n1 gh cache delete
+      # GitHub's CodeQL scan saves a database of the code for each run on
+      # main, a few hundred MB, and reads only the newest of its
+      # language's: the key's seventh part.
+      - name: Keep only the newest CodeQL database of each language
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh cache list --ref refs/heads/main --key codeql-overlay-base-database- --limit 1000 \
+            --json id,key,createdAt \
+            --jq 'group_by(.key | split("-")[6]) | .[] | sort_by(.createdAt) | reverse | .[1:][].id' |
+            xargs -r -n1 gh cache delete
+      # The system libraries' (.github/actions/playwright-deps): an entry
+      # per runner image, the two newest kept, as both run while GitHub
+      # rolls a new image out.
+      - name: Keep only the newest system libraries of each browser
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          for browser in chromium firefox webkit; do
+            gh cache list --ref refs/heads/main --key "playwright-deps-$browser-" --sort created_at --order desc --limit 100 \
+              --json id --jq '.[2:][].id'
+          done | xargs -r -n1 gh cache delete
 
   # The site, built once for the whole run (npm run build): the journeys
   # test this build, which they download, rather than each building its
@@ -489,9 +516,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browser }}
       - if: steps.browsers.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-      - if: steps.browsers.outputs.cache-hit == 'true'
-        run: npx playwright install-deps ${{ matrix.browser }}
+        run: npx playwright install ${{ matrix.browser }}
+      - uses: ./.github/actions/playwright-deps
+        with:
+          browser: ${{ matrix.browser }}
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site
@@ -682,7 +710,8 @@ jobs:
   # skipped, the caches they would have saved there, which every pull
   # request and queue run reads: each server's images and the journeys'
   # (e2e-images), the journeys' browsers, and Chromium's headless shell
-  # (.github/actions/chromium). This job only looks them up, by the keys
+  # (.github/actions/chromium), and their system libraries
+  # (.github/actions/playwright-deps). This job only looks them up, by the keys
   # those jobs use; warm-images and warm-browsers make and save what is
   # missing, and nothing else, so a run with every cache in place spends
   # one short job; warm-pip, pip's. Like caches, they may fail without
@@ -745,6 +774,14 @@ jobs:
           # under the chromium action's key, by markdown's playwright.
           shell=$(node -p "require('playwright/package.json').version")
           cached "playwright-shell-$RUNNER_OS-$shell" || browsers+=("shell")
+          # The system libraries, under this runner's image: a job's may
+          # be another while GitHub rolls a new one out. A browser listed
+          # already gets them too; the headless shell's are Chromium's.
+          core=$(node -p "require('playwright-core/package.json').version")
+          for name in chromium firefox webkit; do
+            cached "playwright-deps-$name-$ImageOS-$ImageVersion-$RUNNER_ARCH-$core" ||
+              [[ " ${browsers[*]} " == *" $name "* ]] || browsers+=("$name")
+          done
           echo "Browsers missing: ${browsers[*]:-none}"
           echo "browsers=$(jq -cn '$ARGS.positional' --args "${browsers[@]}")" >> "$GITHUB_OUTPUT"
 
@@ -808,13 +845,14 @@ jobs:
 
   # A journeys job's missing browser, downloaded as it would (its
   # matrix's browser), or the missing headless shell, as the chromium
-  # action downloads it, and saved under the key it is restored by.
+  # action downloads it, and saved under the key it is restored by; and
+  # a browser's missing system libraries, which playwright-deps saves.
   # Deterministic.
   warm-browsers:
     if: needs.warm.outputs.browsers != '' && needs.warm.outputs.browsers != '[]'
     needs: warm
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     continue-on-error: true
     strategy:
       fail-fast: false
@@ -838,16 +876,30 @@ jobs:
           else
             echo "key=playwright-$RUNNER_OS-$(node -p "require('@playwright/test/package.json').version")-$BROWSERS" >> "$GITHUB_OUTPUT"
           fi
-      - run: |
+      # A browser listed for its system libraries alone is in the cache
+      # already, and only looked up.
+      - id: browsers
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.key.outputs.key }}
+          lookup-only: true
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: |
           if [ "$BROWSERS" = shell ]; then
             npx playwright install --only-shell chromium
           else
             npx playwright install "$BROWSERS"
           fi
-      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: ${{ steps.key.outputs.key }}
+      - if: matrix.browsers != 'shell'
+        uses: ./.github/actions/playwright-deps
+        with:
+          browser: ${{ matrix.browsers }}
 
   # On main, when this run reuses another, pip's caches, which crosscheck,
   # docs and workflows restore in every pull request and queue run, under

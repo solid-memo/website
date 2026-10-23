@@ -281,8 +281,9 @@ for a release made late by hand, the gate runs every job instead.
 
 What a skipped job would have saved on `main`, the caches every pull
 request reads, CI's `warm` jobs save instead: `warm` looks up each
-server's images, the journeys' server's, the journeys' browsers and
-Chromium's headless shell, and `warm-images` and `warm-browsers` pull,
+server's images, the journeys' server's, the journeys' browsers,
+Chromium's headless shell and the browsers' system libraries, and
+`warm-images` and `warm-browsers` pull,
 build or download only what is missing, and save it; `warm-pip`
 installs the Python tools, so pip's caches are saved where `main`
 lacks them ([testing.md](testing.md#continuous-integration)).
