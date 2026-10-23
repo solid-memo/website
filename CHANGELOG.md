@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.3.2](https://github.com/solid-memo/website/compare/v6.3.1...v6.3.2) (2026-10-23)
+
+### Performance Improvements
+
+* **solid:** read the library index once a page ([a97a5c2](https://github.com/solid-memo/website/commit/a97a5c24013e815605cf27cf8aa67e797cbc0ef8)), closes [#256](https://github.com/solid-memo/website/issues/256)
+* **ui:** keep every library query for the page ([6f71e8c](https://github.com/solid-memo/website/commit/6f71e8c454bdcaf059f6a981777b2fcb97efa2ae)), closes [#256](https://github.com/solid-memo/website/issues/256)
+
 ## [6.3.1](https://github.com/solid-memo/website/compare/v6.3.0...v6.3.1) (2026-10-23)
 
 ### Bug Fixes
