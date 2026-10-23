@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.3.0](https://github.com/solid-memo/website/compare/v6.2.0...v6.3.0) (2026-10-23)
+
+### Features
+
+* **decks:** say the getting-started course runs alongside the library ([5368885](https://github.com/solid-memo/website/commit/536888578576d27e5a70e7c0e31dbf80f1db334b)), closes [#253](https://github.com/solid-memo/website/issues/253)
+* **ui:** point to the deck library while only courses are on the list ([fee8ac3](https://github.com/solid-memo/website/commit/fee8ac3f4a746b17ad5613299b8fa6fd9c5a2876)), closes [#253](https://github.com/solid-memo/website/issues/253)
+
 ## [6.2.0](https://github.com/solid-memo/website/compare/v6.1.0...v6.2.0) (2026-10-23)
 
 ### Features
