@@ -44,7 +44,6 @@ export function ImportUrlContainer({
     queryKey: ["releaseFromLink", url],
     queryFn: () => useCases.readReleaseFromLink(url!),
     enabled: url !== undefined,
-    retry: false,
     refetchOnWindowFocus: false,
   });
   const release = url === undefined ? undefined : releaseQuery.data;

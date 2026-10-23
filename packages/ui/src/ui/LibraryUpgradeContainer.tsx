@@ -101,7 +101,6 @@ export function LibraryUpgradeContainer({
     },
     enabled: deck.sourceUrl !== undefined,
     staleTime: Infinity,
-    retry: false,
   });
 
   const [progress, setProgress] = useState<{

@@ -6,6 +6,7 @@ import { render } from "preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
+import { retryable } from "@solid-memo/ui/retryable";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
 import { siteConfig, siteVersion } from "./config";
@@ -30,7 +31,10 @@ const useCases = createAppUseCases({
   indexedDB: globalThis.indexedDB,
 });
 
-const queryClient = new QueryClient();
+// A failed read is tried three times more only when another try may pass, so a checked outcome shows at once (retryable).
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: (count, error) => count < 3 && retryable(error) } },
+});
 
 const source = {
   repoUrl: config.repoUrl,

@@ -29,6 +29,7 @@
     "./courseKey": "./src/ui/courseKey.ts",
     "./composing": "./src/ui/composing.ts",
     "./askFirst": "./src/ui/askFirst.ts",
+    "./retryable": "./src/ui/retryable.ts",
     "./test/setup": "./src/test/setup.ts",
     "./test/useCasesFake": "./src/test/useCasesFake.ts",
     "./test/course": "./src/test/course.ts",
