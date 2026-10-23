@@ -130,7 +130,8 @@ keys. Every key is made by a function of one module:
 for those Solid Memo's screens use, the Studio's too, and
 [apps/studio/src/ui/queryKeys.ts](../apps/studio/src/ui/queryKeys.ts)
 for those only the Studio reads, built on the first. A new key goes
-there, never into a screen as an array written out.
+there, never into a screen as an array written out, which
+`npm run check:keys` refuses ([testing.md](testing.md#the-repositorys-own-checks)).
 
 A key whose first items are another's sits under it: refreshing or
 dropping the shorter key reaches it too. The decks' arrangement

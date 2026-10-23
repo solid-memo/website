@@ -822,6 +822,11 @@ ends with checks of the repository as a whole, plain Node scripts in
   ([releasing.md](releasing.md#the-deploy-key)). A tag can be moved to
   other code, a commit cannot. Local actions (`./.github/actions/`) are
   the repository's own.
+- `check:keys` ([checkQueryKeys.ts](../scripts/checkQueryKeys.ts)): no
+  screen of Solid Memo or the Studio writes a query key out as an
+  array; each is made by a function of the keys modules
+  ([architecture.md](architecture.md#query-keys)). Tests write theirs
+  out, so that they fail when a key changes.
 - `check:scripts`: these scripts' own tests and types, at 100%
   coverage like a package's (`scripts/vitest.config.ts`).
 

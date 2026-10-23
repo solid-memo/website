@@ -9,7 +9,7 @@ import type { StatisticsRange } from "./router";
  * Every query key of pod data Solid Memo's screens cache, and the Studio's
  * screens share (docs/architecture.md#query-keys): a screen reads, and a
  * write refreshes, a key by its function here, never by an array written
- * out. A key whose first items are another's
+ * out (`npm run check:keys`). A key whose first items are another's
  * sits under it: invalidating or removing the shorter key reaches it too,
  * as each one's comment says. Keys only the Studio reads are in
  * apps/studio/src/ui/queryKeys.ts, built on these.
