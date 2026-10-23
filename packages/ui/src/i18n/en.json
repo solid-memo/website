@@ -1455,9 +1455,11 @@
   },
   "cram": {
     "heading": "Cram: {deck}",
+    "headingAll": "Cram the leeches",
     "notice": "Nothing is recorded here: your answers don't change any due date, your statistics, or which cards are leeches.",
     "finished": "Cram finished — nothing was recorded.",
     "nothing": "This deck has no leeches to cram.",
+    "nothingAll": "None of your decks has a leech to cram.",
     "again": "Cram again",
     "preparing": "Preparing the leeches…"
   },

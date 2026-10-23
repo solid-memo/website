@@ -80,7 +80,8 @@ function answerButtons(
  *
  * A cram (`cram`, CramContainer) is headed as one and says, the whole
  * session, that nothing in it is recorded; its end says so too, and
- * offers to cram the same cards again.
+ * offers to cram the same cards again. A cram of every deck's leeches
+ * names the deck of the card up, and the leeches when none is.
  */
 export function StudyScreen({
   deckName,
@@ -101,11 +102,16 @@ export function StudyScreen({
   onExit,
   cram,
 }: {
-  deckName: string;
+  /**
+   * The deck's name, or, in a cram of every deck's leeches, the name of
+   * the deck of the card up; absent there when no card is up, the
+   * heading naming the leeches instead.
+   */
+  deckName?: string;
   /** The language the deck's name is in, when not the page's (readerLang). */
   deckLang?: string;
   /** URL of the deck's page; its name links there. */
-  deckHref: string;
+  deckHref?: string;
   /**
    * Where a mistake in the deck's release is reported, the release, and
    * the ids of its cards, the only ones reported; none for a deck from
@@ -192,18 +198,22 @@ export function StudyScreen({
   const end =
     cram === undefined
       ? t(total === 0 ? "study.nothingToday" : "study.finished")
-      : t(total === 0 ? "cram.nothing" : "cram.finished");
+      : total > 0
+        ? t("cram.finished")
+        : t(deckName === undefined ? "cram.nothingAll" : "cram.nothing");
   return (
     <section onKeyDown={onKeyDown}>
       <header>
         <h2>
-          {tx(cram === undefined ? "study.heading" : "cram.heading", {
-            deck: (
-              <a href={deckHref} lang={deckLang}>
-                {deckName}
-              </a>
-            ),
-          })}
+          {deckName === undefined
+            ? t("cram.headingAll")
+            : tx(cram === undefined ? "study.heading" : "cram.heading", {
+                deck: (
+                  <a href={deckHref} lang={deckLang}>
+                    {deckName}
+                  </a>
+                ),
+              })}
         </h2>
         {/* At the end it is the next step, under the end message. */}
         {!finished && endButton}

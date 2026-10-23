@@ -54,7 +54,12 @@ const leeches = (deck: Deck) =>
 /** Keeps the order the leeches are in, and puts a card back last. */
 const inOrder = () => 0.99;
 
-function renderCram(useCases: UseCases, deck = capitals, random: () => number = inOrder) {
+/** A cram of the deck's leeches, or, for null, of every deck's. */
+function renderCram(
+  useCases: UseCases,
+  deck: Deck | null = capitals,
+  random: () => number = inOrder,
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const onExit = vi.fn();
   const view = render(
@@ -63,7 +68,7 @@ function renderCram(useCases: UseCases, deck = capitals, random: () => number = 
         <CramContainer
           useCases={useCases}
           instance={instance}
-          deck={deck}
+          deck={deck ?? undefined}
           onExit={onExit}
           random={random}
         />
@@ -254,5 +259,67 @@ describe("CramContainer", () => {
       }),
     );
     expect(await screen.findByRole("alert")).toHaveTextContent("preferences unreadable");
+  });
+
+  it("crams every deck's leeches, given no deck, naming the deck of the card up", async () => {
+    const RELEASE = "https://solid-memo.com/decks/rivers/v1.ttl";
+    const rivers: Deck = {
+      ...capitals,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      title: { sv: "Floder" },
+      cardsDocumentUrl: `${instance.url}decks/deck-2.ttl`,
+      reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`,
+      sourceUrl: RELEASE,
+    };
+    const nile = { ...cardOf("r-1", "Egypt"), url: `${rivers.cardsDocumentUrl}#r-1` };
+    const useCases = makeUseCasesFake({
+      getCardProgress: vi.fn(async () =>
+        reportOf(
+          progressOf(capitals, [hard(france, 4, 8), hard(spain, 1, 2)]),
+          progressOf(rivers, [hard(nile, 6, 6)]),
+        ),
+      ),
+      reportPlace: vi.fn(async () => ({ library: true as const })),
+      deckRelease: vi.fn(
+        async () => ({ url: RELEASE, cards: [{ id: nile.id }] }) as unknown as LibraryDeckContent,
+      ),
+    });
+    const { onExit } = renderCram(useCases, null);
+    // The most forgotten first, whichever deck it is in: Egypt, in Rivers.
+    expect(await screen.findByRole("heading", { name: "Cram: Floder" })).toBeInTheDocument();
+    expect(useCases.getCardProgress).toHaveBeenCalledWith(instance.url, expect.any(Date), {});
+    expect(screen.getByRole("link", { name: "Floder" })).toHaveAttribute("lang", "sv");
+    expect(screen.getByText("Card 1 of 2")).toBeInTheDocument();
+    expect(screen.getByText("Egypt")).toBeInTheDocument();
+    // Its card is the release's, whose mistakes are reported where it says.
+    expect(await screen.findByRole("link", { name: /Report a mistake/ })).toBeInTheDocument();
+    answer("4 — Good");
+    expect(screen.getByRole("heading", { name: "Cram: Capitals" })).toBeInTheDocument();
+    expect(screen.getByText("France")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Report a mistake/ })).toBeNull();
+    answer("4 — Good");
+    // With no card up, the heading names the leeches.
+    expect(screen.getByRole("heading", { name: "Cram the leeches" })).toBeInTheDocument();
+    expect(screen.getByText("Cram finished — nothing was recorded.")).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Cram again" }));
+    expect(screen.getByRole("heading", { name: "Cram: Floder" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "End session" }));
+    expect(onExit).toHaveBeenCalledOnce();
+    expect(called(useCases)).toEqual([
+      "deckRelease",
+      "getCardProgress",
+      "getPreferences",
+      "reportPlace",
+    ]);
+  });
+
+  it("says when no deck has a leech to cram", async () => {
+    const useCases = makeUseCasesFake({
+      getCardProgress: vi.fn(async () => reportOf(progressOf(capitals, [hard(spain, 3, 3)]))),
+    });
+    renderCram(useCases, null);
+    expect(await screen.findByText("None of your decks has a leech to cram.")).toHaveFocus();
+    expect(screen.getByRole("heading", { name: "Cram the leeches" })).toBeInTheDocument();
   });
 });

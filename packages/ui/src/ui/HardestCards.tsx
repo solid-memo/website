@@ -163,7 +163,8 @@ export function ConfusedOptions({
  * The leeches of every deck (cards forgotten LEECH_LAPSES times or more
  * in their reviews of the last twelve months), the most forgotten first,
  * each a link to its page, with its deck and how often of how many
- * reviews. A deck since removed has no cards to name, so none of its.
+ * reviews, and, with one, a link to cram them all. A deck since removed
+ * has no cards to name, so none of its.
  */
 export function Leeches({
   instanceUrl,
@@ -196,6 +197,7 @@ export function Leeches({
           ))}
         </ol>
       )}
+      {leeches.length > 0 && <CramLink href={cramHref(instanceUrl)} />}
     </>
   );
 }

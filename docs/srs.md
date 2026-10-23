@@ -602,15 +602,19 @@ can be crammed: studied right now, as often as the learner likes,
 whether they are due or not. Under the deck's hardest cards, on its page
 and on its statistics' memory tab, **Cram the leeches** opens the cram
 (`#/cram`, [routing.md](routing.md)) when the deck has at least one.
+Under the leeches across the decks, on the statistics' memory tab, the
+same link crams every deck's leeches together, when there is one.
 
 The cram ([CramContainer](../packages/ui/src/ui/CramContainer.tsx))
 takes the leeches once, from the cards' progress (`getCardProgress`),
 each in every direction the deck is studied in (`promptsOf`), shuffles
 them and walks them on the study screen, with the answer buttons the
-preferences ask for (`getPreferences`). Once it has begun, it reads
-neither again, not on the window's focus nor when a change elsewhere
-invalidates them, so a read failing cannot end it. A grade of 0 or 1
-puts the card back, as in a session (`requeueCard`). At the end,
+preferences ask for (`getPreferences`). A cram of every deck's keeps
+each prompt with its deck, so the heading, the link to the deck and
+where a mistake is reported follow the card up. Once it has begun, it
+reads neither again, not on the window's focus nor when a change
+elsewhere invalidates them, so a read failing cannot end it. A grade of
+0 or 1 puts the card back, as in a session (`requeueCard`). At the end,
 **Cram again** starts over with the same cards, shuffled afresh.
 
 A cram's answers record nothing. It never calls `recordReview`,

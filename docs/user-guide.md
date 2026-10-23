@@ -212,7 +212,10 @@ of the last 12 months. **Cram the leeches**, under a deck's hardest
 cards, asks you that deck's leeches right now, whether they are due or
 not, in a shuffled order. You answer them as in a study session, and a
 card you get wrong comes back later in the cram. At the end, **Cram
-again** goes through them once more, as often as you like.
+again** goes through them once more, as often as you like. Under the
+leeches in the statistics, on the Memory tab, **Cram the leeches** does
+the same with the leeches of all your decks, the heading naming the
+deck of each card.
 
 Nothing in a cram is recorded, as the screen says the whole time: your
 answers change neither when the cards are due, nor your statistics,
@@ -319,7 +322,8 @@ the last 12 months, or all time. Its tabs, each a link of its own:
   by how late you reviewed it, how you answered course questions,
   counted apart, and your leeches: the cards you forgot 4 times or more
   in their reviews, each a link to the card, whose page shows every
-  answer you gave it. What is worked out from your answers alone, such
+  answer you gave it, and **Cram the leeches** to practice them all now
+  ([Cramming the leeches](#cramming-the-leeches)). What is worked out from your answers alone, such
   as how late a review was before the app recorded the day it was due,
   is approximate, and says so: changes made in the Studio are not in
   your answers.

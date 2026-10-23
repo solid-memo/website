@@ -1455,9 +1455,11 @@
   },
   "cram": {
     "heading": "Nöta: {deck}",
+    "headingAll": "Nöt blodiglarna",
     "notice": "Inget sparas här: dina svar ändrar inte när korten ska repeteras, din statistik eller vilka kort som är blodiglar.",
     "finished": "Nötpasset är klart — inget sparades.",
     "nothing": "Den här kortleken har inga blodiglar att nöta.",
+    "nothingAll": "Ingen av dina kortlekar har några blodiglar att nöta.",
     "again": "Nöt igen",
     "preparing": "Förbereder blodiglarna…"
   },

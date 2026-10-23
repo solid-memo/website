@@ -127,6 +127,14 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
   if (route.screen === "statistics") {
     return [decks, { label: t("breadcrumbs.statistics"), route }];
   }
+  // Every deck's leeches are crammed from the statistics' memory tab, which lists them.
+  if (route.screen === "cramAll") {
+    const statistics: Crumb = {
+      label: t("breadcrumbs.statistics"),
+      route: { screen: "statistics", instanceUrl: route.instanceUrl, view: "memory" },
+    };
+    return [decks, statistics, { label: t("breadcrumbs.cram"), route }];
+  }
   if (route.screen === "validation") {
     return [decks, { label: t("breadcrumbs.validation"), route }];
   }

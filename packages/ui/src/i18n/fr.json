@@ -1523,9 +1523,11 @@
   },
   "cram": {
     "heading": "Bachotage : {deck}",
+    "headingAll": "Bachotage des sangsues",
     "notice": "Rien n’est enregistré ici : vos réponses ne changent ni la date de révision des cartes, ni vos statistiques, ni les cartes qui sont des sangsues.",
     "finished": "Bachotage terminé : rien n’a été enregistré.",
     "nothing": "Ce paquet n’a aucune sangsue à bachoter.",
+    "nothingAll": "Aucun de vos paquets n’a de sangsue à bachoter.",
     "again": "Bachoter encore",
     "preparing": "Préparation des sangsues…"
   },

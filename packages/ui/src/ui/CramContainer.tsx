@@ -20,11 +20,17 @@ import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
 
+/** A leech's prompt, with the deck it is in. */
+interface CramPrompt {
+  deck: Deck;
+  prompt: Prompt;
+}
+
 /** A cram as it stands: the prompts it began with, and its walk through them. */
 interface Cram {
   /** The leeches' prompts, as they were when the cram began; each start shuffles them afresh. */
-  leeches: readonly Prompt[];
-  prompts: Prompt[];
+  leeches: readonly CramPrompt[];
+  prompts: CramPrompt[];
   position: number;
   /** The last answer put its card back to come round again. */
   putBack: boolean;
@@ -33,20 +39,26 @@ interface Cram {
 }
 
 /** A cram of `leeches` from the start, in an order of `random`'s, on `answerScale`'s buttons. */
-function startOf(leeches: readonly Prompt[], answerScale: AnswerScale, random: () => number): Cram {
+function startOf(
+  leeches: readonly CramPrompt[],
+  answerScale: AnswerScale,
+  random: () => number,
+): Cram {
   return { leeches, prompts: shuffle(leeches, random), position: 0, putBack: false, answerScale };
 }
 
 /**
- * A cram of a deck's leeches (leechesOf, from the cards' progress the
- * deck's page has read): each leech in each direction the deck is
- * studied in, shuffled, answered as in a study session (StudyScreen,
- * with the answer buttons the preferences ask for) and as often as the
- * learner likes, a low grade putting its card back as a study session
- * does. The cards are taken once, when the cram begins, and the progress
- * and the preferences are not read again after it (not on focus, nor
- * when a change elsewhere invalidates them), so nothing changes the
- * cards under the learner, and a read failing then cannot end the cram;
+ * A cram of a deck's leeches, or, given no deck, of every deck's
+ * (leechesOf, from the cards' progress the deck's page or the statistics
+ * have read): each leech in each direction its deck is studied in,
+ * shuffled, the screen naming the deck of the card up. They are
+ * answered as in a study session (StudyScreen, with the answer buttons
+ * the preferences ask for) and as often as the learner likes, a low
+ * grade putting its card back as a study session does. The cards are
+ * taken once, when the cram begins, and the progress and the
+ * preferences are not read again after it (not on focus, nor when a
+ * change elsewhere invalidates them), so nothing changes the cards
+ * under the learner, and a read failing then cannot end the cram;
  * "Cram again" starts over with the same cards.
  *
  * Nothing is recorded: no answer is graded or logged, no study digest
@@ -65,7 +77,8 @@ export function CramContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  deck: Deck;
+  /** The deck whose leeches are crammed; absent, every deck's. */
+  deck?: Deck;
   onExit: () => void;
   /** Uniform [0, 1) source: the order of the cards, and where a failed card comes back. */
   random?: () => number;
@@ -80,12 +93,16 @@ export function CramContainer({
     queryFn: () => useCases.getPreferences(instance.url),
     enabled: reading,
   });
-  const report = useReportTarget(useCases, deck);
+  const up =
+    cram !== null && cram.position < cram.prompts.length ? cram.prompts[cram.position] : null;
+  // The deck named: the card up's, else the one crammed; none for every deck's with no card up.
+  const shown = up?.deck ?? deck;
+  const report = useReportTarget(useCases, shown);
 
   useEffect(() => {
     if (!reading || progressQuery.data === undefined || preferencesQuery.data === undefined) return;
-    const leeches = leechesOf(progressQuery.data.decks).flatMap(({ hard }) =>
-      promptsOf([hard.card], deck.direction),
+    const leeches = leechesOf(progressQuery.data.decks).flatMap(({ deck: of, hard }) =>
+      promptsOf([hard.card], of.direction).map((prompt) => ({ deck: of, prompt })),
     );
     setCram(startOf(leeches, effectiveAnswerScale(preferencesQuery.data), random));
   }, [reading, progressQuery.data, preferencesQuery.data]);
@@ -115,11 +132,11 @@ export function CramContainer({
   const { prompts, position, putBack, answerScale } = cram;
   return (
     <StudyScreen
-      deckName={readerText(deck.title)}
-      deckLang={readerLang(deck.title)}
-      deckHref={deckHref(instance.url, deck.url)}
+      deckName={shown && readerText(shown.title)}
+      deckLang={shown && readerLang(shown.title)}
+      deckHref={shown && deckHref(instance.url, shown.url)}
       report={report}
-      prompt={position < prompts.length ? prompts[position] : null}
+      prompt={up?.prompt ?? null}
       position={position + 1}
       total={prompts.length}
       putBack={putBack}

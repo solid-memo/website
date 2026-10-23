@@ -1022,16 +1022,16 @@ describe("Workspace", () => {
         listDecks: vi.fn(async () => [kana, kanji]),
         getCardProgress: vi.fn(async (_url: string, _now: Date, { deck }: { deck?: Deck }) => ({
           today: "2026-09-21",
-          decks: [
-            deckProgressOf(deck!, {
+          decks: (deck === undefined ? [kana, kanji] : [deck]).map((of) =>
+            deckProgressOf(of, {
               hardest: {
                 reviews: 6,
                 cards: [
-                  { card: deck === kana ? leeches.kana : leeches.kanji, lapses: 4, reviews: 6 },
+                  { card: of === kana ? leeches.kana : leeches.kanji, lapses: 4, reviews: 6 },
                 ],
               },
             }),
-          ],
+          ),
         })),
       }),
     );
@@ -1045,6 +1045,73 @@ describe("Workspace", () => {
     expect(await screen.findByRole("heading", { name: "Cram: Kanji" })).toBeInTheDocument();
     expect(await screen.findByText("水")).toBeInTheDocument();
     expect(screen.queryByText("あ")).toBeNull();
+    // And from a deck's to every deck's.
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "cramAll", instanceUrl: instanceA.url }),
+    );
+    fireEvent(window, new Event("hashchange"));
+    expect(await screen.findByText("Card 1 of 2")).toBeInTheDocument();
+  });
+
+  it("crams every deck's leeches from the statistics' memory tab, under the statistics, back on that tab at the end", async () => {
+    const deck: Deck = {
+      id: "deck-1",
+      url: `${instanceA.url}catalog.ttl#deck-1`,
+      title: { en: "Kana" },
+      cardsDocumentUrl: `${instanceA.url}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${instanceA.url}reviews/deck-1.ttl`,
+      direction: "front-to-back" as const,
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 1,
+      authors: [],
+    };
+    const leech: Card = {
+      id: "card-1",
+      url: `${deck.cardsDocumentUrl}#card-1`,
+      front: { "": "あ" },
+      back: { "": "a" },
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 1,
+    };
+    const memory = routeToHash({
+      screen: "statistics",
+      instanceUrl: instanceA.url,
+      view: "memory",
+    });
+    window.history.replaceState(null, "", memory);
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [deck]),
+      getCardProgress: vi.fn(async () => ({
+        today: "2026-09-21",
+        decks: [
+          deckProgressOf(deck, {
+            hardest: { reviews: 6, cards: [{ card: leech, lapses: 4, reviews: 6 }] },
+          }),
+        ],
+      })),
+    });
+    renderWorkspace(useCases);
+    fireEvent.click(await screen.findByRole("link", { name: "Cram the leeches" }));
+    expect(await screen.findByRole("heading", { name: "Cram: Kana" })).toBeInTheDocument();
+    expect(window.location.hash).toBe(
+      routeToHash({ screen: "cramAll", instanceUrl: instanceA.url }),
+    );
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(
+      within(trail)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual([
+      routeToHash({ screen: "home", instanceUrl: instanceA.url }),
+      memory,
+      routeToHash({ screen: "cramAll", instanceUrl: instanceA.url }),
+    ]);
+    await waitFor(() => expect(document.title).toBe("Cram – Statistics – Solid Memo"));
+    fireEvent.click(screen.getByRole("button", { name: "End session" }));
+    await waitFor(() => expect(window.location.hash).toBe(memory));
   });
 
   it("opens a deck's statistics under the deck, and falls back to the deck list for a deck it does not have", async () => {

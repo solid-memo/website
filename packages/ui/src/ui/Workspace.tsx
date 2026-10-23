@@ -951,6 +951,17 @@ export function Workspace({
             }
           />
         );
+      case "cramAll":
+        return (
+          <CramContainer
+            key="all"
+            useCases={useCases}
+            instance={activeInstance!}
+            onExit={() =>
+              navigate({ screen: "statistics", instanceUrl: instanceUrl!, view: "memory" })
+            }
+          />
+        );
       case "course":
         return (
           <CourseContainer

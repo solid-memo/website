@@ -110,6 +110,11 @@ describe("HardestCardsContainer", () => {
       `#/card?instance=${encodeURIComponent(INSTANCE.url)}&deck=${encodeURIComponent(rivers.url)}&card=${encodeURIComponent(nile.url)}`,
     );
     expect(useCases.getCardProgress).toHaveBeenCalledTimes(1);
+    // They can be crammed, every deck's together.
+    expect(screen.getByRole("link", { name: "Cram the leeches" })).toHaveAttribute(
+      "href",
+      `#/cram?instance=${encodeURIComponent(INSTANCE.url)}`,
+    );
   });
 
   it("says when no card is a leech, but nothing before the first review", async () => {
@@ -122,6 +127,7 @@ describe("HardestCardsContainer", () => {
     expect(
       await screen.findByText("No leeches: no card was forgotten that often."),
     ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Cram the leeches" })).toBeNull();
     const fresh = makeUseCasesFake({
       getCardProgress: vi.fn(async () => reportOf(progressOf(capitals), progressOf(rivers))),
     });

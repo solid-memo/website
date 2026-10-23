@@ -1455,9 +1455,11 @@
   },
   "cram": {
     "heading": "{deck} pauken",
+    "headingAll": "Problemkarten pauken",
     "notice": "Hier wird nichts gespeichert: Deine Antworten ändern weder, wann Karten fällig sind, noch deine Statistik oder welche Karten Problemkarten sind.",
     "finished": "Pauken beendet – nichts wurde gespeichert.",
     "nothing": "Dieser Stapel hat keine Problemkarten zum Pauken.",
+    "nothingAll": "Keiner deiner Stapel hat Problemkarten zum Pauken.",
     "again": "Noch einmal pauken",
     "preparing": "Die Problemkarten werden vorbereitet…"
   },

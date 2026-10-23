@@ -585,6 +585,18 @@ describe("StudyScreen", () => {
     expect(screen.queryByRole("button", { name: "Cram again" })).toBeNull();
   });
 
+  it("heads a cram of every deck's leeches with no card up as the leeches'", () => {
+    renderScreen({
+      cram: { onAgain: vi.fn() },
+      deckName: undefined,
+      deckHref: undefined,
+      prompt: null,
+      total: 0,
+    });
+    expect(screen.getByRole("heading", { name: "Cram the leeches" })).toBeInTheDocument();
+    expect(screen.getByText("None of your decks has a leech to cram.")).toHaveFocus();
+  });
+
   it("says nothing of a cram in a study session", () => {
     renderScreen({ prompt: null, position: 4 });
     expect(screen.getByRole("heading", { name: "Study: Kanji N5" })).toBeInTheDocument();

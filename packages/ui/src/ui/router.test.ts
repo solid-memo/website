@@ -129,6 +129,7 @@ const roundTrips: RouteRef[] = [
     instanceUrl: "https://pod.example/solid-memo/a/",
     deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
   },
+  { screen: "cramAll", instanceUrl: "https://pod.example/solid-memo/a/" },
   {
     screen: "course",
     instanceUrl: "https://pod.example/solid-memo/a/",
@@ -342,6 +343,13 @@ describe("cramHref", () => {
       screen: "cram",
       instanceUrl: "https://pod.example/a/",
       deckUrl: "https://pod.example/a/c#d",
+    });
+  });
+
+  it("is the hash URL of a cram of every deck's leeches, given no deck", () => {
+    expect(parseHash(cramHref("https://pod.example/a/"))).toEqual({
+      screen: "cramAll",
+      instanceUrl: "https://pod.example/a/",
     });
   });
 });

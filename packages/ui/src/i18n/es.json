@@ -1523,9 +1523,11 @@
   },
   "cram": {
     "heading": "Repaso intensivo: {deck}",
+    "headingAll": "Repaso intensivo de las sanguijuelas",
     "notice": "Aquí no se registra nada: tus respuestas no cambian cuándo toca repasar las tarjetas, ni tus estadísticas, ni qué tarjetas son sanguijuelas.",
     "finished": "Repaso intensivo terminado — no se registró nada.",
     "nothing": "Este mazo no tiene sanguijuelas que repasar.",
+    "nothingAll": "Ninguno de tus mazos tiene sanguijuelas que repasar.",
     "again": "Repetir el repaso intensivo",
     "preparing": "Preparando las sanguijuelas…"
   },
