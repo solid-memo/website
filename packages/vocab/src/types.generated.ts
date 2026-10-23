@@ -17,7 +17,7 @@ export type LangText = Readonly<Record<string, string>>;
 export type LangTexts = Readonly<Record<string, readonly string[]>>;
 
 /** The record kinds the shapes describe (see docs/shapes.md). */
-export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "colorSet" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "draftChapter" | "draftDeck" | "draftStep" | "fsrsReviewState" | "instance" | "libraryDeck" | "libraryDeckSeries" | "palette" | "preferences" | "reviewState" | "step";
+export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "colorSet" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "draftChapter" | "draftDeck" | "draftStep" | "fsrsReviewState" | "instance" | "libraryDeck" | "libraryDeckSeries" | "monthSummary" | "palette" | "preferences" | "reviewState" | "step";
 
 /** The shape version this app writes for each kind. */
 export const LATEST_VERSION = {
@@ -40,6 +40,7 @@ export const LATEST_VERSION = {
   instance: 2,
   libraryDeck: 6,
   libraryDeckSeries: 3,
+  monthSummary: 1,
   palette: 1,
   preferences: 6,
   reviewState: 2,
@@ -609,6 +610,16 @@ export interface LibraryDeckSeriesV3 {
   readonly hasCurrentVersion: string;
 }
 
+/** Month summary format 1: the month's document of the answer log and the version it was summarized from, each study day's answers, introductions, reviews and lapses, the month's reviews of young prompts and how many were remembered, and how many recalled answers took each whole second. */
+export interface MonthSummaryV1 {
+  readonly document: string;
+  readonly version: string;
+  readonly days: readonly string[];
+  readonly youngReviews: number;
+  readonly youngRecalled: number;
+  readonly recallSeconds: readonly string[];
+}
+
 /** Palette format 1: a palette the user designed, with a language-tagged name, the palette it is based on, and a color set for the light theme and one for the dark. */
 export interface PaletteV1 {
   readonly title: LangText;
@@ -748,6 +759,7 @@ export type FsrsReviewStateRecord = { version: 1; data: FsrsReviewStateV1 };
 export type InstanceRecord = { version: 1; data: InstanceV1 } | { version: 2; data: InstanceV2 };
 export type LibraryDeckRecord = { version: 1; data: LibraryDeckV1 } | { version: 2; data: LibraryDeckV2 } | { version: 3; data: LibraryDeckV3 } | { version: 4; data: LibraryDeckV4 } | { version: 5; data: LibraryDeckV5 } | { version: 6; data: LibraryDeckV6 };
 export type LibraryDeckSeriesRecord = { version: 1; data: LibraryDeckSeriesV1 } | { version: 2; data: LibraryDeckSeriesV2 } | { version: 3; data: LibraryDeckSeriesV3 };
+export type MonthSummaryRecord = { version: 1; data: MonthSummaryV1 };
 export type PaletteRecord = { version: 1; data: PaletteV1 };
 export type PreferencesRecord = { version: 1; data: PreferencesV1 } | { version: 2; data: PreferencesV2 } | { version: 3; data: PreferencesV3 } | { version: 4; data: PreferencesV4 } | { version: 5; data: PreferencesV5 } | { version: 6; data: PreferencesV6 };
 export type ReviewStateRecord = { version: 1; data: ReviewStateV1 } | { version: 2; data: ReviewStateV2 };
@@ -774,6 +786,7 @@ export type VersionedRecord = {
   instance: InstanceRecord;
   libraryDeck: LibraryDeckRecord;
   libraryDeckSeries: LibraryDeckSeriesRecord;
+  monthSummary: MonthSummaryRecord;
   palette: PaletteRecord;
   preferences: PreferencesRecord;
   reviewState: ReviewStateRecord;
@@ -801,6 +814,7 @@ export type LatestRecord = {
   instance: InstanceV2;
   libraryDeck: LibraryDeckV6;
   libraryDeckSeries: LibraryDeckSeriesV3;
+  monthSummary: MonthSummaryV1;
   palette: PaletteV1;
   preferences: PreferencesV6;
   reviewState: ReviewStateV2;

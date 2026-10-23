@@ -510,6 +510,16 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       latestFormat: true,
     },
   },
+  monthSummary: {
+    1: {
+      document: "https://pod.example/solid-memo/a/history/2026-09.ttl",
+      version: '"m1"',
+      days: ["2026-09-29 12 3 8 1", "2026-09-30 1 0 0 0"],
+      youngReviews: 6,
+      youngRecalled: 5,
+      recallSeconds: ["4 7", "60 1"],
+    },
+  },
   deckSchedule: {
     1: {
       deck: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",

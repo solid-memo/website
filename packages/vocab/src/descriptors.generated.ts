@@ -41,6 +41,7 @@ import type {
   LibraryDeckSeriesV1,
   LibraryDeckSeriesV2,
   LibraryDeckSeriesV3,
+  MonthSummaryV1,
   PaletteV1,
   PreferencesV1,
   PreferencesV2,
@@ -1006,6 +1007,26 @@ export const LIBRARY_DECK_SERIES_V3: ShapeDescriptor<LibraryDeckSeriesV3> = {
   ],
 };
 
+export const MONTH_SUMMARY_V1: ShapeDescriptor<MonthSummaryV1> = {
+  shape: "monthSummary",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#MonthSummary",
+  additionalTypes: [],
+  absent: [],
+  fixedValues: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/month-summary/v1.ttl#shape",
+  shapeDocument: "month-summary/v1.ttl",
+  context: "any",
+  fields: [
+    { name: "document", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#summaryOf", kind: "iri", cardinality: "one" },
+    { name: "version", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#summarizedVersion", kind: "string", cardinality: "one" },
+    { name: "days", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#studyDayCounts", kind: "string", cardinality: "many" },
+    { name: "youngReviews", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#youngReviewCount", kind: "integer", cardinality: "one" },
+    { name: "youngRecalled", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#youngRecalledCount", kind: "integer", cardinality: "one" },
+    { name: "recallSeconds", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#recallSecondsCount", kind: "string", cardinality: "many" },
+  ],
+};
+
 export const PALETTE_V1: ShapeDescriptor<PaletteV1> = {
   shape: "palette",
   version: 1,
@@ -1247,6 +1268,7 @@ export const SHAPES = {
   instance: { 1: INSTANCE_V1, 2: INSTANCE_V2 },
   libraryDeck: { 1: LIBRARY_DECK_V1, 2: LIBRARY_DECK_V2, 3: LIBRARY_DECK_V3, 4: LIBRARY_DECK_V4, 5: LIBRARY_DECK_V5, 6: LIBRARY_DECK_V6 },
   libraryDeckSeries: { 1: LIBRARY_DECK_SERIES_V1, 2: LIBRARY_DECK_SERIES_V2, 3: LIBRARY_DECK_SERIES_V3 },
+  monthSummary: { 1: MONTH_SUMMARY_V1 },
   palette: { 1: PALETTE_V1 },
   preferences: { 1: PREFERENCES_V1, 2: PREFERENCES_V2, 3: PREFERENCES_V3, 4: PREFERENCES_V4, 5: PREFERENCES_V5, 6: PREFERENCES_V6 },
   reviewState: { 1: REVIEW_STATE_V1, 2: REVIEW_STATE_V2 },
@@ -1294,6 +1316,7 @@ export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   LIBRARY_DECK_SERIES_V1,
   LIBRARY_DECK_SERIES_V2,
   LIBRARY_DECK_SERIES_V3,
+  MONTH_SUMMARY_V1,
   PALETTE_V1,
   PREFERENCES_V1,
   PREFERENCES_V2,

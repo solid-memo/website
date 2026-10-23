@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.24 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.25 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -18,6 +18,8 @@ export const SM = {
   DocumentReceipt: `${SM_NS}DocumentReceipt`,
   /** How many of a deck's prompts fall due on which study day and how many are still new, computed from given versions of its cards and reviews documents, so the deck list can count today's study without them. A subject of the instance's digest document; derived data, rebuilt whenever it does not hold. (Added in 1.9.) */
   DeckSchedule: `${SM_NS}DeckSchedule`,
+  /** What the today strip needs of one study month of the answer log, summarized from a given version of the month's document: each study day's answers, introductions, reviews and lapses, the month's reviews of young prompts and how many were remembered, and how many recalled answers took each whole second. A subject of the instance's digest document; derived data, rebuilt whenever it does not hold. (Added in 1.25.) */
+  MonthSummary: `${SM_NS}MonthSummary`,
   /** One grade given to one prompt (a card, studied one way) during study: an entry of the instance's answer log, one document per study month, which the study statistics are computed from. Appended, never edited; resetting a study day removes that day's answers. (Added in 1.10.) */
   Answer: `${SM_NS}Answer`,
   /** A named group of decks and deck groups that the user arranged on the deck list. A subject of the instance's catalog document: a dcat:Catalog of its decks (dcat:dataset) and sub-groups (dcat:catalog), listed by the one catalogue or group it is in. (Added in 1.13.) */
@@ -212,6 +214,18 @@ export const SM = {
   reviewedOnDayCount: `${SM_NS}reviewedOnDayCount`,
   /** How many prompts were first reviewed on the study day the schedule was computed on. (Added in 1.9.) */
   introducedOnDayCount: `${SM_NS}introducedOnDayCount`,
+  /** The answer log's month document a month summary is about. (Added in 1.25 for month summary format 1.) */
+  summaryOf: `${SM_NS}summaryOf`,
+  /** The version (ETag) of the month's document the summary was made from. (Added in 1.25 for month summary format 1.) */
+  summarizedVersion: `${SM_NS}summarizedVersion`,
+  /** What one study day of the month with answers came to, as "YYYY-MM-DD answers introduced reviews lapses": its answers, the prompts it introduced, its scored reviews and those below grade 3; one value per day. (Added in 1.25 for month summary format 1.) */
+  studyDayCounts: `${SM_NS}studyDayCounts`,
+  /** How many of the month's scored reviews were of prompts at an interval below 21 days. (Added in 1.25 for month summary format 1.) */
+  youngReviewCount: `${SM_NS}youngReviewCount`,
+  /** How many of the month's scored reviews of young prompts were remembered (grade 3 or above). (Added in 1.25 for month summary format 1.) */
+  youngRecalledCount: `${SM_NS}youngRecalledCount`,
+  /** How many of the month's recalled answers with a recorded time (recallMillis and gradeMillis) took a whole number of seconds, as "seconds count", a time of 60 seconds or more counted at 60; one value per number of seconds. (Added in 1.25 for month summary format 1.) */
+  recallSecondsCount: `${SM_NS}recallSecondsCount`,
   /** The short piece of theory a course step teaches, read before its questions: language-tagged text, one per language. (Added in 1.14.) */
   theory: `${SM_NS}theory`,
   /** A card of the same release, asked as a multiple-choice question right after the step's theory; answering it puts it among the cards the learner studies. A card is checked by one step at most. (Added in 1.14.) */

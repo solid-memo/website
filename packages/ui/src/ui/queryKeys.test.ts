@@ -65,6 +65,7 @@ describe("queryKeys", () => {
       queryKeys.allStatistics(),
       queryKeys.statistics(INSTANCE),
       queryKeys.statisticsOfRange(INSTANCE, "30d"),
+      queryKeys.todayFigures(INSTANCE),
       queryKeys.deckStatistics(INSTANCE, DECK, "all"),
       queryKeys.courseStatistics(INSTANCE, course),
       queryKeys.allCardProgress(),
@@ -115,6 +116,7 @@ describe("queryKeys", () => {
       ["statistics"],
       ["statistics", INSTANCE],
       ["statistics", INSTANCE, "range", "30d"],
+      ["statistics", INSTANCE, "today"],
       ["statistics", INSTANCE, DECK, "all"],
       ["statistics", INSTANCE, "courses", course],
       ["cardProgress"],
@@ -147,6 +149,7 @@ describe("queryKeys", () => {
     expectUnder(queryKeys.courseStrip(DECK, RELEASE), queryKeys.course(DECK));
     expectUnder(queryKeys.statistics(INSTANCE), queryKeys.allStatistics());
     expectUnder(queryKeys.statisticsOfRange(INSTANCE, "90d"), queryKeys.statistics(INSTANCE));
+    expectUnder(queryKeys.todayFigures(INSTANCE), queryKeys.statistics(INSTANCE));
     expectUnder(queryKeys.deckStatistics(INSTANCE, DECK, "12m"), queryKeys.statistics(INSTANCE));
     expectUnder(queryKeys.courseStatistics(INSTANCE, []), queryKeys.statistics(INSTANCE));
     expectUnder(queryKeys.cardProgress(INSTANCE), queryKeys.allCardProgress());

@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { MutationObserver, QueryClient } from "@tanstack/react-query";
 import { makeUseCasesFake } from "../test/useCasesFake";
-import { keepStudyFiguresFresh, statisticsQuery } from "./studyFigures";
+import { keepStudyFiguresFresh, statisticsQuery, todayFiguresQuery } from "./studyFigures";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const OTHER = "https://pod.example/solid-memo/b/";
@@ -72,10 +72,15 @@ describe("keepStudyFiguresFresh", () => {
 });
 
 describe("statisticsQuery", () => {
-  it("reads the range asked for, of the instance or of a deck, the last 12 months under the today strip's key", async () => {
+  it("reads the range asked for, of the instance or of a deck", async () => {
     const useCases = makeUseCasesFake();
     const deckUrl = `${INSTANCE}catalog.ttl#deck-1`;
-    expect(statisticsQuery(useCases, INSTANCE, "12m").queryKey).toEqual(["statistics", INSTANCE]);
+    expect(statisticsQuery(useCases, INSTANCE, "12m").queryKey).toEqual([
+      "statistics",
+      INSTANCE,
+      "range",
+      "12m",
+    ]);
     expect(statisticsQuery(useCases, INSTANCE, "all").queryKey).toEqual([
       "statistics",
       INSTANCE,
@@ -95,5 +100,21 @@ describe("statisticsQuery", () => {
       range: 90,
       deckUrl,
     });
+  });
+});
+
+describe("todayFiguresQuery", () => {
+  it("reads the today strip's figures under a key of its own, which a change made clears", async () => {
+    const useCases = makeUseCasesFake();
+    const query = todayFiguresQuery(useCases, INSTANCE);
+    expect(query.queryKey).toEqual(["statistics", INSTANCE, "today"]);
+    expect(query.queryKey).not.toEqual(statisticsQuery(useCases, INSTANCE, "12m").queryKey);
+    await query.queryFn();
+    expect(useCases.getTodayFigures).toHaveBeenLastCalledWith(INSTANCE, expect.any(Date));
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(query.queryKey, await query.queryFn());
+    keepStudyFiguresFresh(queryClient);
+    await new MutationObserver(queryClient, { mutationFn: async () => undefined }).mutate();
+    expect(queryClient.getQueryState(query.queryKey)?.isInvalidated).toBe(true);
   });
 });

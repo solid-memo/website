@@ -8,8 +8,10 @@ import type { Deck } from "@solid-memo/domain/deck";
 import {
   ABSENT_VERSION,
   emptyDigest,
+  withMonthSummaries,
   withReceipt,
   withSchedule,
+  type StoredMonthSummary,
   type StoredSchedule,
 } from "@solid-memo/domain/studyDigest";
 import { readDataset, readDatasetSince, saveDataset, UNCHANGED, versionOf } from "./datasets";
@@ -233,10 +235,25 @@ describe("the instance's digest in the pod", () => {
       introducedOnDay: 0,
     },
   };
+  const month: StoredMonthSummary = {
+    document: `${INSTANCE}history/2026-09.ttl`,
+    version: '"m1"',
+    summary: {
+      days: [
+        { studyDay: "2026-09-29", answers: 12, introduced: 3, reviews: 8, lapses: 1 },
+        { studyDay: "2026-09-30", answers: 1, introduced: 0, reviews: 0, lapses: 0 },
+      ],
+      young: { reviews: 6, recalled: 5 },
+      recallSeconds: { 4: 7, 60: 1 },
+    },
+  };
   const learned = (digest = emptyDigest()) =>
-    withSchedule(
-      withReceipt(digest, CARDS, '"v1"', { conformedTo: "rules", latestFormat: true }),
-      schedule,
+    withMonthSummaries(
+      withSchedule(
+        withReceipt(digest, CARDS, '"v1"', { conformedTo: "rules", latestFormat: true }),
+        schedule,
+      ),
+      { [month.document]: month },
     );
 
   it("is null until something is learned, then read back as written", async () => {
@@ -279,12 +296,15 @@ describe("the instance's digest in the pod", () => {
     await digests.updateDigest(INSTANCE, (stored) => ({
       receipts: {},
       schedules: stored!.schedules,
+      months: {},
     }));
     expect(await digests.readDigest(INSTANCE)).toEqual({
       receipts: {},
       schedules: { [deck.url]: schedule },
+      months: {},
     });
     expect(pod.triples(DIGEST)!.some((t) => t.includes("#receipt-"))).toBe(false);
+    expect(pod.triples(DIGEST)!.some((t) => t.includes("#month-"))).toBe(false);
     await digests.updateDigest(INSTANCE, () => emptyDigest());
     expect(pod.triples(DIGEST)).toEqual([]);
   });
@@ -376,6 +396,10 @@ describe("the instance's digest in the pod", () => {
       DIGEST,
       `${PREFIXES}<#receipt-x> a sm:DocumentReceipt ; sm:receiptOf <decks/x.ttl> .
        <#schedule-x> a sm:DeckSchedule ; sm:scheduleOf <catalog.ttl#x> .
+       <#month-x> a sm:MonthSummary ; sm:summaryOf <history/2026-09.ttl> .
+       <#month-y> a sm:MonthSummary ; sm:formatVersion 1 ; sm:summaryOf <history/2026-08.ttl> ;
+         sm:summarizedVersion "v" ; sm:youngReviewCount 0 ; sm:youngRecalledCount 0 ;
+         sm:studyDayCounts "2026-08-01 x" .
        <#other> a sm:Card .`,
     );
     expect(await createSolidDigestRepository({ fetch: pod.fetch }).readDigest(INSTANCE)).toEqual(

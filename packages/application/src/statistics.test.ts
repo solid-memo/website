@@ -247,6 +247,135 @@ describe("the statistics of the answer log", () => {
     expect(byMonth.get("2026-09")).toHaveLength(2);
     expect(log.readMonthSince).toHaveBeenCalledTimes(2);
   });
+
+  describe("the today strip's figures", () => {
+    const timed = (studyDay: string, at: string, recallMillis?: number): Answer => ({
+      id: `answer-${studyDay}-${at}`,
+      deckUrl: deck.url,
+      cardUrl: `${card.url}-${at}`,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T${at}.000Z`,
+      studyDay,
+      priorIntervalDays: 3,
+      nextIntervalDays: 7,
+      ...(recallMillis === undefined ? {} : { recallMillis, gradeMillis: 500 }),
+    });
+    /** The log above and a digest kept in memory, for one page load after another. */
+    function pages() {
+      const { log, byMonth } = memoryLog();
+      let stored: InstanceDigest | null = null;
+      const digestRepository: DigestRepository = {
+        readDigest: vi.fn(async () => stored),
+        updateDigest: vi.fn(async (_instanceUrl, change) => {
+          stored = change(stored);
+        }),
+      };
+      const load = () => createUseCases({ ...makeDeps(), answerLog: log, digestRepository });
+      return { log, byMonth, digestRepository, load, stored: () => stored };
+    }
+    const AUGUST = `${instance.url}history/2026-08.ttl`;
+
+    it("are the year's statistics', each past month read once and then kept in the digest until it changes", async () => {
+      const { log, byMonth, digestRepository, load, stored } = pages();
+      byMonth.set("2025-08", [timed("2025-08-20", "10:00:00", 9000)]);
+      // Of the month the activity calendar begins in (2025-09-29), the days before it do not count.
+      byMonth.set("2025-09", [timed("2025-09-20", "10:00:00", 9000)]);
+      byMonth.set("2026-08", [
+        timed("2026-08-31", "10:00:00", 4000),
+        timed("2026-08-31", "10:00:30", 6000),
+      ]);
+      byMonth.set("2026-09", [
+        timed("2026-09-01", "10:00:00", 5000),
+        timed("2026-09-21", "10:00:00", 7000),
+      ]);
+      const first = load();
+      const figures = await first.getTodayFigures(instance.url, noon);
+      const statistics = await first.getStatistics(instance.url, noon);
+      expect(figures).toMatchObject({
+        today: "2026-09-21",
+        days: statistics.days.map(({ repeats: _, ...day }) => day),
+        streaks: statistics.streaks,
+        week: statistics.week,
+        young: statistics.retention.young,
+      });
+      // 4.5, 5.5, 6.5 and 7.5 s with grading, each the middle of its second: the median is the same.
+      expect(statistics.studyTime.medianAnswerMs).toBe(6000);
+      expect(figures.medianAnswerMs).toBe(6000);
+      expect(figures.days[0]!.studyDay).toBe("2026-08-31");
+      // A month before those looked back over is not read.
+      expect(log.readMonthSince).not.toHaveBeenCalledWith(instance.url, "2025-08", undefined);
+      await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledOnce());
+      expect(Object.keys(stored()!.months)).toEqual([`${instance.url}history/2025-09.ttl`, AUGUST]);
+      expect(stored()!.months[AUGUST]).toMatchObject({ document: AUGUST, version: "v0" });
+
+      log.readMonthSince.mockClear();
+      await expect(load().getTodayFigures(instance.url, noon)).resolves.toEqual(figures);
+      expect(log.readMonthSince.mock.calls).toEqual([
+        [instance.url, "2025-09", "v0"],
+        [instance.url, "2026-08", "v0"],
+        [instance.url, "2026-09", undefined],
+      ]);
+      expect(digestRepository.updateDigest).toHaveBeenCalledOnce();
+
+      await log.append(instance.url, timed("2026-08-30", "10:00:00"));
+      const changed = await load().getTodayFigures(instance.url, noon);
+      expect(changed.days[0]).toMatchObject({ studyDay: "2026-08-30", answers: 1 });
+      await vi.waitFor(() => expect(stored()!.months[AUGUST]!.version).toBe("v1"));
+    });
+
+    it("take in the whole range where it begins before the calendar's weeks, as the statistics do", async () => {
+      const { log, byMonth, load } = pages();
+      // On 31 December the range begins on 1 January, before the calendar's first Monday (5 January).
+      const at = new Date(2026, 11, 31, 12, 0);
+      byMonth.set("2025-12", [timed("2025-12-31", "10:00:00", 4000)]);
+      byMonth.set("2026-01", [timed("2026-01-02", "10:00:00", 5000)]);
+      byMonth.set("2026-12", [timed("2026-12-31", "10:00:00", 6000)]);
+      const page = load();
+      const figures = await page.getTodayFigures(instance.url, at);
+      const statistics = await page.getStatistics(instance.url, at);
+      expect(figures.days.map((day) => day.studyDay)).toEqual(["2026-01-02", "2026-12-31"]);
+      expect(figures.days.map((day) => day.studyDay)).toEqual(
+        statistics.recentDays.map((day) => day.studyDay),
+      );
+      expect(log.readMonthSince).not.toHaveBeenCalledWith(instance.url, "2025-12", undefined);
+    });
+
+    it("drop the summaries of months no longer looked back over, and keep none the pod gave no version of", async () => {
+      const { log, byMonth, load, stored } = pages();
+      byMonth.set("2026-08", [timed("2026-08-31", "10:00:00", 4000)]);
+      await load().getTodayFigures(instance.url, new Date(2027, 6, 15, 12, 0));
+      await vi.waitFor(() => expect(Object.keys(stored()!.months)).toEqual([AUGUST]));
+      // In September 2027, August 2026 is of neither the last 12 months nor the calendar's weeks.
+      await load().getTodayFigures(instance.url, new Date(2027, 8, 15, 12, 0));
+      await vi.waitFor(() => expect(stored()!.months).toEqual({}));
+      // Node Solid Server gives no ETag: every past month is read again each time.
+      log.readMonthSince.mockImplementation(async (_instanceUrl, month) => ({
+        unchanged: false,
+        value: byMonth.get(month) ?? [],
+        version: null,
+      }));
+      const figures = await load().getTodayFigures(instance.url, new Date(2027, 6, 15, 12, 0));
+      expect(figures.days).toHaveLength(1);
+      expect(stored()!.months).toEqual({});
+    });
+
+    it("estimate the median answer time from every answer while none was recorded, as the statistics do", async () => {
+      const { byMonth, load } = pages();
+      byMonth.set("2026-08", [timed("2026-08-31", "10:00:00"), timed("2026-08-31", "10:00:20")]);
+      const page = load();
+      const figures = await page.getTodayFigures(instance.url, noon);
+      expect(figures.medianAnswerMs).toBe(20_000);
+      expect(figures.medianAnswerMs).toBe(
+        (await page.getStatistics(instance.url, noon)).studyTime.medianAnswerMs,
+      );
+      // And knows none without an answer.
+      await expect(pages().load().getTodayFigures(instance.url, noon)).resolves.toMatchObject({
+        days: [],
+        medianAnswerMs: null,
+      });
+    });
+  });
 });
 
 describe("the cards' progress", () => {
@@ -322,6 +451,7 @@ describe("the cards' progress", () => {
     };
     const { useCases, digestRepository } = setup({
       receipts: {},
+      months: {},
       schedules: {
         [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule },
       },
@@ -348,6 +478,7 @@ describe("the cards' progress", () => {
     };
     const { useCases } = setup({
       receipts: {},
+      months: {},
       schedules: {
         [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule },
       },
@@ -610,6 +741,7 @@ describe("the Studio's answer history and schedule insight", () => {
     };
     const { useCases, digestRepository } = setup({
       receipts: {},
+      months: {},
       schedules: {
         [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule },
       },

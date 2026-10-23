@@ -10,7 +10,16 @@ import { monthOfStudyDay, shiftStudyDay, type Answer } from "@solid-memo/domain/
 import { courseProgressOf, type CourseResults } from "@solid-memo/domain/course";
 import { answersCsv } from "@solid-memo/domain/answerCsv";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
-import { firstTimedOf } from "@solid-memo/domain/studyTime";
+import { estimateStudyTime, firstTimedOf } from "@solid-memo/domain/studyTime";
+import { historyUrlOf } from "@solid-memo/domain/instanceLayout";
+import {
+  monthSummaryOf,
+  todayFiguresOf,
+  withMonthSummaries,
+  type MonthSummary,
+  type StoredMonthSummary,
+  type TodayFigures,
+} from "@solid-memo/domain/studyDigest";
 import { calendarStartOf } from "@solid-memo/domain/studyPatterns";
 import {
   cardAnswers,
@@ -64,6 +73,20 @@ export interface StatisticsUseCases {
     now: Date,
     options?: StatisticsRange,
   ): Promise<StatisticsReport>;
+  /**
+   * The today strip's figures (todayFiguresOf) of the answers of the
+   * last 12 study months up to now and of the activity calendar's weeks,
+   * as getStatistics gives them of that range, answers still waiting to
+   * be added to the log added first. A month before this one is
+   * summarized from its document once and kept in the instance's digest
+   * with its version: it is read again only when it changed (or the pod
+   * gave no version), and the summaries learned are written back in the
+   * background, those of months no longer looked back over dropped. This
+   * month is read as getStatistics reads it. While no time was recorded
+   * in those months, the median answer time is estimated from every
+   * answer, as getStatistics estimates it, which reads them all.
+   */
+  getTodayFigures(instanceUrl: string, now: Date): Promise<TodayFigures>;
   /**
    * Save the answers of the range getStatistics would read with the same
    * `options` (every column the log has, answersCsv) as a CSV file on the
@@ -247,7 +270,7 @@ export function createStatisticsUseCases({
   fileExchange: FileExchange;
   preferenceStore: Pick<PreferenceStore, "get">;
   answerStore: Pick<AnswerStore, "flush" | "readMonths" | "loadAll">;
-  digestStore: Pick<DigestStore, "of" | "recordSchedule">;
+  digestStore: Pick<DigestStore, "of" | "recordSchedule" | "remember">;
 }): StatisticsUseCases {
   /**
    * The answers of a range of the log up to `at` (StatisticsRange), of
@@ -355,6 +378,55 @@ export function createStatisticsUseCases({
         logBegins: begins ?? null,
         dayBoundaryHour,
       };
+    },
+    async getTodayFigures(instanceUrl, at) {
+      await answerStore.flush();
+      const [prefs, logged, digest] = await Promise.all([
+        preferenceStore.get(instanceUrl),
+        answerLog.months(instanceUrl),
+        digestStore.of(instanceUrl),
+      ]);
+      const today = studyDayOf(at, prefs.dayBoundaryHour);
+      const thisMonth = monthOfStudyDay(today);
+      // getStatistics' range, and the activity calendar's weeks, which the streaks look back over.
+      const first = firstDayOfMonths(today, 12);
+      const calendarStart = calendarStartOf(today);
+      const fromMonth = monthOfStudyDay(first < calendarStart ? first : calendarStart);
+      const kept: Record<string, StoredMonthSummary> = {};
+      const summaries = await Promise.all(
+        logged
+          .filter((month) => month >= fromMonth)
+          .map(async (month): Promise<MonthSummary> => {
+            // This month changes with every answer (a month after it, only when the clock is behind).
+            if (month >= thisMonth)
+              return monthSummaryOf(
+                await answerStore.readMonths(instanceUrl, logged, (m) => m === month),
+              );
+            const document = historyUrlOf(instanceUrl, month);
+            const stored = digest.months[document];
+            const since = await answerLog.readMonthSince(instanceUrl, month, stored?.version);
+            if (since.unchanged) {
+              kept[document] = stored!;
+              return stored!.summary;
+            }
+            const summary = monthSummaryOf(since.value);
+            if (since.version !== null)
+              kept[document] = { document, version: since.version, summary };
+            return summary;
+          }),
+      );
+      const before = Object.values(digest.months);
+      if (
+        before.length !== Object.keys(kept).length ||
+        before.some((stored) => kept[stored.document]?.version !== stored.version)
+      )
+        digestStore.remember(instanceUrl, (stored) => withMonthSummaries(stored, kept));
+      const figures = todayFiguresOf(summaries, today, first);
+      if (figures.medianAnswerMs !== null || !figures.days.some((day) => day.studyDay >= first))
+        return figures;
+      const { answers, firstTimed } = await rangeAnswers(instanceUrl, at, {}, true);
+      const ranged = answers.filter((answer) => answer.studyDay >= first);
+      return { ...figures, medianAnswerMs: estimateStudyTime(ranged, firstTimed).medianAnswerMs };
     },
     async saveAnswers(instanceUrl, at, options = {}) {
       const { answers, today } = await rangeAnswers(instanceUrl, at, options);

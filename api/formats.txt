@@ -36,6 +36,8 @@ libraryDeck: read from format 1
 libraryDeck: written in format 6
 libraryDeckSeries: read from format 1
 libraryDeckSeries: written in format 3
+monthSummary: read from format 1
+monthSummary: written in format 1
 palette: read from format 1
 palette: written in format 1
 preferences: read from format 1

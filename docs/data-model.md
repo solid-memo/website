@@ -165,7 +165,7 @@ flowchart LR
   document's saying it is the deck's; the answers of a month
   (`sm:Answer`); the preferences (`sm:Preferences`); the palettes
   (`sm:Palette`, `sm:ColorSet`); the digest's
-  receipts and schedules; the catalog's subjects (the catalog, its
+  receipts, schedules and month summaries; the catalog's subjects (the catalog, its
   decks, groups, agents and distributions); the instance's `#it`; a
   draft's subjects and what they lead to. A document is deleted only
   when nothing else is left in it; one that also holds another app's
@@ -343,10 +343,12 @@ data.
 │                        document, readable by everyone, never written
 │                        again (the user may publish elsewhere instead)
 └── digest.ttl      derived data (below): a sm:DocumentReceipt per document
-                         (#receipt-<path>) and a sm:DeckSchedule per deck
-                         (#schedule-<path>), each stamped with the versions
-                         it was learned from; sm:formatVersion 1 (a
-                         receipt), 2 (a schedule)
+                         (#receipt-<path>), a sm:DeckSchedule per deck
+                         (#schedule-<path>) and a sm:MonthSummary per past
+                         month of the answer log (#month-<path>), each
+                         stamped with the versions it was learned from;
+                         sm:formatVersion 1 (a receipt or a month
+                         summary), 2 (a schedule)
 ```
 
 A deck's documents are found through its catalog entry
@@ -1094,7 +1096,9 @@ data, since nothing could rebuild it.
   `history/<YYYY-MM>.ttl` (`historyUrlOf`, by the month of the study day,
   so a day is never split): reading a year of statistics is twelve GETs
   whatever the number of decks, and reading it again a `304` for each
-  month that did not change.
+  month that did not change. The today strip keeps a summary of each
+  past month in the [digest](#the-digest), so on a new visit it too
+  reads only this month in full.
 - **One subject per answer**, `#answer-<time>-<random>` (one added
   from a guest's study followed by the id of the deck it was added to)
   ([answer.ts](../packages/domain/src/answer.ts)): the deck's catalog
@@ -1195,6 +1199,19 @@ stamped with the version (ETag) of the document it was learned from
   and holds only while all three are the deck's and the preferences':
   switching scheduler writes no review, so the documents' versions alone
   could not tell SM-2's due days from FSRS-6's.
+- a **month summary** per past study month of the
+  [answer log](#the-answer-log) that the today strip looks back over,
+  from a given version of its `history/<YYYY-MM>.ttl` (`sm:summaryOf`,
+  `sm:summarizedVersion`): each study day's answers, new cards, scored
+  reviews and lapses (`sm:studyDayCounts "2026-09-29 12 3 8 1"`), the
+  month's reviews of young prompts and how many were remembered
+  (`sm:youngReviewCount`, `sm:youngRecalledCount`), and how many
+  recalled answers took each whole second (`sm:recallSecondsCount "4
+  7"`, a minute or more counted at 60). That is what the strip shows and
+  estimates the time left today with
+  ([statistics.md](statistics.md#the-today-strip)), so a visit reads only
+  this month's answers. Each answer keeps its study day, so a summary
+  needs no day boundary; a month no longer looked back over is dropped.
 
 ```mermaid
 sequenceDiagram

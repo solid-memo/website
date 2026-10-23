@@ -127,14 +127,16 @@ export const queryKeys = {
 
   /** Every instance's statistics, and every key under them. */
   allStatistics: () => ["statistics"],
-  /** An instance's statistics of every deck over the last 12 months: under allStatistics. */
+  /** An instance's statistics of every range and deck, and its today strip's: under allStatistics. */
   statistics: (instanceUrl: string) => [...queryKeys.allStatistics(), instanceUrl],
-  /** An instance's statistics of every deck over another range: under statistics. */
+  /** An instance's statistics of every deck over a range: under statistics. */
   statisticsOfRange: (instanceUrl: string, range: StatisticsRange) => [
     ...queryKeys.statistics(instanceUrl),
     "range",
     range,
   ],
+  /** The figures of an instance's today strip (UseCases.getTodayFigures): under statistics. */
+  todayFigures: (instanceUrl: string) => [...queryKeys.statistics(instanceUrl), "today"],
   /** An instance's statistics of one deck over a range: under statistics. */
   deckStatistics: (instanceUrl: string, deckUrl: string, range: StatisticsRange) => [
     ...queryKeys.statistics(instanceUrl),

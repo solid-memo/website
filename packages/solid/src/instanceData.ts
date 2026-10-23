@@ -58,7 +58,7 @@ import { RDF, SM } from "./vocab";
  * From each document only what is Solid Memo's of its kind is removed
  * (datasets.ts removeOwned, ownership.ts): a deck's cards, distractors
  * and review states, the answers, the preferences, the palettes and
- * their color sets, the digest's receipts and schedules, the catalog's
+ * their color sets, the digest's receipts, schedules and month summaries, the catalog's
  * subjects, the instance's
  * `#it`; a document is deleted only when nothing else is left in it,
  * and one that also holds another app's data is kept with that, which
@@ -98,7 +98,10 @@ export async function deleteInstanceData(
   }
   await remove(preferencesUrlOf(container), subjectsOfClasses(SM.Preferences));
   await remove(palettesUrlOf(container), subjectsOfClasses(SM.Palette, SM.ColorSet));
-  await remove(digestUrlOf(container), subjectsOfClasses(SM.DocumentReceipt, SM.DeckSchedule));
+  await remove(
+    digestUrlOf(container),
+    subjectsOfClasses(SM.DocumentReceipt, SM.DeckSchedule, SM.MonthSummary),
+  );
   // A catalog that cannot be read is the one record of the decks' documents, which are kept: so is it.
   if (catalog !== UNREADABLE) await remove(catalogUrl, solidMemoSubjects);
   for (const subcontainer of [

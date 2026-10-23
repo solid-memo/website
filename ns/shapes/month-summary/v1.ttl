@@ -1,0 +1,83 @@
+@base <https://solid-memo.com/ns/shapes/month-summary/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+
+# A month summary, format 1 (vocabulary 1.25): in the instance's digest
+# document, what the today strip needs of one study month of the answer
+# log, summarized from a given version of the month's document, so a
+# visit need not read a past month that has not changed.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "MonthSummaryV1" ;
+    rdfs:comment "Month summary format 1: the month's document of the answer log and the version it was summarized from, each study day's answers, introductions, reviews and lapses, the month's reviews of young prompts and how many were remembered, and how many recalled answers took each whole second." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:MonthSummary ;
+    sh:property <#formatVersion> ,
+                <#document> ,
+                <#version> ,
+                <#days> ,
+                <#youngReviews> ,
+                <#youngRecalled> ,
+                <#recallSeconds> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#document>
+    a sh:PropertyShape ;
+    sh:path solid-memo:summaryOf ;
+    sh:name "document" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#version>
+    a sh:PropertyShape ;
+    sh:path solid-memo:summarizedVersion ;
+    sh:name "version" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#days>
+    a sh:PropertyShape ;
+    sh:path solid-memo:studyDayCounts ;
+    sh:name "days" ;
+    sh:datatype xsd:string ;
+    sh:pattern "^[0-9]{4}-[0-9]{2}-[0-9]{2} [1-9][0-9]* [0-9]+ [0-9]+ [0-9]+$" ;
+    sh:message "A study day's counts are \"YYYY-MM-DD answers introduced reviews lapses\", one value per day."@en ,
+               "En studiedags antal anges som \"YYYY-MM-DD svar introducerade repetitioner missar\", ett värde per dag."@sv .
+
+<#youngReviews>
+    a sh:PropertyShape ;
+    sh:path solid-memo:youngReviewCount ;
+    sh:name "youngReviews" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#youngRecalled>
+    a sh:PropertyShape ;
+    sh:path solid-memo:youngRecalledCount ;
+    sh:name "youngRecalled" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#recallSeconds>
+    a sh:PropertyShape ;
+    sh:path solid-memo:recallSecondsCount ;
+    sh:name "recallSeconds" ;
+    sh:datatype xsd:string ;
+    sh:pattern "^([0-9]|[1-5][0-9]|60) [1-9][0-9]*$" ;
+    sh:message "Recalled answers by their seconds are \"seconds count\", from 0 to 60 seconds, one value per number of seconds."@en ,
+               "Återkallade svar efter sekunder anges som \"sekunder antal\", från 0 till 60 sekunder, ett värde per antal sekunder."@sv .

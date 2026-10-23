@@ -11,9 +11,11 @@
  * missing and keeps however many tabs add at once; resetting a study day
  * removes that deck's answers of the day; the statistics and the Studio
  * read a month again only once it changed, sharing what they read, and
- * the figures of memory follow a card across months. Runs
- * against each server globalSetup.ts starts. With MEASURE_ANSWER_LOG set,
- * it also measures reading a large log (docs/statistics.md, "Loading").
+ * the figures of memory follow a card across months; the today strip
+ * keeps a summary of each past month in the digest, read again only once
+ * it changed. Runs against each server globalSetup.ts starts. With
+ * MEASURE_ANSWER_LOG set, it also measures reading a large log
+ * (docs/statistics.md, "Loading").
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
@@ -23,6 +25,7 @@ import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
+import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, versioned } from "./serverTraits";
 
@@ -57,7 +60,18 @@ function answerOf(instanceUrl: string, studyDay: string, deck: string, n: number
   };
 }
 
-/** One read of a month's document: its status and the bytes of its body. */
+/** The digest's month summaries, once a page's write of them is done: as many as `count`. */
+async function summariesWritten(instanceUrl: string, count: number) {
+  const digests = createSolidDigestRepository({ fetch });
+  await expect
+    .poll(async () => Object.keys((await digests.readDigest(instanceUrl))?.months ?? {}).length, {
+      timeout: 60_000,
+    })
+    .toBe(count);
+  return (await digests.readDigest(instanceUrl))!.months;
+}
+
+/** One read of a month's document or of the digest: its status and the bytes of its body. */
 interface MonthRead {
   url: string;
   status: number;
@@ -66,20 +80,28 @@ interface MonthRead {
 
 /**
  * A page of the app reading the log as createAppUseCases wires it (only
- * what the statistics need), each read of a month's document recorded;
+ * what the statistics and the today strip need), each read of a month's
+ * document recorded, and each of the digest (`digestReads`);
  * each call is a new page, with nothing in memory. `bodies` keeps what
  * each month's read gave, for parsing again without the server.
  */
 function page() {
   const reads: MonthRead[] = [];
+  const digestReads: MonthRead[] = [];
   const bodies = new Map<string, { body: string; etag: string | null }>();
   const recording: typeof fetch = async (input, init) => {
     const response = await fetch(input, init);
     const url = String(input);
-    if (!/\/history\/\d{4}-\d{2}\.ttl$/.test(url) || (init?.method ?? "GET") !== "GET")
-      return response;
+    if ((init?.method ?? "GET") !== "GET") return response;
+    const month = /\/history\/\d{4}-\d{2}\.ttl$/.test(url);
+    if (!month && !url.endsWith("/digest.ttl")) return response;
     const body = await response.clone().text();
-    reads.push({ url, status: response.status, bytes: new TextEncoder().encode(body).length });
+    const read = { url, status: response.status, bytes: new TextEncoder().encode(body).length };
+    if (!month) {
+      digestReads.push(read);
+      return response;
+    }
+    reads.push(read);
     if (response.status === 200) bodies.set(url, { body, etag: response.headers.get("ETag") });
     return response;
   };
@@ -97,8 +119,12 @@ function page() {
     repairRepository: undefined as never,
     instanceCopier: undefined as never,
     answerLog: createSolidAnswerLog({ fetch: recording }),
+    digestRepository: createSolidDigestRepository({
+      fetch: recording,
+      checkWrite: createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES }).checkSubjects,
+    }),
   });
-  return { useCases, reads, bodies };
+  return { useCases, reads, digestReads, bodies };
 }
 
 describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
@@ -278,6 +304,45 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
     expect(all.lateness[0]!.recall).toEqual({ reviews: 3, recalled: 3 });
   });
 
+  it("summarizes the past months for the today strip once, then reads them again only once they changed", async (context) => {
+    const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
+    const log = answerLog();
+    const at = new Date("2026-09-21T12:00:00.000Z");
+    for (const answer of [
+      answerOf(instanceUrl, "2026-07-30", "deck-1", 1),
+      answerOf(instanceUrl, "2026-08-31", "deck-1", 2),
+      answerOf(instanceUrl, "2026-09-01", "deck-1", 3),
+      answerOf(instanceUrl, "2026-09-21", "deck-1", 5),
+    ])
+      await log.append(instanceUrl, answer);
+    const first = page();
+    const figures = await first.useCases.getTodayFigures(instanceUrl, at);
+    const statistics = await first.useCases.getStatistics(instanceUrl, at);
+    expect(figures).toMatchObject({ streaks: statistics.streaks, week: statistics.week });
+    // 1502, 1506 and 1510 ms: the median, 1506 ms, counted as the middle of its second.
+    expect(statistics.studyTime.medianAnswerMs).toBe(1506);
+    expect(figures.medianAnswerMs).toBe(1500);
+    if (!(await versioned(`${instanceUrl}history/2026-07.ttl`)))
+      return context.skip("this server gives no ETag on a read, so every past month is read whole");
+    // The summaries are written in the background, conforming to their shape (checkWrite).
+    await summariesWritten(instanceUrl, 2);
+    const second = page();
+    await expect(second.useCases.getTodayFigures(instanceUrl, at)).resolves.toEqual(figures);
+    expect(
+      second.reads.map((read) => [read.url.slice(-"YYYY-MM.ttl".length), read.status]).sort(),
+    ).toEqual([
+      ["2026-07.ttl", 304],
+      ["2026-08.ttl", 304],
+      ["2026-09.ttl", 200],
+    ]);
+    if (!everyEdit) return context.skip(ETAG_OUTLIVES_EDITS);
+    await log.append(instanceUrl, answerOf(instanceUrl, "2026-08-30", "deck-1", 7));
+    const third = page();
+    const changed = await third.useCases.getTodayFigures(instanceUrl, at);
+    expect(changed.streaks.longest).toBe(figures.streaks.longest + 1);
+    expect(third.reads.filter((read) => read.status === 200)).toHaveLength(2);
+  });
+
   it.runIf(process.env.MEASURE_ANSWER_LOG)(
     "measures reading a large log: a year, and two, of a hundred answers a day",
     { timeout: 30 * 60_000 },
@@ -307,6 +372,9 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
             studyDay,
             ...(day < 20 ? {} : { priorIntervalDays: (n % 40) + 1 }),
             nextIntervalDays: (n % 40) + 2,
+            // Timed, as every answer given since vocabulary 1.19 is.
+            recallMillis: 2000 + ((n * 37) % 8000),
+            gradeMillis: 400 + ((n * 11) % 1200),
           };
           const answers = byMonth.get(month);
           if (answers === undefined) byMonth.set(month, [answer]);
@@ -377,9 +445,38 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
           unchanged,
         };
       };
+      // The today strip on a second page load: the past months' summaries checked, this month read.
+      const strip = async () => {
+        const learning = page();
+        await learning.useCases.getTodayFigures(instanceUrl, at);
+        // Where the server gives versions, the past months' summaries are written in the background.
+        const thisMonth = `${instanceUrl}history/${at.toISOString().slice(0, 7)}.ttl`;
+        if (await versioned(thisMonth))
+          await summariesWritten(
+            instanceUrl,
+            new Set(learning.reads.map((read) => read.url).filter((url) => url !== thisMonth)).size,
+          );
+        const { useCases, reads, digestReads } = page();
+        const start = performance.now();
+        await useCases.getTodayFigures(instanceUrl, at);
+        const ms = performance.now() - start;
+        const bytes = [...reads, ...digestReads].reduce((sum, read) => sum + read.bytes, 0);
+        return {
+          months: reads.length,
+          unchanged: reads.filter((read) => read.status === 304).length,
+          megabytes: +(bytes / 1_000_000).toFixed(1),
+          digestKilobytes: Math.round(
+            digestReads.reduce((sum, read) => sum + read.bytes, 0) / 1000,
+          ),
+          ms: Math.round(ms),
+        };
+      };
       const year = await measure({ months: 12 });
       const all = await measure({ range: "all" });
-      console.info(JSON.stringify({ server, seededMs: Math.round(seeded), year, all }, null, 2));
+      const today = await strip();
+      console.info(
+        JSON.stringify({ server, seededMs: Math.round(seeded), year, all, today }, null, 2),
+      );
       expect(year.answers).toBeGreaterThan(36_000);
       expect(all.answers).toBe(days.length * perDay);
     },

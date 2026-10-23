@@ -48,6 +48,14 @@ it off. They say how fast you remember and at what hour you study, so
 they are as personal as the rest of the log, and stay in the same
 private documents.
 
+The digest keeps a summary of each past month of the log, so the strip
+above the deck list need not read the months again
+([data-model.md](data-model.md#the-digest)): each study day's numbers
+of answers, new cards, reviews and lapses, how many reviews of young
+cards were remembered, and how many answers took each second. It says
+when and how much you studied, as the log does, and stays in your pod
+beside it, in the instance's `digest.ttl`.
+
 ## In the browser
 
 Before you log in, you study as a guest, in a pod kept in the browser's

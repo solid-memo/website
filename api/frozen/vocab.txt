@@ -10,6 +10,7 @@ sm:Distractor: class
 sm:DocumentReceipt: class
 sm:Instance: class
 sm:InvalidDataPolicies: scheme
+sm:MonthSummary: class
 sm:Palette: class
 sm:Palettes: scheme
 sm:Preferences: class
@@ -122,6 +123,7 @@ sm:priorIntervalDays: property, range xsd:integer, domain sm:Answer
 sm:publishedRelease: property, range http://www.w3.org/ns/dcat#Dataset, domain http://www.w3.org/ns/dcat#Catalog
 sm:recall: concept
 sm:recallMillis: property, range xsd:integer, domain sm:Answer
+sm:recallSecondsCount: property, range xsd:string, domain sm:MonthSummary
 sm:receiptOf: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:DocumentReceipt
 sm:releaseDraft: property, range sm:Deck, domain http://www.w3.org/ns/dcat#Catalog
 sm:releasedAs: property, range http://www.w3.org/ns/dcat#Dataset, domain sm:Deck
@@ -142,8 +144,11 @@ sm:schedulerInvitationDismissed: property, range xsd:boolean, domain sm:Preferen
 sm:sm2: concept
 sm:stability: property, range xsd:decimal, domain sm:ReviewState
 sm:standardPalette: concept
+sm:studyDayCounts: property, range xsd:string, domain sm:MonthSummary
 sm:studyDirection: property, range skos:Concept, domain sm:Deck
 sm:studyScheduler: property, range skos:Concept, domain sm:Preferences
+sm:summarizedVersion: property, range xsd:string, domain sm:MonthSummary
+sm:summaryOf: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:MonthSummary
 sm:sunkenSurfaceColor: property, range xsd:string, domain sm:ColorSet
 sm:surfaceColor: property, range xsd:string, domain sm:ColorSet
 sm:systemTheme: concept
@@ -156,6 +161,8 @@ sm:unreviewedCount: property, range xsd:integer, domain sm:DeckSchedule
 sm:utcOffsetMinutes: property, range xsd:integer, domain sm:Answer
 sm:warnOnly: concept
 sm:warningColor: property, range xsd:string, domain sm:ColorSet
+sm:youngRecalledCount: property, range xsd:integer, domain sm:MonthSummary
+sm:youngReviewCount: property, range xsd:integer, domain sm:MonthSummary
 topics:arabic: topic
 topics:art: topic
 topics:astronomy: topic
