@@ -55,6 +55,13 @@ describe("deckProblemsOf", () => {
     ]);
   });
 
+  it("names the cards in the deck's card language first", () => {
+    const swedish = { ...kanji, cardLanguage: "sv" };
+    const vatten = { ...water, front: { en: "water", sv: "vatten" } };
+    const found = deckProblemsOf(swedish, health({ duplicates: [[vatten, fire]] }), en);
+    expect(found.map((one) => one.text)).toEqual(["vatten: says the same as another card"]);
+  });
+
   it("lists nothing of a healthy deck, nor of the languages it could not check", () => {
     expect(deckProblemsOf(kanji, health({}), en)).toEqual([]);
     expect(deckProblemsOf(kanji, health({ unstated: null }), en)).toEqual([]);

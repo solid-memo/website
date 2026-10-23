@@ -4,6 +4,7 @@
 
 import type { ComponentChildren } from "preact";
 import type { Card } from "@solid-memo/domain/deck";
+import { useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { CARD_TABS, type CardTab } from "./router";
@@ -50,12 +51,13 @@ export function CardInspectorScreen({
   /** The tab's panel. */
   children: ComponentChildren;
 }) {
-  const { t, readerText } = useI18n();
+  const { t } = useI18n();
+  const { cardText } = useCardText();
   const count = card.distractors?.length ?? 0;
   return (
     <section class="card-inspector">
       <header>
-        <h2>{t("studio.card.heading", { card: cardName(card, readerText) })}</h2>
+        <h2>{t("studio.card.heading", { card: cardName(card, cardText) })}</h2>
         {card.retired && <span class="studio-badge">{t("retiredCards.tag")}</span>}
         {steps !== undefined && (
           <div class="studio-card-steps" role="group" aria-label={t("studio.card.steps")}>

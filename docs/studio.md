@@ -735,7 +735,8 @@ The URL holds how the cards are looked at. The domain applies it
   `interval`, `ease` or `lapses`. A column's name sorts by it, then the other way,
   then back to the deck's order, as on Home. A side sorts by the text
   the table shows the reader (as plain text, when in Markdown), in the
-  order of the UI's language. Case and accents count no more than in
+  deck's card language first when it has one
+  ([i18n.md](i18n.md#which-language)), in the order of the UI's language. Case and accents count no more than in
   the search, unless that language makes a letter of its own of one:
   in Swedish, `ä` comes after `z`. Numbers sort by value. A card
   without the value (one never studied) comes last, either way.

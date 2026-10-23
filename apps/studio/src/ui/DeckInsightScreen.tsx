@@ -5,6 +5,7 @@
 import type { DeckInsight } from "@solid-memo/application/useCases";
 import { LEECH_LAPSES } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import { useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
@@ -36,7 +37,8 @@ export function DeckInsightScreen({
   cardHref: (card: Card) => string;
   leechesHref: string;
 }) {
-  const { t, tx, readerText, formatDate, formatMonth } = useI18n();
+  const { t, tx, formatDate, formatMonth } = useI18n();
+  const { cardText } = useCardText();
   const { forecast, lapses, leeches } = insight;
   const week = forecast.slice(0, WEEK).reduce((sum, day) => sum + day.reviews, 0);
   const ranges = useBinRanges();
@@ -130,7 +132,7 @@ export function DeckInsightScreen({
           <ol class="studio-leeches" aria-label={t("studio.insight.leeches")}>
             {leeches.map(({ card, lapses: count }) => (
               <li key={card.url}>
-                <a href={cardHref(card)}>{cardName(card, readerText)}</a>{" "}
+                <a href={cardHref(card)}>{cardName(card, cardText)}</a>{" "}
                 <span class="hint">{t("studio.insight.leechLapses", { count })}</span>
               </li>
             ))}

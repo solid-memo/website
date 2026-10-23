@@ -18,6 +18,7 @@ import {
 import type { CardEdit, CardEditPlan, SkipReason } from "@solid-memo/domain/cardBulk";
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
 import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
+import { useCardText } from "@solid-memo/ui/cardLanguage";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName, cardNameText } from "@solid-memo/ui/DataText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -203,8 +204,8 @@ export function CardWorkbenchScreen({
   busy: boolean;
   error: ErrorText | null;
 }) {
-  const { t, tx, readerText, readerLang, partLang, languageLabel, formatDate, formatMonth } =
-    useI18n();
+  const { t, tx, readerText, partLang, languageLabel, formatDate, formatMonth } = useI18n();
+  const { cardText, cardLang } = useCardText();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
   // Why the last side edited in its cell was not saved, until another is.
   const [refusal, setRefusal] = useState<SkipReason | null>(null);
@@ -264,8 +265,8 @@ export function CardWorkbenchScreen({
     return {
       field: {
         column: t(`studio.cards.column.${side}`),
-        row: cardName(card, readerText),
-        rowLang: readerLang(cardNameText(card, readerText)),
+        row: cardName(card, cardText),
+        rowLang: cardLang(cardNameText(card, cardText)),
       },
       shown: card[side][tag]!,
       value: card[side][tag]!,
@@ -487,7 +488,7 @@ export function CardWorkbenchScreen({
                   label: t("studio.cards.select"),
                   allLabel: t("studio.cards.selectAll"),
                   rowLabel: ({ card }) =>
-                    t("studio.cards.selectCard", { card: cardName(card, readerText) }),
+                    t("studio.cards.selectCard", { card: cardName(card, cardText) }),
                   chosen,
                   onChoose: setChosen,
                 }}

@@ -130,6 +130,22 @@ describe("the palette's entries", () => {
     expect(idOf("instances", "Deck set A")).not.toBe(idOf("sections", "Decks"));
   });
 
+  it("name the deck's cards in its card language first, the deck as before", () => {
+    const swedish = {
+      ...kanji,
+      title: { en: "Kanji N5", sv: "Kanji N5 (sv)" },
+      cardLanguage: "sv",
+    };
+    const vatten = { ...water, front: { en: "water", sv: "vatten" } };
+    const labels = buildCommands(
+      { ...sources, decks: [swedish, verbs], cards: { deckUrl: kanji.url, cards: [vatten] } },
+      en,
+    )
+      .filter((command) => command.group === "cards" || command.group === "decks")
+      .map((command) => command.label);
+    expect(labels).toEqual(["Kanji N5", "Verbs", "vatten"]);
+  });
+
   it("number only the first nine tabs, and have no section of an instance on the instances", () => {
     const tabs = Array.from({ length: 10 }, (_, n) => ({
       key: "cards",

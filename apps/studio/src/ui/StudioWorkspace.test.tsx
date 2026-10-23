@@ -569,6 +569,31 @@ describe("StudioWorkspace", () => {
     expect(window.history.length).toBe(length + 1);
   });
 
+  it("shows a deck's cards in its card language first, its title as before", async () => {
+    const swedish = {
+      ...kanji,
+      title: { en: "Kanji N5", sv: "Kanji N5 (sv)" },
+      cardLanguage: "sv",
+    };
+    const card = { ...makeCard(kanji, "water"), front: { en: "water", sv: "vatten" } };
+    window.history.replaceState(
+      null,
+      "",
+      studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url }),
+    );
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [swedish]),
+        listCards: vi.fn(async () => [card]),
+      }),
+    );
+    expect(await screen.findByRole("heading", { name: "Card: vatten" })).toBeInTheDocument();
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Cards of Kanji N5" })).toBeInTheDocument();
+    expect(within(trail).getByRole("link", { name: "vatten" })).toBeInTheDocument();
+  });
+
   it("opens a deck's schedule from its tabs, its trail through its cards, its leeches linked to their history and to the workbench", async () => {
     const card = makeCard(kanji, "water");
     window.history.replaceState(

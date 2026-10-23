@@ -133,8 +133,15 @@ export function CardWorkbenchContainer({
   const today = prefs === undefined ? undefined : studyDayOf(new Date(), prefs.dayBoundaryHour);
   const reviews = reviewsQuery.data;
   const states = reviews?.sm2;
-  // As readerText reads them.
-  const languages = useMemo(() => [locale, ...navigator.languages], [locale]);
+  // As the cards are shown (cardReader): in the deck's card language first, so a sort by side sorts what is seen.
+  const languages = useMemo(
+    () => [
+      ...(deck.cardLanguage === undefined ? [] : [deck.cardLanguage]),
+      locale,
+      ...navigator.languages,
+    ],
+    [deck.cardLanguage, locale],
+  );
   const rows = useMemo(
     () =>
       cards === undefined ||

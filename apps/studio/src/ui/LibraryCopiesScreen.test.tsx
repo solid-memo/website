@@ -180,6 +180,20 @@ describe("LibraryCopiesScreen", () => {
     ).toEqual(["Release 2: Norway added.", "Norway", "Sweden", "latvia"]);
   });
 
+  it("names the cards of a copy's plan in its card language first", () => {
+    const swedish = { ...old, cardLanguage: "sv" };
+    const svPlan = {
+      ...makePlan(swedish),
+      add: [{ id: "norway", front: { en: "Norway", sv: "Norge" }, back: {}, formatVersion: 3 }],
+    };
+    render(
+      <LibraryPlanScreen
+        row={{ copy: { deck: swedish, series: capitals, version: "1", newer: true }, plan: svPlan }}
+      />,
+    );
+    expect(screen.getByRole("region", { name: "Capitals" })).toHaveTextContent("Norge");
+  });
+
   it("details a copy's plan without notes, and with the cards kept as the user has them", () => {
     render(<LibraryPlanScreen row={rows[1]!} />);
     const plan = screen.getByRole("region", { name: "My capitals" });

@@ -60,7 +60,7 @@ export function CommandPalette({
   onChoose: (command: Command) => void;
   onClose: () => void;
 }) {
-  const { t, readerText } = useI18n();
+  const { t, readerText, cardReader } = useI18n();
   const queryClient = useQueryClient();
   const listId = useId();
   const [query, setQuery] = useState("");
@@ -88,7 +88,7 @@ export function CommandPalette({
         cards: cards === undefined ? null : { deckUrl: deck!.url, cards },
         commands,
       },
-      { t, readerText },
+      { t, readerText, cardReader },
     );
   });
   const [recent] = useState(() => recentCommands());

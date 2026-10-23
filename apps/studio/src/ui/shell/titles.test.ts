@@ -172,6 +172,18 @@ describe("crumbsOf", () => {
     expect(trail(route)).toEqual(expected);
   });
 
+  it("names a card in its deck's card language first, the deck as before", () => {
+    const deck = { ...kanji, cardLanguage: "sv" };
+    const card = { ...water, front: { en: "water", sv: "vatten" } };
+    const route: StudioRoute = { screen: "card", deckUrl, cardUrl: water.url };
+    expect(crumbsOf(route, { ...subjects, deck, card }, en).map((crumb) => crumb.label)).toEqual([
+      "Instances",
+      "Decks",
+      "Cards of Kanji N5",
+      "vatten",
+    ]);
+  });
+
   it("names a draft of no title, a chapter of none by its id, and a step of no chapter by its id", () => {
     const loose: ReleaseDraft = {
       ...draft,

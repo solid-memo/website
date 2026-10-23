@@ -12,6 +12,7 @@ import {
 } from "@solid-memo/domain/cardBulk";
 import { UNSTATED } from "@solid-memo/domain/cardQuery";
 import type { Card } from "@solid-memo/domain/deck";
+import { useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Dialog } from "./shell/Dialog";
@@ -42,7 +43,8 @@ export function FindReplaceDialog({
   onConfirm: (edit: CardEdit, plan: CardEditPlan) => void;
   onCancel: () => void;
 }) {
-  const { t, readerText, languageLabel } = useI18n();
+  const { t, languageLabel } = useI18n();
+  const { cardText } = useCardText();
   const [find, setFind] = useState("");
   const [replace, setReplace] = useState("");
   const [fields, setFields] = useState<ReadonlySet<ReplaceField>>(new Set(REPLACE_FIELDS));
@@ -145,7 +147,7 @@ export function FindReplaceDialog({
                   const before = byId.get(after.id)!;
                   return (
                     <li key={after.id}>
-                      <strong>{cardName(before, readerText)}</strong>
+                      <strong>{cardName(before, cardText)}</strong>
                       <ul>
                         {changedTexts(before, after).map((change, at) => (
                           <li key={at}>
@@ -174,7 +176,7 @@ export function FindReplaceDialog({
               <ul>
                 {reasons.map(({ id, reason }) => (
                   <li key={id}>
-                    {cardName(byId.get(id)!, readerText)}: {t(`studio.cardBulk.reasons.${reason}`)}
+                    {cardName(byId.get(id)!, cardText)}: {t(`studio.cardBulk.reasons.${reason}`)}
                   </li>
                 ))}
               </ul>

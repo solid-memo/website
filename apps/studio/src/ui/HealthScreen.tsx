@@ -18,7 +18,8 @@ import type { ValidationReport, Violation } from "@solid-memo/domain/validation"
 import { cardName } from "@solid-memo/ui/DataText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { ExternalLink } from "@solid-memo/ui/ExternalLink";
-import { useI18n, type ErrorText, type I18n } from "@solid-memo/ui/i18n";
+import { useCardText } from "@solid-memo/ui/cardLanguage";
+import { useI18n, type CardReader, type ErrorText, type I18n } from "@solid-memo/ui/i18n";
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { repairLabels } from "@solid-memo/ui/RepairContainer";
@@ -135,9 +136,12 @@ function Result({ violation, severity }: { violation: Violation; severity: strin
   );
 }
 
-/** Where in a card a problem is, in words: "Water, note under the back". */
-export function placeText(spot: CardSpot, t: I18n["t"], readerText: I18n["readerText"]): string {
-  const card = cardName(spot.card, readerText);
+/**
+ * Where in a card a problem is, in words: "Water, note under the back",
+ * the card named by `cardText` (its deck's, CardReader).
+ */
+export function placeText(spot: CardSpot, t: I18n["t"], cardText: CardReader["cardText"]): string {
+  const card = cardName(spot.card, cardText);
   const { place } = spot;
   switch (place.tab) {
     case "schedule":
@@ -168,8 +172,9 @@ function SpotLink({
   spotHref: ((spot: CardSpot) => string) | null;
   language?: string;
 }) {
-  const { t, readerText, languageParts } = useI18n();
-  const place = placeText(spot, t, readerText);
+  const { t, languageParts } = useI18n();
+  const { cardText } = useCardText();
+  const place = placeText(spot, t, cardText);
   const text =
     language === undefined || language === ""
       ? place

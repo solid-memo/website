@@ -32,9 +32,9 @@ export interface CrumbSubjects {
 export function crumbsOf(
   route: StudioRoute,
   subjects: CrumbSubjects,
-  i18n: Pick<I18n, "t" | "readerText">,
+  i18n: Pick<I18n, "t" | "readerText" | "cardReader">,
 ): Crumb<StudioRoute>[] {
-  const { t, readerText } = i18n;
+  const { t, readerText, cardReader } = i18n;
   const instances: Crumb<StudioRoute> = {
     label: t("breadcrumbs.instances"),
     route: { screen: "instances" },
@@ -120,7 +120,11 @@ export function crumbsOf(
           label: t("studio.cards.crumb", { deck: deck() }),
           route: { screen: "cards", deckUrl: route.deckUrl },
         },
-        { label: cardName(subjects.card!, readerText), route },
+        // In the deck's card language first, as its screens show the card.
+        {
+          label: cardName(subjects.card!, cardReader(subjects.deck!.cardLanguage).cardText),
+          route,
+        },
       ];
     case "draft":
       return draftCrumbs(route.draftUrl);

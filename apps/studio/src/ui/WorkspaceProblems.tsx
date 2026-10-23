@@ -193,10 +193,12 @@ export interface DeckProblem {
 export function deckProblemsOf(
   deck: Deck,
   health: Health,
-  { t, readerText }: Pick<I18n, "t" | "readerText">,
+  { t, cardReader }: Pick<I18n, "t" | "cardReader">,
 ): DeckProblem[] {
   const at = (spot: CardSpot) => spotRoute(deck.url, spot);
-  const place = (spot: CardSpot) => placeText(spot, t, readerText);
+  // Its cards named as its screens show them: in its card language first.
+  const { cardText } = cardReader(deck.cardLanguage);
+  const place = (spot: CardSpot) => placeText(spot, t, cardText);
   const { violationCount } = health.report;
   const atHealth: StudioRoute = {
     screen: "health",
