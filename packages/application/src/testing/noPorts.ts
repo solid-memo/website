@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type {
+  DigestRepository,
   LanguagePreference,
   CustomPalettePreference,
   PalettePreference,
@@ -54,6 +55,11 @@ const NO_DECK_ARCHIVE: DeckArchive = {
 
 const NO_FILE_EXCHANGE: FileExchange = { save: () => undefined, open: async () => null };
 
+const NO_DIGESTS: DigestRepository = {
+  readDigest: async () => null,
+  updateDigest: async () => undefined,
+};
+
 /**
  * A port that keeps nothing and does nothing, or refuses, for each port
  * a test has no use for: a test spreads NO_PORTS, then gives the ports
@@ -61,6 +67,7 @@ const NO_FILE_EXCHANGE: FileExchange = { save: () => undefined, open: async () =
  * their own, so a missing one is a type error (packages/composition/).
  */
 export const NO_PORTS = {
+  digestRepository: NO_DIGESTS,
   deckArchive: NO_DECK_ARCHIVE,
   fileExchange: NO_FILE_EXCHANGE,
   languagePreference: NO_LANGUAGE_PREFERENCE,

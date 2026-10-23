@@ -4,15 +4,7 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
-import { SM } from "@solid-memo/vocab/vocab.generated";
-import type {
-  AnswerLog,
-  DigestRepository,
-  DeckRepository,
-  ReviewStateRepository,
-  GuestPod,
-  ReleaseDraftRepository,
-} from "./ports";
+import type { AnswerLog, DigestRepository, GuestPod, ReleaseDraftRepository } from "./ports";
 import {
   GUEST_INSTANCE_URL,
   GUEST_ORIGIN,
@@ -39,7 +31,6 @@ import {
   type Deck,
 } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { fsrsInterval } from "@solid-memo/domain/fsrs";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
@@ -56,10 +47,10 @@ import {
   instance,
   deck,
   card,
-  libraryContent,
   makeDeps,
   memoryLog,
 } from "./testing/fakePorts";
+import { now, RULES, review, setup, learned } from "./testing/digestWorld";
 
 describe("createUseCases", () => {
   it("restoreSession delegates to the session gateway", async () => {
@@ -202,125 +193,9 @@ describe("createUseCases", () => {
     await expect(useCases.viewWebIdDocument(session)).resolves.toEqual(document);
     expect(deps.webIdDocumentRepository.fetchWebIdDocument).toHaveBeenCalledWith(session.webId);
   });
-
-  it("planRepair plans from a report, and applyRepairs hands the repairs to the repository", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    expect(
-      useCases.planRepair({
-        instanceUrl: instance.url,
-        documents: [],
-        violationCount: 0,
-        conforms: true,
-      }),
-    ).toEqual({
-      repairs: [],
-      unrepairable: [],
-    });
-    const repairs = [
-      { kind: "describe-deck" as const, documentUrl: "d", subjectUrl: "d#x", version: 3 },
-    ];
-    await useCases.applyRepairs(repairs);
-    expect(deps.repairRepository.applyRepairs).toHaveBeenCalledWith(repairs);
-  });
-
-  it("validateInstance checks every document of the instance", async () => {
-    const deps = makeDeps();
-    vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
-      url.endsWith("catalog.ttl")
-        ? {
-            url,
-            status: "checked",
-            subjects: [
-              {
-                url: `${url}#deck-1`,
-                status: "checked",
-                shape: "deck",
-                version: 2,
-                violations: [
-                  { message: { en: "no title" }, severity: "violation", constraint: "MinCount" },
-                ],
-              },
-            ],
-          }
-        : { url, status: "missing", subjects: [] },
-    );
-    const report = await createUseCases(deps).validateInstance(instance.url);
-    expect(report).toMatchObject({ instanceUrl: instance.url, violationCount: 1, conforms: false });
-    expect(report.documents.map((d) => d.url)).toEqual([
-      `${instance.url}meta.ttl`,
-      `${instance.url}preferences.ttl`,
-      `${instance.url}palettes.ttl`,
-      `${instance.url}catalog.ttl`,
-      deck.cardsDocumentUrl,
-      deck.reviewsDocumentUrl,
-    ]);
-  });
 });
 
 describe("the instance digest", () => {
-  const now = new Date("2026-09-28T10:00:00.000Z");
-  const RULES = "rules-1";
-  const review: ReviewState = {
-    cardId: "card-1",
-    direction: "front-to-back",
-    easeFactor: 2.5,
-    intervalDays: 1,
-    repetitions: 1,
-    due: "2026-09-27",
-    firstReviewedAt: "2026-09-26T10:00:00.000Z",
-    lastReviewedAt: "2026-09-26T10:00:00.000Z",
-    formatVersion: 2,
-  };
-  const current: Card = { ...card, formatVersion: CARD_FORMAT_VERSION };
-  const card2: Card = { ...current, id: "card-2", url: `${deck.cardsDocumentUrl}#card-2` };
-
-  /** The deps, with documents at versions "c1" (cards) and "r1" (reviews) and a digest kept in memory. */
-  function setup(initial: InstanceDigest | null = null) {
-    const deps = makeDeps();
-    let stored = initial;
-    const digestRepository: DigestRepository = {
-      readDigest: vi.fn(async () => stored),
-      updateDigest: vi.fn(async (_instanceUrl, change) => {
-        stored = change(stored);
-      }),
-    };
-    const at = (version: string, value: unknown) =>
-      vi.fn(async (_target: unknown, since: string | undefined) =>
-        since === version
-          ? { unchanged: true as const }
-          : { unchanged: false as const, value, version },
-      );
-    deps.deckRepository.readCardsSince = at("c1", [
-      current,
-      card2,
-    ]) as DeckRepository["readCardsSince"];
-    deps.reviewStateRepository.readReviewStatesSince = at(
-      "r1",
-      sm2s([review]),
-    ) as ReviewStateRepository["readReviewStatesSince"];
-    deps.shapeValidator.validateDocumentSince = vi.fn(
-      async (url: string, since: string | undefined) =>
-        since === `v-${url}`
-          ? { unchanged: true as const }
-          : {
-              unchanged: false as const,
-              value: { url, status: "checked" as const, subjects: [] },
-              version: `v-${url}`,
-            },
-    );
-    const useCases = createUseCases({ ...deps, digestRepository, ruleset: RULES });
-    return { deps, useCases, digestRepository, stored: () => stored };
-  }
-
-  /** What the digest learns from the documents above. */
-  async function learned() {
-    const { useCases, stored, digestRepository } = setup();
-    await useCases.getStudyCounts(instance.url, deck, now);
-    await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalled());
-    return stored()!;
-  }
-
   it("counts today's study from the documents the first time, and keeps the deck's schedule", async () => {
     const { useCases, stored, digestRepository } = setup();
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
@@ -542,109 +417,6 @@ describe("the instance digest", () => {
     expect(stored()!.receipts[deck.reviewsDocumentUrl]!.conformedTo).toBeUndefined();
   });
 
-  it("checks only documents changed since they conformed, by these rules", async () => {
-    const urls = [
-      `${instance.url}meta.ttl`,
-      `${instance.url}preferences.ttl`,
-      `${instance.url}palettes.ttl`,
-      `${instance.url}catalog.ttl`,
-      deck.cardsDocumentUrl,
-      deck.reviewsDocumentUrl,
-    ];
-    const first = setup();
-    await expect(first.useCases.checkInstance(instance.url)).resolves.toMatchObject({
-      conforms: true,
-    });
-    await vi.waitFor(() => expect(Object.keys(first.stored()!.receipts)).toHaveLength(urls.length));
-    expect(first.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
-      urls[0],
-      undefined,
-      "pod",
-    );
-
-    const digest = first.stored()!;
-    const again = setup({
-      ...digest,
-      receipts: {
-        ...digest.receipts,
-        [urls[0]!]: { ...digest.receipts[urls[0]!]!, conformedTo: "older-rules" },
-      },
-    });
-    const report = await again.useCases.checkInstance(instance.url);
-    expect(report.documents.map((d) => d.subjects.length)).toEqual([0, 0, 0, 0, 0, 0]);
-    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
-      urls[0],
-      undefined,
-      "pod",
-    );
-    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
-      urls[1],
-      `v-${urls[1]}`,
-      "pod",
-    );
-  });
-
-  it("checks the instance's drafts against the draft shapes, in the quick check and the full one", async () => {
-    const drafts = [
-      `${instance.url}drafts/solid/v1/release.ttl`,
-      `${instance.url}drafts/solid/v1/cards.ttl`,
-    ];
-    const { deps } = setup();
-    const releaseDraftRepository = {
-      documents: vi.fn(async () => drafts),
-    } as unknown as ReleaseDraftRepository;
-    const useCases = createUseCases({ ...deps, releaseDraftRepository });
-    const report = await useCases.checkInstance(instance.url);
-    expect(report.documents.map((document) => document.url).slice(-2)).toEqual(drafts);
-    expect(deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
-      drafts[0],
-      undefined,
-      "draft",
-    );
-    await useCases.validateInstance(instance.url);
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(drafts[1], "draft");
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
-      `${instance.url}catalog.ttl`,
-      "pod",
-    );
-  });
-
-  it("names the decks whose documents are unclaimed, and checks those documents not, in every check", async () => {
-    const { deps, useCases } = setup();
-    deps.deckRepository.unclaimedDocuments = vi.fn(async () => [deck.reviewsDocumentUrl]);
-    const unclaimed = [
-      { deckUrl: deck.url, title: deck.title, documents: [deck.reviewsDocumentUrl] },
-    ];
-    const quick = await useCases.checkInstance(instance.url);
-    expect(quick.unclaimed).toEqual(unclaimed);
-    expect(quick.documents.map((document) => document.url)).toContain(deck.cardsDocumentUrl);
-    expect(quick.documents.map((document) => document.url)).not.toContain(deck.reviewsDocumentUrl);
-    const full = await useCases.validateInstance(instance.url);
-    expect(full.unclaimed).toEqual(unclaimed);
-    expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalledWith(
-      deck.reviewsDocumentUrl,
-      "pod",
-    );
-    const health = await useCases.checkDeck(instance.url, deck, {
-      plain: (value) => value,
-      check: () => [],
-    });
-    expect(health.report.unclaimed).toEqual(unclaimed);
-    expect(
-      vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
-    ).not.toContain(deck.reviewsDocumentUrl);
-  });
-
-  it("claims a deck's documents as the user confirmed, a deck of the instance only", async () => {
-    const { deps, useCases } = setup();
-    await useCases.claimDeckDocuments(instance.url, deck.url);
-    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck);
-    await expect(
-      useCases.claimDeckDocuments(instance.url, `${instance.url}catalog.ttl#deck-other`),
-    ).rejects.toMatchObject({ code: "deckGone" });
-    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledTimes(1);
-  });
-
   it("keeps no drafts without a repository of them", async () => {
     const useCases = createUseCases(makeDeps());
     await expect(useCases.listReleaseDrafts(instance.url)).resolves.toEqual([]);
@@ -663,70 +435,6 @@ describe("the instance digest", () => {
     const documents = graph.nodes.filter((node) => node.kind === "document");
     expect(documents.length).toBeGreaterThan(0);
     expect(documents.every((node) => node.unreadable === true)).toBe(true);
-  });
-
-  it("keeps no receipt of a document that does not conform or has no version", async () => {
-    const { deps, useCases, digestRepository } = setup();
-    deps.shapeValidator.validateDocumentSince = vi.fn(async (url: string) => ({
-      unchanged: false as const,
-      value: { url, status: "missing" as const, subjects: [] },
-      version: null,
-    }));
-    await useCases.checkInstance(instance.url);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(digestRepository.updateDigest).not.toHaveBeenCalled();
-  });
-
-  describe("checkDeck", () => {
-    const text = {
-      plain: (value: string) => value.replace(/\*/g, ""),
-      check: (value: string) => (value.includes("<") ? [{ code: "html" }] : []),
-    };
-    const unstated: Card = { ...current, front: { "": "水" }, back: { en: "water" } };
-    const twin: Card = { ...unstated, id: "card-3", url: `${deck.cardsDocumentUrl}#card-3` };
-    const marked: Card = {
-      ...card2,
-      front: { en: "<b>x</b>" },
-      back: { en: "x" },
-      textFormat: SM.markdown,
-    };
-
-    it("checks the deck's entry and documents as the instance's check does, its cards' languages, twins and Markdown", async () => {
-      const { deps, useCases } = setup();
-      deps.deckRepository.listCards = vi.fn(async () => [unstated, twin, marked]);
-      const health = await useCases.checkDeck(instance.url, deck, text);
-      expect(
-        vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
-      ).toEqual([`${instance.url}catalog.ttl`, deck.cardsDocumentUrl, deck.reviewsDocumentUrl]);
-      expect(health.report.conforms).toBe(true);
-      expect(health.unstated!.map(({ card }) => card.id)).toEqual(["card-1", "card-3"]);
-      expect(health.duplicates.map((group) => group.map(({ id }) => id))).toEqual([
-        ["card-1", "card-3"],
-      ]);
-      expect(health.markdown.map(({ card, finding }) => [card.id, finding.code])).toEqual([
-        ["card-2", "html"],
-      ]);
-      expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
-    });
-
-    it("leaves out the cards still as the deck's release has them, and does not know them while it cannot be read", async () => {
-      const { deps, useCases } = setup();
-      const copy = { ...deck, sourceUrl: libraryContent.url };
-      deps.deckRepository.listCards = vi.fn(async () => [unstated, twin]);
-      deps.deckLibrary.fetchLibraryDeck = vi.fn(
-        async () =>
-          ({ ...libraryContent, cards: [{ ...unstated, distractors: [] }] }) as LibraryDeckContent,
-      );
-      expect(
-        (await useCases.checkDeck(instance.url, copy, text)).unstated!.map(({ card }) => card.id),
-      ).toEqual(["card-3"]);
-      deps.deckLibrary.fetchLibraryDeck = vi.fn(async () => {
-        throw new Error("offline");
-      });
-      const health = await useCases.checkDeck(instance.url, copy, text);
-      expect(health.unstated).toBeNull();
-      expect(health.duplicates).toHaveLength(1);
-    });
   });
 
   it("tells how far along every deck's prompts are and what each has due, at its pace, and keeps its schedule", async () => {
