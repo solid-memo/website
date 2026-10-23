@@ -81,7 +81,7 @@ keeps to its boundaries."
 | `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `markdown` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()`; `markdown`: `vite.config.ts` and `src/build.test.ts` only, its node tooling, which renders the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
-| `e2e-journeys` | `ui` | `ui`: `harness/strings.ts` only, for the app's messages |
+| `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for the app's messages and the Studio's |
 
 Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
 `solid`, `browser`, `composition`, `ui`, `web` and `studio`; `vocab`'s

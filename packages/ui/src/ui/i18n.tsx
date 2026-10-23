@@ -9,13 +9,8 @@ import type { Violation } from "@solid-memo/domain/validation";
 import { AppError, type ErrorVars } from "@solid-memo/domain/appError";
 import { isolated, shown, shownTag, type LangText } from "@solid-memo/domain/langText";
 import { NO_LANGUAGE } from "@solid-memo/domain/languageTag";
-import { DEFAULT_LOCALE, type Locale } from "@solid-memo/domain/locale";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@solid-memo/domain/locale";
 import en from "../i18n/en.json";
-import sv from "../i18n/sv.json";
-import ko from "../i18n/ko.json";
-import de from "../i18n/de.json";
-import es from "../i18n/es.json";
-import fr from "../i18n/fr.json";
 
 /**
  * A message with a form per plural category its language's plural rules
@@ -42,8 +37,9 @@ export type ErrorText = string | VNode;
 const NETWORK_FAILURE = /fetch|network|load failed/i;
 
 /**
- * The key of every message in English, the language every other is
- * checked against: "deckList.heading", a plural message's included.
+ * The key of every message in an English catalog, the language every
+ * other is checked against: "deckList.heading", a plural message's
+ * included.
  */
 type KeysOf<T, Prefix extends string = ""> = {
   [K in keyof T & string]: T[K] extends string | { other: string }
@@ -51,9 +47,92 @@ type KeysOf<T, Prefix extends string = ""> = {
     : KeysOf<T[K], `${Prefix}${K}.`>;
 }[keyof T & string];
 
-export type MessageKey = KeysOf<typeof en>;
+/**
+ * The English catalogs whose keys `t` takes, by who holds them: `ui`'s
+ * own here, and the Studio's, which apps/studio adds to this interface,
+ * so its keys are typed wherever the Studio's code is.
+ */
+export interface EnglishCatalogs {
+  ui: typeof en;
+}
 
-const CATALOGS: Record<Locale, Messages> = { en, sv, ko, de, es, fr };
+/** The key of every message: `ui`'s, and the Studio's where its code is. */
+export type MessageKey = {
+  [Holder in keyof EnglishCatalogs]: KeysOf<EnglishCatalogs[Holder]>;
+}[keyof EnglishCatalogs];
+
+/**
+ * A set of messages in each of the app's languages: English at hand, the
+ * others each fetched the first time the page speaks it, an `import()`,
+ * so a chunk of its own, and a visitor fetches only the language they
+ * read (docs/i18n.md). `ui`'s own, and the Studio's, which come with its
+ * chunk (addCatalogs).
+ */
+export interface Catalogs {
+  en: Messages;
+  others: Record<Exclude<Locale, "en">, () => Promise<{ default: Messages }>>;
+}
+
+/** A set of catalogs, and its messages in each language fetched so far. */
+interface Source {
+  catalogs: Catalogs;
+  fetched: Partial<Record<Locale, Messages>>;
+}
+
+/** `ui`'s own messages. */
+const UI_CATALOGS: Catalogs = {
+  en,
+  others: {
+    sv: () => import("../i18n/sv.json"),
+    ko: () => import("../i18n/ko.json"),
+    de: () => import("../i18n/de.json"),
+    es: () => import("../i18n/es.json"),
+    fr: () => import("../i18n/fr.json"),
+  },
+};
+
+/** Where a message is looked for, first to last: `ui`'s, then those added. */
+const sources: Source[] = [{ catalogs: UI_CATALOGS, fetched: { en } }];
+
+async function fetchInto(source: Source, locale: Locale): Promise<void> {
+  if (source.fetched[locale] !== undefined) return;
+  // English is there from the start, so this is another language.
+  source.fetched[locale] = (
+    await source.catalogs.others[locale as Exclude<Locale, "en">]()
+  ).default;
+}
+
+/**
+ * Fetch the messages of `locale`, from every set, so that
+ * `createI18n(locale)` speaks it; rejects when they cannot be fetched.
+ * Until then, a set whose messages in it are not here speaks English.
+ */
+export async function loadLocale(locale: Locale): Promise<void> {
+  // A set added meanwhile (the Studio's) is fetched in it too.
+  while (!sources.every((source) => source.fetched[locale] !== undefined))
+    await Promise.all(sources.map((source) => fetchInto(source, locale)));
+}
+
+/**
+ * Add a set of catalogs (the Studio's, once its chunk is here), and fetch
+ * its messages in each language the page has fetched `ui`'s in; rejects
+ * when they cannot be fetched.
+ */
+export async function addCatalogs(catalogs: Catalogs): Promise<void> {
+  const source: Source = { catalogs, fetched: { en: catalogs.en } };
+  sources.push(source);
+  const fetched = LOCALES.filter((locale) => sources[0]!.fetched[locale] !== undefined);
+  await Promise.all(fetched.map((locale) => fetchInto(source, locale)));
+}
+
+/** The message at a dotted key in `locale`, from the first set that has it; undefined when none does. */
+function find(locale: Locale, key: string): Message | undefined {
+  for (const { catalogs, fetched } of sources) {
+    const message = lookup(fetched[locale] ?? catalogs.en, key);
+    if (message !== undefined) return message;
+  }
+  return undefined;
+}
 
 function isPlural(node: Message | Messages): node is Plural {
   return typeof node === "object" && typeof node.other === "string";
@@ -209,7 +288,7 @@ export function createI18n(locale: Locale, appName?: string): I18n {
 
   function template(key: string, count: unknown): string {
     if (key === APP_NAME_KEY && appName !== undefined) return appName;
-    const message = lookup(CATALOGS[locale], key) ?? key;
+    const message = find(locale, key) ?? key;
     if (typeof message === "string") return message;
     // The message files' tests give each plural message every form its language names.
     return typeof count === "number" ? message[plurals.select(count)]! : message.other;
@@ -290,7 +369,7 @@ export function createI18n(locale: Locale, appName?: string): I18n {
   function translatedConstraint(violation: Violation): boolean {
     return (
       violation.builtIn === true &&
-      lookup(CATALOGS[locale], `validation.constraint.${violation.constraint}`) !== undefined
+      find(locale, `validation.constraint.${violation.constraint}`) !== undefined
     );
   }
 
@@ -386,12 +465,15 @@ export function createI18n(locale: Locale, appName?: string): I18n {
 }
 
 interface I18nState extends I18n {
-  /** Speak another language from now on. */
-  chooseLocale(locale: Locale): void;
+  /**
+   * Speak another language from now on, once its messages are here;
+   * rejects, the language unchanged, when they cannot be fetched.
+   */
+  chooseLocale(locale: Locale): Promise<void>;
 }
 
 /** Where no language can be chosen: outside a provider, or under one with no `onChoose`. */
-const keepLocale = () => undefined;
+const keepLocale = async () => undefined;
 
 const I18nContext = createContext<I18nState>({
   ...createI18n(DEFAULT_LOCALE),
@@ -408,13 +490,14 @@ export function I18nProvider({
   locale: Locale;
   /** The site's own name, in place of Solid Memo's (see createI18n). */
   appName?: string;
-  onChoose?: (locale: Locale) => void;
+  /** Speak `locale` (once its messages are fetched: AppShell); a promise that rejects when it cannot. */
+  onChoose?: (locale: Locale) => void | Promise<void>;
   children: ComponentChildren;
 }) {
+  const chooseLocale =
+    onChoose === undefined ? keepLocale : async (chosen: Locale) => onChoose(chosen);
   return (
-    <I18nContext.Provider
-      value={{ ...createI18n(locale, appName), chooseLocale: onChoose ?? keepLocale }}
-    >
+    <I18nContext.Provider value={{ ...createI18n(locale, appName), chooseLocale }}>
       {children}
     </I18nContext.Provider>
   );

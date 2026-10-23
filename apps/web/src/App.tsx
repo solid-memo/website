@@ -9,15 +9,16 @@ import type { PodProvider } from "@solid-memo/domain/podProvider";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "@solid-memo/ui/App";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import type { SiteSource } from "@solid-memo/ui/Footer";
-import { useI18n } from "@solid-memo/ui/i18n";
+import { addCatalogs, useI18n, type Catalogs } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { isStudioHash } from "@solid-memo/ui/router";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { Workspace } from "@solid-memo/ui/Workspace";
 
-/** The Studio's code, as its entry point (`@solid-memo/studio`) exports it. */
+/** The Studio's code, as its entry point (`@solid-memo/studio`) exports it: its workspace, and its messages. */
 export interface StudioModule {
   StudioWorkspace: ComponentType<WorkspaceProps>;
+  STUDIO_CATALOGS: Catalogs;
 }
 
 /**
@@ -51,14 +52,19 @@ export function App({
     return () => window.removeEventListener("hashchange", follow);
   }, []);
 
-  // The Studio's workspace once its code is here, or one that says it could not be fetched.
+  // The Studio's workspace once its code and its messages are here, or one that says they could not be fetched.
   const [studio, setStudio] = useState<ComponentType<WorkspaceProps> | null>(null);
   useEffect(() => {
     if (!inStudio || studio !== null) return;
-    loadStudio().then(
-      (module) => setStudio(() => module.StudioWorkspace),
-      () => setStudio(() => StudioUnavailable),
-    );
+    loadStudio()
+      .then(async (module) => {
+        await addCatalogs(module.STUDIO_CATALOGS);
+        return module;
+      })
+      .then(
+        (module) => setStudio(() => module.StudioWorkspace),
+        () => setStudio(() => StudioUnavailable),
+      );
   }, [inStudio]);
 
   return (

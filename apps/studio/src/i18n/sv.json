@@ -1,0 +1,1601 @@
+{
+  "studio": {
+    "shell": {
+      "status": "Studions status",
+      "density": "Täthet",
+      "compact": "Kompakt",
+      "comfortable": "Luftig",
+      "saving": "Sparar utkastet…",
+      "saved": "Utkastet är sparat",
+      "failed": "Senaste ändringen sparades inte",
+      "close": "Stäng",
+      "sidebar": "Sidofält",
+      "nav": "Studio",
+      "section": {
+        "decks": "Kortlekar",
+        "groups": "Grupper",
+        "drafts": "Utkast",
+        "releases": "Utgåvor",
+        "graph": "Graf",
+        "health": "Hälsa",
+        "library": "Kopior från biblioteket",
+        "transfer": "Importera och exportera",
+        "instance": "Namn och katalog"
+      },
+      "problems": {
+        "one": "{count} problem",
+        "other": "{count} problem"
+      },
+      "filter": "Filtrera kortlekar och utkast",
+      "deckList": "Kortlekar",
+      "draftList": "Utkast",
+      "noDecks": "Inga kortlekar.",
+      "noDrafts": "Inga utkast.",
+      "version": "v{version}",
+      "switchInstance": "Byt instans: {instance}",
+      "allInstances": "Alla instanser",
+      "resizeAside": "Sidopanelens bredd",
+      "hide": "Dölj",
+      "pinned": "Fästa",
+      "recent": "Nyligen öppnade",
+      "pin": "Fäst {name}",
+      "ready": "Redo att publicera",
+      "blocked": {
+        "one": "{count} problem hindrar publicering",
+        "other": "{count} problem hindrar publicering"
+      },
+      "someBlock": {
+        "one": "{count} problem, {blocking} hindrar publicering",
+        "other": "{count} problem, {blocking} hindrar publicering"
+      },
+      "released": "Publicerad"
+    },
+    "tabs": {
+      "deck": "Kortlek",
+      "draft": "Utkast",
+      "cards": "Kort",
+      "schedule": "Schema",
+      "health": "Hälsa",
+      "about": "Om",
+      "export": "Exportera",
+      "overview": "Översikt",
+      "check": "Kontroll",
+      "preview": "Förhandsvisning",
+      "trial": "Provkörning",
+      "diff": "Ändringar",
+      "release": "Utgåva"
+    },
+    "keys": {
+      "palette": "Sök, gå till eller kör ett kommando",
+      "button": "? Tangenter",
+      "heading": "Kortkommandon",
+      "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6, Shift+F6, F8 och Shift+F8.",
+      "characterKeys": "Kortkommandon med en tangent",
+      "characterKeysHint": "Tangenter som trycks utan Ctrl, som g d, j, [ eller ?, som kortkommandon. Stäng av dem om röststyrning eller en tangent av misstag sätter i gång dem; Ctrl+K, F6, F8 och knapparna fungerar ändå.",
+      "scope": {
+        "studio": "Överallt i Studion",
+        "table": "I en tabell: korten, kortlekarna, ett utkasts kort…"
+      },
+      "help": "Visa kortkommandona",
+      "filter": "Gå till skärmens sökning eller filter",
+      "nextRegion": "Gå till nästa område: sidhuvud, sidofält, huvudinnehåll, sidopanel, panel, statusfält",
+      "previousRegion": "Gå till föregående område",
+      "go": {
+        "decks": "Gå till kortlekarna",
+        "groups": "Gå till grupperna",
+        "drafts": "Gå till utkasten",
+        "releases": "Gå till utgåvorna",
+        "health": "Gå till hälsan",
+        "library": "Gå till bibliotekskopiorna",
+        "transfer": "Gå till import och export",
+        "instances": "Gå till instanserna"
+      },
+      "toggleSidebar": "Visa eller dölj sidofältet",
+      "toggleAside": "Visa eller dölj sidopanelen (dispositionen, kortleken, uppgraderingen), eller stäng kortet bredvid korten",
+      "toggleDock": "Visa eller dölj panelen: problem och aktivitet",
+      "nextProblem": "Gå till nästa problems fält",
+      "previousProblem": "Gå till föregående problems fält",
+      "previousTab": "Gå till kortlekens eller utkastets föregående flik",
+      "nextTab": "Gå till kortlekens eller utkastets nästa flik",
+      "tab": "Gå till en flik i kortleken eller utkastet efter dess nummer",
+      "down": "Nästa rad",
+      "up": "Föregående rad",
+      "select": "Välj raden",
+      "open": "Öppna raden",
+      "extendDown": "Välj raden och nästa också",
+      "extendUp": "Välj raden och den före också",
+      "clear": "Rensa valet",
+      "bulk": "Öppna åtgärderna för de valda raderna",
+      "edit": "Redigera cellen: Enter sparar, Escape avbryter"
+    },
+    "dock": {
+      "label": "Panel",
+      "problems": "Problem",
+      "problemsCount": "Problem ({count})",
+      "activity": "Aktivitet",
+      "resize": "Panelens höjd",
+      "noActivity": "Inget gjort ännu sedan Studion öppnades.",
+      "repeated": "{text} ×{count}",
+      "noProblemsHere": "En kortleks eller ett utkasts problem listas på dess skärmar.",
+      "checking": "Letar efter problem…",
+      "none": "Inga problem hittades.",
+      "deckData": {
+        "one": "{count} problem i kortlekens data",
+        "other": "{count} problem i kortlekens data"
+      },
+      "unstated": "{place}: språket anges inte",
+      "duplicate": "{place}: säger samma sak som ett annat kort"
+    },
+    "palette": {
+      "button": "Sök eller kör…",
+      "heading": "Snabböppna",
+      "label": "Sök kortlekar, utkast, kort och kommandon",
+      "none": "Inget matchar.",
+      "help": "Visa kortkommandona",
+      "group": {
+        "recent": "Senast använda",
+        "commands": "Kommandon",
+        "tabs": "Flikar",
+        "sections": "Avsnitt",
+        "instances": "Instanser",
+        "decks": "Kortlekar",
+        "drafts": "Utkast",
+        "cards": "Kortlekens kort",
+        "pinned": "Fästa"
+      }
+    },
+    "decks": {
+      "heading": "Kortlekar",
+      "caption": "Kortlekarna i {instance}",
+      "loading": "Läser in kortlekar…",
+      "empty": "Inga kortlekar än: skapa eller importera dem i {app}.",
+      "filter": "Filtrera på namn eller grupp",
+      "shown": {
+        "one": "{shown} av {count} kortlek",
+        "other": "{shown} av {count} kortlekar"
+      },
+      "noMatch": "Ingen kortlek matchar ”{filter}”.",
+      "select": "Välj",
+      "selectAll": "Välj alla kortlekar som visas",
+      "selectDeck": "Välj {deck}",
+      "title": "Kortlek",
+      "group": "Grupp",
+      "direction": "Riktning",
+      "newCardsPerDay": "Nya per dag",
+      "maxReviewsPerDay": "Repetitioner per dag",
+      "due": "Att repetera idag",
+      "new": "Nya idag",
+      "modified": "Senast ändrad",
+      "cards": "Kort",
+      "cardsOf": "kort i {deck}",
+      "topLevel": "Översta nivån",
+      "followsInstance": "(instansen)",
+      "counting": "Räknar…",
+      "unreadable": "Kunde inte läsas",
+      "badge": {
+        "library": "Bibliotek",
+        "course": "Kurs",
+        "invalid": "Ogiltiga data",
+        "unreadable": "Oläslig",
+        "from": "Från {host}"
+      },
+      "healthOf": "i {deck}"
+    },
+    "views": {
+      "label": "Vyer",
+      "all": "Alla",
+      "due": "Att repetera i dag",
+      "courses": "Kurser",
+      "copies": "Bibliotekskopior",
+      "attention": "Behöver åtgärdas",
+      "none": "Ingen kortlek i den här vyn.",
+      "cards": {
+        "all": "Alla",
+        "due": "Att repetera",
+        "new": "Nya",
+        "leech": "Igelkort"
+      },
+      "options": "Alternativ för vyn {name}",
+      "rename": "Byt namn…",
+      "remove": "Ta bort",
+      "removeHeading": "Ta bort vyn",
+      "removeConfirm": "Ta bort vyn {name}? Bara vyn försvinner: inget i din Pod ändras.",
+      "save": "+ Spara vy",
+      "saveHeading": "Spara vyn",
+      "renameHeading": "Byt namn på vyn {name}",
+      "name": "Namn",
+      "nameHint": "En vy med samma namn ersätts.",
+      "saveButton": "Spara"
+    },
+    "peek": {
+      "label": "Kortlek",
+      "none": "Gå till en kortleks rad ({j}, {k}) för att se den här.",
+      "of": "– {deck}"
+    },
+    "bulk": {
+      "label": "Valda kortlekar",
+      "selected": {
+        "one": "{count} kortlek vald",
+        "other": "{count} kortlekar valda"
+      },
+      "move": "Flytta till grupp",
+      "pace": "Ange takt",
+      "direction": "Ange riktning",
+      "remove": "Ta bort",
+      "clear": "Avmarkera alla",
+      "group": "Grupp",
+      "topLevel": "Översta nivån (ingen grupp)",
+      "moveReadOnly": "En nyare version av Solid Memo har ordnat grupperna, så kortlekar kan inte flyttas in i dem här.",
+      "newCardsPerDay": "Nya kort per dag",
+      "maxReviewsPerDay": "Högst antal repetitioner per dag",
+      "paceHint": "En gräns som lämnas tom följer instansens inställningar.",
+      "apply": "Verkställ",
+      "cancel": "Avbryt",
+      "removeConfirm": {
+        "one": "Ta bort kortleken {names} och alla dess kort? Det går inte att ångra.",
+        "other": "Ta bort {count} kortlekar och alla deras kort: {names}? Det går inte att ångra."
+      },
+      "moved": {
+        "one": "Flyttade {count} kortlek till {group}.",
+        "other": "Flyttade {count} kortlekar till {group}."
+      },
+      "paced": {
+        "one": "Angav takten för {count} kortlek.",
+        "other": "Angav takten för {count} kortlekar."
+      },
+      "directed": {
+        "one": "Angav riktningen för {count} kortlek.",
+        "other": "Angav riktningen för {count} kortlekar."
+      },
+      "removed": {
+        "one": "Tog bort {count} kortlek.",
+        "other": "Tog bort {count} kortlekar."
+      },
+      "export": "Exportera",
+      "moveSetAside": "Ordningen av kortlekarna har ogiltiga data, så kortlekar kan inte flyttas in i grupper förrän den är reparerad.",
+      "groups": {
+        "edit": "Redigera",
+        "editCards": "Redigera de valda korten",
+        "editDecks": "Redigera de valda kortlekarna",
+        "schedule": "Schema",
+        "scheduleCards": "Schema för de valda korten",
+        "transfer": "Flytta eller kopiera",
+        "transferCards": "Flytta eller kopiera de valda korten"
+      }
+    },
+    "groups": {
+      "heading": "Grupper"
+    },
+    "cards": {
+      "crumb": "Kort i {deck}",
+      "heading": "Kort: {deck}",
+      "loading": "Läser in korten…",
+      "courseHint": "En kopia av en kurs: dess kort är kursens frågor.",
+      "empty": "Inga kort i kortleken än.",
+      "search": "Sök",
+      "field": "I",
+      "fields": {
+        "any": "All text",
+        "front": "Framsida",
+        "back": "Baksida",
+        "note": "Anteckningar",
+        "label": "Etikett",
+        "distractor": "Felaktiga alternativ"
+      },
+      "lang": "Språk",
+      "anyLang": "Alla språk",
+      "unstated": "Inget språk angivet",
+      "state": "Läge",
+      "anyState": "Alla lägen",
+      "states": {
+        "live": "I bruk",
+        "retired": "Ur bruk",
+        "new": "Nya",
+        "learning": "Lär in",
+        "young": "Unga",
+        "mature": "Mogna",
+        "due": "Att repetera",
+        "leech": "Blodigel: glöms ofta"
+      },
+      "has": "Har",
+      "anything": "Vad som helst",
+      "features": {
+        "picture": "En bild",
+        "distractors": "Felaktiga alternativ",
+        "markdown": "Markdown",
+        "notes": "Anteckningar"
+      },
+      "pageSize": "Kort per sida",
+      "shown": {
+        "one": "{shown} av {count} kort",
+        "other": "{shown} av {count} kort"
+      },
+      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det, {shiftJ} och {shiftK} väljer också nästa eller det före, {escape} tömmer urvalet, {f2} redigerar en fram- eller baksida i sin cell, och {dot} öppnar åtgärderna för de valda korten.",
+      "selected": {
+        "one": "{count} kort valt",
+        "other": "{count} kort valda"
+      },
+      "noMatch": "Inget kort matchar.",
+      "caption": "Korten i {deck}",
+      "select": "Välj",
+      "selectAll": "Välj alla kort på sidan",
+      "selectCard": "Välj {card}",
+      "column": {
+        "front": "Framsida",
+        "back": "Baksida",
+        "due": "Repeteras",
+        "interval": "Intervall",
+        "ease": "Lätthet",
+        "lapses": "Missar",
+        "created": "Tillagt",
+        "id": "Id"
+      },
+      "days": {
+        "one": "{count} dag",
+        "other": "{count} dagar"
+      },
+      "notStudied": "Inte studerat än",
+      "lapsesSince": "Missar räknar kortets glömda repetitioner sedan {month}, månaden för kortlekens första svar i loggen. Ett första svar, ett kort som kommer tillbaka i passet samma dag och ett kurssvar är ingen miss.",
+      "lapsesNone": "Missar räknar kortets glömda repetitioner: inga är loggade än.",
+      "lapsesLoading": "Läser svarsloggen för missarna…",
+      "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända."
+    },
+    "columns": {
+      "button": "Kolumner",
+      "label": "Visa eller dölj kolumner"
+    },
+    "card": {
+      "heading": "Kort: {card}",
+      "tabs": "Vad som ska redigeras",
+      "tab": {
+        "content": "Innehåll",
+        "distractors": "Felaktiga alternativ ({count})",
+        "schedule": "Schema",
+        "history": "Historik"
+      },
+      "releaseSame": "Det här kortet är som i utgåvan som kortleken kopierades från, så en nyare utgåva uppdaterar det. En ändring kopplar loss det: nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
+      "releaseChanged": "Det här kortet har ändrats sedan utgåvan som kortleken kopierades från, så nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
+      "openInApp": "Öppna kortet i Solid Memo",
+      "steps": "Korten i listan",
+      "previous": "Föregående kort",
+      "next": "Nästa kort",
+      "detail": "Kort",
+      "close": "Stäng kortet",
+      "saved": "Sparade kortet {card}."
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "Spara dina ändringar?",
+        "text": "Vissa ändringar är inte sparade. Spara dem innan du går vidare, kasta dem eller stanna kvar.",
+        "save": "Spara",
+        "discard": "Kasta",
+        "stay": "Stanna"
+      },
+      "cancel": "Avbryt",
+      "deleteCards": "Ta bort de valda korten",
+      "forgetCards": "Glöm de valda kortens framsteg",
+      "deleteDecks": "Ta bort de valda kortlekarna",
+      "forgetDirection": "Glöm kortets framsteg",
+      "restartCourse": "Börja om kursen",
+      "deleteDraft": "Ta bort utkastet",
+      "deletePart": {
+        "chapter": "Ta bort kapitlet",
+        "step": "Ta bort steget",
+        "card": "Ta bort kortet"
+      },
+      "removeData": "Ta bort det ur din pod"
+    },
+    "schedule": {
+      "loading": "Läser in schemat…",
+      "notStudiedSo": "Kortleken studeras inte längre åt det här hållet. Kortets framsteg åt det här hållet sparas.",
+      "new": "Inte studerat åt det här hållet än: kortet är nytt.",
+      "due": "Repeteras",
+      "interval": "Intervall",
+      "ease": "Lätthet",
+      "repetitions": "Rätt i rad",
+      "firstReviewed": "Först repeterat",
+      "lastReviewed": "Senast repeterat",
+      "sm2Heading": "SM-2",
+      "fsrsHeading": "FSRS-6",
+      "stability": "Stabilitet",
+      "difficulty": "Svårighet",
+      "difficultyValue": "{value} av 10",
+      "recall": "Chans att minnas nu",
+      "fsrsSets": "FSRS-6 avgör när korten repeteras, som instansens inställningar säger; SM-2:s tillstånd hålls uppdaterat bredvid.",
+      "sm2Sets": "SM-2 avgör när korten repeteras, som instansens inställningar säger; FSRS-6:s tillstånd uppdateras inte under tiden, och byter du till FSRS-6 räknas det ut på nytt.",
+      "fsrsEstimated": "FSRS-6 avgör när korten repeteras, som instansens inställningar säger, men har inget aktuellt tillstånd för kortet åt det här hållet: SM-2:s dag gäller till nästa repetition, som uppskattar FSRS-6:s tillstånd från SM-2:s.",
+      "dueLabel": "Repeteras den",
+      "reschedule": "Ändra repetitionsdag",
+      "reset": "Glöm framstegen",
+      "resetConfirm": "Glömma kortets framsteg åt det här hållet? Det blir nytt igen. Dess svar finns kvar i historiken.",
+      "hint": "Inget av dem ändrar kortets svar: de finns kvar i historiken och statistiken.",
+      "done": {
+        "reset": "Glömde kortets framsteg åt hållet ”{direction}”.",
+        "reschedule": "”{direction}” repeteras nu den {due}."
+      }
+    },
+    "history": {
+      "loading": "Läser kortets svar…",
+      "empty": "Inga svar på det här kortet i den här kortleken än.",
+      "summary": {
+        "one": "{count} svar. Missar: {lapses}.",
+        "other": "{count} svar. Missar: {lapses}."
+      },
+      "caption": "Kortets svar, nyaste först",
+      "column": {
+        "when": "När",
+        "direction": "Riktning",
+        "grade": "Betyg",
+        "mode": "Hur",
+        "chosen": "Valt felaktigt alternativ"
+      },
+      "mode": {
+        "recall": "Mindes",
+        "multiple-choice": "Flerval"
+      },
+      "unknownOption": "{id} (finns inte längre på kortet)",
+      "hint": "Bara svaren i den här kortleken visas: ett kort som flyttats hit från en annan kortlek börjar sin historik om. Att glömma kortets framsteg behåller dess svar. En miss är en glömd repetition: ett första svar, ett kort som kommer tillbaka i passet samma dag och ett kurssvar är ingen miss."
+    },
+    "insight": {
+      "crumb": "Schema",
+      "heading": "Schema: {deck}",
+      "loading": "Läser schemat…",
+      "today": "Repetitioner i dag",
+      "week": "Repetitioner, de närmaste {count} dagarna",
+      "scheduled": "Studerade, åt varje håll",
+      "leeches": "Blodiglar",
+      "forecastHeading": "Kommande repetitioner",
+      "capDeck": "Högst {max} repetitioner om dagen, som kortleken anger: det som taket håller tillbaka väntar till nästa dag. I dag räknas varje kort som förfallit till i dag.",
+      "capInstance": "Högst {max} repetitioner om dagen, enligt instansens inställningar: det som taket håller tillbaka väntar till nästa dag. I dag räknas varje kort som förfallit till i dag.",
+      "forecast": "Repetitioner, de närmaste {count} dagarna",
+      "forecastLabel": "Repetitioner var och en av de närmaste {count} dagarna, så som det dagliga taket släpper igenom dem.",
+      "forecastDay": "{date}: {reviews} att repetera, {due} förfaller.",
+      "due": "Förfaller",
+      "reviews": "Att repetera",
+      "spreadHeading": "Intervall och lätthet",
+      "noneScheduled": "Inget kort i den här kortleken är studerat än.",
+      "intervals": "Intervall",
+      "intervalsLabel": "Hur många kort, åt varje håll, som har varje intervall.",
+      "interval": "Intervall",
+      "eases": "Lätthet",
+      "easesLabel": "Hur många kort, åt varje håll, som har varje lätthet.",
+      "easesNote": "Lättheten är SM-2:s och hålls uppdaterad vid varje repetition, vilken schemaläggare som än avgör när korten repeteras.",
+      "ease": "Lätthet",
+      "lapsesHeading": "Missar och blodiglar",
+      "lapsesSince": "Missar räknar de glömda repetitionerna sedan {month}, månaden för kortlekens första svar i loggen. Ett första svar, ett kort som kommer tillbaka i passet samma dag och ett kurssvar är ingen miss.",
+      "noAnswers": "Inga svar är loggade än.",
+      "leechHint": "En blodigel är ett kort som glömts {count} gånger eller fler. Det kostar repetition efter repetition: skriv om det, dela upp det eller ta det ur bruk.",
+      "noLeeches": "Inga blodiglar.",
+      "leechLapses": {
+        "one": "glömt {count} gång",
+        "other": "glömt {count} gånger"
+      },
+      "allLeeches": "Visa blodiglarna bland kortlekens kort"
+    },
+    "cardBulk": {
+      "label": "Valda kort",
+      "retire": "Ta ur bruk",
+      "restore": "Ta i bruk igen",
+      "markdownOn": "Skriv i Markdown",
+      "markdownOff": "Skriv som vanlig text",
+      "stateLanguage": "Ange språk",
+      "findReplace": "Sök och ersätt",
+      "reschedule": "Ändra repetitionsdag",
+      "reset": "Glöm framstegen",
+      "remove": "Ta bort",
+      "removeConfirm": {
+        "one": "Ta bort {count} kort och dess framsteg? Du kan ångra det tills du gör nästa ändring eller lämnar sidan.",
+        "other": "Ta bort {count} kort och deras framsteg? Du kan ångra det tills du gör nästa ändring eller lämnar sidan."
+      },
+      "resetConfirm": {
+        "one": "Glömma framstegen för {count} kort? Det blir nytt igen. Dess svar finns kvar i historiken.",
+        "other": "Glömma framstegen för {count} kort? De blir nya igen. Deras svar finns kvar i historiken."
+      },
+      "dueLabel": "Repeteras den",
+      "rescheduleHint": "Ett kort som inte studerats än förblir nytt.",
+      "notStudied": "Inget av de valda korten har studerats än.",
+      "nothing": "Inget av de valda korten skulle ändras.",
+      "tag": "Språkkod",
+      "side": "För",
+      "sides": {
+        "both": "Båda sidorna",
+        "front": "Framsidan",
+        "back": "Baksidan"
+      },
+      "stateHint": "Bara en sida vars språk inte är angivet ändras. Dess text förblir som den är.",
+      "find": "Sök",
+      "replaceWith": "Ersätt med",
+      "fields": "I",
+      "lang": "På språket",
+      "caseSensitive": "Skilj på stora och små bokstäver",
+      "wholeWord": "Bara hela ord",
+      "preview": "Förhandsvisning",
+      "previewEmpty": "Skriv texten att söka efter. Inget ändras förrän du bekräftar.",
+      "noChange": "Inget av de valda korten har den här texten.",
+      "changes": {
+        "one": "{count} kort ändras:",
+        "other": "{count} kort ändras:"
+      },
+      "skippedHeading": {
+        "one": "{count} kort lämnas som det är:",
+        "other": "{count} kort lämnas som de är:"
+      },
+      "reasons": {
+        "missing": "det finns inte längre i kortleken",
+        "unchanged": "inget i det ändras",
+        "wouldEmpty": "en sida eller ett felaktigt alternativ skulle bli tomt",
+        "unstatedLanguage": "dess text anger inget språk; ange det först",
+        "invalid": "kortet är inte giltigt som det är; rätta det i kortredigeraren"
+      },
+      "part": {
+        "front": "Framsida",
+        "back": "Baksida",
+        "frontNote": "Anteckning under framsidan",
+        "backNote": "Anteckning under baksidan",
+        "frontLabel": "Etikett ovanför framsidan",
+        "backLabel": "Etikett ovanför baksidan",
+        "distractor": "Felaktigt alternativ",
+        "distractorNote": "Anteckning till ett felaktigt alternativ"
+      },
+      "removed": "(borttagen)",
+      "confirmReplace": {
+        "one": "Ersätt i {count} kort",
+        "other": "Ersätt i {count} kort"
+      },
+      "done": {
+        "retire": {
+          "one": "Tog {count} kort ur bruk.",
+          "other": "Tog {count} kort ur bruk."
+        },
+        "restore": {
+          "one": "Tog {count} kort i bruk igen.",
+          "other": "Tog {count} kort i bruk igen."
+        },
+        "remove": {
+          "one": "Tog bort {count} kort.",
+          "other": "Tog bort {count} kort."
+        },
+        "replaceText": {
+          "one": "Ersatte text i {count} kort.",
+          "other": "Ersatte text i {count} kort."
+        },
+        "markdownOn": {
+          "one": "Skrev {count} kort i Markdown.",
+          "other": "Skrev {count} kort i Markdown."
+        },
+        "markdownOff": {
+          "one": "Skrev {count} kort som vanlig text.",
+          "other": "Skrev {count} kort som vanlig text."
+        },
+        "stateLanguage": {
+          "one": "Angav språket för {count} kort.",
+          "other": "Angav språket för {count} kort."
+        },
+        "reset": {
+          "one": "Glömde framstegen för {count} kort.",
+          "other": "Glömde framstegen för {count} kort."
+        },
+        "reschedule": {
+          "one": "{count} kort repeteras nu den {due}.",
+          "other": "{count} kort repeteras nu den {due}."
+        },
+        "setText": {
+          "one": "Sparade texten på {count} kort.",
+          "other": "Sparade texten på {count} kort."
+        }
+      },
+      "skipped": {
+        "one": "{count} kort lämnades som det var.",
+        "other": "{count} kort lämnades som de var."
+      },
+      "undo": "Ångra",
+      "undone": "Ångrat: korten är som de var.",
+      "moveTo": "Flytta till kortlek…",
+      "copyTo": "Kopiera till kortlek…",
+      "transfer": {
+        "deck": "Till kortleken",
+        "keepProgress": "Behåll deras framsteg",
+        "moveHint": "Korten lämnar den här kortleken när den andra kortleken har dem. Deras tidigare svar stannar hos den här kortleken, så deras historik börjar om där.",
+        "copyHint": "Den här kortleken behåller korten. Kopiornas historik börjar i den andra kortleken.",
+        "noDeck": "Den här instansen har ingen annan kortlek att lägga korten i.",
+        "move": {
+          "one": "Flytta {count} kort",
+          "other": "Flytta {count} kort"
+        },
+        "copy": {
+          "one": "Kopiera {count} kort",
+          "other": "Kopiera {count} kort"
+        },
+        "moved": {
+          "one": "Flyttade {count} kort till {deck}.",
+          "other": "Flyttade {count} kort till {deck}."
+        },
+        "copied": {
+          "one": "Kopierade {count} kort till {deck}.",
+          "other": "Kopierade {count} kort till {deck}."
+        },
+        "renamed": {
+          "one": "{count} kort fick ett nytt id: kortleken hade redan ett kort med samma id.",
+          "other": "{count} kort fick nya id: kortleken hade redan kort med samma id."
+        },
+        "present": {
+          "one": "{count} kort fanns redan där.",
+          "other": "{count} kort fanns redan där."
+        },
+        "heading": {
+          "move": "Flytta kort till en annan kortlek",
+          "copy": "Kopiera kort till en annan kortlek"
+        }
+      }
+    },
+    "license": {
+      "label": "Licens",
+      "none": "Ingen angiven"
+    },
+    "about": {
+      "crumb": "Om {deck}",
+      "heading": "Om: {deck}",
+      "openInApp": "Öppna kortleken i Solid Memo",
+      "name": "Namn",
+      "rename": "Byt namn",
+      "provenance": "Upphovspersoner och licens",
+      "noProvenance": "Inga upphovspersoner eller licens angivna.",
+      "editProvenance": "Redigera upphovspersoner och licens",
+      "authors": "Upphovspersoner",
+      "authorsHint": "Ett namn, eller ett namn och en e-postadress: Ada Lovelace <ada@example.org>. Lämna en rad tom för att ta bort den.",
+      "author": "Upphovsperson {number}",
+      "removeAuthor": "Ta bort upphovsperson {number}",
+      "addAuthor": "Lägg till en upphovsperson",
+      "saveProvenance": "Spara upphovspersoner och licens",
+      "study": "Studier",
+      "saveStudy": "Spara studieinställningar",
+      "progress": "Framsteg i kursen",
+      "progressLoading": "Läser in kursen…",
+      "chapter": {
+        "done": "Klart",
+        "open": "Öppet",
+        "locked": "Låst"
+      },
+      "notDone": "Markera som inte klart",
+      "notDoneLabel": "Markera {chapter} som inte klart",
+      "goneChapters": "Avklarade kapitel som kursen inte längre har:",
+      "progressHint": "Dina svar och dina framsteg med korten blir kvar som de är.",
+      "restart": "Börja om kursen",
+      "restartConfirm": "Börja om kursen? Alla kapitel markeras som inte klara, så det första öppnas igen. Dina svar och dina framsteg med korten blir kvar.",
+      "saved": "Sparat."
+    },
+    "instance": {
+      "crumb": "Namn och katalog",
+      "heading": "Instans: {instance}",
+      "loading": "Läser in katalogen…",
+      "preferencesLink": "Studieinställningar i Solid Memo",
+      "address": "Adress",
+      "name": "Namn",
+      "nameLabel": "Instansens namn",
+      "nameHint": "Sparas i instansen, i dess katalog och i din Pods listor över data, där andra appar hittar den.",
+      "saveName": "Spara namn",
+      "catalog": "Katalog",
+      "noCatalog": "Den här instansen har ingen katalog än. Öppna den i Solid Memo för att uppdatera den.",
+      "publisher": "Utgivare",
+      "description": "Beskrivning",
+      "licenseHint": "Licensen som kortlekarna erbjuds under, för appar som läser katalogen.",
+      "saveCatalog": "Spara katalog"
+    },
+    "health": {
+      "crumb": "Hälsa",
+      "heading": "Hälsan i {instance}",
+      "deckHeading": "Hälsan i {deck}",
+      "loading": "Kontrollerar…",
+      "checkAgain": "Kontrollera igen",
+      "checking": "Kontrollerar…",
+      "summary": {
+        "one": "{count} problem hittades.",
+        "other": "{count} problem hittades."
+      },
+      "allWell": "Inget är fel med den här kortleken.",
+      "dataHeading": "Datakontroll",
+      "dataHint": "Kortlekens post i katalogen och dess dokument, kontrollerade mot Solid Memos former.",
+      "held": "Inget i kortleken kan ändras förrän data är reparerade, så problemen nedan namnges men länkas inte till sina formulär. Reparera det som kan repareras här, och ta bort det som ingen reparation täcker.",
+      "instanceDataHint": "Instansens dokument, kontrollerade mot Solid Memos former. Dokument som inte ändrats sedan de senast godkändes kontrolleras inte igen.",
+      "deckEntry": "Kortlekens post",
+      "deckDistribution": "Kortlekens distribution",
+      "inDeck": "i {deck}",
+      "remove": "Ta bort {subject}",
+      "removeHint": "Ingen reparation täcker det här: rätta det i dokumentet eller ta bort det.",
+      "decksHeading": "Kortlekar",
+      "decksHint": "Varje kortlek kontrolleras när den syns på skärmen.",
+      "languagesHeading": "Språk",
+      "languagesFine": "Varje kortsida anger sitt språk.",
+      "unstated": {
+        "one": "{count} kortsida anger inget språk.",
+        "other": "{count} kortsidor anger inget språk."
+      },
+      "unstatedLink": "Ange språken på sidan om kortleken",
+      "languagesUnchecked": "Utgåvan som kortleken kopierades från kunde inte läsas, så det går inte att veta vilka sidor du ska ange.",
+      "duplicatesHeading": "Kort som säger samma sak",
+      "duplicatesFine": "Inga två kort i bruk säger samma sak.",
+      "duplicatesHint": "De här korten har samma framsida och baksida, på samma språk, och samma bilder.",
+      "duplicateGroup": "Samma kort {count} gånger:",
+      "markdownHeading": "Markdown",
+      "markdownFine": "Texten som skrivits i Markdown visas så som den var tänkt.",
+      "markdownHint": "Det som inte skulle visas så som det var tänkt, i korten som skrivits i Markdown.",
+      "part": {
+        "front": "framsidan",
+        "back": "baksidan",
+        "frontNote": "anteckningen under framsidan",
+        "backNote": "anteckningen under baksidan",
+        "frontLabel": "etiketten ovanför framsidan",
+        "backLabel": "etiketten ovanför baksidan",
+        "frontImageDescription": "framsidebildens beskrivning",
+        "backImageDescription": "baksidebildens beskrivning"
+      },
+      "place": {
+        "card": "{card}",
+        "part": "{card}, {part}",
+        "distractor": "{card}, felaktigt alternativ {id}",
+        "distractorText": "{card}, felaktigt alternativ {id}",
+        "distractorNote": "{card}, anteckningen till felaktigt alternativ {id}",
+        "schedule": "{card}, dess schema"
+      },
+      "language": "{place} ({language})",
+      "badge": {
+        "problems": {
+          "one": "{count} problem",
+          "other": "{count} problem"
+        },
+        "healthy": "Inga problem",
+        "failed": "Inte kontrollerad"
+      }
+    },
+    "library": {
+      "crumb": "Kopior från biblioteket",
+      "heading": "Kopior från biblioteket i {instance}",
+      "caption": "Kortlekarna i {instance} som kopierats från biblioteket",
+      "loading": "Slår upp i biblioteket…",
+      "empty": "Ingen kortlek här är en kopia av en kortlek från biblioteket. Hitta en i {library}.",
+      "libraryLink": "kortleksbiblioteket",
+      "browse": "Bläddra i kortleksbiblioteket",
+      "intro": "Varje kortlek som kopierats från kortleksbiblioteket eller lagts till från en länk, utgåvan den kom från och den senaste. En uppdatering för över utgåvans ändringar till de kort som du har lämnat som utgåvan hade dem; din repetitionshistorik behålls.",
+      "upgrade": {
+        "one": "Uppdatera {count} kortlek",
+        "other": "Uppdatera {count} kortlekar"
+      },
+      "running": "Uppdaterar {deck} ({at} av {total})",
+      "selectAll": "Välj alla kortlekar som kan uppdateras",
+      "copied": "Kopierad från",
+      "current": "I biblioteket",
+      "update": "Uppdatering",
+      "unknown": "Okänd utgåva",
+      "release": "Utgåva {version}",
+      "gone": "Finns inte längre i biblioteket",
+      "upToDate": "Aktuell",
+      "planning": "Ser efter vad en uppdatering skulle ändra…",
+      "planFailed": "Utgåva {version} finns, men vad den skulle ändra kunde inte läsas.",
+      "nothingToUpdate": "Utgåva {version} finns, men inget i den uppdaterar din kopia.",
+      "changes": "Utgåva {version}: en uppdatering {changes}.",
+      "cards": {
+        "add": {
+          "one": "Läggs till: {count} kort",
+          "other": "Läggs till: {count} kort"
+        },
+        "change": {
+          "one": "Ändras: {count} kort",
+          "other": "Ändras: {count} kort"
+        },
+        "about": {
+          "one": "Vad det handlar om: {count} kort",
+          "other": "Vad de handlar om: {count} kort"
+        },
+        "retire": {
+          "one": "Tas ur bruk: {count} kort",
+          "other": "Tas ur bruk: {count} kort"
+        },
+        "restore": {
+          "one": "Tas tillbaka: {count} kort",
+          "other": "Tas tillbaka: {count} kort"
+        },
+        "remove": {
+          "one": "Tas bort: {count} kort",
+          "other": "Tas bort: {count} kort"
+        },
+        "kept": {
+          "one": "Lämnas som du har det: {count} kort",
+          "other": "Lämnas som du har dem: {count} kort"
+        }
+      },
+      "updated": "{deck}: uppdaterad till utgåva {version}.",
+      "failed": "{deck}: uppdateringen misslyckades i steget ”{step}”:",
+      "badge": "Utgåva {version} finns",
+      "badgeOf": "för {deck}",
+      "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den",
+      "peek": "Gå till en kopias rad ({j}, {k}) för att se vad en uppgradering skulle ändra.",
+      "plan": "Uppgradering",
+      "bulk": "Valda kopior",
+      "selected": {
+        "one": "{count} kopia vald",
+        "other": "{count} kopior valda"
+      }
+    },
+    "transfer": {
+      "crumb": "Importera och exportera",
+      "heading": "Importera och exportera kortlekar i {instance}",
+      "export": "Exportera",
+      "exportIntro": "Spara kortlekar som filer, var och en i en egen fil, i Turtle eller JSON-LD: kortleken, dess kort och deras felaktiga alternativ, och, om du vill, dina framsteg. Alla appar som läser RDF kan läsa dem, och Solid Memo kan importera dem igen.",
+      "noDecks": "Den här instansen har inga kortlekar att exportera än.",
+      "decks": "Kortlekar att exportera",
+      "format": "Format",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "Ta med mina framsteg: när varje kort ska repeteras, och de kapitel i en kurs som jag har slutfört",
+      "exportButton": {
+        "one": "Exportera {count} kortlek",
+        "other": "Exportera {count} kortlekar"
+      },
+      "exporting": "Exporterar {deck} ({at} av {total})…",
+      "exported": {
+        "one": "Exporterade {count} kortlek. Din webbläsare sparar den som en nedladdning.",
+        "other": "Lämnade {count} kortlekar till din webbläsare, var och en att spara som en egen nedladdning. Den kan be dig tillåta flera nedladdningar: de den stoppar sparas inte."
+      },
+      "import": "Importera",
+      "importIntro": "Lägg till en kortlek från en Turtle- eller JSON-LD-fil i {instance}, som en ny kortlek. En fil från en äldre version av Solid Memo uppdateras när den läses.",
+      "choose": "Välj en fil…",
+      "reading": "Läser filen…",
+      "file": "{name}: {deck}",
+      "cards": {
+        "one": "{count} kort",
+        "other": "{count} kort"
+      },
+      "states": {
+        "one": "Framsteg: {count} repetitionstillstånd",
+        "other": "Framsteg: {count} repetitionstillstånd"
+      },
+      "chapters": {
+        "one": "{count} slutfört kapitel",
+        "other": "{count} slutförda kapitel"
+      },
+      "upgraded": {
+        "one": "{count} del av den har ett äldre format och uppdateras.",
+        "other": "{count} delar av den har ett äldre format och uppdateras."
+      },
+      "dropped": {
+        "one": "{count} del av den kan inte läsas och utelämnas.",
+        "other": "{count} delar av den kan inte läsas och utelämnas."
+      },
+      "importProgress": "Importera framstegen också",
+      "importButton": "Importera till {instance}",
+      "importing": "Importerar kortleken…",
+      "imported": "Importerade {deck}."
+    },
+    "readOnly": {
+      "checking": "Instansens data kontrolleras. Inget kan ändras förrän kontrollen är klar.",
+      "blocked": "Instansen har ogiltiga data, och dina inställningar håller den stängd tills de är reparerade, så inget kan ändras här. {repair}",
+      "deck": "Kortleken har ogiltiga data, så den är lagd åt sidan: den visas här, men inget i den kan ändras förrän den är reparerad. {repair}",
+      "decks": "Kortlekar med ogiltiga data är lagda åt sidan: de kan inte väljas eller ändras förrän de är reparerade. {repair}",
+      "catalogue": "Instansens katalog eller en av dess grupper har ogiltiga data, så den är lagd åt sidan: inget kan läggas till i den eller ändras i den förrän den är reparerad. {repair}",
+      "repair": "Reparera den på skärmen Hälsa.",
+      "repairDecks": "Reparera dem på skärmen Hälsa."
+    },
+    "drafts": {
+      "crumb": "Utkast",
+      "loading": "Läser in utkasten…",
+      "heading": "Utkast till utgåvor i {instance}",
+      "intro": "Ett utkast är en kortlek eller kurs som du skriver här, i din Pod, innan du ger ut den som en utgåva som andra kan lägga till. Det finns bara i den här instansen, och ingen annan ser det.",
+      "new": "Nytt utkast",
+      "from": "Börja från",
+      "start": {
+        "blankDeck": "En tom kortlek",
+        "blankCourse": "En tom kurs",
+        "fromDeck": "En kortlek i den här instansen",
+        "nextVersionOf": "Nästa version av en utgåva",
+        "fromFile": "En utgåva sparad som fil"
+      },
+      "name": "Namn",
+      "deck": "Kortlek",
+      "release": "Utgåvans adress",
+      "releaseHint": "Där utgåvan är publicerad, till exempel en kortlek i biblioteket (https://solid-memo.com/decks/<namn>/v1.ttl) eller en utgåva i en Pod. Utkastet behåller varje kort, kapitel och steg som den gav ut.",
+      "fileHint": "En Turtle- eller JSON-LD-fil med en utgåva av en kortlek eller kurs. Utkastet innehåller den som den är.",
+      "create": "Skapa utkastet",
+      "chooseFile": "Välj en fil och skapa utkastet…",
+      "creating": "Skapar utkastet…",
+      "created": "Skapade utkastet {draft}, version {version}.",
+      "basedOn": "Den här kortleken är en kopia av utgåvan {release}. Dess nästa version behåller det som de som studerar den har lärt sig, så du kanske hellre vill börja på den.",
+      "startNext": "Börja på nästa version av den utgåvan",
+      "list": "Utkast",
+      "none": "Den här instansen har inga utkast än.",
+      "caption": "Utkasten i {instance}",
+      "column": {
+        "name": "Utkast",
+        "kind": "Typ",
+        "version": "Version",
+        "state": "Läge",
+        "actions": "Åtgärder"
+      },
+      "kind": {
+        "deck": "Kortlek",
+        "course": "Kurs"
+      },
+      "state": {
+        "writing": "Skrivs",
+        "released": "Utgiven",
+        "unreadable": "Kan inte läsas"
+      },
+      "untitled": "Namnlöst ({name})",
+      "summary": "{kind}, version {version}",
+      "delete": "Ta bort",
+      "deleteDraft": "Ta bort utkastet {draft}, version {version}",
+      "deleteConfirm": "Ta bort utkastet {draft}, version {version}? Det går inte att ångra.",
+      "deleting": "Tar bort utkastet {draft}…",
+      "deleted": "Tog bort utkastet {draft}, version {version}."
+    },
+    "draft": {
+      "untitled": "Namnlöst utkast",
+      "about": "Om den här utgåvan",
+      "title": "Titel",
+      "description": "Beskrivning",
+      "outline": "Disposition",
+      "outlineHint": "Kapitlen, och stegen i vart och ett, i den ordning en elev går igenom dem. Dra ett till en annan plats, eller använd dess meny. Ett stegs frågor ställs i ordningen för deras id.",
+      "newChapter": "Nytt kapitel",
+      "chapterTitle": "Kapitlets titel",
+      "addChapter": "Lägg till kapitlet",
+      "retiredChapters": "Kapitel ur bruk",
+      "questions": "Frågor",
+      "cards": "Kort",
+      "cardCount": {
+        "one": "{count} kort sammanlagt.",
+        "other": "{count} kort sammanlagt."
+      },
+      "allCards": "Alla kort",
+      "newCard": "Nytt kort",
+      "problems": "Problem",
+      "problemsChecking": "Kontrollerar utkastet …",
+      "problemsNone": "Utgåvekontrollen hittar inga problem.",
+      "problemsCount": {
+        "one": "Utgåvekontrollen hittar {count} problem.",
+        "other": "Utgåvekontrollen hittar {count} problem."
+      }
+    },
+    "outline": {
+      "empty": "Inga kapitel än.",
+      "noSteps": "Inga steg än.",
+      "noTheory": "Ingen teori än.",
+      "stepNumber": "Steg {chapter}.{step}",
+      "stepCount": {
+        "one": "{count} steg",
+        "other": "{count} steg"
+      },
+      "actions": "Åtgärder för {name}",
+      "moveTo": "Flytta till kapitel",
+      "inChapter": "i {chapter}",
+      "afterChapter": "efter {chapter}",
+      "moved": "Flyttat.",
+      "dragCancelled": "Flytten avbröts.",
+      "retired": "{name} togs ur bruk.",
+      "deleted": "{name} togs bort."
+    },
+    "chapter": {
+      "untitled": "Kapitel {id}",
+      "number": "Kapitel {number} av {count}",
+      "retired": "Kapitel ur bruk",
+      "title": "Titel",
+      "description": "Beskrivning",
+      "steps": "Steg",
+      "step": "Steg {number}",
+      "stepUp": "Flytta {step} uppåt",
+      "stepDown": "Flytta {step} nedåt",
+      "newStep": "Nytt steg",
+      "addStep": "Lägg till steget",
+      "retiredSteps": "Steg ur bruk",
+      "review": "Slutrepetition",
+      "reviewHint": "Frågor som bara ställs i kapitlets slutrepetition, efter stegens egna frågor.",
+      "newReviewQuestion": "Ny repetitionsfråga"
+    },
+    "step": {
+      "inChapter": "I",
+      "retired": "Steg ur bruk",
+      "theory": "Teori",
+      "questions": "Frågor som kontrollerar den",
+      "questionsHint": "Ställs efter teorin, som inte visas medan de besvaras, i ordningen för deras id.",
+      "newQuestion": "Ny fråga"
+    },
+    "question": {
+      "retired": "Ur bruk",
+      "place": "Ställs",
+      "nowhere": "Ingenstans än",
+      "atStep": "{chapter}, steg {step}",
+      "atReview": "{chapter}, slutrepetition",
+      "preview": "Så som kursen ställer den",
+      "again": "Ställ igen"
+    },
+    "draftCards": {
+      "crumb": "Kort",
+      "heading": "Kort i {draft}",
+      "headingCourse": "Frågor i {draft}",
+      "filter": "Visa",
+      "all": "Alla kort",
+      "filters": {
+        "unasked": "Ställs ingenstans",
+        "askedTwice": "Ställs från två ställen",
+        "fewDistractors": "För få felaktiga alternativ",
+        "retired": "Ur bruk"
+      },
+      "language": "Språk",
+      "anyLanguage": "Alla språk",
+      "unstated": "Inget språk angivet",
+      "count": {
+        "one": "{count} kort",
+        "other": "{count} kort"
+      },
+      "caption": "Utkastets kort",
+      "column": {
+        "front": "Framsida",
+        "back": "Baksida",
+        "place": "Ställs",
+        "distractors": "Felaktiga alternativ",
+        "id": "Id"
+      },
+      "retired": "(ur bruk)",
+      "askedTimes": "Ställs från {count} ställen",
+      "newQuestion": "Ny fråga, som inte ställs någonstans än",
+      "retire": {
+        "one": "Ta {count} kort ur bruk",
+        "other": "Ta {count} kort ur bruk"
+      },
+      "restore": {
+        "one": "Återställ {count} kort",
+        "other": "Återställ {count} kort"
+      }
+    },
+    "draftEdit": {
+      "saving": "Sparar…",
+      "saved": "Alla ändringar är sparade.",
+      "released": "Det här utkastet har getts ut och är därför fryst: inget i det kan ändras. Dess nästa version påbörjas från {drafts}.",
+      "releasedLink": "utkasten",
+      "chooseLanguage": "Välj språk för {field} för att spara det.",
+      "id": "Id",
+      "idHint": "En del av dess adress i utgåvan, och ändras aldrig när det väl har getts ut. Bokstäverna A till Z, siffror, ”.”, ”_” och ”-”.",
+      "idProblem": {
+        "invalid": "Ett id består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-”, och börjar med en bokstav eller siffra.",
+        "taken": "Det här utkastet, eller en utgåva före det, har redan det här id:t."
+      },
+      "addQuestion": "Lägg till frågan",
+      "questionEmpty": "Skriv framsidan och baksidan.",
+      "askedWhere": "Ställ den",
+      "askedLast": "Efter den sista frågan",
+      "askedBefore": "Före ”{name}”",
+      "noIdBetween": "Assistenten hittar inget id som sorteras där: skriv ett som gör det.",
+      "notAskedThere": "Det här id:t sorteras inte där, så frågan skulle inte ställas där ”Ställ den” säger: skriv ett som gör det.",
+      "retire": "Ta ur bruk",
+      "restore": "Återställ",
+      "delete": "Ta bort",
+      "published": "En tidigare utgåva gav ut det här, så en elevs framsteg kan nämna det: det kan tas ur bruk, aldrig tas bort.",
+      "life": {
+        "chapter": "Ta kapitlet ur bruk eller ta bort det",
+        "step": "Ta steget ur bruk eller ta bort det",
+        "card": "Ta kortet ur bruk eller ta bort det"
+      },
+      "deleteConfirm": {
+        "chapter": "Ta bort kapitlet {name}, med dess steg? Dess frågor finns kvar, utan att ställas någonstans.",
+        "step": "Ta bort {name}? Dess frågor finns kvar, utan att ställas någonstans.",
+        "card": "Ta bort kortet {name}, med dess felaktiga alternativ?"
+      },
+      "refused": {
+        "released": "Det här utkastet har getts ut: det ändras inte längre.",
+        "missing": "”{id}” finns inte längre i det här utkastet. Kanske ändrades det i en annan flik.",
+        "published": "En tidigare utgåva gav ut ”{id}”: det kan tas ur bruk, aldrig tas bort.",
+        "idTaken": "Id:t ”{id}” är upptaget, i det här utkastet eller en utgåva före det.",
+        "idInvalid": "”{id}” kan inte vara ett id: bokstäverna A till Z, siffror, ”.”, ”_” och ”-”, med en bokstav eller siffra först.",
+        "askedElsewhere": "Det här kortet ställs redan från ett annat ställe: flytta det dit i stället.",
+        "notACourse": "Bara en kurs har kapitel, steg och frågor.",
+        "notFrontToBack": "En kurs studeras från framsida till baksida.",
+        "carriedActivity": "Hur en tidigare utgåva togs fram skrivs inte om.",
+        "noAuthors": "Ange en upphovsperson först: tillskrivningen nämner utgåvans upphovspersoner.",
+        "unusedSource": "En källa är en som utgåvan bygger på eller som dess framtagning använde: kryssa i minst en."
+      }
+    },
+    "check": {
+      "crumb": "Utgåvekontroll",
+      "heading": "Utgåvekontroll",
+      "intro": "Varje regel en utgåva hålls till, körd på utkastet som den utgåva det blir. Varje problem länkar till den del av utkastet det gäller.",
+      "policy": "Kontrollera för",
+      "policyPod": "En utgåva i din pod",
+      "policyLibrary": "Solid Memos bibliotek",
+      "policyHintPod": "En utgåva i en pod hålls till reglerna för sina data: sin kurs, vad en utgåva anger, sin Markdown och utgåvan den följer.",
+      "policyHintLibrary": "En kortlek som skickas till Solid Memos bibliotek hålls också till dess urval (titel, beskrivning och nyckelord på varje språk appen talar, temat Utbildning) och placeras bland dess kortlekar av bibliotekets index.",
+      "checking": "Kontrollerar utkastet …",
+      "clear": "Inga problem hittades.",
+      "summary": {
+        "one": "{count} problem.",
+        "other": "{count} problem."
+      },
+      "errors": "Fel",
+      "warnings": "Varningar",
+      "shapesHeading": "Former",
+      "shapesHint": "Formerna, och profilerna DCAT-AP och SKOS, kontrollerar utgåvan som publicerade data. De tar en stund på ett stort utkast, så de körs bara när du ber om det.",
+      "shapesRun": "Kontrollera mot formerna",
+      "shapesRunning": "Kontrollerar mot formerna …",
+      "again": "Kontrollera utkastet igen",
+      "shapesAgain": "Kontrollera igen",
+      "shapesStale": "Utkastet har ändrats sedan dess: det här är problemen det hade då.",
+      "shapesClear": "Formerna hittar inget fel.",
+      "shapesCount": {
+        "one": "Formerna hittar {count} problem, bland dem ovan.",
+        "other": "Formerna hittar {count} problem, bland dem ovan."
+      },
+      "release": "Den här utgåvan",
+      "distractor": "Felaktigt alternativ {id}",
+      "badge": {
+        "one": "{count} problem",
+        "other": "{count} problem"
+      },
+      "badgeOf": "i {name}",
+      "untagged": "text utan språk",
+      "nothing": "ingenting",
+      "firstVersion": "ingenting, eftersom det är första versionen",
+      "kind": {
+        "card": "ett kort",
+        "chapter": "ett kapitel",
+        "step": "ett steg",
+        "distractor": "ett felaktigt alternativ"
+      },
+      "profile": "{profile}: {message}"
+    },
+    "field": {
+      "title": "Titel",
+      "description": "Beskrivning",
+      "publisher": "Utgivare",
+      "license": "Licens",
+      "version": "Version",
+      "inSeries": "Serie",
+      "isVersionOf": "Serie som den är en version av",
+      "distribution": "Distribution",
+      "theme": "Teman",
+      "keyword": "Nyckelord",
+      "prev": "Föregående version",
+      "previousVersion": "Föregående version",
+      "studyDirection": "Studieriktning",
+      "theory": "Teori",
+      "checkedBy": "Frågor",
+      "isPartOf": "Vad den är del av",
+      "position": "Plats",
+      "reviewQuestion": "Repetitionsfrågor",
+      "front": "Framsida",
+      "back": "Baksida",
+      "frontLabel": "Framsidans etikett",
+      "backLabel": "Baksidans etikett",
+      "frontNote": "Anteckning under framsidan",
+      "backNote": "Anteckning under baksidan",
+      "frontImageDescription": "Beskrivning av bilden på framsidan",
+      "backImageDescription": "Beskrivning av bilden på baksidan",
+      "distractor": "Felaktiga alternativ",
+      "distractorText": "Felaktigt alternativ",
+      "distractorNote": "Varför det är fel",
+      "textFormat": "Textformat",
+      "versionNotes": "Versionsanteckningar",
+      "language": "Språk",
+      "creator": "Upphovspersoner",
+      "comment": "Kommentar",
+      "wasDerivedFrom": "Källor"
+    },
+    "problem": {
+      "notARelease": "{path} är ingen plats för en utgåva i biblioteket: namnet får bara innehålla gemener, siffror och bindestreck.",
+      "versionGap": "Bibliotekets versioner av {deck} skulle inte löpa 1, 2, … utan luckor: {versions}.",
+      "notOneDeck": "Utgåvan beskriver inte exakt en kortlek, sig själv: den har {decks}.",
+      "versionMismatch": "Anger version {stated}; dess plats säger {expected}.",
+      "linkMismatch": "{field}: anger {stated}; dess plats säger {expected}.",
+      "noLicense": "Anger ingen licens: en kortlek i biblioteket anger vilken licens den ges ut under.",
+      "cardsDropped": "Tar bort {ids}, som {previous} har. Ett kort tas aldrig bort: ta det ur bruk i stället, så att eleverna behåller det och dess historik.",
+      "outlineDropped": "Tar bort {ids}, som {previous} har. Ett kapitel, steg eller felaktigt alternativ tas aldrig bort: ta det ur bruk i stället, så att eleverna behåller sin plats.",
+      "idReused": "{id} är {now} här, men {was} i {previous}: ett id namnger ett och samma subjekt för alltid.",
+      "versionNotNext": "Version {version} följer inte {previous}, version {previousVersion}.",
+      "outlineWithoutCourse": "Har kapitel eller steg, men är ingen kurs.",
+      "courseWithoutChapter": "En kurs har minst ett kapitel.",
+      "courseDirection": "En kurs studeras från framsida till baksida; den här anger {stated}.",
+      "chapterPartOf": "Är del av {parts}: ett kapitel är del av utgåvan det står i.",
+      "stepPartOf": "Är del av {part}, som inte är något kapitel i den här utgåvan.",
+      "askedNotACard": "Frågar {card}, som inte är något kort i den här utgåvan.",
+      "askedRetired": "Frågar {card}, som är ur bruk: fråga ett kort i bruk, eller ta även detta ur bruk.",
+      "notADistractor": "Anger {distractor} som felaktigt alternativ, men det är inget felaktigt alternativ i den här utgåvan.",
+      "distractorShared": "Är ett felaktigt alternativ till {cards}: varje kort har sina egna.",
+      "checkedTwice": "Ställs av stegen {steps}: högst ett steg ställer en fråga.",
+      "checkedAndReviewed": "Ställs av {steps} och i repetitionen av {chapters}: en fråga ställs på ett ställe.",
+      "noBack": "Har ingen text på baksidan, det rätta alternativet.",
+      "fewDistractors": {
+        "one": "Har {count} felaktigt alternativ i bruk: en fråga som en kurs ställer har minst {least}.",
+        "other": "Har {count} felaktiga alternativ i bruk: en fråga som en kurs ställer har minst {least}."
+      },
+      "distractorLanguages": "Har ingen text på {missing}, som baksidan av {card} har.",
+      "chapterPositions": "Kapitlen {chapters} delar plats {position}.",
+      "stepPositions": "Stegen {steps} delar plats {position}.",
+      "chapterWithoutStep": "Har inget steg i bruk.",
+      "textFormatMisplaced": "Anger ett textformat, vilket bara ett kort, ett steg eller ett kapitel gör.",
+      "textFormatUnknown": "Anger ett textformat som appen inte känner till, {format}: dess text visas som vanlig text.",
+      "markdown": "{field}, {language}: {finding}",
+      "theoryEmptyChunk": "{field}, {language}: ett tematiskt avbrott först, sist eller direkt efter ett annat ger en tom del, som appen hoppar över. Ett stegs teori visas en del i taget, delad vid sina tematiska avbrott: skriv text mellan varje två.",
+      "theoryChunks": "{field}: i {counts}. Ett stegs teori har lika många delar på varje språk, så att den som byter språk inte tappar sin plats.",
+      "theoryChunkCount": {
+        "one": "{count} del på {language}",
+        "other": "{count} delar på {language}"
+      },
+      "missingLanguage": "{field}: ingen text på {language}.",
+      "missingImageDescription": "{field}: ingen beskrivning på {language}. Utan den säger en skärmläsare bara att det finns en bild.",
+      "missingTheme": "Teman: saknar {theme}.",
+      "missingContact": "Kontakt: bibliotekets, {contact}, anges inte. En utgåva för biblioteket anger den, inte en e-postadress.",
+      "emailNamed": "Anger en e-postadress: en utgåva för biblioteket anger ingens e-postadress, bara bibliotekets kontakt.",
+      "required": "{field}: inte angivet än.",
+      "previousUnread": "Utgåvan den följer, {previous}, kunde inte läsas, så inget kontrolleras mot den. Kontrollera igen senare.",
+      "libraryUnread": "Bibliotekets index kunde inte läsas, så utkastets plats i biblioteket kontrolleras inte. Kontrollera igen senare.",
+      "shape": "{field}: {message}",
+      "unshaped": "Är av en klass i Solid Memo som ingen form i den här appen beskriver.",
+      "sourceUndescribed": "Anger inte {missing}: en källa säger vad den är, vems den är och på vilka villkor den användes.",
+      "usedNotDerived": "Användes för att ta fram utgåvan, som inte säger att den bygger på den.",
+      "countDisagrees": "Säger {stated} {what}, men utgåvan har {counted}."
+    },
+    "preview": {
+      "crumb": "Förhandsvisning av listningen",
+      "heading": "Förhandsvisning av listningen",
+      "intro": "Den här utgåvan i biblioteket, som eleverna kommer att se den. Inget här går att klicka på: det är en bild.",
+      "row": "I bibliotekets lista",
+      "page": "På sin egen sida"
+    },
+    "diff": {
+      "crumb": "Ändringar",
+      "heading": "Ändringar sedan föregående version",
+      "intro": "Det här utkastet jämfört med utgåvan det följer: vad det lägger till, ändrar, tar ur bruk och tar i bruk igen, och vad elever som har den utgåvan skulle få av det.",
+      "comparing": "Jämför utkastet…",
+      "first": "Det här utkastet är en första version: det följer ingen utgåva, så det finns inget att jämföra det med.",
+      "against": "Jämfört med version {version}, {url}.",
+      "rules": "Seriens regler",
+      "rulesKept": "Det tar inte bort något, ger inget id åt ett annat slags subjekt, och dess version är nästa.",
+      "about": "Vad det säger om sig självt",
+      "aboutSame": "Oförändrat.",
+      "aboutChanged": "Ändrat: {fields}.",
+      "detail": {
+        "course": "kurs eller kortlek",
+        "title": "titel",
+        "description": "beskrivning",
+        "keywords": "nyckelord",
+        "themes": "teman",
+        "direction": "studieriktning",
+        "license": "licens",
+        "authors": "upphovspersoner",
+        "languages": "språk",
+        "sources": "källor"
+      },
+      "subjects": "Dess innehåll",
+      "subjectsSame": "Varje kapitel, steg, kort och felaktigt alternativ är som det var.",
+      "kind": {
+        "chapter": "Kapitel",
+        "step": "Steg",
+        "card": "Kort",
+        "distractor": "Felaktiga alternativ"
+      },
+      "unchanged": {
+        "one": "{count} som det var.",
+        "other": "{count} som de var."
+      },
+      "status": {
+        "added": "tillagt",
+        "changed": "ändrat",
+        "retired": "taget ur bruk",
+        "restored": "taget i bruk igen",
+        "retiredChanged": "taget ur bruk, och ändrat",
+        "restoredChanged": "taget i bruk igen, och ändrat"
+      },
+      "learners": "Vad eleverna får",
+      "notNewer": "Eleverna erbjuds bara en nyare utgåva, och version {version} kommer inte efter version {previous}.",
+      "noUpgrade": "En elevs kopia av version {previous} skulle inte ändras.",
+      "upgrade": "En uppdatering av en elevs kopia av version {previous} {changes}.",
+      "retiredOnly": "uppdaterar bara kort som är tagna ur bruk",
+      "courseLearner": "Kopian här tillhör en elev som har nått varje fråga. En kurs elever får dess nya frågor när de når dem.",
+      "nothingLost": "Ingen elev förlorar framsteg: det utkastet inte längre använder tar det ur bruk, och ett kort ur bruk behåller sin historik.",
+      "lost": "Framsteg eleverna skulle förlora",
+      "lostCards": {
+        "one": "Repetitionshistoriken för {count} kort som utkastet tar bort: {ids}.",
+        "other": "Repetitionshistoriken för {count} kort som utkastet tar bort: {ids}."
+      },
+      "lostChapters": {
+        "one": "{count} slutfört kapitel som utkastet tar bort: {ids}.",
+        "other": "{count} slutförda kapitel som utkastet tar bort: {ids}."
+      }
+    },
+    "trial": {
+      "crumb": "Provkörning",
+      "heading": "Provkörning",
+      "intro": "Utkastet spelat som en elev kommer att spela det, i en sandlåda på den här sidan: inget som görs här når din pod, och börjar du om glöms allt bort.",
+      "opening": "Förbereder provkörningen…",
+      "notReady": "Det här utkastet går inte att spela än. Rätta först detta:",
+      "controls": "Provkörningens kontroller",
+      "coursePage": "Kursens sida",
+      "chapter": "Kapitel",
+      "jump": "Öppna kapitlet",
+      "jumpHint": "Som en elev som har klarat varje kapitel före det.",
+      "answersCourse": "Varje fråga i kapitlet som visas, eller i kapitlet som står på tur:",
+      "answersDeck": "Varje kort att studera nu:",
+      "allRight": "Svara rätt på allt",
+      "allWrong": "Svara fel på allt",
+      "days": "Dagar framåt",
+      "advance": "Gå framåt",
+      "ahead": {
+        "one": "Provkörningen är {count} dag framåt.",
+        "other": "Provkörningen är {count} dagar framåt."
+      },
+      "today": "Provkörningen är på dagens datum.",
+      "working": "Arbetar…",
+      "reset": "Börja om",
+      "reload": "Läs in utkastet igen"
+    },
+    "release": {
+      "crumb": "Utgåva",
+      "heading": "Utgåvans metadata och proveniens",
+      "intro": "Vad utgåvan säger om sig själv utöver sin listning: vem som sammanställde den och hur, och vad den togs fram ur. Varje ändring sparas när den görs.",
+      "about": "Om den här versionen",
+      "versionNotes": "Versionsanteckningar",
+      "versionNotesHint": "Vad den här versionen är, eller ändrar, med några ord till eleverna.",
+      "languages": "Språk",
+      "languagesHint": "Språken dess innehåll är på, ur EU:s tabell över språk.",
+      "languageOther": "{iri} (finns inte i tabellen)",
+      "themes": "Teman",
+      "themesHint": "Vad utgåvan handlar om: EU:s tema som utgåvekontrollen kräver, och ämnena biblioteket listar den under.",
+      "themeEducation": "Utbildning, kultur och sport (EDUC)",
+      "themesRequired": "EU:s datatema (krävs)",
+      "themesTopics": "Solid Memos ämnen (valfritt)",
+      "themesOther": "Andra teman som utgåvan anger",
+      "licenseHint": "Anges som ett licensdokument, som DCAT-AP kräver.",
+      "contact": "Kontakt",
+      "contactHint": "En webbsida där läsare kan fråga om utgåvan eller rapportera ett fel i den, till exempel en ärendehanterare. Solid Memos bibliotek kräver sin egen, och ingens e-postadress.",
+      "contactLibrary": "Använd bibliotekets kontakt",
+      "contactInvalid": "Ange en webbadress som börjar med https:// eller http://.",
+      "publisher": "Utgivare",
+      "publisherNone": "Ingen angiven",
+      "publisherHint": "Vem som ger ut utgåvan: en av dess upphovspersoner, eller den utgivare den redan nämner.",
+      "authors": "Upphovspersoner",
+      "authorsHint": "De som sammanställde utgåvan, sparade i själva utgåvan.",
+      "noAuthors": "Inga upphovspersoner än.",
+      "otherAuthors": "Nämns också, i ett annat dokument, och behålls som de är: {authors}",
+      "authorName": "Namn",
+      "authorEmail": "E-post (valfritt)",
+      "saveAuthor": "Spara",
+      "newAuthor": "Ny upphovsperson",
+      "addAuthor": "Lägg till upphovspersonen",
+      "authorEmpty": "Skriv upphovspersonens namn.",
+      "making": "Hur den togs fram",
+      "attribution": "Tillskrivning",
+      "attributionHint": "Säger vem som sammanställde utgåvan, på engelska och svenska. Inget här säger att någon har granskat den.",
+      "attributionNone": "Ingen tillskrivning",
+      "attributionNeedsAuthors": "Ange en upphovsperson först: tillskrivningen nämner utgåvans upphovspersoner.",
+      "makingNotes": "Anteckningar om hur den togs fram",
+      "makingNotesHint": "Varje stycke sparas som en anteckning om hur utgåvan togs fram: dess källor, struktur, urval eller licenser, till exempel. Ett antal som en anteckning anger (kapitel, steg, källor eller kort sammanlagt) kontrolleras mot utgåvan.",
+      "sources": "Källor",
+      "sourcesHint": "Vad utgåvan togs fram ur. Varje källa säger vad den är, vems den är och på vilka villkor den användes: dess licens, eller belägget för en. Studion visar dess adress och öppnar den aldrig.",
+      "noSources": "Inga källor än.",
+      "sourceIri": "Adress",
+      "sourceTitle": "Titel",
+      "sourceCreator": "Upphov",
+      "sourceLicense": "Licens (dess adress)",
+      "sourceEvidence": "Belägg för dess licens",
+      "derivedFrom": "Utgåvan bygger på den",
+      "used": "Den här versionens framtagning använde den",
+      "usedEarlier": "En tidigare versions framtagning använde den.",
+      "sourceOthers": {
+        "one": "{count} uppgift till om den behålls som den är.",
+        "other": "{count} uppgifter till om den behålls som de är."
+      },
+      "saveSource": "Spara källan",
+      "newSource": "Ny källa",
+      "addSource": "Lägg till källan",
+      "sourceInvalid": "Ange källans webbadress, som börjar med https:// eller http://.",
+      "sourceExists": "Utgåvan nämner redan den här källan.",
+      "sourceUnused": "Kryssa i minst en: utgåvan bygger på den, eller den här versionens framtagning använde den.",
+      "licenseInvalid": "Ange licensens webbadress, som börjar med https:// eller http://, eller lämna fältet tomt.",
+      "checks": "Kontroller",
+      "checksHint": "Kontroller som utgåvan har gått igenom, maskinellt (validerarna, utgåvekontrollen) eller av AI. Var och en sparas uttryckligen som en kontroll som inte är en mänsklig granskning; Studion kan inte spara någon mänsklig granskning.",
+      "noChecks": "Inga kontroller sparade än.",
+      "checkKind": "Kontrollerad av",
+      "checkMachine": "En maskin",
+      "checkAi": "AI",
+      "checkLabel": "Vad den gällde",
+      "checkScope": "Omfattning",
+      "checkOutcome": "Utfall",
+      "checkEnded": "Avslutad",
+      "checkLanguage": "Skriven på",
+      "checkLanguageEn": "Engelska",
+      "checkLanguageSv": "Svenska",
+      "checkEmpty": "Skriv vad den gällde, dess omfattning och dess utfall.",
+      "newCheck": "Ny kontroll",
+      "addCheck": "Spara kontrollen",
+      "saveCheck": "Spara kontrollen",
+      "checkOtherwise": "Skriven på ett annat sätt än Studion skriver en kontroll: den kan tas bort, inte ändras.",
+      "carried": "Från tidigare versioner",
+      "carriedHint": "Hur tidigare versioner togs fram. Behålls som de är: en utgåva skrivs aldrig om.",
+      "detail": {
+        "title": "sin titel",
+        "creator": "sitt upphov",
+        "licence": "sin licens eller belägget för en"
+      },
+      "counted": {
+        "chapters": "kapitel",
+        "steps": "steg",
+        "sources": "källor",
+        "cards": "kort sammanlagt"
+      },
+      "edit": "Ändra",
+      "cancel": "Avbryt",
+      "remove": "Ta bort",
+      "editOf": "Ändra {name}",
+      "removeOf": "Ta bort {name}"
+    },
+    "publish": {
+      "heading": "Publicera",
+      "intro": "När du publicerar skrivs utgåvan i din Pod som ett Turtle-dokument, på en adress som aldrig ändras, och blir läsbar för alla. En utgåva ändras aldrig efteråt: för att ändra den skriver du ett utkast till nästa version.",
+      "checking": "Kontrollerar utkastet…",
+      "noErrors": "Utgåvekontrollen hittar inga fel. När du publicerar kontrolleras utgåvan igen, mot formerna också.",
+      "errors": {
+        "one": "Utgåvekontrollen hittar {count} fel. Rätta det innan du publicerar.",
+        "other": "Utgåvekontrollen hittar {count} fel. Rätta dem innan du publicerar."
+      },
+      "folder": "Mapp i din Pod",
+      "folderInvalid": "Ange mappens webbadress, som börjar med https:// eller http:// och slutar med /.",
+      "address": "Utgåvan publiceras på {url}.",
+      "confirm": "Jag förstår att utgåvan blir offentlig: alla som har dess adress kan läsa den. När den är publicerad kan den aldrig ändras eller tas tillbaka här.",
+      "publish": "Publicera i min Pod",
+      "publishing": "Kontrollerar och publicerar utgåvan…",
+      "waitSaving": "Väntar på att dina ändringar sparas…",
+      "guest": "En gästs studier finns bara i den här webbläsaren, där ingen annan skulle kunna läsa en utgåva. Flytta dina studier till en Pod för att publicera den där. Under tiden kan du ladda ner den som en fil.",
+      "releasedAt": "Utkastet gavs ut på {url}.",
+      "askingPublic": "Frågar om vem som helst kan läsa den…",
+      "public": "Alla som har dess adress kan läsa den.",
+      "private": "Bara du kan läsa den: din Pod gjorde den inte offentlig. Försök igen, eller gör den läsbar för alla med verktygen hos din Pod-leverantör.",
+      "makePublic": "Gör den offentlig",
+      "makingPublic": "Gör utgåvan offentlig…",
+      "nextHint": "En utgåva ändras aldrig. För att ändra den börjar du på nästa version: ett nytt utkast som behåller allt som den här utgåvan gav ut.",
+      "downloadHeading": "Ladda ner",
+      "downloadIntro": "Spara utgåvan som en Turtle-fil, med den adress den skulle få i Solid Memos bibliotek, för att föreslå den till biblioteket. Inget i din Pod ändras.",
+      "download": "Ladda ner .ttl",
+      "downloaded": "Sparade {file}, som utgåvan på {url}.",
+      "stepsIntro": "För att föreslå den till biblioteket, i en kopia av Solid Memos kodförråd:",
+      "stepCopy": "Lägg filen i decks/ som {file}.",
+      "stepLibrary": "Formatera den, och för in den i bibliotekets index:",
+      "stepCheck": "Kontrollera den mot bibliotekets regler:",
+      "stepAll": "Kör alla kontroller:",
+      "stepPullRequest": "Öppna en pull request med den nya filen och indexet.",
+      "libraryCheck": "Kontrollera utkastet för biblioteket först"
+    },
+    "releases": {
+      "crumb": "Utgåvor",
+      "link": "Publicerade utgåvor",
+      "loading": "Läser utgåvorna…",
+      "heading": "Utgåvor publicerade från {instance}",
+      "intro": "Varje utgåva är ett dokument i din Pod, som den som lär sig lägger till med dess adress. En utgåva ändras aldrig: för att ändra en börjar du på nästa version.",
+      "none": "Den här instansen har inte publicerat några utgåvor än.",
+      "caption": "Utgåvor publicerade från {instance}",
+      "column": {
+        "release": "Utgåva",
+        "readers": "Läsbar för",
+        "draft": "Utkast",
+        "actions": "Åtgärder"
+      },
+      "filter": "Filtrera på namn eller adress",
+      "noMatch": "Ingen utgåva matchar ”{filter}”.",
+      "noDraft": "Inte bland den här instansens utkast",
+      "name": "{name}, version {version}",
+      "public": "Alla",
+      "private": "Bara dig",
+      "makePublicOf": "Gör {release} offentlig",
+      "copy": "Kopiera länken",
+      "copyLink": "Kopiera länken {url}",
+      "copied": "Länken är kopierad.",
+      "copyFailed": "Länken kunde inte kopieras. Markera adressen och kopiera den.",
+      "startNext": "Börja på nästa version",
+      "startNextOf": "Börja på nästa version av {release}",
+      "starting": "Börjar på nästa version…",
+      "drafts": "Utkast till utgåvor"
+    },
+    "graph": {
+      "crumb": "Graf",
+      "loading": "Läser instansen…",
+      "reading": {
+        "one": "Läser instansen: {read} av {count} dokument…",
+        "other": "Läser instansen: {read} av {count} dokument…"
+      },
+      "heading": "Graf över {instance}",
+      "intro": "Allt Solid Memo sparar i den här instansen, som en graf: varje mapp, dokument och resurs är en nod, och varje länk mellan dem en kant. En länk till något annat slutar i ett löv, som aldrig läses.",
+      "search": "Hitta en nod",
+      "group": {
+        "vocabulary": "Vokabulärtermer",
+        "cards": "Kort",
+        "distractors": "Felaktiga alternativ",
+        "reviewStates": "Repetitionslägen",
+        "answers": "Svar",
+        "leaves": "Löv"
+      },
+      "neighborsOnly": "Bara grannar",
+      "neighborsHint": "Välj en nod för att bara se den och dess grannar.",
+      "table": "Visa som tabell",
+      "found": {
+        "one": "{count} nod hittades",
+        "other": "{count} noder hittades"
+      },
+      "moreFound": {
+        "one": "och {count} till: skriv mer för att begränsa",
+        "other": "och {count} till: skriv mer för att begränsa"
+      },
+      "noMatch": "Ingen nod som visas matchar ”{text}”.",
+      "counts": "{nodes} och {edges} visas",
+      "nodesShown": {
+        "one": "{shown} av {count} nod",
+        "other": "{shown} av {count} noder"
+      },
+      "edgesShown": {
+        "one": "{shown} av {count} kant",
+        "other": "{shown} av {count} kanter"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} kant till en vokabulärterm ritas bara för den valda noden eller den som pekas på.",
+        "other": "{count} kanter till vokabulärtermer ritas bara för den valda noden eller den som pekas på."
+      },
+      "tooLarge": "Det här skulle rita {nodes} noder och {edges} kanter, fler än sidan ritar smidigt. Dölj några med filtren, visa den som tabell eller rita den ändå.",
+      "drawAnyway": "Rita ändå",
+      "placing": "Placerar noderna",
+      "prompt": "Peka på en nod, eller använd piltangenterna, för att se vad den är; Enter eller ett klick öppnar den, och ett klick på bakgrunden avmarkerar den. +, − och 0 zoomar in, ut och till hela grafen, och att dra flyttar den.",
+      "zoomIn": "Zooma in",
+      "zoomOut": "Zooma ut",
+      "zoomFit": "Hela grafen",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "mapp",
+        "document": "dokument",
+        "absent": "dokument som saknas",
+        "unreadable": "dokument som inte gick att läsa",
+        "resource": "resurs",
+        "missing": "finns inte i något dokument",
+        "podLeaf": "i din Pod, inte läst",
+        "outsideLeaf": "utanför din Pod, inte läst",
+        "vocabularyLeaf": "vokabulärterm"
+      },
+      "defines": "definierar",
+      "nodes": {
+        "caption": "Grafens noder",
+        "label": "Nod",
+        "kind": "Typ av nod",
+        "document": "Definieras i",
+        "types": "Klasser",
+        "pages": "Sidor med noder"
+      },
+      "edges": {
+        "caption": "Grafens kanter",
+        "from": "Från",
+        "predicate": "Länk",
+        "to": "Till",
+        "pages": "Sidor med kanter"
+      },
+      "node": {
+        "label": "Nod",
+        "none": "Välj en nod i grafen för att se vad den säger.",
+        "outside": "Inte hämtad: utanför din Pod.",
+        "inPod": "Inte hämtad: i din Pod, men inte Solid Memos data.",
+        "vocabulary": "Inte hämtad: en vokabulärterm.",
+        "missing": "Nämns här, men finns inte i något dokument.",
+        "absent": "Det här dokumentet finns inte.",
+        "unreadable": "Det här dokumentet gick inte att läsa.",
+        "values": "Värden",
+        "statedIn": "anges i {document}",
+        "outgoing": "Länkar från den",
+        "incoming": "Länkar till den",
+        "noLinks": "Inga.",
+        "showAll": {
+          "one": "Visa {count} länk",
+          "other": "Visa alla {count} länkar"
+        }
+      }
+    },
+    "inline": {
+      "field": "{column} för {row}",
+      "cell": "{field}: {value}",
+      "save": "Spara",
+      "cancel": "Avbryt",
+      "refused": "Inte sparat: {reason}."
+    }
+  }
+}

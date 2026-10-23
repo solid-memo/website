@@ -52,8 +52,13 @@ router. It sits on the same layers as Solid Memo's app
   containers over use cases and screens over props, as in `ui`. They
   reuse `ui`'s components, such as `InstancePickerContainer`,
   `Breadcrumbs` and `ReaderText`.
-- Its text is in `ui`'s message files, under `studio.*`, in each of
-  Solid Memo's languages ([i18n.md](i18n.md)).
+- Its text is in its own message files,
+  [`apps/studio/src/i18n/`](../apps/studio/src/i18n/), under
+  `studio.*`, in each of Solid Memo's languages
+  ([i18n.md](i18n.md#the-studios-messages)). Only what the page says
+  before the Studio's code is here stays in `ui`'s: its name, its
+  tagline, the link back to Solid Memo, the links that open it
+  (`studio.open`), and that it is opening or could not be.
 
 Both apps are one page. So they share one session and one login
 ([authentication.md](authentication.md#session-restore)): a link from
@@ -70,9 +75,14 @@ tab moves a guest's study into a pod, the others refuse to write to it
 The Studio's code is a chunk of its own. The page fetches it the first
 time a Studio route opens (`loadStudio`, in
 [`apps/web/src/main.tsx`](../apps/web/src/main.tsx)), so a learner who
-never opens the Studio never downloads it. Meanwhile, under the
-masthead, the page says the Studio is opening; if the chunk cannot be
-fetched (offline, or after a new deploy), it says so.
+never opens the Studio never downloads it. Its messages come the same
+way: English in its chunk, each other language a chunk of its own,
+which the page adds to its own and fetches in the language it speaks
+before it shows the Studio (`addCatalogs`, in
+[`apps/web/src/App.tsx`](../apps/web/src/App.tsx)). Meanwhile, under the
+masthead, the page says the Studio is opening; if the chunk or its
+messages cannot be fetched (offline, or after a new deploy), it says
+so.
 
 ## Layout
 

@@ -6,6 +6,7 @@ import { render } from "preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
+import { loadLocale } from "@solid-memo/ui/i18n";
 import { retryable } from "@solid-memo/ui/retryable";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
@@ -41,6 +42,11 @@ const source = {
   version: siteVersion(document),
   commitSha: __COMMIT_SHA__,
 };
+
+// The language the page speaks, its messages fetched before the first
+// render (docs/i18n.md), so it never starts in another; English, at hand
+// from the start, waits for nothing. Should they fail, the page speaks English.
+await loadLocale(useCases.language(navigator.languages)).catch(() => undefined);
 
 render(
   // An error nothing else caught gets a screen or a notice, never a blank page (docs/privacy.md).

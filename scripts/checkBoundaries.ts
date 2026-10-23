@@ -45,7 +45,7 @@ export const LAYERS: Record<string, string[]> = {
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
   // The journeys drive the built app in a browser; they read only its text.
-  "e2e-journeys": ["ui"],
+  "e2e-journeys": ["ui", "studio"],
 };
 
 /** Within a package, files that alone may use some of its allowed packages. */
@@ -65,8 +65,8 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   markdown: { turtle: /^tooling\// },
   // The browser-side engine never needs the node tooling, nor the library check's Markdown rules.
   shacl: { turtle: /^node\//, markdown: /^node\// },
-  // The app's messages (packages/ui/src/i18n), which the page objects find text by.
-  "e2e-journeys": { ui: /^harness\/strings\.ts$/ },
+  // The app's messages (packages/ui/src/i18n, apps/studio/src/i18n), which the page objects find text by.
+  "e2e-journeys": { ui: /^harness\/strings\.ts$/, studio: /^harness\/strings\.ts$/ },
 };
 
 /**

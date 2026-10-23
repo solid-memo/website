@@ -9,6 +9,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
+import type { Catalogs } from "@solid-memo/ui/i18n";
 import { App, type StudioModule } from "./App";
 
 const session = { webId: "https://alice.example/profile/card#me" };
@@ -25,7 +26,15 @@ function FakeStudioWorkspace({ banner }: WorkspaceProps) {
   );
 }
 
-const studioModule: StudioModule = { StudioWorkspace: FakeStudioWorkspace };
+/** Catalogs as the Studio's are, each language's fetched by `fetch`. */
+function catalogs(fetch: () => Promise<{ default: Catalogs["en"] }>): Catalogs {
+  return { en: {}, others: { sv: fetch, ko: fetch, de: fetch, es: fetch, fr: fetch } };
+}
+
+const studioModule: StudioModule = {
+  StudioWorkspace: FakeStudioWorkspace,
+  STUDIO_CATALOGS: catalogs(async () => ({ default: {} })),
+};
 
 const source = { repoUrl: "https://git.example/memo", version: "0.1.0", commitSha: null };
 
@@ -165,10 +174,28 @@ describe("App", () => {
       Promise.reject(new TypeError("Failed to fetch dynamically imported module")),
     );
     await waitFor(() =>
-      expect(screen.getByRole("alert")).toHaveTextContent(
+      expect(within(screen.getByRole("main")).getByRole("alert")).toHaveTextContent(
         "The Studio could not be opened. Reload the page to try again.",
       ),
     );
     expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
+  });
+
+  it("says so when the Studio's messages cannot be fetched", async () => {
+    window.history.replaceState(null, "", "#/studio");
+    const useCases = makeUseCasesFake({
+      restoreSession: vi.fn(async () => ({ session, origin: "restored" as const })),
+    });
+    const offline = vi
+      .fn<() => Promise<{ default: Catalogs["en"] }>>()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue({ default: {} });
+    renderApp(useCases, async () => ({ ...studioModule, STUDIO_CATALOGS: catalogs(offline) }));
+    await waitFor(() =>
+      expect(within(screen.getByRole("main")).getByRole("alert")).toHaveTextContent(
+        "The Studio could not be opened. Reload the page to try again.",
+      ),
+    );
+    expect(screen.queryByRole("heading", { name: "The Studio's screens" })).toBeNull();
   });
 });

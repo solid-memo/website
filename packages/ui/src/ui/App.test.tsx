@@ -20,6 +20,13 @@ import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
 import { useInstanceTheme, useTheme } from "./theme";
+import { loadLocale } from "./i18n";
+
+vi.mock("./i18n", async (actual) => {
+  const real = await actual<typeof import("./i18n")>();
+  // The real fetch, which a test can have fail or wait.
+  return { ...real, loadLocale: vi.fn(real.loadLocale) };
+});
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const restored: EstablishedSession = { session, origin: "restored" };
@@ -473,13 +480,49 @@ describe("AppShell", () => {
     fireEvent.input(await screen.findByRole("combobox", { name: "Language" }), {
       target: { value: "sv" },
     });
-    expect(useCases.chooseLanguage).toHaveBeenCalledWith("sv");
     expect(await screen.findByText(/Skapad av/)).toBeInTheDocument();
-    expect(document.documentElement.lang).toBe("sv");
+    expect(useCases.chooseLanguage).toHaveBeenCalledWith("sv");
+    await waitFor(() => expect(document.documentElement.lang).toBe("sv"));
     await waitFor(() => expect(document.title).toBe("Logga in – Solid Memo"));
     fireEvent.input(screen.getByRole("combobox", { name: "Språk" }), { target: { value: "en" } });
     expect(await screen.findByText(/Created by/)).toBeInTheDocument();
+    await waitFor(() => expect(document.documentElement.lang).toBe("en"));
+  });
+
+  it("stays in the language spoken when another's messages cannot be fetched, and says so", async () => {
+    vi.mocked(loadLocale).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    const useCases = makeUseCases();
+    renderApp(useCases);
+    fireEvent.input(await screen.findByRole("combobox", { name: "Language" }), {
+      target: { value: "sv" },
+    });
+    await waitFor(() =>
+      expect(screen.getAllByRole("alert").map((alert) => alert.textContent)).toContain(
+        "Svenska could not be loaded. Check your connection and try again.",
+      ),
+    );
+    expect(screen.getByText(/Created by/)).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("en");
+    expect(useCases.chooseLanguage).not.toHaveBeenCalled();
+  });
+
+  it("switches to the language chosen last, whichever language's messages come first", async () => {
+    let swedish!: () => void;
+    vi.mocked(loadLocale).mockReturnValueOnce(
+      new Promise((resolve) => {
+        swedish = resolve;
+      }),
+    );
+    const useCases = makeUseCases();
+    renderApp(useCases);
+    const list = await screen.findByRole("combobox", { name: "Language" });
+    fireEvent.input(list, { target: { value: "sv" } });
+    fireEvent.input(list, { target: { value: "de" } });
+    expect(await screen.findByText(/Erstellt von/)).toBeInTheDocument();
+    await act(async () => swedish());
+    expect(screen.getByText(/Erstellt von/)).toBeInTheDocument();
+    expect(useCases.chooseLanguage).toHaveBeenCalledTimes(1);
+    expect(useCases.chooseLanguage).toHaveBeenCalledWith("de");
   });
 
   describe("page structure", () => {

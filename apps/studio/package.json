@@ -6,7 +6,8 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/ui/StudioWorkspace.tsx"
+    ".": "./src/ui/StudioWorkspace.tsx",
+    "./i18n/*.json": "./src/i18n/*.json"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p .",

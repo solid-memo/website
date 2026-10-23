@@ -1,0 +1,1601 @@
+{
+  "studio": {
+    "shell": {
+      "status": "Status des Studios",
+      "density": "Dichte",
+      "compact": "Kompakt",
+      "comfortable": "Komfortabel",
+      "saving": "Der Entwurf wird gespeichert…",
+      "saved": "Entwurf gespeichert",
+      "failed": "Letzte Änderung nicht gespeichert",
+      "close": "Schließen",
+      "sidebar": "Seitenleiste",
+      "nav": "Studio",
+      "section": {
+        "decks": "Stapel",
+        "groups": "Gruppen",
+        "drafts": "Entwürfe",
+        "releases": "Ausgaben",
+        "graph": "Graph",
+        "health": "Zustand",
+        "library": "Kopien aus der Bibliothek",
+        "transfer": "Importieren und exportieren",
+        "instance": "Name und Katalog"
+      },
+      "problems": {
+        "one": "{count} Problem",
+        "other": "{count} Probleme"
+      },
+      "filter": "Stapel und Entwürfe filtern",
+      "deckList": "Stapel",
+      "draftList": "Entwürfe",
+      "noDecks": "Keine Stapel.",
+      "noDrafts": "Keine Entwürfe.",
+      "version": "v{version}",
+      "switchInstance": "Instanz wechseln: {instance}",
+      "allInstances": "Alle Instanzen",
+      "resizeAside": "Breite des Seitenbereichs",
+      "hide": "Ausblenden",
+      "pinned": "Angeheftet",
+      "recent": "Zuletzt geöffnet",
+      "pin": "{name} anheften",
+      "ready": "Bereit zum Veröffentlichen",
+      "blocked": {
+        "one": "{count} Problem verhindert die Veröffentlichung",
+        "other": "{count} Probleme verhindern die Veröffentlichung"
+      },
+      "someBlock": {
+        "one": "{count} Problem, davon verhindern {blocking} die Veröffentlichung",
+        "other": "{count} Probleme, davon verhindern {blocking} die Veröffentlichung"
+      },
+      "released": "Veröffentlicht"
+    },
+    "tabs": {
+      "deck": "Stapel",
+      "draft": "Entwurf",
+      "cards": "Karten",
+      "schedule": "Zeitplan",
+      "health": "Zustand",
+      "about": "Über",
+      "export": "Exportieren",
+      "overview": "Übersicht",
+      "check": "Prüfung",
+      "preview": "Vorschau",
+      "trial": "Probelauf",
+      "diff": "Änderungen",
+      "release": "Ausgabe"
+    },
+    "keys": {
+      "palette": "Suchen, hingehen oder einen Befehl ausführen",
+      "button": "? Tasten",
+      "heading": "Tastenkürzel",
+      "chords": "Nebeneinander gezeigte Tasten wie g d werden nacheinander gedrückt. Während du in einem Feld tippst, funktionieren nur Ctrl+K, F6, Shift+F6, F8 und Shift+F8.",
+      "characterKeys": "Kürzel mit einer Taste",
+      "characterKeysHint": "Tasten, die ohne Ctrl gedrückt werden, wie g d, j, [ oder ?, als Kürzel. Schalte sie aus, wenn Spracheingabe oder eine versehentlich gedrückte Taste sie auslöst; Ctrl+K, F6, F8 und die Schaltflächen funktionieren weiterhin.",
+      "scope": {
+        "studio": "Überall im Studio",
+        "table": "In einer Tabelle: die Karten, die Stapel, die Karten eines Entwurfs…"
+      },
+      "help": "Diese Tastenkürzel anzeigen",
+      "filter": "Zur Suche oder zum Filter der Ansicht gehen",
+      "nextRegion": "Zum nächsten Bereich gehen: Kopfzeile, Seitenleiste, Hauptinhalt, Seitenbereich, Panel, Statusleiste",
+      "previousRegion": "Zum vorigen Bereich gehen",
+      "go": {
+        "decks": "Zu den Stapeln gehen",
+        "groups": "Zu den Gruppen gehen",
+        "drafts": "Zu den Entwürfen gehen",
+        "releases": "Zu den Ausgaben gehen",
+        "health": "Zum Zustand gehen",
+        "library": "Zu den Kopien aus der Bibliothek gehen",
+        "transfer": "Zu Importieren und Exportieren gehen",
+        "instances": "Zu den Instanzen gehen"
+      },
+      "toggleSidebar": "Seitenleiste ein- oder ausblenden",
+      "toggleAside": "Seitenbereich ein- oder ausblenden (die Gliederung, den Stapel, die Aktualisierung) oder die Karte neben den Karten schließen",
+      "toggleDock": "Panel ein- oder ausblenden: Probleme und Aktivität",
+      "nextProblem": "Zum Feld des nächsten Problems gehen",
+      "previousProblem": "Zum Feld des vorigen Problems gehen",
+      "previousTab": "Zum vorigen Tab des Stapels oder Entwurfs gehen",
+      "nextTab": "Zum nächsten Tab des Stapels oder Entwurfs gehen",
+      "tab": "Über seine Nummer zu einem Tab des Stapels oder Entwurfs gehen",
+      "down": "Nächste Zeile",
+      "up": "Vorige Zeile",
+      "select": "Zeile auswählen",
+      "open": "Zeile öffnen",
+      "extendDown": "Die Zeile und auch die nächste auswählen",
+      "extendUp": "Die Zeile und auch die vorige auswählen",
+      "clear": "Auswahl aufheben",
+      "bulk": "Aktionen der ausgewählten Zeilen öffnen",
+      "edit": "Zelle bearbeiten: Enter speichert, Escape bricht ab"
+    },
+    "dock": {
+      "label": "Panel",
+      "problems": "Probleme",
+      "problemsCount": "Probleme ({count})",
+      "activity": "Aktivität",
+      "resize": "Höhe des Panels",
+      "noActivity": "Seit dem Öffnen des Studios ist noch nichts geschehen.",
+      "repeated": "{text} ×{count}",
+      "noProblemsHere": "Die Probleme eines Stapels oder eines Entwurfs werden in seinen Ansichten aufgeführt.",
+      "checking": "Es wird nach Problemen gesucht…",
+      "none": "Keine Probleme gefunden.",
+      "deckData": {
+        "one": "{count} Problem in den Daten des Stapels",
+        "other": "{count} Probleme in den Daten des Stapels"
+      },
+      "unstated": "{place}: Die Sprache ist nicht angegeben",
+      "duplicate": "{place}: sagt dasselbe wie eine andere Karte"
+    },
+    "palette": {
+      "button": "Suchen oder ausführen…",
+      "heading": "Schnell öffnen",
+      "label": "Stapel, Entwürfe, Karten und Befehle durchsuchen",
+      "none": "Nichts passt.",
+      "help": "Tastenkürzel anzeigen",
+      "group": {
+        "recent": "Zuletzt verwendet",
+        "commands": "Befehle",
+        "tabs": "Tabs",
+        "sections": "Bereiche",
+        "instances": "Instanzen",
+        "decks": "Stapel",
+        "drafts": "Entwürfe",
+        "cards": "Karten dieses Stapels",
+        "pinned": "Angeheftet"
+      }
+    },
+    "decks": {
+      "heading": "Stapel",
+      "caption": "Die Stapel von „{instance}“",
+      "loading": "Stapel werden geladen…",
+      "empty": "Noch keine Stapel: Erstelle oder importiere sie in {app}.",
+      "filter": "Nach Name oder Gruppe filtern",
+      "shown": {
+        "one": "{shown} von {count} Stapel",
+        "other": "{shown} von {count} Stapeln"
+      },
+      "noMatch": "Kein Stapel passt zu „{filter}“.",
+      "select": "Auswählen",
+      "selectAll": "Alle angezeigten Stapel auswählen",
+      "selectDeck": "{deck} auswählen",
+      "title": "Stapel",
+      "group": "Gruppe",
+      "direction": "Richtung",
+      "newCardsPerDay": "Neu pro Tag",
+      "maxReviewsPerDay": "Wiederholungen pro Tag",
+      "due": "Heute fällig",
+      "new": "Heute neu",
+      "modified": "Zuletzt geändert",
+      "cards": "Karten",
+      "cardsOf": "Karten von „{deck}“",
+      "topLevel": "Oberste Ebene",
+      "followsInstance": "(Instanz)",
+      "counting": "Wird gezählt…",
+      "unreadable": "Konnte nicht gelesen werden",
+      "badge": {
+        "library": "Bibliothek",
+        "course": "Kurs",
+        "invalid": "Ungültige Daten",
+        "unreadable": "Nicht lesbar",
+        "from": "Von {host}"
+      },
+      "healthOf": "in „{deck}“"
+    },
+    "views": {
+      "label": "Ansichten",
+      "all": "Alle",
+      "due": "Heute fällig",
+      "courses": "Kurse",
+      "copies": "Kopien aus der Bibliothek",
+      "attention": "Braucht Aufmerksamkeit",
+      "none": "Kein Stapel in dieser Ansicht.",
+      "cards": {
+        "all": "Alle",
+        "due": "Fällig",
+        "new": "Neu",
+        "leech": "Problemkarten"
+      },
+      "options": "Optionen der Ansicht {name}",
+      "rename": "Umbenennen…",
+      "remove": "Entfernen",
+      "removeHeading": "Ansicht entfernen",
+      "removeConfirm": "Die Ansicht {name} entfernen? Nur die Ansicht verschwindet: In deinem Pod ändert sich nichts.",
+      "save": "+ Ansicht speichern",
+      "saveHeading": "Ansicht speichern",
+      "renameHeading": "Ansicht {name} umbenennen",
+      "name": "Name",
+      "nameHint": "Eine Ansicht mit demselben Namen wird ersetzt.",
+      "saveButton": "Speichern"
+    },
+    "peek": {
+      "label": "Stapel",
+      "none": "Gehe zur Zeile eines Stapels ({j}, {k}), um ihn hier zu sehen.",
+      "of": "– {deck}"
+    },
+    "bulk": {
+      "label": "Ausgewählte Stapel",
+      "selected": {
+        "one": "{count} Stapel ausgewählt",
+        "other": "{count} Stapel ausgewählt"
+      },
+      "move": "In Gruppe verschieben",
+      "pace": "Lerntempo festlegen",
+      "direction": "Lernrichtung festlegen",
+      "remove": "Löschen",
+      "clear": "Auswahl aufheben",
+      "group": "Gruppe",
+      "topLevel": "Oberste Ebene (ohne Gruppe)",
+      "moveReadOnly": "Eine neuere Version von Solid Memo hat diese Gruppen angeordnet, daher lassen sich hier keine Stapel in sie verschieben.",
+      "newCardsPerDay": "Neue Karten pro Tag",
+      "maxReviewsPerDay": "Max. Wiederholungen pro Tag",
+      "paceHint": "Ein leeres Limit folgt den Einstellungen der Instanz.",
+      "apply": "Anwenden",
+      "cancel": "Abbrechen",
+      "removeConfirm": {
+        "one": "Den Stapel {names} mit allen Karten löschen? Das lässt sich nicht rückgängig machen.",
+        "other": "{count} Stapel mit allen Karten löschen: {names}? Das lässt sich nicht rückgängig machen."
+      },
+      "moved": {
+        "one": "{count} Stapel nach „{group}“ verschoben.",
+        "other": "{count} Stapel nach „{group}“ verschoben."
+      },
+      "paced": {
+        "one": "Lerntempo von {count} Stapel festgelegt.",
+        "other": "Lerntempo von {count} Stapeln festgelegt."
+      },
+      "directed": {
+        "one": "Lernrichtung von {count} Stapel festgelegt.",
+        "other": "Lernrichtung von {count} Stapeln festgelegt."
+      },
+      "removed": {
+        "one": "{count} Stapel gelöscht.",
+        "other": "{count} Stapel gelöscht."
+      },
+      "export": "Exportieren",
+      "moveSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sich Stapel erst nach der Reparatur in Gruppen verschieben.",
+      "groups": {
+        "edit": "Bearbeiten",
+        "editCards": "Ausgewählte Karten bearbeiten",
+        "editDecks": "Ausgewählte Stapel bearbeiten",
+        "schedule": "Zeitplan",
+        "scheduleCards": "Ausgewählte Karten einplanen",
+        "transfer": "Verschieben oder kopieren",
+        "transferCards": "Ausgewählte Karten verschieben oder kopieren"
+      }
+    },
+    "groups": {
+      "heading": "Gruppen"
+    },
+    "cards": {
+      "crumb": "Karten von „{deck}“",
+      "heading": "Karten: {deck}",
+      "loading": "Karten werden geladen…",
+      "courseHint": "Eine Kopie eines Kurses: Die Karten darin sind die Fragen des Kurses.",
+      "empty": "Dieser Stapel hat noch keine Karten.",
+      "search": "Suche",
+      "field": "Suchen in",
+      "fields": {
+        "any": "Beliebiger Text",
+        "front": "Vorderseite",
+        "back": "Rückseite",
+        "note": "Anmerkungen",
+        "label": "Beschriftung",
+        "distractor": "Falsche Antwortmöglichkeiten"
+      },
+      "lang": "Sprache",
+      "anyLang": "Beliebige Sprache",
+      "unstated": "Keine Sprache angegeben",
+      "state": "Status",
+      "anyState": "Beliebiger Status",
+      "states": {
+        "live": "In Verwendung",
+        "retired": "Ausgemustert",
+        "new": "Neu",
+        "learning": "Lernen",
+        "young": "Jung",
+        "mature": "Ausgereift",
+        "due": "Fällig",
+        "leech": "Problemkarte: oft vergessen"
+      },
+      "has": "Enthält",
+      "anything": "Beliebig",
+      "features": {
+        "picture": "Ein Bild",
+        "distractors": "Falsche Antwortmöglichkeiten",
+        "markdown": "Markdown",
+        "notes": "Anmerkungen"
+      },
+      "pageSize": "Karten pro Seite",
+      "shown": {
+        "one": "{shown} von {count} Karte",
+        "other": "{shown} von {count} Karten"
+      },
+      "keys": "Tasten: {j} und {k} wechseln zwischen den Karten, {x} wählt eine aus, {enter} öffnet sie, {shiftJ} und {shiftK} wählen auch die nächste oder die vorige aus, {escape} hebt die Auswahl auf, {f2} bearbeitet eine Vorder- oder Rückseite in ihrer Zelle, und {dot} öffnet die Aktionen der ausgewählten Karten.",
+      "selected": {
+        "one": "{count} Karte ausgewählt",
+        "other": "{count} Karten ausgewählt"
+      },
+      "noMatch": "Keine Karte passt.",
+      "caption": "Die Karten von „{deck}“",
+      "select": "Auswählen",
+      "selectAll": "Alle Karten auf dieser Seite auswählen",
+      "selectCard": "„{card}“ auswählen",
+      "column": {
+        "front": "Vorderseite",
+        "back": "Rückseite",
+        "due": "Fällig",
+        "interval": "Intervall",
+        "ease": "Leichtigkeitsgrad",
+        "lapses": "Aussetzer",
+        "created": "Hinzugefügt",
+        "id": "ID"
+      },
+      "days": {
+        "one": "{count} Tag",
+        "other": "{count} Tage"
+      },
+      "notStudied": "Noch nicht gelernt",
+      "lapsesSince": "Als Aussetzer zählen die vergessenen Wiederholungen der Karte seit {month}, dem Monat der ersten Antwort des Stapels im Protokoll. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer.",
+      "lapsesNone": "Als Aussetzer zählen die vergessenen Wiederholungen der Karte: Es sind noch keine protokolliert.",
+      "lapsesLoading": "Das Antwortprotokoll wird für die Aussetzer gelesen…",
+      "lapsesFailed": "Das Antwortprotokoll konnte nicht gelesen werden, daher sind die Aussetzer nicht bekannt."
+    },
+    "columns": {
+      "button": "Spalten",
+      "label": "Spalten ein- oder ausblenden"
+    },
+    "card": {
+      "heading": "Karte: {card}",
+      "tabs": "Was du bearbeiten willst",
+      "tab": {
+        "content": "Inhalt",
+        "distractors": "Falsche Antwortmöglichkeiten ({count})",
+        "schedule": "Zeitplan",
+        "history": "Verlauf"
+      },
+      "releaseSame": "Diese Karte ist so, wie sie in der Ausgabe steht, aus der dieser Stapel kopiert wurde, daher aktualisiert eine neuere Ausgabe sie. Eine Änderung löst sie von der Ausgabe: Neuere Ausgaben aktualisieren sie dann nicht mehr, können sie aber weiterhin ausmustern.",
+      "releaseChanged": "Diese Karte wurde gegenüber der Ausgabe geändert, aus der dieser Stapel kopiert wurde, daher aktualisieren neuere Ausgaben sie nicht mehr. Sie können sie aber weiterhin ausmustern.",
+      "openInApp": "Diese Karte in Solid Memo öffnen",
+      "steps": "Karten in der Liste",
+      "previous": "Vorige Karte",
+      "next": "Nächste Karte",
+      "detail": "Karte",
+      "close": "Karte schließen",
+      "saved": "Karte {card} gespeichert."
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "Änderungen speichern?",
+        "text": "Einige Änderungen sind nicht gespeichert. Speichere sie, bevor du weitermachst, verwirf sie oder bleib, wo du bist.",
+        "save": "Speichern",
+        "discard": "Verwerfen",
+        "stay": "Bleiben"
+      },
+      "cancel": "Abbrechen",
+      "deleteCards": "Ausgewählte Karten löschen",
+      "forgetCards": "Fortschritt der ausgewählten Karten zurücksetzen",
+      "deleteDecks": "Ausgewählte Stapel löschen",
+      "forgetDirection": "Fortschritt der Karte zurücksetzen",
+      "restartCourse": "Kurs neu beginnen",
+      "deleteDraft": "Entwurf löschen",
+      "deletePart": {
+        "chapter": "Kapitel löschen",
+        "step": "Schritt löschen",
+        "card": "Karte löschen"
+      },
+      "removeData": "Aus deinem Pod entfernen"
+    },
+    "schedule": {
+      "loading": "Der Zeitplan wird geladen…",
+      "notStudiedSo": "Der Stapel wird nicht mehr in dieser Richtung gelernt. Der Fortschritt der Karte in dieser Richtung bleibt erhalten.",
+      "new": "In dieser Richtung noch nicht gelernt: Die Karte ist neu.",
+      "due": "Fällig",
+      "interval": "Intervall",
+      "ease": "Leichtigkeitsgrad",
+      "repetitions": "Richtig in Folge",
+      "firstReviewed": "Erste Wiederholung",
+      "lastReviewed": "Letzte Wiederholung",
+      "sm2Heading": "SM-2",
+      "fsrsHeading": "FSRS-6",
+      "stability": "Stabilität",
+      "difficulty": "Schwierigkeit",
+      "difficultyValue": "{value} von 10",
+      "recall": "Erinnerungschance jetzt",
+      "fsrsSets": "FSRS-6 legt die Fälligkeitstage fest, wie es die Einstellungen der Instanz sagen; der Stand von SM-2 wird daneben aktuell gehalten.",
+      "sm2Sets": "SM-2 legt die Fälligkeitstage fest, wie es die Einstellungen der Instanz sagen; der Stand von FSRS-6 wird solange nicht aktualisiert, und ein Wechsel zu FSRS-6 berechnet ihn neu.",
+      "fsrsEstimated": "FSRS-6 legt die Fälligkeitstage fest, wie es die Einstellungen der Instanz sagen, hat aber keinen aktuellen Stand der Karte in dieser Richtung: Bis zur nächsten Wiederholung gilt der Fälligkeitstag von SM-2, und dann wird der Stand von FSRS-6 aus dem von SM-2 geschätzt.",
+      "dueLabel": "Fällig am",
+      "reschedule": "Fälligkeitstag festlegen",
+      "reset": "Fortschritt zurücksetzen",
+      "resetConfirm": "Fortschritt der Karte in dieser Richtung zurücksetzen? Sie wird wieder neu. Ihre Antworten bleiben im Verlauf.",
+      "hint": "Beides ändert nichts an den Antworten zur Karte: Sie bleiben im Verlauf und in der Statistik.",
+      "done": {
+        "reset": "Fortschritt der Karte in der Richtung „{direction}“ zurückgesetzt.",
+        "reschedule": "„{direction}“ ist jetzt am {due} fällig."
+      }
+    },
+    "history": {
+      "loading": "Die Antworten zu dieser Karte werden geladen…",
+      "empty": "Noch keine Antworten zu dieser Karte in diesem Stapel.",
+      "summary": {
+        "one": "{count} Antwort. Aussetzer: {lapses}.",
+        "other": "{count} Antworten. Aussetzer: {lapses}."
+      },
+      "caption": "Die Antworten zu dieser Karte, neueste zuerst",
+      "column": {
+        "when": "Wann",
+        "direction": "Richtung",
+        "grade": "Bewertung",
+        "mode": "Wie",
+        "chosen": "Gewählte falsche Antwortmöglichkeit"
+      },
+      "mode": {
+        "recall": "Aus dem Gedächtnis",
+        "multiple-choice": "Multiple Choice"
+      },
+      "unknownOption": "{id} (nicht mehr auf der Karte)",
+      "hint": "Hier stehen nur die Antworten, die in diesem Stapel gegeben wurden: Wird eine Karte aus einem anderen Stapel hierher verschoben, beginnt ihr Verlauf neu. Wenn du den Fortschritt der Karte zurücksetzt, bleiben ihre Antworten erhalten. Ein Aussetzer ist eine vergessene Wiederholung: Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer."
+    },
+    "insight": {
+      "crumb": "Zeitplan",
+      "heading": "Zeitplan: {deck}",
+      "loading": "Zeitplan wird geladen…",
+      "today": "Wiederholungen heute",
+      "week": "Wiederholungen in den nächsten {count} Tagen",
+      "scheduled": "Gelernt, je Richtung",
+      "leeches": "Problemkarten",
+      "forecastHeading": "Anstehende Wiederholungen",
+      "capDeck": "Höchstens {max} Wiederholungen pro Tag, wie dieser Stapel es festlegt: Was das Limit zurückhält, wartet auf den nächsten Tag. Die Zahl für heute zählt jede Karte mit, die bis heute fällig ist.",
+      "capInstance": "Höchstens {max} Wiederholungen pro Tag, wie die Einstellungen der Instanz es festlegen: Was das Limit zurückhält, wartet auf den nächsten Tag. Die Zahl für heute zählt jede Karte mit, die bis heute fällig ist.",
+      "forecast": "Wiederholungen in den nächsten {count} Tagen",
+      "forecastLabel": "Wiederholungen an jedem der nächsten {count} Tage, so wie das Tageslimit sie durchlässt.",
+      "forecastDay": "{date}: {reviews} zu wiederholen, {due} neu fällig.",
+      "due": "Neu fällig",
+      "reviews": "Zu wiederholen",
+      "spreadHeading": "Intervalle und Leichtigkeitsgrade",
+      "noneScheduled": "Noch keine Karte dieses Stapels wird gelernt.",
+      "intervals": "Intervalle",
+      "intervalsLabel": "Wie viele Karten je Richtung welches Intervall haben.",
+      "interval": "Intervall",
+      "eases": "Leichtigkeitsgrade",
+      "easesLabel": "Wie viele Karten je Richtung welchen Leichtigkeitsgrad haben.",
+      "easesNote": "Der Leichtigkeitsgrad ist der von SM-2 und wird bei jeder Wiederholung aktuell gehalten, gleich welches Planungsverfahren die Fälligkeitstage festlegt.",
+      "ease": "Leichtigkeitsgrad",
+      "lapsesHeading": "Aussetzer und Problemkarten",
+      "lapsesSince": "Aussetzer zählen die vergessenen Wiederholungen seit {month}, dem Monat der ersten Antwort zu diesem Stapel im Antwortprotokoll. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer.",
+      "noAnswers": "Noch keine Antworten protokolliert.",
+      "leechHint": "Eine Problemkarte ist eine Karte, die {count}-mal oder öfter vergessen wurde. Sie kostet immer wieder Wiederholungen: Formuliere sie neu, teile sie auf oder mustere sie aus.",
+      "noLeeches": "Keine Problemkarten.",
+      "leechLapses": {
+        "one": "{count}-mal vergessen",
+        "other": "{count}-mal vergessen"
+      },
+      "allLeeches": "Problemkarten unter den Karten des Stapels anzeigen"
+    },
+    "cardBulk": {
+      "label": "Ausgewählte Karten",
+      "retire": "Ausmustern",
+      "restore": "Zurückholen",
+      "markdownOn": "In Markdown schreiben",
+      "markdownOff": "Als reinen Text schreiben",
+      "stateLanguage": "Sprache angeben",
+      "findReplace": "Suchen und Ersetzen",
+      "reschedule": "Fälligkeitstag festlegen",
+      "reset": "Fortschritt zurücksetzen",
+      "remove": "Löschen",
+      "removeConfirm": {
+        "one": "{count} Karte und ihren Fortschritt löschen? Du kannst es rückgängig machen, bis du das nächste Mal etwas änderst oder diese Seite verlässt.",
+        "other": "{count} Karten und ihren Fortschritt löschen? Du kannst es rückgängig machen, bis du das nächste Mal etwas änderst oder diese Seite verlässt."
+      },
+      "resetConfirm": {
+        "one": "Fortschritt von {count} Karte zurücksetzen? Sie wird wieder neu. Ihre Antworten bleiben im Verlauf.",
+        "other": "Fortschritt von {count} Karten zurücksetzen? Sie werden wieder neu. Ihre Antworten bleiben im Verlauf."
+      },
+      "dueLabel": "Fällig am",
+      "rescheduleHint": "Eine noch nicht gelernte Karte bleibt neu.",
+      "notStudied": "Keine der ausgewählten Karten wurde bisher gelernt.",
+      "nothing": "Keine der ausgewählten Karten würde sich ändern.",
+      "tag": "Sprachcode",
+      "side": "Für",
+      "sides": {
+        "both": "Beide Seiten",
+        "front": "Die Vorderseite",
+        "back": "Die Rückseite"
+      },
+      "stateHint": "Nur eine Seite, deren Sprache noch nicht angegeben ist, ändert sich. Ihr Text bleibt, wie er ist.",
+      "find": "Suchen",
+      "replaceWith": "Ersetzen durch",
+      "fields": "Suchen in",
+      "lang": "In der Sprache",
+      "caseSensitive": "Groß-/Kleinschreibung beachten",
+      "wholeWord": "Nur ganze Wörter",
+      "preview": "Vorschau",
+      "previewEmpty": "Gib den Text ein, der gesucht werden soll. Nichts ändert sich, bevor du bestätigst.",
+      "noChange": "Keine der ausgewählten Karten enthält diesen Text.",
+      "changes": {
+        "one": "{count} Karte ändert sich:",
+        "other": "{count} Karten ändern sich:"
+      },
+      "skippedHeading": {
+        "one": "{count} Karte bleibt, wie sie ist:",
+        "other": "{count} Karten bleiben, wie sie sind:"
+      },
+      "reasons": {
+        "missing": "sie ist nicht mehr im Stapel",
+        "unchanged": "nichts an ihr ändert sich",
+        "wouldEmpty": "eine Seite oder eine falsche Antwortmöglichkeit wäre leer",
+        "unstatedLanguage": "für ihren Text ist keine Sprache angegeben; gib sie zuerst an",
+        "invalid": "die Karte ist so nicht gültig; korrigiere sie im Karteneditor"
+      },
+      "part": {
+        "front": "Vorderseite",
+        "back": "Rückseite",
+        "frontNote": "Anmerkung zur Vorderseite",
+        "backNote": "Anmerkung zur Rückseite",
+        "frontLabel": "Beschriftung der Vorderseite",
+        "backLabel": "Beschriftung der Rückseite",
+        "distractor": "Falsche Antwortmöglichkeit",
+        "distractorNote": "Anmerkung zu einer falschen Antwortmöglichkeit"
+      },
+      "removed": "(entfernt)",
+      "confirmReplace": {
+        "one": "In {count} Karte ersetzen",
+        "other": "In {count} Karten ersetzen"
+      },
+      "done": {
+        "retire": {
+          "one": "{count} Karte ausgemustert.",
+          "other": "{count} Karten ausgemustert."
+        },
+        "restore": {
+          "one": "{count} Karte zurückgeholt.",
+          "other": "{count} Karten zurückgeholt."
+        },
+        "remove": {
+          "one": "{count} Karte gelöscht.",
+          "other": "{count} Karten gelöscht."
+        },
+        "replaceText": {
+          "one": "Text in {count} Karte ersetzt.",
+          "other": "Text in {count} Karten ersetzt."
+        },
+        "markdownOn": {
+          "one": "{count} Karte in Markdown geschrieben.",
+          "other": "{count} Karten in Markdown geschrieben."
+        },
+        "markdownOff": {
+          "one": "{count} Karte als reinen Text geschrieben.",
+          "other": "{count} Karten als reinen Text geschrieben."
+        },
+        "stateLanguage": {
+          "one": "Sprache von {count} Karte angegeben.",
+          "other": "Sprache von {count} Karten angegeben."
+        },
+        "reset": {
+          "one": "Fortschritt von {count} Karte zurückgesetzt.",
+          "other": "Fortschritt von {count} Karten zurückgesetzt."
+        },
+        "reschedule": {
+          "one": "{count} Karte ist jetzt am {due} fällig.",
+          "other": "{count} Karten sind jetzt am {due} fällig."
+        },
+        "setText": {
+          "one": "Text von {count} Karte gespeichert.",
+          "other": "Text von {count} Karten gespeichert."
+        }
+      },
+      "skipped": {
+        "one": "{count} Karte blieb, wie sie war.",
+        "other": "{count} Karten blieben, wie sie waren."
+      },
+      "undo": "Rückgängig",
+      "undone": "Rückgängig gemacht: Die Karten sind wieder wie vorher.",
+      "moveTo": "In Stapel verschieben…",
+      "copyTo": "In Stapel kopieren…",
+      "transfer": {
+        "deck": "In den Stapel",
+        "keepProgress": "Fortschritt behalten",
+        "moveHint": "Die Karten verlassen diesen Stapel, sobald der andere Stapel sie hat. Ihre bisherigen Antworten bleiben bei diesem Stapel, daher beginnt ihr Verlauf dort neu.",
+        "copyHint": "Dieser Stapel behält die Karten. Der Verlauf der Kopien beginnt im anderen Stapel.",
+        "noDeck": "Diese Instanz hat keinen anderen Stapel für die Karten.",
+        "move": {
+          "one": "{count} Karte verschieben",
+          "other": "{count} Karten verschieben"
+        },
+        "copy": {
+          "one": "{count} Karte kopieren",
+          "other": "{count} Karten kopieren"
+        },
+        "moved": {
+          "one": "{count} Karte nach „{deck}“ verschoben.",
+          "other": "{count} Karten nach „{deck}“ verschoben."
+        },
+        "copied": {
+          "one": "{count} Karte nach „{deck}“ kopiert.",
+          "other": "{count} Karten nach „{deck}“ kopiert."
+        },
+        "renamed": {
+          "one": "{count} Karte hat eine neue ID bekommen: Der Stapel hatte schon eine Karte mit ihrer ID.",
+          "other": "{count} Karten haben eine neue ID bekommen: Der Stapel hatte schon Karten mit ihren IDs."
+        },
+        "present": {
+          "one": "{count} Karte war schon dort.",
+          "other": "{count} Karten waren schon dort."
+        },
+        "heading": {
+          "move": "Karten in einen anderen Stapel verschieben",
+          "copy": "Karten in einen anderen Stapel kopieren"
+        }
+      }
+    },
+    "license": {
+      "label": "Lizenz",
+      "none": "Nicht angegeben"
+    },
+    "about": {
+      "crumb": "Über „{deck}“",
+      "heading": "Über: {deck}",
+      "openInApp": "Diesen Stapel in Solid Memo öffnen",
+      "name": "Name",
+      "rename": "Umbenennen",
+      "provenance": "Urheberschaft und Lizenz",
+      "noProvenance": "Keine Urheberschaft und keine Lizenz angegeben.",
+      "editProvenance": "Urheberschaft und Lizenz bearbeiten",
+      "authors": "Verfasst von",
+      "authorsHint": "Ein Name oder ein Name mit E-Mail-Adresse: Ada Lovelace <ada@example.org>. Lass eine Zeile leer, um sie zu entfernen.",
+      "author": "Person {number}",
+      "removeAuthor": "Person {number} entfernen",
+      "addAuthor": "Person hinzufügen",
+      "saveProvenance": "Urheberschaft und Lizenz speichern",
+      "study": "Lernen",
+      "saveStudy": "Lerneinstellungen speichern",
+      "progress": "Kursfortschritt",
+      "progressLoading": "Kurs wird geladen…",
+      "chapter": {
+        "done": "Erledigt",
+        "open": "Offen",
+        "locked": "Gesperrt"
+      },
+      "notDone": "Als nicht erledigt markieren",
+      "notDoneLabel": "{chapter} als nicht erledigt markieren",
+      "goneChapters": "Erledigte Kapitel, die der Kurs nicht mehr hat:",
+      "progressHint": "Deine Antworten und dein Fortschritt bei den Karten bleiben, wie sie sind.",
+      "restart": "Kurs neu beginnen",
+      "restartConfirm": "Kurs neu beginnen? Alle Kapitel werden als nicht erledigt markiert, sodass sich das erste wieder öffnet. Deine Antworten und dein Fortschritt bei den Karten bleiben erhalten.",
+      "saved": "Gespeichert."
+    },
+    "instance": {
+      "crumb": "Name und Katalog",
+      "heading": "Instanz: {instance}",
+      "loading": "Der Katalog wird geladen…",
+      "preferencesLink": "Lerneinstellungen in Solid Memo",
+      "address": "Adresse",
+      "name": "Name",
+      "nameLabel": "Name der Instanz",
+      "nameHint": "Wird in der Instanz gespeichert, in ihrem Katalog und in den Datenlisten deines Pods, wo andere Apps sie finden.",
+      "saveName": "Name speichern",
+      "catalog": "Katalog",
+      "noCatalog": "Diese Instanz hat noch keinen Katalog. Öffne sie in Solid Memo, um sie zu aktualisieren.",
+      "publisher": "Herausgeber",
+      "description": "Beschreibung",
+      "licenseHint": "Die Lizenz, unter der die Stapel angeboten werden, für Apps, die den Katalog lesen.",
+      "saveCatalog": "Katalog speichern"
+    },
+    "health": {
+      "crumb": "Zustand",
+      "heading": "Zustand von „{instance}“",
+      "deckHeading": "Zustand von „{deck}“",
+      "loading": "Wird geprüft…",
+      "checkAgain": "Erneut prüfen",
+      "checking": "Wird geprüft…",
+      "summary": {
+        "one": "{count} Problem gefunden.",
+        "other": "{count} Probleme gefunden."
+      },
+      "allWell": "Mit diesem Stapel ist alles in Ordnung.",
+      "dataHeading": "Datenprüfung",
+      "dataHint": "Der Eintrag des Stapels im Katalog und seine Dokumente, geprüft anhand der Formen von Solid Memo.",
+      "held": "In diesem Stapel lässt sich bis zur Reparatur der Daten nichts ändern, daher werden die Probleme unten nur genannt und nicht mit ihren Formularen verlinkt. Repariere hier, was sich reparieren lässt, und entferne, was keine Reparatur abdeckt.",
+      "instanceDataHint": "Die Dokumente der Instanz, geprüft anhand der Formen von Solid Memo. Dokumente, die sich seit ihrer letzten bestandenen Prüfung nicht geändert haben, werden nicht erneut geprüft.",
+      "deckEntry": "Der Eintrag des Stapels",
+      "deckDistribution": "Die Distribution des Stapels",
+      "inDeck": "in „{deck}“",
+      "remove": "{subject} entfernen",
+      "removeHint": "Keine Reparatur deckt das ab: Korrigiere es im Dokument oder entferne es.",
+      "decksHeading": "Stapel",
+      "decksHint": "Jeder Stapel wird geprüft, sobald er auf dem Bildschirm erscheint.",
+      "languagesHeading": "Sprachen",
+      "languagesFine": "Jede Kartenseite gibt ihre Sprache an.",
+      "unstated": {
+        "one": "{count} Kartenseite gibt keine Sprache an.",
+        "other": "{count} Kartenseiten geben keine Sprache an."
+      },
+      "unstatedLink": "Sprachen auf der Seite „Über“ angeben",
+      "languagesUnchecked": "Die Ausgabe, aus der dieser Stapel kopiert wurde, konnte nicht gelesen werden, daher ist unklar, für welche Seiten du die Sprache selbst angeben musst.",
+      "duplicatesHeading": "Gleichlautende Karten",
+      "duplicatesFine": "Unter den Karten in Verwendung gibt es keine gleichlautenden.",
+      "duplicatesHint": "Diese Karten haben dieselbe Vorder- und Rückseite in denselben Sprachen und dieselben Bilder.",
+      "duplicateGroup": "Dieselbe Karte {count}-mal:",
+      "markdownHeading": "Markdown",
+      "markdownFine": "Der in Markdown geschriebene Text wird so angezeigt, wie er gemeint war.",
+      "markdownHint": "Was in den Karten mit Markdown nicht so angezeigt würde, wie es gemeint war.",
+      "part": {
+        "front": "Vorderseite",
+        "back": "Rückseite",
+        "frontNote": "Anmerkung zur Vorderseite",
+        "backNote": "Anmerkung zur Rückseite",
+        "frontLabel": "Beschriftung der Vorderseite",
+        "backLabel": "Beschriftung der Rückseite",
+        "frontImageDescription": "Bildbeschreibung der Vorderseite",
+        "backImageDescription": "Bildbeschreibung der Rückseite"
+      },
+      "place": {
+        "card": "{card}",
+        "part": "{card}, {part}",
+        "distractor": "{card}, falsche Antwortmöglichkeit {id}",
+        "distractorText": "{card}, falsche Antwortmöglichkeit {id}",
+        "distractorNote": "{card}, Anmerkung zur falschen Antwortmöglichkeit {id}",
+        "schedule": "{card}, Zeitplan"
+      },
+      "language": "{place} ({language})",
+      "badge": {
+        "problems": {
+          "one": "{count} Problem",
+          "other": "{count} Probleme"
+        },
+        "healthy": "Keine Probleme",
+        "failed": "Nicht geprüft"
+      }
+    },
+    "library": {
+      "crumb": "Kopien aus der Bibliothek",
+      "heading": "Kopien aus der Bibliothek in „{instance}“",
+      "caption": "Die aus der Bibliothek kopierten Stapel von „{instance}“",
+      "loading": "Die Bibliothek wird abgefragt…",
+      "empty": "Kein Stapel hier ist eine Kopie eines Bibliotheksstapels. Such dir einen in der {library} aus.",
+      "libraryLink": "Stapelbibliothek",
+      "browse": "Stapelbibliothek durchsuchen",
+      "intro": "Jeder Stapel, der aus der Stapelbibliothek kopiert oder über einen Link hinzugefügt wurde, mit der Ausgabe, aus der er stammt, und der neuesten erschienenen. Eine Aktualisierung übernimmt die Änderungen der Ausgabe in die Karten, die du so gelassen hast, wie sie waren; dein Wiederholungsverlauf bleibt erhalten.",
+      "upgrade": {
+        "one": "{count} Stapel aktualisieren",
+        "other": "{count} Stapel aktualisieren"
+      },
+      "running": "„{deck}“ wird aktualisiert ({at} von {total})",
+      "selectAll": "Alle Stapel auswählen, die sich aktualisieren lassen",
+      "copied": "Kopiert von",
+      "current": "In der Bibliothek",
+      "update": "Aktualisieren",
+      "unknown": "Unbekannte Ausgabe",
+      "release": "Ausgabe {version}",
+      "gone": "Nicht mehr in der Bibliothek",
+      "upToDate": "Auf dem neuesten Stand",
+      "planning": "Es wird ermittelt, was eine Aktualisierung ändern würde…",
+      "planFailed": "Ausgabe {version} ist erschienen, aber was sie ändern würde, konnte nicht gelesen werden.",
+      "nothingToUpdate": "Ausgabe {version} ist erschienen, enthält aber nichts, womit sich deine Kopie aktualisieren ließe.",
+      "changes": "Ausgabe {version}: Eine Aktualisierung {changes}.",
+      "cards": {
+        "add": {
+          "one": "Hinzugefügt: {count} Karte",
+          "other": "Hinzugefügt: {count} Karten"
+        },
+        "change": {
+          "one": "Geändert: {count} Karte",
+          "other": "Geändert: {count} Karten"
+        },
+        "about": {
+          "one": "Worum es geht: {count} Karte",
+          "other": "Worum es geht: {count} Karten"
+        },
+        "retire": {
+          "one": "Ausgemustert: {count} Karte",
+          "other": "Ausgemustert: {count} Karten"
+        },
+        "restore": {
+          "one": "Zurückgeholt: {count} Karte",
+          "other": "Zurückgeholt: {count} Karten"
+        },
+        "remove": {
+          "one": "Entfernt: {count} Karte",
+          "other": "Entfernt: {count} Karten"
+        },
+        "kept": {
+          "one": "So gelassen, wie du sie hast: {count} Karte",
+          "other": "So gelassen, wie du sie hast: {count} Karten"
+        }
+      },
+      "updated": "„{deck}“: auf Ausgabe {version} aktualisiert.",
+      "failed": "„{deck}“: Die Aktualisierung ist beim Schritt „{step}“ fehlgeschlagen:",
+      "badge": "Ausgabe {version} ist erschienen",
+      "badgeOf": "für „{deck}“",
+      "newerUnknown": "Unbekannt: Der Stapel steht in keinem öffentlichen Katalog der Person, die ihn erstellt hat",
+      "peek": "Gehe zur Zeile einer Kopie ({j}, {k}), um zu sehen, was eine Aktualisierung ändern würde.",
+      "plan": "Aktualisierung",
+      "bulk": "Ausgewählte Kopien",
+      "selected": {
+        "one": "{count} Kopie ausgewählt",
+        "other": "{count} Kopien ausgewählt"
+      }
+    },
+    "transfer": {
+      "crumb": "Importieren und exportieren",
+      "heading": "Stapel von „{instance}“ importieren und exportieren",
+      "export": "Exportieren",
+      "exportIntro": "Speichere Stapel als Dateien, jeden in einer eigenen Datei, in Turtle oder JSON-LD: den Stapel, seine Karten und ihre falschen Antwortmöglichkeiten und, wenn du willst, deinen Fortschritt. Jede App, die RDF liest, kann sie lesen, und Solid Memo kann sie wieder importieren.",
+      "noDecks": "Diese Instanz hat noch keine Stapel zum Exportieren.",
+      "decks": "Zu exportierende Stapel",
+      "format": "Format",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "Meinen Fortschritt einschließen: wann jede Karte fällig ist und welche Kapitel eines Kurses ich abgeschlossen habe",
+      "exportButton": {
+        "one": "{count} Stapel exportieren",
+        "other": "{count} Stapel exportieren"
+      },
+      "exporting": "„{deck}“ wird exportiert ({at} von {total})…",
+      "exported": {
+        "one": "{count} Stapel exportiert. Dein Browser lädt ihn herunter.",
+        "other": "{count} Stapel an deinen Browser übergeben, damit er jeden einzeln herunterlädt. Er fragt vielleicht, ob er mehrere Dateien herunterladen darf: Was er blockiert, wird nicht gespeichert."
+      },
+      "import": "Importieren",
+      "importIntro": "Füge einen Stapel aus einer Turtle- oder JSON-LD-Datei als neuen Stapel zu „{instance}“ hinzu. Eine Datei aus einer älteren Version von Solid Memo wird beim Lesen auf den neuesten Stand gebracht.",
+      "choose": "Datei auswählen…",
+      "reading": "Die Datei wird gelesen…",
+      "file": "{name}: {deck}",
+      "cards": {
+        "one": "{count} Karte",
+        "other": "{count} Karten"
+      },
+      "states": {
+        "one": "Fortschritt: {count} Wiederholungsstand",
+        "other": "Fortschritt: {count} Wiederholungsstände"
+      },
+      "chapters": {
+        "one": "{count} abgeschlossenes Kapitel",
+        "other": "{count} abgeschlossene Kapitel"
+      },
+      "upgraded": {
+        "one": "{count} Teil davon hat ein älteres Format und wird auf den neuesten Stand gebracht.",
+        "other": "{count} Teile davon haben ein älteres Format und werden auf den neuesten Stand gebracht."
+      },
+      "dropped": {
+        "one": "{count} Teil davon kann nicht gelesen werden und wird ausgelassen.",
+        "other": "{count} Teile davon können nicht gelesen werden und werden ausgelassen."
+      },
+      "importProgress": "Fortschritt mitimportieren",
+      "importButton": "In „{instance}“ importieren",
+      "importing": "Der Stapel wird importiert…",
+      "imported": "„{deck}“ importiert."
+    },
+    "readOnly": {
+      "checking": "Die Daten dieser Instanz werden geprüft. Bis die Prüfung abgeschlossen ist, lässt sich nichts ändern.",
+      "blocked": "Diese Instanz hat ungültige Daten, und deine Einstellungen halten sie bis zur Reparatur gesperrt. Daher lässt sich hier nichts ändern. {repair}",
+      "deck": "Dieser Stapel hat ungültige Daten und ist daher zurückgestellt: Er wird hier angezeigt, aber bis zur Reparatur lässt sich darin nichts ändern. {repair}",
+      "decks": "Stapel mit ungültigen Daten sind zurückgestellt: Bis zur Reparatur lassen sie sich weder auswählen noch ändern. {repair}",
+      "catalogue": "Der Katalog der Instanz oder eine seiner Gruppen hat ungültige Daten und ist daher zurückgestellt: Bis zur Reparatur lässt sich darin nichts hinzufügen oder ändern. {repair}",
+      "repair": "Repariere es auf der Zustandsseite.",
+      "repairDecks": "Repariere sie auf der Zustandsseite."
+    },
+    "drafts": {
+      "crumb": "Entwürfe",
+      "loading": "Die Entwürfe werden gelesen…",
+      "heading": "Entwürfe für Ausgaben in „{instance}“",
+      "intro": "Ein Entwurf ist ein Stapel oder Kurs, den du hier in deinem Pod schreibst, bevor du ihn als Ausgabe veröffentlichst, die andere hinzufügen können. Er liegt nur in dieser Instanz, und niemand sonst sieht ihn.",
+      "new": "Neuer Entwurf",
+      "from": "Beginnen mit",
+      "start": {
+        "blankDeck": "Ein leerer Stapel",
+        "blankCourse": "Ein leerer Kurs",
+        "fromDeck": "Ein Stapel dieser Instanz",
+        "nextVersionOf": "Die nächste Version einer Ausgabe",
+        "fromFile": "Eine als Datei gespeicherte Ausgabe"
+      },
+      "name": "Name",
+      "deck": "Stapel",
+      "release": "Adresse der Ausgabe",
+      "releaseHint": "Wo die Ausgabe veröffentlicht ist, z. B. ein Stapel der Bibliothek (https://solid-memo.com/decks/<name>/v1.ttl) oder eine Ausgabe in einem Pod. Der Entwurf übernimmt alle Karten, Kapitel und Schritte, die sie veröffentlicht hat.",
+      "fileHint": "Eine Turtle- oder JSON-LD-Datei mit genau einer Ausgabe eines Stapels oder Kurses. Der Entwurf übernimmt sie unverändert.",
+      "create": "Entwurf erstellen",
+      "chooseFile": "Datei auswählen und Entwurf erstellen…",
+      "creating": "Der Entwurf wird erstellt…",
+      "created": "Entwurf {draft}, Version {version}, erstellt.",
+      "basedOn": "Dieser Stapel ist eine Kopie der Ausgabe {release}. Deren nächste Version behält, was ihre Lernenden gelernt haben. Vielleicht beginnst du daher lieber diese.",
+      "startNext": "Nächste Version dieser Ausgabe beginnen",
+      "list": "Entwürfe",
+      "none": "Diese Instanz hat noch keine Entwürfe.",
+      "caption": "Entwürfe in „{instance}“",
+      "column": {
+        "name": "Entwurf",
+        "kind": "Art",
+        "version": "Version",
+        "state": "Status",
+        "actions": "Aktionen"
+      },
+      "kind": {
+        "deck": "Stapel",
+        "course": "Kurs"
+      },
+      "state": {
+        "writing": "In Arbeit",
+        "released": "Erschienen",
+        "unreadable": "Nicht lesbar"
+      },
+      "untitled": "Unbenannt ({name})",
+      "summary": "{kind}, Version {version}",
+      "delete": "Löschen",
+      "deleteDraft": "Entwurf {draft}, Version {version} löschen",
+      "deleteConfirm": "Entwurf {draft}, Version {version} löschen? Das lässt sich nicht rückgängig machen.",
+      "deleting": "Entwurf {draft} wird gelöscht…",
+      "deleted": "Entwurf {draft}, Version {version} gelöscht."
+    },
+    "draft": {
+      "untitled": "Unbenannter Entwurf",
+      "about": "Über diese Ausgabe",
+      "title": "Titel",
+      "description": "Beschreibung",
+      "outline": "Gliederung",
+      "outlineHint": "Die Kapitel und ihre Schritte in der Reihenfolge, in der Lernende sie durchgehen. Ziehe eines an eine andere Stelle oder nutze sein Menü. Die Fragen eines Schritts werden in der Reihenfolge ihrer IDs gestellt.",
+      "newChapter": "Neues Kapitel",
+      "chapterTitle": "Titel des Kapitels",
+      "addChapter": "Kapitel hinzufügen",
+      "retiredChapters": "Ausgemusterte Kapitel",
+      "questions": "Fragen",
+      "cards": "Karten",
+      "cardCount": {
+        "one": "{count} Karte insgesamt.",
+        "other": "{count} Karten insgesamt."
+      },
+      "allCards": "Alle Karten",
+      "newCard": "Neue Karte",
+      "problems": "Probleme",
+      "problemsChecking": "Der Entwurf wird geprüft…",
+      "problemsNone": "Die Prüfung der Ausgabe findet keine Probleme.",
+      "problemsCount": {
+        "one": "Die Prüfung der Ausgabe findet {count} Problem.",
+        "other": "Die Prüfung der Ausgabe findet {count} Probleme."
+      }
+    },
+    "outline": {
+      "empty": "Noch keine Kapitel.",
+      "noSteps": "Noch keine Schritte.",
+      "noTheory": "Noch keine Theorie.",
+      "stepNumber": "Schritt {chapter}.{step}",
+      "stepCount": {
+        "one": "{count} Schritt",
+        "other": "{count} Schritte"
+      },
+      "actions": "Aktionen für {name}",
+      "moveTo": "In Kapitel verschieben",
+      "inChapter": "in {chapter}",
+      "afterChapter": "nach {chapter}",
+      "moved": "Verschoben.",
+      "dragCancelled": "Verschieben abgebrochen.",
+      "retired": "{name} ausgemustert.",
+      "deleted": "{name} gelöscht."
+    },
+    "chapter": {
+      "untitled": "Kapitel {id}",
+      "number": "Kapitel {number} von {count}",
+      "retired": "Ausgemustertes Kapitel",
+      "title": "Titel",
+      "description": "Beschreibung",
+      "steps": "Schritte",
+      "step": "Schritt {number}",
+      "stepUp": "{step} nach oben",
+      "stepDown": "{step} nach unten",
+      "newStep": "Neuer Schritt",
+      "addStep": "Schritt hinzufügen",
+      "retiredSteps": "Ausgemusterte Schritte",
+      "review": "Abschlusswiederholung",
+      "reviewHint": "Fragen, die nur in der Abschlusswiederholung des Kapitels gestellt werden, nach den Fragen seiner Schritte.",
+      "newReviewQuestion": "Neue Frage für die Abschlusswiederholung"
+    },
+    "step": {
+      "inChapter": "In",
+      "retired": "Ausgemusterter Schritt",
+      "theory": "Theorie",
+      "questions": "Fragen zum Verständnis",
+      "questionsHint": "Werden nach der Theorie gestellt, in der Reihenfolge ihrer IDs. Die Theorie ist beim Beantworten nicht zu sehen.",
+      "newQuestion": "Neue Frage"
+    },
+    "question": {
+      "retired": "Ausgemustert",
+      "place": "Gestellt",
+      "nowhere": "Noch nirgends",
+      "atStep": "{chapter}, Schritt {step}",
+      "atReview": "{chapter}, Abschlusswiederholung",
+      "preview": "So, wie der Kurs sie stellt",
+      "again": "Erneut stellen"
+    },
+    "draftCards": {
+      "crumb": "Karten",
+      "heading": "Karten von „{draft}“",
+      "headingCourse": "Fragen von „{draft}“",
+      "filter": "Anzeigen",
+      "all": "Alle Karten",
+      "filters": {
+        "unasked": "Nirgends gestellt",
+        "askedTwice": "An zwei Stellen gestellt",
+        "fewDistractors": "Zu wenige falsche Antwortmöglichkeiten",
+        "retired": "Ausgemustert"
+      },
+      "language": "Sprache",
+      "anyLanguage": "Alle Sprachen",
+      "unstated": "Keine Sprache angegeben",
+      "count": {
+        "one": "{count} Karte",
+        "other": "{count} Karten"
+      },
+      "caption": "Die Karten des Entwurfs",
+      "column": {
+        "front": "Vorderseite",
+        "back": "Rückseite",
+        "place": "Gestellt",
+        "distractors": "Falsche Antwortmöglichkeiten",
+        "id": "ID"
+      },
+      "retired": "(ausgemustert)",
+      "askedTimes": "An {count} Stellen gestellt",
+      "newQuestion": "Neue Frage, noch nirgends gestellt",
+      "retire": {
+        "one": "{count} Karte ausmustern",
+        "other": "{count} Karten ausmustern"
+      },
+      "restore": {
+        "one": "{count} Karte zurückholen",
+        "other": "{count} Karten zurückholen"
+      }
+    },
+    "draftEdit": {
+      "saving": "Wird gespeichert…",
+      "saved": "Alle Änderungen gespeichert.",
+      "released": "Dieser Entwurf ist erschienen und ist daher eingefroren: Nichts darin lässt sich ändern. Seine nächste Version beginnst du unter {drafts}.",
+      "releasedLink": "Entwürfe",
+      "chooseLanguage": "Wähle die Sprache für {field}, um zu speichern.",
+      "id": "ID",
+      "idHint": "Teil der Adresse in der Ausgabe; nach der Veröffentlichung nicht mehr änderbar. Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“.",
+      "idProblem": {
+        "invalid": "Eine ID besteht aus Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“ und beginnt mit einem Buchstaben oder einer Ziffer.",
+        "taken": "Dieser Entwurf oder eine Ausgabe davor hat diese ID schon."
+      },
+      "addQuestion": "Frage hinzufügen",
+      "questionEmpty": "Schreib die Vorderseite und die Rückseite.",
+      "askedWhere": "Stellen",
+      "askedLast": "Nach der letzten Frage",
+      "askedBefore": "Vor „{name}“",
+      "noIdBetween": "Der Assistent findet keine ID, die dort einsortiert wird: Schreib selbst eine, die passt.",
+      "notAskedThere": "Diese ID wird dort nicht einsortiert, daher würde die Frage nicht dort gestellt, wo „Stellen“ es angibt: Schreib eine, die passt.",
+      "retire": "Ausmustern",
+      "restore": "Zurückholen",
+      "delete": "Löschen",
+      "published": "Eine frühere Ausgabe hat dies veröffentlicht, daher kann der Fortschritt von Lernenden darauf verweisen: Es lässt sich ausmustern, aber nie löschen.",
+      "life": {
+        "chapter": "Kapitel ausmustern oder löschen",
+        "step": "Schritt ausmustern oder löschen",
+        "card": "Karte ausmustern oder löschen"
+      },
+      "deleteConfirm": {
+        "chapter": "Das Kapitel „{name}“ mit seinen Schritten löschen? Seine Fragen bleiben erhalten, werden aber nirgends mehr gestellt.",
+        "step": "„{name}“ löschen? Seine Fragen bleiben erhalten, werden aber nirgends mehr gestellt.",
+        "card": "Die Karte „{name}“ mit ihren falschen Antwortmöglichkeiten löschen?"
+      },
+      "refused": {
+        "released": "Dieser Entwurf ist erschienen: Er wird nicht mehr geändert.",
+        "missing": "„{id}“ ist nicht mehr in diesem Entwurf. Vielleicht wurde der Entwurf in einem anderen Tab geändert.",
+        "published": "Eine frühere Ausgabe hat „{id}“ veröffentlicht: Es lässt sich ausmustern, aber nie löschen.",
+        "idTaken": "Die ID „{id}“ ist schon vergeben, in diesem Entwurf oder einer Ausgabe davor.",
+        "idInvalid": "„{id}“ kann keine ID sein: Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“, beginnend mit einem Buchstaben oder einer Ziffer.",
+        "askedElsewhere": "Diese Karte wird schon an einer anderen Stelle gestellt: Verschiebe sie stattdessen dorthin.",
+        "notACourse": "Nur ein Kurs hat Kapitel, Schritte und Fragen.",
+        "notFrontToBack": "Ein Kurs wird von der Vorderseite zur Rückseite gelernt.",
+        "carriedActivity": "Wie eine frühere Ausgabe entstanden ist, wird nicht umgeschrieben.",
+        "noAuthors": "Gib zuerst an, wer die Ausgabe verfasst hat: Die Namensnennung nennt alle, die sie verfasst haben.",
+        "unusedSource": "Eine Quelle ist etwas, worauf die Ausgabe beruht oder was bei ihrer Entstehung verwendet wurde: Kreuze mindestens eines an."
+      }
+    },
+    "check": {
+      "crumb": "Prüfung der Ausgabe",
+      "heading": "Prüfung der Ausgabe",
+      "intro": "Alle Regeln, die für eine Ausgabe gelten, angewandt auf diesen Entwurf als die Ausgabe, die er werden wird. Jedes Problem verlinkt auf den Teil des Entwurfs, um den es geht.",
+      "policy": "Prüfen für",
+      "policyPod": "Eine Ausgabe in deinem Pod",
+      "policyLibrary": "Die Bibliothek von Solid Memo",
+      "policyHintPod": "Eine Ausgabe in einem Pod muss die Regeln für ihre Daten einhalten: für ihren Kurs, für das, was eine Ausgabe angibt, für ihr Markdown und für die Ausgabe, auf die sie folgt.",
+      "policyHintLibrary": "Ein Stapel, der an die Bibliothek von Solid Memo geht, muss auch ihre Auswahlkriterien erfüllen (Titel, Beschreibung und Schlagwörter in jeder Sprache der App, das Thema Bildung) und wird über den Index der Bibliothek unter ihre Stapel eingeordnet.",
+      "checking": "Der Entwurf wird geprüft…",
+      "clear": "Keine Probleme gefunden.",
+      "summary": {
+        "one": "{count} Problem.",
+        "other": "{count} Probleme."
+      },
+      "errors": "Fehler",
+      "warnings": "Warnungen",
+      "shapesHeading": "Formen",
+      "shapesHint": "Die Formen und die Profile DCAT-AP und SKOS prüfen die Ausgabe als veröffentlichte Daten. Bei einem großen Entwurf dauert das eine Weile, daher laufen sie nur auf Anfrage.",
+      "shapesRun": "Anhand der Formen prüfen",
+      "shapesRunning": "Wird anhand der Formen geprüft…",
+      "again": "Entwurf erneut prüfen",
+      "shapesAgain": "Erneut prüfen",
+      "shapesStale": "Der Entwurf hat sich seitdem geändert: Das sind die Probleme, die er damals hatte.",
+      "shapesClear": "Die Formen finden keine Probleme.",
+      "shapesCount": {
+        "one": "Die Formen finden {count} Problem; es ist oben bereits aufgeführt.",
+        "other": "Die Formen finden {count} Probleme; sie sind oben bereits aufgeführt."
+      },
+      "release": "Diese Ausgabe",
+      "distractor": "Falsche Antwortmöglichkeit {id}",
+      "badge": {
+        "one": "{count} Problem",
+        "other": "{count} Probleme"
+      },
+      "badgeOf": "in {name}",
+      "untagged": "Text ohne Sprachangabe",
+      "nothing": "nichts",
+      "firstVersion": "nichts, da es die erste Version ist",
+      "kind": {
+        "card": "eine Karte",
+        "chapter": "ein Kapitel",
+        "step": "ein Schritt",
+        "distractor": "eine falsche Antwortmöglichkeit"
+      },
+      "profile": "{profile}: {message}"
+    },
+    "field": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "publisher": "Herausgeber",
+      "license": "Lizenz",
+      "version": "Version",
+      "inSeries": "Reihe",
+      "isVersionOf": "Reihe, von der sie eine Version ist",
+      "distribution": "Distribution",
+      "theme": "Themen",
+      "keyword": "Schlagwörter",
+      "prev": "Vorige Version",
+      "previousVersion": "Vorige Version",
+      "studyDirection": "Lernrichtung",
+      "theory": "Theorie",
+      "checkedBy": "Fragen",
+      "isPartOf": "Teil von",
+      "position": "Position",
+      "reviewQuestion": "Fragen der Abschlusswiederholung",
+      "front": "Vorderseite",
+      "back": "Rückseite",
+      "frontLabel": "Beschriftung der Vorderseite",
+      "backLabel": "Beschriftung der Rückseite",
+      "frontNote": "Anmerkung zur Vorderseite",
+      "backNote": "Anmerkung zur Rückseite",
+      "frontImageDescription": "Beschreibung des Bildes auf der Vorderseite",
+      "backImageDescription": "Beschreibung des Bildes auf der Rückseite",
+      "distractor": "Falsche Antwortmöglichkeiten",
+      "distractorText": "Falsche Antwortmöglichkeit",
+      "distractorNote": "Warum sie falsch ist",
+      "textFormat": "Textformat",
+      "versionNotes": "Versionshinweise",
+      "language": "Sprachen",
+      "creator": "Verfasst von",
+      "comment": "Kommentar",
+      "wasDerivedFrom": "Quellen"
+    },
+    "problem": {
+      "notARelease": "{path} ist kein Ort für eine Ausgabe in der Bibliothek: Der Name darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten.",
+      "versionGap": "Die Versionen von „{deck}“ in der Bibliothek wären nicht lückenlos 1, 2, …: {versions}.",
+      "notOneDeck": "Die Ausgabe beschreibt nicht genau einen Stapel, nämlich sich selbst: Sie hat {decks}.",
+      "versionMismatch": "Gibt Version {stated} an; nach ihrem Ort in der Bibliothek wäre es {expected}.",
+      "linkMismatch": "{field}: gibt {stated} an; nach ihrem Ort in der Bibliothek wäre es {expected}.",
+      "noLicense": "Gibt keine Lizenz an: Ein Stapel der Bibliothek nennt die Lizenz, unter der er veröffentlicht wird.",
+      "cardsDropped": "Lässt {ids} weg, die {previous} hat. Eine Karte wird nie entfernt: Mustere sie stattdessen aus, damit Lernende sie und ihren Verlauf behalten.",
+      "outlineDropped": "Lässt {ids} weg, die {previous} hat. Ein Kapitel, ein Schritt oder eine falsche Antwortmöglichkeit wird nie entfernt: Mustere sie stattdessen aus, damit Lernende ihre Stelle im Kurs behalten.",
+      "idReused": "{id} ist hier {now}, in {previous} aber {was}: Eine ID benennt dauerhaft dasselbe Subjekt.",
+      "versionNotNext": "Version {version} folgt nicht auf {previous}, Version {previousVersion}.",
+      "outlineWithoutCourse": "Hat Kapitel oder Schritte, ist aber kein Kurs.",
+      "courseWithoutChapter": "Ein Kurs hat mindestens ein Kapitel.",
+      "courseDirection": "Ein Kurs wird von der Vorderseite zur Rückseite gelernt; hier ist {stated} angegeben.",
+      "chapterPartOf": "Ist Teil von {parts}: Ein Kapitel ist Teil der Ausgabe, in der es steht.",
+      "stepPartOf": "Ist Teil von {part}, doch das ist kein Kapitel dieser Ausgabe.",
+      "askedNotACard": "Fragt {card} ab, doch das ist keine Karte dieser Ausgabe.",
+      "askedRetired": "Fragt {card} ab, doch diese Karte ist ausgemustert: Frage eine Karte in Verwendung ab oder mustere auch dies hier aus.",
+      "notADistractor": "Nennt {distractor} als falsche Antwortmöglichkeit, doch das ist keine falsche Antwortmöglichkeit dieser Ausgabe.",
+      "distractorShared": "Ist eine falsche Antwortmöglichkeit von {cards}: Jede Karte hat ihre eigenen.",
+      "checkedTwice": "Wird in den Schritten {steps} gestellt: Eine Frage stellt höchstens ein Schritt.",
+      "checkedAndReviewed": "Wird in {steps} und in der Abschlusswiederholung von {chapters} gestellt: Eine Frage wird nur an einer Stelle gestellt.",
+      "noBack": "Hat keinen Text auf der Rückseite, der richtigen Antwortmöglichkeit.",
+      "fewDistractors": {
+        "one": "Hat {count} falsche Antwortmöglichkeit in Verwendung: Eine Frage in einem Kurs hat mindestens {least}.",
+        "other": "Hat {count} falsche Antwortmöglichkeiten in Verwendung: Eine Frage in einem Kurs hat mindestens {least}."
+      },
+      "distractorLanguages": "Hat keinen Text auf {missing}, den die Rückseite von {card} hat.",
+      "chapterPositions": "Die Kapitel {chapters} teilen sich die Position {position}.",
+      "stepPositions": "Die Schritte {steps} teilen sich die Position {position}.",
+      "chapterWithoutStep": "Hat keinen Schritt in Verwendung.",
+      "textFormatMisplaced": "Gibt ein Textformat an, was nur eine Karte, ein Schritt oder ein Kapitel tut.",
+      "textFormatUnknown": "Gibt ein Textformat an, das diese App nicht kennt, {format}: Der Text wird als reiner Text angezeigt.",
+      "markdown": "{field}, {language}: {finding}",
+      "theoryEmptyChunk": "{field}, {language}: Eine Trennlinie am Anfang, am Ende oder direkt nach einer anderen ergibt einen leeren Teil, den die App weglässt. Die Theorie eines Schritts wird Teil für Teil angezeigt, geteilt an ihren Trennlinien: Setze zwischen je zwei Trennlinien Text.",
+      "theoryChunks": "{field}: {counts}. Die Theorie eines Schritts hat in jeder Sprache gleich viele Teile, damit Lernende beim Wechsel der Sprache ihre Stelle behalten.",
+      "theoryChunkCount": {
+        "one": "{count} Teil auf {language}",
+        "other": "{count} Teile auf {language}"
+      },
+      "missingLanguage": "{field}: kein Text auf {language}.",
+      "missingImageDescription": "{field}: keine Beschreibung auf {language}. Ohne sie sagt ein Screenreader nur, dass dort ein Bild ist.",
+      "missingTheme": "Themen: {theme} fehlt.",
+      "missingContact": "Kontakt: Der der Bibliothek, {contact}, ist nicht angegeben. Eine Veröffentlichung für die Bibliothek nennt ihn, keine E-Mail-Adresse.",
+      "emailNamed": "Nennt eine E-Mail-Adresse: Eine Veröffentlichung für die Bibliothek nennt keine E-Mail-Adresse, nur den Kontakt der Bibliothek.",
+      "required": "{field}: noch nicht angegeben.",
+      "previousUnread": "Die Ausgabe, auf die sie folgt, {previous}, konnte nicht gelesen werden, daher wird nichts mit ihr verglichen. Prüfe später noch einmal.",
+      "libraryUnread": "Der Index der Bibliothek konnte nicht gelesen werden, daher wird der Platz des Entwurfs in der Bibliothek nicht geprüft. Prüfe später noch einmal.",
+      "shape": "{field}: {message}",
+      "unshaped": "Gehört zu einer Klasse von Solid Memo, die keine Form dieser App beschreibt.",
+      "sourceUndescribed": "Gibt {missing} nicht an: Eine Quelle sagt, was sie ist, wem sie gehört und zu welchen Bedingungen sie verwendet wurde.",
+      "usedNotDerived": "Wurde bei der Entstehung der Ausgabe verwendet, doch die Ausgabe gibt nicht an, dass sie darauf beruht.",
+      "countDisagrees": "Nennt {stated} {what}, die Ausgabe hat aber {counted}."
+    },
+    "preview": {
+      "crumb": "Vorschau des Eintrags",
+      "heading": "Vorschau des Eintrags",
+      "intro": "Diese Ausgabe in der Bibliothek, wie Lernende sie sehen werden. Hier lässt sich nichts anklicken: Es ist nur ein Bild.",
+      "row": "In der Liste der Bibliothek",
+      "page": "Auf seiner eigenen Seite"
+    },
+    "diff": {
+      "crumb": "Änderungen",
+      "heading": "Änderungen seit der vorigen Version",
+      "intro": "Dieser Entwurf im Vergleich mit der Ausgabe, auf die er folgt: was er hinzufügt, ändert, ausmustert und zurückholt, und was Lernende mit dieser Ausgabe davon bekommen.",
+      "comparing": "Der Entwurf wird verglichen…",
+      "first": "Dieser Entwurf ist eine erste Version: Er folgt auf keine Ausgabe, daher gibt es nichts zu vergleichen.",
+      "against": "Verglichen mit Version {version}, {url}.",
+      "rules": "Regeln der Reihe",
+      "rulesKept": "Er lässt nichts weg, gibt keine ID an eine andere Art von Subjekt, und seine Version ist die nächste.",
+      "about": "Was er über sich selbst sagt",
+      "aboutSame": "Unverändert.",
+      "aboutChanged": "Geändert: {fields}.",
+      "detail": {
+        "course": "Kurs oder Stapel",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "keywords": "Schlagwörter",
+        "themes": "Themen",
+        "direction": "Lernrichtung",
+        "license": "Lizenz",
+        "authors": "Urheberschaft",
+        "languages": "Sprachen",
+        "sources": "Quellen"
+      },
+      "subjects": "Inhalt",
+      "subjectsSame": "Jedes Kapitel, jeder Schritt, jede Karte und jede falsche Antwortmöglichkeit ist wie vorher.",
+      "kind": {
+        "chapter": "Kapitel",
+        "step": "Schritte",
+        "card": "Karten",
+        "distractor": "Falsche Antwortmöglichkeiten"
+      },
+      "unchanged": {
+        "one": "{count} wie vorher.",
+        "other": "{count} wie vorher."
+      },
+      "status": {
+        "added": "hinzugefügt",
+        "changed": "geändert",
+        "retired": "ausgemustert",
+        "restored": "zurückgeholt",
+        "retiredChanged": "ausgemustert und geändert",
+        "restoredChanged": "zurückgeholt und geändert"
+      },
+      "learners": "Was Lernende bekommen",
+      "notNewer": "Lernenden wird nur eine neuere Ausgabe angeboten, und Version {version} kommt nicht nach Version {previous}.",
+      "noUpgrade": "Die Kopie von Version {previous}, mit der jemand lernt, würde sich nicht ändern.",
+      "upgrade": "Die Aktualisierung einer Kopie von Version {previous}, mit der jemand lernt, {changes}.",
+      "retiredOnly": "ändert nur ausgemusterte Karten",
+      "courseLearner": "Die Kopie hier gehört jemandem, der jede Frage erreicht hat. Lernende eines Kurses bekommen seine neuen Fragen, sobald sie dort ankommen.",
+      "nothingLost": "Niemand, der lernt, verliert Fortschritt: Was der Entwurf nicht mehr verwendet, mustert er aus, und eine ausgemusterte Karte behält ihren Verlauf.",
+      "lost": "Fortschritt, den Lernende verlieren würden",
+      "lostCards": {
+        "one": "Der Wiederholungsverlauf von {count} Karte, die der Entwurf weglässt: {ids}.",
+        "other": "Der Wiederholungsverlauf von {count} Karten, die der Entwurf weglässt: {ids}."
+      },
+      "lostChapters": {
+        "one": "Der Abschluss von {count} Kapitel, das der Entwurf weglässt: {ids}.",
+        "other": "Der Abschluss von {count} Kapiteln, die der Entwurf weglässt: {ids}."
+      }
+    },
+    "trial": {
+      "crumb": "Probelauf",
+      "heading": "Probelauf",
+      "intro": "Der Entwurf so, wie Lernende ihn erleben werden, in einer Sandbox auf dieser Seite: Nichts davon erreicht deinen Pod, und „Neu beginnen“ setzt alles zurück.",
+      "opening": "Der Probelauf wird vorbereitet…",
+      "notReady": "Dieser Entwurf lässt sich noch nicht ausprobieren. Behebe zuerst Folgendes:",
+      "controls": "Steuerung des Probelaufs",
+      "coursePage": "Seite des Kurses",
+      "chapter": "Kapitel",
+      "jump": "Kapitel öffnen",
+      "jumpHint": "Wie jemand, der alle Kapitel davor abgeschlossen hat.",
+      "answersCourse": "Jede Frage des angezeigten Kapitels oder des Kapitels, das als Nächstes ansteht:",
+      "answersDeck": "Jede Karte, die jetzt zu lernen ist:",
+      "allRight": "Alle richtig beantworten",
+      "allWrong": "Alle falsch beantworten",
+      "days": "Tage vorspulen",
+      "advance": "Vorspulen",
+      "ahead": {
+        "one": "Der Probelauf ist {count} Tag voraus.",
+        "other": "Der Probelauf ist {count} Tage voraus."
+      },
+      "today": "Der Probelauf steht auf dem heutigen Datum.",
+      "working": "Wird ausgeführt…",
+      "reset": "Neu beginnen",
+      "reload": "Entwurf neu laden"
+    },
+    "release": {
+      "crumb": "Ausgabe",
+      "heading": "Metadaten und Herkunft der Ausgabe",
+      "intro": "Was die Ausgabe über ihren Eintrag hinaus über sich selbst sagt: wer sie wie zusammengestellt hat und woraus sie entstanden ist. Jede Änderung wird sofort gespeichert.",
+      "about": "Über diese Version",
+      "versionNotes": "Versionshinweise",
+      "versionNotesHint": "Was diese Version ist oder ändert, in wenigen Worten für Lernende.",
+      "languages": "Sprachen",
+      "languagesHint": "Die Sprachen ihres Inhalts, aus der Sprachentabelle der EU.",
+      "languageOther": "{iri} (nicht in der Tabelle)",
+      "themes": "Themen",
+      "themesHint": "Worum es in der Ausgabe geht: das Thema der EU, das die Prüfung der Ausgabe verlangt, und die Themen, unter denen die Bibliothek sie aufführt.",
+      "themeEducation": "Bildung, Kultur und Sport (EDUC)",
+      "themesRequired": "Datenthema der EU (erforderlich)",
+      "themesTopics": "Themen von Solid Memo (optional)",
+      "themesOther": "Weitere Themen, die die Ausgabe angibt",
+      "licenseHint": "Als Lizenzdokument angegeben, wie DCAT-AP es verlangt.",
+      "contact": "Kontakt",
+      "contactHint": "Eine Webseite, auf der Lesende Fragen zur Veröffentlichung stellen oder einen Fehler darin melden, etwa ein Issue-Tracker. Die Bibliothek von Solid Memo verlangt ihre eigene und keine E-Mail-Adresse.",
+      "contactLibrary": "Kontakt der Bibliothek verwenden",
+      "contactInvalid": "Gib eine Webadresse an, die mit https:// oder http:// beginnt.",
+      "publisher": "Herausgeber",
+      "publisherNone": "Nicht angegeben",
+      "publisherHint": "Wer die Ausgabe herausgibt: eine der Personen, die sie verfasst haben, oder der Herausgeber, den sie bereits nennt.",
+      "authors": "Verfasst von",
+      "authorsHint": "Die Personen, die die Ausgabe zusammengestellt haben, gespeichert in der Ausgabe selbst.",
+      "noAuthors": "Noch keine Personen.",
+      "otherAuthors": "In einem anderen Dokument ebenfalls genannt und unverändert beibehalten: {authors}",
+      "authorName": "Name",
+      "authorEmail": "E-Mail (optional)",
+      "saveAuthor": "Speichern",
+      "newAuthor": "Neue Person",
+      "addAuthor": "Person hinzufügen",
+      "authorEmpty": "Gib den Namen der Person ein.",
+      "making": "Wie sie entstanden ist",
+      "attribution": "Namensnennung",
+      "attributionHint": "Sagt auf Englisch und Schwedisch, wer die Ausgabe zusammengestellt hat. Nichts hier sagt, dass jemand sie geprüft hat.",
+      "attributionNone": "Keine Namensnennung",
+      "attributionNeedsAuthors": "Gib zuerst an, wer die Ausgabe verfasst hat: Die Namensnennung nennt die Personen, die sie verfasst haben.",
+      "makingNotes": "Anmerkungen zur Entstehung",
+      "makingNotesHint": "Jeder Absatz wird als Anmerkung zur Entstehung der Ausgabe gespeichert, etwa zu ihren Quellen, ihrem Aufbau, ihrer Auswahl oder ihrer Lizenzierung. Eine Anzahl, die eine Anmerkung nennt (Kapitel, Schritte, Quellen oder Karten insgesamt), wird mit der Ausgabe abgeglichen.",
+      "sources": "Quellen",
+      "sourcesHint": "Woraus die Ausgabe entstanden ist. Jede Quelle sagt, was sie ist, wem sie gehört und unter welchen Bedingungen sie verwendet wurde: ihre Lizenz oder ein Nachweis dafür. Das Studio zeigt ihre Adresse an und öffnet sie nie.",
+      "noSources": "Noch keine Quellen.",
+      "sourceIri": "Adresse",
+      "sourceTitle": "Titel",
+      "sourceCreator": "Urheberschaft",
+      "sourceLicense": "Lizenz (ihre Adresse)",
+      "sourceEvidence": "Nachweis für ihre Lizenz",
+      "derivedFrom": "Die Ausgabe beruht auf ihr",
+      "used": "Bei der Entstehung dieser Version verwendet",
+      "usedEarlier": "Bei der Entstehung einer früheren Version verwendet.",
+      "sourceOthers": {
+        "one": "{count} weitere Angabe zu ihr bleibt unverändert erhalten.",
+        "other": "{count} weitere Angaben zu ihr bleiben unverändert erhalten."
+      },
+      "saveSource": "Quelle speichern",
+      "newSource": "Neue Quelle",
+      "addSource": "Quelle hinzufügen",
+      "sourceInvalid": "Gib die Webadresse der Quelle an, beginnend mit https:// oder http://.",
+      "sourceExists": "Die Ausgabe nennt diese Quelle bereits.",
+      "sourceUnused": "Kreuze mindestens eines an: Die Ausgabe beruht auf ihr, oder sie wurde bei der Entstehung dieser Version verwendet.",
+      "licenseInvalid": "Gib die Webadresse der Lizenz an, beginnend mit https:// oder http://, oder lass das Feld leer.",
+      "checks": "Prüfungen",
+      "checksHint": "Prüfungen, die die Ausgabe durchlaufen hat, maschinell (die Prüfprogramme, die Prüfung der Ausgabe) oder durch KI. Keine davon wird als Prüfung durch einen Menschen eingetragen: Das Studio trägt keine Prüfung durch Menschen ein.",
+      "noChecks": "Noch keine Prüfungen eingetragen.",
+      "checkKind": "Geprüft von",
+      "checkMachine": "Maschinell",
+      "checkAi": "KI",
+      "checkLabel": "Was geprüft wurde",
+      "checkScope": "Umfang",
+      "checkOutcome": "Ergebnis",
+      "checkEnded": "Abgeschlossen am",
+      "checkLanguage": "Geschrieben auf",
+      "checkLanguageEn": "Englisch",
+      "checkLanguageSv": "Schwedisch",
+      "checkEmpty": "Gib an, was geprüft wurde, in welchem Umfang und mit welchem Ergebnis.",
+      "newCheck": "Neue Prüfung",
+      "addCheck": "Prüfung eintragen",
+      "saveCheck": "Prüfung speichern",
+      "checkOtherwise": "Anders geschrieben, als das Studio eine Prüfung schreibt: Sie lässt sich löschen, aber nicht bearbeiten.",
+      "carried": "Aus früheren Versionen",
+      "carriedHint": "Wie frühere Versionen entstanden sind. Unverändert beibehalten: Eine Ausgabe wird nie umgeschrieben.",
+      "detail": {
+        "title": "ihren Titel",
+        "creator": "ihre Urheberschaft",
+        "licence": "ihre Lizenz oder einen Nachweis dafür"
+      },
+      "counted": {
+        "chapters": "Kapitel",
+        "steps": "Schritte",
+        "sources": "Quellen",
+        "cards": "Karten insgesamt"
+      },
+      "edit": "Bearbeiten",
+      "cancel": "Abbrechen",
+      "remove": "Entfernen",
+      "editOf": "{name} bearbeiten",
+      "removeOf": "{name} entfernen"
+    },
+    "publish": {
+      "heading": "Veröffentlichen",
+      "intro": "Beim Veröffentlichen wird die Ausgabe als ein Turtle-Dokument in deinen Pod geschrieben, unter einer Adresse, die sich nie ändert, und für alle lesbar gemacht. Eine Ausgabe wird danach nie mehr geändert: Um sie zu ändern, entwirfst du ihre nächste Version.",
+      "checking": "Der Entwurf wird geprüft…",
+      "noErrors": "Die Prüfung der Ausgabe findet keine Fehler. Beim Veröffentlichen wird die Ausgabe erneut geprüft, auch gegen die Formen.",
+      "errors": {
+        "one": "Die Prüfung der Ausgabe findet {count} Fehler. Behebe ihn, bevor du veröffentlichst.",
+        "other": "Die Prüfung der Ausgabe findet {count} Fehler. Behebe sie, bevor du veröffentlichst."
+      },
+      "folder": "Ordner in deinem Pod",
+      "folderInvalid": "Gib die Webadresse des Ordners an, beginnend mit https:// oder http:// und endend auf /.",
+      "address": "Die Ausgabe wird unter {url} veröffentlicht.",
+      "confirm": "Mir ist klar, dass diese Ausgabe öffentlich sein wird: Alle, die ihre Adresse kennen, können sie lesen. Einmal veröffentlicht, lässt sie sich hier nie mehr ändern oder zurücknehmen.",
+      "publish": "In meinem Pod veröffentlichen",
+      "publishing": "Die Ausgabe wird geprüft und veröffentlicht…",
+      "waitSaving": "Es wird gewartet, bis deine Änderungen gespeichert sind…",
+      "guest": "Der Lernstand als Gast wird nur in diesem Browser gespeichert, wo niemand sonst eine Ausgabe lesen könnte. Übertrage deinen Lernstand in einen Pod, um sie dort zu veröffentlichen. Bis dahin kannst du sie als Datei herunterladen.",
+      "releasedAt": "Dieser Entwurf ist unter {url} erschienen.",
+      "askingPublic": "Es wird geprüft, ob alle sie lesen können…",
+      "public": "Alle, die ihre Adresse kennen, können sie lesen.",
+      "private": "Nur du kannst sie lesen: Dein Pod hat sie nicht öffentlich gemacht. Versuche es erneut, oder mach sie mit den Werkzeugen deines Pod-Anbieters für alle lesbar.",
+      "makePublic": "Öffentlich machen",
+      "makingPublic": "Die Ausgabe wird öffentlich gemacht…",
+      "nextHint": "Eine Ausgabe wird nie geändert. Um sie zu ändern, beginne ihre nächste Version: einen neuen Entwurf, der alles behält, was diese Ausgabe veröffentlicht hat.",
+      "downloadHeading": "Herunterladen",
+      "downloadIntro": "Speichere die Ausgabe als Turtle-Datei, mit der Adresse, die sie in der Bibliothek von Solid Memo hätte, um sie für die Bibliothek vorzuschlagen. In deinem Pod ändert sich nichts.",
+      "download": ".ttl herunterladen",
+      "downloaded": "{file} gespeichert, als Ausgabe mit der Adresse {url}.",
+      "stepsIntro": "Um sie für die Bibliothek vorzuschlagen, in einer Kopie des Repositorys von Solid Memo:",
+      "stepCopy": "Lege die Datei als {file} in decks/ ab.",
+      "stepLibrary": "Formatiere sie und trage sie in den Index der Bibliothek ein:",
+      "stepCheck": "Prüfe sie gegen die Regeln der Bibliothek:",
+      "stepAll": "Führe alle Prüfungen aus:",
+      "stepPullRequest": "Öffne einen Pull-Request mit der neuen Datei und dem Index.",
+      "libraryCheck": "Den Entwurf zuerst für die Bibliothek prüfen"
+    },
+    "releases": {
+      "crumb": "Ausgaben",
+      "link": "Veröffentlichte Ausgaben",
+      "loading": "Die Ausgaben werden gelesen…",
+      "heading": "Aus „{instance}“ veröffentlichte Ausgaben",
+      "intro": "Jede Ausgabe ist ein Dokument in deinem Pod, das Lernende über seine Adresse hinzufügen. Eine Ausgabe wird nie geändert: Um eine zu ändern, beginne ihre nächste Version.",
+      "none": "Aus dieser Instanz wurden noch keine Ausgaben veröffentlicht.",
+      "caption": "Aus „{instance}“ veröffentlichte Ausgaben",
+      "column": {
+        "release": "Ausgabe",
+        "readers": "Lesbar für",
+        "draft": "Entwurf",
+        "actions": "Aktionen"
+      },
+      "filter": "Nach Name oder Adresse filtern",
+      "noMatch": "Keine Ausgabe passt zu „{filter}“.",
+      "noDraft": "Nicht unter den Entwürfen dieser Instanz",
+      "name": "{name}, Version {version}",
+      "public": "Alle",
+      "private": "Nur du",
+      "makePublicOf": "{release} öffentlich machen",
+      "copy": "Link kopieren",
+      "copyLink": "Link {url} kopieren",
+      "copied": "Link kopiert.",
+      "copyFailed": "Der Link konnte nicht kopiert werden. Markiere seine Adresse und kopiere sie.",
+      "startNext": "Nächste Version beginnen",
+      "startNextOf": "Nächste Version von {release} beginnen",
+      "starting": "Die nächste Version wird angelegt…",
+      "drafts": "Entwürfe für Ausgaben"
+    },
+    "graph": {
+      "crumb": "Graph",
+      "loading": "Die Instanz wird gelesen…",
+      "reading": {
+        "one": "Die Instanz wird gelesen: {read} von {count} Dokument…",
+        "other": "Die Instanz wird gelesen: {read} von {count} Dokumenten…"
+      },
+      "heading": "Graph von „{instance}“",
+      "intro": "Alles, was Solid Memo in dieser Instanz speichert, als Graph: Jeder Ordner, jedes Dokument und jede Ressource ist ein Knoten, und jede Verbindung zwischen ihnen eine Kante. Eine Verbindung zu etwas anderem endet in einem Blatt, das nie gelesen wird.",
+      "search": "Knoten finden",
+      "group": {
+        "vocabulary": "Vokabularbegriffe",
+        "cards": "Karten",
+        "distractors": "Falsche Antwortmöglichkeiten",
+        "reviewStates": "Wiederholungsstände",
+        "answers": "Antworten",
+        "leaves": "Blätter"
+      },
+      "neighborsOnly": "Nur Nachbarn",
+      "neighborsHint": "Wähle einen Knoten, um nur ihn und seine Nachbarn zu sehen.",
+      "table": "Als Tabelle zeigen",
+      "found": {
+        "one": "{count} Knoten gefunden",
+        "other": "{count} Knoten gefunden"
+      },
+      "moreFound": {
+        "one": "und {count} weiterer: Tippe mehr, um sie einzugrenzen",
+        "other": "und {count} weitere: Tippe mehr, um sie einzugrenzen"
+      },
+      "noMatch": "Kein angezeigter Knoten passt zu „{text}“.",
+      "counts": "{nodes} und {edges} angezeigt",
+      "nodesShown": {
+        "one": "{shown} von {count} Knoten",
+        "other": "{shown} von {count} Knoten"
+      },
+      "edgesShown": {
+        "one": "{shown} von {count} Kante",
+        "other": "{shown} von {count} Kanten"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} Kante zu einem Vokabularbegriff wird nur für den ausgewählten Knoten oder den, auf den gezeigt wird, gezeichnet.",
+        "other": "{count} Kanten zu Vokabularbegriffen werden nur für den ausgewählten Knoten oder den, auf den gezeigt wird, gezeichnet."
+      },
+      "tooLarge": "Das würde {nodes} Knoten und {edges} Kanten zeichnen, mehr als die Seite flüssig zeichnet. Blende einige mit den Filtern aus, zeige ihn als Tabelle oder zeichne ihn trotzdem.",
+      "drawAnyway": "Trotzdem zeichnen",
+      "placing": "Die Knoten werden platziert",
+      "prompt": "Zeige auf einen Knoten oder nutze die Pfeiltasten, um zu sehen, was er ist; die Eingabetaste oder ein Klick öffnet ihn, ein Klick auf den Hintergrund hebt die Auswahl auf. +, − und 0 zoomen hinein, heraus und auf den ganzen Graphen, und Ziehen verschiebt ihn.",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "zoomFit": "Ganzer Graph",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "Ordner",
+        "document": "Dokument",
+        "absent": "Dokument, das fehlt",
+        "unreadable": "Dokument, das sich nicht lesen ließ",
+        "resource": "Ressource",
+        "missing": "in keinem Dokument gefunden",
+        "podLeaf": "in deinem Pod, nicht gelesen",
+        "outsideLeaf": "außerhalb deines Pods, nicht gelesen",
+        "vocabularyLeaf": "Vokabularbegriff"
+      },
+      "defines": "definiert",
+      "nodes": {
+        "caption": "Knoten des Graphen",
+        "label": "Knoten",
+        "kind": "Art",
+        "document": "Definiert in",
+        "types": "Klassen",
+        "pages": "Seiten der Knoten"
+      },
+      "edges": {
+        "caption": "Kanten des Graphen",
+        "from": "Von",
+        "predicate": "Verbindung",
+        "to": "Zu",
+        "pages": "Seiten der Kanten"
+      },
+      "node": {
+        "label": "Knoten",
+        "none": "Wähle einen Knoten im Graphen, um zu sehen, was er aussagt.",
+        "outside": "Nicht abgerufen: außerhalb deines Pods.",
+        "inPod": "Nicht abgerufen: in deinem Pod, aber keine Daten von Solid Memo.",
+        "vocabulary": "Nicht abgerufen: ein Vokabularbegriff.",
+        "missing": "Hier genannt, aber in keinem Dokument gefunden.",
+        "absent": "Dieses Dokument gibt es nicht.",
+        "unreadable": "Dieses Dokument ließ sich nicht lesen.",
+        "values": "Werte",
+        "statedIn": "angegeben in {document}",
+        "outgoing": "Verbindungen von ihm",
+        "incoming": "Verbindungen zu ihm",
+        "noLinks": "Keine.",
+        "showAll": {
+          "one": "Die {count} Verbindung zeigen",
+          "other": "Alle {count} Verbindungen zeigen"
+        }
+      }
+    },
+    "inline": {
+      "field": "{column} von {row}",
+      "cell": "{field}: {value}",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "refused": "Nicht gespeichert: {reason}."
+    }
+  }
+}

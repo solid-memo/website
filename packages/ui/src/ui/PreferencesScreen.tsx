@@ -19,7 +19,7 @@ import { TEXT_SCALES, TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { THEME_CHOICES } from "@solid-memo/domain/theme";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
-import { LANGUAGE_NAMES } from "./LanguageSelector";
+import { LANGUAGE_NAMES, useChooseLocale } from "./LanguageSelector";
 import { routeToHash } from "./router";
 import { paletteStyle, useTheme } from "./theme";
 
@@ -135,7 +135,8 @@ export function PreferencesScreen({
   error: ErrorText | null;
   onSave: (preferences: StudyPreferences) => void;
 }) {
-  const { t, locale, chooseLocale } = useI18n();
+  const { t, locale } = useI18n();
+  const { choose: chooseLocale, failure: localeFailure } = useChooseLocale();
   const {
     choice: themeChoice,
     chooseTheme,
@@ -217,6 +218,7 @@ export function PreferencesScreen({
           <p id="pref-language-hint" class="hint">
             {t("preferences.language.hint")}
           </p>
+          <ErrorMessage error={localeFailure} />
         </fieldset>
         <fieldset aria-describedby="pref-theme-hint">
           <legend>{t("preferences.theme.legend")}</legend>

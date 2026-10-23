@@ -23,7 +23,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { Footer, type SiteSource } from "./Footer";
 import { RepoUrl } from "./ReportMistake";
-import { I18nProvider, useI18n, type MessageKey } from "./i18n";
+import { I18nProvider, loadLocale, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
@@ -127,7 +127,14 @@ export function AppShell({
     document.documentElement.lang = locale;
   }, [locale]);
 
-  function chooseLocale(chosen: Locale) {
+  // The language chosen last: one whose messages come after a later choice's is not switched to.
+  const latestLocale = useRef(locale);
+
+  /** Speak `chosen` once its messages are here (loadLocale); until then, the screen stays as it is. */
+  async function chooseLocale(chosen: Locale) {
+    latestLocale.current = chosen;
+    await loadLocale(chosen);
+    if (latestLocale.current !== chosen) return;
     useCases.chooseLanguage(chosen);
     setLocale(chosen);
   }

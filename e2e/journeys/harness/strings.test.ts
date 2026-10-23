@@ -15,6 +15,12 @@ describe("text", () => {
     expect(text("fr", "app.logOut")).toBe("Se déconnecter");
   });
 
+  it("has the Studio's messages beside ui's own under studio", () => {
+    expect(text("en", "studio.shell.nav")).toBe("Studio");
+    expect(text("sv", "studio.name")).toBe("Solid Memo Studio");
+    expect(text("en", "studio.loading")).toBe("Opening the Studio…");
+  });
+
   it("fills placeholders", () => {
     expect(text("en", "app.loggedInAs", { name: "Ada" })).toBe("Logged in as Ada");
   });
@@ -41,7 +47,7 @@ describe("text", () => {
     expect(() => text("en", "app.noSuchMessage")).toThrow(
       /en\.json has no message app\.noSuchMessage/,
     );
-    expect(() => text("en", "app")).toThrow(/has no message app\.$/);
+    expect(() => text("en", "app")).toThrow(/has no message app,/);
   });
 });
 
