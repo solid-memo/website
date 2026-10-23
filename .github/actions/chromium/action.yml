@@ -7,8 +7,8 @@
 # builds the site or archives a release's docs (npm run docs:archive):
 # from GitHub's cache, under the version of `playwright`
 # (packages/markdown/package.json), which fixes the browser's build. The
-# system libraries it needs come from apt on every run, the cache holding
-# only the browser. Run it after npm ci, which installs that version.
+# system libraries it needs come from playwright-deps, from GitHub's
+# cache too. Run it after npm ci, which installs that version.
 #
 # The key is not the journeys job's (ci.yml): that job installs the full
 # Chromium, and neither may restore a cache that lacks its browser.
@@ -27,7 +27,7 @@ runs:
         key: playwright-shell-${{ runner.os }}-${{ steps.version.outputs.version }}
     - if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
-      run: npx playwright install --with-deps --only-shell chromium
-    - if: steps.cache.outputs.cache-hit == 'true'
-      shell: bash
-      run: npx playwright install-deps chromium
+      run: npx playwright install --only-shell chromium
+    - uses: ./.github/actions/playwright-deps
+      with:
+        browser: chromium

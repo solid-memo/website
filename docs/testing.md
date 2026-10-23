@@ -413,6 +413,22 @@ Playwright's Docker image of the same version
 and `JOURNEY_SERVER_URL` pointing at a server that
 `npm run css -w @solid-memo/e2e-journeys` keeps up.
 
+**In CI the browsers and their system libraries come from GitHub's
+cache**, not the Internet. The browsers are kept under Playwright's
+version. The system libraries are the packages the runner image lacks,
+which `npx playwright install-deps` would install from Ubuntu's mirror,
+kept as their `.deb` files and installed from them
+([playwright-deps](../.github/actions/playwright-deps/action.yml)). The
+mirror stalls often enough, for minutes and at times past a job's
+timeout, that a job should not depend on it. Their key is the runner
+image's (`ImageOS`, `ImageVersion`), which fixes what is installed
+already, with playwright-core's version, which fixes the list, so a new
+image or a new Playwright is a new entry. Only when the cache has none
+does a job ask the mirror, each `apt-get` given three minutes and one
+more try, and only on `main` does it save what it downloaded, as for
+the images. The `caches` job keeps `main`'s two newest entries per
+browser, as GitHub rolls a new image out over days.
+
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
 replays it). The browser's time zone is one where it is about noon, far
@@ -593,7 +609,7 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s. The merge queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
+| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell and its system libraries from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s. The merge queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
 | `site` | deterministic | `npm run build`, once for the whole run, the docs' diagrams drawn in Chromium's headless shell as in `check`; the site is kept a week as the run's `site` artifact, so a `journeys` job run again still finds it, and the `journeys` jobs test that build, which the deploy ships ([deployment.md](deployment.md#the-build-ci-tested)) |
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over what that run made, its site, kept as this run's `site` artifact, and, but on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
@@ -606,8 +622,8 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `check`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
-| `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another and the jobs that test are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's, the journeys' browsers and Chromium's headless shell, and `warm-images` and `warm-browsers` pull, build or download only what is missing, and save it; `warm-pip` installs the Python tools, so setup-python saves pip's caches where `main` lacks them. Like `caches`, they fail neither the run nor `ci-ok` |
+| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do; and the browsers' system libraries but the two newest of each browser ([Browsers](#browsers)). The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another and the jobs that test are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's, the journeys' browsers and Chromium's headless shell, and the browsers' system libraries, and `warm-images` and `warm-browsers` pull, build or download only what is missing, and save it; `warm-pip` installs the Python tools, so setup-python saves pip's caches where `main` lacks them. Like `caches`, they fail neither the run nor `ci-ok` |
 | `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches` and the `warm` jobs aside |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
@@ -700,7 +716,8 @@ can read the repository and nothing more (`caches`, the one job whose
 token can delete caches, runs on `main` alone), no job uses a secret,
 and no checkout keeps the token (`persist-credentials: false`). A fork's
 run may restore the caches `main`'s runs saved; what it saves (npm's,
-pip's and Playwright's, not Turbo's or the images') is kept for its own
+pip's and Playwright's browsers, not Turbo's, the images' or the
+browsers' system libraries) is kept for its own
 pull request only. No pull request run's artifact reaches `main`:
 `reuse` takes over only those of a run of this repository's own, the
 merge queue's run that passed the commit `main` moved to or, for a
