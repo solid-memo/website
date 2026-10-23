@@ -16,7 +16,6 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { DeckUpgradeOutcome, StepPart } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
-import { courseKey } from "./courseKey";
 import { useI18n } from "./i18n";
 import { LibraryUpgradeNotice } from "./LibraryUpgradeNotice";
 import {
@@ -25,6 +24,7 @@ import {
   DeckUpgradeProgress,
   type DeckUpgradeScreenStep,
 } from "./DeckUpgrade";
+import { queryKeys } from "./queryKeys";
 
 /**
  * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
@@ -53,7 +53,7 @@ export function refreshUpgradedDeck(
     queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
     queryClient.invalidateQueries({ queryKey: ["migration", instanceUrl] }),
     // A course's deck now follows the newer release, and its outline with it.
-    queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
   ]);
 }
 

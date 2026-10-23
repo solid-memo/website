@@ -6,12 +6,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DRAFT_URL, instanceA, instanceB, makeCard, makeDeck } from "../../test/fixtures";
-import { draftsKey } from "../DraftsContainer";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import type { ScreenCommand } from "./commandIndex";
 import { CommandPalette } from "./CommandPalette";
 import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { deckTabs } from "./workspaceLayout";
+import { queryKeys } from "../queryKeys";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -23,7 +23,7 @@ function readCache() {
   const queryClient = new QueryClient();
   queryClient.setQueryData(["decks", instanceA.url], [kanji, verbs]);
   queryClient.setQueryData(["cards", kanji.cardsDocumentUrl], [water]);
-  queryClient.setQueryData(draftsKey(instanceA.url), []);
+  queryClient.setQueryData(queryKeys.releaseDrafts(instanceA.url), []);
   return queryClient;
 }
 
@@ -247,7 +247,7 @@ describe("CommandPalette, off a deck", () => {
 
   it("lists the drafts of the open instance, but no cards, on another screen of it", () => {
     const queryClient = readCache();
-    queryClient.setQueryData(draftsKey(instanceA.url), [
+    queryClient.setQueryData(queryKeys.releaseDrafts(instanceA.url), [
       {
         url: DRAFT_URL,
         instanceUrl: instanceA.url,

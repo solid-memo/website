@@ -10,11 +10,9 @@ import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { draftsKey } from "./DraftsContainer";
-import { draftKey } from "./draftEditor";
-import { publicKey, publishedKey } from "./releaseActions";
 import { ReleasesContainer } from "./ReleasesContainer";
 import { instanceA, invalidReport } from "../test/fixtures";
+import { queryKeys } from "./queryKeys";
 
 const SOLID = `${instanceA.url}releases/solid/v1.ttl`;
 const next: ReleaseDraftSummary = {
@@ -65,8 +63,10 @@ describe("ReleasesContainer", () => {
       SOLID,
       "https://alice.example/profile/card#me",
     );
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: publicKey(SOLID) });
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: publishedKey(instanceA.url) });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releasePublic(SOLID) });
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: queryKeys.publishedReleases(instanceA.url),
+    });
   });
 
   it("links a release to the draft it was published from", async () => {
@@ -106,8 +106,8 @@ describe("ReleasesContainer", () => {
       kind: "nextVersionOf",
       url: SOLID,
     });
-    expect(remove).toHaveBeenCalledWith({ queryKey: draftKey(next.url) });
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: draftsKey(instanceA.url) });
+    expect(remove).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDraft(next.url) });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDrafts(instanceA.url) });
   });
 
   it("says what it does while it does it", async () => {

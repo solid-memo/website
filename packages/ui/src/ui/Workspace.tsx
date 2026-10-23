@@ -22,7 +22,6 @@ import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
 import { CourseContainer, type CompletedChapter } from "./CourseContainer";
 import { courseStripQuery } from "./CourseStrip";
-import { courseKey } from "./courseKey";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
@@ -71,6 +70,7 @@ import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
 import { MAIN_ID } from "./SkipLink";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The breadcrumbs' names of what the route has open, each "" (or no
@@ -415,7 +415,7 @@ export function Workspace({
     route?.screen === "courseReview";
   const needsCourse = isCourseRoute && activeDeck !== null;
   const courseQuery = useQuery({
-    queryKey: courseKey(deckUrl!),
+    queryKey: queryKeys.course(deckUrl!),
     queryFn: () => useCases.getCourse(activeDeck!),
     enabled: needsCourse && activeDeck.sourceUrl !== undefined,
   });

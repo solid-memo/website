@@ -10,11 +10,12 @@ import type { DeckFile, DeckFileOptions } from "@solid-memo/domain/deckFile";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
-import { catalogScope, deckTreeKey } from "@solid-memo/ui/deckTreeEditor";
+import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { TransferScreen, type ExportRun } from "./TransferScreen";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The import and export screen's data: the instance's decks as the user
@@ -49,7 +50,7 @@ export function TransferContainer({
   const [file, setFile] = useState<DeckFile | null>(null);
   const check = useDataCheck(useCases, instance.url);
   const treeQuery = useQuery({
-    queryKey: deckTreeKey(instance.url),
+    queryKey: queryKeys.deckTree(instance.url),
     queryFn: () => useCases.listDeckTree(instance.url),
   });
 

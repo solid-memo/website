@@ -10,11 +10,11 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
 import { chapterHref } from "./CourseContainer";
-import { courseKey } from "./courseKey";
 import { useCourseLinks } from "./courseLinks";
 import { CourseIcon, LibraryIcon } from "./icons";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
+import { queryKeys } from "./queryKeys";
 
 /** A course still to finish, as the strip shows it. */
 export interface CourseStripEntry {
@@ -108,7 +108,7 @@ export function CourseStrip({
  */
 export function courseStripQuery(useCases: UseCases, deck: Deck) {
   return {
-    queryKey: [...courseKey(deck.url), "strip", deck.sourceUrl],
+    queryKey: queryKeys.courseStrip(deck.url, deck.sourceUrl),
     queryFn: () => useCases.getCourseSummary(deck),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
@@ -121,7 +121,7 @@ export function courseStripQuery(useCases: UseCases, deck: Deck) {
  * completed chapters, so a deck read afresh moves the strip on), linked where the course links say (useCourseLinks). A
  * course not yet read, or that cannot be, is left out: the deck list
  * works without it. Once a course is shown, the whole of it (getCourse,
- * under courseKey) is read behind it, so its page and chapter open on
+ * under queryKeys.course) is read behind it, so its page and chapter open on
  * it, as Workspace reads them.
  */
 export function CourseStripContainer({
@@ -167,7 +167,7 @@ export function CourseStripContainer({
     for (const deck of decks) {
       if (!shown.split(" ").includes(deck.url)) continue;
       void queryClient.prefetchQuery({
-        queryKey: courseKey(deck.url),
+        queryKey: queryKeys.course(deck.url),
         queryFn: () => useCases.getCourse(deck),
         staleTime: 30_000,
       });

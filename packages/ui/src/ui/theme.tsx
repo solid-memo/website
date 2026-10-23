@@ -16,6 +16,7 @@ import {
 import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
+import { queryKeys } from "./queryKeys";
 
 /** The browser's wish for a dark page. */
 export const DARK_QUERY = "(prefers-color-scheme: dark)";
@@ -92,19 +93,6 @@ export function applyTextSize(size: TextSize) {
   const root = document.documentElement;
   if (size === DEFAULT_TEXT_SIZE) delete root.dataset.textSize;
   else root.dataset.textSize = size;
-}
-
-/**
- * The query key of how an instance's preferences show the app, its
- * theme, palette and text size, to refetch them after a write.
- */
-export function instanceAppearanceKey(instanceUrl: string) {
-  return ["instanceAppearance", instanceUrl];
-}
-
-/** The query key of the palettes the user designed in an instance. */
-export function palettesKey(instanceUrl: string) {
-  return ["palettes", instanceUrl];
 }
 
 interface ThemeState {
@@ -228,20 +216,20 @@ export function useInstanceTheme(useCases: UseCases, instanceUrl: string | null)
     followInstance(instanceUrl);
     return () => followInstance(null);
   }, [instanceUrl]);
-  const key = instanceAppearanceKey(instanceUrl ?? "");
+  const url = instanceUrl ?? "";
   const enabled = instanceUrl !== null;
   const theme = useQuery({
-    queryKey: [...key, "theme"],
+    queryKey: queryKeys.instanceAppearancePart(url, "theme"),
     queryFn: () => useCases.instanceTheme(instanceUrl!),
     enabled,
   });
   const palette = useQuery({
-    queryKey: [...key, "palette"],
+    queryKey: queryKeys.instanceAppearancePart(url, "palette"),
     queryFn: () => useCases.instancePalette(instanceUrl!),
     enabled,
   });
   const textSize = useQuery({
-    queryKey: [...key, "textSize"],
+    queryKey: queryKeys.instanceAppearancePart(url, "textSize"),
     queryFn: () => useCases.instanceTextSize(instanceUrl!),
     enabled,
   });

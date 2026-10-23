@@ -26,7 +26,7 @@
     "./routerCore": "./src/ui/routerCore.ts",
     "./deckTreeEditor": "./src/ui/deckTreeEditor.ts",
     "./courseLinks": "./src/ui/courseLinks.ts",
-    "./courseKey": "./src/ui/courseKey.ts",
+    "./queryKeys": "./src/ui/queryKeys.ts",
     "./composing": "./src/ui/composing.ts",
     "./askFirst": "./src/ui/askFirst.ts",
     "./retryable": "./src/ui/retryable.ts",

@@ -98,6 +98,7 @@ caller can skip it). The discovered OIDC issuer passes the same
   as" and the connection screen show it instead of the WebID, as a link
   to the WebID.
 
-The account is held in the react-query cache (`["account", webId]`) and,
+The account is held in the react-query cache (`queryKeys.account(webId)`,
+[architecture.md](architecture.md#query-keys)) and,
 like all Pod data, is cleared on logout. Nothing is persisted by the app;
 the session itself is persisted by the authn library.

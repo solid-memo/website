@@ -16,20 +16,11 @@ import {
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
 import { useDataCheck, type ReadOnlyReason } from "@solid-memo/ui/dataCheck";
-
-/** The query of a draft: its screens, and the workspace's trail, share it. */
-export function draftKey(draftUrl: string): readonly unknown[] {
-  return ["releaseDraft", draftUrl];
-}
+import { queryKeys } from "./queryKeys";
 
 /** The queue a write of a draft waits in, after the draft's writes before it, whatever their documents. */
 export function draftScope(draftUrl: string): string {
   return `draft ${draftUrl}`;
-}
-
-/** The writes of a draft, whichever screen made them. */
-function writeKey(draftUrl: string): readonly unknown[] {
-  return ["editReleaseDraft", draftUrl];
 }
 
 /** What a draft's editor tells the Studio's status bar: how many documents of its changes wait to be written, and whether its last change failed. */
@@ -56,7 +47,10 @@ export type DraftSaving = "saving" | "failed" | "saved";
  * DraftWaiting (`reports`, all of them together).
  */
 export function useDraftSaving(draftUrl: string, reports: EditorReport): DraftSaving {
-  if (useIsMutating({ mutationKey: writeKey(draftUrl) }) > 0 || reports.waiting > 0)
+  if (
+    useIsMutating({ mutationKey: queryKeys.releaseDraftWrites(draftUrl) }) > 0 ||
+    reports.waiting > 0
+  )
     return "saving";
   return reports.failed ? "failed" : "saved";
 }
@@ -141,7 +135,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   const instanceUrl = draftPlaceOf(draftUrl)!.instanceUrl;
   const check = useDataCheck(useCases, instanceUrl);
   const query = useQuery({
-    queryKey: draftKey(draftUrl),
+    queryKey: queryKeys.releaseDraft(draftUrl),
     queryFn: () => useCases.getReleaseDraft(draftUrl),
     // The draft on screen holds changes not yet written: it is read afresh only when asked.
     staleTime: Infinity,
@@ -149,7 +143,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   const [failure, setFailure] = useState<DraftFailure | null>(null);
   const waiting = pendingOf(draftUrl);
   const [waitingCount, setWaitingCount] = useState(0);
-  const mutationKey = writeKey(draftUrl);
+  const mutationKey = queryKeys.releaseDraftWrites(draftUrl);
   const writing = useIsMutating({ mutationKey });
 
   // Every editor of the draft hears what waits, whichever made it.
@@ -168,7 +162,9 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   const last = () => queryClient.isMutating({ mutationKey }) === 0 && waiting.documents.size === 0;
 
   function readAfresh() {
-    return last() ? queryClient.invalidateQueries({ queryKey: draftKey(draftUrl) }) : undefined;
+    return last()
+      ? queryClient.invalidateQueries({ queryKey: queryKeys.releaseDraft(draftUrl) })
+      : undefined;
   }
 
   function write(changes: readonly DraftChange[]) {
@@ -187,7 +183,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
           return readAfresh();
         }
         // The writes before it are in its draft; one after it would undo the screen's changes it has not made.
-        if (last()) queryClient.setQueryData(draftKey(draftUrl), result.draft);
+        if (last()) queryClient.setQueryData(queryKeys.releaseDraft(draftUrl), result.draft);
         return undefined;
       })
       .catch((error: unknown) => {
@@ -227,7 +223,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
     changes: readonly DraftChange[],
     { debounce = false }: { debounce?: boolean } = {},
   ): DraftRefusal | null {
-    const before = queryClient.getQueryData<ReleaseDraft>(draftKey(draftUrl))!;
+    const before = queryClient.getQueryData<ReleaseDraft>(queryKeys.releaseDraft(draftUrl))!;
     const after = applyDraftChanges(before, changes);
     if (isRefusal(after)) {
       setFailure({ refusal: after });
@@ -236,7 +232,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
     setFailure(null);
     const documents = changedDocuments(before, after);
     if (documents.length === 0) return null;
-    queryClient.setQueryData(draftKey(draftUrl), after);
+    queryClient.setQueryData(queryKeys.releaseDraft(draftUrl), after);
     if (!debounce || documents.length > 1) {
       // What waits goes first, whichever editor it waits for, so the writes keep the order the user made them in.
       flushAll();

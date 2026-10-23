@@ -38,7 +38,6 @@ import { LibraryCopiesContainer, LibraryPlanContainer } from "./LibraryCopiesCon
 import { TransferContainer } from "./TransferContainer";
 import { ChapterEditorContainer } from "./ChapterEditorContainer";
 import { DraftCardsContainer } from "./DraftCardsContainer";
-import { draftKey } from "./draftEditor";
 import { DraftOverviewContainer } from "./DraftOverviewContainer";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { ListingPreviewContainer } from "./ListingPreviewContainer";
@@ -81,6 +80,7 @@ import {
   type CardRoute,
   type StudioRoute,
 } from "./router";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The signed-in Studio: in its shell (StudioShell), with the open
@@ -868,7 +868,7 @@ function useRouteReads(
   const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
   // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
   const draftQuery = useQuery({
-    queryKey: draftKey(draftUrl ?? ""),
+    queryKey: queryKeys.releaseDraft(draftUrl ?? ""),
     queryFn: () => useCases.getReleaseDraft(draftUrl!),
     enabled: draftUrl !== null && activeInstance !== null,
     staleTime: Infinity,

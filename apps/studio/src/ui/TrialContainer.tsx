@@ -19,16 +19,16 @@ import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { ChapterPlayerContainer } from "@solid-memo/ui/ChapterPlayerContainer";
 import { ChapterReviewContainer } from "@solid-memo/ui/ChapterReviewContainer";
 import { CourseContainer, type CompletedChapter } from "@solid-memo/ui/CourseContainer";
-import { courseKey } from "@solid-memo/ui/courseKey";
 import { Clock, CourseLinksContext, type CourseLinks } from "@solid-memo/ui/courseLinks";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { StudyContainer } from "@solid-memo/ui/StudyContainer";
-import { draftKey, useDraftEditor } from "./draftEditor";
+import { useDraftEditor } from "./draftEditor";
 import { answerChapter, answerQueue, jumpToChapter } from "./trialActions";
 import { TrialControls } from "./TrialControls";
 import { TrialScreen } from "./TrialScreen";
+import { queryKeys } from "./queryKeys";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -91,7 +91,7 @@ export function TrialContainer({
       const draft: ReleaseDraft =
         from ??
         (await queryClient.fetchQuery({
-          queryKey: draftKey(draftUrl),
+          queryKey: queryKeys.releaseDraft(draftUrl),
           queryFn: () => useCases.getReleaseDraft(draftUrl),
           staleTime: 0,
         }));
@@ -184,7 +184,7 @@ function TrialPlay({
   const clock = () => new Date(Date.now() + days * DAY_MS);
   const { useCases, instance, deck } = trial;
   const courseQuery = useQuery({
-    queryKey: courseKey(deck.url),
+    queryKey: queryKeys.course(deck.url),
     queryFn: () => useCases.getCourse(deck),
     enabled: draft.course,
   });

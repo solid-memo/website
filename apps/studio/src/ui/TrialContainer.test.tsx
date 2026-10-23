@@ -13,8 +13,8 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { makeUseCasesFake, QUEUE_DEFAULTS } from "@solid-memo/ui/test/useCasesFake";
 import { CH1, courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
 import { courseDraft, DRAFT_URL, instanceA } from "../test/fixtures";
-import { draftKey } from "./draftEditor";
 import { TrialContainer, type TrialLinks } from "./TrialContainer";
+import { queryKeys } from "./queryKeys";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -48,7 +48,7 @@ function renderTrial({
     openTrial: vi.fn(openTrial),
   });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  queryClient.setQueryData(draftKey(DRAFT_URL), draft);
+  queryClient.setQueryData(queryKeys.releaseDraft(DRAFT_URL), draft);
   const onReview = vi.fn();
   const onCourse = vi.fn();
   const onJump = vi.fn();

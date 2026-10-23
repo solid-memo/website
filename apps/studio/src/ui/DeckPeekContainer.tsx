@@ -9,11 +9,11 @@ import { groupsOfDecks } from "@solid-memo/domain/deckTable";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
-import { deckTreeKey } from "@solid-memo/ui/deckTreeEditor";
 import { DeckPeekScreen } from "./DeckPeekScreen";
 import { HealthBadge } from "./HealthBadge";
 import { studioRouteToHash, type StudioRoute } from "./router";
 import { deckTabs } from "./shell/workspaceLayout";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The deck beside Home's table (DeckPeekScreen), by its URL (`deckUrl`;
@@ -35,7 +35,7 @@ export function DeckPeekContainer({
   deckUrl: string | null;
 }) {
   const treeQuery = useQuery({
-    queryKey: deckTreeKey(instance.url),
+    queryKey: queryKeys.deckTree(instance.url),
     queryFn: () => useCases.listDeckTree(instance.url),
     refetchOnWindowFocus: false,
   });

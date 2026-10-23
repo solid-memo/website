@@ -9,11 +9,11 @@ import { choicesOf, type Choice, type CourseChapter } from "@solid-memo/domain/c
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import { ChapterPlayerScreen, type StepPhase } from "./ChapterPlayerScreen";
-import { courseKey } from "./courseKey";
 import { useClock } from "./courseLinks";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useI18n } from "./i18n";
 import { useKeepSchedule } from "./keepSchedule";
+import { queryKeys } from "./queryKeys";
 
 /**
  * Answers a course question of `card`, then refreshes what the answer
@@ -55,7 +55,7 @@ export function useCourseAnswer(
       ),
     onSuccess: ({ effect }, { choice }) => {
       onAnswered({ choice, effect });
-      void queryClient.invalidateQueries({ queryKey: courseKey(deck.url) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) });
       if (effect === "none") return;
       noteGraded();
       void queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });

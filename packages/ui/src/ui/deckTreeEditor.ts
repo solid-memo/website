@@ -26,6 +26,7 @@ import { isCopyOf, libraryCopiesOf, releaseHost } from "@solid-memo/domain/libra
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { useI18n, type ErrorText } from "./i18n";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
+import { queryKeys } from "./queryKeys";
 
 /**
  * The mutation scope of every write of an instance's catalog document:
@@ -34,11 +35,6 @@ import { collapsedGroups, rememberCollapsed } from "./remembered";
  */
 export function catalogScope(instanceUrl: string): string {
   return `deckTree ${instanceUrl}`;
-}
-
-/** The query key of an instance's arrangement: under its decks', so whatever refreshes them refreshes it too. */
-export function deckTreeKey(instanceUrl: string): unknown[] {
-  return ["decks", instanceUrl, "tree"];
 }
 
 /** Every group's URL in the nodes, at any depth. */
@@ -77,7 +73,7 @@ export interface DeckTreeEditor {
  * edits, wherever it is edited: Solid Memo's deck list
  * (DeckListContainer) and the Studio's Groups screen.
  *
- * The arrangement is queried under deckTreeKey, not again when the
+ * The arrangement is queried under queryKeys.deckTree, not again when the
  * window regains focus, which would undo edits still on their way. An
  * edit is shown at once and written in turn after the ones before it
  * (catalogScope), each against the pod as it is then. One that fails
@@ -104,7 +100,7 @@ export function useDeckTreeEditor(
 ): { treeQuery: UseQueryResult<DeckTree>; editor: DeckTreeEditor | undefined } {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
-  const treeKey = deckTreeKey(instance.url);
+  const treeKey = queryKeys.deckTree(instance.url);
   const treeQuery = useQuery({
     queryKey: treeKey,
     queryFn: () => useCases.listDeckTree(instance.url),

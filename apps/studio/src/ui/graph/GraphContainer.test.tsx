@@ -13,7 +13,8 @@ import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { instanceA, session } from "../../test/fixtures";
 import { CARD, smallGraph } from "../../test/graph";
 import { RevealAside } from "../shell/revealAside";
-import { GraphContainer, GraphNodeContainer, graphKey } from "./GraphContainer";
+import { GraphContainer, GraphNodeContainer } from "./GraphContainer";
+import { queryKeys } from "../queryKeys";
 
 function withClient(client: QueryClient, children: ComponentChildren) {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
@@ -138,7 +139,7 @@ describe("GraphNodeContainer", () => {
     render(withClient(client, view));
     expect(screen.getByText("Select a node in the graph to see what it says.")).toBeInTheDocument();
     act(() => {
-      client.setQueryData(graphKey(instanceA.url, session.webId), smallGraph());
+      client.setQueryData(queryKeys.instanceGraph(instanceA.url, session.webId), smallGraph());
     });
     expect(
       await screen.findByRole("heading", { name: "decks/capitals#sweden" }),

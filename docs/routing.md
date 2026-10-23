@@ -128,17 +128,19 @@ flowchart LR
     deck --> screen
 ```
 
-- The deck lookup shares the `["decks", instanceUrl]` query cache with
-  the home screen, so in-app navigation resolves without a refetch. The
-  deck list itself reads the decks as arranged into groups, under
-  `["decks", instanceUrl, "tree"]`, so whatever refreshes the decks
-  refreshes their arrangement too; on the home screen, the decks in that
-  arrangement fill `["decks", instanceUrl]`, so the catalog is read once. A
-  library deck is resolved the same way from the `["library"]` cache the
-  library screen reads. Every `["library"]` query is `libraryIndexQuery`,
-  which never goes stale and is not read again when the window is
-  focused: the index changes only with a deploy, so it is read once a
-  page ([deck-library.md](deck-library.md#reading-it)).
+- The deck lookup shares the `queryKeys.decks(instanceUrl)` query cache
+  with the home screen, so in-app navigation resolves without a refetch.
+  The deck list itself reads the decks as arranged into groups, under
+  `queryKeys.deckTree(instanceUrl)`, which sits under the decks' key, so
+  whatever refreshes the decks refreshes their arrangement too; on the
+  home screen, the decks in that arrangement fill
+  `queryKeys.decks(instanceUrl)`, so the catalog is read once. A library
+  deck is resolved the same way from the `queryKeys.library()` cache the
+  library screen reads. Every `queryKeys.library()` query is
+  `libraryIndexQuery`, which never goes stale and is not read again when
+  the window is focused: the index changes only with a deploy, so it is
+  read once a page ([deck-library.md](deck-library.md#reading-it)). The
+  keys are made in one module ([architecture.md](architecture.md#query-keys)).
 - The header logotype links to `#/` — deliberately not a route — so it
   lands on the default route: the deck list, or a picker when the
   instance is ambiguous.

@@ -14,8 +14,9 @@ import {
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { DEBOUNCE_MS, draftKey, draftScope, useDraftEditor, type DraftEditor } from "./draftEditor";
+import { DEBOUNCE_MS, draftScope, useDraftEditor, type DraftEditor } from "./draftEditor";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
+import { queryKeys } from "./queryKeys";
 
 let editor: DraftEditor;
 let other: DraftEditor;
@@ -356,7 +357,7 @@ describe("useDraftEditor", () => {
     await waitFor(() => expect(editor.saving).toBe(false));
     expect(
       queryClient
-        .getQueryData<ReleaseDraft>(draftKey(DRAFT_URL))!
+        .getQueryData<ReleaseDraft>(queryKeys.releaseDraft(DRAFT_URL))!
         .chapters.find((node) => node.id === "ch-apps")!.data.title,
     ).toEqual({ en: "Two" });
   });
