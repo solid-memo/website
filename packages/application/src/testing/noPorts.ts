@@ -5,15 +5,19 @@
 import type {
   AnswerLog,
   DigestRepository,
+  GuestPod,
   LanguagePreference,
   CustomPalettePreference,
   PalettePreference,
   PaletteRepository,
   TextSizePreference,
   ThemePreference,
+  UpdateJournal,
+  WriteFence,
   DeckArchive,
   FileExchange,
 } from "../ports";
+import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
 
@@ -73,6 +77,24 @@ const NO_ANSWER_LOG: AnswerLog = {
   removeAnswer: nothing,
 };
 
+const NO_JOURNAL: UpdateJournal = {
+  begin: () => undefined,
+  end: () => undefined,
+  staging: () => null,
+  run: () => () => undefined,
+  watch: () => undefined,
+};
+
+const NO_FENCE: WriteFence = { hold: () => () => undefined };
+
+const NO_GUEST_POD: GuestPod = {
+  exists: async () => false,
+  start: async () => {
+    throw new AppError("noGuestPod");
+  },
+  discard: nothing,
+};
+
 /**
  * A port that keeps nothing and does nothing, or refuses, for each port
  * a test has no use for: a test spreads NO_PORTS, then gives the ports
@@ -80,6 +102,9 @@ const NO_ANSWER_LOG: AnswerLog = {
  * their own, so a missing one is a type error (packages/composition/).
  */
 export const NO_PORTS = {
+  updateJournal: NO_JOURNAL,
+  writeFence: NO_FENCE,
+  guestPod: NO_GUEST_POD,
   answerLog: NO_ANSWER_LOG,
   digestRepository: NO_DIGESTS,
   deckArchive: NO_DECK_ARCHIVE,
