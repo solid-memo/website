@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.1.0](https://github.com/solid-memo/website/compare/v6.0.2...v6.1.0) (2026-10-23)
+
+### Features
+
+* **ui:** cram a deck's leeches without recording answers ([b6b67d9](https://github.com/solid-memo/website/commit/b6b67d9812718ce8fd16fef065069b37f1dc78c9)), closes [#250](https://github.com/solid-memo/website/issues/250)
+* **ui:** cram the leeches of every deck from the statistics ([8fe68c7](https://github.com/solid-memo/website/commit/8fe68c7772559b74568e4b2547bfea6a3e6987af)), closes [#250](https://github.com/solid-memo/website/issues/250)
+
 ## [6.0.2](https://github.com/solid-memo/website/compare/v6.0.1...v6.0.2) (2026-10-23)
 
 ### Bug Fixes
