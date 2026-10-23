@@ -135,7 +135,10 @@ flowchart LR
   refreshes their arrangement too; on the home screen, the decks in that
   arrangement fill `["decks", instanceUrl]`, so the catalog is read once. A
   library deck is resolved the same way from the `["library"]` cache the
-  library screen reads.
+  library screen reads. Every `["library"]` query is `libraryIndexQuery`,
+  which never goes stale and is not read again when the window is
+  focused: the index changes only with a deploy, so it is read once a
+  page ([deck-library.md](deck-library.md#reading-it)).
 - The header logotype links to `#/` — deliberately not a route — so it
   lands on the default route: the deck list, or a picker when the
   instance is ambiguous.
