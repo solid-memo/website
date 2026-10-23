@@ -7,6 +7,7 @@ import {
   buildThing,
   createThing,
   getPropertyAll,
+  getStringNoLocale,
   getThing,
   getThingAll,
   getUrlAll,
@@ -24,6 +25,7 @@ import {
   type Catalog,
 } from "@solid-memo/domain/catalog";
 import type { Card, Deck, Distractor } from "@solid-memo/domain/deck";
+import { cardLanguageTag } from "@solid-memo/domain/deckCardLanguage";
 import {
   cardFromRecord,
   deckAgents,
@@ -86,7 +88,10 @@ export function toDecks(dataset: SolidDataset, catalogUrl: string): Deck[] {
  * Map a catalog subject to a Deck; null when the subject is not an
  * sm:Deck that fits its format's shape. An older format is brought up to
  * the current one in memory; the stored version stays on the model. A
- * course's deck also has the chapters it completed (sm:completedChapter). A
+ * course's deck also has the chapters it completed (sm:completedChapter),
+ * and a deck the language its card text is shown in first
+ * (sm:deckCardLanguage), kept only when it names a language: the catalog
+ * is data anyone may have written, and no shape checks that term. A
  * deck from before format 3 names its creators itself ("Name <email>"),
  * which name the agents the migration gives it.
  */
@@ -102,6 +107,8 @@ export function toDeck(
     for (const author of read.record.data.creator) names.set(agentUrlOf(url, author), author);
   }
   const completedChapters = getUrlAll(thing, SM.completedChapter);
+  const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);
+  const cardLanguage = storedLanguage === null ? undefined : cardLanguageTag(storedLanguage);
   return {
     ...deckFromRecord(
       url,
@@ -109,8 +116,9 @@ export function toDeck(
       migrate("deck", read.record, { subject: url }),
       (agent) => names.get(agent) ?? agent,
     ),
-    // Outside the deck's shape, like sm:position: every write of the entry keeps it (recordThing).
+    // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
     ...(completedChapters.length === 0 ? {} : { completedChapters }),
+    ...(cardLanguage === undefined ? {} : { cardLanguage }),
   };
 }
 
@@ -119,6 +127,10 @@ export function toDeck(
  * its existing subject when there is one (so unknown triples survive),
  * with its creators' agent nodes and its distribution beside it, and
  * listed by the catalog. Agents no deck names any more are removed.
+ * The terms outside the deck's shape (sm:position, sm:completedChapter,
+ * sm:deckCardLanguage) are kept as the entry has them, whatever the deck
+ * says: a deck read before one changed cannot undo it by a save of its
+ * own fields.
  */
 export function withDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
   let updated = setThing(

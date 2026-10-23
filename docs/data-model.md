@@ -291,7 +291,9 @@ data.
 │                        prov:wasDerivedFrom, the deck's own study caps
 │                        (sm:deckNewCardsPerDay/MaxReviewsPerDay), and
 │                        for a course the chapters completed
-│                        (sm:completedChapter);
+│                        (sm:completedChapter); the language its
+│                        card text is shown in first
+│                        (sm:deckCardLanguage, outside the shape);
 │                        beside each deck its
 │                        dcat:Distribution (#deck-X-cards) and the
 │                        foaf:Agent nodes of its creators (#agent-…);
@@ -570,6 +572,21 @@ graph LR
   Preferences page (`#/deck-preferences`, from the deck's page); a
   library release never sets them, and a library upgrade keeps the
   copy's.
+- **Card language**: a deck may name the language its card text is
+  shown in first, `sm:deckCardLanguage`, one lower-case language tag:
+  its fronts, backs, notes, labels, picture descriptions and wrong
+  options then rank that language ahead of the app's, and a card
+  without text in it is shown as usual ([i18n.md](i18n.md#which-language)).
+  The deck's title, description and keywords do not follow it. Like
+  `sm:position` and `sm:completedChapter` it belongs to no shape, so
+  `DeckV6` is unchanged: every other write of the deck keeps it as the
+  entry has it (`withDeck`), so a deck read before it changed cannot
+  undo it, and only `setCardLanguage` sets or removes it, on the entry
+  as it is then (If-Match), as `completeChapter` adds a chapter. A new
+  entry (an import, a guest's deck moved) is written with the deck's,
+  and a reader drops a value that names no language. A library release
+  never sets it, a library upgrade keeps the copy's, and a release
+  drafted from the deck leaves it behind.
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, saying which version of its class's
   [shape](shapes.md) it conforms to: instance 1, decks 3 (DCAT),
@@ -802,7 +819,8 @@ uses as such), so the order is Solid Memo's own `sm:position`.
   moves its members, in order, into its place in its parent.
 - `sm:position` on a deck and the catalog's `dcat:catalog` belong to
   no shape (`DeckV6` and `CatalogV1` are unchanged), so writing a deck or
-  the catalog keeps them, and no deck format version was needed.
+  the catalog keeps them, and no deck format version was needed. A
+  deck's `sm:deckCardLanguage` belongs to no shape either.
 
 What is not one valid tree is read as one, rather than refused. A link
 to nothing, from a group to itself, or of the wrong kind (a
@@ -1236,7 +1254,8 @@ JSON-LD, one deck to a file. The domain names its parts
 An export holds triples as the pod has them, at the pod's IRIs:
 
 - the deck's entry in `catalog.ttl`, its distribution and the agents
-  it names as its creators. Its `sm:position` among its groups is left
+  it names as its creators, its card language (`sm:deckCardLanguage`)
+  among them. Its `sm:position` among its groups is left
   behind, and its `sm:completedChapter`s unless the progress goes too;
 - every subject of its cards document: its cards and their wrong
   options, retired ones too, and whatever another app put there;

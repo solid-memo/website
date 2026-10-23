@@ -51,6 +51,7 @@ sm:dangerColor: property, range xsd:string, domain sm:ColorSet
 sm:darkColors: property, range sm:ColorSet, domain sm:Palette
 sm:darkTheme: concept
 sm:dayBoundaryHour: property, range xsd:integer, domain sm:Preferences
+sm:deckCardLanguage: property, range xsd:string, domain sm:Deck
 sm:deckMaxReviewsPerDay: property, range xsd:integer, domain sm:Deck
 sm:deckNewCardsPerDay: property, range xsd:integer, domain sm:Deck
 sm:defaultTextSize: concept

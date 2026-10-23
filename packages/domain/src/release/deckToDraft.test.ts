@@ -28,6 +28,7 @@ const deck: Deck = {
   newCardsPerDay: 5,
   maxReviewsPerDay: 50,
   completedChapters: ["https://solid-memo.com/decks/capitals/v1.ttl#ch-a"],
+  cardLanguage: "sv",
 };
 
 const cards: Card[] = [

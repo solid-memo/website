@@ -1490,7 +1490,8 @@ A new draft starts from
   its retired ones and wrong options with it, its authors the
   release's agents, the first its publisher, its themes and EDUC. What
   is the learner's own is left behind: where its documents are, its
-  study caps, its place among the groups, a course's progress. A deck
+  study caps, its card language, its place among the groups, a
+  course's progress. A deck
   copied from a release names it (`prov:wasDerivedFrom`), which is no
   source of the new release: the screen says the deck is based on it,
   and offers to start the next version of that release instead, which

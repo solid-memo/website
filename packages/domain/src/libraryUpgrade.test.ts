@@ -1090,6 +1090,30 @@ describe("applyLibraryUpgrade", () => {
       direction: "bidirectional",
     });
   });
+
+  it("keeps the learner's card language, which no release sets", () => {
+    const plan = {
+      fromVersion: "1",
+      toVersion: "3",
+      releaseUrl: `${DECKS}capitals/v3.ttl`,
+      notes: [],
+      add: [],
+      change: [],
+      retire: [],
+      restore: [],
+      remove: [],
+      about: [],
+      kept: [],
+      applied: [],
+      gone: [],
+      appliedAbout: [],
+    };
+    expect(applyLibraryUpgrade({ ...deck, cardLanguage: "sv" }, plan)).toEqual({
+      ...deck,
+      cardLanguage: "sv",
+      sourceUrl: `${DECKS}capitals/v3.ttl`,
+    });
+  });
 });
 
 describe("the deck's texts in an upgrade", () => {

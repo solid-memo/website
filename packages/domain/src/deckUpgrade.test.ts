@@ -156,4 +156,14 @@ describe("withDeckChanges", () => {
       cardsDocumentUrl: "new",
     });
   });
+
+  it("keeps a card language chosen meanwhile", () => {
+    const next = { ...deck, sourceUrl: plan.releaseUrl };
+    const stored = { ...deck, cardLanguage: "sv" };
+    expect(withDeckChanges(stored, deck, next)).toEqual({
+      ...deck,
+      cardLanguage: "sv",
+      sourceUrl: plan.releaseUrl,
+    });
+  });
 });

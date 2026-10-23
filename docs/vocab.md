@@ -157,7 +157,10 @@ string, so other applications can look up what it means:
   1.23's `sm:Palette` and `sm:ColorSet`, with `sm:basedOn`,
   `sm:lightColors`, `sm:darkColors` and a property for each color,
   joined two new shapes, palette and color set format 1
-  ([Palettes of one's own](#palettes-of-ones-own)). A shape may take a
+  ([Palettes of one's own](#palettes-of-ones-own)). 1.24's
+  `sm:deckCardLanguage` is written on a deck outside `DeckV6`, as
+  `sm:position` is, so the deck format did not move
+  ([The language of text](#the-language-of-text)). A shape may take a
   term of another vocabulary too, which is no `sm:` term and so moves no
   vocabulary version: card format 7 took `dcterms:subject`, what a card
   is about ([deck-library.md](deck-library.md#what-a-card-is-about)).
@@ -440,13 +443,22 @@ not in; a page shows it with no `lang`. A card side saved untagged
 none. Which formats require which tags is the [shapes](shapes.md)'
 business.
 
-There is no term for a deck's languages: the app works out which
-languages to offer from the tags the deck's text already uses (see
-[i18n.md](i18n.md#text-in-the-users-languages)). Optional
-`sm:frontLanguage` / `sm:backLanguage` defaults could join the deck's
-next format, should that prove too weak. `dcterms:language`
-is used only on library releases, for DCAT-AP: it names EU
-authority-table languages and cannot tell a card's front from its back.
+There is no term for the languages a deck is in: the app works out
+which languages to offer from the tags the deck's text already uses
+(see [i18n.md](i18n.md#text-in-the-users-languages)). A learner may say
+which of them they want first, though: `sm:deckCardLanguage` (1.24), one
+lower-case BCP 47 tag as a plain string, on the deck's catalog entry, is
+the language the deck's card text (fronts, backs, notes, labels,
+picture descriptions and wrong options) is shown in first, ahead of
+the app's language ([i18n.md](i18n.md#which-language)). It ranks card text only: the
+deck's title, description and keywords are shown as before. It is
+written outside `DeckV6`, which neither owns nor checks it, so a reader
+keeps it only when it names a language other than `zxx`, and drops
+anything else. `dcterms:language` is not used for it: that term is used
+only on library releases, for DCAT-AP, where it names EU
+authority-table languages (IRIs, not tags) and cannot tell a card's
+front from its back, and it says what a dataset is in, not what a
+learner prefers.
 
 ## License
 

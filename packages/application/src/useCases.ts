@@ -14,6 +14,7 @@ import { withAbout, type DeckAbout } from "@solid-memo/domain/deckAbout";
 import { withProvenance, type DeckProvenance } from "@solid-memo/domain/deckProvenance";
 import type { LangTexts } from "@solid-memo/domain/keywords";
 import { shown } from "@solid-memo/domain/langText";
+import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { deckPreferences, withPace, type DeckPace } from "@solid-memo/domain/deckPace";
 import {
   isCopyOf,
@@ -614,6 +615,14 @@ export interface UseCases
    * whole number is refused before any write.
    */
   setDecksPace(decks: readonly Deck[], pace: DeckPace): Promise<Deck[]>;
+  /**
+   * Set the language the deck's card text is shown in first (its
+   * fronts, backs, notes, labels, picture descriptions and wrong
+   * options), kept on the deck in the pod; null goes back to the usual order, the app's
+   * language first. A tag that names no language, or "zxx", is refused
+   * (textLanguageInvalid) before any write.
+   */
+  setDeckCardLanguage(deck: Deck, language: string | null): Promise<Deck>;
   /** Remove a deck and its cards; the result names the documents kept for another app's data in them. */
   removeDeck(deck: Deck): Promise<KeptDocuments>;
   /** Remove several decks of an instance and their cards, their entries in one write of their catalog. */
@@ -3563,6 +3572,13 @@ export function createUseCases({
     },
     async setDecksPace(decks, pace) {
       return deckRepository.saveDecks(decks.map((deck) => withPace(deck, pace)));
+    },
+    async setDeckCardLanguage(deck, language) {
+      // Checked and put in the case the app stores tags in before any write.
+      return deckRepository.setCardLanguage(
+        deck,
+        withCardLanguage(deck, language).cardLanguage ?? null,
+      );
     },
     removeDeck(deck) {
       return deckRepository.removeDeck(deck);

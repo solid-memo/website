@@ -100,6 +100,47 @@ describe("toDeck", () => {
     });
   });
 
+  describe("the deck's card language", () => {
+    const withLanguage = (value: string, lang?: string) =>
+      deckThing((t) => {
+        const entry = t
+          .addIri(RDF.type, SM.Deck)
+          .addStringNoLocale(DCTERMS.title, "Words")
+          .addIri(SM.cardsDocument, CARDS_DOC)
+          .addIri(SM.reviewsDocument, REVIEWS_DOC)
+          .addStringNoLocale("https://other.example/ns#note", "kept");
+        return lang === undefined
+          ? entry.addStringNoLocale(SM.deckCardLanguage, value)
+          : entry.addStringWithLocale(SM.deckCardLanguage, value, lang);
+      });
+
+    it("reads one that names a language, in lower case", () => {
+      expect(toDeck(withLanguage("sv"))?.cardLanguage).toBe("sv");
+      expect(toDeck(withLanguage("PT-br"))?.cardLanguage).toBe("pt-br");
+    });
+
+    it("drops one that names no language, text in no language, or a language-tagged string", () => {
+      expect(toDeck(withLanguage("Swedish"))).not.toHaveProperty("cardLanguage");
+      expect(toDeck(withLanguage("zxx"))).not.toHaveProperty("cardLanguage");
+      expect(toDeck(withLanguage("sv", "en"))).not.toHaveProperty("cardLanguage");
+    });
+
+    it("is kept as stored by a write of the deck, whatever the deck says, as the triples it does not know", () => {
+      const thing = withLanguage("sv");
+      const deck = toDeck(thing)!;
+      const stored = setThing(mockSolidDatasetFrom(CATALOG), thing);
+      const read = (dataset: SolidDataset) => getThing(dataset, deck.url)!;
+
+      const { cardLanguage: _, ...stale } = deck;
+      for (const written of [stale, { ...deck, cardLanguage: "ko" }]) {
+        const updated = withDeck(stored, written);
+        expect(getStringNoLocale(read(updated), SM.deckCardLanguage)).toBe("sv");
+        expect(getStringNoLocale(read(updated), "https://other.example/ns#note")).toBe("kept");
+        expect(toDecks(updated, CATALOG)[0]?.cardLanguage).toBe("sv");
+      }
+    });
+  });
+
   it("keeps the provenance of an imported deck", () => {
     const thing = deckThing((t) =>
       t

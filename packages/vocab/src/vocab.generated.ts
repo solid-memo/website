@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.23 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.24 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -54,6 +54,8 @@ export const SM = {
   deckNewCardsPerDay: `${SM_NS}deckNewCardsPerDay`,
   /** Maximum due-card reviews of this deck per study day, in place of the instance's maxReviewsPerDay. Absent means the instance's. (Added in 1.7.) */
   deckMaxReviewsPerDay: `${SM_NS}deckMaxReviewsPerDay`,
+  /** The language, as a lower-case BCP 47 tag, the learner wants this deck's card text shown in first: its fronts, backs, notes, labels, picture descriptions and wrong options (distractors). A card without text in it falls back to the usual order (the app's language, then the browser's, then English). The deck's own title, description and keywords are not affected. Absent means the usual order. (Added in 1.24. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  deckCardLanguage: `${SM_NS}deckCardLanguage`,
   /** Text on the front of the card. (Since 1.0.) */
   front: `${SM_NS}front`,
   /** Text on the back of the card. (Since 1.0.) */
