@@ -4,7 +4,8 @@
 
 import { useMemo, useState } from "preact/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Course, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { Course } from "@solid-memo/application/courses";
 import { choicesOf, finalReviewQueue, type CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useCourseAnswer } from "./ChapterPlayerContainer";

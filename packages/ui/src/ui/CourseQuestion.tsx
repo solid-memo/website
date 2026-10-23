@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useId, useLayoutEffect, useRef } from "preact/hooks";
-import type { CourseAnswer } from "@solid-memo/application/useCases";
+import type { CourseAnswer } from "@solid-memo/application/courses";
 import type { Choice } from "@solid-memo/domain/course";
 import { isMarkdown, promptSides, type CardContent } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";

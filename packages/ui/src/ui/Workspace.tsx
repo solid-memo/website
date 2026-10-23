@@ -5,7 +5,8 @@
 import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Course, UseCases } from "@solid-memo/application/useCases";
+import type { UseCases } from "@solid-memo/application/useCases";
+import type { Course } from "@solid-memo/application/courses";
 import { cardName, cardNameText } from "./DataText";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { CourseChapter } from "@solid-memo/domain/course";

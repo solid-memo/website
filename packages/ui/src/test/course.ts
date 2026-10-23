@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Course } from "@solid-memo/application/useCases";
+import type { Course } from "@solid-memo/application/courses";
 import { courseProgress, type CourseOutline } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";

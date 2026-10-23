@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Course } from "@solid-memo/application/useCases";
+import type { Course } from "@solid-memo/application/courses";
 import type { CompletedChaptersEdit } from "@solid-memo/domain/course";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
