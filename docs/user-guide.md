@@ -512,6 +512,7 @@ screenshot of each.
 | Statistics, and a card's history | full-learner | 15–15b |
 | Previewing and importing a library deck | full-learner | 16–17 |
 | Describing a deck in two languages, and switching language | full-learner | 18–20b |
+| Showing a deck's cards in another language than the app's, and back | full-learner | 20c–20d |
 | Checking the instance (developer mode) | full-learner | 21 |
 | A card in Markdown | [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts) | 04–07 |
 | The course for newcomers, from an empty deck list | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–05 |

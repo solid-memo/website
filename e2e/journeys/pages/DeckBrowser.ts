@@ -97,6 +97,16 @@ export class DeckBrowser extends Screen {
     });
   }
 
+  /** The row of the card whose front is `front` shows `back`, in its language. */
+  async expectBack(front: string, back: string, lang?: string): Promise<void> {
+    const cell = this.cardRows
+      .filter({ hasText: front })
+      .getByRole("cell")
+      .filter({ hasText: back });
+    await expect(cell).toHaveCount(1);
+    if (lang !== undefined) await expect(cell.locator(`[lang="${lang}"]`)).toHaveCount(1);
+  }
+
   /** The table lists exactly these fronts (in any order). */
   async expectFronts(fronts: readonly string[]): Promise<void> {
     await expect(this.cardRows).toHaveCount(fronts.length);

@@ -337,6 +337,30 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
   });
 
   await app.step(
+    "20c · Show the deck's cards in Swedish, the app and the deck's name in English",
+    async () => {
+      await app.deckDetail.openPreferences();
+      await app.deckPreferences.expectCardLanguage(null);
+      await app.deckPreferences.chooseCardLanguage("sv");
+      await app.deckPreferences.backToDeck(BRIGHTEST_STARS.en);
+      await app.deckDetail.openBrowser();
+      await app.deckBrowser.expectDeck(BRIGHTEST_STARS.en);
+      await app.deckBrowser.expectBack("Sirius", "Stora hunden", "sv");
+    },
+  );
+
+  await app.step("20d · Show the deck's cards in the app's language again", async () => {
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.decks.openDeck(BRIGHTEST_STARS.en);
+    await app.deckDetail.openPreferences();
+    await app.deckPreferences.expectCardLanguage("sv");
+    await app.deckPreferences.chooseCardLanguage(null);
+    await app.deckPreferences.backToDeck(BRIGHTEST_STARS.en);
+    await app.deckDetail.openBrowser();
+    await app.deckBrowser.expectBack("Sirius", "Canis Major");
+  });
+
+  await app.step(
     "21 · With developer mode on, validate the instance: all documents conform",
     async () => {
       await app.preferences.open();

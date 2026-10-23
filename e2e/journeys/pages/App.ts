@@ -28,6 +28,7 @@ import { DeckCreator } from "./DeckCreator.ts";
 import { DeckDetail } from "./DeckDetail.ts";
 import { DeckGroups } from "./DeckGroups.ts";
 import { DeckList } from "./DeckList.ts";
+import { DeckPreferences } from "./DeckPreferences.ts";
 import { DraftEditor } from "./DraftEditor.ts";
 import { GuestOffer } from "./GuestOffer.ts";
 import { ImportUrl } from "./ImportUrl.ts";
@@ -67,6 +68,7 @@ export class App {
   readonly groups = new DeckGroups(this);
   readonly deckCreator = new DeckCreator(this);
   readonly deckDetail = new DeckDetail(this);
+  readonly deckPreferences = new DeckPreferences(this);
   readonly deckBrowser = new DeckBrowser(this);
   readonly cardCreator = new CardCreator(this);
   readonly cardEditor = new CardEditor(this);

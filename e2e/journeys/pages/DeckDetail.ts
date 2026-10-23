@@ -25,6 +25,19 @@ export class DeckDetail extends Screen {
     await expect(this.page.getByRole("heading", { name, exact: true, level: 2 })).toBeVisible();
   }
 
+  /** Follows "Preferences" to the deck's own preferences. */
+  async openPreferences(): Promise<void> {
+    await this.intent("Open the deck's preferences", async () => {
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("deckDetail.preferencesLabel"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.tp("deckPreferences.heading") }),
+      ).toBeVisible();
+    });
+  }
+
   /** Follows "Browser" to the deck's cards. */
   async openBrowser(): Promise<void> {
     await this.intent("Open the deck's Browser", async () => {
