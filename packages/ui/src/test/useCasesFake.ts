@@ -4,6 +4,7 @@
 
 import { vi } from "vitest";
 import type {
+  DeckProgress,
   StatisticsReport,
   StudySessionQueue,
   UseCases,
@@ -38,6 +39,28 @@ export function statisticsReportOf(
     coverage,
     logBegins,
     dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+  };
+}
+
+/**
+ * A deck's figures in the cards' progress (getCardProgress): nothing
+ * studied and nothing hard, unless given.
+ */
+export function deckProgressOf(deck: Deck, extra: Partial<DeckProgress> = {}): DeckProgress {
+  return {
+    deck,
+    progress: { new: 0, relearning: 0, young: 0, mature: 0 },
+    forecast: [],
+    intervals: intervalHistogram([]),
+    eases: easeHistogram([]),
+    overdue: 0,
+    daysToClear: 0,
+    newCardsPerDay: 5,
+    introducedToday: 0,
+    hardest: { reviews: 0, cards: [] },
+    courseAnswers: 0,
+    confusions: [],
+    ...extra,
   };
 }
 

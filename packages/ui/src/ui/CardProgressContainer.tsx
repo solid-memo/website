@@ -66,14 +66,21 @@ export function CardProgressContainer({
 /**
  * The cards' progress of every deck of the instance, or of the one deck
  * given, as one query: CardProgressContainer and HardestCardsContainer
- * share what it reads.
+ * share what it reads. Not `enabled`, it is never read again, neither
+ * on focus nor when invalidated, and keeps what it has.
  */
-export function useCardProgress(useCases: UseCases, instance: Instance, deck?: Deck) {
+export function useCardProgress(
+  useCases: UseCases,
+  instance: Instance,
+  deck?: Deck,
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["cardProgress", instance.url, deck?.url],
     queryFn: () =>
       useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
     staleTime: STATISTICS_STALE_MS,
+    enabled,
   });
 }
 

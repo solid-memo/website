@@ -26,7 +26,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
 import { StudyScreen } from "./StudyScreen";
 import { useClock } from "./courseLinks";
-import { useDeckRelease } from "./deckRelease";
+import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
 
@@ -97,23 +97,7 @@ export function StudyContainer({
     refetchOnMount: "always",
   });
 
-  // Where a mistake in the deck's release is reported, and which cards are the release's:
-  // read once, as a release never changes. A card the learner added is theirs to fix.
-  const reportQuery = useQuery({
-    queryKey: ["reportPlace", deck.sourceUrl],
-    queryFn: () => useCases.reportPlace(deck.sourceUrl!),
-    enabled: deck.sourceUrl !== undefined,
-    staleTime: Infinity,
-  });
-  const release = useDeckRelease(useCases, deck);
-  const report =
-    reportQuery.data === undefined || release === null || release === undefined
-      ? undefined
-      : {
-          place: reportQuery.data,
-          releaseUrl: deck.sourceUrl!,
-          cardIds: new Set(release.cards.map((card) => card.id)),
-        };
+  const report = useReportTarget(useCases, deck);
 
   const [session, setSession] = useState<Session | null>(null);
   useEffect(() => {

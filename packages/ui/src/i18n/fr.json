@@ -166,6 +166,7 @@
     "browser": "Parcourir",
     "cardCreator": "Nouvelle carte",
     "study": "Étudier",
+    "cram": "Bachotage",
     "statistics": "Statistiques",
     "course": "Cours",
     "courseReview": "Révision finale",
@@ -1520,6 +1521,16 @@
       "easy": "Facile"
     }
   },
+  "cram": {
+    "heading": "Bachotage : {deck}",
+    "headingAll": "Bachotage des sangsues",
+    "notice": "Rien n’est enregistré ici : vos réponses ne changent ni la date de révision des cartes, ni vos statistiques, ni les cartes qui sont des sangsues.",
+    "finished": "Bachotage terminé : rien n’a été enregistré.",
+    "nothing": "Ce paquet n’a aucune sangsue à bachoter.",
+    "nothingAll": "Aucun de vos paquets n’a de sangsue à bachoter.",
+    "again": "Bachoter encore",
+    "preparing": "Préparation des sangsues…"
+  },
   "validation": {
     "heading": "Validation de {name}",
     "validating": "Validation…",
@@ -2003,6 +2014,8 @@
     },
     "noLeeches": "Aucune sangsue : aucune carte n’a été oubliée aussi souvent.",
     "leechIn": "{forgotten}, dans {deck}",
+    "cramLeeches": "Bachoter les sangsues",
+    "cramLeechesHint": "Entraînez-vous dessus maintenant, autant de fois que vous le souhaitez. Rien n’est enregistré : leur date de révision ne change pas.",
     "courses": "Vos cours",
     "coursesHint": "Les chapitres que vous avez terminés dans chaque cours, et vos réponses aux questions de chaque chapitre ces 12 derniers mois : la part de bonnes réponses parmi la première réponse du jour à chaque question.",
     "chapter": "Chapitre",

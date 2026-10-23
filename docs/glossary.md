@@ -152,6 +152,10 @@ it most. The specifications' versions and status are in
   the statistics are drawn from. [data-model.md](data-model.md#the-answer-log).
 - **Answer scale**: the buttons you grade an answer with, the full 0 to
   5 or Again, Hard, Good and Easy. [srs.md](srs.md#answer-scales).
+- **Cram**: studying the leeches of a deck, or of every deck, right now,
+  as often as you like, with nothing recorded: no due date, statistic
+  or leech changes.
+  [srs.md](srs.md#cramming-the-leeches).
 - **Desired retention**: the chance of recalling a card when it comes
   back that FSRS-6 schedules for, from 70% to 97%, 90% by default; set
   in the preferences. [srs.md](srs.md#fsrs-6).

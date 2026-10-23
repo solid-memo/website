@@ -2,13 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useId } from "preact/hooks";
 import type { DeckProgress } from "@solid-memo/application/useCases";
 import { LEECH_LAPSES, type HardCard } from "@solid-memo/domain/cardHistory";
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
 import { cardName, cardNameText, DataLine } from "./DataText";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
-import { routeToHash } from "./router";
+import { cramHref, routeToHash } from "./router";
 
 /** How many of a deck's hardest cards its page lists. */
 export const HARDEST_SHOWN = 10;
@@ -40,11 +41,48 @@ function useForgottenText(): (hard: HardCard<Card>) => string {
 }
 
 /**
+ * The leeches of the decks given (cards forgotten LEECH_LAPSES times or
+ * more in their reviews of the last twelve months), each with its deck,
+ * the most forgotten first, then the most often forgotten of their
+ * reviews: what the statistics list and a cram crams.
+ */
+export function leechesOf(decks: readonly DeckProgress[]): { deck: Deck; hard: HardCard<Card> }[] {
+  return decks
+    .flatMap(({ deck, hardest }) =>
+      hardest.cards.filter((hard) => hard.lapses >= LEECH_LAPSES).map((hard) => ({ deck, hard })),
+    )
+    .sort(
+      (a, b) =>
+        b.hard.lapses - a.hard.lapses ||
+        b.hard.lapses / b.hard.reviews - a.hard.lapses / a.hard.reviews,
+    );
+}
+
+/** A link to cram leeches (CramContainer), described by what cramming them does and does not. */
+function CramLink({ href }: { href: string }) {
+  const { t } = useI18n();
+  const hintId = useId();
+  return (
+    <>
+      <p>
+        <a href={href} aria-describedby={hintId}>
+          {t("statistics.cramLeeches")}
+        </a>
+      </p>
+      <p class="hint" id={hintId}>
+        {t("statistics.cramLeechesHint")}
+      </p>
+    </>
+  );
+}
+
+/**
  * A deck's hardest cards (hardestCardsOf): the HARDEST_SHOWN forgotten
  * most often in their reviews of the last twelve months, each a link to
- * its page, with how often of how many reviews, a leech marked as one.
- * Nothing for a deck without such reviews (one studied only in a
- * course's chapters, or not yet reviewed).
+ * its page, with how often of how many reviews, a leech marked as one;
+ * with a leech, a link to cram the deck's leeches. Nothing for a deck
+ * without such reviews (one studied only in a course's chapters, or not
+ * yet reviewed).
  */
 export function HardestCards({
   instanceUrl,
@@ -73,6 +111,7 @@ export function HardestCards({
           ))}
         </ol>
       )}
+      {leechesOf([progress]).length > 0 && <CramLink href={cramHref(instanceUrl, deck.url)} />}
     </>
   );
 }
@@ -124,7 +163,8 @@ export function ConfusedOptions({
  * The leeches of every deck (cards forgotten LEECH_LAPSES times or more
  * in their reviews of the last twelve months), the most forgotten first,
  * each a link to its page, with its deck and how often of how many
- * reviews. A deck since removed has no cards to name, so none of its.
+ * reviews, and, with one, a link to cram them all. A deck since removed
+ * has no cards to name, so none of its.
  */
 export function Leeches({
   instanceUrl,
@@ -135,15 +175,7 @@ export function Leeches({
 }) {
   const { t, tx } = useI18n();
   const forgotten = useForgottenText();
-  const leeches = decks
-    .flatMap(({ deck, hardest }) =>
-      hardest.cards.filter((hard) => hard.lapses >= LEECH_LAPSES).map((hard) => ({ deck, hard })),
-    )
-    .sort(
-      (a, b) =>
-        b.hard.lapses - a.hard.lapses ||
-        b.hard.lapses / b.hard.reviews - a.hard.lapses / a.hard.reviews,
-    );
+  const leeches = leechesOf(decks);
   return (
     <>
       <h4>{t("statistics.leeches")}</h4>
@@ -165,6 +197,7 @@ export function Leeches({
           ))}
         </ol>
       )}
+      {leeches.length > 0 && <CramLink href={cramHref(instanceUrl)} />}
     </>
   );
 }

@@ -47,6 +47,7 @@ import { LibraryPreviewContainer } from "./LibraryPreviewContainer";
 import { Loading } from "./Loading";
 import { MigrationContainer } from "./MigrationContainer";
 import { StudyContainer } from "./StudyContainer";
+import { CramContainer } from "./CramContainer";
 import { PaletteEditorContainer } from "./PaletteEditorContainer";
 import { PreferencesContainer } from "./PreferencesContainer";
 import { StatisticsContainer } from "./StatisticsContainer";
@@ -936,6 +937,29 @@ export function Workspace({
             instance={activeInstance!}
             deck={activeDeck!}
             onExit={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
+          />
+        );
+      case "cram":
+        return (
+          <CramContainer
+            key={deckUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            deck={activeDeck!}
+            onExit={() =>
+              navigate({ screen: "deckDetail", instanceUrl: instanceUrl!, deckUrl: deckUrl! })
+            }
+          />
+        );
+      case "cramAll":
+        return (
+          <CramContainer
+            key="all"
+            useCases={useCases}
+            instance={activeInstance!}
+            onExit={() =>
+              navigate({ screen: "statistics", instanceUrl: instanceUrl!, view: "memory" })
+            }
           />
         );
       case "course":

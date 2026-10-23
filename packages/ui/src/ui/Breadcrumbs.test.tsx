@@ -204,6 +204,24 @@ describe("breadcrumbsFor", () => {
     ]);
   });
 
+  it("ends a cram's trail with Cram, under the deck", () => {
+    const cram: RouteRef = { screen: "cram", instanceUrl, deckUrl };
+    expect(breadcrumbsFor(cram, { deck: "Kanji N5", card: "", libraryDeck: "" })).toEqual([
+      { label: "Decks", route: home },
+      { label: "Kanji N5", route: deckDetail },
+      { label: "Cram", route: cram },
+    ]);
+  });
+
+  it("puts a cram of every deck's leeches under the statistics' memory tab, which lists them", () => {
+    const cram: RouteRef = { screen: "cramAll", instanceUrl };
+    expect(breadcrumbsFor(cram, { deck: "", card: "", libraryDeck: "" })).toEqual([
+      { label: "Decks", route: home },
+      { label: "Statistics", route: { screen: "statistics", instanceUrl, view: "memory" } },
+      { label: "Cram", route: cram },
+    ]);
+  });
+
   it("ends a deck's statistics' trail with Statistics, under the deck", () => {
     const statistics: RouteRef = { screen: "deckStatistics", instanceUrl, deckUrl, view: "cards" };
     expect(breadcrumbsFor(statistics, { deck: "Kanji N5", card: "", libraryDeck: "" })).toEqual([

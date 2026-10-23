@@ -157,7 +157,9 @@ many are new, with a **Study** button. It also shows:
   today's answers for this deck ([srs.md](srs.md#resetting-the-day));
 - the deck's own statistics in short, with "More statistics" for all
   of them, where its cards stand, and what is hard in it: the cards you forget most, and in a course's deck the wrong
-  options you choose most.
+  options you choose most. When some of them are leeches (forgotten 4
+  times or more), **Cram the leeches** lets you practice those now
+  ([Cramming the leeches](#cramming-the-leeches)).
 
 Its buttons lead to **Preferences** (the deck's name, its own daily
 limits, and the languages of its text), the **Browser** (its cards),
@@ -202,6 +204,24 @@ on the project's issue tracker with the deck and the card already
 filled in: say what is wrong. A deck added from a link has the link
 when its creator names a page for reports
 ([deck-library.md](deck-library.md#reporting-a-mistake)).
+
+### Cramming the leeches
+
+A leech is a card you keep forgetting: 4 times or more in its reviews
+of the last 12 months. **Cram the leeches**, under a deck's hardest
+cards, asks you that deck's leeches right now, whether they are due or
+not, in a shuffled order. You answer them as in a study session, and a
+card you get wrong comes back later in the cram. At the end, **Cram
+again** goes through them once more, as often as you like. Under the
+leeches in the statistics, on the Memory tab, **Cram the leeches** does
+the same with the leeches of all your decks, the heading naming the
+deck of each card.
+
+Nothing in a cram is recorded, as the screen says the whole time: your
+answers change neither when the cards are due, nor your statistics,
+nor which cards are leeches, so the grades show no interval and there
+is no undo. A card stops being a leech only through your normal study
+([srs.md](srs.md#cramming-the-leeches)).
 
 ## Adding and editing cards
 
@@ -302,7 +322,8 @@ the last 12 months, or all time. Its tabs, each a link of its own:
   by how late you reviewed it, how you answered course questions,
   counted apart, and your leeches: the cards you forgot 4 times or more
   in their reviews, each a link to the card, whose page shows every
-  answer you gave it. What is worked out from your answers alone, such
+  answer you gave it, and **Cram the leeches** to practice them all now
+  ([Cramming the leeches](#cramming-the-leeches)). What is worked out from your answers alone, such
   as how late a review was before the app recorded the day it was due,
   is approximate, and says so: changes made in the Studio are not in
   your answers.
@@ -493,7 +514,7 @@ screenshot of each.
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts | 21–23 |
 | Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |
-| Reviewing on a later study day, forgetting cards, and the hardest cards | later-day | 07–12 |
+| Reviewing on a later study day, forgetting cards, and the hardest cards, with no leech to cram | later-day | 07–12 |
 | Welcomed back with the streak before the day's first answer | later-day | 07 |
 | Updating a library deck to its new release, its progress kept | [library-upgrade.journey.ts](../e2e/journeys/journeys/library-upgrade.journey.ts) | 04–10 |
 | Undoing an answer, and resetting today's study | [reset-day.journey.ts](../e2e/journeys/journeys/reset-day.journey.ts) | 07–12 |

@@ -34,7 +34,9 @@ import { fixedOffsetZone, offsetWhereItIs } from "../harness/timezone.ts";
  * session holds the other two, answered Good. Of the four reviews, two
  * are remembered and two are lapses. A leech, forgotten 4 times, would
  * take three more study days than the time zones' 28 hours hold, so there
- * is none: the statistics say so.
+ * is none: the statistics say so, and the deck's page offers no cram of
+ * its leeches (docs/srs.md, Cramming the leeches), which the unit tests
+ * cover instead.
  */
 test.use({ timezoneId: "" });
 
@@ -217,14 +219,17 @@ test("a later study day @review", async ({ app, account, runId }) => {
     },
   );
 
-  await app.step("11 · The deck's page lists the two cards forgotten as its hardest", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.openDeck(deck);
-    await app.deckDetail.expectHardestCards([
-      { lapses: 1, reviews: 1 },
-      { lapses: 1, reviews: 1 },
-    ]);
-  });
+  await app.step(
+    "11 · The deck's page lists the two cards forgotten as its hardest, with no leech to cram",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.openDeck(deck);
+      await app.deckDetail.expectHardestCards([
+        { lapses: 1, reviews: 1 },
+        { lapses: 1, reviews: 1 },
+      ]);
+    },
+  );
 
   await app.step("12 · Reload: the deck list's counts still agree", async () => {
     await app.chrome.breadcrumb("breadcrumbs.decks");

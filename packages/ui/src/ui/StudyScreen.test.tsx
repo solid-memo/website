@@ -550,4 +550,58 @@ describe("StudyScreen", () => {
     expect(document.activeElement).toHaveTextContent("Svar: water");
     expect(screen.getByRole("group", { name: "Hur väl mindes du det?" })).toBeInTheDocument();
   });
+
+  it("heads a cram as one and says throughout that nothing is recorded", () => {
+    const { props, rerender } = renderScreen({ cram: { onAgain: vi.fn() } });
+    expect(screen.getByRole("heading", { name: "Cram: Kanji N5" })).toBeInTheDocument();
+    const notice =
+      "Nothing is recorded here: your answers don't change any due date, your statistics, or which cards are leeches.";
+    expect(screen.getByText(notice)).toBeInTheDocument();
+    // Said where the focus goes when the cram begins: the first question.
+    expect(document.activeElement).toHaveTextContent("水");
+    expect(document.activeElement).toHaveAccessibleDescription(notice);
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    fireEvent.click(screen.getByRole("button", { name: "4 — Good" }));
+    expect(props.onAnswer).toHaveBeenCalledWith(4, timed);
+    // Then shown, but not said again with every card.
+    rerender(<StudyScreen {...props} position={2} />);
+    expect(screen.getByText(notice)).toBeInTheDocument();
+    expect(document.activeElement).toHaveTextContent("水");
+    expect(document.activeElement).not.toHaveAccessibleDescription();
+  });
+
+  it("ends a cram saying nothing was recorded, offering to cram again", () => {
+    const onAgain = vi.fn();
+    const { rerender, props } = renderScreen({ cram: { onAgain }, prompt: null, position: 4 });
+    expect(screen.getByText("Cram finished — nothing was recorded.")).toHaveFocus();
+    expect(screen.getByText(/Nothing is recorded here/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cram again" }));
+    expect(onAgain).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "End session" }));
+    expect(props.onExit).toHaveBeenCalledOnce();
+    // A cram with no leech has nothing to cram again.
+    rerender(<StudyScreen {...props} total={0} position={1} />);
+    expect(screen.getByText("This deck has no leeches to cram.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cram again" })).toBeNull();
+  });
+
+  it("heads a cram of every deck's leeches with no card up as the leeches'", () => {
+    renderScreen({
+      cram: { onAgain: vi.fn() },
+      deckName: undefined,
+      deckHref: undefined,
+      prompt: null,
+      total: 0,
+    });
+    expect(screen.getByRole("heading", { name: "Cram the leeches" })).toBeInTheDocument();
+    expect(screen.getByText("None of your decks has a leech to cram.")).toHaveFocus();
+  });
+
+  it("says nothing of a cram in a study session", () => {
+    renderScreen({ prompt: null, position: 4 });
+    expect(screen.getByRole("heading", { name: "Study: Kanji N5" })).toBeInTheDocument();
+    expect(screen.getByText("Session finished — all cards reviewed.")).toBeInTheDocument();
+    expect(screen.queryByText(/Nothing is recorded/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Cram again" })).toBeNull();
+  });
 });

@@ -110,6 +110,11 @@ describe("HardestCardsContainer", () => {
       `#/card?instance=${encodeURIComponent(INSTANCE.url)}&deck=${encodeURIComponent(rivers.url)}&card=${encodeURIComponent(nile.url)}`,
     );
     expect(useCases.getCardProgress).toHaveBeenCalledTimes(1);
+    // They can be crammed, every deck's together.
+    expect(screen.getByRole("link", { name: "Cram the leeches" })).toHaveAttribute(
+      "href",
+      `#/cram?instance=${encodeURIComponent(INSTANCE.url)}`,
+    );
   });
 
   it("says when no card is a leech, but nothing before the first review", async () => {
@@ -122,6 +127,7 @@ describe("HardestCardsContainer", () => {
     expect(
       await screen.findByText("No leeches: no card was forgotten that often."),
     ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Cram the leeches" })).toBeNull();
     const fresh = makeUseCasesFake({
       getCardProgress: vi.fn(async () => reportOf(progressOf(capitals), progressOf(rivers))),
     });
@@ -169,6 +175,27 @@ describe("HardestCardsContainer", () => {
       "Capital of Spain confused with Barcelona 2 times",
     );
     expect(within(confused).getByText("Barcelona").tagName).toBe("EM");
+    // With a leech among them, the deck's leeches can be crammed.
+    // Its hint, that nothing is recorded, is the link's description.
+    const cram = screen.getByRole("link", { name: "Cram the leeches" });
+    expect(cram).toHaveAttribute(
+      "href",
+      `#/cram?instance=${encodeURIComponent(INSTANCE.url)}&deck=${encodeURIComponent(capitals.url)}`,
+    );
+    expect(cram).toHaveAccessibleDescription(
+      "Practice them now, as often as you like. Nothing is recorded, so their due dates stay the same.",
+    );
+  });
+
+  it("offers no cram to a deck whose hard cards are no leeches", async () => {
+    const useCases = makeUseCasesFake({
+      getCardProgress: vi.fn(async () =>
+        reportOf(progressOf(capitals, { hardest: { reviews: 9, cards: [hard(rome, 3, 9)] } })),
+      ),
+    });
+    withQueries(<HardestCardsContainer useCases={useCases} instance={INSTANCE} deck={capitals} />);
+    expect(await screen.findByRole("list", { name: "Hardest cards" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Cram the leeches" })).toBeNull();
   });
 
   it("says when a deck has no hard card yet, and leaves out wrong options without course answers", async () => {

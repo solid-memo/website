@@ -162,6 +162,7 @@
     "browser": "카드 브라우저",
     "cardCreator": "새 카드",
     "study": "학습",
+    "cram": "집중 연습",
     "statistics": "통계",
     "course": "코스",
     "courseReview": "마무리 복습",
@@ -1384,6 +1385,16 @@
       "easy": "쉬움"
     }
   },
+  "cram": {
+    "heading": "집중 연습: {deck}",
+    "headingAll": "자주 잊는 카드 집중 연습",
+    "notice": "여기서는 아무것도 기록되지 않아요. 답해도 카드의 복습 날짜, 통계, 자주 잊는 카드인지가 바뀌지 않아요.",
+    "finished": "집중 연습을 마쳤어요. 아무것도 기록되지 않았어요.",
+    "nothing": "이 덱에는 집중 연습할 자주 잊는 카드가 없어요.",
+    "nothingAll": "어느 덱에도 집중 연습할 자주 잊는 카드가 없어요.",
+    "again": "다시 집중 연습하기",
+    "preparing": "자주 잊는 카드를 준비하는 중…"
+  },
   "validation": {
     "heading": "{name} 검증",
     "validating": "검증하는 중…",
@@ -1793,6 +1804,8 @@
     },
     "noLeeches": "자주 잊는 카드가 없어요.",
     "leechIn": "{deck}: {forgotten}",
+    "cramLeeches": "자주 잊는 카드 집중 연습하기",
+    "cramLeechesHint": "지금 원하는 만큼 연습해 보세요. 아무것도 기록되지 않으니 복습 날짜는 그대로예요.",
     "courses": "내 코스",
     "coursesHint": "코스마다 완료한 챕터와, 지난 12개월 동안 챕터별 문제에 어떻게 답했는지예요. 문제마다 그날 처음 한 답변 중 맞힌 비율이에요.",
     "chapter": "챕터",

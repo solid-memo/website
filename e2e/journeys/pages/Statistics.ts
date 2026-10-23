@@ -140,10 +140,10 @@ export interface ExpectedStatistics {
   /** Every deck under "Maturity by deck", in any order. */
   maturityByDeck?: ({ name: string } & Maturity)[];
   /**
-   * The fronts listed under "Leeches across your decks", in order; none
-   * when no card was forgotten that often, which the page says; null
-   * when there is no review yet, so nothing is hard to tell and no list
-   * is shown.
+   * The fronts listed under "Leeches across your decks", in order, with
+   * a link to cram them; none when no card was forgotten that often,
+   * which the page says, and nothing to cram; null when there is no
+   * review yet, so nothing is hard to tell and no list is shown.
    */
   leeches?: string[] | null;
 }
@@ -713,8 +713,13 @@ export class Statistics extends Screen {
   /** The leeches' list, read with where the cards stand (so after it is shown). */
   private async expectLeeches(fronts: string[] | null): Promise<void> {
     const list = this.main.getByRole("list", { name: this.t("statistics.leeches"), exact: true });
+    const cram = this.main.getByRole("link", {
+      name: this.t("statistics.cramLeeches"),
+      exact: true,
+    });
     if (fronts === null) {
       await expect(list, this.t("statistics.leeches")).toHaveCount(0);
+      await expect(cram, this.t("statistics.cramLeeches")).toHaveCount(0);
       return;
     }
     if (fronts.length === 0) {
@@ -723,9 +728,11 @@ export class Statistics extends Screen {
         this.main.getByText(this.t("statistics.noLeeches"), { exact: true }),
         this.t("statistics.leeches"),
       ).toBeVisible();
+      await expect(cram, this.t("statistics.cramLeeches")).toHaveCount(0);
       return;
     }
     await expect(list.getByRole("listitem").getByRole("link")).toHaveText(fronts);
+    await expect(cram, this.t("statistics.cramLeeches")).toBeVisible();
   }
 
   /** The note that the figures begin with this month, the log's first. */

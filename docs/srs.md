@@ -495,13 +495,15 @@ it.
 
 ## Study sessions
 
-A deck offers one session, **Study** ([StudyContainer](../packages/ui/src/ui/StudyContainer.tsx)):
+A deck offers one session for the day, **Study** ([StudyContainer](../packages/ui/src/ui/StudyContainer.tsx)):
 today's due prompts plus new ones up to the daily new-card budget, the
 new ones spread evenly among the due (`interleave`) rather than queued
 after them, so a deck with a backlog still introduces something new
 early on. The session opens with a due prompt when there is one. (There
 used to be a separate due-only mode; one button with everything for the
-day proved simpler.)
+day proved simpler.) Its leeches can also be crammed, any time and as
+often as the learner likes, in a session that records nothing
+([Cramming the leeches](#cramming-the-leeches)).
 
 A session walks its queue one prompt at a time: the side asked → reveal
 the other side → grade. A back→front prompt shows the card's back first.
@@ -591,6 +593,43 @@ end of it.
 Storage note: `sm:due` is stored as a plain `"YYYY-MM-DD"` string literal,
 not `xsd:date` — a study day is a calendar label, and date round-trips
 through `Date` objects risk timezone off-by-one shifts.
+
+### Cramming the leeches
+
+A deck's leeches, the cards forgotten `LEECH_LAPSES` (4) times or more
+in their reviews of the last 12 months ([statistics.md](statistics.md#a-decks-own-figures)),
+can be crammed: studied right now, as often as the learner likes,
+whether they are due or not. Under the deck's hardest cards, on its page
+and on its statistics' memory tab, **Cram the leeches** opens the cram
+(`#/cram`, [routing.md](routing.md)) when the deck has at least one.
+Under the leeches across the decks, on the statistics' memory tab, the
+same link crams every deck's leeches together, when there is one.
+
+The cram ([CramContainer](../packages/ui/src/ui/CramContainer.tsx))
+takes the leeches once, from the cards' progress (`getCardProgress`),
+each in every direction the deck is studied in (`promptsOf`), shuffles
+them and walks them on the study screen, with the answer buttons the
+preferences ask for (`getPreferences`). A cram of every deck's keeps
+each prompt with its deck, so the heading, the link to the deck and
+where a mistake is reported follow the card up. Once it has begun, it
+reads neither again, not on the window's focus nor when a change
+elsewhere invalidates them, so a read failing cannot end it. A grade of
+0 or 1 puts the card back, as in a session (`requeueCard`). At the end,
+**Cram again** starts over with the same cards, shuffled afresh.
+
+A cram's answers record nothing. It never calls `recordReview`,
+`undoReview` or `refreshStudyDigest`, so no review state is written,
+no answer of the cram is logged, and no cached review state or queue
+is changed. No due date moves, the statistics do not count it, and a
+leech stays a leech: a card stops being one only through study, as its
+lapses in the 12-month window fall below 4. Hence the grades show no
+interval and nothing can be undone, and the screen says that nothing
+is recorded. Reading the cards' progress as the cram begins is the
+read the statistics make: like theirs, it may log answers still queued
+from earlier study and refresh the schedule cached in the study digest
+([data-model.md](data-model.md#the-digest)). A
+deck copied from a release still says where a mistake in a card is
+reported, which only reads.
 
 ## Suggesting a session
 

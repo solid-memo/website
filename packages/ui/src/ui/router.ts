@@ -63,6 +63,11 @@ export type RouteRef =
   | { screen: "card"; instanceUrl: string; deckUrl: string; cardUrl: string }
   /** A study session over the deck's due and new prompts. */
   | { screen: "study"; instanceUrl: string; deckUrl: string }
+  /** The deck's leeches crammed, as often as the learner likes: nothing
+      is recorded, so no due date, statistic or leech changes. */
+  | { screen: "cram"; instanceUrl: string; deckUrl: string }
+  /** The leeches of every deck of the instance crammed, as the deck's are. */
+  | { screen: "cramAll"; instanceUrl: string }
   /** The course a deck is the learner's copy of: its chapters and progress. */
   | { screen: "course"; instanceUrl: string; deckUrl: string }
   /** One chapter of the deck's course, its steps taken in turn. `chapterUrl`
@@ -235,6 +240,10 @@ export function routeToHash(ref: RouteRef): string {
         instance: ref.instanceUrl,
         deck: ref.deckUrl,
       })}`;
+    case "cram":
+      return `#/cram${params({ instance: ref.instanceUrl, deck: ref.deckUrl })}`;
+    case "cramAll":
+      return `#/cram${params({ instance: ref.instanceUrl })}`;
     case "course":
       return `#/course${params({ instance: ref.instanceUrl, deck: ref.deckUrl })}`;
     case "courseChapter":
@@ -333,6 +342,19 @@ export function deckHref(instanceUrl: string, deckUrl: string): string {
   return routeToHash({ screen: "deckDetail", instanceUrl, deckUrl });
 }
 
+/**
+ * Hash URL of a cram of a deck's leeches, or of every deck's without
+ * one: what "Cram the leeches" links to, under the deck's hardest cards
+ * or the leeches across the decks.
+ */
+export function cramHref(instanceUrl: string, deckUrl?: string): string {
+  return routeToHash(
+    deckUrl === undefined
+      ? { screen: "cramAll", instanceUrl }
+      : { screen: "cram", instanceUrl, deckUrl },
+  );
+}
+
 /** Hash URL of the course a deck is the learner's copy of. */
 export function courseHref(instanceUrl: string, deckUrl: string): string {
   return routeToHash({ screen: "course", instanceUrl, deckUrl });
@@ -424,6 +446,10 @@ function parseInstanceRoute(
       return paletteRoute(instanceUrl, query.get("palette"));
     case "/statistics":
       return { screen: "statistics", instanceUrl, ...parseStatisticsParams(query) };
+    case "/cram":
+      return deckUrl === null
+        ? { screen: "cramAll", instanceUrl }
+        : { screen: "cram", instanceUrl, deckUrl };
     case "/validate":
       return { screen: "validation", instanceUrl };
     default:
