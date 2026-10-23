@@ -132,7 +132,7 @@ function DeckHealthContainer({
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
   const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const error = healthQuery.error ?? cardsQuery.error;

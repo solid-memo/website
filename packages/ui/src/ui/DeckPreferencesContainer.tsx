@@ -58,7 +58,7 @@ export function DeckPreferencesContainer({
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
 
@@ -97,7 +97,8 @@ export function DeckPreferencesContainer({
 
   const stateLanguagesMutation = useMutation({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
   });
 
   const cardLanguageMutation = useMutation({

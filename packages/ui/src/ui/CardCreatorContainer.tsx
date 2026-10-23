@@ -32,7 +32,7 @@ export function CardCreatorContainer({
   const queryClient = useQueryClient();
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
@@ -41,7 +41,7 @@ export function CardCreatorContainer({
     mutationFn: (content: CardContent) => useCases.addCard(deck, content),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["cards", deck.cardsDocumentUrl],
+        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       });
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
     },

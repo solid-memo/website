@@ -41,7 +41,7 @@ export function releaseLinkOf(
 
 /**
  * The card inspector's data: the card (resolved by the workspace from
- * the ["cards", …] query, so a save shows here once that query is read
+ * the queryKeys.cards query, so a save shows here once that query is read
  * afresh) and the release its deck was copied from, if any, which says
  * how the card stands to it and which wrong options it published (never
  * deleted). The content tab is Solid Memo's card editor (CardContainer,
@@ -124,7 +124,7 @@ export function CardInspectorContainer({
     mutationFn: (distractors: Distractor[]) =>
       useCases.updateCard(deck, card, { ...card, distractors }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) });
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       logSaved();
     },

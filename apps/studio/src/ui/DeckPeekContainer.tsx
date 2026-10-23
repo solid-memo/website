@@ -41,7 +41,7 @@ export function DeckPeekContainer({
   });
   const deck = decksOf(treeQuery.data?.children ?? []).find((each) => each.url === deckUrl) ?? null;
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck?.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck?.cardsDocumentUrl),
     queryFn: deck === null ? skipToken : () => useCases.listCards(deck),
   });
   const countsQuery = useQuery(

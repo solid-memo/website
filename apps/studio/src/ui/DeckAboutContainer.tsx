@@ -63,7 +63,7 @@ export function DeckAboutContainer({
   // After the preferences' own query, which reads them.
   const readOnly = useDataCheck(useCases, instance.url).readOnly(deck);
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   // The same query as Solid Memo's course screens, so a change shows there.
@@ -94,7 +94,8 @@ export function DeckAboutContainer({
   });
   const stateLanguages = useMutation({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
   });
   const run = (write: Save["write"], touches?: QueryKey[]) =>
     save.mutateAsync({ write, touches }).then(

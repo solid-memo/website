@@ -44,7 +44,7 @@ export function DeckDetailContainer({
 }) {
   const { t, errorText } = useI18n();
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
 

@@ -852,7 +852,7 @@ function useRouteReads(
   const cardUrl = route?.screen === "card" ? route.cardUrl : null;
   // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
   const cardsQuery = useQuery({
-    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
+    queryKey: queryKeys.cards(activeDeck?.cardsDocumentUrl),
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: cardUrl !== null && activeDeck !== null,
   });

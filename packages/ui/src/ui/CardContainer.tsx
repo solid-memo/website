@@ -14,7 +14,7 @@ import { queryKeys } from "./queryKeys";
 
 /**
  * Owns the edit/remove mutations of one card's page. The card itself is
- * resolved by the Workspace from the ["cards", …] query, so a save shows
+ * resolved by the Workspace from the queryKeys.cards query, so a save shows
  * up here as a fresh `card` prop once that query is invalidated. The
  * deck's cards (the same query) give the languages its new text starts
  * in, and the release the deck came from, if any, the wrong options it
@@ -54,7 +54,7 @@ export function CardContainer({
   const queryClient = useQueryClient();
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
@@ -64,7 +64,7 @@ export function CardContainer({
     mutationFn: (content: CardContent) => useCases.updateCard(deck, card, content),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["cards", deck.cardsDocumentUrl],
+        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       });
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
       onSaved?.();
@@ -75,7 +75,7 @@ export function CardContainer({
     mutationFn: () => useCases.removeCard(deck, card),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["cards", deck.cardsDocumentUrl],
+        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       });
       await queryClient.invalidateQueries({
         queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),

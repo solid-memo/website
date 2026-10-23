@@ -52,7 +52,7 @@ export function BrowserContainer({
   const release = useDeckRelease(useCases, deck);
 
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
 
@@ -81,7 +81,7 @@ export function BrowserContainer({
     mutationFn: (card: Card) => useCases.removeCard(deck, card),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["cards", deck.cardsDocumentUrl],
+        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       });
       await queryClient.invalidateQueries({
         queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),

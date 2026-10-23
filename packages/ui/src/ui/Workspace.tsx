@@ -318,7 +318,7 @@ export function Workspace({
 
   const needsCard = cardUrl !== null && activeDeck !== null;
   const cardsQuery = useQuery({
-    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
+    queryKey: queryKeys.cards(activeDeck?.cardsDocumentUrl),
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: needsCard,
   });

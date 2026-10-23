@@ -120,7 +120,7 @@ export function DeckTableContainer({
   const decks = decksOf(treeQuery.data?.children ?? []);
   const cardQueries = useQueries({
     queries: decks.map((deck) => ({
-      queryKey: ["cards", deck.cardsDocumentUrl],
+      queryKey: queryKeys.cards(deck.cardsDocumentUrl),
       queryFn: () => useCases.listCards(deck),
     })),
   });

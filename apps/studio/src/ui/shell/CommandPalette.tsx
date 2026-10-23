@@ -75,7 +75,7 @@ export function CommandPalette({
     const cards =
       deck === undefined
         ? undefined
-        : queryClient.getQueryData<Card[]>(["cards", deck.cardsDocumentUrl]);
+        : queryClient.getQueryData<Card[]>(queryKeys.cards(deck.cardsDocumentUrl));
     const drafts =
       instanceUrl === null
         ? undefined

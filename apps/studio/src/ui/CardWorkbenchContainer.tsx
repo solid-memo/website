@@ -103,7 +103,7 @@ export function CardWorkbenchContainer({
   const [reviewDone, setReviewDone] = useState<ReviewEditMade | null>(null);
   const [transferDone, setTransferDone] = useState<TransferMade | null>(null);
   const cardsQuery = useQuery({
-    queryKey: ["cards", deck.cardsDocumentUrl],
+    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
   });
   const reviewsQuery = useQuery({
@@ -186,7 +186,7 @@ export function CardWorkbenchContainer({
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(each.url) });
     await Promise.all(
       touched.flatMap((each) => [
-        queryClient.invalidateQueries({ queryKey: ["cards", each.cardsDocumentUrl] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.cards(each.cardsDocumentUrl) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reviews(each.reviewsDocumentUrl) }),
       ]),
     );
