@@ -14,7 +14,7 @@
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-import { withDocsVersion } from "@solid-memo/markdown/tooling/docsSite";
+import { withDocsVersion } from "@solid-memo/site/docsSite";
 import { withSiteVersion } from "../apps/web/src/config.ts";
 import { isReleaseVersion } from "./releaseVersion.ts";
 

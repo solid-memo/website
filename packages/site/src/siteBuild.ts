@@ -6,7 +6,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { NS_ROOT, VOCAB_ROOT } from "./root.ts";
+import { NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
 /**
  * What the site is built with (apps/web/vite.config.ts): the values its

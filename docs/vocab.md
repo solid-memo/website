@@ -484,7 +484,7 @@ GitHub Pages serves each as `text/turtle` with
 directly. It negotiates no content: the documents are Turtle only, and
 an IRI without the `.ttl` would be a 404, which is why the namespace
 keeps the extension. The `turtleDirectoryPlugin` in
-[packages/vocab/tooling/publishTurtle.ts](../packages/vocab/tooling/publishTurtle.ts)
+[packages/site/src/publishTurtle.ts](../packages/site/src/publishTurtle.ts)
 emits them into the build and serves them in dev.
 
 ## Adding a term

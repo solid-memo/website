@@ -6,7 +6,7 @@
 # diagrams in (docs/markdown.md), for a job that runs npm run check,
 # builds the site or archives a release's docs (npm run docs:archive):
 # from GitHub's cache, under the version of `playwright`
-# (packages/markdown/package.json), which fixes the browser's build. The
+# (packages/site/package.json), which fixes the browser's build. The
 # system libraries it needs come from playwright-deps, from GitHub's
 # cache too. Run it after npm ci, which installs that version.
 #

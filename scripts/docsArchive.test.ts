@@ -12,9 +12,9 @@ import {
   diagramsOf,
   embedFont,
   fontNotice,
-} from "@solid-memo/markdown/tooling/diagrams";
-import { type DocsIo, type Draw, repositoryIo } from "@solid-memo/markdown/tooling/docsSite";
-import { drawInputs } from "@solid-memo/markdown/tooling/drawDiagrams";
+} from "@solid-memo/site/diagrams";
+import { type DocsIo, type Draw, repositoryIo } from "@solid-memo/site/docsSite";
+import { drawInputs } from "@solid-memo/site/drawDiagrams";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type ArchiveIo,

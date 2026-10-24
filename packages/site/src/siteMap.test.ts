@@ -6,7 +6,7 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { REPOSITORY_ROOT } from "./root.ts";
+import { REPOSITORY_ROOT } from "@solid-memo/vocab/tooling/root";
 import { isNoindex, robotsTxt, siteMapPlugin, siteOrigin, sitemapXml } from "./siteMap.ts";
 
 let dir: string;

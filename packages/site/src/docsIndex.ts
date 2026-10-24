@@ -3,7 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { parseTurtle } from "@solid-memo/turtle/rdf";
-import { type DocBlock, type DocumentError, type MdInline, parseDocument } from "../src/parse.ts";
+import {
+  type DocBlock,
+  type DocumentError,
+  type MdInline,
+  parseDocument,
+} from "@solid-memo/markdown/parse";
 
 /**
  * The docs' index (docs/markdown.md, The docs' index): `docs/docs.ttl`,

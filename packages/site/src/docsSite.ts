@@ -4,7 +4,12 @@
 
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, posix } from "node:path";
-import { type DocBlock, type DocumentError, type MdInline, parseDocument } from "../src/parse.ts";
+import {
+  type DocBlock,
+  type DocumentError,
+  type MdInline,
+  parseDocument,
+} from "@solid-memo/markdown/parse";
 import {
   cssProblem,
   type Diagram,
@@ -60,7 +65,7 @@ export function repositoryIo(root: string = REPOSITORY_ROOT): DocsIo {
 }
 
 /** The stylesheet every page links to, by its path from the repository's root. */
-export const DOCS_CSS = "packages/markdown/tooling/docs.css";
+export const DOCS_CSS = "packages/site/src/docs.css";
 
 /** Draws the diagrams, by their hash: drawDiagrams in a build; null when they were not drawn (DOCS_DIAGRAMS=skip). */
 export type Draw = (diagrams: readonly Diagram[]) => Promise<Map<string, Drawing> | null>;

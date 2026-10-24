@@ -5,7 +5,7 @@
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { beforeAll, describe, expect, it } from "vitest";
-import { type DocBlock, parseDocument } from "../src/parse.ts";
+import { type DocBlock, parseDocument } from "@solid-memo/markdown/parse";
 import { DiagramError, type DrawInputs } from "./diagrams.ts";
 import { DOCS_INDEX, readDocsIndex } from "./docsIndex.ts";
 import {

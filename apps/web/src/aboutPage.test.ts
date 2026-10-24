@@ -6,7 +6,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
+import { siteOrigin } from "@solid-memo/site/siteMap";
 import { describe, expect, it } from "vitest";
 
 /*

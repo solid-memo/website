@@ -36,14 +36,14 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import { checkSvg } from "@solid-memo/markdown/tooling/diagrams";
+import { checkSvg } from "@solid-memo/site/diagrams";
 import {
   checkPage,
   checkStylesheet,
   FONT_LICENSE_NAME,
   type ListedRelease,
   versionsPage,
-} from "@solid-memo/markdown/tooling/docsSite";
+} from "@solid-memo/site/docsSite";
 import { loadEnv } from "vite";
 import { siteConfig } from "../apps/web/src/config.ts";
 import { archivePath } from "./docsArchive.ts";

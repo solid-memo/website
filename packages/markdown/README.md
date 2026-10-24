@@ -5,9 +5,9 @@ deck's description; and the repository's own docs, in the same dialect.
 It reads the text into a tree of its own, folds it
 to what the app shows, bounds it at every entry point, derives plain
 text from it, and checks it by the rules for a release
-([markdown.md](../../docs/markdown.md)). Its node tooling renders the
-docs to static pages and draws their Mermaid diagrams to SVG, in
-Chromium ([markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
+([markdown.md](../../docs/markdown.md)). The site's build,
+[`@solid-memo/site`](../site/), renders the docs to static pages with
+its parser ([markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
 
 ## Exports
 
@@ -28,38 +28,13 @@ Chromium ([markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
 
 Its API is its own types, never `mdast`'s.
 
-`@solid-memo/markdown/tooling/<module>` is `tooling/<module>.ts`, for
-node only, at build time:
-
-- `diagrams`: the Mermaid blocks of a page and what each must have,
-  the settings they are drawn with, their cache keys, the font's
-  notice, and `checkSvg`, the check every drawing passes.
-- `drawDiagrams`: drawing them, light and dark, with the official
-  Mermaid in Chromium through Playwright, cached between builds.
-- `slug`: a heading's id, as GitHub makes it.
-- `docsIndex`: the docs' index, `docs/docs.ttl`, read with
-  `readDocsIndex` into its groups and pages, every problem listed with
-  its line; what it lacks against the pages in `docs/`, and the block
-  to add for a page it does not list
-  ([markdown.md](../../docs/markdown.md#the-docs-index)).
-- `docsSite`: the docs folder as static pages, `renderDocsSite`, its
-  links made to work where the pages are served and every problem
-  listed with its file and line; `docs.css` is their stylesheet.
-- `publishDocs`: the Vite plugin that emits the pages with a build and
-  serves them in dev.
-
 ## Boundaries
 
-It imports nothing of the app's but `turtle`, from `tooling/` only, to
-read the docs' index. `ui` may import it from `src/ui/`
-only, `shacl` from `node/` only, and `web` from its build
-(`vite.config.ts`) and its build's test (`src/build.test.ts`) only. Its parser libraries
+It imports nothing of the app's. `ui` may import it from `src/ui/`
+only, `shacl` from `node/` only, and `site`, the site's build, to
+render the docs. Its parser libraries
 (`mdast-util-from-markdown` and its extensions) are used in
 `src/parse.ts` alone ([boundaries.md](../../docs/boundaries.md)).
-`tooling/` is node-only. Its development dependencies, `mermaid`,
-`playwright` and `@fontsource-variable/fredoka`, are used in
-`tooling/drawDiagrams.ts` alone, and `vite`'s types in
-`tooling/publishDocs.ts`.
 
 ## Tests
 
@@ -67,11 +42,6 @@ only, `shacl` from `node/` only, and `web` from its build
 npx turbo run typecheck test --filter=@solid-memo/markdown   # 100% coverage
 npm run test:unit -- packages/markdown/src/parse.test.ts      # one file, from the root
 ```
-
-One test draws in the real Chromium, which `npm run browsers` installs
-once, and one renders the repository's own docs, so a docs edit can
-fail the package's tests
-([testing.md](../../docs/testing.md#strategy-per-layer)).
 
 ## Status
 
