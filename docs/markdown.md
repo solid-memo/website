@@ -425,24 +425,11 @@ site's origin from `CNAME`, for each page's canonical address.
   heading of level 1 and the paragraph after it. Its header names the
   version, every page under "All pages" (a disclosure, in the index's
   groups, with the page itself marked), and the list of versions
-  (`docs/versions/`), which a
-  build writes with its own version and the releases page, and the
-  deploy writes again with every release
-  ([deployment.md](deployment.md#each-releases-docs)); its
-  sections are listed under "On this page"; the previous and next pages
-  are in the index's order, the README first; and its footer links its
-  source (the README's, the index's too), the
-  issues, the license and the commit. `checkPage` holds a page to what
-  it is written as: after the doctype, only plain tags of the elements
-  and attributes the pages have, with no script, style, event handler
-  or comment; the policy in the head before any address, with only
-  `<html>`, `<head>` and `<meta>` tags and whitespace before it, so no
-  text or element can open the body first and the browser drop it; and
-  no address from the site's root or of a scheme other than http(s).
-  Every page `site` writes passes it, and the deploy checks an
-  archived page with it, and a stylesheet with `checkStylesheet` (no
-  `@import`, `url(`, `image-set(`, backslash or address in a string),
-  before it serves them.
+  (`docs/versions/`), which a build writes with its own version and
+  the releases page; its sections are listed under "On this page"; the
+  previous and next pages are in the index's order, the README first;
+  and its footer links its source (the README's, the index's too), the
+  issues, the license and the commit.
 - **A diagram** is a figure: its light and dark drawings through
   `<img>` in a `<picture>`, sized from the drawing so the page does not
   move as it loads, its `accTitle` as their alternative text, its
@@ -454,14 +441,14 @@ site's origin from `CNAME`, for each page's canonical address.
   open, and says so. In dev, the browser is started on the first
   drawing and kept until the server closes; without Chromium, the
   pages show the source and the server says why, once.
-- **An archive** (a release's docs, served under its version) is the
-  same pages one folder deeper, at the release's tag, never indexed
-  (`noindex`, no canonical address), each with a note that links the
-  latest docs. `npm run docs:archive -- X.Y.Z` packs one, every
-  diagram drawn, and every GitHub release carries its own
-  ([deployment.md](deployment.md#a-releases-docs-as-an-archive)), which
-  the deploy serves at `/docs/X.Y.Z/` once it has checked it
-  ([deployment.md](deployment.md#each-releases-docs)).
+- **An archive** (a release's docs, as its GitHub release carries
+  them) is the same pages one folder deeper, at the release's tag,
+  never indexed (`noindex`, no canonical address), each with a note
+  that links the latest docs. `npm run docs:archive -- X.Y.Z` packs
+  one, every diagram drawn, and every GitHub release carries its own
+  ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). The
+  site serves none of them
+  ([deployment.md](deployment.md#older-releases-docs)).
 
 What a page holds that would not show as written, or would lead
 nowhere, fails: `renderDocsSite` throws one `DocsSiteError` that lists

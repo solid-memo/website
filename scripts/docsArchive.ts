@@ -4,10 +4,9 @@
 
 /**
  * `npm run docs:archive -- <version>`: renders the docs as that release
- * publishes them (docs/deployment.md#a-releases-docs-as-an-archive), the
- * pages that are served one folder below `/docs/`, at
- * `/docs/<version>/`, with their links into the repository at the
- * release's tag, and packs them into one file,
+ * publishes them on its GitHub release
+ * (docs/deployment.md#a-releases-docs-as-an-archive), with their links
+ * into the repository at the release's tag, and packs them into one file,
  * `release-assets/docs-<version>.tar.gz`. The archive holds the pages,
  * their stylesheet and their drawings, with the font's license beside
  * them, all under `docs/`.

@@ -11,9 +11,9 @@
  * files that name it, commits them to main, tags the commit vX.Y.Z and
  * makes a GitHub release of it, from which Zenodo mints a DOI.
  *
- * The GitHub release carries the version's docs, rendered as the site
- * serves them under the version (scripts/docsArchive.ts), so that the
- * deploy can serve every release's own docs.
+ * The GitHub release carries the version's docs, as pages in an archive
+ * (scripts/docsArchive.ts, docs/deployment.md#a-releases-docs-as-an-archive),
+ * for whoever wants a release's docs as it had them.
  *
  * The release commit is not marked [skip ci]: CI runs on it, and the
  * deploy that follows, which deploys only a commit a version tag names,

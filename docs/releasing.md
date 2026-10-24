@@ -314,8 +314,8 @@ release, semantic-release:
    (`softwareVersion`, `releaseDate`) and [`CITATION.cff`](../CITATION.cff)
    (`version`, `date-released`), with `npm run release:version`
    ([releaseVersion.ts](../scripts/releaseVersion.ts));
-4. renders the version's docs as they are served under the version,
-   every diagram drawn in Chromium, into
+4. renders the version's docs as pages, every diagram drawn in
+   Chromium, into
    `release-assets/docs-X.Y.Z.tar.gz`, with `npm run docs:archive`
    ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). git
    ignores the archive, so the release commit leaves it out;
@@ -329,8 +329,8 @@ release, semantic-release:
    then publishes it, so a release is never published without its
    docs, and the deploy refuses a draft. Then the workflow attests the
    archive as made by the release workflow on `main` (`actions/attest`),
-   which the deploy checks before it serves it
-   ([deployment.md](deployment.md#each-releases-docs)). Zenodo,
+   so whoever downloads it can check where it came from
+   ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). Zenodo,
    connected to the repository, archives each GitHub release and gives
    it a DOI. The concept DOI,
    [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
@@ -548,10 +548,12 @@ next push to `main` that passes CI also tries again.
 - **The release is a draft without its docs** (the archive's upload
   failed), **or its docs are not attested** (the attestation step
   failed): the release commit and the tag are on `main`, so a new run
-  finds nothing to release, and the deploy, which refuses a draft,
-  deploys nothing, or serves the version without its archive. Run the workflow by hand from `main` with the
-  version's tag (Actions › Release › Run workflow, "tag" `vX.Y.Z`),
-  while no Release run is running or waiting: the `docs` job has a
+  finds nothing to release. The deploy refuses a draft, so it deploys
+  nothing; a published release whose archive is not attested deploys
+  as usual, and only its archive lacks the attestation. Run the
+  workflow by hand from `main` with the version's tag (Actions ›
+  Release › Run workflow, "tag" `vX.Y.Z`), while no Release run is
+  running or waiting: the `docs` job has a
   concurrency group of its own, so it does not wait for one, and it
   marks the version latest when it is the newest tag, which a release
   made while it runs would leave wrong. The job renders the docs from
@@ -560,11 +562,12 @@ next push to `main` that passes CI also tries again.
   the deploy key. A release that already carries an archive keeps it
   when it is attested, and the job then only publishes it if it is
   still a draft; one that is not attested is rendered again and
-  replaced. Then run the deploy by hand (Actions › Deploy to GitHub
-  Pages › Run workflow, from `main`), and it deploys the version. Do
-  not upload the archive by hand: the deploy serves only one that this
-  workflow attested as made on `main`, as the release and the `docs`
-  job do ([deployment.md](deployment.md#each-releases-docs)).
+  replaced. For a draft, then run the deploy by hand (Actions › Deploy
+  to GitHub Pages › Run workflow, from `main`), and it deploys the
+  version. Do
+  not upload the archive by hand: only this workflow can attest it as
+  made on `main`, as the release and the `docs` job do
+  ([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
 
 A tag is never moved or deleted, even one whose release went wrong:
 Zenodo and anyone who fetched it may already hold it.

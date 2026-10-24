@@ -2,8 +2,8 @@
 
 The site's build, in node: what `apps/web`'s `vite.config.ts` adds to
 Vite's build of the page, and what its tests and the root scripts that
-archive and check the docs (`scripts/docsArchive.ts`, `docsVersions.ts`,
-`siteVersion.ts` and `checkDocs.ts`) check the build against. Nothing
+archive and check the docs (`scripts/docsArchive.ts`, `siteVersion.ts`
+and `checkDocs.ts`) check the build against. Nothing
 in the browser imports it.
 
 ## Exports

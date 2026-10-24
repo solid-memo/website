@@ -73,8 +73,9 @@ These are done. Those since 1.0.0 come first; the rest are part of
 - Only the latest version is deployed, and only the release workflow on
   `main` can read the key that releases it
   ([docs/releasing.md](docs/releasing.md#the-deploy-key)).
-- These docs as a website, at `/docs/`, with each release's own
-  ([docs/deployment.md](docs/deployment.md#each-releases-docs)).
+- These docs as a website, at `/docs/`, and each release's own as an
+  archive on its GitHub release
+  ([docs/deployment.md](docs/deployment.md#a-releases-docs-as-an-archive)).
 - The journeys run in Firefox, WebKit and on a phone too, and check
   each screen they visit with axe, against the target in
   [docs/accessibility.md](docs/accessibility.md)
