@@ -1218,6 +1218,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -19471,12 +19472,12 @@
                   "US-Bundesstaaten und ihre Hauptstädte"@de ,
                   "Estados de EE. UU. y sus capitales"@es ,
                   "États des États-Unis et leurs capitales"@fr ;
-    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
-                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ,
-                        "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
-                        "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft."@de ,
-                        "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin."@es ,
-                        "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."@fr ;
+    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
+                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft."@de ,
+                        "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin."@es ,
+                        "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -19516,11 +19517,12 @@
                  "Amérique du Nord"@fr ,
                  "USA"@fr ;
     dcat:first <https://solid-memo.com/decks/us-states-and-capitals/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
+    dcat:last <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/us-states-and-capitals/v1.ttl> ,
                     <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl> ,
-                    <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> .
+                    <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ,
+                    <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl> .
 
 <https://solid-memo.com/decks/us-states-and-capitals/v1.ttl>
     a dcat:Dataset ;
@@ -19551,6 +19553,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl>
+    a dcat:Dataset ;
+    dcterms:title "US states and capitals"@en ,
+                  "USA:s delstater och huvudstäder"@sv ,
+                  "미국의 주와 주도"@ko ,
+                  "US-Bundesstaaten und ihre Hauptstädte"@de ,
+                  "Estados de EE. UU. y sus capitales"@es ,
+                  "États des États-Unis et leurs capitales"@fr ;
+    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
+                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft."@de ,
+                        "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin."@es ,
+                        "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."@fr ;
+    dcat:version "3" ;
+    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each front is labeled \"State\" and each back \"Capital\", in English and Swedish, so a card studied either way says what is asked (card format 6); no card's text was changed." .
+
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "US states and capitals"@en ,
@@ -19559,17 +19579,19 @@
                   "US-Bundesstaaten und ihre Hauptstädte"@de ,
                   "Estados de EE. UU. y sus capitales"@es ,
                   "États des États-Unis et leurs capitales"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
-                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ,
-                        "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
-                        "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft."@de ,
-                        "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin."@es ,
-                        "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."@fr ;
+    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
+                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft."@de ,
+                        "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin."@es ,
+                        "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q35657> ,
-                        <https://www.census.gov/schools/statefacts/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#compilation> ;
+                        <https://www.census.gov/schools/statefacts/> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#compilation> ,
+                        <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -19609,30 +19631,34 @@
                  "Amérique du Nord"@fr ,
                  "USA"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
     solid-memo:formatVersion 6 ;
-    dcat:version "3" ;
-    dcat:prev <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl> ;
-    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Each front is labeled \"State\" and each back \"Capital\", in English and Swedish, so a card studied either way says what is asked (card format 6); no card's text was changed." ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 50 cards in use, 50 in Korean, 50 in German, 50 in Spanish, 50 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject)." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#us-states-and-capitals> ;
     dcat:isVersionOf <#us-states-and-capitals> ;
-    dcat:contactPoint <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#turtle> ;
     solid-memo:cardCount 50 .
 
-<https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#anton-wiklund>
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#contact>
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
-<https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#compilation>
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#compilation>
     a prov:Activity .
 
 <https://www.wikidata.org/wiki/Q35657>
@@ -19644,10 +19670,18 @@
     dcterms:title "U.S. Census Bureau, State Facts for Students (Statistics in Schools), the page of each state" ;
     dcterms:creator "U.S. Census Bureau" .
 
-<https://solid-memo.com/decks/us-states-and-capitals/v3.ttl#turtle>
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/us-states-and-capitals.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "ecad696c291b662d68c020f2cfa0bb53e8b7b3fc5e31f7911764711629fc7cdf"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/us-states-and-capitals/v4.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 

@@ -1,0 +1,1891 @@
+@base <https://solid-memo.com/decks/us-states-and-capitals/v4.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+@prefix spdx:       <http://spdx.org/rdf/terms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "US states and capitals"@en ,
+                  "USA:s delstater och huvudstäder"@sv ,
+                  "미국의 주와 주도"@ko ,
+                  "US-Bundesstaaten und ihre Hauptstädte"@de ,
+                  "Estados de EE. UU. y sus capitales"@es ,
+                  "États des États-Unis et leurs capitales"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
+                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft."@de ,
+                        "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin."@es ,
+                        "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q35657> ,
+                        <https://www.census.gov/schools/statefacts/> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ,
+                        <#wikidata-labels> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "United States"@en ,
+                 "US states"@en ,
+                 "state capitals"@en ,
+                 "geography"@en ,
+                 "North America"@en ,
+                 "USA"@en ,
+                 "USA"@sv ,
+                 "delstater"@sv ,
+                 "huvudstäder"@sv ,
+                 "geografi"@sv ,
+                 "Nordamerika"@sv ,
+                 "미국"@ko ,
+                 "미국의 주"@ko ,
+                 "주도"@ko ,
+                 "지리"@ko ,
+                 "북아메리카"@ko ,
+                 "USA"@ko ,
+                 "Vereinigte Staaten"@de ,
+                 "US-Bundesstaaten"@de ,
+                 "Hauptstädte"@de ,
+                 "Geografie"@de ,
+                 "Nordamerika"@de ,
+                 "USA"@de ,
+                 "Estados Unidos"@es ,
+                 "estados de EE. UU."@es ,
+                 "capitales"@es ,
+                 "geografía"@es ,
+                 "América del Norte"@es ,
+                 "EE. UU."@es ,
+                 "États-Unis"@fr ,
+                 "États américains"@fr ,
+                 "capitales"@fr ,
+                 "géographie"@fr ,
+                 "Amérique du Nord"@fr ,
+                 "USA"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 50 cards in use, 50 in Korean, 50 in German, 50 in Spanish, 50 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject)." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#us-states-and-capitals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#us-states-and-capitals> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q35657> ,
+              <https://www.census.gov/schools/statefacts/> ,
+              <https://www.ne.se/uppslagsverk/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection and capitals from Wikidata (query 1): every item that is an instance (P31) of \"state of the United States\" (Q35657), with every P36 (capital) statement that has no end time (pq:P582), its rank, and the English and Swedish labels of the state and of the capital. The query returned exactly 50 rows, one per state, so each state has exactly one current capital. Query 2 listed every P36 statement of all ranks with its start and end times: 56 statements, the 6 extra ones being former capitals with an end time (Alabama: Tuscaloosa, Cahaba; California: San Jose, Vallejo, Benicia; Indiana: Corydon), so the truthy P36 value of every state is the current capital (preferred rank where former capitals are recorded, the only, normal-rank, statement otherwise). The raw CSV files were saved."@en ,
+                 "Names from Wikidata (query 3, the script fetch_entities.py): the Wikidata API (wbgetentities) returned the English, Swedish and multilingual (mul) labels and aliases and the English and Swedish Wikipedia sitelinks of the 50 states and 50 capitals. The front is the state's English and Swedish label; the back is the capital's English and Swedish label. The capital of Alaska, Juneau (Q29445), has no English or Swedish label, only the multilingual label \"Juneau\", which is used for both (Wikidata's mul label is the name shared by languages that write it the same; the builder accepts it for both checks)."@en ,
+                 "Swedish names of the states: Wikidata's Swedish label differs from the English one for one state only, California (\"Kalifornien\"); for the other 49 the Swedish label is the English name. Older Swedish forms survive as Swedish aliases (Californien, Georgien, Nya Hampshire, Nya Mexico/Nya Mexiko, Nordcarolina, Norddakota, Pennsylvanien, Sydcarolina, Syddakota, Virginien, Västvirginien). Each was decided by checking the Swedish label against the headword of Nationalencyklopedin's article (see the encyclopedia check below) and the title of the Swedish Wikipedia article (Wikidata's svwiki sitelink): both use \"Kalifornien\" and the English names for all the others (Swedish Wikipedia disambiguates two titles, \"New York (delstat)\" and \"Washington (delstat)\"). The deck therefore uses \"Kalifornien\" and the English name elsewhere (for example \"North Carolina\", not \"Nordkarolina\"). An attempt to look the names up in Svensk ordbok/SAOL on svenska.se (query 6) returned only the site's JavaScript application, not an entry, so these dictionaries were not used. The capitals' Swedish labels are all identical to the English ones, which NE also uses."@en ,
+                 "Official US check (queries 7 and 8): the US Census Bureau's State Facts for Students has one page per state, https://www.census.gov/schools/statefacts/state.php?<State_Name> (the URL pattern taken from the page's script usm.js). The script fetch_census.py downloaded all 50 pages (the address is the state's English Wikidata label with spaces replaced by underscores), stripped the HTML tags, collapsed white space and took the 60 characters after \"Capital city:\" (regular expression Capital city:\\s*(.{0,60})), accepting the state when that text starts with Wikidata's English label of the capital; every mismatch was to be inspected by hand (the only one was Minnesota). The \"Largest city:\" field was read the same way. The capital field it agrees with Wikidata for all 50 states (for Minnesota the Census writes \"St. Paul\", Wikidata's label is \"Saint Paul\" and \"St. Paul\" an alias). The quoted field is in each card's evidence."@en ,
+                 "Swedish encyclopedia check (queries 9 and 10): the script fetch_ne.py downloaded NE's article on each state at https://www.ne.se/uppslagsverk/encyklopedi/lång/<slug>, where the slug is the state's Swedish Wikidata label in lower case with spaces as hyphens (for New York the address \"new-york\" is the city, so the state's article \"new-york-(ingress-delstat)\" was found among that page's links and fetched). ne_capitals.py stripped the HTML tags of the article text (after the \"Skriv ut\" button and before \"Information om artikeln\") and printed every sentence containing \"huvudstad\" and the capital's English Wikidata label; ne_grep.py was the same search for a single state. All 50 headwords and capitals agree with the cards. In quality-control round 3 the evidence was reduced to that sentence alone (for New York the two consecutive sentences naming the largest city and the capital), quoted word for word without elisions: the script ne_round1.py confirmed that every quote occurs verbatim in the saved article text and read the article's contributors from its \"Medverkande\" field, which each locator names (Arne Jakobsson for 29 states; for the other 21 the article page names no contributor, confirmed for Idaho by fetching the page again, query 17). The headword is given in the locator."@en ,
+                 "Notes: brief back notes, in the compiler's own words, for four cards where they prevent a common wrong answer and the fact is stable: New York and Illinois (the largest city — New York City, Chicago — is not the capital: the Census page's \"Largest city:\" field is the source and NE's article confirms it; the cities' Wikidata labels are checked: Chicago in English and Swedish, and New York City (Q60) in English, \"New York City\". Wikidata's Swedish label of Q60 is \"New York\" (checked as such); the Swedish note nevertheless says \"New York City\", a name also used in Swedish, to tell the city from the state of the same name on the card), Washington (the state, not Washington, D.C., the federal capital: Wikidata P36 of the United States, Q30, is Washington, D.C., Q61) and Minnesota (Saint Paul is also written St. Paul, as the Census page does: Wikidata English and Swedish alias). The notes are worded so that they read correctly in both study directions. No largest-city note was written for other states, because the sources disagree about some of them (see quality control) and population rankings change."@en ,
+                 "Cards and checks: the script make_cards.py built the 50 cards with their evidence and Wikidata checks from the saved responses (q1.csv, entities.json, census/*.html, ne/*.html); the deck metadata, method and documentation were written by hand. The helper scripts (fetch_entities.py, fetch_census.py, fetch_ne.py, ne_capitals.py, ne_grep.py, make_cards.py, ne_round1.py) were throwaway scripts in the compiler's working directory and are not published; their logic is described in these steps, and every value they produced was checked as described here. make_cards.py only copied values from the saved responses into the card structure (front: state labels; back: capital labels; evidence: the extracted fields and sentences; checks: the label and P36 values). Each card has evidence from Wikidata (labels, P36), the Census Bureau and NE, and Wikidata checks for the state's English and Swedish label, its P36 value, and the capital's English and Swedish label (or alias), plus the Wikidata facts of the four notes. Card ids are the English state name as a slug. Every back text is unique (no two states have capitals of the same name), so the deck is studied in both directions."@en ,
+                 "Build and validation: the deck builder ran all the Wikidata checks against live Wikidata (all passed) and wrote the deck and the provenance report; node packages/deck-library/scripts/validate_sources.ts us-states-and-capitals validated the deck with the app's SHACL and DCAT-AP validators."@en ,
+                 "Selection: All 50 states of the United States, each with its one current capital (as of October 2026; Wikidata, the Census Bureau and NE, all consulted on 2026-10-04, agree on all 50). Left out: the District of Columbia (a federal district, not a state, and itself the federal capital) and the territories (Puerto Rico, Guam, the US Virgin Islands, American Samoa and the Northern Mariana Islands), which are not states; former capitals (recorded in Wikidata with an end time, as for Alabama, California and Indiana). The back gives the capital only, not the largest city; a note is added only for New York, Illinois, Washington and Minnesota (see the method). Largest-city notes for other states (such as California or Pennsylvania) were considered and left out to keep notes few and because the sources disagree on the largest city of some states."@en ,
+                 "Licensing: The content sources are Wikidata, whose structured data is CC0, and the US Census Bureau's State Facts for Students, a work of the US federal government that is not protected by copyright in the United States (17 U.S.C. § 105). Wikidata supplies the selection of the 50 states (every instance of Q35657), the link from each state to its capital (P36) and the English and Swedish names of the states and the capitals; the Census Bureau supplies only two facts, the largest cities of New York and Illinois named in their notes, restated in the compiler's own words (facts are not copyrightable anywhere). Both allow any use, so the deck is CC0 1.0 like most of the library. Nationalencyklopedin (all rights reserved) was used for verification only: it confirmed facts the content sources gave; no wording, table or selection was copied from it. The selection is the complete set of the 50 states, not a choice taken from any list, and the notes are the compiler's own wording. Quotations in the provenance report's evidence are not part of the CC0 deck: NE's text remains under NE's copyright and is quoted, one word-for-word sentence (for New York two) per article, naming NE and the article's contributor where the page names one, under the Swedish quotation right (Upphovsrättslagen 22 §) and in line with the conditions of NE's own quotation permission (verbatim, with NE and the writer named); that permission is limited to non-commercial use, so anyone reusing the report commercially relies on the quotation right alone, while the deck itself contains no NE text."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every capital against Wikidata (P36, current statement), the US Census Bureau's State Facts for Students and NE; the Swedish names against Wikidata labels, NE's headwords and the Swedish Wikipedia titles; the notes against Wikidata, the Census Bureau and NE."@en ;
+    rdfs:comment "Scope: All 50 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the Census Bureau and NE agree on the capital of all 50 states, and Wikidata's Swedish labels agree with NE's headwords and the Swedish Wikipedia titles; no card follows a value that a better source contradicts, and no Wikidata check was skipped. The builder's checks cover, for every card, the state's English and Swedish label, its P36 value and the capital's English and Swedish label (for Juneau the multilingual label), and the Wikidata facts in the four notes. The discrepancies found concern spellings and largest cities, which the cards avoid."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 50 cards and the four notes, against live Wikidata (P36 of every instance of Q35657), English Wikipedia's \"List of capitals in the United States\" and the Census Bureau's New York page, chosen for the review; the builder's Wikidata checks re-run."@en ,
+                 "Outcome: No factual errors: all 50 capitals agree with live Wikidata and the review's own sources, the four notes are correct and stable, every back is unique and each front has one right answer in both study directions; the builder's 258 Wikidata checks passed. The review confirmed round 0."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 50 cards (100 front and back texts), the four notes, the title, description and keywords, in the dossier and the built deck."@en ,
+                 "Outcome: No language or tag errors: every text is tagged en or sv, the Swedish state names (only \"Kalifornien\" differs) and the notes are idiomatic. Three suggestions: one fixed, two declined (one outside the dossier's reach)."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The licences and licence evidence of all three sources, the evidence of 17 cards fetched live, the attribution, the method, queries and licensing text."@en ,
+                 "Outcome: The licences are recorded correctly and the CC0 deck licence complies. Two warnings and three suggestions, all verified and fixed: the Census Bureau is now a content source (for two largest-city facts), the NE quotes were reduced to verbatim sentences naming NE and the contributor with their legal basis stated, the Q60 Swedish label is documented and checked, the misfiled queries are marked or split, and the helper scripts' logic is described."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 50 cards (every card changed in round 3), their Census Bureau and NE evidence fetched live, the Wikidata checks, licences, language tags, metadata and the quality-control log."@en ,
+                 "Outcome: No errors or warnings; all fixes from rounds 0 to 3 confirmed present. One suggestion on the Swedish description, verified and applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Q35657>
+    dcterms:title "Wikidata: the states of the United States (instances of Q35657), their capitals (P36) and the English, Swedish and multilingual labels and aliases of the states and the capitals" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero\" (fetched 2026-10-04)."@en .
+
+<https://www.census.gov/schools/statefacts/>
+    dcterms:title "U.S. Census Bureau, State Facts for Students (Statistics in Schools), the page of each state" ;
+    dcterms:creator "U.S. Census Bureau" ;
+    rdfs:comment "A work of the United States Government (the Census Bureau is a federal agency): 17 U.S.C. § 105, https://www.law.cornell.edu/uscode/text/17/105 — \"Copyright protection under this title is not available for any work of the United States Government\"; USA.gov, https://www.usa.gov/government-copyright — \"Government work is something created by a U.S. government officer or employee as part of their official duties.\" (both fetched 2026-10-04). Only two facts are taken from it (the largest cities of New York and Illinois), restated in the compiler's own words; facts are not protected by copyright in any case."@en .
+
+<https://www.ne.se/uppslagsverk/>
+    dcterms:title "Nationalencyklopedin (NE), the articles on the 50 states" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://ne.se/info/hj%c3%a4lp/upphovsratt (NE's copyright page, linked from every article page; fetched 2026-10-04) — \"Nästan allt material på NE.se omfattas av upphovsrättslagen … Ingen kopiering får göras utan tillstånd.\" For texts from the encyclopedia: \"det är fritt att citera dem i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte. Detta under förutsättning att NE, och i förekommande fall skribenten, anges som källa, att citaten är ordagranna och att ingen utomstående kan gå in och ändra i texten.\" Verification only; nothing from NE is in the deck. The report quotes one verbatim sentence (or two consecutive sentences) per article under the Swedish quotation right, Upphovsrättslagen (1960:729) 22 §, https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/ — \"Var och en får citera ur offentliggjorda verk i överensstämmelse med god sed och i den omfattning som motiveras av ändamålet.\" (fetched 2026-10-04), naming NE and the contributor shown on the article page."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+# How this version's Korean, German, Spanish and French card text was made (W3C PROV-O): from the
+# previous version, the mapping that says what each card is about, and the labels of each Wikidata
+# item at the revision named here, by the script named here. English and Swedish text, and the
+# notes, are the previous version's. To make it again, with the mapping as it was committed with
+# this version, or to check that its cards come out byte for byte the same from the same
+# revisions, from the repository root:
+#   git checkout 23f0a84dcc5f3ae4ee13447185c52726c5ea747a && python3 scripts/wikidata_labels.py
+#     --deck us-states-and-capitals --issued 2026-10-24
+#   python3 scripts/wikidata_labels.py --verify --deck us-states-and-capitals
+<#wikidata-labels>
+    a prov:Activity ;
+    prov:used <https://solid-memo.com/decks/us-states-and-capitals/v3.ttl> ,
+              <#wikidata-mapping> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q99.json?revision=2559937430> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q100.json?revision=2559386688> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q173.json?revision=2560303057> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q724.json?revision=2549947185> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q759.json?revision=2552623306> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q771.json?revision=2552116487> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q779.json?revision=2522665803> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q782.json?revision=2544411122> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q797.json?revision=2551305508> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q812.json?revision=2537710078> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q816.json?revision=2558503576> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q824.json?revision=2553821929> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q829.json?revision=2547887248> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1166.json?revision=2542320808> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1204.json?revision=2559439664> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1207.json?revision=2551388967> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1211.json?revision=2553347673> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1212.json?revision=2530387054> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1214.json?revision=2522883812> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1221.json?revision=2515823733> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1223.json?revision=2559439489> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1227.json?revision=2554705052> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1261.json?revision=2541931612> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1370.json?revision=2553816446> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1371.json?revision=2554561545> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1384.json?revision=2559439475> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1387.json?revision=2539557109> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1391.json?revision=2537256601> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1393.json?revision=2538126509> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1397.json?revision=2542320873> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1400.json?revision=2538685322> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1408.json?revision=2559490693> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1415.json?revision=2548042954> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1428.json?revision=2558524043> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1439.json?revision=2535878689> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1454.json?revision=2559742278> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1456.json?revision=2541893659> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1494.json?revision=2552234246> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1509.json?revision=2547814601> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1522.json?revision=2548451076> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1527.json?revision=2528567889> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1537.json?revision=2553468762> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1546.json?revision=2533131444> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1553.json?revision=2553820786> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1558.json?revision=2534056113> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1581.json?revision=2553820085> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1588.json?revision=2535531080> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1603.json?revision=2531940915> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1612.json?revision=2559540639> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1649.json?revision=2536441005> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q6346.json?revision=2557930243> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q16551.json?revision=2553815963> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q16554.json?revision=2557929578> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q16556.json?revision=2553422963> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q16559.json?revision=2553425643> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q16567.json?revision=2553879262> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q18013.json?revision=2553427240> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q18094.json?revision=2559346851> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q18383.json?revision=2541919030> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q23197.json?revision=2555053868> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q23337.json?revision=2535579029> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q23556.json?revision=2539498040> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q24861.json?revision=2552380405> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q25280.json?revision=2555096762> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q25330.json?revision=2537202077> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26426.json?revision=2555491853> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28180.json?revision=2530086469> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28198.json?revision=2556578007> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28206.json?revision=2530086477> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28218.json?revision=2535436980> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28237.json?revision=2530086485> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28249.json?revision=2530086489> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28260.json?revision=2537829773> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28271.json?revision=2537256641> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28515.json?revision=2538995142> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28603.json?revision=2530086569> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q28848.json?revision=2555052736> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q29364.json?revision=2556975010> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q29445.json?revision=2551273842> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q33405.json?revision=2550293922> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q33486.json?revision=2553735088> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q33518.json?revision=2530086911> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q34863.json?revision=2530087067> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q35775.json?revision=2536722543> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q37043.json?revision=2551037016> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q37066.json?revision=2530087131> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q38453.json?revision=2530087206> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q38555.json?revision=2532687828> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q38733.json?revision=2530087247> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q39042.json?revision=2530087275> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q39709.json?revision=2553697086> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q40747.json?revision=2553308099> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q40881.json?revision=2549012592> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q41057.json?revision=2530087356> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q41087.json?revision=2555567119> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q42735.json?revision=2540663138> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q43421.json?revision=2551397508> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q43788.json?revision=2530087504> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q43919.json?revision=2530126913> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q44564.json?revision=2549121965> ;
+    prov:wasAssociatedWith <https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py> ;
+    rdfs:comment "python3 scripts/wikidata_labels.py --deck us-states-and-capitals --issued 2026-10-24 (Python 3.14.4, Unicode 16.0.0)" .
+
+<#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/us-states-and-capitals.json" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "ecad696c291b662d68c020f2cfa0bb53e8b7b3fc5e31f7911764711629fc7cdf"^^xsd:hexBinary ] .
+
+<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "wikidata_labels.py" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+
+spdx:checksumAlgorithm_sha256
+    a spdx:ChecksumAlgorithm .
+
+<#alabama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q173> ,
+                    <http://www.wikidata.org/entity/Q29364> ;
+    solid-memo:front "Alabama"@en ,
+                     "Alabama"@sv ,
+                     "앨라배마주"@ko ,
+                     "Alabama"@de ,
+                     "Alabama"@es ,
+                     "Alabama"@fr ;
+    solid-memo:back "Montgomery"@en ,
+                    "Montgomery"@sv ,
+                    "몽고메리"@ko ,
+                    "Montgomery"@de ,
+                    "Montgomery"@es ,
+                    "Montgomery"@fr .
+
+<#alaska>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q797> ,
+                    <http://www.wikidata.org/entity/Q29445> ;
+    solid-memo:front "Alaska"@en ,
+                     "Alaska"@sv ,
+                     "알래스카주"@ko ,
+                     "Alaska"@de ,
+                     "Alaska"@es ,
+                     "Alaska"@fr ;
+    solid-memo:back "Juneau"@en ,
+                    "Juneau"@sv ,
+                    "주노"@ko ,
+                    "Juneau"@de ,
+                    "Juneau"@es ,
+                    "Juneau"@fr .
+
+<#arizona>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q816> ,
+                    <http://www.wikidata.org/entity/Q16556> ;
+    solid-memo:front "Arizona"@en ,
+                     "Arizona"@sv ,
+                     "애리조나주"@ko ,
+                     "Arizona"@de ,
+                     "Arizona"@es ,
+                     "Arizona"@fr ;
+    solid-memo:back "Phoenix"@en ,
+                    "Phoenix"@sv ,
+                    "피닉스"@ko ,
+                    "Phoenix"@de ,
+                    "Phoenix"@es ,
+                    "Phoenix"@fr .
+
+<#arkansas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1612> ,
+                    <http://www.wikidata.org/entity/Q33405> ;
+    solid-memo:front "Arkansas"@en ,
+                     "Arkansas"@sv ,
+                     "아칸소주"@ko ,
+                     "Arkansas"@de ,
+                     "Arkansas"@es ,
+                     "Arkansas"@fr ;
+    solid-memo:back "Little Rock"@en ,
+                    "Little Rock"@sv ,
+                    "리틀록"@ko ,
+                    "Little Rock"@de ,
+                    "Little Rock"@es ,
+                    "Little Rock"@fr .
+
+<#california>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q99> ,
+                    <http://www.wikidata.org/entity/Q18013> ;
+    solid-memo:front "California"@en ,
+                     "Kalifornien"@sv ,
+                     "캘리포니아주"@ko ,
+                     "Kalifornien"@de ,
+                     "California"@es ,
+                     "Californie"@fr ;
+    solid-memo:back "Sacramento"@en ,
+                    "Sacramento"@sv ,
+                    "새크라멘토"@ko ,
+                    "Sacramento"@de ,
+                    "Sacramento"@es ,
+                    "Sacramento"@fr .
+
+<#colorado>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1261> ,
+                    <http://www.wikidata.org/entity/Q16554> ;
+    solid-memo:front "Colorado"@en ,
+                     "Colorado"@sv ,
+                     "콜로라도주"@ko ,
+                     "Colorado"@de ,
+                     "Colorado"@es ,
+                     "Colorado"@fr ;
+    solid-memo:back "Denver"@en ,
+                    "Denver"@sv ,
+                    "덴버"@ko ,
+                    "Denver"@de ,
+                    "Denver"@es ,
+                    "Denver"@fr .
+
+<#connecticut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q779> ,
+                    <http://www.wikidata.org/entity/Q33486> ;
+    solid-memo:front "Connecticut"@en ,
+                     "Connecticut"@sv ,
+                     "코네티컷주"@ko ,
+                     "Connecticut"@de ,
+                     "Connecticut"@es ,
+                     "Connecticut"@fr ;
+    solid-memo:back "Hartford"@en ,
+                    "Hartford"@sv ,
+                    "하트퍼드"@ko ,
+                    "Hartford"@de ,
+                    "Hartford"@es ,
+                    "Hartford"@fr .
+
+<#delaware>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1393> ,
+                    <http://www.wikidata.org/entity/Q33518> ;
+    solid-memo:front "Delaware"@en ,
+                     "Delaware"@sv ,
+                     "델라웨어주"@ko ,
+                     "Delaware"@de ,
+                     "Delaware"@es ,
+                     "Delaware"@fr ;
+    solid-memo:back "Dover"@en ,
+                    "Dover"@sv ,
+                    "도버"@ko ,
+                    "Dover"@de ,
+                    "Dover"@es ,
+                    "Dover"@fr .
+
+<#florida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q812> ,
+                    <http://www.wikidata.org/entity/Q37043> ;
+    solid-memo:front "Florida"@en ,
+                     "Florida"@sv ,
+                     "플로리다주"@ko ,
+                     "Florida"@de ,
+                     "Florida"@es ,
+                     "Floride"@fr ;
+    solid-memo:back "Tallahassee"@en ,
+                    "Tallahassee"@sv ,
+                    "탤러해시"@ko ,
+                    "Tallahassee"@de ,
+                    "Tallahassee"@es ,
+                    "Tallahassee"@fr .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1428> ,
+                    <http://www.wikidata.org/entity/Q23556> ;
+    solid-memo:front "Georgia"@en ,
+                     "Georgia"@sv ,
+                     "조지아주"@ko ,
+                     "Georgia"@de ,
+                     "Georgia"@es ,
+                     "Géorgie"@fr ;
+    solid-memo:back "Atlanta"@en ,
+                    "Atlanta"@sv ,
+                    "애틀랜타"@ko ,
+                    "Atlanta"@de ,
+                    "Atlanta"@es ,
+                    "Atlanta"@fr .
+
+<#hawaii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q782> ,
+                    <http://www.wikidata.org/entity/Q18094> ;
+    solid-memo:front "Hawaii"@en ,
+                     "Hawaii"@sv ,
+                     "하와이주"@ko ,
+                     "Hawaii"@de ,
+                     "Hawái"@es ,
+                     "Hawaï"@fr ;
+    solid-memo:back "Honolulu"@en ,
+                    "Honolulu"@sv ,
+                    "호놀룰루"@ko ,
+                    "Honolulu"@de ,
+                    "Honolulu"@es ,
+                    "Honolulu"@fr .
+
+<#idaho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1221> ,
+                    <http://www.wikidata.org/entity/Q35775> ;
+    solid-memo:front "Idaho"@en ,
+                     "Idaho"@sv ,
+                     "아이다호주"@ko ,
+                     "Idaho"@de ,
+                     "Idaho"@es ,
+                     "Idaho"@fr ;
+    solid-memo:back "Boise"@en ,
+                    "Boise"@sv ,
+                    "보이시"@ko ,
+                    "Boise"@de ,
+                    "Boise"@es ,
+                    "Boise"@fr .
+
+<#illinois>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1204> ,
+                    <http://www.wikidata.org/entity/Q28515> ;
+    solid-memo:front "Illinois"@en ,
+                     "Illinois"@sv ,
+                     "일리노이주"@ko ,
+                     "Illinois"@de ,
+                     "Illinois"@es ,
+                     "Illinois"@fr ;
+    solid-memo:back "Springfield"@en ,
+                    "Springfield"@sv ,
+                    "스프링필드"@ko ,
+                    "Springfield"@de ,
+                    "Springfield"@es ,
+                    "Springfield"@fr ;
+    solid-memo:backNote "The largest city, Chicago, is not the capital."@en ,
+                        "Den största staden, Chicago, är inte huvudstad."@sv .
+
+<#indiana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1415> ,
+                    <http://www.wikidata.org/entity/Q6346> ;
+    solid-memo:front "Indiana"@en ,
+                     "Indiana"@sv ,
+                     "인디애나주"@ko ,
+                     "Indiana"@de ,
+                     "Indiana"@es ,
+                     "Indiana"@fr ;
+    solid-memo:back "Indianapolis"@en ,
+                    "Indianapolis"@sv ,
+                    "인디애나폴리스"@ko ,
+                    "Indianapolis"@de ,
+                    "Indianápolis"@es ,
+                    "Indianapolis"@fr .
+
+<#iowa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1546> ,
+                    <http://www.wikidata.org/entity/Q39709> ;
+    solid-memo:front "Iowa"@en ,
+                     "Iowa"@sv ,
+                     "아이오와주"@ko ,
+                     "Iowa"@de ,
+                     "Iowa"@es ,
+                     "Iowa"@fr ;
+    solid-memo:back "Des Moines"@en ,
+                    "Des Moines"@sv ,
+                    "디모인"@ko ,
+                    "Des Moines"@de ,
+                    "Des Moines"@es ,
+                    "Des Moines"@fr .
+
+<#kansas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1558> ,
+                    <http://www.wikidata.org/entity/Q41057> ;
+    solid-memo:front "Kansas"@en ,
+                     "Kansas"@sv ,
+                     "캔자스주"@ko ,
+                     "Kansas"@de ,
+                     "Kansas"@es ,
+                     "Kansas"@fr ;
+    solid-memo:back "Topeka"@en ,
+                    "Topeka"@sv ,
+                    "토피카"@ko ,
+                    "Topeka"@de ,
+                    "Topeka"@es ,
+                    "Topeka"@fr .
+
+<#kentucky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1603> ,
+                    <http://www.wikidata.org/entity/Q28603> ;
+    solid-memo:front "Kentucky"@en ,
+                     "Kentucky"@sv ,
+                     "켄터키주"@ko ,
+                     "Kentucky"@de ,
+                     "Kentucky"@es ,
+                     "Kentucky"@fr ;
+    solid-memo:back "Frankfort"@en ,
+                    "Frankfort"@sv ,
+                    "프랭크퍼트"@ko ,
+                    "Frankfort"@de ,
+                    "Frankfort"@es ,
+                    "Frankfort"@fr .
+
+<#louisiana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1588> ,
+                    <http://www.wikidata.org/entity/Q28218> ;
+    solid-memo:front "Louisiana"@en ,
+                     "Louisiana"@sv ,
+                     "루이지애나주"@ko ,
+                     "Louisiana"@de ,
+                     "Luisiana"@es ,
+                     "Louisiane"@fr ;
+    solid-memo:back "Baton Rouge"@en ,
+                    "Baton Rouge"@sv ,
+                    "배턴루지"@ko ,
+                    "Baton Rouge"@de ,
+                    "Baton Rouge"@es ,
+                    "Baton Rouge"@fr .
+
+<#maine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q724> ,
+                    <http://www.wikidata.org/entity/Q28206> ;
+    solid-memo:front "Maine"@en ,
+                     "Maine"@sv ,
+                     "메인주"@ko ,
+                     "Maine"@de ,
+                     "Maine"@es ,
+                     "Maine"@fr ;
+    solid-memo:back "Augusta"@en ,
+                    "Augusta"@sv ,
+                    "오거스타"@ko ,
+                    "Augusta"@de ,
+                    "Augusta"@es ,
+                    "Augusta"@fr .
+
+<#maryland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1391> ,
+                    <http://www.wikidata.org/entity/Q28271> ;
+    solid-memo:front "Maryland"@en ,
+                     "Maryland"@sv ,
+                     "메릴랜드주"@ko ,
+                     "Maryland"@de ,
+                     "Maryland"@es ,
+                     "Maryland"@fr ;
+    solid-memo:back "Annapolis"@en ,
+                    "Annapolis"@sv ,
+                    "아나폴리스"@ko ,
+                    "Annapolis"@de ,
+                    "Annapolis"@es ,
+                    "Annapolis"@fr .
+
+<#massachusetts>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q771> ,
+                    <http://www.wikidata.org/entity/Q100> ;
+    solid-memo:front "Massachusetts"@en ,
+                     "Massachusetts"@sv ,
+                     "매사추세츠주"@ko ,
+                     "Massachusetts"@de ,
+                     "Massachusetts"@es ,
+                     "Massachusetts"@fr ;
+    solid-memo:back "Boston"@en ,
+                    "Boston"@sv ,
+                    "보스턴"@ko ,
+                    "Boston"@de ,
+                    "Boston"@es ,
+                    "Boston"@fr .
+
+<#michigan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1166> ,
+                    <http://www.wikidata.org/entity/Q28237> ;
+    solid-memo:front "Michigan"@en ,
+                     "Michigan"@sv ,
+                     "미시간주"@ko ,
+                     "Michigan"@de ,
+                     "Míchigan"@es ,
+                     "Michigan"@fr ;
+    solid-memo:back "Lansing"@en ,
+                    "Lansing"@sv ,
+                    "랜싱"@ko ,
+                    "Lansing"@de ,
+                    "Lansing"@es ,
+                    "Lansing"@fr .
+
+<#minnesota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1527> ,
+                    <http://www.wikidata.org/entity/Q28848> ;
+    solid-memo:front "Minnesota"@en ,
+                     "Minnesota"@sv ,
+                     "미네소타주"@ko ,
+                     "Minnesota"@de ,
+                     "Minnesota"@es ,
+                     "Minnesota"@fr ;
+    solid-memo:back "Saint Paul"@en ,
+                    "Saint Paul"@sv ,
+                    "세인트폴"@ko ,
+                    "Saint Paul"@de ,
+                    "Saint Paul"@es ,
+                    "Saint Paul"@fr ;
+    solid-memo:backNote "Saint Paul is also written St. Paul."@en ,
+                        "Saint Paul skrivs även St. Paul."@sv .
+
+<#mississippi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1494> ,
+                    <http://www.wikidata.org/entity/Q28198> ;
+    solid-memo:front "Mississippi"@en ,
+                     "Mississippi"@sv ,
+                     "미시시피주"@ko ,
+                     "Mississippi"@de ,
+                     "Misisipi"@es ,
+                     "Mississippi"@fr ;
+    solid-memo:back "Jackson"@en ,
+                    "Jackson"@sv ,
+                    "잭슨"@ko ,
+                    "Jackson"@de ,
+                    "Jackson"@es ,
+                    "Jackson"@fr .
+
+<#missouri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1581> ,
+                    <http://www.wikidata.org/entity/Q28180> ;
+    solid-memo:front "Missouri"@en ,
+                     "Missouri"@sv ,
+                     "미주리주"@ko ,
+                     "Missouri"@de ,
+                     "Misuri"@es ,
+                     "Missouri"@fr ;
+    solid-memo:back "Jefferson City"@en ,
+                    "Jefferson City"@sv ,
+                    "제퍼슨시티"@ko ,
+                    "Jefferson City"@de ,
+                    "Jefferson City"@es ,
+                    "Jefferson City"@fr .
+
+<#montana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1212> ,
+                    <http://www.wikidata.org/entity/Q38733> ;
+    solid-memo:front "Montana"@en ,
+                     "Montana"@sv ,
+                     "몬태나주"@ko ,
+                     "Montana"@de ,
+                     "Montana"@es ,
+                     "Montana"@fr ;
+    solid-memo:back "Helena"@en ,
+                    "Helena"@sv ,
+                    "헬레나"@ko ,
+                    "Helena"@de ,
+                    "Helena"@es ,
+                    "Helena"@fr .
+
+<#nebraska>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1553> ,
+                    <http://www.wikidata.org/entity/Q28260> ;
+    solid-memo:front "Nebraska"@en ,
+                     "Nebraska"@sv ,
+                     "네브래스카주"@ko ,
+                     "Nebraska"@de ,
+                     "Nebraska"@es ,
+                     "Nebraska"@fr ;
+    solid-memo:back "Lincoln"@en ,
+                    "Lincoln"@sv ,
+                    "링컨"@ko ,
+                    "Lincoln"@de ,
+                    "Lincoln"@es ,
+                    "Lincoln"@fr .
+
+<#nevada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1227> ,
+                    <http://www.wikidata.org/entity/Q40881> ;
+    solid-memo:front "Nevada"@en ,
+                     "Nevada"@sv ,
+                     "네바다주"@ko ,
+                     "Nevada"@de ,
+                     "Nevada"@es ,
+                     "Nevada"@fr ;
+    solid-memo:back "Carson City"@en ,
+                    "Carson City"@sv ,
+                    "카슨시티"@ko ,
+                    "Carson City"@de ,
+                    "Carson City"@es ,
+                    "Carson City"@fr .
+
+<#new-hampshire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q759> ,
+                    <http://www.wikidata.org/entity/Q28249> ;
+    solid-memo:front "New Hampshire"@en ,
+                     "New Hampshire"@sv ,
+                     "뉴햄프셔주"@ko ,
+                     "New Hampshire"@de ,
+                     "Nuevo Hampshire"@es ,
+                     "New Hampshire"@fr ;
+    solid-memo:back "Concord"@en ,
+                    "Concord"@sv ,
+                    "콩코드"@ko ,
+                    "Concord"@de ,
+                    "Concord"@es ,
+                    "Concord"@fr .
+
+<#new-jersey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1408> ,
+                    <http://www.wikidata.org/entity/Q25330> ;
+    solid-memo:front "New Jersey"@en ,
+                     "New Jersey"@sv ,
+                     "뉴저지주"@ko ,
+                     "New Jersey"@de ,
+                     "Nueva Jersey"@es ,
+                     "New Jersey"@fr ;
+    solid-memo:back "Trenton"@en ,
+                    "Trenton"@sv ,
+                    "트렌턴"@ko ,
+                    "Trenton"@de ,
+                    "Trenton"@es ,
+                    "Trenton"@fr .
+
+<#new-mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1522> ,
+                    <http://www.wikidata.org/entity/Q38555> ;
+    solid-memo:front "New Mexico"@en ,
+                     "New Mexico"@sv ,
+                     "뉴멕시코주"@ko ,
+                     "New Mexico"@de ,
+                     "Nuevo México"@es ,
+                     "Nouveau-Mexique"@fr ;
+    solid-memo:back "Santa Fe"@en ,
+                    "Santa Fe"@sv ,
+                    "샌타페이"@ko ,
+                    "Santa Fe"@de ,
+                    "Santa Fe"@es ,
+                    "Santa Fe"@fr .
+
+<#new-york>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1384> ,
+                    <http://www.wikidata.org/entity/Q24861> ;
+    solid-memo:front "New York"@en ,
+                     "New York"@sv ,
+                     "뉴욕주"@ko ,
+                     "New York"@de ,
+                     "Nueva York"@es ,
+                     "New York"@fr ;
+    solid-memo:back "Albany"@en ,
+                    "Albany"@sv ,
+                    "올버니"@ko ,
+                    "Albany"@de ,
+                    "Albany"@es ,
+                    "Albany"@fr ;
+    solid-memo:backNote "The largest city, New York City, is not the capital."@en ,
+                        "Den största staden, New York City, är inte huvudstad."@sv .
+
+<#north-carolina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1454> ,
+                    <http://www.wikidata.org/entity/Q41087> ;
+    solid-memo:front "North Carolina"@en ,
+                     "North Carolina"@sv ,
+                     "노스캐롤라이나주"@ko ,
+                     "North Carolina"@de ,
+                     "Carolina del Norte"@es ,
+                     "Caroline du Nord"@fr ;
+    solid-memo:back "Raleigh"@en ,
+                    "Raleigh"@sv ,
+                    "롤리"@ko ,
+                    "Raleigh"@de ,
+                    "Raleigh"@es ,
+                    "Raleigh"@fr .
+
+<#north-dakota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1207> ,
+                    <http://www.wikidata.org/entity/Q37066> ;
+    solid-memo:front "North Dakota"@en ,
+                     "North Dakota"@sv ,
+                     "노스다코타주"@ko ,
+                     "North Dakota"@de ,
+                     "Dakota del Norte"@es ,
+                     "Dakota du Nord"@fr ;
+    solid-memo:back "Bismarck"@en ,
+                    "Bismarck"@sv ,
+                    "비즈마크"@ko ,
+                    "Bismarck"@de ,
+                    "Bismarck"@es ,
+                    "Bismarck"@fr .
+
+<#ohio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1397> ,
+                    <http://www.wikidata.org/entity/Q16567> ;
+    solid-memo:front "Ohio"@en ,
+                     "Ohio"@sv ,
+                     "오하이오주"@ko ,
+                     "Ohio"@de ,
+                     "Ohio"@es ,
+                     "Ohio"@fr ;
+    solid-memo:back "Columbus"@en ,
+                    "Columbus"@sv ,
+                    "콜럼버스"@ko ,
+                    "Columbus"@de ,
+                    "Columbus"@es ,
+                    "Columbus"@fr .
+
+<#oklahoma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1649> ,
+                    <http://www.wikidata.org/entity/Q34863> ;
+    solid-memo:front "Oklahoma"@en ,
+                     "Oklahoma"@sv ,
+                     "오클라호마주"@ko ,
+                     "Oklahoma"@de ,
+                     "Oklahoma"@es ,
+                     "Oklahoma"@fr ;
+    solid-memo:back "Oklahoma City"@en ,
+                    "Oklahoma City"@sv ,
+                    "오클라호마시티"@ko ,
+                    "Oklahoma City"@de ,
+                    "Oklahoma City"@es ,
+                    "Oklahoma City"@fr .
+
+<#oregon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q824> ,
+                    <http://www.wikidata.org/entity/Q43919> ;
+    solid-memo:front "Oregon"@en ,
+                     "Oregon"@sv ,
+                     "오리건주"@ko ,
+                     "Oregon"@de ,
+                     "Oregón"@es ,
+                     "Oregon"@fr ;
+    solid-memo:back "Salem"@en ,
+                    "Salem"@sv ,
+                    "세일럼"@ko ,
+                    "Salem"@de ,
+                    "Salem"@es ,
+                    "Salem"@fr .
+
+<#pennsylvania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1400> ,
+                    <http://www.wikidata.org/entity/Q25280> ;
+    solid-memo:front "Pennsylvania"@en ,
+                     "Pennsylvania"@sv ,
+                     "펜실베이니아주"@ko ,
+                     "Pennsylvania"@de ,
+                     "Pensilvania"@es ,
+                     "Pennsylvanie"@fr ;
+    solid-memo:back "Harrisburg"@en ,
+                    "Harrisburg"@sv ,
+                    "해리스버그"@ko ,
+                    "Harrisburg"@de ,
+                    "Harrisburg"@es ,
+                    "Harrisburg"@fr .
+
+<#rhode-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1387> ,
+                    <http://www.wikidata.org/entity/Q18383> ;
+    solid-memo:front "Rhode Island"@en ,
+                     "Rhode Island"@sv ,
+                     "로드아일랜드주"@ko ,
+                     "Rhode Island"@de ,
+                     "Rhode Island"@es ,
+                     "Rhode Island"@fr ;
+    solid-memo:back "Providence"@en ,
+                    "Providence"@sv ,
+                    "프로비던스"@ko ,
+                    "Providence"@de ,
+                    "Providence"@es ,
+                    "Providence"@fr .
+
+<#south-carolina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1456> ,
+                    <http://www.wikidata.org/entity/Q38453> ;
+    solid-memo:front "South Carolina"@en ,
+                     "South Carolina"@sv ,
+                     "사우스캐롤라이나주"@ko ,
+                     "South Carolina"@de ,
+                     "Carolina del Sur"@es ,
+                     "Caroline du Sud"@fr ;
+    solid-memo:back "Columbia"@en ,
+                    "Columbia"@sv ,
+                    "컬럼비아"@ko ,
+                    "Columbia"@de ,
+                    "Columbia"@es ,
+                    "Columbia"@fr .
+
+<#south-dakota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1211> ,
+                    <http://www.wikidata.org/entity/Q40747> ;
+    solid-memo:front "South Dakota"@en ,
+                     "South Dakota"@sv ,
+                     "사우스다코타주"@ko ,
+                     "South Dakota"@de ,
+                     "Dakota del Sur"@es ,
+                     "Dakota du Sud"@fr ;
+    solid-memo:back "Pierre"@en ,
+                    "Pierre"@sv ,
+                    "피어"@ko ,
+                    "Pierre"@de ,
+                    "Pierre"@es ,
+                    "Pierre"@fr .
+
+<#tennessee>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1509> ,
+                    <http://www.wikidata.org/entity/Q23197> ;
+    solid-memo:front "Tennessee"@en ,
+                     "Tennessee"@sv ,
+                     "테네시주"@ko ,
+                     "Tennessee"@de ,
+                     "Tennessee"@es ,
+                     "Tennessee"@fr ;
+    solid-memo:back "Nashville"@en ,
+                    "Nashville"@sv ,
+                    "내슈빌"@ko ,
+                    "Nashville"@de ,
+                    "Nashville"@es ,
+                    "Nashville"@fr .
+
+<#texas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1439> ,
+                    <http://www.wikidata.org/entity/Q16559> ;
+    solid-memo:front "Texas"@en ,
+                     "Texas"@sv ,
+                     "텍사스주"@ko ,
+                     "Texas"@de ,
+                     "Texas"@es ,
+                     "Texas"@fr ;
+    solid-memo:back "Austin"@en ,
+                    "Austin"@sv ,
+                    "오스틴"@ko ,
+                    "Austin"@de ,
+                    "Austin"@es ,
+                    "Austin"@fr .
+
+<#utah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q829> ,
+                    <http://www.wikidata.org/entity/Q23337> ;
+    solid-memo:front "Utah"@en ,
+                     "Utah"@sv ,
+                     "유타주"@ko ,
+                     "Utah"@de ,
+                     "Utah"@es ,
+                     "Utah"@fr ;
+    solid-memo:back "Salt Lake City"@en ,
+                    "Salt Lake City"@sv ,
+                    "솔트레이크시티"@ko ,
+                    "Salt Lake City"@de ,
+                    "Salt Lake City"@es ,
+                    "Salt Lake City"@fr .
+
+<#vermont>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q16551> ,
+                    <http://www.wikidata.org/entity/Q26426> ;
+    solid-memo:front "Vermont"@en ,
+                     "Vermont"@sv ,
+                     "버몬트주"@ko ,
+                     "Vermont"@de ,
+                     "Vermont"@es ,
+                     "Vermont"@fr ;
+    solid-memo:back "Montpelier"@en ,
+                    "Montpelier"@sv ,
+                    "몬트필리어"@ko ,
+                    "Montpelier"@de ,
+                    "Montpelier"@es ,
+                    "Montpelier"@fr .
+
+<#virginia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1370> ,
+                    <http://www.wikidata.org/entity/Q43421> ;
+    solid-memo:front "Virginia"@en ,
+                     "Virginia"@sv ,
+                     "버지니아주"@ko ,
+                     "Virginia"@de ,
+                     "Virginia"@es ,
+                     "Virginie"@fr ;
+    solid-memo:back "Richmond"@en ,
+                    "Richmond"@sv ,
+                    "리치먼드"@ko ,
+                    "Richmond"@de ,
+                    "Richmond"@es ,
+                    "Richmond"@fr .
+
+<#washington>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1223> ,
+                    <http://www.wikidata.org/entity/Q42735> ;
+    solid-memo:front "Washington"@en ,
+                     "Washington"@sv ,
+                     "워싱턴주"@ko ,
+                     "Washington"@de ,
+                     "Washington"@es ,
+                     "Washington"@fr ;
+    solid-memo:back "Olympia"@en ,
+                    "Olympia"@sv ,
+                    "올림피아"@ko ,
+                    "Olympia"@de ,
+                    "Olympia"@es ,
+                    "Olympia"@fr ;
+    solid-memo:backNote "The state, not Washington, D.C., the federal capital."@en ,
+                        "Delstaten, inte den federala huvudstaden Washington, D.C."@sv .
+
+<#west-virginia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1371> ,
+                    <http://www.wikidata.org/entity/Q44564> ;
+    solid-memo:front "West Virginia"@en ,
+                     "West Virginia"@sv ,
+                     "웨스트버지니아주"@ko ,
+                     "West Virginia"@de ,
+                     "Virginia Occidental"@es ,
+                     "Virginie-Occidentale"@fr ;
+    solid-memo:back "Charleston"@en ,
+                    "Charleston"@sv ,
+                    "찰스턴"@ko ,
+                    "Charleston"@de ,
+                    "Charleston"@es ,
+                    "Charleston"@fr .
+
+<#wisconsin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1537> ,
+                    <http://www.wikidata.org/entity/Q43788> ;
+    solid-memo:front "Wisconsin"@en ,
+                     "Wisconsin"@sv ,
+                     "위스콘신주"@ko ,
+                     "Wisconsin"@de ,
+                     "Wisconsin"@es ,
+                     "Wisconsin"@fr ;
+    solid-memo:back "Madison"@en ,
+                    "Madison"@sv ,
+                    "매디슨"@ko ,
+                    "Madison"@de ,
+                    "Madison"@es ,
+                    "Madison"@fr .
+
+<#wyoming>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:frontLabel "State"@en ,
+                          "Delstat"@sv ,
+                          "주"@ko ,
+                          "Bundesstaat"@de ,
+                          "Estado"@es ,
+                          "État"@fr ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1214> ,
+                    <http://www.wikidata.org/entity/Q39042> ;
+    solid-memo:front "Wyoming"@en ,
+                     "Wyoming"@sv ,
+                     "와이오밍주"@ko ,
+                     "Wyoming"@de ,
+                     "Wyoming"@es ,
+                     "Wyoming"@fr ;
+    solid-memo:back "Cheyenne"@en ,
+                    "Cheyenne"@sv ,
+                    "샤이엔"@ko ,
+                    "Cheyenne"@de ,
+                    "Cheyenne"@es ,
+                    "Cheyenne"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
