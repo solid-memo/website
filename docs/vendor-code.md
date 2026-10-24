@@ -43,7 +43,7 @@ is stable within an ecosystem that is not yet at 1.0.
 
 | Package | Version | Why it is allowed |
 |---|---|---|
-| `rdf-validate-shacl` | 0.6 | The SHACL engine the app uses, maintained by Zazuko. Its 0.x minor is its major: 0.2 to 0.6 each broke something, which the `^` range keeps out. The risk is slow upkeep, one maintainer and releases far apart ([zazuko/rdf-validate-shacl#171](https://github.com/zazuko/rdf-validate-shacl/issues/171)), and the `ShapeEngine` interface and the shacl tests contain it: it is loaded lazily, and only `packages/shacl/src/engine.ts` and `packages/shacl/node/shacl.ts` touch it, so a change in it costs those two files (below). [`shacl-engine`](https://www.npmjs.com/package/shacl-engine) 1.x exists, but brings in packages before 1.0.0 of its own (`rdf-validation` 0.1, `process` 0.11) and a SPARQL engine the app does not need. |
+| `rdf-validate-shacl` | 0.6 | The SHACL engine the app uses, maintained by Zazuko. Its 0.x minor is its major: 0.2 to 0.6 each broke something, which the `^` range keeps out. The risk is slow upkeep, one maintainer and releases far apart ([zazuko/rdf-validate-shacl#171](https://github.com/zazuko/rdf-validate-shacl/issues/171)), and the `ShapeEngine` interface and the shacl tests contain it: it is loaded lazily, and only `packages/shacl/src/engine.ts` imports it (`packages/shacl/node/shacl.ts` goes through its `createEngine`), so a change in it costs that one file (below). [`shacl-engine`](https://www.npmjs.com/package/shacl-engine) 1.x exists, but brings in packages before 1.0.0 of its own (`rdf-validation` 0.1, `process` 0.11) and a SPARQL engine the app does not need. |
 | `rdf-validate-datatype` | 0.2 | `rdf-validate-shacl`'s check of literals against their datatypes, by the same maintainers, and replaced with it. Like it, it breaks only in a 0.x minor (0.2.0, to ESM), which `^` keeps out; its exports have not changed since 2020, and the risk is slow upkeep ([zazuko/rdf-validate-datatype#30](https://github.com/zazuko/rdf-validate-datatype/issues/30)). |
 | `@inrupt/solid-client-errors` | 0.0 | Inrupt's error classes, a part of `@inrupt/solid-client` 4 that Inrupt releases with it. The app never imports it. |
 | `process` | 0.11 | A browser stand-in for Node's `process`, which `readable-stream` asks for (through `n3` and the JSON-LD parser). Final at 0.11 by its maintainer's choice, who turned down a 1.0.0 ([defunctzombie/node-process#82](https://github.com/defunctzombie/node-process/issues/82)); unchanged since 2017. |
@@ -79,9 +79,11 @@ never cross upward past a mapper.
   or a plain HTTP backend means rewriting the port implementations and
   the generic reader/writer (`records.ts`), nothing else: the record ↔
   model mappers are in the domain and the shape descriptors are data.
-- **rdf-validate-shacl** → `packages/shacl/src/engine.ts` and
-  `packages/shacl/node/shacl.ts`: the `ShapeEngine` interface (one node against one
-  shape, results as plain objects) is all the rest depends on.
+- **rdf-validate-shacl** → `packages/shacl/src/engine.ts`, the only
+  module that imports it; `packages/shacl/node/shacl.ts` builds its
+  engine with `createEngine` from there. The `ShapeEngine` interface
+  (one node against one shape, results as plain objects) is all the
+  rest depends on.
 - **The Markdown parser** → `packages/markdown/src/parse.ts`: the rest
   of the package and the app see only its folded tree (`MdBlock`,
   `MdInline`), which any CommonMark parser with tables and the CJK-friendly
