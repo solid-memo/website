@@ -166,7 +166,7 @@ jobs:
   # Main's older Turbo caches, deleted once check or reuse has saved its
   # own, which was built on them, and they would count toward the
   # repository's 10 GB until GitHub's 7 days are up; with them, the
-  # older entries of two other caches that only grow. A job of its own, so
+  # older entries of three other caches that only grow. A job of its own, so
   # the only token that can delete caches is in a job that runs none of
   # the repository's code; and one that may fail without failing the run,
   # which release.yml and deploy.yml wait for. Deterministic.
@@ -203,6 +203,21 @@ jobs:
           gh cache list --ref refs/heads/main --key codeql-overlay-base-database- --limit 1000 \
             --json id,key,createdAt \
             --jq 'group_by(.key | split("-")[6]) | .[] | sort_by(.createdAt) | reverse | .[1:][].id' |
+            xargs -r -n1 gh cache delete
+      # The end-to-end images' (.github/actions/e2e-images): an entry per
+      # server and key, the key's last part what names its images, so a
+      # changed image leaves the older entry, which main never reads again.
+      # A revert to an older key, still cached, leaves its entry the older,
+      # and so deleted, until a run of main misses it and saves it again.
+      - name: Keep only the newest images of each end-to-end server
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh cache list --ref refs/heads/main --key e2e-images- --limit 1000 \
+            --json id,key,createdAt \
+            --jq 'group_by(.key | split("-") | .[:-1]) | .[] | sort_by(.createdAt) | reverse | .[1:][].id' |
             xargs -r -n1 gh cache delete
       # The system libraries' (.github/actions/playwright-deps): an entry
       # per runner image, the two newest kept, as both run while GitHub

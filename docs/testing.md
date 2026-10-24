@@ -142,7 +142,8 @@ GitHub keeps what a run saves under its ref, so their copies would never
 be read again, and they would count toward the repository's 10 GB of
 caches, past which GitHub evicts the least recently used. A pull request
 that changes an image (a Renovate digest update, say) pulls it, until
-`main` has saved it.
+`main` has saved it; then the next `caches` job deletes `main`'s older
+entry of that image, which no run of `main` reads again.
 The key is what names the images (`node e2e/pod/servers.ts key <id>`):
 the compose file, which pins a pulled image by digest, or, for an image
 built here, a hash of its compose file and of every file of its build
@@ -625,7 +626,7 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `check`'s |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do; the CodeQL databases GitHub's code scanning saves for each run on `main` but the newest of each language, the only one it reads; and the browsers' system libraries but the two newest of each browser ([Browsers](#browsers)). The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do; the CodeQL databases GitHub's code scanning saves for each run on `main` but the newest of each language, the only one it reads; each end-to-end server's images but the newest, the only ones `main`'s runs read; and the browsers' system libraries but the two newest of each browser ([Browsers](#browsers)). The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another and the jobs that test are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's, the journeys' browsers and Chromium's headless shell, and the browsers' system libraries, and `warm-images` and `warm-browsers` pull, build or download only what is missing, and save it; `warm-pip` installs the Python tools, so setup-python saves pip's caches where `main` lacks them. Like `caches`, they fail neither the run nor `ci-ok` |
 | `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches` and the `warm` jobs aside |
 
