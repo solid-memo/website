@@ -1,0 +1,434 @@
+{
+  "description": {
+    "en": "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources.",
+    "sv": "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor.",
+    "ko": "유럽 40개 주권 국가의 최고점으로, 나라마다 카드 한 장입니다. 유엔의 M49 표준이 유럽으로 분류하는 나라들로, 러시아는 포함하고 키프로스, 튀르키예, 캅카스 국가들은 포함하지 않으며, 최고점이 논란이 있거나 이름 있는 봉우리가 아닌 이탈리아, 세르비아, 모나코, 바티칸 시국은 뺐습니다. 앞면: 나라, 예: “스웨덴의 최고점”, 뒷면: 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 된 봉우리 이름, 짧은 메모가 함께 있는 경우가 많습니다. 덴마크는 덴마크 본토(그린란드와 페로 제도 제외)를, 네덜란드는 유럽 지역을 묻습니다. 위키데이터에서 가져왔고, CIA 월드 팩트북 마지막 판, 위키백과, 각국 자료로 확인했습니다.",
+    "de": "Der höchste Punkt von 40 souveränen Staaten Europas, je eine Karte: die Staaten, die der M49-Standard der Vereinten Nationen Europa zuordnet, mit Russland, aber ohne Zypern, die Türkei und die Kaukasusstaaten, und ohne Italien, Serbien, Monaco und die Vatikanstadt, deren höchster Punkt umstritten oder kein benannter Gipfel ist. Vorderseite: das Land, z. B. „Höchster Punkt: Schweden“; Rückseite: der Name des Gipfels auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, oft mit einer kurzen Anmerkung. Bei Dänemark fragt die Karte nach dem eigentlichen Dänemark (ohne Grönland und die Färöer), bei den Niederlanden nach dem europäischen Teil. Aus Wikidata übernommen und geprüft anhand der letzten Ausgabe des CIA World Factbook, der Wikipedia und nationaler Quellen.",
+    "es": "El punto más alto de 40 Estados soberanos de Europa, una tarjeta por cada uno: los Estados que la norma M49 de la ONU sitúa en Europa, con Rusia incluida y sin Chipre, Turquía ni los Estados del Cáucaso, y dejando fuera Italia, Serbia, Mónaco y la Ciudad del Vaticano, cuyo punto más alto es discutido o no es una cima con nombre. Anverso: el país, p. ej. «Punto más alto de Suecia»; reverso: el nombre de la cima en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, a menudo con una nota breve. Para Dinamarca la tarjeta pregunta por Dinamarca propiamente dicha (sin Groenlandia ni las Islas Feroe), y para los Países Bajos por la parte europea. Datos tomados de Wikidata y comprobados con la última edición del World Factbook de la CIA, Wikipedia y fuentes nacionales.",
+    "fr": "Le point culminant de 40 États souverains d’Europe, une carte chacun : les États que la norme M49 de l’ONU place en Europe, Russie comprise mais sans Chypre, la Turquie ni les États du Caucase, et sans l’Italie, la Serbie, Monaco et le Vatican, dont le point culminant est contesté ou n’est pas un sommet nommé. Recto : le pays, p. ex. « Point culminant : Suède » ; verso : le nom du sommet en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, souvent avec une courte note. Pour le Danemark, la carte porte sur le Danemark proprement dit (sans le Groenland ni les îles Féroé), pour les Pays-Bas sur la partie européenne. Données tirées de Wikidata et vérifiées dans la dernière édition du World Factbook de la CIA, Wikipédia et des sources nationales."
+  },
+  "frames": {
+    "highest-point": {
+      "en": "Highest point of {0}",
+      "sv": "Högsta punkten i {0}",
+      "ko": "{0}의 최고점",
+      "de": "Höchster Punkt: {0}",
+      "es": "Punto más alto de {0}",
+      "fr": "Point culminant : {0}"
+    },
+    "highest-point-on": {
+      "en": "Highest point of {0}",
+      "sv": "Högsta punkten på {0}",
+      "ko": "{0}의 최고점",
+      "de": "Höchster Punkt: {0}",
+      "es": "Punto más alto de {0}",
+      "fr": "Point culminant : {0}"
+    },
+    "highest-point-of-the": {
+      "en": "Highest point of the {0}",
+      "sv": "Högsta punkten i {0}",
+      "ko": "{0}의 최고점",
+      "de": "Höchster Punkt: {0}",
+      "es": "Punto más alto del {0}",
+      "fr": "Point culminant : {0}"
+    },
+    "highest-point-of-the-plural": {
+      "en": "Highest point of the {0}",
+      "sv": "Högsta punkten i {0}",
+      "ko": "{0}의 최고점",
+      "de": "Höchster Punkt: {0}",
+      "es": "Punto más alto de los {0}",
+      "fr": "Point culminant : {0}"
+    },
+    "highest-point-of-the-feminine": {
+      "en": "Highest point of {0}",
+      "sv": "Högsta punkten i {0}",
+      "ko": "{0}의 최고점",
+      "de": "Höchster Punkt: {0}",
+      "es": "Punto más alto de la {0}",
+      "fr": "Point culminant : {0}"
+    }
+  },
+  "cards": {
+    "albania": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q222"
+        ]
+      },
+      "back": "{Q912579}"
+    },
+    "andorra": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q228"
+        ]
+      },
+      "back": "{Q62467}"
+    },
+    "austria": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q40"
+        ]
+      },
+      "back": "{Q3388}"
+    },
+    "belarus": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q184"
+        ]
+      },
+      "back": "{Q921447}"
+    },
+    "belgium": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q31"
+        ]
+      },
+      "back": "{Q322824}"
+    },
+    "bosnia-and-herzegovina": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q225"
+        ]
+      },
+      "back": "{Q837723}"
+    },
+    "bulgaria": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q219"
+        ]
+      },
+      "back": "{Q209341}"
+    },
+    "croatia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q224"
+        ]
+      },
+      "back": "{Q3183447}"
+    },
+    "czechia": {
+      "front": {
+        "frame": "highest-point-of-the-feminine",
+        "items": [
+          "Q213"
+        ]
+      },
+      "back": "{Q617511}"
+    },
+    "denmark": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q35"
+        ]
+      },
+      "back": "{Q689106}"
+    },
+    "estonia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q191"
+        ]
+      },
+      "back": "{Q504991}"
+    },
+    "finland": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q33"
+        ]
+      },
+      "back": "{Q216035}"
+    },
+    "france": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q142"
+        ]
+      },
+      "back": "{Q583}"
+    },
+    "germany": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q183"
+        ]
+      },
+      "back": "{Q3375}"
+    },
+    "greece": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q41"
+        ]
+      },
+      "back": "{Q80344}",
+      "not": {
+        "de": [
+          "Berg Olymp"
+        ]
+      }
+    },
+    "hungary": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q28"
+        ]
+      },
+      "back": "{Q747618}"
+    },
+    "iceland": {
+      "front": {
+        "frame": "highest-point-on",
+        "items": [
+          "Q189"
+        ]
+      },
+      "back": "{Q140084}"
+    },
+    "ireland": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q27"
+        ]
+      },
+      "back": "{Q503368}"
+    },
+    "latvia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q211"
+        ]
+      },
+      "back": "{Q1122342}"
+    },
+    "liechtenstein": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q347"
+        ]
+      },
+      "back": "{Q665000}"
+    },
+    "lithuania": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q37"
+        ]
+      },
+      "back": "{Q771431}"
+    },
+    "luxembourg": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q32"
+        ]
+      },
+      "back": "{Q24457}"
+    },
+    "malta": {
+      "front": {
+        "frame": "highest-point-on",
+        "items": [
+          "Q233"
+        ]
+      },
+      "back": "{Q1850604}",
+      "not": {
+        "es": [
+          "Ta'Dmejrek"
+        ]
+      }
+    },
+    "moldova": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q217"
+        ]
+      },
+      "back": "{Q47940}",
+      "not": {
+        "es": [
+          "Monte Balanesti"
+        ]
+      }
+    },
+    "montenegro": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q236"
+        ]
+      },
+      "back": "{Q2720697}"
+    },
+    "netherlands": {
+      "front": {
+        "frame": "highest-point-of-the-plural",
+        "items": [
+          "Q2118709"
+        ]
+      },
+      "back": "{Q159860}"
+    },
+    "north-macedonia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q221"
+        ]
+      },
+      "back": "{Q912579}"
+    },
+    "norway": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q20"
+        ]
+      },
+      "back": "{Q203942}"
+    },
+    "poland": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q36"
+        ]
+      },
+      "back": "{Q672936}"
+    },
+    "portugal": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q45"
+        ]
+      },
+      "back": "{Q928681}"
+    },
+    "romania": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q218"
+        ]
+      },
+      "back": "{Q746524}"
+    },
+    "russia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q159"
+        ]
+      },
+      "back": "{Q43105}"
+    },
+    "san-marino": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q238"
+        ]
+      },
+      "back": "{Q158526}"
+    },
+    "slovakia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q214"
+        ]
+      },
+      "back": "{Q81213}"
+    },
+    "slovenia": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q215"
+        ]
+      },
+      "back": "{Q1024}"
+    },
+    "spain": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q29"
+        ]
+      },
+      "back": "{Q38954}"
+    },
+    "sweden": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q34"
+        ]
+      },
+      "back": "{Q214011}"
+    },
+    "switzerland": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q39"
+        ]
+      },
+      "back": "{Q3403}",
+      "not": {
+        "ko": [
+          "몬테로사 산"
+        ]
+      }
+    },
+    "ukraine": {
+      "front": {
+        "frame": "highest-point",
+        "items": [
+          "Q212"
+        ]
+      },
+      "back": "{Q627508}"
+    },
+    "united-kingdom": {
+      "front": {
+        "frame": "highest-point-of-the",
+        "items": [
+          "Q145"
+        ]
+      },
+      "back": "{Q104674}"
+    }
+  }
+}

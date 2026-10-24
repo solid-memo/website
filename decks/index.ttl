@@ -1220,6 +1220,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -6464,12 +6465,12 @@
                   "Höchste Punkte der Länder Europas"@de ,
                   "Puntos más altos de los países de Europa"@es ,
                   "Points culminants des pays d’Europe"@fr ;
-    dcterms:description "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources."@en ,
-                        "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor."@sv ,
-                        "유럽 40개 주권 국가의 최고점으로, 나라마다 카드 한 장입니다. 유엔의 M49 표준이 유럽으로 분류하는 나라들로, 러시아는 포함하고 키프로스, 튀르키예, 캅카스 국가들은 포함하지 않으며, 최고점이 논란이 있거나 이름 있는 봉우리가 아닌 이탈리아, 세르비아, 모나코, 바티칸 시국은 뺐습니다. 앞면: 나라, 예: “스웨덴의 최고점”, 뒷면: 영어와 스웨덴어로 된 봉우리 이름, 짧은 메모가 함께 있는 경우가 많습니다. 덴마크는 덴마크 본토(그린란드와 페로 제도 제외)를, 네덜란드는 유럽 지역을 묻습니다. 위키데이터에서 가져왔고, CIA 월드 팩트북 마지막 판, 위키백과, 각국 자료로 확인했습니다."@ko ,
-                        "Der höchste Punkt von 40 souveränen Staaten Europas, je eine Karte: die Staaten, die der M49-Standard der Vereinten Nationen Europa zuordnet, mit Russland, aber ohne Zypern, die Türkei und die Kaukasusstaaten, und ohne Italien, Serbien, Monaco und die Vatikanstadt, deren höchster Punkt umstritten oder kein benannter Gipfel ist. Vorderseite: das Land, z. B. „Höchster Punkt Schwedens“; Rückseite: der Name des Gipfels auf Englisch und Schwedisch, oft mit einer kurzen Anmerkung. Bei Dänemark fragt die Karte nach dem eigentlichen Dänemark (ohne Grönland und die Färöer), bei den Niederlanden nach dem europäischen Teil. Aus Wikidata übernommen und geprüft anhand der letzten Ausgabe des CIA World Factbook, der Wikipedia und nationaler Quellen."@de ,
-                        "El punto más alto de 40 Estados soberanos de Europa, una tarjeta por cada uno: los Estados que la norma M49 de la ONU sitúa en Europa, con Rusia incluida y sin Chipre, Turquía ni los Estados del Cáucaso, y dejando fuera Italia, Serbia, Mónaco y la Ciudad del Vaticano, cuyo punto más alto es discutido o no es una cima con nombre. Anverso: el país, p. ej. «Punto más alto de Suecia»; reverso: el nombre de la cima en inglés y en sueco, a menudo con una nota breve. Para Dinamarca la tarjeta pregunta por Dinamarca propiamente dicha (sin Groenlandia ni las Islas Feroe), y para los Países Bajos por la parte europea. Datos tomados de Wikidata y comprobados con la última edición del World Factbook de la CIA, Wikipedia y fuentes nacionales."@es ,
-                        "Le point culminant de 40 États souverains d’Europe, une carte chacun : les États que la norme M49 de l’ONU place en Europe, Russie comprise mais sans Chypre, la Turquie ni les États du Caucase, et sans l’Italie, la Serbie, Monaco et le Vatican, dont le point culminant est contesté ou n’est pas un sommet nommé. Recto : le pays, p. ex. « Point culminant de la Suède » ; verso : le nom du sommet en anglais et en suédois, souvent avec une courte note. Pour le Danemark, la carte porte sur le Danemark proprement dit (sans le Groenland ni les îles Féroé), pour les Pays-Bas sur la partie européenne. Données tirées de Wikidata et vérifiées dans la dernière édition du World Factbook de la CIA, Wikipédia et des sources nationales."@fr ;
+    dcterms:description "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources."@en ,
+                        "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor."@sv ,
+                        "유럽 40개 주권 국가의 최고점으로, 나라마다 카드 한 장입니다. 유엔의 M49 표준이 유럽으로 분류하는 나라들로, 러시아는 포함하고 키프로스, 튀르키예, 캅카스 국가들은 포함하지 않으며, 최고점이 논란이 있거나 이름 있는 봉우리가 아닌 이탈리아, 세르비아, 모나코, 바티칸 시국은 뺐습니다. 앞면: 나라, 예: “스웨덴의 최고점”, 뒷면: 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 된 봉우리 이름, 짧은 메모가 함께 있는 경우가 많습니다. 덴마크는 덴마크 본토(그린란드와 페로 제도 제외)를, 네덜란드는 유럽 지역을 묻습니다. 위키데이터에서 가져왔고, CIA 월드 팩트북 마지막 판, 위키백과, 각국 자료로 확인했습니다."@ko ,
+                        "Der höchste Punkt von 40 souveränen Staaten Europas, je eine Karte: die Staaten, die der M49-Standard der Vereinten Nationen Europa zuordnet, mit Russland, aber ohne Zypern, die Türkei und die Kaukasusstaaten, und ohne Italien, Serbien, Monaco und die Vatikanstadt, deren höchster Punkt umstritten oder kein benannter Gipfel ist. Vorderseite: das Land, z. B. „Höchster Punkt: Schweden“; Rückseite: der Name des Gipfels auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, oft mit einer kurzen Anmerkung. Bei Dänemark fragt die Karte nach dem eigentlichen Dänemark (ohne Grönland und die Färöer), bei den Niederlanden nach dem europäischen Teil. Aus Wikidata übernommen und geprüft anhand der letzten Ausgabe des CIA World Factbook, der Wikipedia und nationaler Quellen."@de ,
+                        "El punto más alto de 40 Estados soberanos de Europa, una tarjeta por cada uno: los Estados que la norma M49 de la ONU sitúa en Europa, con Rusia incluida y sin Chipre, Turquía ni los Estados del Cáucaso, y dejando fuera Italia, Serbia, Mónaco y la Ciudad del Vaticano, cuyo punto más alto es discutido o no es una cima con nombre. Anverso: el país, p. ej. «Punto más alto de Suecia»; reverso: el nombre de la cima en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, a menudo con una nota breve. Para Dinamarca la tarjeta pregunta por Dinamarca propiamente dicha (sin Groenlandia ni las Islas Feroe), y para los Países Bajos por la parte europea. Datos tomados de Wikidata y comprobados con la última edición del World Factbook de la CIA, Wikipedia y fuentes nacionales."@es ,
+                        "Le point culminant de 40 États souverains d’Europe, une carte chacun : les États que la norme M49 de l’ONU place en Europe, Russie comprise mais sans Chypre, la Turquie ni les États du Caucase, et sans l’Italie, la Serbie, Monaco et le Vatican, dont le point culminant est contesté ou n’est pas un sommet nommé. Recto : le pays, p. ex. « Point culminant : Suède » ; verso : le nom du sommet en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, souvent avec une courte note. Pour le Danemark, la carte porte sur le Danemark proprement dit (sans le Groenland ni les îles Féroé), pour les Pays-Bas sur la partie européenne. Données tirées de Wikidata et vérifiées dans la dernière édition du World Factbook de la CIA, Wikipédia et des sources nationales."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -6504,10 +6505,11 @@
                  "Europe"@fr ,
                  "géographie"@fr ;
     dcat:first <https://solid-memo.com/decks/highest-points-of-europe/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/highest-points-of-europe/v1.ttl> ,
-                    <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> .
+                    <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ,
+                    <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl> .
 
 <https://solid-memo.com/decks/highest-points-of-europe/v1.ttl>
     a dcat:Dataset ;
@@ -6520,6 +6522,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Highest points of European countries"@en ,
+                  "Högsta punkterna i Europas länder"@sv ,
+                  "유럽 각국의 최고점"@ko ,
+                  "Höchste Punkte der Länder Europas"@de ,
+                  "Puntos más altos de los países de Europa"@es ,
+                  "Points culminants des pays d’Europe"@fr ;
+    dcterms:description "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources."@en ,
+                        "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor."@sv ,
+                        "유럽 40개 주권 국가의 최고점으로, 나라마다 카드 한 장입니다. 유엔의 M49 표준이 유럽으로 분류하는 나라들로, 러시아는 포함하고 키프로스, 튀르키예, 캅카스 국가들은 포함하지 않으며, 최고점이 논란이 있거나 이름 있는 봉우리가 아닌 이탈리아, 세르비아, 모나코, 바티칸 시국은 뺐습니다. 앞면: 나라, 예: “스웨덴의 최고점”, 뒷면: 영어와 스웨덴어로 된 봉우리 이름, 짧은 메모가 함께 있는 경우가 많습니다. 덴마크는 덴마크 본토(그린란드와 페로 제도 제외)를, 네덜란드는 유럽 지역을 묻습니다. 위키데이터에서 가져왔고, CIA 월드 팩트북 마지막 판, 위키백과, 각국 자료로 확인했습니다."@ko ,
+                        "Der höchste Punkt von 40 souveränen Staaten Europas, je eine Karte: die Staaten, die der M49-Standard der Vereinten Nationen Europa zuordnet, mit Russland, aber ohne Zypern, die Türkei und die Kaukasusstaaten, und ohne Italien, Serbien, Monaco und die Vatikanstadt, deren höchster Punkt umstritten oder kein benannter Gipfel ist. Vorderseite: das Land, z. B. „Höchster Punkt Schwedens“; Rückseite: der Name des Gipfels auf Englisch und Schwedisch, oft mit einer kurzen Anmerkung. Bei Dänemark fragt die Karte nach dem eigentlichen Dänemark (ohne Grönland und die Färöer), bei den Niederlanden nach dem europäischen Teil. Aus Wikidata übernommen und geprüft anhand der letzten Ausgabe des CIA World Factbook, der Wikipedia und nationaler Quellen."@de ,
+                        "El punto más alto de 40 Estados soberanos de Europa, una tarjeta por cada uno: los Estados que la norma M49 de la ONU sitúa en Europa, con Rusia incluida y sin Chipre, Turquía ni los Estados del Cáucaso, y dejando fuera Italia, Serbia, Mónaco y la Ciudad del Vaticano, cuyo punto más alto es discutido o no es una cima con nombre. Anverso: el país, p. ej. «Punto más alto de Suecia»; reverso: el nombre de la cima en inglés y en sueco, a menudo con una nota breve. Para Dinamarca la tarjeta pregunta por Dinamarca propiamente dicha (sin Groenlandia ni las Islas Feroe), y para los Países Bajos por la parte europea. Datos tomados de Wikidata y comprobados con la última edición del World Factbook de la CIA, Wikipedia y fuentes nacionales."@es ,
+                        "Le point culminant de 40 États souverains d’Europe, une carte chacun : les États que la norme M49 de l’ONU place en Europe, Russie comprise mais sans Chypre, la Turquie ni les États du Caucase, et sans l’Italie, la Serbie, Monaco et le Vatican, dont le point culminant est contesté ou n’est pas un sommet nommé. Recto : le pays, p. ex. « Point culminant de la Suède » ; verso : le nom du sommet en anglais et en suédois, souvent avec une courte note. Pour le Danemark, la carte porte sur le Danemark proprement dit (sans le Groenland ni les îles Féroé), pour les Pays-Bas sur la partie européenne. Données tirées de Wikidata et vérifiées dans la dernière édition du World Factbook de la CIA, Wikipédia et des sources nationales."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Highest points of European countries"@en ,
@@ -6528,16 +6548,18 @@
                   "Höchste Punkte der Länder Europas"@de ,
                   "Puntos más altos de los países de Europa"@es ,
                   "Points culminants des pays d’Europe"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources."@en ,
-                        "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor."@sv ,
-                        "유럽 40개 주권 국가의 최고점으로, 나라마다 카드 한 장입니다. 유엔의 M49 표준이 유럽으로 분류하는 나라들로, 러시아는 포함하고 키프로스, 튀르키예, 캅카스 국가들은 포함하지 않으며, 최고점이 논란이 있거나 이름 있는 봉우리가 아닌 이탈리아, 세르비아, 모나코, 바티칸 시국은 뺐습니다. 앞면: 나라, 예: “스웨덴의 최고점”, 뒷면: 영어와 스웨덴어로 된 봉우리 이름, 짧은 메모가 함께 있는 경우가 많습니다. 덴마크는 덴마크 본토(그린란드와 페로 제도 제외)를, 네덜란드는 유럽 지역을 묻습니다. 위키데이터에서 가져왔고, CIA 월드 팩트북 마지막 판, 위키백과, 각국 자료로 확인했습니다."@ko ,
-                        "Der höchste Punkt von 40 souveränen Staaten Europas, je eine Karte: die Staaten, die der M49-Standard der Vereinten Nationen Europa zuordnet, mit Russland, aber ohne Zypern, die Türkei und die Kaukasusstaaten, und ohne Italien, Serbien, Monaco und die Vatikanstadt, deren höchster Punkt umstritten oder kein benannter Gipfel ist. Vorderseite: das Land, z. B. „Höchster Punkt Schwedens“; Rückseite: der Name des Gipfels auf Englisch und Schwedisch, oft mit einer kurzen Anmerkung. Bei Dänemark fragt die Karte nach dem eigentlichen Dänemark (ohne Grönland und die Färöer), bei den Niederlanden nach dem europäischen Teil. Aus Wikidata übernommen und geprüft anhand der letzten Ausgabe des CIA World Factbook, der Wikipedia und nationaler Quellen."@de ,
-                        "El punto más alto de 40 Estados soberanos de Europa, una tarjeta por cada uno: los Estados que la norma M49 de la ONU sitúa en Europa, con Rusia incluida y sin Chipre, Turquía ni los Estados del Cáucaso, y dejando fuera Italia, Serbia, Mónaco y la Ciudad del Vaticano, cuyo punto más alto es discutido o no es una cima con nombre. Anverso: el país, p. ej. «Punto más alto de Suecia»; reverso: el nombre de la cima en inglés y en sueco, a menudo con una nota breve. Para Dinamarca la tarjeta pregunta por Dinamarca propiamente dicha (sin Groenlandia ni las Islas Feroe), y para los Países Bajos por la parte europea. Datos tomados de Wikidata y comprobados con la última edición del World Factbook de la CIA, Wikipedia y fuentes nacionales."@es ,
-                        "Le point culminant de 40 États souverains d’Europe, une carte chacun : les États que la norme M49 de l’ONU place en Europe, Russie comprise mais sans Chypre, la Turquie ni les États du Caucase, et sans l’Italie, la Serbie, Monaco et le Vatican, dont le point culminant est contesté ou n’est pas un sommet nommé. Recto : le pays, p. ex. « Point culminant de la Suède » ; verso : le nom du sommet en anglais et en suédois, souvent avec une courte note. Pour le Danemark, la carte porte sur le Danemark proprement dit (sans le Groenland ni les îles Féroé), pour les Pays-Bas sur la partie européenne. Données tirées de Wikidata et vérifiées dans la dernière édition du World Factbook de la CIA, Wikipédia et des sources nationales."@fr ;
-    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Property:P610> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#compilation> ;
+    dcterms:description "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources."@en ,
+                        "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor."@sv ,
+                        "유럽 40개 주권 국가의 최고점으로, 나라마다 카드 한 장입니다. 유엔의 M49 표준이 유럽으로 분류하는 나라들로, 러시아는 포함하고 키프로스, 튀르키예, 캅카스 국가들은 포함하지 않으며, 최고점이 논란이 있거나 이름 있는 봉우리가 아닌 이탈리아, 세르비아, 모나코, 바티칸 시국은 뺐습니다. 앞면: 나라, 예: “스웨덴의 최고점”, 뒷면: 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 된 봉우리 이름, 짧은 메모가 함께 있는 경우가 많습니다. 덴마크는 덴마크 본토(그린란드와 페로 제도 제외)를, 네덜란드는 유럽 지역을 묻습니다. 위키데이터에서 가져왔고, CIA 월드 팩트북 마지막 판, 위키백과, 각국 자료로 확인했습니다."@ko ,
+                        "Der höchste Punkt von 40 souveränen Staaten Europas, je eine Karte: die Staaten, die der M49-Standard der Vereinten Nationen Europa zuordnet, mit Russland, aber ohne Zypern, die Türkei und die Kaukasusstaaten, und ohne Italien, Serbien, Monaco und die Vatikanstadt, deren höchster Punkt umstritten oder kein benannter Gipfel ist. Vorderseite: das Land, z. B. „Höchster Punkt: Schweden“; Rückseite: der Name des Gipfels auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, oft mit einer kurzen Anmerkung. Bei Dänemark fragt die Karte nach dem eigentlichen Dänemark (ohne Grönland und die Färöer), bei den Niederlanden nach dem europäischen Teil. Aus Wikidata übernommen und geprüft anhand der letzten Ausgabe des CIA World Factbook, der Wikipedia und nationaler Quellen."@de ,
+                        "El punto más alto de 40 Estados soberanos de Europa, una tarjeta por cada uno: los Estados que la norma M49 de la ONU sitúa en Europa, con Rusia incluida y sin Chipre, Turquía ni los Estados del Cáucaso, y dejando fuera Italia, Serbia, Mónaco y la Ciudad del Vaticano, cuyo punto más alto es discutido o no es una cima con nombre. Anverso: el país, p. ej. «Punto más alto de Suecia»; reverso: el nombre de la cima en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, a menudo con una nota breve. Para Dinamarca la tarjeta pregunta por Dinamarca propiamente dicha (sin Groenlandia ni las Islas Feroe), y para los Países Bajos por la parte europea. Datos tomados de Wikidata y comprobados con la última edición del World Factbook de la CIA, Wikipedia y fuentes nacionales."@es ,
+                        "Le point culminant de 40 États souverains d’Europe, une carte chacun : les États que la norme M49 de l’ONU place en Europe, Russie comprise mais sans Chypre, la Turquie ni les États du Caucase, et sans l’Italie, la Serbie, Monaco et le Vatican, dont le point culminant est contesté ou n’est pas un sommet nommé. Recto : le pays, p. ex. « Point culminant : Suède » ; verso : le nom du sommet en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, souvent avec une courte note. Pour le Danemark, la carte porte sur le Danemark proprement dit (sans le Groenland ni les îles Féroé), pour les Pays-Bas sur la partie européenne. Données tirées de Wikidata et vérifiées dans la dernière édition du World Factbook de la CIA, Wikipédia et des sources nationales."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Property:P610> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -6572,25 +6594,34 @@
                  "Europe"@fr ,
                  "géographie"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/highest-points-of-europe/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/highest-points-of-europe/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 40 cards in use, 25 in Korean, 39 in German, 38 in Spanish, 40 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#highest-points-of-europe> ;
     dcat:isVersionOf <#highest-points-of-europe> ;
-    dcat:distribution <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#turtle> ;
     solid-memo:cardCount 40 .
 
-<https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#compilation>
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#compilation>
     a prov:Activity .
 
 <https://www.wikidata.org/wiki/Property:P610>
@@ -6638,10 +6669,18 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#turtle>
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/highest-points-of-europe.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "ca6ed071b21e3fc56f4e2ca88ef9f00f2223b74222a4d695b83ba49a8d269148"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/highest-points-of-europe/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/highest-points-of-europe/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
