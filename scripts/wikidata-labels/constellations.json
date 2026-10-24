@@ -1,0 +1,311 @@
+{
+  "description": {
+    "en": "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, and its Korean, German, Spanish and French names from Wikidata's labels, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin.",
+    "sv": "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, och dess koreanska, tyska, spanska och franska namn från Wikidatas etiketter, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin.",
+    "ko": "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름, 그리고 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다.",
+    "de": "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name sowie, aus den Bezeichnungen von Wikidata, sein koreanischer, deutscher, spanischer und französischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin.",
+    "es": "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin.",
+    "fr": "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."
+  },
+  "cards": {
+    "andromeda": {
+      "back": "{Q9256}"
+    },
+    "antlia": {
+      "back": "{Q10481}"
+    },
+    "apus": {
+      "back": "{Q10506}"
+    },
+    "aquarius": {
+      "back": "{Q10576}"
+    },
+    "aquila": {
+      "back": "{Q10586}"
+    },
+    "ara": {
+      "back": "{Q9253}"
+    },
+    "aries": {
+      "back": "{Q10584}"
+    },
+    "auriga": {
+      "back": "{Q10476}"
+    },
+    "bootes": {
+      "back": "{Q8667}"
+    },
+    "caelum": {
+      "back": "{Q10488}"
+    },
+    "camelopardalis": {
+      "back": "{Q8832}"
+    },
+    "cancer": {
+      "back": "{Q8849}"
+    },
+    "canes-venatici": {
+      "back": "{Q10452}"
+    },
+    "canis-major": {
+      "back": "{Q10538}"
+    },
+    "canis-minor": {
+      "back": "{Q9305}"
+    },
+    "capricornus": {
+      "back": "{Q10535}"
+    },
+    "carina": {
+      "back": "{Q10470}"
+    },
+    "cassiopeia": {
+      "back": "{Q10464}",
+      "not": {
+        "es": [
+          "Cassiopeia"
+        ]
+      }
+    },
+    "centaurus": {
+      "back": "{Q8844}"
+    },
+    "cepheus": {
+      "back": "{Q10468}"
+    },
+    "cetus": {
+      "back": "{Q8839}"
+    },
+    "chamaeleon": {
+      "back": "{Q10457}"
+    },
+    "circinus": {
+      "back": "{Q10508}"
+    },
+    "columba": {
+      "back": "{Q10425}"
+    },
+    "coma-berenices": {
+      "back": "{Q9285}"
+    },
+    "corona-australis": {
+      "back": "{Q10413}"
+    },
+    "corona-borealis": {
+      "back": "{Q10406}"
+    },
+    "corvus": {
+      "back": "{Q10517}"
+    },
+    "crater": {
+      "back": "{Q9282}"
+    },
+    "crux": {
+      "back": "{Q10542}"
+    },
+    "cygnus": {
+      "back": "{Q8921}"
+    },
+    "delphinus": {
+      "back": "{Q9302}"
+    },
+    "dorado": {
+      "back": "{Q8837}"
+    },
+    "draco": {
+      "back": "{Q8675}"
+    },
+    "equuleus": {
+      "back": "{Q10438}"
+    },
+    "eridanus": {
+      "back": "{Q10433}"
+    },
+    "fornax": {
+      "back": "{Q8913}"
+    },
+    "gemini": {
+      "back": "{Q8923}"
+    },
+    "grus": {
+      "back": "{Q10563}"
+    },
+    "hercules": {
+      "back": "{Q10448}"
+    },
+    "horologium": {
+      "back": "{Q10574}"
+    },
+    "hydra": {
+      "back": "{Q10578}"
+    },
+    "hydrus": {
+      "back": "{Q10416}"
+    },
+    "indus": {
+      "back": "{Q10450}",
+      "not": {
+        "de": [
+          "Indus"
+        ]
+      }
+    },
+    "lacerta": {
+      "back": "{Q10430}"
+    },
+    "leo": {
+      "back": "{Q8853}"
+    },
+    "leo-minor": {
+      "back": "{Q10403}"
+    },
+    "lepus": {
+      "back": "{Q10446}"
+    },
+    "libra": {
+      "back": "{Q10580}"
+    },
+    "lupus": {
+      "back": "{Q10571}"
+    },
+    "lynx": {
+      "back": "{Q10443}"
+    },
+    "lyra": {
+      "back": "{Q10484}"
+    },
+    "mensa": {
+      "back": "{Q9289}"
+    },
+    "microscopium": {
+      "back": "{Q10492}"
+    },
+    "monoceros": {
+      "back": "{Q10428}"
+    },
+    "musca": {
+      "back": "{Q10435}"
+    },
+    "norma": {
+      "back": "{Q10582}"
+    },
+    "octans": {
+      "back": "{Q10503}"
+    },
+    "ophiuchus": {
+      "back": "{Q8906}"
+    },
+    "orion": {
+      "back": "{Q8860}"
+    },
+    "pavo": {
+      "back": "{Q10515}"
+    },
+    "pegasus": {
+      "back": "{Q8864}"
+    },
+    "perseus": {
+      "back": "{Q10511}",
+      "not": {
+        "es": [
+          "Perseus"
+        ]
+      }
+    },
+    "phoenix": {
+      "back": "{Q10441}",
+      "not": {
+        "es": [
+          "El Fenix"
+        ]
+      }
+    },
+    "pictor": {
+      "back": "{Q10486}",
+      "not": {
+        "de": [
+          "Pictor"
+        ]
+      }
+    },
+    "pisces": {
+      "back": "{Q8679}"
+    },
+    "piscis-austrinus": {
+      "back": "{Q10409}"
+    },
+    "puppis": {
+      "back": "{Q9251}"
+    },
+    "pyxis": {
+      "back": "{Q10473}"
+    },
+    "reticulum": {
+      "back": "{Q10498}",
+      "not": {
+        "de": [
+          "Reticulum / Netz"
+        ]
+      }
+    },
+    "sagitta": {
+      "back": "{Q10513}",
+      "not": {
+        "es": [
+          "Sagita"
+        ]
+      }
+    },
+    "sagittarius": {
+      "back": "{Q8866}"
+    },
+    "scorpius": {
+      "back": "{Q8865}"
+    },
+    "sculptor": {
+      "back": "{Q9286}"
+    },
+    "scutum": {
+      "back": "{Q10529}"
+    },
+    "serpens": {
+      "back": "{Q8910}"
+    },
+    "sextans": {
+      "back": "{Q10525}"
+    },
+    "taurus": {
+      "back": "{Q10570}"
+    },
+    "telescopium": {
+      "back": "{Q10546}"
+    },
+    "triangulum": {
+      "back": "{Q10565}"
+    },
+    "triangulum-australe": {
+      "back": "{Q10422}"
+    },
+    "tucana": {
+      "back": "{Q10567}"
+    },
+    "ursa-major": {
+      "back": "{Q8918}"
+    },
+    "ursa-minor": {
+      "back": "{Q10478}"
+    },
+    "vela": {
+      "back": "{Q10521}"
+    },
+    "virgo": {
+      "back": "{Q8842}"
+    },
+    "volans": {
+      "back": "{Q10437}"
+    },
+    "vulpecula": {
+      "back": "{Q10519}"
+    }
+  }
+}

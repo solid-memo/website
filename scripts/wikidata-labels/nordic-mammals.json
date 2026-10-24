@@ -1,0 +1,251 @@
+{
+  "description": {
+    "en": "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia.",
+    "sv": "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia.",
+    "ko": "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다.",
+    "de": "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia.",
+    "es": "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco.",
+    "fr": "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."
+  },
+  "untranslated": [
+    "la"
+  ],
+  "cards": {
+    "american-mink": {
+      "front": "{Q27179}",
+      "not": {
+        "es": [
+          "Neovison vison"
+        ]
+      }
+    },
+    "arctic-fox": {
+      "front": "{Q82738}",
+      "not": {
+        "es": [
+          "Alopex lagopus"
+        ]
+      }
+    },
+    "bank-vole": {
+      "front": "{Q216580}",
+      "not": {
+        "es": [
+          "Myodes glareolus"
+        ],
+        "fr": [
+          "Myodes glareolus"
+        ]
+      }
+    },
+    "brown-bear": {
+      "front": "{Q36341}"
+    },
+    "brown-long-eared-bat": {
+      "front": "{Q210708}"
+    },
+    "brown-rat": {
+      "front": "{Q184224}"
+    },
+    "common-minke-whale": {
+      "front": "{Q201808}"
+    },
+    "common-noctule": {
+      "front": "{Q214846}"
+    },
+    "common-pipistrelle": {
+      "front": "{Q176901}"
+    },
+    "common-shrew": {
+      "front": "{Q591450}"
+    },
+    "daubentons-bat": {
+      "front": "{Q504488}"
+    },
+    "eurasian-beaver": {
+      "front": "{Q181191}"
+    },
+    "eurasian-lynx": {
+      "front": "{Q43375}"
+    },
+    "eurasian-otter": {
+      "front": "{Q29995}"
+    },
+    "european-badger": {
+      "front": "{Q27066}"
+    },
+    "european-hare": {
+      "front": "{Q26838}"
+    },
+    "european-hedgehog": {
+      "front": "{Q6145}"
+    },
+    "european-mole": {
+      "front": "{Q209067}"
+    },
+    "european-polecat": {
+      "front": "{Q26582}"
+    },
+    "european-rabbit": {
+      "front": "{Q25851}",
+      "not": {
+        "es": [
+          "Poponejo"
+        ]
+      }
+    },
+    "fallow-deer": {
+      "front": "{Q159857}"
+    },
+    "field-vole": {
+      "front": "{Q264793}"
+    },
+    "grey-red-backed-vole": {
+      "front": "{Q125628803}"
+    },
+    "grey-seal": {
+      "front": "{Q27370}"
+    },
+    "grey-wolf": {
+      "front": "{Q18498}"
+    },
+    "harbour-porpoise": {
+      "front": "{Q27027}"
+    },
+    "harbour-seal": {
+      "front": "{Q26913}"
+    },
+    "hazel-dormouse": {
+      "front": "{Q207148}"
+    },
+    "house-mouse": {
+      "front": "{Q83310}"
+    },
+    "humpback-whale": {
+      "front": "{Q132905}"
+    },
+    "killer-whale": {
+      "front": "{Q26843}"
+    },
+    "least-weasel": {
+      "front": "{Q25311}"
+    },
+    "moose": {
+      "front": "{Q35517}"
+    },
+    "mountain-hare": {
+      "front": "{Q180035}"
+    },
+    "muskrat": {
+      "front": "{Q26283}"
+    },
+    "nathusius-pipistrelle": {
+      "front": "{Q520425}"
+    },
+    "natterers-bat": {
+      "front": "{Q723123}"
+    },
+    "northern-bat": {
+      "front": "{Q300941}",
+      "not": {
+        "es": [
+          "Eptesicus nilssonii"
+        ],
+        "fr": [
+          "Eptesicus nilssonii"
+        ]
+      }
+    },
+    "northern-birch-mouse": {
+      "front": "{Q751958}"
+    },
+    "norway-lemming": {
+      "front": "{Q819985}"
+    },
+    "parti-coloured-bat": {
+      "front": "{Q232644}"
+    },
+    "pine-marten": {
+      "front": "{Q26046}"
+    },
+    "pygmy-shrew": {
+      "front": "{Q244372}"
+    },
+    "raccoon-dog": {
+      "front": "{Q133189}"
+    },
+    "red-deer": {
+      "front": "{Q79794}"
+    },
+    "red-fox": {
+      "front": "{Q8332}"
+    },
+    "red-squirrel": {
+      "front": "{Q4388}"
+    },
+    "reindeer": {
+      "front": "{Q39624}"
+    },
+    "ringed-seal": {
+      "front": "{Q203208}"
+    },
+    "roe-deer": {
+      "front": "{Q122069}"
+    },
+    "root-vole": {
+      "front": "{Q703702}",
+      "not": {
+        "es": [
+          "Microtus oeconomus"
+        ],
+        "fr": [
+          "Microtus oeconomus"
+        ]
+      }
+    },
+    "serotine": {
+      "front": "{Q214869}",
+      "not": {
+        "es": [
+          "Eptesicus serotinus"
+        ],
+        "fr": [
+          "Eptesicus serotinus"
+        ]
+      }
+    },
+    "soprano-pipistrelle": {
+      "front": "{Q304368}"
+    },
+    "stoat": {
+      "front": "{Q25345}"
+    },
+    "water-shrew": {
+      "front": "{Q465986}"
+    },
+    "water-vole": {
+      "front": "{Q27016}"
+    },
+    "whiskered-bat": {
+      "front": "{Q508013}"
+    },
+    "white-beaked-dolphin": {
+      "front": "{Q217147}"
+    },
+    "wild-boar": {
+      "front": "{Q58697}"
+    },
+    "wolverine": {
+      "front": "{Q14334}"
+    },
+    "wood-lemming": {
+      "front": "{Q665347}"
+    },
+    "wood-mouse": {
+      "front": "{Q212185}"
+    },
+    "yellow-necked-mouse": {
+      "front": "{Q216871}"
+    }
+  }
+}

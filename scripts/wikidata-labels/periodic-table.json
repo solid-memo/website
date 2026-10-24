@@ -1,0 +1,366 @@
+{
+  "description": {
+    "en": "Every chemical element by symbol, named in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Compiled from Wikipedia's List of chemical elements; the names and symbols themselves are standardised by IUPAC, the Swedish names taken from Wikidata.",
+    "sv": "Varje grundämne efter sin kemiska beteckning, med namnet på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Sammanställd från Wikipedias lista över grundämnen; namnen och beteckningarna standardiseras av IUPAC, och de svenska namnen är hämtade från Wikidata.",
+    "ko": "모든 화학 원소를 원소 기호별로, 영어와 스웨덴어 이름, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어 이름과 함께 담았습니다. 위키백과의 화학 원소 목록(List of chemical elements)을 바탕으로 만들었고, 이름과 기호 자체는 IUPAC이 표준화한 것이며 스웨덴어 이름은 Wikidata에서 가져왔습니다.",
+    "de": "Jedes chemische Element nach seinem Symbol, mit dem Namen auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Zusammengestellt aus der Liste der chemischen Elemente der Wikipedia (List of chemical elements); die Namen und Symbole selbst sind von der IUPAC standardisiert, die schwedischen Namen stammen aus Wikidata.",
+    "es": "Todos los elementos químicos por su símbolo, con el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Recopilado a partir de la lista de elementos químicos de Wikipedia (List of chemical elements); los nombres y símbolos en sí están normalizados por la IUPAC, y los nombres suecos proceden de Wikidata.",
+    "fr": "Chaque élément chimique par son symbole, avec son nom en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Compilé à partir de la liste des éléments chimiques de Wikipédia (List of chemical elements) ; les noms et symboles eux-mêmes sont normalisés par l’UICPA, les noms suédois étant tirés de Wikidata."
+  },
+  "cards": {
+    "actinium": {
+      "back": "{Q1121}"
+    },
+    "aluminium": {
+      "back": "{Q663}"
+    },
+    "americium": {
+      "back": "{Q1872}"
+    },
+    "antimony": {
+      "back": "{Q1099}"
+    },
+    "argon": {
+      "back": "{Q696}"
+    },
+    "arsenic": {
+      "back": "{Q871}"
+    },
+    "astatine": {
+      "back": "{Q999}"
+    },
+    "barium": {
+      "back": "{Q1112}"
+    },
+    "berkelium": {
+      "back": "{Q1882}"
+    },
+    "beryllium": {
+      "back": "{Q569}"
+    },
+    "bismuth": {
+      "back": "{Q942}"
+    },
+    "bohrium": {
+      "back": "{Q1249}"
+    },
+    "boron": {
+      "back": "{Q618}"
+    },
+    "bromine": {
+      "back": "{Q879}"
+    },
+    "cadmium": {
+      "back": "{Q1091}"
+    },
+    "caesium": {
+      "back": "{Q1108}"
+    },
+    "calcium": {
+      "back": "{Q706}"
+    },
+    "californium": {
+      "back": "{Q1888}"
+    },
+    "carbon": {
+      "back": "{Q623}"
+    },
+    "cerium": {
+      "back": "{Q1385}"
+    },
+    "chlorine": {
+      "back": "{Q688}"
+    },
+    "chromium": {
+      "back": "{Q725}"
+    },
+    "cobalt": {
+      "back": "{Q740}"
+    },
+    "copernicium": {
+      "back": "{Q1278}"
+    },
+    "copper": {
+      "back": "{Q753}"
+    },
+    "curium": {
+      "back": "{Q1876}"
+    },
+    "darmstadtium": {
+      "back": "{Q1266}"
+    },
+    "dubnium": {
+      "back": "{Q1232}"
+    },
+    "dysprosium": {
+      "back": "{Q1843}"
+    },
+    "einsteinium": {
+      "back": "{Q1892}"
+    },
+    "erbium": {
+      "back": "{Q1849}"
+    },
+    "europium": {
+      "back": "{Q1396}"
+    },
+    "fermium": {
+      "back": "{Q1896}"
+    },
+    "flerovium": {
+      "back": "{Q1302}"
+    },
+    "fluorine": {
+      "back": "{Q650}"
+    },
+    "francium": {
+      "back": "{Q671}"
+    },
+    "gadolinium": {
+      "back": "{Q1832}"
+    },
+    "gallium": {
+      "back": "{Q861}"
+    },
+    "germanium": {
+      "back": "{Q867}"
+    },
+    "gold": {
+      "back": "{Q897}"
+    },
+    "hafnium": {
+      "back": "{Q1119}"
+    },
+    "hassium": {
+      "back": "{Q1252}"
+    },
+    "helium": {
+      "back": "{Q560}"
+    },
+    "holmium": {
+      "back": "{Q1846}"
+    },
+    "hydrogen": {
+      "back": "{Q556}"
+    },
+    "indium": {
+      "back": "{Q1094}"
+    },
+    "iodine": {
+      "back": "{Q1103}"
+    },
+    "iridium": {
+      "back": "{Q877}"
+    },
+    "iron": {
+      "back": "{Q677}"
+    },
+    "krypton": {
+      "back": "{Q888}"
+    },
+    "lanthanum": {
+      "back": "{Q1801}"
+    },
+    "lawrencium": {
+      "back": "{Q1905}"
+    },
+    "lead": {
+      "back": "{Q708}"
+    },
+    "lithium": {
+      "back": "{Q568}"
+    },
+    "livermorium": {
+      "back": "{Q1304}"
+    },
+    "lutetium": {
+      "back": "{Q1857}"
+    },
+    "magnesium": {
+      "back": "{Q660}"
+    },
+    "manganese": {
+      "back": "{Q731}"
+    },
+    "meitnerium": {
+      "back": "{Q1258}"
+    },
+    "mendelevium": {
+      "back": "{Q1898}"
+    },
+    "mercury": {
+      "back": "{Q925}"
+    },
+    "molybdenum": {
+      "back": "{Q1053}"
+    },
+    "moscovium": {
+      "back": "{Q1303}"
+    },
+    "neodymium": {
+      "back": "{Q1388}"
+    },
+    "neon": {
+      "back": "{Q654}"
+    },
+    "neptunium": {
+      "back": "{Q1105}"
+    },
+    "nickel": {
+      "back": "{Q744}"
+    },
+    "nihonium": {
+      "back": "{Q1301}"
+    },
+    "niobium": {
+      "back": "{Q1046}"
+    },
+    "nitrogen": {
+      "back": "{Q627}"
+    },
+    "nobelium": {
+      "back": "{Q1901}"
+    },
+    "oganesson": {
+      "back": "{Q1307}"
+    },
+    "osmium": {
+      "back": "{Q751}"
+    },
+    "oxygen": {
+      "back": "{Q629}"
+    },
+    "palladium": {
+      "back": "{Q1089}"
+    },
+    "phosphorus": {
+      "back": "{Q674}"
+    },
+    "platinum": {
+      "back": "{Q880}"
+    },
+    "plutonium": {
+      "back": "{Q1102}"
+    },
+    "polonium": {
+      "back": "{Q979}"
+    },
+    "potassium": {
+      "back": "{Q703}"
+    },
+    "praseodymium": {
+      "back": "{Q1386}"
+    },
+    "promethium": {
+      "back": "{Q1809}"
+    },
+    "protactinium": {
+      "back": "{Q1109}"
+    },
+    "radium": {
+      "back": "{Q1128}"
+    },
+    "radon": {
+      "back": "{Q1133}"
+    },
+    "rhenium": {
+      "back": "{Q737}"
+    },
+    "rhodium": {
+      "back": "{Q1087}"
+    },
+    "roentgenium": {
+      "back": "{Q1272}"
+    },
+    "rubidium": {
+      "back": "{Q895}"
+    },
+    "ruthenium": {
+      "back": "{Q1086}"
+    },
+    "rutherfordium": {
+      "back": "{Q1226}"
+    },
+    "samarium": {
+      "back": "{Q1819}"
+    },
+    "scandium": {
+      "back": "{Q713}"
+    },
+    "seaborgium": {
+      "back": "{Q1234}"
+    },
+    "selenium": {
+      "back": "{Q876}"
+    },
+    "silicon": {
+      "back": "{Q670}"
+    },
+    "silver": {
+      "back": "{Q1090}"
+    },
+    "sodium": {
+      "back": "{Q658}"
+    },
+    "strontium": {
+      "back": "{Q938}"
+    },
+    "sulfur": {
+      "back": "{Q682}"
+    },
+    "tantalum": {
+      "back": "{Q1123}"
+    },
+    "technetium": {
+      "back": "{Q1054}"
+    },
+    "tellurium": {
+      "back": "{Q1100}"
+    },
+    "tennessine": {
+      "back": "{Q1306}"
+    },
+    "terbium": {
+      "back": "{Q1838}"
+    },
+    "thallium": {
+      "back": "{Q932}"
+    },
+    "thorium": {
+      "back": "{Q1115}"
+    },
+    "thulium": {
+      "back": "{Q1853}"
+    },
+    "tin": {
+      "back": "{Q1096}"
+    },
+    "titanium": {
+      "back": "{Q716}"
+    },
+    "tungsten": {
+      "back": "{Q743}"
+    },
+    "uranium": {
+      "back": "{Q1098}"
+    },
+    "vanadium": {
+      "back": "{Q722}"
+    },
+    "xenon": {
+      "back": "{Q1106}"
+    },
+    "ytterbium": {
+      "back": "{Q1855}"
+    },
+    "yttrium": {
+      "back": "{Q941}"
+    },
+    "zinc": {
+      "back": "{Q758}"
+    },
+    "zirconium": {
+      "back": "{Q1038}"
+    }
+  }
+}

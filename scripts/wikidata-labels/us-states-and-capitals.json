@@ -1,0 +1,228 @@
+{
+  "description": {
+    "en": "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin.",
+    "sv": "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin.",
+    "ko": "2026년 10월 기준 미국의 50개 주와 그 주도를 양방향으로 학습하는 카드 50장입니다. 앞면은 주 이름(예: 영어 ‘California’, 스웨덴어 ‘Kalifornien’), 뒷면은 주도 이름으로, 영어와 스웨덴어 표기가 같습니다. 네 개 주(뉴욕, 일리노이, 워싱턴, 미네소타)에는 짧은 메모가 있습니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져왔으며(두 메모의 최대 도시는 미국 인구조사국의 State Facts for Students에서 가져옴), 인구조사국과 Nationalencyklopedin과 대조해 확인했습니다.",
+    "de": "Die 50 Bundesstaaten der Vereinigten Staaten und ihre Hauptstädte, Stand Oktober 2026: 50 Karten, die in beide Richtungen gelernt werden. Vorderseite: der Bundesstaat, z. B. „California“ (schwedisch „Kalifornien“); Rückseite: seine Hauptstadt, deren Name auf Englisch und Schwedisch gleich geschrieben wird, mit einer kurzen Anmerkung bei vier Bundesstaaten (New York, Illinois, Washington und Minnesota). Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen (die größten Städte in zwei Anmerkungen aus den State Facts for Students des US Census Bureau) und anhand des Census Bureau und der Nationalencyklopedin geprüft.",
+    "es": "Los 50 estados de Estados Unidos y sus capitales, a octubre de 2026: 50 tarjetas que se estudian en ambos sentidos. Anverso: el estado, p. ej. «California» (en sueco «Kalifornien»); reverso: su capital, cuyo nombre se escribe igual en inglés y en sueco, con una nota breve para cuatro estados (Nueva York, Illinois, Washington y Minnesota). Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Datos tomados de Wikidata (salvo las ciudades más grandes que figuran en dos notas, que proceden de State Facts for Students de la Oficina del Censo de los Estados Unidos) y contrastados con la Oficina del Censo y la Nationalencyklopedin.",
+    "fr": "Les 50 États des États-Unis et leurs capitales, en date d’octobre 2026 : 50 cartes étudiées dans les deux sens. Recto : l’État, par exemple « California » (en suédois « Kalifornien ») ; verso : sa capitale, dont le nom s’écrit de la même façon en anglais et en suédois, avec une courte note pour quatre États (New York, Illinois, Washington et Minnesota). Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Données tirées de Wikidata (sauf les plus grandes villes citées dans deux notes, qui proviennent des State Facts for Students du Bureau du recensement des États-Unis) et vérifiées auprès du Bureau du recensement et de la Nationalencyklopedin."
+  },
+  "labels": {
+    "State": {
+      "sv": "Delstat",
+      "ko": "주",
+      "de": "Bundesstaat",
+      "es": "Estado",
+      "fr": "État"
+    },
+    "Capital": {
+      "sv": "Huvudstad",
+      "ko": "주도",
+      "de": "Hauptstadt",
+      "es": "Capital",
+      "fr": "Capitale"
+    }
+  },
+  "cards": {
+    "alabama": {
+      "front": "{Q173}",
+      "back": "{Q29364}"
+    },
+    "alaska": {
+      "front": "{Q797}",
+      "back": "{Q29445}"
+    },
+    "arizona": {
+      "front": "{Q816}",
+      "back": "{Q16556}"
+    },
+    "arkansas": {
+      "front": "{Q1612}",
+      "back": "{Q33405}"
+    },
+    "california": {
+      "front": "{Q99}",
+      "back": "{Q18013}"
+    },
+    "colorado": {
+      "front": "{Q1261}",
+      "back": "{Q16554}"
+    },
+    "connecticut": {
+      "front": "{Q779}",
+      "back": "{Q33486}"
+    },
+    "delaware": {
+      "front": "{Q1393}",
+      "back": "{Q33518}"
+    },
+    "florida": {
+      "front": "{Q812}",
+      "back": "{Q37043}"
+    },
+    "georgia": {
+      "front": "{Q1428}",
+      "back": "{Q23556}"
+    },
+    "hawaii": {
+      "front": "{Q782}",
+      "back": "{Q18094}"
+    },
+    "idaho": {
+      "front": "{Q1221}",
+      "back": "{Q35775}"
+    },
+    "illinois": {
+      "front": "{Q1204}",
+      "back": "{Q28515}"
+    },
+    "indiana": {
+      "front": "{Q1415}",
+      "back": "{Q6346}"
+    },
+    "iowa": {
+      "front": "{Q1546}",
+      "back": "{Q39709}"
+    },
+    "kansas": {
+      "front": "{Q1558}",
+      "back": "{Q41057}"
+    },
+    "kentucky": {
+      "front": "{Q1603}",
+      "back": "{Q28603}"
+    },
+    "louisiana": {
+      "front": "{Q1588}",
+      "back": "{Q28218}"
+    },
+    "maine": {
+      "front": "{Q724}",
+      "back": "{Q28206}"
+    },
+    "maryland": {
+      "front": "{Q1391}",
+      "back": "{Q28271}"
+    },
+    "massachusetts": {
+      "front": "{Q771}",
+      "back": "{Q100}"
+    },
+    "michigan": {
+      "front": "{Q1166}",
+      "back": "{Q28237}"
+    },
+    "minnesota": {
+      "front": "{Q1527}",
+      "back": "{Q28848}"
+    },
+    "mississippi": {
+      "front": "{Q1494}",
+      "back": "{Q28198}"
+    },
+    "missouri": {
+      "front": "{Q1581}",
+      "back": "{Q28180}"
+    },
+    "montana": {
+      "front": "{Q1212}",
+      "back": "{Q38733}"
+    },
+    "nebraska": {
+      "front": "{Q1553}",
+      "back": "{Q28260}"
+    },
+    "nevada": {
+      "front": "{Q1227}",
+      "back": "{Q40881}"
+    },
+    "new-hampshire": {
+      "front": "{Q759}",
+      "back": "{Q28249}"
+    },
+    "new-jersey": {
+      "front": "{Q1408}",
+      "back": "{Q25330}"
+    },
+    "new-mexico": {
+      "front": "{Q1522}",
+      "back": "{Q38555}"
+    },
+    "new-york": {
+      "front": "{Q1384}",
+      "back": "{Q24861}"
+    },
+    "north-carolina": {
+      "front": "{Q1454}",
+      "back": "{Q41087}"
+    },
+    "north-dakota": {
+      "front": "{Q1207}",
+      "back": "{Q37066}"
+    },
+    "ohio": {
+      "front": "{Q1397}",
+      "back": "{Q16567}"
+    },
+    "oklahoma": {
+      "front": "{Q1649}",
+      "back": "{Q34863}"
+    },
+    "oregon": {
+      "front": "{Q824}",
+      "back": "{Q43919}"
+    },
+    "pennsylvania": {
+      "front": "{Q1400}",
+      "back": "{Q25280}"
+    },
+    "rhode-island": {
+      "front": "{Q1387}",
+      "back": "{Q18383}"
+    },
+    "south-carolina": {
+      "front": "{Q1456}",
+      "back": "{Q38453}"
+    },
+    "south-dakota": {
+      "front": "{Q1211}",
+      "back": "{Q40747}"
+    },
+    "tennessee": {
+      "front": "{Q1509}",
+      "back": "{Q23197}"
+    },
+    "texas": {
+      "front": "{Q1439}",
+      "back": "{Q16559}"
+    },
+    "utah": {
+      "front": "{Q829}",
+      "back": "{Q23337}"
+    },
+    "vermont": {
+      "front": "{Q16551}",
+      "back": "{Q26426}"
+    },
+    "virginia": {
+      "front": "{Q1370}",
+      "back": "{Q43421}"
+    },
+    "washington": {
+      "front": "{Q1223}",
+      "back": "{Q42735}"
+    },
+    "west-virginia": {
+      "front": "{Q1371}",
+      "back": "{Q44564}"
+    },
+    "wisconsin": {
+      "front": "{Q1537}",
+      "back": "{Q43788}"
+    },
+    "wyoming": {
+      "front": "{Q1214}",
+      "back": "{Q39042}"
+    }
+  }
+}

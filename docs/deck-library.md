@@ -261,7 +261,8 @@ in two decks. A card about several things names each.
 - **A deck compiled from linked data keeps its IDs** from its next
   version on: the taxonomy deck, whose script writes them, and the
   decks compiled from Wikidata, such as `famous-paintings` and
-  `capitals-of-the-world`, their QIDs.
+  `capitals-of-the-world`, their QIDs. The label decks get theirs with
+  their [languages from Wikidata](#languages-from-wikidata).
 
 ## Publishing a new version
 
@@ -433,6 +434,91 @@ up, the `update` job fails at the step that makes the token, and the
 failure issue links that run. To change the key, generate a new one in
 the App's settings, replace the environment's secret, then delete the
 old key there.
+
+## Languages from Wikidata
+
+Many decks are labels of well-known things, a country and its capital, an
+element, a star, and their cards were written in English and Swedish.
+Wikidata has a name for each thing in every language the app speaks,
+written by people and CC0, as the decks are.
+[scripts/wikidata_labels.py](../scripts/wikidata_labels.py) makes a
+deck's next version with its cards in Korean, German, Spanish and
+French as well, from those labels, with Python's standard library
+alone. Its docstring says how, in full.
+
+**The mapping** says what each card is about:
+`scripts/wikidata-labels/<deck>.json`, one per deck, written once and
+checked by a person, so nothing is guessed again on a later run. It
+names every card in use, by its fragment id, with what its front and
+back are made of: a template such as `"{Q224}"` or
+`"{Q199471} (AFN)"`, in which `{Q…}` is the item's label, or a frame
+written in each language, such as "Highest point of {0}", for text
+built from more than one part. A card it cannot make it skips, saying
+why. A card may refuse a label Wikidata gives that is wrong for it, such
+as a species' former scientific name or the name of another species:
+the card goes without that language until the label is mended on
+Wikidata. It also translates the deck's card labels ("Capital"), and gives
+the next version's description, which says which languages the cards
+are in.
+
+**What a card gets.** A card gets a language when every item its
+sides name has a label in it; else it goes without that language, and
+the report says which item lacks it. Its labels get the languages its
+sides get; its notes stay as they are. English and Swedish text never
+changes: some Swedish names follow the Swedish Language Council rather
+than Wikidata, and some English names are the author's own wording.
+Each card names its items as `dcterms:subject`
+([What a card is about](#what-a-card-is-about)). The report also lists
+where the card's English or Swedish text differs from what the mapping
+makes of Wikidata's labels in those languages: often on purpose, but it
+is how a wrong item shows.
+
+**Reproducible.** The version records how it was made, in
+`<#wikidata-labels>`: the script at the commit that last changed it,
+with its SHA-256 and the Python and Unicode versions, the mapping by its
+path and SHA-256, the command line, and the revision of every item it
+read
+(`https://www.wikidata.org/wiki/Special:EntityData/Q224.json?revision=N`).
+`--verify` makes the cards of the newest version the script made again,
+from the version before it, the mapping and those revisions, and fails
+unless they come out byte for byte the same. So the script refuses to
+run unless it is committed and unmodified (`--allow-uncommitted` writes
+a draft), and the mapping is committed with the version it made.
+
+**Polite to Wikidata.** One request at a time, 50 items a request, an
+honest User-Agent with a contact URL, gzip, and waiting as long as
+Wikidata asks when it is busy, as Wikimedia's
+[User-Agent policy](https://foundation.wikimedia.org/wiki/Policy:User-Agent_policy)
+and [API etiquette](https://www.mediawiki.org/wiki/API:Etiquette) ask.
+The requests only read, so they send no `maxlag`: on Wikidata it counts
+the query service's lag, which edits cause, to hold back bots that
+edit, and it can refuse every request for hours.
+`--cache-dir` keeps the labels of each revision read, since a revision
+never changes. `--verify` asks for an old revision's content only for an
+item edited since.
+
+To make a deck's next version, from the repository root on an
+up-to-date `main` with the mapping written:
+
+```sh
+python3 scripts/wikidata_labels.py --deck capitals-of-the-world --cache-dir ~/.cache/wikidata
+npm run format:turtle
+npm run library
+npm run library:check -- --base origin/main
+```
+
+Commit the new version with the index and the mapping as a
+`feat(decks)` commit, as for
+[any new version](#publishing-a-new-version). A version made by hand
+later keeps the cards' text; the next run of the script writes the four
+languages afresh from the labels, so a wrong label is mended on
+Wikidata, or in the mapping.
+
+It is no check of CI, which never reaches Wikidata. The
+[Wikidata workflow](../.github/workflows/wikidata.yml) runs `--verify`
+on every deck with a mapping each Tuesday, and by hand (Actions ›
+Wikidata › Run workflow). When Wikidata cannot be reached, it warns and
+passes; when a deck's cards come out otherwise, it fails.
 
 ## Authoring Markdown
 

@@ -1,0 +1,222 @@
+{
+  "description": {
+    "en": "50 major rivers of the world and the water each one flows into: a sea, ocean, bay, lake or another river. The rivers come from every continent except Antarctica, seven of them Nordic, such as the Torne and the Göta älv. Front: the river; back: where it flows into, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. The mouth is a water that Wikidata records for the river (P403); where it records several, the card gives the sea or bay that the other sources also name, sometimes with a note. Rivers whose mouth is disputed or splits between different waters are left out. From Wikidata, checked against Wikipedia and Nationalencyklopedin.",
+    "sv": "50 av världens stora floder och det vatten som var och en mynnar i: ett hav, en ocean, en vik, en sjö eller en annan flod. Floderna kommer från alla världsdelar utom Antarktis, sju av dem nordiska, som Torne älv och Göta älv. Framsida: floden; baksida: var den mynnar, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Mynningen är ett vatten som Wikidata anger för floden (P403, mynnar i); där Wikidata anger flera ger kortet det hav eller den vik som även de andra källorna nämner, ibland med en anteckning. Floder vars mynning är omstridd eller delas mellan olika vatten är utelämnade. Uppgifterna kommer från Wikidata och är kontrollerade mot Wikipedia och Nationalencyklopedin.",
+    "ko": "세계의 주요 강 50개와 각 강이 흘러드는 물, 곧 바다, 대양, 만, 호수 또는 다른 강입니다. 강은 남극을 뺀 모든 대륙에서 골랐으며, 그중 7개는 토르네강과 예타강 같은 북유럽의 강입니다. 앞면은 강, 뒷면은 강이 흘러드는 곳을 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 보여 줍니다. 하구는 Wikidata가 그 강에 대해 기록한 물(P403)입니다. 여러 개가 기록된 경우 카드는 다른 출처도 언급하는 바다나 만을 제시하며, 때로는 메모를 덧붙입니다. 하구에 이견이 있거나 여러 물로 갈라지는 강은 제외했습니다. Wikidata에서 가져왔고 위키백과와 Nationalencyklopedin과 대조해 확인했습니다.",
+    "de": "50 große Flüsse der Welt und das Gewässer, in das jeder von ihnen mündet: ein Meer, ein Ozean, eine Bucht, ein See oder ein anderer Fluss. Die Flüsse stammen von allen Kontinenten außer der Antarktis, sieben davon aus den nordischen Ländern, etwa der Torne älv und der Göta älv. Vorderseite: der Fluss; Rückseite: wohin er mündet, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Die Mündung ist ein Gewässer, das Wikidata für den Fluss verzeichnet (P403); wo es mehrere verzeichnet, nennt die Karte das Meer oder die Bucht, die auch die anderen Quellen nennen, manchmal mit einer Anmerkung. Flüsse, deren Mündung umstritten ist oder sich auf verschiedene Gewässer aufteilt, sind weggelassen. Aus Wikidata, geprüft anhand von Wikipedia und Nationalencyklopedin.",
+    "es": "50 grandes ríos del mundo y las aguas en las que desemboca cada uno: un mar, un océano, una bahía, un lago u otro río. Los ríos proceden de todos los continentes salvo la Antártida, y siete de ellos son nórdicos, como el Torne y el Göta älv. Anverso: el río; reverso: dónde desemboca, en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. La desembocadura es una masa de agua que Wikidata registra para el río (P403); cuando registra varias, la tarjeta da el mar o la bahía que también nombran las demás fuentes, a veces con una nota. Se han dejado fuera los ríos cuya desembocadura es discutida o se reparte entre aguas distintas. Datos tomados de Wikidata y contrastados con Wikipedia y la Nationalencyklopedin.",
+    "fr": "50 grands fleuves et rivières du monde et les eaux dans lesquelles chacun se jette : une mer, un océan, une baie, un lac ou un autre cours d’eau. Ils viennent de tous les continents sauf l’Antarctique, et sept d’entre eux sont nordiques, comme le Torne et le Göta älv. Recto : le cours d’eau ; verso : là où il se jette, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. L’embouchure est une étendue d’eau que Wikidata indique pour le cours d’eau (P403) ; quand Wikidata en indique plusieurs, la carte donne la mer ou la baie que citent aussi les autres sources, parfois avec une note. Les cours d’eau dont l’embouchure est contestée ou se partage entre différentes eaux sont écartés. Données tirées de Wikidata, vérifiées auprès de Wikipédia et de la Nationalencyklopedin."
+  },
+  "cards": {
+    "amazon": {
+      "front": "{Q3783}",
+      "back": "{Q97}"
+    },
+    "blue-nile": {
+      "front": "{Q882739}",
+      "back": "{Q3392}"
+    },
+    "columbia": {
+      "front": "{Q2251}",
+      "back": "{Q98}"
+    },
+    "congo": {
+      "front": "{Q3503}",
+      "back": "{Q97}"
+    },
+    "danube": {
+      "front": "{Q1653}",
+      "back": "{Q166}"
+    },
+    "darling": {
+      "front": "{Q181482}",
+      "back": "{Q183078}"
+    },
+    "don": {
+      "front": "{Q1229}",
+      "back": "{Q35000}"
+    },
+    "elbe": {
+      "front": "{Q1644}",
+      "back": "{Q1693}"
+    },
+    "euphrates": {
+      "front": "{Q34589}",
+      "back": "{Q166966}"
+    },
+    "ganges": {
+      "front": "{Q5089}",
+      "back": "{Q38684}"
+    },
+    "gota-alv": {
+      "front": "{Q214748}",
+      "back": "{Q131716}"
+    },
+    "indus": {
+      "front": "{Q7348}",
+      "back": "{Q58705}"
+    },
+    "irrawaddy": {
+      "front": "{Q26076}",
+      "back": "{Q47632}"
+    },
+    "jordan": {
+      "front": "{Q40059}",
+      "back": "{Q23883}"
+    },
+    "kemijoki": {
+      "front": "{Q214779}",
+      "back": "{Q13234218}"
+    },
+    "klaralven": {
+      "front": "{Q1338024}",
+      "back": "{Q173596}"
+    },
+    "kymijoki": {
+      "front": "{Q890526}",
+      "back": "{Q14686}"
+    },
+    "limpopo": {
+      "front": "{Q173017}",
+      "back": "{Q1239}"
+    },
+    "loire": {
+      "front": "{Q1469}",
+      "back": "{Q41573}"
+    },
+    "mackenzie": {
+      "front": "{Q3411}",
+      "back": "{Q131274}"
+    },
+    "magdalena": {
+      "front": "{Q191829}",
+      "back": "{Q1247}"
+    },
+    "mekong": {
+      "front": "{Q41179}",
+      "back": "{Q37660}"
+    },
+    "mississippi": {
+      "front": "{Q1497}",
+      "back": "{Q12630}"
+    },
+    "missouri": {
+      "front": "{Q5419}",
+      "back": "{Q1497}"
+    },
+    "niagara": {
+      "front": "{Q182343}",
+      "back": "{Q1062}"
+    },
+    "niger": {
+      "front": "{Q3542}",
+      "back": "{Q41430}"
+    },
+    "nile": {
+      "front": "{Q3392}",
+      "back": "{Q4918}"
+    },
+    "orange": {
+      "front": "{Q181475}",
+      "back": "{Q97}"
+    },
+    "orinoco": {
+      "front": "{Q131792}",
+      "back": "{Q97}"
+    },
+    "oulujoki": {
+      "front": "{Q736575}",
+      "back": "{Q13234218}",
+      "not": {
+        "fr": [
+          "Oulu"
+        ]
+      }
+    },
+    "parana": {
+      "front": "{Q127892}",
+      "back": "{Q35827}"
+    },
+    "po": {
+      "front": "{Q643}",
+      "back": "{Q13924}"
+    },
+    "rhine": {
+      "front": "{Q584}",
+      "back": "{Q1693}"
+    },
+    "rhone": {
+      "front": "{Q602}",
+      "back": "{Q4918}"
+    },
+    "sao-francisco": {
+      "front": "{Q142148}",
+      "back": "{Q97}"
+    },
+    "seine": {
+      "front": "{Q1471}",
+      "back": "{Q34640}"
+    },
+    "st-lawrence": {
+      "front": "{Q134750}",
+      "back": "{Q169523}"
+    },
+    "tagus": {
+      "front": "{Q14294}",
+      "back": "{Q97}"
+    },
+    "thames": {
+      "front": "{Q19686}",
+      "back": "{Q1693}"
+    },
+    "tiber": {
+      "front": "{Q13712}",
+      "back": "{Q38882}"
+    },
+    "torne": {
+      "front": "{Q121538}",
+      "back": "{Q13234218}"
+    },
+    "ural": {
+      "front": "{Q80240}",
+      "back": "{Q5484}"
+    },
+    "volga": {
+      "front": "{Q626}",
+      "back": "{Q5484}"
+    },
+    "vuoksi": {
+      "front": "{Q819448}",
+      "back": "{Q15288}"
+    },
+    "white-nile": {
+      "front": "{Q4814791}",
+      "back": "{Q3392}"
+    },
+    "yangtze": {
+      "front": "{Q5413}",
+      "back": "{Q45341}",
+      "not": {
+        "ko": [
+          "창 강"
+        ]
+      }
+    },
+    "yellow-river": {
+      "front": "{Q7355}",
+      "back": "{Q181969}"
+    },
+    "yenisei": {
+      "front": "{Q78707}",
+      "back": "{Q33629}"
+    },
+    "yukon": {
+      "front": "{Q104437}",
+      "back": "{Q44725}"
+    },
+    "zambezi": {
+      "front": "{Q43106}",
+      "back": "{Q1239}"
+    }
+  }
+}

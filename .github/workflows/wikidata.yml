@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Wikidata
+
+# Once a week, check that the decks whose cards take their Korean, German,
+# Spanish and French text from Wikidata come out the same again: for each
+# deck with a mapping in scripts/wikidata-labels/, the newest version
+# scripts/wikidata_labels.py made is made again from the Wikidata revisions
+# it records (docs/deck-library.md#languages-from-wikidata). It runs on a
+# schedule and by hand, never on a pull request: when Wikidata cannot be
+# reached, the script warns and the run passes.
+
+on:
+  schedule:
+    - cron: "41 5 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wikidata
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+      # The labels of each revision read: a revision never changes, so they
+      # are kept, and Wikidata is asked again only for revisions not kept.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/wikidata
+          key: wikidata-${{ hashFiles('decks/**/*.ttl') }}
+          restore-keys: wikidata-
+      - run: python3 scripts/wikidata_labels.py --verify --cache-dir ~/.cache/wikidata

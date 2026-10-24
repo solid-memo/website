@@ -1,0 +1,1789 @@
+@base <https://solid-memo.com/decks/periodic-table/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+@prefix spdx:       <http://spdx.org/rdf/terms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Periodic table"@en ,
+                  "Periodiska systemet"@sv ,
+                  "주기율표"@ko ,
+                  "Periodensystem"@de ,
+                  "Tabla periódica"@es ,
+                  "Tableau périodique"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every chemical element by symbol, named in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Compiled from Wikipedia's List of chemical elements; the names and symbols themselves are standardised by IUPAC, the Swedish names taken from Wikidata."@en ,
+                        "Varje grundämne efter sin kemiska beteckning, med namnet på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Sammanställd från Wikipedias lista över grundämnen; namnen och beteckningarna standardiseras av IUPAC, och de svenska namnen är hämtade från Wikidata."@sv ,
+                        "모든 화학 원소를 원소 기호별로, 영어와 스웨덴어 이름, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어 이름과 함께 담았습니다. 위키백과의 화학 원소 목록(List of chemical elements)을 바탕으로 만들었고, 이름과 기호 자체는 IUPAC이 표준화한 것이며 스웨덴어 이름은 Wikidata에서 가져왔습니다."@ko ,
+                        "Jedes chemische Element nach seinem Symbol, mit dem Namen auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Zusammengestellt aus der Liste der chemischen Elemente der Wikipedia (List of chemical elements); die Namen und Symbole selbst sind von der IUPAC standardisiert, die schwedischen Namen stammen aus Wikidata."@de ,
+                        "Todos los elementos químicos por su símbolo, con el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Recopilado a partir de la lista de elementos químicos de Wikipedia (List of chemical elements); los nombres y símbolos en sí están normalizados por la IUPAC, y los nombres suecos proceden de Wikidata."@es ,
+                        "Chaque élément chimique par son symbole, avec son nom en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Compilé à partir de la liste des éléments chimiques de Wikipédia (List of chemical elements) ; les noms et symboles eux-mêmes sont normalisés par l’UICPA, les noms suédois étant tirés de Wikidata."@fr ;
+    prov:wasDerivedFrom <https://en.wikipedia.org/wiki/List_of_chemical_elements> ,
+                        <https://iupac.org/what-we-do/periodic-table-of-elements/> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#wikidata-labels> ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:chemistry ;
+    dcat:keyword "chemical elements"@en ,
+                 "chemistry"@en ,
+                 "periodic table"@en ,
+                 "grundämnen"@sv ,
+                 "kemi"@sv ,
+                 "periodiska systemet"@sv ,
+                 "화학 원소"@ko ,
+                 "화학"@ko ,
+                 "주기율표"@ko ,
+                 "chemische Elemente"@de ,
+                 "Chemie"@de ,
+                 "Periodensystem"@de ,
+                 "elementos químicos"@es ,
+                 "química"@es ,
+                 "tabla periódica"@es ,
+                 "éléments chimiques"@fr ,
+                 "chimie"@fr ,
+                 "tableau périodique"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/periodic-table/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/periodic-table/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 118 cards in use, 118 in Korean, 118 in German, 118 in Spanish, 118 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#periodic-table> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#periodic-table> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://en.wikipedia.org/wiki/List_of_chemical_elements>
+    dcterms:title "List of chemical elements" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://iupac.org/what-we-do/periodic-table-of-elements/>
+    dcterms:title "IUPAC Periodic Table of the Elements" ;
+    dcterms:creator "International Union of Pure and Applied Chemistry" .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+# How this version's Korean, German, Spanish and French card text was made (W3C PROV-O): from the
+# previous version, the mapping that says what each card is about, and the labels of each Wikidata
+# item at the revision named here, by the script named here. English and Swedish text, and the
+# notes, are the previous version's. To make it again, with the mapping as it was committed with
+# this version, or to check that its cards come out byte for byte the same from the same
+# revisions, from the repository root:
+#   git checkout 23f0a84dcc5f3ae4ee13447185c52726c5ea747a && python3 scripts/wikidata_labels.py
+#     --deck periodic-table --issued 2026-10-24
+#   python3 scripts/wikidata_labels.py --verify --deck periodic-table
+<#wikidata-labels>
+    a prov:Activity ;
+    prov:used <https://solid-memo.com/decks/periodic-table/v2.ttl> ,
+              <#wikidata-mapping> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q556.json?revision=2558492364> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q560.json?revision=2558795777> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q568.json?revision=2559694034> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q569.json?revision=2557693220> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q618.json?revision=2556156363> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q623.json?revision=2558817939> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q627.json?revision=2558694731> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q629.json?revision=2558484951> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q650.json?revision=2557700785> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q654.json?revision=2552964670> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q658.json?revision=2559694124> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q660.json?revision=2553557179> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q663.json?revision=2552512825> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q670.json?revision=2552964723> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q671.json?revision=2552521575> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q674.json?revision=2557700827> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q677.json?revision=2558877745> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q682.json?revision=2559693805> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q688.json?revision=2558479359> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q696.json?revision=2554586639> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q703.json?revision=2557707160> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q706.json?revision=2557707208> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q708.json?revision=2558730037> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q713.json?revision=2552513129> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q716.json?revision=2557945984> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q722.json?revision=2552513214> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q725.json?revision=2558730140> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q731.json?revision=2552513285> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q737.json?revision=2552519411> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q740.json?revision=2558730087> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q743.json?revision=2552519383> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q744.json?revision=2557719639> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q751.json?revision=2552519440> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q753.json?revision=2553652348> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q758.json?revision=2552517524> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q861.json?revision=2552965582> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q867.json?revision=2552517703> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q871.json?revision=2558478421> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q876.json?revision=2552965636> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q877.json?revision=2552519468> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q879.json?revision=2557693522> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q880.json?revision=2552519537> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q888.json?revision=2554576503> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q895.json?revision=2552517919> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q897.json?revision=2556518613> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q925.json?revision=2558492094> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q932.json?revision=2557722380> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q938.json?revision=2552518062> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q941.json?revision=2552518101> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q942.json?revision=2552519690> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q979.json?revision=2558795849> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q999.json?revision=2552519751> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1038.json?revision=2555329896> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1046.json?revision=2552518156> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1053.json?revision=2552518194> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1054.json?revision=2552518223> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1086.json?revision=2552518250> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1087.json?revision=2552518272> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1089.json?revision=2552518301> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1090.json?revision=2558691514> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1091.json?revision=2558482330> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1094.json?revision=2558687647> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1096.json?revision=2559694331> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1098.json?revision=2557725531> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1099.json?revision=2552518557> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1100.json?revision=2552966080> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1102.json?revision=2552521792> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1103.json?revision=2554597263> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1105.json?revision=2552521764> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1106.json?revision=2554587152> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1108.json?revision=2552518721> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1109.json?revision=2552521715> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1112.json?revision=2557688060> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1115.json?revision=2557722412> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1119.json?revision=2552519307> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1121.json?revision=2552521630> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1123.json?revision=2557722259> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1128.json?revision=2557720651> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1133.json?revision=2559207880> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1226.json?revision=2555298777> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1232.json?revision=2547736835> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1234.json?revision=2547736839> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1249.json?revision=2547736844> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1252.json?revision=2547736951> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1258.json?revision=2547741905> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1266.json?revision=2547736958> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1272.json?revision=2547736965> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1278.json?revision=2547736970> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1301.json?revision=2555329594> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1302.json?revision=2555329816> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1303.json?revision=2555329735> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1304.json?revision=2559693381> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1306.json?revision=2555329663> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1307.json?revision=2555329873> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1385.json?revision=2552518848> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1386.json?revision=2552518891> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1388.json?revision=2552518911> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1396.json?revision=2552519011> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1801.json?revision=2552518789> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1809.json?revision=2555329942> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1819.json?revision=2552518971> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1832.json?revision=2552519063> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1838.json?revision=2552519113> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1843.json?revision=2552519141> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1846.json?revision=2552519172> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1849.json?revision=2552519196> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1853.json?revision=2552519228> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1855.json?revision=2552519255> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1857.json?revision=2552519277> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1872.json?revision=2552521833> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1876.json?revision=2552521851> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1882.json?revision=2547741845> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1888.json?revision=2547745079> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1892.json?revision=2547741874> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1896.json?revision=2547720917> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1898.json?revision=2547736815> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1901.json?revision=2547736820> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1905.json?revision=2547736825> ;
+    prov:wasAssociatedWith <https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py> ;
+    rdfs:comment "python3 scripts/wikidata_labels.py --deck periodic-table --issued 2026-10-24 (Python 3.14.4, Unicode 16.0.0)" .
+
+<#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/periodic-table.json" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "3b6bf354a889f928f27c7ac58aaa183fbf99b711b98c9b63d507192ffb787913"^^xsd:hexBinary ] .
+
+<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "wikidata_labels.py" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+
+spdx:checksumAlgorithm_sha256
+    a spdx:ChecksumAlgorithm .
+
+<#hydrogen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q556> ;
+    solid-memo:back "Hydrogen"@en ,
+                    "Väte"@sv ,
+                    "수소"@ko ,
+                    "Wasserstoff"@de ,
+                    "hidrógeno"@es ,
+                    "hydrogène"@fr ;
+    solid-memo:front "H" .
+
+<#helium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q560> ;
+    solid-memo:back "Helium"@en ,
+                    "Helium"@sv ,
+                    "헬륨"@ko ,
+                    "Helium"@de ,
+                    "helio"@es ,
+                    "hélium"@fr ;
+    solid-memo:front "He" .
+
+<#lithium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q568> ;
+    solid-memo:back "Lithium"@en ,
+                    "Litium"@sv ,
+                    "리튬"@ko ,
+                    "Lithium"@de ,
+                    "litio"@es ,
+                    "lithium"@fr ;
+    solid-memo:front "Li" .
+
+<#beryllium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q569> ;
+    solid-memo:back "Beryllium"@en ,
+                    "Beryllium"@sv ,
+                    "베릴륨"@ko ,
+                    "Beryllium"@de ,
+                    "berilio"@es ,
+                    "béryllium"@fr ;
+    solid-memo:front "Be" .
+
+<#boron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q618> ;
+    solid-memo:back "Boron"@en ,
+                    "Bor"@sv ,
+                    "붕소"@ko ,
+                    "Bor"@de ,
+                    "boro"@es ,
+                    "bore"@fr ;
+    solid-memo:front "B" .
+
+<#carbon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q623> ;
+    solid-memo:back "Carbon"@en ,
+                    "Kol"@sv ,
+                    "탄소"@ko ,
+                    "Kohlenstoff"@de ,
+                    "carbono"@es ,
+                    "carbone"@fr ;
+    solid-memo:front "C" .
+
+<#nitrogen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q627> ;
+    solid-memo:back "Nitrogen"@en ,
+                    "Kväve"@sv ,
+                    "질소"@ko ,
+                    "Stickstoff"@de ,
+                    "nitrógeno"@es ,
+                    "azote"@fr ;
+    solid-memo:front "N" .
+
+<#oxygen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q629> ;
+    solid-memo:back "Oxygen"@en ,
+                    "Syre"@sv ,
+                    "산소"@ko ,
+                    "Sauerstoff"@de ,
+                    "oxígeno"@es ,
+                    "oxygène"@fr ;
+    solid-memo:front "O" .
+
+<#fluorine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q650> ;
+    solid-memo:back "Fluorine"@en ,
+                    "Fluor"@sv ,
+                    "플루오린"@ko ,
+                    "Fluor"@de ,
+                    "flúor"@es ,
+                    "fluor"@fr ;
+    solid-memo:front "F" .
+
+<#neon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q654> ;
+    solid-memo:back "Neon"@en ,
+                    "Neon"@sv ,
+                    "네온"@ko ,
+                    "Neon"@de ,
+                    "neón"@es ,
+                    "néon"@fr ;
+    solid-memo:front "Ne" .
+
+<#sodium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q658> ;
+    solid-memo:back "Sodium"@en ,
+                    "Natrium"@sv ,
+                    "나트륨"@ko ,
+                    "Natrium"@de ,
+                    "sodio"@es ,
+                    "sodium"@fr ;
+    solid-memo:front "Na" .
+
+<#magnesium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q660> ;
+    solid-memo:back "Magnesium"@en ,
+                    "Magnesium"@sv ,
+                    "마그네슘"@ko ,
+                    "Magnesium"@de ,
+                    "magnesio"@es ,
+                    "magnésium"@fr ;
+    solid-memo:front "Mg" .
+
+<#aluminium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q663> ;
+    solid-memo:back "Aluminium"@en ,
+                    "Aluminium"@sv ,
+                    "알루미늄"@ko ,
+                    "Aluminium"@de ,
+                    "aluminio"@es ,
+                    "aluminium"@fr ;
+    solid-memo:front "Al" .
+
+<#silicon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q670> ;
+    solid-memo:back "Silicon"@en ,
+                    "Kisel"@sv ,
+                    "규소"@ko ,
+                    "Silicium"@de ,
+                    "silicio"@es ,
+                    "silicium"@fr ;
+    solid-memo:front "Si" .
+
+<#phosphorus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q674> ;
+    solid-memo:back "Phosphorus"@en ,
+                    "Fosfor"@sv ,
+                    "인"@ko ,
+                    "Phosphor"@de ,
+                    "fósforo"@es ,
+                    "phosphore"@fr ;
+    solid-memo:front "P" .
+
+<#sulfur>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q682> ;
+    solid-memo:back "Sulfur"@en ,
+                    "Svavel"@sv ,
+                    "황"@ko ,
+                    "Schwefel"@de ,
+                    "azufre"@es ,
+                    "soufre"@fr ;
+    solid-memo:front "S" .
+
+<#chlorine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q688> ;
+    solid-memo:back "Chlorine"@en ,
+                    "Klor"@sv ,
+                    "염소"@ko ,
+                    "Chlor"@de ,
+                    "cloro"@es ,
+                    "chlore"@fr ;
+    solid-memo:front "Cl" .
+
+<#argon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q696> ;
+    solid-memo:back "Argon"@en ,
+                    "Argon"@sv ,
+                    "아르곤"@ko ,
+                    "Argon"@de ,
+                    "argón"@es ,
+                    "argon"@fr ;
+    solid-memo:front "Ar" .
+
+<#potassium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q703> ;
+    solid-memo:back "Potassium"@en ,
+                    "Kalium"@sv ,
+                    "칼륨"@ko ,
+                    "Kalium"@de ,
+                    "potasio"@es ,
+                    "potassium"@fr ;
+    solid-memo:front "K" .
+
+<#calcium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q706> ;
+    solid-memo:back "Calcium"@en ,
+                    "Kalcium"@sv ,
+                    "칼슘"@ko ,
+                    "Calcium"@de ,
+                    "calcio"@es ,
+                    "calcium"@fr ;
+    solid-memo:front "Ca" .
+
+<#scandium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q713> ;
+    solid-memo:back "Scandium"@en ,
+                    "Skandium"@sv ,
+                    "스칸듐"@ko ,
+                    "Scandium"@de ,
+                    "escandio"@es ,
+                    "scandium"@fr ;
+    solid-memo:front "Sc" .
+
+<#titanium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q716> ;
+    solid-memo:back "Titanium"@en ,
+                    "Titan"@sv ,
+                    "타이타늄"@ko ,
+                    "Titan"@de ,
+                    "titanio"@es ,
+                    "titane"@fr ;
+    solid-memo:front "Ti" .
+
+<#vanadium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q722> ;
+    solid-memo:back "Vanadium"@en ,
+                    "Vanadin"@sv ,
+                    "바나듐"@ko ,
+                    "Vanadium"@de ,
+                    "vanadio"@es ,
+                    "vanadium"@fr ;
+    solid-memo:front "V" .
+
+<#chromium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q725> ;
+    solid-memo:back "Chromium"@en ,
+                    "Krom"@sv ,
+                    "크로뮴"@ko ,
+                    "Chrom"@de ,
+                    "cromo"@es ,
+                    "chrome"@fr ;
+    solid-memo:front "Cr" .
+
+<#manganese>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q731> ;
+    solid-memo:back "Manganese"@en ,
+                    "Mangan"@sv ,
+                    "망가니즈"@ko ,
+                    "Mangan"@de ,
+                    "manganeso"@es ,
+                    "manganèse"@fr ;
+    solid-memo:front "Mn" .
+
+<#iron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q677> ;
+    solid-memo:back "Iron"@en ,
+                    "Järn"@sv ,
+                    "철"@ko ,
+                    "Eisen"@de ,
+                    "hierro"@es ,
+                    "fer"@fr ;
+    solid-memo:front "Fe" .
+
+<#cobalt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q740> ;
+    solid-memo:back "Cobalt"@en ,
+                    "Kobolt"@sv ,
+                    "코발트"@ko ,
+                    "Cobalt"@de ,
+                    "cobalto"@es ,
+                    "cobalt"@fr ;
+    solid-memo:front "Co" .
+
+<#nickel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q744> ;
+    solid-memo:back "Nickel"@en ,
+                    "Nickel"@sv ,
+                    "니켈"@ko ,
+                    "Nickel"@de ,
+                    "níquel"@es ,
+                    "nickel"@fr ;
+    solid-memo:front "Ni" .
+
+<#copper>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q753> ;
+    solid-memo:back "Copper"@en ,
+                    "Koppar"@sv ,
+                    "구리"@ko ,
+                    "Kupfer"@de ,
+                    "cobre"@es ,
+                    "cuivre"@fr ;
+    solid-memo:front "Cu" .
+
+<#zinc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q758> ;
+    solid-memo:back "Zinc"@en ,
+                    "Zink"@sv ,
+                    "아연"@ko ,
+                    "Zink"@de ,
+                    "zinc"@es ,
+                    "zinc"@fr ;
+    solid-memo:front "Zn" .
+
+<#gallium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q861> ;
+    solid-memo:back "Gallium"@en ,
+                    "Gallium"@sv ,
+                    "갈륨"@ko ,
+                    "Gallium"@de ,
+                    "galio"@es ,
+                    "gallium"@fr ;
+    solid-memo:front "Ga" .
+
+<#germanium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q867> ;
+    solid-memo:back "Germanium"@en ,
+                    "Germanium"@sv ,
+                    "저마늄"@ko ,
+                    "Germanium"@de ,
+                    "germanio"@es ,
+                    "germanium"@fr ;
+    solid-memo:front "Ge" .
+
+<#arsenic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q871> ;
+    solid-memo:back "Arsenic"@en ,
+                    "Arsenik"@sv ,
+                    "비소"@ko ,
+                    "Arsen"@de ,
+                    "arsénico"@es ,
+                    "arsenic"@fr ;
+    solid-memo:front "As" .
+
+<#selenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q876> ;
+    solid-memo:back "Selenium"@en ,
+                    "Selen"@sv ,
+                    "셀레늄"@ko ,
+                    "Selen"@de ,
+                    "selenio"@es ,
+                    "sélénium"@fr ;
+    solid-memo:front "Se" .
+
+<#bromine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q879> ;
+    solid-memo:back "Bromine"@en ,
+                    "Brom"@sv ,
+                    "브로민"@ko ,
+                    "Brom"@de ,
+                    "bromo"@es ,
+                    "brome"@fr ;
+    solid-memo:front "Br" .
+
+<#krypton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q888> ;
+    solid-memo:back "Krypton"@en ,
+                    "Krypton"@sv ,
+                    "크립톤"@ko ,
+                    "Krypton"@de ,
+                    "kriptón"@es ,
+                    "krypton"@fr ;
+    solid-memo:front "Kr" .
+
+<#rubidium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q895> ;
+    solid-memo:back "Rubidium"@en ,
+                    "Rubidium"@sv ,
+                    "루비듐"@ko ,
+                    "Rubidium"@de ,
+                    "rubidio"@es ,
+                    "rubidium"@fr ;
+    solid-memo:front "Rb" .
+
+<#strontium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q938> ;
+    solid-memo:back "Strontium"@en ,
+                    "Strontium"@sv ,
+                    "스트론튬"@ko ,
+                    "Strontium"@de ,
+                    "estroncio"@es ,
+                    "strontium"@fr ;
+    solid-memo:front "Sr" .
+
+<#yttrium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q941> ;
+    solid-memo:back "Yttrium"@en ,
+                    "Yttrium"@sv ,
+                    "이트륨"@ko ,
+                    "Yttrium"@de ,
+                    "itrio"@es ,
+                    "yttrium"@fr ;
+    solid-memo:front "Y" .
+
+<#zirconium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1038> ;
+    solid-memo:back "Zirconium"@en ,
+                    "Zirkonium"@sv ,
+                    "지르코늄"@ko ,
+                    "Zirconium"@de ,
+                    "circonio"@es ,
+                    "zirconium"@fr ;
+    solid-memo:front "Zr" .
+
+<#niobium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1046> ;
+    solid-memo:back "Niobium"@en ,
+                    "Niob"@sv ,
+                    "나이오븀"@ko ,
+                    "Niob"@de ,
+                    "niobio"@es ,
+                    "niobium"@fr ;
+    solid-memo:front "Nb" .
+
+<#molybdenum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1053> ;
+    solid-memo:back "Molybdenum"@en ,
+                    "Molybden"@sv ,
+                    "몰리브데넘"@ko ,
+                    "Molybdän"@de ,
+                    "molibdeno"@es ,
+                    "molybdène"@fr ;
+    solid-memo:front "Mo" .
+
+<#technetium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1054> ;
+    solid-memo:back "Technetium"@en ,
+                    "Teknetium"@sv ,
+                    "테크네튬"@ko ,
+                    "Technetium"@de ,
+                    "tecnecio"@es ,
+                    "technétium"@fr ;
+    solid-memo:front "Tc" .
+
+<#ruthenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1086> ;
+    solid-memo:back "Ruthenium"@en ,
+                    "Rutenium"@sv ,
+                    "루테늄"@ko ,
+                    "Ruthenium"@de ,
+                    "rutenio"@es ,
+                    "ruthénium"@fr ;
+    solid-memo:front "Ru" .
+
+<#rhodium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1087> ;
+    solid-memo:back "Rhodium"@en ,
+                    "Rodium"@sv ,
+                    "로듐"@ko ,
+                    "Rhodium"@de ,
+                    "rodio"@es ,
+                    "rhodium"@fr ;
+    solid-memo:front "Rh" .
+
+<#palladium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1089> ;
+    solid-memo:back "Palladium"@en ,
+                    "Palladium"@sv ,
+                    "팔라듐"@ko ,
+                    "Palladium"@de ,
+                    "paladio"@es ,
+                    "palladium"@fr ;
+    solid-memo:front "Pd" .
+
+<#silver>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1090> ;
+    solid-memo:back "Silver"@en ,
+                    "Silver"@sv ,
+                    "은"@ko ,
+                    "Silber"@de ,
+                    "plata"@es ,
+                    "argent"@fr ;
+    solid-memo:front "Ag" .
+
+<#cadmium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1091> ;
+    solid-memo:back "Cadmium"@en ,
+                    "Kadmium"@sv ,
+                    "카드뮴"@ko ,
+                    "Cadmium"@de ,
+                    "cadmio"@es ,
+                    "cadmium"@fr ;
+    solid-memo:front "Cd" .
+
+<#indium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1094> ;
+    solid-memo:back "Indium"@en ,
+                    "Indium"@sv ,
+                    "인듐"@ko ,
+                    "Indium"@de ,
+                    "indio"@es ,
+                    "indium"@fr ;
+    solid-memo:front "In" .
+
+<#tin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1096> ;
+    solid-memo:back "Tin"@en ,
+                    "Tenn"@sv ,
+                    "주석"@ko ,
+                    "Zinn"@de ,
+                    "estaño"@es ,
+                    "étain"@fr ;
+    solid-memo:front "Sn" .
+
+<#antimony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1099> ;
+    solid-memo:back "Antimony"@en ,
+                    "Antimon"@sv ,
+                    "안티모니"@ko ,
+                    "Antimon"@de ,
+                    "antimonio"@es ,
+                    "antimoine"@fr ;
+    solid-memo:front "Sb" .
+
+<#tellurium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1100> ;
+    solid-memo:back "Tellurium"@en ,
+                    "Tellur"@sv ,
+                    "텔루륨"@ko ,
+                    "Tellur"@de ,
+                    "telurio"@es ,
+                    "tellure"@fr ;
+    solid-memo:front "Te" .
+
+<#iodine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1103> ;
+    solid-memo:back "Iodine"@en ,
+                    "Jod"@sv ,
+                    "아이오딘"@ko ,
+                    "Iod"@de ,
+                    "yodo"@es ,
+                    "iode"@fr ;
+    solid-memo:front "I" .
+
+<#xenon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1106> ;
+    solid-memo:back "Xenon"@en ,
+                    "Xenon"@sv ,
+                    "제논"@ko ,
+                    "Xenon"@de ,
+                    "xenón"@es ,
+                    "xénon"@fr ;
+    solid-memo:front "Xe" .
+
+<#caesium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1108> ;
+    solid-memo:back "Caesium"@en ,
+                    "Cesium"@sv ,
+                    "세슘"@ko ,
+                    "Caesium"@de ,
+                    "cesio"@es ,
+                    "césium"@fr ;
+    solid-memo:front "Cs" .
+
+<#barium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1112> ;
+    solid-memo:back "Barium"@en ,
+                    "Barium"@sv ,
+                    "바륨"@ko ,
+                    "Barium"@de ,
+                    "bario"@es ,
+                    "baryum"@fr ;
+    solid-memo:front "Ba" .
+
+<#lanthanum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1801> ;
+    solid-memo:back "Lanthanum"@en ,
+                    "Lantan"@sv ,
+                    "란타넘"@ko ,
+                    "Lanthan"@de ,
+                    "lantano"@es ,
+                    "lanthane"@fr ;
+    solid-memo:front "La" .
+
+<#cerium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1385> ;
+    solid-memo:back "Cerium"@en ,
+                    "Cerium"@sv ,
+                    "세륨"@ko ,
+                    "Cer"@de ,
+                    "cerio"@es ,
+                    "cérium"@fr ;
+    solid-memo:front "Ce" .
+
+<#praseodymium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1386> ;
+    solid-memo:back "Praseodymium"@en ,
+                    "Praseodym"@sv ,
+                    "프라세오디뮴"@ko ,
+                    "Praseodym"@de ,
+                    "praseodimio"@es ,
+                    "praséodyme"@fr ;
+    solid-memo:front "Pr" .
+
+<#neodymium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1388> ;
+    solid-memo:back "Neodymium"@en ,
+                    "Neodym"@sv ,
+                    "네오디뮴"@ko ,
+                    "Neodym"@de ,
+                    "neodimio"@es ,
+                    "néodyme"@fr ;
+    solid-memo:front "Nd" .
+
+<#promethium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1809> ;
+    solid-memo:back "Promethium"@en ,
+                    "Prometium"@sv ,
+                    "프로메튬"@ko ,
+                    "Promethium"@de ,
+                    "prometio"@es ,
+                    "prométhium"@fr ;
+    solid-memo:front "Pm" .
+
+<#samarium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1819> ;
+    solid-memo:back "Samarium"@en ,
+                    "Samarium"@sv ,
+                    "사마륨"@ko ,
+                    "Samarium"@de ,
+                    "samario"@es ,
+                    "samarium"@fr ;
+    solid-memo:front "Sm" .
+
+<#europium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1396> ;
+    solid-memo:back "Europium"@en ,
+                    "Europium"@sv ,
+                    "유로퓸"@ko ,
+                    "Europium"@de ,
+                    "europio"@es ,
+                    "europium"@fr ;
+    solid-memo:front "Eu" .
+
+<#gadolinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1832> ;
+    solid-memo:back "Gadolinium"@en ,
+                    "Gadolinium"@sv ,
+                    "가돌리늄"@ko ,
+                    "Gadolinium"@de ,
+                    "gadolinio"@es ,
+                    "gadolinium"@fr ;
+    solid-memo:front "Gd" .
+
+<#terbium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1838> ;
+    solid-memo:back "Terbium"@en ,
+                    "Terbium"@sv ,
+                    "터븀"@ko ,
+                    "Terbium"@de ,
+                    "terbio"@es ,
+                    "terbium"@fr ;
+    solid-memo:front "Tb" .
+
+<#dysprosium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1843> ;
+    solid-memo:back "Dysprosium"@en ,
+                    "Dysprosium"@sv ,
+                    "디스프로슘"@ko ,
+                    "Dysprosium"@de ,
+                    "disprosio"@es ,
+                    "dysprosium"@fr ;
+    solid-memo:front "Dy" .
+
+<#holmium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1846> ;
+    solid-memo:back "Holmium"@en ,
+                    "Holmium"@sv ,
+                    "홀뮴"@ko ,
+                    "Holmium"@de ,
+                    "holmio"@es ,
+                    "holmium"@fr ;
+    solid-memo:front "Ho" .
+
+<#erbium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1849> ;
+    solid-memo:back "Erbium"@en ,
+                    "Erbium"@sv ,
+                    "어븀"@ko ,
+                    "Erbium"@de ,
+                    "erbio"@es ,
+                    "erbium"@fr ;
+    solid-memo:front "Er" .
+
+<#thulium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1853> ;
+    solid-memo:back "Thulium"@en ,
+                    "Tulium"@sv ,
+                    "툴륨"@ko ,
+                    "Thulium"@de ,
+                    "tulio"@es ,
+                    "thulium"@fr ;
+    solid-memo:front "Tm" .
+
+<#ytterbium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1855> ;
+    solid-memo:back "Ytterbium"@en ,
+                    "Ytterbium"@sv ,
+                    "이터븀"@ko ,
+                    "Ytterbium"@de ,
+                    "iterbio"@es ,
+                    "ytterbium"@fr ;
+    solid-memo:front "Yb" .
+
+<#lutetium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1857> ;
+    solid-memo:back "Lutetium"@en ,
+                    "Lutetium"@sv ,
+                    "루테튬"@ko ,
+                    "Lutetium"@de ,
+                    "lutecio"@es ,
+                    "lutécium"@fr ;
+    solid-memo:front "Lu" .
+
+<#hafnium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1119> ;
+    solid-memo:back "Hafnium"@en ,
+                    "Hafnium"@sv ,
+                    "하프늄"@ko ,
+                    "Hafnium"@de ,
+                    "hafnio"@es ,
+                    "hafnium"@fr ;
+    solid-memo:front "Hf" .
+
+<#tantalum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1123> ;
+    solid-memo:back "Tantalum"@en ,
+                    "Tantal"@sv ,
+                    "탄탈럼"@ko ,
+                    "Tantal"@de ,
+                    "tántalo"@es ,
+                    "tantale"@fr ;
+    solid-memo:front "Ta" .
+
+<#tungsten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q743> ;
+    solid-memo:back "Tungsten"@en ,
+                    "Volfram"@sv ,
+                    "텅스텐"@ko ,
+                    "Wolfram"@de ,
+                    "wolframio"@es ,
+                    "tungstène"@fr ;
+    solid-memo:front "W" .
+
+<#rhenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q737> ;
+    solid-memo:back "Rhenium"@en ,
+                    "Rhenium"@sv ,
+                    "레늄"@ko ,
+                    "Rhenium"@de ,
+                    "renio"@es ,
+                    "rhénium"@fr ;
+    solid-memo:front "Re" .
+
+<#osmium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q751> ;
+    solid-memo:back "Osmium"@en ,
+                    "Osmium"@sv ,
+                    "오스뮴"@ko ,
+                    "Osmium"@de ,
+                    "osmio"@es ,
+                    "osmium"@fr ;
+    solid-memo:front "Os" .
+
+<#iridium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q877> ;
+    solid-memo:back "Iridium"@en ,
+                    "Iridium"@sv ,
+                    "이리듐"@ko ,
+                    "Iridium"@de ,
+                    "iridio"@es ,
+                    "iridium"@fr ;
+    solid-memo:front "Ir" .
+
+<#platinum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q880> ;
+    solid-memo:back "Platinum"@en ,
+                    "Platina"@sv ,
+                    "백금"@ko ,
+                    "Platin"@de ,
+                    "platino"@es ,
+                    "platine"@fr ;
+    solid-memo:front "Pt" .
+
+<#gold>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q897> ;
+    solid-memo:back "Gold"@en ,
+                    "Guld"@sv ,
+                    "금"@ko ,
+                    "Gold"@de ,
+                    "oro"@es ,
+                    "or"@fr ;
+    solid-memo:front "Au" .
+
+<#mercury>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q925> ;
+    solid-memo:back "Mercury"@en ,
+                    "Kvicksilver"@sv ,
+                    "수은"@ko ,
+                    "Quecksilber"@de ,
+                    "mercurio"@es ,
+                    "mercure"@fr ;
+    solid-memo:front "Hg" .
+
+<#thallium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q932> ;
+    solid-memo:back "Thallium"@en ,
+                    "Tallium"@sv ,
+                    "탈륨"@ko ,
+                    "Thallium"@de ,
+                    "talio"@es ,
+                    "thallium"@fr ;
+    solid-memo:front "Tl" .
+
+<#lead>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q708> ;
+    solid-memo:back "Lead"@en ,
+                    "Bly"@sv ,
+                    "납"@ko ,
+                    "Blei"@de ,
+                    "plomo"@es ,
+                    "plomb"@fr ;
+    solid-memo:front "Pb" .
+
+<#bismuth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q942> ;
+    solid-memo:back "Bismuth"@en ,
+                    "Vismut"@sv ,
+                    "비스무트"@ko ,
+                    "Bismut"@de ,
+                    "bismuto"@es ,
+                    "bismuth"@fr ;
+    solid-memo:front "Bi" .
+
+<#polonium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q979> ;
+    solid-memo:back "Polonium"@en ,
+                    "Polonium"@sv ,
+                    "폴로늄"@ko ,
+                    "Polonium"@de ,
+                    "polonio"@es ,
+                    "polonium"@fr ;
+    solid-memo:front "Po" .
+
+<#astatine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q999> ;
+    solid-memo:back "Astatine"@en ,
+                    "Astat"@sv ,
+                    "아스타틴"@ko ,
+                    "Astat"@de ,
+                    "ástato"@es ,
+                    "astate"@fr ;
+    solid-memo:front "At" .
+
+<#radon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1133> ;
+    solid-memo:back "Radon"@en ,
+                    "Radon"@sv ,
+                    "라돈"@ko ,
+                    "Radon"@de ,
+                    "radón"@es ,
+                    "radon"@fr ;
+    solid-memo:front "Rn" .
+
+<#francium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q671> ;
+    solid-memo:back "Francium"@en ,
+                    "Francium"@sv ,
+                    "프랑슘"@ko ,
+                    "Francium"@de ,
+                    "francio"@es ,
+                    "francium"@fr ;
+    solid-memo:front "Fr" .
+
+<#radium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1128> ;
+    solid-memo:back "Radium"@en ,
+                    "Radium"@sv ,
+                    "라듐"@ko ,
+                    "Radium"@de ,
+                    "radio"@es ,
+                    "radium"@fr ;
+    solid-memo:front "Ra" .
+
+<#actinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1121> ;
+    solid-memo:back "Actinium"@en ,
+                    "Aktinium"@sv ,
+                    "악티늄"@ko ,
+                    "Actinium"@de ,
+                    "actinio"@es ,
+                    "actinium"@fr ;
+    solid-memo:front "Ac" .
+
+<#thorium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1115> ;
+    solid-memo:back "Thorium"@en ,
+                    "Torium"@sv ,
+                    "토륨"@ko ,
+                    "Thorium"@de ,
+                    "torio"@es ,
+                    "thorium"@fr ;
+    solid-memo:front "Th" .
+
+<#protactinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1109> ;
+    solid-memo:back "Protactinium"@en ,
+                    "Protaktinium"@sv ,
+                    "프로탁티늄"@ko ,
+                    "Protactinium"@de ,
+                    "protactinio"@es ,
+                    "protactinium"@fr ;
+    solid-memo:front "Pa" .
+
+<#uranium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1098> ;
+    solid-memo:back "Uranium"@en ,
+                    "Uran"@sv ,
+                    "우라늄"@ko ,
+                    "Uran"@de ,
+                    "uranio"@es ,
+                    "uranium"@fr ;
+    solid-memo:front "U" .
+
+<#neptunium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1105> ;
+    solid-memo:back "Neptunium"@en ,
+                    "Neptunium"@sv ,
+                    "넵투늄"@ko ,
+                    "Neptunium"@de ,
+                    "neptunio"@es ,
+                    "neptunium"@fr ;
+    solid-memo:front "Np" .
+
+<#plutonium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1102> ;
+    solid-memo:back "Plutonium"@en ,
+                    "Plutonium"@sv ,
+                    "플루토늄"@ko ,
+                    "Plutonium"@de ,
+                    "plutonio"@es ,
+                    "plutonium"@fr ;
+    solid-memo:front "Pu" .
+
+<#americium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1872> ;
+    solid-memo:back "Americium"@en ,
+                    "Americium"@sv ,
+                    "아메리슘"@ko ,
+                    "Americium"@de ,
+                    "americio"@es ,
+                    "américium"@fr ;
+    solid-memo:front "Am" .
+
+<#curium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1876> ;
+    solid-memo:back "Curium"@en ,
+                    "Curium"@sv ,
+                    "퀴륨"@ko ,
+                    "Curium"@de ,
+                    "curio"@es ,
+                    "curium"@fr ;
+    solid-memo:front "Cm" .
+
+<#berkelium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1882> ;
+    solid-memo:back "Berkelium"@en ,
+                    "Berkelium"@sv ,
+                    "버클륨"@ko ,
+                    "Berkelium"@de ,
+                    "berkelio"@es ,
+                    "berkélium"@fr ;
+    solid-memo:front "Bk" .
+
+<#californium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1888> ;
+    solid-memo:back "Californium"@en ,
+                    "Californium"@sv ,
+                    "캘리포늄"@ko ,
+                    "Californium"@de ,
+                    "californio"@es ,
+                    "californium"@fr ;
+    solid-memo:front "Cf" .
+
+<#einsteinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1892> ;
+    solid-memo:back "Einsteinium"@en ,
+                    "Einsteinium"@sv ,
+                    "아인슈타이늄"@ko ,
+                    "Einsteinium"@de ,
+                    "einstenio"@es ,
+                    "einsteinium"@fr ;
+    solid-memo:front "Es" .
+
+<#fermium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1896> ;
+    solid-memo:back "Fermium"@en ,
+                    "Fermium"@sv ,
+                    "페르뮴"@ko ,
+                    "Fermium"@de ,
+                    "fermio"@es ,
+                    "fermium"@fr ;
+    solid-memo:front "Fm" .
+
+<#mendelevium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1898> ;
+    solid-memo:back "Mendelevium"@en ,
+                    "Mendelevium"@sv ,
+                    "멘델레븀"@ko ,
+                    "Mendelevium"@de ,
+                    "mendelevio"@es ,
+                    "mendélévium"@fr ;
+    solid-memo:front "Md" .
+
+<#nobelium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1901> ;
+    solid-memo:back "Nobelium"@en ,
+                    "Nobelium"@sv ,
+                    "노벨륨"@ko ,
+                    "Nobelium"@de ,
+                    "nobelio"@es ,
+                    "nobélium"@fr ;
+    solid-memo:front "No" .
+
+<#lawrencium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1905> ;
+    solid-memo:back "Lawrencium"@en ,
+                    "Lawrencium"@sv ,
+                    "로렌슘"@ko ,
+                    "Lawrencium"@de ,
+                    "lawrencio"@es ,
+                    "lawrencium"@fr ;
+    solid-memo:front "Lr" .
+
+<#rutherfordium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1226> ;
+    solid-memo:back "Rutherfordium"@en ,
+                    "Rutherfordium"@sv ,
+                    "러더포듐"@ko ,
+                    "Rutherfordium"@de ,
+                    "rutherfordio"@es ,
+                    "rutherfordium"@fr ;
+    solid-memo:front "Rf" .
+
+<#dubnium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1232> ;
+    solid-memo:back "Dubnium"@en ,
+                    "Dubnium"@sv ,
+                    "더브늄"@ko ,
+                    "Dubnium"@de ,
+                    "dubnio"@es ,
+                    "dubnium"@fr ;
+    solid-memo:front "Db" .
+
+<#seaborgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1234> ;
+    solid-memo:back "Seaborgium"@en ,
+                    "Seaborgium"@sv ,
+                    "시보귬"@ko ,
+                    "Seaborgium"@de ,
+                    "seaborgio"@es ,
+                    "seaborgium"@fr ;
+    solid-memo:front "Sg" .
+
+<#bohrium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1249> ;
+    solid-memo:back "Bohrium"@en ,
+                    "Bohrium"@sv ,
+                    "보륨"@ko ,
+                    "Bohrium"@de ,
+                    "bohrio"@es ,
+                    "bohrium"@fr ;
+    solid-memo:front "Bh" .
+
+<#hassium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1252> ;
+    solid-memo:back "Hassium"@en ,
+                    "Hassium"@sv ,
+                    "하슘"@ko ,
+                    "Hassium"@de ,
+                    "hasio"@es ,
+                    "hassium"@fr ;
+    solid-memo:front "Hs" .
+
+<#meitnerium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1258> ;
+    solid-memo:back "Meitnerium"@en ,
+                    "Meitnerium"@sv ,
+                    "마이트너륨"@ko ,
+                    "Meitnerium"@de ,
+                    "meitnerio"@es ,
+                    "meitnérium"@fr ;
+    solid-memo:front "Mt" .
+
+<#darmstadtium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1266> ;
+    solid-memo:back "Darmstadtium"@en ,
+                    "Darmstadtium"@sv ,
+                    "다름슈타튬"@ko ,
+                    "Darmstadtium"@de ,
+                    "darmstatio"@es ,
+                    "darmstadtium"@fr ;
+    solid-memo:front "Ds" .
+
+<#roentgenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1272> ;
+    solid-memo:back "Roentgenium"@en ,
+                    "Röntgenium"@sv ,
+                    "뢴트게늄"@ko ,
+                    "Roentgenium"@de ,
+                    "roentgenio"@es ,
+                    "roentgenium"@fr ;
+    solid-memo:front "Rg" .
+
+<#copernicium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1278> ;
+    solid-memo:back "Copernicium"@en ,
+                    "Copernicium"@sv ,
+                    "코페르니슘"@ko ,
+                    "Copernicium"@de ,
+                    "copernicio"@es ,
+                    "copernicium"@fr ;
+    solid-memo:front "Cn" .
+
+<#nihonium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1301> ;
+    solid-memo:back "Nihonium"@en ,
+                    "Nihonium"@sv ,
+                    "니호늄"@ko ,
+                    "Nihonium"@de ,
+                    "nihonio"@es ,
+                    "nihonium"@fr ;
+    solid-memo:front "Nh" .
+
+<#flerovium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1302> ;
+    solid-memo:back "Flerovium"@en ,
+                    "Flerovium"@sv ,
+                    "플레로븀"@ko ,
+                    "Flerovium"@de ,
+                    "flerovio"@es ,
+                    "flérovium"@fr ;
+    solid-memo:front "Fl" .
+
+<#moscovium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1303> ;
+    solid-memo:back "Moscovium"@en ,
+                    "Moskovium"@sv ,
+                    "모스코븀"@ko ,
+                    "Moscovium"@de ,
+                    "moscovio"@es ,
+                    "moscovium"@fr ;
+    solid-memo:front "Mc" .
+
+<#livermorium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1304> ;
+    solid-memo:back "Livermorium"@en ,
+                    "Livermorium"@sv ,
+                    "리버모륨"@ko ,
+                    "Livermorium"@de ,
+                    "livermorio"@es ,
+                    "livermorium"@fr ;
+    solid-memo:front "Lv" .
+
+<#tennessine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1306> ;
+    solid-memo:back "Tennessine"@en ,
+                    "Tenness"@sv ,
+                    "테네신"@ko ,
+                    "Tenness"@de ,
+                    "teneso"@es ,
+                    "tennesse"@fr ;
+    solid-memo:front "Ts" .
+
+<#oganesson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1307> ;
+    solid-memo:back "Oganesson"@en ,
+                    "Oganesson"@sv ,
+                    "오가네손"@ko ,
+                    "Oganesson"@de ,
+                    "oganesón"@es ,
+                    "oganesson"@fr ;
+    solid-memo:front "Og" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

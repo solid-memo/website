@@ -32,7 +32,7 @@ npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
 npm run test:roundtrip -w @solid-memo/solid   # every library release through a draft and back (below)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
-npm run test:crosscheck   # the Python scripts' own tests (the cross-check's, the taxonomy deck generator's), Python's unittest (needs scripts/requirements-ci.txt too)
+npm run test:crosscheck   # the Python scripts' own tests (the cross-check's, the taxonomy deck generator's, the Wikidata labels script's), Python's unittest (needs scripts/requirements-ci.txt too)
 npm run check:closes -- --base origin/main   # a commit since the branch left main closes an issue (add --body-file <file> for the pull request's body), as CI's commits job checks it (CONTRIBUTING.md)
 npm run check:breaking -- --base origin/main   # the public API against where the branch left main, as CI's library job checks it (docs/releasing.md)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
@@ -273,11 +273,18 @@ DCAT-AP adds, `rdfs:subClassOf`, a subject with no shape) and what it
 reports when a document fails. The same command runs the tests of the
 taxonomy deck's generator
 ([scripts/test_taxonomy_deck.py](../scripts/test_taxonomy_deck.py),
-[deck-library.md](deck-library.md#the-taxonomy-deck)). CI's
+[deck-library.md](deck-library.md#the-taxonomy-deck)), and of the
+script that gives label decks their languages from Wikidata
+([scripts/test_wikidata_labels.py](../scripts/test_wikidata_labels.py),
+[deck-library.md](deck-library.md#languages-from-wikidata)), each against
+a fake taxonomy or Wikidata of its own. CI's
 `crosscheck` job runs them all before the cross-check; `npm run check`
 does not, as it needs no Python. The generator itself runs weekly, and
 by hand, in the [Taxonomy workflow](../.github/workflows/taxonomy.yml),
-which proposes each new version of its deck as a pull request.
+which proposes each new version of its deck as a pull request. The Wikidata
+labels script checks its decks against the revisions they record weekly,
+and by hand, in the [Wikidata workflow](../.github/workflows/wikidata.yml),
+never on a pull request.
 
 ## User journeys
 
@@ -618,7 +625,7 @@ jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over what that run made, its site, kept as this run's `site` artifact, and, but on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
 | `library` | deterministic | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
-| `crosscheck` | deterministic | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
+| `crosscheck` | deterministic | the Python scripts' tests (the cross-check's, the taxonomy deck generator's and the Wikidata labels script's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
 | `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |

@@ -1,0 +1,220 @@
+{
+  "description": {
+    "en": "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin.",
+    "sv": "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin.",
+    "ko": "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다.",
+    "de": "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen.",
+    "es": "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin.",
+    "fr": "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."
+  },
+  "labels": {
+    "Capital": {
+      "sv": "Huvudstad",
+      "ko": "주도",
+      "de": "Hauptstadt",
+      "es": "Capital",
+      "fr": "Capitale"
+    }
+  },
+  "cards": {
+    "at-burgenland": {
+      "front": "{Q43210}",
+      "back": "{Q126321}"
+    },
+    "at-carinthia": {
+      "front": "{Q37985}",
+      "back": "{Q41753}"
+    },
+    "at-lower-austria": {
+      "front": "{Q42497}",
+      "back": "{Q82500}"
+    },
+    "at-salzburg": {
+      "front": "{Q43325}",
+      "back": "{Q34713}"
+    },
+    "at-styria": {
+      "front": "{Q41358}",
+      "back": "{Q13298}"
+    },
+    "at-tyrol": {
+      "front": "{Q42880}",
+      "back": "{Q1735}"
+    },
+    "at-upper-austria": {
+      "front": "{Q41967}",
+      "back": "{Q41329}"
+    },
+    "at-vienna": {
+      "front": "{Q1741}",
+      "back": "{Q1741}"
+    },
+    "at-vorarlberg": {
+      "front": "{Q38981}",
+      "back": "{Q1737}"
+    },
+    "au-australian-capital-territory": {
+      "front": "{Q3258}",
+      "back": "{Q3114}"
+    },
+    "au-new-south-wales": {
+      "front": "{Q3224}",
+      "back": "{Q3130}"
+    },
+    "au-northern-territory": {
+      "front": "{Q3235}",
+      "back": "{Q11568}",
+      "not": {
+        "de": [
+          "Nordterritorium"
+        ]
+      }
+    },
+    "au-queensland": {
+      "front": "{Q36074}",
+      "back": "{Q34932}"
+    },
+    "au-south-australia": {
+      "front": "{Q35715}",
+      "back": "{Q5112}",
+      "not": {
+        "de": [
+          "Süd-Australien"
+        ]
+      }
+    },
+    "au-tasmania": {
+      "front": "{Q34366}",
+      "back": "{Q40191}"
+    },
+    "au-victoria": {
+      "front": "{Q36687}",
+      "back": "{Q3141}"
+    },
+    "au-western-australia": {
+      "front": "{Q3206}",
+      "back": "{Q3183}"
+    },
+    "ca-alberta": {
+      "front": "{Q1951}",
+      "back": "{Q2096}"
+    },
+    "ca-british-columbia": {
+      "front": "{Q1973}",
+      "back": "{Q2132}"
+    },
+    "ca-manitoba": {
+      "front": "{Q1948}",
+      "back": "{Q2135}"
+    },
+    "ca-new-brunswick": {
+      "front": "{Q1965}",
+      "back": "{Q2138}"
+    },
+    "ca-newfoundland-and-labrador": {
+      "front": "{Q2003}",
+      "back": "{Q2082}"
+    },
+    "ca-northwest-territories": {
+      "front": "{Q2007}",
+      "back": "{Q2061}",
+      "not": {
+        "es": [
+          "Cuchillo amarillo"
+        ]
+      }
+    },
+    "ca-nova-scotia": {
+      "front": "{Q1952}",
+      "back": "{Q2141}"
+    },
+    "ca-nunavut": {
+      "front": "{Q2023}",
+      "back": "{Q2030}"
+    },
+    "ca-ontario": {
+      "front": "{Q1904}",
+      "back": "{Q172}"
+    },
+    "ca-prince-edward-island": {
+      "front": "{Q1978}",
+      "back": "{Q2127}"
+    },
+    "ca-quebec": {
+      "front": "{Q176}",
+      "back": "{Q2145}"
+    },
+    "ca-saskatchewan": {
+      "front": "{Q1989}",
+      "back": "{Q2123}"
+    },
+    "ca-yukon": {
+      "front": "{Q2009}",
+      "back": "{Q2055}"
+    },
+    "de-baden-wuerttemberg": {
+      "front": "{Q985}",
+      "back": "{Q1022}"
+    },
+    "de-bavaria": {
+      "front": "{Q980}",
+      "back": "{Q1726}"
+    },
+    "de-berlin": {
+      "front": "{Q64}",
+      "back": "{Q64}"
+    },
+    "de-brandenburg": {
+      "front": "{Q1208}",
+      "back": "{Q1711}"
+    },
+    "de-bremen": {
+      "front": "{Q1209}",
+      "back": "{Q24879}"
+    },
+    "de-hamburg": {
+      "front": "{Q1055}",
+      "back": "{Q1055}"
+    },
+    "de-hesse": {
+      "front": "{Q1199}",
+      "back": "{Q1721}"
+    },
+    "de-lower-saxony": {
+      "front": "{Q1197}",
+      "back": "{Q1715}"
+    },
+    "de-mecklenburg-vorpommern": {
+      "front": "{Q1196}",
+      "back": "{Q1709}"
+    },
+    "de-north-rhine-westphalia": {
+      "front": "{Q1198}",
+      "back": "{Q1718}"
+    },
+    "de-rhineland-palatinate": {
+      "front": "{Q1200}",
+      "back": "{Q1720}"
+    },
+    "de-saarland": {
+      "front": "{Q1201}",
+      "back": "{Q1724}"
+    },
+    "de-saxony": {
+      "front": "{Q1202}",
+      "back": "{Q1731}"
+    },
+    "de-saxony-anhalt": {
+      "front": "{Q1206}",
+      "back": "{Q1733}"
+    },
+    "de-schleswig-holstein": {
+      "front": "{Q1194}",
+      "back": "{Q1707}"
+    },
+    "de-thuringia": {
+      "front": "{Q1205}",
+      "back": "{Q1729}"
+    }
+  }
+}

@@ -1089,7 +1089,8 @@ export class Studio extends Screen {
       const aside = this.page.getByRole("region", { name: deck, exact: true });
       await expect(aside).toContainText(said);
       await expect(aside).toContainText(upgrade.kept);
-      await expect(aside.getByRole("listitem")).toHaveText(
+      // The releases' notes are its first list; the cards each change touches follow in lists of their own.
+      await expect(aside.getByRole("list").first().getByRole("listitem")).toHaveText(
         upgrade.notes.map((notes, at) =>
           this.t("libraryUpgradeNotice.releaseNote", { version: upgrade.from + 1 + at, notes }),
         ),

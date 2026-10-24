@@ -261,7 +261,7 @@ describe("a deck imported from the library", () => {
 });
 
 const FIRST = `${SITE}decks/capitals-of-the-world/v1.ttl`;
-const LATEST = `${SITE}decks/capitals-of-the-world/v3.ttl`;
+const LATEST = `${SITE}decks/capitals-of-the-world/v4.ttl`;
 
 /** The card ids a release of the library holds, as the site publishes it through `site`. */
 async function releaseCardIds(url: string, site: typeof fetch = siteFetch): Promise<string[]> {

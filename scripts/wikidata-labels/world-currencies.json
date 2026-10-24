@@ -1,0 +1,852 @@
+{
+  "description": {
+    "en": "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide.",
+    "sv": "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok.",
+    "ko": "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다.",
+    "de": "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU.",
+    "es": "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE.",
+    "fr": "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."
+  },
+  "cards": {
+    "afghanistan": {
+      "front": "{Q889}",
+      "back": "{Q199471} (AFN)"
+    },
+    "albania": {
+      "front": "{Q222}",
+      "back": "{Q125999} (ALL)"
+    },
+    "algeria": {
+      "front": "{Q262}",
+      "back": "{Q199674} (DZD)"
+    },
+    "andorra": {
+      "front": "{Q228}",
+      "back": "{Q4916} (EUR)"
+    },
+    "angola": {
+      "front": "{Q916}",
+      "back": "{Q200337} (AOA)"
+    },
+    "antigua-and-barbuda": {
+      "front": "{Q781}",
+      "back": "{Q26365} (XCD)"
+    },
+    "argentina": {
+      "front": "{Q414}",
+      "back": "{Q199578} (ARS)",
+      "not": {
+        "es": [
+          "peso argentino convertible"
+        ]
+      }
+    },
+    "armenia": {
+      "front": "{Q399}",
+      "back": "{Q130498} (AMD)"
+    },
+    "australia": {
+      "front": "{Q408}",
+      "back": "{Q259502} (AUD)"
+    },
+    "austria": {
+      "front": "{Q40}",
+      "back": "{Q4916} (EUR)"
+    },
+    "azerbaijan": {
+      "front": "{Q227}",
+      "back": "{Q483725} (AZN)"
+    },
+    "bahrain": {
+      "front": "{Q398}",
+      "back": "{Q201871} (BHD)"
+    },
+    "bangladesh": {
+      "front": "{Q902}",
+      "back": "{Q194453} (BDT)"
+    },
+    "barbados": {
+      "front": "{Q244}",
+      "back": "{Q194351} (BBD)"
+    },
+    "belarus": {
+      "front": "{Q184}",
+      "back": "{Q21531507} (BYN)",
+      "not": {
+        "es": [
+          "rublo bierlorruso"
+        ]
+      }
+    },
+    "belgium": {
+      "front": "{Q31}",
+      "back": "{Q4916} (EUR)"
+    },
+    "belize": {
+      "front": "{Q242}",
+      "back": "{Q275112} (BZD)"
+    },
+    "benin": {
+      "front": "{Q962}",
+      "back": "{Q861690} (XOF)"
+    },
+    "bhutan": {
+      "front": "{Q917}",
+      "back": "{Q201799} (BTN)"
+    },
+    "bolivia": {
+      "front": "{Q750}",
+      "back": "{Q200737} (BOB)"
+    },
+    "bosnia-and-herzegovina": {
+      "front": "{Q225}",
+      "back": "{Q179620} (BAM)"
+    },
+    "botswana": {
+      "front": "{Q963}",
+      "back": "{Q186794} (BWP)"
+    },
+    "brazil": {
+      "front": "{Q155}",
+      "back": "{Q173117} (BRL)"
+    },
+    "brunei": {
+      "front": "{Q921}",
+      "back": "{Q206319} (BND)"
+    },
+    "bulgaria": {
+      "front": "{Q219}",
+      "back": "{Q4916} (EUR)"
+    },
+    "burkina-faso": {
+      "front": "{Q965}",
+      "back": "{Q861690} (XOF)"
+    },
+    "burundi": {
+      "front": "{Q967}",
+      "back": "{Q238007} (BIF)"
+    },
+    "cambodia": {
+      "front": "{Q424}",
+      "back": "{Q204737} (KHR)"
+    },
+    "cameroon": {
+      "front": "{Q1009}",
+      "back": "{Q847739} (XAF)"
+    },
+    "canada": {
+      "front": "{Q16}",
+      "back": "{Q1104069} (CAD)"
+    },
+    "cape-verde": {
+      "front": "{Q1011}",
+      "back": "{Q4591} (CVE)"
+    },
+    "central-african-republic": {
+      "front": "{Q929}",
+      "back": "{Q847739} (XAF)"
+    },
+    "chad": {
+      "front": "{Q657}",
+      "back": "{Q847739} (XAF)"
+    },
+    "chile": {
+      "front": "{Q298}",
+      "back": "{Q200050} (CLP)",
+      "not": {
+        "es": [
+          "peso"
+        ]
+      }
+    },
+    "china": {
+      "front": "{Q148}",
+      "back": "{Q39099} (CNY)"
+    },
+    "colombia": {
+      "front": "{Q739}",
+      "back": "{Q244819} (COP)",
+      "not": {
+        "es": [
+          "peso"
+        ]
+      }
+    },
+    "comoros": {
+      "front": "{Q970}",
+      "back": "{Q267264} (KMF)"
+    },
+    "costa-rica": {
+      "front": "{Q800}",
+      "back": "{Q242915} (CRC)"
+    },
+    "croatia": {
+      "front": "{Q224}",
+      "back": "{Q4916} (EUR)"
+    },
+    "cuba": {
+      "front": "{Q241}",
+      "back": "{Q201505} (CUP)",
+      "not": {
+        "es": [
+          "peso"
+        ]
+      }
+    },
+    "cyprus": {
+      "front": "{Q229}",
+      "back": "{Q4916} (EUR)"
+    },
+    "czech-republic": {
+      "front": "{Q213}",
+      "back": "{Q131016} (CZK)"
+    },
+    "democratic-republic-of-the-congo": {
+      "front": "{Q974}",
+      "back": "{Q4734} (CDF)"
+    },
+    "denmark": {
+      "front": "{Q35}",
+      "back": "{Q25417} (DKK)"
+    },
+    "djibouti": {
+      "front": "{Q977}",
+      "back": "{Q4594} (DJF)"
+    },
+    "dominica": {
+      "front": "{Q784}",
+      "back": "{Q26365} (XCD)"
+    },
+    "dominican-republic": {
+      "front": "{Q786}",
+      "back": "{Q242922} (DOP)"
+    },
+    "ecuador": {
+      "front": "{Q736}",
+      "back": "{Q4917} (USD)"
+    },
+    "egypt": {
+      "front": "{Q79}",
+      "back": "{Q199462} (EGP)"
+    },
+    "el-salvador": {
+      "front": "{Q792}",
+      "back": "{Q4917} (USD)"
+    },
+    "equatorial-guinea": {
+      "front": "{Q983}",
+      "back": "{Q847739} (XAF)"
+    },
+    "eritrea": {
+      "front": "{Q986}",
+      "back": "{Q171503} (ERN)"
+    },
+    "estonia": {
+      "front": "{Q191}",
+      "back": "{Q4916} (EUR)"
+    },
+    "eswatini": {
+      "front": "{Q1050}",
+      "back": "{Q4823} (SZL)",
+      "not": {
+        "es": [
+          "Suazilandia"
+        ]
+      }
+    },
+    "ethiopia": {
+      "front": "{Q115}",
+      "back": "{Q206243} (ETB)"
+    },
+    "federated-states-of-micronesia": {
+      "front": "{Q702}",
+      "back": "{Q4917} (USD)"
+    },
+    "fiji": {
+      "front": "{Q712}",
+      "back": "{Q4592} (FJD)"
+    },
+    "finland": {
+      "front": "{Q33}",
+      "back": "{Q4916} (EUR)"
+    },
+    "france": {
+      "front": "{Q142}",
+      "back": "{Q4916} (EUR)"
+    },
+    "gabon": {
+      "front": "{Q1000}",
+      "back": "{Q847739} (XAF)"
+    },
+    "georgia": {
+      "front": "{Q230}",
+      "back": "{Q4608} (GEL)"
+    },
+    "germany": {
+      "front": "{Q183}",
+      "back": "{Q4916} (EUR)"
+    },
+    "ghana": {
+      "front": "{Q117}",
+      "back": "{Q183530} (GHS)"
+    },
+    "greece": {
+      "front": "{Q41}",
+      "back": "{Q4916} (EUR)"
+    },
+    "grenada": {
+      "front": "{Q769}",
+      "back": "{Q26365} (XCD)"
+    },
+    "guatemala": {
+      "front": "{Q774}",
+      "back": "{Q207396} (GTQ)"
+    },
+    "guinea": {
+      "front": "{Q1006}",
+      "back": "{Q213311} (GNF)"
+    },
+    "guinea-bissau": {
+      "front": "{Q1007}",
+      "back": "{Q861690} (XOF)"
+    },
+    "guyana": {
+      "front": "{Q734}",
+      "back": "{Q213005} (GYD)"
+    },
+    "haiti": {
+      "front": "{Q790}",
+      "back": "{Q203955} (HTG)"
+    },
+    "honduras": {
+      "front": "{Q783}",
+      "back": "{Q4719} (HNL)"
+    },
+    "hungary": {
+      "front": "{Q28}",
+      "back": "{Q47190} (HUF)"
+    },
+    "iceland": {
+      "front": "{Q189}",
+      "back": "{Q131473} (ISK)"
+    },
+    "india": {
+      "front": "{Q668}",
+      "back": "{Q80524} (INR)"
+    },
+    "indonesia": {
+      "front": "{Q252}",
+      "back": "{Q41588} (IDR)"
+    },
+    "iran": {
+      "front": "{Q794}",
+      "back": "{Q188608} (IRR)"
+    },
+    "iraq": {
+      "front": "{Q796}",
+      "back": "{Q193094} (IQD)"
+    },
+    "ireland": {
+      "front": "{Q27}",
+      "back": "{Q4916} (EUR)"
+    },
+    "israel": {
+      "front": "{Q801}",
+      "back": "{Q131309} (ILS)"
+    },
+    "italy": {
+      "front": "{Q38}",
+      "back": "{Q4916} (EUR)"
+    },
+    "ivory-coast": {
+      "front": "{Q1008}",
+      "back": "{Q861690} (XOF)"
+    },
+    "jamaica": {
+      "front": "{Q766}",
+      "back": "{Q209792} (JMD)"
+    },
+    "japan": {
+      "front": "{Q17}",
+      "back": "{Q8146} (JPY)"
+    },
+    "jordan": {
+      "front": "{Q810}",
+      "back": "{Q203722} (JOD)"
+    },
+    "kazakhstan": {
+      "front": "{Q232}",
+      "back": "{Q173751} (KZT)"
+    },
+    "kenya": {
+      "front": "{Q114}",
+      "back": "{Q202882} (KES)"
+    },
+    "kiribati": {
+      "front": "{Q710}",
+      "back": "{Q259502} (AUD)"
+    },
+    "kuwait": {
+      "front": "{Q817}",
+      "back": "{Q193098} (KWD)"
+    },
+    "kyrgyzstan": {
+      "front": "{Q813}",
+      "back": "{Q35881} (KGS)"
+    },
+    "laos": {
+      "front": "{Q819}",
+      "back": "{Q200055} (LAK)"
+    },
+    "latvia": {
+      "front": "{Q211}",
+      "back": "{Q4916} (EUR)"
+    },
+    "lebanon": {
+      "front": "{Q822}",
+      "back": "{Q201880} (LBP)"
+    },
+    "lesotho": {
+      "front": "{Q1013}",
+      "back": "{Q208039} (LSL)"
+    },
+    "liberia": {
+      "front": "{Q1014}",
+      "back": "{Q242988} (LRD)"
+    },
+    "libya": {
+      "front": "{Q1016}",
+      "back": "{Q190699} (LYD)"
+    },
+    "liechtenstein": {
+      "front": "{Q347}",
+      "back": "{Q25344} (CHF)"
+    },
+    "lithuania": {
+      "front": "{Q37}",
+      "back": "{Q4916} (EUR)"
+    },
+    "luxembourg": {
+      "front": "{Q32}",
+      "back": "{Q4916} (EUR)"
+    },
+    "madagascar": {
+      "front": "{Q1019}",
+      "back": "{Q4584} (MGA)"
+    },
+    "malawi": {
+      "front": "{Q1020}",
+      "back": "{Q211694} (MWK)"
+    },
+    "malaysia": {
+      "front": "{Q833}",
+      "back": "{Q163712} (MYR)"
+    },
+    "maldives": {
+      "front": "{Q826}",
+      "back": "{Q206600} (MVR)"
+    },
+    "mali": {
+      "front": "{Q912}",
+      "back": "{Q861690} (XOF)"
+    },
+    "malta": {
+      "front": "{Q233}",
+      "back": "{Q4916} (EUR)"
+    },
+    "marshall-islands": {
+      "front": "{Q709}",
+      "back": "{Q4917} (USD)"
+    },
+    "mauritania": {
+      "front": "{Q1025}",
+      "back": "{Q207024} (MRU)"
+    },
+    "mauritius": {
+      "front": "{Q1027}",
+      "back": "{Q212967} (MUR)"
+    },
+    "mexico": {
+      "front": "{Q96}",
+      "back": "{Q4730} (MXN)",
+      "not": {
+        "es": [
+          "peso"
+        ]
+      }
+    },
+    "moldova": {
+      "front": "{Q217}",
+      "back": "{Q181129} (MDL)"
+    },
+    "monaco": {
+      "front": "{Q235}",
+      "back": "{Q4916} (EUR)"
+    },
+    "mongolia": {
+      "front": "{Q711}",
+      "back": "{Q183435} (MNT)"
+    },
+    "montenegro": {
+      "front": "{Q236}",
+      "back": "{Q4916} (EUR)"
+    },
+    "morocco": {
+      "front": "{Q1028}",
+      "back": "{Q200192} (MAD)"
+    },
+    "mozambique": {
+      "front": "{Q1029}",
+      "back": "{Q200753} (MZN)"
+    },
+    "myanmar": {
+      "front": "{Q836}",
+      "back": "{Q201875} (MMK)"
+    },
+    "namibia": {
+      "front": "{Q1030}",
+      "back": "{Q202462} (NAD)"
+    },
+    "nauru": {
+      "front": "{Q697}",
+      "back": "{Q259502} (AUD)",
+      "not": {
+        "de": [
+          "Naoero"
+        ]
+      }
+    },
+    "nepal": {
+      "front": "{Q837}",
+      "back": "{Q202895} (NPR)"
+    },
+    "netherlands": {
+      "front": "{Q55}",
+      "back": "{Q4916} (EUR)"
+    },
+    "new-zealand": {
+      "front": "{Q664}",
+      "back": "{Q1472704} (NZD)"
+    },
+    "nicaragua": {
+      "front": "{Q811}",
+      "back": "{Q207312} (NIO)"
+    },
+    "niger": {
+      "front": "{Q1032}",
+      "back": "{Q861690} (XOF)"
+    },
+    "nigeria": {
+      "front": "{Q1033}",
+      "back": "{Q203567} (NGN)"
+    },
+    "north-korea": {
+      "front": "{Q423}",
+      "back": "{Q106720} (KPW)",
+      "not": {
+        "es": [
+          "wŏn norcoreano"
+        ]
+      }
+    },
+    "north-macedonia": {
+      "front": "{Q221}",
+      "back": "{Q177875} (MKD)"
+    },
+    "norway": {
+      "front": "{Q20}",
+      "back": "{Q132643} (NOK)"
+    },
+    "oman": {
+      "front": "{Q842}",
+      "back": "{Q272290} (OMR)"
+    },
+    "pakistan": {
+      "front": "{Q843}",
+      "back": "{Q188289} (PKR)"
+    },
+    "palau": {
+      "front": "{Q695}",
+      "back": "{Q4917} (USD)"
+    },
+    "panama": {
+      "front": "{Q804}",
+      "back": "{Q210472} (PAB)"
+    },
+    "papua-new-guinea": {
+      "front": "{Q691}",
+      "back": "{Q200759} (PGK)"
+    },
+    "paraguay": {
+      "front": "{Q733}",
+      "back": "{Q207514} (PYG)"
+    },
+    "peru": {
+      "front": "{Q419}",
+      "back": "{Q204656} (PEN)",
+      "not": {
+        "de": [
+          "Nuevo Sol"
+        ]
+      }
+    },
+    "philippines": {
+      "front": "{Q928}",
+      "back": "{Q17193} (PHP)"
+    },
+    "poland": {
+      "front": "{Q36}",
+      "back": "{Q123213} (PLN)"
+    },
+    "portugal": {
+      "front": "{Q45}",
+      "back": "{Q4916} (EUR)"
+    },
+    "qatar": {
+      "front": "{Q846}",
+      "back": "{Q206386} (QAR)"
+    },
+    "republic-of-the-congo": {
+      "front": "{Q971}",
+      "back": "{Q847739} (XAF)"
+    },
+    "romania": {
+      "front": "{Q218}",
+      "back": "{Q131645} (RON)"
+    },
+    "russia": {
+      "front": "{Q159}",
+      "back": "{Q41044} (RUB)"
+    },
+    "rwanda": {
+      "front": "{Q1037}",
+      "back": "{Q4741} (RWF)"
+    },
+    "saint-kitts-and-nevis": {
+      "front": "{Q763}",
+      "back": "{Q26365} (XCD)"
+    },
+    "saint-lucia": {
+      "front": "{Q760}",
+      "back": "{Q26365} (XCD)"
+    },
+    "saint-vincent-and-the-grenadines": {
+      "front": "{Q757}",
+      "back": "{Q26365} (XCD)"
+    },
+    "samoa": {
+      "front": "{Q683}",
+      "back": "{Q4588} (WST)",
+      "not": {
+        "es": [
+          "tālā"
+        ]
+      }
+    },
+    "san-marino": {
+      "front": "{Q238}",
+      "back": "{Q4916} (EUR)"
+    },
+    "sao-tome-and-principe": {
+      "front": "{Q1039}",
+      "back": "{Q193712} (STN)"
+    },
+    "saudi-arabia": {
+      "front": "{Q851}",
+      "back": "{Q199857} (SAR)"
+    },
+    "senegal": {
+      "front": "{Q1041}",
+      "back": "{Q861690} (XOF)"
+    },
+    "serbia": {
+      "front": "{Q403}",
+      "back": "{Q172524} (RSD)"
+    },
+    "seychelles": {
+      "front": "{Q1042}",
+      "back": "{Q4595} (SCR)"
+    },
+    "sierra-leone": {
+      "front": "{Q1044}",
+      "back": "{Q4587} (SLE)"
+    },
+    "singapore": {
+      "front": "{Q334}",
+      "back": "{Q190951} (SGD)"
+    },
+    "slovakia": {
+      "front": "{Q214}",
+      "back": "{Q4916} (EUR)"
+    },
+    "slovenia": {
+      "front": "{Q215}",
+      "back": "{Q4916} (EUR)"
+    },
+    "solomon-islands": {
+      "front": "{Q685}",
+      "back": "{Q4597} (SBD)"
+    },
+    "somalia": {
+      "front": "{Q1045}",
+      "back": "{Q4603} (SOS)"
+    },
+    "south-africa": {
+      "front": "{Q258}",
+      "back": "{Q181907} (ZAR)"
+    },
+    "south-korea": {
+      "front": "{Q884}",
+      "back": "{Q202040} (KRW)"
+    },
+    "south-sudan": {
+      "front": "{Q958}",
+      "back": "{Q244366} (SSP)"
+    },
+    "spain": {
+      "front": "{Q29}",
+      "back": "{Q4916} (EUR)"
+    },
+    "sri-lanka": {
+      "front": "{Q854}",
+      "back": "{Q4596} (LKR)"
+    },
+    "sudan": {
+      "front": "{Q1049}",
+      "back": "{Q271206} (SDG)"
+    },
+    "suriname": {
+      "front": "{Q730}",
+      "back": "{Q202036} (SRD)"
+    },
+    "sweden": {
+      "front": "{Q34}",
+      "back": "{Q122922} (SEK)"
+    },
+    "switzerland": {
+      "front": "{Q39}",
+      "back": "{Q25344} (CHF)"
+    },
+    "syria": {
+      "front": "{Q858}",
+      "back": "{Q240468} (SYP)"
+    },
+    "tajikistan": {
+      "front": "{Q863}",
+      "back": "{Q199886} (TJS)"
+    },
+    "tanzania": {
+      "front": "{Q924}",
+      "back": "{Q4589} (TZS)"
+    },
+    "thailand": {
+      "front": "{Q869}",
+      "back": "{Q177882} (THB)"
+    },
+    "the-bahamas": {
+      "front": "{Q778}",
+      "back": "{Q194339} (BSD)"
+    },
+    "the-gambia": {
+      "front": "{Q1005}",
+      "back": "{Q202885} (GMD)"
+    },
+    "timor-leste": {
+      "front": "{Q574}",
+      "back": "{Q4917} (USD)"
+    },
+    "togo": {
+      "front": "{Q945}",
+      "back": "{Q861690} (XOF)"
+    },
+    "tonga": {
+      "front": "{Q678}",
+      "back": "{Q4613} (TOP)"
+    },
+    "trinidad-and-tobago": {
+      "front": "{Q754}",
+      "back": "{Q242890} (TTD)"
+    },
+    "tunisia": {
+      "front": "{Q948}",
+      "back": "{Q4602} (TND)"
+    },
+    "turkey": {
+      "front": "{Q43}",
+      "back": "{Q172872} (TRY)",
+      "not": {
+        "ko": [
+          "터키 리라"
+        ]
+      }
+    },
+    "turkmenistan": {
+      "front": "{Q874}",
+      "back": "{Q486637} (TMT)"
+    },
+    "tuvalu": {
+      "front": "{Q672}",
+      "back": "{Q259502} (AUD)"
+    },
+    "uganda": {
+      "front": "{Q1036}",
+      "back": "{Q4598} (UGX)"
+    },
+    "ukraine": {
+      "front": "{Q212}",
+      "back": "{Q81893} (UAH)"
+    },
+    "united-arab-emirates": {
+      "front": "{Q878}",
+      "back": "{Q200294} (AED)"
+    },
+    "united-kingdom": {
+      "front": "{Q145}",
+      "back": "{Q25224} (GBP)"
+    },
+    "united-states": {
+      "front": "{Q30}",
+      "back": "{Q4917} (USD)"
+    },
+    "uruguay": {
+      "front": "{Q77}",
+      "back": "{Q209272} (UYU)"
+    },
+    "uzbekistan": {
+      "front": "{Q265}",
+      "back": "{Q487888} (UZS)"
+    },
+    "vanuatu": {
+      "front": "{Q686}",
+      "back": "{Q207523} (VUV)"
+    },
+    "venezuela": {
+      "front": "{Q717}",
+      "back": "{Q56349362} (VES)",
+      "not": {
+        "es": [
+          "bolívar soberano"
+        ],
+        "fr": [
+          "bolivar souverain"
+        ]
+      }
+    },
+    "vietnam": {
+      "front": "{Q881}",
+      "back": "{Q192090} (VND)"
+    },
+    "yemen": {
+      "front": "{Q805}",
+      "back": "{Q240512} (YER)"
+    },
+    "zambia": {
+      "front": "{Q953}",
+      "back": "{Q73408} (ZMW)"
+    },
+    "zimbabwe": {
+      "front": "{Q954}",
+      "back": "{Q125352135} (ZWG)"
+    }
+  }
+}
