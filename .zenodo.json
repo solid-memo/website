@@ -1,7 +1,7 @@
 {
   "upload_type": "software",
   "title": "Solid Memo",
-  "description": "Spaced-repetition flashcards that live in your own Solid pod: a static web app that schedules cards with SM-2 and keeps decks, cards and study history in the user's own Solid pod, with a library of ready-made decks, courses, and a studio for writing and publishing decks.",
+  "description": "Spaced-repetition flashcards that live in your own Solid pod: a static web app that schedules cards with SM-2 or FSRS-6 and keeps decks, cards and study history in the user's own Solid pod, with a library of ready-made decks, courses, and a studio for writing and publishing decks.",
   "creators": [
     {
       "name": "Wiklund, Anton"
@@ -13,6 +13,7 @@
     "spaced repetition",
     "flashcards",
     "SM-2",
+    "FSRS",
     "linked data",
     "RDF",
     "SHACL",

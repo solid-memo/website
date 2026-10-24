@@ -33,6 +33,34 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 These are done. Those since 1.0.0 come first; the rest are part of
 1.0.0. Every version is in the [changelog](CHANGELOG.md).
 
+- A deck's cards shown in a language the learner chooses for that deck
+  ([docs/user-guide.md](docs/user-guide.md#languages)).
+- Cramming a deck's leeches, or every deck's from the statistics,
+  without recording the answers
+  ([docs/user-guide.md](docs/user-guide.md#cramming-the-leeches)).
+- What each library card is about, linked to the concepts of the
+  taxonomy, and a description of every picture for screen readers
+  ([docs/deck-library.md](docs/deck-library.md#what-a-card-is-about)).
+- Commands, keys and names in the code decks written as code
+  ([docs/deck-library.md](docs/deck-library.md#authoring-markdown)).
+- The statistics by deck, a block a deck
+  ([docs/statistics.md](docs/statistics.md#the-statistics-page)), and a
+  returning learner welcomed back with their streak
+  ([docs/statistics.md](docs/statistics.md#the-today-strip)).
+- Palettes beside the standard one: High contrast, Color-blind friendly,
+  Parchment and one of your own; and the text at a larger size
+  ([docs/theme.md](docs/theme.md#palettes)).
+- A graph of the instance's data in the Studio
+  ([docs/studio.md](docs/studio.md#graph)).
+- FSRS-6, the scheduler the app now recommends, beside SM-2, with an
+  invitation to switch ([docs/srs.md](docs/srs.md#fsrs-6)).
+- A course in the theory of the Swedish driving license B, and a deck
+  of famous movie quotes ([docs/deck-library.md](docs/deck-library.md)).
+- Every library deck's title, description and keywords in every
+  language of the app
+  ([docs/deck-library.md](docs/deck-library.md#a-version)).
+- A release's contact written from the Studio's release screen
+  ([docs/studio.md](docs/studio.md#the-releases-metadata-and-provenance)).
 - Pull requests merged through GitHub's merge queue, so `main` only
   gets a commit whose checks passed
   ([docs/testing.md](docs/testing.md#the-merge-queue)).

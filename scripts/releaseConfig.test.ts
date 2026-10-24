@@ -212,4 +212,22 @@ describe("the commits, as the release reads them", () => {
     );
     expect(written).not.toContain("say why");
   });
+
+  // Like the body of a4d7b99, which 5.2.0's notes say closes #9ba6b2 and
+  // #aab4bf: the parser's own prefix takes `#` and any word after it.
+  it("links only `#` and a number as an issue, not a CSS color", async () => {
+    const written = await notes({
+      hash: "e".repeat(40),
+      message: [
+        "fix(ui): raise Standard's dark muted text to 4.5:1 on a hovered grade",
+        "",
+        "Standard's dark #9ba6b2 measured 4.29:1; #aab4bf holds it at 4.70:1,",
+        "as #rrggbb, see #216.",
+        "",
+        "Refs: #216",
+      ].join("\n"),
+    });
+    expect(written).toContain("[#216](https://github.com/solid-memo/website/issues/216)");
+    for (const color of ["9ba6b2", "aab4bf", "rrggbb"]) expect(written).not.toContain(color);
+  });
 });

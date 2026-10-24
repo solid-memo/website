@@ -193,6 +193,11 @@ version's entry goes under the file's header, newest first, with the
 and so on, each line a commit's subject with its scope and a link to the
 commit. A breaking change is listed first, under "BREAKING CHANGES",
 with its footer's text. The commits of the other types are left out.
+After the link, a line lists the issues its message refers to, as
+`closes`, whichever word comes before them: each `#` followed by a
+number ([release.config.mjs](../release.config.mjs)'s `parserOpts`).
+A `#` before any word used to count, so the entries of 5.0.0 and 5.2.0
+say they close CSS colors, such as `#9ba6b2` (#281).
 The site's footer links to it, on `main`
 ([Footer.tsx](../packages/ui/src/ui/Footer.tsx)).
 
