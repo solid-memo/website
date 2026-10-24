@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.7.0](https://github.com/solid-memo/website/compare/v6.6.0...v6.7.0) (2026-10-24)
+
+### Features
+
+* **site:** drop the docs' list of versions ([47a6beb](https://github.com/solid-memo/website/commit/47a6bebcccf281b62e8f22a64404b664ccb089db)), closes [#280](https://github.com/solid-memo/website/issues/280)
+
+### Bug Fixes
+
+* **site:** link the site by its address from a release's archived docs ([051bd8b](https://github.com/solid-memo/website/commit/051bd8b0982f5601981691b25f3d810ee92364d9)), closes [#280](https://github.com/solid-memo/website/issues/280)
+
 ## [6.6.0](https://github.com/solid-memo/website/compare/v6.5.0...v6.6.0) (2026-10-24)
 
 ### Features
