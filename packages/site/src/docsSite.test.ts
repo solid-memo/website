@@ -724,7 +724,7 @@ describe("renderDocsSite", () => {
     expect(one).not.toContain("Fredoka");
   });
 
-  it("writes an archive one folder deeper, never indexed, its links at the release's tag", async () => {
+  it("writes an archive never indexed, its links at the release's tag and to the site at its origin", async () => {
     const files = await render(
       {
         ...siteFiles(),
@@ -737,17 +737,23 @@ describe("renderDocsSite", () => {
     expect(one).toContain('<meta name="robots" content="noindex">');
     expect(one).not.toContain("canonical");
     expect(one).toContain(
-      '<p class="archive">These are the docs as released with Solid Memo 2.2.0. <a href="../../">Read the latest docs</a>.</p>',
+      '<p class="archive">These are the docs as released with Solid Memo 2.2.0. <a href="https://memo.example/docs/">Read the latest docs</a>.</p>',
     );
-    expect(one).toContain('<a href="../../../">Solid Memo</a> <a href="../">Docs</a>');
-    expect(one).toContain('<link rel="icon" href="../../../favicon.ico"');
+    expect(one).toContain('<a href="https://memo.example/">Solid Memo</a> <a href="../">Docs</a>');
+    expect(one).not.toContain('rel="icon"');
     expect(one).toContain('<p class="version">Version 2.2.0</p>');
     expect(one).toContain(`<a href="${REPO}/blob/v2.2.0/packages/app/main.ts">code</a>`);
     expect(one).toContain(`<a href="${REPO}/blob/v2.2.0/docs/one.md">This page's source</a>`);
     expect(one).toContain(`Built from <a href="${REPO}/tree/v2.2.0">v2.2.0</a>`);
-    const readme = files.get("index.html")!;
-    expect(readme).toContain('<a href="../../">Solid Memo</a> <a href="./">Docs</a>');
-    expect(readme).toContain('<a href="../">Read the latest docs</a>');
+    expect(files.get("index.html")).toContain(
+      '<a href="https://memo.example/">Solid Memo</a> <a href="./">Docs</a>',
+    );
+    const alone = await render(siteFiles(), { mode: "archive", origin: null });
+    const readme = alone.get("index.html")!;
+    expect(readme).toContain('<nav aria-label="Site"><a href="./">Docs</a></nav>');
+    expect(readme).toContain(
+      '<p class="archive">These are the docs as released with Solid Memo 2.2.0.</p>',
+    );
   });
 });
 

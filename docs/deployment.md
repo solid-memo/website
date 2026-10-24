@@ -317,7 +317,9 @@ source in place of its drawing ([configuration.md](configuration.md#docs_diagram
 `npm run docs:archive -- X.Y.Z` renders the docs of release X.Y.Z
 ([markdown.md](markdown.md#the-docs-as-a-site)): the same pages as
 `/docs/`, their links into the repository at the tag `vX.Y.Z`, never
-indexed, and each with a note that links the latest docs. It
+indexed, and each with a note that links the latest docs at the
+site's origin, from [CNAME](../CNAME), as the header's link to the
+site does, so the pages work wherever the archive is unpacked. It
 packs them into `release-assets/docs-X.Y.Z.tar.gz`, which git ignores:
 the pages, `docs.css`, every diagram's light and dark drawing and the
 font's license, `OFL-Fredoka.txt`, all under `docs/`

@@ -77,7 +77,7 @@ export type DocsSiteOptions = {
   ref: string;
   /** The app's version, which every page names. */
   version: string;
-  /** The site's origin (`https://solid-memo.com`), for the canonical address; null for none. */
+  /** The site's origin (`https://solid-memo.com`), for the canonical address and an archive's links to the site; null for none. */
   origin?: string | null;
   /** `live`: the site's own docs, at /docs/; `archive`: a release's, for its GitHub release, never indexed. */
   mode: "live" | "archive";
@@ -706,12 +706,19 @@ function code(value: string): string {
 export const DOCS_CSP =
   "default-src 'none'; script-src 'none'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
 
-/** Where the site's root and the docs' root are from a page `depth` folders below the docs' root. */
-function roots(options: DocsSiteOptions, depth: number) {
+/**
+ * Where the docs' root and the site's root are from a page `depth`
+ * folders below the docs' root. A live page's site is the folder above
+ * the docs; an archive's is the site at `origin`, as the archive is
+ * read wherever it was unpacked, and is null without one.
+ */
+function roots({ mode, origin = null }: DocsSiteOptions, depth: number) {
   const docs = "../".repeat(depth);
+  if (mode === "live") return { docs, site: `${docs}../`, latest: null };
   return {
     docs,
-    site: `${docs}..${options.mode === "archive" ? "/.." : ""}/`,
+    site: origin === null ? null : `${origin}/`,
+    latest: origin === null ? null : `${origin}/docs/`,
   };
 }
 
@@ -836,10 +843,18 @@ function pageShell(
     name === undefined
       ? ""
       : `<a rel="${rel}" href="${pageHref(page, name)}">${label}: ${escapeHtml(titles.get(name)!)}</a>`;
+  const latest =
+    at.latest === null ? "" : ` <a href="${escapeHtml(at.latest)}">Read the latest docs</a>.`;
   const archived =
     mode === "archive"
-      ? `<p class="archive">These are the docs as released with Solid Memo ${escapeHtml(version)}. <a href="${at.docs}../">Read the latest docs</a>.</p>`
+      ? `<p class="archive">These are the docs as released with Solid Memo ${escapeHtml(version)}.${latest}</p>`
       : "";
+  // An archive has no icons beside it, and its policy loads none from elsewhere.
+  const icons =
+    mode === "live"
+      ? `<link rel="icon" href="${at.site}favicon.ico" sizes="48x48">\n<link rel="icon" type="image/svg+xml" href="${at.site}favicon.svg">\n`
+      : "";
+  const home = at.site === null ? "" : `<a href="${escapeHtml(at.site)}">Solid Memo</a> `;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -849,15 +864,13 @@ function pageShell(
 <meta name="description" content="${escapeHtml(description)}">
 <meta name="color-scheme" content="light dark">
 ${head.filter((line) => line !== "").join("\n")}
-<link rel="icon" href="${at.site}favicon.ico" sizes="48x48">
-<link rel="icon" type="image/svg+xml" href="${at.site}favicon.svg">
-<link rel="stylesheet" href="${at.docs}docs.css">
+${icons}<link rel="stylesheet" href="${at.docs}docs.css">
 <title>${escapeHtml(titles.get(page.name)!)} - Solid Memo docs</title>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 <header class="site">
-<nav aria-label="Site"><a href="${at.site}">Solid Memo</a> <a href="${at.docs || "./"}">Docs</a></nav>
+<nav aria-label="Site">${home}<a href="${at.docs || "./"}">Docs</a></nav>
 <p class="version">Version ${escapeHtml(version)}</p>
 ${pagesNav(page, groups, titles)}
 </header>

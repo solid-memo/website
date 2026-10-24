@@ -439,9 +439,12 @@ site's origin from `CNAME`, for each page's canonical address.
   drawing and kept until the server closes; without Chromium, the
   pages show the source and the server says why, once.
 - **An archive** (a release's docs, as its GitHub release carries
-  them) is the same pages one folder deeper, at the release's tag,
-  never indexed (`noindex`, no canonical address), each with a note
-  that links the latest docs. `npm run docs:archive -- X.Y.Z` packs
+  them) is the same pages at the release's tag, never indexed
+  (`noindex`, no canonical address), and read wherever it is
+  unpacked: each has a note that links the latest docs, and its header
+  links the site, both at the site's origin from
+  [CNAME](../CNAME) (neither without one), and it has no icon.
+  `npm run docs:archive -- X.Y.Z` packs
   one, every diagram drawn, and every GitHub release carries its own
   ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). The
   site serves none of them
