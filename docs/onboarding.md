@@ -59,7 +59,7 @@ instead, in `VITE_POD_PROVIDERS` ([configuration.md](configuration.md#vite_pod_p
 `AppShell` takes the list as its `providers`:
 
 - providers **with a `signUpUrl`** are offered on the first step for
-  creating a Pod (currently iGrant.io Data Pod);
+  creating a Pod ([which ones](#offered-for-creating-a-pod));
 - **every** provider is suggested on the WebID step under "Or pick your
   provider", for users who do not want to type their WebID. Picking one
   calls `loginWithProvider(oidcIssuer)`, which starts the same Solid-OIDC
@@ -68,6 +68,28 @@ instead, in `VITE_POD_PROVIDERS` ([configuration.md](configuration.md#vite_pod_p
 
 Issuers are the exact values each provider advertises in its
 `/.well-known/openid-configuration`.
+
+### Offered for creating a Pod
+
+Every suggested provider is offered for creating a Pod: each lets anyone
+sign up, with no invite and no waiting list (checked on 2026-10-24).
+
+| Provider | Sign-up page |
+| --- | --- |
+| iGrant.io Data Pod | <https://igrant.io/datapod.html> |
+| solidcommunity.net | <https://solidcommunity.net/.account/login/password/register/> |
+| Inrupt PodSpaces | <https://start.inrupt.com/> |
+| solidweb.me | <https://solidweb.me/.account/login/password/register/> |
+
+solidcommunity.net and solidweb.me run the Community Solid Server: its
+"Create account" page makes the account, and the Pod is created from the
+account's page after that. Inrupt PodSpaces is a Developer Preview, which
+Inrupt says is not for production use or for sensitive or personal data.
+
+`npm run check:providers` requests each sign-up page weekly
+([testing.md](testing.md#pod-providers)). A provider whose sign-up
+closes, or comes to need an invite, loses its `signUpUrl` and stays
+suggested for logging in; say here why it was left out.
 
 ## WebID validation
 

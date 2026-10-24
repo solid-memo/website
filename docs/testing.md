@@ -897,7 +897,8 @@ these. `npm run check:providers`
 provider instead. Its issuer must answer
 `<issuer>/.well-known/openid-configuration` with JSON whose `issuer` is
 the entry's `oidcIssuer`, character for character, as the login compares
-them. Its `signUpUrl`, where it has one, must answer too. A request that
+them. Its `signUpUrl`, where it has one, must answer too, to a request
+that asks for HTML as a browser does. A request that
 fails or answers 5xx is tried three times. The
 [Links workflow](../.github/workflows/links.yml) runs the check weekly,
 and by hand, in a job of its own. It is not a gate, so a provider that

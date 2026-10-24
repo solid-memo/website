@@ -36,15 +36,18 @@ export const POD_PROVIDERS: readonly PodProvider[] = [
     id: "solidcommunity",
     name: "solidcommunity.net",
     oidcIssuer: "https://solidcommunity.net/",
+    signUpUrl: "https://solidcommunity.net/.account/login/password/register/",
   },
   {
     id: "inrupt",
     name: "Inrupt PodSpaces",
     oidcIssuer: "https://login.inrupt.com",
+    signUpUrl: "https://start.inrupt.com/",
   },
   {
     id: "solidweb",
     name: "solidweb.me",
     oidcIssuer: "https://solidweb.me/",
+    signUpUrl: "https://solidweb.me/.account/login/password/register/",
   },
 ];

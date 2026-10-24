@@ -22,13 +22,22 @@ export function configurationUrl(issuer: string): string {
   return `${issuer.replace(/\/$/, "")}/.well-known/openid-configuration`;
 }
 
+/** What the discovery document is asked for as. */
+const JSON_ACCEPT = "application/json";
+/**
+ * What a sign-up page is asked for as: a browser's request, since a newcomer
+ * opens it in one. Some servers (the Community Solid Server) answer a page
+ * of theirs only to a request that prefers HTML.
+ */
+const PAGE_ACCEPT = "text/html, */*;q=0.8";
+
 /** A GET, tried again while it fails or the server answers 5xx; the last error is thrown. */
-async function get(fetch: typeof globalThis.fetch, url: string): Promise<Response> {
+async function get(fetch: typeof globalThis.fetch, url: string, accept: string): Promise<Response> {
   let failure: unknown;
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
     try {
       const response = await fetch(url, {
-        headers: { accept: "application/json, text/html;q=0.9, */*;q=0.8" },
+        headers: { accept },
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (response.status < 500 || attempt === ATTEMPTS) return response;
@@ -62,7 +71,7 @@ export async function providerProblems(
   const problems: string[] = [];
   const url = configurationUrl(provider.oidcIssuer);
   try {
-    const response = await get(fetch, url);
+    const response = await get(fetch, url, JSON_ACCEPT);
     if (!response.ok) {
       problems.push(`${provider.name}: ${url} answers ${response.status}.`);
     } else {
@@ -78,7 +87,7 @@ export async function providerProblems(
   }
   if (provider.signUpUrl !== undefined) {
     try {
-      const response = await get(fetch, provider.signUpUrl);
+      const response = await get(fetch, provider.signUpUrl, PAGE_ACCEPT);
       if (!response.ok)
         problems.push(
           `${provider.name}: its sign-up page ${provider.signUpUrl} answers ${response.status}.`,

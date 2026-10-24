@@ -42,6 +42,18 @@ describe("providerProblems", () => {
     expect(await providerProblems(PROVIDER, fetch)).toEqual([]);
   });
 
+  it("asks for the discovery document as JSON and for the sign-up page as a browser does", async () => {
+    const fetch = fakeFetch({
+      [CONFIGURATION]: [json({ issuer: "https://login.example/" })],
+      "https://example/sign-up": [new Response("<html>")],
+    });
+    await providerProblems(PROVIDER, fetch);
+    const accept = (url: string) =>
+      fetch.mock.calls.find(([input]) => String(input) === url)?.[1]?.headers.accept;
+    expect(accept(CONFIGURATION)).toBe("application/json");
+    expect(accept("https://example/sign-up")).toBe("text/html, */*;q=0.8");
+  });
+
   it("reads no sign-up page for a provider that has none", async () => {
     const fetch = fakeFetch({ [CONFIGURATION]: [json({ issuer: "https://login.example/" })] });
     const { signUpUrl: _, ...withoutSignUp } = PROVIDER;
