@@ -325,6 +325,8 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
       keptReleases: true,
       keptDocuments: [],
     });
-    expect((await fetch(target, { headers: { accept: "text/turtle" } })).status).toBe(200);
+    // Asked by its head: a body left unread past 64 KiB, as a release grows, fails Node 24's fetch
+    // when the server then closes the connection (nodejs/undici#5360).
+    expect((await fetch(target, { method: "HEAD" })).status).toBe(200);
   });
 });
