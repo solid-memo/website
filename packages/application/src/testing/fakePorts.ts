@@ -82,6 +82,7 @@ export const libraryDeck: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals" },
   cardCount: 1,
+  languages: [],
   authors: ["Anton Wiklund"],
   license: "https://creativecommons.org/publicdomain/zero/1.0/",
   direction: "front-to-back",

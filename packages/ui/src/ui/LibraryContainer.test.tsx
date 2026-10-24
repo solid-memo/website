@@ -24,6 +24,7 @@ const capitals: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals" },
   cardCount: 2,
+  languages: [],
   authors: ["Anton Wiklund"],
   license: "https://creativecommons.org/publicdomain/zero/1.0/",
   direction: "front-to-back",
@@ -34,6 +35,7 @@ const rivers: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"),
   title: { en: "Rivers" },
   cardCount: 1,
+  languages: [],
   authors: [],
   direction: "front-to-back",
   sources: [],
@@ -68,7 +70,8 @@ function renderContainer(useCases: UseCases) {
 describe("LibraryContainer", () => {
   // The library remembers its checked decks and filters per instance; each test starts afresh.
   afterEach(() => {
-    for (const part of ["selected", "topics", "query"]) forget(`library:${instance.url}:${part}`);
+    for (const part of ["selected", "topics", "languages", "query"])
+      forget(`library:${instance.url}:${part}`);
   });
 
   it("shows a loading state, then the library", async () => {

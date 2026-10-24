@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { TOPICS } from "@solid-memo/vocab/concepts.generated";
+import { EU_LANGUAGES, TOPICS } from "@solid-memo/vocab/concepts.generated";
 import type { CardContent, Deck, DeckDirection } from "./deck";
+import { languageTagOf } from "./euLanguages";
 import { allKeywords, type LangTexts } from "./keywords";
 import type { LangText } from "./langText";
 import { librarySeriesUrlOf } from "./libraryLayout";
@@ -33,6 +34,12 @@ export interface LibraryDeck {
   /** The deck's title, in every language it states it in (one of them English). */
   title: LangText;
   cardCount: number;
+  /**
+   * The languages the current release's cards are in (dcterms:language),
+   * by their IRIs in the EU's table, in the order the release gives them:
+   * none when it states none, as a release published elsewhere may.
+   */
+  languages: string[];
   authors: string[];
   license?: string;
   /** A sentence or two about the deck, in every language it states it in. */
@@ -225,19 +232,46 @@ function isAbout(deck: LibraryDeck, topic: string): boolean {
   );
 }
 
+/** A language a library deck's cards are in: its IRI in the EU's table and its language tag. */
+export interface CardLanguage {
+  iri: string;
+  tag: string;
+}
+
+/** The languages a deck's cards are in, in its order: those the reference data describes (languageTagOf), any other left out. */
+export function deckCardLanguages(deck: Pick<LibraryDeck, "languages">): CardLanguage[] {
+  return deck.languages.flatMap((iri) => {
+    const tag = languageTagOf(iri);
+    return tag === undefined ? [] : [{ iri, tag }];
+  });
+}
+
+/** The languages the decks' cards are in, to filter the library by: each any deck states, in the EU table's order. */
+export function libraryCardLanguages(decks: readonly LibraryDeck[]): CardLanguage[] {
+  const stated = new Set(decks.flatMap((deck) => deck.languages));
+  return deckCardLanguages({
+    languages: EU_LANGUAGES.map((concept) => concept.iri).filter((iri) => stated.has(iri)),
+  });
+}
+
 /**
- * The decks about every chosen topic whose title, description or
- * keywords, in any language, contain the query (case-insensitively,
- * whatever its Unicode form: see search.ts); all of them when nothing is
- * chosen or typed.
+ * The decks about every chosen topic, with cards in every chosen
+ * language, whose title, description or keywords, in any language,
+ * contain the query (case-insensitively, whatever its Unicode form: see
+ * search.ts); all of them when nothing is chosen or typed.
  */
 export function filterLibraryDecks(
   decks: readonly LibraryDeck[],
-  { topics, query }: { topics: readonly string[]; query: string },
+  {
+    topics,
+    languages,
+    query,
+  }: { topics: readonly string[]; languages: readonly string[]; query: string },
 ): LibraryDeck[] {
   return decks.filter(
     (deck) =>
       topics.every((topic) => isAbout(deck, topic)) &&
+      languages.every((language) => deck.languages.includes(language)) &&
       matchesQuery(
         [
           ...Object.values(deck.title),

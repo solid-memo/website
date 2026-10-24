@@ -873,6 +873,7 @@
     "intro": "Des paquets prêts à l’emploi. Ouvrez-en un pour en savoir plus, ou cochez-en plusieurs et importez-les dans cette instance comme vos propres copies.",
     "empty": "La bibliothèque n’a pas encore de paquets.",
     "topics": "Thèmes",
+    "cardLanguages": "Langues des cartes",
     "search": "Rechercher",
     "searchPlaceholder": "Nom, description ou mot-clé",
     "noMatch": "Aucun paquet ne correspond.",
@@ -919,6 +920,11 @@
       "many": "Thèmes",
       "other": "Thèmes"
     },
+    "cardLanguages": {
+      "one": "Langue des cartes",
+      "many": "Langues des cartes",
+      "other": "Langues des cartes"
+    },
     "keywords": "Mots-clés",
     "release": "Version",
     "version": "Version {version}",
@@ -958,6 +964,7 @@
     "back": "Retour à la bibliothèque",
     "empty": "Ce paquet ne contient aucune carte.",
     "hint": "Des cartes du paquet tirées au hasard. Rien n’est enregistré : importez le paquet pour l’étudier.",
+    "cardLanguages": "Cartes en {languages}.",
     "nextCard": "Carte suivante",
     "reveal": "Afficher la réponse",
     "loading": "Chargement des cartes…"

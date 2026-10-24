@@ -25,6 +25,7 @@ const rivers: LibraryDeck = {
   title: { en: "Rivers" },
   description: { en: "The longest rivers." },
   cardCount: 3,
+  languages: [],
   authors: ["Bob"],
   license: "https://creativecommons.org/publicdomain/zero/1.0/",
   direction: "front-to-back",

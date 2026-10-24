@@ -68,6 +68,51 @@ export class Library extends Screen {
     });
   }
 
+  /** The decks the list shows, by name, in its order. */
+  async shownDecks(): Promise<string[]> {
+    return this.page.getByRole("main").locator(".library-deck-name").allInnerTexts();
+  }
+
+  /** A box of "Card languages", by the language's name in the app's language. */
+  private cardLanguage(name: string): Locator {
+    return this.page
+      .getByRole("group", { name: this.t("library.cardLanguages"), exact: true })
+      .getByRole("checkbox", { name, exact: true });
+  }
+
+  /** Checks a language under "Card languages": the list keeps the decks with cards in it. */
+  async checkCardLanguage(name: string): Promise<void> {
+    await this.intent(`Check the card language ${name}`, async () => {
+      await this.cardLanguage(name).check();
+      await expect(this.cardLanguage(name)).toBeChecked();
+    });
+  }
+
+  /** Unchecks a language under "Card languages". */
+  async uncheckCardLanguage(name: string): Promise<void> {
+    await this.intent(`Uncheck the card language ${name}`, async () => {
+      await this.cardLanguage(name).uncheck();
+      await expect(this.cardLanguage(name)).not.toBeChecked();
+    });
+  }
+
+  async expectCardLanguageChecked(name: string): Promise<void> {
+    await this.intent(`Check ${name} is still checked under the card languages`, async () => {
+      await expect(this.cardLanguage(name)).toBeChecked();
+    });
+  }
+
+  /** The languages a deck's row names beside its size: `names`, in the deck's order. */
+  async expectRowLanguages(title: string, names: string[]): Promise<void> {
+    await this.intent(`Check the row of ${title} names its card languages`, async () => {
+      const row = this.page
+        .getByRole("main")
+        .getByRole("listitem")
+        .filter({ has: this.page.getByRole("link", { name: title, exact: true }) });
+      await expect(row).toContainText(names.join(", "));
+    });
+  }
+
   /** Opens a deck's page (LibraryDeck) by its name. */
   async openDeck(title: string): Promise<void> {
     await this.intent(`Open the library deck ${title}`, async () => {

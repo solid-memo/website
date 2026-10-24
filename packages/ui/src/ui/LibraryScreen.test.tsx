@@ -16,6 +16,7 @@ const capitals: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals of the world" },
   cardCount: 243,
+  languages: [],
   authors: ["Anton Wiklund"],
   license: "https://creativecommons.org/publicdomain/zero/1.0/",
   description: { en: "Every country and its capital, from Wikipedia." },
@@ -27,6 +28,7 @@ const rivers: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"),
   title: { en: "Rivers" },
   cardCount: 1,
+  languages: [],
   authors: [],
   direction: "front-to-back",
   sources: [],
@@ -149,6 +151,59 @@ describe("LibraryScreen", () => {
   it("offers no topics when no deck names one", () => {
     renderScreen();
     expect(screen.queryByRole("group", { name: "Topics" })).toBeNull();
+  });
+
+  describe("card languages", () => {
+    const LANGUAGE = "http://publications.europa.eu/resource/authority/language/";
+    const english = { ...capitals, languages: [`${LANGUAGE}ENG`, `${LANGUAGE}SWE`] };
+    const korean = {
+      ...rivers,
+      title: { en: "Korean nouns" },
+      languages: [`${LANGUAGE}KOR`, `${LANGUAGE}SWE`, "https://example.org/unknown"],
+    };
+
+    it("names the languages of each deck's cards beside its size, in the deck's order", () => {
+      renderScreen({ decks: [english, korean, { ...rivers, url: "none" }] });
+      expect(screen.getByText("English, Swedish")).toBeInTheDocument();
+      expect(screen.getByText("Korean, Swedish")).toBeInTheDocument();
+    });
+
+    it("offers the languages the decks state, by name, in the language the user reads", () => {
+      renderScreen({ decks: [english, korean] }, "sv");
+      const group = screen.getByRole("group", { name: "Kortens språk" });
+      expect([...group.querySelectorAll("label")].map((l) => l.textContent)).toEqual([
+        "engelska",
+        "koreanska",
+        "svenska",
+      ]);
+    });
+
+    it("narrows the list to the decks with cards in every checked language", () => {
+      renderScreen({ decks: [english, korean] });
+      fireEvent.click(screen.getByRole("checkbox", { name: "Swedish" }));
+      expect(screen.getByText("2 decks")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("checkbox", { name: "Korean" }));
+      expect(screen.queryByRole("checkbox", { name: "Capitals of the world" })).toBeNull();
+      expect(screen.getByRole("checkbox", { name: "Korean nouns" })).toBeInTheDocument();
+      expect(screen.getByText("1 of 2 decks")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("checkbox", { name: "English" }));
+      expect(screen.getByText("No deck matches.")).toBeInTheDocument();
+    });
+
+    it("remembers the checked languages between visits", () => {
+      const memoryKey = `library-test-languages-${++renders}`;
+      const { unmount } = renderScreen({ decks: [english, korean], memoryKey });
+      fireEvent.click(screen.getByRole("checkbox", { name: "Korean" }));
+      unmount();
+      renderScreen({ decks: [english, korean], memoryKey });
+      expect(screen.getByRole("checkbox", { name: "Korean" })).toBeChecked();
+      expect(screen.queryByRole("checkbox", { name: "Capitals of the world" })).toBeNull();
+    });
+
+    it("offers no languages when no deck states one", () => {
+      renderScreen();
+      expect(screen.queryByRole("group", { name: "Card languages" })).toBeNull();
+    });
   });
 
   it("searches names, descriptions and keywords, in every language, and says when nothing matches", () => {

@@ -3,7 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useRef, useState } from "preact/hooks";
-import { filterLibraryDecks, topicsOf, type LibraryDeck } from "@solid-memo/domain/library";
+import {
+  filterLibraryDecks,
+  libraryCardLanguages,
+  topicsOf,
+  type LibraryDeck,
+} from "@solid-memo/domain/library";
+import { cardLanguageNames } from "./cardLanguageNames";
 import { ErrorMessage } from "./ErrorMessage";
 import { LibraryIcon } from "./icons";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
@@ -30,10 +36,12 @@ export function forgetLibrarySelection(memoryKey: string): void {
 /**
  * The deck library: ready-made decks to copy into the current instance.
  * Any number can be checked and imported in one go. The list can be
- * narrowed to topics (checkboxes, from Solid Memo's topics scheme) and
- * by a search of names, descriptions and keywords, in every language
- * (filterLibraryDecks). A row says only the
- * deck's name and size; clicking it (anywhere but the checkbox and the
+ * narrowed to topics (checkboxes, from Solid Memo's topics scheme), to
+ * the languages the cards are in (checkboxes of those the decks state,
+ * a deck shown when its cards are in every one checked) and by a search
+ * of names, descriptions and keywords, in every language
+ * (filterLibraryDecks). A row says only the deck's name, its size and
+ * the languages of its cards; clicking it (anywhere but the checkbox and the
  * Preview button) opens the deck's own page, where it is described in
  * full and can be imported on its own. Preview tries its cards first.
  * A deck or course published elsewhere is added from a link to it
@@ -73,11 +81,12 @@ export function LibraryScreen({
   error: ErrorText | null;
   onImport: (decks: LibraryDeck[]) => void;
 }) {
-  const { t, tx } = useI18n();
+  const { t, tx, locale, languageParts } = useI18n();
   const [selectedUrls, setSelectedUrls] = useRemembered<string[]>(`${memoryKey}:selected`, []);
   const [topics, setTopics] = useRemembered<string[]>(`${memoryKey}:topics`, []);
+  const [languages, setLanguages] = useRemembered<string[]>(`${memoryKey}:languages`, []);
   const [query, setQuery] = useRemembered(`${memoryKey}:query`, "");
-  const shown = filterLibraryDecks(decks, { topics, query });
+  const shown = filterLibraryDecks(decks, { topics, languages, query });
   // A deck the filters hide stays checked for when it shows again, but is
   // not imported: the import never includes what the user cannot see. A
   // course is never imported: it is started from its page, and its cards
@@ -86,6 +95,9 @@ export function LibraryScreen({
     (deck) => deck.isCourse !== true && selectedUrls.includes(deck.url),
   );
   const available = topicsOf(decks);
+  const availableLanguages = libraryCardLanguages(decks)
+    .map((language) => ({ iri: language.iri, name: languageParts(language.tag).name }))
+    .sort((a, b) => a.name.localeCompare(b.name, locale));
   const count =
     shown.length === decks.length
       ? t("library.deckCount", { count: decks.length })
@@ -98,11 +110,11 @@ export function LibraryScreen({
     if (!filtered.current) return;
     const timer = setTimeout(() => setAnnounced(result), ANNOUNCE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [result, topics, query]);
+  }, [result, topics, languages, query]);
 
-  function toggleTopic(topic: string, checked: boolean) {
+  function toggleIn(set: typeof setTopics, value: string, checked: boolean) {
     filtered.current = true;
-    setTopics((current) => (checked ? [...current, topic] : current.filter((t) => t !== topic)));
+    set((current) => (checked ? [...current, value] : current.filter((one) => one !== value)));
   }
 
   function toggle(deck: LibraryDeck, checked: boolean) {
@@ -143,9 +155,26 @@ export function LibraryScreen({
                     <input
                       type="checkbox"
                       checked={topics.includes(topic.iri)}
-                      onChange={(e) => toggleTopic(topic.iri, e.currentTarget.checked)}
+                      onChange={(e) => toggleIn(setTopics, topic.iri, e.currentTarget.checked)}
                     />
                     <ReaderText text={topic.label} />
+                  </label>
+                ))}
+              </fieldset>
+            )}
+            {availableLanguages.length > 0 && (
+              <fieldset class="library-languages">
+                <legend>{t("library.cardLanguages")}</legend>
+                {availableLanguages.map((language) => (
+                  <label key={language.iri} class="checkbox-option">
+                    <input
+                      type="checkbox"
+                      checked={languages.includes(language.iri)}
+                      onChange={(e) =>
+                        toggleIn(setLanguages, language.iri, e.currentTarget.checked)
+                      }
+                    />
+                    {language.name}
                   </label>
                 ))}
               </fieldset>
@@ -201,7 +230,8 @@ export function LibraryScreen({
 /**
  * One deck of the library's list (LibraryScreen): a box to check it (a
  * course has none, being started from its page), its name, linking to
- * its page, its size, that it is a course or already imported, and its
+ * its page, its size, the languages its cards are in, that it is a
+ * course or already imported, and its
  * Preview button. The Studio shows a draft's row as learners will see
  * it (docs/studio.md, The listing preview).
  */
@@ -222,7 +252,8 @@ export function LibraryDeckRow({
   previewHref: string;
   onToggle: (checked: boolean) => void;
 }) {
-  const { t, readerText } = useI18n();
+  const { t, readerText, languageParts } = useI18n();
+  const languages = cardLanguageNames(deck, languageParts);
   return (
     <>
       {/* A 44px target above the row's link, so a near miss
@@ -246,6 +277,9 @@ export function LibraryDeckRow({
       </a>
       <span class="library-deck-meta">
         <span class="hint">{t("common.cardCount", { count: deck.cardCount })}</span>
+        {languages.length > 0 && (
+          <span class="hint library-card-languages">{languages.join(", ")}</span>
+        )}
         {deck.isCourse === true && <span class="hint library-course">{t("library.course")}</span>}
         {imported && <span class="hint library-imported">{t("library.alreadyImported")}</span>}
       </span>

@@ -16,12 +16,14 @@ export interface PreviewPrompt {
 /**
  * A try of a library deck before importing it: its cards one at a time,
  * as study shows them, but with nothing graded or recorded — after the
- * answer comes the next card, for as long as the user likes.
+ * answer comes the next card, for as long as the user likes. The
+ * languages the deck says its cards are in are named above them.
  */
 export function LibraryPreviewScreen({
   deckName,
   deckLang,
   deckHref,
+  cardLanguages,
   prompt,
   turn,
   onNext,
@@ -32,6 +34,8 @@ export function LibraryPreviewScreen({
   deckLang?: string;
   /** URL of the deck's page; its name links there. */
   deckHref: string;
+  /** The languages the deck's cards are in, named in the app's language; none when it states none. */
+  cardLanguages: string[];
   /** null when the deck has no cards. */
   prompt: PreviewPrompt | null;
   /** Counts the cards shown, so each one starts unrevealed, even a repeat. */
@@ -59,6 +63,11 @@ export function LibraryPreviewScreen({
       ) : (
         <>
           <p class="hint">{t("libraryPreview.hint")}</p>
+          {cardLanguages.length > 0 && (
+            <p class="hint">
+              {t("libraryPreview.cardLanguages", { languages: cardLanguages.join(", ") })}
+            </p>
+          )}
           <PreviewCard key={turn} prompt={prompt} onNext={onNext} />
         </>
       )}

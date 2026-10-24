@@ -5,8 +5,10 @@
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import {
+  deckCardLanguages,
   filterLibraryDecks,
   isCopyOf,
+  libraryCardLanguages,
   libraryCopiesOf,
   newestRelease,
   offersNewerRelease,
@@ -19,6 +21,8 @@ import {
 
 const TOPIC = "https://solid-memo.com/ns/vocab/topics.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
+const LANGUAGE = "http://publications.europa.eu/resource/authority/language/";
+const [ENG, SWE, KOR] = [`${LANGUAGE}ENG`, `${LANGUAGE}SWE`, `${LANGUAGE}KOR`];
 
 function libraryDeck(
   name: string,
@@ -33,6 +37,7 @@ function libraryDeck(
     releases: [],
     title: { en: name },
     cardCount: 1,
+    languages: [],
     authors: [],
     direction: "front-to-back",
     sources: [],
@@ -44,9 +49,11 @@ function libraryDeck(
 
 const capitals = libraryDeck("capitals", [`${TOPIC}geography`], {
   description: { en: "Every country's capital." },
+  languages: [ENG, SWE],
 });
 const nouns = libraryDeck("swedish-nouns", [`${TOPIC}swedish`], {
   keywords: { en: ["Vocabulary"], sv: ["Ordförråd"] },
+  languages: [SWE, ENG],
 });
 const http = libraryDeck("http", [`${TOPIC}computing`]);
 
@@ -195,46 +202,99 @@ describe("topicsOf and topicLabels", () => {
   });
 });
 
+describe("deckCardLanguages and libraryCardLanguages", () => {
+  const korean = libraryDeck("korean", [], { languages: [KOR, `${LANGUAGE}NOR`, SWE] });
+
+  it("tag a deck's card languages in its order, leaving out those the reference data does not describe", () => {
+    expect(deckCardLanguages(nouns)).toEqual([
+      { iri: SWE, tag: "sv" },
+      { iri: ENG, tag: "en" },
+    ]);
+    expect(deckCardLanguages(korean).map((language) => language.tag)).toEqual(["ko", "sv"]);
+    expect(deckCardLanguages(http)).toEqual([]);
+  });
+
+  it("list each language any deck's cards are in once, in the EU table's order", () => {
+    expect(libraryCardLanguages([korean, nouns, http]).map((language) => language.tag)).toEqual([
+      "en",
+      "sv",
+      "ko",
+    ]);
+    expect(libraryCardLanguages([http])).toEqual([]);
+  });
+});
+
 describe("filterLibraryDecks", () => {
   const decks = [capitals, nouns, http];
 
   it("keeps every deck when nothing is chosen or typed", () => {
-    expect(filterLibraryDecks(decks, { topics: [], query: "  " })).toEqual(decks);
+    expect(filterLibraryDecks(decks, { topics: [], languages: [], query: "  " })).toEqual(decks);
   });
 
   it("keeps the decks about every chosen topic, a narrower topic included", () => {
-    expect(filterLibraryDecks(decks, { topics: [`${TOPIC}languages`], query: "" })).toEqual([
-      nouns,
-    ]);
-    expect(filterLibraryDecks(decks, { topics: [`${TOPIC}geography`], query: "" })).toEqual([
-      capitals,
-    ]);
     expect(
-      filterLibraryDecks(decks, { topics: [`${TOPIC}geography`, `${TOPIC}computing`], query: "" }),
+      filterLibraryDecks(decks, { topics: [`${TOPIC}languages`], languages: [], query: "" }),
+    ).toEqual([nouns]);
+    expect(
+      filterLibraryDecks(decks, { topics: [`${TOPIC}geography`], languages: [], query: "" }),
+    ).toEqual([capitals]);
+    expect(
+      filterLibraryDecks(decks, {
+        topics: [`${TOPIC}geography`, `${TOPIC}computing`],
+        languages: [],
+        query: "",
+      }),
     ).toEqual([]);
   });
 
+  it("keeps the decks with cards in every chosen language", () => {
+    const korean = libraryDeck("korean", [], { languages: [KOR, SWE] });
+    const all = [...decks, korean];
+    expect(filterLibraryDecks(all, { topics: [], languages: [SWE], query: "" })).toEqual([
+      capitals,
+      nouns,
+      korean,
+    ]);
+    expect(filterLibraryDecks(all, { topics: [], languages: [KOR, SWE], query: "" })).toEqual([
+      korean,
+    ]);
+    expect(filterLibraryDecks(all, { topics: [], languages: [KOR, ENG], query: "" })).toEqual([]);
+    expect(
+      filterLibraryDecks(all, { topics: [`${TOPIC}swedish`], languages: [ENG], query: "" }),
+    ).toEqual([nouns]);
+  });
+
   it("keeps the decks whose name, description or keywords contain the query, whatever the case", () => {
-    expect(filterLibraryDecks(decks, { topics: [], query: "HTTP" })).toEqual([http]);
-    expect(filterLibraryDecks(decks, { topics: [], query: "capital" })).toEqual([capitals]);
-    expect(filterLibraryDecks(decks, { topics: [], query: "vocabulary" })).toEqual([nouns]);
+    expect(filterLibraryDecks(decks, { topics: [], languages: [], query: "HTTP" })).toEqual([http]);
+    expect(filterLibraryDecks(decks, { topics: [], languages: [], query: "capital" })).toEqual([
+      capitals,
+    ]);
+    expect(filterLibraryDecks(decks, { topics: [], languages: [], query: "vocabulary" })).toEqual([
+      nouns,
+    ]);
   });
 
   it("searches the keywords in every language, not only the reader's", () => {
-    expect(filterLibraryDecks(decks, { topics: [], query: "ordförråd" })).toEqual([nouns]);
+    expect(filterLibraryDecks(decks, { topics: [], languages: [], query: "ordförråd" })).toEqual([
+      nouns,
+    ]);
   });
 
   it("finds composed text with a decomposed query, and decomposed text with a composed one", () => {
     const korean = libraryDeck("korean-nouns", [`${TOPIC}korean`], { keywords: { ko: ["사람"] } });
     const decomposed = libraryDeck("decomposed", [], { description: { en: "Cafe\u0301 words" } });
     expect(
-      filterLibraryDecks([...decks, korean], { topics: [], query: "사람".normalize("NFD") }),
+      filterLibraryDecks([...decks, korean], {
+        topics: [],
+        languages: [],
+        query: "사람".normalize("NFD"),
+      }),
     ).toEqual([korean]);
-    expect(filterLibraryDecks([...decks, decomposed], { topics: [], query: "CAFÉ" })).toEqual([
-      decomposed,
-    ]);
-    expect(filterLibraryDecks(decks, { topics: [], query: "ordfo\u0308rra\u030Ad" })).toEqual([
-      nouns,
-    ]);
+    expect(
+      filterLibraryDecks([...decks, decomposed], { topics: [], languages: [], query: "CAFÉ" }),
+    ).toEqual([decomposed]);
+    expect(
+      filterLibraryDecks(decks, { topics: [], languages: [], query: "ordfo\u0308rra\u030Ad" }),
+    ).toEqual([nouns]);
   });
 });

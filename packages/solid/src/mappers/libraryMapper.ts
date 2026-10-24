@@ -104,6 +104,7 @@ function toLibraryDeck(
       .sort((a, b) => Number(a.version) - Number(b.version)),
     title: release.title,
     cardCount: getInteger(currentThing!, SM.cardCount) ?? 0,
+    languages: [...release.language],
     authors: release.creator.map((agent) => names.get(agent) ?? agent),
     ...(release.license === undefined ? {} : { license: release.license }),
     description: release.description,
@@ -238,6 +239,7 @@ export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): Lib
       .map((one) => (one.url === subject ? { ...one, url } : one))
       .sort((a, b) => Number(a.version) - Number(b.version)),
     cardCount: cards.filter((card) => card.retired !== true).length,
+    languages: [...release.language],
     ...(release.created === undefined ? {} : { createdAt: release.created }),
     sources: release.wasDerivedFrom.map((sourceUrl) =>
       toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),

@@ -21,6 +21,7 @@ const solid: LibraryDeck = {
   ...firstRelease(RELEASE),
   title: { en: "Solid" },
   cardCount: 1,
+  languages: [],
   authors: [],
   direction: "front-to-back",
   sources: [],

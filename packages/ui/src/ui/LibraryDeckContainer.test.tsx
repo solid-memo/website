@@ -23,6 +23,7 @@ const capitals: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals" },
   cardCount: 2,
+  languages: [],
   authors: ["Anton Wiklund"],
   direction: "front-to-back",
   sources: [],

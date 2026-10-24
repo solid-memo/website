@@ -26,6 +26,17 @@ export class LibraryDeck extends Screen {
     ).toBeVisible();
   }
 
+  /** The page's facts name the languages of the deck's cards, `names` among them. */
+  async expectCardLanguages(names: string[]): Promise<void> {
+    await this.intent("Check the deck's page names its card languages", async () => {
+      const term = this.page.getByRole("term").filter({
+        hasText: this.t("libraryDeck.cardLanguages", { count: 2 }),
+      });
+      const languages = term.locator("xpath=following-sibling::dd[1]");
+      for (const name of names) await expect(languages).toContainText(name);
+    });
+  }
+
   /**
    * "Copy link": the link to the deck that names no instance, as the app
    * wrote it to the clipboard. Only Chromium lets a page read the
