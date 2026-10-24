@@ -138,7 +138,6 @@ describe("docsSitePlugin, in a build", () => {
       "docs/docs.css",
       "docs/index.html",
       "docs/one/index.html",
-      "docs/versions/index.html",
     ]);
     expect(names.filter((name) => name.endsWith(".svg"))).toHaveLength(2);
     expect(emitted.get("docs/diagrams/OFL-Fredoka.txt")).toMatch(/^Copyright /);

@@ -11,7 +11,6 @@ import {
   parseDocument,
 } from "@solid-memo/markdown/parse";
 import {
-  cssProblem,
   type Diagram,
   DiagramError,
   type DrawInputs,
@@ -78,9 +77,9 @@ export type DocsSiteOptions = {
   ref: string;
   /** The app's version, which every page names. */
   version: string;
-  /** The site's origin (`https://solid-memo.com`), for the canonical address; null for none. */
+  /** The site's origin (`https://solid-memo.com`), for the canonical address and an archive's links to the site; null for none. */
   origin?: string | null;
-  /** `live`: the site's own docs, at /docs/; `archive`: a release's, at /docs/X.Y.Z/, never indexed. */
+  /** `live`: the site's own docs, at /docs/; `archive`: a release's, for its GitHub release, never indexed. */
   mode: "live" | "archive";
   inputs: DrawInputs;
   draw: Draw;
@@ -107,12 +106,8 @@ export class DocsSiteError extends Error {
 /** The name of the drawings' font license, beside them. */
 export const FONT_LICENSE_NAME = `OFL-${FONT_FAMILY}.txt`;
 
-/**
- * A page name that a folder of the site has, or may one day: a version
- * (`/docs/2.2.0/`, or `/docs/2.2/` if one copy per minor is hosted),
- * the list of versions, or the drawings.
- */
-const RESERVED = /^(\d+\.\d+(\.\d+)?|versions|diagrams)\.md$/;
+/** A page name that a folder of the site has: the drawings'. */
+const RESERVED = /^diagrams\.md$/;
 /** A page's name: lowercase, hyphenated (style.md). */
 const PAGE_NAME = /^[a-z0-9]+(-[a-z0-9]+)*\.md$/;
 const README = "README.md";
@@ -135,9 +130,9 @@ type Page = {
 
 /**
  * The docs as pages, by their path in the site's docs folder:
- * `index.html` (the README), `<page>/index.html`, `docs.css`, in a live
- * build `versions/index.html`, and each diagram's drawings in
- * `diagrams/` with the font's license (FONT_LICENSE_NAME) beside them.
+ * `index.html` (the README), `<page>/index.html`, `docs.css`, and each
+ * diagram's drawings in `diagrams/` with the font's license
+ * (FONT_LICENSE_NAME) beside them.
  * Throws a DocsSiteError that lists every problem.
  */
 export async function renderDocsSite(options: DocsSiteOptions): Promise<Map<string, string>> {
@@ -234,7 +229,6 @@ export async function renderDocsSite(options: DocsSiteOptions): Promise<Map<stri
     );
   }
   files.set("docs.css", (await io.read(DOCS_CSS))!);
-  if (options.mode === "live") files.set("versions/index.html", versionsPage(options));
   if ([...files.keys()].some((path) => path.endsWith(".svg")))
     files.set(`diagrams/${FONT_LICENSE_NAME}`, inputs.license);
   return files;
@@ -712,182 +706,19 @@ function code(value: string): string {
 export const DOCS_CSP =
   "default-src 'none'; script-src 'none'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
 
-/** The elements a page is written with (checkPage). */
-const PAGE_ELEMENTS = new Set(
-  [
-    "html head meta link title body header nav main article footer",
-    "h1 h2 h3 h4 h5 h6 p a strong em code pre br hr blockquote ul ol li",
-    "div table thead tbody tr th td figure picture source img figcaption details summary",
-  ]
-    .join(" ")
-    .split(" "),
-);
-
-/** The attributes a page's elements have (checkPage): no `on…`, no `style`. */
-const PAGE_ATTRIBUTES = new Set(
-  [
-    "lang charset http-equiv content name rel href sizes type class id aria-label",
-    "start media srcset src alt width height open translate aria-current",
-  ]
-    .join(" ")
-    .split(" "),
-);
-
-/** A tag as the pages are written: lowercase, each attribute's value in double quotes. */
-const PLAIN_TAG = /<(\/?)([a-z][a-z0-9]*)((?:\s+[a-z][a-z-]*(?:="[^"<>]*")?)*)\s*>/y;
-
-/** The character references escapeHtml writes, and what each stands for. */
-const DECODED: Record<string, string> = Object.fromEntries(
-  Object.entries(ENTITIES).map(([char, entity]) => [entity, char]),
-);
-
-/** Why an address in a page is refused; null when it is not. */
-function addressProblem(address: string, external: boolean): string | null {
-  if (/[\s\\\x00-\x1f]/.test(address))
-    return `an address with a space, a control character or a backslash ("${address}")`;
-  if (address.startsWith("/")) return `an address from the site's root ("${address}")`;
-  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(address);
-  if (scheme === null) return null;
-  if (!external) return `an address on another site to load ("${address}")`;
-  if (!/^https?$/i.test(scheme[1]!))
-    return `an address of a scheme other than http(s) ("${address}")`;
-  return null;
-}
-
 /**
- * A tag's attributes by name, their values decoded (checkPage); why
- * they are refused instead: one a page does not have, one twice, or a
- * character reference escapeHtml does not write.
+ * Where the docs' root and the site's root are from a page `depth`
+ * folders below the docs' root. A live page's site is the folder above
+ * the docs; an archive's is the site at `origin`, as the archive is
+ * read wherever it was unpacked, and is null without one.
  */
-function tagValues(name: string, attributes: string): Map<string, string> | string {
-  const values = new Map<string, string>();
-  for (const [, attribute, raw = ""] of attributes.matchAll(/\s+([a-z-]+)(?:="([^"]*)")?/g)) {
-    if (!PAGE_ATTRIBUTES.has(attribute!)) return `has an attribute ${attribute} on <${name}>`;
-    if (values.has(attribute!)) return `has the attribute ${attribute} twice on <${name}>`;
-    if (/&(?!(?:amp|lt|gt|quot|#39);)/.test(raw))
-      return `has a character reference other than escapeHtml's on <${name}>`;
-    values.set(
-      attribute!,
-      raw.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => DECODED[entity]!),
-    );
-  }
-  return values;
-}
-
-/** Why the addresses a tag names are refused (checkPage); null when they are not. */
-function tagAddressProblem(
-  name: string,
-  values: Map<string, string>,
-  policy: boolean,
-): string | null {
-  for (const attribute of ["href", "src", "srcset"]) {
-    const address = values.get(attribute);
-    if (address === undefined) continue;
-    if (!policy) return "names an address before its Content Security Policy";
-    // A link, or the page's canonical address, may name another site; nothing else.
-    const external = name === "a" || (name === "link" && values.get("rel") === "canonical");
-    const refused = addressProblem(address, external);
-    if (refused !== null) return `has ${refused}`;
-  }
-  return null;
-}
-
-/**
- * Why a page, its HTML as written, is not safe to serve on the app's
- * origin; null when it is (docs/markdown.md, The docs as a site). It
- * checks the pages renderDocsSite writes, and an earlier release's
- * archived pages before the deploy serves them
- * (scripts/docsVersions.ts). It does not read the HTML leniently, as a
- * browser would: it takes only what the pages are written as, and
- * refuses the rest. After the doctype, every `<` opens a plain tag of
- * an element the pages have, with attributes they have, each value in
- * double quotes, with no character reference but those escapeHtml
- * writes. So there is no script, no style, no event handler and no
- * comment. The Content Security Policy is in the head, as the pages
- * write it: after the doctype only `<html>`, `<head>` and `<meta>`
- * tags come before it, with nothing but whitespace between them, so
- * the browser cannot have opened the body and dropped the policy; and
- * there is one `<head>`. The policy comes before anything that names
- * an address, and starts from nothing and runs no script.
- * No address starts from the site's root, holds a space or names a
- * scheme other than http(s), and only a link or the canonical address
- * names another site.
- */
-export function checkPage(html: string): string | null {
-  const DOCTYPE = "<!doctype html>";
-  if (!html.startsWith(DOCTYPE)) return `does not start with ${DOCTYPE}`;
-  let policy = false;
-  let heads = 0;
-  /** The tags before the policy, which may be `<html>`, `<head>`, then `<meta>`s. */
-  let before = 0;
-  let end = DOCTYPE.length;
-  for (let at = html.indexOf("<", end); at >= 0; at = html.indexOf("<", at)) {
-    if (!policy && !/^[\t\n\f\r ]*$/.test(html.slice(end, at)))
-      return "has text before its Content Security Policy";
-    PLAIN_TAG.lastIndex = at;
-    const tag = PLAIN_TAG.exec(html);
-    if (tag === null) return `has markup that is not a plain tag ("${html.slice(at, at + 20)}")`;
-    at = PLAIN_TAG.lastIndex;
-    end = at;
-    const closing = tag[1] === "/";
-    const name = tag[2]!;
-    const attributes = tag[3]!;
-    if (!PAGE_ELEMENTS.has(name)) return `has a <${name}> element`;
-    if (name === "head" && !closing && heads++ > 0) return "has a second <head>";
-    if (!policy && (closing || name !== (["html", "head"][before++] ?? "meta")))
-      return `has <${closing ? "/" : ""}${name}> before its Content Security Policy`;
-    if (closing) {
-      if (attributes !== "") return `has a closing tag with attributes (</${name}>)`;
-      continue;
-    }
-    const values = openTagValues(name, attributes, policy);
-    if (typeof values === "string") return values;
-    if (values.has("http-equiv")) policy = true;
-  }
-  return policy ? null : "has no Content Security Policy";
-}
-
-/**
- * An opening tag's attribute values (tagValues), or why the tag is
- * refused (checkPage): an address it may not name (tagAddressProblem),
- * or an `http-equiv` other than a Content Security Policy that starts
- * from nothing and runs no script.
- */
-function openTagValues(
-  name: string,
-  attributes: string,
-  policy: boolean,
-): Map<string, string> | string {
-  const values = tagValues(name, attributes);
-  if (typeof values === "string") return values;
-  const refused = tagAddressProblem(name, values, policy);
-  if (refused !== null) return refused;
-  const equiv = values.get("http-equiv");
-  if (equiv !== undefined) {
-    if (equiv.toLowerCase() !== "content-security-policy")
-      return `has a <meta http-equiv="${equiv}">`;
-    const directives = (values.get("content") ?? "").split(";").map((part) => part.trim());
-    if (!directives.includes("default-src 'none'") || !directives.includes("script-src 'none'"))
-      return "has a Content Security Policy that lets something load or run without naming it";
-  }
-  return values;
-}
-
-/**
- * Why a stylesheet is not safe to serve; null when it is: it imports
- * nothing and loads nothing (cssProblem, with no `url(` at all).
- */
-export function checkStylesheet(css: string): string | null {
-  return cssProblem(css, false);
-}
-
-/** Where the site's root and the docs' root are from a page `depth` folders below the docs' root. */
-function roots(options: DocsSiteOptions, depth: number) {
+function roots({ mode, origin = null }: DocsSiteOptions, depth: number) {
   const docs = "../".repeat(depth);
+  if (mode === "live") return { docs, site: `${docs}../`, latest: null };
   return {
     docs,
-    site: `${docs}..${options.mode === "archive" ? "/.." : ""}/`,
-    versions: `${docs}${options.mode === "archive" ? "../" : ""}versions/`,
+    site: origin === null ? null : `${origin}/`,
+    latest: origin === null ? null : `${origin}/docs/`,
   };
 }
 
@@ -1012,10 +843,18 @@ function pageShell(
     name === undefined
       ? ""
       : `<a rel="${rel}" href="${pageHref(page, name)}">${label}: ${escapeHtml(titles.get(name)!)}</a>`;
+  const latest =
+    at.latest === null ? "" : ` <a href="${escapeHtml(at.latest)}">Read the latest docs</a>.`;
   const archived =
     mode === "archive"
-      ? `<p class="archive">These are the docs as released with Solid Memo ${escapeHtml(version)}. <a href="${at.docs}../">Read the latest docs</a>.</p>`
+      ? `<p class="archive">These are the docs as released with Solid Memo ${escapeHtml(version)}.${latest}</p>`
       : "";
+  // An archive has no icons beside it, and its policy loads none from elsewhere.
+  const icons =
+    mode === "live"
+      ? `<link rel="icon" href="${at.site}favicon.ico" sizes="48x48">\n<link rel="icon" type="image/svg+xml" href="${at.site}favicon.svg">\n`
+      : "";
+  const home = at.site === null ? "" : `<a href="${escapeHtml(at.site)}">Solid Memo</a> `;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -1025,16 +864,14 @@ function pageShell(
 <meta name="description" content="${escapeHtml(description)}">
 <meta name="color-scheme" content="light dark">
 ${head.filter((line) => line !== "").join("\n")}
-<link rel="icon" href="${at.site}favicon.ico" sizes="48x48">
-<link rel="icon" type="image/svg+xml" href="${at.site}favicon.svg">
-<link rel="stylesheet" href="${at.docs}docs.css">
+${icons}<link rel="stylesheet" href="${at.docs}docs.css">
 <title>${escapeHtml(titles.get(page.name)!)} - Solid Memo docs</title>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 <header class="site">
-<nav aria-label="Site"><a href="${at.site}">Solid Memo</a> <a href="${at.docs || "./"}">Docs</a></nav>
-<p class="version">Version ${escapeHtml(version)} · <a href="${at.versions}">All versions</a></p>
+<nav aria-label="Site">${home}<a href="${at.docs || "./"}">Docs</a></nav>
+<p class="version">Version ${escapeHtml(version)}</p>
 ${pagesNav(page, groups, titles)}
 </header>
 <main id="main">
@@ -1062,10 +899,7 @@ ${figures ? `<li><a href="${at.docs}diagrams/${FONT_LICENSE_NAME}">Diagrams set 
 `;
 }
 
-/** A release on the list of versions, and whether the site serves its docs, at `/docs/X.Y.Z/`. */
-export type ListedRelease = { version: string; hosted: boolean };
-
-/** The version a page of the docs states in its header, as pageShell and versionsPage write it. */
+/** The version a page of the docs states in its header, as pageShell writes it. */
 const STATED_VERSION = /(<p class="version">Version )[^ <]+/;
 
 /**
@@ -1073,69 +907,9 @@ const STATED_VERSION = /(<p class="version">Version )[^ <]+/;
  * it was built with; null for a page that states none. The deploy gives
  * the site CI tested, built before its release, the released version
  * (docs/deployment.md#github-pages-automatic). Only the header changes:
- * a live page names its version nowhere else, and the list of versions
- * is written again by the deploy.
+ * a page names its version nowhere else.
  */
 export function withDocsVersion(html: string, version: string): string | null {
   if (!STATED_VERSION.test(html)) return null;
   return html.replace(STATED_VERSION, (_, before: string) => `${before}${escapeHtml(version)}`);
-}
-
-/**
- * The list of versions, at `docs/versions/`. A build lists its own
- * version and links the releases on the repository's host; the deploy
- * writes it again with every release (`releases`, newest first), each
- * linked to its docs where the site serves them, and always to its docs
- * in the repository at its tag and to its notes.
- */
-export function versionsPage(
-  { repoUrl, version }: Pick<DocsSiteOptions, "repoUrl" | "version">,
-  releases: readonly ListedRelease[] | null = null,
-): string {
-  const link = (href: string, text: string) => `<a href="${escapeHtml(href)}">${text}</a>`;
-  const listed =
-    releases === null
-      ? [`<li><a href="../">${escapeHtml(version)}</a>, this one</li>`]
-      : releases.map((release) => {
-          const name = escapeHtml(release.version);
-          const tag = `v${release.version}`;
-          return `<li>${[
-            release.hosted ? `<a href="../${name}/">${name}</a>` : name,
-            link(`${repoUrl}/tree/${tag}/docs`, "in the repository"),
-            link(`${repoUrl}/releases/tag/${tag}`, "release notes"),
-          ].join(" · ")}</li>`;
-        });
-  const lead =
-    releases === null
-      ? ""
-      : `<p>The <a href="../">docs</a> are of ${escapeHtml(version)}. Each release's own are below, newest first: on this site when it serves them, and always in the repository at the release's tag, with its notes.</p>\n`;
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="${DOCS_CSP}">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Every version of Solid Memo's docs.">
-<meta name="color-scheme" content="light dark">
-<meta name="robots" content="noindex">
-<link rel="icon" href="../../favicon.ico" sizes="48x48">
-<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="stylesheet" href="../docs.css">
-<title>All versions - Solid Memo docs</title>
-</head>
-<body>
-<a class="skip" href="#main">Skip to the content</a>
-<header class="site">
-<nav aria-label="Site"><a href="../../">Solid Memo</a> <a href="../">Docs</a></nav>
-<p class="version">Version ${escapeHtml(version)}</p>
-</header>
-<main id="main">
-<article>
-<h1>All versions</h1>
-${lead}${listed.length === 0 ? "" : `<ul>\n${listed.join("\n")}\n</ul>\n`}<p>Every release, with its notes and the docs as it had them, is on ${link(`${repoUrl}/releases`, "the repository's releases")}.</p>
-</article>
-</main>
-</body>
-</html>
-`;
 }

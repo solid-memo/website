@@ -68,7 +68,7 @@ semantic-release runs, and every action is pinned to a commit. CI fails a change
 breaking, and a commit that says no why or names no issue. CodeQL scans
 the code: the five alerts it raised on `main` were fixed in pull
 requests (#96, #99 to #102), and one that a pull request's own scan
-raised was fixed in that pull request (#158). Since 2.1.1, the site serves each release's docs
+raised was fixed in that pull request (#158). Since 2.1.1, each GitHub release carries its docs
 (#129), Software Heritage keeps a copy of the code (#131), some of the
 journeys run in Firefox, WebKit and on a phone too (#159) and check each screen
 for accessibility (#160), and GOVERNANCE.md says who holds the domain
@@ -156,7 +156,7 @@ Three verdicts changed within a count, or not at all, with new evidence:
   since 1.0.0 that records no reason is a merge commit.
 
 Everything else held. Where its text changed, it is to record what
-landed since: the 18 releases, each release's docs at `/docs/`,
+landed since: the 18 releases, the docs at `/docs/`,
 Software Heritage, the docs index in [docs.ttl](docs.ttl), the release
 job's hardening, the browsers and the accessibility checks in the
 journeys, the domain in GOVERNANCE.md, #165's fixes, the release's
@@ -269,8 +269,9 @@ What holds today, and what does not, criterion by criterion.
   contact (#166). Secret scanning and push protection are on.
 - SHOULD, partial — publish code not in use. The history, the pull
   requests, the old deck and shape versions, and every released version
-  are public. Each release is tagged, and its docs are served at
-  `/docs/X.Y.Z/` ([deployment.md](deployment.md#each-releases-docs)).
+  are public. Each release is tagged, and its docs are in the
+  repository at its tag and in an archive on its GitHub release
+  ([deployment.md](deployment.md#older-releases-docs)).
   Branches with work not yet merged are public too. The 17 leftover
   `pc/*` and `*-backup` branches are still only on the maintainer's
   machine. They are most likely copies of work already merged.
@@ -319,8 +320,8 @@ What holds today, and what does not, criterion by criterion.
   reads the discovery documents of the Pod providers that onboarding
   suggests. It is not a gate, and the app needs none of these
   providers ([testing.md](testing.md#pod-providers)). The release and
-  the deploy run on GitHub Actions, for this deployment only, and so
-  do the copies of older releases' docs. A build needs none of them.
+  the deploy run on GitHub Actions, for this deployment only. A build
+  needs none of them.
 - SHOULD, not met — used by several parties.
 - SHOULD, not met — a roadmap shaped by several parties.
   [ROADMAP.md](../ROADMAP.md) is public and says how to propose an item,
@@ -358,8 +359,7 @@ What holds today, and what does not, criterion by criterion.
   that says what it exports and may import.
 - SHOULD, met — no single-vendor platform. Any static host serves the
   site ([deployment.md](deployment.md)), and any Solid provider holds the
-  data. Only this deployment's copies of older releases' docs, at
-  `/docs/X.Y.Z/`, need GitHub. Without them, `/docs/` is still served.
+  data.
 
 ### 4. Welcome contributors
 
@@ -568,7 +568,7 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — English is one of them.
 - MUST, met — the docs are up to date in English, the one authoritative
   language. What landed since 2.1.1 came with its docs: the docs at
-  `/docs/` ([deployment.md](deployment.md#each-releases-docs)), the
+  `/docs/` ([deployment.md](deployment.md#what-the-artifact-contains)), the
   accessibility target and its checks ([accessibility.md](accessibility.md)),
   the browsers the journeys run in ([testing.md](testing.md#browsers)),
   CodeQL ([testing.md](testing.md#code-scanning),
@@ -647,8 +647,8 @@ What holds today, and what does not, criterion by criterion.
   new since 2.1.1, is in its package's coverage. The scripts are covered
   too (`npm run check:scripts`), the four new since 2.1.1
   (`checkActions.ts`, `checkProviders.ts`, `docsArchive.ts` and
-  `docsVersions.ts`) included, and `shacl_crosscheck.py` has its own
-  tests, which CI runs before the cross-check ([testing.md](testing.md)).
+  `docsVersions.ts`, since removed) included, and `shacl_crosscheck.py`
+  has its own tests, which CI runs before the cross-check ([testing.md](testing.md)).
 - MUST, met — contributions pass all tests before they are merged.
   CI runs on every pull request, in the merge queue and on every push to
   `main`, and `ci-ok` passes only when all its jobs did (on `main`, a
@@ -778,9 +778,9 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — versioned. semantic-release releases a version after CI
   passes on `main`: 26 so far, 1.0.0 to 3.11.0, each with its tag and
   its GitHub release. The site runs only the newest released version,
-  and the footer shows which. Since 3.3.0 (#129), the docs of each
-  release whose GitHub release carries them stay at `/docs/X.Y.Z/`
-  ([deployment.md](deployment.md#each-releases-docs)). 2.0.0 was a
+  and the footer shows which. Since 3.3.0 (#129), each GitHub release
+  carries the docs of its release as an archive
+  ([deployment.md](deployment.md#older-releases-docs)). 2.0.0 was a
   major version by mistake: no commit in it breaks anything, but
   semantic-release read a line in a commit's body as a breaking change.
   [releasing.md](releasing.md) says so, and the release now counts only

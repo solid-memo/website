@@ -510,12 +510,12 @@ describe("embedFont and checkSvg", () => {
 
 describe("cssProblem", () => {
   it.each([
-    ["g{fill:url(#a)}", true, null],
-    ["g{fill:url(#a)}", false, "loads a file (url())"],
-    ["/* the docs' rule: */ g{content:'a'}", true, null],
-    ['g{content:"a"} /* "b:c" */ g{content:"d:e"}', true, 'has an address in a string ("d:e")'],
-    ["g{content:'a\nb:c'}", true, null],
-  ])("checks %s, local %s", (css, local, problem) => {
-    expect(cssProblem(css, local)).toBe(problem);
+    ["g{fill:url(#a)}", null],
+    ["g{fill:url(a.svg)}", 'loads "a.svg"'],
+    ["/* the docs' rule: */ g{content:'a'}", null],
+    ['g{content:"a"} /* "b:c" */ g{content:"d:e"}', 'has an address in a string ("d:e")'],
+    ["g{content:'a\nb:c'}", null],
+  ])("checks %s", (css, problem) => {
+    expect(cssProblem(css)).toBe(problem);
   });
 });

@@ -9,8 +9,6 @@ import { type DocBlock, parseDocument } from "@solid-memo/markdown/parse";
 import { DiagramError, type DrawInputs } from "./diagrams.ts";
 import { DOCS_INDEX, readDocsIndex } from "./docsIndex.ts";
 import {
-  checkPage,
-  checkStylesheet,
   DOCS_CSP,
   DOCS_CSS,
   type DocsIo,
@@ -20,7 +18,6 @@ import {
   escapeHtml,
   renderDocsSite,
   repositoryIo,
-  versionsPage,
   withDocsVersion,
 } from "./docsSite.ts";
 import { drawInputs } from "./drawDiagrams.ts";
@@ -164,14 +161,13 @@ const articleLinks = (html: string) => {
 };
 
 describe("renderDocsSite", () => {
-  it("writes each page, the stylesheet and the list of versions", async () => {
+  it("writes each page and the stylesheet", async () => {
     const files = await render(siteFiles());
     expect([...files.keys()].sort()).toEqual([
       "docs.css",
       "index.html",
       "one/index.html",
       "two/index.html",
-      "versions/index.html",
     ]);
     expect(files.get("docs.css")).toBe("body{}");
   });
@@ -191,7 +187,7 @@ describe("renderDocsSite", () => {
     expect(one).not.toContain("noindex");
     expect(one).toContain('<link rel="stylesheet" href="../docs.css">');
     expect(one).toContain('<a href="../../">Solid Memo</a> <a href="../">Docs</a>');
-    expect(one).toContain('Version 2.2.0 · <a href="../versions/">All versions</a>');
+    expect(one).toContain('<p class="version">Version 2.2.0</p>');
     expect(one).toContain('<a class="skip" href="#main">');
     expect(one).toContain('<main id="main">');
     expect(one).toContain(
@@ -337,48 +333,6 @@ describe("renderDocsSite", () => {
     });
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatch(/^docs\/docs\.ttl(:1)?: not Turtle: /);
-  });
-
-  it("writes the list of versions: this one, and the releases", async () => {
-    const versions = (await render(siteFiles())).get("versions/index.html")!;
-    expect(versions).toContain(`content="${DOCS_CSP}"`);
-    expect(versions).toContain('<a href="../">2.2.0</a>, this one');
-    expect(versions).toContain(`<a href="${REPO}/releases">`);
-    expect(versions).toContain('<link rel="stylesheet" href="../docs.css">');
-    expect(versions).toBe(versionsPage({ repoUrl: REPO, version: "2.2.0" }));
-  });
-
-  it("writes the list of every release, for the deploy: each one's docs where the site has them, in the repository and its notes", () => {
-    const versions = versionsPage({ repoUrl: REPO, version: "2.2.0" }, [
-      { version: "2.2.0", hosted: true },
-      { version: "2.1.1", hosted: false },
-    ]);
-    expect(checkPage(versions)).toBeNull();
-    expect(versions).toContain('<p class="version">Version 2.2.0</p>');
-    expect(versions).toContain('<p>The <a href="../">docs</a> are of 2.2.0.');
-    expect(versions).toContain(
-      [
-        "<ul>",
-        `<li><a href="../2.2.0/">2.2.0</a> · <a href="${REPO}/tree/v2.2.0/docs">in the repository</a> · <a href="${REPO}/releases/tag/v2.2.0">release notes</a></li>`,
-        `<li>2.1.1 · <a href="${REPO}/tree/v2.1.1/docs">in the repository</a> · <a href="${REPO}/releases/tag/v2.1.1">release notes</a></li>`,
-        "</ul>",
-      ].join("\n"),
-    );
-    expect(versions).not.toContain("this one");
-    const none = versionsPage({ repoUrl: REPO, version: "2.2.0" }, []);
-    expect(none).not.toContain("<ul>");
-    expect(none).toContain(`<a href="${REPO}/releases">the repository's releases</a>`);
-  });
-
-  it("writes every page safe to serve, as checkPage and checkStylesheet hold it", async () => {
-    for (const mode of ["live", "archive"] as const) {
-      const files = await render(siteFiles({ "docs/one.md": page("One", diagram("Flow")) }), {
-        mode,
-      });
-      for (const [path, content] of files) {
-        if (path.endsWith(".html")) expect(checkPage(content), path).toBeNull();
-      }
-    }
   });
 
   it("describes a page by its first paragraph, as one line", async () => {
@@ -534,32 +488,14 @@ describe("renderDocsSite", () => {
         "",
         "> ```mermaid\n> flowchart LR\u202e\n> ```",
       ),
-      "docs/2.2.0.md": "",
-      "docs/2.2.md": "",
-      "docs/versions.md": "",
       "docs/diagrams.md": "",
       "docs/Upper_Case.md": "",
       [DOCS_INDEX]: docsTtl([
-        [
-          "pages",
-          "Pages",
-          [
-            "one.md",
-            "raw.md",
-            "2.2.0.md",
-            "2.2.md",
-            "versions.md",
-            "diagrams.md",
-            "Upper_Case.md",
-            "gone.md",
-          ],
-        ],
+        ["pages", "Pages", ["one.md", "raw.md", "diagrams.md", "Upper_Case.md", "gone.md"]],
       ]),
       "CONTRIBUTING.md": "# Contributing\n",
     });
     expect(problems).toEqual([
-      "docs/2.2.0.md: a page name the site keeps for a folder of its own",
-      "docs/2.2.md: a page name the site keeps for a folder of its own",
       "docs/README.md:11: a task list item: write **Done.** or **Open.** instead (style.md)",
       "docs/README.md:12: a task list item: write **Done.** or **Open.** instead (style.md)",
       'docs/README.md:16: a heading whose id ("part") the page already has',
@@ -572,11 +508,10 @@ describe("renderDocsSite", () => {
       "docs/one.md:1: the page does not open with its title, a heading of level 1 (`# …`)",
       "docs/raw.md:5: raw HTML",
       "docs/two.md:1: the title is not followed by a paragraph, the page's description",
-      "docs/versions.md: a page name the site keeps for a folder of its own",
       "docs/drawn.md: docs/docs.ttl does not list the page",
       "docs/nested.md: docs/docs.ttl does not list the page",
       "docs/two.md: docs/docs.ttl does not list the page",
-      "docs/docs.ttl:57: lists gone.md, which is not in docs/",
+      "docs/docs.ttl:39: lists gone.md, which is not in docs/",
       'docs/README.md:6: a link to "gone.md": no such page',
       'docs/README.md:7: a link to "#nowhere": no such heading',
       'docs/README.md:7: a link to "one.md#nowhere": one.md has no such heading',
@@ -789,7 +724,7 @@ describe("renderDocsSite", () => {
     expect(one).not.toContain("Fredoka");
   });
 
-  it("writes an archive one folder deeper, never indexed, its links at the release's tag", async () => {
+  it("writes an archive never indexed, its links at the release's tag and to the site at its origin", async () => {
     const files = await render(
       {
         ...siteFiles(),
@@ -798,164 +733,27 @@ describe("renderDocsSite", () => {
       },
       { mode: "archive", ref: "v2.2.0" },
     );
-    expect(files.has("versions/index.html")).toBe(false);
     const one = files.get("one/index.html")!;
     expect(one).toContain('<meta name="robots" content="noindex">');
     expect(one).not.toContain("canonical");
     expect(one).toContain(
-      '<p class="archive">These are the docs as released with Solid Memo 2.2.0. <a href="../../">Read the latest docs</a>.</p>',
+      '<p class="archive">These are the docs as released with Solid Memo 2.2.0. <a href="https://memo.example/docs/">Read the latest docs</a>.</p>',
     );
-    expect(one).toContain('<a href="../../../">Solid Memo</a> <a href="../">Docs</a>');
-    expect(one).toContain('<link rel="icon" href="../../../favicon.ico"');
-    expect(one).toContain('Version 2.2.0 · <a href="../../versions/">All versions</a>');
+    expect(one).toContain('<a href="https://memo.example/">Solid Memo</a> <a href="../">Docs</a>');
+    expect(one).not.toContain('rel="icon"');
+    expect(one).toContain('<p class="version">Version 2.2.0</p>');
     expect(one).toContain(`<a href="${REPO}/blob/v2.2.0/packages/app/main.ts">code</a>`);
     expect(one).toContain(`<a href="${REPO}/blob/v2.2.0/docs/one.md">This page's source</a>`);
     expect(one).toContain(`Built from <a href="${REPO}/tree/v2.2.0">v2.2.0</a>`);
-    const readme = files.get("index.html")!;
-    expect(readme).toContain('<a href="../../">Solid Memo</a> <a href="./">Docs</a>');
-    expect(readme).toContain('<a href="../">Read the latest docs</a>');
-  });
-});
-
-describe("checkPage", () => {
-  const PAGE = [
-    "<!doctype html>",
-    '<html lang="en">',
-    "<head>",
-    '<meta charset="utf-8">',
-    `<meta http-equiv="Content-Security-Policy" content="${DOCS_CSP}">`,
-    '<link rel="canonical" href="https://memo.example/docs/">',
-    '<link rel="stylesheet" href="docs.css">',
-    "</head>",
-    "<body>",
-    "<p>A &amp; B, 1 &lt; 2 > 0</p>",
-    '<a href="https://example.org/?a=1&amp;b=2">the web</a> <a href="#main">here</a>',
-    '<details open><summary>More</summary><pre><code translate="no">&lt;script&gt;</code></pre></details>',
-    "</body>",
-    "</html>",
-    "",
-  ].join("\n");
-  const body = (html: string) => PAGE.replace("<body>\n", `<body>\n${html}\n`);
-
-  it("takes a page as renderDocsSite writes it", () => {
-    expect(checkPage(PAGE)).toBeNull();
-  });
-
-  it.each([
-    ["no doctype", PAGE.replace("<!doctype html>", ""), "does not start with <!doctype html>"],
-    ["a script", body("<script>alert(1)</script>"), "has a <script> element"],
-    ["a frame", body('<iframe src="x.html"></iframe>'), "has a <iframe> element"],
-    ["a comment", body("<!-- note -->"), 'has markup that is not a plain tag ("<!-- note -->'],
-    ["an uppercase tag", body("<SCRIPT>"), 'has markup that is not a plain tag ("<SCRIPT>'],
-    ["an unquoted value", body("<p id=x>"), 'has markup that is not a plain tag ("<p id=x>'],
-    ["an event handler", body('<p onclick="alert(1)">'), "has an attribute onclick on <p>"],
-    ["a style", body('<p style="color:red">'), "has an attribute style on <p>"],
-    ["an attribute twice", body('<p id="a" id="b">'), "has the attribute id twice on <p>"],
-    [
-      "another character reference",
-      body('<a href="&#106;avascript:alert(1)">x</a>'),
-      "has a character reference other than escapeHtml's on <a>",
-    ],
-    [
-      "a closing tag with attributes",
-      body('</p id="a">'),
-      "has a closing tag with attributes (</p>)",
-    ],
-    [
-      "a script address",
-      body('<a href="javascript:alert(1)">x</a>'),
-      'has an address of a scheme other than http(s) ("javascript:alert(1)")',
-    ],
-    [
-      "an address from the root",
-      body('<a href="/docs/">x</a>'),
-      `has an address from the site's root ("/docs/")`,
-    ],
-    [
-      "an address with a space",
-      body('<a href=" javascript:alert(1)">x</a>'),
-      'has an address with a space, a control character or a backslash (" javascript:alert(1)")',
-    ],
-    [
-      "a drawing from another site",
-      body('<img src="https://example.org/a.svg" alt="">'),
-      'has an address on another site to load ("https://example.org/a.svg")',
-    ],
-    [
-      "a refresh",
-      body('<meta http-equiv="refresh" content="0">'),
-      'has a <meta http-equiv="refresh">',
-    ],
-    [
-      "an address before the policy",
-      PAGE.replace('<meta charset="utf-8">', '<meta charset="utf-8" href="a.ico">'),
-      "names an address before its Content Security Policy",
-    ],
-    [
-      "another element before the policy",
-      PAGE.replace('<meta charset="utf-8">', '<link rel="stylesheet" href="docs.css">'),
-      "has <link> before its Content Security Policy",
-    ],
-    [
-      "the policy outside the head",
-      PAGE.replace(/<meta http-equiv[^\n]*\n(<link[^\n]*\n)*/, "").replace(
-        "<body>",
-        `<body>\n<meta http-equiv="Content-Security-Policy" content="${DOCS_CSP}">`,
-      ),
-      "has </head> before its Content Security Policy",
-    ],
-    [
-      "the policy after the body has begun",
-      PAGE.replace('<html lang="en">\n<head>', '<html lang="en">x<head>'),
-      "has text before its Content Security Policy",
-    ],
-    [
-      "text before the page",
-      PAGE.replace("<!doctype html>\n", "<!doctype html>\u00a0"),
-      "has text before its Content Security Policy",
-    ],
-    [
-      "no <html> first",
-      PAGE.replace('<html lang="en">\n', ""),
-      "has <head> before its Content Security Policy",
-    ],
-    ["a second head", body("<head>"), "has a second <head>"],
-    [
-      "a policy that lets script run",
-      PAGE.replace(DOCS_CSP, "default-src 'none'; script-src 'self'"),
-      "has a Content Security Policy that lets something load or run without naming it",
-    ],
-    [
-      "a policy without its content",
-      PAGE.replace(` content="${DOCS_CSP}"`, ""),
-      "has a Content Security Policy that lets something load or run without naming it",
-    ],
-    [
-      "no policy",
-      '<!doctype html>\n<html><head><meta charset="utf-8">\n',
-      "has no Content Security Policy",
-    ],
-  ])("refuses %s", (_, html, problem) => {
-    // A piece of markup is named by its first characters, which this compares.
-    expect(checkPage(html)!.slice(0, problem.length)).toBe(problem);
-  });
-});
-
-describe("checkStylesheet", () => {
-  it.each([
-    ["body{color:red}", null],
-    ['@import "a.css";', "has an @import"],
-    ["a{background:URL(a.png)}", "loads a file (url())"],
-    ["a::after{content:'\\75'}", "has a backslash"],
-    ['a{background:image-set("https://example.org/a.png" 1x)}', "loads a file (image-set())"],
-    ["a{background:-webkit-image-set('a.png' 1x)}", "loads a file (image-set())"],
-    [
-      'a::after{content:"https://example.org/"}',
-      'has an address in a string ("https://example.org/")',
-    ],
-    ["/* the docs' pages: one */ a::after{content:'→'}", null],
-  ])("checks %s", (css, problem) => {
-    expect(checkStylesheet(css)).toBe(problem);
+    expect(files.get("index.html")).toContain(
+      '<a href="https://memo.example/">Solid Memo</a> <a href="./">Docs</a>',
+    );
+    const alone = await render(siteFiles(), { mode: "archive", origin: null });
+    const readme = alone.get("index.html")!;
+    expect(readme).toContain('<nav aria-label="Site"><a href="./">Docs</a></nav>');
+    expect(readme).toContain(
+      '<p class="archive">These are the docs as released with Solid Memo 2.2.0.</p>',
+    );
   });
 });
 
@@ -1033,10 +831,6 @@ describe("the repository's own docs", () => {
         name,
       ).toEqual(source);
     }
-    for (const [path, content] of files) {
-      if (path.endsWith(".html")) expect(checkPage(content), path).toBeNull();
-      if (path.endsWith(".css")) expect(checkStylesheet(content), path).toBeNull();
-    }
   }, 120_000);
 });
 
@@ -1047,12 +841,6 @@ describe("withDocsVersion", () => {
     for (const name of ["index.html", "one/index.html", "two/index.html"]) {
       expect(withDocsVersion(built.get(name)!, "3.0.0")).toBe(released.get(name));
     }
-  });
-
-  it("states the version in the list of versions' header", () => {
-    expect(withDocsVersion(versionsPage({ repoUrl: REPO, version: "2.2.0" }), "3.0.0")).toContain(
-      '<p class="version">Version 3.0.0</p>',
-    );
   });
 
   it("is null for a page that states no version", () => {

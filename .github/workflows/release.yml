@@ -27,8 +27,8 @@ name: Release
 #
 # The GitHub release carries the version's docs, rendered and drawn in
 # Chromium in the release's prepare step (npm run docs:archive), and
-# attested as this workflow's on main, which the deploy checks before it
-# serves them. The job that holds the key runs Chromium and Mermaid for
+# attested as this workflow's on main, so whoever downloads them can
+# check where they came from. The job that holds the key runs Chromium and Mermaid for
 # it; docs/releasing.md says why that is accepted. When the archive could
 # not be attached or attested, run this by hand with the version's tag,
 # and the docs job renders, attests and attaches it, and publishes the
@@ -194,11 +194,11 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
           npx semantic-release --repository-url "$REPOSITORY_URL"
       # The archive of the version's docs, attested as made by this
-      # workflow on main, which the deploy checks before it serves it
-      # (docs/deployment.md#each-releases-docs). semantic-release makes and
-      # uploads it in one run, so it is attested just after: if this step
-      # fails, run the docs job by hand with the tag, which renders and
-      # attests it again.
+      # workflow on main, so whoever downloads it can check where it came
+      # from (docs/deployment.md#a-releases-docs-as-an-archive).
+      # semantic-release makes and uploads it in one run, so it is attested
+      # just after: if this step fails, run the docs job by hand with the
+      # tag, which renders and attests it again.
       - if: steps.tip.outputs.release == 'true' && hashFiles('release-assets/docs-*.tar.gz') != ''
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -209,8 +209,8 @@ jobs:
   # made as a draft, and the upload failed, or the archive was not
   # attested. Run by hand from main, with the version's tag. It renders
   # the docs from the tag, as the release would have, attests them as
-  # this workflow's on main, and uploads them, so the deploy accepts
-  # them; it needs no deploy key, and has none. A release that already
+  # this workflow's on main, and uploads them, then publishes the draft,
+  # which the deploy refuses; it needs no deploy key, and has none. A release that already
   # carries an attested archive keeps it: an archive is rendered once.
   docs:
     if: >-
@@ -250,7 +250,7 @@ jobs:
             exit 1
           fi
           # An archive it carries is kept when this workflow attested it
-          # on main, as the deploy checks; one that is not is replaced.
+          # on main; one that is not is replaced.
           attach=true
           if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fqx "docs-$version.tar.gz"; then
             carried="$(mktemp -d)"
@@ -306,7 +306,7 @@ jobs:
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: npm run docs:archive -- "$VERSION"
-      # Attested before it is uploaded, so the deploy never finds it
+      # Attested before it is uploaded, so the release never carries it
       # without its attestation.
       - if: steps.release.outputs.attach == 'true'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2

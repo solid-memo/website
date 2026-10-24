@@ -12,9 +12,8 @@ name: Deploy to GitHub Pages
 # check. Either way, only if the tag is the newest version on main, names
 # that version's release commit, and has its GitHub release. Other
 # commits on main are not deployed, and neither is an older version: the
-# site always runs the newest version the releases page lists. Beside it,
-# the site serves each release's docs under /docs/X.Y.Z/, from the
-# archive its GitHub release carries (docs/deployment.md#each-releases-docs).
+# site always runs the newest version the releases page lists, and its
+# docs are that version's only.
 # CI also runs on pull requests, a fork's included, and a fork's branch
 # may be named main too: workflow_run's branch filter matches that name,
 # so the job checks that CI ran for a push, in this repository.
@@ -32,8 +31,6 @@ permissions:
   contents: read
   # To download the user journeys' report from the CI run.
   actions: read
-  # To check that the release workflow made each release's docs archive.
-  attestations: read
 
 # A deploy waiting its turn is replaced by a newer one in its group. Only
 # a run that may deploy (one by hand, or one after CI on a release
@@ -66,9 +63,6 @@ jobs:
     outputs:
       sha: ${{ steps.release.outputs.sha }}
       tag: ${{ steps.tag.outputs.tag }}
-      # Every version tag up to the one deployed, newest first, one a line,
-      # for the docs' list of versions: the build's checkout has no tags.
-      tags: ${{ steps.release.outputs.tags }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -145,12 +139,6 @@ jobs:
             exit 1
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          {
-            echo "tags<<TAGS"
-            git tag --merged "$TAG" --list 'v[0-9]*' --sort=-v:refname |
-              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$'
-            echo "TAGS"
-          } >> "$GITHUB_OUTPUT"
           echo "Deploying $TAG."
 
   build:
@@ -159,7 +147,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      attestations: read
       # To download the site from the CI run on the release commit.
       actions: read
       # To set up GitHub Pages, before the artifact is uploaded.
@@ -215,25 +202,11 @@ jobs:
         run: npm run check
       - if: github.event_name == 'workflow_dispatch' || hashFiles('scripts/siteVersion.ts') == ''
         run: npm run build
-      # Each release's docs, from the archive its GitHub release carries,
-      # under /docs/X.Y.Z/, and the list of every version over the build's
-      # (docs/deployment.md#each-releases-docs). A version whose archive is
-      # refused is left out with an error, one without an archive with a
-      # notice; the list links both to their docs in the repository. A
-      # version from before the archives has no such script, and serves
-      # only its own docs.
-      - name: Each release's docs, under /docs/X.Y.Z/
-        if: hashFiles('scripts/docsVersions.ts') != ''
-        env:
-          DOCS_TAGS: ${{ needs.version.outputs.tags }}
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: npm run docs:versions -- apps/web/dist
       # The artifact is the whole site: the app, and beside it what the
       # build writes: ns/, decks/, the vendored shapes, robots.txt, the
-      # sitemap and the docs; then every release's docs under docs/X.Y.Z/
-      # (docs/deployment.md). The user journeys' report is not in it: the
-      # journeys job publishes it on a site of its own.
+      # sitemap and the docs (docs/deployment.md). The user journeys'
+      # report is not in it: the journeys job publishes it on a site of its
+      # own.
       # robots.txt always, and the sitemap whenever CNAME names a domain
       # (docs/deployment.md#custom-domain-optional); the docs, with their
       # diagrams drawn and the font's license beside them (docs/markdown.md),

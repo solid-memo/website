@@ -91,8 +91,8 @@ describe("docsArchive", () => {
     },
   );
 
-  it("packs the docs as the release serves them, under docs/, with every drawing and the font's license", async () => {
-    const archive = io();
+  it("packs the docs as the release carries them, under docs/, with every drawing and the font's license", async () => {
+    const archive = { ...io(), origin: () => "https://memo.example" };
     expect(await main(["node", "2.2.0"], archive)).toBe(0);
     const file = join(root, "release-assets/docs-2.2.0.tar.gz");
     const entries = tar("-tzf", file).trim().split("\n");
@@ -106,8 +106,6 @@ describe("docsArchive", () => {
         "docs/diagrams/OFL-Fredoka.txt",
       ]),
     );
-    // The list of versions is the site's own, which the archive links to.
-    expect(entries).not.toContain("docs/versions/index.html");
     const svgs = entries.filter((entry) => entry.endsWith(".svg"));
     expect(svgs.length).toBeGreaterThan(0);
     const out = join(root, "out");
@@ -122,7 +120,9 @@ describe("docsArchive", () => {
     const page = readFileSync(join(out, "docs/configuration/index.html"), "utf8");
     expect(page).toContain('<meta name="robots" content="noindex">');
     expect(page).toContain(`${REPO}/blob/v2.2.0/`);
-    expect(page).toContain("These are the docs as released with Solid Memo 2.2.0.");
+    expect(page).toContain(
+      'These are the docs as released with Solid Memo 2.2.0. <a href="https://memo.example/docs/">Read the latest docs</a>.',
+    );
     expect(archive.logged).toEqual([
       `release-assets/docs-2.2.0.tar.gz: the docs of 2.2.0, ${entries.length} files, ${svgs.length} drawings.`,
     ]);
@@ -159,6 +159,12 @@ describe("docsArchive", () => {
     const archive = io(fakeDraw, docs);
     expect(await main(["node", "2.2.0"], archive)).toBe(1);
     expect(archive.logged.join("\n")).toContain("docs/README.md: there is no README.md");
+  });
+
+  it("finds the site's origin in CNAME, as the site's build does, and none without it", () => {
+    expect(defaultIo(root).origin()).toBeNull();
+    writeFileSync(join(root, "CNAME"), "memo.example\n");
+    expect(defaultIo(root).origin()).toBe("https://memo.example");
   });
 
   it("names the repository as the site's build does, from apps/web's .env files", () => {

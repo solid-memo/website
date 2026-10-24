@@ -4,10 +4,9 @@
 
 /**
  * `npm run docs:archive -- <version>`: renders the docs as that release
- * publishes them (docs/deployment.md#a-releases-docs-as-an-archive), the
- * pages that are served one folder below `/docs/`, at
- * `/docs/<version>/`, with their links into the repository at the
- * release's tag, and packs them into one file,
+ * publishes them on its GitHub release
+ * (docs/deployment.md#a-releases-docs-as-an-archive), with their links
+ * into the repository at the release's tag, and packs them into one file,
  * `release-assets/docs-<version>.tar.gz`. The archive holds the pages,
  * their stylesheet and their drawings, with the font's license beside
  * them, all under `docs/`.
@@ -31,6 +30,7 @@ import {
   type Launch,
   launchChromium,
 } from "@solid-memo/site/drawDiagrams";
+import { siteOrigin } from "@solid-memo/site/siteMap";
 import { loadEnv } from "vite";
 import { siteConfig } from "../apps/web/src/config.ts";
 import { isReleaseVersion } from "./releaseVersion.ts";
@@ -48,6 +48,8 @@ export type ArchiveIo = {
   docs: DocsIo;
   /** The repository's web address the site's build links to (VITE_REPO_URL, checked). */
   repoUrl(): string;
+  /** The site's origin, from CNAME, as the site's build reads it; null without one. */
+  origin(): string | null;
   /** What the drawings depend on besides their source. */
   inputs(): Promise<DrawInputs>;
   /** Draws the diagrams, failing when they cannot be. */
@@ -70,6 +72,7 @@ export function defaultIo(
   return {
     docs: repositoryIo(root),
     repoUrl: () => siteConfig(loadEnv("production", join(root, "apps/web"), "VITE_")).repoUrl,
+    origin: () => siteOrigin(join(root, "CNAME")),
     inputs: drawInputs,
     // `required`, whatever DOCS_DIAGRAMS says: without Chromium, it fails.
     draw: (inputs) => (diagrams) =>
@@ -137,7 +140,7 @@ export async function main(argv: readonly string[], io: ArchiveIo): Promise<numb
       repoUrl: io.repoUrl(),
       ref: `v${version}`,
       version,
-      origin: null,
+      origin: io.origin(),
       mode: "archive",
       inputs,
       draw: async (diagrams) => {

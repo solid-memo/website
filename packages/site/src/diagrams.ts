@@ -378,17 +378,15 @@ const SVG_TAG =
 const SVG_ATTRIBUTE = /\s+([^\s=/>]+)\s*=\s*(?:"([^"<]*)"|'([^'<]*)')/g;
 
 /**
- * Why CSS, a drawing's or a stylesheet's, could load something; null
- * when it cannot: no `@import`, no `url(` (in a drawing, one to `#…`:
- * `local`), no `image-set(`, no backslash, which could spell any of
- * them, and no string with `:` or `/`, an address some other function
- * could load. Strings are read as CSS reads them: not inside a comment,
+ * Why a drawing's CSS could load something; null when it cannot: no
+ * `@import`, no `url(` but one to `#…`, no `image-set(`, no backslash,
+ * which could spell any of them, and no string with `:` or `/`, an
+ * address some other function could load. Strings are read as CSS reads them: not inside a comment,
  * and a comment not inside a string.
  */
-export function cssProblem(css: string, local: boolean): string | null {
+export function cssProblem(css: string): string | null {
   if (/@import/i.test(css)) return "has an @import";
   for (const [, value] of css.matchAll(/url\(\s*["']?([^)"']*)/gi)) {
-    if (!local) return "loads a file (url())";
     if (!value!.startsWith("#")) return `loads "${value}"`;
   }
   if (/image-set\(/i.test(css)) return "loads a file (image-set())";
@@ -541,7 +539,7 @@ function stylesProblem(css: readonly string[], notice: boolean): string | null {
     styles.push(each.replace(FONT_FACE, ""));
   }
   for (const style of styles) {
-    const refused = cssProblem(style, true);
+    const refused = cssProblem(style);
     if (refused !== null) return refused;
   }
   return null;

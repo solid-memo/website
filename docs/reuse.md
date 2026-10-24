@@ -69,11 +69,9 @@ On GitHub Pages, a fork deploys with the same workflow as this site
 only released versions, so the fork releases its own with a deploy key
 of its own ([releasing.md](releasing.md#the-deploy-key)). It deploys to
 `https://<user>.github.io/<repository>/`, or to a domain of its own
-([deployment.md](deployment.md#custom-domain-optional)). Its docs serve
-each of its own releases at `/docs/X.Y.Z/`; the upstream project's tags,
-which a fork has too, have no archive on the fork's releases, so the
-list of versions links their docs in the repository
-([deployment.md](deployment.md#each-releases-docs)).
+([deployment.md](deployment.md#custom-domain-optional)). Its docs, at
+`/docs/`, are those of the version it deploys
+([deployment.md](deployment.md#older-releases-docs)).
 
 ## 5. Your own deck library
 

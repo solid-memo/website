@@ -476,7 +476,6 @@ describe("robots.txt and the sitemap", () => {
 });
 
 describe("the docs", () => {
-  const VERSIONS = "docs/versions/index.html";
   /** A made-up origin the pages' relative addresses are resolved on. */
   const SITE = "https://site.invalid/";
   /** The commit the pages' links into the repository name, as the build has it. */
@@ -519,16 +518,13 @@ describe("the docs", () => {
         ) ?? [],
     ).length;
 
-  it("are a page for each of docs/*.md, the list of versions and one stylesheet", () => {
+  it("are a page for each of docs/*.md and one stylesheet", () => {
     expect(
       docsFiles()
         .filter((fileName) => fileName.endsWith(".html"))
         .sort(),
-    ).toEqual([...DOCS_PAGES, VERSIONS].sort());
+    ).toEqual([...DOCS_PAGES].sort());
     expect(built.has("docs/docs.css")).toBe(true);
-    expect(page(VERSIONS).querySelector('meta[name="robots"]')!.getAttribute("content")).toBe(
-      "noindex",
-    );
   });
 
   it("each open with their policy, run no script and name themselves, with ids of their own", () => {
@@ -563,7 +559,7 @@ describe("the docs", () => {
   });
 
   it("link docs.css as their one stylesheet", () => {
-    for (const fileName of [...DOCS_PAGES, VERSIONS]) {
+    for (const fileName of DOCS_PAGES) {
       const sheets = [...page(fileName).querySelectorAll('link[rel="stylesheet"]')];
       expect(sheets, fileName).toHaveLength(1);
       expect(fileOf(new URL(sheets[0]!.getAttribute("href")!, SITE + fileName))).toBe(
@@ -573,7 +569,7 @@ describe("the docs", () => {
   });
 
   it("name every address on the site relatively, and no Markdown file", () => {
-    for (const fileName of [...DOCS_PAGES, VERSIONS])
+    for (const fileName of DOCS_PAGES)
       for (const { address } of addresses(fileName)) {
         if (/^[a-z][a-z0-9+.-]*:/i.test(address)) continue;
         expect(address, fileName).not.toMatch(/^\//);
@@ -593,7 +589,7 @@ describe("the docs", () => {
       return null;
     };
     const counts = { site: 0, repository: 0, web: 0 };
-    for (const fileName of [...DOCS_PAGES, VERSIONS])
+    for (const fileName of DOCS_PAGES)
       for (const { element, address } of addresses(fileName)) {
         if (element.tagName !== "A" && element.tagName !== "LINK") continue;
         const url = new URL(address, SITE + fileName);
