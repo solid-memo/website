@@ -47,6 +47,8 @@ import { createTrialUseCases } from "./trialUseCases";
 export interface AppOptions {
   /** The name the app gives itself when the user logs in (docs/authentication.md). */
   clientName: string;
+  /** The Client ID Document the build wrote, if any: the client ID on the site it was written for (docs/authentication.md#the-client-id-document). */
+  clientId?: string | null;
   /**
    * The address the site is served from, ending in a slash: where the
    * documents it publishes (the shapes, the vocabulary, the deck library
@@ -69,6 +71,7 @@ export interface AppOptions {
  */
 export function createAppUseCases({
   clientName,
+  clientId,
   servedSite,
   libraryIndexUrl,
   ruleset,
@@ -114,7 +117,7 @@ export function createAppUseCases({
   const randomId = () => crypto.randomUUID();
 
   return createUseCases({
-    sessionGateway: createSolidSessionGateway(clientName),
+    sessionGateway: createSolidSessionGateway({ clientName, site: servedSite, clientId }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway: createSolidStorageGateway({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository({

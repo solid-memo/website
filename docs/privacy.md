@@ -110,7 +110,10 @@ The app contacts these from your browser, each when it is needed:
 - **Your WebID's server**, to read your profile when you log in
   ([authentication.md](authentication.md)).
 - **Your identity provider**, which handles the login itself. It sees
-  that you logged in to Solid Memo. A provider you pick from the
+  that you logged in to Solid Memo, and may read Solid Memo's Client ID
+  Document from the site to learn who it is: that request comes from the
+  provider, not from your browser
+  ([authentication.md](authentication.md#the-client-id-document)). A provider you pick from the
   suggestions ([onboarding.md](onboarding.md)) is one of the providers
   in [`podProvider.ts`](../packages/domain/src/podProvider.ts); none of
   them is run by the project.

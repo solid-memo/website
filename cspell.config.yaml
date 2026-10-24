@@ -103,6 +103,8 @@ words:
   # Standards, vocabularies and their terms
   - adms
   - bidi
+  # The Client ID Document's file, clientid.jsonld (docs/authentication.md)
+  - clientid
   - CLDR
   # CSS's color notations: #rrggbb, #rrggbbaa, color-mix(in srgb, …)
   - rrggbb

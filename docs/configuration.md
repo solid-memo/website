@@ -89,7 +89,8 @@ The name is shown where it stands alone:
 - the end of every browser tab's title (`Log in – Example School Cards`);
 - the link to the learner's app on the Studio's empty deck list;
 - the name the identity provider shows when the user logs in (the
-  client name, [authentication.md](authentication.md));
+  client name, and the `client_name` of the Client ID Document,
+  [authentication.md](authentication.md#the-client-id-document));
 - the page's `<title>`, `og:site_name`, `og:title` and JSON-LD `name` in
   [index.html](../apps/web/index.html), which vite.config.ts fills in.
 
@@ -243,6 +244,7 @@ in its script.
 | the version, `<meta name="version">` in `index.html` | the `version` in the root [package.json](../package.json) | The footer's version, and the one an error report names. It is in the page, not the script, whose file is named by a hash of its content, so a built site can be given another version without touching its script: the deploy gives the site CI tested the version released (`npm run site:version`, [deployment.md](deployment.md#the-build-ci-tested)). |
 | `__COMMIT_SHA__` | `git rev-parse HEAD`, else `GITHUB_SHA`, else none | The footer's commit link; left out when unknown. The docs' links into the repository name the same commit, or `main` when it is unknown. |
 | `__SHAPES_RULESET__` | a hash of `ns/shapes/` and the vendored profiles | Which rules a pod's check receipts were made under ([validation.md](validation.md)). |
+| `__CLIENT_ID__` | the domain in [CNAME](../CNAME): `https://<domain>/clientid.jsonld`, else none | The client ID the page logs in with when it is served on that domain, the address of the Client ID Document the build writes there ([authentication.md](authentication.md#the-client-id-document)). |
 
 ## What cannot be configured
 

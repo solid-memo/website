@@ -148,6 +148,7 @@ data it reads:
 |---|---|---|
 | `/` (`index.html`, `assets/`) | `apps/web/`, `apps/studio/` | The app, [Solid Memo Studio](studio.md) at `#/studio` included, in a chunk of its own under `assets/`. |
 | `/about/index.html` | `apps/web/public/about/` | What Solid Memo is, for learners, deck authors, technologists and decision makers: plain HTML, in English, that search engines and browsers without script can read. It runs no script, so it follows the browser's light or dark, not the theme chosen in the app; [aboutPage.test.ts](../apps/web/src/aboutPage.test.ts) checks its policy and its links. It has a link preview of its own (`og:` and `twitter:` tags), with the site's picture. `sitemap.xml` lists it, the app's footer links to it, and so does the site's page in a `<noscript>`. Its links to the docs lead to `/docs/` on the same site. |
+| `/clientid.jsonld` | written by the build, from [CNAME](../CNAME) and `VITE_APP_NAME` | The site's Client ID Document, which identity providers read when a user logs in on the domain in `CNAME` ([authentication.md](authentication.md#the-client-id-document)). Pages serves it as `application/ld+json`. Without a `CNAME`, there is none. |
 | `/robots.txt`, `/sitemap.xml` | written by the build, from [CNAME](../CNAME) | `robots.txt` keeps search engines out of `/journeys/`, the report's old address, and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, except a page whose `<meta name="robots">` says `noindex` (the Studio's and the journeys' report's old addresses), on the domain in `CNAME` ([below](#custom-domain-optional)). Without a `CNAME`, there is no sitemap, and `robots.txt` names none. |
 | `/docs/` (`index.html`, `<page>/index.html`, `diagrams/`, `docs.css`) | [`docs/`](README.md), rendered by the build | These docs as static pages, in English, at the version deployed: the README at `/docs/`, with the list of pages from their index, [docs.ttl](docs.ttl), and every other page at `/docs/<page>/` ([markdown.md](markdown.md#the-docs-as-a-site)). Like the About page they run no script, so they follow the browser's light or dark. Their diagrams are drawn as the site is built, light and dark, as SVG files in `diagrams/` with the font's license, `OFL-Fredoka.txt`, beside them. Their links into the repository lead to `VITE_REPO_URL` at the commit built ([configuration.md](configuration.md#vite_repo_url)). The app's footer, the About page, the site's page in a `<noscript>`, and `publiccode.yml`'s `documentation` link to `/docs/`. These addresses may change in any version: they are not part of the public API ([releasing.md](releasing.md#the-public-api)). |
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
@@ -244,9 +245,13 @@ repository's Pages settings name it, with HTTPS enforced.
   `/<repository>/` project path on GitHub Pages.
 - Routing is hash-based (`docs/routing.md`), so deep links resolve to
   `index.html` without rewrite rules.
-- The Solid OIDC redirect URL derives from `window.location` at
-  runtime; no per-origin auth configuration. HTTPS is required, which
-  GitHub Pages provides.
+- The Solid OIDC redirect URL derives from the page's address at
+  runtime. The only auth setting tied to an origin is the domain in
+  `CNAME`, which the build writes the Client ID Document for: the app
+  logs in with it on that domain alone, and on any other address it
+  registers at each login, as it does without a `CNAME`
+  ([authentication.md](authentication.md#the-client-id-document)).
+  HTTPS is required, which GitHub Pages provides.
 - The Content Security Policy is a meta tag in `index.html`, not a
   header, for GitHub Pages sets none: it travels with the page to any
   host ([markdown.md](markdown.md#safety)). A host that can set headers
@@ -277,12 +282,15 @@ repository is not read for that. On another host, follow its own steps.
 The build reads it, though: `siteMapPlugin` in
 [siteMap.ts](../packages/site/src/siteMap.ts) writes
 `sitemap.xml` and the `Sitemap:` line of `robots.txt` on the domain
-that `CNAME` names, since a sitemap's addresses are absolute. So write
-your domain into `CNAME` too, a bare hostname such as
+that `CNAME` names, since a sitemap's addresses are absolute, and
+`clientIdPlugin` in [clientId.ts](../packages/site/src/clientId.ts)
+writes the Client ID Document there, which names the domain too
+([authentication.md](authentication.md#the-client-id-document)). So
+write your domain into `CNAME` too, a bare hostname such as
 `memo.example.org`; the build fails on anything else, a scheme, a path
 or a port. Without a domain, delete `CNAME`: the build then writes
-`robots.txt` without a sitemap. The deploy's guard checks that there is
-a sitemap whenever `CNAME` is there.
+`robots.txt` without a sitemap, and no Client ID Document. The deploy's
+guard checks that there are both whenever `CNAME` is there.
 
 The vocabulary, shape and library IRIs name `https://solid-memo.com/`
 whatever domain serves the site; the app reads them from where it is
@@ -292,7 +300,8 @@ served ([reuse.md](reuse.md#what-stays-the-same)).
 
 One.com's DNS points `solid-memo.com` at GitHub Pages, and the custom
 domain is set in the repository's settings. [CNAME](../CNAME) records
-that setting, and the build writes the sitemap on that domain. The IRIs
+that setting, and the build writes the sitemap and the Client ID
+Document, <https://solid-memo.com/clientid.jsonld>, on that domain. The IRIs
 above resolve on the web because this domain serves this site.
 
 ## Manual publish (any static web space)

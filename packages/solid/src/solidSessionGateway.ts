@@ -58,14 +58,38 @@ function returnTo(hash: string): void {
   window.dispatchEvent(new HashChangeEvent("hashchange"));
 }
 
-export function createSolidSessionGateway(clientName: string): SessionGateway {
+/** Who the app says it is when the user logs in, and where it is served. */
+interface SessionGatewayOptions {
+  /** The name it registers under when the authn library registers it dynamically. */
+  clientName: string;
+  /** The folder the page is served from, ending in a slash: where the provider sends the user back to. */
+  site: string;
+  /**
+   * The address of the site's Client ID Document, if the build wrote
+   * one (docs/authentication.md#the-client-id-document). It is the
+   * client ID only on the site it was written for, the folder it is in,
+   * as it lists that site's redirect URL alone.
+   */
+  clientId?: string | null;
+}
+
+export function createSolidSessionGateway({
+  clientName,
+  site,
+  clientId,
+}: SessionGatewayOptions): SessionGateway {
+  const ownClientId = clientId != null && new URL(".", clientId).href === site;
+
   /** Redirects the browser to the identity provider; does not return. */
   async function startLogin(oidcIssuer: string): Promise<void> {
     window.sessionStorage.setItem(LOGIN_HASH_KEY, window.location.hash);
     await login({
       oidcIssuer,
-      redirectUrl: new URL(window.location.pathname, window.location.origin).toString(),
+      // The site's folder, not the page's path, so /index.html sends the user back to / too.
+      redirectUrl: site,
       clientName,
+      // With a provider that does not list the webid scope, the library registers the app by its name instead.
+      ...(ownClientId && { clientId }),
     });
   }
 

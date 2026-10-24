@@ -52,11 +52,16 @@ describe("appVersion", () => {
 });
 
 describe("siteDefines", () => {
-  it("gives the apps the commit and the ruleset as code, but not the version", () => {
+  it("gives the apps the commit, the ruleset and the client ID as code, but not the version", () => {
     execFileSync.mockReturnValue("abc123\n");
-    expect(siteDefines()).toEqual({
+    expect(siteDefines({ origin: "https://example.org" })).toEqual({
       __COMMIT_SHA__: '"abc123"',
       __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
+      __CLIENT_ID__: '"https://example.org/clientid.jsonld"',
     });
+  });
+
+  it("gives no client ID without a domain", () => {
+    expect(siteDefines({ origin: null }).__CLIENT_ID__).toBe("null");
   });
 });

@@ -15,6 +15,9 @@ in the browser imports it.
   ([configuration.md](../../docs/configuration.md)).
 - `siteMap`: the site's `robots.txt` and sitemap, written from the
   repository's `CNAME` ([deployment.md](../../docs/deployment.md#custom-domain-optional)).
+- `clientId`: the site's Client ID Document, written from the same
+  `CNAME`, and its address, the client ID the app logs in with
+  ([authentication.md](../../docs/authentication.md#the-client-id-document)).
 - `publishTurtle`: the Vite plugin that publishes `ns/`, `decks/` and
   `vocab`'s `vendor/` with the site ([vocab.md](../../docs/vocab.md)).
 - `diagrams`: the Mermaid blocks of a page and what each must have,

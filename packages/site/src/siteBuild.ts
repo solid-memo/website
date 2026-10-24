@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { clientIdUrl } from "./clientId.ts";
 
 /**
  * What the site is built with (apps/web/vite.config.ts): the values its
@@ -59,14 +60,17 @@ export function shapesRuleset(): string {
 }
 
 /**
- * Vite's `define`: `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each
- * app's vite-env.d.ts declares them. The version is not one: the page
- * states it in its HTML (apps/web/index.html), so a built site can be
- * given another version without touching its script.
+ * Vite's `define`: `__COMMIT_SHA__`, `__SHAPES_RULESET__` and
+ * `__CLIENT_ID__`, the address of the Client ID Document the build
+ * writes on the site's `origin` (null without one), as each app's
+ * vite-env.d.ts declares them. The version is not one: the page states
+ * it in its HTML (apps/web/index.html), so a built site can be given
+ * another version without touching its script.
  */
-export function siteDefines(): Record<string, string> {
+export function siteDefines({ origin }: { origin: string | null }): Record<string, string> {
   return {
     __COMMIT_SHA__: JSON.stringify(commitSha()),
     __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
+    __CLIENT_ID__: JSON.stringify(origin === null ? null : clientIdUrl(origin)),
   };
 }
