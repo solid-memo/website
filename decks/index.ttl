@@ -1213,7 +1213,8 @@
 <https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
     a prov:SoftwareAgent ;
     dcterms:title "wikidata_labels.py" ;
-    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
     a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
@@ -19852,12 +19853,12 @@
                   "Währungen der Welt"@de ,
                   "Monedas del mundo"@es ,
                   "Monnaies du monde"@fr ;
-    dcterms:description "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide."@en ,
-                        "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok."@sv ,
-                        "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다."@ko ,
-                        "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU."@de ,
-                        "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE."@es ,
-                        "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."@fr ;
+    dcterms:description "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide."@en ,
+                        "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok."@sv ,
+                        "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다."@ko ,
+                        "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU."@de ,
+                        "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE."@es ,
+                        "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ,
@@ -19896,10 +19897,11 @@
                  "géographie"@fr ,
                  "devises"@fr ;
     dcat:first <https://solid-memo.com/decks/world-currencies/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/world-currencies/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/world-currencies/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/world-currencies/v1.ttl> ,
-                    <https://solid-memo.com/decks/world-currencies/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-currencies/v2.ttl> .
+                    <https://solid-memo.com/decks/world-currencies/v2.ttl> ,
+                    <https://solid-memo.com/decks/world-currencies/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-currencies/v3.ttl> .
 
 <https://solid-memo.com/decks/world-currencies/v1.ttl>
     a dcat:Dataset ;
@@ -19912,6 +19914,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/world-currencies/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "World currencies"@en ,
+                  "Världens valutor"@sv ,
+                  "세계의 통화"@ko ,
+                  "Währungen der Welt"@de ,
+                  "Monedas del mundo"@es ,
+                  "Monnaies du monde"@fr ;
+    dcterms:description "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide."@en ,
+                        "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok."@sv ,
+                        "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다."@ko ,
+                        "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU."@de ,
+                        "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE."@es ,
+                        "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/world-currencies/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "World currencies"@en ,
@@ -19920,16 +19940,17 @@
                   "Währungen der Welt"@de ,
                   "Monedas del mundo"@es ,
                   "Monnaies du monde"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/world-currencies/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/world-currencies/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide."@en ,
-                        "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok."@sv ,
-                        "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다."@ko ,
-                        "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU."@de ,
-                        "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE."@es ,
-                        "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."@fr ;
+    dcterms:description "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide."@en ,
+                        "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok."@sv ,
+                        "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다."@ko ,
+                        "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU."@de ,
+                        "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE."@es ,
+                        "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/world-currencies/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/world-currencies/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/world-currencies/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ,
@@ -19968,25 +19989,34 @@
                  "géographie"@fr ,
                  "devises"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/world-currencies/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/world-currencies/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/world-currencies/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-currencies/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 193 cards in use, 191 in Korean, 190 in German, 183 in Spanish, 192 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#world-currencies> ;
     dcat:isVersionOf <#world-currencies> ;
-    dcat:distribution <https://solid-memo.com/decks/world-currencies/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/world-currencies/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/world-currencies/v3.ttl#turtle> ;
     solid-memo:cardCount 193 .
 
-<https://solid-memo.com/decks/world-currencies/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/world-currencies/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/world-currencies/v2.ttl#compilation>
+<https://solid-memo.com/decks/world-currencies/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/world-currencies/v3.ttl#compilation>
     a prov:Activity .
 
 <https://www.six-group.com/en/products-services/financial-information/market-reference-data/data-standards.html>
@@ -20014,10 +20044,18 @@
     dcterms:title "Ley de Integración Monetaria (Decreto Legislativo Nº 201 of 30 November 2000, Diario Oficial Nº 241, Tomo 349, 22 December 2000), text as published by Justia El Salvador" ;
     dcterms:creator "Asamblea Legislativa de la República de El Salvador" .
 
-<https://solid-memo.com/decks/world-currencies/v2.ttl#turtle>
+<https://solid-memo.com/decks/world-currencies/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/world-currencies/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/world-currencies.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "8e0a8bfd51994e71b7a40ac315821c03e12026cc61eecd20d84a1935e5a8c2ad"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/world-currencies/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/world-currencies/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/world-currencies/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/world-currencies/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/world-currencies/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
