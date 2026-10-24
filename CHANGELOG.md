@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.5.0](https://github.com/solid-memo/website/compare/v6.4.0...v6.5.0) (2026-10-24)
+
+### Features
+
+* **domain:** offer every suggested provider for creating a Pod ([bc566ff](https://github.com/solid-memo/website/commit/bc566ffe9f8444c0d275fb29100b7830dd19f74c)), closes [#283](https://github.com/solid-memo/website/issues/283)
+
+### Bug Fixes
+
+* **ci:** ask for a provider's sign-up page as a browser does ([4ea9ab8](https://github.com/solid-memo/website/commit/4ea9ab8acb527b7f031eca7fa05d2bc5c251c2b4)), closes [#283](https://github.com/solid-memo/website/issues/283)
+
 ## [6.4.0](https://github.com/solid-memo/website/compare/v6.3.3...v6.4.0) (2026-10-24)
 
 ### Features
