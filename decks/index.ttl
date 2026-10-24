@@ -1216,6 +1216,7 @@
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -2061,12 +2062,12 @@
                   "Sternbilder"@de ,
                   "Constelaciones"@es ,
                   "Constellations"@fr ;
-    dcterms:description "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin."@en ,
-                        "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin."@sv ,
-                        "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다."@ko ,
-                        "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin."@de ,
-                        "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin."@es ,
-                        "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."@fr ;
+    dcterms:description "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, and its Korean, German, Spanish and French names from Wikidata's labels, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin."@en ,
+                        "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, och dess koreanska, tyska, spanska och franska namn från Wikidatas etiketter, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin."@sv ,
+                        "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름, 그리고 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name sowie, aus den Bezeichnungen von Wikidata, sein koreanischer, deutscher, spanischer und französischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin."@de ,
+                        "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin."@es ,
+                        "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:astronomy ;
@@ -2103,10 +2104,11 @@
                  "ciel nocturne"@fr ,
                  "étoiles"@fr ;
     dcat:first <https://solid-memo.com/decks/constellations/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/constellations/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/constellations/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/constellations/v1.ttl> ,
-                    <https://solid-memo.com/decks/constellations/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/constellations/v2.ttl> .
+                    <https://solid-memo.com/decks/constellations/v2.ttl> ,
+                    <https://solid-memo.com/decks/constellations/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/constellations/v3.ttl> .
 
 <https://solid-memo.com/decks/constellations/v1.ttl>
     a dcat:Dataset ;
@@ -2119,6 +2121,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/constellations/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Constellations"@en ,
+                  "Stjärnbilder"@sv ,
+                  "별자리"@ko ,
+                  "Sternbilder"@de ,
+                  "Constelaciones"@es ,
+                  "Constellations"@fr ;
+    dcterms:description "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin."@en ,
+                        "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin."@sv ,
+                        "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin."@de ,
+                        "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin."@es ,
+                        "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/constellations/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Constellations"@en ,
@@ -2127,17 +2147,19 @@
                   "Sternbilder"@de ,
                   "Constelaciones"@es ,
                   "Constellations"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/constellations/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/constellations/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:description "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin."@en ,
-                        "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin."@sv ,
-                        "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다."@ko ,
-                        "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin."@de ,
-                        "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin."@es ,
-                        "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."@fr ;
+    dcterms:description "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, and its Korean, German, Spanish and French names from Wikidata's labels, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin."@en ,
+                        "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, och dess koreanska, tyska, spanska och franska namn från Wikidatas etiketter, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin."@sv ,
+                        "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름, 그리고 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name sowie, aus den Bezeichnungen von Wikidata, sein koreanischer, deutscher, spanischer und französischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin."@de ,
+                        "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin."@es ,
+                        "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."@fr ;
     prov:wasDerivedFrom <https://iauarchive.eso.org/public/themes/constellations/> ,
-                        <https://www.wikidata.org/wiki/Wikidata:Main_Page> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/constellations/v2.ttl#compilation> ;
+                        <https://www.wikidata.org/wiki/Wikidata:Main_Page> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/constellations/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/constellations/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:astronomy ;
@@ -2175,25 +2197,34 @@
                  "étoiles"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+                     <http://publications.europa.eu/resource/authority/language/LAT> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/constellations/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/constellations/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/constellations/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/constellations/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 88 cards in use, 88 in Korean, 85 in German, 84 in Spanish, 88 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#constellations> ;
     dcat:isVersionOf <#constellations> ;
-    dcat:distribution <https://solid-memo.com/decks/constellations/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/constellations/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/constellations/v3.ttl#turtle> ;
     solid-memo:cardCount 88 .
 
-<https://solid-memo.com/decks/constellations/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/constellations/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/constellations/v2.ttl#compilation>
+<https://solid-memo.com/decks/constellations/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/constellations/v3.ttl#compilation>
     a prov:Activity .
 
 <https://www.wikidata.org/wiki/Wikidata:Main_Page>
@@ -2231,10 +2262,18 @@
     dcterms:creator "NE Nationalencyklopedin AB" ;
     dcterms:title "Nationalencyklopedin (ne.se): the articles on the rivers" .
 
-<https://solid-memo.com/decks/constellations/v2.ttl#turtle>
+<https://solid-memo.com/decks/constellations/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/constellations/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/constellations.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "3162d2aaf813d60111a1f02cbb149346e917d2ce6dd96947cfb45aec332507bf"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/constellations/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/constellations/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/constellations/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/constellations/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/constellations/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
