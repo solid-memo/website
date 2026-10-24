@@ -1,0 +1,173 @@
+{
+  "description": {
+    "en": "46 trees and shrubs that grow wild in Sweden and the Nordic countries or are widely planted there: conifers such as spruce, pine, juniper, yew and larches, and broadleaves such as birches, alders, aspen, oaks, beech, ash, elms, limes, maples, rowan, cherries and willows. Front: the English name and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name, as accepted by Dyntaxa, the Swedish taxonomic database (September 2026), with a note where another checklist uses a different name. Names from Dyntaxa and Wikidata, checked against Kew's World Checklist of Vascular Plants and Wikipedia.",
+    "sv": "46 träd och buskar som växer vilt i Sverige och Norden eller ofta planteras där: barrträd som gran, tall, en (enbuske), idegran och lärkar, och lövträd som björkar, alar, asp, ekar, bok, ask, almar, lindar, lönnar, rönn, körsbär och pilar. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet, så som det godtas i Dyntaxa, Sveriges taxonomiska databas (september 2026), med en anteckning där en annan checklista använder ett annat namn. Namnen kommer från Dyntaxa och Wikidata och är kontrollerade mot Kews World Checklist of Vascular Plants och Wikipedia.",
+    "ko": "스웨덴과 북유럽 나라들에서 자생하거나 널리 심는 나무와 관목 46종입니다. 가문비나무, 소나무, 노간주나무, 주목, 낙엽송 같은 침엽수와 자작나무, 오리나무, 사시나무, 참나무, 너도밤나무, 물푸레나무, 느릅나무, 피나무, 단풍나무, 마가목, 벚나무, 버드나무 같은 활엽수가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 스웨덴 분류학 데이터베이스 Dyntaxa(2026년 9월)가 인정하는 학명. 다른 점검 목록이 다른 이름을 쓰는 경우 메모가 있습니다. 이름은 Dyntaxa와 위키데이터에서 가져왔고, 큐 왕립식물원의 World Checklist of Vascular Plants와 위키백과로 확인했습니다.",
+    "de": "46 Bäume und Sträucher, die in Schweden und den nordischen Ländern wild wachsen oder dort weit verbreitet gepflanzt werden: Nadelbäume wie Fichte, Kiefer, Wacholder, Eibe und Lärchen und Laubbäume wie Birken, Erlen, Zitterpappel, Eichen, Buche, Esche, Ulmen, Linden, Ahorne, Eberesche, Kirschen und Weiden. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name, wie ihn Dyntaxa, die schwedische taxonomische Datenbank, anerkennt (September 2026), mit einer Anmerkung, wo eine andere Checkliste einen anderen Namen verwendet. Namen aus Dyntaxa und Wikidata, geprüft anhand der World Checklist of Vascular Plants von Kew und der Wikipedia.",
+    "es": "46 árboles y arbustos que crecen silvestres en Suecia y los países nórdicos o que se plantan mucho allí: coníferas como la pícea, el pino, el enebro, el tejo y los alerces, y frondosas como los abedules, los alisos, el álamo temblón, los robles, el haya, el fresno, los olmos, los tilos, los arces, el serbal, los cerezos y los sauces. Anverso: el nombre en inglés y el nombre en sueco, y el nombre en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico, tal como lo acepta Dyntaxa, la base de datos taxonómica sueca (septiembre de 2026), con una nota cuando otra lista de referencia usa otro nombre. Nombres de Dyntaxa y Wikidata, comprobados con la World Checklist of Vascular Plants de Kew y con Wikipedia.",
+    "fr": "46 arbres et arbustes qui poussent à l’état sauvage en Suède et dans les pays nordiques ou qui y sont largement plantés : des conifères comme l’épicéa, le pin, le genévrier, l’if et les mélèzes, et des feuillus comme les bouleaux, les aulnes, le tremble, les chênes, le hêtre, le frêne, les ormes, les tilleuls, les érables, le sorbier des oiseleurs, les cerisiers et les saules. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique, tel que l’accepte Dyntaxa, la base de données taxonomique suédoise (septembre 2026), avec une note lorsqu’une autre liste de référence emploie un autre nom. Noms tirés de Dyntaxa et de Wikidata, vérifiés dans la World Checklist of Vascular Plants de Kew et dans Wikipédia."
+  },
+  "untranslated": [
+    "la"
+  ],
+  "cards": {
+    "alder-buckthorn": {
+      "front": "{Q146136}",
+      "not": {
+        "es": [
+          "Rhamnus frangula"
+        ]
+      }
+    },
+    "bay-willow": {
+      "front": "{Q158912}"
+    },
+    "bird-cherry": {
+      "front": "{Q165424}"
+    },
+    "blackthorn": {
+      "front": "{Q129018}"
+    },
+    "common-alder": {
+      "front": "{Q156904}"
+    },
+    "common-hawthorn": {
+      "front": "{Q161511}"
+    },
+    "common-hazel": {
+      "front": "{Q124969}"
+    },
+    "common-juniper": {
+      "front": "{Q26325}"
+    },
+    "common-lime": {
+      "front": "{Q163760}",
+      "not": {
+        "es": [
+          "Tilia × europaea"
+        ]
+      }
+    },
+    "douglas-fir": {
+      "front": "{Q156687}"
+    },
+    "downy-birch": {
+      "front": "{Q157624}"
+    },
+    "dwarf-birch": {
+      "front": "{Q157628}"
+    },
+    "european-ash": {
+      "front": "{Q156907}"
+    },
+    "european-aspen": {
+      "front": "{Q146110}"
+    },
+    "european-beech": {
+      "front": "{Q146149}"
+    },
+    "european-crab-apple": {
+      "front": "{Q47161}"
+    },
+    "european-elder": {
+      "front": "{Q22701}"
+    },
+    "european-holly": {
+      "front": "{Q192190}"
+    },
+    "european-hornbeam": {
+      "front": "{Q158776}"
+    },
+    "european-larch": {
+      "front": "{Q146048}"
+    },
+    "european-white-elm": {
+      "front": "{Q147492}"
+    },
+    "european-yew": {
+      "front": "{Q179729}"
+    },
+    "field-elm": {
+      "front": "{Q147487}"
+    },
+    "field-maple": {
+      "front": "{Q158785}"
+    },
+    "goat-willow": {
+      "front": "{Q159565}"
+    },
+    "grey-alder": {
+      "front": "{Q157641}"
+    },
+    "guelder-rose": {
+      "front": "{Q156928}"
+    },
+    "horse-chestnut": {
+      "front": "{Q26899}"
+    },
+    "large-leaved-lime": {
+      "front": "{Q156831}"
+    },
+    "lodgepole-pine": {
+      "front": "{Q165091}"
+    },
+    "norway-maple": {
+      "front": "{Q26745}"
+    },
+    "norway-spruce": {
+      "front": "{Q145992}"
+    },
+    "pedunculate-oak": {
+      "front": "{Q165145}"
+    },
+    "rowan": {
+      "front": "{Q146198}",
+      "not": {
+        "ko": [
+          "유럽팥배나무"
+        ]
+      }
+    },
+    "scots-pine": {
+      "front": "{Q133128}"
+    },
+    "sessile-oak": {
+      "front": "{Q158608}"
+    },
+    "siberian-larch": {
+      "front": "{Q754765}"
+    },
+    "silver-birch": {
+      "front": "{Q156895}"
+    },
+    "sitka-spruce": {
+      "front": "{Q147426}",
+      "not": {
+        "fr": [
+          "épinette de Sitka"
+        ]
+      }
+    },
+    "small-leaved-lime": {
+      "front": "{Q158746}"
+    },
+    "swedish-whitebeam": {
+      "front": "{Q27980}"
+    },
+    "sycamore-maple": {
+      "front": "{Q156944}"
+    },
+    "white-poplar": {
+      "front": "{Q146269}"
+    },
+    "white-willow": {
+      "front": "{Q156918}"
+    },
+    "wild-cherry": {
+      "front": "{Q165137}"
+    },
+    "wych-elm": {
+      "front": "{Q147498}"
+    }
+  }
+}
