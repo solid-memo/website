@@ -816,12 +816,12 @@
                   "Die hellsten Sterne des Nachthimmels"@de ,
                   "Las estrellas más brillantes del cielo nocturno"@es ,
                   "Les étoiles les plus brillantes du ciel nocturne"@fr ;
-    dcterms:description "52 cards on the brightest stars of the night sky. 49 cover every star with a name approved by the International Astronomical Union (IAU) that is brighter than apparent magnitude 2.0 (close pairs by their combined light), plus Polaris: front, the star's name, e.g. “Sirius”; back, its constellation, in English by its official IAU name (e.g. “Canis Major”), in Swedish by its Swedish name (“Stora hunden”), with the Bayer designation in a note. Three more ask for the brightest and second-brightest star of the night sky and the north pole star. Names from the IAU Working Group on Star Names; constellations and magnitudes from Wikidata, checked against SIMBAD."@en ,
-                        "52 kort om natthimlens ljusaste stjärnor. 49 av dem gäller alla stjärnor med ett namn som godkänts av Internationella astronomiska unionen (IAU) och som är ljusare än skenbar magnitud 2,0 (täta par efter sitt sammanlagda ljus), samt Polstjärnan: på framsidan stjärnans namn, t.ex. ”Sirius”; på baksidan dess stjärnbild, på engelska med det officiella IAU-namnet (t.ex. ”Canis Major”), på svenska med det svenska namnet (”Stora hunden”), med Bayerbeteckningen i en anteckning. Tre kort frågar efter natthimlens ljusaste och näst ljusaste stjärna och stjärnan närmast norra himmelspolen. Namnen kommer från IAU:s arbetsgrupp för stjärnnamn; stjärnbilder och magnituder från Wikidata, kontrollerade mot SIMBAD."@sv ,
-                        "밤하늘에서 가장 밝은 별에 관한 52장의 카드. 그중 49장은 국제천문연맹(IAU)이 승인한 이름을 가진 별 가운데 겉보기 등급 2.0보다 밝은 모든 별(가까운 쌍성은 합친 밝기 기준)과 북극성을 다룬다: 앞면에는 별의 이름, 예: ‘Sirius’; 뒷면에는 그 별의 별자리가 영어로는 IAU 공식 이름(예: ‘Canis Major’)으로, 스웨덴어로는 스웨덴어 이름(‘Stora hunden’)으로 나오고, 바이어 명명법에 따른 이름은 메모에 있다. 나머지 3장은 밤하늘에서 가장 밝은 별과 두 번째로 밝은 별, 그리고 북극성을 묻는다. 이름은 IAU 항성 이름 작업반(Working Group on Star Names)에서, 별자리와 등급은 Wikidata에서 가져와 SIMBAD로 확인했다."@ko ,
-                        "52 Karten zu den hellsten Sternen des Nachthimmels. 49 behandeln jeden Stern mit einem von der Internationalen Astronomischen Union (IAU) anerkannten Namen, dessen scheinbare Helligkeit heller als 2,0 ist (enge Paare nach ihrem gemeinsamen Licht), dazu den Polarstern: Vorderseite der Name des Sterns, z. B. „Sirius“; Rückseite sein Sternbild, auf Englisch mit dem offiziellen IAU-Namen (z. B. „Canis Major“), auf Schwedisch mit dem schwedischen Namen („Stora hunden“), mit der Bayer-Bezeichnung in einer Anmerkung. Drei weitere fragen nach dem hellsten und dem zweithellsten Stern des Nachthimmels und nach dem Nordpolarstern. Namen von der Working Group on Star Names der IAU; Sternbilder und Helligkeiten aus Wikidata, abgeglichen mit SIMBAD."@de ,
-                        "52 tarjetas sobre las estrellas más brillantes del cielo nocturno. 49 abarcan todas las estrellas con un nombre aprobado por la Unión Astronómica Internacional (UAI) que son más brillantes que la magnitud aparente 2,0 (los pares cercanos, por su luz combinada), además de la Estrella Polar: en el anverso, el nombre de la estrella, p. ej., «Sirius»; en el reverso, su constelación, en inglés con su nombre oficial de la UAI (p. ej., «Canis Major») y en sueco con su nombre sueco («Stora hunden»), con la designación de Bayer en una nota. Otras tres preguntan por la estrella más brillante y la segunda más brillante del cielo nocturno y por la estrella polar del norte. Nombres del Working Group on Star Names de la UAI; constelaciones y magnitudes de Wikidata, comprobadas con SIMBAD."@es ,
-                        "52 cartes sur les étoiles les plus brillantes du ciel nocturne. 49 portent sur toutes les étoiles dont le nom est approuvé par l’Union astronomique internationale (UAI) et qui sont plus brillantes que la magnitude apparente 2,0 (les couples serrés selon leur lumière combinée), plus l’étoile Polaire : au recto, le nom de l’étoile, p. ex. « Sirius » ; au verso, sa constellation, en anglais sous son nom officiel de l’UAI (p. ex. « Canis Major »), en suédois sous son nom suédois (« Stora hunden »), avec la désignation de Bayer dans une note. Trois autres demandent l’étoile la plus brillante et la deuxième plus brillante du ciel nocturne, et l’étoile polaire du nord. Noms issus du Working Group on Star Names de l’UAI ; constellations et magnitudes issues de Wikidata, vérifiées sur SIMBAD."@fr ;
+    dcterms:description "52 cards on the brightest stars of the night sky. 49 cover every star with a name approved by the International Astronomical Union (IAU) that is brighter than apparent magnitude 2.0 (close pairs by their combined light), plus Polaris: front, the star's name, e.g. “Sirius”; back, its constellation, in English by its official IAU name (e.g. “Canis Major”), in Swedish by its Swedish name (“Stora hunden”), with the Bayer designation in a note. Three more ask for the brightest and second-brightest star of the night sky and the north pole star. The cards are also in Korean, German, Spanish and French, from Wikidata's labels. Names from the IAU Working Group on Star Names; constellations and magnitudes from Wikidata, checked against SIMBAD."@en ,
+                        "52 kort om natthimlens ljusaste stjärnor. 49 av dem gäller alla stjärnor med ett namn som godkänts av Internationella astronomiska unionen (IAU) och som är ljusare än skenbar magnitud 2,0 (täta par efter sitt sammanlagda ljus), samt Polstjärnan: på framsidan stjärnans namn, t.ex. ”Sirius”; på baksidan dess stjärnbild, på engelska med det officiella IAU-namnet (t.ex. ”Canis Major”), på svenska med det svenska namnet (”Stora hunden”), med Bayerbeteckningen i en anteckning. Tre kort frågar efter natthimlens ljusaste och näst ljusaste stjärna och stjärnan närmast norra himmelspolen. Korten finns även på koreanska, tyska, spanska och franska, från Wikidatas etiketter. Namnen kommer från IAU:s arbetsgrupp för stjärnnamn; stjärnbilder och magnituder från Wikidata, kontrollerade mot SIMBAD."@sv ,
+                        "밤하늘에서 가장 밝은 별에 관한 52장의 카드. 그중 49장은 국제천문연맹(IAU)이 승인한 이름을 가진 별 가운데 겉보기 등급 2.0보다 밝은 모든 별(가까운 쌍성은 합친 밝기 기준)과 북극성을 다룬다: 앞면에는 별의 이름, 예: ‘Sirius’; 뒷면에는 그 별의 별자리가 영어로는 IAU 공식 이름(예: ‘Canis Major’)으로, 스웨덴어로는 스웨덴어 이름(‘Stora hunden’)으로 나오고, 바이어 명명법에 따른 이름은 메모에 있다. 나머지 3장은 밤하늘에서 가장 밝은 별과 두 번째로 밝은 별, 그리고 북극성을 묻는다. 카드는 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있다. 이름은 IAU 항성 이름 작업반(Working Group on Star Names)에서, 별자리와 등급은 Wikidata에서 가져와 SIMBAD로 확인했다."@ko ,
+                        "52 Karten zu den hellsten Sternen des Nachthimmels. 49 behandeln jeden Stern mit einem von der Internationalen Astronomischen Union (IAU) anerkannten Namen, dessen scheinbare Helligkeit heller als 2,0 ist (enge Paare nach ihrem gemeinsamen Licht), dazu den Polarstern: Vorderseite der Name des Sterns, z. B. „Sirius“; Rückseite sein Sternbild, auf Englisch mit dem offiziellen IAU-Namen (z. B. „Canis Major“), auf Schwedisch mit dem schwedischen Namen („Stora hunden“), mit der Bayer-Bezeichnung in einer Anmerkung. Drei weitere fragen nach dem hellsten und dem zweithellsten Stern des Nachthimmels und nach dem Nordpolarstern. Die Karten gibt es auch auf Koreanisch, Deutsch, Spanisch und Französisch, mit den Bezeichnungen aus Wikidata. Namen von der Working Group on Star Names der IAU; Sternbilder und Helligkeiten aus Wikidata, abgeglichen mit SIMBAD."@de ,
+                        "52 tarjetas sobre las estrellas más brillantes del cielo nocturno. 49 abarcan todas las estrellas con un nombre aprobado por la Unión Astronómica Internacional (UAI) que son más brillantes que la magnitud aparente 2,0 (los pares cercanos, por su luz combinada), además de la Estrella Polar: en el anverso, el nombre de la estrella, p. ej., «Sirius»; en el reverso, su constelación, en inglés con su nombre oficial de la UAI (p. ej., «Canis Major») y en sueco con su nombre sueco («Stora hunden»), con la designación de Bayer en una nota. Otras tres preguntan por la estrella más brillante y la segunda más brillante del cielo nocturno y por la estrella polar del norte. Las tarjetas están también en coreano, alemán, español y francés, a partir de las etiquetas de Wikidata. Nombres del Working Group on Star Names de la UAI; constelaciones y magnitudes de Wikidata, comprobadas con SIMBAD."@es ,
+                        "52 cartes sur les étoiles les plus brillantes du ciel nocturne. 49 portent sur toutes les étoiles dont le nom est approuvé par l’Union astronomique internationale (UAI) et qui sont plus brillantes que la magnitude apparente 2,0 (les couples serrés selon leur lumière combinée), plus l’étoile Polaire : au recto, le nom de l’étoile, p. ex. « Sirius » ; au verso, sa constellation, en anglais sous son nom officiel de l’UAI (p. ex. « Canis Major »), en suédois sous son nom suédois (« Stora hunden »), avec la désignation de Bayer dans une note. Trois autres demandent l’étoile la plus brillante et la deuxième plus brillante du ciel nocturne, et l’étoile polaire du nord. Les cartes sont aussi en coréen, en allemand, en espagnol et en français, d’après les libellés de Wikidata. Noms issus du Working Group on Star Names de l’UAI ; constellations et magnitudes issues de Wikidata, vérifiées sur SIMBAD."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:astronomy ;
@@ -862,10 +862,11 @@
                  "astronomie"@fr ,
                  "UAI"@fr ;
     dcat:first <https://solid-memo.com/decks/brightest-stars/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/brightest-stars/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/brightest-stars/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/brightest-stars/v1.ttl> ,
-                    <https://solid-memo.com/decks/brightest-stars/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/brightest-stars/v2.ttl> .
+                    <https://solid-memo.com/decks/brightest-stars/v2.ttl> ,
+                    <https://solid-memo.com/decks/brightest-stars/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/brightest-stars/v3.ttl> .
 
 <https://solid-memo.com/decks/brightest-stars/v1.ttl>
     a dcat:Dataset ;
@@ -878,6 +879,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/brightest-stars/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Brightest stars of the night sky"@en ,
+                  "Natthimlens ljusaste stjärnor"@sv ,
+                  "밤하늘에서 가장 밝은 별"@ko ,
+                  "Die hellsten Sterne des Nachthimmels"@de ,
+                  "Las estrellas más brillantes del cielo nocturno"@es ,
+                  "Les étoiles les plus brillantes du ciel nocturne"@fr ;
+    dcterms:description "52 cards on the brightest stars of the night sky. 49 cover every star with a name approved by the International Astronomical Union (IAU) that is brighter than apparent magnitude 2.0 (close pairs by their combined light), plus Polaris: front, the star's name, e.g. “Sirius”; back, its constellation, in English by its official IAU name (e.g. “Canis Major”), in Swedish by its Swedish name (“Stora hunden”), with the Bayer designation in a note. Three more ask for the brightest and second-brightest star of the night sky and the north pole star. Names from the IAU Working Group on Star Names; constellations and magnitudes from Wikidata, checked against SIMBAD."@en ,
+                        "52 kort om natthimlens ljusaste stjärnor. 49 av dem gäller alla stjärnor med ett namn som godkänts av Internationella astronomiska unionen (IAU) och som är ljusare än skenbar magnitud 2,0 (täta par efter sitt sammanlagda ljus), samt Polstjärnan: på framsidan stjärnans namn, t.ex. ”Sirius”; på baksidan dess stjärnbild, på engelska med det officiella IAU-namnet (t.ex. ”Canis Major”), på svenska med det svenska namnet (”Stora hunden”), med Bayerbeteckningen i en anteckning. Tre kort frågar efter natthimlens ljusaste och näst ljusaste stjärna och stjärnan närmast norra himmelspolen. Namnen kommer från IAU:s arbetsgrupp för stjärnnamn; stjärnbilder och magnituder från Wikidata, kontrollerade mot SIMBAD."@sv ,
+                        "밤하늘에서 가장 밝은 별에 관한 52장의 카드. 그중 49장은 국제천문연맹(IAU)이 승인한 이름을 가진 별 가운데 겉보기 등급 2.0보다 밝은 모든 별(가까운 쌍성은 합친 밝기 기준)과 북극성을 다룬다: 앞면에는 별의 이름, 예: ‘Sirius’; 뒷면에는 그 별의 별자리가 영어로는 IAU 공식 이름(예: ‘Canis Major’)으로, 스웨덴어로는 스웨덴어 이름(‘Stora hunden’)으로 나오고, 바이어 명명법에 따른 이름은 메모에 있다. 나머지 3장은 밤하늘에서 가장 밝은 별과 두 번째로 밝은 별, 그리고 북극성을 묻는다. 이름은 IAU 항성 이름 작업반(Working Group on Star Names)에서, 별자리와 등급은 Wikidata에서 가져와 SIMBAD로 확인했다."@ko ,
+                        "52 Karten zu den hellsten Sternen des Nachthimmels. 49 behandeln jeden Stern mit einem von der Internationalen Astronomischen Union (IAU) anerkannten Namen, dessen scheinbare Helligkeit heller als 2,0 ist (enge Paare nach ihrem gemeinsamen Licht), dazu den Polarstern: Vorderseite der Name des Sterns, z. B. „Sirius“; Rückseite sein Sternbild, auf Englisch mit dem offiziellen IAU-Namen (z. B. „Canis Major“), auf Schwedisch mit dem schwedischen Namen („Stora hunden“), mit der Bayer-Bezeichnung in einer Anmerkung. Drei weitere fragen nach dem hellsten und dem zweithellsten Stern des Nachthimmels und nach dem Nordpolarstern. Namen von der Working Group on Star Names der IAU; Sternbilder und Helligkeiten aus Wikidata, abgeglichen mit SIMBAD."@de ,
+                        "52 tarjetas sobre las estrellas más brillantes del cielo nocturno. 49 abarcan todas las estrellas con un nombre aprobado por la Unión Astronómica Internacional (UAI) que son más brillantes que la magnitud aparente 2,0 (los pares cercanos, por su luz combinada), además de la Estrella Polar: en el anverso, el nombre de la estrella, p. ej., «Sirius»; en el reverso, su constelación, en inglés con su nombre oficial de la UAI (p. ej., «Canis Major») y en sueco con su nombre sueco («Stora hunden»), con la designación de Bayer en una nota. Otras tres preguntan por la estrella más brillante y la segunda más brillante del cielo nocturno y por la estrella polar del norte. Nombres del Working Group on Star Names de la UAI; constelaciones y magnitudes de Wikidata, comprobadas con SIMBAD."@es ,
+                        "52 cartes sur les étoiles les plus brillantes du ciel nocturne. 49 portent sur toutes les étoiles dont le nom est approuvé par l’Union astronomique internationale (UAI) et qui sont plus brillantes que la magnitude apparente 2,0 (les couples serrés selon leur lumière combinée), plus l’étoile Polaire : au recto, le nom de l’étoile, p. ex. « Sirius » ; au verso, sa constellation, en anglais sous son nom officiel de l’UAI (p. ex. « Canis Major »), en suédois sous son nom suédois (« Stora hunden »), avec la désignation de Bayer dans une note. Trois autres demandent l’étoile la plus brillante et la deuxième plus brillante du ciel nocturne, et l’étoile polaire du nord. Noms issus du Working Group on Star Names de l’UAI ; constellations et magnitudes issues de Wikidata, vérifiées sur SIMBAD."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/brightest-stars/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Brightest stars of the night sky"@en ,
@@ -886,18 +905,20 @@
                   "Die hellsten Sterne des Nachthimmels"@de ,
                   "Las estrellas más brillantes del cielo nocturno"@es ,
                   "Les étoiles les plus brillantes du ciel nocturne"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/brightest-stars/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/brightest-stars/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:description "52 cards on the brightest stars of the night sky. 49 cover every star with a name approved by the International Astronomical Union (IAU) that is brighter than apparent magnitude 2.0 (close pairs by their combined light), plus Polaris: front, the star's name, e.g. “Sirius”; back, its constellation, in English by its official IAU name (e.g. “Canis Major”), in Swedish by its Swedish name (“Stora hunden”), with the Bayer designation in a note. Three more ask for the brightest and second-brightest star of the night sky and the north pole star. Names from the IAU Working Group on Star Names; constellations and magnitudes from Wikidata, checked against SIMBAD."@en ,
-                        "52 kort om natthimlens ljusaste stjärnor. 49 av dem gäller alla stjärnor med ett namn som godkänts av Internationella astronomiska unionen (IAU) och som är ljusare än skenbar magnitud 2,0 (täta par efter sitt sammanlagda ljus), samt Polstjärnan: på framsidan stjärnans namn, t.ex. ”Sirius”; på baksidan dess stjärnbild, på engelska med det officiella IAU-namnet (t.ex. ”Canis Major”), på svenska med det svenska namnet (”Stora hunden”), med Bayerbeteckningen i en anteckning. Tre kort frågar efter natthimlens ljusaste och näst ljusaste stjärna och stjärnan närmast norra himmelspolen. Namnen kommer från IAU:s arbetsgrupp för stjärnnamn; stjärnbilder och magnituder från Wikidata, kontrollerade mot SIMBAD."@sv ,
-                        "밤하늘에서 가장 밝은 별에 관한 52장의 카드. 그중 49장은 국제천문연맹(IAU)이 승인한 이름을 가진 별 가운데 겉보기 등급 2.0보다 밝은 모든 별(가까운 쌍성은 합친 밝기 기준)과 북극성을 다룬다: 앞면에는 별의 이름, 예: ‘Sirius’; 뒷면에는 그 별의 별자리가 영어로는 IAU 공식 이름(예: ‘Canis Major’)으로, 스웨덴어로는 스웨덴어 이름(‘Stora hunden’)으로 나오고, 바이어 명명법에 따른 이름은 메모에 있다. 나머지 3장은 밤하늘에서 가장 밝은 별과 두 번째로 밝은 별, 그리고 북극성을 묻는다. 이름은 IAU 항성 이름 작업반(Working Group on Star Names)에서, 별자리와 등급은 Wikidata에서 가져와 SIMBAD로 확인했다."@ko ,
-                        "52 Karten zu den hellsten Sternen des Nachthimmels. 49 behandeln jeden Stern mit einem von der Internationalen Astronomischen Union (IAU) anerkannten Namen, dessen scheinbare Helligkeit heller als 2,0 ist (enge Paare nach ihrem gemeinsamen Licht), dazu den Polarstern: Vorderseite der Name des Sterns, z. B. „Sirius“; Rückseite sein Sternbild, auf Englisch mit dem offiziellen IAU-Namen (z. B. „Canis Major“), auf Schwedisch mit dem schwedischen Namen („Stora hunden“), mit der Bayer-Bezeichnung in einer Anmerkung. Drei weitere fragen nach dem hellsten und dem zweithellsten Stern des Nachthimmels und nach dem Nordpolarstern. Namen von der Working Group on Star Names der IAU; Sternbilder und Helligkeiten aus Wikidata, abgeglichen mit SIMBAD."@de ,
-                        "52 tarjetas sobre las estrellas más brillantes del cielo nocturno. 49 abarcan todas las estrellas con un nombre aprobado por la Unión Astronómica Internacional (UAI) que son más brillantes que la magnitud aparente 2,0 (los pares cercanos, por su luz combinada), además de la Estrella Polar: en el anverso, el nombre de la estrella, p. ej., «Sirius»; en el reverso, su constelación, en inglés con su nombre oficial de la UAI (p. ej., «Canis Major») y en sueco con su nombre sueco («Stora hunden»), con la designación de Bayer en una nota. Otras tres preguntan por la estrella más brillante y la segunda más brillante del cielo nocturno y por la estrella polar del norte. Nombres del Working Group on Star Names de la UAI; constelaciones y magnitudes de Wikidata, comprobadas con SIMBAD."@es ,
-                        "52 cartes sur les étoiles les plus brillantes du ciel nocturne. 49 portent sur toutes les étoiles dont le nom est approuvé par l’Union astronomique internationale (UAI) et qui sont plus brillantes que la magnitude apparente 2,0 (les couples serrés selon leur lumière combinée), plus l’étoile Polaire : au recto, le nom de l’étoile, p. ex. « Sirius » ; au verso, sa constellation, en anglais sous son nom officiel de l’UAI (p. ex. « Canis Major »), en suédois sous son nom suédois (« Stora hunden »), avec la désignation de Bayer dans une note. Trois autres demandent l’étoile la plus brillante et la deuxième plus brillante du ciel nocturne, et l’étoile polaire du nord. Noms issus du Working Group on Star Names de l’UAI ; constellations et magnitudes issues de Wikidata, vérifiées sur SIMBAD."@fr ;
+    dcterms:description "52 cards on the brightest stars of the night sky. 49 cover every star with a name approved by the International Astronomical Union (IAU) that is brighter than apparent magnitude 2.0 (close pairs by their combined light), plus Polaris: front, the star's name, e.g. “Sirius”; back, its constellation, in English by its official IAU name (e.g. “Canis Major”), in Swedish by its Swedish name (“Stora hunden”), with the Bayer designation in a note. Three more ask for the brightest and second-brightest star of the night sky and the north pole star. The cards are also in Korean, German, Spanish and French, from Wikidata's labels. Names from the IAU Working Group on Star Names; constellations and magnitudes from Wikidata, checked against SIMBAD."@en ,
+                        "52 kort om natthimlens ljusaste stjärnor. 49 av dem gäller alla stjärnor med ett namn som godkänts av Internationella astronomiska unionen (IAU) och som är ljusare än skenbar magnitud 2,0 (täta par efter sitt sammanlagda ljus), samt Polstjärnan: på framsidan stjärnans namn, t.ex. ”Sirius”; på baksidan dess stjärnbild, på engelska med det officiella IAU-namnet (t.ex. ”Canis Major”), på svenska med det svenska namnet (”Stora hunden”), med Bayerbeteckningen i en anteckning. Tre kort frågar efter natthimlens ljusaste och näst ljusaste stjärna och stjärnan närmast norra himmelspolen. Korten finns även på koreanska, tyska, spanska och franska, från Wikidatas etiketter. Namnen kommer från IAU:s arbetsgrupp för stjärnnamn; stjärnbilder och magnituder från Wikidata, kontrollerade mot SIMBAD."@sv ,
+                        "밤하늘에서 가장 밝은 별에 관한 52장의 카드. 그중 49장은 국제천문연맹(IAU)이 승인한 이름을 가진 별 가운데 겉보기 등급 2.0보다 밝은 모든 별(가까운 쌍성은 합친 밝기 기준)과 북극성을 다룬다: 앞면에는 별의 이름, 예: ‘Sirius’; 뒷면에는 그 별의 별자리가 영어로는 IAU 공식 이름(예: ‘Canis Major’)으로, 스웨덴어로는 스웨덴어 이름(‘Stora hunden’)으로 나오고, 바이어 명명법에 따른 이름은 메모에 있다. 나머지 3장은 밤하늘에서 가장 밝은 별과 두 번째로 밝은 별, 그리고 북극성을 묻는다. 카드는 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있다. 이름은 IAU 항성 이름 작업반(Working Group on Star Names)에서, 별자리와 등급은 Wikidata에서 가져와 SIMBAD로 확인했다."@ko ,
+                        "52 Karten zu den hellsten Sternen des Nachthimmels. 49 behandeln jeden Stern mit einem von der Internationalen Astronomischen Union (IAU) anerkannten Namen, dessen scheinbare Helligkeit heller als 2,0 ist (enge Paare nach ihrem gemeinsamen Licht), dazu den Polarstern: Vorderseite der Name des Sterns, z. B. „Sirius“; Rückseite sein Sternbild, auf Englisch mit dem offiziellen IAU-Namen (z. B. „Canis Major“), auf Schwedisch mit dem schwedischen Namen („Stora hunden“), mit der Bayer-Bezeichnung in einer Anmerkung. Drei weitere fragen nach dem hellsten und dem zweithellsten Stern des Nachthimmels und nach dem Nordpolarstern. Die Karten gibt es auch auf Koreanisch, Deutsch, Spanisch und Französisch, mit den Bezeichnungen aus Wikidata. Namen von der Working Group on Star Names der IAU; Sternbilder und Helligkeiten aus Wikidata, abgeglichen mit SIMBAD."@de ,
+                        "52 tarjetas sobre las estrellas más brillantes del cielo nocturno. 49 abarcan todas las estrellas con un nombre aprobado por la Unión Astronómica Internacional (UAI) que son más brillantes que la magnitud aparente 2,0 (los pares cercanos, por su luz combinada), además de la Estrella Polar: en el anverso, el nombre de la estrella, p. ej., «Sirius»; en el reverso, su constelación, en inglés con su nombre oficial de la UAI (p. ej., «Canis Major») y en sueco con su nombre sueco («Stora hunden»), con la designación de Bayer en una nota. Otras tres preguntan por la estrella más brillante y la segunda más brillante del cielo nocturno y por la estrella polar del norte. Las tarjetas están también en coreano, alemán, español y francés, a partir de las etiquetas de Wikidata. Nombres del Working Group on Star Names de la UAI; constelaciones y magnitudes de Wikidata, comprobadas con SIMBAD."@es ,
+                        "52 cartes sur les étoiles les plus brillantes du ciel nocturne. 49 portent sur toutes les étoiles dont le nom est approuvé par l’Union astronomique internationale (UAI) et qui sont plus brillantes que la magnitude apparente 2,0 (les couples serrés selon leur lumière combinée), plus l’étoile Polaire : au recto, le nom de l’étoile, p. ex. « Sirius » ; au verso, sa constellation, en anglais sous son nom officiel de l’UAI (p. ex. « Canis Major »), en suédois sous son nom suédois (« Stora hunden »), avec la désignation de Bayer dans une note. Trois autres demandent l’étoile la plus brillante et la deuxième plus brillante du ciel nocturne, et l’étoile polaire du nord. Les cartes sont aussi en coréen, en allemand, en espagnol et en français, d’après les libellés de Wikidata. Noms issus du Working Group on Star Names de l’UAI ; constellations et magnitudes issues de Wikidata, vérifiées sur SIMBAD."@fr ;
     prov:wasDerivedFrom <https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt> ,
                         <https://www.wikidata.org/wiki/Q3409> ,
-                        <https://iauarchive.eso.org/public/themes/constellations/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/brightest-stars/v2.ttl#compilation> ;
+                        <https://iauarchive.eso.org/public/themes/constellations/> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/brightest-stars/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/brightest-stars/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:astronomy ;
@@ -938,28 +959,37 @@
                  "astronomie"@fr ,
                  "UAI"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/brightest-stars/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/brightest-stars/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/brightest-stars/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/brightest-stars/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 52 cards in use, 52 in Korean, 52 in German, 52 in Spanish, 52 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#brightest-stars> ;
     dcat:isVersionOf <#brightest-stars> ;
-    dcat:distribution <https://solid-memo.com/decks/brightest-stars/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/brightest-stars/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/brightest-stars/v3.ttl#turtle> ;
     solid-memo:cardCount 52 .
 
-<https://solid-memo.com/decks/brightest-stars/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/brightest-stars/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/brightest-stars/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://creativecommons.org/licenses/by/4.0/>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/brightest-stars/v2.ttl#compilation>
+<https://solid-memo.com/decks/brightest-stars/v3.ttl#compilation>
     a prov:Activity .
 
 <https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt>
@@ -994,10 +1024,67 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/brightest-stars/v2.ttl#turtle>
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:title "Wikidata (English lexemes and items)" ,
+                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
+                  "Wikidata (Finnish lexemes and items)" ,
+                  "Wikidata (French lexemes and items)" ,
+                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
+                  "Wikidata (German lexemes and items)" ,
+                  "Wikidata (Italian lexemes and items)" ,
+                  "Wikidata (Japanese lexemes and items)" ,
+                  "Wikidata (Korean lexemes and items)" ,
+                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
+                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
+                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
+                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
+                  "Wikidata (Portuguese lexemes and items)" ,
+                  "Wikidata (Spanish lexemes and items)" ,
+                  "Wikidata (Swedish lexemes and items)" ,
+                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
+                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
+
+<https://solid-memo.com/decks/brightest-stars/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/brightest-stars/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/brightest-stars.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "31393cd9a49dbe39acdcf528f046ac13409875c4cea38ccc04c608587ebc66a2"^^xsd:hexBinary ] .
+
+<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "wikidata_labels.py" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+
+<http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
+    a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
+
+<https://solid-memo.com/decks/brightest-stars/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/brightest-stars/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/brightest-stars/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/brightest-stars/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/brightest-stars/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -1177,31 +1264,6 @@
     dcterms:creator "Wikidata contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
 
-<https://www.wikidata.org/>
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:title "Wikidata (English lexemes and items)" ,
-                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
-                  "Wikidata (Finnish lexemes and items)" ,
-                  "Wikidata (French lexemes and items)" ,
-                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
-                  "Wikidata (German lexemes and items)" ,
-                  "Wikidata (Italian lexemes and items)" ,
-                  "Wikidata (Japanese lexemes and items)" ,
-                  "Wikidata (Korean lexemes and items)" ,
-                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
-                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
-                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
-                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
-                  "Wikidata (Portuguese lexemes and items)" ,
-                  "Wikidata (Spanish lexemes and items)" ,
-                  "Wikidata (Swedish lexemes and items)" ,
-                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
-                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
-
 <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#wikidata-labels>
     a prov:Activity .
 
@@ -1209,29 +1271,6 @@
     a prov:Entity ;
     dcterms:title "scripts/wikidata-labels/capitals-of-the-world.json" ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "29c60397d08a1e966d2f475060e088c28b5d961a3384122e4257d13306badf07"^^xsd:hexBinary ] .
-
-<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
-    a prov:SoftwareAgent ;
-    dcterms:title "wikidata_labels.py" ;
-    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
-                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
-
-<http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
-    a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
 
 <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#turtle>
     a dcat:Distribution ;

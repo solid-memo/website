@@ -9,7 +9,7 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
 /**
  * A learner who holds an older release of a library deck, as the
  * journey's spec numbers it: add release 1 of the brightest stars from
- * its link, study it, see release 2 offered in Solid Memo and in the
+ * its link, study it, see the newest release offered in Solid Memo and in the
  * Studio and read what it changes, update the copy, reload, and find the
  * progress kept, Solid Memo and the Studio agreeing that the copy is up
  * to date. A card studied offers to report a mistake in it, the
@@ -25,25 +25,33 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * release, of a series the index lists, so it is a library copy.
  * Release 2 changes no card: it adds the deck's name, description and
  * keywords in Korean, German, Spanish and French, which the German name
- * shows once the copy is updated.
+ * shows once the copy is updated. Release 3 adds those languages to every
+ * card, from Wikidata's labels (docs/deck-library.md#languages-from-wikidata),
+ * so updating to it changes every card, the progress kept all the same.
  */
 test("a learner updates a library copy @upgrade", async ({ app, account, runId }) => {
   const instance = `Journey ${runId}`;
   const deck = BRIGHTEST_STARS.en;
   const releaseOne = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
-  // decks/brightest-stars/v2.ttl: its name in German, its notes, and the
-  // offer's words for what a change of name, description and keywords does.
+  const cards = 52;
+  // decks/brightest-stars/v2.ttl and v3.ttl: the name in German, the notes
+  // of each, and the offer's words for what they do together: every card
+  // changed, and the name, description and keywords.
   const german = "Die hellsten Sterne des Nachthimmels";
-  const notes =
-    "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed.";
+  const notes = [
+    "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed.",
+    "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 52 cards in use, 52 in Korean, 52 in German, 52 in Spanish, 52 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email.",
+  ];
   const upgrade = {
     from: 1,
-    to: 2,
-    changes: app.t("libraryUpgradeNotice.describes"),
+    to: 3,
+    changes: app.t("libraryUpgradeNotice.list", {
+      items: app.t("libraryUpgradeNotice.changes", { count: cards }),
+      last: app.t("libraryUpgradeNotice.describes"),
+    }),
     kept: app.t("libraryUpgradeNotice.historyKept"),
-    notes: [notes],
+    notes,
   };
-  const cards = 52;
   const newPerDay = 3;
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
@@ -79,7 +87,7 @@ test("a learner updates a library copy @upgrade", async ({ app, account, runId }
     await app.decks.expectAnsweredToday(newPerDay);
   });
 
-  await app.step("06 · Solid Memo offers release 2 and says what it changes", async () => {
+  await app.step("06 · Solid Memo offers release 3 and says what it changes", async () => {
     await app.decks.expectNewRelease(deck);
     await app.decks.openDeck(deck);
     await app.deckDetail.expectUpgradeOffer({ deck, ...upgrade });
@@ -89,25 +97,25 @@ test("a learner updates a library copy @upgrade", async ({ app, account, runId }
     await app.chrome.switchLanguage("en");
   });
 
-  await app.step("07 · The Studio offers release 2 too, with the same changes", async () => {
+  await app.step("07 · The Studio offers release 3 too, with the same changes", async () => {
     await app.studio.openFromApp();
     await app.studio.followUpdateBadge(instance, deck, upgrade.to);
     await app.studio.readCopyUpgrade(instance, deck, upgrade);
     await app.studio.backToApp();
   });
 
-  await app.step("08 · Update the copy to release 2 from its page", async () => {
+  await app.step("08 · Update the copy to release 3 from its page", async () => {
     await app.decks.openDeck(deck);
     await app.deckDetail.upgrade(upgrade.to);
   });
 
-  await app.step("09 · Reload: the copy is release 2, its progress kept", async () => {
+  await app.step("09 · Reload: the copy is release 3, its progress kept", async () => {
     await app.chrome.reload();
     await app.deckDetail.expectDeck(deck);
     await app.deckDetail.expectNoUpgradeOffer();
     await app.deckDetail.expectCardCount(cards);
     await app.deckDetail.expectDoneForToday(newPerDay);
-    // What release 2 changes: the deck now has a German name.
+    // What release 2 changed: the deck now has a German name.
     await app.chrome.switchLanguage("de");
     await app.deckDetail.expectDeck(german);
     await app.chrome.switchLanguage("en");
