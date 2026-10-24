@@ -21,6 +21,29 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.8.0](https://github.com/solid-memo/website/compare/v6.7.0...v6.8.0) (2026-10-24)
+
+### Features
+
+* **decks:** add a script that gives label decks languages from Wikidata ([23f0a84](https://github.com/solid-memo/website/commit/23f0a84dcc5f3ae4ee13447185c52726c5ea747a)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the brightest stars deck's cards four more languages ([cba9d93](https://github.com/solid-memo/website/commit/cba9d932591591e12f782167d2290fb2e6cad743)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the capitals deck's cards four more languages ([d0aef71](https://github.com/solid-memo/website/commit/d0aef71c3bc5925e618cdaf9bc53664d6c2ca114)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the constellations deck's cards four more languages ([97e34ab](https://github.com/solid-memo/website/commit/97e34ab2acbfeb509d0b813e61d63ff1a9304a6c)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the EU member states deck's cards four more languages ([23af207](https://github.com/solid-memo/website/commit/23af207546205a20a8fbbc6aed78991b25d75f83)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the famous buildings deck's cards four more languages ([6386808](https://github.com/solid-memo/website/commit/638680878eba733cb0c31a874c26fb3f61a8bc2c)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the federal states deck's cards four more languages ([0de9e00](https://github.com/solid-memo/website/commit/0de9e00cb6eef04685984cf1ce3ed00f12b7eca4)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the highest points of Europe deck's cards four more languages ([62ea3cf](https://github.com/solid-memo/website/commit/62ea3cf8cd1764a2befb589e60469b6388d80878)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the Nordic birds deck's cards four more languages ([d67ce63](https://github.com/solid-memo/website/commit/d67ce6378ead8ea094b3a86da81341ae5b6b73a0)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the Nordic fish deck's cards four more languages ([4c530fd](https://github.com/solid-memo/website/commit/4c530fdfd818db86646c580684ba250d64d290a7)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the Nordic mammals deck's cards four more languages ([39fee82](https://github.com/solid-memo/website/commit/39fee8228fd5d409d1f2835071a9e23b49670b28)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the Nordic trees deck's cards four more languages ([ca16d8a](https://github.com/solid-memo/website/commit/ca16d8a9d54ebc7c16c9d8ed7a2a57d6276b26d5)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the Nordic World Heritage deck's cards four more languages ([e9157ce](https://github.com/solid-memo/website/commit/e9157ce26099a45b8595ecfe2dd57fcd00406b38)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the periodic table deck's cards four more languages ([754415c](https://github.com/solid-memo/website/commit/754415c244ac5ed80e0270e667d072b396c6dce4)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the solar system deck's cards four more languages ([9378957](https://github.com/solid-memo/website/commit/93789572d615e49b75f989f65b07023590a73175)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the US states deck's cards four more languages ([0ffe486](https://github.com/solid-memo/website/commit/0ffe486a8900480c9d16fd857281f7c9a9aabf4b)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the world currencies deck's cards four more languages ([8da3ef6](https://github.com/solid-memo/website/commit/8da3ef60c5dee27df81d176110147e58da77100b)), closes [#284](https://github.com/solid-memo/website/issues/284)
+* **decks:** give the world rivers deck's cards four more languages ([97ef67f](https://github.com/solid-memo/website/commit/97ef67fa3aa07cfce228642d2958be28ddfd546e)), closes [#284](https://github.com/solid-memo/website/issues/284)
+
 ## [6.7.0](https://github.com/solid-memo/website/compare/v6.6.0...v6.7.0) (2026-10-24)
 
 ### Features
