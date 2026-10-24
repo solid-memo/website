@@ -1,0 +1,38 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix schema:     <https://schema.org/> .
+
+<#catalog>
+    a dcat:Catalog ;
+    dcterms:title "Main" ;
+    dcterms:description "My decks." ;
+    dcterms:publisher <https://pod.example/profile/card#me> ;
+    dcat:themeTaxonomy <https://solid-memo.com/ns/vocab/topics.ttl> ;
+    dcat:dataset <#deck-1> .
+
+<https://pod.example/profile/card#me>
+    a foaf:Agent ;
+    foaf:name "Anton" .
+
+<#deck-1>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      schema:Course ;
+    solid-memo:formatVersion 6 ;
+    dcterms:title "Solid fundamentals"@en ;
+    dcterms:description "A course on Solid."@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    dcat:theme <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
+    dcat:distribution <#deck-1-cards> ;
+    solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-1.ttl> ;
+    solid-memo:reviewsDocument <https://pod.example/solid-memo/main/reviews/deck-1.ttl> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    solid-memo:completedChapter <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid> .
+
+<#deck-1-cards>
+    a dcat:Distribution ;
+    dcat:accessURL <https://pod.example/solid-memo/main/decks/deck-1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .

@@ -253,13 +253,18 @@ export function libraryIndexQuery(useCases: UseCases) {
 /**
  * What the decks that are copies are copies of: which are copies of a
  * course (docs/courses.md), and where those added from a link came from.
- * The library says which of its decks are courses, read once some deck
+ * A copy that says it is a course's (Deck.course) is one, whatever is
+ * read or fails to be; a deck that names no release is none, whatever it
+ * says, since a course is read from its release. For a copy made before
+ * decks said so, the library
+ * says which of its decks are courses, read once some deck
  * is a copy (only then, and once a page: queryKeys.library(), which never goes
  * stale, since the index changes only with a deploy). A copy whose series the
  * library does not list is of a release added from a link
  * (docs/deck-library.md, From a link): `linkedHost` names the host it
  * came from, and its own release, read once (queryKeys.deckRelease), says
- * whether it is a course. `newerRelease` tells a copy the library has a
+ * whether it is a course, read only for a copy that does not say so
+ * itself. `newerRelease` tells a copy the library has a
  * newer release of, as its index tells (libraryCopiesOf), reading no
  * release: the deck's page says what upgrading would change
  * (docs/migrations.md, Catching up with the library). A copy of a
@@ -285,8 +290,10 @@ export function useCopies(
             deck.sourceUrl !== undefined &&
             !library.some((libraryDeck) => isCopyOf(deck, libraryDeck)),
         );
+  // A copy that says it is a course needs no release read to tell.
+  const unknown = linked.filter((deck) => deck.course !== true);
   const releaseQueries = useQueries({
-    queries: linked.map((deck) => ({
+    queries: unknown.map((deck) => ({
       queryKey: queryKeys.deckRelease(deck.sourceUrl),
       queryFn: () => useCases.deckRelease(deck),
       staleTime: Infinity,
@@ -298,7 +305,7 @@ export function useCopies(
   );
   const linkedSources = new Set(linked.map((deck) => deck.sourceUrl!));
   const linkedCourses = new Set(
-    linked
+    unknown
       .filter((_, at) => releaseQueries[at]!.data?.isCourse === true)
       .map((deck) => deck.sourceUrl!),
   );
@@ -310,7 +317,9 @@ export function useCopies(
   return {
     isCourse: (deck) =>
       deck.sourceUrl !== undefined &&
-      (courses.has(librarySeriesUrlOf(deck.sourceUrl)) || linkedCourses.has(deck.sourceUrl)),
+      (deck.course === true ||
+        courses.has(librarySeriesUrlOf(deck.sourceUrl)) ||
+        linkedCourses.has(deck.sourceUrl)),
     linkedHost: (deck) =>
       deck.sourceUrl !== undefined && linkedSources.has(deck.sourceUrl)
         ? releaseHost(deck.sourceUrl)

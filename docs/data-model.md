@@ -758,7 +758,9 @@ when the instance is created or a guest's study moves into the pod as a
 new instance, and
 by the format update and Preferences when missing
 ([Discovery chain](#discovery-chain)). The whole document
-conforms to DCAT-AP (a test holds what the app writes to it).
+conforms to DCAT-AP (a test holds what the app writes to it), a
+course's deck, typed `schema:Course` too ([Courses](#courses)),
+included.
 
 The instance's name is kept in the meta document's `dcterms:title`,
 the catalog's `dcterms:title`, and, in each type index, the
@@ -939,6 +941,15 @@ type-index entries:
   to no shape, as `sm:position` does. Library releases are frozen and
   do not state it: only the copy in the pod does.
   Removing a card removes the distractors it names.
+- **The entry says it is a course's deck.** Starting a course types
+  its catalog entry `schema:Course` too, beside `sm:Deck` and
+  `dcat:Dataset`, as its release is typed (`Deck.course`). The deck
+  shape asks only that the entry be a `dcat:Dataset` and is not closed,
+  so the deck format did not move, and every write of the entry keeps
+  the type. A deck [added from a guest's study](guest-mode.md#adding-to-an-instance)
+  and a deck file carry it, a file without the progress too. A copy
+  made before the type was written lacks it: the library's index, or
+  the copy's own release, tells it a course then.
 - **Completed chapters are on the catalog entry**: one
   `sm:completedChapter <release#ch-…>` per chapter whose final review
   was passed. Like a deck's `sm:position`, it belongs to no shape, so

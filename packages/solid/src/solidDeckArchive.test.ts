@@ -11,7 +11,7 @@ import { createSolidDeckArchive } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { fakePod } from "./testing/fakePod";
-import { SM, SM_NS } from "./vocab";
+import { SCHEMA, SM, SM_NS } from "./vocab";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const FOREIGN = "https://other.example/ns#rating";
@@ -117,6 +117,7 @@ async function podWithDeck() {
     [
       ...pod.triples(`${INSTANCE}catalog.ttl`)!,
       `<${deck.url}> <${SM.position}> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+      `<${deck.url}> a <${SCHEMA.Course}> .`,
     ].join("\n"),
   );
   const stored = (await repository.readDeck(deck.url))!;
@@ -145,6 +146,7 @@ describe("createSolidDeckArchive", () => {
         dropped: [],
       });
       expect(read.fsrsReviews).toHaveLength(1);
+      expect(read.deck.course).toBe(true);
       expect(read.deck.completedChapters).toEqual([CHAPTER]);
       expect(read.deck.cardLanguage).toBe("sv");
       expect(read.cards.find((card) => card.id === "card-se")!.distractors).toHaveLength(2);
@@ -163,6 +165,8 @@ describe("createSolidDeckArchive", () => {
     const read = await archive.readDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
     const { completedChapters: _, ...withoutProgress } = deck;
     expect(read).toEqual({ deck: withoutProgress, cards, upgraded: [], dropped: [] });
+    // What the deck is goes along: a course's deck is one without its progress too.
+    expect(read.deck.course).toBe(true);
   });
 
   it("writes JSON-LD with its context in full, as compact IRIs and value objects", async () => {

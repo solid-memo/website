@@ -88,8 +88,8 @@ export function toDecks(dataset: SolidDataset, catalogUrl: string): Deck[] {
  * Map a catalog subject to a Deck; null when the subject is not an
  * sm:Deck that fits its format's shape. An older format is brought up to
  * the current one in memory; the stored version stays on the model. A
- * course's deck also has the chapters it completed (sm:completedChapter),
- * and a deck the language its card text is shown in first
+ * course's deck is also typed schema:Course and has the chapters it
+ * completed (sm:completedChapter), and a deck the language its card text is shown in first
  * (sm:deckCardLanguage), kept only when it names a language: the catalog
  * is data anyone may have written, and no shape checks that term. A
  * deck from before format 3 names its creators itself ("Name <email>"),
@@ -117,6 +117,7 @@ export function toDeck(
       (agent) => names.get(agent) ?? agent,
     ),
     // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
+    ...(getUrlAll(thing, RDF.type).includes(SCHEMA.Course) ? { course: true as const } : {}),
     ...(completedChapters.length === 0 ? {} : { completedChapters }),
     ...(cardLanguage === undefined ? {} : { cardLanguage }),
   };
@@ -128,7 +129,8 @@ export function toDeck(
  * with its creators' agent nodes and its distribution beside it, and
  * listed by the catalog. Agents no deck names any more are removed.
  * The terms outside the deck's shape (sm:position, sm:completedChapter,
- * sm:deckCardLanguage) are kept as the entry has them, whatever the deck
+ * sm:deckCardLanguage) and the entry's other types (a course's
+ * schema:Course) are kept as the entry has them, whatever the deck
  * says: a deck read before one changed cannot undo it by a save of its
  * own fields.
  */

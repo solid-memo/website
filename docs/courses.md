@@ -9,7 +9,8 @@ course the learner has a deck of every card they studied.
 
 A course is not a new kind of thing in the pod. It is a
 [library](deck-library.md) release with an outline, and the learner's
-copy is an ordinary deck. A course published anywhere else, in its
+copy is an ordinary deck, typed `schema:Course` too, as its release
+is. A course published anywhere else, in its
 creator's pod say, is the same: a learner adds it
 [from a link](deck-library.md#from-a-link) to its release, and plays it
 as one from the library, its outline read from that address. The pure parts are in
@@ -126,7 +127,7 @@ new type-index entries ([data-model.md](data-model.md#courses)):
 
 | Where | What |
 |---|---|
-| `catalog.ttl` | The course's deck: `prov:wasDerivedFrom <release>`, and one `sm:completedChapter <release#ch-…>` per chapter completed. |
+| `catalog.ttl` | The course's deck: typed `schema:Course` too, `prov:wasDerivedFrom <release>`, and one `sm:completedChapter <release#ch-…>` per chapter completed. |
 | `decks/<deckId>.ttl` | The cards answered so far, each with its `sm:Distractor` subjects, under the release's fragment ids; each card names them with `schema:suggestedAnswer` too. |
 | `reviews/<deckId>.ttl` | An ordinary front→back review state per card answered, naming its card (`sm:reviewOf`). |
 | `history/<YYYY-MM>.ttl` | An `sm:Answer` per graded answer, with `sm:answerMode sm:multipleChoice` and, when the answer was wrong, `sm:chosenDistractor <…#d1>`. |
@@ -154,11 +155,15 @@ new type-index entries ([data-model.md](data-model.md#courses)):
 1. **Start.** A library deck whose release is a course is marked as one
    (`LibraryDeck.isCourse`, from `schema:Course` in the index). Starting
    it (`startCourse`) copies the release's metadata into an empty deck
-   (`importDeck` with no cards). An instance that already has a copy of
+   (`importDeck` with no cards) whose catalog entry says it is a course
+   (`schema:Course`, `Deck.course`). An instance that already has a copy of
    any release of the course gets that copy back: a course is started
-   once. A course added from a link is started the same way; its own
-   release says it is a course, so the deck list offers to continue it
-   as it does a library course (`useCopies`). Until every chapter is
+   once. A course added from a link is started the same way. The deck
+   list and the Studio tell a course by its deck (`useCopies`), with
+   nothing read: while the library's index is still read, or a course's
+   host cannot be reached, it is still a course. Only a copy made before
+   decks said so is told by the index, or by its own release when it was
+   added from a link. Until every chapter is
    completed, the course is offered above the deck list, with its
    chapters done and a button to go on where the learner left off; a
    course deck's menu leads to its page too. The strip it is in is
@@ -175,7 +180,8 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    and is read only as far as the strip needs (`getCourseSummary`: the
    release's outline and the deck's answers, not its cards), as soon as
    the deck list's arrangement is in: the library's index, which tells
-   the courses, is read beside the arrangement, not once it is in.
+   the courses of older copies, is read beside the arrangement, not once
+   it is in.
 2. **A step.** A step comes in two phases. First the learner reads the
    theory, with no question shown. Theory in chunks is read one chunk
    at a time, starting at the first: "Part 2 of 3" says where the

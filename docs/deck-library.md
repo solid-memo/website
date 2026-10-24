@@ -895,8 +895,10 @@ flowchart LR
   a link (`useCopies` in
   [deckTreeEditor.ts](../packages/ui/src/ui/deckTreeEditor.ts)). The
   deck list says "from \<host>" after its name, and the Studio's Home a
-  "From \<host>" badge. Its own release says whether it is a course,
-  read once.
+  "From \<host>" badge. A course's deck says it is one (`schema:Course`
+  on its catalog entry, [courses.md](courses.md#the-learners-state)),
+  so its release is not read to tell; any other copy's own release is
+  read, once, to tell a course copied before decks said so.
 - **Newer versions.** No index lists the versions of a release from a
   link. The creator's catalog may: it links what its instance
   published (`sm:publishedRelease`, [data-model.md](data-model.md)).
