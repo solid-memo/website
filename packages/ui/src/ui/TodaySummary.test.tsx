@@ -11,7 +11,7 @@ import type { Answer } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { TodaySummary as Today } from "@solid-memo/domain/statistics";
 import { makeUseCasesFake } from "../test/useCasesFake";
-import { statisticsReportOf } from "../test/fakes/statistics";
+import { todayFiguresFrom } from "../test/fakes/statistics";
 import { statisticsHref } from "./router";
 import { TodaySummary } from "./TodaySummary";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
@@ -129,7 +129,7 @@ describe("TodaySummary", () => {
 
 describe("TodaySummaryContainer", () => {
   function renderContainer(
-    getStatistics: UseCases["getStatistics"],
+    getTodayFigures: UseCases["getTodayFigures"],
     {
       decks = [],
       getStudyCounts,
@@ -143,7 +143,7 @@ describe("TodaySummaryContainer", () => {
       wrap(
         <TodaySummaryContainer
           useCases={makeUseCasesFake({
-            getStatistics,
+            getTodayFigures,
             ...(getStudyCounts === undefined ? {} : { getStudyCounts }),
           })}
           instance={INSTANCE}
@@ -175,20 +175,20 @@ describe("TodaySummaryContainer", () => {
   });
 
   it("shows today's study, linking to the statistics", async () => {
-    const getStatistics = vi.fn(async () =>
-      statisticsReportOf([answer("2026-10-03")], "2026-10-03"),
+    const getTodayFigures = vi.fn(async () =>
+      todayFiguresFrom([answer("2026-10-03")], "2026-10-03"),
     );
-    renderContainer(getStatistics);
+    renderContainer(getTodayFigures);
     expect(await screen.findByRole("link", { name: "All statistics" })).toHaveAttribute(
       "href",
       statisticsHref(INSTANCE.url),
     );
-    expect(getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), {});
+    expect(getTodayFigures).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date));
   });
 
   it("adds up the cards left today in every deck from their rows' counts, once all are known", async () => {
-    const getStatistics = vi.fn(async () =>
-      statisticsReportOf([answer("2026-10-03")], "2026-10-03"),
+    const getTodayFigures = vi.fn(async () =>
+      todayFiguresFrom([answer("2026-10-03")], "2026-10-03"),
     );
     let finish: (counts: { dueCount: number; newCount: number }) => void = () => undefined;
     const getStudyCounts = vi.fn(async (_instanceUrl: string, deck: Deck) =>
@@ -198,7 +198,10 @@ describe("TodaySummaryContainer", () => {
             finish = resolve;
           }),
     );
-    renderContainer(getStatistics, { decks: [deckOf("deck-1"), deckOf("deck-2")], getStudyCounts });
+    renderContainer(getTodayFigures, {
+      decks: [deckOf("deck-1"), deckOf("deck-2")],
+      getStudyCounts,
+    });
     await screen.findByRole("link", { name: "All statistics" });
     expect(screen.queryByText(/left to study today/)).toBeNull();
     finish({ dueCount: 1, newCount: 0 });
@@ -208,8 +211,8 @@ describe("TodaySummaryContainer", () => {
 
   it("says about how long the cards left will take, from how long an answer has taken", async () => {
     // Twenty seconds apart: an answer takes about 20 s.
-    const getStatistics = vi.fn(async () =>
-      statisticsReportOf(
+    const getTodayFigures = vi.fn(async () =>
+      todayFiguresFrom(
         [
           answer("2026-10-03"),
           { ...answer("2026-10-03"), id: "answer-2", answeredAt: "2026-10-03T10:00:20.000Z" },
@@ -218,7 +221,7 @@ describe("TodaySummaryContainer", () => {
       ),
     );
     const getStudyCounts = vi.fn(async () => ({ dueCount: 4, newCount: 2 }));
-    renderContainer(getStatistics, { decks: [deckOf("deck-1")], getStudyCounts });
+    renderContainer(getTodayFigures, { decks: [deckOf("deck-1")], getStudyCounts });
     // Six cards at 20 s, and no young review yet to expect any back: 2 minutes.
     expect(
       await screen.findByText(/· 6 left to study today · about 2 minutes to go ·/),
@@ -226,19 +229,19 @@ describe("TodaySummaryContainer", () => {
   });
 
   it("says no time while how long an answer takes is unknown", async () => {
-    const getStatistics = vi.fn(async () =>
-      statisticsReportOf([answer("2026-10-03")], "2026-10-03"),
+    const getTodayFigures = vi.fn(async () =>
+      todayFiguresFrom([answer("2026-10-03")], "2026-10-03"),
     );
     const getStudyCounts = vi.fn(async () => ({ dueCount: 1, newCount: 0 }));
-    renderContainer(getStatistics, { decks: [deckOf("deck-1")], getStudyCounts });
+    renderContainer(getTodayFigures, { decks: [deckOf("deck-1")], getStudyCounts });
     expect(await screen.findByText(/· 1 left to study today ·/)).toBeInTheDocument();
     expect(screen.queryByText(/to go/)).toBeNull();
   });
 
   it("welcomes back before the day's first answer, with the streak to keep and the cards left", async () => {
     // A two-day streak through yesterday, with an answer that took about 20 s.
-    const getStatistics = vi.fn(async () =>
-      statisticsReportOf(
+    const getTodayFigures = vi.fn(async () =>
+      todayFiguresFrom(
         [
           answer("2026-10-01"),
           answer("2026-10-02"),
@@ -248,7 +251,7 @@ describe("TodaySummaryContainer", () => {
       ),
     );
     const getStudyCounts = vi.fn(async () => ({ dueCount: 4, newCount: 2 }));
-    renderContainer(getStatistics, { decks: [deckOf("deck-1")], getStudyCounts });
+    renderContainer(getTodayFigures, { decks: [deckOf("deck-1")], getStudyCounts });
     const note = await screen.findByRole("complementary", { name: "Your streak" });
     expect(note).toHaveTextContent(
       /^2-day streak .+6 left to study today · about 2 minutes to go$/,
@@ -257,9 +260,9 @@ describe("TodaySummaryContainer", () => {
   });
 
   it("shows nothing before the day's first answer without a study day to come back to", async () => {
-    const getStatistics = vi.fn(async () => statisticsReportOf([], "2026-10-03"));
-    const { container } = renderContainer(getStatistics);
-    await vi.waitFor(() => expect(getStatistics).toHaveBeenCalled());
+    const getTodayFigures = vi.fn(async () => todayFiguresFrom([], "2026-10-03"));
+    const { container } = renderContainer(getTodayFigures);
+    await vi.waitFor(() => expect(getTodayFigures).toHaveBeenCalled());
     await Promise.resolve();
     expect(container).toBeEmptyDOMElement();
   });

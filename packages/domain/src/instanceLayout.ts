@@ -326,13 +326,14 @@ export function monthOfHistoryUrl(instanceUrl: string, url: string): string | nu
 }
 
 /**
- * The digest subject about a document or deck, `#<kind>-<where>`: where
+ * The digest subject about a document, a deck or a month of the answer
+ * log (by its document), `#<kind>-<where>`: where
  * it is under the instance, else its whole URL, with every character
  * but letters, digits, ".", "_" and "-" made a "-".
  */
 export function digestSubjectOf(
   instanceUrl: string,
-  kind: "receipt" | "schedule",
+  kind: "receipt" | "schedule" | "month",
   target: string,
 ): string {
   const container = ensureTrailingSlash(instanceUrl);

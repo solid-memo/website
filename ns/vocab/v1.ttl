@@ -18,8 +18,8 @@
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
     dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, review state (SM-2 or FSRS-6) and study preferences." ;
-    owl:versionInfo "1.24" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: newcomerCourse, the course the deck library's index offers to newcomers (on the catalogue, outside every shape). 1.18: releaseDraft and publishedRelease, a catalogue's drafts of releases and the releases it published (on the catalogue, outside every shape), and releasedAs, the release a draft was published as (draft deck format 1). 1.19: recallMillis, gradeMillis, priorDue and utcOffsetMinutes, how long an answer took, when its prompt was due and the device's offset from UTC (on an answer, without an answer format bump). 1.20: frontLabel, a caption above the front (card format 6). 1.21: fsrs6, the FSRS-6 scheduler, a concept of Schedulers, with stability, difficulty, previousStability and previousDifficulty (FSRS review-state format 1, a new shape of ReviewState told apart by its scheduler); studyScheduler and desiredRetention, which scheduler sets the due days and the retention FSRS-6 aims at, and schedulerInvitationDismissed, whether the learner declined the invitation to switch to FSRS-6 (preferences format 5); scheduledWith, the scheduler whose due days a deck schedule counts (deck schedule format 2). 1.22: the Palettes and TextSizes concept schemes, palette and textSize, the colors the app is shown in and the size of its text (preferences format 6). 1.23: Palette and ColorSet, a palette the user designs, with basedOn, lightColors, darkColors and a property for each color it sets (palette and color set format 1, in the instance's palettes document); preferences choose one with palette, without a format bump. 1.24: deckCardLanguage, the language a deck's card text is shown in first, written on a deck outside deck format 6." .
+    owl:versionInfo "1.25" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: newcomerCourse, the course the deck library's index offers to newcomers (on the catalogue, outside every shape). 1.18: releaseDraft and publishedRelease, a catalogue's drafts of releases and the releases it published (on the catalogue, outside every shape), and releasedAs, the release a draft was published as (draft deck format 1). 1.19: recallMillis, gradeMillis, priorDue and utcOffsetMinutes, how long an answer took, when its prompt was due and the device's offset from UTC (on an answer, without an answer format bump). 1.20: frontLabel, a caption above the front (card format 6). 1.21: fsrs6, the FSRS-6 scheduler, a concept of Schedulers, with stability, difficulty, previousStability and previousDifficulty (FSRS review-state format 1, a new shape of ReviewState told apart by its scheduler); studyScheduler and desiredRetention, which scheduler sets the due days and the retention FSRS-6 aims at, and schedulerInvitationDismissed, whether the learner declined the invitation to switch to FSRS-6 (preferences format 5); scheduledWith, the scheduler whose due days a deck schedule counts (deck schedule format 2). 1.22: the Palettes and TextSizes concept schemes, palette and textSize, the colors the app is shown in and the size of its text (preferences format 6). 1.23: Palette and ColorSet, a palette the user designs, with basedOn, lightColors, darkColors and a property for each color it sets (palette and color set format 1, in the instance's palettes document); preferences choose one with palette, without a format bump. 1.24: deckCardLanguage, the language a deck's card text is shown in first, written on a deck outside deck format 6. 1.25: MonthSummary, a summary of one study month of the answer log in the instance digest, so the today strip need not read past months that have not changed (month summary format 1)." .
 
 #################### Classes ####################
 
@@ -71,6 +71,13 @@ solid-memo:DeckSchedule
     rdfs:comment "How many of a deck's prompts fall due on which study day and how many are still new, computed from given versions of its cards and reviews documents, so the deck list can count today's study without them. A subject of the instance's digest document; derived data, rebuilt whenever it does not hold." ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.9." .
+
+solid-memo:MonthSummary
+    a owl:Class ;
+    rdfs:label "Month summary" ;
+    rdfs:comment "What the today strip needs of one study month of the answer log, summarized from a given version of the month's document: each study day's answers, introductions, reviews and lapses, the month's reviews of young prompts and how many were remembered, and how many recalled answers took each whole second. A subject of the instance's digest document; derived data, rebuilt whenever it does not hold." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25." .
 
 solid-memo:Answer
     a owl:Class ;
@@ -949,6 +956,60 @@ solid-memo:introducedOnDayCount
     rdfs:range xsd:integer ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.9." .
+
+solid-memo:summaryOf
+    a owl:ObjectProperty ;
+    rdfs:label "summary of" ;
+    rdfs:comment "The answer log's month document a month summary is about." ;
+    rdfs:domain solid-memo:MonthSummary ;
+    rdfs:range rdfs:Resource ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25 for month summary format 1." .
+
+solid-memo:summarizedVersion
+    a owl:DatatypeProperty ;
+    rdfs:label "summarized version" ;
+    rdfs:comment "The version (ETag) of the month's document the summary was made from." ;
+    rdfs:domain solid-memo:MonthSummary ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25 for month summary format 1." .
+
+solid-memo:studyDayCounts
+    a owl:DatatypeProperty ;
+    rdfs:label "study day counts" ;
+    rdfs:comment "What one study day of the month with answers came to, as \"YYYY-MM-DD answers introduced reviews lapses\": its answers, the prompts it introduced, its scored reviews and those below grade 3; one value per day." ;
+    rdfs:domain solid-memo:MonthSummary ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25 for month summary format 1." .
+
+solid-memo:youngReviewCount
+    a owl:DatatypeProperty ;
+    rdfs:label "young review count" ;
+    rdfs:comment "How many of the month's scored reviews were of prompts at an interval below 21 days." ;
+    rdfs:domain solid-memo:MonthSummary ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25 for month summary format 1." .
+
+solid-memo:youngRecalledCount
+    a owl:DatatypeProperty ;
+    rdfs:label "young recalled count" ;
+    rdfs:comment "How many of the month's scored reviews of young prompts were remembered (grade 3 or above)." ;
+    rdfs:domain solid-memo:MonthSummary ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25 for month summary format 1." .
+
+solid-memo:recallSecondsCount
+    a owl:DatatypeProperty ;
+    rdfs:label "recall seconds count" ;
+    rdfs:comment "How many of the month's recalled answers with a recorded time (recallMillis and gradeMillis) took a whole number of seconds, as \"seconds count\", a time of 60 seconds or more counted at 60; one value per number of seconds." ;
+    rdfs:domain solid-memo:MonthSummary ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.25 for month summary format 1." .
 
 #################### Course ####################
 

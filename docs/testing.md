@@ -120,7 +120,8 @@ Renovate keeps each server on its major (`renovate.json5`), and which
 servers each workflow runs is the table's in servers.ts (`npm test`
 checks). `MEASURE_ANSWER_LOG=1` adds a measurement of reading a large
 answer log to `history.integration.test.ts`: two years of answers,
-seeded in about a minute and a half a server, its timings printed
+seeded in about a minute and a half a server, then the today strip's
+read on a second page load, its timings printed
 (shown with `--silent=false`; [statistics.md](statistics.md#loading)).
 `MEASURE_GRADES=1` adds one of grading to `grading.integration.test.ts`:
 a session's grades on a deck of 2,000 states, the requests, bytes and

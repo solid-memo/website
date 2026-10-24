@@ -36,7 +36,7 @@ export function keepStudyFiguresFresh(queryClient: QueryClient): () => void {
   });
 }
 
-/** What getStatistics reads for a range of the statistics' routes: "12m" is its default, the today strip's. */
+/** What getStatistics reads for a range of the statistics' routes: "12m" is its default. */
 export function rangeRead(range: StatisticsRange): RangeRead {
   switch (range) {
     case "30d":
@@ -50,12 +50,7 @@ export function rangeRead(range: StatisticsRange): RangeRead {
   }
 }
 
-/**
- * The statistics of a range, of every deck of the instance or of one
- * (by its URL), as one query: of every deck over the last 12 months it
- * is the today strip's (TodaySummaryContainer), so neither reads them
- * for the other.
- */
+/** The statistics of a range, of every deck of the instance or of one (by its URL), as one query. */
 export function statisticsQuery(
   useCases: UseCases,
   instanceUrl: string,
@@ -67,15 +62,26 @@ export function statisticsQuery(
     queryKey:
       deckUrl !== undefined
         ? queryKeys.deckStatistics(instanceUrl, deckUrl, range)
-        : range === "12m"
-          ? queryKeys.statistics(instanceUrl)
-          : queryKeys.statisticsOfRange(instanceUrl, range),
+        : queryKeys.statisticsOfRange(instanceUrl, range),
     queryFn: () =>
       useCases.getStatistics(
         instanceUrl,
         new Date(),
         deckUrl === undefined ? read : { ...read, deckUrl },
       ),
+    staleTime: STATISTICS_STALE_MS,
+  };
+}
+
+/**
+ * The today strip's figures (TodaySummaryContainer), as the statistics
+ * are kept: under "statistics", so a change made clears them too
+ * (keepStudyFiguresFresh), and as long without reading them anew.
+ */
+export function todayFiguresQuery(useCases: UseCases, instanceUrl: string) {
+  return {
+    queryKey: queryKeys.todayFigures(instanceUrl),
+    queryFn: () => useCases.getTodayFigures(instanceUrl, new Date()),
     staleTime: STATISTICS_STALE_MS,
   };
 }

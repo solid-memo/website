@@ -11,9 +11,14 @@ import {
 } from "@inrupt/solid-client";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
-import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
+import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
-import { toDigest, toReceiptThing, toScheduleThing } from "./mappers/digestMapper";
+import {
+  toDigest,
+  toMonthSummaryThing,
+  toReceiptThing,
+  toScheduleThing,
+} from "./mappers/digestMapper";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 
 export interface SolidDigestRepositoryDeps {
@@ -135,7 +140,7 @@ function withDigest(
   let updated = dataset;
   const subjects: string[] = [];
   const differs = (a: unknown, b: unknown) => JSON.stringify(a) !== JSON.stringify(b);
-  const before = stored ?? { receipts: {}, schedules: {} };
+  const before = stored ?? emptyDigest();
   for (const [document, receipt] of Object.entries(next.receipts)) {
     if (!differs(before.receipts[document], receipt)) continue;
     const url = digestSubjectOf(instanceUrl, "receipt", document);
@@ -148,6 +153,12 @@ function withDigest(
     updated = setThing(updated, toScheduleThing(url, schedule, getThing(updated, url)));
     subjects.push(url);
   }
+  for (const [document, summary] of Object.entries(next.months)) {
+    if (!differs(before.months[document], summary)) continue;
+    const url = digestSubjectOf(instanceUrl, "month", document);
+    updated = setThing(updated, toMonthSummaryThing(url, summary, getThing(updated, url)));
+    subjects.push(url);
+  }
   const gone = [
     ...Object.keys(before.receipts)
       .filter((document) => !(document in next.receipts))
@@ -155,6 +166,9 @@ function withDigest(
     ...Object.keys(before.schedules)
       .filter((deck) => !(deck in next.schedules))
       .map((d) => digestSubjectOf(instanceUrl, "schedule", d)),
+    ...Object.keys(before.months)
+      .filter((document) => !(document in next.months))
+      .map((d) => digestSubjectOf(instanceUrl, "month", d)),
   ];
   for (const url of gone) {
     updated = removeThing(updated, url);

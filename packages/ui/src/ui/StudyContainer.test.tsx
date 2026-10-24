@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudyContainer } from "./StudyContainer";
-import { keepStudyFiguresFresh } from "./studyFigures";
+import { keepStudyFiguresFresh, todayFiguresQuery } from "./studyFigures";
 import { Clock } from "./courseLinks";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
@@ -18,7 +18,7 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { previewIntervals } from "@solid-memo/domain/grading";
 import { makeUseCasesFake } from "../test/useCasesFake";
-import { statisticsReportOf } from "../test/fakes/statistics";
+import { todayFiguresFrom } from "../test/fakes/statistics";
 import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { RepoUrl } from "./ReportMistake";
 
@@ -829,7 +829,7 @@ describe("StudyContainer leaving for the deck list", () => {
   });
 
   it("lets the today strip count the session's answers, not show the day from before it", async () => {
-    const studied = statisticsReportOf(
+    const studied = todayFiguresFrom(
       [
         {
           id: "answer-1",
@@ -851,13 +851,16 @@ describe("StudyContainer leaving for the deck list", () => {
         studiedToday: 0,
         ...QUEUE_DEFAULTS,
       })),
-      getStatistics: vi.fn(async () => studied),
+      getTodayFigures: vi.fn(async () => studied),
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     // As the app does (AppShell): every change made has the statistics read again.
     keepStudyFiguresFresh(queryClient);
     // The strip read the day before the session: nothing studied yet, fresh for a while.
-    queryClient.setQueryData(["statistics", instance.url], statisticsReportOf([], "2026-09-21"));
+    queryClient.setQueryData(
+      todayFiguresQuery(useCases, instance.url).queryKey,
+      todayFiguresFrom([], "2026-09-21"),
+    );
     const screenFor = (studying: boolean) => (
       <QueryClientProvider client={queryClient}>
         {studying ? (
@@ -877,6 +880,6 @@ describe("StudyContainer leaving for the deck list", () => {
     await waitFor(() => expect(useCases.recordReview).toHaveBeenCalledOnce());
     view.rerender(screenFor(false));
     expect(await screen.findByRole("link", { name: "All statistics" })).toBeInTheDocument();
-    expect(useCases.getStatistics).toHaveBeenCalledOnce();
+    expect(useCases.getTodayFigures).toHaveBeenCalledOnce();
   });
 });

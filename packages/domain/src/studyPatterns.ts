@@ -6,7 +6,7 @@ import { isRecalled, MATURE_INTERVAL_DAYS, shiftStudyDay, type Answer } from "./
 import { isRepeat, isScoredReview, type ChainIndex } from "./answerChain";
 import type { StudyDirection } from "./deck";
 import type { ReviewQuality } from "./review";
-import type { DayActivity, Recall } from "./statistics";
+import type { DayActivity, DayCounts, Recall } from "./statistics";
 
 /**
  * How a learner answers and studies, from the answer log: the answer
@@ -162,7 +162,7 @@ export function daysBetween(from: string, to: string): number {
 }
 
 /** What the days given held from `first` to `last`, both included. */
-function periodOf(days: readonly DayActivity[], first: string, last: string): PeriodFigures {
+function periodOf(days: readonly DayCounts[], first: string, last: string): PeriodFigures {
   const period: PeriodFigures = {
     answers: 0,
     studyDays: 0,
@@ -187,7 +187,7 @@ function periodOf(days: readonly DayActivity[], first: string, last: string): Pe
  * today's date (its last day, when it was shorter).
  */
 export function periodToDateOf(
-  days: readonly DayActivity[],
+  days: readonly DayCounts[],
   today: string,
   period: "week" | "month",
 ): PeriodToDate {

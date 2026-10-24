@@ -23,7 +23,7 @@ card/v1.ttl … v7.ttl
 review-state/v1.ttl, v2.ttl
 fsrs-review-state/v1.ttl      …/fsrs-review-state/v1.ttl#shape  (an FSRS-6 review state)
 preferences/v1.ttl … v6.ttl
-document-receipt/v1.ttl, deck-schedule/v1.ttl, v2.ttl   (the digest)
+document-receipt/v1.ttl, deck-schedule/v1.ttl, v2.ttl, month-summary/v1.ttl   (the digest)
 deck-group/v1.ttl             …/deck-group/v1.ttl#inPod  (the arranged deck list)
 chapter/v1.ttl, step/v1.ttl   …/chapter/v1.ttl#inLibrary  (a course's outline)
 distractor/v1.ttl             …/distractor/v1.ttl#shape  (a wrong option, in a pod or the library)
@@ -164,6 +164,7 @@ checked by the shapes every place shares (`<#shape>`).
 | Distractor 1 | In a pod or the library (`DistractorV1`, `<#shape>`): a wrong option of a card, a `sm:Distractor` and a `schema:Answer`, a subject of the card's document; `sm:distractorText` 1..n, one untagged literal or language-tagged text, one per language, never both, as a card 5 side's text; `sm:distractorNote` 0..n language-tagged text, one per language, why the option is wrong; `owl:deprecated` 0..1, true once retired, when the app no longer offers it |
 | Deck schedule 1 | In an instance's digest: `sm:scheduleOf` (the deck), `sm:cardsVersion`, `sm:reviewsVersion` (`"absent"` for none), `sm:scheduledDirection` (a concept of `sm:StudyDirections`), `sm:scheduledDayBoundaryHour` (0–23), `sm:scheduledOn` (`YYYY-MM-DD`), `sm:unreviewedCount`, `sm:reviewedOnDayCount`, `sm:introducedOnDayCount` 1..1; `sm:dueOnDay` 0..n, `"YYYY-MM-DD count"` |
 | Deck schedule 2 | Deck schedule 1 + `sm:scheduledWith` 1..1, `sm:sm2` or `sm:fsrs6` (the scheduler whose due days it counts), and the format version 1..1 |
+| Month summary 1 | In an instance's [digest](data-model.md#the-digest) (vocabulary 1.25): `sm:summaryOf` (the answer log's month document) and `sm:summarizedVersion` (its ETag) 1..1; `sm:studyDayCounts` 0..n, `"YYYY-MM-DD answers introduced reviews lapses"`, one per study day with answers; `sm:youngReviewCount` and `sm:youngRecalledCount` 1..1, 0 or more; `sm:recallSecondsCount` 0..n, `"seconds count"`, 0 to 60 seconds |
 
 The DCAT and FOAF classes' values (an agent is a `foaf:Agent`, a theme a
 `skos:Concept`, a license a `dcterms:LicenseDocument`) are checked by the

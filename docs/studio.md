@@ -2288,7 +2288,7 @@ Its nodes, each drawn in a shape of its own, its color only helping:
 | --- | --- | --- |
 | folder | the instance's folder, or a folder in it that holds a document read | a rounded square |
 | document | a document read; one that was not there, or could not be read, too | a square, dashed when it was not there or could not be read |
-| resource | a subject a document defines: the catalog, a group, a deck, its distribution and its authors, a card, a wrong option, a review state, an answer, a receipt or schedule of the digest, a draft, a chapter, a step, a release | a dot |
+| resource | a subject a document defines: the catalog, a group, a deck, its distribution and its authors, a card, a wrong option, a review state, an answer, a receipt, schedule or month summary of the digest, a draft, a chapter, a step, a release | a dot |
 | vocabulary term | a class (`sm:Card`), a concept (`sm:frontToBack`), a license, a topic or theme, a media type, an EU authority table: one node for each, however many link to it | a small square |
 | in your Pod | an address in one of the user's storages that is not Solid Memo data: the WebID profile on many servers, a release published to another folder | a diamond |
 | outside your Pod | any other address: a library release a copy came from, a picture, a source, a `mailto:` address | a hollow dashed ring |

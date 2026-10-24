@@ -10,17 +10,18 @@ import { todayOf, welcomeBackOf } from "@solid-memo/domain/statistics";
 import { expectedTimeToday } from "@solid-memo/domain/studyTime";
 import { studyCountsQuery } from "./DeckStudyAction";
 import { statisticsHref } from "./router";
-import { statisticsQuery } from "./studyFigures";
+import { todayFiguresQuery } from "./studyFigures";
 import { TodaySummary } from "./TodaySummary";
 import { WelcomeBack } from "./WelcomeBack";
 
 /**
  * Today's study above the deck list, from the answers of the last
  * twelve study months, whatever range the statistics page opens on, so
- * the streak record is the year's (one query with that page's "12m",
- * statisticsQuery): read again when the list opens and it is over half
- * a minute old, and at once after any change made, an answer in a
- * session or a course among them, which clears it. With it, the cards
+ * the streak record is the year's (getTodayFigures, which reads only
+ * the months that changed since the digest summarized them): read again
+ * when the list opens and it is over half a minute old, and at once
+ * after any change made, an answer in a session or a course among them,
+ * which clears it (todayFiguresQuery). With it, the cards
  * left to study today in the `decks` listed, from the counts their rows
  * read (studyCountsQuery, one cache), once every deck's is known, and
  * about how many minutes they will take, from how long an answer has
@@ -40,25 +41,25 @@ export function TodaySummaryContainer({
   instance: Instance;
   decks: readonly Deck[];
 }) {
-  const statistics = useQuery(statisticsQuery(useCases, instance.url, "12m"));
+  const figures = useQuery(todayFiguresQuery(useCases, instance.url));
   const counts = useQueries({
     queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
   });
   const known = counts.every((one) => one.data !== undefined);
   const reviews = counts.reduce((sum, { data }) => sum + (data?.dueCount ?? 0), 0);
   const newCards = counts.reduce((sum, { data }) => sum + (data?.newCount ?? 0), 0);
-  if (statistics.data === undefined) return null;
+  if (figures.data === undefined) return null;
   const ms = expectedTimeToday({
     reviews,
     newCards,
-    young: statistics.data.retention.young,
-    medianAnswerMs: statistics.data.studyTime.medianAnswerMs,
+    young: figures.data.young,
+    medianAnswerMs: figures.data.medianAnswerMs,
   });
   const left = known ? reviews + newCards : undefined;
   const minutesLeft = ms === null ? undefined : Math.max(1, Math.round(ms / 60_000));
-  const today = todayOf(statistics.data);
+  const today = todayOf(figures.data);
   if (today === null) {
-    const welcome = welcomeBackOf(statistics.data);
+    const welcome = welcomeBackOf(figures.data);
     return welcome === null ? null : (
       <WelcomeBack welcome={welcome} left={left} minutesLeft={minutesLeft} />
     );

@@ -33,6 +33,7 @@ https://solid-memo.com/ns/shapes/instance/v1.ttl sha256:4f309ebef78308120ffe29fa
 https://solid-memo.com/ns/shapes/instance/v2.ttl sha256:951c00a62ddf687d4325f88cbb223a209a2079f11c4c31cd7f75b76824d02245
 https://solid-memo.com/ns/shapes/library-deck/v5.ttl sha256:98a23a9de197b8c0a4a93b1216deca93e408ba31db3cc5b9bb045dd703b76cc5
 https://solid-memo.com/ns/shapes/library-deck/v6.ttl sha256:e498d1dd4a1498e18a099415b74799f837d283971de72363ad7b5b1030fc9ea2
+https://solid-memo.com/ns/shapes/month-summary/v1.ttl sha256:e32b5e1b997c658af340954000250b1602315cd90a9160b4edbfe91fb119dbb8
 https://solid-memo.com/ns/shapes/palette/v1.ttl sha256:1c602d54d9d21eb229466c3abaae764fa7e20d04daacf81de28ca1b60e3b1c88
 https://solid-memo.com/ns/shapes/preferences/v1.ttl sha256:2b2d7e093f5b98083f3cc1469b4dfa40ce8dd056ec4aa20da9e7553b3049268e
 https://solid-memo.com/ns/shapes/preferences/v2.ttl sha256:d7089233c185697fa3de86318b44115add50600084fb3d0e425d2bf4cf76a64b

@@ -160,7 +160,10 @@ string, so other applications can look up what it means:
   ([Palettes of one's own](#palettes-of-ones-own)). 1.24's
   `sm:deckCardLanguage` is written on a deck outside `DeckV6`, as
   `sm:position` is, so the deck format did not move
-  ([The language of text](#the-language-of-text)). A shape may take a
+  ([The language of text](#the-language-of-text)). 1.25's
+  `sm:MonthSummary` and its properties joined a new shape, month
+  summary format 1, in the digest ([The answer log](#the-answer-log)).
+  A shape may take a
   term of another vocabulary too, which is no `sm:` term and so moves no
   vocabulary version: card format 7 took `dcterms:subject`, what a card
   is about ([deck-library.md](deck-library.md#what-a-card-is-about)).
@@ -341,6 +344,23 @@ answer format 1:
 | `sm:gradeMillis` | datatype property | Answer → `xsd:integer` (milliseconds) | |
 | `sm:priorDue` | datatype property | Answer → `xsd:string` (`YYYY-MM-DD`, as `sm:due`) | |
 | `sm:utcOffsetMinutes` | datatype property | Answer → `xsd:integer` (minutes east of UTC) | |
+
+1.25 added a summary of one study month of the log, kept in the
+instance's [digest](data-model.md#the-digest) as derived data (as
+1.9's receipts and schedules are), so the today strip reads only the
+months that changed ([statistics.md](statistics.md#the-today-strip)):
+
+| Term | Kind | Domain → range |
+|---|---|---|
+| `sm:MonthSummary` | class | |
+| `sm:summaryOf` | object property | MonthSummary → the month's `history/<YYYY-MM>.ttl` |
+| `sm:summarizedVersion` | datatype property | MonthSummary → `xsd:string` (the document's ETag) |
+| `sm:studyDayCounts` | datatype property | MonthSummary → `xsd:string`, `YYYY-MM-DD answers introduced reviews lapses` |
+| `sm:youngReviewCount`, `sm:youngRecalledCount` | datatype property | MonthSummary → `xsd:integer` |
+| `sm:recallSecondsCount` | datatype property | MonthSummary → `xsd:string`, `seconds count`, 0 to 60 seconds |
+
+A summary keeps the recall times by the second, not their median:
+medians cannot be put together into a year's, counts by the second can.
 
 ## Card labels
 

@@ -48,7 +48,10 @@ async function seedInstance(p: ReturnType<typeof pod>, catalogExtra = "") {
     `<#palette-1> a <${SM}Palette> ; <${SM}lightColors> <#palette-1-light> .
 <#palette-1-light> a <${SM}ColorSet> .`,
   );
-  await p.put(`${INSTANCE}digest.ttl`, `<#receipt-catalog.ttl> a <${SM}DocumentReceipt> .`);
+  await p.put(
+    `${INSTANCE}digest.ttl`,
+    `<#receipt-catalog.ttl> a <${SM}DocumentReceipt> . <#month-history-2026-09.ttl> a <${SM}MonthSummary> .`,
+  );
   await p.put(
     `${INSTANCE}catalog.ttl`,
     `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> .

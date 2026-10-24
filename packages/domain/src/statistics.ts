@@ -59,8 +59,8 @@ import { fragmentIdOf } from "./subjectUrl";
  * it needs.
  */
 
-/** What happened on one study day. */
-export interface DayActivity {
+/** What happened on one study day, as the digest's month summaries keep it (studyDigest.ts). */
+export interface DayCounts {
   /** "YYYY-MM-DD". */
   studyDay: string;
   answers: number;
@@ -70,6 +70,10 @@ export interface DayActivity {
   reviews: number;
   /** Scored reviews below grade 3 (answerChain.ts isLapse). */
   lapses: number;
+}
+
+/** What happened on one study day. */
+export interface DayActivity extends DayCounts {
   /** Answers that repeat one to the same prompt that day. */
   repeats: number;
 }
@@ -435,8 +439,22 @@ export interface TodaySummary {
   week: { answers: number; previous: number };
 }
 
+/**
+ * What todayOf and welcomeBackOf read of the statistics, which the today
+ * strip's figures (studyDigest.ts todayFiguresOf) hold too.
+ */
+export interface StudyDayFigures {
+  /** The study day the figures run up to. */
+  today: string;
+  /** Every study day with answers, oldest first. */
+  days: readonly DayCounts[];
+  streaks: Streaks;
+  /** This week so far, beside the same days of last week. */
+  week: PeriodToDate;
+}
+
 /** Today's study, or null while nothing is studied today. */
-export function todayOf(statistics: Statistics): TodaySummary | null {
+export function todayOf(statistics: StudyDayFigures): TodaySummary | null {
   const day = statistics.days.find((activity) => activity.studyDay === statistics.today);
   if (day === undefined) return null;
   return {
@@ -467,7 +485,7 @@ export interface WelcomeBack {
  * who has studied before; null once today has an answer (todayOf says
  * what it came to), or when there is no study day to come back to.
  */
-export function welcomeBackOf(statistics: Statistics): WelcomeBack | null {
+export function welcomeBackOf(statistics: StudyDayFigures): WelcomeBack | null {
   if (statistics.streaks.longest === 0) return null;
   if (statistics.days.some((activity) => activity.studyDay === statistics.today)) return null;
   return {

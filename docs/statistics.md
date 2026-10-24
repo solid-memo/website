@@ -67,18 +67,47 @@ study day in the last 12 months there is nothing to come back to, and
 no note. After the day's first answer the strip takes its place. When
 the answers cannot be read there is neither: the deck list works
 without them.
-It reads the last 12 study months, whatever range the statistics page
-opens on, so the record is the year's; that is the page's own read when
-its range is the last 12 months, so the two never read them twice.
-Every change made clears that read, an answer in a session or a course
-among them, so the strip is up to date after a session; otherwise it is
-read again when the list opens and what was read is over half a minute
-old ([below](#loading)).
+It counts the last 12 study months, whatever range the statistics page
+opens on, so the record is the year's, with the activity calendar's 52
+weeks for the streaks, as the statistics page's last 12 months does:
+its figures are that page's. But it does not read those months' answers
+on every visit. Each past month is summarized once, and the summary is
+kept in the instance's [digest](data-model.md#the-digest) with the
+version (ETag) of the month's document: each study day's answers, new
+cards, reviews and lapses, the month's young-card recall, and how many
+recalled answers took each whole second up to a minute. A visit checks
+each past month against that version, and a `304` means its summary
+holds; only this month, and a month that changed, are read in full. The
+summaries learned are written back in the background.
+Each answer keeps the study day it was given on, so a change of the day
+boundary leaves the summaries as they are. Whether an answer repeats
+another depends on the answer before it to its card, which is in the
+same month as long as answer times and study days run in the same
+order, so the counts are exact. They can differ only when the day
+boundary or the time zone changes in the night of a month's end, and a
+card is answered on both sides of it.
+Only the median answer time, which the time left today is estimated
+from, is counted by the second: each time counts as the middle of its
+second, so the median is off by half a second at most (a median of a
+minute or more counts as a minute). A median cannot be put together
+from medians, so the summary keeps the times by second instead. While
+no time was recorded in those months (answers given before the app
+recorded times, [below](#time-spent-and-the-hours-of-the-day)), the
+median is estimated from the pauses between answers, which needs every
+answer, so then the months are read in full. A server that sends no
+ETag (Node Solid Server) cannot be checked, so there every month is
+read in full on every visit, and the summaries help nothing.
+Every change made clears what was read, an answer in a session or a
+course among them, so the strip is up to date after a session;
+otherwise it is read again when the list opens and what was read is
+over half a minute old ([below](#loading)).
 
 Code: [TodaySummaryContainer.tsx](../packages/ui/src/ui/TodaySummaryContainer.tsx)
-reads the statistics and [TodaySummary.tsx](../packages/ui/src/ui/TodaySummary.tsx)
-shows them; `todayOf` in [statistics.ts](../packages/domain/src/statistics.ts)
-picks the day out.
+reads the figures (`getTodayFigures`) and [TodaySummary.tsx](../packages/ui/src/ui/TodaySummary.tsx)
+shows them; `monthSummaryOf` and `todayFiguresOf` in
+[studyDigest.ts](../packages/domain/src/studyDigest.ts) summarize the
+months and put the summaries together, and `todayOf` in
+[statistics.ts](../packages/domain/src/statistics.ts) picks the day out.
 
 ## The statistics page
 
@@ -205,6 +234,9 @@ month, by server, for a learner who answers a hundred cards a day. So:
   month being studied changes with every answer, so it is read again
   after studying. A server that sends no ETag (Node Solid Server) is
   read whole every time.
+- **The today strip keeps a summary of each past month** in the
+  digest, so a visit checks the past months with a `304` each and reads
+  only this month in full ([above](#the-today-strip)).
 - **What was read is shown again for half a minute** (`staleTime`) on
   the statistics page, a deck's page and the today strip, so moving
   between them reads nothing. Every change made clears the statistics,
@@ -225,16 +257,15 @@ month, by server, for a learner who answers a hundred cards a day. So:
   (`calendarStartOf`) when the range begins after them, for the figures
   up to today: `statisticsOf` counts the range's answers from its first
   day (`since`), and those figures, with `recentDays`, from every answer
-  read. The months read are the same the today strip's read takes in,
-  so they come from the shared cache. Its result's `coverage` is the
+  read. Its result's `coverage` is the
   log's first month when the log begins inside the range, and
   `logBegins` the log's first month, for the empty range's message.
   The page's ranges are 30 days, 90
   days (its default), getStatistics' own 12 months and `"all"` (`rangeRead` and
   `statisticsQuery` in
   [studyFigures.ts](../packages/ui/src/ui/studyFigures.ts)), each
-  read once and kept apart; the last 12 months are kept under the
-  today strip's key, so the strip and the page share that read. All
+  read once and kept apart; the today strip has a key of its own
+  (`todayFiguresQuery`), as it reads the months its own way. All
   time downloads the whole log once a page load, as the Studio's
   `loadAnswerLog` does, and on a server without ETags at every visit.
 
@@ -412,7 +443,7 @@ Nothing in the pod changed: the same answer log is read differently.
 | Layer | Files |
 |---|---|
 | Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [memoryCurve.ts](../packages/domain/src/memoryCurve.ts): recall by interval, by lateness and by week, where the cards stood and their median interval week by week, and the time to mature. [studyTime.ts](../packages/domain/src/studyTime.ts): the time studied, recorded or estimated, sessions and time left today, and the answers by hour. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, the prompts introduced and grown mature (`promptGrowthOf`), and `todayOf`. [answerCsv.ts](../packages/domain/src/answerCsv.ts): the answers as CSV. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [course.ts](../packages/domain/src/course.ts): `courseProgressOf`, a course's chapters done and its graded answers chapter by chapter. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
-| Application | `getStatistics`, `saveAnswers`, `getCardProgress` and `getCourseStatistics` in [statistics.ts](../packages/application/src/statistics.ts): which months and documents to read; the answer store's `readMonths` ([answerStore.ts](../packages/application/src/answerStore.ts)) keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. |
+| Application | `getStatistics`, `saveAnswers`, `getCardProgress` and `getCourseStatistics` in [statistics.ts](../packages/application/src/statistics.ts): which months and documents to read; the answer store's `readMonths` ([answerStore.ts](../packages/application/src/answerStore.ts)) keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. `getTodayFigures` for the today strip, from the digest's month summaries. |
 | UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) (the page, of the instance or of a deck), [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (its range and tabs) and [StatisticsSections.tsx](../packages/ui/src/ui/StatisticsSections.tsx) (the overview, activity and memory tabs), the `statistics` and `deckStatistics` routes in [router.ts](../packages/ui/src/ui/router.ts), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx) and [HardestCards.tsx](../packages/ui/src/ui/HardestCards.tsx) (what is hard, from the same read, and the leeches a cram crams, `leechesOf`), [CramContainer.tsx](../packages/ui/src/ui/CramContainer.tsx) (a cram of the leeches, from that read too), [CourseStatistics.tsx](../packages/ui/src/ui/CourseStatistics.tsx) (your courses), [CardHistoryContainer.tsx](../packages/ui/src/ui/CardHistoryContainer.tsx) and [CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx) (a card's history), [charts/](../packages/ui/src/ui/charts/) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars, a module each, gathered for the Studio in [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx)), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
 
 The statistics are the same for a guest ([guest-mode.md](guest-mode.md)),
@@ -425,8 +456,10 @@ rest of their study when they log in.
   ([testing.md](testing.md)): `answerChain.test.ts`,
   `statistics.test.ts`, `memoryCurve.test.ts` (a forget, a move with
   its progress, a reschedule, introductions before the answers read), `studyTime.test.ts`, `answerCsv.test.ts`, `studyPatterns.test.ts`, `cardProgress.test.ts`,
-  `cardHistory.test.ts`, `scheduleInsight.test.ts` and
-  `course.test.ts` in the domain,
+  `cardHistory.test.ts`, `scheduleInsight.test.ts`,
+  `course.test.ts` and `studyDigest.test.ts` (the today strip's figures
+  from month summaries against `statisticsOf` of a year of answers, and
+  by how much the median moves) in the domain,
   the passes over the whole log (`chainIndexOf`, `statisticsOf` and the
   answer buttons, first try, recall each way, where the cards stood,
   the estimated time and the hardest cards) held to linear growth,
@@ -446,8 +479,9 @@ rest of their study when they log in.
   the statistics and the whole log share the months read, a month read
   again only once it changed, that lateness, where the cards stood and
   the time to mature follow a card across months (journeys cannot
-  span days), and measures a large log when asked
-  ([above](#loading)).
+  span days), that the today strip's figures are the statistics' and,
+  on a server with ETags, read a past month again only once it changed,
+  and measures a large log when asked ([above](#loading)).
 - **User journeys**: in
   [full-learner.journey.ts](../e2e/journeys/journeys/full-learner.journey.ts),
   step 13 checks that the today strip counts each session's answers as

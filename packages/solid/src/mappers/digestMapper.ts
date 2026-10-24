@@ -4,18 +4,26 @@
 
 import { asUrl, getThingAll, type ThingPersisted, type SolidDataset } from "@inrupt/solid-client";
 import {
+  monthSummaryFromRecord,
+  monthSummaryToRecord,
   receiptFromRecord,
   receiptToRecord,
   scheduleFromRecord,
   scheduleToRecord,
 } from "@solid-memo/domain/digestRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import type {
-  DocumentReceipt,
-  InstanceDigest,
-  StoredSchedule,
+import {
+  emptyDigest,
+  type DocumentReceipt,
+  type InstanceDigest,
+  type StoredMonthSummary,
+  type StoredSchedule,
 } from "@solid-memo/domain/studyDigest";
-import { DECK_SCHEDULE_V2, DOCUMENT_RECEIPT_V1 } from "@solid-memo/vocab/descriptors.generated";
+import {
+  DECK_SCHEDULE_V2,
+  DOCUMENT_RECEIPT_V1,
+  MONTH_SUMMARY_V1,
+} from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 
 /**
@@ -25,7 +33,7 @@ import { readVersioned, recordThing } from "../records";
  * latest (one of format 1 counted SM-2's due days).
  */
 export function toDigest(dataset: SolidDataset): InstanceDigest {
-  const digest: InstanceDigest = { receipts: {}, schedules: {} };
+  const digest = emptyDigest();
   for (const thing of getThingAll(dataset)) {
     const receipt = readVersioned(thing, "documentReceipt");
     if (receipt !== null) {
@@ -39,6 +47,12 @@ export function toDigest(dataset: SolidDataset): InstanceDigest {
         migrate("deckSchedule", schedule.record, { subject: asUrl(thing) }),
       );
       digest.schedules[read.deck] = read;
+      continue;
+    }
+    const summary = readVersioned(thing, "monthSummary");
+    if (summary !== null) {
+      const read = monthSummaryFromRecord(summary.record.data);
+      if (read !== null) digest.months[read.document] = read;
     }
   }
   return digest;
@@ -58,4 +72,12 @@ export function toScheduleThing(
   existing: ThingPersisted | null,
 ): ThingPersisted {
   return recordThing(url, DECK_SCHEDULE_V2, scheduleToRecord(schedule), existing);
+}
+
+export function toMonthSummaryThing(
+  url: string,
+  summary: StoredMonthSummary,
+  existing: ThingPersisted | null,
+): ThingPersisted {
+  return recordThing(url, MONTH_SUMMARY_V1, monthSummaryToRecord(summary), existing);
 }

@@ -8,6 +8,7 @@ import type { Answer } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
+import type { TodayFigures } from "@solid-memo/domain/studyDigest";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import type { StatisticsUseCases } from "@solid-memo/application/statistics";
 
@@ -28,6 +29,19 @@ export function statisticsReportOf(
     coverage,
     logBegins,
     dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+  };
+}
+
+/** The today strip's figures (getTodayFigures) of the answers given, as statisticsOf makes them. */
+export function todayFiguresFrom(answers: readonly Answer[], today: string): TodayFigures {
+  const { days, streaks, week, retention, studyTime } = statisticsOf(answers, today);
+  return {
+    today,
+    days,
+    streaks,
+    week,
+    young: retention.young,
+    medianAnswerMs: studyTime.medianAnswerMs,
   };
 }
 
@@ -67,6 +81,7 @@ export function makeStatisticsUseCasesFake(
     fake,
     {
       getStatistics: vi.fn(async () => statisticsReportOf([], "2026-09-21")),
+      getTodayFigures: vi.fn(async () => todayFiguresFrom([], "2026-09-21")),
       saveAnswers: vi.fn(async () => undefined),
       loadAnswerLog: vi.fn(async () => []),
       cardAnswers: vi.fn(async () => []),
