@@ -1,0 +1,1109 @@
+@base <https://solid-memo.com/decks/nordic-mammals/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+@prefix spdx:       <http://spdx.org/rdf/terms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nordic mammals"@en ,
+                  "Nordiska däggdjur"@sv ,
+                  "북유럽의 포유류"@ko ,
+                  "Nordische Säugetiere"@de ,
+                  "Mamíferos nórdicos"@es ,
+                  "Mammifères nordiques"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:description "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia."@en ,
+                        "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia."@sv ,
+                        "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia."@de ,
+                        "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco."@es ,
+                        "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://doi.org/10.15468/j43wfc> ,
+                        <https://doi.org/10.5281/zenodo.21654811> ,
+                        <https://doi.org/10.15468/i57bff> ;
+    prov:wasGeneratedBy <#compilation> ,
+                        <#wikidata-labels> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ;
+    dcat:keyword "mammals"@en ,
+                 "zoology"@en ,
+                 "scientific names"@en ,
+                 "animal names"@en ,
+                 "Nordic countries"@en ,
+                 "däggdjur"@sv ,
+                 "zoologi"@sv ,
+                 "vetenskapliga namn"@sv ,
+                 "djurnamn"@sv ,
+                 "Norden"@sv ,
+                 "포유류"@ko ,
+                 "동물학"@ko ,
+                 "학명"@ko ,
+                 "동물 이름"@ko ,
+                 "북유럽"@ko ,
+                 "Säugetiere"@de ,
+                 "Zoologie"@de ,
+                 "wissenschaftliche Namen"@de ,
+                 "Tiernamen"@de ,
+                 "nordische Länder"@de ,
+                 "mamíferos"@es ,
+                 "zoología"@es ,
+                 "nombres científicos"@es ,
+                 "nombres de animales"@es ,
+                 "países nórdicos"@es ,
+                 "mammifères"@fr ,
+                 "zoologie"@fr ,
+                 "noms scientifiques"@fr ,
+                 "noms d’animaux"@fr ,
+                 "pays nordiques"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 63 cards in use, 63 in Korean, 61 in German, 11 in Spanish, 29 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nordic-mammals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nordic-mammals> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://doi.org/10.15468/j43wfc> ,
+              <https://doi.org/10.5281/zenodo.21654811> ,
+              <https://doi.org/10.15468/i57bff> ,
+              <https://sv.wikipedia.org/> ,
+              <https://www.svt.se/nyheter/lokalt/norrbotten/mardhunden-funktionellt-utrotad-i-sverige-nu-hotar-tvattbjorn-och-mink> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "Scope and authority. The library editor asked for about 60 wild mammals of Sweden and the Nordic countries, land and marine, with the common name (English and Swedish) on the front and the scientific name on the back, using one stated taxonomic authority consistently. The Mammal Diversity Database (MDD) of the American Society of Mammalogists was chosen as the single authority for scientific and English names: its current release, v2.5 of 28 July 2026, was confirmed on its home page and its Zenodo record on 2026-10-04. Swedish names follow Dyntaxa, the Swedish taxonomic database of SLU Artdatabanken, as published under CC0 on GBIF (dataset publication date 2026-09-29)."@en ,
+                 "Candidate list. The authoring agent wrote down 79 candidate species from general knowledge of the Nordic mammal fauna (the big four predators and other carnivores, seals, deer and other ungulates, whales and dolphins, hares, rodents, hedgehog, mole, shrews and bats), using the names it expected MDD to use, plus 10 older or alternative names (for example Myodes glareolus, Eptesicus nilssonii, Neovison vison, Phoca hispida, Alopex lagopus) to see how the sources treat them. One candidate, Microtus oeconomus, is not an MDD v2.5 name (MDD: Alexandromys oeconomus), so the second pass used Alexandromys oeconomus. No published list was copied."@en ,
+                 "Wikidata (content source). One SPARQL query (the first query below) fetched, for every candidate and alternative name, the items with that taxon name (P225), their rank (P105), English and Swedish labels and aliases, and Dyntaxa id (P1939). A second query (the second below) did the same for the final MDD names and Dyntaxa's accepted names."@en ,
+                 "Dyntaxa (content source). Each name was looked up in the Dyntaxa checklist on GBIF (species search restricted to the dataset, exact canonical name), and for each matching record its vernacular names (with GBIF's 'preferred' flag, which marks Dyntaxa's recommended Swedish name), synonyms and Swedish distribution record (status, establishment means, threat status) were fetched. In a second pass the records were fetched under Dyntaxa's own accepted names where they differ from MDD's (Myodes glareolus for Clethrionomys glareolus, Neovison vison for Neogale vison)."@en ,
+                 "MDD (content source and authority). The release file MDD_v2.5_6904species.csv was downloaded from the Zenodo record of v2.5, and each candidate's row was looked up by sciName, recording id, authority, mainCommonName, otherCommonNames, originalNameCombination, taxonomyNotes and countryDistribution."@en ,
+                 "Selection. The candidates were filtered by the criteria in the selection section and cut by editorial judgement to the most familiar species; exclusions and reasons are listed there."@en ,
+                 "Card text. Back: the MDD v2.5 scientific name, tagged as Latin; it is also the taxon name (P225) of a Wikidata item, and Dyntaxa's accepted name for all but two cards (bank vole and American mink, where Dyntaxa lists the MDD name as a synonym). English front: MDD's main English name, written in British spelling (grey, harbour, particoloured) and in lower case except proper nouns and words derived from them (Eurasian, European, Arctic, Norway, West European, Daubenton's, Natterer's, Nathusius's, American); for three species MDD's main name is not the usual European name and another of MDD's English names is used: stoat (main name 'Beringian Ermine'), reindeer ('Caribou') and wild boar ('Eurasian Wild Pig'). A script (ambiguity.py, last query) compared each English front, ignoring letter case and British/American spelling, with every main and other English name of all 6,904 MDD species: each front is a name of its own species only. Swedish front: Dyntaxa's preferred Swedish vernacular name, exactly as Dyntaxa writes it, except for the reindeer, whose preferred Dyntaxa name 'vildren' means wild reindeer; the card uses Dyntaxa's other name 'ren', which is also the Wikidata Swedish label and the Swedish Wikipedia article. No Swedish text was translated by the agent except the notes."@en ,
+                 "Notes. Back notes give former scientific names (from Dyntaxa synonyms, MDD's taxonomic notes and original combinations, and Wikidata items or aliases), where Dyntaxa's name differs from MDD's, common alternative English or Swedish names (from MDD's other names, Dyntaxa's other Swedish names and Wikidata aliases; a Swedish note gives an alternative English name whenever the English note does), the species that are not native to Sweden (see the next paragraph), and two short clarifications: the moose's English name 'elk' (an MDD other name of both Alces alces and Cervus canadensis; Wikidata's Swedish label of Cervus canadensis is 'vapiti') and the status of wild reindeer (Dyntaxa: regionally extinct in Sweden; MDD: occurs in Norway and Finland). Alternative Swedish names are given as 'Swedish also …' / 'Kallas också …': Dyntaxa lists them as other (non-preferred) names but does not say whether they are older names, so the notes do not call them earlier names. The Swedish notes were written by the authoring agent."@en ,
+                 "Non-native species (added in review round 1, narrowed in round 4). The note 'Non-native in Sweden.' / 'Främmande art i Sverige.' marks the five species that two open content sources both list as introduced in Sweden: Dyntaxa's Swedish distribution record (establishment means INTRODUCED) and the Global Register of Introduced and Invasive Species (GRIIS) - Sweden on GBIF (CC BY 4.0; establishment means INTRODUCED), fetched with the GBIF species search restricted to that dataset and each record's distributions. These are the American mink, common raccoon dog, European hare, European rabbit and common muskrat. The notes say only that the species is non-native, not how it arrived: for the muskrat and the raccoon dog, sources differ on or describe spread from Finland rather than a release in Sweden. GRIIS also lists the common fallow deer, red deer, wild boar, brown rat and house mouse as introduced, but Dyntaxa lists the fallow deer, red deer, brown rat and house mouse as NATIVE and gives no establishment means for the wild boar (its record https://api.gbif.org/v1/species/159940004/distributions has only SE, PRESENT) (Swedish Wikipedia, as verification, says fallow deer were probably brought to Sweden in the second half of the 16th century and red deer came about 10,000 years ago). A review in round 4 pointed out that SLU Artdatabanken, which publishes Dyntaxa, treats species that people brought in and that became established before 1800 as part of the Swedish fauna, and that 'främmande art' is its term for later arrivals; the agent saw this only in a search snippet, so it is not stated on any card. Because the status of these long-established populations depends on the convention used and the two content sources do not both say INTRODUCED, those five cards carry no such note."@en ,
+                 "Cross-check with Swedish Wikipedia (verification). For every Swedish front the Swedish Wikipedia API was asked for the article the name leads to (following redirects) and the first sentences of its introduction. For 57 names the article was the species; 'lo', 'iller', 'älg', 'tumlare', 'bäver' and 'vildkanin' led to a disambiguation page, the genus, the family or a hatnote, and the species articles Lodjur, Iller, Europeisk älg, Vanlig tumlare, Europeisk bäver and Europeisk kanin were fetched instead. Every article's introduction gives the card's Swedish name (or, for 'mindre skogsmus', 'vikval', 'knölval' and 'fransfladdermus', its definite form) for the card's species; three give an older scientific name (Clethrionomys rufocanus, Microtus oeconomus, Eptesicus serotinus with the synonym Cnephaeus serotinus) and one treats the moose as two species, all recorded under quality control."@en ,
+                 "Machine checks. Each card has a Wikidata check of the taxon name (P225) of the item with the MDD name, and checks of its English and Swedish fronts as a label or alias wherever Wikidata has that text in exactly the card's letter case (on the item with the MDD name, or for five species whose Wikidata item under the MDD name has no labels, on the item under the older name). The builder ran them against live Wikidata on every build. Where Wikidata links the item with the MDD name to the labelled item by 'taxon synonym' (P1420) — the bank vole (Q50407592 → Q216580) and the root vole (Q125399268 → Q703702) — that link is checked too, so the label check and the taxon-name check are tied to one species; for the grey red-backed vole, northern serotine and Eurasian serotine Wikidata has no direct statement between the two items (query below) and the link rests on Dyntaxa's and MDD's synonym lists."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: The deck has 63 wild mammal species of Sweden and the Nordic countries: 14 carnivores (including the big four: brown bear, grey wolf, Eurasian lynx and wolverine), 3 seals, 6 deer and other ungulates, 5 whales, dolphins and porpoises, 3 hares and rabbits, 16 rodents, 5 hedgehogs, moles and shrews, and 11 bats. Inclusion criteria: (1) a species in MDD v2.5; (2) an accepted Dyntaxa taxon (under the MDD name or a name Dyntaxa lists the MDD name as a synonym of) with a preferred Swedish vernacular name; (3) regularly occurring in the Nordic countries: Dyntaxa's Swedish distribution status PRESENT (native or introduced and established), or, for the reindeer and four cetaceans that Dyntaxa lists as IRREGULAR in Sweden (common minke whale, common killer whale, humpback whale, white-beaked dolphin), Norway among MDD's countries for the species; (4) a Wikidata item with the MDD name as taxon name; (5) an English name that is unambiguous among all MDD species. Introduced species are included when Dyntaxa lists them as present (American mink, common raccoon dog, European hare, European rabbit, common muskrat). Dyntaxa's status PRESENT is out of date for the common raccoon dog: Svenska Jägareförbundet declared it functionally eradicated as a breeding species in Sweden in early 2025, though single animals still cross from Finland (SVT, 7 January 2025; Swedish Wikipedia, both verification). The card is kept because the species is established in Finland, a Nordic country (Swedish Wikipedia: about 150,000 shot there a year). Familiarity to a Nordic beginner decided the final cut. Left out after research: Clethrionomys rutilus (northern red-backed vole, rödsork), Myotis brandtii (Brandt's myotis, tajgafladdermus; hard to tell from the whiskered myotis), Barbastella barbastellus (barbastell), Micromys minutus (dvärgmus), Sorex caecutiens (lappnäbbmus) and Sorex minutissimus (mindre dvärgnäbbmus), only to keep the deck near the requested size; Pagophilus groenlandicus (grönlandssäl), Erignathus barbatus (storsäl) and Odocoileus virginianus (vitsvanshjort): Dyntaxa status in Sweden IRREGULAR; Balaenoptera physalus, Physeter macrocephalus, Globicephala melas and Tursiops truncatus: irregular in Sweden and less often met than the whales kept; Ovibos moschatus (myskoxe): present in Sweden only as a small introduced herd; Pteromys volans (Siberian flying squirrel) and Cystophora cristata (hooded seal): no Dyntaxa record found. Taxonomy: names follow MDD v2.5 throughout, also where Dyntaxa differs (Clethrionomys glareolus, Dyntaxa Myodes glareolus; Neogale vison, Dyntaxa Neovison vison), with Dyntaxa's name in a back note. MDD treats the moose of Eurasia and North America as one species (Alces alces) and keeps the reindeer as one species (Rangifer tarandus, not following the six-species split proposed in 2022); MDD v2.5 treats the Saimaa ringed seal of Finland as a species of its own (Pusa saimensis), so the ringed seal card means Pusa hispida, which includes the Baltic ringed seal. Subspecies are not included."@en ,
+                 "Licensing: The deck is released under CC BY 4.0 because two of its content sources are published under CC BY 4.0: the Mammal Diversity Database v2.5 (Zenodo record 10.5281/zenodo.21654811) and GRIIS - Sweden (GBIF, 10.15468/i57bff). The English names on the cards follow MDD (a number of them, such as 'western red deer' or 'common whiskered myotis', are in no CC0 source in that form), and MDD is the taxonomic authority behind the scientific names; GRIIS is the second source for the 'non-native in Sweden' notes. Both are attributed in the deck (prov:wasDerivedFrom, with title, creator and licence) and in the provenance report. The other content sources are CC0: Wikidata (structured data) for the taxon names and the labels, and Dyntaxa (SLU Artdatabanken, published on GBIF under CC0 1.0) for every Swedish name and the Swedish status of each species; CC0 material may be included in a CC BY deck. Swedish Wikipedia (CC BY-SA 4.0) and an SVT news article (all rights reserved) were used for verification only: they confirmed that each Swedish name denotes the species and the background of the non-native species; nothing in the cards rests on them alone, no text, list or selection was taken from them, and the short phrases quoted in the evidence are citations. The selection of species is the authoring agent's own."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources and machine checks: every card's scientific, English and Swedish names compared across MDD v2.5, Dyntaxa (GBIF), Wikidata and Swedish Wikipedia; English names checked for ambiguity against all MDD species."@en ;
+    rdfs:comment "Scope: All 63 cards and the candidates left out."@en ,
+                 "Outcome: All 63 scientific names are MDD v2.5 names and the taxon name (P225) of a Wikidata item (checked by the builder); 61 are Dyntaxa's accepted name and the other two are Dyntaxa synonyms of its accepted name. All Swedish fronts are Dyntaxa's preferred name (the reindeer: Dyntaxa's other name 'ren') and lead to the species on Swedish Wikipedia. Every English front is an MDD name of its species and of no other MDD species. Wikidata differs from the cards in letter case or in the name chosen for 29 English and 19 Swedish fronts: those label checks are left out and recorded below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 63 cards, re-checked against the Dyntaxa checklist on GBIF (2026-09-29), the MDD v2.5 species file and live Wikidata; the round 0 fixes."@en ,
+                 "Outcome: No name errors. The review found the raccoon dog's 'Introduced to Sweden' note wrong and out of date, the muskrat's disputed, and the fallow deer's missing note misleading; all three were verified and the introduced-species notes were rewritten as 'Non-native in Sweden' backed by Dyntaxa and a second open source (GRIIS - Sweden, CC BY 4.0). Taxon-synonym checks now tie two of the split Wikidata items together."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 63 cards, the title, description and keywords, and the language tags in the built deck."@en ,
+                 "Outcome: No wrong names or card tags. The untagged keywords are a builder limitation outside the dossier. The description now says the English names are in British spelling and its last Swedish sentence has a verb; the Swedish notes of root-vole and northern-bat now give the English alternative; 'Införd till Sverige' is gone, replaced in round 1 by 'Främmande art i Sverige'."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 63 cards' evidence against live data, every source's licence, the method, queries and licensing text."@en ,
+                 "Outcome: Licences are recorded correctly. The 'earlier Swedish name' label on four bat notes rested on Swedish Wikipedia, a verification source; the notes now say only what Dyntaxa supports and the method and licensing text no longer claim otherwise. The MDD licence evidence quotes the Zenodo metadata correctly and the ambiguity check is written out in full."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 13 cards changed in rounds 1–3 and every third card (32 distinct cards), the metadata and the documentation, against the MDD v2.5 CSV, live Dyntaxa and GRIIS - Sweden records on GBIF and the Wikidata API."@en ,
+                 "Outcome: Earlier fixes confirmed. The fallow deer's 'Non-native in Sweden' note went against Dyntaxa (NATIVE) and the method's own rule; the note was removed, so the documented rule (Dyntaxa and GRIIS both INTRODUCED) now reproduces exactly the five noted cards. The stoat's 'ermine' note now has its Wikidata alias in the evidence and a label check."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 23 cards: the 2 cards changed in round 4 (fallow-deer, stoat) and every third card, plus the metadata and the documentation, against live Dyntaxa and GRIIS - Sweden records on GBIF, the MDD v2.5 CSV and the Wikidata API."@en ,
+                 "Outcome: Round 4's fixes confirmed and no card errors found. The method wrongly said Dyntaxa lists the wild boar as NATIVE (Dyntaxa gives no establishment means for it); the method now says so, and the out-of-date Process step now names the review rounds. No card content changed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://doi.org/10.15468/j43wfc>
+    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF)" ;
+    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/de8934f4-a136-481c-a87a-b0b202b80a31 — the dataset's metadata: \"license\":\"http://creativecommons.org/publicdomain/zero/1.0/legalcode\" (publisher SLU Artdatabanken, publication date 2026-09-29); DOI 10.15468/j43wfc, citation \"Backlund M (2026). Dyntaxa. Svensk taxonomisk databas. SLU Artdatabanken. Checklist dataset https://doi.org/10.15468/j43wfc accessed via GBIF.org on 2026-10-04.\""@en .
+
+<https://doi.org/10.5281/zenodo.21654811>
+    dcterms:title "Mammal Diversity Database, version 2.5" ;
+    dcterms:creator "Mammal Diversity Database (American Society of Mammalogists)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://zenodo.org/api/records/21654811 — the Zenodo record of the release (metadata title 'Mammal Diversity Database', version 'v2.5', publication date 2026-07-28, creator 'Mammal Diversity Database', DOI 10.5281/zenodo.21654811, concept DOI 10.5281/zenodo.4139722) has \"license\": {\"id\": \"cc-by-4.0\"}. The MDD home page (https://www.mammaldiversity.org/) says \"Current version: v2.5, released July 28, 2026\" and asks to be cited as \"Mammal Diversity Database. (2026). Mammal Diversity Database (Version 2.5) [Data set]. Zenodo.\""@en .
+
+<https://doi.org/10.15468/i57bff>
+    dcterms:title "Global Register of Introduced and Invasive Species - Sweden, version 1.3 (via GBIF)" ;
+    dcterms:creator "Pagad S, Wong L J (Invasive Species Specialist Group ISSG)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/c1a61294-6195-4055-9b22-a2e48e5e16d7 — the dataset's metadata: \"license\":\"http://creativecommons.org/licenses/by/4.0/legalcode\" (publication date 2026-03-25); citation \"Pagad S, Wong L J (2026). Global Register of Introduced and Invasive Species - Sweden. Version 1.3. Invasive Species Specialist Group ISSG. Checklist dataset https://doi.org/10.15468/i57bff accessed via GBIF.org on 2026-10-04.\""@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenska Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Wikipedia:Upphovsr%C3%A4tt — page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\"; the policy text: \"Bidrag till Wikipedia måste få användas och spridas, också kommersiellt, enligt CC BY-SA.\" Used for verification only, so nothing in the deck is under its licence."@en .
+
+<https://www.svt.se/nyheter/lokalt/norrbotten/mardhunden-funktionellt-utrotad-i-sverige-nu-hotar-tvattbjorn-och-mink>
+    dcterms:title "Mårdhunden funktionellt utrotad i Sverige – nu hotar tvättbjörn och mink (SVT Nyheter Norrbotten, 7 January 2025)" ;
+    dcterms:creator "Sveriges Television (SVT)" ;
+    rdfs:comment "https://www.svt.se/kontakt/kopa-visa-och-forska-pa-svts-program-och-material — \"SVT:s undertexter, översättningar och manus är upphovsrättsskyddade texter som vi inte säljer eller ger bort.\" No open licence is offered for SVT's articles, so the article is treated as all rights reserved and used for verification only."@en .
+
+# How this version's Korean, German, Spanish and French card text was made (W3C PROV-O): from the
+# previous version, the mapping that says what each card is about, and the labels of each Wikidata
+# item at the revision named here, by the script named here. English and Swedish text, and the
+# notes, are the previous version's. To make it again, with the mapping as it was committed with
+# this version, or to check that its cards come out byte for byte the same from the same
+# revisions, from the repository root:
+#   git checkout 23f0a84dcc5f3ae4ee13447185c52726c5ea747a && python3 scripts/wikidata_labels.py
+#     --deck nordic-mammals --issued 2026-10-24
+#   python3 scripts/wikidata_labels.py --verify --deck nordic-mammals
+<#wikidata-labels>
+    a prov:Activity ;
+    prov:used <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ,
+              <#wikidata-mapping> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q4388.json?revision=2551130472> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q6145.json?revision=2548460292> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q8332.json?revision=2556449596> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q14334.json?revision=2540233149> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q18498.json?revision=2560019401> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q25311.json?revision=2555930448> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q25345.json?revision=2542803546> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q25851.json?revision=2534230787> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26046.json?revision=2531932512> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26283.json?revision=2547341574> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26582.json?revision=2546481198> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26838.json?revision=2547677473> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26843.json?revision=2558054810> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q26913.json?revision=2538878809> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q27016.json?revision=2551130351> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q27027.json?revision=2558949350> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q27066.json?revision=2521607597> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q27179.json?revision=2541825819> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q27370.json?revision=2560222998> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q29995.json?revision=2546274432> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q35517.json?revision=2542555781> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q36341.json?revision=2549916646> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q39624.json?revision=2559494294> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q43375.json?revision=2559678456> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q58697.json?revision=2556043762> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q79794.json?revision=2557227429> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q82738.json?revision=2548246039> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q83310.json?revision=2553295507> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q122069.json?revision=2538422591> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q132905.json?revision=2540980684> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q133189.json?revision=2539326273> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q159857.json?revision=2521607636> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q176901.json?revision=2558316907> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q180035.json?revision=2543744320> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q181191.json?revision=2548126580> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q184224.json?revision=2546858188> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q201808.json?revision=2534389253> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q203208.json?revision=2526492799> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q207148.json?revision=2558749572> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q209067.json?revision=2551130537> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q210708.json?revision=2556930184> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q212185.json?revision=2531932287> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q214846.json?revision=2559117835> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q214869.json?revision=2557709545> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q216580.json?revision=2546857883> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q216871.json?revision=2521154379> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q217147.json?revision=2537136059> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q232644.json?revision=2557298368> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q244372.json?revision=2553136392> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q264793.json?revision=2556299087> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q300941.json?revision=2559505772> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q304368.json?revision=2550174440> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q465986.json?revision=2556290557> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q504488.json?revision=2559944828> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q508013.json?revision=2550175427> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q520425.json?revision=2558317031> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q591450.json?revision=2553946998> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q665347.json?revision=2511967437> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q703702.json?revision=2548129660> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q723123.json?revision=2551130195> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q751958.json?revision=2550176221> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q819985.json?revision=2531932311> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q125628803.json?revision=2482678720> ;
+    prov:wasAssociatedWith <https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py> ;
+    rdfs:comment "python3 scripts/wikidata_labels.py --deck nordic-mammals --issued 2026-10-24 (Python 3.14.4, Unicode 16.0.0)" .
+
+<#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/nordic-mammals.json" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "349ae91b422c54c512b31f607b7ae09896f982c37b096c2c4f5d4fe938740d20"^^xsd:hexBinary ] .
+
+<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "wikidata_labels.py" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+
+spdx:checksumAlgorithm_sha256
+    a spdx:ChecksumAlgorithm .
+
+<#brown-bear>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q36341> ;
+    solid-memo:front "brown bear"@en ,
+                     "brunbjörn"@sv ,
+                     "불곰"@ko ,
+                     "Braunbär"@de ,
+                     "Ours brun"@fr ;
+    solid-memo:back "Ursus arctos"@la .
+
+<#grey-wolf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q18498> ;
+    solid-memo:front "grey wolf"@en ,
+                     "varg"@sv ,
+                     "회색늑대"@ko ,
+                     "Wolf"@de ,
+                     "lobo"@es ,
+                     "loup"@fr ;
+    solid-memo:back "Canis lupus"@la .
+
+<#eurasian-lynx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q43375> ;
+    solid-memo:front "Eurasian lynx"@en ,
+                     "lo"@sv ,
+                     "스라소니"@ko ,
+                     "Eurasischer Luchs"@de ,
+                     "lince europeo"@es ,
+                     "lynx boréal"@fr ;
+    solid-memo:back "Lynx lynx"@la ;
+    solid-memo:backNote "Swedish also lodjur."@en ,
+                        "Kallas också lodjur."@sv .
+
+<#wolverine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q14334> ;
+    solid-memo:front "wolverine"@en ,
+                     "järv"@sv ,
+                     "울버린"@ko ,
+                     "Vielfraß"@de ;
+    solid-memo:back "Gulo gulo"@la .
+
+<#red-fox>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q8332> ;
+    solid-memo:front "red fox"@en ,
+                     "rödräv"@sv ,
+                     "붉은여우"@ko ,
+                     "Rotfuchs"@de ,
+                     "renard roux"@fr ;
+    solid-memo:back "Vulpes vulpes"@la .
+
+<#arctic-fox>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q82738> ;
+    solid-memo:front "Arctic fox"@en ,
+                     "fjällräv"@sv ,
+                     "북극여우"@ko ,
+                     "Polarfuchs"@de ,
+                     "renard polaire"@fr ;
+    solid-memo:back "Vulpes lagopus"@la ;
+    solid-memo:backNote "Formerly Alopex lagopus."@en ,
+                        "Tidigare namn: Alopex lagopus."@sv .
+
+<#european-badger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q27066> ;
+    solid-memo:front "European badger"@en ,
+                     "grävling"@sv ,
+                     "유럽오소리"@ko ,
+                     "Europäischer Dachs"@de ,
+                     "Tejón"@es ,
+                     "Blaireau européen"@fr ;
+    solid-memo:back "Meles meles"@la .
+
+<#eurasian-otter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q29995> ;
+    solid-memo:front "Eurasian otter"@en ,
+                     "utter"@sv ,
+                     "수달"@ko ,
+                     "Eurasischer Fischotter"@de ;
+    solid-memo:back "Lutra lutra"@la .
+
+<#pine-marten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q26046> ;
+    solid-memo:front "European pine marten"@en ,
+                     "mård"@sv ,
+                     "유럽솔담비"@ko ,
+                     "Baummarder"@de ,
+                     "marta"@es ,
+                     "Martre des pins"@fr ;
+    solid-memo:back "Martes martes"@la .
+
+<#stoat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q25345> ;
+    solid-memo:front "stoat"@en ,
+                     "hermelin"@sv ,
+                     "북방족제비"@ko ,
+                     "Hermelin"@de ,
+                     "armiño"@es ;
+    solid-memo:back "Mustela erminea"@la ;
+    solid-memo:backNote "Also called ermine; Swedish also lekatt."@en ,
+                        "Kallas också lekatt; på engelska även ermine."@sv .
+
+<#least-weasel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q25311> ;
+    solid-memo:front "least weasel"@en ,
+                     "småvessla"@sv ,
+                     "쇠족제비"@ko ,
+                     "Mauswiesel"@de ;
+    solid-memo:back "Mustela nivalis"@la ;
+    solid-memo:backNote "Swedish also vessla."@en ,
+                        "Kallas också vessla."@sv .
+
+<#european-polecat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q26582> ;
+    solid-memo:front "European polecat"@en ,
+                     "iller"@sv ,
+                     "긴털족제비"@ko ,
+                     "Europäischer Iltis"@de ;
+    solid-memo:back "Mustela putorius"@la .
+
+<#american-mink>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q27179> ;
+    solid-memo:front "American mink"@en ,
+                     "mink"@sv ,
+                     "아메리카밍크"@ko ,
+                     "Amerikanischer Nerz"@de ;
+    solid-memo:back "Neogale vison"@la ;
+    solid-memo:backNote "Non-native in Sweden. Formerly Neovison vison (still Dyntaxa's name) or Mustela vison."@en ,
+                        "Främmande art i Sverige. Tidigare namn: Neovison vison (fortfarande Dyntaxas namn) eller Mustela vison."@sv .
+
+<#raccoon-dog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q133189> ;
+    solid-memo:front "common raccoon dog"@en ,
+                     "mårdhund"@sv ,
+                     "너구리"@ko ,
+                     "Marderhund"@de ;
+    solid-memo:back "Nyctereutes procyonoides"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#grey-seal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q27370> ;
+    solid-memo:front "grey seal"@en ,
+                     "gråsäl"@sv ,
+                     "회색물범"@ko ,
+                     "Kegelrobbe"@de ,
+                     "Phoque gris"@fr ;
+    solid-memo:back "Halichoerus grypus"@la .
+
+<#harbour-seal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q26913> ;
+    solid-memo:front "harbour seal"@en ,
+                     "knubbsäl"@sv ,
+                     "참물범"@ko ,
+                     "Seehund"@de ,
+                     "phoque commun"@fr ;
+    solid-memo:back "Phoca vitulina"@la .
+
+<#ringed-seal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q203208> ;
+    solid-memo:front "ringed seal"@en ,
+                     "vikare"@sv ,
+                     "고리무늬물범"@ko ,
+                     "Ringelrobbe"@de ,
+                     "Phoque annelé"@fr ;
+    solid-memo:back "Pusa hispida"@la ;
+    solid-memo:backNote "Formerly Phoca hispida."@en ,
+                        "Tidigare namn: Phoca hispida."@sv .
+
+<#moose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q35517> ;
+    solid-memo:front "moose"@en ,
+                     "älg"@sv ,
+                     "말코손바닥사슴"@ko ,
+                     "Elch"@de ,
+                     "élan"@fr ;
+    solid-memo:back "Alces alces"@la ;
+    solid-memo:backNote "Also called elk, a name also used for the wapiti (Cervus canadensis)."@en ,
+                        "Kallas på engelska även elk, ett namn som också används om vapiti (Cervus canadensis)."@sv .
+
+<#roe-deer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q122069> ;
+    solid-memo:front "western roe deer"@en ,
+                     "rådjur"@sv ,
+                     "유럽노루"@ko ,
+                     "Reh"@de ,
+                     "chevreuil"@fr ;
+    solid-memo:back "Capreolus capreolus"@la .
+
+<#red-deer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q79794> ;
+    solid-memo:front "western red deer"@en ,
+                     "kronhjort"@sv ,
+                     "말사슴"@ko ,
+                     "Rothirsch"@de ,
+                     "cerf élaphe"@fr ;
+    solid-memo:back "Cervus elaphus"@la .
+
+<#fallow-deer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q159857> ;
+    solid-memo:front "common fallow deer"@en ,
+                     "dovhjort"@sv ,
+                     "다마사슴"@ko ,
+                     "Damhirsch"@de ,
+                     "daim"@fr ;
+    solid-memo:back "Dama dama"@la .
+
+<#reindeer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q39624> ;
+    solid-memo:front "reindeer"@en ,
+                     "ren"@sv ,
+                     "순록"@ko ,
+                     "Ren"@de ,
+                     "reno"@es ;
+    solid-memo:back "Rangifer tarandus"@la ;
+    solid-memo:backNote "Wild reindeer (Swedish vildren) are regionally extinct in Sweden but live wild in Norway and Finland."@en ,
+                        "Vildren är nationellt utdöd i Sverige men lever vilt i Norge och Finland."@sv .
+
+<#wild-boar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q58697> ;
+    solid-memo:front "wild boar"@en ,
+                     "vildsvin"@sv ,
+                     "멧돼지"@ko ,
+                     "Wildschwein"@de ,
+                     "sanglier"@fr ;
+    solid-memo:back "Sus scrofa"@la .
+
+<#harbour-porpoise>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q27027> ;
+    solid-memo:front "harbour porpoise"@en ,
+                     "tumlare"@sv ,
+                     "쇠돌고래"@ko ,
+                     "Gewöhnlicher Schweinswal"@de ,
+                     "Marsouin commun"@fr ;
+    solid-memo:back "Phocoena phocoena"@la ;
+    solid-memo:backNote "Swedish also vanlig tumlare."@en ,
+                        "Kallas också vanlig tumlare."@sv .
+
+<#common-minke-whale>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q201808> ;
+    solid-memo:front "common minke whale"@en ,
+                     "vikval"@sv ,
+                     "밍크고래"@ko ,
+                     "Minkwal"@de ;
+    solid-memo:back "Balaenoptera acutorostrata"@la .
+
+<#killer-whale>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q26843> ;
+    solid-memo:front "common killer whale"@en ,
+                     "späckhuggare"@sv ,
+                     "범고래"@ko ,
+                     "Schwertwal"@de ,
+                     "orque"@fr ;
+    solid-memo:back "Orcinus orca"@la .
+
+<#humpback-whale>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q132905> ;
+    solid-memo:front "humpback whale"@en ,
+                     "knölval"@sv ,
+                     "혹등고래"@ko ,
+                     "Buckelwal"@de ,
+                     "baleine à bosse"@fr ;
+    solid-memo:back "Megaptera novaeangliae"@la .
+
+<#white-beaked-dolphin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q217147> ;
+    solid-memo:front "white-beaked dolphin"@en ,
+                     "vitnos"@sv ,
+                     "흰부리돌고래"@ko ,
+                     "Weißschnauzendelfin"@de ,
+                     "Dauphin à nez blanc"@fr ;
+    solid-memo:back "Lagenorhynchus albirostris"@la .
+
+<#mountain-hare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q180035> ;
+    solid-memo:front "mountain hare"@en ,
+                     "skogshare"@sv ,
+                     "고산토끼"@ko ,
+                     "Schneehase"@de ;
+    solid-memo:back "Lepus timidus"@la .
+
+<#european-hare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q26838> ;
+    solid-memo:front "European hare"@en ,
+                     "fälthare"@sv ,
+                     "숲멧토끼"@ko ,
+                     "Feldhase"@de ,
+                     "Lièvre d'Europe"@fr ;
+    solid-memo:back "Lepus europaeus"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#european-rabbit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q25851> ;
+    solid-memo:front "European rabbit"@en ,
+                     "vildkanin"@sv ,
+                     "굴토끼"@ko ,
+                     "Wildkaninchen"@de ;
+    solid-memo:back "Oryctolagus cuniculus"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#red-squirrel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q4388> ;
+    solid-memo:front "Eurasian red squirrel"@en ,
+                     "ekorre"@sv ,
+                     "청서"@ko ,
+                     "Eurasisches Eichhörnchen"@de ,
+                     "écureuil roux"@fr ;
+    solid-memo:back "Sciurus vulgaris"@la .
+
+<#eurasian-beaver>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q181191> ;
+    solid-memo:front "Eurasian beaver"@en ,
+                     "bäver"@sv ,
+                     "유럽비버"@ko ,
+                     "Europäischer Biber"@de ,
+                     "Castor d'Europe"@fr ;
+    solid-memo:back "Castor fiber"@la .
+
+<#norway-lemming>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q819985> ;
+    solid-memo:front "Norway brown lemming"@en ,
+                     "fjällämmel"@sv ,
+                     "노르웨이레밍"@ko ,
+                     "Berglemming"@de ;
+    solid-memo:back "Lemmus lemmus"@la .
+
+<#wood-lemming>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q665347> ;
+    solid-memo:front "wood lemming"@en ,
+                     "skogslämmel"@sv ,
+                     "숲레밍"@ko ,
+                     "Waldlemming"@de ;
+    solid-memo:back "Myopus schisticolor"@la .
+
+<#bank-vole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q216580> ;
+    solid-memo:front "bank vole"@en ,
+                     "skogssork"@sv ,
+                     "유럽대륙밭쥐"@ko ,
+                     "Rötelmaus"@de ;
+    solid-memo:back "Clethrionomys glareolus"@la ;
+    solid-memo:backNote "Dyntaxa and many other sources: Myodes glareolus."@en ,
+                        "Dyntaxa och många andra källor: Myodes glareolus."@sv .
+
+<#grey-red-backed-vole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q125628803> ;
+    solid-memo:front "grey red-backed vole"@en ,
+                     "gråsiding"@sv ,
+                     "대륙밭쥐"@ko ;
+    solid-memo:back "Craseomys rufocanus"@la ;
+    solid-memo:backNote "Formerly Myodes rufocanus or Clethrionomys rufocanus."@en ,
+                        "Tidigare namn: Myodes rufocanus eller Clethrionomys rufocanus."@sv .
+
+<#field-vole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q264793> ;
+    solid-memo:front "short-tailed field vole"@en ,
+                     "åkersork"@sv ,
+                     "짧은꼬리밭쥐"@ko ,
+                     "Erdmaus"@de ,
+                     "topillo agreste"@es ,
+                     "Campagnol agreste"@fr ;
+    solid-memo:back "Microtus agrestis"@la .
+
+<#root-vole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q703702> ;
+    solid-memo:front "root vole"@en ,
+                     "mellansork"@sv ,
+                     "툰드라밭쥐"@ko ,
+                     "Nordische Wühlmaus"@de ;
+    solid-memo:back "Alexandromys oeconomus"@la ;
+    solid-memo:backNote "Also called tundra vole. Formerly Microtus oeconomus."@en ,
+                        "På engelska även tundra vole. Tidigare namn: Microtus oeconomus."@sv .
+
+<#water-vole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q27016> ;
+    solid-memo:front "Eurasian water vole"@en ,
+                     "vattensork"@sv ,
+                     "유럽물밭쥐"@ko ,
+                     "Ostschermaus"@de ;
+    solid-memo:back "Arvicola amphibius"@la .
+
+<#muskrat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q26283> ;
+    solid-memo:front "common muskrat"@en ,
+                     "bisam"@sv ,
+                     "사향쥐"@ko ,
+                     "Bisamratte"@de ,
+                     "rat musqué"@fr ;
+    solid-memo:back "Ondatra zibethicus"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#house-mouse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q83310> ;
+    solid-memo:front "house mouse"@en ,
+                     "husmus"@sv ,
+                     "생쥐"@ko ,
+                     "Hausmaus"@de ,
+                     "ratón doméstico"@es ,
+                     "souris domestique"@fr ;
+    solid-memo:back "Mus musculus"@la .
+
+<#brown-rat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q184224> ;
+    solid-memo:front "brown rat"@en ,
+                     "brunråtta"@sv ,
+                     "집쥐"@ko ,
+                     "Wanderratte"@de ,
+                     "rata parda"@es ,
+                     "rat brun"@fr ;
+    solid-memo:back "Rattus norvegicus"@la .
+
+<#wood-mouse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q212185> ;
+    solid-memo:front "long-tailed field mouse"@en ,
+                     "mindre skogsmus"@sv ,
+                     "북숲쥐"@ko ,
+                     "Waldmaus"@de ;
+    solid-memo:back "Apodemus sylvaticus"@la .
+
+<#yellow-necked-mouse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q216871> ;
+    solid-memo:front "yellow-necked field mouse"@en ,
+                     "större skogsmus"@sv ,
+                     "노란목들쥐"@ko ,
+                     "Gelbhalsmaus"@de ;
+    solid-memo:back "Apodemus flavicollis"@la .
+
+<#hazel-dormouse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q207148> ;
+    solid-memo:front "hazel dormouse"@en ,
+                     "hasselmus"@sv ,
+                     "유럽겨울잠쥐"@ko ,
+                     "Haselmaus"@de ;
+    solid-memo:back "Muscardinus avellanarius"@la .
+
+<#northern-birch-mouse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q751958> ;
+    solid-memo:front "northern birch mouse"@en ,
+                     "buskmus"@sv ,
+                     "북부긴꼬리쥐"@ko ,
+                     "Waldbirkenmaus"@de ;
+    solid-memo:back "Sicista betulina"@la .
+
+<#european-hedgehog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q6145> ;
+    solid-memo:front "West European hedgehog"@en ,
+                     "igelkott"@sv ,
+                     "유럽고슴도치"@ko ,
+                     "Braunbrustigel"@de ,
+                     "erizo común"@es ,
+                     "hérisson commun"@fr ;
+    solid-memo:back "Erinaceus europaeus"@la .
+
+<#european-mole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q209067> ;
+    solid-memo:front "European mole"@en ,
+                     "mullvad"@sv ,
+                     "유럽두더지"@ko ,
+                     "Europäischer Maulwurf"@de ;
+    solid-memo:back "Talpa europaea"@la .
+
+<#common-shrew>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q591450> ;
+    solid-memo:front "common shrew"@en ,
+                     "vanlig näbbmus"@sv ,
+                     "첨서"@ko ,
+                     "Waldspitzmaus"@de ;
+    solid-memo:back "Sorex araneus"@la .
+
+<#pygmy-shrew>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q244372> ;
+    solid-memo:front "Eurasian pygmy shrew"@en ,
+                     "dvärgnäbbmus"@sv ,
+                     "유라시아피그미뒤쥐"@ko ,
+                     "Zwergspitzmaus"@de ;
+    solid-memo:back "Sorex minutus"@la .
+
+<#water-shrew>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q465986> ;
+    solid-memo:front "Eurasian water shrew"@en ,
+                     "vattennäbbmus"@sv ,
+                     "갯첨서"@ko ,
+                     "Wasserspitzmaus"@de ;
+    solid-memo:back "Neomys fodiens"@la .
+
+<#northern-bat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q300941> ;
+    solid-memo:front "northern serotine"@en ,
+                     "nordfladdermus"@sv ,
+                     "생박쥐"@ko ,
+                     "Nordfledermaus"@de ;
+    solid-memo:back "Cnephaeus nilssonii"@la ;
+    solid-memo:backNote "Also called northern bat. Formerly Eptesicus nilssonii."@en ,
+                        "På engelska även northern bat. Tidigare namn: Eptesicus nilssonii."@sv .
+
+<#serotine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q214869> ;
+    solid-memo:front "Eurasian serotine"@en ,
+                     "sydfladdermus"@sv ,
+                     "문둥이박쥐"@ko ,
+                     "Breitflügelfledermaus"@de ;
+    solid-memo:back "Cnephaeus serotinus"@la ;
+    solid-memo:backNote "Formerly Eptesicus serotinus."@en ,
+                        "Tidigare namn: Eptesicus serotinus."@sv .
+
+<#daubentons-bat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q504488> ;
+    solid-memo:front "Daubenton's myotis"@en ,
+                     "vattenfladdermus"@sv ,
+                     "물윗수염박쥐"@ko ,
+                     "Wasserfledermaus"@de ;
+    solid-memo:back "Myotis daubentonii"@la ;
+    solid-memo:backNote "Also called Daubenton's bat."@en ,
+                        "På engelska även Daubenton's bat."@sv .
+
+<#whiskered-bat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q508013> ;
+    solid-memo:front "common whiskered myotis"@en ,
+                     "mustaschfladdermus"@sv ,
+                     "윗수염박쥐"@ko ,
+                     "Kleine Bartfledermaus"@de ;
+    solid-memo:back "Myotis mystacinus"@la ;
+    solid-memo:backNote "Also called whiskered bat."@en ,
+                        "På engelska även whiskered bat."@sv .
+
+<#natterers-bat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q723123> ;
+    solid-memo:front "Natterer's myotis"@en ,
+                     "fransfladdermus"@sv ,
+                     "나터러박쥐"@ko ,
+                     "Fransenfledermaus"@de ;
+    solid-memo:back "Myotis nattereri"@la ;
+    solid-memo:backNote "Also called Natterer's bat."@en ,
+                        "På engelska även Natterer's bat."@sv .
+
+<#brown-long-eared-bat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q210708> ;
+    solid-memo:front "brown long-eared bat"@en ,
+                     "brunlångöra"@sv ,
+                     "토끼박쥐"@ko ,
+                     "Braunes Langohr"@de ;
+    solid-memo:back "Plecotus auritus"@la ;
+    solid-memo:backNote "Swedish also långörad fladdermus."@en ,
+                        "Kallas också långörad fladdermus."@sv .
+
+<#common-pipistrelle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q176901> ;
+    solid-memo:front "common pipistrelle"@en ,
+                     "sydpipistrell"@sv ,
+                     "유럽집박쥐"@ko ,
+                     "Zwergfledermaus"@de ;
+    solid-memo:back "Pipistrellus pipistrellus"@la ;
+    solid-memo:backNote "Swedish also pipistrell."@en ,
+                        "Kallas också pipistrell."@sv .
+
+<#soprano-pipistrelle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q304368> ;
+    solid-memo:front "soprano pipistrelle"@en ,
+                     "dvärgpipistrell"@sv ,
+                     "소프라노집박쥐"@ko ,
+                     "Mückenfledermaus"@de ,
+                     "Pipistrelle soprane"@fr ;
+    solid-memo:back "Pipistrellus pygmaeus"@la ;
+    solid-memo:backNote "Swedish also dvärgfladdermus."@en ,
+                        "Kallas också dvärgfladdermus."@sv .
+
+<#nathusius-pipistrelle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q520425> ;
+    solid-memo:front "Nathusius's pipistrelle"@en ,
+                     "trollpipistrell"@sv ,
+                     "나투지우스집박쥐"@ko ,
+                     "Rauhautfledermaus"@de ,
+                     "Pipistrelle de Nathusius"@fr ;
+    solid-memo:back "Pipistrellus nathusii"@la ;
+    solid-memo:backNote "Swedish also trollfladdermus."@en ,
+                        "Kallas också trollfladdermus."@sv .
+
+<#common-noctule>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q214846> ;
+    solid-memo:front "common noctule"@en ,
+                     "större brunfladdermus"@sv ,
+                     "작은멧박쥐"@ko ,
+                     "Großer Abendsegler"@de ,
+                     "Nóctulo común"@es ;
+    solid-memo:back "Nyctalus noctula"@la ;
+    solid-memo:backNote "Swedish also stor fladdermus."@en ,
+                        "Kallas också stor fladdermus."@sv .
+
+<#parti-coloured-bat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q232644> ;
+    solid-memo:front "Eurasian particoloured bat"@en ,
+                     "gråskimlig fladdermus"@sv ,
+                     "북방애기박쥐"@ko ;
+    solid-memo:back "Vespertilio murinus"@la .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

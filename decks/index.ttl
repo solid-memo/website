@@ -1226,6 +1226,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -11190,12 +11191,12 @@
                   "Nordische Säugetiere"@de ,
                   "Mamíferos nórdicos"@es ,
                   "Mammifères nordiques"@fr ;
-    dcterms:description "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia."@en ,
-                        "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia."@sv ,
-                        "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다."@ko ,
-                        "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia."@de ,
-                        "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco."@es ,
-                        "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."@fr ;
+    dcterms:description "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia."@en ,
+                        "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia."@sv ,
+                        "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia."@de ,
+                        "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco."@es ,
+                        "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:biology ;
@@ -11230,10 +11231,11 @@
                  "noms d’animaux"@fr ,
                  "pays nordiques"@fr ;
     dcat:first <https://solid-memo.com/decks/nordic-mammals/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/nordic-mammals/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/nordic-mammals/v1.ttl> ,
-                    <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/nordic-mammals/v2.ttl> .
+                    <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ,
+                    <https://solid-memo.com/decks/nordic-mammals/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/nordic-mammals/v3.ttl> .
 
 <https://solid-memo.com/decks/nordic-mammals/v1.ttl>
     a dcat:Dataset ;
@@ -11246,6 +11248,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/nordic-mammals/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Nordic mammals"@en ,
+                  "Nordiska däggdjur"@sv ,
+                  "북유럽의 포유류"@ko ,
+                  "Nordische Säugetiere"@de ,
+                  "Mamíferos nórdicos"@es ,
+                  "Mammifères nordiques"@fr ;
+    dcterms:description "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia."@en ,
+                        "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia."@sv ,
+                        "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia."@de ,
+                        "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco."@es ,
+                        "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Nordic mammals"@en ,
@@ -11254,19 +11274,20 @@
                   "Nordische Säugetiere"@de ,
                   "Mamíferos nórdicos"@es ,
                   "Mammifères nordiques"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/nordic-mammals/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/nordic-mammals/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:description "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia."@en ,
-                        "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia."@sv ,
-                        "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다."@ko ,
-                        "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia."@de ,
-                        "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco."@es ,
-                        "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."@fr ;
+    dcterms:description "63 wild mammals of Sweden and the Nordic countries: large predators, deer, rodents, shrews, bats, seals, whales and dolphins. Front: the English and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and English names follow the Mammal Diversity Database (v2.5; English names in British spelling), Swedish names Dyntaxa (SLU Artdatabanken). Data from Wikidata, Dyntaxa and the Mammal Diversity Database, checked against Swedish Wikipedia."@en ,
+                        "63 vilda däggdjur i Sverige och Norden: stora rovdjur, hjortdjur, gnagare, näbbmöss, fladdermöss, sälar, valar och delfiner. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer Mammal Diversity Database (v2.5; engelska namn med brittisk stavning), svenska namn Dyntaxa (SLU Artdatabanken). Uppgifterna kommer från Wikidata, Dyntaxa och Mammal Diversity Database och har kontrollerats mot svenska Wikipedia."@sv ,
+                        "스웨덴과 북유럽 국가의 야생 포유류 63종으로, 대형 포식동물, 사슴류, 설치류, 땃쥐류, 박쥐, 물범, 고래와 돌고래가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 영어 이름은 Mammal Diversity Database(v2.5, 영어 이름은 영국식 철자)를, 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를 따릅니다. 데이터는 Wikidata, Dyntaxa, Mammal Diversity Database에서 가져왔고 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "63 wildlebende Säugetiere Schwedens und der nordischen Länder: große Raubtiere, Hirsche, Nagetiere, Spitzmäuse, Fledermäuse, Robben, Wale und Delfine. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der Mammal Diversity Database (v2.5; englische Namen in britischer Schreibweise), die schwedischen Namen folgen Dyntaxa (SLU Artdatabanken). Daten aus Wikidata, Dyntaxa und der Mammal Diversity Database, abgeglichen mit der schwedischsprachigen Wikipedia."@de ,
+                        "63 mamíferos salvajes de Suecia y los países nórdicos: grandes depredadores, cérvidos, roedores, musarañas, murciélagos, focas, ballenas y delfines. Anverso: el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos e ingleses siguen la Mammal Diversity Database (v2.5; nombres ingleses con ortografía británica), y los suecos, Dyntaxa (SLU Artdatabanken). Datos de Wikidata, Dyntaxa y la Mammal Diversity Database, comprobados con la Wikipedia en sueco."@es ,
+                        "63 mammifères sauvages de Suède et des pays nordiques : grands prédateurs, cervidés, rongeurs, musaraignes, chauves-souris, phoques, baleines et dauphins. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la Mammal Diversity Database (v2.5 ; noms anglais en orthographe britannique), les noms suédois Dyntaxa (SLU Artdatabanken). Données issues de Wikidata, de Dyntaxa et de la Mammal Diversity Database, vérifiées avec la Wikipédia en suédois."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ,
                         <https://doi.org/10.15468/j43wfc> ,
                         <https://doi.org/10.5281/zenodo.21654811> ,
                         <https://doi.org/10.15468/i57bff> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/nordic-mammals/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/nordic-mammals/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/nordic-mammals/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:biology ;
@@ -11302,25 +11323,34 @@
                  "pays nordiques"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+                     <http://publications.europa.eu/resource/authority/language/LAT> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/nordic-mammals/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/nordic-mammals/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 63 cards in use, 63 in Korean, 61 in German, 11 in Spanish, 29 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#nordic-mammals> ;
     dcat:isVersionOf <#nordic-mammals> ;
-    dcat:distribution <https://solid-memo.com/decks/nordic-mammals/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/nordic-mammals/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/nordic-mammals/v3.ttl#turtle> ;
     solid-memo:cardCount 63 .
 
-<https://solid-memo.com/decks/nordic-mammals/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/nordic-mammals/v2.ttl#compilation>
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl#compilation>
     a prov:Activity .
 
 <https://doi.org/10.5281/zenodo.21654811>
@@ -11337,10 +11367,18 @@
     dcterms:title "Mårdhunden funktionellt utrotad i Sverige – nu hotar tvättbjörn och mink (SVT Nyheter Norrbotten, 7 January 2025)" ;
     dcterms:creator "Sveriges Television (SVT)" .
 
-<https://solid-memo.com/decks/nordic-mammals/v2.ttl#turtle>
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/nordic-mammals.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "349ae91b422c54c512b31f607b7ae09896f982c37b096c2c4f5d4fe938740d20"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/nordic-mammals/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/nordic-mammals/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/nordic-mammals/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/nordic-mammals/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
