@@ -1224,6 +1224,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -10790,12 +10791,12 @@
                   "Nordische Vögel"@de ,
                   "Aves nórdicas"@es ,
                   "Oiseaux nordiques"@fr ;
-    dcterms:description "86 familiar breeding birds of Sweden and the Nordic countries. Front: the English name and the official Swedish name; back: the scientific name. Scientific and English names follow the global checklist AviList (v2025b; BirdLife Sverige's lists follow AviList v2025, whose names v2025b leaves unchanged). Names from Wikidata and Dyntaxa, checked against AviList and BirdLife Sverige's official Swedish list."@en ,
-                        "86 välkända häckfåglar i Sverige och Norden. Framsida: det engelska namnet och det officiella svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer den globala checklistan AviList (v2025b; BirdLife Sveriges listor följer AviList v2025, vars namn är oförändrade i v2025b). Namnen kommer från Wikidata och Dyntaxa och är kontrollerade mot AviList och BirdLife Sveriges officiella Sverigelista."@sv ,
-                        "스웨덴과 북유럽 국가에서 번식하는 친숙한 새 86종입니다. 앞면: 영어 이름과 공식 스웨덴어 이름; 뒷면: 학명. 학명과 영어 이름은 세계 조류 목록 AviList(v2025b)를 따릅니다(BirdLife Sverige의 목록은 AviList v2025를 따르는데, v2025b에서도 이름이 바뀌지 않았습니다). 이름은 위키데이터와 Dyntaxa에서 가져와 AviList와 BirdLife Sverige의 공식 스웨덴 목록으로 확인했습니다."@ko ,
-                        "86 bekannte Brutvögel Schwedens und der nordischen Länder. Vorderseite: der englische Name und der offizielle schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der weltweiten Checkliste AviList (v2025b; die Listen von BirdLife Sverige folgen AviList v2025, deren Namen v2025b unverändert lässt). Namen aus Wikidata und Dyntaxa, abgeglichen mit AviList und der offiziellen schwedischen Liste von BirdLife Sverige."@de ,
-                        "86 aves reproductoras conocidas de Suecia y los países nórdicos. Anverso: el nombre en inglés y el nombre oficial en sueco; reverso: el nombre científico. Los nombres científicos y en inglés siguen la lista mundial AviList (v2025b; las listas de BirdLife Sverige siguen AviList v2025, cuyos nombres v2025b deja sin cambios). Nombres de Wikidata y Dyntaxa, comprobados con AviList y la lista sueca oficial de BirdLife Sverige."@es ,
-                        "86 oiseaux nicheurs familiers de Suède et des pays nordiques. Recto : le nom anglais et le nom suédois officiel ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la liste mondiale AviList (v2025b ; les listes de BirdLife Sverige suivent AviList v2025, dont v2025b ne change pas les noms). Noms tirés de Wikidata et de Dyntaxa, vérifiés avec AviList et la liste suédoise officielle de BirdLife Sverige."@fr ;
+    dcterms:description "86 familiar breeding birds of Sweden and the Nordic countries. Front: the English name and the official Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and English names follow the global checklist AviList (v2025b; BirdLife Sverige's lists follow AviList v2025, whose names v2025b leaves unchanged). Names from Wikidata and Dyntaxa, checked against AviList and BirdLife Sverige's official Swedish list."@en ,
+                        "86 välkända häckfåglar i Sverige och Norden. Framsida: det engelska namnet och det officiella svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer den globala checklistan AviList (v2025b; BirdLife Sveriges listor följer AviList v2025, vars namn är oförändrade i v2025b). Namnen kommer från Wikidata och Dyntaxa och är kontrollerade mot AviList och BirdLife Sveriges officiella Sverigelista."@sv ,
+                        "스웨덴과 북유럽 국가에서 번식하는 친숙한 새 86종입니다. 앞면: 영어 이름과 공식 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 영어 이름은 세계 조류 목록 AviList(v2025b)를 따릅니다(BirdLife Sverige의 목록은 AviList v2025를 따르는데, v2025b에서도 이름이 바뀌지 않았습니다). 이름은 위키데이터와 Dyntaxa에서 가져와 AviList와 BirdLife Sverige의 공식 스웨덴 목록으로 확인했습니다."@ko ,
+                        "86 bekannte Brutvögel Schwedens und der nordischen Länder. Vorderseite: der englische Name und der offizielle schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der weltweiten Checkliste AviList (v2025b; die Listen von BirdLife Sverige folgen AviList v2025, deren Namen v2025b unverändert lässt). Namen aus Wikidata und Dyntaxa, abgeglichen mit AviList und der offiziellen schwedischen Liste von BirdLife Sverige."@de ,
+                        "86 aves reproductoras conocidas de Suecia y los países nórdicos. Anverso: el nombre en inglés y el nombre oficial en sueco, y el nombre en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos y en inglés siguen la lista mundial AviList (v2025b; las listas de BirdLife Sverige siguen AviList v2025, cuyos nombres v2025b deja sin cambios). Nombres de Wikidata y Dyntaxa, comprobados con AviList y la lista sueca oficial de BirdLife Sverige."@es ,
+                        "86 oiseaux nicheurs familiers de Suède et des pays nordiques. Recto : le nom anglais et le nom suédois officiel, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la liste mondiale AviList (v2025b ; les listes de BirdLife Sverige suivent AviList v2025, dont v2025b ne change pas les noms). Noms tirés de Wikidata et de Dyntaxa, vérifiés avec AviList et la liste suédoise officielle de BirdLife Sverige."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:biology ;
@@ -10830,10 +10831,11 @@
                  "noms d’oiseaux"@fr ,
                  "pays nordiques"@fr ;
     dcat:first <https://solid-memo.com/decks/nordic-birds/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/nordic-birds/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/nordic-birds/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/nordic-birds/v1.ttl> ,
-                    <https://solid-memo.com/decks/nordic-birds/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/nordic-birds/v2.ttl> .
+                    <https://solid-memo.com/decks/nordic-birds/v2.ttl> ,
+                    <https://solid-memo.com/decks/nordic-birds/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/nordic-birds/v3.ttl> .
 
 <https://solid-memo.com/decks/nordic-birds/v1.ttl>
     a dcat:Dataset ;
@@ -10846,6 +10848,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/nordic-birds/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Nordic birds"@en ,
+                  "Nordiska fåglar"@sv ,
+                  "북유럽의 새"@ko ,
+                  "Nordische Vögel"@de ,
+                  "Aves nórdicas"@es ,
+                  "Oiseaux nordiques"@fr ;
+    dcterms:description "86 familiar breeding birds of Sweden and the Nordic countries. Front: the English name and the official Swedish name; back: the scientific name. Scientific and English names follow the global checklist AviList (v2025b; BirdLife Sverige's lists follow AviList v2025, whose names v2025b leaves unchanged). Names from Wikidata and Dyntaxa, checked against AviList and BirdLife Sverige's official Swedish list."@en ,
+                        "86 välkända häckfåglar i Sverige och Norden. Framsida: det engelska namnet och det officiella svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer den globala checklistan AviList (v2025b; BirdLife Sveriges listor följer AviList v2025, vars namn är oförändrade i v2025b). Namnen kommer från Wikidata och Dyntaxa och är kontrollerade mot AviList och BirdLife Sveriges officiella Sverigelista."@sv ,
+                        "스웨덴과 북유럽 국가에서 번식하는 친숙한 새 86종입니다. 앞면: 영어 이름과 공식 스웨덴어 이름; 뒷면: 학명. 학명과 영어 이름은 세계 조류 목록 AviList(v2025b)를 따릅니다(BirdLife Sverige의 목록은 AviList v2025를 따르는데, v2025b에서도 이름이 바뀌지 않았습니다). 이름은 위키데이터와 Dyntaxa에서 가져와 AviList와 BirdLife Sverige의 공식 스웨덴 목록으로 확인했습니다."@ko ,
+                        "86 bekannte Brutvögel Schwedens und der nordischen Länder. Vorderseite: der englische Name und der offizielle schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der weltweiten Checkliste AviList (v2025b; die Listen von BirdLife Sverige folgen AviList v2025, deren Namen v2025b unverändert lässt). Namen aus Wikidata und Dyntaxa, abgeglichen mit AviList und der offiziellen schwedischen Liste von BirdLife Sverige."@de ,
+                        "86 aves reproductoras conocidas de Suecia y los países nórdicos. Anverso: el nombre en inglés y el nombre oficial en sueco; reverso: el nombre científico. Los nombres científicos y en inglés siguen la lista mundial AviList (v2025b; las listas de BirdLife Sverige siguen AviList v2025, cuyos nombres v2025b deja sin cambios). Nombres de Wikidata y Dyntaxa, comprobados con AviList y la lista sueca oficial de BirdLife Sverige."@es ,
+                        "86 oiseaux nicheurs familiers de Suède et des pays nordiques. Recto : le nom anglais et le nom suédois officiel ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la liste mondiale AviList (v2025b ; les listes de BirdLife Sverige suivent AviList v2025, dont v2025b ne change pas les noms). Noms tirés de Wikidata et de Dyntaxa, vérifiés avec AviList et la liste suédoise officielle de BirdLife Sverige."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/nordic-birds/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Nordic birds"@en ,
@@ -10854,17 +10874,18 @@
                   "Nordische Vögel"@de ,
                   "Aves nórdicas"@es ,
                   "Oiseaux nordiques"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/nordic-birds/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/nordic-birds/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "86 familiar breeding birds of Sweden and the Nordic countries. Front: the English name and the official Swedish name; back: the scientific name. Scientific and English names follow the global checklist AviList (v2025b; BirdLife Sverige's lists follow AviList v2025, whose names v2025b leaves unchanged). Names from Wikidata and Dyntaxa, checked against AviList and BirdLife Sverige's official Swedish list."@en ,
-                        "86 välkända häckfåglar i Sverige och Norden. Framsida: det engelska namnet och det officiella svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer den globala checklistan AviList (v2025b; BirdLife Sveriges listor följer AviList v2025, vars namn är oförändrade i v2025b). Namnen kommer från Wikidata och Dyntaxa och är kontrollerade mot AviList och BirdLife Sveriges officiella Sverigelista."@sv ,
-                        "스웨덴과 북유럽 국가에서 번식하는 친숙한 새 86종입니다. 앞면: 영어 이름과 공식 스웨덴어 이름; 뒷면: 학명. 학명과 영어 이름은 세계 조류 목록 AviList(v2025b)를 따릅니다(BirdLife Sverige의 목록은 AviList v2025를 따르는데, v2025b에서도 이름이 바뀌지 않았습니다). 이름은 위키데이터와 Dyntaxa에서 가져와 AviList와 BirdLife Sverige의 공식 스웨덴 목록으로 확인했습니다."@ko ,
-                        "86 bekannte Brutvögel Schwedens und der nordischen Länder. Vorderseite: der englische Name und der offizielle schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der weltweiten Checkliste AviList (v2025b; die Listen von BirdLife Sverige folgen AviList v2025, deren Namen v2025b unverändert lässt). Namen aus Wikidata und Dyntaxa, abgeglichen mit AviList und der offiziellen schwedischen Liste von BirdLife Sverige."@de ,
-                        "86 aves reproductoras conocidas de Suecia y los países nórdicos. Anverso: el nombre en inglés y el nombre oficial en sueco; reverso: el nombre científico. Los nombres científicos y en inglés siguen la lista mundial AviList (v2025b; las listas de BirdLife Sverige siguen AviList v2025, cuyos nombres v2025b deja sin cambios). Nombres de Wikidata y Dyntaxa, comprobados con AviList y la lista sueca oficial de BirdLife Sverige."@es ,
-                        "86 oiseaux nicheurs familiers de Suède et des pays nordiques. Recto : le nom anglais et le nom suédois officiel ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la liste mondiale AviList (v2025b ; les listes de BirdLife Sverige suivent AviList v2025, dont v2025b ne change pas les noms). Noms tirés de Wikidata et de Dyntaxa, vérifiés avec AviList et la liste suédoise officielle de BirdLife Sverige."@fr ;
+    dcterms:description "86 familiar breeding birds of Sweden and the Nordic countries. Front: the English name and the official Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and English names follow the global checklist AviList (v2025b; BirdLife Sverige's lists follow AviList v2025, whose names v2025b leaves unchanged). Names from Wikidata and Dyntaxa, checked against AviList and BirdLife Sverige's official Swedish list."@en ,
+                        "86 välkända häckfåglar i Sverige och Norden. Framsida: det engelska namnet och det officiella svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer den globala checklistan AviList (v2025b; BirdLife Sveriges listor följer AviList v2025, vars namn är oförändrade i v2025b). Namnen kommer från Wikidata och Dyntaxa och är kontrollerade mot AviList och BirdLife Sveriges officiella Sverigelista."@sv ,
+                        "스웨덴과 북유럽 국가에서 번식하는 친숙한 새 86종입니다. 앞면: 영어 이름과 공식 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 영어 이름은 세계 조류 목록 AviList(v2025b)를 따릅니다(BirdLife Sverige의 목록은 AviList v2025를 따르는데, v2025b에서도 이름이 바뀌지 않았습니다). 이름은 위키데이터와 Dyntaxa에서 가져와 AviList와 BirdLife Sverige의 공식 스웨덴 목록으로 확인했습니다."@ko ,
+                        "86 bekannte Brutvögel Schwedens und der nordischen Länder. Vorderseite: der englische Name und der offizielle schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der weltweiten Checkliste AviList (v2025b; die Listen von BirdLife Sverige folgen AviList v2025, deren Namen v2025b unverändert lässt). Namen aus Wikidata und Dyntaxa, abgeglichen mit AviList und der offiziellen schwedischen Liste von BirdLife Sverige."@de ,
+                        "86 aves reproductoras conocidas de Suecia y los países nórdicos. Anverso: el nombre en inglés y el nombre oficial en sueco, y el nombre en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos y en inglés siguen la lista mundial AviList (v2025b; las listas de BirdLife Sverige siguen AviList v2025, cuyos nombres v2025b deja sin cambios). Nombres de Wikidata y Dyntaxa, comprobados con AviList y la lista sueca oficial de BirdLife Sverige."@es ,
+                        "86 oiseaux nicheurs familiers de Suède et des pays nordiques. Recto : le nom anglais et le nom suédois officiel, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la liste mondiale AviList (v2025b ; les listes de BirdLife Sverige suivent AviList v2025, dont v2025b ne change pas les noms). Noms tirés de Wikidata et de Dyntaxa, vérifiés avec AviList et la liste suédoise officielle de BirdLife Sverige."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ,
                         <https://doi.org/10.15468/j43wfc> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/nordic-birds/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/nordic-birds/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/nordic-birds/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:biology ;
@@ -10900,25 +10921,34 @@
                  "pays nordiques"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+                     <http://publications.europa.eu/resource/authority/language/LAT> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/nordic-birds/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/nordic-birds/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-birds/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-birds/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 86 cards in use, 74 in Korean, 66 in German, 28 in Spanish, 85 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#nordic-birds> ;
     dcat:isVersionOf <#nordic-birds> ;
-    dcat:distribution <https://solid-memo.com/decks/nordic-birds/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/nordic-birds/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/nordic-birds/v3.ttl#turtle> ;
     solid-memo:cardCount 86 .
 
-<https://solid-memo.com/decks/nordic-birds/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/nordic-birds/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/nordic-birds/v2.ttl#compilation>
+<https://solid-memo.com/decks/nordic-birds/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/nordic-birds/v3.ttl#compilation>
     a prov:Activity .
 
 <https://doi.org/10.15468/j43wfc>
@@ -10936,10 +10966,18 @@
     dcterms:title "Förteckning över Sveriges fågeltaxa, version 2025: fynd t.o.m. 2023, and Officiella svenska namn på alla världens fågelarter, version 2025 (NL2025b.xlsx)" ;
     dcterms:creator "BirdLife Sverige: Taxonomikommittén and Raritetskommittén" .
 
-<https://solid-memo.com/decks/nordic-birds/v2.ttl#turtle>
+<https://solid-memo.com/decks/nordic-birds/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/nordic-birds/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/nordic-birds.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "3cb67c1ea287a54bc1ff31d64127937fcd9518615d3bc0b306951ebcb5b0a12e"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/nordic-birds/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/nordic-birds/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/nordic-birds/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/nordic-birds/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/nordic-birds/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
