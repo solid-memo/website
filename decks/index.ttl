@@ -1225,6 +1225,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -10991,12 +10992,12 @@
                   "Nordische Fische"@de ,
                   "Peces nórdicos"@es ,
                   "Poissons nordiques"@fr ;
-    dcterms:description "55 fish species of Swedish and Nordic fresh and coastal waters: salmon and trout, pike, perch and zander, carp-like fishes, cod fishes, herring and sprat, flatfish, a shark, a ray, a lamprey and others. Front: the English and the Swedish name; back: the scientific name. Scientific and Swedish names follow Dyntaxa (SLU Artdatabanken), English names Wikidata (one from Dyntaxa). Data from Wikidata and Dyntaxa, checked against Eschmeyer's Catalog of Fishes and FishBase."@en ,
-                        "55 fiskarter i svenska och nordiska sötvatten och kustvatten: lax och öring, gädda, abborre och gös, karpfiskar, torskfiskar, sill och skarpsill, plattfiskar, en haj, en rocka, ett nejonöga och andra. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och svenska namn följer Dyntaxa (SLU Artdatabanken), engelska namn Wikidata (ett från Dyntaxa). Uppgifterna kommer från Wikidata och Dyntaxa och har kontrollerats mot Eschmeyer's Catalog of Fishes och FishBase."@sv ,
-                        "스웨덴과 북유럽의 민물과 연안에 사는 어류 55종: 연어와 송어, 강꼬치고기, 퍼치와 잔더, 잉어류, 대구류, 청어와 스프랫, 가자미류, 상어 한 종, 가오리 한 종, 칠성장어 한 종 등. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를, 영어 이름은 Wikidata를 따른다(하나는 Dyntaxa에서 가져왔다). 데이터는 Wikidata와 Dyntaxa에서 가져왔으며 Eschmeyer's Catalog of Fishes 및 FishBase와 대조해 확인했다."@ko ,
-                        "55 Fischarten der schwedischen und nordischen Süß- und Küstengewässer: Lachs und Forelle, Hecht, Barsch und Zander, Karpfenfische, Dorschartige, Hering und Sprotte, Plattfische, ein Hai, ein Rochen, ein Neunauge und andere. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und schwedische Namen folgen Dyntaxa (SLU Artdatabanken), englische Namen Wikidata (einer stammt aus Dyntaxa). Daten aus Wikidata und Dyntaxa, geprüft anhand von Eschmeyer's Catalog of Fishes und FishBase."@de ,
-                        "55 especies de peces de las aguas dulces y costeras de Suecia y los países nórdicos: salmón y trucha, lucio, perca y lucioperca, ciprínidos, gádidos, arenque y espadín, peces planos, un tiburón, una raya, una lamprea y otros. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos y suecos siguen Dyntaxa (SLU Artdatabanken), y los ingleses, Wikidata (uno procede de Dyntaxa). Datos de Wikidata y Dyntaxa, comprobados con Eschmeyer's Catalog of Fishes y FishBase."@es ,
-                        "55 espèces de poissons des eaux douces et côtières de Suède et des pays nordiques : saumon et truite, brochet, perche et sandre, cyprinidés, gadidés, hareng et sprat, poissons plats, un requin, une raie, une lamproie et d’autres. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et suédois suivent Dyntaxa (SLU Artdatabanken), les noms anglais Wikidata (l’un d’eux vient de Dyntaxa). Données de Wikidata et de Dyntaxa, vérifiées avec Eschmeyer's Catalog of Fishes et FishBase."@fr ;
+    dcterms:description "55 fish species of Swedish and Nordic fresh and coastal waters: salmon and trout, pike, perch and zander, carp-like fishes, cod fishes, herring and sprat, flatfish, a shark, a ray, a lamprey and others. Front: the English and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and Swedish names follow Dyntaxa (SLU Artdatabanken), English names Wikidata (one from Dyntaxa). Data from Wikidata and Dyntaxa, checked against Eschmeyer's Catalog of Fishes and FishBase."@en ,
+                        "55 fiskarter i svenska och nordiska sötvatten och kustvatten: lax och öring, gädda, abborre och gös, karpfiskar, torskfiskar, sill och skarpsill, plattfiskar, en haj, en rocka, ett nejonöga och andra. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och svenska namn följer Dyntaxa (SLU Artdatabanken), engelska namn Wikidata (ett från Dyntaxa). Uppgifterna kommer från Wikidata och Dyntaxa och har kontrollerats mot Eschmeyer's Catalog of Fishes och FishBase."@sv ,
+                        "스웨덴과 북유럽의 민물과 연안에 사는 어류 55종: 연어와 송어, 강꼬치고기, 퍼치와 잔더, 잉어류, 대구류, 청어와 스프랫, 가자미류, 상어 한 종, 가오리 한 종, 칠성장어 한 종 등. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를, 영어 이름은 Wikidata를 따른다(하나는 Dyntaxa에서 가져왔다). 데이터는 Wikidata와 Dyntaxa에서 가져왔으며 Eschmeyer's Catalog of Fishes 및 FishBase와 대조해 확인했다."@ko ,
+                        "55 Fischarten der schwedischen und nordischen Süß- und Küstengewässer: Lachs und Forelle, Hecht, Barsch und Zander, Karpfenfische, Dorschartige, Hering und Sprotte, Plattfische, ein Hai, ein Rochen, ein Neunauge und andere. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und schwedische Namen folgen Dyntaxa (SLU Artdatabanken), englische Namen Wikidata (einer stammt aus Dyntaxa). Daten aus Wikidata und Dyntaxa, geprüft anhand von Eschmeyer's Catalog of Fishes und FishBase."@de ,
+                        "55 especies de peces de las aguas dulces y costeras de Suecia y los países nórdicos: salmón y trucha, lucio, perca y lucioperca, ciprínidos, gádidos, arenque y espadín, peces planos, un tiburón, una raya, una lamprea y otros. Anverso: el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos y suecos siguen Dyntaxa (SLU Artdatabanken), y los ingleses, Wikidata (uno procede de Dyntaxa). Datos de Wikidata y Dyntaxa, comprobados con Eschmeyer's Catalog of Fishes y FishBase."@es ,
+                        "55 espèces de poissons des eaux douces et côtières de Suède et des pays nordiques : saumon et truite, brochet, perche et sandre, cyprinidés, gadidés, hareng et sprat, poissons plats, un requin, une raie, une lamproie et d’autres. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et suédois suivent Dyntaxa (SLU Artdatabanken), les noms anglais Wikidata (l’un d’eux vient de Dyntaxa). Données de Wikidata et de Dyntaxa, vérifiées avec Eschmeyer's Catalog of Fishes et FishBase."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:biology ;
@@ -11031,10 +11032,11 @@
                  "noms d’animaux"@fr ,
                  "pays nordiques"@fr ;
     dcat:first <https://solid-memo.com/decks/nordic-fish/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/nordic-fish/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/nordic-fish/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/nordic-fish/v1.ttl> ,
-                    <https://solid-memo.com/decks/nordic-fish/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/nordic-fish/v2.ttl> .
+                    <https://solid-memo.com/decks/nordic-fish/v2.ttl> ,
+                    <https://solid-memo.com/decks/nordic-fish/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/nordic-fish/v3.ttl> .
 
 <https://solid-memo.com/decks/nordic-fish/v1.ttl>
     a dcat:Dataset ;
@@ -11047,6 +11049,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/nordic-fish/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Nordic fish"@en ,
+                  "Nordiska fiskar"@sv ,
+                  "북유럽의 물고기"@ko ,
+                  "Nordische Fische"@de ,
+                  "Peces nórdicos"@es ,
+                  "Poissons nordiques"@fr ;
+    dcterms:description "55 fish species of Swedish and Nordic fresh and coastal waters: salmon and trout, pike, perch and zander, carp-like fishes, cod fishes, herring and sprat, flatfish, a shark, a ray, a lamprey and others. Front: the English and the Swedish name; back: the scientific name. Scientific and Swedish names follow Dyntaxa (SLU Artdatabanken), English names Wikidata (one from Dyntaxa). Data from Wikidata and Dyntaxa, checked against Eschmeyer's Catalog of Fishes and FishBase."@en ,
+                        "55 fiskarter i svenska och nordiska sötvatten och kustvatten: lax och öring, gädda, abborre och gös, karpfiskar, torskfiskar, sill och skarpsill, plattfiskar, en haj, en rocka, ett nejonöga och andra. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och svenska namn följer Dyntaxa (SLU Artdatabanken), engelska namn Wikidata (ett från Dyntaxa). Uppgifterna kommer från Wikidata och Dyntaxa och har kontrollerats mot Eschmeyer's Catalog of Fishes och FishBase."@sv ,
+                        "스웨덴과 북유럽의 민물과 연안에 사는 어류 55종: 연어와 송어, 강꼬치고기, 퍼치와 잔더, 잉어류, 대구류, 청어와 스프랫, 가자미류, 상어 한 종, 가오리 한 종, 칠성장어 한 종 등. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를, 영어 이름은 Wikidata를 따른다(하나는 Dyntaxa에서 가져왔다). 데이터는 Wikidata와 Dyntaxa에서 가져왔으며 Eschmeyer's Catalog of Fishes 및 FishBase와 대조해 확인했다."@ko ,
+                        "55 Fischarten der schwedischen und nordischen Süß- und Küstengewässer: Lachs und Forelle, Hecht, Barsch und Zander, Karpfenfische, Dorschartige, Hering und Sprotte, Plattfische, ein Hai, ein Rochen, ein Neunauge und andere. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und schwedische Namen folgen Dyntaxa (SLU Artdatabanken), englische Namen Wikidata (einer stammt aus Dyntaxa). Daten aus Wikidata und Dyntaxa, geprüft anhand von Eschmeyer's Catalog of Fishes und FishBase."@de ,
+                        "55 especies de peces de las aguas dulces y costeras de Suecia y los países nórdicos: salmón y trucha, lucio, perca y lucioperca, ciprínidos, gádidos, arenque y espadín, peces planos, un tiburón, una raya, una lamprea y otros. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos y suecos siguen Dyntaxa (SLU Artdatabanken), y los ingleses, Wikidata (uno procede de Dyntaxa). Datos de Wikidata y Dyntaxa, comprobados con Eschmeyer's Catalog of Fishes y FishBase."@es ,
+                        "55 espèces de poissons des eaux douces et côtières de Suède et des pays nordiques : saumon et truite, brochet, perche et sandre, cyprinidés, gadidés, hareng et sprat, poissons plats, un requin, une raie, une lamproie et d’autres. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et suédois suivent Dyntaxa (SLU Artdatabanken), les noms anglais Wikidata (l’un d’eux vient de Dyntaxa). Données de Wikidata et de Dyntaxa, vérifiées avec Eschmeyer's Catalog of Fishes et FishBase."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/nordic-fish/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Nordic fish"@en ,
@@ -11055,17 +11075,18 @@
                   "Nordische Fische"@de ,
                   "Peces nórdicos"@es ,
                   "Poissons nordiques"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/nordic-fish/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/nordic-fish/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "55 fish species of Swedish and Nordic fresh and coastal waters: salmon and trout, pike, perch and zander, carp-like fishes, cod fishes, herring and sprat, flatfish, a shark, a ray, a lamprey and others. Front: the English and the Swedish name; back: the scientific name. Scientific and Swedish names follow Dyntaxa (SLU Artdatabanken), English names Wikidata (one from Dyntaxa). Data from Wikidata and Dyntaxa, checked against Eschmeyer's Catalog of Fishes and FishBase."@en ,
-                        "55 fiskarter i svenska och nordiska sötvatten och kustvatten: lax och öring, gädda, abborre och gös, karpfiskar, torskfiskar, sill och skarpsill, plattfiskar, en haj, en rocka, ett nejonöga och andra. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och svenska namn följer Dyntaxa (SLU Artdatabanken), engelska namn Wikidata (ett från Dyntaxa). Uppgifterna kommer från Wikidata och Dyntaxa och har kontrollerats mot Eschmeyer's Catalog of Fishes och FishBase."@sv ,
-                        "스웨덴과 북유럽의 민물과 연안에 사는 어류 55종: 연어와 송어, 강꼬치고기, 퍼치와 잔더, 잉어류, 대구류, 청어와 스프랫, 가자미류, 상어 한 종, 가오리 한 종, 칠성장어 한 종 등. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를, 영어 이름은 Wikidata를 따른다(하나는 Dyntaxa에서 가져왔다). 데이터는 Wikidata와 Dyntaxa에서 가져왔으며 Eschmeyer's Catalog of Fishes 및 FishBase와 대조해 확인했다."@ko ,
-                        "55 Fischarten der schwedischen und nordischen Süß- und Küstengewässer: Lachs und Forelle, Hecht, Barsch und Zander, Karpfenfische, Dorschartige, Hering und Sprotte, Plattfische, ein Hai, ein Rochen, ein Neunauge und andere. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und schwedische Namen folgen Dyntaxa (SLU Artdatabanken), englische Namen Wikidata (einer stammt aus Dyntaxa). Daten aus Wikidata und Dyntaxa, geprüft anhand von Eschmeyer's Catalog of Fishes und FishBase."@de ,
-                        "55 especies de peces de las aguas dulces y costeras de Suecia y los países nórdicos: salmón y trucha, lucio, perca y lucioperca, ciprínidos, gádidos, arenque y espadín, peces planos, un tiburón, una raya, una lamprea y otros. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos y suecos siguen Dyntaxa (SLU Artdatabanken), y los ingleses, Wikidata (uno procede de Dyntaxa). Datos de Wikidata y Dyntaxa, comprobados con Eschmeyer's Catalog of Fishes y FishBase."@es ,
-                        "55 espèces de poissons des eaux douces et côtières de Suède et des pays nordiques : saumon et truite, brochet, perche et sandre, cyprinidés, gadidés, hareng et sprat, poissons plats, un requin, une raie, une lamproie et d’autres. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et suédois suivent Dyntaxa (SLU Artdatabanken), les noms anglais Wikidata (l’un d’eux vient de Dyntaxa). Données de Wikidata et de Dyntaxa, vérifiées avec Eschmeyer's Catalog of Fishes et FishBase."@fr ;
+    dcterms:description "55 fish species of Swedish and Nordic fresh and coastal waters: salmon and trout, pike, perch and zander, carp-like fishes, cod fishes, herring and sprat, flatfish, a shark, a ray, a lamprey and others. Front: the English and the Swedish name, and the Korean, German, Spanish and French name from Wikidata's labels where Wikidata has a common name; back: the scientific name. Scientific and Swedish names follow Dyntaxa (SLU Artdatabanken), English names Wikidata (one from Dyntaxa). Data from Wikidata and Dyntaxa, checked against Eschmeyer's Catalog of Fishes and FishBase."@en ,
+                        "55 fiskarter i svenska och nordiska sötvatten och kustvatten: lax och öring, gädda, abborre och gös, karpfiskar, torskfiskar, sill och skarpsill, plattfiskar, en haj, en rocka, ett nejonöga och andra. Framsida: det engelska och det svenska namnet, och det koreanska, tyska, spanska och franska namnet från Wikidatas etiketter där Wikidata har ett trivialnamn; baksida: det vetenskapliga namnet. Vetenskapliga och svenska namn följer Dyntaxa (SLU Artdatabanken), engelska namn Wikidata (ett från Dyntaxa). Uppgifterna kommer från Wikidata och Dyntaxa och har kontrollerats mot Eschmeyer's Catalog of Fishes och FishBase."@sv ,
+                        "스웨덴과 북유럽의 민물과 연안에 사는 어류 55종: 연어와 송어, 강꼬치고기, 퍼치와 잔더, 잉어류, 대구류, 청어와 스프랫, 가자미류, 상어 한 종, 가오리 한 종, 칠성장어 한 종 등. 앞면: 영어 이름과 스웨덴어 이름, 그리고 위키데이터에 일반명이 있으면 위키데이터의 레이블에서 가져온 한국어, 독일어, 스페인어, 프랑스어 이름; 뒷면: 학명. 학명과 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를, 영어 이름은 Wikidata를 따른다(하나는 Dyntaxa에서 가져왔다). 데이터는 Wikidata와 Dyntaxa에서 가져왔으며 Eschmeyer's Catalog of Fishes 및 FishBase와 대조해 확인했다."@ko ,
+                        "55 Fischarten der schwedischen und nordischen Süß- und Küstengewässer: Lachs und Forelle, Hecht, Barsch und Zander, Karpfenfische, Dorschartige, Hering und Sprotte, Plattfische, ein Hai, ein Rochen, ein Neunauge und andere. Vorderseite: der englische und der schwedische Name sowie, wo Wikidata einen Trivialnamen hat, aus den Bezeichnungen von Wikidata der koreanische, deutsche, spanische und französische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und schwedische Namen folgen Dyntaxa (SLU Artdatabanken), englische Namen Wikidata (einer stammt aus Dyntaxa). Daten aus Wikidata und Dyntaxa, geprüft anhand von Eschmeyer's Catalog of Fishes und FishBase."@de ,
+                        "55 especies de peces de las aguas dulces y costeras de Suecia y los países nórdicos: salmón y trucha, lucio, perca y lucioperca, ciprínidos, gádidos, arenque y espadín, peces planos, un tiburón, una raya, una lamprea y otros. Anverso: el nombre en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata cuando Wikidata tiene un nombre común; reverso: el nombre científico. Los nombres científicos y suecos siguen Dyntaxa (SLU Artdatabanken), y los ingleses, Wikidata (uno procede de Dyntaxa). Datos de Wikidata y Dyntaxa, comprobados con Eschmeyer's Catalog of Fishes y FishBase."@es ,
+                        "55 espèces de poissons des eaux douces et côtières de Suède et des pays nordiques : saumon et truite, brochet, perche et sandre, cyprinidés, gadidés, hareng et sprat, poissons plats, un requin, une raie, une lamproie et d’autres. Recto : le nom anglais et le nom suédois, ainsi que les noms coréen, allemand, espagnol et français d’après les libellés de Wikidata lorsque Wikidata a un nom vernaculaire ; verso : le nom scientifique. Les noms scientifiques et suédois suivent Dyntaxa (SLU Artdatabanken), les noms anglais Wikidata (l’un d’eux vient de Dyntaxa). Données de Wikidata et de Dyntaxa, vérifiées avec Eschmeyer's Catalog of Fishes et FishBase."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ,
                         <https://doi.org/10.15468/j43wfc> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/nordic-fish/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/nordic-fish/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/nordic-fish/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:biology ;
@@ -11101,25 +11122,34 @@
                  "pays nordiques"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+                     <http://publications.europa.eu/resource/authority/language/LAT> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/nordic-fish/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/nordic-fish/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-fish/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-fish/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 55 cards in use, 18 in Korean, 55 in German, 10 in Spanish, 38 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#nordic-fish> ;
     dcat:isVersionOf <#nordic-fish> ;
-    dcat:distribution <https://solid-memo.com/decks/nordic-fish/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/nordic-fish/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/nordic-fish/v3.ttl#turtle> ;
     solid-memo:cardCount 55 .
 
-<https://solid-memo.com/decks/nordic-fish/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/nordic-fish/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/nordic-fish/v2.ttl#compilation>
+<https://solid-memo.com/decks/nordic-fish/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/nordic-fish/v3.ttl#compilation>
     a prov:Activity .
 
 <https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatmain.asp>
@@ -11135,10 +11165,18 @@
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/nordic-fish/v2.ttl#turtle>
+<https://solid-memo.com/decks/nordic-fish/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/nordic-fish/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/nordic-fish.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "b1c4572c9ff445395cb954750307c2cb5ae50f97f9359430f4d29a9bf5ea57ca"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/nordic-fish/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/nordic-fish/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/nordic-fish/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/nordic-fish/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/nordic-fish/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
