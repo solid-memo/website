@@ -1,0 +1,516 @@
+{
+  "description": {
+    "en": "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia.",
+    "sv": "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia.",
+    "ko": "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다.",
+    "de": "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia.",
+    "es": "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco.",
+    "fr": "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."
+  },
+  "frames": {
+    "dwarf-planet-orbits-where": {
+      "en": "Where does the dwarf planet {0} orbit?",
+      "sv": "Var kretsar dvärgplaneten {0}?",
+      "ko": "왜행성 {0}의 궤도는 어디에 있나요?",
+      "de": "Wo kreist der Zwergplanet {0}?",
+      "es": "¿Dónde orbita el planeta enano {0}?",
+      "fr": "Où orbite la planète naine {0} ?"
+    },
+    "in-belt-between": {
+      "en": "In the {0}, between {1} and {2}",
+      "sv": "I {0}, mellan {1} och {2}",
+      "ko": "{1} 궤도와 {2} 궤도 사이의 {0}",
+      "de": "Im {0}, zwischen {1} und {2}",
+      "es": "En el {0}, entre {1} y {2}",
+      "fr": "Dans la {0}, entre {1} et {2}"
+    },
+    "in-belt-beyond": {
+      "en": "In the {0}, beyond {1}",
+      "sv": "I {0}, bortom {1}",
+      "ko": "{1} 너머의 {0}",
+      "de": "Im {0}, jenseits von {1}",
+      "es": "En el {0}, más allá de {1}",
+      "fr": "Dans la {0}, au-delà de {1}"
+    },
+    "beyond": {
+      "en": "Beyond {0}",
+      "sv": "Bortom {0}",
+      "ko": "{0} 너머",
+      "de": "Jenseits von {0}",
+      "es": "Más allá de {0}",
+      "fr": "Au-delà de {0}"
+    },
+    "largest-moon-of": {
+      "en": "Largest moon of {0}",
+      "sv": "{0}s största måne",
+      "ko": "{0}의 가장 큰 위성",
+      "de": "Größter Mond des Planeten {0}",
+      "es": "Luna más grande de {0}",
+      "fr": "Plus grande lune de la planète {0}"
+    },
+    "largest-moon-of-s": {
+      "en": "Largest moon of {0}",
+      "sv": "{0} största måne",
+      "ko": "{0}의 가장 큰 위성",
+      "de": "Größter Mond des Planeten {0}",
+      "es": "Luna más grande de {0}",
+      "fr": "Plus grande lune de la planète {0}"
+    },
+    "which-planet-orbits": {
+      "en": "Which planet does {0} orbit?",
+      "sv": "Vilken planet kretsar {0} kring?",
+      "ko": "{0} 위성은 어느 행성을 도나요?",
+      "de": "Welchen Planeten umkreist {0}?",
+      "es": "¿Alrededor de qué planeta orbita {0}?",
+      "fr": "Autour de quelle planète orbite {0} ?"
+    },
+    "which-dwarf-planet-orbits": {
+      "en": "Which dwarf planet does {0} orbit?",
+      "sv": "Vilken dvärgplanet kretsar {0} kring?",
+      "ko": "{0} 위성은 어느 왜행성을 도나요?",
+      "de": "Welchen Zwergplaneten umkreist {0}?",
+      "es": "¿Alrededor de qué planeta enano orbita {0}?",
+      "fr": "Autour de quelle planète naine orbite {0} ?"
+    },
+    "natural-satellite-of-earth": {
+      "en": "{0}'s natural satellite",
+      "sv": "{0}s naturliga satellit",
+      "ko": "{0}의 자연위성",
+      "de": "Natürlicher Satellit der {0}",
+      "es": "Satélite natural de la {0}",
+      "fr": "Satellite naturel de la {0}"
+    },
+    "the-moon": {
+      "en": "the {0}",
+      "sv": "{0}",
+      "ko": "{0}",
+      "de": "der {0}",
+      "es": "la {0}",
+      "fr": "la {0}"
+    },
+    "planet-with-the-storm": {
+      "en": "Planet with the {0}",
+      "sv": "Planeten med {0}",
+      "ko": "{0} 폭풍이 있는 행성",
+      "de": "Planet mit dem Sturm „{0}“",
+      "es": "Planeta con la {0}",
+      "fr": "Planète de la {0}"
+    }
+  },
+  "cards": {
+    "densest-planet": {
+      "back": "{Q2}"
+    },
+    "dwarf-planet-ceres": {
+      "front": {
+        "frame": "dwarf-planet-orbits-where",
+        "items": [
+          "Q596"
+        ]
+      },
+      "back": {
+        "frame": "in-belt-between",
+        "items": [
+          "Q2179",
+          "Q111",
+          "Q319"
+        ]
+      },
+      "not": {
+        "de": [
+          "(1) Ceres"
+        ],
+        "fr": [
+          "(1) Cérès"
+        ]
+      }
+    },
+    "dwarf-planet-eris": {
+      "front": {
+        "frame": "dwarf-planet-orbits-where",
+        "items": [
+          "Q611"
+        ]
+      },
+      "back": {
+        "frame": "beyond",
+        "items": [
+          "Q332"
+        ]
+      },
+      "not": {
+        "de": [
+          "(136199) Eris"
+        ],
+        "fr": [
+          "(136199) Éris"
+        ]
+      }
+    },
+    "dwarf-planet-haumea": {
+      "front": {
+        "frame": "dwarf-planet-orbits-where",
+        "items": [
+          "Q601"
+        ]
+      },
+      "back": {
+        "frame": "in-belt-beyond",
+        "items": [
+          "Q427",
+          "Q332"
+        ]
+      },
+      "not": {
+        "de": [
+          "(136108) Haumea"
+        ],
+        "fr": [
+          "(136108) Hauméa"
+        ]
+      }
+    },
+    "dwarf-planet-makemake": {
+      "front": {
+        "frame": "dwarf-planet-orbits-where",
+        "items": [
+          "Q604"
+        ]
+      },
+      "back": {
+        "frame": "in-belt-beyond",
+        "items": [
+          "Q427",
+          "Q332"
+        ]
+      },
+      "not": {
+        "de": [
+          "(136472) Makemake"
+        ],
+        "ko": [
+          "마케마케 (왜행성)"
+        ]
+      }
+    },
+    "dwarf-planet-pluto": {
+      "front": {
+        "frame": "dwarf-planet-orbits-where",
+        "items": [
+          "Q339"
+        ]
+      },
+      "back": {
+        "frame": "in-belt-beyond",
+        "items": [
+          "Q427",
+          "Q332"
+        ]
+      }
+    },
+    "earth-moon": {
+      "front": {
+        "frame": "natural-satellite-of-earth",
+        "items": [
+          "Q2"
+        ]
+      },
+      "back": {
+        "frame": "the-moon",
+        "items": [
+          "Q405"
+        ]
+      }
+    },
+    "great-red-spot": {
+      "front": {
+        "frame": "planet-with-the-storm",
+        "items": [
+          "Q194256"
+        ]
+      },
+      "back": "{Q319}"
+    },
+    "hottest-planet": {
+      "back": "{Q313}"
+    },
+    "largest-moon-jupiter": {
+      "front": {
+        "frame": "largest-moon-of",
+        "items": [
+          "Q319"
+        ]
+      },
+      "back": "{Q3169}"
+    },
+    "largest-moon-mars": {
+      "front": {
+        "frame": "largest-moon-of-s",
+        "items": [
+          "Q111"
+        ]
+      },
+      "back": "{Q7547}"
+    },
+    "largest-moon-neptune": {
+      "front": {
+        "frame": "largest-moon-of-s",
+        "items": [
+          "Q332"
+        ]
+      },
+      "back": "{Q3359}",
+      "not": {
+        "de": [
+          "Neptun I Triton"
+        ]
+      }
+    },
+    "largest-moon-saturn": {
+      "front": {
+        "frame": "largest-moon-of-s",
+        "items": [
+          "Q193"
+        ]
+      },
+      "back": "{Q2565}"
+    },
+    "largest-moon-solar-system": {
+      "back": "{Q3169}"
+    },
+    "largest-moon-uranus": {
+      "front": {
+        "frame": "largest-moon-of-s",
+        "items": [
+          "Q324"
+        ]
+      },
+      "back": "{Q3322}"
+    },
+    "largest-planet": {
+      "back": "{Q319}"
+    },
+    "largest-rocky-planet": {
+      "back": "{Q2}"
+    },
+    "least-dense-planet": {
+      "back": "{Q193}"
+    },
+    "liquid-water-surface": {
+      "back": "{Q2}"
+    },
+    "moon-ariel": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3343"
+        ]
+      },
+      "back": "{Q324}"
+    },
+    "moon-callisto": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3134"
+        ]
+      },
+      "back": "{Q319}"
+    },
+    "moon-charon": {
+      "front": {
+        "frame": "which-dwarf-planet-orbits",
+        "items": [
+          "Q6604"
+        ]
+      },
+      "back": "{Q339}"
+    },
+    "moon-deimos": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q7548"
+        ]
+      },
+      "back": "{Q111}"
+    },
+    "moon-enceladus": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3303"
+        ]
+      },
+      "back": "{Q193}"
+    },
+    "moon-europa": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3143"
+        ]
+      },
+      "back": "{Q319}"
+    },
+    "moon-ganymede": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3169"
+        ]
+      },
+      "back": "{Q319}"
+    },
+    "moon-iapetus": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q17958"
+        ]
+      },
+      "back": "{Q193}"
+    },
+    "moon-io": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3123"
+        ]
+      },
+      "back": "{Q319}"
+    },
+    "moon-mimas": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q15034"
+        ]
+      },
+      "back": "{Q193}"
+    },
+    "moon-miranda": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3352"
+        ]
+      },
+      "back": "{Q324}"
+    },
+    "moon-oberon": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3332"
+        ]
+      },
+      "back": "{Q324}"
+    },
+    "moon-phobos": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q7547"
+        ]
+      },
+      "back": "{Q111}"
+    },
+    "moon-thick-atmosphere": {
+      "back": "{Q2565}"
+    },
+    "moon-titan": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q2565"
+        ]
+      },
+      "back": "{Q193}"
+    },
+    "moon-titania": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3322"
+        ]
+      },
+      "back": "{Q324}"
+    },
+    "moon-triton": {
+      "front": {
+        "frame": "which-planet-orbits",
+        "items": [
+          "Q3359"
+        ]
+      },
+      "back": "{Q332}",
+      "not": {
+        "de": [
+          "Neptun I Triton"
+        ]
+      }
+    },
+    "most-volcanic-body": {
+      "back": "{Q3123}"
+    },
+    "only-dwarf-planet-inner-solar-system": {
+      "back": "{Q596}",
+      "not": {
+        "de": [
+          "(1) Ceres"
+        ],
+        "fr": [
+          "(1) Cérès"
+        ]
+      }
+    },
+    "planet-eighth": {
+      "back": "{Q332}"
+    },
+    "planet-fifth": {
+      "back": "{Q319}"
+    },
+    "planet-first": {
+      "back": "{Q308}"
+    },
+    "planet-fourth": {
+      "back": "{Q111}"
+    },
+    "planet-second": {
+      "back": "{Q313}"
+    },
+    "planet-seventh": {
+      "back": "{Q324}"
+    },
+    "planet-sixth": {
+      "back": "{Q193}"
+    },
+    "planet-third": {
+      "back": "{Q2}"
+    },
+    "red-planet": {
+      "back": "{Q111}"
+    },
+    "retrograde-large-moon": {
+      "back": "{Q3359}",
+      "not": {
+        "de": [
+          "Neptun I Triton"
+        ]
+      }
+    },
+    "shortest-day": {
+      "back": "{Q319}"
+    },
+    "sideways-planet": {
+      "back": "{Q324}"
+    },
+    "slowest-rotation": {
+      "back": "{Q313}"
+    },
+    "smallest-planet": {
+      "back": "{Q308}"
+    }
+  }
+}

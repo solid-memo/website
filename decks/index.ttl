@@ -1215,6 +1215,7 @@
     dcterms:title "wikidata_labels.py" ;
     <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -13403,12 +13404,12 @@
                   "Das Sonnensystem"@de ,
                   "El sistema solar"@es ,
                   "Le Système solaire"@fr ;
-    dcterms:description "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia."@en ,
-                        "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia."@sv ,
-                        "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다."@ko ,
-                        "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia."@de ,
-                        "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco."@es ,
-                        "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."@fr ;
+    dcterms:description "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia."@en ,
+                        "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia."@sv ,
+                        "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia."@de ,
+                        "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco."@es ,
+                        "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:astronomy ;
@@ -13443,10 +13444,11 @@
                  "lunes"@fr ,
                  "astronomie"@fr ;
     dcat:first <https://solid-memo.com/decks/solar-system/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/solar-system/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/solar-system/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/solar-system/v1.ttl> ,
-                    <https://solid-memo.com/decks/solar-system/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/solar-system/v2.ttl> .
+                    <https://solid-memo.com/decks/solar-system/v2.ttl> ,
+                    <https://solid-memo.com/decks/solar-system/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/solar-system/v3.ttl> .
 
 <https://solid-memo.com/decks/solar-system/v1.ttl>
     a dcat:Dataset ;
@@ -13459,6 +13461,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/solar-system/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "The Solar System"@en ,
+                  "Solsystemet"@sv ,
+                  "태양계"@ko ,
+                  "Das Sonnensystem"@de ,
+                  "El sistema solar"@es ,
+                  "Le Système solaire"@fr ;
+    dcterms:description "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia."@en ,
+                        "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia."@sv ,
+                        "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia."@de ,
+                        "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco."@es ,
+                        "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/solar-system/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "The Solar System"@en ,
@@ -13467,17 +13487,19 @@
                   "Das Sonnensystem"@de ,
                   "El sistema solar"@es ,
                   "Le Système solaire"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/solar-system/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/solar-system/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia."@en ,
-                        "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia."@sv ,
-                        "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다."@ko ,
-                        "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia."@de ,
-                        "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco."@es ,
-                        "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."@fr ;
+    dcterms:description "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia."@en ,
+                        "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia."@sv ,
+                        "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia."@de ,
+                        "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco."@es ,
+                        "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."@fr ;
     prov:wasDerivedFrom <https://science.nasa.gov/solar-system/> ,
-                        <https://www.wikidata.org/wiki/Q544> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/solar-system/v2.ttl#compilation> ;
+                        <https://www.wikidata.org/wiki/Q544> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/solar-system/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/solar-system/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:astronomy ;
@@ -13512,25 +13534,34 @@
                  "lunes"@fr ,
                  "astronomie"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/solar-system/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/solar-system/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/solar-system/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/solar-system/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 52 cards in use, 51 in Korean, 44 in German, 52 in Spanish, 48 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#solar-system> ;
     dcat:isVersionOf <#solar-system> ;
-    dcat:distribution <https://solid-memo.com/decks/solar-system/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/solar-system/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/solar-system/v3.ttl#turtle> ;
     solid-memo:cardCount 52 .
 
-<https://solid-memo.com/decks/solar-system/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/solar-system/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/solar-system/v2.ttl#compilation>
+<https://solid-memo.com/decks/solar-system/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/solar-system/v3.ttl#compilation>
     a prov:Activity .
 
 <https://science.nasa.gov/solar-system/>
@@ -13569,10 +13600,18 @@
     dcterms:title "AGU Newsroom: \"Jupiter's Great Red Spot is not the same one Cassini observed in 1600s\" (press release, 17 June 2024, on Sánchez-Lavega et al., Geophysical Research Letters 2024)" ;
     dcterms:creator "American Geophysical Union (AGU)" .
 
-<https://solid-memo.com/decks/solar-system/v2.ttl#turtle>
+<https://solid-memo.com/decks/solar-system/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/solar-system/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/solar-system.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "e494bc9a5cd0d4a059fdb77038104b17e757f4b974ddda5bc3ea237318922366"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/solar-system/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/solar-system/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/solar-system/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/solar-system/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/solar-system/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
