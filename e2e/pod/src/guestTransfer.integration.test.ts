@@ -78,6 +78,7 @@ const course: LibraryDeck = {
   keywords: {},
   title: content.title,
   cardCount: 1,
+  languages: [],
   authors: content.authors,
   direction: "front-to-back",
   sources: [],

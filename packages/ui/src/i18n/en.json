@@ -831,6 +831,7 @@
     "intro": "Ready-made decks. Open one to read about it, or check several and import them into this instance as your own copies.",
     "empty": "The library has no decks yet.",
     "topics": "Topics",
+    "cardLanguages": "Card languages",
     "search": "Search",
     "searchPlaceholder": "Name, description or keyword",
     "noMatch": "No deck matches.",
@@ -874,6 +875,10 @@
       "one": "Topic",
       "other": "Topics"
     },
+    "cardLanguages": {
+      "one": "Card language",
+      "other": "Card languages"
+    },
     "keywords": "Keywords",
     "release": "Release",
     "version": "Version {version}",
@@ -911,6 +916,7 @@
     "back": "Back to library",
     "empty": "This deck has no cards.",
     "hint": "Random cards from the deck. Nothing is recorded: import the deck to study it.",
+    "cardLanguages": "Cards in {languages}.",
     "nextCard": "Next card",
     "reveal": "Reveal",
     "loading": "Loading cards…"

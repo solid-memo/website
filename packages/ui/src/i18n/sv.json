@@ -831,6 +831,7 @@
     "intro": "Färdiga kortlekar. Öppna en för att läsa om den, eller kryssa i flera och importera dem till den här instansen som egna kopior.",
     "empty": "Biblioteket har inga kortlekar än.",
     "topics": "Ämnen",
+    "cardLanguages": "Kortens språk",
     "search": "Sök",
     "searchPlaceholder": "Namn, beskrivning eller nyckelord",
     "noMatch": "Ingen kortlek matchar.",
@@ -874,6 +875,10 @@
       "one": "Ämne",
       "other": "Ämnen"
     },
+    "cardLanguages": {
+      "one": "Kortens språk",
+      "other": "Kortens språk"
+    },
     "keywords": "Nyckelord",
     "release": "Utgåva",
     "version": "Version {version}",
@@ -911,6 +916,7 @@
     "back": "Tillbaka till biblioteket",
     "empty": "Kortleken har inga kort.",
     "hint": "Slumpade kort ur kortleken. Inget sparas: importera kortleken för att studera den.",
+    "cardLanguages": "Korten är på {languages}.",
     "nextCard": "Nästa kort",
     "reveal": "Visa svar",
     "loading": "Läser in kort…"

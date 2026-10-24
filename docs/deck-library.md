@@ -784,11 +784,28 @@ flowchart LR
   format-4 release's untagged keywords stay untagged, their language
   unknown. A series or release
   that does not fit its shape is left out.
-- The library screen lists each deck's name and card count with a
-  checkbox, filtered by **topic** (checkboxes of the topics the decks
-  name, a broader topic finding the narrower: "Languages" finds the
-  Swedish decks) and by a **search** of names, descriptions and keywords,
-  in every language (`filterLibraryDecks` in [domain/library.ts](../packages/domain/src/library.ts)).
+- The library screen lists each deck's name, card count and the
+  languages of its cards with a checkbox, filtered by **topic**
+  (checkboxes of the topics the decks name, a broader topic finding the
+  narrower: "Languages" finds the Swedish decks), by **card languages**
+  (checkboxes of the languages the decks state, a deck shown when its
+  cards are in every one checked) and by a **search** of names,
+  descriptions and keywords, in every language (`filterLibraryDecks` in
+  [domain/library.ts](../packages/domain/src/library.ts)). The checked
+  topics and languages and the search are kept until a reload, so a look
+  at a deck's page and back finds the list as it was left.
+- A deck's card languages are its current release's `dcterms:language`
+  (`LibraryDeck.languages`), read by `toLibraryDecks` from the index and
+  by `toStandaloneLibraryDeck` from a release added from a link: IRIs of
+  the EU's language table, in the order the release gives them, none
+  when it states none (the shape does not ask for them). Each is named
+  in the app's language with `Intl.DisplayNames`, through its language
+  tag ("KOR" is "ko", `languageTagOf` in
+  [domain/euLanguages.ts](../packages/domain/src/euLanguages.ts), which
+  tags every language `EU_LANGUAGES` lists); one not on that list is
+  left out. They are not worked out from the cards, which would mean
+  reading every release before the list can show. The row, the deck's
+  page and its preview name them.
   The search ignores case and Unicode form: query and text are compared
   composed (NFC), so "사람" or "é" pasted decomposed (NFD), as macOS
   file names and some PDFs hold text, still finds the deck; and Arabic

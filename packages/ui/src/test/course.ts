@@ -27,6 +27,7 @@ export const courseLibraryDeck: LibraryDeck = {
   ...firstRelease(RELEASE),
   title: { en: "Solid fundamentals", sv: "Solids grunder" },
   cardCount: 5,
+  languages: [],
   authors: [],
   direction: "front-to-back",
   sources: [],

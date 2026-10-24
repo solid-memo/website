@@ -30,6 +30,7 @@ const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const SERIES = "https://solid-memo.com/decks/index.ttl#capitals";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 const FLAG = "https://flagcdn.com/af.svg";
+const LANGUAGE = "http://publications.europa.eu/resource/authority/language/";
 
 function thing(
   url: string,
@@ -71,6 +72,7 @@ const INDEX_TURTLE = `
    dcterms:issued "2026-09-22T10:00:00Z"^^xsd:dateTime ;
    dcterms:publisher <#solid-memo> ; sm:studyDirection sm:bidirectional ;
    dcat:theme <${EDUC}>, <https://solid-memo.com/ns/vocab/topics.ttl#geography> ; dcat:keyword "capitals" ;
+   dcterms:language <${LANGUAGE}SWE>, <${LANGUAGE}ENG> ;
    dcat:version "2" ; adms:versionNotes "Added Norway." ;
    dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/v2.ttl#turtle> ;
    prov:wasDerivedFrom <${WIKIPEDIA}>, <https://iupac.org/>, <${WIKIDATA}> .
@@ -113,6 +115,7 @@ describe("toLibraryDecks", () => {
         ],
         title: { en: "Capitals" },
         cardCount: 243,
+        languages: [`${LANGUAGE}SWE`, `${LANGUAGE}ENG`],
         authors: ["Anton <anton@example.com>", "https://solid-memo.com/decks/capitals/v2.ttl#gone"],
         license: CC0,
         description: { en: "Capitals of the world." },

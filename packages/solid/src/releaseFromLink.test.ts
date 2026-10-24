@@ -64,6 +64,10 @@ describe("readRelease", () => {
       title: { en: "Capitals", sv: "Huvudstäder" },
       description: { en: "Capitals of the world.", sv: "Världens huvudstäder." },
       cardCount: 2,
+      languages: [
+        "http://publications.europa.eu/resource/authority/language/ENG",
+        "http://publications.europa.eu/resource/authority/language/SWE",
+      ],
       authors: ["Alice"],
       license: "https://creativecommons.org/publicdomain/zero/1.0/",
       direction: "front-to-back",

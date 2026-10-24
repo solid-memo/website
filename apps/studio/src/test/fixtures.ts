@@ -60,6 +60,7 @@ export const capitals: LibraryDeck = {
   keywords: {},
   title: { en: "Capitals" },
   cardCount: 3,
+  languages: [],
   authors: [],
   direction: "front-to-back",
   sources: [],

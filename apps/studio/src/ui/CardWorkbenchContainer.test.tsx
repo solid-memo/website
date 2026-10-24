@@ -207,6 +207,7 @@ describe("CardWorkbenchContainer", () => {
       ...firstRelease(url),
       title: { en: "Solid" },
       cardCount: 1,
+      languages: [],
       authors: [],
       direction: "front-to-back",
       sources: [],

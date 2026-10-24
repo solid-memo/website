@@ -16,6 +16,7 @@ const capitals: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals" },
   cardCount: 3,
+  languages: [],
   authors: [],
   direction: "front-to-back",
   sources: [],
@@ -80,6 +81,25 @@ describe("LibraryPreviewContainer", () => {
     expect(question()).toBe("Norway");
     expect(screen.queryByText("Oslo")).toBeNull();
     expect(listLibraryCards).toHaveBeenCalledWith(capitals);
+  });
+
+  it("names the languages the deck says its cards are in", async () => {
+    renderContainer({
+      deck: {
+        ...capitals,
+        languages: [
+          "http://publications.europa.eu/resource/authority/language/ENG",
+          "http://publications.europa.eu/resource/authority/language/SWE",
+        ],
+      },
+    });
+    expect(await screen.findByText("Cards in English, Swedish.")).toBeInTheDocument();
+  });
+
+  it("names no card languages for a deck that states none", async () => {
+    renderContainer();
+    await screen.findByRole("heading", { name: "Preview: Capitals" });
+    expect(screen.queryByText(/^Cards in/)).toBeNull();
   });
 
   it("shows the question's note only once the answer is revealed", async () => {

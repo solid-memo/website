@@ -8,6 +8,7 @@ import { keywordsIn } from "@solid-memo/domain/keywords";
 import { topicLabels, type LibraryDeck, type LibrarySource } from "@solid-memo/domain/library";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import { AuthorNames } from "./AuthorName";
+import { cardLanguageNames } from "./cardLanguageNames";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n, type ErrorText } from "./i18n";
@@ -17,8 +18,8 @@ import { ReaderText, ReaderTexts } from "./ReaderText";
 import { ReportMistake } from "./ReportMistake";
 
 /**
- * One library deck in full — its blurb, what it is about (its keywords
- * only those in the reader's language), who made it
+ * One library deck in full — its blurb, the languages its cards are in,
+ * what it is about (its keywords only those in the reader's language), who made it
  * and under what terms, when it was made and last changed, which
  * release it is and what changed in it, and what it was compiled from —
  * with a look at its cards and an import button for this deck alone.
@@ -68,8 +69,10 @@ export function LibraryDeckScreen({
   /** Where a mistake in the release is reported (UseCases.reportPlace); none while it is read. */
   reportPlace?: ReportPlace;
 }) {
-  const { t, locale, readerText, readerLang, formatDate, directionLabel } = useI18n();
+  const { t, locale, readerText, readerLang, formatDate, directionLabel, languageParts } =
+    useI18n();
   const topics = topicLabels(deck.themes);
+  const languages = cardLanguageNames(deck, languageParts);
   /** Only those in the reader's language: none in it, no keywords shown. */
   const keywords = keywordsIn(deck.keywords, locale);
   const current = deck.releases.find((release) => release.url === deck.url);
@@ -105,6 +108,12 @@ export function LibraryDeckScreen({
         )}
         <dt>{t("libraryDeck.size")}</dt>
         <dd>{t("common.cardCount", { count: deck.cardCount })}</dd>
+        {languages.length > 0 && (
+          <>
+            <dt>{t("libraryDeck.cardLanguages", { count: languages.length })}</dt>
+            <dd>{languages.join(", ")}</dd>
+          </>
+        )}
         <dt>{t("libraryDeck.studied")}</dt>
         <dd>
           {deck.direction === "bidirectional"

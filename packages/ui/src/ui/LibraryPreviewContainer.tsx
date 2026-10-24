@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { activeCards, studyDirections } from "@solid-memo/domain/deck";
 import type { LibraryDeck } from "@solid-memo/domain/library";
+import { cardLanguageNames } from "./cardLanguageNames";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { LibraryPreviewScreen, type PreviewPrompt } from "./LibraryPreviewScreen";
@@ -32,7 +33,7 @@ export function LibraryPreviewContainer({
   /** Uniform [0, 1) source picking the next card. */
   random?: () => number;
 }) {
-  const { t, readerText, readerLang, errorText } = useI18n();
+  const { t, readerText, readerLang, errorText, languageParts } = useI18n();
   const cardsQuery = useQuery({
     queryKey: queryKeys.libraryCards(deck.url),
     queryFn: () => useCases.listLibraryCards(deck),
@@ -65,6 +66,7 @@ export function LibraryPreviewContainer({
       deckName={readerText(deck.title)}
       deckLang={readerLang(deck.title)}
       deckHref={deckHref}
+      cardLanguages={cardLanguageNames(deck, languageParts)}
       prompt={prompts.length === 0 ? null : prompts[index]}
       turn={turn}
       onNext={next}

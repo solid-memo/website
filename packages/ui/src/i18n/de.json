@@ -831,6 +831,7 @@
     "intro": "Fertige Kartenstapel. Öffne einen, um mehr darüber zu lesen, oder kreuze mehrere an und importiere sie als eigene Kopien in diese Instanz.",
     "empty": "Die Bibliothek hat noch keine Stapel.",
     "topics": "Themen",
+    "cardLanguages": "Sprachen der Karten",
     "search": "Suche",
     "searchPlaceholder": "Name, Beschreibung oder Schlagwort",
     "noMatch": "Kein Stapel passt.",
@@ -874,6 +875,10 @@
       "one": "Thema",
       "other": "Themen"
     },
+    "cardLanguages": {
+      "one": "Sprache der Karten",
+      "other": "Sprachen der Karten"
+    },
     "keywords": "Schlagwörter",
     "release": "Ausgabe",
     "version": "Version {version}",
@@ -911,6 +916,7 @@
     "back": "Zurück zur Bibliothek",
     "empty": "Dieser Stapel hat keine Karten.",
     "hint": "Zufällige Karten aus dem Stapel. Nichts wird gespeichert: Importiere den Stapel, um ihn zu lernen.",
+    "cardLanguages": "Karten auf {languages}.",
     "nextCard": "Nächste Karte",
     "reveal": "Antwort anzeigen",
     "loading": "Karten werden geladen…"

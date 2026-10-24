@@ -150,6 +150,7 @@ describe("DeckTableContainer", () => {
       ...firstRelease(course.sourceUrl),
       title: { en: "Solid" },
       cardCount: 5,
+      languages: [],
       authors: [],
       direction: "front-to-back",
       sources: [],

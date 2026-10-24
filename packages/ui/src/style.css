@@ -2037,17 +2037,20 @@ html.drag-active {
   margin-top: 0.35rem;
 }
 
-.library-topics {
+.library-topics,
+.library-languages {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 1rem;
 }
 
-.library-topics legend {
+.library-topics legend,
+.library-languages legend {
   width: 100%;
 }
 
-.library-topics label.checkbox-option {
+.library-topics label.checkbox-option,
+.library-languages label.checkbox-option {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -2124,8 +2127,8 @@ html.drag-active {
 }
 
 /* As in the deck list: the checkbox beside the name, which wraps,
-   and the size under the name, followed by the imported badge,
-   which wraps below it when there is no room. */
+   and the size under the name, followed by the card languages and the
+   imported badge, which wrap below it when there is no room. */
 .library-deck-meta {
   grid-column: 2;
   grid-row: 2;
@@ -2147,6 +2150,13 @@ html.drag-active {
 .library-list .hint {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* A deck's card languages may be many: they shrink and wrap, a name at a time. */
+.library-list .library-card-languages {
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: normal;
 }
 
 .provenance {

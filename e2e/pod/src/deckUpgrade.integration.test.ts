@@ -104,6 +104,7 @@ function libraryOf(...published: LibraryDeckContent[]): DeckLibrary {
         keywords: current.keywords,
         title: current.title,
         cardCount: current.cards.length,
+        languages: [],
         authors: current.authors,
         direction: current.direction,
         sources: [],

@@ -22,6 +22,7 @@ const capitals: LibraryDeck = {
   ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals of the world" },
   cardCount: 243,
+  languages: [],
   authors: ["Anton Wiklund"],
   license: CC0,
   description: { en: `Every country and its capital. Compiled from ${WIKIPEDIA}.` },
@@ -123,6 +124,17 @@ describe("LibraryDeckScreen", () => {
     expect(screen.queryByText("Keywords", { selector: "dt" })).toBeNull();
   });
 
+  it("names the languages its cards are in, in the deck's order, the singular for one", () => {
+    const LANGUAGE = "http://publications.europa.eu/resource/authority/language/";
+    const { unmount } = renderScreen({
+      deck: { ...capitals, languages: [`${LANGUAGE}SWE`, `${LANGUAGE}ENG`] },
+    });
+    expect(fact("Card languages")).toHaveTextContent(/^Swedish, English$/);
+    unmount();
+    renderScreen({ deck: { ...capitals, languages: [`${LANGUAGE}KOR`] } });
+    expect(fact("Card language")).toHaveTextContent(/^Korean$/);
+  });
+
   it("uses the singular for one topic", () => {
     renderScreen({
       deck: { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] },
@@ -222,6 +234,7 @@ describe("LibraryDeckScreen", () => {
         ...firstRelease(capitals.url),
         title: { en: "Rivers" },
         cardCount: 1,
+        languages: [],
         authors: [],
         direction: "front-to-back",
         sources: [],

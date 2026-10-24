@@ -789,6 +789,7 @@
     "intro": "바로 쓸 수 있는 덱이에요. 덱을 열어 자세히 보거나, 여러 개를 선택해 이 인스턴스에 내 복사본으로 가져올 수 있어요.",
     "empty": "라이브러리에 아직 덱이 없어요.",
     "topics": "주제",
+    "cardLanguages": "카드 언어",
     "search": "검색",
     "searchPlaceholder": "이름, 설명 또는 키워드",
     "noMatch": "일치하는 덱이 없어요.",
@@ -829,6 +830,9 @@
     "topics": {
       "other": "주제"
     },
+    "cardLanguages": {
+      "other": "카드 언어"
+    },
     "keywords": "키워드",
     "release": "릴리스",
     "version": "버전 {version}",
@@ -864,6 +868,7 @@
     "back": "덱 라이브러리로 돌아가기",
     "empty": "이 덱에는 카드가 없어요.",
     "hint": "덱에서 무작위로 고른 카드예요. 아무것도 기록되지 않아요. 학습하려면 덱을 가져와 주세요.",
+    "cardLanguages": "카드 언어: {languages}",
     "nextCard": "다음 카드",
     "reveal": "정답 보기",
     "loading": "카드를 불러오는 중…"

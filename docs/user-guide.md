@@ -246,8 +246,10 @@ All of this is described in [browsing.md](browsing.md).
 ## The deck library
 
 **Deck library**, under the deck list, lists ready-made decks
-([deck-library.md](deck-library.md#in-the-app)). Search by name,
-description or keyword, or narrow the list to topics. Many of the decks
+([deck-library.md](deck-library.md#in-the-app)), each with the
+languages its cards are in. Search by name, description or keyword, or
+narrow the list to topics, or to the decks whose cards are in the
+languages you check. Many of the decks
 teach a language: Arabic, English, Finnish, French, German, Italian,
 Japanese, Korean, Portuguese, Spanish and Swedish. There are four
 Arabic decks: Basic Arabic and the most common nouns, verbs and
@@ -514,6 +516,7 @@ screenshot of each.
 | Grouping decks | full-learner | 09–11 |
 | Statistics, and a card's history | full-learner | 15–15b |
 | Previewing and importing a library deck | full-learner | 16–17 |
+| Narrowing the deck library to the language of the cards | [library-languages.journey.ts](../e2e/journeys/journeys/library-languages.journey.ts) | 02–04 |
 | Describing a deck in two languages, and switching language | full-learner | 18–20b |
 | Showing a deck's cards in another language than the app's, and back | full-learner | 20c–20d |
 | Checking the instance (developer mode) | full-learner | 21 |

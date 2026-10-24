@@ -873,6 +873,7 @@
     "intro": "Mazos ya preparados. Abre uno para ver de qué trata, o marca varios e impórtalos a esta instancia como copias tuyas.",
     "empty": "La biblioteca aún no tiene mazos.",
     "topics": "Temas",
+    "cardLanguages": "Idiomas de las tarjetas",
     "search": "Buscar",
     "searchPlaceholder": "Nombre, descripción o palabra clave",
     "noMatch": "Ningún mazo coincide.",
@@ -919,6 +920,11 @@
       "many": "Temas",
       "other": "Temas"
     },
+    "cardLanguages": {
+      "one": "Idioma de las tarjetas",
+      "many": "Idiomas de las tarjetas",
+      "other": "Idiomas de las tarjetas"
+    },
     "keywords": "Palabras clave",
     "release": "Publicación",
     "version": "Versión {version}",
@@ -958,6 +964,7 @@
     "back": "Volver a la biblioteca",
     "empty": "Este mazo no tiene tarjetas.",
     "hint": "Tarjetas al azar del mazo. No se registra nada: importa el mazo para estudiarlo.",
+    "cardLanguages": "Tarjetas en {languages}.",
     "nextCard": "Siguiente tarjeta",
     "reveal": "Mostrar respuesta",
     "loading": "Cargando tarjetas…"
