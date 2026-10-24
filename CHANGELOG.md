@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.4.0](https://github.com/solid-memo/website/compare/v6.3.3...v6.4.0) (2026-10-24)
+
+### Features
+
+* **courses:** keep on the deck that it is a course ([221b3ca](https://github.com/solid-memo/website/commit/221b3ca73476c515f78b166c5f6fd6b6c522089e)), closes [#262](https://github.com/solid-memo/website/issues/262)
+* **statistics:** summarize past months in the digest for the today strip ([c1f65fe](https://github.com/solid-memo/website/commit/c1f65fe2412cc56ee5513a50f94d54220b4ed755)), closes [#259](https://github.com/solid-memo/website/issues/259)
+
 ## [6.3.3](https://github.com/solid-memo/website/compare/v6.3.2...v6.3.3) (2026-10-23)
 
 ### Performance Improvements
