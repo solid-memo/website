@@ -1,0 +1,317 @@
+{
+  "description": {
+    "en": "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. The names of the buildings and architects are also in Korean, German, Spanish and French, from Wikidata's labels. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites.",
+    "sv": "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Byggnadernas och arkitekternas namn finns även på koreanska, tyska, spanska och franska, från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser.",
+    "ko": "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 건축물과 건축가 이름은 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다.",
+    "de": "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Die Namen der Bauwerke und Architekten gibt es auch auf Koreanisch, Deutsch, Spanisch und Französisch, mit den Bezeichnungen aus Wikidata. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen.",
+    "es": "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Los nombres de los edificios y de los arquitectos también están en coreano, alemán, español y francés, a partir de las etiquetas de Wikidata. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales.",
+    "fr": "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Les noms des bâtiments et des architectes figurent aussi en coréen, en allemand, en espagnol et en français, d’après les libellés de Wikidata. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."
+  },
+  "frames": {
+    "two-names": {
+      "en": "{0} and {1}",
+      "sv": "{0} och {1}",
+      "ko": "{0}, {1}",
+      "de": "{0} und {1}",
+      "es": "{0} y {1}",
+      "fr": "{0} et {1}"
+    },
+    "two-names-e": {
+      "en": "{0} and {1}",
+      "sv": "{0} och {1}",
+      "ko": "{0}, {1}",
+      "de": "{0} und {1}",
+      "es": "{0} e {1}",
+      "fr": "{0} et {1}"
+    }
+  },
+  "cards": {
+    "amalienborg": {
+      "front": "{Q211053}",
+      "back": "{Q962029}"
+    },
+    "belvedere-vienna": {
+      "front": "{Q211818}",
+      "back": "{Q84507}"
+    },
+    "brandenburg-gate": {
+      "front": "{Q82425}",
+      "back": "{Q313181}"
+    },
+    "british-museum": {
+      "front": "{Q6373}",
+      "back": "{Q983719}"
+    },
+    "burj-al-arab": {
+      "front": "{Q62939}",
+      "back": "{Q1335131}"
+    },
+    "centre-pompidou": {
+      "front": "{Q178065}",
+      "back": {
+        "frame": "two-names",
+        "items": [
+          "Q190148",
+          "Q237412"
+        ]
+      }
+    },
+    "chrysler-building": {
+      "front": "{Q11274}",
+      "back": "{Q706549}"
+    },
+    "drottningholm-palace": {
+      "front": "{Q208559}",
+      "back": "{Q61188}"
+    },
+    "fallingwater": {
+      "front": "{Q463179}",
+      "back": "{Q5604}",
+      "not": {
+        "fr": [
+          "maison sur la cascade"
+        ]
+      }
+    },
+    "gazprom-arena": {
+      "front": "{Q722970}",
+      "back": "{Q358502}",
+      "not": {
+        "ko": [
+          "제니트 스타디움"
+        ]
+      }
+    },
+    "guggenheim-museum-bilbao": {
+      "front": "{Q179199}",
+      "back": "{Q180374}"
+    },
+    "guggenheim-museum-new-york": {
+      "front": "{Q201469}",
+      "back": "{Q5604}"
+    },
+    "hagia-sophia": {
+      "front": "{Q12506}",
+      "back": {
+        "frame": "two-names-e",
+        "items": [
+          "Q298226",
+          "Q310028"
+        ]
+      }
+    },
+    "hallgrimskirkja": {
+      "front": "{Q271466}",
+      "back": "{Q1238310}"
+    },
+    "helsinki-cathedral": {
+      "front": "{Q738015}",
+      "back": "{Q77103}"
+    },
+    "helsinki-olympic-stadium": {
+      "front": "{Q332219}",
+      "back": {
+        "frame": "two-names",
+        "items": [
+          "Q267839",
+          "Q5895272"
+        ]
+      }
+    },
+    "la-scala": {
+      "front": "{Q5471}",
+      "back": "{Q647911}"
+    },
+    "lenins-mausoleum": {
+      "front": "{Q191414}",
+      "back": "{Q380282}"
+    },
+    "mausoleum-at-halicarnassus": {
+      "front": "{Q45368}",
+      "back": {
+        "frame": "two-names",
+        "items": [
+          "Q1502896",
+          "Q1243502"
+        ]
+      },
+      "not": {
+        "fr": [
+          "Satyros de Priène"
+        ],
+        "ko": [
+          "프티오스"
+        ]
+      }
+    },
+    "mirante-do-vale": {
+      "front": "{Q42258}",
+      "back": {
+        "frame": "two-names",
+        "items": [
+          "Q10392973",
+          "Q9630079"
+        ]
+      }
+    },
+    "museo-del-prado": {
+      "front": "{Q160112}",
+      "back": "{Q2429525}"
+    },
+    "nationalmuseum": {
+      "front": "{Q842858}",
+      "back": "{Q61256}",
+      "not": {
+        "es": [
+          "Frederico Augusto Stüler"
+        ]
+      }
+    },
+    "palace-of-westminster": {
+      "front": "{Q62408}",
+      "back": "{Q552584}"
+    },
+    "palais-garnier": {
+      "front": "{Q187840}",
+      "back": "{Q313556}"
+    },
+    "pantheon-paris": {
+      "front": "{Q188856}",
+      "back": "{Q550244}"
+    },
+    "parthenon": {
+      "front": "{Q10288}",
+      "back": {
+        "frame": "two-names",
+        "items": [
+          "Q311502",
+          "Q114112"
+        ]
+      }
+    },
+    "pergamon-museum": {
+      "front": "{Q157298}",
+      "back": "{Q73131}"
+    },
+    "petajavesi-old-church": {
+      "front": "{Q435829}",
+      "back": "{Q17381123}"
+    },
+    "petronas-towers": {
+      "front": "{Q83063}",
+      "back": "{Q309483}"
+    },
+    "rijksmuseum": {
+      "front": "{Q190804}",
+      "back": "{Q540431}"
+    },
+    "rock-and-roll-hall-of-fame": {
+      "front": "{Q179191}",
+      "back": "{Q46868}"
+    },
+    "sacre-coeur": {
+      "front": "{Q28785}",
+      "back": "{Q367627}"
+    },
+    "sagrada-familia": {
+      "front": "{Q48435}",
+      "back": "{Q25328}"
+    },
+    "selimiye-mosque": {
+      "front": "{Q184534}",
+      "back": "{Q5600}",
+      "not": {
+        "de": [
+          "Selimiye Moschee"
+        ]
+      }
+    },
+    "st-pauls-cathedral": {
+      "front": "{Q173882}",
+      "back": "{Q170373}"
+    },
+    "stockholm-city-hall": {
+      "front": "{Q648483}",
+      "back": "{Q944344}"
+    },
+    "stockholm-olympic-stadium": {
+      "front": "{Q727078}",
+      "back": "{Q3047104}"
+    },
+    "stockholm-palace": {
+      "front": "{Q750444}",
+      "back": "{Q455143}"
+    },
+    "suleymaniye-mosque": {
+      "front": "{Q178643}",
+      "back": "{Q5600}"
+    },
+    "sultan-ahmed-mosque": {
+      "front": "{Q80541}",
+      "back": "{Q2533343}",
+      "not": {
+        "fr": [
+          "mosquée bleue"
+        ]
+      }
+    },
+    "sydney-opera-house": {
+      "front": "{Q45178}",
+      "back": "{Q180398}"
+    },
+    "taipei-101": {
+      "front": "{Q83101}",
+      "back": "{Q696759}"
+    },
+    "the-pentagon": {
+      "front": "{Q11208}",
+      "back": "{Q5148177}"
+    },
+    "the-shard": {
+      "front": "{Q18536}",
+      "back": "{Q190148}",
+      "not": {
+        "es": [
+          "Shard London Bridge"
+        ]
+      }
+    },
+    "tokyo-tower": {
+      "front": "{Q183536}",
+      "back": "{Q1340974}",
+      "not": {
+        "de": [
+          "Tokio-Turm"
+        ]
+      }
+    },
+    "turning-torso": {
+      "front": "{Q206435}",
+      "back": "{Q168482}"
+    },
+    "uffizi": {
+      "front": "{Q51252}",
+      "back": "{Q128027}"
+    },
+    "white-house": {
+      "front": "{Q35525}",
+      "back": "{Q470765}"
+    },
+    "willis-tower": {
+      "front": "{Q29294}",
+      "back": "{Q62570}",
+      "not": {
+        "de": [
+          "Sears-Tower"
+        ],
+        "es": [
+          "Sears Tower"
+        ]
+      }
+    },
+    "winter-palace": {
+      "front": "{Q182147}",
+      "back": "{Q299687}"
+    }
+  }
+}

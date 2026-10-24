@@ -1222,6 +1222,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -3674,12 +3675,12 @@
                   "Berühmte Bauwerke"@de ,
                   "Edificios famosos"@es ,
                   "Bâtiments célèbres"@fr ;
-    dcterms:description "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites."@en ,
-                        "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser."@sv ,
-                        "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다."@ko ,
-                        "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen."@de ,
-                        "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales."@es ,
-                        "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."@fr ;
+    dcterms:description "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. The names of the buildings and architects are also in Korean, German, Spanish and French, from Wikidata's labels. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites."@en ,
+                        "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Byggnadernas och arkitekternas namn finns även på koreanska, tyska, spanska och franska, från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser."@sv ,
+                        "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 건축물과 건축가 이름은 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다."@ko ,
+                        "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Die Namen der Bauwerke und Architekten gibt es auch auf Koreanisch, Deutsch, Spanisch und Französisch, mit den Bezeichnungen aus Wikidata. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen."@de ,
+                        "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Los nombres de los edificios y de los arquitectos también están en coreano, alemán, español y francés, a partir de las etiquetas de Wikidata. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales."@es ,
+                        "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Les noms des bâtiments et des architectes figurent aussi en coréen, en allemand, en espagnol et en français, d’après les libellés de Wikidata. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:art ,
@@ -3715,10 +3716,11 @@
                  "histoire de l’art"@fr ,
                  "monuments"@fr ;
     dcat:first <https://solid-memo.com/decks/famous-buildings/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/famous-buildings/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/famous-buildings/v1.ttl> ,
-                    <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-buildings/v2.ttl> .
+                    <https://solid-memo.com/decks/famous-buildings/v2.ttl> ,
+                    <https://solid-memo.com/decks/famous-buildings/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-buildings/v3.ttl> .
 
 <https://solid-memo.com/decks/famous-buildings/v1.ttl>
     a dcat:Dataset ;
@@ -3731,6 +3733,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/famous-buildings/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Famous buildings"@en ,
+                  "Kända byggnader"@sv ,
+                  "유명한 건축물"@ko ,
+                  "Berühmte Bauwerke"@de ,
+                  "Edificios famosos"@es ,
+                  "Bâtiments célèbres"@fr ;
+    dcterms:description "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites."@en ,
+                        "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser."@sv ,
+                        "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다."@ko ,
+                        "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen."@de ,
+                        "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales."@es ,
+                        "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/famous-buildings/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Famous buildings"@en ,
@@ -3739,16 +3759,18 @@
                   "Berühmte Bauwerke"@de ,
                   "Edificios famosos"@es ,
                   "Bâtiments célèbres"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/famous-buildings/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/famous-buildings/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites."@en ,
-                        "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser."@sv ,
-                        "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다."@ko ,
-                        "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen."@de ,
-                        "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales."@es ,
-                        "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."@fr ;
-    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q41176> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-buildings/v2.ttl#compilation> ;
+    dcterms:description "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. The names of the buildings and architects are also in Korean, German, Spanish and French, from Wikidata's labels. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites."@en ,
+                        "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Byggnadernas och arkitekternas namn finns även på koreanska, tyska, spanska och franska, från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser."@sv ,
+                        "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 건축물과 건축가 이름은 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다."@ko ,
+                        "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Die Namen der Bauwerke und Architekten gibt es auch auf Koreanisch, Deutsch, Spanisch und Französisch, mit den Bezeichnungen aus Wikidata. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen."@de ,
+                        "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Los nombres de los edificios y de los arquitectos también están en coreano, alemán, español y francés, a partir de las etiquetas de Wikidata. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales."@es ,
+                        "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Les noms des bâtiments et des architectes figurent aussi en coréen, en allemand, en espagnol et en français, d’après les libellés de Wikidata. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q41176> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-buildings/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/famous-buildings/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:art ,
@@ -3784,25 +3806,34 @@
                  "histoire de l’art"@fr ,
                  "monuments"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/famous-buildings/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/famous-buildings/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 50 cards in use, 29 in Korean, 46 in German, 47 in Spanish, 46 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#famous-buildings> ;
     dcat:isVersionOf <#famous-buildings> ;
-    dcat:distribution <https://solid-memo.com/decks/famous-buildings/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/famous-buildings/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/famous-buildings/v3.ttl#turtle> ;
     solid-memo:cardCount 50 .
 
-<https://solid-memo.com/decks/famous-buildings/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/famous-buildings/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/famous-buildings/v2.ttl#compilation>
+<https://solid-memo.com/decks/famous-buildings/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/famous-buildings/v3.ttl#compilation>
     a prov:Activity .
 
 <https://www.wikidata.org/wiki/Q41176>
@@ -3849,10 +3880,18 @@
     dcterms:title "La Santa Sede: \"Cappella Sistina\"" ;
     dcterms:creator "Holy See (vatican.va)" .
 
-<https://solid-memo.com/decks/famous-buildings/v2.ttl#turtle>
+<https://solid-memo.com/decks/famous-buildings/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/famous-buildings/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/famous-buildings.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "284bc071757a90349b3f3cf35905f31459e4f0bc7240adf62743ba7e1bb5c34c"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/famous-buildings/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/famous-buildings/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/famous-buildings/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
