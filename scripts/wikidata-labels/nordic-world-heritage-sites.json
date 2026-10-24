@@ -1,0 +1,258 @@
+{
+  "description": {
+    "en": "All 44 UNESCO World Heritage Sites in the five Nordic countries – Sweden, Norway, Denmark (including Greenland; the Faroe Islands have none), Finland and Iceland – as inscribed on the World Heritage List on 4 October 2026, including the sites inscribed in 2025 and 2026. Front: the site, by UNESCO's English name or a short form of it and by its established Swedish name; back: the Nordic country or countries it lies in, with a note giving the year of inscription and, for sites that extend beyond the Nordic countries, the other countries. The names of the sites and countries are also in Korean, German, Spanish and French, from Wikidata's labels. Taken from Wikidata (the English names of twelve sites are UNESCO's official names, which Wikidata does not use) and checked against UNESCO's World Heritage List, the Swedish National Heritage Board (Riksantikvarieämbetet) and the Swedish Wikipedia.",
+    "sv": "Alla 44 av Unescos världsarv i de fem nordiska länderna – Sverige, Norge, Danmark (med Grönland; Färöarna har inga), Finland och Island – så som de står på världsarvslistan den 4 oktober 2026, inklusive de världsarv som togs upp 2025 och 2026. Framsida: världsarvet, med Unescos engelska namn eller en kortform av det och med det vedertagna svenska namnet; baksida: det eller de nordiska länder där det ligger, med en anteckning om året då det blev världsarv och, för världsarv som sträcker sig utanför Norden, vilka de andra länderna är. Världsarvens och ländernas namn finns även på koreanska, tyska, spanska och franska, från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata (tolv världsarvs engelska namn är Unescos officiella namn, som Wikidata inte använder) och kontrollerade mot Unescos världsarvslista, Riksantikvarieämbetet och svenskspråkiga Wikipedia.",
+    "ko": "북유럽 다섯 나라(스웨덴, 노르웨이, 덴마크(그린란드 포함; 페로 제도에는 없음), 핀란드, 아이슬란드)에 있는 유네스코 세계유산 44곳 전체로, 2026년 10월 4일 기준 세계유산 목록에 등재된 대로이며 2025년과 2026년에 등재된 곳도 포함합니다. 앞면에는 유산의 이름이 유네스코 영어 이름이나 그 줄임말과 널리 쓰이는 스웨덴어 이름으로, 뒷면에는 유산이 있는 북유럽 나라가 있고, 메모에 등재 연도와, 북유럽 밖으로 이어지는 유산이라면 다른 나라들이 있습니다. 유산과 나라의 이름은 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키데이터에서 가져왔고(유산 열두 곳의 영어 이름은 위키데이터가 쓰지 않는 유네스코 공식 이름임), 유네스코 세계유산 목록, 스웨덴 국가문화유산청(Riksantikvarieämbetet), 스웨덴어 위키백과로 확인했습니다.",
+    "de": "Alle 44 UNESCO-Welterbestätten in den fünf nordischen Ländern – Schweden, Norwegen, Dänemark (mit Grönland; die Färöer haben keine), Finnland und Island –, wie sie am 4. Oktober 2026 in der Welterbeliste eingetragen sind, einschließlich der 2025 und 2026 eingetragenen Stätten. Vorderseite: die Stätte, mit dem englischen Namen der UNESCO oder einer Kurzform davon und mit ihrem gebräuchlichen schwedischen Namen; Rückseite: das nordische Land oder die nordischen Länder, in denen sie liegt, mit einer Anmerkung zum Jahr der Eintragung und, bei Stätten, die über die nordischen Länder hinausreichen, zu den anderen Ländern. Die Namen der Stätten und Länder gibt es, aus den Bezeichnungen von Wikidata, auch auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen (die englischen Namen von zwölf Stätten sind die offiziellen Namen der UNESCO, die Wikidata nicht verwendet) und geprüft an der Welterbeliste der UNESCO, am schwedischen Zentralamt für Denkmalpflege (Riksantikvarieämbetet) und an der schwedischsprachigen Wikipedia.",
+    "es": "Los 44 sitios del Patrimonio de la Humanidad de la UNESCO en los cinco países nórdicos —Suecia, Noruega, Dinamarca (incluida Groenlandia; las islas Feroe no tienen ninguno), Finlandia e Islandia—, tal como figuran en la Lista del Patrimonio Mundial el 4 de octubre de 2026, incluidos los inscritos en 2025 y 2026. Anverso: el sitio, con el nombre inglés de la UNESCO o una forma abreviada de él y con su nombre sueco establecido; reverso: el país o los países nórdicos en que se encuentra, con una nota que indica el año de inscripción y, en los sitios que se extienden más allá de los países nórdicos, los demás países. Los nombres de los sitios y de los países también están en coreano, alemán, español y francés, a partir de las etiquetas de Wikidata. Tomado de Wikidata (los nombres ingleses de doce sitios son los nombres oficiales de la UNESCO, que Wikidata no usa) y comprobado con la Lista del Patrimonio Mundial de la UNESCO, la Junta Nacional de Patrimonio de Suecia (Riksantikvarieämbetet) y la Wikipedia en sueco.",
+    "fr": "Les 44 sites du patrimoine mondial de l’UNESCO dans les cinq pays nordiques (Suède, Norvège, Danemark [Groenland compris ; les îles Féroé n’en ont aucun], Finlande et Islande), tels qu’inscrits sur la liste du patrimoine mondial au 4 octobre 2026, y compris les sites inscrits en 2025 et 2026. Recto : le site, sous le nom anglais de l’UNESCO ou une forme courte de celui-ci et sous son nom suédois établi ; verso : le ou les pays nordiques où il se trouve, avec une note donnant l’année d’inscription et, pour les sites qui s’étendent au-delà des pays nordiques, les autres pays. Les noms des sites et des pays figurent aussi en coréen, en allemand, en espagnol et en français, d’après les libellés de Wikidata. Tiré de Wikidata (les noms anglais de douze sites sont les noms officiels de l’UNESCO, que Wikidata n’utilise pas) et vérifié dans la liste du patrimoine mondial de l’UNESCO, auprès de l’Office national du patrimoine de Suède (Riksantikvarieämbetet) et dans la Wikipédia en suédois."
+  },
+  "frames": {
+    "two-names": {
+      "en": "{0} and {1}",
+      "sv": "{0} och {1}",
+      "ko": "{0}, {1}",
+      "de": "{0} und {1}",
+      "es": "{0} y {1}",
+      "fr": "{0} et {1}"
+    },
+    "three-names": {
+      "en": "{0}, {1} and {2}",
+      "sv": "{0}, {1} och {2}",
+      "ko": "{0}, {1}, {2}",
+      "de": "{0}, {1} und {2}",
+      "es": "{0}, {1} y {2}",
+      "fr": "{0}, {1} et {2}"
+    }
+  },
+  "cards": {
+    "aalto-works": {
+      "front": "{Q127518238}",
+      "back": "{Q33}",
+      "not": {
+        "fr": [
+          "Œuvres d'Alvar Aalto inscrites au patrimoine mondial en Finlande"
+        ]
+      }
+    },
+    "aasivissuit-nipisat": {
+      "front": "{Q16324987}",
+      "back": "{Q35} ({Q223})"
+    },
+    "agricultural-landscape-of-southern-oland": {
+      "front": "{Q396132}",
+      "back": "{Q34}"
+    },
+    "birka-and-hovgarden": {
+      "front": "{Q2904503}",
+      "back": "{Q34}"
+    },
+    "bony-fish-fossils-of-the-western-limfjord": {
+      "front": "{Q127521592}",
+      "back": "{Q35}",
+      "not": {
+        "es": [
+          "Los fósiles de peces óseos de Limfjord occidental: evolución y adaptación climática en el Eoceno inferior"
+        ],
+        "fr": [
+          "Les fossiles de poissons osseux du Limfjord occidental – évolution et adaptation climatique au cours de l’Éocène inférieur"
+        ]
+      }
+    },
+    "bryggen": {
+      "front": "{Q153430}",
+      "back": "{Q20}"
+    },
+    "church-town-of-gammelstad": {
+      "front": "{Q1756286}",
+      "back": "{Q34}"
+    },
+    "decorated-farmhouses-of-halsingland": {
+      "front": "{Q1642003}",
+      "back": "{Q34}",
+      "not": {
+        "de": [
+          "Hälsingehof"
+        ]
+      }
+    },
+    "engelsberg-ironworks": {
+      "front": "{Q936884}",
+      "back": "{Q34}"
+    },
+    "fortress-of-suomenlinna": {
+      "front": "{Q1292442}",
+      "back": "{Q33}"
+    },
+    "great-copper-mountain-in-falun": {
+      "front": "{Q636194}",
+      "back": "{Q34}",
+      "not": {
+        "de": [
+          "Kopparbergslagen"
+        ]
+      }
+    },
+    "grimeton-radio-station": {
+      "front": "{Q920206}",
+      "back": "{Q34}"
+    },
+    "hanseatic-town-of-visby": {
+      "front": "{Q1779992}",
+      "back": "{Q34}"
+    },
+    "high-coast-kvarken-archipelago": {
+      "front": "{Q10532185}",
+      "back": {
+        "frame": "two-names",
+        "items": [
+          "Q34",
+          "Q33"
+        ]
+      }
+    },
+    "ilulissat-icefjord": {
+      "front": "{Q828071}",
+      "back": "{Q35} ({Q223})"
+    },
+    "jelling-mounds-runic-stones-and-church": {
+      "front": "{Q4993586}",
+      "back": "{Q35}"
+    },
+    "kronborg-castle": {
+      "front": "{Q189358}",
+      "back": "{Q35}"
+    },
+    "kujataa": {
+      "front": "{Q32904732}",
+      "back": "{Q35} ({Q223})"
+    },
+    "laponian-area": {
+      "front": "{Q1137314}",
+      "back": "{Q34}"
+    },
+    "mons-klint": {
+      "front": "{Q1517331}",
+      "back": "{Q35}"
+    },
+    "moravian-church-settlements": {
+      "front": "{Q128009257}",
+      "back": "{Q35}"
+    },
+    "naval-port-of-karlskrona": {
+      "front": "{Q15255454}",
+      "back": "{Q34}"
+    },
+    "old-rauma": {
+      "front": "{Q828417}",
+      "back": "{Q33}"
+    },
+    "par-force-hunting-landscape": {
+      "front": "{Q10620357}",
+      "back": "{Q35}"
+    },
+    "petajavesi-old-church": {
+      "front": "{Q435829}",
+      "back": "{Q33}"
+    },
+    "rjukan-notodden-industrial-heritage-site": {
+      "front": "{Q20643889}",
+      "back": "{Q20}",
+      "not": {
+        "de": [
+          "Industriedenkmalstätte Rjukkan-Notodden"
+        ]
+      }
+    },
+    "rock-art-of-alta": {
+      "front": "{Q433634}",
+      "back": "{Q20}"
+    },
+    "rock-carvings-in-tanum": {
+      "front": "{Q1761052}",
+      "back": "{Q34}"
+    },
+    "roros-mining-town": {
+      "front": "{Q19387263}",
+      "back": "{Q20}"
+    },
+    "roskilde-cathedral": {
+      "front": "{Q209705}",
+      "back": "{Q35}"
+    },
+    "royal-domain-of-drottningholm": {
+      "front": "{Q28246887}",
+      "back": "{Q34}"
+    },
+    "sammallahdenmaki": {
+      "front": "{Q239748}",
+      "back": "{Q33}"
+    },
+    "skogskyrkogarden": {
+      "front": "{Q213988}",
+      "back": "{Q34}"
+    },
+    "stevns-klint": {
+      "front": "{Q1614152}",
+      "back": "{Q35}"
+    },
+    "struve-geodetic-arc": {
+      "front": "{Q192243}",
+      "back": {
+        "frame": "three-names",
+        "items": [
+          "Q20",
+          "Q34",
+          "Q33"
+        ]
+      }
+    },
+    "surtsey": {
+      "front": "{Q178124}",
+      "back": "{Q189}"
+    },
+    "thingvellir-national-park": {
+      "front": "{Q107370}",
+      "back": "{Q189}"
+    },
+    "urnes-stave-church": {
+      "front": "{Q210678}",
+      "back": "{Q20}"
+    },
+    "vatnajokull-national-park": {
+      "front": "{Q1353292}",
+      "back": "{Q189}"
+    },
+    "vega-archipelago": {
+      "front": "{Q829084}",
+      "back": "{Q20}"
+    },
+    "verla-groundwood-and-board-mill": {
+      "front": "{Q217447}",
+      "back": "{Q33}"
+    },
+    "viking-age-ring-fortresses": {
+      "front": "{Q64518271}",
+      "back": "{Q35}"
+    },
+    "wadden-sea": {
+      "front": "{Q64590476}",
+      "back": "{Q35}",
+      "not": {
+        "fr": [
+          "La mer des Wadden"
+        ]
+      }
+    },
+    "west-norwegian-fjords": {
+      "front": {
+        "frame": "two-names",
+        "items": [
+          "Q193989",
+          "Q212205"
+        ]
+      },
+      "back": "{Q20}"
+    }
+  }
+}
