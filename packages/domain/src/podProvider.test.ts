@@ -7,11 +7,16 @@ import { POD_PROVIDERS } from "./podProvider";
 import { isSecureUrl } from "./webId";
 
 describe("POD_PROVIDERS", () => {
-  it("offers iGrant.io Data Pod for creating a Pod", () => {
-    expect(POD_PROVIDERS.find((p) => p.id === "igrant")).toMatchObject({
-      name: "iGrant.io Data Pod",
-      signUpUrl: "https://igrant.io/datapod.html",
-    });
+  it("offers every suggested provider for creating a Pod", () => {
+    expect(POD_PROVIDERS.map(({ id, signUpUrl }) => ({ id, signUpUrl }))).toEqual([
+      { id: "igrant", signUpUrl: "https://igrant.io/datapod.html" },
+      {
+        id: "solidcommunity",
+        signUpUrl: "https://solidcommunity.net/.account/login/password/register/",
+      },
+      { id: "inrupt", signUpUrl: "https://start.inrupt.com/" },
+      { id: "solidweb", signUpUrl: "https://solidweb.me/.account/login/password/register/" },
+    ]);
   });
 
   it("only suggests https issuers and sign-up pages, with unique ids", () => {

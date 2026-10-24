@@ -39,7 +39,9 @@ describe("OnboardingFlow", () => {
     expect(buttons[0]).toHaveTextContent("Try it without logging in");
     expect(buttons[0]).toHaveClass("primary");
     // Creating a Pod stays offered, no longer as the main action.
-    expect(screen.getByRole("link", { name: /Create a Pod with/ })).not.toHaveClass("primary");
+    for (const link of screen.getAllByRole("link", { name: /Create a Pod with/ })) {
+      expect(link).not.toHaveClass("primary");
+    }
     fireEvent.click(screen.getByRole("button", { name: "Try it without logging in" }));
     expect(props.onTryAsGuest).toHaveBeenCalledOnce();
   });
@@ -47,19 +49,24 @@ describe("OnboardingFlow", () => {
   it("offers no guest's study unless it may", () => {
     renderFlow();
     expect(screen.queryByRole("button", { name: "Try it without logging in" })).toBeNull();
-    expect(screen.getByRole("link", { name: /Create a Pod with/ })).toHaveClass("primary");
+    for (const link of screen.getAllByRole("link", { name: /Create a Pod with/ })) {
+      expect(link).toHaveClass("primary");
+    }
   });
 
-  it("links to iGrant.io sign-up in a new tab, without leaking the opener", () => {
+  it("links to each provider's sign-up in a new tab, without leaking the opener", () => {
     renderFlow();
-    expect(screen.getByText("iGrant.io Data Pod")).toBeInTheDocument();
-    const link = screen.getByRole("link", {
-      name: "Create a Pod with iGrant.io Data Pod (opens in a new tab)",
-    });
-    expect(link).toHaveTextContent("Create a Pod ↗");
-    expect(link).toHaveAttribute("href", "https://igrant.io/datapod.html");
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getAllByRole("link")).toHaveLength(POD_PROVIDERS.length);
+    for (const provider of POD_PROVIDERS) {
+      expect(screen.getByText(provider.name)).toBeInTheDocument();
+      const link = screen.getByRole("link", {
+        name: `Create a Pod with ${provider.name} (opens in a new tab)`,
+      });
+      expect(link).toHaveTextContent("Create a Pod ↗");
+      expect(link).toHaveAttribute("href", provider.signUpUrl);
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
   });
 
   it("lists whichever providers it is given", () => {
