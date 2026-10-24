@@ -84,10 +84,17 @@ export const docsArchive = {
  * needs no colon, so a line of a body that began "breaking change of the
  * app" released 2.0.0, which breaks nothing (#84). `!` after the type
  * is read by the preset, as before.
+ *
+ * And how they find an issue a commit refers to: `#` and a number. The
+ * parser's own prefix, `#`, takes any word after it, so the notes of
+ * 5.0.0 and 5.2.0 say they close #rrggbb, #9ba6b2 and #aab4bf, colors
+ * their commits' bodies named. The parser takes a RegExp's source as a
+ * prefix, and reads the word after it as the issue.
  */
 export const parserOpts = {
   noteKeywords: ["BREAKING CHANGE", "BREAKING-CHANGE"],
   notesPattern: (keywords) => new RegExp(`^(${keywords}):\\s*(.*)`),
+  issuePrefixes: [/#(?=\d+\b)/],
 };
 
 export default {
