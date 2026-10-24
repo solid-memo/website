@@ -55,13 +55,21 @@ import { StoragePicker } from "./StoragePicker";
 import {
   DEFAULT_STATISTICS_RANGE,
   deckHref,
-  isCanonicalStatisticsHash,
   libraryDeckHref,
   routeToHash,
   useHashRoute,
   type RouteRef,
   validationHref,
 } from "./router";
+import {
+  found,
+  type Lookup,
+  openChapterOf,
+  resolveRoute,
+  reviewTooSoon,
+  settled,
+  triedTarget,
+} from "./resolveRoute";
 import { ValidationContainer } from "./ValidationContainer";
 import { WebIdDocumentContainer } from "./WebIdDocumentContainer";
 import { CardLanguage } from "./cardLanguage";
@@ -128,26 +136,26 @@ function routeAddresses(route: RouteRef | null) {
   };
 }
 
-/**
- * What a lookup the route needs finds in what it has read: null when the
- * route does not need it, until it is read, and when it is not there.
- */
-function lookedUp<T>(needed: boolean, read: T[] | undefined, isIt: (item: T) => boolean) {
-  return needed ? (read?.find(isIt) ?? null) : null;
+/** What a lookup the route needs has found in what its query has read. */
+function lookupOf<T>(
+  needed: boolean,
+  query: { data: T[] | undefined; isError: boolean },
+  isIt: (item: T) => boolean,
+): Lookup<T> {
+  if (!needed) return { status: "unneeded" };
+  if (query.data !== undefined) {
+    const value = query.data.find(isIt);
+    return value === undefined ? { status: "missing" } : { status: "found", value };
+  }
+  return { status: query.isError ? "failed" : "loading" };
 }
 
-/**
- * Where the route's chapter is in the course's outline (-1 when it is not,
- * or there is no course), and the chapter, null unless it is there and open.
- */
-function openChapterOf(course: Course | null, chapterUrl: string | null) {
-  const chapterIndex =
-    course === null ? -1 : course.outline.chapters.findIndex((c) => c.url === chapterUrl);
-  const activeChapter =
-    chapterIndex >= 0 && course!.progress.chapters[chapterIndex]!.state !== "locked"
-      ? course!.outline.chapters[chapterIndex]!
-      : null;
-  return { chapterIndex, activeChapter };
+/** What the course's query has found of the course the route needs. */
+function courseLookupOf(
+  needed: boolean,
+  query: { data: Course | undefined; isError: boolean },
+): Lookup<Course> {
+  return lookupOf(needed, { ...query, data: query.data && [query.data] }, () => true);
 }
 
 /**
@@ -185,22 +193,6 @@ function lookupWaiting(
     return <ErrorMessage error={errorText(query.error)} />;
   }
   return missing ? <Loading label={loadingLabel} /> : null;
-}
-
-/**
- * On a link to a library deck (#/try), the deck: undefined until the
- * library is read (and off that route), null when it does not have it;
- * and whether that is settled, the library read or failed.
- */
-function triedOf(
-  onTry: boolean,
-  library: { data: LibraryDeck[] | undefined; isError: boolean },
-  isAddressed: (deck: LibraryDeck) => boolean,
-) {
-  const triedDeck =
-    onTry && library.data !== undefined ? (library.data.find(isAddressed) ?? null) : undefined;
-  const triedSettled = onTry && (triedDeck !== undefined || library.isError);
-  return { triedDeck, triedSettled };
 }
 
 /**
@@ -273,49 +265,21 @@ export function Workspace({
 
   const { instanceUrl, deckUrl, cardUrl, libraryDeckUrl, libraryCardId, chapterUrl } =
     routeAddresses(route);
-  const activeInstance = lookedUp(instanceUrl !== null, instances, (i) => i.url === instanceUrl);
+  const activeInstance = found(
+    lookupOf(instanceUrl !== null, instancesQuery, (i) => i.url === instanceUrl),
+  );
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
   const needsDeck = deckUrl !== null && activeInstance !== null;
-
-  useEffect(() => {
-    if (route !== null || instances === undefined) return;
-    if (instances.length === 1) {
-      replace({ screen: "home", instanceUrl: instances[0].url });
-    } else if (instances.length > 1) {
-      replace({ screen: "instancePicker" });
-    } else {
-      replace({ screen: "storagePicker" });
-    }
-  }, [route, instances]);
-
-  useEffect(() => {
-    if (instanceUrl === null || instances === undefined) return;
-    if (!instances.some((i) => i.url === instanceUrl)) {
-      replace(instances.length > 0 ? { screen: "instancePicker" } : { screen: "storagePicker" });
-    }
-  }, [instanceUrl, instances]);
 
   const decksQuery = useQuery({
     queryKey: queryKeys.decks(instanceUrl),
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: needsDeck,
   });
-  const activeDeck = lookedUp(needsDeck, decksQuery.data, (d) => d.url === deckUrl);
-
-  useEffect(() => {
-    if (!needsDeck || decksQuery.data === undefined) return;
-    if (!decksQuery.data.some((d) => d.url === deckUrl)) {
-      replace({ screen: "home", instanceUrl: instanceUrl! });
-    }
-  }, [needsDeck, decksQuery.data, deckUrl, instanceUrl]);
-
-  // A range or tab the statistics do not know falls back to the default, the URL with it.
-  useEffect(() => {
-    if (route?.screen !== "statistics" && route?.screen !== "deckStatistics") return;
-    if (!isCanonicalStatisticsHash(window.location.hash)) replace(route);
-  }, [route]);
+  const deckLookup = lookupOf(needsDeck, decksQuery, (d) => d.url === deckUrl);
+  const activeDeck = found(deckLookup);
 
   const needsCard = cardUrl !== null && activeDeck !== null;
   const cardsQuery = useQuery({
@@ -323,36 +287,24 @@ export function Workspace({
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: needsCard,
   });
-  const activeCard = lookedUp(needsCard, cardsQuery.data, (c) => c.url === cardUrl);
+  const cardLookup = lookupOf(needsCard, cardsQuery, (c) => c.url === cardUrl);
+  const activeCard = found(cardLookup);
 
-  useEffect(() => {
-    if (!needsCard || cardsQuery.data === undefined) return;
-    if (!cardsQuery.data.some((c) => c.url === cardUrl)) {
-      replace({
-        screen: "browser",
-        instanceUrl: instanceUrl!,
-        deckUrl: deckUrl!,
-      });
-    }
-  }, [needsCard, cardsQuery.data, cardUrl, instanceUrl, deckUrl]);
-
+  // A link to a library deck (#/try) names no instance, but looks its deck up too.
+  const onTry = route?.screen === "try";
   const needsLibraryDeck = libraryDeckUrl !== null && activeInstance !== null;
   const libraryQuery = useQuery({
     ...libraryIndexQuery(useCases),
-    enabled: needsLibraryDeck || route?.screen === "try",
+    enabled: needsLibraryDeck || onTry,
   });
   // A library deck's page is addressed by its series, which outlives
   // releases; an address of one of its releases still finds it.
-  const isAddressed = (d: LibraryDeck) =>
-    d.seriesUrl === libraryDeckUrl || d.releases.some((r) => r.url === libraryDeckUrl);
-  const activeLibraryDeck = lookedUp(needsLibraryDeck, libraryQuery.data, isAddressed);
-
-  useEffect(() => {
-    if (!needsLibraryDeck || libraryQuery.data === undefined) return;
-    if (!libraryQuery.data.some(isAddressed)) {
-      replace({ screen: "library", instanceUrl: instanceUrl! });
-    }
-  }, [needsLibraryDeck, libraryQuery.data, libraryDeckUrl, instanceUrl]);
+  const libraryDeckLookup = lookupOf(
+    needsLibraryDeck || onTry,
+    libraryQuery,
+    (d) => d.seriesUrl === libraryDeckUrl || d.releases.some((r) => r.url === libraryDeckUrl),
+  );
+  const activeLibraryDeck = found(libraryDeckLookup);
 
   // A link to a library deck (#/try) goes on to the deck's page in the
   // learner's instance, once the library is read; with several, the one
@@ -365,20 +317,12 @@ export function Workspace({
   useEffect(() => {
     if (route?.screen !== "try" && route?.screen !== "library") setTriedUnknown(false);
   }, [route]);
-  const { triedDeck, triedSettled } = triedOf(route?.screen === "try", libraryQuery, isAddressed);
+  const triedSettled = onTry && settled(libraryDeckLookup);
   const openTried = (instance: Instance) => {
-    if (triedDeck === null) setTriedUnknown(true);
-    replace(
-      triedDeck == null
-        ? { screen: "library", instanceUrl: instance.url }
-        : { screen: "libraryDeck", instanceUrl: instance.url, libraryDeckUrl: triedDeck.seriesUrl },
-    );
+    const tried = triedTarget(instance.url, libraryDeckLookup);
+    if (tried.triedUnknown) setTriedUnknown(true);
+    replace(tried.to);
   };
-  useEffect(() => {
-    if (!triedSettled || instances === undefined) return;
-    if (instances.length === 1) openTried(instances[0]!);
-    else if (instances.length === 0) replace({ screen: "storagePicker" });
-  }, [triedSettled, instances]);
 
   const needsLibraryCard = libraryCardId !== null && activeLibraryDeck !== null;
   const libraryCardsQuery = useQuery({
@@ -386,22 +330,12 @@ export function Workspace({
     queryFn: () => useCases.listLibraryCards(activeLibraryDeck!),
     enabled: needsLibraryCard,
   });
-  const activeLibraryCard = lookedUp(
+  const libraryCardLookup = lookupOf(
     needsLibraryCard,
-    libraryCardsQuery.data,
+    libraryCardsQuery,
     (c) => c.id === libraryCardId,
   );
-
-  useEffect(() => {
-    if (!needsLibraryCard || libraryCardsQuery.data === undefined) return;
-    if (!libraryCardsQuery.data.some((c) => c.id === libraryCardId)) {
-      replace({
-        screen: "libraryBrowser",
-        instanceUrl: instanceUrl!,
-        libraryDeckUrl: libraryDeckUrl!,
-      });
-    }
-  }, [needsLibraryCard, libraryCardsQuery.data, libraryCardId, instanceUrl, libraryDeckUrl]);
+  const activeLibraryCard = found(libraryCardLookup);
 
   // A course's routes name the learner's deck of it; the course itself
   // (its release's outline and cards, and the learner's progress) is read
@@ -421,12 +355,8 @@ export function Workspace({
     enabled: needsCourse && activeDeck.sourceUrl !== undefined,
   });
   const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
-  const { chapterIndex, activeChapter } = openChapterOf(activeCourse, chapterUrl);
-  const reviewTooSoon =
-    route?.screen === "courseReview" &&
-    activeChapter !== null &&
-    activeCourse!.progress.chapters[chapterIndex]!.resumeStepId !== undefined &&
-    !courseQuery.isFetching;
+  const { activeChapter } = openChapterOf(activeCourse, chapterUrl);
+  const tooSoon = reviewTooSoon(route, activeCourse, courseQuery.isFetching);
 
   // The chapter the learner has just completed, for the course's page to
   // celebrate as they come back to it. Kept in memory, not the URL, and
@@ -436,31 +366,6 @@ export function Workspace({
   useEffect(() => {
     if (route?.screen !== "course") setJustCompleted(null);
   }, [route]);
-
-  useEffect(() => {
-    if (!needsCourse) return;
-    if (activeDeck.sourceUrl === undefined) {
-      replace({ screen: "deckDetail", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
-    } else if (chapterUrl !== null && activeCourse !== null && activeChapter === null) {
-      replace({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
-    } else if (reviewTooSoon) {
-      replace({
-        screen: "courseChapter",
-        instanceUrl: instanceUrl!,
-        deckUrl: deckUrl!,
-        chapterUrl: chapterUrl!,
-      });
-    }
-  }, [
-    needsCourse,
-    activeDeck,
-    activeCourse,
-    activeChapter,
-    reviewTooSoon,
-    chapterUrl,
-    instanceUrl,
-    deckUrl,
-  ]);
 
   const preferencesQuery = useQuery({
     queryKey: queryKeys.preferences(instanceUrl),
@@ -539,15 +444,24 @@ export function Workspace({
     enabled: route?.screen === "storagePicker",
   });
 
+  // A route whose data says it cannot open goes where resolveRoute says,
+  // once what decides it is read; none is a Back stop.
+  const redirect = resolveRoute(route, {
+    hash: window.location.hash,
+    instances,
+    deck: deckLookup,
+    card: cardLookup,
+    libraryDeck: libraryDeckLookup,
+    libraryCard: libraryCardLookup,
+    course: courseLookupOf(needsCourse, courseQuery),
+    courseRereading: courseQuery.isFetching,
+    storages: storagesQuery.data,
+  });
   useEffect(() => {
-    if (route?.screen === "storagePicker" && storagesQuery.data?.length === 1) {
-      replace({
-        screen: "instanceCreator",
-        storageUrl: storagesQuery.data[0].url,
-        source: storagesQuery.data[0].source,
-      });
-    }
-  }, [route, storagesQuery.data]);
+    if (redirect === null) return;
+    if (redirect.triedUnknown) setTriedUnknown(true);
+    replace(redirect.to);
+  }, [route, redirect === null ? null : `${routeToHash(redirect.to)} ${redirect.triedUnknown}`]);
 
   const registrationOptionsQuery = useQuery({
     queryKey: queryKeys.registrationOptions(webId),
@@ -641,7 +555,7 @@ export function Workspace({
       lookupWaiting(
         needsCourse,
         courseQuery,
-        activeCourse === null || (chapterUrl !== null && activeChapter === null) || reviewTooSoon,
+        activeCourse === null || (chapterUrl !== null && activeChapter === null) || tooSoon,
         t("workspace.loadingCourse"),
         errorText,
       ) ??
@@ -652,7 +566,7 @@ export function Workspace({
         t("workspace.loadingLibrary"),
         errorText,
       ) ??
-      (route.screen === "try" && (!triedSettled || instances.length < 2) ? (
+      (onTry && (!triedSettled || instances.length < 2) ? (
         <Loading label={t("workspace.loadingLibrary")} />
       ) : null) ??
       lookupWaiting(
@@ -708,10 +622,10 @@ export function Workspace({
             session={session}
             instances={instances}
             purpose={
-              triedDeck == null
+              activeLibraryDeck === null
                 ? undefined
                 : tx("workspace.tryChooseInstance", {
-                    deck: <ReaderText text={triedDeck.title} />,
+                    deck: <ReaderText text={activeLibraryDeck.title} />,
                   })
             }
             newInstanceHref={routeToHash({ screen: "storagePicker" })}

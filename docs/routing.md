@@ -144,14 +144,42 @@ flowchart LR
 - The header logotype links to `#/` — deliberately not a route — so it
   lands on the default route: the deck list, or a picker when the
   instance is ambiguous.
-- Invalid or unknown routes never strand the user: an unparsable hash
-  falls back to the default route (home / instance picker / storage
-  picker, by instance count), an unknown instance falls back to the
-  instance picker, an unknown deck to that instance's deck list, an
-  unknown library deck to the library, an unknown library card to its
-  deck's cards. All
-  fallbacks use `history.replaceState`, so they are not Back stops;
-  in-app navigation uses `pushState`, so Back walks the screens.
+- Invalid or unknown routes never strand the user. Where a route goes
+  instead is decided in one pure function, `resolveRoute(route, loaded)`
+  in [`resolveRoute.ts`](../packages/ui/src/ui/resolveRoute.ts), from
+  the route and what `Workspace` has read for it so far: the instances,
+  and for each of the deck, card, library deck, library card and course
+  the route needs, whether it isn't needed, is still loading, failed, is
+  missing or was found. It returns the route to go to, or null while the
+  route opens or what decides it is still being read; a read that failed
+  shows its error, not a fallback, save the library's for a link to a
+  library deck, which goes to the library. One effect in `Workspace` calls it and
+  replaces the route with what it returns. Its rules, in the order a
+  route is resolved, the first that applies winning:
+  1. **No route** (an unparsable hash, or `#/`): the deck list of the
+     only instance, the instance picker with several, the storage picker
+     with none.
+  2. **A link to a library deck** (`#/try`), once the library is read:
+     [as below](#a-link-to-a-library-deck).
+  3. **An unknown instance**: the instance picker, or the storage picker
+     when there are no instances.
+  4. **An unknown deck**: that instance's deck list.
+  5. **The statistics** with a range or tab they do not know: the same
+     statistics at its default.
+  6. **An unknown card**: its deck's cards (the Browser).
+  7. **An unknown library deck**: the library.
+  8. **An unknown library card**: its deck's cards.
+  9. **A course's routes**: a deck that is no copy of a release goes to
+     its page; a chapter the course does not have, or one still locked,
+     to the course; a final review of a chapter with steps not done, to
+     the chapter, once the course has been read afresh.
+  10. **The storage picker** with a single storage: on to the instance
+      creator for it.
+
+  All fallbacks use `history.replaceState`, so they are not Back stops;
+  in-app navigation uses `pushState`, so Back walks the screens. What
+  the fallbacks leave in memory, not the URL (that a `#/try` deck is not
+  in the library, and the chapter just completed), `Workspace` keeps.
 
 ## A link to a library deck
 
