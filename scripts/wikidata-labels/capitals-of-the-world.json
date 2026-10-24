@@ -1,0 +1,1104 @@
+{
+  "description": {
+    "en": "Every country and its capital city, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Compiled from Wikipedia's List of national capitals and Wikidata's capital property; the Swedish names from Wikidata, following the Swedish Language Council where they differ.",
+    "sv": "Varje land och dess huvudstad, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Sammanställd från Wikipedias lista över nationella huvudstäder och Wikidatas egenskap för huvudstad; de svenska namnen från Wikidata, enligt Språkrådets rekommendationer där de skiljer sig åt.",
+    "ko": "모든 나라와 그 수도를 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키백과의 국가 수도 목록과 위키데이터의 수도 속성으로 엮었고, 스웨덴어 이름은 위키데이터에서 가져오되 서로 다를 때는 스웨덴 언어위원회를 따랐습니다.",
+    "de": "Jedes Land und seine Hauptstadt, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Zusammengestellt aus der Wikipedia-Liste nationaler Hauptstädte und der Hauptstadt-Eigenschaft von Wikidata; die schwedischen Namen stammen von Wikidata und folgen, wo sie abweichen, dem schwedischen Sprachrat.",
+    "es": "Cada país y su capital, en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Recopilado a partir de la lista de capitales nacionales de Wikipedia y la propiedad «capital» de Wikidata; los nombres suecos proceden de Wikidata y siguen al Consejo de la Lengua Sueca donde difieren.",
+    "fr": "Chaque pays et sa capitale, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Compilé à partir de la liste des capitales nationales de Wikipédia et de la propriété « capitale » de Wikidata ; les noms suédois proviennent de Wikidata et suivent le Conseil de la langue suédoise lorsqu’ils diffèrent."
+  },
+  "frames": {
+    "three-capitals": {
+      "en": "{0}, {1}, and {2}",
+      "sv": "{0}, {1} och {2}",
+      "ko": "{0}, {1}, {2}",
+      "de": "{0}, {1} und {2}",
+      "es": "{0}, {1} y {2}",
+      "fr": "{0}, {1} et {2}"
+    }
+  },
+  "labels": {
+    "Country or territory": {
+      "sv": "Land eller territorium",
+      "ko": "나라 또는 지역",
+      "de": "Land oder Gebiet",
+      "es": "País o territorio",
+      "fr": "Pays ou territoire"
+    },
+    "Capital": {
+      "sv": "Huvudstad",
+      "ko": "수도",
+      "de": "Hauptstadt",
+      "es": "Capital",
+      "fr": "Capitale"
+    }
+  },
+  "cards": {
+    "abkhazia": {
+      "front": "{Q23334}",
+      "back": "{Q40811}"
+    },
+    "afghanistan": {
+      "front": "{Q889}",
+      "back": "{Q5838}"
+    },
+    "akrotiri-and-dhekelia": {
+      "front": "{Q37362}",
+      "back": "{Q60527}"
+    },
+    "aland-islands": {
+      "front": "{Q5689}",
+      "back": "{Q48329}"
+    },
+    "albania": {
+      "front": "{Q222}",
+      "back": "{Q19689}"
+    },
+    "algeria": {
+      "front": "{Q262}",
+      "back": "{Q3561}"
+    },
+    "american-samoa": {
+      "front": "{Q16641}",
+      "back": "{Q51678}"
+    },
+    "andorra": {
+      "front": "{Q228}",
+      "back": "{Q1863}"
+    },
+    "angola": {
+      "front": "{Q916}",
+      "back": "{Q3897}"
+    },
+    "anguilla": {
+      "front": "{Q25228}",
+      "back": "{Q30994}",
+      "not": {
+        "es": [
+          "El Valle"
+        ]
+      }
+    },
+    "antigua-and-barbuda": {
+      "front": "{Q781}",
+      "back": "{Q36262}",
+      "not": {
+        "es": [
+          "Saint John"
+        ]
+      }
+    },
+    "argentina": {
+      "front": "{Q414}",
+      "back": "{Q1486}"
+    },
+    "armenia": {
+      "front": "{Q399}",
+      "back": "{Q1953}"
+    },
+    "aruba": {
+      "front": "{Q21203}",
+      "back": "{Q131243}"
+    },
+    "ascension-island": {
+      "front": "{Q46197}",
+      "back": "{Q695774}",
+      "not": {
+        "de": [
+          "Ascension Insel"
+        ]
+      }
+    },
+    "australia": {
+      "front": "{Q408}",
+      "back": "{Q3114}"
+    },
+    "austria": {
+      "front": "{Q40}",
+      "back": "{Q1741}"
+    },
+    "azerbaijan": {
+      "front": "{Q227}",
+      "back": "{Q9248}"
+    },
+    "bahamas": {
+      "front": "{Q778}",
+      "back": "{Q2467}"
+    },
+    "bahrain": {
+      "front": "{Q398}",
+      "back": "{Q3882}"
+    },
+    "bangladesh": {
+      "front": "{Q902}",
+      "back": "{Q1354}"
+    },
+    "barbados": {
+      "front": "{Q244}",
+      "back": "{Q36168}"
+    },
+    "belarus": {
+      "front": "{Q184}",
+      "back": "{Q2280}"
+    },
+    "belgium": {
+      "front": "{Q31}",
+      "back": "{Q239}"
+    },
+    "belize": {
+      "front": "{Q242}",
+      "back": "{Q3043}"
+    },
+    "benin": {
+      "front": "{Q962}",
+      "back": "{Q3799}"
+    },
+    "bermuda": {
+      "front": "{Q23635}",
+      "back": "{Q30985}"
+    },
+    "bhutan": {
+      "front": "{Q917}",
+      "back": "{Q9270}"
+    },
+    "bolivia": {
+      "front": "{Q750}",
+      "back": "{Q2907}"
+    },
+    "bosnia-and-herzegovina": {
+      "front": "{Q225}",
+      "back": "{Q11194}"
+    },
+    "botswana": {
+      "front": "{Q963}",
+      "back": "{Q3919}"
+    },
+    "brazil": {
+      "front": "{Q155}",
+      "back": "{Q2844}"
+    },
+    "british-antarctic-territory": {
+      "front": "{Q165783}",
+      "back": "{Q1635867}"
+    },
+    "british-indian-ocean-territory": {
+      "front": "{Q43448}",
+      "back": "{Q184851}"
+    },
+    "british-virgin-islands": {
+      "front": "{Q25305}",
+      "back": "{Q179431}"
+    },
+    "brunei": {
+      "front": "{Q921}",
+      "back": "{Q9279}"
+    },
+    "bulgaria": {
+      "front": "{Q219}",
+      "back": "{Q472}"
+    },
+    "burkina-faso": {
+      "front": "{Q965}",
+      "back": "{Q3777}"
+    },
+    "burundi": {
+      "front": "{Q967}",
+      "back": "{Q167551}"
+    },
+    "cambodia": {
+      "front": "{Q424}",
+      "back": "{Q1850}"
+    },
+    "cameroon": {
+      "front": "{Q1009}",
+      "back": "{Q3808}"
+    },
+    "canada": {
+      "front": "{Q16}",
+      "back": "{Q1930}"
+    },
+    "cape-verde": {
+      "front": "{Q1011}",
+      "back": "{Q3751}"
+    },
+    "cayman-islands": {
+      "front": "{Q5785}",
+      "back": "{Q172996}"
+    },
+    "central-african-republic": {
+      "front": "{Q929}",
+      "back": "{Q3832}"
+    },
+    "chad": {
+      "front": "{Q657}",
+      "back": "{Q3659}"
+    },
+    "chile": {
+      "front": "{Q298}",
+      "back": "{Q2887}"
+    },
+    "china": {
+      "front": "{Q148}",
+      "back": "{Q956}"
+    },
+    "christmas-island": {
+      "front": "{Q31063}",
+      "back": "{Q30980}"
+    },
+    "cocos-keeling-islands": {
+      "front": "{Q36004}",
+      "back": "{Q48675}"
+    },
+    "colombia": {
+      "front": "{Q739}",
+      "back": "{Q2841}"
+    },
+    "comoros": {
+      "front": "{Q970}",
+      "back": "{Q3901}"
+    },
+    "congo": {
+      "front": "{Q971}",
+      "back": "{Q3844}"
+    },
+    "cook-islands": {
+      "front": "{Q26988}",
+      "back": "{Q170482}"
+    },
+    "costa-rica": {
+      "front": "{Q800}",
+      "back": "{Q3070}"
+    },
+    "croatia": {
+      "front": "{Q224}",
+      "back": "{Q1435}"
+    },
+    "cuba": {
+      "front": "{Q241}",
+      "back": "{Q1563}"
+    },
+    "curacao": {
+      "front": "{Q25279}",
+      "back": "{Q132679}"
+    },
+    "cyprus": {
+      "front": "{Q229}",
+      "back": "{Q3856}"
+    },
+    "czech-republic": {
+      "front": "{Q213}",
+      "back": "{Q1085}"
+    },
+    "democratic-republic-of-the-congo": {
+      "front": "{Q974}",
+      "back": "{Q3838}"
+    },
+    "denmark": {
+      "front": "{Q35}",
+      "back": "{Q1748}"
+    },
+    "djibouti": {
+      "front": "{Q977}",
+      "back": "{Q3604}"
+    },
+    "dominica": {
+      "front": "{Q784}",
+      "back": "{Q36281}"
+    },
+    "dominican-republic": {
+      "front": "{Q786}",
+      "back": "{Q34820}"
+    },
+    "east-timor": {
+      "front": "{Q574}",
+      "back": "{Q9310}"
+    },
+    "ecuador": {
+      "front": "{Q736}",
+      "back": "{Q2900}"
+    },
+    "egypt": {
+      "front": "{Q79}",
+      "back": "{Q85}"
+    },
+    "el-salvador": {
+      "front": "{Q792}",
+      "back": "{Q3110}"
+    },
+    "equatorial-guinea": {
+      "front": "{Q983}",
+      "back": "{Q1140136}"
+    },
+    "eritrea": {
+      "front": "{Q986}",
+      "back": "{Q3642}"
+    },
+    "estonia": {
+      "front": "{Q191}",
+      "back": "{Q1770}"
+    },
+    "eswatini": {
+      "front": "{Q1050}",
+      "back": "{Q3904}",
+      "not": {
+        "es": [
+          "Suazilandia"
+        ]
+      }
+    },
+    "ethiopia": {
+      "front": "{Q115}",
+      "back": "{Q3624}"
+    },
+    "falkland-islands": {
+      "front": "{Q9648}",
+      "back": "{Q12245}"
+    },
+    "faroe-islands": {
+      "front": "{Q4628}",
+      "back": "{Q10704}"
+    },
+    "fiji": {
+      "front": "{Q712}",
+      "back": "{Q38807}"
+    },
+    "finland": {
+      "front": "{Q33}",
+      "back": "{Q1757}"
+    },
+    "france": {
+      "front": "{Q142}",
+      "back": "{Q90}"
+    },
+    "french-polynesia": {
+      "front": "{Q30971}",
+      "back": "{Q130800}"
+    },
+    "gabon": {
+      "front": "{Q1000}",
+      "back": "{Q3825}"
+    },
+    "gambia": {
+      "front": "{Q1005}",
+      "back": "{Q3726}"
+    },
+    "georgia": {
+      "front": "{Q230}",
+      "back": "{Q994}"
+    },
+    "germany": {
+      "front": "{Q183}",
+      "back": "{Q64}"
+    },
+    "ghana": {
+      "front": "{Q117}",
+      "back": "{Q3761}"
+    },
+    "gibraltar": {
+      "front": "{Q1410}",
+      "back": "{Q1410}"
+    },
+    "greece": {
+      "front": "{Q41}",
+      "back": "{Q1524}"
+    },
+    "greenland": {
+      "front": "{Q223}",
+      "back": "{Q226}"
+    },
+    "grenada": {
+      "front": "{Q769}",
+      "back": "{Q41547}",
+      "not": {
+        "es": [
+          "Saint George"
+        ]
+      }
+    },
+    "guam": {
+      "front": "{Q16635}",
+      "back": "{Q30988}"
+    },
+    "guatemala": {
+      "front": "{Q774}",
+      "back": "{Q1555}"
+    },
+    "guernsey": {
+      "front": "{Q25230}",
+      "back": "{Q174262}",
+      "not": {
+        "ko": [
+          "건지 행정관 관할구"
+        ]
+      }
+    },
+    "guinea": {
+      "front": "{Q1006}",
+      "back": "{Q3733}"
+    },
+    "guinea-bissau": {
+      "front": "{Q1007}",
+      "back": "{Q3739}"
+    },
+    "guyana": {
+      "front": "{Q734}",
+      "back": "{Q10717}"
+    },
+    "haiti": {
+      "front": "{Q790}",
+      "back": "{Q34261}"
+    },
+    "honduras": {
+      "front": "{Q783}",
+      "back": "{Q3238}"
+    },
+    "hungary": {
+      "front": "{Q28}",
+      "back": "{Q1781}"
+    },
+    "iceland": {
+      "front": "{Q189}",
+      "back": "{Q1764}"
+    },
+    "india": {
+      "front": "{Q668}",
+      "back": "{Q987}"
+    },
+    "indonesia": {
+      "front": "{Q252}",
+      "back": "{Q3630}"
+    },
+    "iran": {
+      "front": "{Q794}",
+      "back": "{Q3616}"
+    },
+    "iraq": {
+      "front": "{Q796}",
+      "back": "{Q1530}"
+    },
+    "ireland": {
+      "front": "{Q27}",
+      "back": "{Q1761}"
+    },
+    "isle-of-man": {
+      "front": "{Q9676}",
+      "back": "{Q18569}"
+    },
+    "israel": {
+      "front": "{Q801}",
+      "back": "{Q1218}"
+    },
+    "italy": {
+      "front": "{Q38}",
+      "back": "{Q220}"
+    },
+    "ivory-coast": {
+      "front": "{Q1008}",
+      "back": "{Q1515}"
+    },
+    "jamaica": {
+      "front": "{Q766}",
+      "back": "{Q34692}"
+    },
+    "japan": {
+      "front": "{Q17}",
+      "back": "{Q1490}",
+      "not": {
+        "ko": [
+          "도쿄도"
+        ]
+      }
+    },
+    "jersey": {
+      "front": "{Q785}",
+      "back": "{Q147738}"
+    },
+    "jordan": {
+      "front": "{Q810}",
+      "back": "{Q3805}"
+    },
+    "kazakhstan": {
+      "front": "{Q232}",
+      "back": "{Q1520}"
+    },
+    "kenya": {
+      "front": "{Q114}",
+      "back": "{Q3870}"
+    },
+    "kiribati": {
+      "front": "{Q710}",
+      "back": "{Q131233}"
+    },
+    "kosovo": {
+      "front": "{Q1246}",
+      "back": "{Q25270}"
+    },
+    "kuwait": {
+      "front": "{Q817}",
+      "back": "{Q35178}",
+      "not": {
+        "ko": [
+          "쿠웨이트 시"
+        ]
+      }
+    },
+    "kyrgyzstan": {
+      "front": "{Q813}",
+      "back": "{Q9361}"
+    },
+    "laos": {
+      "front": "{Q819}",
+      "back": "{Q9326}"
+    },
+    "latvia": {
+      "front": "{Q211}",
+      "back": "{Q1773}"
+    },
+    "lebanon": {
+      "front": "{Q822}",
+      "back": "{Q3820}"
+    },
+    "lesotho": {
+      "front": "{Q1013}",
+      "back": "{Q3909}"
+    },
+    "liberia": {
+      "front": "{Q1014}",
+      "back": "{Q3748}"
+    },
+    "libya": {
+      "front": "{Q1016}",
+      "back": "{Q3579}"
+    },
+    "liechtenstein": {
+      "front": "{Q347}",
+      "back": "{Q1844}"
+    },
+    "lithuania": {
+      "front": "{Q37}",
+      "back": "{Q216}"
+    },
+    "luxembourg": {
+      "front": "{Q32}",
+      "back": "{Q1842}"
+    },
+    "madagascar": {
+      "front": "{Q1019}",
+      "back": "{Q3915}"
+    },
+    "malawi": {
+      "front": "{Q1020}",
+      "back": "{Q3876}"
+    },
+    "malaysia": {
+      "front": "{Q833}",
+      "back": "{Q1865}"
+    },
+    "maldives": {
+      "front": "{Q826}",
+      "back": "{Q9347}"
+    },
+    "mali": {
+      "front": "{Q912}",
+      "back": "{Q3703}"
+    },
+    "malta": {
+      "front": "{Q233}",
+      "back": "{Q23800}"
+    },
+    "marshall-islands": {
+      "front": "{Q709}",
+      "back": "{Q12919}"
+    },
+    "mauritania": {
+      "front": "{Q1025}",
+      "back": "{Q3688}"
+    },
+    "mauritius": {
+      "front": "{Q1027}",
+      "back": "{Q3929}"
+    },
+    "mexico": {
+      "front": "{Q96}",
+      "back": "{Q1489}"
+    },
+    "micronesia": {
+      "front": "{Q702}",
+      "back": "{Q42751}"
+    },
+    "moldova": {
+      "front": "{Q217}",
+      "back": "{Q21197}",
+      "not": {
+        "de": [
+          "Kischinau"
+        ]
+      }
+    },
+    "monaco": {
+      "front": "{Q235}",
+      "back": "{Q235}"
+    },
+    "mongolia": {
+      "front": "{Q711}",
+      "back": "{Q23430}"
+    },
+    "montenegro": {
+      "front": "{Q236}",
+      "back": "{Q23564}"
+    },
+    "montserrat": {
+      "front": "{Q13353}",
+      "back": "{Q31006}"
+    },
+    "morocco": {
+      "front": "{Q1028}",
+      "back": "{Q3551}"
+    },
+    "mozambique": {
+      "front": "{Q1029}",
+      "back": "{Q3889}"
+    },
+    "myanmar": {
+      "front": "{Q836}",
+      "back": "{Q37400}"
+    },
+    "namibia": {
+      "front": "{Q1030}",
+      "back": "{Q3935}"
+    },
+    "nauru": {
+      "front": "{Q697}",
+      "back": "{Q31026}",
+      "not": {
+        "de": [
+          "Naoero"
+        ],
+        "ko": [
+          "야렌구"
+        ]
+      }
+    },
+    "nepal": {
+      "front": "{Q837}",
+      "back": "{Q3037}"
+    },
+    "netherlands": {
+      "front": "{Q55}",
+      "back": "{Q727}"
+    },
+    "new-caledonia": {
+      "front": "{Q33788}",
+      "back": "{Q9733}"
+    },
+    "new-zealand": {
+      "front": "{Q664}",
+      "back": "{Q23661}"
+    },
+    "nicaragua": {
+      "front": "{Q811}",
+      "back": "{Q131546626}"
+    },
+    "niger": {
+      "front": "{Q1032}",
+      "back": "{Q3674}"
+    },
+    "nigeria": {
+      "front": "{Q1033}",
+      "back": "{Q3787}"
+    },
+    "niue": {
+      "front": "{Q34020}",
+      "back": "{Q30966}"
+    },
+    "norfolk-island": {
+      "front": "{Q31057}",
+      "back": "{Q30963}"
+    },
+    "north-korea": {
+      "front": "{Q423}",
+      "back": "{Q18808}"
+    },
+    "north-macedonia": {
+      "front": "{Q221}",
+      "back": "{Q384}"
+    },
+    "northern-mariana-islands": {
+      "front": "{Q16644}",
+      "back": "{Q49755159}"
+    },
+    "norway": {
+      "front": "{Q20}",
+      "back": "{Q585}"
+    },
+    "oman": {
+      "front": "{Q842}",
+      "back": "{Q3826}"
+    },
+    "pakistan": {
+      "front": "{Q843}",
+      "back": "{Q1362}"
+    },
+    "palau": {
+      "front": "{Q695}",
+      "back": "{Q515229}"
+    },
+    "palestine": {
+      "front": "{Q219060}",
+      "back": "{Q1218}"
+    },
+    "panama": {
+      "front": "{Q804}",
+      "back": "{Q3306}"
+    },
+    "papua-new-guinea": {
+      "front": "{Q691}",
+      "back": "{Q36526}"
+    },
+    "paraguay": {
+      "front": "{Q733}",
+      "back": "{Q2933}"
+    },
+    "peru": {
+      "front": "{Q419}",
+      "back": "{Q2868}"
+    },
+    "philippines": {
+      "front": "{Q928}",
+      "back": "{Q1461}"
+    },
+    "pitcairn-islands": {
+      "front": "{Q35672}",
+      "back": "{Q48273}"
+    },
+    "poland": {
+      "front": "{Q36}",
+      "back": "{Q270}"
+    },
+    "portugal": {
+      "front": "{Q45}",
+      "back": "{Q597}"
+    },
+    "puerto-rico": {
+      "front": "{Q1183}",
+      "back": "{Q41211}"
+    },
+    "qatar": {
+      "front": "{Q846}",
+      "back": "{Q3861}"
+    },
+    "romania": {
+      "front": "{Q218}",
+      "back": "{Q19660}"
+    },
+    "russia": {
+      "front": "{Q159}",
+      "back": "{Q649}"
+    },
+    "rwanda": {
+      "front": "{Q1037}",
+      "back": "{Q3859}"
+    },
+    "saint-barthelemy": {
+      "front": "{Q25362}",
+      "back": "{Q34112}"
+    },
+    "saint-helena": {
+      "front": "{Q34497}",
+      "back": "{Q30970}"
+    },
+    "saint-kitts-and-nevis": {
+      "front": "{Q763}",
+      "back": "{Q41295}"
+    },
+    "saint-lucia": {
+      "front": "{Q760}",
+      "back": "{Q41699}"
+    },
+    "saint-martin": {
+      "front": "{Q126125}",
+      "back": "{Q200605}"
+    },
+    "saint-pierre-and-miquelon": {
+      "front": "{Q34617}",
+      "back": "{Q185678}"
+    },
+    "saint-vincent-and-the-grenadines": {
+      "front": "{Q757}",
+      "back": "{Q41474}"
+    },
+    "samoa": {
+      "front": "{Q683}",
+      "back": "{Q36260}"
+    },
+    "san-marino": {
+      "front": "{Q238}",
+      "back": "{Q1848}"
+    },
+    "sao-tome-and-principe": {
+      "front": "{Q1039}",
+      "back": "{Q3932}"
+    },
+    "saudi-arabia": {
+      "front": "{Q851}",
+      "back": "{Q3692}"
+    },
+    "senegal": {
+      "front": "{Q1041}",
+      "back": "{Q3718}"
+    },
+    "serbia": {
+      "front": "{Q403}",
+      "back": "{Q3711}"
+    },
+    "seychelles": {
+      "front": "{Q1042}",
+      "back": "{Q3940}"
+    },
+    "sierra-leone": {
+      "front": "{Q1044}",
+      "back": "{Q3780}"
+    },
+    "singapore": {
+      "front": "{Q334}",
+      "back": "{Q334}"
+    },
+    "sint-maarten": {
+      "front": "{Q26273}",
+      "back": "{Q30958}",
+      "not": {
+        "es": [
+          "San Martín"
+        ],
+        "fr": [
+          "Saint-Martin"
+        ]
+      }
+    },
+    "slovakia": {
+      "front": "{Q214}",
+      "back": "{Q1780}"
+    },
+    "slovenia": {
+      "front": "{Q215}",
+      "back": "{Q437}"
+    },
+    "solomon-islands": {
+      "front": "{Q685}",
+      "back": "{Q40921}"
+    },
+    "somalia": {
+      "front": "{Q1045}",
+      "back": "{Q2449}"
+    },
+    "somaliland": {
+      "front": "{Q34754}",
+      "back": "{Q168652}"
+    },
+    "south-africa": {
+      "front": "{Q258}",
+      "back": {
+        "frame": "three-capitals",
+        "items": [
+          "Q3926",
+          "Q5465",
+          "Q37701"
+        ]
+      }
+    },
+    "south-georgia-and-the-south-sandwich-islands": {
+      "front": "{Q35086}",
+      "back": "{Q393878}"
+    },
+    "south-korea": {
+      "front": "{Q884}",
+      "back": "{Q8684}"
+    },
+    "south-ossetia": {
+      "front": "{Q23427}",
+      "back": "{Q79863}",
+      "not": {
+        "es": [
+          "Tsjinval"
+        ],
+        "fr": [
+          "Ossétie du Sud-Alanie"
+        ]
+      }
+    },
+    "south-sudan": {
+      "front": "{Q958}",
+      "back": "{Q1947}"
+    },
+    "spain": {
+      "front": "{Q29}",
+      "back": "{Q2807}"
+    },
+    "sri-lanka": {
+      "front": "{Q854}",
+      "back": "{Q41963}",
+      "not": {
+        "fr": [
+          "Sri Jayawardenapura"
+        ]
+      }
+    },
+    "sudan": {
+      "front": "{Q1049}",
+      "back": "{Q1963}"
+    },
+    "suriname": {
+      "front": "{Q730}",
+      "back": "{Q3001}"
+    },
+    "sweden": {
+      "front": "{Q34}",
+      "back": "{Q1754}"
+    },
+    "switzerland": {
+      "front": "{Q39}",
+      "back": "{Q70}"
+    },
+    "syria": {
+      "front": "{Q858}",
+      "back": "{Q3766}"
+    },
+    "taiwan": {
+      "front": "{Q865}",
+      "back": "{Q1867}",
+      "not": {
+        "es": [
+          "República de China"
+        ],
+        "ko": [
+          "중화민국"
+        ]
+      }
+    },
+    "tajikistan": {
+      "front": "{Q863}",
+      "back": "{Q9365}"
+    },
+    "tanzania": {
+      "front": "{Q924}",
+      "back": "{Q3866}"
+    },
+    "thailand": {
+      "front": "{Q869}",
+      "back": "{Q1861}"
+    },
+    "togo": {
+      "front": "{Q945}",
+      "back": "{Q3792}"
+    },
+    "tonga": {
+      "front": "{Q678}",
+      "back": "{Q38834}"
+    },
+    "transnistria": {
+      "front": "{Q907112}",
+      "back": "{Q132572}",
+      "not": {
+        "de": [
+          "Pridnestrowien"
+        ]
+      }
+    },
+    "trinidad-and-tobago": {
+      "front": "{Q754}",
+      "back": "{Q39178}"
+    },
+    "tristan-da-cunha": {
+      "front": "{Q220982}",
+      "back": "{Q498153}"
+    },
+    "tunisia": {
+      "front": "{Q948}",
+      "back": "{Q3572}"
+    },
+    "turkey": {
+      "front": "{Q43}",
+      "back": "{Q3640}"
+    },
+    "turkmenistan": {
+      "front": "{Q874}",
+      "back": "{Q23438}"
+    },
+    "turks-and-caicos-islands": {
+      "front": "{Q18221}",
+      "back": "{Q34205}"
+    },
+    "tuvalu": {
+      "front": "{Q672}",
+      "back": "{Q34126}"
+    },
+    "uganda": {
+      "front": "{Q1036}",
+      "back": "{Q3894}"
+    },
+    "ukraine": {
+      "front": "{Q212}",
+      "back": "{Q1899}"
+    },
+    "united-arab-emirates": {
+      "front": "{Q878}",
+      "back": "{Q1519}"
+    },
+    "united-kingdom": {
+      "front": "{Q145}",
+      "back": "{Q84}"
+    },
+    "united-states": {
+      "front": "{Q30}",
+      "back": "{Q61}"
+    },
+    "united-states-virgin-islands": {
+      "front": "{Q11703}",
+      "back": "{Q51681}"
+    },
+    "uruguay": {
+      "front": "{Q77}",
+      "back": "{Q1335}"
+    },
+    "uzbekistan": {
+      "front": "{Q265}",
+      "back": "{Q269}"
+    },
+    "vanuatu": {
+      "front": "{Q686}",
+      "back": "{Q37806}"
+    },
+    "vatican-city": {
+      "front": "{Q237}",
+      "back": "{Q237}"
+    },
+    "venezuela": {
+      "front": "{Q717}",
+      "back": "{Q1533}"
+    },
+    "vietnam": {
+      "front": "{Q881}",
+      "back": "{Q1858}"
+    },
+    "wallis-and-futuna": {
+      "front": "{Q35555}",
+      "back": "{Q31002}"
+    },
+    "western-sahara": {
+      "front": "{Q6250}",
+      "back": "{Q47837}"
+    },
+    "yemen": {
+      "front": "{Q805}",
+      "back": "{Q131694}"
+    },
+    "zambia": {
+      "front": "{Q953}",
+      "back": "{Q3881}"
+    },
+    "zimbabwe": {
+      "front": "{Q954}",
+      "back": "{Q3921}"
+    }
+  }
+}

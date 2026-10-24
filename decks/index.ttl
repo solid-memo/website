@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-23T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-24T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -1011,12 +1011,12 @@
                   "Hauptstädte der Welt"@de ,
                   "Capitales del mundo"@es ,
                   "Capitales du monde"@fr ;
-    dcterms:description "Every country and its capital city, in English and Swedish. Compiled from Wikipedia's List of national capitals and Wikidata's capital property; the Swedish names from Wikidata, following the Swedish Language Council where they differ."@en ,
-                        "Varje land och dess huvudstad, på engelska och svenska. Sammanställd från Wikipedias lista över nationella huvudstäder och Wikidatas egenskap för huvudstad; de svenska namnen från Wikidata, enligt Språkrådets rekommendationer där de skiljer sig åt."@sv ,
-                        "모든 나라와 그 수도를 영어와 스웨덴어로 담았습니다. 위키백과의 국가 수도 목록과 위키데이터의 수도 속성으로 엮었고, 스웨덴어 이름은 위키데이터에서 가져오되 서로 다를 때는 스웨덴 언어위원회를 따랐습니다."@ko ,
-                        "Jedes Land und seine Hauptstadt, auf Englisch und Schwedisch. Zusammengestellt aus der Wikipedia-Liste nationaler Hauptstädte und der Hauptstadt-Eigenschaft von Wikidata; die schwedischen Namen stammen von Wikidata und folgen, wo sie abweichen, dem schwedischen Sprachrat."@de ,
-                        "Cada país y su capital, en inglés y sueco. Recopilado a partir de la lista de capitales nacionales de Wikipedia y la propiedad «capital» de Wikidata; los nombres suecos proceden de Wikidata y siguen al Consejo de la Lengua Sueca donde difieren."@es ,
-                        "Chaque pays et sa capitale, en anglais et en suédois. Compilé à partir de la liste des capitales nationales de Wikipédia et de la propriété « capitale » de Wikidata ; les noms suédois proviennent de Wikidata et suivent le Conseil de la langue suédoise lorsqu’ils diffèrent."@fr ;
+    dcterms:description "Every country and its capital city, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Compiled from Wikipedia's List of national capitals and Wikidata's capital property; the Swedish names from Wikidata, following the Swedish Language Council where they differ."@en ,
+                        "Varje land och dess huvudstad, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Sammanställd från Wikipedias lista över nationella huvudstäder och Wikidatas egenskap för huvudstad; de svenska namnen från Wikidata, enligt Språkrådets rekommendationer där de skiljer sig åt."@sv ,
+                        "모든 나라와 그 수도를 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키백과의 국가 수도 목록과 위키데이터의 수도 속성으로 엮었고, 스웨덴어 이름은 위키데이터에서 가져오되 서로 다를 때는 스웨덴 언어위원회를 따랐습니다."@ko ,
+                        "Jedes Land und seine Hauptstadt, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Zusammengestellt aus der Wikipedia-Liste nationaler Hauptstädte und der Hauptstadt-Eigenschaft von Wikidata; die schwedischen Namen stammen von Wikidata und folgen, wo sie abweichen, dem schwedischen Sprachrat."@de ,
+                        "Cada país y su capital, en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Recopilado a partir de la lista de capitales nacionales de Wikipedia y la propiedad «capital» de Wikidata; los nombres suecos proceden de Wikidata y siguen al Consejo de la Lengua Sueca donde difieren."@es ,
+                        "Chaque pays et sa capitale, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Compilé à partir de la liste des capitales nationales de Wikipédia et de la propriété « capitale » de Wikidata ; les noms suédois proviennent de Wikidata et suivent le Conseil de la langue suédoise lorsqu’ils diffèrent."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -1041,11 +1041,12 @@
                  "pays"@fr ,
                  "géographie"@fr ;
     dcat:first <https://solid-memo.com/decks/capitals-of-the-world/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ;
+    dcat:last <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/capitals-of-the-world/v1.ttl> ,
                     <https://solid-memo.com/decks/capitals-of-the-world/v2.ttl> ,
-                    <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> .
+                    <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ,
+                    <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl> .
 
 <https://solid-memo.com/decks/capitals-of-the-world/v1.ttl>
     a dcat:Dataset ;
@@ -1076,6 +1077,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Capitals of the world"@en ,
+                  "Världens huvudstäder"@sv ,
+                  "세계의 수도"@ko ,
+                  "Hauptstädte der Welt"@de ,
+                  "Capitales del mundo"@es ,
+                  "Capitales du monde"@fr ;
+    dcterms:description "Every country and its capital city, in English and Swedish. Compiled from Wikipedia's List of national capitals and Wikidata's capital property; the Swedish names from Wikidata, following the Swedish Language Council where they differ."@en ,
+                        "Varje land och dess huvudstad, på engelska och svenska. Sammanställd från Wikipedias lista över nationella huvudstäder och Wikidatas egenskap för huvudstad; de svenska namnen från Wikidata, enligt Språkrådets rekommendationer där de skiljer sig åt."@sv ,
+                        "모든 나라와 그 수도를 영어와 스웨덴어로 담았습니다. 위키백과의 국가 수도 목록과 위키데이터의 수도 속성으로 엮었고, 스웨덴어 이름은 위키데이터에서 가져오되 서로 다를 때는 스웨덴 언어위원회를 따랐습니다."@ko ,
+                        "Jedes Land und seine Hauptstadt, auf Englisch und Schwedisch. Zusammengestellt aus der Wikipedia-Liste nationaler Hauptstädte und der Hauptstadt-Eigenschaft von Wikidata; die schwedischen Namen stammen von Wikidata und folgen, wo sie abweichen, dem schwedischen Sprachrat."@de ,
+                        "Cada país y su capital, en inglés y sueco. Recopilado a partir de la lista de capitales nacionales de Wikipedia y la propiedad «capital» de Wikidata; los nombres suecos proceden de Wikidata y siguen al Consejo de la Lengua Sueca donde difieren."@es ,
+                        "Chaque pays et sa capitale, en anglais et en suédois. Compilé à partir de la liste des capitales nationales de Wikipédia et de la propriété « capitale » de Wikidata ; les noms suédois proviennent de Wikidata et suivent le Conseil de la langue suédoise lorsqu’ils diffèrent."@fr ;
+    dcat:version "3" ;
+    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each front is labeled \"Country or territory\" and each back \"Capital\", in English and Swedish, so a card studied either way says what is asked (card format 6); no card's text was changed." .
+
+<https://solid-memo.com/decks/capitals-of-the-world/v4.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Capitals of the world"@en ,
@@ -1084,18 +1103,20 @@
                   "Hauptstädte der Welt"@de ,
                   "Capitales del mundo"@es ,
                   "Capitales du monde"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "Every country and its capital city, in English and Swedish. Compiled from Wikipedia's List of national capitals and Wikidata's capital property; the Swedish names from Wikidata, following the Swedish Language Council where they differ."@en ,
-                        "Varje land och dess huvudstad, på engelska och svenska. Sammanställd från Wikipedias lista över nationella huvudstäder och Wikidatas egenskap för huvudstad; de svenska namnen från Wikidata, enligt Språkrådets rekommendationer där de skiljer sig åt."@sv ,
-                        "모든 나라와 그 수도를 영어와 스웨덴어로 담았습니다. 위키백과의 국가 수도 목록과 위키데이터의 수도 속성으로 엮었고, 스웨덴어 이름은 위키데이터에서 가져오되 서로 다를 때는 스웨덴 언어위원회를 따랐습니다."@ko ,
-                        "Jedes Land und seine Hauptstadt, auf Englisch und Schwedisch. Zusammengestellt aus der Wikipedia-Liste nationaler Hauptstädte und der Hauptstadt-Eigenschaft von Wikidata; die schwedischen Namen stammen von Wikidata und folgen, wo sie abweichen, dem schwedischen Sprachrat."@de ,
-                        "Cada país y su capital, en inglés y sueco. Recopilado a partir de la lista de capitales nacionales de Wikipedia y la propiedad «capital» de Wikidata; los nombres suecos proceden de Wikidata y siguen al Consejo de la Lengua Sueca donde difieren."@es ,
-                        "Chaque pays et sa capitale, en anglais et en suédois. Compilé à partir de la liste des capitales nationales de Wikipédia et de la propriété « capitale » de Wikidata ; les noms suédois proviennent de Wikidata et suivent le Conseil de la langue suédoise lorsqu’ils diffèrent."@fr ;
+    dcterms:description "Every country and its capital city, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Compiled from Wikipedia's List of national capitals and Wikidata's capital property; the Swedish names from Wikidata, following the Swedish Language Council where they differ."@en ,
+                        "Varje land och dess huvudstad, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Sammanställd från Wikipedias lista över nationella huvudstäder och Wikidatas egenskap för huvudstad; de svenska namnen från Wikidata, enligt Språkrådets rekommendationer där de skiljer sig åt."@sv ,
+                        "모든 나라와 그 수도를 영어와 스웨덴어로, 그리고 위키데이터의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 담았습니다. 위키백과의 국가 수도 목록과 위키데이터의 수도 속성으로 엮었고, 스웨덴어 이름은 위키데이터에서 가져오되 서로 다를 때는 스웨덴 언어위원회를 따랐습니다."@ko ,
+                        "Jedes Land und seine Hauptstadt, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Zusammengestellt aus der Wikipedia-Liste nationaler Hauptstädte und der Hauptstadt-Eigenschaft von Wikidata; die schwedischen Namen stammen von Wikidata und folgen, wo sie abweichen, dem schwedischen Sprachrat."@de ,
+                        "Cada país y su capital, en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Recopilado a partir de la lista de capitales nacionales de Wikipedia y la propiedad «capital» de Wikidata; los nombres suecos proceden de Wikidata y siguen al Consejo de la Lengua Sueca donde difieren."@es ,
+                        "Chaque pays et sa capitale, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Compilé à partir de la liste des capitales nationales de Wikipédia et de la propriété « capitale » de Wikidata ; les noms suédois proviennent de Wikidata et suivent le Conseil de la langue suédoise lorsqu’ils diffèrent."@fr ;
     prov:wasDerivedFrom <https://en.wikipedia.org/wiki/List_of_national_capitals> ,
-                        <https://www.wikidata.org/wiki/Property:P36> ;
+                        <https://www.wikidata.org/wiki/Property:P36> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#wikidata-labels> ;
     dcterms:created "2026-09-22T09:49:00.236Z"^^xsd:dateTime ;
-    dcterms:modified "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-24T00:00:00Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
     dcat:keyword "capitals"@en ,
@@ -1119,26 +1140,30 @@
                  "pays"@fr ,
                  "géographie"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
     solid-memo:formatVersion 6 ;
-    dcat:version "3" ;
-    dcat:prev <https://solid-memo.com/decks/capitals-of-the-world/v2.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/capitals-of-the-world/v2.ttl> ;
-    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Each front is labeled \"Country or territory\" and each back \"Capital\", in English and Swedish, so a card studied either way says what is asked (card format 6); no card's text was changed." ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 243 cards in use, 237 in Korean, 239 in German, 236 in Spanish, 240 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject)." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#capitals-of-the-world> ;
     dcat:isVersionOf <#capitals-of-the-world> ;
-    dcat:contactPoint <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#turtle> ;
     solid-memo:cardCount 243 .
 
-<https://solid-memo.com/decks/capitals-of-the-world/v3.ttl#anton-wiklund>
+<https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/capitals-of-the-world/v3.ttl#contact>
+<https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
@@ -1152,10 +1177,51 @@
     dcterms:creator "Wikidata contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
 
-<https://solid-memo.com/decks/capitals-of-the-world/v3.ttl#turtle>
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:title "Wikidata (English lexemes and items)" ,
+                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
+                  "Wikidata (Finnish lexemes and items)" ,
+                  "Wikidata (French lexemes and items)" ,
+                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
+                  "Wikidata (German lexemes and items)" ,
+                  "Wikidata (Italian lexemes and items)" ,
+                  "Wikidata (Japanese lexemes and items)" ,
+                  "Wikidata (Korean lexemes and items)" ,
+                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
+                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
+                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
+                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
+                  "Wikidata (Portuguese lexemes and items)" ,
+                  "Wikidata (Spanish lexemes and items)" ,
+                  "Wikidata (Swedish lexemes and items)" ,
+                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
+                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
+
+<https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/capitals-of-the-world.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "29c60397d08a1e966d2f475060e088c28b5d961a3384122e4257d13306badf07"^^xsd:hexBinary ] .
+
+<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "wikidata_labels.py" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+
+<http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
+    a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
+
+<https://solid-memo.com/decks/capitals-of-the-world/v4.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/capitals-of-the-world/v3.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/capitals-of-the-world/v4.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -1286,31 +1352,6 @@
 
 <https://solid-memo.com/decks/chemical-compounds/v2.ttl#compilation>
     a prov:Activity .
-
-<https://www.wikidata.org/>
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:title "Wikidata (English lexemes and items)" ,
-                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
-                  "Wikidata (Finnish lexemes and items)" ,
-                  "Wikidata (French lexemes and items)" ,
-                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
-                  "Wikidata (German lexemes and items)" ,
-                  "Wikidata (Italian lexemes and items)" ,
-                  "Wikidata (Japanese lexemes and items)" ,
-                  "Wikidata (Korean lexemes and items)" ,
-                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
-                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
-                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
-                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
-                  "Wikidata (Portuguese lexemes and items)" ,
-                  "Wikidata (Spanish lexemes and items)" ,
-                  "Wikidata (Swedish lexemes and items)" ,
-                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
-                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
 
 <https://pubchem.ncbi.nlm.nih.gov/>
     dcterms:title "PubChem" ;
@@ -16902,9 +16943,6 @@
 <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
-
-<http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
-    a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
 
 <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v3.ttl#generation>
     a prov:Activity .
