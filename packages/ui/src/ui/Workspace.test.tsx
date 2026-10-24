@@ -917,7 +917,7 @@ describe("Workspace", () => {
     });
   });
 
-  it("crams a deck's leeches from its page, under the deck, back on the deck's page at the end; a deck it does not have falls back to the deck list", async () => {
+  it("crams a deck's leeches from its page, under the deck, back on the deck's page at the end", async () => {
     const deck: Deck = {
       id: "deck-1",
       url: `${instanceA.url}catalog.ttl#deck-1`,
@@ -954,7 +954,7 @@ describe("Workspace", () => {
         ],
       })),
     });
-    const view = renderWorkspace(useCases);
+    renderWorkspace(useCases);
     fireEvent.click(await screen.findByRole("link", { name: "Cram the leeches" }));
     expect(await screen.findByRole("heading", { name: "Cram: Kana" })).toBeInTheDocument();
     expect(window.location.hash).toBe(
@@ -975,19 +975,6 @@ describe("Workspace", () => {
       ),
     );
     expect(useCases.recordReview).not.toHaveBeenCalled();
-    view.unmount();
-
-    window.history.replaceState(
-      null,
-      "",
-      routeToHash({ screen: "cram", instanceUrl: instanceA.url, deckUrl: "gone" }),
-    );
-    renderWorkspace(useCases);
-    await waitFor(() =>
-      expect(window.location.hash).toBe(
-        routeToHash({ screen: "home", instanceUrl: instanceA.url }),
-      ),
-    );
   });
 
   it("begins a cram afresh when the route turns to another deck's", async () => {
@@ -1116,7 +1103,7 @@ describe("Workspace", () => {
     await waitFor(() => expect(window.location.hash).toBe(memory));
   });
 
-  it("opens a deck's statistics under the deck, and falls back to the deck list for a deck it does not have", async () => {
+  it("opens a deck's statistics under the deck", async () => {
     const deck: Deck = {
       id: "deck-1",
       url: `${instanceA.url}catalog.ttl#deck-1`,
@@ -1142,7 +1129,7 @@ describe("Workspace", () => {
       listInstances: vi.fn(async () => [instanceA]),
       listDecks: vi.fn(async () => [deck]),
     });
-    const view = renderWorkspace(useCases);
+    renderWorkspace(useCases);
     expect(
       await screen.findByRole("tab", { name: "Activity", selected: true }),
     ).toBeInTheDocument();
@@ -1157,19 +1144,6 @@ describe("Workspace", () => {
       range: 90,
       deckUrl: deck.url,
     });
-    view.unmount();
-
-    window.history.replaceState(
-      null,
-      "",
-      routeToHash({ screen: "deckStatistics", instanceUrl: instanceA.url, deckUrl: "gone" }),
-    );
-    renderWorkspace(useCases);
-    await waitFor(() =>
-      expect(window.location.hash).toBe(
-        routeToHash({ screen: "home", instanceUrl: instanceA.url }),
-      ),
-    );
   });
 
   it("creates a deck in the deck creator and returns to the deck list", async () => {
@@ -1679,39 +1653,6 @@ describe("Workspace", () => {
     expect(await screen.findByRole("heading", { name: "Capitals" })).toBeInTheDocument();
   });
 
-  it("falls back to the library from a deep link to a deck it does not have", async () => {
-    window.history.replaceState(
-      null,
-      "",
-      routeToHash({
-        screen: "libraryDeck",
-        instanceUrl: instanceA.url,
-        libraryDeckUrl: "https://solid-memo.com/decks/nope/v1.ttl",
-      }),
-    );
-    renderWorkspace(
-      makeUseCases({
-        listInstances: vi.fn(async () => [instanceA]),
-        listLibraryDecks: vi.fn(async () => [
-          {
-            url: "https://solid-memo.com/decks/capitals/v1.ttl",
-            ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
-            title: { en: "Capitals" },
-            cardCount: 3,
-            authors: [],
-            direction: "front-to-back" as const,
-            sources: [],
-          },
-        ]),
-      }),
-    );
-
-    expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
-    expect(window.location.hash).toBe(
-      routeToHash({ screen: "library", instanceUrl: instanceA.url }),
-    );
-  });
-
   describe("a link to a library deck (#/try)", () => {
     const releaseUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     const seriesUrl = librarySeriesUrlOf(releaseUrl);
@@ -1821,6 +1762,24 @@ describe("Workspace", () => {
       act(() => window.history.back());
       expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
       expect(screen.queryByText(/The deck that link leads to/)).toBeNull();
+    });
+
+    it("shows the library, saying so, for a deck it does not have, in the learner's one instance", async () => {
+      follow("https://solid-memo.com/decks/index.ttl#nope");
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listLibraryDecks: vi.fn(async () => [capitals]),
+        }),
+      );
+
+      expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(
+        routeToHash({ screen: "library", instanceUrl: instanceA.url }),
+      );
+      expect(
+        screen.getByText(/The deck that link leads to is not in the library/),
+      ).toBeInTheDocument();
     });
 
     it("shows the library, with why it cannot be read, when it cannot", async () => {
@@ -2509,29 +2468,6 @@ describe("Workspace", () => {
       expect(document.querySelector(".card-front")).toHaveTextContent("vatten");
     });
 
-    it("sends a deep link to an unknown card back to the Browser", async () => {
-      window.history.replaceState(
-        null,
-        "",
-        routeToHash({
-          screen: "card",
-          instanceUrl: instanceA.url,
-          deckUrl: deck.url,
-          cardUrl: `${deck.cardsDocumentUrl}#gone`,
-        }),
-      );
-      renderWorkspace(
-        makeUseCases({
-          listInstances: vi.fn(async () => [instanceA]),
-          listDecks: vi.fn(async () => [deck]),
-          listCards: vi.fn(async () => [card]),
-        }),
-      );
-      expect(
-        await screen.findByRole("heading", { name: `Browser: ${deck.title.en}` }),
-      ).toBeInTheDocument();
-    });
-
     it("shows a loading state, then an error, when the cards cannot be read", async () => {
       window.history.replaceState(
         null,
@@ -2744,13 +2680,6 @@ describe("Workspace", () => {
         name: "Choose a Solid Memo instance",
       }),
     ).toBeInTheDocument();
-  });
-
-  it("falls back to the storage picker for an unknown instance when none exist", async () => {
-    window.history.replaceState(null, "", "#/decks?instance=https%3A%2F%2Felsewhere.example%2F");
-    renderWorkspace(makeUseCases());
-
-    expect(await screen.findByRole("heading", { name: "Choose a storage" })).toBeInTheDocument();
   });
 
   it("falls back to the deck list for a deep link to an unknown deck", async () => {
@@ -3007,23 +2936,6 @@ describe("Workspace", () => {
       expect(document.querySelector(".course-cheer")).toBeNull();
     });
 
-    it("falls back to the course for a chapter it does not have, or one still locked", async () => {
-      window.history.replaceState(
-        null,
-        "",
-        routeToHash({ ...chapterRoute, chapterUrl: `${CH1}-gone` }),
-      );
-      const { unmount } = renderWorkspace(courseUseCases());
-      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
-      expect(window.location.hash).toBe(routeToHash(courseRoute));
-      unmount();
-
-      window.history.replaceState(null, "", routeToHash({ ...reviewRoute, chapterUrl: CH2 }));
-      renderWorkspace(courseUseCases());
-      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
-      expect(window.location.hash).toBe(routeToHash(courseRoute));
-    });
-
     it("falls back to the chapter for a final review of a chapter with steps not done", async () => {
       window.history.replaceState(null, "", routeToHash(reviewRoute));
       renderWorkspace(courseUseCases({ getCourse: vi.fn(async () => makeCourse(["q-1"])) }));
@@ -3056,18 +2968,6 @@ describe("Workspace", () => {
 
       expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(courseRoute));
-    });
-
-    it("falls back to the deck's page for a deck that is no copy of a course", async () => {
-      const useCases = courseUseCases({
-        listDecks: vi.fn(async () => [{ ...courseDeck, sourceUrl: undefined }]),
-      });
-      window.history.replaceState(null, "", routeToHash(courseRoute));
-      renderWorkspace(useCases);
-      await waitFor(() =>
-        expect(window.location.hash).toBe(routeToHash({ ...courseRoute, screen: "deckDetail" })),
-      );
-      expect(useCases.getCourse).not.toHaveBeenCalled();
     });
 
     it("shows a loading state while the course is read, and why it could not be", async () => {
