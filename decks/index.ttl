@@ -1219,6 +1219,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -4413,12 +4414,12 @@
                   "Gliedstaaten und Hauptstädte: Deutschland, Österreich, Kanada, Australien"@de ,
                   "Estados y capitales: Alemania, Austria, Canadá, Australia"@es ,
                   "États et capitales : Allemagne, Autriche, Canada, Australie"@fr ;
-    dcterms:description "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin."@en ,
-                        "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin."@sv ,
-                        "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다."@ko ,
-                        "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen."@de ,
-                        "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin."@es ,
-                        "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."@fr ;
+    dcterms:description "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin."@en ,
+                        "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다."@ko ,
+                        "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen."@de ,
+                        "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin."@es ,
+                        "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -4459,11 +4460,12 @@
                  "Canada"@fr ,
                  "Australie"@fr ;
     dcat:first <https://solid-memo.com/decks/federal-states-and-capitals/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
+    dcat:last <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/federal-states-and-capitals/v1.ttl> ,
                     <https://solid-memo.com/decks/federal-states-and-capitals/v2.ttl> ,
-                    <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> .
+                    <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ,
+                    <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl> .
 
 <https://solid-memo.com/decks/federal-states-and-capitals/v1.ttl>
     a dcat:Dataset ;
@@ -4494,6 +4496,24 @@
     adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
 
 <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl>
+    a dcat:Dataset ;
+    dcterms:title "States and capitals: Germany, Austria, Canada, Australia"@en ,
+                  "Delstater och huvudstäder: Tyskland, Österrike, Kanada, Australien"@sv ,
+                  "주와 주도: 독일, 오스트리아, 캐나다, 오스트레일리아"@ko ,
+                  "Gliedstaaten und Hauptstädte: Deutschland, Österreich, Kanada, Australien"@de ,
+                  "Estados y capitales: Alemania, Austria, Canadá, Australia"@es ,
+                  "États et capitales : Allemagne, Autriche, Canada, Australie"@fr ;
+    dcterms:description "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin."@en ,
+                        "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다."@ko ,
+                        "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen."@de ,
+                        "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin."@es ,
+                        "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."@fr ;
+    dcat:version "3" ;
+    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each back is labeled \"Capital\", in English and Swedish, so the card says what it answers (card format 6); no card's text was changed." .
+
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "States and capitals: Germany, Austria, Canada, Australia"@en ,
@@ -4502,16 +4522,18 @@
                   "Gliedstaaten und Hauptstädte: Deutschland, Österreich, Kanada, Australien"@de ,
                   "Estados y capitales: Alemania, Austria, Canadá, Australia"@es ,
                   "États et capitales : Allemagne, Autriche, Canada, Australie"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin."@en ,
-                        "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin."@sv ,
-                        "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다."@ko ,
-                        "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen."@de ,
-                        "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin."@es ,
-                        "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."@fr ;
-    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q1221156> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#compilation> ;
+    dcterms:description "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin."@en ,
+                        "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다."@ko ,
+                        "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen."@de ,
+                        "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin."@es ,
+                        "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q1221156> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#compilation> ,
+                        <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -4552,30 +4574,34 @@
                  "Canada"@fr ,
                  "Australie"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 6 ;
-    dcat:version "3" ;
-    dcat:prev <https://solid-memo.com/decks/federal-states-and-capitals/v2.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/federal-states-and-capitals/v2.ttl> ;
-    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Each back is labeled \"Capital\", in English and Swedish, so the card says what it answers (card format 6); no card's text was changed." ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 46 cards in use, 46 in Korean, 44 in German, 45 in Spanish, 46 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject)." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#federal-states-and-capitals> ;
     dcat:isVersionOf <#federal-states-and-capitals> ;
-    dcat:contactPoint <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#contact> ;
-    dcat:distribution <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#turtle> ;
     solid-memo:cardCount 46 .
 
-<https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#anton-wiklund>
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#contact>
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#contact>
     a vcard:Kind ;
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
-<https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#compilation>
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#compilation>
     a prov:Activity .
 
 <https://www.wikidata.org/wiki/Q1221156>
@@ -4614,10 +4640,18 @@
     dcterms:title "Nationalencyklopedin (NE), uppslagsverket, entries for the Greek letter names" ,
                   "Nationalencyklopedin (NE), the articles on the 50 states" .
 
-<https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl#turtle>
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/federal-states-and-capitals.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "2d4cb4f1cb7ca2aafb57944d8e8e46b04e1d660e80caf7dc46e31885560753ae"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 

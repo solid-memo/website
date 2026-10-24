@@ -1,0 +1,1600 @@
+@base <https://solid-memo.com/decks/federal-states-and-capitals/v4.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+@prefix spdx:       <http://spdx.org/rdf/terms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "States and capitals: Germany, Austria, Canada, Australia"@en ,
+                  "Delstater och huvudstäder: Tyskland, Österrike, Kanada, Australien"@sv ,
+                  "주와 주도: 독일, 오스트리아, 캐나다, 오스트레일리아"@ko ,
+                  "Gliedstaaten und Hauptstädte: Deutschland, Österreich, Kanada, Australien"@de ,
+                  "Estados y capitales: Alemania, Austria, Canadá, Australia"@es ,
+                  "États et capitales : Allemagne, Autriche, Canada, Australie"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The constituent states of four federations and their capitals, as of October 2026: Germany's 16 and Austria's 9 states, Canada's 10 provinces and 3 territories, and Australia's 6 states and 2 self-governing mainland territories, 46 cards. Front: the state, province or territory, e.g. \"Bavaria\" (Swedish \"Bayern\"), with its country in a note; back: its capital, e.g. \"Munich\" (\"München\"). For Berlin, Hamburg and Vienna, cities that are themselves states, the answer is the city itself. The cards are in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. Taken from Wikidata and checked against official sites of each country, the Swedish Wikipedia and Nationalencyklopedin."@en ,
+                        "Delstaterna i fyra förbundsstater och deras huvudstäder, enligt läget i oktober 2026: Tysklands 16 och Österrikes 9 förbundsländer, Kanadas 10 provinser och 3 territorier samt Australiens 6 delstater och 2 självstyrande fastlandsterritorier, 46 kort. Framsida: delstaten, provinsen eller territoriet, t.ex. ”Bayern”, med landet i en anteckning; baksida: huvudstaden, t.ex. ”München”. För Berlin, Hamburg och Wien, städer som själva är förbundsländer, är svaret staden själv. Korten finns på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Uppgifterna är hämtade från Wikidata och kontrollerade mot officiella webbplatser i varje land, svenskspråkiga Wikipedia och Nationalencyklopedin."@sv ,
+                        "2026년 10월 기준 네 연방 국가의 구성 주와 그 주도입니다. 독일의 주 16개와 오스트리아의 주 9개, 캐나다의 주 10개와 준주 3개, 오스트레일리아의 주 6개와 본토 자치 준주 2개로, 카드 46장입니다. 앞면에는 ‘Bavaria’(스웨덴어 ‘Bayern’)처럼 주나 준주가, 메모에 그 나라가 있고, 뒷면에는 ‘Munich’(‘München’)처럼 그 주도가 있습니다. 도시 자체가 주인 베를린, 함부르크, 빈은 그 도시가 답입니다. 카드는 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 되어 있습니다. Wikidata에서 가져와 각 나라의 공식 사이트, 스웨덴어 위키백과, Nationalencyklopedin으로 확인했습니다."@ko ,
+                        "Die Gliedstaaten von vier Bundesstaaten und ihre Hauptstädte, Stand Oktober 2026: die 16 Länder Deutschlands und die 9 Länder Österreichs, die 10 Provinzen und 3 Territorien Kanadas sowie die 6 Bundesstaaten und 2 selbstverwalteten Festlandterritorien Australiens, 46 Karten. Vorderseite: der Gliedstaat, die Provinz oder das Territorium, z. B. „Bavaria“ (schwedisch „Bayern“), mit dem zugehörigen Staat in einer Anmerkung; Rückseite: die Hauptstadt, z. B. „Munich“ („München“). Bei Berlin, Hamburg und Wien, Städten, die selbst Länder sind, ist die Antwort die Stadt selbst. Die Karten sind auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Aus Wikidata übernommen und mit offiziellen Websites der einzelnen Staaten, der schwedischsprachigen Wikipedia und der Nationalencyklopedin abgeglichen."@de ,
+                        "Los estados que forman cuatro federaciones y sus capitales, a octubre de 2026: los 16 estados de Alemania y los 9 de Austria, las 10 provincias y los 3 territorios de Canadá, y los 6 estados y los 2 territorios continentales autónomos de Australia, 46 tarjetas. Anverso: el estado, la provincia o el territorio, p. ej., «Bavaria» (en sueco, «Bayern»), con su país en una nota; reverso: su capital, p. ej., «Munich» («München»). Para Berlín, Hamburgo y Viena, ciudades que son a la vez estados, la respuesta es la propia ciudad. Las tarjetas están en inglés y sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. Tomado de Wikidata y comprobado con los sitios oficiales de cada país, la Wikipedia en sueco y la Nationalencyklopedin."@es ,
+                        "Les entités fédérées de quatre fédérations et leurs capitales, en octobre 2026 : les 16 Länder d’Allemagne et les 9 d’Autriche, les 10 provinces et 3 territoires du Canada, et les 6 États et 2 territoires continentaux autonomes d’Australie, 46 cartes. Recto : l’État, la province ou le territoire, p. ex. « Bavaria » (en suédois « Bayern »), avec son pays dans une note ; verso : sa capitale, p. ex. « Munich » (« München »). Pour Berlin, Hambourg et Vienne, villes qui sont elles-mêmes des Länder, la réponse est la ville elle-même. Les cartes sont en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. Tiré de Wikidata et vérifié sur les sites officiels de chaque pays, dans la Wikipédia en suédois et dans la Nationalencyklopedin."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q1221156> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ,
+                        <#wikidata-labels> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "federal states"@en ,
+                 "capitals"@en ,
+                 "Germany"@en ,
+                 "Austria"@en ,
+                 "Canada"@en ,
+                 "Australia"@en ,
+                 "delstater"@sv ,
+                 "huvudstäder"@sv ,
+                 "Tyskland"@sv ,
+                 "Österrike"@sv ,
+                 "Kanada"@sv ,
+                 "Australien"@sv ,
+                 "연방 주"@ko ,
+                 "주도"@ko ,
+                 "독일"@ko ,
+                 "오스트리아"@ko ,
+                 "캐나다"@ko ,
+                 "오스트레일리아"@ko ,
+                 "Bundesländer"@de ,
+                 "Hauptstädte"@de ,
+                 "Deutschland"@de ,
+                 "Österreich"@de ,
+                 "Kanada"@de ,
+                 "Australien"@de ,
+                 "estados federados"@es ,
+                 "capitales"@es ,
+                 "Alemania"@es ,
+                 "Austria"@es ,
+                 "Canadá"@es ,
+                 "Australia"@es ,
+                 "États fédérés"@fr ,
+                 "capitales"@fr ,
+                 "Allemagne"@fr ,
+                 "Autriche"@fr ,
+                 "Canada"@fr ,
+                 "Australie"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "4" ;
+    dcat:prev <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 46 cards in use, 46 in Korean, 44 in German, 45 in Spanish, 46 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject)." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#federal-states-and-capitals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#federal-states-and-capitals> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q1221156> ,
+              <https://www.bundesrat.de/DE/bundesrat/laender/laender-node.html> ,
+              <https://www.migration.gv.at/de/leben-und-arbeiten-in-oesterreich/oesterreich-stellt-sich-vor/geografie-und-bevoelkerung/> ,
+              <https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10000138&Artikel=108> ,
+              <https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html> ,
+              <https://www.australia.com/en/facts-and-planning/about-australia/cities-states-and-territories.html> ,
+              <https://sv.wikipedia.org/wiki/Tysklands_f%C3%B6rbundsl%C3%A4nder> ,
+              <https://www.ne.se/uppslagsverk/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Selection and capitals from Wikidata (query 1): every P150 (contains the administrative territorial entity) statement without an end time of Germany (Q183), Austria (Q40), Canada (Q16) and Australia (Q408), with the classes (P31) of each division, its P36 (capital) statements without an end time and their rank, and the English, Swedish and multilingual (mul) labels of division and capital. It returned 16 German divisions, all instances of \"federated state of Germany\" (Q1221156); 9 Austrian ones, all instances of \"federal state of Austria\" (Q261543); 13 Canadian ones, 10 instances of \"province of Canada\" (Q11828004) and 3 of \"territory of Canada\" (Q9357527); and 15 Australian ones: 6 instances of \"state of Australia\" (Q5852411), 3 \"mainland territories of Australia\" (Q14192234: the Australian Capital Territory, the Northern Territory and the Jervis Bay Territory) and 7 external territories. Every division in the deck has exactly one P36 statement without an end time, except Berlin (Q64), Hamburg (Q1055) and Vienna (Q1741), which have none: each is a single item that is both a city and a state (P31 includes Q133442, city-state). Query 2 read the further statements used in notes (Bremen's P150 and the P1448 official names of Klagenfurt and Quebec City) and the class and location of Q21882134, to confirm that this P36 value of Vorarlberg is the town of Bregenz."@en ,
+                 "2. Names from Wikidata (the script entities.py, query 3): the Wikidata API (wbgetentities) returned the English, Swedish, multilingual and German labels and aliases, the English and Swedish Wikipedia sitelinks and the claims of every division and capital of query 1 and of the class items. The front is the division's English and Swedish label. The back is the capital's English and Swedish label, with two exceptions: Fredericton (Q2138) has no English label, so its multilingual label is used; the English back of Carinthia is \"Klagenfurt\", the city's multilingual alias and the form the Austrian government table, NE and the Swedish label use, rather than the English label \"Klagenfurt am Wörthersee\", its official name (P1448), which the card gives in a note. The front notes give the federation and the kind of division in the compiler's own short wording, based on the class items Q1221156, Q261543, Q11828004, Q9357527, Q5852411 and Q14192234 (sv labels \"förbundsland\", \"Österrikes förbundsländer\", \"provins i Kanada\", \"territorium i Kanada\", \"delstat i Australien\", \"fastlandsterritorium i Australien\"): \"Förbundsland i Tyskland\", \"Förbundsland i Österrike\", \"Provins i Kanada\", \"Territorium i Kanada\", \"Delstat i Australien\", \"Territorium i Australien\"."@en ,
+                 "3. Official checks, one per federation, each page downloaded with curl (queries 4 to 7) and its text read after removing the HTML tags: Germany — the Bundesrat's page \"Die Länder\", whose box for each Land gives \"Hauptstadt: …\" for all 16 (\"Berlin Hauptstadt: Berlin\", \"Freie Hansestadt Bremen Hauptstadt: Bremen\", \"Freie und Hansestadt Hamburg Hauptstadt: Hamburg\"); Austria — the federal government's Migration.gv.at page \"Geografie und Bevölkerung\", whose table (\"Quelle: Statistik Austria (Stand 1.1.2026, vorläufige Daten)\") gives the Landeshauptstadt of eight Länder and a dash for Wien; for Vienna the federal constitution (B-VG Art. 108, from the Austrian legal information system RIS, query 8) was read; Canada — the citizenship guide Discover Canada (Immigration, Refugees and Citizenship Canada), chapter \"Canada's Regions\", whose table lists, per region, the provinces and territories and their capital cities in the same order; Australia — Tourism Australia's page \"Australian States, Territories and Capital Cities\", which names the capital in its section on each state and territory. The Australian government sources tried first gave no list of state capitals: Geoscience Australia's page on the areas of the states and territories and the Australian Bureau of Statistics' page on Greater Capital City Statistical Areas (both fetched, query 7) describe the capital cities without naming each state's capital, so they were not used. Each card's evidence quotes the line or sentence of the official page; the script make_dossier.py asserted that every quote occurs in the saved page text (with tags removed, white space collapsed and a space before a comma or full stop removed)."@en ,
+                 "4. Swedish names (queries 9 and 10): the four Swedish Wikipedia list articles \"Tysklands förbundsländer\", \"Österrikes förbundsländer\", \"Kanadas provinser och territorier\" and \"Australiens delstater och territorier\" were fetched as wikitext with their revision ids through the MediaWiki API (svwiki.py) and the division and capital cells of their tables parsed (parse_svwiki.py). For every card the Swedish front equals the name shown in the row and the Swedish back equals the capital's link text (for the city-states, the German table spans the row of Berlin and Hamburg over both columns, with the note \"Berlin och Hamburg är både städer och förbundsländer\", and the Austrian table has a dash for Wien). Nationalencyklopedin was then consulted (fetch_ne.py): the article on each division whose address could be found from its Swedish or English name (34 of the 46; Berlin, Hamburg, Bremen, Brandenburg, Saarland, Schleswig-Holstein, Salzburg, Alberta, Manitoba, Ontario, Saskatchewan and Victoria were not fetched or not found, and those cards rest on Wikidata, the official page and the Swedish Wikipedia), and the articles on München, Hannover, Düsseldorf, Sankt Pölten, Klagenfurt, Eisenstadt, Bregenz, Quebec (the city) and Canberra. The evidence quotes NE's short description phrase (e.g. \"delstat i södra Tyskland\") and, where present, the phrase naming the capital. Where NE's Swedish form differs from the card (Quebec, Newfoundland and Labrador, compounds written with an en dash) the card follows Wikidata's Swedish label and the Swedish Wikipedia; see quality control."@en ,
+                 "5. Assembly: make_dossier.py wrote the cards from the saved files: the Wikidata evidence from q1.csv and entities.json, the Swedish Wikipedia evidence from the parsed rows, and the official and NE evidence from the quotes listed in the script, each asserted to be present in the saved page. It also refuses a card whose division is not in query 1, is not an instance of its class, whose capital is not its P36 value, or whose English or Swedish text is not a label, alias or mul label of the item. The Wikidata checks on every card (division labels, class, capital, capital labels, and the statements behind the notes) are run against live Wikidata by the builder on every build."@en ,
+                 "6. The city-state convention: where one item is both the city and the state (Berlin, Hamburg, Vienna), the card's answer is the city itself, with the note \"City-state: the city is itself a state\"; the Bundesrat states the same for Berlin and Hamburg (\"Hauptstadt: Berlin\", \"Hauptstadt: Hamburg\"). Bremen is a city-state of two cities whose capital is the city of Bremen (Wikidata P36, the Bundesrat). For Vienna no source names a separate capital (the Austrian table leaves it blank); the card applies the same convention, and its note states the fact the answer rests on, that the city is itself the state."@en ,
+                 "Selection: All constituent states of four federations, as of 4 October 2026: the 16 Länder of Germany, the 9 Länder of Austria, the 10 provinces and 3 territories of Canada, and the 6 states and the 2 self-governing mainland territories of Australia (the Australian Capital Territory and the Northern Territory): 46 cards, one per division, each with its one current capital. Left out: Australia's Jervis Bay Territory (a mainland territory without self-government or a capital of its own; the Swedish Wikipedia and Wikidata list it separately) and its seven external territories (Norfolk Island, Christmas Island, the Cocos (Keeling) Islands and others), which are not among the states and self-governing territories of the federation; the federal capitals as such (Berlin, Vienna, Ottawa, Canberra), except where they are themselves a state's capital or a city-state, as noted on those cards; former capitals; and other federations (the United States has its own deck). Conventions: Berlin, Hamburg and Vienna, each a single city that is itself a state, are answered with the city itself (see the method); Canberra is the capital of the Australian Capital Territory as Wikidata and the Swedish Wikipedia list give it. The cards are studied front to back only: \"Victoria\" is both an Australian state (front) and the capital of British Columbia (back), and the city-states have the same name on both sides, so the reverse direction would not always have one answer."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the selection of the 46 divisions, the link from each to its capital, the English and Swedish names, the class names in the front notes and the facts in the back notes all come from it, so the deck is CC0 1.0 like the rest of the library. The Bundesrat, Migration.gv.at, Discover Canada and Tourism Australia (all with copyright terms that allow at most non-commercial reproduction), Nationalencyklopedin (all rights reserved) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only, as was the Austrian federal constitution on RIS (not protected by copyright, § 7 UrhG): they confirmed facts that Wikidata gave, and no wording, table or selection was copied from them. The selection is the complete set of constituent states of each federation, shared by any list of them because it is the complete set, not a choice taken from a list. The notes are the compiler's own wording. Quotations in the provenance report's evidence are not part of the deck: they are short verbatim quotations naming their sources (for NE under the Swedish quotation right, Upphovsrättslagen 22 §, and in line with NE's own conditions for quoting)."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's division, capital and names against Wikidata, the official page of its federation (Bundesrat, Migration.gv.at, Discover Canada, Tourism Australia), the Swedish Wikipedia list and, where found, Nationalencyklopedin; the city-state convention; the Swedish names."@en ;
+    rdfs:comment "Scope: All 46 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the official pages and the Swedish Wikipedia agree on the capital of every division that has one; NE agrees wherever an article was found. No Wikidata check was skipped. The differences found are the city-states (no separate capital in Wikidata, the Austrian table and the Swedish Wikipedia; the Bundesrat names Berlin and Hamburg as their own capitals), a few name forms (Klagenfurt, Quebec City, Yukon, Swedish forms in NE) and the name Victoria on both sides of the deck."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 46 cards against live Wikidata, the Bundesrat page, German and English Wikipedia lists; the description and notes."@en ,
+                 "Outcome: No factual errors. Two wording suggestions: the description listed Berlin, Hamburg and Vienna as \"the city-states\" although Bremen is one too, and the Québec notes said different things in English and Swedish. Both applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 46 cards, title, description, keywords and the language tags of the built TTL."@en ,
+                 "Outcome: Swedish forms, lower-casing and tags correct. One warning (the description's list of city-states omits Bremen) and three style suggestions (Bremen note, Québec notes, full stops); all applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Sources, licence evidence, the method, queries and selection, the evidence quotes against re-fetched pages, the built TTL and report."@en ,
+                 "Outcome: Licensing compliant (CC0 deck, Wikidata the only content source, all other sources verification only). Four documentation precision suggestions, all applied after checking: Q261543 and Q14192234 sv labels re-fetched (\"Österrikes förbundsländer\", \"fastlandsterritorium i Australien\"), and the NE terms URL re-fetched (it ends at https://www.ne.se/info/upphovsratt/)."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 46 cards (capitals as of 2026-10-04, Swedish forms, language tags, notes), title, description, keywords, study direction, and the fixes of rounds 1–3."@en ,
+                 "Outcome: All 46 capitals correct as of 2026-10-04, Swedish names established, tags and notes consistent, description accurate, and the fixes of rounds 1–3 confirmed present. One optional suggestion (a note on Salzburg's identical front and back), applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Q1221156>
+    dcterms:title "Wikidata: the states, provinces and territories of Germany, Austria, Canada and Australia, their capitals and their English and Swedish names" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under [https://creativecommons.org/publicdomain/zero/1.0/ Creative Commons Zero].\" (raw page text, fetched 2026-10-04)"@en .
+
+<https://www.bundesrat.de/DE/bundesrat/laender/laender-node.html>
+    dcterms:title "Bundesrat: Die Länder" ;
+    dcterms:creator "Bundesrat (Federal Council of Germany)" ;
+    rdfs:comment "https://www.bundesrat.de/DE/service-navi/impressum/impressum-node.html, Nutzungsbedingungen — \"Alle im Internetangebot des Bundesrates veröffentlichten Bilder, Texte usw. sind urheberrechtlich geschützt. Das Herunterladen und Ausdrucken dieser Dokumente ist nur für den persönlichen Gebrauch gestattet.\" (fetched 2026-10-04). Verification only."@en .
+
+<https://www.migration.gv.at/de/leben-und-arbeiten-in-oesterreich/oesterreich-stellt-sich-vor/geografie-und-bevoelkerung/>
+    dcterms:title "Geografie und Bevölkerung (Migration.gv.at, Österreich stellt sich vor)" ;
+    dcterms:creator "Bundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz and Bundesministerium für Inneres, Republic of Austria (table data: Statistik Austria)" ;
+    rdfs:comment "https://www.migration.gv.at/de/service-und-links/impressum.html, Urheberschutz — \"Die auf dieser Website veröffentlichten Beiträge sind urheberrechtlich geschützt. Alle Rechte bleiben vorbehalten. Außer zu kommerziellen Zwecken ist ein Nachdruck mit Quellenangabe (BMASGPK/BMI) gestattet.\" (fetched 2026-10-04). Verification only."@en .
+
+<https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10000138&Artikel=108>
+    dcterms:title "Bundes-Verfassungsgesetz (B-VG), Artikel 108 (Rechtsinformationssystem des Bundes)" ;
+    dcterms:creator "Republic of Austria (Bundeskanzleramt, RIS)" ;
+    rdfs:comment "Austrian Urheberrechtsgesetz § 7 (1), https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001848&Paragraf=7 — \"Gesetze, Verordnungen, amtliche Erlässe, Bekanntmachungen und Entscheidungen sowie ausschließlich oder vorwiegend zum amtlichen Gebrauch hergestellte amtliche Werke der im § 2 Z 1 oder 3 bezeichneten Art genießen keinen urheberrechtlichen Schutz.\" (fetched 2026-10-04). Used for verification only."@en .
+
+<https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html>
+    dcterms:title "Discover Canada: The Rights and Responsibilities of Citizenship, chapter \"Canada's Regions\"" ;
+    dcterms:creator "Immigration, Refugees and Citizenship Canada, Government of Canada" ;
+    rdfs:comment "https://www.canada.ca/en/transparency/terms.html — \"Unless otherwise specified you may reproduce the materials in whole or in part for non-commercial purposes, and in any format, without charge or further permission\" (fetched 2026-10-04): a non-commercial permission only, so verification only."@en .
+
+<https://www.australia.com/en/facts-and-planning/about-australia/cities-states-and-territories.html>
+    dcterms:title "Australian States, Territories and Capital Cities (australia.com)" ;
+    dcterms:creator "Tourism Australia (Australian Government agency)" ;
+    rdfs:comment "https://www.australia.com/en/terms-and-conditions.html, 2. Intellectual Property Rights — \"You acknowledge that the Content on the Site(s) is subject to copyright, trade mark and possibly other intellectual property rights.\" (fetched 2026-10-04). Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Tysklands_f%C3%B6rbundsl%C3%A4nder>
+    dcterms:title "Svenskspråkiga Wikipedia: Tysklands förbundsländer, Österrikes förbundsländer, Kanadas provinser och territorier, Australiens delstater och territorier" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article Tysklands förbundsländer (https://sv.wikipedia.org/wiki/Tysklands_f%C3%B6rbundsl%C3%A4nder; the footer of one of the four articles was read): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\" (fetched 2026-10-04). Verification only."@en .
+
+<https://www.ne.se/uppslagsverk/>
+    dcterms:title "Nationalencyklopedin (NE), the articles on the divisions and on some capitals" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://www.ne.se/info/upphovsratt/ (fetched 2026-10-04) — \"Nästan allt material på NE.se omfattas av upphovsrättslagen … Ingen kopiering får göras utan tillstånd.\" For texts from the encyclopedia: \"det är fritt att citera dem i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte. Detta under förutsättning att NE, och i förekommande fall skribenten, anges som källa, att citaten är ordagranna och att ingen utomstående kan gå in och ändra i texten.\" Verification only; the report quotes short verbatim phrases under the Swedish quotation right, Upphovsrättslagen (1960:729) 22 §, https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/ — \"Var och en får citera ur offentliggjorda verk i överensstämmelse med god sed och i den omfattning som motiveras av ändamålet.\" (fetched 2026-10-04), naming NE and the contributor where the page names one."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+# How this version's Korean, German, Spanish and French card text was made (W3C PROV-O): from the
+# previous version, the mapping that says what each card is about, and the labels of each Wikidata
+# item at the revision named here, by the script named here. English and Swedish text, and the
+# notes, are the previous version's. To make it again, with the mapping as it was committed with
+# this version, or to check that its cards come out byte for byte the same from the same
+# revisions, from the repository root:
+#   git checkout 23f0a84dcc5f3ae4ee13447185c52726c5ea747a && python3 scripts/wikidata_labels.py
+#     --deck federal-states-and-capitals --issued 2026-10-24
+#   python3 scripts/wikidata_labels.py --verify --deck federal-states-and-capitals
+<#wikidata-labels>
+    a prov:Activity ;
+    prov:used <https://solid-memo.com/decks/federal-states-and-capitals/v3.ttl> ,
+              <#wikidata-mapping> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q64.json?revision=2559997546> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q172.json?revision=2558395212> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q176.json?revision=2560316305> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q980.json?revision=2559158165> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q985.json?revision=2551910629> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1022.json?revision=2550423669> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1055.json?revision=2554347491> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1194.json?revision=2559612794> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1196.json?revision=2550835600> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1197.json?revision=2557235530> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1198.json?revision=2550835684> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1199.json?revision=2552059409> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1200.json?revision=2550835764> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1201.json?revision=2551912287> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1202.json?revision=2553650122> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1205.json?revision=2552059509> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1206.json?revision=2551912719> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1208.json?revision=2555315763> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1209.json?revision=2550835205> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1707.json?revision=2550402156> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1709.json?revision=2550440611> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1711.json?revision=2557601773> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1715.json?revision=2558949209> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1718.json?revision=2550409869> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1720.json?revision=2550420128> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1721.json?revision=2551020370> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1724.json?revision=2556525159> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1726.json?revision=2559522549> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1729.json?revision=2550446540> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1731.json?revision=2550444779> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1733.json?revision=2550445589> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1735.json?revision=2556468548> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1737.json?revision=2540147850> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1741.json?revision=2553605752> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1904.json?revision=2556110623> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1948.json?revision=2560210940> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1951.json?revision=2559942585> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1952.json?revision=2539829738> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1965.json?revision=2539829626> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1973.json?revision=2547573075> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1978.json?revision=2547547723> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q1989.json?revision=2556112222> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2003.json?revision=2542727955> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2007.json?revision=2556459048> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2009.json?revision=2555480652> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2023.json?revision=2556458428> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2030.json?revision=2551156584> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2055.json?revision=2551131615> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2061.json?revision=2547632290> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2082.json?revision=2542838161> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2096.json?revision=2555350682> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2123.json?revision=2547631862> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2127.json?revision=2547631141> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2132.json?revision=2542592765> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2135.json?revision=2556850960> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2138.json?revision=2547626944> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2141.json?revision=2559280473> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q2145.json?revision=2557267891> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3114.json?revision=2537901353> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3130.json?revision=2550371039> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3141.json?revision=2558949398> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3183.json?revision=2558948858> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3206.json?revision=2559524946> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3224.json?revision=2557935457> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3235.json?revision=2551929966> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q3258.json?revision=2559102383> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q5112.json?revision=2560024196> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q11568.json?revision=2558975906> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q13298.json?revision=2558556302> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q24879.json?revision=2557239446> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q34366.json?revision=2546738960> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q34713.json?revision=2558723716> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q34932.json?revision=2532533693> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q35715.json?revision=2557936221> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q36074.json?revision=2558986770> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q36687.json?revision=2539521124> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q37985.json?revision=2521597908> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q38981.json?revision=2540147063> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q40191.json?revision=2548787947> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q41329.json?revision=2551034532> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q41358.json?revision=2526707687> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q41753.json?revision=2527584239> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q41967.json?revision=2517850301> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q42497.json?revision=2527580231> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q42880.json?revision=2537288526> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q43210.json?revision=2551844204> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q43325.json?revision=2523317059> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q82500.json?revision=2527590547> ,
+              <https://www.wikidata.org/wiki/Special:EntityData/Q126321.json?revision=2527582885> ;
+    prov:wasAssociatedWith <https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py> ;
+    rdfs:comment "python3 scripts/wikidata_labels.py --deck federal-states-and-capitals --issued 2026-10-24 (Python 3.14.4, Unicode 16.0.0)" .
+
+<#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/federal-states-and-capitals.json" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "2d4cb4f1cb7ca2aafb57944d8e8e46b04e1d660e80caf7dc46e31885560753ae"^^xsd:hexBinary ] .
+
+<https://github.com/solid-memo/website/blob/23f0a84dcc5f3ae4ee13447185c52726c5ea747a/scripts/wikidata_labels.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "wikidata_labels.py" ;
+    spdx:checksum [ a spdx:Checksum ; spdx:algorithm spdx:checksumAlgorithm_sha256 ; spdx:checksumValue "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
+
+spdx:checksumAlgorithm_sha256
+    a spdx:ChecksumAlgorithm .
+
+<#de-baden-wuerttemberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q985> ,
+                    <http://www.wikidata.org/entity/Q1022> ;
+    solid-memo:front "Baden-Württemberg"@en ,
+                     "Baden-Württemberg"@sv ,
+                     "바덴뷔르템베르크주"@ko ,
+                     "Baden-Württemberg"@de ,
+                     "Baden-Wurtemberg"@es ,
+                     "Bade-Wurtemberg"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Stuttgart"@en ,
+                    "Stuttgart"@sv ,
+                    "슈투트가르트"@ko ,
+                    "Stuttgart"@de ,
+                    "Stuttgart"@es ,
+                    "Stuttgart"@fr .
+
+<#de-bavaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q980> ,
+                    <http://www.wikidata.org/entity/Q1726> ;
+    solid-memo:front "Bavaria"@en ,
+                     "Bayern"@sv ,
+                     "바이에른주"@ko ,
+                     "Bayern"@de ,
+                     "Baviera"@es ,
+                     "Bavière"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Munich"@en ,
+                    "München"@sv ,
+                    "뮌헨"@ko ,
+                    "München"@de ,
+                    "Múnich"@es ,
+                    "Munich"@fr .
+
+<#de-berlin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q64> ;
+    solid-memo:front "Berlin"@en ,
+                     "Berlin"@sv ,
+                     "베를린"@ko ,
+                     "Berlin"@de ,
+                     "Berlín"@es ,
+                     "Berlin"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Berlin"@en ,
+                    "Berlin"@sv ,
+                    "베를린"@ko ,
+                    "Berlin"@de ,
+                    "Berlín"@es ,
+                    "Berlin"@fr ;
+    solid-memo:backNote "City-state: the city is itself a state. Also the capital of Germany."@en ,
+                        "Stadsstat: staden är själv ett förbundsland. Även Tysklands huvudstad."@sv .
+
+<#de-brandenburg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1208> ,
+                    <http://www.wikidata.org/entity/Q1711> ;
+    solid-memo:front "Brandenburg"@en ,
+                     "Brandenburg"@sv ,
+                     "브란덴부르크주"@ko ,
+                     "Brandenburg"@de ,
+                     "Brandemburgo"@es ,
+                     "Brandebourg"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Potsdam"@en ,
+                    "Potsdam"@sv ,
+                    "포츠담"@ko ,
+                    "Potsdam"@de ,
+                    "Potsdam"@es ,
+                    "Potsdam"@fr .
+
+<#de-bremen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1209> ,
+                    <http://www.wikidata.org/entity/Q24879> ;
+    solid-memo:front "Bremen"@en ,
+                     "Bremen"@sv ,
+                     "브레멘주"@ko ,
+                     "Freie Hansestadt Bremen"@de ,
+                     "Bremen"@es ,
+                     "land de Brême"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Bremen"@en ,
+                    "Bremen"@sv ,
+                    "브레멘"@ko ,
+                    "Bremen"@de ,
+                    "Bremen"@es ,
+                    "Brême"@fr ;
+    solid-memo:backNote "City-state of two cities, Bremen and Bremerhaven."@en ,
+                        "Stadsstat med två städer, Bremen och Bremerhaven."@sv .
+
+<#de-hamburg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1055> ;
+    solid-memo:front "Hamburg"@en ,
+                     "Hamburg"@sv ,
+                     "함부르크"@ko ,
+                     "Hamburg"@de ,
+                     "Hamburgo"@es ,
+                     "Hambourg"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Hamburg"@en ,
+                    "Hamburg"@sv ,
+                    "함부르크"@ko ,
+                    "Hamburg"@de ,
+                    "Hamburgo"@es ,
+                    "Hambourg"@fr ;
+    solid-memo:backNote "City-state: the city is itself a state."@en ,
+                        "Stadsstat: staden är själv ett förbundsland."@sv .
+
+<#de-hesse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1199> ,
+                    <http://www.wikidata.org/entity/Q1721> ;
+    solid-memo:front "Hesse"@en ,
+                     "Hessen"@sv ,
+                     "헤센주"@ko ,
+                     "Hessen"@de ,
+                     "Hesse"@es ,
+                     "Hesse"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Wiesbaden"@en ,
+                    "Wiesbaden"@sv ,
+                    "비스바덴"@ko ,
+                    "Wiesbaden"@de ,
+                    "Wiesbaden"@es ,
+                    "Wiesbaden"@fr .
+
+<#de-lower-saxony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1197> ,
+                    <http://www.wikidata.org/entity/Q1715> ;
+    solid-memo:front "Lower Saxony"@en ,
+                     "Niedersachsen"@sv ,
+                     "니더작센주"@ko ,
+                     "Niedersachsen"@de ,
+                     "Baja Sajonia"@es ,
+                     "Basse-Saxe"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Hanover"@en ,
+                    "Hannover"@sv ,
+                    "하노버"@ko ,
+                    "Hannover"@de ,
+                    "Hannover"@es ,
+                    "Hanovre"@fr .
+
+<#de-mecklenburg-vorpommern>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1196> ,
+                    <http://www.wikidata.org/entity/Q1709> ;
+    solid-memo:front "Mecklenburg-Vorpommern"@en ,
+                     "Mecklenburg-Vorpommern"@sv ,
+                     "메클렌부르크포어포메른주"@ko ,
+                     "Mecklenburg-Vorpommern"@de ,
+                     "Mecklemburgo-Pomerania Occidental"@es ,
+                     "Mecklembourg-Poméranie-Occidentale"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Schwerin"@en ,
+                    "Schwerin"@sv ,
+                    "슈베린"@ko ,
+                    "Schwerin"@de ,
+                    "Schwerin"@es ,
+                    "Schwerin"@fr .
+
+<#de-north-rhine-westphalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1198> ,
+                    <http://www.wikidata.org/entity/Q1718> ;
+    solid-memo:front "North Rhine-Westphalia"@en ,
+                     "Nordrhein-Westfalen"@sv ,
+                     "노르트라인베스트팔렌주"@ko ,
+                     "Nordrhein-Westfalen"@de ,
+                     "Renania del Norte-Westfalia"@es ,
+                     "Rhénanie-du-Nord-Westphalie"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Düsseldorf"@en ,
+                    "Düsseldorf"@sv ,
+                    "뒤셀도르프"@ko ,
+                    "Düsseldorf"@de ,
+                    "Düsseldorf"@es ,
+                    "Düsseldorf"@fr .
+
+<#de-rhineland-palatinate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1200> ,
+                    <http://www.wikidata.org/entity/Q1720> ;
+    solid-memo:front "Rhineland-Palatinate"@en ,
+                     "Rheinland-Pfalz"@sv ,
+                     "라인란트팔츠주"@ko ,
+                     "Rheinland-Pfalz"@de ,
+                     "Renania-Palatinado"@es ,
+                     "Rhénanie-Palatinat"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Mainz"@en ,
+                    "Mainz"@sv ,
+                    "마인츠"@ko ,
+                    "Mainz"@de ,
+                    "Maguncia"@es ,
+                    "Mayence"@fr .
+
+<#de-saarland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1201> ,
+                    <http://www.wikidata.org/entity/Q1724> ;
+    solid-memo:front "Saarland"@en ,
+                     "Saarland"@sv ,
+                     "자를란트주"@ko ,
+                     "Saarland"@de ,
+                     "Sarre"@es ,
+                     "Sarre"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Saarbrücken"@en ,
+                    "Saarbrücken"@sv ,
+                    "자르브뤼켄"@ko ,
+                    "Saarbrücken"@de ,
+                    "Sarrebruck"@es ,
+                    "Sarrebruck"@fr .
+
+<#de-saxony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1202> ,
+                    <http://www.wikidata.org/entity/Q1731> ;
+    solid-memo:front "Saxony"@en ,
+                     "Sachsen"@sv ,
+                     "작센주"@ko ,
+                     "Sachsen"@de ,
+                     "Sajonia"@es ,
+                     "Saxe"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Dresden"@en ,
+                    "Dresden"@sv ,
+                    "드레스덴"@ko ,
+                    "Dresden"@de ,
+                    "Dresde"@es ,
+                    "Dresde"@fr .
+
+<#de-saxony-anhalt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1206> ,
+                    <http://www.wikidata.org/entity/Q1733> ;
+    solid-memo:front "Saxony-Anhalt"@en ,
+                     "Sachsen-Anhalt"@sv ,
+                     "작센안할트주"@ko ,
+                     "Sachsen-Anhalt"@de ,
+                     "Sajonia-Anhalt"@es ,
+                     "Saxe-Anhalt"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Magdeburg"@en ,
+                    "Magdeburg"@sv ,
+                    "마그데부르크"@ko ,
+                    "Magdeburg"@de ,
+                    "Magdeburgo"@es ,
+                    "Magdebourg"@fr .
+
+<#de-schleswig-holstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1194> ,
+                    <http://www.wikidata.org/entity/Q1707> ;
+    solid-memo:front "Schleswig-Holstein"@en ,
+                     "Schleswig-Holstein"@sv ,
+                     "슐레스비히홀슈타인주"@ko ,
+                     "Schleswig-Holstein"@de ,
+                     "Schleswig-Holstein"@es ,
+                     "Schleswig-Holstein"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Kiel"@en ,
+                    "Kiel"@sv ,
+                    "킬"@ko ,
+                    "Kiel"@de ,
+                    "Kiel"@es ,
+                    "Kiel"@fr .
+
+<#de-thuringia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1205> ,
+                    <http://www.wikidata.org/entity/Q1729> ;
+    solid-memo:front "Thuringia"@en ,
+                     "Thüringen"@sv ,
+                     "튀링겐주"@ko ,
+                     "Thüringen"@de ,
+                     "Turingia"@es ,
+                     "Thuringe"@fr ;
+    solid-memo:frontNote "State of Germany"@en ,
+                         "Förbundsland i Tyskland"@sv ;
+    solid-memo:back "Erfurt"@en ,
+                    "Erfurt"@sv ,
+                    "에르푸르트"@ko ,
+                    "Erfurt"@de ,
+                    "Érfurt"@es ,
+                    "Erfurt"@fr .
+
+<#at-burgenland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q43210> ,
+                    <http://www.wikidata.org/entity/Q126321> ;
+    solid-memo:front "Burgenland"@en ,
+                     "Burgenland"@sv ,
+                     "부르겐란트주"@ko ,
+                     "Burgenland"@de ,
+                     "Burgenland"@es ,
+                     "Burgenland"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Eisenstadt"@en ,
+                    "Eisenstadt"@sv ,
+                    "아이젠슈타트"@ko ,
+                    "Eisenstadt"@de ,
+                    "Eisenstadt"@es ,
+                    "Eisenstadt"@fr .
+
+<#at-carinthia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q37985> ,
+                    <http://www.wikidata.org/entity/Q41753> ;
+    solid-memo:front "Carinthia"@en ,
+                     "Kärnten"@sv ,
+                     "케른텐주"@ko ,
+                     "Kärnten"@de ,
+                     "Carintia"@es ,
+                     "Carinthie"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Klagenfurt"@en ,
+                    "Klagenfurt"@sv ,
+                    "클라겐푸르트"@ko ,
+                    "Klagenfurt am Wörthersee"@de ,
+                    "Klagenfurt"@es ,
+                    "Klagenfurt"@fr ;
+    solid-memo:backNote "Official name: Klagenfurt am Wörthersee."@en ,
+                        "Officiellt namn: Klagenfurt am Wörthersee."@sv .
+
+<#at-lower-austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q42497> ,
+                    <http://www.wikidata.org/entity/Q82500> ;
+    solid-memo:front "Lower Austria"@en ,
+                     "Niederösterreich"@sv ,
+                     "니더외스터라이히주"@ko ,
+                     "Niederösterreich"@de ,
+                     "Baja Austria"@es ,
+                     "Basse-Autriche"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "St. Pölten"@en ,
+                    "Sankt Pölten"@sv ,
+                    "장크트푈텐"@ko ,
+                    "St. Pölten"@de ,
+                    "Sankt Pölten"@es ,
+                    "Sankt Pölten"@fr .
+
+<#at-upper-austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q41967> ,
+                    <http://www.wikidata.org/entity/Q41329> ;
+    solid-memo:front "Upper Austria"@en ,
+                     "Oberösterreich"@sv ,
+                     "오버외스터라이히주"@ko ,
+                     "Oberösterreich"@de ,
+                     "Alta Austria"@es ,
+                     "Haute-Autriche"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Linz"@en ,
+                    "Linz"@sv ,
+                    "린츠"@ko ,
+                    "Linz"@de ,
+                    "Linz"@es ,
+                    "Linz"@fr .
+
+<#at-salzburg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q43325> ,
+                    <http://www.wikidata.org/entity/Q34713> ;
+    solid-memo:front "Salzburg"@en ,
+                     "Salzburg"@sv ,
+                     "잘츠부르크주"@ko ,
+                     "Salzburg"@de ,
+                     "Salzburgo"@es ,
+                     "Salzbourg"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Salzburg"@en ,
+                    "Salzburg"@sv ,
+                    "잘츠부르크"@ko ,
+                    "Salzburg"@de ,
+                    "Salzburgo"@es ,
+                    "Salzbourg"@fr ;
+    solid-memo:backNote "The city has the same name as the state."@en ,
+                        "Staden har samma namn som förbundslandet."@sv .
+
+<#at-styria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q41358> ,
+                    <http://www.wikidata.org/entity/Q13298> ;
+    solid-memo:front "Styria"@en ,
+                     "Steiermark"@sv ,
+                     "슈타이어마르크주"@ko ,
+                     "Steiermark"@de ,
+                     "Estiria"@es ,
+                     "Styrie"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Graz"@en ,
+                    "Graz"@sv ,
+                    "그라츠"@ko ,
+                    "Graz"@de ,
+                    "Graz"@es ,
+                    "Graz"@fr .
+
+<#at-tyrol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q42880> ,
+                    <http://www.wikidata.org/entity/Q1735> ;
+    solid-memo:front "Tyrol"@en ,
+                     "Tyrolen"@sv ,
+                     "티롤주"@ko ,
+                     "Tirol"@de ,
+                     "Tirol"@es ,
+                     "Tyrol"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Innsbruck"@en ,
+                    "Innsbruck"@sv ,
+                    "인스브루크"@ko ,
+                    "Innsbruck"@de ,
+                    "Innsbruck"@es ,
+                    "Innsbruck"@fr .
+
+<#at-vorarlberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q38981> ,
+                    <http://www.wikidata.org/entity/Q1737> ;
+    solid-memo:front "Vorarlberg"@en ,
+                     "Vorarlberg"@sv ,
+                     "포어아를베르크주"@ko ,
+                     "Vorarlberg"@de ,
+                     "Vorarlberg"@es ,
+                     "Vorarlberg"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Bregenz"@en ,
+                    "Bregenz"@sv ,
+                    "브레겐츠"@ko ,
+                    "Bregenz"@de ,
+                    "Bregenz"@es ,
+                    "Brégence"@fr .
+
+<#at-vienna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1741> ;
+    solid-memo:front "Vienna"@en ,
+                     "Wien"@sv ,
+                     "빈"@ko ,
+                     "Wien"@de ,
+                     "Viena"@es ,
+                     "Vienne"@fr ;
+    solid-memo:frontNote "State of Austria"@en ,
+                         "Förbundsland i Österrike"@sv ;
+    solid-memo:back "Vienna"@en ,
+                    "Wien"@sv ,
+                    "빈"@ko ,
+                    "Wien"@de ,
+                    "Viena"@es ,
+                    "Vienne"@fr ;
+    solid-memo:backNote "City-state: the city is itself a state. Also the capital of Austria."@en ,
+                        "Stadsstat: staden är själv ett förbundsland. Även Österrikes huvudstad."@sv .
+
+<#ca-alberta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1951> ,
+                    <http://www.wikidata.org/entity/Q2096> ;
+    solid-memo:front "Alberta"@en ,
+                     "Alberta"@sv ,
+                     "앨버타주"@ko ,
+                     "Alberta"@de ,
+                     "Alberta"@es ,
+                     "Alberta"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Edmonton"@en ,
+                    "Edmonton"@sv ,
+                    "에드먼턴"@ko ,
+                    "Edmonton"@de ,
+                    "Edmonton"@es ,
+                    "Edmonton"@fr .
+
+<#ca-british-columbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1973> ,
+                    <http://www.wikidata.org/entity/Q2132> ;
+    solid-memo:front "British Columbia"@en ,
+                     "British Columbia"@sv ,
+                     "브리티시컬럼비아주"@ko ,
+                     "Britisch-Kolumbien"@de ,
+                     "Columbia Británica"@es ,
+                     "Colombie-Britannique"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Victoria"@en ,
+                    "Victoria"@sv ,
+                    "빅토리아"@ko ,
+                    "Victoria"@de ,
+                    "Victoria"@es ,
+                    "Victoria"@fr .
+
+<#ca-manitoba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1948> ,
+                    <http://www.wikidata.org/entity/Q2135> ;
+    solid-memo:front "Manitoba"@en ,
+                     "Manitoba"@sv ,
+                     "매니토바주"@ko ,
+                     "Manitoba"@de ,
+                     "Manitoba"@es ,
+                     "Manitoba"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Winnipeg"@en ,
+                    "Winnipeg"@sv ,
+                    "위니펙"@ko ,
+                    "Winnipeg"@de ,
+                    "Winnipeg"@es ,
+                    "Winnipeg"@fr .
+
+<#ca-new-brunswick>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1965> ,
+                    <http://www.wikidata.org/entity/Q2138> ;
+    solid-memo:front "New Brunswick"@en ,
+                     "New Brunswick"@sv ,
+                     "뉴브런즈윅주"@ko ,
+                     "New Brunswick"@de ,
+                     "Nuevo Brunswick"@es ,
+                     "Nouveau-Brunswick"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Fredericton"@en ,
+                    "Fredericton"@sv ,
+                    "프레더릭턴"@ko ,
+                    "Fredericton"@de ,
+                    "Fredericton"@es ,
+                    "Fredericton"@fr .
+
+<#ca-newfoundland-and-labrador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2003> ,
+                    <http://www.wikidata.org/entity/Q2082> ;
+    solid-memo:front "Newfoundland and Labrador"@en ,
+                     "Newfoundland och Labrador"@sv ,
+                     "뉴펀들랜드 래브라도주"@ko ,
+                     "Neufundland und Labrador"@de ,
+                     "Terranova y Labrador"@es ,
+                     "Terre-Neuve-et-Labrador"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "St. John's"@en ,
+                    "St. John's"@sv ,
+                    "세인트존스"@ko ,
+                    "St. John's"@de ,
+                    "San Juan de Terranova"@es ,
+                    "Saint-Jean de Terre-Neuve"@fr .
+
+<#ca-nova-scotia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1952> ,
+                    <http://www.wikidata.org/entity/Q2141> ;
+    solid-memo:front "Nova Scotia"@en ,
+                     "Nova Scotia"@sv ,
+                     "노바스코샤주"@ko ,
+                     "Nova Scotia"@de ,
+                     "Nueva Escocia"@es ,
+                     "Nouvelle-Écosse"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Halifax"@en ,
+                    "Halifax"@sv ,
+                    "핼리팩스"@ko ,
+                    "Halifax"@de ,
+                    "Halifax"@es ,
+                    "Halifax"@fr .
+
+<#ca-ontario>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1904> ,
+                    <http://www.wikidata.org/entity/Q172> ;
+    solid-memo:front "Ontario"@en ,
+                     "Ontario"@sv ,
+                     "온타리오주"@ko ,
+                     "Ontario"@de ,
+                     "Ontario"@es ,
+                     "Ontario"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Toronto"@en ,
+                    "Toronto"@sv ,
+                    "토론토"@ko ,
+                    "Toronto"@de ,
+                    "Toronto"@es ,
+                    "Toronto"@fr .
+
+<#ca-prince-edward-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1978> ,
+                    <http://www.wikidata.org/entity/Q2127> ;
+    solid-memo:front "Prince Edward Island"@en ,
+                     "Prince Edward Island"@sv ,
+                     "프린스에드워드아일랜드"@ko ,
+                     "Prinz-Edward-Insel"@de ,
+                     "Isla del Príncipe Eduardo"@es ,
+                     "Île-du-Prince-Édouard"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Charlottetown"@en ,
+                    "Charlottetown"@sv ,
+                    "샬럿타운"@ko ,
+                    "Charlottetown"@de ,
+                    "Charlottetown"@es ,
+                    "Charlottetown"@fr .
+
+<#ca-quebec>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q176> ,
+                    <http://www.wikidata.org/entity/Q2145> ;
+    solid-memo:front "Quebec"@en ,
+                     "Québec"@sv ,
+                     "퀘벡주"@ko ,
+                     "Québec"@de ,
+                     "Quebec"@es ,
+                     "Québec"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Quebec City"@en ,
+                    "Québec"@sv ,
+                    "퀘벡"@ko ,
+                    "Québec"@de ,
+                    "Quebec"@es ,
+                    "Québec"@fr ;
+    solid-memo:backNote "Official name: Québec. The city has the same name as the province."@en ,
+                        "Officiellt namn: Québec. Staden har samma namn som provinsen."@sv .
+
+<#ca-saskatchewan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1989> ,
+                    <http://www.wikidata.org/entity/Q2123> ;
+    solid-memo:front "Saskatchewan"@en ,
+                     "Saskatchewan"@sv ,
+                     "서스캐처원주"@ko ,
+                     "Saskatchewan"@de ,
+                     "Saskatchewan"@es ,
+                     "Saskatchewan"@fr ;
+    solid-memo:frontNote "Province of Canada"@en ,
+                         "Provins i Kanada"@sv ;
+    solid-memo:back "Regina"@en ,
+                    "Regina"@sv ,
+                    "리자이나"@ko ,
+                    "Regina"@de ,
+                    "Regina"@es ,
+                    "Regina"@fr .
+
+<#ca-northwest-territories>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2007> ,
+                    <http://www.wikidata.org/entity/Q2061> ;
+    solid-memo:front "Northwest Territories"@en ,
+                     "Northwest Territories"@sv ,
+                     "노스웨스트 준주"@ko ,
+                     "Nordwest-Territorien"@de ,
+                     "Territoires du Nord-Ouest"@fr ;
+    solid-memo:frontNote "Territory of Canada"@en ,
+                         "Territorium i Kanada"@sv ;
+    solid-memo:back "Yellowknife"@en ,
+                    "Yellowknife"@sv ,
+                    "옐로나이프"@ko ,
+                    "Yellowknife"@de ,
+                    "Yellowknife"@fr .
+
+<#ca-nunavut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2023> ,
+                    <http://www.wikidata.org/entity/Q2030> ;
+    solid-memo:front "Nunavut"@en ,
+                     "Nunavut"@sv ,
+                     "누나부트 준주"@ko ,
+                     "Nunavut"@de ,
+                     "Nunavut"@es ,
+                     "Nunavut"@fr ;
+    solid-memo:frontNote "Territory of Canada"@en ,
+                         "Territorium i Kanada"@sv ;
+    solid-memo:back "Iqaluit"@en ,
+                    "Iqaluit"@sv ,
+                    "이칼루이트"@ko ,
+                    "Iqaluit"@de ,
+                    "Iqaluit"@es ,
+                    "Iqaluit"@fr .
+
+<#ca-yukon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2009> ,
+                    <http://www.wikidata.org/entity/Q2055> ;
+    solid-memo:front "Yukon"@en ,
+                     "Yukon"@sv ,
+                     "유콘 준주"@ko ,
+                     "Yukon"@de ,
+                     "Yukón"@es ,
+                     "Yukon"@fr ;
+    solid-memo:frontNote "Territory of Canada"@en ,
+                         "Territorium i Kanada"@sv ;
+    solid-memo:back "Whitehorse"@en ,
+                    "Whitehorse"@sv ,
+                    "화이트호스"@ko ,
+                    "Whitehorse"@de ,
+                    "Whitehorse"@es ,
+                    "Whitehorse"@fr .
+
+<#au-new-south-wales>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q3224> ,
+                    <http://www.wikidata.org/entity/Q3130> ;
+    solid-memo:front "New South Wales"@en ,
+                     "New South Wales"@sv ,
+                     "뉴사우스웨일스주"@ko ,
+                     "New South Wales"@de ,
+                     "Nueva Gales del Sur"@es ,
+                     "Nouvelle-Galles du Sud"@fr ;
+    solid-memo:frontNote "State of Australia"@en ,
+                         "Delstat i Australien"@sv ;
+    solid-memo:back "Sydney"@en ,
+                    "Sydney"@sv ,
+                    "시드니"@ko ,
+                    "Sydney"@de ,
+                    "Sídney"@es ,
+                    "Sydney"@fr .
+
+<#au-victoria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q36687> ,
+                    <http://www.wikidata.org/entity/Q3141> ;
+    solid-memo:front "Victoria"@en ,
+                     "Victoria"@sv ,
+                     "빅토리아주"@ko ,
+                     "Victoria"@de ,
+                     "Victoria"@es ,
+                     "Victoria"@fr ;
+    solid-memo:frontNote "State of Australia"@en ,
+                         "Delstat i Australien"@sv ;
+    solid-memo:back "Melbourne"@en ,
+                    "Melbourne"@sv ,
+                    "멜버른"@ko ,
+                    "Melbourne"@de ,
+                    "Melbourne"@es ,
+                    "Melbourne"@fr .
+
+<#au-queensland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q36074> ,
+                    <http://www.wikidata.org/entity/Q34932> ;
+    solid-memo:front "Queensland"@en ,
+                     "Queensland"@sv ,
+                     "퀸즐랜드주"@ko ,
+                     "Queensland"@de ,
+                     "Queensland"@es ,
+                     "Queensland"@fr ;
+    solid-memo:frontNote "State of Australia"@en ,
+                         "Delstat i Australien"@sv ;
+    solid-memo:back "Brisbane"@en ,
+                    "Brisbane"@sv ,
+                    "브리즈번"@ko ,
+                    "Brisbane"@de ,
+                    "Brisbane"@es ,
+                    "Brisbane"@fr .
+
+<#au-south-australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q35715> ,
+                    <http://www.wikidata.org/entity/Q5112> ;
+    solid-memo:front "South Australia"@en ,
+                     "South Australia"@sv ,
+                     "사우스오스트레일리아주"@ko ,
+                     "Australia Meridional"@es ,
+                     "Australie-Méridionale"@fr ;
+    solid-memo:frontNote "State of Australia"@en ,
+                         "Delstat i Australien"@sv ;
+    solid-memo:back "Adelaide"@en ,
+                    "Adelaide"@sv ,
+                    "애들레이드"@ko ,
+                    "Adelaida"@es ,
+                    "Adélaïde"@fr .
+
+<#au-western-australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q3206> ,
+                    <http://www.wikidata.org/entity/Q3183> ;
+    solid-memo:front "Western Australia"@en ,
+                     "Western Australia"@sv ,
+                     "웨스턴오스트레일리아주"@ko ,
+                     "Westaustralien"@de ,
+                     "Australia Occidental"@es ,
+                     "Australie-Occidentale"@fr ;
+    solid-memo:frontNote "State of Australia"@en ,
+                         "Delstat i Australien"@sv ;
+    solid-memo:back "Perth"@en ,
+                    "Perth"@sv ,
+                    "퍼스"@ko ,
+                    "Perth"@de ,
+                    "Perth"@es ,
+                    "Perth"@fr .
+
+<#au-tasmania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q34366> ,
+                    <http://www.wikidata.org/entity/Q40191> ;
+    solid-memo:front "Tasmania"@en ,
+                     "Tasmanien"@sv ,
+                     "태즈메이니아주"@ko ,
+                     "Tasmanien"@de ,
+                     "Tasmania"@es ,
+                     "Tasmanie"@fr ;
+    solid-memo:frontNote "State of Australia"@en ,
+                         "Delstat i Australien"@sv ;
+    solid-memo:back "Hobart"@en ,
+                    "Hobart"@sv ,
+                    "호바트"@ko ,
+                    "Hobart"@de ,
+                    "Hobart"@es ,
+                    "Hobart"@fr .
+
+<#au-northern-territory>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q3235> ,
+                    <http://www.wikidata.org/entity/Q11568> ;
+    solid-memo:front "Northern Territory"@en ,
+                     "Northern Territory"@sv ,
+                     "노던 준주"@ko ,
+                     "Territorio del Norte"@es ,
+                     "Territoire du Nord"@fr ;
+    solid-memo:frontNote "Territory of Australia"@en ,
+                         "Territorium i Australien"@sv ;
+    solid-memo:back "Darwin"@en ,
+                    "Darwin"@sv ,
+                    "다윈"@ko ,
+                    "Darwin"@es ,
+                    "Darwin"@fr .
+
+<#au-australian-capital-territory>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ,
+                         "주도"@ko ,
+                         "Hauptstadt"@de ,
+                         "Capital"@es ,
+                         "Capitale"@fr ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q3258> ,
+                    <http://www.wikidata.org/entity/Q3114> ;
+    solid-memo:front "Australian Capital Territory"@en ,
+                     "Australian Capital Territory"@sv ,
+                     "오스트레일리아 수도 준주"@ko ,
+                     "Australian Capital Territory"@de ,
+                     "Territorio de la Capital Australiana"@es ,
+                     "Territoire de la capitale australienne"@fr ;
+    solid-memo:frontNote "Territory of Australia"@en ,
+                         "Territorium i Australien"@sv ;
+    solid-memo:back "Canberra"@en ,
+                    "Canberra"@sv ,
+                    "캔버라"@ko ,
+                    "Canberra"@de ,
+                    "Canberra"@es ,
+                    "Canberra"@fr ;
+    solid-memo:backNote "Also the capital of Australia."@en ,
+                        "Även Australiens huvudstad."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
