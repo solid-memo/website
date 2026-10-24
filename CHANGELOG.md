@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.6.0](https://github.com/solid-memo/website/compare/v6.5.0...v6.6.0) (2026-10-24)
+
+### Features
+
+* **library:** name and filter by the languages of a deck's cards ([d8f931b](https://github.com/solid-memo/website/commit/d8f931b98c695ca413f5efddd74473060e517291)), closes [#282](https://github.com/solid-memo/website/issues/282)
+
+### Bug Fixes
+
+* **release:** count only `#` and a number as an issue a commit refers to ([5064209](https://github.com/solid-memo/website/commit/50642092a9dc6d8944c53b8f30074386fc42f143)), closes [#281](https://github.com/solid-memo/website/issues/281)
+
 ## [6.5.0](https://github.com/solid-memo/website/compare/v6.4.0...v6.5.0) (2026-10-24)
 
 ### Features
