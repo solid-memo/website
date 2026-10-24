@@ -10,6 +10,9 @@ declare const __COMMIT_SHA__: string | null;
 /** A hash of the shapes documents are checked by (vite.config.ts). */
 declare const __SHAPES_RULESET__: string;
 
+/** The address of the Client ID Document the build wrote on the domain in CNAME (vite.config.ts); null without one. */
+declare const __CLIENT_ID__: string | null;
+
 interface ImportMetaEnv {
   /** The deck library's index, read by src/config.ts; the site's own, decks/index.ttl, when unset (docs/deck-library.md). */
   readonly VITE_LIBRARY_INDEX_URL?: string;

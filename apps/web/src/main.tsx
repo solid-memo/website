@@ -25,6 +25,8 @@ void unregisterJourneysWorkers(navigator.serviceWorker, servedSite);
 const useCases = createAppUseCases({
   // The name the identity provider shows when the user logs in.
   clientName: config.appName,
+  // The Client ID Document the build wrote on the domain in CNAME, if any (docs/authentication.md).
+  clientId: __CLIENT_ID__,
   servedSite,
   // VITE_LIBRARY_INDEX_URL points a build at another copy of the deck library.
   libraryIndexUrl: config.libraryIndexUrl,

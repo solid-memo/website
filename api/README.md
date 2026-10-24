@@ -18,7 +18,7 @@ npm run test:unit -- packages/ui/src/ui/routes.api.test.ts -u
 | [routes/app.txt](routes/app.txt) | The hashes that open the app's screens | [routes.api.test.ts](../packages/ui/src/ui/routes.api.test.ts) |
 | [routes/studio.txt](routes/studio.txt) | The hashes that open the Studio's screens | [routes.api.test.ts](../apps/studio/src/ui/routes.api.test.ts) |
 | [browser-storage/](browser-storage/) | What each package keeps in the browser: storage keys, the guest pod's IndexedDB, Web Locks | `browserStorage.api.test.ts` in each of browser, solid, ui and studio |
-| [self-hosting.txt](self-hosting.txt) | The `VITE_*` variables, the build and start commands, the folder the build writes | [selfHosting.api.test.ts](../scripts/selfHosting.api.test.ts) |
+| [self-hosting.txt](self-hosting.txt) | The `VITE_*` variables, the build and start commands, the folder the build writes, the Client ID Document's address | [selfHosting.api.test.ts](../scripts/selfHosting.api.test.ts) |
 | [frozen/published.txt](frozen/published.txt) | Every document published from `ns/` and `vendor/`, and each shape's hash | [published.api.test.ts](../packages/vocab/tooling/published.api.test.ts) |
 | [frozen/vocab.txt](frozen/vocab.txt) | Every term of the vocabulary, with its kind, range and domain, and every topic | [vocab.api.test.ts](../packages/vocab/tooling/vocab.api.test.ts) |
 

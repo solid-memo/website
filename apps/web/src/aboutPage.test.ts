@@ -6,6 +6,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { CLIENT_ID_FILE } from "@solid-memo/site/clientId";
 import { siteOrigin } from "@solid-memo/site/siteMap";
 import { describe, expect, it } from "vitest";
 
@@ -26,11 +27,13 @@ const hrefs = [...html.matchAll(/<(?:a|link)\b[^>]*\bhref="([^"]*)"/g)].map(([, 
 /**
  * Where a link relative to /about/ is served from: the site's page, a
  * page of the docs (`/docs/` from docs/README.md, `/docs/<page>/` from
- * docs/<page>.md), public/, or the folders the build publishes.
+ * docs/<page>.md), the Client ID Document (from CNAME, which the build
+ * writes it on), public/, or the folders the build publishes.
  */
 function served(href: string): string {
   const path = new URL(href, "https://site.example/about/").pathname;
   if (path === "/") return resolve(app, "index.html");
+  if (path === `/${CLIENT_ID_FILE}`) return resolve(repository, "CNAME");
   if (path === "/docs/") return resolve(repository, "docs/README.md");
   const page = /^\/docs\/([a-z0-9-]+)\/$/.exec(path);
   if (page) return resolve(repository, "docs", `${page[1]}.md`);

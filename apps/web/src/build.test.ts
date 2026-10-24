@@ -15,6 +15,7 @@ import { PAINTED_ROLES } from "@solid-memo/domain/customPalette";
 import { checkSvg, fontNotice } from "@solid-memo/site/diagrams";
 import { DOCS_CSP } from "@solid-memo/site/docsSite";
 import { diagramMode, FONT_LICENSE_FILE } from "@solid-memo/site/drawDiagrams";
+import { CLIENT_ID_FILE, clientIdDocument, clientIdUrl } from "@solid-memo/site/clientId";
 import { appVersion, commitSha } from "@solid-memo/site/siteBuild";
 import { siteOrigin } from "@solid-memo/site/siteMap";
 import { siteConfig, siteHtml, siteVersion, type SiteConfig } from "./config";
@@ -472,6 +473,21 @@ describe("robots.txt and the sitemap", () => {
         .querySelector('meta[name="robots"]');
       expect(robots?.getAttribute("content") ?? "", loc).not.toContain("noindex");
     }
+  });
+});
+
+describe("the Client ID Document", () => {
+  const document = () => built.get(CLIENT_ID_FILE);
+
+  it("is written on the domain in CNAME, under the site's name, and none without one", () => {
+    if (origin === null) expect(document()).toBeUndefined();
+    else expect(document()).toBe(clientIdDocument(origin, builtConfig().appName));
+  });
+
+  it.runIf(origin !== null)("is the client ID the page logs in with, its own address", () => {
+    const { client_id } = JSON.parse(document()!) as { client_id: string };
+    expect(client_id).toBe(clientIdUrl(origin!));
+    expect(chunks.some((chunk) => chunk.code.includes(client_id))).toBe(true);
   });
 });
 

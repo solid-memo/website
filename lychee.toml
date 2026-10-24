@@ -19,7 +19,12 @@ exclude_path = ["(^|/)node_modules/"]
 no_progress = true
 
 # Addresses that answer only once the maintainer does something, each to
-# remove from this list then. None now: the changelog's links to tags and
-# comparisons are written by semantic-release with the tag they name
-# (docs/releasing.md), so each answers once the release is pushed.
-exclude = []
+# remove from this list then. The changelog's links to tags and
+# comparisons are not among them: semantic-release writes them with the
+# tag they name (docs/releasing.md), so each answers once the release is
+# pushed.
+exclude = [
+  # The Client ID Document (docs/authentication.md), which the site has
+  # once the release that writes it is deployed.
+  "^https://solid-memo\\.com/clientid\\.jsonld$",
+]

@@ -204,22 +204,25 @@ jobs:
         run: npm run build
       # The artifact is the whole site: the app, and beside it what the
       # build writes: ns/, decks/, the vendored shapes, robots.txt, the
-      # sitemap and the docs (docs/deployment.md). The user journeys'
-      # report is not in it: the journeys job publishes it on a site of its
-      # own.
+      # sitemap, the Client ID Document and the docs (docs/deployment.md).
+      # The user journeys' report is not in it: the journeys job publishes
+      # it on a site of its own.
       # robots.txt always, and the sitemap whenever CNAME names a domain
-      # (docs/deployment.md#custom-domain-optional); the docs, with their
-      # diagrams drawn and the font's license beside them (docs/markdown.md),
-      # so a build under DOCS_DIAGRAMS=skip is not deployed. Each only when
-      # the checked-out version's build writes it: a version from before
-      # (no siteMap.ts, no publishDocs.ts, in packages/site/ or before
-      # that in vocab's and markdown's tooling/) can still be deployed.
-      - name: The vocabulary, the deck library, robots.txt, the sitemap and the docs are in the artifact
+      # (docs/deployment.md#custom-domain-optional), the Client ID Document
+      # too, as logins on that domain name it (docs/authentication.md); the
+      # docs, with their diagrams drawn and the font's license beside them
+      # (docs/markdown.md), so a build under DOCS_DIAGRAMS=skip is not
+      # deployed. Each only when the checked-out version's build writes it:
+      # a version from before (no siteMap.ts, no clientId.ts, no
+      # publishDocs.ts, in packages/site/ or before that in vocab's and
+      # markdown's tooling/) can still be deployed.
+      - name: The vocabulary, the deck library, robots.txt, the sitemap, the Client ID Document and the docs are in the artifact
         run: >-
           test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
           && { { [ ! -f packages/site/src/siteMap.ts ] && [ ! -f packages/vocab/tooling/siteMap.ts ]; } || {
           test -f apps/web/dist/robots.txt
           && { [ ! -s CNAME ] || test -f apps/web/dist/sitemap.xml; }; }; }
+          && { [ ! -f packages/site/src/clientId.ts ] || [ ! -s CNAME ] || test -f apps/web/dist/clientid.jsonld; }
           && { { [ ! -f packages/site/src/publishDocs.ts ] && [ ! -f packages/markdown/tooling/publishDocs.ts ]; } || {
           test -f apps/web/dist/docs/index.html
           && test -f apps/web/dist/docs/diagrams/OFL-Fredoka.txt

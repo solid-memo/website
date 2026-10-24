@@ -10,6 +10,7 @@ import { docsSitePlugin } from "@solid-memo/site/publishDocs";
 import { turtleDirectoryPlugin } from "@solid-memo/site/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { appVersion, commitSha, siteDefines } from "@solid-memo/site/siteBuild";
+import { clientIdPlugin } from "@solid-memo/site/clientId";
 import { siteMapPlugin, siteOrigin } from "@solid-memo/site/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 
@@ -38,7 +39,7 @@ const settings = siteSettings();
 const origin = siteOrigin(`${REPOSITORY_ROOT}CNAME`);
 
 export default defineConfig({
-  define: siteDefines(),
+  define: siteDefines({ origin }),
   base: "./",
   plugins: [
     settings,
@@ -64,6 +65,9 @@ export default defineConfig({
     // domain in CNAME (docs/deployment.md#custom-domain-optional): none
     // without one.
     siteMapPlugin({ origin }),
+    // The Client ID Document the app logs in with on that domain
+    // (docs/authentication.md#the-client-id-document), under the site's name.
+    clientIdPlugin({ origin, name: () => settings.api!.settings().appName }),
   ],
   resolve: {
     alias: {
