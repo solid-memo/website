@@ -1221,6 +1221,7 @@
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
+                                         [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] ,
                                          [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "4d2e509842aefd3b49e0f6d8ccffcae5f02c9c00caa1ef080b9ff5c4eb0fe938"^^xsd:hexBinary ] .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
@@ -20624,12 +20625,12 @@
                   "Flüsse der Welt und ihre Mündungen"@de ,
                   "Ríos del mundo y sus desembocaduras"@es ,
                   "Fleuves du monde et leurs embouchures"@fr ;
-    dcterms:description "50 major rivers of the world and the water each one flows into: a sea, ocean, bay, lake or another river. The rivers come from every continent except Antarctica, seven of them Nordic, such as the Torne and the Göta älv. Front: the river; back: where it flows into, in English and Swedish. The mouth is a water that Wikidata records for the river (P403); where it records several, the card gives the sea or bay that the other sources also name, sometimes with a note. Rivers whose mouth is disputed or splits between different waters are left out. From Wikidata, checked against Wikipedia and Nationalencyklopedin."@en ,
-                        "50 av världens stora floder och det vatten som var och en mynnar i: ett hav, en ocean, en vik, en sjö eller en annan flod. Floderna kommer från alla världsdelar utom Antarktis, sju av dem nordiska, som Torne älv och Göta älv. Framsida: floden; baksida: var den mynnar, på engelska och svenska. Mynningen är ett vatten som Wikidata anger för floden (P403, mynnar i); där Wikidata anger flera ger kortet det hav eller den vik som även de andra källorna nämner, ibland med en anteckning. Floder vars mynning är omstridd eller delas mellan olika vatten är utelämnade. Uppgifterna kommer från Wikidata och är kontrollerade mot Wikipedia och Nationalencyklopedin."@sv ,
-                        "세계의 주요 강 50개와 각 강이 흘러드는 물, 곧 바다, 대양, 만, 호수 또는 다른 강입니다. 강은 남극을 뺀 모든 대륙에서 골랐으며, 그중 7개는 토르네강과 예타강 같은 북유럽의 강입니다. 앞면은 강, 뒷면은 강이 흘러드는 곳을 영어와 스웨덴어로 보여 줍니다. 하구는 Wikidata가 그 강에 대해 기록한 물(P403)입니다. 여러 개가 기록된 경우 카드는 다른 출처도 언급하는 바다나 만을 제시하며, 때로는 메모를 덧붙입니다. 하구에 이견이 있거나 여러 물로 갈라지는 강은 제외했습니다. Wikidata에서 가져왔고 위키백과와 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
-                        "50 große Flüsse der Welt und das Gewässer, in das jeder von ihnen mündet: ein Meer, ein Ozean, eine Bucht, ein See oder ein anderer Fluss. Die Flüsse stammen von allen Kontinenten außer der Antarktis, sieben davon aus den nordischen Ländern, etwa der Torne älv und der Göta älv. Vorderseite: der Fluss; Rückseite: wohin er mündet, auf Englisch und Schwedisch. Die Mündung ist ein Gewässer, das Wikidata für den Fluss verzeichnet (P403); wo es mehrere verzeichnet, nennt die Karte das Meer oder die Bucht, die auch die anderen Quellen nennen, manchmal mit einer Anmerkung. Flüsse, deren Mündung umstritten ist oder sich auf verschiedene Gewässer aufteilt, sind weggelassen. Aus Wikidata, geprüft anhand von Wikipedia und Nationalencyklopedin."@de ,
-                        "50 grandes ríos del mundo y las aguas en las que desemboca cada uno: un mar, un océano, una bahía, un lago u otro río. Los ríos proceden de todos los continentes salvo la Antártida, y siete de ellos son nórdicos, como el Torne y el Göta älv. Anverso: el río; reverso: dónde desemboca, en inglés y en sueco. La desembocadura es una masa de agua que Wikidata registra para el río (P403); cuando registra varias, la tarjeta da el mar o la bahía que también nombran las demás fuentes, a veces con una nota. Se han dejado fuera los ríos cuya desembocadura es discutida o se reparte entre aguas distintas. Datos tomados de Wikidata y contrastados con Wikipedia y la Nationalencyklopedin."@es ,
-                        "50 grands fleuves et rivières du monde et les eaux dans lesquelles chacun se jette : une mer, un océan, une baie, un lac ou un autre cours d’eau. Ils viennent de tous les continents sauf l’Antarctique, et sept d’entre eux sont nordiques, comme le Torne et le Göta älv. Recto : le cours d’eau ; verso : là où il se jette, en anglais et en suédois. L’embouchure est une étendue d’eau que Wikidata indique pour le cours d’eau (P403) ; quand Wikidata en indique plusieurs, la carte donne la mer ou la baie que citent aussi les autres sources, parfois avec une note. Les cours d’eau dont l’embouchure est contestée ou se partage entre différentes eaux sont écartés. Données tirées de Wikidata, vérifiées auprès de Wikipédia et de la Nationalencyklopedin."@fr ;
+    dcterms:description "50 major rivers of the world and the water each one flows into: a sea, ocean, bay, lake or another river. The rivers come from every continent except Antarctica, seven of them Nordic, such as the Torne and the Göta älv. Front: the river; back: where it flows into, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. The mouth is a water that Wikidata records for the river (P403); where it records several, the card gives the sea or bay that the other sources also name, sometimes with a note. Rivers whose mouth is disputed or splits between different waters are left out. From Wikidata, checked against Wikipedia and Nationalencyklopedin."@en ,
+                        "50 av världens stora floder och det vatten som var och en mynnar i: ett hav, en ocean, en vik, en sjö eller en annan flod. Floderna kommer från alla världsdelar utom Antarktis, sju av dem nordiska, som Torne älv och Göta älv. Framsida: floden; baksida: var den mynnar, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Mynningen är ett vatten som Wikidata anger för floden (P403, mynnar i); där Wikidata anger flera ger kortet det hav eller den vik som även de andra källorna nämner, ibland med en anteckning. Floder vars mynning är omstridd eller delas mellan olika vatten är utelämnade. Uppgifterna kommer från Wikidata och är kontrollerade mot Wikipedia och Nationalencyklopedin."@sv ,
+                        "세계의 주요 강 50개와 각 강이 흘러드는 물, 곧 바다, 대양, 만, 호수 또는 다른 강입니다. 강은 남극을 뺀 모든 대륙에서 골랐으며, 그중 7개는 토르네강과 예타강 같은 북유럽의 강입니다. 앞면은 강, 뒷면은 강이 흘러드는 곳을 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 보여 줍니다. 하구는 Wikidata가 그 강에 대해 기록한 물(P403)입니다. 여러 개가 기록된 경우 카드는 다른 출처도 언급하는 바다나 만을 제시하며, 때로는 메모를 덧붙입니다. 하구에 이견이 있거나 여러 물로 갈라지는 강은 제외했습니다. Wikidata에서 가져왔고 위키백과와 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "50 große Flüsse der Welt und das Gewässer, in das jeder von ihnen mündet: ein Meer, ein Ozean, eine Bucht, ein See oder ein anderer Fluss. Die Flüsse stammen von allen Kontinenten außer der Antarktis, sieben davon aus den nordischen Ländern, etwa der Torne älv und der Göta älv. Vorderseite: der Fluss; Rückseite: wohin er mündet, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Die Mündung ist ein Gewässer, das Wikidata für den Fluss verzeichnet (P403); wo es mehrere verzeichnet, nennt die Karte das Meer oder die Bucht, die auch die anderen Quellen nennen, manchmal mit einer Anmerkung. Flüsse, deren Mündung umstritten ist oder sich auf verschiedene Gewässer aufteilt, sind weggelassen. Aus Wikidata, geprüft anhand von Wikipedia und Nationalencyklopedin."@de ,
+                        "50 grandes ríos del mundo y las aguas en las que desemboca cada uno: un mar, un océano, una bahía, un lago u otro río. Los ríos proceden de todos los continentes salvo la Antártida, y siete de ellos son nórdicos, como el Torne y el Göta älv. Anverso: el río; reverso: dónde desemboca, en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. La desembocadura es una masa de agua que Wikidata registra para el río (P403); cuando registra varias, la tarjeta da el mar o la bahía que también nombran las demás fuentes, a veces con una nota. Se han dejado fuera los ríos cuya desembocadura es discutida o se reparte entre aguas distintas. Datos tomados de Wikidata y contrastados con Wikipedia y la Nationalencyklopedin."@es ,
+                        "50 grands fleuves et rivières du monde et les eaux dans lesquelles chacun se jette : une mer, un océan, une baie, un lac ou un autre cours d’eau. Ils viennent de tous les continents sauf l’Antarctique, et sept d’entre eux sont nordiques, comme le Torne et le Göta älv. Recto : le cours d’eau ; verso : là où il se jette, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. L’embouchure est une étendue d’eau que Wikidata indique pour le cours d’eau (P403) ; quand Wikidata en indique plusieurs, la carte donne la mer ou la baie que citent aussi les autres sources, parfois avec une note. Les cours d’eau dont l’embouchure est contestée ou se partage entre différentes eaux sont écartés. Données tirées de Wikidata, vérifiées auprès de Wikipédia et de la Nationalencyklopedin."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -20665,10 +20666,11 @@
                  "mers et océans"@fr ,
                  "lacs"@fr ;
     dcat:first <https://solid-memo.com/decks/world-rivers/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/world-rivers/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/world-rivers/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/world-rivers/v1.ttl> ,
-                    <https://solid-memo.com/decks/world-rivers/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-rivers/v2.ttl> .
+                    <https://solid-memo.com/decks/world-rivers/v2.ttl> ,
+                    <https://solid-memo.com/decks/world-rivers/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/world-rivers/v3.ttl> .
 
 <https://solid-memo.com/decks/world-rivers/v1.ttl>
     a dcat:Dataset ;
@@ -20681,6 +20683,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/world-rivers/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Rivers of the world and their mouths"@en ,
+                  "Världens floder och deras mynningar"@sv ,
+                  "세계의 강과 하구"@ko ,
+                  "Flüsse der Welt und ihre Mündungen"@de ,
+                  "Ríos del mundo y sus desembocaduras"@es ,
+                  "Fleuves du monde et leurs embouchures"@fr ;
+    dcterms:description "50 major rivers of the world and the water each one flows into: a sea, ocean, bay, lake or another river. The rivers come from every continent except Antarctica, seven of them Nordic, such as the Torne and the Göta älv. Front: the river; back: where it flows into, in English and Swedish. The mouth is a water that Wikidata records for the river (P403); where it records several, the card gives the sea or bay that the other sources also name, sometimes with a note. Rivers whose mouth is disputed or splits between different waters are left out. From Wikidata, checked against Wikipedia and Nationalencyklopedin."@en ,
+                        "50 av världens stora floder och det vatten som var och en mynnar i: ett hav, en ocean, en vik, en sjö eller en annan flod. Floderna kommer från alla världsdelar utom Antarktis, sju av dem nordiska, som Torne älv och Göta älv. Framsida: floden; baksida: var den mynnar, på engelska och svenska. Mynningen är ett vatten som Wikidata anger för floden (P403, mynnar i); där Wikidata anger flera ger kortet det hav eller den vik som även de andra källorna nämner, ibland med en anteckning. Floder vars mynning är omstridd eller delas mellan olika vatten är utelämnade. Uppgifterna kommer från Wikidata och är kontrollerade mot Wikipedia och Nationalencyklopedin."@sv ,
+                        "세계의 주요 강 50개와 각 강이 흘러드는 물, 곧 바다, 대양, 만, 호수 또는 다른 강입니다. 강은 남극을 뺀 모든 대륙에서 골랐으며, 그중 7개는 토르네강과 예타강 같은 북유럽의 강입니다. 앞면은 강, 뒷면은 강이 흘러드는 곳을 영어와 스웨덴어로 보여 줍니다. 하구는 Wikidata가 그 강에 대해 기록한 물(P403)입니다. 여러 개가 기록된 경우 카드는 다른 출처도 언급하는 바다나 만을 제시하며, 때로는 메모를 덧붙입니다. 하구에 이견이 있거나 여러 물로 갈라지는 강은 제외했습니다. Wikidata에서 가져왔고 위키백과와 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "50 große Flüsse der Welt und das Gewässer, in das jeder von ihnen mündet: ein Meer, ein Ozean, eine Bucht, ein See oder ein anderer Fluss. Die Flüsse stammen von allen Kontinenten außer der Antarktis, sieben davon aus den nordischen Ländern, etwa der Torne älv und der Göta älv. Vorderseite: der Fluss; Rückseite: wohin er mündet, auf Englisch und Schwedisch. Die Mündung ist ein Gewässer, das Wikidata für den Fluss verzeichnet (P403); wo es mehrere verzeichnet, nennt die Karte das Meer oder die Bucht, die auch die anderen Quellen nennen, manchmal mit einer Anmerkung. Flüsse, deren Mündung umstritten ist oder sich auf verschiedene Gewässer aufteilt, sind weggelassen. Aus Wikidata, geprüft anhand von Wikipedia und Nationalencyklopedin."@de ,
+                        "50 grandes ríos del mundo y las aguas en las que desemboca cada uno: un mar, un océano, una bahía, un lago u otro río. Los ríos proceden de todos los continentes salvo la Antártida, y siete de ellos son nórdicos, como el Torne y el Göta älv. Anverso: el río; reverso: dónde desemboca, en inglés y en sueco. La desembocadura es una masa de agua que Wikidata registra para el río (P403); cuando registra varias, la tarjeta da el mar o la bahía que también nombran las demás fuentes, a veces con una nota. Se han dejado fuera los ríos cuya desembocadura es discutida o se reparte entre aguas distintas. Datos tomados de Wikidata y contrastados con Wikipedia y la Nationalencyklopedin."@es ,
+                        "50 grands fleuves et rivières du monde et les eaux dans lesquelles chacun se jette : une mer, un océan, une baie, un lac ou un autre cours d’eau. Ils viennent de tous les continents sauf l’Antarctique, et sept d’entre eux sont nordiques, comme le Torne et le Göta älv. Recto : le cours d’eau ; verso : là où il se jette, en anglais et en suédois. L’embouchure est une étendue d’eau que Wikidata indique pour le cours d’eau (P403) ; quand Wikidata en indique plusieurs, la carte donne la mer ou la baie que citent aussi les autres sources, parfois avec une note. Les cours d’eau dont l’embouchure est contestée ou se partage entre différentes eaux sont écartés. Données tirées de Wikidata, vérifiées auprès de Wikipédia et de la Nationalencyklopedin."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/world-rivers/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Rivers of the world and their mouths"@en ,
@@ -20689,17 +20709,18 @@
                   "Flüsse der Welt und ihre Mündungen"@de ,
                   "Ríos del mundo y sus desembocaduras"@es ,
                   "Fleuves du monde et leurs embouchures"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/world-rivers/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/world-rivers/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "50 major rivers of the world and the water each one flows into: a sea, ocean, bay, lake or another river. The rivers come from every continent except Antarctica, seven of them Nordic, such as the Torne and the Göta älv. Front: the river; back: where it flows into, in English and Swedish. The mouth is a water that Wikidata records for the river (P403); where it records several, the card gives the sea or bay that the other sources also name, sometimes with a note. Rivers whose mouth is disputed or splits between different waters are left out. From Wikidata, checked against Wikipedia and Nationalencyklopedin."@en ,
-                        "50 av världens stora floder och det vatten som var och en mynnar i: ett hav, en ocean, en vik, en sjö eller en annan flod. Floderna kommer från alla världsdelar utom Antarktis, sju av dem nordiska, som Torne älv och Göta älv. Framsida: floden; baksida: var den mynnar, på engelska och svenska. Mynningen är ett vatten som Wikidata anger för floden (P403, mynnar i); där Wikidata anger flera ger kortet det hav eller den vik som även de andra källorna nämner, ibland med en anteckning. Floder vars mynning är omstridd eller delas mellan olika vatten är utelämnade. Uppgifterna kommer från Wikidata och är kontrollerade mot Wikipedia och Nationalencyklopedin."@sv ,
-                        "세계의 주요 강 50개와 각 강이 흘러드는 물, 곧 바다, 대양, 만, 호수 또는 다른 강입니다. 강은 남극을 뺀 모든 대륙에서 골랐으며, 그중 7개는 토르네강과 예타강 같은 북유럽의 강입니다. 앞면은 강, 뒷면은 강이 흘러드는 곳을 영어와 스웨덴어로 보여 줍니다. 하구는 Wikidata가 그 강에 대해 기록한 물(P403)입니다. 여러 개가 기록된 경우 카드는 다른 출처도 언급하는 바다나 만을 제시하며, 때로는 메모를 덧붙입니다. 하구에 이견이 있거나 여러 물로 갈라지는 강은 제외했습니다. Wikidata에서 가져왔고 위키백과와 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
-                        "50 große Flüsse der Welt und das Gewässer, in das jeder von ihnen mündet: ein Meer, ein Ozean, eine Bucht, ein See oder ein anderer Fluss. Die Flüsse stammen von allen Kontinenten außer der Antarktis, sieben davon aus den nordischen Ländern, etwa der Torne älv und der Göta älv. Vorderseite: der Fluss; Rückseite: wohin er mündet, auf Englisch und Schwedisch. Die Mündung ist ein Gewässer, das Wikidata für den Fluss verzeichnet (P403); wo es mehrere verzeichnet, nennt die Karte das Meer oder die Bucht, die auch die anderen Quellen nennen, manchmal mit einer Anmerkung. Flüsse, deren Mündung umstritten ist oder sich auf verschiedene Gewässer aufteilt, sind weggelassen. Aus Wikidata, geprüft anhand von Wikipedia und Nationalencyklopedin."@de ,
-                        "50 grandes ríos del mundo y las aguas en las que desemboca cada uno: un mar, un océano, una bahía, un lago u otro río. Los ríos proceden de todos los continentes salvo la Antártida, y siete de ellos son nórdicos, como el Torne y el Göta älv. Anverso: el río; reverso: dónde desemboca, en inglés y en sueco. La desembocadura es una masa de agua que Wikidata registra para el río (P403); cuando registra varias, la tarjeta da el mar o la bahía que también nombran las demás fuentes, a veces con una nota. Se han dejado fuera los ríos cuya desembocadura es discutida o se reparte entre aguas distintas. Datos tomados de Wikidata y contrastados con Wikipedia y la Nationalencyklopedin."@es ,
-                        "50 grands fleuves et rivières du monde et les eaux dans lesquelles chacun se jette : une mer, un océan, une baie, un lac ou un autre cours d’eau. Ils viennent de tous les continents sauf l’Antarctique, et sept d’entre eux sont nordiques, comme le Torne et le Göta älv. Recto : le cours d’eau ; verso : là où il se jette, en anglais et en suédois. L’embouchure est une étendue d’eau que Wikidata indique pour le cours d’eau (P403) ; quand Wikidata en indique plusieurs, la carte donne la mer ou la baie que citent aussi les autres sources, parfois avec une note. Les cours d’eau dont l’embouchure est contestée ou se partage entre différentes eaux sont écartés. Données tirées de Wikidata, vérifiées auprès de Wikipédia et de la Nationalencyklopedin."@fr ;
+    dcterms:description "50 major rivers of the world and the water each one flows into: a sea, ocean, bay, lake or another river. The rivers come from every continent except Antarctica, seven of them Nordic, such as the Torne and the Göta älv. Front: the river; back: where it flows into, in English and Swedish, and in Korean, German, Spanish and French from Wikidata's labels. The mouth is a water that Wikidata records for the river (P403); where it records several, the card gives the sea or bay that the other sources also name, sometimes with a note. Rivers whose mouth is disputed or splits between different waters are left out. From Wikidata, checked against Wikipedia and Nationalencyklopedin."@en ,
+                        "50 av världens stora floder och det vatten som var och en mynnar i: ett hav, en ocean, en vik, en sjö eller en annan flod. Floderna kommer från alla världsdelar utom Antarktis, sju av dem nordiska, som Torne älv och Göta älv. Framsida: floden; baksida: var den mynnar, på engelska och svenska, och på koreanska, tyska, spanska och franska från Wikidatas etiketter. Mynningen är ett vatten som Wikidata anger för floden (P403, mynnar i); där Wikidata anger flera ger kortet det hav eller den vik som även de andra källorna nämner, ibland med en anteckning. Floder vars mynning är omstridd eller delas mellan olika vatten är utelämnade. Uppgifterna kommer från Wikidata och är kontrollerade mot Wikipedia och Nationalencyklopedin."@sv ,
+                        "세계의 주요 강 50개와 각 강이 흘러드는 물, 곧 바다, 대양, 만, 호수 또는 다른 강입니다. 강은 남극을 뺀 모든 대륙에서 골랐으며, 그중 7개는 토르네강과 예타강 같은 북유럽의 강입니다. 앞면은 강, 뒷면은 강이 흘러드는 곳을 영어와 스웨덴어로, 그리고 Wikidata의 레이블로 한국어, 독일어, 스페인어, 프랑스어로도 보여 줍니다. 하구는 Wikidata가 그 강에 대해 기록한 물(P403)입니다. 여러 개가 기록된 경우 카드는 다른 출처도 언급하는 바다나 만을 제시하며, 때로는 메모를 덧붙입니다. 하구에 이견이 있거나 여러 물로 갈라지는 강은 제외했습니다. Wikidata에서 가져왔고 위키백과와 Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "50 große Flüsse der Welt und das Gewässer, in das jeder von ihnen mündet: ein Meer, ein Ozean, eine Bucht, ein See oder ein anderer Fluss. Die Flüsse stammen von allen Kontinenten außer der Antarktis, sieben davon aus den nordischen Ländern, etwa der Torne älv und der Göta älv. Vorderseite: der Fluss; Rückseite: wohin er mündet, auf Englisch und Schwedisch sowie, aus den Bezeichnungen von Wikidata, auf Koreanisch, Deutsch, Spanisch und Französisch. Die Mündung ist ein Gewässer, das Wikidata für den Fluss verzeichnet (P403); wo es mehrere verzeichnet, nennt die Karte das Meer oder die Bucht, die auch die anderen Quellen nennen, manchmal mit einer Anmerkung. Flüsse, deren Mündung umstritten ist oder sich auf verschiedene Gewässer aufteilt, sind weggelassen. Aus Wikidata, geprüft anhand von Wikipedia und Nationalencyklopedin."@de ,
+                        "50 grandes ríos del mundo y las aguas en las que desemboca cada uno: un mar, un océano, una bahía, un lago u otro río. Los ríos proceden de todos los continentes salvo la Antártida, y siete de ellos son nórdicos, como el Torne y el Göta älv. Anverso: el río; reverso: dónde desemboca, en inglés y en sueco, y en coreano, alemán, español y francés a partir de las etiquetas de Wikidata. La desembocadura es una masa de agua que Wikidata registra para el río (P403); cuando registra varias, la tarjeta da el mar o la bahía que también nombran las demás fuentes, a veces con una nota. Se han dejado fuera los ríos cuya desembocadura es discutida o se reparte entre aguas distintas. Datos tomados de Wikidata y contrastados con Wikipedia y la Nationalencyklopedin."@es ,
+                        "50 grands fleuves et rivières du monde et les eaux dans lesquelles chacun se jette : une mer, un océan, une baie, un lac ou un autre cours d’eau. Ils viennent de tous les continents sauf l’Antarctique, et sept d’entre eux sont nordiques, comme le Torne et le Göta älv. Recto : le cours d’eau ; verso : là où il se jette, en anglais et en suédois, ainsi qu’en coréen, en allemand, en espagnol et en français d’après les libellés de Wikidata. L’embouchure est une étendue d’eau que Wikidata indique pour le cours d’eau (P403) ; quand Wikidata en indique plusieurs, la carte donne la mer ou la baie que citent aussi les autres sources, parfois avec une note. Les cours d’eau dont l’embouchure est contestée ou se partage entre différentes eaux sont écartés. Données tirées de Wikidata, vérifiées auprès de Wikipédia et de la Nationalencyklopedin."@fr ;
     prov:wasDerivedFrom <https://www.wikidata.org/> ,
                         <https://www.govinfo.gov/content/pkg/FR-2025-01-31/pdf/2025-02096.pdf> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/world-rivers/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/world-rivers/v3.ttl#compilation> ,
+                        <https://solid-memo.com/decks/world-rivers/v3.ttl#wikidata-labels> ;
     dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:geography ;
@@ -20735,35 +20756,52 @@
                  "mers et océans"@fr ,
                  "lacs"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/world-rivers/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/world-rivers/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/world-rivers/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-rivers/v2.ttl> ;
+    dcterms:issued "2026-10-24T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Card text in Korean, German, Spanish and French as well, from Wikidata's labels of what each card names: of the 50 cards in use, 45 in Korean, 50 in German, 49 in Spanish, 49 in French; English and Swedish text unchanged. Each card names the Wikidata items it is about (dcterms:subject). The deck names the project's issue tracker as its contact, and no email." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#world-rivers> ;
     dcat:isVersionOf <#world-rivers> ;
-    dcat:distribution <https://solid-memo.com/decks/world-rivers/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/world-rivers/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/world-rivers/v3.ttl#turtle> ;
     solid-memo:cardCount 50 .
 
-<https://solid-memo.com/decks/world-rivers/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/world-rivers/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/world-rivers/v2.ttl#compilation>
+<https://solid-memo.com/decks/world-rivers/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/world-rivers/v3.ttl#compilation>
     a prov:Activity .
 
 <https://www.govinfo.gov/content/pkg/FR-2025-01-31/pdf/2025-02096.pdf>
     dcterms:title "Executive Order 14172 of January 20, 2025: Restoring Names That Honor American Greatness (Federal Register vol. 90, no. 20, from p. 8629)" ;
     dcterms:creator "The President of the United States (Executive Office of the President); published by the Office of the Federal Register" .
 
-<https://solid-memo.com/decks/world-rivers/v2.ttl#turtle>
+<https://solid-memo.com/decks/world-rivers/v3.ttl#wikidata-labels>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/world-rivers/v3.ttl#wikidata-mapping>
+    a prov:Entity ;
+    dcterms:title "scripts/wikidata-labels/world-rivers.json" ;
+    <http://spdx.org/rdf/terms#checksum> [ a <http://spdx.org/rdf/terms#Checksum> ; <http://spdx.org/rdf/terms#algorithm> <http://spdx.org/rdf/terms#checksumAlgorithm_sha256> ; <http://spdx.org/rdf/terms#checksumValue> "035c45b6c338fc7927a5bb75a6861fd9ccdd2aabbebbb75a70b43db8df1eee3e"^^xsd:hexBinary ] .
+
+<https://solid-memo.com/decks/world-rivers/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/world-rivers/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/world-rivers/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/world-rivers/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/world-rivers/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
