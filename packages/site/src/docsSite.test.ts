@@ -18,7 +18,6 @@ import {
   escapeHtml,
   renderDocsSite,
   repositoryIo,
-  versionsPage,
   withDocsVersion,
 } from "./docsSite.ts";
 import { drawInputs } from "./drawDiagrams.ts";
@@ -162,14 +161,13 @@ const articleLinks = (html: string) => {
 };
 
 describe("renderDocsSite", () => {
-  it("writes each page, the stylesheet and the list of versions", async () => {
+  it("writes each page and the stylesheet", async () => {
     const files = await render(siteFiles());
     expect([...files.keys()].sort()).toEqual([
       "docs.css",
       "index.html",
       "one/index.html",
       "two/index.html",
-      "versions/index.html",
     ]);
     expect(files.get("docs.css")).toBe("body{}");
   });
@@ -189,7 +187,7 @@ describe("renderDocsSite", () => {
     expect(one).not.toContain("noindex");
     expect(one).toContain('<link rel="stylesheet" href="../docs.css">');
     expect(one).toContain('<a href="../../">Solid Memo</a> <a href="../">Docs</a>');
-    expect(one).toContain('Version 2.2.0 · <a href="../versions/">All versions</a>');
+    expect(one).toContain('<p class="version">Version 2.2.0</p>');
     expect(one).toContain('<a class="skip" href="#main">');
     expect(one).toContain('<main id="main">');
     expect(one).toContain(
@@ -335,15 +333,6 @@ describe("renderDocsSite", () => {
     });
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatch(/^docs\/docs\.ttl(:1)?: not Turtle: /);
-  });
-
-  it("writes the list of versions: this one, and the releases", async () => {
-    const versions = (await render(siteFiles())).get("versions/index.html")!;
-    expect(versions).toContain(`content="${DOCS_CSP}"`);
-    expect(versions).toContain('<a href="../">2.2.0</a>, this one');
-    expect(versions).toContain(`<a href="${REPO}/releases">`);
-    expect(versions).toContain('<link rel="stylesheet" href="../docs.css">');
-    expect(versions).toBe(versionsPage({ repoUrl: REPO, version: "2.2.0" }));
   });
 
   it("describes a page by its first paragraph, as one line", async () => {
@@ -499,15 +488,10 @@ describe("renderDocsSite", () => {
         "",
         "> ```mermaid\n> flowchart LR\u202e\n> ```",
       ),
-      "docs/versions.md": "",
       "docs/diagrams.md": "",
       "docs/Upper_Case.md": "",
       [DOCS_INDEX]: docsTtl([
-        [
-          "pages",
-          "Pages",
-          ["one.md", "raw.md", "versions.md", "diagrams.md", "Upper_Case.md", "gone.md"],
-        ],
+        ["pages", "Pages", ["one.md", "raw.md", "diagrams.md", "Upper_Case.md", "gone.md"]],
       ]),
       "CONTRIBUTING.md": "# Contributing\n",
     });
@@ -524,11 +508,10 @@ describe("renderDocsSite", () => {
       "docs/one.md:1: the page does not open with its title, a heading of level 1 (`# …`)",
       "docs/raw.md:5: raw HTML",
       "docs/two.md:1: the title is not followed by a paragraph, the page's description",
-      "docs/versions.md: a page name the site keeps for a folder of its own",
       "docs/drawn.md: docs/docs.ttl does not list the page",
       "docs/nested.md: docs/docs.ttl does not list the page",
       "docs/two.md: docs/docs.ttl does not list the page",
-      "docs/docs.ttl:45: lists gone.md, which is not in docs/",
+      "docs/docs.ttl:39: lists gone.md, which is not in docs/",
       'docs/README.md:6: a link to "gone.md": no such page',
       'docs/README.md:7: a link to "#nowhere": no such heading',
       'docs/README.md:7: a link to "one.md#nowhere": one.md has no such heading',
@@ -750,7 +733,6 @@ describe("renderDocsSite", () => {
       },
       { mode: "archive", ref: "v2.2.0" },
     );
-    expect(files.has("versions/index.html")).toBe(false);
     const one = files.get("one/index.html")!;
     expect(one).toContain('<meta name="robots" content="noindex">');
     expect(one).not.toContain("canonical");
@@ -759,7 +741,7 @@ describe("renderDocsSite", () => {
     );
     expect(one).toContain('<a href="../../../">Solid Memo</a> <a href="../">Docs</a>');
     expect(one).toContain('<link rel="icon" href="../../../favicon.ico"');
-    expect(one).toContain('Version 2.2.0 · <a href="../../versions/">All versions</a>');
+    expect(one).toContain('<p class="version">Version 2.2.0</p>');
     expect(one).toContain(`<a href="${REPO}/blob/v2.2.0/packages/app/main.ts">code</a>`);
     expect(one).toContain(`<a href="${REPO}/blob/v2.2.0/docs/one.md">This page's source</a>`);
     expect(one).toContain(`Built from <a href="${REPO}/tree/v2.2.0">v2.2.0</a>`);
@@ -853,12 +835,6 @@ describe("withDocsVersion", () => {
     for (const name of ["index.html", "one/index.html", "two/index.html"]) {
       expect(withDocsVersion(built.get(name)!, "3.0.0")).toBe(released.get(name));
     }
-  });
-
-  it("states the version in the list of versions' header", () => {
-    expect(withDocsVersion(versionsPage({ repoUrl: REPO, version: "2.2.0" }), "3.0.0")).toContain(
-      '<p class="version">Version 3.0.0</p>',
-    );
   });
 
   it("is null for a page that states no version", () => {

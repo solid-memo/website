@@ -410,8 +410,7 @@ site's origin from `CNAME`, for each page's canonical address.
   pages from [the docs' index](#the-docs-index); every other page
   `docs/<page>/`, so `configuration.md` is `docs/configuration/`.
   Every address a page names is relative, so the pages work from any
-  folder. A page may not be named like a version (`2.2.0.md`),
-  `versions.md` or `diagrams.md`, which are folders of the site.
+  folder. A page may not be named `diagrams.md`, a folder of the site.
 - **Links.** A link to another page leads to its address, and a link
   to a heading to the heading's id, which is GitHub's (`slug.ts`), so
   `configuration.md#vite_repo_url` leads to the same heading on both.
@@ -423,12 +422,10 @@ site's origin from `CNAME`, for each page's canonical address.
   styles from its one stylesheet, `docs.css`, alone (`style-src
   'self'`), and runs no script. Its title and description are its
   heading of level 1 and the paragraph after it. Its header names the
-  version, every page under "All pages" (a disclosure, in the index's
-  groups, with the page itself marked), and the list of versions
-  (`docs/versions/`), which a build writes with its own version and
-  the releases page; its sections are listed under "On this page"; the
-  previous and next pages are in the index's order, the README first;
-  and its footer links its source (the README's, the index's too), the
+  version and every page under "All pages" (a disclosure, in the
+  index's groups, with the page itself marked); its sections are
+  listed under "On this page"; the previous and next pages are in the
+  index's order, the README first; and its footer links its source (the README's, the index's too), the
   issues, the license and the commit.
 - **A diagram** is a figure: its light and dark drawings through
   `<img>` in a `<picture>`, sized from the drawing so the page does not

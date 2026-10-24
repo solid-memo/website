@@ -106,8 +106,8 @@ export class DocsSiteError extends Error {
 /** The name of the drawings' font license, beside them. */
 export const FONT_LICENSE_NAME = `OFL-${FONT_FAMILY}.txt`;
 
-/** A page name that a folder of the site has: the list of versions, or the drawings. */
-const RESERVED = /^(versions|diagrams)\.md$/;
+/** A page name that a folder of the site has: the drawings'. */
+const RESERVED = /^diagrams\.md$/;
 /** A page's name: lowercase, hyphenated (style.md). */
 const PAGE_NAME = /^[a-z0-9]+(-[a-z0-9]+)*\.md$/;
 const README = "README.md";
@@ -130,9 +130,9 @@ type Page = {
 
 /**
  * The docs as pages, by their path in the site's docs folder:
- * `index.html` (the README), `<page>/index.html`, `docs.css`, in a live
- * build `versions/index.html`, and each diagram's drawings in
- * `diagrams/` with the font's license (FONT_LICENSE_NAME) beside them.
+ * `index.html` (the README), `<page>/index.html`, `docs.css`, and each
+ * diagram's drawings in `diagrams/` with the font's license
+ * (FONT_LICENSE_NAME) beside them.
  * Throws a DocsSiteError that lists every problem.
  */
 export async function renderDocsSite(options: DocsSiteOptions): Promise<Map<string, string>> {
@@ -229,7 +229,6 @@ export async function renderDocsSite(options: DocsSiteOptions): Promise<Map<stri
     );
   }
   files.set("docs.css", (await io.read(DOCS_CSS))!);
-  if (options.mode === "live") files.set("versions/index.html", versionsPage(options));
   if ([...files.keys()].some((path) => path.endsWith(".svg")))
     files.set(`diagrams/${FONT_LICENSE_NAME}`, inputs.license);
   return files;
@@ -713,7 +712,6 @@ function roots(options: DocsSiteOptions, depth: number) {
   return {
     docs,
     site: `${docs}..${options.mode === "archive" ? "/.." : ""}/`,
-    versions: `${docs}${options.mode === "archive" ? "../" : ""}versions/`,
   };
 }
 
@@ -860,7 +858,7 @@ ${head.filter((line) => line !== "").join("\n")}
 <a class="skip" href="#main">Skip to the content</a>
 <header class="site">
 <nav aria-label="Site"><a href="${at.site}">Solid Memo</a> <a href="${at.docs || "./"}">Docs</a></nav>
-<p class="version">Version ${escapeHtml(version)} · <a href="${at.versions}">All versions</a></p>
+<p class="version">Version ${escapeHtml(version)}</p>
 ${pagesNav(page, groups, titles)}
 </header>
 <main id="main">
@@ -888,7 +886,7 @@ ${figures ? `<li><a href="${at.docs}diagrams/${FONT_LICENSE_NAME}">Diagrams set 
 `;
 }
 
-/** The version a page of the docs states in its header, as pageShell and versionsPage write it. */
+/** The version a page of the docs states in its header, as pageShell writes it. */
 const STATED_VERSION = /(<p class="version">Version )[^ <]+/;
 
 /**
@@ -901,47 +899,4 @@ const STATED_VERSION = /(<p class="version">Version )[^ <]+/;
 export function withDocsVersion(html: string, version: string): string | null {
   if (!STATED_VERSION.test(html)) return null;
   return html.replace(STATED_VERSION, (_, before: string) => `${before}${escapeHtml(version)}`);
-}
-
-/**
- * The list of versions, at `docs/versions/`: the build's own version,
- * and the releases on the repository's host.
- */
-export function versionsPage({
-  repoUrl,
-  version,
-}: Pick<DocsSiteOptions, "repoUrl" | "version">): string {
-  const link = (href: string, text: string) => `<a href="${escapeHtml(href)}">${text}</a>`;
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="${DOCS_CSP}">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Every version of Solid Memo's docs.">
-<meta name="color-scheme" content="light dark">
-<meta name="robots" content="noindex">
-<link rel="icon" href="../../favicon.ico" sizes="48x48">
-<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="stylesheet" href="../docs.css">
-<title>All versions - Solid Memo docs</title>
-</head>
-<body>
-<a class="skip" href="#main">Skip to the content</a>
-<header class="site">
-<nav aria-label="Site"><a href="../../">Solid Memo</a> <a href="../">Docs</a></nav>
-<p class="version">Version ${escapeHtml(version)}</p>
-</header>
-<main id="main">
-<article>
-<h1>All versions</h1>
-<ul>
-<li><a href="../">${escapeHtml(version)}</a>, this one</li>
-</ul>
-<p>Every release, with its notes and the docs as it had them, is on ${link(`${repoUrl}/releases`, "the repository's releases")}.</p>
-</article>
-</main>
-</body>
-</html>
-`;
 }

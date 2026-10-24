@@ -106,8 +106,6 @@ describe("docsArchive", () => {
         "docs/diagrams/OFL-Fredoka.txt",
       ]),
     );
-    // The list of versions is the site's own, which the archive links to.
-    expect(entries).not.toContain("docs/versions/index.html");
     const svgs = entries.filter((entry) => entry.endsWith(".svg"));
     expect(svgs.length).toBeGreaterThan(0);
     const out = join(root, "out");

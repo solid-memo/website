@@ -11,9 +11,7 @@ import { defaultIo, main, run, type SiteVersionIo } from "./siteVersion.ts";
 const DIST = resolve("/site");
 const PAGE =
   '<head><meta name="version" content="4.1.2" /></head><script src="assets/index-abc.js"></script>';
-const DOC =
-  '<header><p class="version">Version 4.1.2 · <a href="versions/">All versions</a></p></header>';
-const VERSIONS = '<header><p class="version">Version 4.1.2</p></header>';
+const DOC = '<header><p class="version">Version 4.1.2</p></header>';
 
 /** A built site in memory, with the repository at `version`. */
 function fakeIo(
@@ -40,7 +38,6 @@ const site = {
   "assets/index-abc.js": "the script",
   "docs/index.html": DOC,
   "docs/testing/index.html": DOC,
-  "docs/versions/index.html": VERSIONS,
   "docs/docs.css": "p {}",
   "docs/diagrams/a.svg": "<svg/>",
 };
@@ -53,9 +50,8 @@ describe("main", () => {
       "index.html": PAGE.replace("4.1.2", "4.2.0"),
       "docs/index.html": DOC.replace("4.1.2", "4.2.0"),
       "docs/testing/index.html": DOC.replace("4.1.2", "4.2.0"),
-      "docs/versions/index.html": VERSIONS.replace("4.1.2", "4.2.0"),
     });
-    expect(io.logs).toEqual([`${DIST}: version 4.2.0, in index.html and 3 pages of the docs.`]);
+    expect(io.logs).toEqual([`${DIST}: version 4.2.0, in index.html and 2 pages of the docs.`]);
   });
 
   it("writes nothing when a page states no version, and names it", () => {
