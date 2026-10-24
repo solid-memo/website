@@ -131,8 +131,9 @@ It runs these steps:
      everything else its entry says is the guest's: its title,
      description, authors, license, topics and keywords, its direction
      and pace, its card language (`sm:deckCardLanguage`), when it was
-     made, the release it came from (`prov:wasDerivedFrom`) and a
-     course's chapters completed (`sm:completedChapter`);
+     made, the release it came from (`prov:wasDerivedFrom`) and, for a
+     course's deck, its `schema:Course` type and the chapters completed
+     (`sm:completedChapter`);
    - its cards keep their fragment ids (a deck's documents are its
      own, so no id can clash), their distractors and when they were
      made, written in this app's format, the document saying it is part

@@ -197,13 +197,14 @@ describe("courses", () => {
     );
   });
 
-  it("startCourse copies the release without its cards, or returns the copy the instance has", async () => {
+  it("startCourse copies the release without its cards, saying it is a course, or returns the copy the instance has", async () => {
     const { deps, useCases } = setup();
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck]);
     await useCases.startCourse(instance.url, course);
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(RELEASE);
     expect(deps.deckRepository.importDeck).toHaveBeenCalledWith(instance.url, {
       ...release,
+      isCourse: true,
       cards: [],
     });
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck, courseDeck]);

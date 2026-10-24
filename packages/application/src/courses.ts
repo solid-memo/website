@@ -157,7 +157,8 @@ export function createCourseUseCases({
     );
     if (started !== undefined) return started;
     const release = await deckLibrary.fetchLibraryDeck(course.url);
-    return deckRepository.importDeck(instanceUrl, { ...release, cards: [] });
+    // The deck says it is a course, so no screen has to read the library to tell.
+    return deckRepository.importDeck(instanceUrl, { ...release, isCourse: true, cards: [] });
   }
 
   return {

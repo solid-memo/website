@@ -35,7 +35,7 @@ import {
   withoutDeck,
 } from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
-import { DCAT, DCTERMS, RDF, SM } from "../vocab";
+import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 
@@ -98,6 +98,23 @@ describe("toDeck", () => {
       title: { en: "Solid, renamed" },
       completedChapters: chapters,
     });
+  });
+
+  it("reads a course's deck by its schema:Course type, which a write of the deck keeps whatever the deck says", () => {
+    const thing = deckThing((t) =>
+      t
+        .addIri(RDF.type, SM.Deck)
+        .addIri(RDF.type, SCHEMA.Course)
+        .addStringNoLocale(DCTERMS.title, "Solid")
+        .addIri(SM.cardsDocument, CARDS_DOC)
+        .addIri(SM.reviewsDocument, REVIEWS_DOC),
+    );
+    const deck = toDeck(thing)!;
+    expect(deck.course).toBe(true);
+    const { course: _, ...stale } = deck;
+    const rewritten = withDeck(setThing(mockSolidDatasetFrom(CATALOG), thing), stale);
+    expect(getUrlAll(getThing(rewritten, deck.url)!, RDF.type)).toContain(SCHEMA.Course);
+    expect(toDecks(rewritten, CATALOG)[0]?.course).toBe(true);
   });
 
   describe("the deck's card language", () => {

@@ -54,7 +54,7 @@ import {
   type Removal,
 } from "./datasets";
 import { deckDocumentSubjects } from "./ownership";
-import { DCTERMS, SM } from "./vocab";
+import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import {
   deckSubjects,
   toCard,
@@ -661,6 +661,7 @@ export function createSolidDeckRepository({
       direction: DeckDirection;
       themes: string[];
       keywords: LangTexts;
+      isCourse?: true;
     },
   ): Deck {
     const base = ensureTrailingSlash(instanceUrl);
@@ -682,6 +683,7 @@ export function createSolidDeckRepository({
       ...(source === undefined || noKeywords(source.keywords)
         ? {}
         : { keywords: copyKeywords(source.keywords) }),
+      ...(source?.isCourse === true ? { course: true as const } : {}),
     };
   }
 
@@ -768,12 +770,14 @@ export function createSolidDeckRepository({
 
   /**
    * A new entry with what the deck says of the terms no shape owns, which
-   * withDeck keeps as stored: the chapters a course completed
-   * (sm:completedChapter, as completeChapter adds one) and the card
-   * language (sm:deckCardLanguage, as setCardLanguage sets it).
+   * withDeck keeps as stored: a course's type (schema:Course, as its
+   * release is typed), the chapters it completed (sm:completedChapter,
+   * as completeChapter adds one) and the card language
+   * (sm:deckCardLanguage, as setCardLanguage sets it).
    */
   function withOwnTerms(dataset: SolidDataset, deck: Deck): SolidDataset {
     let builder = buildThing(getThing(dataset, deck.url)!);
+    if (deck.course === true) builder = builder.addIri(RDF.type, SCHEMA.Course);
     for (const url of deck.completedChapters ?? [])
       builder = builder.addIri(SM.completedChapter, url);
     if (deck.cardLanguage !== undefined)

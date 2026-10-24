@@ -57,6 +57,7 @@ const state: ReviewState = {
 function content(extra: Partial<DeckFileContent> = {}): DeckFileContent {
   return {
     deck: deck("deck-a", {
+      course: true,
       completedChapters: ["https://lib.example/c.ttl#ch1"],
       cardLanguage: "sv",
     }),
@@ -122,6 +123,7 @@ describe("importedDeck", () => {
       reviewsDocumentUrl: `${INSTANCE}reviews/deck-a.ttl`,
       createdAt: "2025-01-02T03:04:05.000Z",
       formatVersion: DECK_FORMAT_VERSION,
+      course: true,
       completedChapters: ["https://lib.example/c.ttl#ch1"],
       cardLanguage: "sv",
     });
@@ -150,12 +152,13 @@ describe("importedDeck", () => {
     expect(importedDeck(INSTANCE, content(), options).fsrsReviews).toEqual([]);
   });
 
-  it("leaves the progress out unless asked", () => {
+  it("leaves the progress out unless asked, a course's deck still one", () => {
     const { deck: imported, reviews } = importedDeck(INSTANCE, content(), {
       ...options,
       withProgress: false,
     });
     expect(imported.completedChapters).toBeUndefined();
+    expect(imported.course).toBe(true);
     expect(reviews).toEqual([]);
     const withNone = importedDeck(
       INSTANCE,

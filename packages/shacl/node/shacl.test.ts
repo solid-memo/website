@@ -784,6 +784,7 @@ describe("the vendored profiles over their fixtures", async () => {
       "deck/v5/valid/pod-titled-in-japanese-and-english.ttl",
       "deck/v5/valid/pod-with-stand-in.ttl",
       "deck/v6/valid/pod.ttl",
+      "deck/v6/valid/pod-course.ttl",
       "deck-group/v1/valid/pod.ttl",
     ]) {
       await expect(

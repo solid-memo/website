@@ -229,6 +229,16 @@ export interface Deck {
    */
   completedChapters?: string[];
   /**
+   * Set when the deck is a course's (docs/courses.md): its catalog entry
+   * is also typed `schema:Course`, as its release is, written when the
+   * course is started. Like `sm:completedChapter`, every write of the
+   * entry keeps it, adding a guest's deck to an instance and a deck file
+   * carry it, and it goes along even when a deck file leaves the
+   * progress out. A copy made before the type was written lacks it: the
+   * library's index, or the copy's release, tells it then (useCopies).
+   */
+  course?: true;
+  /**
    * The language the learner wants this deck's card text shown in first
    * (fronts, backs, notes, labels, picture descriptions, wrong
    * options), as a lower-case language tag: `sm:deckCardLanguage` on the catalog entry, a triple

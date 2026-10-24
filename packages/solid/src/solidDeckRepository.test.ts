@@ -26,7 +26,7 @@ import {
 } from "@inrupt/solid-client";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
-import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
+import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 
@@ -352,11 +352,12 @@ describe("addDeck", () => {
     reviewsDocumentUrl: `${INSTANCE}reviews/deck-2.ttl`,
     createdAt: "2026-01-02T03:04:05.000Z",
     sourceUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl",
+    course: true,
     completedChapters: ["https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid"],
     cardLanguage: "sv",
   };
 
-  it("adds the deck's entry as it is, at its own URLs, with its chapters completed, beside the decks there, checked first", async () => {
+  it("adds the deck's entry as it is, at its own URLs, a course with its chapters completed, beside the decks there, checked first", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     const checkWrite = vi.fn(async () => undefined);
     const written = await makeRepository(checkWrite).addDeck(added);
@@ -371,18 +372,20 @@ describe("addDeck", () => {
     const thing = getThing(saved as SolidDataset, added.url)!;
     expect(getUrl(thing, SM.cardsDocument)).toBe(added.cardsDocumentUrl);
     expect(getUrl(thing, PROV_WAS_DERIVED_FROM)).toBe(added.sourceUrl);
+    expect(getUrlAll(thing, RDF.type)).toContain(SCHEMA.Course);
     expect(getUrlAll(thing, SM.completedChapter)).toEqual(added.completedChapters);
     expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
     expect(getDatetime(thing, DCTERMS.created)?.toISOString()).toBe("2026-01-02T03:04:05.000Z");
     expect(getThing(saved as SolidDataset, deck.url)).not.toBeNull();
   });
 
-  it("creates the catalog document when there is none, a deck without chapters stating none", async () => {
+  it("creates the catalog document when there is none, a deck that is no course stating no chapters", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    const { completedChapters: _chapters, ...plain } = added;
+    const { completedChapters: _chapters, course: _course, ...plain } = added;
     await makeRepository().addDeck(plain);
     const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as SolidDataset;
     expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([]);
+    expect(getUrlAll(getThing(saved, added.url)!, RDF.type)).not.toContain(SCHEMA.Course);
   });
 
   it("refuses an entry where the catalog has one, writing nothing", async () => {
@@ -737,6 +740,20 @@ describe("importDeck", () => {
     expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe(content.title.en);
     expect(getStringWithLocale(entry, DCTERMS.title, "sv")).toBe("Huvudstäder");
     expect(getStringWithLocale(entry, DCTERMS.description, "sv")).toBe("Från Wikipedia.");
+  });
+
+  it("types a course's deck schema:Course, as its release is", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const imported = await makeRepository().importDeck(INSTANCE, {
+      ...content,
+      isCourse: true,
+      cards: [],
+    });
+
+    expect(imported.course).toBe(true);
+    const catalog = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
+    const types = getUrlAll(getThing(catalog, imported.url)!, RDF.type);
+    expect(types).toEqual(expect.arrayContaining([SM.Deck, DCAT.Dataset, SCHEMA.Course]));
   });
 
   it("leaves the catalog alone when the cards document fails to save", async () => {

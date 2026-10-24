@@ -345,6 +345,59 @@ describe("DeckListContainer", () => {
     );
   });
 
+  it("takes a deck's word that it is a course, while the index is still read and when its release cannot be", async () => {
+    const fromLibrary: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      title: { en: "Solid" },
+      sourceUrl: courseLibraryDeck.url,
+      course: true,
+    };
+    const fromLink: Deck = {
+      ...fromLibrary,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Pods" },
+      sourceUrl: "https://bob.example/releases/pods/v1.ttl",
+    };
+    // A course is read from its release: a deck that names none is no course, whatever it says.
+    const sourceless: Deck = {
+      ...deck,
+      id: "deck-4",
+      url: `${instance.url}catalog.ttl#deck-4`,
+      title: { en: "Notes" },
+      course: true,
+    };
+    let index: (decks: (typeof courseLibraryDeck)[]) => void = () => {};
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, fromLibrary, fromLink, sourceless]),
+      listLibraryDecks: vi.fn(
+        () => new Promise<(typeof courseLibraryDeck)[]>((resolve) => (index = resolve)),
+      ),
+      deckRelease: vi.fn(async () => {
+        throw new Error("host unreachable");
+      }),
+      getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
+    });
+    renderContainer(useCases);
+    // The index is not read yet: both are courses all the same.
+    expect(await screen.findByRole("link", { name: "Start the course Solid" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Start the course Pods" })).toBeInTheDocument();
+    await waitFor(() => expect(useCases.listLibraryDecks).toHaveBeenCalledOnce());
+    index([courseLibraryDeck]);
+    expect(await screen.findByRole("link", { name: "Pods from bob.example" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Actions for Pods" }));
+    expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute(
+      "href",
+      courseHref(instance.url, fromLink.url),
+    );
+    // Its release is not read just to tell what it is.
+    expect(useCases.deckRelease).not.toHaveBeenCalled();
+    expect(screen.queryByRole("link", { name: "Start the course Notes" })).toBeNull();
+    expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(sourceless);
+  });
+
   it("marks a copy the library has a newer release of, its row leading to the deck's page", async () => {
     const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
     const library = {

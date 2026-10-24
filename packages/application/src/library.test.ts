@@ -328,8 +328,10 @@ describe("the deck library", () => {
       expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(`${RELEASES}v1.ttl`);
       expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, libraryContent);
       await useCases.importReleaseFromUrl(instance.url, linked(1, { isCourse: true }));
+      // The deck says it is a course, as one from the library does.
       expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, {
         ...libraryContent,
+        isCourse: true,
         cards: [],
       });
       const started: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
