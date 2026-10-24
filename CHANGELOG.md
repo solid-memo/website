@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.9.0](https://github.com/solid-memo/website/compare/v6.8.0...v6.9.0) (2026-10-24)
+
+### Features
+
+* **solid:** log in with a Client ID Document on the site's domain ([f400731](https://github.com/solid-memo/website/commit/f400731d1bc2c741df916e2cc198d0c92dd22e6b)), closes [#295](https://github.com/solid-memo/website/issues/295)
+
 ## [6.8.0](https://github.com/solid-memo/website/compare/v6.7.0...v6.8.0) (2026-10-24)
 
 ### Features
