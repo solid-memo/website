@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.12.0](https://github.com/solid-memo/website/compare/v6.11.0...v6.12.0) (2026-10-25)
+
+### Features
+
+* **decks:** learn the brain's regions and what they do ([d0e3470](https://github.com/solid-memo/website/commit/d0e347030d78c1bcfcf90119e09bb41803991136)), closes [#314](https://github.com/solid-memo/website/issues/314)
+* **ui:** show what is new in a version at the top of the deck list ([8eff817](https://github.com/solid-memo/website/commit/8eff817c59bd8a853b9037b711f9c39a162e2257)), closes [#311](https://github.com/solid-memo/website/issues/311)
+* **vocab:** describe psychology as a topic ([4ba9103](https://github.com/solid-memo/website/commit/4ba910353d2d35f6ba13927c993b68c5ae4938f3)), closes [#314](https://github.com/solid-memo/website/issues/314)
+
 ## [6.11.0](https://github.com/solid-memo/website/compare/v6.10.2...v6.11.0) (2026-10-25)
 
 ### Features
