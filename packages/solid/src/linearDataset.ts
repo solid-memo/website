@@ -59,15 +59,15 @@ function collectingTurtleParser(collected: { quads?: Quad[] }): Parser {
 /**
  * The graphs of a SolidDataset holding `quads`, as @inrupt/solid-client's
  * fromRdfJsDataset builds them (each value once, every level frozen),
- * but in time linear in the number of quads.
+ * but in time linear in the number of quads. Every map is keyed by the
+ * quads' own strings, so none has a prototype: a named graph, subject,
+ * datatype or language called `__proto__` is a key like any other, not
+ * a way to write onto Object.prototype (GHSA-m4hj-7c28-fq4h).
  */
 export function graphsOf(quads: Iterable<Quad>): Graphs {
-  const graphs: Record<
-    string,
-    Record<string, { type: "Subject"; url: string; predicates: Record<string, Objects> }>
-  > = {
-    default: {},
-  };
+  const graphs =
+    map<Record<string, { type: "Subject"; url: string; predicates: Record<string, Objects> }>>();
+  graphs.default = map();
   const seen = new Set<string>();
   for (const quad of quads) {
     const graphId = quad.graph.termType === "DefaultGraph" ? "default" : quad.graph.value;
@@ -76,9 +76,9 @@ export function graphsOf(quads: Iterable<Quad>): Graphs {
     const key = `${graphId} ${subjectId} ${quad.predicate.value} ${termKey(quad.object)}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    const graph = (graphs[graphId] ??= {});
-    const subject = (graph[subjectId] ??= { type: "Subject", url: subjectId, predicates: {} });
-    const objects = (subject.predicates[quad.predicate.value] ??= {}) as {
+    const graph = (graphs[graphId] ??= map());
+    const subject = (graph[subjectId] ??= { type: "Subject", url: subjectId, predicates: map() });
+    const objects = (subject.predicates[quad.predicate.value] ??= map()) as {
       namedNodes?: string[];
       blankNodes?: string[];
       literals?: Record<string, string[]>;
@@ -91,15 +91,20 @@ export function graphsOf(quads: Iterable<Quad>): Graphs {
       (objects.blankNodes ??= []).push(`_:${object.value}`);
     } else if (object.termType === "Literal") {
       if (object.datatype.value === LANG_STRING) {
-        ((objects.langStrings ??= {})[object.language.toLowerCase()] ??= []).push(object.value);
+        ((objects.langStrings ??= map())[object.language.toLowerCase()] ??= []).push(object.value);
       } else {
-        ((objects.literals ??= {})[object.datatype.value] ??= []).push(object.value);
+        ((objects.literals ??= map())[object.datatype.value] ??= []).push(object.value);
       }
     } else {
       throw new Error(`Objects of type [${object.termType}] are not supported.`);
     }
   }
   return deepFreeze(graphs) as Graphs;
+}
+
+/** An empty map with no prototype, so that no key reaches Object.prototype. */
+function map<T>(): Record<string, T> {
+  return Object.create(null) as Record<string, T>;
 }
 
 function termKey(term: Quad["object"]): string {
