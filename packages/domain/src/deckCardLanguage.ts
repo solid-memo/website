@@ -9,9 +9,12 @@ import { canonicalTag, NO_LANGUAGE } from "./languageTag";
 
 /**
  * A deck's card language: the language the learner wants the deck's
- * card text shown in first. It ranks card text only, ahead of the app's
- * language and the browser's; a card without text in it is shown as
- * usual, and the deck's title, description and keywords never follow it.
+ * card text shown in first, ahead of the app's language and the
+ * browser's. On a deck that is a course it ranks all of the course's
+ * text too: its title and description, its chapters' titles and
+ * descriptions and its steps' theory. A text not in it is shown as
+ * usual; the deck's keywords, and the title and description of a deck
+ * that is no course, never follow it.
  */
 
 /**

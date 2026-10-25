@@ -470,8 +470,13 @@ which of them they want first, though: `sm:deckCardLanguage` (1.24), one
 lower-case BCP 47 tag as a plain string, on the deck's catalog entry, is
 the language the deck's card text (fronts, backs, notes, labels,
 picture descriptions and wrong options) is shown in first, ahead of
-the app's language ([i18n.md](i18n.md#which-language)). It ranks card text only: the
-deck's title, description and keywords are shown as before. It is
+the app's language ([i18n.md](i18n.md#which-language)). On a deck that
+is a [course](courses.md) it ranks all of the course's text too: the
+course's title and description, each chapter's title and description
+and each step's theory. The deck's keywords, and the title and
+description of a deck that is no course, are shown as before. Its
+definition took in a course's text after 1.25 without a version bump,
+as no term was added and no stored value changed its meaning. It is
 written outside `DeckV6`, which neither owns nor checks it, so a reader
 keeps it only when it names a language other than `zxx`, and drops
 anything else. `dcterms:language` is not used for it: that term is used
