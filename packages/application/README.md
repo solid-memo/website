@@ -15,7 +15,7 @@ interfaces; the adapters conform to them.
 - The slices, each `create<Feature>UseCases` and its
   `<Feature>UseCases`, from only the ports it uses: `session`,
   `instances`, `preferences`, `decks`, `cards`, `library`,
-  `mistakeReports`, `courses`, `study`, `statistics` and
+  `mistakeReports`, `whatsNew`, `courses`, `study`, `statistics` and
   `instanceChecks`; and the Studio's `releaseDrafts`,
   `releasePublishing`, `instanceGraph` and `trial` (test-playing a
   draft, and `TrialUseCases`, the slices a trial plays)

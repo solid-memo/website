@@ -117,7 +117,8 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
 - Slices — `UseCases` is the intersection of one interface per feature:
   the session and the guest (`session`), the instances, the
   preferences, the decks, the cards, the deck library, where a mistake
-  is reported (`mistakeReports`), the courses, study, the statistics,
+  is reported (`mistakeReports`), what is new in a version
+  (`whatsNew`), the courses, study, the statistics,
   the instance checks (`instanceChecks`), and the Studio's drafts,
   publishing, instance graph and trial. Each is made in
   `packages/application/src/<feature>.ts` by `create<Feature>UseCases`,

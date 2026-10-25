@@ -21,6 +21,7 @@ import type {
   CustomPalettePreference,
   PalettePreference,
   PaletteRepository,
+  SeenHighlights,
   TextSizePreference,
   ThemePreference,
   UpdateJournal,
@@ -42,6 +43,7 @@ import { createDeckUseCases, type DeckUseCases } from "./decks";
 import { createCardUseCases, type CardUseCases } from "./cards";
 import { createLibraryUseCases, type LibraryUseCases } from "./library";
 import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
+import { createWhatsNewUseCases, type WhatsNewUseCases } from "./whatsNew";
 import { createCourseUseCases, type CourseUseCases } from "./courses";
 import { createStudyUseCases, type StudyUseCases } from "./study";
 import { createStatisticsUseCases, type StatisticsUseCases } from "./statistics";
@@ -68,6 +70,7 @@ export interface UseCases
     CardUseCases,
     LibraryUseCases,
     MistakeReportUseCases,
+    WhatsNewUseCases,
     CourseUseCases,
     StudyUseCases,
     StatisticsUseCases,
@@ -111,6 +114,8 @@ export interface Dependencies {
   paletteRepository: PaletteRepository;
   /** The text size the user chose, kept on this device. */
   textSizePreference: TextSizePreference;
+  /** The highlights of new versions this browser has shown, kept on this device. */
+  seenHighlights: SeenHighlights;
   /** The clock; injected for tests. */
   now?: () => Date;
   /** Fresh identifiers (a deck group, an answer, a guest's deck); injected for tests. */
@@ -165,6 +170,7 @@ export function createUseCases({
   customPalettePreference,
   paletteRepository,
   textSizePreference,
+  seenHighlights,
   now = () => new Date(),
   newId = () => crypto.randomUUID(),
   writeFence,
@@ -292,6 +298,7 @@ export function createUseCases({
       courses,
     }),
     ...createMistakeReportUseCases({ deckLibrary }),
+    ...createWhatsNewUseCases({ seenHighlights }),
     ...courses,
     ...createStudyUseCases({
       deckRepository,

@@ -9,6 +9,7 @@ localStorage: solid-memo:palette
 localStorage: solid-memo:palette-colors, field dark
 localStorage: solid-memo:palette-colors, field light
 localStorage: solid-memo:palette-colors, field palette
+localStorage: solid-memo:seenHighlights, a JSON array of highlight ids
 localStorage: solid-memo:textSize
 localStorage: solid-memo:theme
 localStorage: solid-memo:update:<source URL>
