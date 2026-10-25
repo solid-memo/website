@@ -407,6 +407,11 @@ export const TOPICS = {
       label: { en: "Film", de: "Film", es: "Cine", fr: "Cinéma", ko: "영화", sv: "Film" },
       definition: { en: "Films, film-makers and film awards.", de: "Filme, Filmschaffende und Filmpreise.", es: "Películas, cineastas y premios de cine.", fr: "Films, cinéastes et prix du cinéma.", ko: "영화, 영화 제작자와 영화상.", sv: "Filmer, filmskapare och filmpriser." },
     },
+    {
+      iri: "https://solid-memo.com/ns/vocab/topics.ttl#psychology",
+      label: { en: "Psychology", de: "Psychologie", es: "Psicología", fr: "Psychologie", ko: "심리학", sv: "Psykologi" },
+      definition: { en: "The mind and behavior: how people perceive, think, feel and learn, and the brain behind it.", de: "Psyche und Verhalten: wie Menschen wahrnehmen, denken, fühlen und lernen, und das Gehirn dahinter.", es: "La mente y la conducta: cómo las personas perciben, piensan, sienten y aprenden, y el cerebro que hay detrás.", fr: "L’esprit et le comportement : comment les personnes perçoivent, pensent, ressentent et apprennent, et le cerveau qui les sous-tend.", ko: "마음과 행동: 사람이 지각하고 생각하고 느끼고 배우는 방식과 그 바탕이 되는 뇌.", sv: "Psyket och beteendet: hur människor uppfattar, tänker, känner och lär sig, och hjärnan bakom det." },
+    },
   ],
 } as const satisfies ConceptScheme;
 
