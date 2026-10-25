@@ -14,6 +14,7 @@ import {
   type Deck,
 } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -2992,6 +2993,41 @@ describe("Workspace", () => {
         "sv",
       );
       await waitFor(() => expect(document.title).toBe("Länkade data – Course – Solid Memo"));
+    });
+
+    it("chooses a course's language from its page, and shows the course in it", async () => {
+      let current: Deck = courseDeck;
+      const useCases = courseUseCases({
+        listDecks: vi.fn(async () => [current]),
+        getCourse: vi.fn(async () => ({ ...makeCourse(), deck: current })),
+        deckRelease: vi.fn(async () => makeCourse().release),
+        setDeckCardLanguage: vi.fn(async (deck: Deck, language: string | null) => {
+          current = withCardLanguage(deck, language);
+          return current;
+        }),
+      });
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Course preferences" }));
+      const select = await screen.findByRole("combobox", { name: "Course language" });
+      // No card is in the deck yet: the course's outline states Swedish.
+      await waitFor(() =>
+        expect(within(select).getByRole("option", { name: /svenska/ })).toBeInTheDocument(),
+      );
+      fireEvent.input(select, { target: { value: "sv" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save course language" }));
+      await waitFor(() =>
+        expect(useCases.setDeckCardLanguage).toHaveBeenCalledWith(courseDeck, "sv"),
+      );
+
+      window.location.hash = routeToHash(courseRoute);
+      await waitFor(() =>
+        expect(
+          screen.getByRole("link", { name: "Länkade data" }).firstElementChild,
+        ).toHaveAttribute("lang", "sv"),
+      );
+      // The app's own text stays in the app's language.
+      expect(screen.getByRole("link", { name: "Start the course" })).not.toHaveAttribute("lang");
     });
 
     it("takes the learner back to the course from a chapter completed, cheering it once", async () => {

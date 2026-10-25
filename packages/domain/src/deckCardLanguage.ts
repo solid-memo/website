@@ -4,7 +4,9 @@
 
 import { AppError } from "./appError";
 import { cardLanguages, UNSTATED } from "./cardQuery";
-import type { Card, Deck } from "./deck";
+import type { CourseOutline } from "./course";
+import type { CardContent, Deck } from "./deck";
+import type { LibraryDeckContent } from "./library";
 import { canonicalTag, NO_LANGUAGE } from "./languageTag";
 
 /**
@@ -46,6 +48,40 @@ export function withCardLanguage(deck: Deck, language: string | null): Deck {
  * their fronts and backs, in order, without untagged text and text in no
  * language.
  */
-export function preferableCardLanguages(cards: readonly Card[]): string[] {
+export function preferableCardLanguages(
+  cards: readonly Pick<CardContent, "front" | "back">[],
+): string[] {
   return cardLanguages(cards).filter((tag) => tag !== UNSTATED && tag !== NO_LANGUAGE);
+}
+
+/**
+ * The languages a course can be shown in first: those its deck's cards
+ * and its release's cards state (preferableCardLanguages), and those its
+ * release's title and description, its chapters' titles and
+ * descriptions and its steps' theory state, in order, without untagged
+ * text and text in no language. A course's deck starts with no cards,
+ * each joining it as its question is first answered, so the release
+ * tells what the course can be read in.
+ */
+export function preferableCourseLanguages(
+  cards: readonly Pick<CardContent, "front" | "back">[],
+  release: Pick<LibraryDeckContent, "title" | "description" | "cards">,
+  outline: Pick<CourseOutline, "chapters">,
+): string[] {
+  const texts = [
+    release.title,
+    release.description ?? {},
+    ...outline.chapters.flatMap((chapter) => [
+      chapter.title,
+      chapter.description ?? {},
+      ...chapter.steps.map((step) => step.theory),
+    ]),
+  ];
+  const tags = new Set([
+    ...preferableCardLanguages([...cards, ...release.cards]),
+    ...texts
+      .flatMap((text) => Object.keys(text))
+      .filter((tag) => tag !== "" && tag !== NO_LANGUAGE),
+  ]);
+  return [...tags].sort();
 }

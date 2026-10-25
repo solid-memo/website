@@ -113,7 +113,11 @@ domain's
   language: on the course's page, its chapters and their final reviews,
   the course's title and description, its chapters' titles and
   descriptions and its steps' theory follow it too, while the app's own
-  text stays in the app's language.
+  text stays in the app's language. The course's page links to its
+  preferences, where the learner chooses it as its course language from
+  every language the course states (`preferableCourseLanguages`): the
+  release's text and cards, not only the deck's cards, since a
+  course's deck starts with none.
 - A retired chapter or step (`owl:deprecated true`) is left out of the
   outline (`courseOutlineFromRecords`), with every step of a retired
   chapter.

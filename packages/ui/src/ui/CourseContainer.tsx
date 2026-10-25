@@ -75,6 +75,7 @@ export function CourseContainer({
       }
       decksHref={links.decksHref?.(instanceUrl)}
       libraryHref={links.libraryHref?.(instanceUrl)}
+      preferencesHref={links.preferencesHref?.(instanceUrl, course.deck.url)}
       justCompleted={justCompleted}
       notice={
         <LibraryUpgradeContainer useCases={useCases} instance={instance} deck={course.deck} />

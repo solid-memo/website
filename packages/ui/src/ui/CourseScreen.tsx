@@ -47,7 +47,9 @@ const SPARKLES = 8;
  * the Studio's trial). Beside the way on, or back, a secondary button
  * leads to the deck library where there is one, since a course runs
  * alongside other decks. A notice (a newer release of the course on
- * offer) goes under the blurb.
+ * offer) goes under the blurb. Beside the title, a button leads to the
+ * course's preferences where there are any (none in the trial), where
+ * its course language is chosen.
  *
  * Coming back from a chapter just completed, the page cheers: a word
  * that the chapter is done, above the button on, which takes the focus
@@ -68,6 +70,7 @@ export function CourseScreen({
   continueHref,
   decksHref,
   libraryHref,
+  preferencesHref,
   justCompleted,
   notice,
 }: {
@@ -85,6 +88,8 @@ export function CourseScreen({
   decksHref?: string;
   /** The deck library, offered after the way on or back; no button without one. */
   libraryHref?: string;
+  /** The course's preferences, linked beside its title; no button without them. */
+  preferencesHref?: string;
   /** The chapter the learner has just completed, to cheer about. */
   justCompleted?: CompletedChapter;
   /** Shown under the blurb: the offer of a newer release. */
@@ -111,6 +116,11 @@ export function CourseScreen({
           <span class="hint">
             {t("course.chaptersDone", { done: doneCount, count: outline.chapters.length })}
           </span>
+          {preferencesHref !== undefined && (
+            <a class="button" href={preferencesHref} aria-label={t("course.preferencesLabel")}>
+              {t("course.preferencesButton")}
+            </a>
+          )}
         </header>
         {description !== undefined && (
           <p class="deck-description" lang={cardLang(description)}>

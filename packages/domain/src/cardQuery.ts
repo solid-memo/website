@@ -229,7 +229,7 @@ function fieldTexts(card: Card, field: CardField): CardText[] {
 }
 
 /** The languages of the cards' sides, as the language filter offers them: their tags in order, then UNSTATED when a side's language is not stated. */
-export function cardLanguages(cards: readonly Card[]): string[] {
+export function cardLanguages(cards: readonly Pick<Card, "front" | "back">[]): string[] {
   const tags = new Set(
     cards.flatMap((card) => [...Object.keys(card.front), ...Object.keys(card.back)]),
   );

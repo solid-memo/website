@@ -62,7 +62,8 @@ function limitUnit(t: I18n["t"], limit: Limit, count: number): string {
  *
  * Below the limits, the language the deck's cards are shown in first
  * (DeckCardLanguageForm), from those its cards state, saved on its own
- * as the screen stays. Below that, the deck's text whose language is not settled
+ * as the screen stays; for a course (`course`), its course language,
+ * from those the course states, which its own text follows too. Below that, the deck's text whose language is not settled
  * (DeckLanguagesSection): its untagged card sides, stated here in bulk.
  * A link may open the screen there (`section`).
  *
@@ -78,6 +79,7 @@ export function DeckPreferencesScreen({
   languages,
   languagesUnreadable = null,
   cardLanguages,
+  course = false,
   section,
   stated = null,
   busy,
@@ -101,6 +103,8 @@ export function DeckPreferencesScreen({
   languagesUnreadable?: ErrorText | null;
   /** The languages the deck's cards state, to show them in first (preferableCardLanguages); undefined while they are read. */
   cardLanguages: readonly string[] | undefined;
+  /** The deck is a course's: the card language is its course language (preferableCourseLanguages lists it). */
+  course?: boolean;
   /** The part of the screen a link opened it at: its heading takes the focus. */
   section?: "languages";
   /** How many cards the last statement of languages changed; null before any. */
@@ -113,7 +117,7 @@ export function DeckPreferencesScreen({
   onRemove: () => void;
   /** State the language of the deck's untagged card fronts and backs. */
   onStateLanguages: (languages: StatedLanguages) => void;
-  /** Show the deck's cards in this language first; null for the app's. */
+  /** Show the deck's cards (a course: all of it) in this language first; null for the app's. */
   onSetCardLanguage: (language: string | null) => void;
 }) {
   const { t, tx, locale, readerText, errorText } = useI18n();
@@ -302,6 +306,7 @@ export function DeckPreferencesScreen({
       <DeckCardLanguageForm
         value={deck.cardLanguage}
         languages={cardLanguages}
+        course={course}
         busy={busy}
         onSave={onSetCardLanguage}
       />

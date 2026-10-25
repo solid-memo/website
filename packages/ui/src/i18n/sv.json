@@ -326,7 +326,9 @@
     "stepsDone": {
       "one": "{done} av {count} steg klart",
       "other": "{done} av {count} steg klara"
-    }
+    },
+    "preferencesButton": "Inställningar",
+    "preferencesLabel": "Kursens inställningar"
   },
   "chapterPlayer": {
     "step": "Steg {number} av {count}",
@@ -654,6 +656,12 @@
       "hint": "Språket som kortlekens kort i första hand visas på, var de än syns. Ett kort utan text på det språket visas som vanligt. Kortlekens namn och beskrivning påverkas inte.",
       "none": "Kortlekens kort anger inget språk att välja.",
       "save": "Spara kortens språk"
+    },
+    "courseLanguage": {
+      "label": "Kursens språk",
+      "hint": "Språket som kursen i första hand visas på: dess titel och beskrivning, dess kapitel och deras teori, och korten i dess frågor. Text som inte finns på det språket visas som vanligt.",
+      "none": "Kursen anger inget språk att välja.",
+      "save": "Spara kursens språk"
     },
     "languages": {
       "heading": "Språk",

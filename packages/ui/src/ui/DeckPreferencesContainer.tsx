@@ -6,7 +6,10 @@ import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import { preferableCardLanguages } from "@solid-memo/domain/deckCardLanguage";
+import {
+  preferableCardLanguages,
+  preferableCourseLanguages,
+} from "@solid-memo/domain/deckCardLanguage";
 import { deckLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckPace } from "@solid-memo/domain/deckPace";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -17,6 +20,7 @@ import { Loading } from "./Loading";
 import { deckHref, routeToHash } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
+import { courseStripQuery } from "./CourseStrip";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -28,9 +32,12 @@ import { queryKeys } from "./queryKeys";
  * text does not say its language (deckLanguages): stating it rewrites the
  * cards and reads them again; when either cannot be read, the section
  * says so. The cards also tell which languages the deck's cards can be
- * shown in first; choosing one saves it on the deck and stays, and the
- * screens showing its cards follow the deck list read again, the
- * statistics their report read again. A link to
+ * shown in first; a course's, which starts with none, its release and
+ * outline too (preferableCourseLanguages), as its course language, the
+ * languages of what can be read when either cannot be.
+ * Choosing one saves it on the deck and stays, and the screens showing
+ * its cards, and a course's screens, follow the deck list read again,
+ * the statistics their report read again. A link to
  * the screen's Languages section
  * opens it there (`section`).
  */
@@ -71,10 +78,24 @@ export function DeckPreferencesContainer({
     [cardsQuery.data, release],
   );
 
-  const cardLanguages = useMemo(
-    () => (cardsQuery.data === undefined ? undefined : preferableCardLanguages(cardsQuery.data)),
-    [cardsQuery.data],
-  );
+  // A copy made before a course's deck said so is told one by its release.
+  const course = deck.course === true || release?.isCourse === true;
+  // The outline as the course strip reads it, so one read serves both.
+  const courseQuery = useQuery({ ...courseStripQuery(useCases, deck), enabled: course });
+
+  const cardLanguages = useMemo(() => {
+    if (cardsQuery.data === undefined) return undefined;
+    if (!course) return preferableCardLanguages(cardsQuery.data);
+    // A course's text is in its release and outline: none is listed while they are read, and
+    // what cannot be read is left out, so the languages of the rest are still offered.
+    if (release === undefined && releaseError === null) return undefined;
+    if (!release) return preferableCardLanguages(cardsQuery.data);
+    if (courseQuery.data)
+      return preferableCourseLanguages(cardsQuery.data, release, courseQuery.data.outline);
+    return courseQuery.isError
+      ? preferableCourseLanguages(cardsQuery.data, release, { chapters: [] })
+      : undefined;
+  }, [cardsQuery.data, course, release, releaseError, courseQuery.data, courseQuery.isError]);
 
   const preferencesQuery = useQuery({
     queryKey: queryKeys.preferences(instance.url),
@@ -103,8 +124,9 @@ export function DeckPreferencesContainer({
 
   const cardLanguageMutation = useMutation({
     mutationFn: (language: string | null) => useCases.setDeckCardLanguage(deck, language),
-    // The deck's card language is on the deck: every screen of its cards reads it from the deck list,
-    // and the statistics' cards (hardest cards, confused options, leeches) from the deck in their report.
+    // The deck's card language is on the deck: every screen of its cards, and a course's screens
+    // (Workspace's CourseLanguage), read it from the deck list, and the statistics' cards
+    // (hardest cards, confused options, leeches) from the deck in their report.
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
@@ -139,6 +161,7 @@ export function DeckPreferencesContainer({
         languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null
       }
       cardLanguages={cardLanguages}
+      course={course}
       stated={stateLanguagesMutation.data ?? null}
       busy={
         saveMutation.isPending ||

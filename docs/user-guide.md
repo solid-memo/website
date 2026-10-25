@@ -280,6 +280,9 @@ shared link, or from the newcomer offer on an empty deck list
 - **The course's page** lists its chapters, each locked, open or done,
   and a button to go on where you left off, with **Deck library** after
   it: you need not finish a course before adding other decks.
+  **Preferences**, beside its title, opens the course's preferences,
+  where you can choose the language it is shown in (see
+  [Languages](#languages)).
 - **A chapter** goes a step at a time. First you read a short piece of
   theory, sometimes in parts ("Part 2 of 3"). Then "Check your
   understanding" asks its questions, with the theory hidden: choose an
@@ -402,11 +405,21 @@ you choose, whatever language the app is in: on the deck's
 **Preferences**, choose it under **Card language** and press **Save
 card language**. The list offers the languages the deck's cards are
 in. Its cards are then shown in that language wherever they appear:
-when you study or cram, in the Browser, in a course's questions and in
-the Studio. A card without text in it is shown as usual, and the deck's
-name and description stay in your language. **The app's language**
-goes back to the usual. The choice is kept with the deck in your Pod,
-so it follows you to every device.
+when you study or cram, in the Browser and in the Studio. A card
+without text in it is shown as usual, and the deck's name and
+description stay in your language. **The app's language** goes back to
+the usual. The choice is kept with the deck in your Pod, so it follows
+you to every device.
+
+A course can be read in another language too: on the course's
+**Preferences**, linked from its page, choose it under **Course
+language** and press **Save course language**. The list offers every
+language the course is in, its theory and titles as well as its
+questions, even before you have answered any. The course's title and
+description, its chapters' titles and descriptions, their theory and
+its questions are then shown in that language, while the app's own
+buttons and words stay in yours. Text the course does not have in it
+is shown as usual. This choice too is kept with the deck in your Pod.
 
 Text in a language written right to left, such as Arabic, runs right to
 left: on a card, in a deck's name, and inside a sentence in English

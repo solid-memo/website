@@ -326,7 +326,9 @@
     "stepsDone": {
       "one": "{done} von {count} Schritt erledigt",
       "other": "{done} von {count} Schritten erledigt"
-    }
+    },
+    "preferencesButton": "Einstellungen",
+    "preferencesLabel": "Kurseinstellungen"
   },
   "chapterPlayer": {
     "step": "Schritt {number} von {count}",
@@ -654,6 +656,12 @@
       "hint": "Die Sprache, in der die Karten dieses Stapels zuerst angezeigt werden, wo auch immer sie erscheinen. Eine Karte ohne Text in dieser Sprache wird wie gewohnt angezeigt. Name und Beschreibung des Stapels bleiben unverändert.",
       "none": "Die Karten dieses Stapels geben keine Sprache zur Auswahl an.",
       "save": "Kartensprache speichern"
+    },
+    "courseLanguage": {
+      "label": "Kurssprache",
+      "hint": "Die Sprache, in der dieser Kurs zuerst angezeigt wird: sein Titel und seine Beschreibung, seine Kapitel mit ihrer Theorie und die Karten seiner Fragen. Text, den es in dieser Sprache nicht gibt, wird wie gewohnt angezeigt.",
+      "none": "Dieser Kurs gibt keine Sprache zur Auswahl an.",
+      "save": "Kurssprache speichern"
     },
     "languages": {
       "heading": "Sprachen",
