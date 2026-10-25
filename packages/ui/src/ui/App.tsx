@@ -23,6 +23,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { Footer, type SiteSource } from "./Footer";
 import { RepoUrl } from "./ReportMistake";
+import { AppVersion } from "./WhatsNew";
 import { I18nProvider, loadLocale, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
@@ -262,15 +263,17 @@ export function AppShell({
       >
         <AppName.Provider value={identity.name}>
           <RepoUrl.Provider value={source.repoUrl}>
-            <SkipLink />
-            <AppContent
-              useCases={useCases}
-              source={source}
-              providers={providers}
-              identity={identity}
-              workspace={workspace}
-            />
-            <Footer source={source} />
+            <AppVersion.Provider value={source.version}>
+              <SkipLink />
+              <AppContent
+                useCases={useCases}
+                source={source}
+                providers={providers}
+                identity={identity}
+                workspace={workspace}
+              />
+              <Footer source={source} />
+            </AppVersion.Provider>
           </RepoUrl.Provider>
         </AppName.Provider>
       </ThemeProvider>

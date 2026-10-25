@@ -4480,6 +4480,59 @@ p[role="status"]:not(.loading) {
   margin: 0.5rem 0 0;
 }
 
+/* What is new in this version, above the deck list: a box like the
+   invitation's, dealt in, with a burst of sparkles from within it. The
+   burst starts a card's half height from the top and 2.5rem from the end,
+   so its 1.5rem flight stays inside the card; the sparkles are see-through
+   at rest, so with motion reduced (the rule that stops every animation)
+   none show, and the burst runs once, well under five seconds. */
+.whats-new {
+  position: relative;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-inline-start: 0.3rem solid var(--primary);
+  border-radius: var(--radius);
+  animation: deal-in 0.4s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+}
+
+.whats-new .whats-new-title {
+  margin: 0 0 0.25rem;
+  font-weight: 650;
+}
+
+.whats-new ul {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.whats-new .edit-actions {
+  margin: 0.5rem 0 0;
+}
+
+.whats-new-sparkles {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 2.5rem;
+  pointer-events: none;
+}
+
+.whats-new-sparkles > span {
+  position: absolute;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin: -0.2rem;
+  border-radius: 50%;
+  background: var(--accent-yellow);
+  opacity: 0;
+  animation: sparkle 0.7s ease-out 0.3s backwards;
+}
+
+.whats-new-sparkles > span:nth-child(even) {
+  background: var(--primary);
+}
+
 .statistics figure {
   margin: 0.75rem 0 1.25rem;
 }

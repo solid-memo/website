@@ -74,6 +74,7 @@ they hold before any pod is reached and stay out of your pod:
 | `solid-memo:palette` | the colors you chose (none for Standard), a copy of your preferences' too | [`localStoragePalettePreference.ts`](../packages/browser/src/localStoragePalettePreference.ts) |
 | `solid-memo:palette-colors` | the colors of a palette of your own you chose, its name among them, for the first paint, a copy of your Pod's (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
 | `solid-memo:textSize` | the text size you chose (none for Default), a copy of your preferences' too | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
+| `solid-memo:seenHighlights` | which highlights of new versions this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages you picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:collapsedGroups.<instance URL>` | which deck groups you folded | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |

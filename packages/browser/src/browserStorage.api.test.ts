@@ -9,6 +9,7 @@ import { DATABASE, DATABASE_VERSION, LOCK, RESOURCES } from "./indexedDbResource
 import { KEY as LANGUAGE_KEY } from "./localStorageLanguagePreference";
 import { KEY as CUSTOM_PALETTE_KEY } from "./localStorageCustomPalettePreference";
 import { KEY as PALETTE_KEY } from "./localStoragePalettePreference";
+import { KEY as SEEN_HIGHLIGHTS_KEY } from "./localStorageSeenHighlights";
 import { KEY as TEXT_SIZE_KEY } from "./localStorageTextSizePreference";
 import { KEY as THEME_KEY } from "./localStorageThemePreference";
 import { PREFIX as JOURNAL_PREFIX } from "./localStorageUpdateJournal";
@@ -40,6 +41,7 @@ it("keeps api/browser-storage/browser.txt to what the browser keeps", async () =
     ...["palette", "light", "dark"].map(
       (field) => `localStorage: ${CUSTOM_PALETTE_KEY}, field ${field}`,
     ),
+    `localStorage: ${SEEN_HIGHLIGHTS_KEY}, a JSON array of highlight ids`,
     `localStorage: ${TEXT_SIZE_KEY}`,
     `localStorage: ${THEME_KEY}`,
     `localStorage: ${JOURNAL_PREFIX}<source URL>`,

@@ -1267,6 +1267,17 @@ describe("a course's celebrations", () => {
   });
 });
 
+describe("what's new", () => {
+  it("bursts sparkles from within the card, out of the pointer's way, gone when they rest", () => {
+    document.body.innerHTML = `<aside class="whats-new"><span class="whats-new-sparkles" aria-hidden="true"><span></span></span></aside>`;
+    expect(getComputedStyle(document.querySelector(".whats-new")!).position).toBe("relative");
+    const sparkles = getComputedStyle(document.querySelector(".whats-new-sparkles")!);
+    expect(sparkles.position).toBe("absolute");
+    expect(sparkles.pointerEvents).toBe("none");
+    expect(getComputedStyle(document.querySelector(".whats-new-sparkles>span")!).opacity).toBe("0");
+  });
+});
+
 describe("German", () => {
   it("hyphenates German words at line ends, and no other language's", () => {
     document.body.innerHTML = `<p lang="de">Lernfortschritt</p><p lang="en">x</p>`;

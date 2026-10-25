@@ -625,6 +625,11 @@
     "switch": "Byt till FSRS-6",
     "notNow": "Inte nu"
   },
+  "whatsNew": {
+    "heading": "Nytt i Solid Memo {version}",
+    "close": "Stäng",
+    "highlight": {}
+  },
   "deckPreferences": {
     "loading": "Läser in inställningar…",
     "heading": "Inställningar: {deck}",

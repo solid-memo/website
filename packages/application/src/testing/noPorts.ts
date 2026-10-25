@@ -10,6 +10,7 @@ import type {
   CustomPalettePreference,
   PalettePreference,
   PaletteRepository,
+  SeenHighlights,
   TextSizePreference,
   ThemePreference,
   UpdateJournal,
@@ -52,6 +53,8 @@ const NO_TEXT_SIZE_PREFERENCE: TextSizePreference = {
   chosen: () => DEFAULT_TEXT_SIZE,
   choose: () => undefined,
 };
+
+const NO_SEEN_HIGHLIGHTS: SeenHighlights = { seen: () => null, see: () => undefined };
 
 const NO_DECK_ARCHIVE: DeckArchive = {
   exportDeck: async () => {
@@ -156,4 +159,5 @@ export const NO_PORTS = {
   customPalettePreference: NO_CUSTOM_PALETTE_PREFERENCE,
   paletteRepository: NO_PALETTES,
   textSizePreference: NO_TEXT_SIZE_PREFERENCE,
+  seenHighlights: NO_SEEN_HIGHLIGHTS,
 };

@@ -27,6 +27,7 @@ import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageCustomPalettePreference } from "@solid-memo/browser/localStorageCustomPalettePreference";
 import { createLocalStoragePalettePreference } from "@solid-memo/browser/localStoragePalettePreference";
+import { createLocalStorageSeenHighlights } from "@solid-memo/browser/localStorageSeenHighlights";
 import { createLocalStorageTextSizePreference } from "@solid-memo/browser/localStorageTextSizePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
@@ -144,6 +145,7 @@ export function createAppUseCases({
     palettePreference: createLocalStoragePalettePreference(),
     customPalettePreference: createLocalStorageCustomPalettePreference(),
     textSizePreference: createLocalStorageTextSizePreference(),
+    seenHighlights: createLocalStorageSeenHighlights(),
     writeFence,
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),

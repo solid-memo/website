@@ -904,6 +904,20 @@ export interface TextSizePreference {
 }
 
 /**
+ * Driven port: the ids of the highlights of new versions ("New in this
+ * version") this browser has shown, or spared a first visit, kept where
+ * the app runs (the browser), since they are no one's data but the
+ * device's. Best effort: it may forget, and the app then takes the next
+ * visit for a first one and shows nothing; where it cannot keep them
+ * (storage full), a closed card comes back on the next visit.
+ */
+export interface SeenHighlights {
+  /** The ids kept; null when none are (a first visit, or they were forgotten). */
+  seen(): string[] | null;
+  see(ids: readonly string[]): void;
+}
+
+/**
  * Driven port: a note of an update in progress, kept where the app runs
  * (the browser), so an update cut off half-way (a closed tab) can be
  * found: a guest's study being moved into its new folder, or each

@@ -10,6 +10,7 @@ import { makeDeckUseCasesFake } from "./fakes/decks";
 import { makeCardUseCasesFake } from "./fakes/cards";
 import { makeLibraryUseCasesFake } from "./fakes/library";
 import { makeMistakeReportUseCasesFake } from "./fakes/mistakeReports";
+import { makeWhatsNewUseCasesFake } from "./fakes/whatsNew";
 import { makeCourseUseCasesFake } from "./fakes/courses";
 import { makeStudyUseCasesFake } from "./fakes/study";
 import { makeStatisticsUseCasesFake } from "./fakes/statistics";
@@ -34,6 +35,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
   makeCardUseCasesFake({}, fake);
   makeLibraryUseCasesFake({}, fake);
   makeMistakeReportUseCasesFake({}, fake);
+  makeWhatsNewUseCasesFake({}, fake);
   makeCourseUseCasesFake({}, fake);
   makeStudyUseCasesFake({}, fake);
   makeStatisticsUseCasesFake({}, fake);
