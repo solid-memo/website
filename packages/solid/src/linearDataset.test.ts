@@ -102,6 +102,29 @@ describe("graphsOf", () => {
     });
   });
 
+  it("keeps every name as a key, `__proto__` too, and writes nothing onto Object.prototype", async () => {
+    const victim = "https://victim.example/profile#me";
+    const proto = { termType: "NamedNode", value: "__proto__" } as Quad["predicate"];
+    const graphs = graphsOf([
+      {
+        subject: { termType: "NamedNode", value: victim },
+        predicate: proto,
+        object: {
+          termType: "Literal",
+          value: "x",
+          language: "",
+          datatype: { termType: "NamedNode", value: "__proto__" },
+        },
+        graph: { termType: "BlankNode", value: "__proto__" },
+      } as Quad,
+    ]);
+    expect(Object.keys(graphs)).toEqual(["default", "__proto__"]);
+    const literals = graphs["__proto__"]![victim]!.predicates["__proto__"]!.literals!;
+    expect(Object.entries(literals)).toEqual([["__proto__", ["x"]]]);
+    expect(victim in {}).toBe(false);
+    expect(getThing(fromRdfJsDataset([] as never), victim)).toBeNull();
+  });
+
   it("refuses an object solid-client cannot hold, as solid-client does", async () => {
     const [first] = await quadsOf(`<#a> <https://example.com/ns#p> "x" .`);
     const { subject, predicate, graph } = first!;

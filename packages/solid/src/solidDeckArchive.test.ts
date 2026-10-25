@@ -336,6 +336,33 @@ describe("readDeckFile", () => {
     expect(read.reviews).toBeUndefined();
   });
 
+  it("reads only the file's default graph, so a named graph called `_:__proto__` reaches nothing", async () => {
+    const victim = "https://victim.example/solid-memo/catalog.ttl#deck";
+    const json = JSON.stringify({
+      "@context": { sm: SM_NS, dcterms: "http://purl.org/dc/terms/" },
+      "@graph": [
+        {
+          "@id": "#deck",
+          "@type": "sm:Deck",
+          "dcterms:title": "Hand",
+          "sm:cardsDocument": { "@id": "cards" },
+          "sm:reviewsDocument": { "@id": "reviews" },
+        },
+        { "@id": "cards#c1", "@type": "sm:Card", "sm:front": "A", "sm:back": "B" },
+        {
+          "@id": "_:__proto__",
+          "@graph": [
+            { "@id": victim, "@type": "sm:Deck", "dcterms:title": "Evil" },
+            { "@id": "cards#c2", "@type": "sm:Card", "sm:front": "C", "sm:back": "D" },
+          ],
+        },
+      ],
+    });
+    const read = await archive.readDeckFile(json, "jsonld", base);
+    expect(read.cards.map((card) => card.id)).toEqual(["c1"]);
+    expect(victim in {}).toBe(false);
+  });
+
   it("refuses JSON-LD whose context would be fetched from elsewhere", async () => {
     for (const context of [
       "https://evil.example/context.jsonld",

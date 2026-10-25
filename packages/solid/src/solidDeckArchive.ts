@@ -188,7 +188,12 @@ function refuseNewer(thing: Thing): void {
   }
 }
 
-/** The file's triples, its relative IRIs resolved against `baseUrl`; deckFileUnreadable when it does not parse. */
+/**
+ * The file's triples, its relative IRIs resolved against `baseUrl`;
+ * deckFileUnreadable when it does not parse. A deck file is triples:
+ * statements in a named graph (JSON-LD can say them, Turtle cannot) are
+ * not the file's and are left out (GHSA-m4hj-7c28-fq4h).
+ */
 export function parseDeckFile(
   text: string,
   format: DeckFileFormat,
@@ -198,7 +203,9 @@ export function parseDeckFile(
   const parser = format === "turtle" ? getTurtleParser() : getJsonLdParser();
   return new Promise((resolve, reject) => {
     const quads: Quad[] = [];
-    parser.onQuad((quad) => quads.push(quad));
+    parser.onQuad((quad) => {
+      if (quad.graph.termType === "DefaultGraph") quads.push(quad);
+    });
     parser.onError((error) =>
       reject(new AppError("deckFileUnreadable", { reason: String(error) })),
     );
