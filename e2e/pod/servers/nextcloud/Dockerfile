@@ -13,7 +13,7 @@ FROM nextcloud:32.0.15-apache@sha256:45afe3bebd1eef20b402cafcb87206e3d9f3a27dbc5
 # fix (CLN-012); Renovate follows the branch (renovate.json5).
 # renovate: datasource=git-refs depName=https://github.com/pdsinterop/solid-nextcloud branch=main
 ARG SOLID_NEXTCLOUD_SHA=a7315d90a145ae669762ba5b4fc4465101f42df5
-COPY --from=composer:2.10.3@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc /usr/bin/composer /usr/local/bin/composer
 RUN apt-get update && apt-get install -y --no-install-recommends git unzip && rm -rf /var/lib/apt/lists/* \
  && git init -q /tmp/solid-nextcloud && cd /tmp/solid-nextcloud \
  && git fetch -q --depth 1 https://github.com/pdsinterop/solid-nextcloud "$SOLID_NEXTCLOUD_SHA" && git checkout -q FETCH_HEAD \
