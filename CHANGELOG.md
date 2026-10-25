@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.10.1](https://github.com/solid-memo/website/compare/v6.10.0...v6.10.1) (2026-10-25)
+
+### Bug Fixes
+
+* **solid:** keep a file's named graphs off Object.prototype ([b988164](https://github.com/solid-memo/website/commit/b988164af74db30a847255c0309b4ff63c05282f))
+
 ## [6.10.0](https://github.com/solid-memo/website/compare/v6.9.0...v6.10.0) (2026-10-25)
 
 ### Features
