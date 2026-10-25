@@ -175,6 +175,10 @@ flowchart LR
      the chapter, once the course has been read afresh.
   10. **The storage picker** with a single storage: on to the instance
       creator for it.
+  11. **The instance creator** with a storage the storage picker does
+      not offer, nor the user added by hand there since the page loaded:
+      back to the storage picker, so a link cannot fill in an address
+      someone else chose. A reload forgets the storages added by hand.
 
   All fallbacks use `history.replaceState`, so they are not Back stops;
   in-app navigation uses `pushState`, so Back walks the screens. What

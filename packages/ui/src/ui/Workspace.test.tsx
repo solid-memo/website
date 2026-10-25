@@ -612,18 +612,74 @@ describe("Workspace", () => {
   });
 
   it("adds a manual storage and continues to the creator", async () => {
-    const useCases = makeUseCases();
+    const manual: Storage = { url: "https://other.example/", source: "manual" };
+    const useCases = makeUseCases({ addManualStorage: vi.fn(async () => manual) });
     renderWorkspace(useCases);
 
     fireEvent.input(await screen.findByLabelText("Storage URL"), {
-      target: { value: "https://pod.example/" },
+      target: { value: "https://other.example/" },
     });
     fireEvent.submit(screen.getByRole("button", { name: "Use this storage" }).closest("form")!);
 
     expect(
       await screen.findByRole("heading", { name: "New Solid Memo instance" }),
     ).toBeInTheDocument();
-    expect(useCases.addManualStorage).toHaveBeenCalledWith("https://pod.example/");
+    expect(useCases.addManualStorage).toHaveBeenCalledWith("https://other.example/");
+    expect(window.location.hash).toBe(
+      routeToHash({ screen: "instanceCreator", storageUrl: manual.url, source: "manual" }),
+    );
+  });
+
+  it("opens a link to the creator with a storage the picker does not offer at the picker", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({
+        screen: "instanceCreator",
+        storageUrl: "https://attacker.example/open/",
+        source: "profile",
+      }),
+    );
+    const useCases = makeUseCases();
+    renderWorkspace(useCases);
+
+    expect(await screen.findByRole("heading", { name: "Choose a storage" })).toBeInTheDocument();
+    expect(window.location.hash).toBe(routeToHash({ screen: "storagePicker" }));
+    expect(screen.queryByText("https://attacker.example/open/")).not.toBeInTheDocument();
+    expect(useCases.createInstance).not.toHaveBeenCalled();
+  });
+
+  it("opens a link to the creator with a storage the picker offers", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "instanceCreator", storageUrl: storageB.url, source: "profile" }),
+    );
+    renderWorkspace(makeUseCases());
+
+    expect(
+      await screen.findByRole("heading", { name: "New Solid Memo instance" }),
+    ).toBeInTheDocument();
+  });
+
+  it("says why the creator cannot open when storage discovery fails", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "instanceCreator", storageUrl: storageA.url, source: "profile" }),
+    );
+    renderWorkspace(
+      makeUseCases({
+        listStorages: vi.fn(async () => {
+          throw new Error("no storages");
+        }),
+      }),
+    );
+
+    expect(await screen.findByText("no storages")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "New Solid Memo instance" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows a create error and stays on the creator", async () => {
