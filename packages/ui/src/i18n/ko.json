@@ -1018,15 +1018,14 @@
     "tryHeading": "바로 사용해 보기",
     "tryAsGuest": "로그인 없이 사용해 보기",
     "tryAsGuestHint": "계정이 없어도 돼요. 게스트로 학습해 보세요. 학습한 내용은 이 브라우저에 저장되고, 로그인하면 언제든 내 Pod로 옮길 수 있어요.",
-    "connectHeading": "내 Pod 연결",
-    "providerHeading": "또는 제공자 선택",
-    "providerHint": "WebID를 모르시나요? Pod가 있는 곳을 골라 그곳에서 로그인해 주세요. 로그인하면 WebID도 함께 전달돼요.",
-    "setUpHeading": "내 Solid Pod 준비하기",
-    "intro": "데이터는 직접 관리하는 Solid Pod에 저장돼요. Pod 제공자에서 Pod를 만들거나, 이미 있는 Pod를 연결해 주세요.",
+    "logInHeading": "내 Pod로 로그인",
+    "webIdHeading": "또는 WebID 사용",
+    "providerHint": "Pod가 있는 곳을 골라 그곳에서 로그인해 주세요. 로그인하면 WebID도 함께 전달돼요.",
+    "setUpHeading": "아직 Pod가 없나요?",
+    "intro": "데이터는 직접 관리하는 Solid Pod에 저장돼요. Pod 제공자에서 Pod를 만든 다음, 위에서 그 Pod로 로그인해 주세요.",
     "createPodLabel": "{provider}에서 Pod 만들기(새 탭에서 열림)",
     "createPod": "Pod 만들기 ↗",
-    "createPodHint": "Pod는 제공자의 사이트에서 새 탭으로 만들어요. 다 만들면 여기로 돌아와 연결해 주세요.",
-    "havePod": "이미 Pod가 있어요"
+    "createPodHint": "Pod는 제공자의 사이트에서 새 탭으로 만들어요. 다 만들면 여기로 돌아와 로그인해 주세요."
   },
   "guest": {
     "instanceName": "내 학습"
@@ -1473,8 +1472,7 @@
   "webIdForm": {
     "help": "WebID는 본인을 식별하는 웹 주소로, Pod 제공자가 발급해 줘요. 로그인은 제공자의 페이지에서 해요. Solid Memo는 비밀번호를 절대 볼 수 없어요.",
     "redirecting": "이동하는 중…",
-    "logIn": "Solid로 로그인",
-    "back": "뒤로"
+    "logIn": "Solid로 로그인"
   },
   "workspace": {
     "loadingInstances": "Solid Memo 인스턴스를 불러오는 중…",

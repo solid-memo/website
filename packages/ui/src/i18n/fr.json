@@ -1140,15 +1140,14 @@
     "tryHeading": "Essayer tout de suite",
     "tryAsGuest": "Essayer sans se connecter",
     "tryAsGuestHint": "Aucun compte nécessaire : étudiez en mode invité. Ce que vous apprenez est conservé dans ce navigateur, et vous pourrez le déplacer dans votre propre Pod lorsque vous vous connecterez.",
-    "connectHeading": "Connecter votre Pod",
-    "providerHeading": "Ou choisissez votre fournisseur",
-    "providerHint": "Pas de WebID sous la main ? Choisissez où se trouve votre Pod et connectez-vous chez ce fournisseur : votre WebID vous est transmis à la connexion.",
-    "setUpHeading": "Configurer votre Pod Solid",
-    "intro": "Vos données sont stockées dans un Pod Solid que vous contrôlez. Créez-en un chez un fournisseur de Pod, ou connectez un Pod que vous avez déjà.",
+    "logInHeading": "Se connecter avec votre Pod",
+    "webIdHeading": "Ou utilisez votre WebID",
+    "providerHint": "Choisissez où se trouve votre Pod et connectez-vous chez ce fournisseur : votre WebID vous est transmis à la connexion.",
+    "setUpHeading": "Pas encore de Pod ?",
+    "intro": "Vos données sont stockées dans un Pod Solid que vous contrôlez. Créez-en un chez un fournisseur de Pod, puis connectez-vous avec lui ci-dessus.",
     "createPodLabel": "Créer un Pod chez {provider} (s’ouvre dans un nouvel onglet)",
     "createPod": "Créer un Pod ↗",
-    "createPodHint": "La création d’un Pod se fait sur le site du fournisseur, dans un nouvel onglet. Une fois le Pod créé, revenez ici pour le connecter.",
-    "havePod": "J’ai déjà un Pod"
+    "createPodHint": "La création d’un Pod se fait sur le site du fournisseur, dans un nouvel onglet. Une fois le Pod créé, revenez ici pour vous connecter."
   },
   "guest": {
     "instanceName": "Mon travail"
@@ -1617,8 +1616,7 @@
   "webIdForm": {
     "help": "Votre WebID est l’adresse web qui vous identifie, attribuée par votre fournisseur de Pod. Vous vous connecterez sur la page de votre fournisseur : Solid Memo ne voit jamais votre mot de passe.",
     "redirecting": "Redirection…",
-    "logIn": "Se connecter avec Solid",
-    "back": "Retour"
+    "logIn": "Se connecter avec Solid"
   },
   "workspace": {
     "loadingInstances": "Chargement de vos instances Solid Memo…",

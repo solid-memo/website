@@ -1079,15 +1079,14 @@
     "tryHeading": "Gleich ausprobieren",
     "tryAsGuest": "Ohne Anmeldung ausprobieren",
     "tryAsGuestHint": "Kein Konto nötig: Lerne als Gast. Was du lernst, wird in diesem Browser gespeichert, und du kannst es in deinen eigenen Pod übertragen, sobald du dich anmeldest.",
-    "connectHeading": "Deinen Pod verbinden",
-    "providerHeading": "Oder wähle deinen Anbieter",
-    "providerHint": "Keine WebID zur Hand? Wähle, wo dein Pod liegt, und melde dich dort an – deine WebID kommt mit der Anmeldung zurück.",
-    "setUpHeading": "Deinen Solid Pod einrichten",
-    "intro": "Deine Daten werden in einem Solid Pod gespeichert, über den du selbst bestimmst. Erstelle einen bei einem Pod-Anbieter oder verbinde einen Pod, den du schon hast.",
+    "logInHeading": "Mit deinem Pod anmelden",
+    "webIdHeading": "Oder nutze deine WebID",
+    "providerHint": "Wähle, wo dein Pod liegt, und melde dich dort an. Deine WebID kommt mit der Anmeldung zurück.",
+    "setUpHeading": "Noch keinen Pod?",
+    "intro": "Deine Daten werden in einem Solid Pod gespeichert, über den du selbst bestimmst. Erstelle einen bei einem Pod-Anbieter und melde dich dann oben damit an.",
     "createPodLabel": "Pod bei {provider} erstellen (öffnet sich in einem neuen Tab)",
     "createPod": "Pod erstellen ↗",
-    "createPodHint": "Den Pod erstellst du auf der Website des Anbieters, in einem neuen Tab. Wenn du fertig bist, komm hierher zurück und verbinde ihn.",
-    "havePod": "Ich habe schon einen Pod"
+    "createPodHint": "Den Pod erstellst du auf der Website des Anbieters, in einem neuen Tab. Wenn du fertig bist, komm hierher zurück und melde dich an."
   },
   "guest": {
     "instanceName": "Mein Lernstand"
@@ -1545,8 +1544,7 @@
   "webIdForm": {
     "help": "Deine WebID ist die Webadresse, die dich identifiziert. Du bekommst sie von deinem Pod-Anbieter. Du meldest dich auf der Seite deines Anbieters an – Solid Memo sieht dein Passwort nie.",
     "redirecting": "Du wirst weitergeleitet…",
-    "logIn": "Mit Solid anmelden",
-    "back": "Zurück"
+    "logIn": "Mit Solid anmelden"
   },
   "workspace": {
     "loadingInstances": "Deine Instanzen von Solid Memo werden geladen…",

@@ -10,9 +10,7 @@ import { alertTexts, statusTexts } from "../../test/liveRegions";
 function renderForm(overrides: Partial<Parameters<typeof WebIdForm>[0]> = {}) {
   const props = {
     busy: false,
-    autoFocus: false,
     onSubmit: vi.fn(),
-    onBack: vi.fn(),
     ...overrides,
   };
   render(<WebIdForm {...props} />);
@@ -63,26 +61,13 @@ describe("WebIdForm", () => {
   });
 
   it("never asks for a password", () => {
-    const { container } = render(
-      <WebIdForm busy={false} autoFocus={false} onSubmit={vi.fn()} onBack={vi.fn()} />,
-    );
+    const { container } = render(<WebIdForm busy={false} onSubmit={vi.fn()} />);
     expect(container.querySelector('input[type="password"]')).toBeNull();
   });
 
-  it("focuses the field on request", () => {
-    renderForm({ autoFocus: true });
-    expect(screen.getByLabelText("WebID")).toHaveFocus();
-  });
-
-  it("leaves focus alone otherwise", () => {
+  it("leaves focus alone", () => {
     renderForm();
     expect(screen.getByLabelText("WebID")).not.toHaveFocus();
-  });
-
-  it("goes back on request", () => {
-    const { onBack } = renderForm();
-    fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(onBack).toHaveBeenCalledOnce();
   });
 
   it("disables the form and changes the button label while busy, and says so", () => {
@@ -91,7 +76,6 @@ describe("WebIdForm", () => {
     // Only aria-disabled, so it keeps the focus while the page redirects.
     const button = screen.getByRole("button", { name: "Redirecting…" });
     expect(button).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
     expect(statusTexts()).toEqual(["Redirecting…"]);
     fireEvent.submit(button.closest("form")!);
     expect(onSubmit).not.toHaveBeenCalled();
