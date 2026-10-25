@@ -441,6 +441,32 @@ describe("guests", () => {
     expect(deps.updateJournal.end).not.toHaveBeenCalled();
   });
 
+  it("transferGuestStudy refuses before it copies anything when the study could not be registered", async () => {
+    const { deps } = guestDeps();
+    vi.mocked(deps.storageGateway.discoverStorages).mockResolvedValue([]);
+    const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+      containerUrl: TARGET,
+      registrationTarget: "public",
+    });
+    expect(outcome).toMatchObject({
+      ok: false,
+      error: expect.objectContaining({ code: "typeIndexNoStorage" }),
+      cleanedUp: true,
+    });
+    expect(deps.instanceCopier.createContainer).not.toHaveBeenCalled();
+    expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
+  });
+
+  it("transferGuestStudy registers in an index already there with no storage to make one in", async () => {
+    const { deps } = guestDeps();
+    vi.mocked(deps.storageGateway.discoverStorages).mockResolvedValue([]);
+    const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+      containerUrl: TARGET,
+      registrationTarget: "private",
+    });
+    expect(outcome).toMatchObject({ ok: true });
+  });
+
   it("transferGuestStudy moves the study to the target as a request sends its address", async () => {
     const { deps } = guestDeps();
     const typed = TARGET.replace("https://", "HTTPS://").replace(/\/$/, "");

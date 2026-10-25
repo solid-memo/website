@@ -26,7 +26,7 @@ import {
 } from "./datasets";
 import { ensureTrailingSlash } from "./urls";
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
-import { candidateStorageUrls, hasStorageLink } from "./solidStorageGateway";
+import { createSolidStorageGateway } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
 import { DATA_CLASSES, type DataClass } from "@solid-memo/domain/instance";
 import {
@@ -121,9 +121,12 @@ async function readSubjectSafely(
 
 /**
  * Create a type index document under <storage>settings/ and link it from
- * the profile. An index document already at that URL (e.g. left behind
- * by an earlier run whose profile link failed) is adopted as-is rather
- * than overwritten. Throws if either write fails.
+ * the profile, in one of the user's own storages (ownStorageFor), never
+ * where the instance it is made for happens to be: an index on a server
+ * someone else runs would be where every Solid app reads the user's
+ * registrations and writes theirs. An index document already at that URL
+ * (e.g. left behind by an earlier run whose profile link failed) is
+ * adopted as-is rather than overwritten. Throws if either write fails.
  */
 export async function createTypeIndex(
   kind: TypeIndexKind,
@@ -131,7 +134,7 @@ export async function createTypeIndex(
   nearUrl: string,
   fetch: Fetch,
 ): Promise<string> {
-  const storageRoot = await findStorageRoot(nearUrl, fetch);
+  const storageRoot = await ownStorageFor(nearUrl, webId, fetch);
   const indexUrl = `${storageRoot}settings/${kind}TypeIndex.ttl`;
 
   const existing = await getSolidDatasetOrNull(indexUrl, fetch);
@@ -483,20 +486,16 @@ export async function renameInstanceRegistrations(
 }
 
 /**
- * Storage root for a resource per the Solid Protocol Link-header walk-up,
- * falling back to the origin root when no candidate advertises one.
+ * The user's own storage to keep a type index in, of those their WebID
+ * leads to (discoverStorages: pim:storage in their profile, or else the
+ * one the WebID's own address is in): the one `url` is in, or else the
+ * first. Throws when the WebID leads to none.
  */
-async function findStorageRoot(resourceUrl: string, fetch: Fetch): Promise<string> {
-  const candidates = candidateStorageUrls(resourceUrl);
-  for (const candidate of candidates) {
-    try {
-      const response = await fetch(candidate, { method: "HEAD" });
-      if (hasStorageLink(response.headers.get("Link"))) {
-        return candidate;
-      }
-    } catch {
-      // A candidate that cannot be fetched is skipped.
-    }
-  }
-  return new URL("/", resourceUrl).toString();
+async function ownStorageFor(url: string, webId: string, fetch: Fetch): Promise<string> {
+  const storages = (await createSolidStorageGateway({ fetch }).discoverStorages(webId)).map(
+    (storage) => ensureTrailingSlash(storage.url),
+  );
+  const storage = storages.find((root) => url.startsWith(root)) ?? storages[0];
+  if (storage === undefined) throw new AppError("typeIndexNoStorage", { webId });
+  return storage;
 }

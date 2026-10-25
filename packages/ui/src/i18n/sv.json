@@ -1600,6 +1600,7 @@
     "profileNoSubject": "Din profil beskriver inte dig, så Solid Memo kan inte anteckna i den var dina data finns. Kontrollera profilen hos din Pod-leverantör och försök sedan igen.",
     "privateTypeIndexNotLinked": "Solid Memo kunde inte länka sin privata lista över dina data från din profil. Kontrollera att Solid Memo får ändra din profil och försök sedan igen.",
     "publicTypeIndexNotLinked": "Solid Memo kunde inte länka sin publika lista över dina data från din profil. Kontrollera att Solid Memo får ändra din profil och försök sedan igen.",
+    "typeIndexNoStorage": "Din profil anger ingen lagring som är din, så Solid Memo har ingenstans att spara sin lista över dina data. Be din Pod-leverantör att lägga till din Pods lagring i din profil och försök sedan igen.",
     "storageInaccessible": "Solid Memo kommer inte åt den lagringen. Kontrollera adressen och att du är inloggad med kontot som äger den.",
     "notAnInstanceNoMeta": "Den adressen är ingen instans av Solid Memo. Kontrollera att du klistrade in adressen till en instans mapp, som slutar med /.",
     "notAnInstanceNoSubject": "Den mappen är ingen instans av Solid Memo: dess beskrivning går inte att läsa. Kontrollera att du klistrade in rätt adress.",

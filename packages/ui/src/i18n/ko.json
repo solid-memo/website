@@ -1528,6 +1528,7 @@
     "profileNoSubject": "프로필에 사용자 정보가 없어서 Solid Memo가 데이터 위치를 프로필에 적을 수 없어요. Pod 제공자에서 프로필을 확인한 뒤 다시 시도해 주세요.",
     "privateTypeIndexNotLinked": "Solid Memo가 데이터의 비공개 목록을 프로필에 연결하지 못했어요. Solid Memo에 프로필 편집 권한이 있는지 확인한 뒤 다시 시도해 주세요.",
     "publicTypeIndexNotLinked": "Solid Memo가 데이터의 공개 목록을 프로필에 연결하지 못했어요. Solid Memo에 프로필 편집 권한이 있는지 확인한 뒤 다시 시도해 주세요.",
+    "typeIndexNoStorage": "프로필에 내 저장소가 없어서 Solid Memo가 데이터 목록을 둘 곳이 없어요. Pod 제공자에게 프로필에 Pod 저장소를 추가해 달라고 요청한 뒤 다시 시도해 주세요.",
     "storageInaccessible": "Solid Memo가 그 저장소를 열 수 없어요. 주소를 확인하고, 저장소를 소유한 계정으로 로그인했는지 확인해 주세요.",
     "notAnInstanceNoMeta": "그 주소는 Solid Memo 인스턴스가 아니에요. /로 끝나는 인스턴스 폴더 주소를 붙여 넣었는지 확인해 주세요.",
     "notAnInstanceNoSubject": "그 폴더는 Solid Memo 인스턴스가 아니에요. 폴더의 설명을 읽을 수 없어요. 올바른 주소를 붙여 넣었는지 확인해 주세요.",

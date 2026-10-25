@@ -1672,6 +1672,7 @@
     "profileNoSubject": "Votre profil ne vous décrit pas, Solid Memo ne peut donc pas y noter où se trouvent vos données. Vérifiez votre profil auprès de votre fournisseur de Pod, puis réessayez.",
     "privateTypeIndexNotLinked": "Solid Memo n’a pas pu relier à votre profil sa liste privée de vos données. Vérifiez que Solid Memo peut modifier votre profil, puis réessayez.",
     "publicTypeIndexNotLinked": "Solid Memo n’a pas pu relier à votre profil sa liste publique de vos données. Vérifiez que Solid Memo peut modifier votre profil, puis réessayez.",
+    "typeIndexNoStorage": "Votre profil n’indique aucun espace de stockage à vous, donc Solid Memo n’a nulle part où garder sa liste de vos données. Demandez à votre fournisseur de Pod d’ajouter le stockage de votre Pod à votre profil, puis réessayez.",
     "storageInaccessible": "Solid Memo ne peut pas ouvrir cet espace de stockage. Vérifiez l’adresse, et que vous êtes connecté avec le compte auquel il appartient.",
     "notAnInstanceNoMeta": "Cette adresse n’est pas une instance Solid Memo. Vérifiez que vous avez collé l’adresse du dossier d’une instance, terminée par /.",
     "notAnInstanceNoSubject": "Ce dossier n’est pas une instance Solid Memo : sa description est illisible. Vérifiez que vous avez collé la bonne adresse.",

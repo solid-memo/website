@@ -233,8 +233,12 @@ later guest's decks have new URLs, which no note names.
 user chooses (by default `<storage>solid-memo/main/`, where a first
 instance goes). It runs these steps:
 
-1. **stage:** list the guest's instance. The digest stays behind,
-   because its versions are this browser's. Make sure the target is
+1. **stage:** refuse (`typeIndexNoStorage`) when the study could not
+   be registered: no type index of the chosen kind, and no storage the
+   user's WebID leads to where one could be made
+   ([data-model.md](data-model.md)). List the guest's instance. The
+   digest stays behind, because its versions are this browser's. Make
+   sure the target is
    free, then create it. Any answers still waiting to be logged go to
    the guest's log first.
 2. **copy:** copy each resource with every IRI under the guest's

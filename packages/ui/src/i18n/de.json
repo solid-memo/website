@@ -1600,6 +1600,7 @@
     "profileNoSubject": "Dein Profil beschreibt dich nicht, daher kann Solid Memo darin nicht vermerken, wo deine Daten liegen. Prüfe dein Profil bei deinem Pod-Anbieter und versuche es dann erneut.",
     "privateTypeIndexNotLinked": "Solid Memo konnte sein privates Verzeichnis deiner Daten nicht mit deinem Profil verknüpfen. Prüfe, ob Solid Memo dein Profil bearbeiten darf, und versuche es dann erneut.",
     "publicTypeIndexNotLinked": "Solid Memo konnte sein öffentliches Verzeichnis deiner Daten nicht mit deinem Profil verknüpfen. Prüfe, ob Solid Memo dein Profil bearbeiten darf, und versuche es dann erneut.",
+    "typeIndexNoStorage": "Dein Profil nennt keinen eigenen Speicherort, also kann Solid Memo sein Verzeichnis deiner Daten nirgends ablegen. Bitte deinen Pod-Anbieter, den Speicherort deines Pods in dein Profil einzutragen, und versuche es dann erneut.",
     "storageInaccessible": "Solid Memo kann diesen Speicherort nicht öffnen. Prüfe die Adresse und ob du mit dem Konto angemeldet bist, dem er gehört.",
     "notAnInstanceNoMeta": "Diese Adresse ist keine Instanz von Solid Memo. Prüfe, ob du die Adresse des Ordners einer Instanz eingefügt hast (sie endet auf /).",
     "notAnInstanceNoSubject": "Dieser Ordner ist keine Instanz von Solid Memo: Seine Beschreibung lässt sich nicht lesen. Prüfe, ob du die richtige Adresse eingefügt hast.",

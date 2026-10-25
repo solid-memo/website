@@ -51,7 +51,7 @@ export function createSolidStorageGateway({ fetch }: SolidStorageGatewayDeps): S
  * Candidate URLs for the Solid Protocol storage walk-up: the WebID document
  * itself, then each ancestor container up to the origin root.
  */
-export function candidateStorageUrls(webId: string): string[] {
+function candidateStorageUrls(webId: string): string[] {
   const url = new URL(webId);
   url.hash = "";
   url.search = "";
