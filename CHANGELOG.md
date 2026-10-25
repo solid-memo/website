@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.10.2](https://github.com/solid-memo/website/compare/v6.10.1...v6.10.2) (2026-10-25)
+
+### Bug Fixes
+
+* **solid:** make a missing type index only in the user's own storage ([28776ed](https://github.com/solid-memo/website/commit/28776edef313156f0efd999767d7ec065b50bd44))
+* **ui:** open the instance creator only with a storage the user chose ([4c1c87b](https://github.com/solid-memo/website/commit/4c1c87b94fa05ddd7e054b321a36f4a748a1cae6))
+
 ## [6.10.1](https://github.com/solid-memo/website/compare/v6.10.0...v6.10.1) (2026-10-25)
 
 ### Bug Fixes
