@@ -1,0 +1,1202 @@
+@base <https://solid-memo.com/decks/brain-regions/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Brain regions and their functions"@en ,
+                  "Hjärnans delar och deras funktioner"@sv ,
+                  "뇌의 부위와 기능"@ko ,
+                  "Hirnregionen und ihre Funktionen"@de ,
+                  "Regiones del cerebro y sus funciones"@es ,
+                  "Régions du cerveau et leurs fonctions"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "40 regions of the human brain, from the lobes of the cerebral cortex to the brainstem and cerebellum. Front: the region's name; back: its main functions in a few words. A note on the back says where the region lies. Names from Wikidata and Svensk MeSH (Karolinska Institutet's Swedish translation of MeSH); the functions were written for the deck from the U.S. National Library of Medicine's MeSH and the National Institute of Neurological Disorders and Stroke (NINDS), and checked against Wikipedia. The functions are simplified for learners: most of them involve networks of regions working together, not one region alone."@en ,
+                        "40 delar av människans hjärna, från hjärnbarkens lober till hjärnstammen och lillhjärnan. Framsida: delens namn; baksida: dess huvudsakliga funktioner med några få ord. En anteckning på baksidan anger var delen sitter. Namnen kommer från Wikidata och Svensk MeSH (Karolinska Institutets svenska översättning av MeSH); funktionerna skrevs för leken utifrån amerikanska National Library of Medicines MeSH och National Institute of Neurological Disorders and Stroke (NINDS) och kontrollerades mot Wikipedia. Funktionerna är förenklade för den som lär sig: de flesta funktioner bygger på nätverk av flera delar som samverkar, inte på en enda del."@sv ,
+                        "대뇌 겉질의 엽에서 뇌줄기와 소뇌까지, 인간 뇌의 부위 40개. 앞면: 부위의 이름, 뒷면: 몇 마디로 적은 주요 기능. 뒷면의 메모에는 그 부위가 어디에 있는지 적혀 있다. 이름은 Wikidata와 Svensk MeSH(Karolinska Institutet가 스웨덴어로 번역한 MeSH)에서 가져왔고, 기능은 미국 국립의학도서관(National Library of Medicine)의 MeSH와 미국 국립신경질환뇌졸중연구소(NINDS)를 바탕으로 이 덱을 위해 새로 썼으며 위키백과와 대조해 확인했다. 기능은 학습자를 위해 단순화했다. 대부분의 기능은 한 부위만이 아니라 여러 부위가 함께 이루는 네트워크가 맡는다."@ko ,
+                        "40 Regionen des menschlichen Gehirns, von den Lappen der Großhirnrinde bis zum Hirnstamm und Kleinhirn. Vorderseite: der Name der Region; Rückseite: ihre Hauptfunktionen in wenigen Worten. Eine Anmerkung auf der Rückseite sagt, wo die Region liegt. Die Namen stammen aus Wikidata und Svensk MeSH (der schwedischen Übersetzung von MeSH durch das Karolinska Institutet); die Funktionen wurden für das Deck anhand von MeSH der U.S. National Library of Medicine und des National Institute of Neurological Disorders and Stroke (NINDS) geschrieben und mit Wikipedia abgeglichen. Die Funktionen sind für Lernende vereinfacht: An den meisten sind Netzwerke mehrerer Regionen beteiligt, nicht eine Region allein."@de ,
+                        "40 regiones del cerebro humano, desde los lóbulos de la corteza cerebral hasta el tronco del encéfalo y el cerebelo. Anverso: el nombre de la región; reverso: sus funciones principales en pocas palabras. Una nota en el reverso indica dónde se encuentra la región. Los nombres proceden de Wikidata y Svensk MeSH (la traducción sueca de MeSH del Karolinska Institutet); las funciones se redactaron para el mazo a partir del MeSH de la Biblioteca Nacional de Medicina de Estados Unidos y del Instituto Nacional de Trastornos Neurológicos y Accidentes Cerebrovasculares (NINDS), y se comprobaron con Wikipedia. Las funciones están simplificadas para quien aprende: en la mayoría intervienen redes de varias regiones, no una sola región."@es ,
+                        "40 régions du cerveau humain, des lobes du cortex cérébral au tronc cérébral et au cervelet. Recto : le nom de la région ; verso : ses principales fonctions en quelques mots. Une note au verso indique où se trouve la région. Les noms viennent de Wikidata et de Svensk MeSH (la traduction suédoise de MeSH par le Karolinska Institutet) ; les fonctions ont été rédigées pour le paquet à partir du MeSH de la National Library of Medicine américaine et du National Institute of Neurological Disorders and Stroke (NINDS), puis vérifiées avec Wikipédia. Les fonctions sont simplifiées pour l’apprenant : la plupart font intervenir des réseaux de plusieurs régions, et non une seule région."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://mesh.kib.ki.se/> ,
+                        <https://id.nlm.nih.gov/mesh/> ,
+                        <https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-know-your-brain> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ,
+               topic:psychology ;
+    dcat:keyword "brain"@en ,
+                 "neuroscience"@en ,
+                 "psychology"@en ,
+                 "anatomy"@en ,
+                 "brain regions"@en ,
+                 "nervous system"@en ,
+                 "hjärnan"@sv ,
+                 "neurovetenskap"@sv ,
+                 "psykologi"@sv ,
+                 "anatomi"@sv ,
+                 "hjärnans delar"@sv ,
+                 "nervsystemet"@sv ,
+                 "뇌"@ko ,
+                 "신경과학"@ko ,
+                 "심리학"@ko ,
+                 "해부학"@ko ,
+                 "뇌 부위"@ko ,
+                 "신경계"@ko ,
+                 "Gehirn"@de ,
+                 "Neurowissenschaft"@de ,
+                 "Psychologie"@de ,
+                 "Anatomie"@de ,
+                 "Hirnregionen"@de ,
+                 "Nervensystem"@de ,
+                 "cerebro"@es ,
+                 "neurociencia"@es ,
+                 "psicología"@es ,
+                 "anatomía"@es ,
+                 "regiones cerebrales"@es ,
+                 "sistema nervioso"@es ,
+                 "cerveau"@fr ,
+                 "neurosciences"@fr ,
+                 "psychologie"@fr ,
+                 "anatomie"@fr ,
+                 "régions cérébrales"@fr ,
+                 "système nerveux"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#brain-regions> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#brain-regions> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://mesh.kib.ki.se/> ,
+              <https://id.nlm.nih.gov/mesh/> ,
+              <https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-know-your-brain> ,
+              <https://en.wikipedia.org/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://ko.wikipedia.org/> ,
+              <https://de.wikipedia.org/> ,
+              <https://es.wikipedia.org/> ,
+              <https://fr.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection. 40 regions of the human brain that introductory psychology and neuroscience courses name, from the four lobes of the cerebral cortex and its best-known areas (prefrontal, orbitofrontal and anterior cingulate cortex, the primary motor, somatosensory, auditory and visual cortex, Broca's and Wernicke's areas, the angular gyrus, the fusiform face area, the insula) through the limbic and memory structures (hippocampus, entorhinal cortex, amygdala, mammillary bodies), the diencephalon (thalamus, hypothalamus, suprachiasmatic nucleus, pineal gland), the olfactory bulb, the basal ganglia and reward system (striatum, nucleus accumbens, substantia nigra, ventral tegmental area), to the brainstem (midbrain, superior colliculus, periaqueductal gray, pons, medulla oblongata, reticular formation, locus coeruleus, raphe nuclei), the cerebellum and the corpus callosum. The compiler wrote the list down without taking it from any source."@en ,
+                 "Items and names (front). Each card names the Wikidata item it is about (dcterms:subject), checked by its class (P31/P279), description and MeSH ID (P486). Each front is the usual name of the region in English, Swedish, Korean, German, Spanish and French: a Wikidata label or alias of the item, a Svensk MeSH preferred term or synonym for Swedish, or the title of the Wikipedia article in that language linked from the item; the evidence for each name was recorded. Where sources disagreed, the term used in that language's textbooks and encyclopedias was preferred. Every front begins with a capital letter."@en ,
+                 "Functions and locations (back and note). The back names the region's main functions in a few words, the note where it is and, for some, one more fact or a caveat. Both were written for the deck from facts in Wikidata, NLM's MeSH scope notes and trees, Svensk MeSH and NINDS, each claim backed by a quote from a fetched source, with Wikipedia used to verify only. Functions are simplified for learners: most functions involve networks of regions, and the notes avoid popular myths (a lone \"fear center\" or \"pleasure center\", left-brain and right-brain types). The Swedish, Korean, German, Spanish and French backs and notes were translated from the English and checked by translating them back."@en ,
+                 "Fetching. Every request used the project's own User-Agent (\"SolidMemoDeckResearch/1.0 (https://github.com/solid-memo/website)\"), only on the hosts listed as sources, and only where their robots.txt allowed."@en ,
+                 "Uniqueness. Every front is unique in each of the six languages and every card is about its own Wikidata item; the deck is studied front to back."@en ,
+                 "Licensing: The deck is CC0-1.0. Its content comes from sources that allow it: Wikidata and Svensk MeSH (CC0), and NLM's MeSH and NINDS's fact sheet (works of the U.S. Government); NLM is credited as the source of the MeSH data. Names of brain regions are terms, not wording. The backs and notes were written for the deck, and a review compared each with the English Wikipedia article on its region and reworded every text that came close to it; Wikipedia (CC BY-SA 4.0) was used to verify facts only."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Source research and fact check per card group"@en ;
+    rdfs:comment "Scope: All 40 cards in eight groups: each Wikidata item, its class, labels, aliases, sitelinks and MeSH ID, each front name in six languages, and every claim of the backs and notes, checked against freshly fetched sources by a checker trying to refute them."@en ,
+                 "Outcome: 24 findings: wrong or overstated claims (such as damage that \"causes\" an aphasia where the sources say \"is associated with\"), imprecise locations and translations that drifted from the English; all were checked against the sources and fixed or declined with a reason."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language: one review per language"@en ;
+    rdfs:comment "Scope: Every card's front, back and note in English, Swedish, Korean, German, Spanish and French, against the English and the established terms of each language, doubtful names checked against Wikidata and that language's Wikipedia."@en ,
+                 "Outcome: 91 findings (English 15, Swedish 20, Korean 12, German 8, Spanish 5, French 31): mainly terms written two ways across cards, French spacing before semicolons and colons, two Swedish notes that said diencephalon for midbrain, and grammar; each was checked and applied or declined with a reason."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing and attribution"@en ;
+    rdfs:comment "Scope: The English backs and notes of all 40 cards, compared with their evidence and with the full English Wikipedia article on each region."@en ,
+                 "Outcome: 14 findings: two texts nearly copied Wikipedia (the periaqueductal gray note, the thalamus back) and nine were close paraphrases or rested on facts found only in Wikipedia; all were reworded from the allowed sources."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Consistency across the deck"@en ;
+    rdfs:comment "Scope: All 40 cards: style, length, capitalization and separators, duplicate fronts in any language, backs too alike to tell apart, notes that contradict each other, duplicate Wikidata items."@en ,
+                 "Outcome: 30 findings, mostly terms written two ways and notes without a subject; no duplicate fronts or items. Across rounds 0–3, 101 findings were applied and 37 declined with a reason, often because another finding's wording was better supported."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review, round 1 (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards in six languages; 25 Wikidata items fetched again."@en ,
+                 "Outcome: 12 errors and warnings, all fixed: an unattested Swedish name for the primary auditory cortex, French spacing in four backs, three orbitofrontal backs out of style, and a German term used two ways."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review, round 2 (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards in six languages; all 40 Wikidata items fetched again, with their classes and labels."@en ,
+                 "Outcome: Every front has evidence, every item is the right region and the facts hold. Three warnings, all fixed: German used two names for the medulla and two for the lateral sulcus; the German temporal-lobe and insula notes then got the attested term \"Sulcus lateralis\" too."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\" Content: the item each card is about (dcterms:subject), front names from item labels and aliases, and facts in item descriptions."@en .
+
+<https://mesh.kib.ki.se/>
+    dcterms:title "Svensk MeSH 2026 (Swedish translation of Medical Subject Headings)" ;
+    dcterms:creator "Karolinska Institutets Universitetsbibliotek (Swedish translation); U.S. National Library of Medicine (MeSH)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://mesh.kib.ki.se/info/om-webbplatsen (fetched 2026-10-25) — \"Licensen som tillhandahålls av KIB är också gratis och berättigar till att använda en kopia av de tabeller som gränssnittet är baserat på. Data distribueras under CC0. Ange Karolinska Institutets Bibliotek som upphovsman.\" The same page continues: \"Själva MeSH-vokabulären produceras av NLM (the National Library of Medicine). All användning av MeSH® är föremål för de restriktioner som anges i NLM:s villkor för användning av MeSH\". Content: Swedish front names (preferred terms and synonyms) and facts in the Swedish scope notes."@en .
+
+<https://id.nlm.nih.gov/mesh/>
+    dcterms:title "Medical Subject Headings (MeSH), RDF and lookup services" ;
+    dcterms:creator "U.S. National Library of Medicine" ;
+    rdfs:comment "https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html (fetched 2026-10-25) — \"NLM freely provides MeSH data.\" Users agree to \"acknowledge NLM as the source of the data in a clear and conspicuous manner, not indicate or imply that NLM has endorsed its products/services/applications.\" https://www.nlm.nih.gov/web_policies.html (fetched 2026-10-25) — \"Works produced by the U.S. government are not subject to copyright protection in the United States. Any such works found on National Library of Medicine (NLM) Web sites may be freely used or reproduced without permission in the U.S.\" Content: facts on location and function from the English scope notes and descriptor trees; NLM is credited as their source and nothing implies its endorsement."@en .
+
+<https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-know-your-brain>
+    dcterms:title "Brain Basics: Know Your Brain" ;
+    dcterms:creator "National Institute of Neurological Disorders and Stroke (NINDS), U.S. National Institutes of Health" ;
+    rdfs:comment "A fact sheet on an official website of the United States government (the page's banner: \"An official website of the United States government\"); as a work of the U.S. federal government it is not subject to copyright in the United States (17 U.S.C. § 105). The page shows no license statement of its own. Fetched once, on 2026-10-25, with the project's own User-Agent and as its robots.txt allows; later requests were refused, and nothing was fetched from it after that. Content: facts on the lobes, motor and sensory areas, the hippocampus and the basal ganglia; no wording was taken."@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://en.wikipedia.org/wiki/Hippocampus (fetched 2026-10-25) — \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply.\" Used to verify facts and names only; no wording was taken."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenska Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://sv.wikipedia.org/wiki/Hippocampus (fetched 2026-10-25) — \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\" Used to verify facts and names only; no wording was taken."@en .
+
+<https://ko.wikipedia.org/>
+    dcterms:title "한국어 위키백과 (Korean Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://ko.wikipedia.org/wiki/해마 (fetched 2026-10-25) — \"모든 문서는 크리에이티브 커먼즈 저작자표시-동일조건변경허락 4.0에 따라 사용할 수 있으며, 추가적인 조건이 적용될 수 있습니다.\" Used to verify facts and names only; no wording was taken."@en .
+
+<https://de.wikipedia.org/>
+    dcterms:title "Deutschsprachige Wikipedia (German Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://de.wikipedia.org/wiki/Hippocampus (fetched 2026-10-25) — \"Der Text ist unter der Lizenz „Creative-Commons Namensnennung – Weitergabe unter gleichen Bedingungen“ verfügbar\" Used to verify facts and names only; no wording was taken."@en .
+
+<https://es.wikipedia.org/>
+    dcterms:title "Wikipedia en español (Spanish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://es.wikipedia.org/wiki/Hipocampo (fetched 2026-10-25) — \"El texto está disponible bajo la Licencia Creative Commons Atribución-CompartirIgual 4.0; pueden aplicarse cláusulas adicionales.\" Used to verify facts and names only; no wording was taken."@en .
+
+<https://fr.wikipedia.org/>
+    dcterms:title "Wikipédia en français (French Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://fr.wikipedia.org/wiki/Hippocampe (fetched 2026-10-25) — \"Droit d'auteur : les textes sont disponibles sous licence Creative Commons attribution, partage dans les mêmes conditions ; d’autres conditions peuvent s’appliquer.\" Used to verify facts and names only; no wording was taken."@en .
+
+<#frontal-lobe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q749520> ;
+    solid-memo:front "Frontal lobe"@en ,
+                     "Frontallob"@sv ,
+                     "전두엽"@ko ,
+                     "Frontallappen"@de ,
+                     "Lóbulo frontal"@es ,
+                     "Lobe frontal"@fr ;
+    solid-memo:back "Planning and self-control; voluntary movement; speech production"@en ,
+                    "Planering och självkontroll; viljestyrda rörelser; talproduktion"@sv ,
+                    "계획과 자기 통제; 수의 운동; 말 산출"@ko ,
+                    "Planung und Selbstkontrolle; willkürliche Bewegungen; Sprachproduktion"@de ,
+                    "Planificación y autocontrol; movimiento voluntario; producción del habla"@es ,
+                    "Planification et maîtrise de soi ; mouvements volontaires ; production de la parole"@fr ;
+    solid-memo:backNote "The largest lobe, at the front of each cerebral hemisphere ahead of the central sulcus. It contains the motor cortex and the prefrontal cortex."@en ,
+                        "Den största loben, längst fram i varje storhjärnshalva framför centralfåran. Den innehåller den motoriska barken och prefrontala cortex."@sv ,
+                        "가장 큰 엽으로, 각 대뇌 반구의 앞쪽, 중심고랑 앞에 있다. 운동 피질과 전전두피질을 포함한다."@ko ,
+                        "Der größte Lappen, vorn in jeder Großhirnhälfte vor der Zentralfurche. Er enthält den motorischen Cortex und den präfrontalen Cortex."@de ,
+                        "El lóbulo más grande, en la parte delantera de cada hemisferio cerebral, por delante del surco central. Contiene la corteza motora y la corteza prefrontal."@es ,
+                        "Le plus grand lobe, à l'avant de chaque hémisphère cérébral, en avant du sillon central. Il contient le cortex moteur et le cortex préfrontal."@fr .
+
+<#parietal-lobe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q815334> ;
+    solid-memo:front "Parietal lobe"@en ,
+                     "Parietallob"@sv ,
+                     "두정엽"@ko ,
+                     "Parietallappen"@de ,
+                     "Lóbulo parietal"@es ,
+                     "Lobe pariétal"@fr ;
+    solid-memo:back "Touch and body sensation; spatial awareness; combining the senses"@en ,
+                    "Beröring och kroppsförnimmelser; rumsuppfattning; sammanvägning av sinnesintryck"@sv ,
+                    "촉각과 신체 감각; 공간 인식; 감각 통합"@ko ,
+                    "Tastsinn und Körperempfindung; räumliche Wahrnehmung; Verknüpfung der Sinne"@de ,
+                    "Tacto y sensaciones corporales; conciencia espacial; integración de los sentidos"@es ,
+                    "Toucher et sensations corporelles ; conscience de l'espace ; intégration des sens"@fr ;
+    solid-memo:backNote "The upper middle part of each cerebral hemisphere, behind the central sulcus. Damage, most often on the right, can make a person ignore one side of space."@en ,
+                        "Den övre mittersta delen av varje storhjärnshalva, bakom centralfåran. Skador, oftast på höger sida, kan få en person att förbise ena sidan av sin omgivning."@sv ,
+                        "각 대뇌 반구의 위쪽 가운데 부분으로, 중심고랑 뒤에 있다. 이곳이 손상되면(대개 오른쪽) 공간의 한쪽을 무시하게 될 수 있다."@ko ,
+                        "Der obere mittlere Teil jeder Großhirnhälfte, hinter der Zentralfurche. Schäden, meist rechts, können dazu führen, dass eine Person eine Seite des Raums nicht beachtet."@de ,
+                        "La parte superior central de cada hemisferio cerebral, detrás del surco central. Una lesión, sobre todo en el lado derecho, puede hacer que la persona ignore un lado del espacio."@es ,
+                        "La partie supérieure et centrale de chaque hémisphère cérébral, en arrière du sillon central. Une lésion, le plus souvent à droite, peut amener une personne à ignorer un côté de l'espace."@fr .
+
+<#temporal-lobe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q744385> ;
+    solid-memo:front "Temporal lobe"@en ,
+                     "Temporallob"@sv ,
+                     "측두엽"@ko ,
+                     "Temporallappen"@de ,
+                     "Lóbulo temporal"@es ,
+                     "Lobe temporal"@fr ;
+    solid-memo:back "Hearing; understanding language; forming memories; semantic knowledge"@en ,
+                    "Hörsel; språkförståelse; bildande av minnen; semantisk kunskap"@sv ,
+                    "청각; 언어 이해; 기억 형성; 의미 지식"@ko ,
+                    "Hören; Sprachverständnis; Gedächtnisbildung; semantisches Wissen"@de ,
+                    "Audición; comprensión del lenguaje; formación de recuerdos; conocimiento semántico"@es ,
+                    "Audition ; compréhension du langage ; formation des souvenirs ; connaissances sémantiques"@fr ;
+    solid-memo:backNote "The lower lateral part of each cerebral hemisphere, below the lateral fissure. Its inner (medial) part holds the hippocampus, which is vital for forming new memories."@en ,
+                        "Den nedre laterala delen av varje storhjärnshalva, nedanför den laterala fåran. Dess inre (mediala) del rymmer hippocampus, som är avgörande för att bilda nya minnen."@sv ,
+                        "각 대뇌 반구의 아래 옆부분으로, 외측고랑 아래에 있다. 안쪽(내측) 부분에는 새로운 기억 형성에 꼭 필요한 해마가 있다."@ko ,
+                        "Der untere laterale Teil jeder Großhirnhälfte, unterhalb der seitlichen Hirnfurche (Sulcus lateralis). Sein innerer (medialer) Teil enthält den Hippocampus, der für die Bildung neuer Erinnerungen unverzichtbar ist."@de ,
+                        "La parte lateral inferior de cada hemisferio cerebral, por debajo de la cisura lateral. Su parte interna (medial) alberga el hipocampo, esencial para formar nuevos recuerdos."@es ,
+                        "La partie latérale inférieure de chaque hémisphère cérébral, sous la scissure latérale. Sa partie interne (médiale) abrite l'hippocampe, essentiel pour former de nouveaux souvenirs."@fr .
+
+<#occipital-lobe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q848340> ;
+    solid-memo:front "Occipital lobe"@en ,
+                     "Occipitallob"@sv ,
+                     "후두엽"@ko ,
+                     "Occipitallappen"@de ,
+                     "Lóbulo occipital"@es ,
+                     "Lobe occipital"@fr ;
+    solid-memo:back "Processing vision, including shape, color and motion"@en ,
+                    "Bearbetning av synintryck, bland annat form, färg och rörelse"@sv ,
+                    "형태, 색, 움직임을 포함한 시각 정보 처리"@ko ,
+                    "Verarbeitung visueller Reize, einschließlich Form, Farbe und Bewegung"@de ,
+                    "Procesamiento de la visión, incluidos la forma, el color y el movimiento"@es ,
+                    "Traitement de la vision, y compris la forme, la couleur et le mouvement"@fr ;
+    solid-memo:backNote "The rearmost lobe of each cerebral hemisphere, at the back of the head. It holds the primary visual cortex; damage to both sides can cause cortical blindness."@en ,
+                        "Den bakersta loben i varje storhjärnshalva, i bakhuvudet. Den rymmer den primära synbarken; skador på båda sidor kan ge kortikal blindhet."@sv ,
+                        "각 대뇌 반구의 가장 뒤쪽 엽으로, 뒤통수 쪽에 있다. 일차 시각 피질이 있으며, 양쪽이 모두 손상되면 피질맹이 생길 수 있다."@ko ,
+                        "Der hinterste Lappen jeder Großhirnhälfte, am Hinterkopf. Er enthält die primäre Sehrinde; Schäden auf beiden Seiten können zu Rindenblindheit führen."@de ,
+                        "El lóbulo más posterior de cada hemisferio cerebral, en la parte trasera de la cabeza. Alberga la corteza visual primaria; una lesión en ambos lados puede causar ceguera cortical."@es ,
+                        "Le lobe le plus postérieur de chaque hémisphère cérébral, à l'arrière de la tête. Il abrite le cortex visuel primaire ; une lésion des deux côtés peut entraîner une cécité corticale."@fr .
+
+<#insular-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1422654> ;
+    solid-memo:front "Insular cortex"@en ,
+                     "Insula"@sv ,
+                     "뇌섬엽"@ko ,
+                     "Inselrinde"@de ,
+                     "Ínsula"@es ,
+                     "Cortex insulaire"@fr ;
+    solid-memo:back "Sensing the body's inner state; taste; emotional awareness"@en ,
+                    "Förnimmelse av kroppens inre tillstånd; smak; känslomässig medvetenhet"@sv ,
+                    "몸 내부 상태 감지; 미각; 정서 인식"@ko ,
+                    "Wahrnehmung des inneren Körperzustands; Geschmack; emotionales Bewusstsein"@de ,
+                    "Percepción del estado interno del cuerpo; gusto; conciencia emocional"@es ,
+                    "Perception de l'état interne du corps ; goût ; conscience émotionnelle"@fr ;
+    solid-memo:backNote "A region of cortex lying deep below the lateral fissure, hidden beneath neighboring folds of the frontal, temporal and parietal lobes. It is also known as the insular lobe."@en ,
+                        "Ett område av hjärnbarken djupt under den laterala fåran, dolt under angränsande veck av frontal-, temporal- och parietalloben. Den kallas också insulära loben."@sv ,
+                        "외측고랑 깊숙이 자리한 피질 영역으로, 전두엽·측두엽·두정엽의 인접한 주름 아래에 숨어 있다. 섬엽 또는 섬피질이라고도 한다."@ko ,
+                        "Ein Bereich der Großhirnrinde tief unter der seitlichen Hirnfurche (Sulcus lateralis), verborgen unter angrenzenden Windungen des Frontal-, Temporal- und Parietallappens. Die Inselrinde wird auch Insellappen genannt."@de ,
+                        "Una región de la corteza situada en lo profundo de la cisura lateral, oculta bajo pliegues vecinos de los lóbulos frontal, temporal y parietal. También se la conoce como lóbulo insular."@es ,
+                        "Une région du cortex située au fond de la scissure latérale, cachée sous les replis voisins des lobes frontal, temporal et pariétal. On l'appelle aussi lobe insulaire."@fr .
+
+<#prefrontal-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q18680> ;
+    solid-memo:front "Prefrontal cortex"@en ,
+                     "Prefrontala cortex"@sv ,
+                     "전전두피질"@ko ,
+                     "Präfrontaler Cortex"@de ,
+                     "Corteza prefrontal"@es ,
+                     "Cortex préfrontal"@fr ;
+    solid-memo:back "Planning and decision-making; working memory; personality and social behavior"@en ,
+                    "Planering och beslutsfattande; arbetsminne; personlighet och socialt beteende"@sv ,
+                    "계획과 의사 결정; 작업 기억; 성격과 사회적 행동"@ko ,
+                    "Planung und Entscheidungsfindung; Arbeitsgedächtnis; Persönlichkeit und Sozialverhalten"@de ,
+                    "Planificación y toma de decisiones; memoria de trabajo; personalidad y conducta social"@es ,
+                    "Planification et prise de décision ; mémoire de travail ; personnalité et comportement social"@fr ;
+    solid-memo:backNote "The foremost part of the frontal lobe, in front of the motor areas; the orbitofrontal cortex is one of its subregions."@en ,
+                        "Den främsta delen av frontalloben, framför de motoriska områdena; orbitofrontala cortex är ett av dess delområden."@sv ,
+                        "전두엽의 가장 앞부분으로, 운동 영역 앞에 있다. 안와전두피질은 그 하위 영역 가운데 하나다."@ko ,
+                        "Der vorderste Teil des Frontallappens, vor den motorischen Arealen; der orbitofrontale Cortex ist eine seiner Teilregionen."@de ,
+                        "La parte más anterior del lóbulo frontal, por delante de las áreas motoras; la corteza orbitofrontal es una de sus subregiones."@es ,
+                        "La partie la plus antérieure du lobe frontal, en avant des aires motrices ; le cortex orbitofrontal est l'une de ses sous-régions."@fr .
+
+<#orbitofrontal-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q18717> ;
+    solid-memo:front "Orbitofrontal cortex"@en ,
+                     "Orbitofrontala cortex"@sv ,
+                     "안와전두피질"@ko ,
+                     "Orbitofrontaler Cortex"@de ,
+                     "Corteza orbitofrontal"@es ,
+                     "Cortex orbitofrontal"@fr ;
+    solid-memo:back "Weighing rewards and punishments to guide decisions"@en ,
+                    "Avvägning av belöningar och bestraffningar som vägledning för beslut"@sv ,
+                    "의사 결정을 이끄는 보상과 처벌 평가"@ko ,
+                    "Abwägen von Belohnungen und Bestrafungen, um Entscheidungen zu lenken"@de ,
+                    "Ponderación de recompensas y castigos para orientar las decisiones"@es ,
+                    "Évaluation des récompenses et des punitions pour orienter les décisions"@fr ;
+    solid-memo:backNote "A region of the prefrontal cortex on the underside of the frontal lobe, resting just above the eye sockets (orbits)."@en ,
+                        "Ett område i prefrontala cortex på frontallobens undersida, strax ovanför ögonhålorna (orbitae)."@sv ,
+                        "전두엽 아랫면에 있는 전전두피질의 한 영역으로, 눈구멍(안와) 바로 위에 놓여 있다."@ko ,
+                        "Eine Region des präfrontalen Cortex an der Unterseite des Frontallappens, direkt über den Augenhöhlen (Orbitae)."@de ,
+                        "Una región de la corteza prefrontal en la cara inferior del lóbulo frontal, justo encima de las cuencas de los ojos (órbitas)."@es ,
+                        "Une région du cortex préfrontal située sur la face inférieure du lobe frontal, juste au-dessus des cavités orbitaires (orbites)."@fr .
+
+<#primary-motor-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q18707> ;
+    solid-memo:front "Primary motor cortex"@en ,
+                     "Primära motoriska barken"@sv ,
+                     "일차운동피질"@ko ,
+                     "Primär-motorischer Cortex"@de ,
+                     "Corteza motora primaria"@es ,
+                     "Cortex moteur primaire"@fr ;
+    solid-memo:back "Executing voluntary movements"@en ,
+                    "Utförande av viljestyrda rörelser"@sv ,
+                    "수의 운동 실행"@ko ,
+                    "Ausführung willkürlicher Bewegungen"@de ,
+                    "Ejecución de los movimientos voluntarios"@es ,
+                    "Exécution des mouvements volontaires"@fr ;
+    solid-memo:backNote "A strip along the precentral gyrus at the back of the frontal lobe. Each side controls the opposite side of the body, mapped as a motor homunculus."@en ,
+                        "En remsa längs gyrus precentralis i frontallobens bakre del. Varje sida styr kroppens motsatta sida, avbildad som en motorisk homunculus."@sv ,
+                        "전두엽 뒤쪽에서 중심앞이랑을 따라 띠 모양으로 놓여 있다. 각 반구는 몸의 반대쪽을 조절하며, 그 신체 지도를 운동 호문쿨루스라고 한다."@ko ,
+                        "Ein Streifen entlang des Gyrus praecentralis im hinteren Teil des Frontallappens. Jede Seite steuert die gegenüberliegende Körperhälfte, abgebildet als motorischer Homunculus."@de ,
+                        "Una franja a lo largo de la circunvolución precentral, en la parte posterior del lóbulo frontal. Cada lado controla el lado opuesto del cuerpo, representado como un homúnculo motor."@es ,
+                        "Une bande le long du gyrus précentral, à l'arrière du lobe frontal. Chaque côté commande le côté opposé du corps, représenté sous la forme d'un homoncule moteur."@fr .
+
+<#brocas-area>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q728285> ;
+    solid-memo:front "Broca's area"@en ,
+                     "Brocas område"@sv ,
+                     "브로카 영역"@ko ,
+                     "Broca-Areal"@de ,
+                     "Área de Broca"@es ,
+                     "Aire de Broca"@fr ;
+    solid-memo:back "Speech production; language processing"@en ,
+                    "Talproduktion; språkbearbetning"@sv ,
+                    "말 산출; 언어 처리"@ko ,
+                    "Sprachproduktion; Sprachverarbeitung"@de ,
+                    "Producción del habla; procesamiento del lenguaje"@es ,
+                    "Production de la parole ; traitement du langage"@fr ;
+    solid-memo:backNote "It lies in the inferior frontal gyrus of the frontal lobe, usually in the left hemisphere. Damage here is linked to Broca's (expressive) aphasia: impaired language production, with comprehension largely spared."@en ,
+                        "Det ligger i gyrus frontalis inferior i frontalloben, oftast i vänster hjärnhalva. Skador här förknippas med Brocas (expressiva) afasi: nedsatt språkproduktion, medan språkförståelsen till stor del är bevarad."@sv ,
+                        "전두엽의 하전두회에 있으며, 대개 좌반구에 있다. 이곳의 손상은 브로카 실어증(표현성 실어증)과 관련이 있으며, 언어 산출은 손상되지만 이해는 대체로 유지된다."@ko ,
+                        "Es liegt im Gyrus frontalis inferior des Frontallappens, meist in der linken Hemisphäre. Schäden hier werden mit einer Broca-Aphasie (expressiven Aphasie) in Verbindung gebracht: Die Sprachproduktion ist gestört, das Sprachverständnis bleibt weitgehend erhalten."@de ,
+                        "Se encuentra en la circunvolución frontal inferior del lóbulo frontal, por lo general en el hemisferio izquierdo. Su lesión se asocia con la afasia de Broca (expresiva): se altera la producción del lenguaje, pero la comprensión se conserva en gran medida."@es ,
+                        "Elle se trouve dans le gyrus frontal inférieur du lobe frontal, le plus souvent dans l'hémisphère gauche. Une lésion de cette aire est associée à l'aphasie de Broca (aphasie expressive), où la production du langage est altérée mais la compréhension reste en grande partie préservée."@fr .
+
+<#anterior-cingulate-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2121931> ;
+    solid-memo:front "Anterior cingulate cortex"@en ,
+                     "Främre gördelvindlingen"@sv ,
+                     "전대상피질"@ko ,
+                     "Anteriorer cingulärer Cortex"@de ,
+                     "Córtex del cíngulo anterior"@es ,
+                     "Cortex cingulaire antérieur"@fr ;
+    solid-memo:back "Detecting conflict and errors; attention; regulating emotion"@en ,
+                    "Upptäckt av konflikter och fel; uppmärksamhet; känsloreglering"@sv ,
+                    "갈등과 오류 탐지; 주의; 정서 조절"@ko ,
+                    "Erkennen von Konflikten und Fehlern; Aufmerksamkeit; Emotionsregulation"@de ,
+                    "Detección de conflictos y errores; atención; regulación de las emociones"@es ,
+                    "Détection des conflits et des erreurs ; attention ; régulation des émotions"@fr ;
+    solid-memo:backNote "The front part of the cingulate gyrus, curving around the front of the corpus callosum on the brain's inner surface; often counted in the limbic system."@en ,
+                        "Den främre delen av gördelvindlingen, som böjer sig runt hjärnbalkens främre del på hjärnans insida; räknas ofta till det limbiska systemet."@sv ,
+                        "대상회의 앞부분으로, 뇌의 안쪽 면에서 뇌량의 앞쪽을 둥글게 감싼다. 흔히 변연계에 포함된다."@ko ,
+                        "Der vordere Teil des Gyrus cinguli, der sich an der Innenseite des Gehirns um den vorderen Teil des Balkens (Corpus callosum) wölbt; wird oft zum limbischen System gezählt."@de ,
+                        "La parte anterior de la circunvolución del cíngulo, que rodea la parte delantera del cuerpo calloso en la cara interna del cerebro; a menudo se incluye en el sistema límbico."@es ,
+                        "La partie antérieure du gyrus cingulaire, qui s'enroule autour de l'avant du corps calleux sur la face interne du cerveau ; souvent rattachée au système limbique."@fr .
+
+<#primary-somatosensory-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q30587611> ;
+    solid-memo:front "Primary somatosensory cortex"@en ,
+                     "Primära somatosensoriska barken"@sv ,
+                     "일차 몸감각 피질"@ko ,
+                     "Primärer somatosensorischer Cortex"@de ,
+                     "Corteza somatosensorial primaria"@es ,
+                     "Cortex somatosensoriel primaire"@fr ;
+    solid-memo:back "Processing touch, pain, temperature and body position"@en ,
+                    "Bearbetning av beröring, smärta, temperatur och kroppsställning"@sv ,
+                    "촉각, 통증, 온도, 몸의 위치 감각 처리"@ko ,
+                    "Verarbeitung von Berührung, Schmerz, Temperatur und Körperlage"@de ,
+                    "Procesamiento del tacto, el dolor, la temperatura y la posición del cuerpo"@es ,
+                    "Traitement du toucher, de la douleur, de la température et de la position du corps"@fr ;
+    solid-memo:backNote "It lies in the postcentral gyrus at the front of the parietal lobe, just behind the central sulcus. Each hemisphere maps the opposite side of the body."@en ,
+                        "Den ligger i gyrus postcentralis längst fram i parietalloben, strax bakom centralfåran. Varje hjärnhalva avbildar den motsatta kroppshalvan."@sv ,
+                        "두정엽 앞부분의 중심뒤이랑에 있으며, 중심고랑 바로 뒤에 놓여 있다. 각 대뇌 반구는 몸의 반대쪽을 지도처럼 나타낸다."@ko ,
+                        "Er liegt im Gyrus postcentralis am vorderen Rand des Parietallappens, direkt hinter der Zentralfurche. Jede Hirnhälfte bildet die gegenüberliegende Körperseite ab."@de ,
+                        "Se sitúa en la circunvolución poscentral, en la parte anterior del lóbulo parietal, justo detrás del surco central. Cada hemisferio representa el lado opuesto del cuerpo."@es ,
+                        "Il se trouve dans le gyrus postcentral, à l'avant du lobe pariétal, juste derrière le sillon central. Chaque hémisphère représente le côté opposé du corps."@fr .
+
+<#primary-auditory-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q112790289> ;
+    solid-memo:front "Primary auditory cortex"@en ,
+                     "Primära hörselcentrat"@sv ,
+                     "일차 청각 피질"@ko ,
+                     "Primäre Hörrinde"@de ,
+                     "Corteza auditiva primaria"@es ,
+                     "Cortex auditif primaire"@fr ;
+    solid-memo:back "Receiving and analyzing sound from the ears"@en ,
+                    "Mottagning och analys av ljud från öronen"@sv ,
+                    "귀에서 오는 소리의 수용과 분석"@ko ,
+                    "Empfang und Analyse von Schallsignalen aus den Ohren"@de ,
+                    "Recepción y análisis del sonido procedente de los oídos"@es ,
+                    "Réception et analyse des sons venant des oreilles"@fr ;
+    solid-memo:backNote "It lies on the upper surface of the temporal lobe, in Heschl's gyrus inside the lateral fissure. Like the cochlea, it is laid out by sound frequency."@en ,
+                        "Det ligger på temporallobens ovansida, i Heschls gyrus inne i den laterala fåran. Liksom hörselsnäckan är det ordnat efter ljudets frekvens."@sv ,
+                        "측두엽 윗면, 외측고랑 안쪽의 헤슬 이랑에 있다. 달팽이관처럼 소리의 주파수에 따라 배열되어 있다."@ko ,
+                        "Sie liegt an der Oberseite des Temporallappens, in der Heschl-Querwindung tief in der seitlichen Hirnfurche (Sulcus lateralis). Wie die Hörschnecke ist sie nach Tonfrequenzen geordnet."@de ,
+                        "Se encuentra en la cara superior del lóbulo temporal, en la circunvolución de Heschl, dentro de la cisura lateral. Como la cóclea, está organizada según la frecuencia del sonido."@es ,
+                        "Il se trouve sur la face supérieure du lobe temporal, dans le gyrus de Heschl, au fond de la scissure latérale. Comme la cochlée, il est organisé selon la fréquence des sons."@fr .
+
+<#primary-visual-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q66531315> ;
+    solid-memo:front "Primary visual cortex"@en ,
+                     "Primära syncentrum"@sv ,
+                     "일차 시각 피질"@ko ,
+                     "Primäre Sehrinde"@de ,
+                     "Corteza visual primaria"@es ,
+                     "Cortex visuel primaire"@fr ;
+    solid-memo:back "Receiving visual input; early analysis of orientation and color"@en ,
+                    "Mottagning av synintryck; tidig analys av orientering och färg"@sv ,
+                    "시각 정보 수용; 방향과 색의 초기 분석"@ko ,
+                    "Empfang visueller Signale; frühe Analyse von Orientierung und Farbe"@de ,
+                    "Recepción de la información visual; análisis temprano de la orientación y el color"@es ,
+                    "Réception des informations visuelles ; analyse précoce de l'orientation et de la couleur"@fr ;
+    solid-memo:backNote "It lies in the occipital lobe around the calcarine sulcus and is also called V1 or striate cortex. Each side receives the opposite half of the visual field."@en ,
+                        "Det ligger i occipitalloben kring sulcus calcarinus och kallas också V1 eller area striata. Varje sida tar emot den motsatta halvan av synfältet."@sv ,
+                        "후두엽의 새발톱고랑(조거구) 주변에 있으며, V1 또는 줄무늬 피질이라고도 한다. 각 쪽은 시야의 반대쪽 절반을 받아들인다."@ko ,
+                        "Sie liegt im Occipitallappen rund um den Sulcus calcarinus und heißt auch V1 oder Area striata. Jede Seite empfängt die gegenüberliegende Hälfte des Gesichtsfelds."@de ,
+                        "Se encuentra en el lóbulo occipital, alrededor del surco calcarino, y también se llama V1 o corteza estriada. Cada lado recibe la mitad opuesta del campo visual."@es ,
+                        "Il se trouve dans le lobe occipital, autour du sillon calcarin, et est aussi appelé V1 ou cortex strié. Chaque côté reçoit la moitié opposée du champ visuel."@fr .
+
+<#angular-gyrus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1038781> ;
+    solid-memo:front "Angular gyrus"@en ,
+                     "Gyrus angularis"@sv ,
+                     "모이랑"@ko ,
+                     "Gyrus angularis"@de ,
+                     "Giro angular"@es ,
+                     "Gyrus angulaire"@fr ;
+    solid-memo:back "Reading and writing; number processing; word meaning"@en ,
+                    "Läsning och skrivning; numerisk bearbetning; ords betydelse"@sv ,
+                    "읽기와 쓰기; 수 처리; 단어 의미 이해"@ko ,
+                    "Lesen und Schreiben; Zahlenverarbeitung; Wortbedeutung"@de ,
+                    "Lectura y escritura; procesamiento numérico; significado de las palabras"@es ,
+                    "Lecture et écriture ; traitement des nombres ; sens des mots"@fr ;
+    solid-memo:backNote "It sits in the lower back of the parietal lobe, where it meets the temporal and occipital lobes (Brodmann area 39). Damage can disturb reading, writing and arithmetic."@en ,
+                        "Den sitter i parietallobens nedre bakre del, där den möter temporalloben och occipitalloben (Brodmanns area 39). Skador kan störa läsning, skrivning och räkning."@sv ,
+                        "두정엽의 아래쪽 뒷부분, 측두엽·후두엽과 만나는 곳에 있다(브로드만 영역 39). 손상되면 읽기, 쓰기, 계산에 장애가 생길 수 있다."@ko ,
+                        "Er liegt im unteren hinteren Teil des Parietallappens, wo dieser an Temporal- und Occipitallappen grenzt (Brodmann-Areal 39). Schäden können Lesen, Schreiben und Rechnen stören."@de ,
+                        "Está en la parte posterior e inferior del lóbulo parietal, donde se une con los lóbulos temporal y occipital (área 39 de Brodmann). Una lesión puede alterar la lectura, la escritura y el cálculo."@es ,
+                        "Il se situe dans la partie postéro-inférieure du lobe pariétal, à la jonction des lobes temporal et occipital (aire 39 de Brodmann). Une lésion peut perturber la lecture, l'écriture et le calcul."@fr .
+
+<#wernickes-area>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q824214> ;
+    solid-memo:front "Wernicke's area"@en ,
+                     "Wernickes område"@sv ,
+                     "베르니케 영역"@ko ,
+                     "Wernicke-Areal"@de ,
+                     "Área de Wernicke"@es ,
+                     "Aire de Wernicke"@fr ;
+    solid-memo:back "Understanding spoken and written language"@en ,
+                    "Förståelse av tal och skrift"@sv ,
+                    "말과 글의 이해"@ko ,
+                    "Verstehen gesprochener und geschriebener Sprache"@de ,
+                    "Comprensión del lenguaje hablado y escrito"@es ,
+                    "Compréhension du langage oral et écrit"@fr ;
+    solid-memo:backNote "It lies in the back of the superior temporal gyrus, usually in the left hemisphere. Damage there is linked to Wernicke's aphasia: fluent speech but poor understanding of words."@en ,
+                        "Det ligger i den bakre delen av gyrus temporalis superior, oftast i vänster hjärnhalva. Skador där förknippas med Wernickes afasi: flytande tal men dålig förståelse av ord."@sv ,
+                        "위측두이랑의 뒷부분에 있으며, 대개 왼쪽 대뇌 반구에 있다. 이곳의 손상은 베르니케 실어증과 관련이 있는데, 말은 유창하지만 단어를 잘 이해하지 못한다."@ko ,
+                        "Es liegt im hinteren Teil des Gyrus temporalis superior, meist in der linken Hirnhälfte. Schäden dort werden mit der Wernicke-Aphasie in Verbindung gebracht: flüssiges Sprechen, aber gestörtes Wortverständnis."@de ,
+                        "Se encuentra en la parte posterior de la circunvolución temporal superior, por lo general en el hemisferio izquierdo. Su lesión se asocia con la afasia de Wernicke: habla fluida, pero mala comprensión de las palabras."@es ,
+                        "Elle se trouve à l'arrière du gyrus temporal supérieur, le plus souvent dans l'hémisphère gauche. Une lésion de cette aire est associée à l'aphasie de Wernicke : un discours fluide, mais une mauvaise compréhension des mots."@fr .
+
+<#fusiform-face-area>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2624677> ;
+    solid-memo:front "Fusiform face area"@en ,
+                     "Fusiforma ansiktsområdet"@sv ,
+                     "방추상 얼굴 영역"@ko ,
+                     "Fusiformes Gesichtsareal"@de ,
+                     "Área fusiforme de las caras"@es ,
+                     "Aire fusiforme des visages"@fr ;
+    solid-memo:back "Face perception and recognition"@en ,
+                    "Uppfattning och igenkänning av ansikten"@sv ,
+                    "얼굴 지각 및 인식"@ko ,
+                    "Wahrnehmung und Erkennung von Gesichtern"@de ,
+                    "Percepción y reconocimiento de caras"@es ,
+                    "Perception et reconnaissance des visages"@fr ;
+    solid-memo:backNote "It lies on the underside of the temporal lobe, in the fusiform gyrus, and is usually larger on the right. Whether it handles only faces is still debated."@en ,
+                        "Det ligger på temporallobens undersida, i gyrus fusiformis, och är oftast större på höger sida. Om området bara bearbetar ansikten är fortfarande omdiskuterat."@sv ,
+                        "측두엽 아래쪽 면의 방추상회에 있으며, 보통 오른쪽이 더 크다. 얼굴만 처리하는 영역인지는 아직 논쟁 중이다."@ko ,
+                        "Es liegt an der Unterseite des Temporallappens im Gyrus fusiformis und ist meist rechts größer. Ob es nur Gesichter verarbeitet, ist noch umstritten."@de ,
+                        "Se encuentra en la cara inferior del lóbulo temporal, en el giro fusiforme, y suele ser mayor en el lado derecho. Aún se debate si procesa solo caras."@es ,
+                        "Située sur la face inférieure du lobe temporal, dans le gyrus fusiforme, elle est généralement plus grande à droite. On débat encore de savoir si elle ne traite que les visages."@fr .
+
+<#entorhinal-cortex>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2603645> ;
+    solid-memo:front "Entorhinal cortex"@en ,
+                     "Entorinal cortex"@sv ,
+                     "내후각 피질"@ko ,
+                     "Entorhinaler Cortex"@de ,
+                     "Corteza entorrinal"@es ,
+                     "Cortex entorhinal"@fr ;
+    solid-memo:back "Main input to the hippocampus; mapping space with grid cells"@en ,
+                    "Huvudsaklig ingång till hippocampus; kartläggning av rummet med rutnätsceller"@sv ,
+                    "해마로 들어가는 주된 입력; 격자 세포로 공간 지도 작성"@ko ,
+                    "Haupteingang zum Hippocampus; Kartierung des Raums mit Gitterzellen"@de ,
+                    "Principal entrada al hipocampo; mapeo del espacio con células de red"@es ,
+                    "Principale entrée de l'hippocampe ; cartographie de l'espace par les cellules de grille"@fr ;
+    solid-memo:backNote "It lies in the medial temporal lobe, on the parahippocampal gyrus. It is among the first areas damaged in Alzheimer's disease."@en ,
+                        "Den ligger i den mediala temporalloben, på gyrus parahippocampalis. Den hör till de första områden som skadas vid Alzheimers sjukdom."@sv ,
+                        "내측 측두엽의 해마곁이랑에 있다. 알츠하이머병에서 가장 먼저 손상되는 영역 가운데 하나다."@ko ,
+                        "Er liegt im medialen Temporallappen am Gyrus parahippocampalis. Er gehört zu den ersten Arealen, die bei der Alzheimer-Krankheit geschädigt werden."@de ,
+                        "Está en el lóbulo temporal medial, en el giro parahipocampal. Es una de las primeras áreas dañadas en la enfermedad de Alzheimer."@es ,
+                        "Il se situe dans le lobe temporal médial, sur le gyrus parahippocampique. C'est l'une des premières régions atteintes dans la maladie d'Alzheimer."@fr .
+
+<#hippocampus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q48360> ;
+    solid-memo:front "Hippocampus"@en ,
+                     "Hippocampus"@sv ,
+                     "해마"@ko ,
+                     "Hippocampus"@de ,
+                     "Hipocampo"@es ,
+                     "Hippocampe"@fr ;
+    solid-memo:back "Forming new memories of facts and events; spatial memory and navigation"@en ,
+                    "Bildande av nya minnen av fakta och händelser; rumsligt minne och navigering"@sv ,
+                    "사실과 사건에 대한 새로운 기억 형성; 공간 기억과 탐색"@ko ,
+                    "Bildung neuer Erinnerungen an Fakten und Ereignisse; räumliches Gedächtnis und Navigation"@de ,
+                    "Formación de nuevos recuerdos de hechos y sucesos; memoria espacial y navegación"@es ,
+                    "Formation de nouveaux souvenirs de faits et d'événements ; mémoire spatiale et navigation"@fr ;
+    solid-memo:backNote "A curved ridge deep in the medial temporal lobe, part of the limbic system. Damage on both sides can leave a person unable to form new memories."@en ,
+                        "En böjd vulst djupt inne i den mediala temporalloben, en del av limbiska systemet. Skador på båda sidor kan göra att man inte längre kan bilda nya minnen."@sv ,
+                        "내측 측두엽 깊숙이 있는 휘어진 융기로, 변연계의 일부다. 양쪽이 모두 손상되면 새로운 기억을 형성하지 못할 수 있다."@ko ,
+                        "Ein gebogener Wulst tief im medialen Temporallappen, Teil des limbischen Systems. Schäden auf beiden Seiten können dazu führen, dass jemand keine neuen Erinnerungen mehr bilden kann."@de ,
+                        "Una cresta curva en lo profundo del lóbulo temporal medial, parte del sistema límbico. Un daño en ambos lados puede impedir que una persona forme nuevos recuerdos."@es ,
+                        "Une saillie incurvée située au fond du lobe temporal médial, qui fait partie du système limbique. Une lésion des deux côtés peut empêcher une personne de former de nouveaux souvenirs."@fr .
+
+<#amygdala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q338924> ;
+    solid-memo:front "Amygdala"@en ,
+                     "Amygdala"@sv ,
+                     "편도체"@ko ,
+                     "Amygdala"@de ,
+                     "Amígdala"@es ,
+                     "Amygdale"@fr ;
+    solid-memo:back "Emotional responses, especially fear and threat; emotional memory"@en ,
+                    "Emotionella reaktioner, särskilt rädsla och hot; emotionellt minne"@sv ,
+                    "정서 반응, 특히 공포와 위협; 정서 기억"@ko ,
+                    "Emotionale Reaktionen, vor allem Furcht und Bedrohung; emotionales Gedächtnis"@de ,
+                    "Respuestas emocionales, sobre todo miedo y amenaza; memoria emocional"@es ,
+                    "Réactions émotionnelles, surtout la peur et la menace ; mémoire émotionnelle"@fr ;
+    solid-memo:backNote "An almond-shaped cluster of nuclei deep in the front of the temporal lobe, part of the limbic system. It works within wider networks, not as a lone fear center."@en ,
+                        "En mandelformad samling kärnor djupt i temporallobens främre del, en del av limbiska systemet. Den arbetar i större nätverk, inte som ett ensamt rädslocentrum."@sv ,
+                        "측두엽 앞부분 깊숙이 있는 아몬드 모양의 신경핵 집합으로, 변연계의 일부다. 홀로 작동하는 공포 중추가 아니라 더 넓은 신경망 안에서 작동한다."@ko ,
+                        "Eine mandelförmige Gruppe von Kernen tief im vorderen Temporallappen, Teil des limbischen Systems. Sie arbeitet in größeren Netzwerken, nicht als alleiniges Angstzentrum."@de ,
+                        "Un conjunto de núcleos en forma de almendra en lo profundo de la parte anterior del lóbulo temporal, parte del sistema límbico. Funciona dentro de redes más amplias, no como un centro del miedo aislado."@es ,
+                        "Un ensemble de noyaux en forme d'amande, au fond de la partie avant du lobe temporal, qui fait partie du système limbique. L'amygdale agit au sein de réseaux plus larges, et non comme un centre de la peur isolé."@fr .
+
+<#mammillary-body>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q499802> ;
+    solid-memo:front "Mammillary bodies"@en ,
+                     "Mammillarkropparna"@sv ,
+                     "유두체"@ko ,
+                     "Mamillarkörper"@de ,
+                     "Cuerpos mamilares"@es ,
+                     "Corps mamillaires"@fr ;
+    solid-memo:back "Memory of events; passing hippocampal signals on to the thalamus"@en ,
+                    "Minne av händelser; vidarebefordran av signaler från hippocampus till talamus"@sv ,
+                    "사건에 대한 기억; 해마의 신호를 시상으로 전달"@ko ,
+                    "Gedächtnis für Ereignisse; Weiterleitung von Signalen des Hippocampus an den Thalamus"@de ,
+                    "Memoria de sucesos; transmisión de señales del hipocampo al tálamo"@es ,
+                    "Mémoire des événements ; transmission des signaux de l'hippocampe vers le thalamus"@fr ;
+    solid-memo:backNote "A pair of small round bumps on the underside of the brain, at the back of the hypothalamus. Thiamine deficiency damages them in Wernicke–Korsakoff syndrome."@en ,
+                        "Ett par små runda upphöjningar på hjärnans undersida, i bakre delen av hypotalamus. Tiaminbrist skadar dem vid Wernicke–Korsakoffs syndrom."@sv ,
+                        "뇌 아래쪽 면, 시상하부 뒷부분에 있는 한 쌍의 작고 둥근 돌기다. 베르니케-코르사코프 증후군에서는 티아민 결핍으로 손상된다."@ko ,
+                        "Ein Paar kleiner, runder Erhebungen an der Unterseite des Gehirns, im hinteren Teil des Hypothalamus. Thiaminmangel schädigt sie beim Wernicke-Korsakow-Syndrom."@de ,
+                        "Un par de pequeñas protuberancias redondas en la cara inferior del cerebro, en la parte posterior del hipotálamo. La falta de tiamina las daña en el síndrome de Wernicke-Korsakoff."@es ,
+                        "Une paire de petites saillies arrondies sur la face inférieure du cerveau, à l'arrière de l'hypothalamus. La carence en thiamine les endommage dans le syndrome de Wernicke-Korsakoff."@fr .
+
+<#thalamus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q184215> ;
+    solid-memo:front "Thalamus"@en ,
+                     "Talamus"@sv ,
+                     "시상"@ko ,
+                     "Thalamus"@de ,
+                     "Tálamo"@es ,
+                     "Thalamus"@fr ;
+    solid-memo:back "Relaying sensory signals to the cortex; regulating sleep"@en ,
+                    "Vidarebefordran av sensoriska signaler till hjärnbarken; reglering av sömn"@sv ,
+                    "감각 신호를 대뇌 피질로 중계; 수면 조절"@ko ,
+                    "Weiterleitung sensorischer Signale zur Großhirnrinde; Regulation des Schlafs"@de ,
+                    "Retransmisión de señales sensitivas a la corteza; regulación del sueño"@es ,
+                    "Relais des signaux sensoriels vers le cortex ; régulation du sommeil"@fr ;
+    solid-memo:backNote "A paired mass of gray matter in the diencephalon, forming the upper part of the third ventricle's side walls. Every sense except smell passes through it on the way to the cortex."@en ,
+                        "En parig massa av grå substans i mellanhjärnan som bildar den övre delen av sidoväggarna i tredje ventrikeln. Alla sinnen utom luktsinnet passerar genom den på väg till hjärnbarken."@sv ,
+                        "사이뇌에 있는 한 쌍의 회색질 덩어리로, 제3뇌실 옆벽의 위쪽 부분을 이룬다. 후각을 제외한 모든 감각은 대뇌 피질로 가는 길에 이곳을 거친다."@ko ,
+                        "Eine paarige Ansammlung grauer Substanz im Zwischenhirn, die den oberen Teil der Seitenwände des dritten Ventrikels bildet. Die Signale aller Sinne außer dem Geruchssinn laufen auf dem Weg zur Großhirnrinde über ihn."@de ,
+                        "Una masa par de sustancia gris del diencéfalo que forma la parte superior de las paredes laterales del tercer ventrículo. Todos los sentidos salvo el olfato pasan por él de camino a la corteza."@es ,
+                        "Une masse paire de substance grise du diencéphale, qui forme la partie haute des parois latérales du troisième ventricule. Tous les sens sauf l'odorat y passent avant d'atteindre le cortex."@fr .
+
+<#hypothalamus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q164386> ;
+    solid-memo:front "Hypothalamus"@en ,
+                     "Hypotalamus"@sv ,
+                     "시상하부"@ko ,
+                     "Hypothalamus"@de ,
+                     "Hipotálamo"@es ,
+                     "Hypothalamus"@fr ;
+    solid-memo:back "Regulating body temperature, hunger and sleep; controlling the pituitary gland"@en ,
+                    "Reglering av kroppstemperatur, hunger och sömn; styrning av hypofysen"@sv ,
+                    "체온, 배고픔, 수면 조절; 뇌하수체 제어"@ko ,
+                    "Regulation von Körpertemperatur, Hunger und Schlaf; Steuerung der Hypophyse"@de ,
+                    "Regulación de la temperatura corporal, el hambre y el sueño; control de la hipófisis"@es ,
+                    "Régulation de la température corporelle, de la faim et du sommeil ; contrôle de l'hypophyse"@fr ;
+    solid-memo:backNote "The lower part of the diencephalon, forming the floor and lower side walls of the third ventricle. Its hormones regulate the pituitary gland."@en ,
+                        "Den nedre delen av mellanhjärnan, som bildar golvet och de nedre sidoväggarna i tredje ventrikeln. Dess hormoner reglerar hypofysen."@sv ,
+                        "사이뇌의 아래쪽 부분으로, 제3뇌실의 바닥과 아래쪽 옆벽을 이룬다. 이곳의 호르몬이 뇌하수체를 조절한다."@ko ,
+                        "Der untere Teil des Zwischenhirns, der den Boden und die unteren Seitenwände des dritten Ventrikels bildet. Seine Hormone steuern die Hypophyse."@de ,
+                        "La parte inferior del diencéfalo, que forma el suelo y la parte inferior de las paredes laterales del tercer ventrículo. Sus hormonas regulan la hipófisis."@es ,
+                        "La partie inférieure du diencéphale, qui forme le plancher et la partie basse des parois latérales du troisième ventricule. Ses hormones régulent l'hypophyse."@fr .
+
+<#suprachiasmatic-nucleus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1156516> ;
+    solid-memo:front "Suprachiasmatic nucleus"@en ,
+                     "Dygnsrytmskärna"@sv ,
+                     "시교차 상핵"@ko ,
+                     "Nucleus suprachiasmaticus"@de ,
+                     "Núcleo supraquiasmático"@es ,
+                     "Noyau suprachiasmatique"@fr ;
+    solid-memo:back "Master circadian clock; keeping daily rhythms in step with light"@en ,
+                    "Kroppens huvudklocka för dygnsrytmen; synkronisering av dygnsrytmerna med ljuset"@sv ,
+                    "일주기 리듬의 중추 시계; 하루 리듬을 빛에 맞춰 동기화"@ko ,
+                    "Zentraler circadianer Taktgeber; Synchronisation der Tagesrhythmen mit dem Licht"@de ,
+                    "Reloj circadiano central; sincronización de los ritmos diarios con la luz"@es ,
+                    "Horloge circadienne centrale ; synchronisation des rythmes quotidiens sur la lumière"@fr ;
+    solid-memo:backNote "A small, dense cluster of cells in the front of the hypothalamus, just above the optic chiasm. Light signals reach it directly from the retina."@en ,
+                        "En liten, tät samling celler i främre delen av hypotalamus, strax ovanför synnervskorsningen. Ljussignaler når den direkt från näthinnan."@sv ,
+                        "시상하부 앞쪽, 시신경 교차 바로 위에 있는 작고 빽빽한 세포 집단이다. 빛 신호가 망막에서 곧바로 이곳에 전달된다."@ko ,
+                        "Eine kleine, dichte Zellgruppe im vorderen Hypothalamus, direkt über der Sehnervenkreuzung. Lichtsignale erreichen sie unmittelbar von der Netzhaut."@de ,
+                        "Un grupo pequeño y denso de células en la parte anterior del hipotálamo, justo encima del quiasma óptico. Las señales de luz le llegan directamente desde la retina."@es ,
+                        "Un petit amas dense de cellules à l'avant de l'hypothalamus, juste au-dessus du chiasma optique. Les signaux lumineux lui parviennent directement de la rétine."@fr .
+
+<#pineal-gland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q198654> ;
+    solid-memo:front "Pineal gland"@en ,
+                     "Tallkottkörtel"@sv ,
+                     "솔방울샘"@ko ,
+                     "Zirbeldrüse"@de ,
+                     "Glándula pineal"@es ,
+                     "Glande pinéale"@fr ;
+    solid-memo:back "Secreting melatonin, which helps time the sleep-wake cycle"@en ,
+                    "Utsöndring av melatonin, som hjälper till att styra sömn-vakenhetscykeln"@sv ,
+                    "수면-각성 주기 조절을 돕는 멜라토닌 분비"@ko ,
+                    "Ausschüttung von Melatonin, das den Schlaf-wach-Rhythmus mitsteuert"@de ,
+                    "Secreción de melatonina, que ayuda a regular el ciclo sueño-vigilia"@es ,
+                    "Sécrétion de mélatonine, qui aide à régler le cycle veille-sommeil"@fr ;
+    solid-memo:backNote "A small endocrine gland in the epithalamus, attached to the roof of the third ventricle. Its melatonin output rises in darkness and falls in light."@en ,
+                        "En liten endokrin körtel i epitalamus, fäst vid taket av tredje ventrikeln. Dess utsöndring av melatonin ökar i mörker och minskar i ljus."@sv ,
+                        "시상상부에 있는 작은 내분비샘으로, 제3뇌실의 지붕에 붙어 있다. 멜라토닌 분비는 어두우면 늘고 밝으면 줄어든다."@ko ,
+                        "Eine kleine Hormondrüse im Epithalamus, die am Dach des dritten Ventrikels sitzt. Ihre Melatoninausschüttung steigt bei Dunkelheit und sinkt bei Licht."@de ,
+                        "Una pequeña glándula endocrina del epitálamo, unida al techo del tercer ventrículo. Su producción de melatonina aumenta en la oscuridad y disminuye con la luz."@es ,
+                        "Une petite glande endocrine de l'épithalamus, rattachée au toit du troisième ventricule. Sa sécrétion de mélatonine augmente dans l'obscurité et diminue à la lumière."@fr .
+
+<#olfactory-bulb>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q644945> ;
+    solid-memo:front "Olfactory bulb"@en ,
+                     "Luktlob"@sv ,
+                     "후각망울"@ko ,
+                     "Riechkolben"@de ,
+                     "Bulbo olfatorio"@es ,
+                     "Bulbe olfactif"@fr ;
+    solid-memo:back "First relay and processing of smell signals from the nose"@en ,
+                    "Första omkoppling och bearbetning av luktsignaler från näsan"@sv ,
+                    "코에서 온 냄새 신호의 첫 중계와 처리"@ko ,
+                    "Erste Umschaltung und Verarbeitung von Geruchssignalen aus der Nase"@de ,
+                    "Primer relevo y procesamiento de las señales olfatorias de la nariz"@es ,
+                    "Premier relais et traitement des signaux olfactifs venus du nez"@fr ;
+    solid-memo:backNote "A forebrain structure resting on the ethmoid bone's cribriform plate, where the olfactory nerve ends. It sends smell signals on to the olfactory cortex and the amygdala."@en ,
+                        "En struktur i framhjärnan som vilar på silbenets silplatta, där luktnerven slutar. Den skickar luktsignaler vidare till luktbarken och amygdala."@sv ,
+                        "사골의 체판 위에 놓인 전뇌 구조로, 후각 신경이 끝나는 곳이다. 냄새 신호를 후각 피질과 편도체로 보낸다."@ko ,
+                        "Eine Struktur des Vorderhirns, die auf der Siebplatte des Siebbeins liegt, wo der Riechnerv endet. Von dort gelangen Geruchssignale weiter zur Riechrinde und zur Amygdala."@de ,
+                        "Una estructura del prosencéfalo apoyada sobre la lámina cribosa del etmoides, donde termina el nervio olfatorio. Envía las señales olfatorias a la corteza olfatoria y a la amígdala."@es ,
+                        "Une structure du prosencéphale posée sur la lame criblée de l'ethmoïde, là où se termine le nerf olfactif. De là, les signaux olfactifs partent vers le cortex olfactif et l'amygdale."@fr .
+
+<#basal-ganglia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q464210> ;
+    solid-memo:front "Basal ganglia"@en ,
+                     "Basala ganglierna"@sv ,
+                     "기저핵"@ko ,
+                     "Basalganglien"@de ,
+                     "Ganglios basales"@es ,
+                     "Ganglions de la base"@fr ;
+    solid-memo:back "Selecting and starting movements; habit and procedural learning"@en ,
+                    "Val och igångsättning av rörelser; vane- och procedurinlärning"@sv ,
+                    "움직임의 선택과 시작; 습관 및 절차 학습"@ko ,
+                    "Auswahl und Einleitung von Bewegungen; Gewohnheits- und prozedurales Lernen"@de ,
+                    "Selección e inicio de movimientos; aprendizaje de hábitos y procedimental"@es ,
+                    "Sélection et déclenchement des mouvements ; apprentissage procédural et formation des habitudes"@fr ;
+    solid-memo:backNote "A group of nuclei mostly deep in the forebrain, with linked nuclei in the midbrain, wired in loops with the cortex and thalamus. Damage mainly causes movement disorders, as in Parkinson's disease."@en ,
+                        "En grupp kärnor främst djupt i framhjärnan, med tillhörande kärnor i mitthjärnan, kopplade i slingor med hjärnbarken och talamus. Skador ger framför allt rörelsestörningar, som vid Parkinsons sjukdom."@sv ,
+                        "주로 전뇌 깊숙이 있고 중간뇌에도 관련 핵이 있는 신경핵의 무리로, 대뇌 피질 및 시상과 고리 모양의 회로로 연결되어 있다. 이곳이 손상되면 파킨슨병에서처럼 대개 운동 장애가 생긴다."@ko ,
+                        "Eine Gruppe von Kerngebieten überwiegend tief im Vorderhirn, mit zugehörigen Kernen im Mittelhirn, die in Schleifen mit der Großhirnrinde und dem Thalamus verschaltet sind. Schäden führen vor allem zu Bewegungsstörungen, etwa bei der Parkinson-Krankheit."@de ,
+                        "Un grupo de núcleos situados sobre todo en lo profundo del prosencéfalo, con núcleos asociados en el mesencéfalo, conectados en circuitos con la corteza y el tálamo. Su lesión causa principalmente trastornos del movimiento, como en la enfermedad de Parkinson."@es ,
+                        "Un ensemble de noyaux situés surtout en profondeur dans le prosencéphale, avec des noyaux associés dans le mésencéphale, reliés en boucles au cortex et au thalamus. Leur atteinte provoque principalement des troubles du mouvement, comme dans la maladie de Parkinson."@fr .
+
+<#striatum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1319792> ;
+    solid-memo:front "Striatum"@en ,
+                     "Striatum"@sv ,
+                     "선조체"@ko ,
+                     "Striatum"@de ,
+                     "Cuerpo estriado"@es ,
+                     "Striatum"@fr ;
+    solid-memo:back "Gateway for cortical input to the basal ganglia; linking actions to rewards"@en ,
+                    "Port för hjärnbarkens signaler till de basala ganglierna; koppling av handlingar till belöningar"@sv ,
+                    "대뇌 피질 신호가 기저핵으로 들어가는 관문; 행동과 보상의 연결"@ko ,
+                    "Eingangsstation der Basalganglien für Signale der Großhirnrinde; Verknüpfung von Handlungen mit Belohnungen"@de ,
+                    "Puerta de entrada de las señales corticales a los ganglios basales; asociación de acciones con recompensas"@es ,
+                    "Porte d'entrée des signaux corticaux vers les ganglions de la base ; association des actions aux récompenses"@fr ;
+    solid-memo:backNote "The largest part of the basal ganglia: the caudate nucleus and putamen, plus the ventral striatum, which includes the nucleus accumbens."@en ,
+                        "Den största delen av de basala ganglierna: nucleus caudatus och putamen samt det ventrala striatum, som omfattar accumbenskärnan."@sv ,
+                        "기저핵에서 가장 큰 부분으로, 미상핵과 피각, 그리고 측좌핵을 포함하는 배쪽 선조체로 이루어진다."@ko ,
+                        "Der größte Teil der Basalganglien: Nucleus caudatus und Putamen sowie das ventrale Striatum, zu dem der Nucleus accumbens gehört."@de ,
+                        "La mayor parte de los ganglios basales: el núcleo caudado y el putamen, más el estriado ventral, que incluye el núcleo accumbens."@es ,
+                        "La plus grande partie des ganglions de la base : le noyau caudé et le putamen, ainsi que le striatum ventral, qui comprend le noyau accumbens."@fr .
+
+<#nucleus-accumbens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1476178> ;
+    solid-memo:front "Nucleus accumbens"@en ,
+                     "Accumbenskärnan"@sv ,
+                     "측좌핵"@ko ,
+                     "Nucleus accumbens"@de ,
+                     "Núcleo accumbens"@es ,
+                     "Noyau accumbens"@fr ;
+    solid-memo:back "Reward, motivation and reinforcement learning"@en ,
+                    "Belöning, motivation och förstärkningsinlärning"@sv ,
+                    "보상, 동기 부여, 강화 학습"@ko ,
+                    "Belohnung, Motivation und Verstärkungslernen"@de ,
+                    "Recompensa, motivación y aprendizaje por refuerzo"@es ,
+                    "Récompense, motivation et apprentissage par renforcement"@fr ;
+    solid-memo:backNote "Part of the ventral striatum in the basal forebrain, one in each hemisphere. It receives dopamine from the ventral tegmental area and plays a major role in addiction."@en ,
+                        "Del av det ventrala striatum i basala framhjärnan, en i varje hjärnhalva. Den tar emot dopamin från ventrala tegmentområdet och spelar en stor roll vid beroende."@sv ,
+                        "기저 전뇌에 있는 배쪽 선조체의 일부로, 양쪽 대뇌 반구에 하나씩 있다. 배쪽 피개부에서 도파민을 받으며 중독에 중요한 역할을 한다."@ko ,
+                        "Teil des ventralen Striatums im basalen Vorderhirn, je einer in jeder Hirnhälfte. Er erhält Dopamin aus der Area tegmentalis ventralis und spielt eine wichtige Rolle bei Sucht."@de ,
+                        "Parte del estriado ventral en el prosencéfalo basal, uno en cada hemisferio. Recibe dopamina del área tegmental ventral y desempeña un papel importante en la adicción."@es ,
+                        "Partie du striatum ventral dans le prosencéphale basal, un dans chaque hémisphère. Il reçoit de la dopamine de l'aire tegmentale ventrale et joue un rôle majeur dans l'addiction."@fr .
+
+<#substantia-nigra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q753278> ;
+    solid-memo:front "Substantia nigra"@en ,
+                     "Substantia nigra"@sv ,
+                     "흑색질"@ko ,
+                     "Substantia nigra"@de ,
+                     "Sustancia negra"@es ,
+                     "Substantia nigra"@fr ;
+    solid-memo:back "Supplying dopamine for movement control; sending basal ganglia output"@en ,
+                    "Tillförsel av dopamin för rörelsekontroll; utsändning av de basala gangliernas utsignaler"@sv ,
+                    "운동 조절을 위한 도파민 공급; 기저핵 출력 신호 송출"@ko ,
+                    "Bereitstellung von Dopamin für die Bewegungssteuerung; Aussendung der Ausgangssignale der Basalganglien"@de ,
+                    "Aporte de dopamina para el control del movimiento; envío de las señales de salida de los ganglios basales"@es ,
+                    "Apport de dopamine pour le contrôle du mouvement ; émission des signaux de sortie des ganglions de la base"@fr ;
+    solid-memo:backNote "A dark band of cells in the midbrain, counted with the basal ganglia. Loss of its dopamine neurons causes the movement symptoms of Parkinson's disease."@en ,
+                        "Ett mörkt band av celler i mitthjärnan som räknas till de basala ganglierna. Förlust av dess dopaminerga nervceller orsakar de motoriska symtomen vid Parkinsons sjukdom."@sv ,
+                        "중간뇌에 있는 짙은 색의 세포 띠로, 기저핵에 포함된다. 이곳의 도파민 신경세포가 소실되면 파킨슨병의 운동 증상이 나타난다."@ko ,
+                        "Ein dunkles Zellband im Mittelhirn, das zu den Basalganglien gezählt wird. Der Verlust seiner Dopamin-Neuronen verursacht die Bewegungssymptome der Parkinson-Krankheit."@de ,
+                        "Una banda oscura de células en el mesencéfalo que se cuenta entre los ganglios basales. La pérdida de sus neuronas dopaminérgicas causa los síntomas motores de la enfermedad de Parkinson."@es ,
+                        "Une bande sombre de cellules dans le mésencéphale, rattachée aux ganglions de la base. La perte de ses neurones dopaminergiques provoque les symptômes moteurs de la maladie de Parkinson."@fr .
+
+<#ventral-tegmental-area>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q640562> ;
+    solid-memo:front "Ventral tegmental area"@en ,
+                     "Ventrala tegmentområdet"@sv ,
+                     "배쪽 피개부"@ko ,
+                     "Area tegmentalis ventralis"@de ,
+                     "Área tegmental ventral"@es ,
+                     "Aire tegmentale ventrale"@fr ;
+    solid-memo:back "Sending dopamine to reward and motivation circuits"@en ,
+                    "Försörjning av belönings- och motivationskretsar med dopamin"@sv ,
+                    "보상 및 동기 회로로 도파민 전달"@ko ,
+                    "Versorgung der Belohnungs- und Motivationsschaltkreise mit Dopamin"@de ,
+                    "Envío de dopamina a los circuitos de recompensa y motivación"@es ,
+                    "Envoi de dopamine vers les circuits de la récompense et de la motivation"@fr ;
+    solid-memo:backNote "A cluster of neurons on the floor of the midbrain, next to the substantia nigra. Its dopamine pathways reach the nucleus accumbens and the prefrontal cortex."@en ,
+                        "En samling nervceller i mitthjärnans botten, intill substantia nigra. Dess dopaminbanor når accumbenskärnan och prefrontala cortex."@sv ,
+                        "중간뇌 바닥, 흑색질 옆에 있는 신경세포 무리다. 이곳의 도파민 경로는 측좌핵과 전전두피질에 이른다."@ko ,
+                        "Eine Ansammlung von Nervenzellen am Boden des Mittelhirns, neben der Substantia nigra. Ihre Dopaminbahnen reichen bis zum Nucleus accumbens und zum präfrontalen Cortex."@de ,
+                        "Un grupo de neuronas en el suelo del mesencéfalo, junto a la sustancia negra. Sus vías dopaminérgicas llegan al núcleo accumbens y a la corteza prefrontal."@es ,
+                        "Un groupe de neurones situé sur le plancher du mésencéphale, à côté de la substantia nigra. Ses voies dopaminergiques atteignent le noyau accumbens et le cortex préfrontal."@fr .
+
+<#midbrain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q185080> ;
+    solid-memo:front "Midbrain"@en ,
+                     "Mitthjärnan"@sv ,
+                     "중간뇌"@ko ,
+                     "Mittelhirn"@de ,
+                     "Mesencéfalo"@es ,
+                     "Mésencéphale"@fr ;
+    solid-memo:back "Relaying visual and auditory signals; movement; sleep and arousal"@en ,
+                    "Vidarebefordran av syn- och hörselsignaler; rörelse; sömn och vakenhet"@sv ,
+                    "시각·청각 신호 중계; 운동; 수면과 각성"@ko ,
+                    "Weiterleitung von Seh- und Hörsignalen; Bewegung; Schlaf und Wachheit"@de ,
+                    "Transmisión de señales visuales y auditivas; movimiento; sueño y vigilia"@es ,
+                    "Relais des signaux visuels et auditifs ; mouvement ; sommeil et éveil"@fr ;
+    solid-memo:backNote "The uppermost part of the brainstem, linking the pons to the diencephalon. Its roof (tectum) holds the colliculi; its floor (tegmentum) holds many nuclei."@en ,
+                        "Hjärnstammens översta del, som förbinder hjärnbryggan med mellanhjärnan. Dess tak (tectum) rymmer colliculi och dess golv (tegmentum) många kärnor."@sv ,
+                        "뇌줄기의 가장 윗부분으로, 다리뇌와 사이뇌를 잇는다. 지붕(덮개)에는 둔덕이 있고, 바닥(피개)에는 많은 신경핵이 있다."@ko ,
+                        "Der oberste Abschnitt des Hirnstamms, der den Pons mit dem Zwischenhirn verbindet. Sein Dach (Tectum) trägt die Colliculi, seine Haube (Tegmentum) viele Kerne."@de ,
+                        "La parte superior del tronco encefálico, que une la protuberancia con el diencéfalo. Su techo (tectum) alberga los colículos, y su suelo (tegmento), muchos núcleos."@es ,
+                        "La partie la plus haute du tronc cérébral, qui relie le pont au diencéphale. Son toit (tectum) porte les colliculi et son plancher (tegmentum) de nombreux noyaux."@fr .
+
+<#superior-colliculus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1109417> ;
+    solid-memo:front "Superior colliculus"@en ,
+                     "Colliculus superior"@sv ,
+                     "위둔덕"@ko ,
+                     "Colliculus superior"@de ,
+                     "Colículo superior"@es ,
+                     "Colliculus supérieur"@fr ;
+    solid-memo:back "Turning the eyes and head toward visual targets; spatial attention"@en ,
+                    "Vändning av ögon och huvud mot visuella mål; rumslig uppmärksamhet"@sv ,
+                    "시각 목표 쪽으로 눈과 머리 돌리기; 공간 주의"@ko ,
+                    "Ausrichten von Augen und Kopf auf visuelle Ziele; räumliche Aufmerksamkeit"@de ,
+                    "Orientación de los ojos y la cabeza hacia objetivos visuales; atención espacial"@es ,
+                    "Orientation des yeux et de la tête vers des cibles visuelles ; attention spatiale"@fr ;
+    solid-memo:backNote "One of a pair of bumps on the roof of the midbrain, part of the visual pathway. It gets input straight from the retina and holds a map of surrounding space."@en ,
+                        "En av två upphöjningar på mitthjärnans tak, en del av synbanan. Den får signaler direkt från näthinnan och har en karta över rummet runt omkring."@sv ,
+                        "중간뇌 지붕에 있는 한 쌍의 융기 중 하나로, 시각 경로의 일부다. 망막에서 직접 입력을 받으며 주변 공간의 지도를 담고 있다."@ko ,
+                        "Einer von zwei Hügeln auf dem Dach des Mittelhirns, Teil der Sehbahn. Er erhält Signale direkt von der Netzhaut und enthält eine Karte des umgebenden Raums."@de ,
+                        "Una de dos prominencias en el techo del mesencéfalo, parte de la vía visual. Recibe información directamente de la retina y contiene un mapa del espacio circundante."@es ,
+                        "L'une de deux saillies sur le toit du mésencéphale, qui fait partie des voies visuelles. Elle reçoit des signaux directement de la rétine et contient une carte de l'espace environnant."@fr .
+
+<#periaqueductal-gray>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1243765> ;
+    solid-memo:front "Periaqueductal gray"@en ,
+                     "Periakveduktal grå massa"@sv ,
+                     "수도관주위회색질"@ko ,
+                     "Periaquäduktales Grau"@de ,
+                     "Sustancia gris central"@es ,
+                     "Substance grise périaqueducale"@fr ;
+    solid-memo:back "Suppressing pain; defensive responses to threat; autonomic control"@en ,
+                    "Smärthämning; försvarsreaktioner vid hot; autonom reglering"@sv ,
+                    "통증 억제; 위협에 대한 방어 반응; 자율신경 조절"@ko ,
+                    "Schmerzhemmung; Abwehrreaktionen auf Bedrohung; vegetative Steuerung"@de ,
+                    "Supresión del dolor; respuestas defensivas ante amenazas; control autónomo"@es ,
+                    "Inhibition de la douleur ; réponses défensives face à la menace ; contrôle végétatif"@fr ;
+    solid-memo:backNote "Gray matter surrounding the cerebral aqueduct in the midbrain. It is probably also involved in feeding, sexual behavior and bladder control."@en ,
+                        "Grå substans som omger hjärnakvedukten i mitthjärnan. Den är troligen också inblandad i födointag, sexuellt beteende och blåsans reglering."@sv ,
+                        "중간뇌에서 대뇌수도관을 둘러싼 회색질이다. 섭식, 성 행동, 방광 조절에도 관여하는 것으로 보인다."@ko ,
+                        "Graue Substanz um den Aquädukt des Mittelhirns. Sie ist wahrscheinlich auch an Nahrungsaufnahme, Sexualverhalten und Blasensteuerung beteiligt."@de ,
+                        "Sustancia gris que rodea el acueducto cerebral en el mesencéfalo. Probablemente también interviene en la alimentación, la conducta sexual y el control de la vejiga."@es ,
+                        "Substance grise qui entoure l'aqueduc cérébral dans le mésencéphale. Elle participe probablement aussi à l'alimentation, au comportement sexuel et au contrôle de la vessie."@fr .
+
+<#pons>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q192570> ;
+    solid-memo:front "Pons"@en ,
+                     "Hjärnbryggan"@sv ,
+                     "다리뇌"@ko ,
+                     "Pons"@de ,
+                     "Protuberancia"@es ,
+                     "Pont"@fr ;
+    solid-memo:back "Relaying signals from the cerebrum to the cerebellum; adjusting breathing; sleep"@en ,
+                    "Vidarebefordran av signaler från storhjärnan till lillhjärnan; justering av andningen; sömn"@sv ,
+                    "대뇌에서 소뇌로 신호 중계; 호흡 조절; 수면"@ko ,
+                    "Weiterleitung von Signalen vom Großhirn zum Kleinhirn; Anpassung der Atmung; Schlaf"@de ,
+                    "Transmisión de señales del cerebro al cerebelo; ajuste de la respiración; sueño"@es ,
+                    "Relais des signaux du cerveau vers le cervelet ; ajustement de la respiration ; sommeil"@fr ;
+    solid-memo:backNote "The middle part of the brainstem, between the midbrain and the medulla and in front of the cerebellum. Cranial nerves for facial sensation and chewing arise here."@en ,
+                        "Hjärnstammens mellersta del, mellan mitthjärnan och förlängda märgen och framför lillhjärnan. Här utgår kranialnerver för ansiktets känsel och tuggning."@sv ,
+                        "뇌줄기의 가운데 부분으로, 중간뇌와 숨뇌 사이, 소뇌 앞쪽에 있다. 얼굴 감각과 씹기를 맡는 뇌신경이 여기서 나온다."@ko ,
+                        "Der mittlere Abschnitt des Hirnstamms, zwischen Mittelhirn und Medulla oblongata und vor dem Kleinhirn. Hier entspringen Hirnnerven für die Gesichtsempfindung und das Kauen."@de ,
+                        "La parte media del tronco encefálico, entre el mesencéfalo y el bulbo raquídeo y por delante del cerebelo. De aquí salen nervios craneales para la sensibilidad de la cara y la masticación."@es ,
+                        "La partie moyenne du tronc cérébral, entre le mésencéphale et le bulbe rachidien, en avant du cervelet. Des nerfs crâniens pour la sensibilité du visage et la mastication y prennent naissance."@fr .
+
+<#medulla-oblongata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q189033> ;
+    solid-memo:front "Medulla oblongata"@en ,
+                     "Förlängda märgen"@sv ,
+                     "숨뇌"@ko ,
+                     "Medulla oblongata"@de ,
+                     "Bulbo raquídeo"@es ,
+                     "Bulbe rachidien"@fr ;
+    solid-memo:back "Controlling breathing, heart rate and blood pressure; vital reflexes"@en ,
+                    "Reglering av andning, hjärtfrekvens och blodtryck; livsviktiga reflexer"@sv ,
+                    "호흡, 심박수, 혈압 조절; 생명 유지 반사"@ko ,
+                    "Steuerung von Atmung, Herzfrequenz und Blutdruck; lebenswichtige Reflexe"@de ,
+                    "Control de la respiración, la frecuencia cardiaca y la presión arterial; reflejos vitales"@es ,
+                    "Contrôle de la respiration, de la fréquence cardiaque et de la pression artérielle ; réflexes vitaux"@fr ;
+    solid-memo:backNote "The lowest part of the brainstem, below the pons and in front of the cerebellum. It relays signals between the brain and the spinal cord."@en ,
+                        "Hjärnstammens nedersta del, under hjärnbryggan och framför lillhjärnan. Den förmedlar signaler mellan hjärnan och ryggmärgen."@sv ,
+                        "뇌줄기의 가장 아랫부분으로, 다리뇌 아래, 소뇌 앞쪽에 있다. 뇌와 척수 사이에서 신호를 중계한다."@ko ,
+                        "Der unterste Abschnitt des Hirnstamms, unterhalb des Pons und vor dem Kleinhirn. Hier werden Signale zwischen Gehirn und Rückenmark weitergeleitet."@de ,
+                        "La parte inferior del tronco encefálico, debajo de la protuberancia y por delante del cerebelo. Transmite señales entre el encéfalo y la médula espinal."@es ,
+                        "La partie la plus basse du tronc cérébral, sous le pont et en avant du cervelet. Le bulbe relaie les signaux entre l'encéphale et la moelle épinière."@fr .
+
+<#reticular-formation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q750588> ;
+    solid-memo:front "Reticular formation"@en ,
+                     "Formatio reticularis"@sv ,
+                     "그물체"@ko ,
+                     "Formatio reticularis"@de ,
+                     "Formación reticular"@es ,
+                     "Formation réticulée"@fr ;
+    solid-memo:back "Wakefulness and arousal; breathing, circulation and motor control"@en ,
+                    "Vakenhet och aktivering; andning, cirkulation och motorisk kontroll"@sv ,
+                    "깨어 있음과 각성; 호흡, 순환, 운동 조절"@ko ,
+                    "Wachheit und Aktivierung; Atmung, Kreislauf und Motorik"@de ,
+                    "Vigilia y activación; respiración, circulación y control motor"@es ,
+                    "Veille et éveil ; respiration, circulation et contrôle moteur"@fr ;
+    solid-memo:backNote "A loose network of neurons through the core of the brainstem, from the medulla up into the midbrain. Its ascending part is called the reticular activating system."@en ,
+                        "Ett löst nätverk av nervceller genom hjärnstammens centrala del, från förlängda märgen upp i mitthjärnan. Dess uppåtstigande del kallas det retikulära aktiveringssystemet."@sv ,
+                        "숨뇌에서 중간뇌까지 뇌줄기의 중심부를 지나는 느슨한 신경세포 그물망이다. 그중 위로 올라가는 부분을 그물활성계라고 부른다."@ko ,
+                        "Ein lockeres Netz von Nervenzellen im Inneren des Hirnstamms, von der Medulla oblongata bis ins Mittelhirn. Sein aufsteigender Teil wird als retikuläres Aktivierungssystem bezeichnet."@de ,
+                        "Una red laxa de neuronas que recorre el centro del tronco del encéfalo, desde el bulbo raquídeo hasta el mesencéfalo. Su parte ascendente se llama sistema activador reticular."@es ,
+                        "Un réseau lâche de neurones au cœur du tronc cérébral, du bulbe rachidien jusqu'au mésencéphale. Sa partie ascendante est appelée système réticulé activateur."@fr .
+
+<#locus-coeruleus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q1470452> ;
+    solid-memo:front "Locus coeruleus"@en ,
+                     "Locus coeruleus"@sv ,
+                     "청색반점"@ko ,
+                     "Locus caeruleus"@de ,
+                     "Locus coeruleus"@es ,
+                     "Locus cœruleus"@fr ;
+    solid-memo:back "Main source of the brain's norepinephrine; arousal, attention and stress responses"@en ,
+                    "Hjärnans främsta källa till noradrenalin; aktivering, uppmärksamhet och stressreaktioner"@sv ,
+                    "뇌의 주요 노르에피네프린 공급원; 각성, 주의, 스트레스 반응"@ko ,
+                    "Wichtigste Noradrenalinquelle des Gehirns; Aktivierung, Aufmerksamkeit und Stressreaktionen"@de ,
+                    "Principal fuente de noradrenalina del encéfalo; activación, atención y respuesta al estrés"@es ,
+                    "Principale source de noradrénaline du cerveau ; éveil, attention et réponses au stress"@fr ;
+    solid-memo:backNote "A small nucleus in the pons, at the floor of the fourth ventricle. Its Latin name means \"blue spot\", after the color of its pigmented neurons."@en ,
+                        "En liten kärna i hjärnbryggan (pons), i botten av fjärde ventrikeln. Det latinska namnet betyder ”blå fläck”, efter färgen på dess pigmenterade nervceller."@sv ,
+                        "다리뇌의 제4뇌실 바닥에 있는 작은 핵이다. 라틴어 이름은 '푸른 점'이라는 뜻으로, 색소를 띤 신경세포의 색에서 왔다."@ko ,
+                        "Ein kleiner Kern in der Brücke (Pons), am Boden des vierten Ventrikels. Sein lateinischer Name bedeutet „blauer Fleck“, nach der Farbe seiner pigmentierten Nervenzellen."@de ,
+                        "Un pequeño núcleo de la protuberancia, en el suelo del cuarto ventrículo. Su nombre latino significa «mancha azul», por el color de sus neuronas pigmentadas."@es ,
+                        "Un petit noyau du pont, au plancher du quatrième ventricule. Son nom latin signifie « tache bleue », d'après la couleur de ses neurones pigmentés."@fr .
+
+<#raphe-nuclei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q2061493> ;
+    solid-memo:front "Raphe nuclei"@en ,
+                     "Rafekärnor"@sv ,
+                     "솔기핵"@ko ,
+                     "Raphe-Kerne"@de ,
+                     "Núcleos del rafe"@es ,
+                     "Noyaux du raphé"@fr ;
+    solid-memo:back "Main source of the brain's serotonin; sleep-wake regulation; pain control"@en ,
+                    "Hjärnans främsta källa till serotonin; reglering av sömn och vakenhet; smärtreglering"@sv ,
+                    "뇌의 주요 세로토닌 공급원; 수면-각성 조절; 통증 조절"@ko ,
+                    "Wichtigste Serotoninquelle des Gehirns; Regulation des Schlaf-wach-Rhythmus; Schmerzkontrolle"@de ,
+                    "Principal fuente de serotonina del encéfalo; regulación del sueño y la vigilia; control del dolor"@es ,
+                    "Principale source de sérotonine du cerveau ; régulation veille-sommeil ; contrôle de la douleur"@fr ;
+    solid-memo:backNote "A chain of small nuclei along the midline of the brainstem, from the midbrain down to the medulla. Many antidepressants act on the serotonin system they supply."@en ,
+                        "En kedja av små kärnor längs hjärnstammens mittlinje, från mitthjärnan ner till förlängda märgen. Många antidepressiva läkemedel verkar på det serotoninsystem som utgår från dem."@sv ,
+                        "중간뇌에서 숨뇌까지 뇌줄기의 정중선을 따라 늘어선 작은 핵들의 사슬이다. 많은 항우울제가 이 핵들에서 나오는 세로토닌계에 작용한다."@ko ,
+                        "Eine Kette kleiner Kerne entlang der Mittellinie des Hirnstamms, vom Mittelhirn bis zur Medulla oblongata. Viele Antidepressiva wirken auf das von ihnen ausgehende Serotoninsystem."@de ,
+                        "Una cadena de pequeños núcleos a lo largo de la línea media del tronco del encéfalo, desde el mesencéfalo hasta el bulbo raquídeo. Muchos antidepresivos actúan sobre el sistema serotoninérgico que nace de ellos."@es ,
+                        "Une chaîne de petits noyaux le long de la ligne médiane du tronc cérébral, du mésencéphale au bulbe rachidien. De nombreux antidépresseurs agissent sur le système sérotoninergique qui en est issu."@fr .
+
+<#cerebellum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q130983> ;
+    solid-memo:front "Cerebellum"@en ,
+                     "Lillhjärna"@sv ,
+                     "소뇌"@ko ,
+                     "Kleinhirn"@de ,
+                     "Cerebelo"@es ,
+                     "Cervelet"@fr ;
+    solid-memo:back "Coordinating movement and balance; motor learning"@en ,
+                    "Samordning av rörelser och balans; motorisk inlärning"@sv ,
+                    "운동 협응과 균형 유지; 운동 학습"@ko ,
+                    "Koordination von Bewegung und Gleichgewicht; motorisches Lernen"@de ,
+                    "Coordinación del movimiento y del equilibrio; aprendizaje motor"@es ,
+                    "Coordination des mouvements et de l'équilibre ; apprentissage moteur"@fr ;
+    solid-memo:backNote "It lies behind the brainstem at the back of the skull, under the cerebrum. Like the cerebrum, it has a folded cortex over white matter and deep nuclei."@en ,
+                        "Den ligger bakom hjärnstammen i bakre delen av skallen, under storhjärnan. Liksom storhjärnan har den en veckad bark över vit substans och djupa kärnor."@sv ,
+                        "머리뼈 뒤쪽, 대뇌 아래에서 뇌줄기 뒤에 자리한다. 대뇌처럼 주름진 겉질이 있고, 그 안쪽에 백색질과 깊은 핵들이 있다."@ko ,
+                        "Es liegt hinter dem Hirnstamm im hinteren Teil des Schädels, unter dem Großhirn. Wie das Großhirn hat es eine gefaltete Rinde über weißer Substanz und tiefen Kernen."@de ,
+                        "Se sitúa detrás del tronco del encéfalo, en la parte posterior del cráneo, bajo los hemisferios cerebrales. Como ellos, tiene una corteza plegada sobre sustancia blanca y núcleos profundos."@es ,
+                        "Il est situé derrière le tronc cérébral, à l'arrière du crâne, sous les hémisphères cérébraux. Comme eux, il possède un cortex plissé qui recouvre de la substance blanche et des noyaux profonds."@fr .
+
+<#corpus-callosum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 7 ;
+    dcterms:created "2026-10-25T12:00:00.000Z"^^xsd:dateTime ;
+    dcterms:subject <http://www.wikidata.org/entity/Q223851> ;
+    solid-memo:front "Corpus callosum"@en ,
+                     "Hjärnbalk"@sv ,
+                     "뇌량"@ko ,
+                     "Corpus callosum"@de ,
+                     "Cuerpo calloso"@es ,
+                     "Corps calleux"@fr ;
+    solid-memo:back "Connecting and passing information between the two cerebral hemispheres"@en ,
+                    "Förbindelse och informationsöverföring mellan de två hjärnhalvorna"@sv ,
+                    "두 대뇌 반구 사이의 연결과 정보 전달"@ko ,
+                    "Verbindung und Informationsaustausch zwischen den beiden Großhirnhälften"@de ,
+                    "Conexión y transmisión de información entre los dos hemisferios cerebrales"@es ,
+                    "Connexion et transmission d'informations entre les deux hémisphères cérébraux"@fr ;
+    solid-memo:backNote "The brain's largest white-matter tract, a broad band of nerve fibers deep in the groove between the hemispheres. Cutting it is a last-resort treatment for severe epilepsy."@en ,
+                        "Hjärnans största bana av vit substans, ett brett band av nervfibrer djupt ner i fåran mellan hjärnhalvorna. Att dela den är en sista utväg vid svår epilepsi."@sv ,
+                        "뇌에서 가장 큰 백색질 신경로로, 두 반구 사이 틈 깊숙이 있는 넓은 신경섬유 띠이다. 이를 절단하는 수술은 중증 뇌전증의 최후 치료 수단이다."@ko ,
+                        "Die größte Bahn aus weißer Substanz im Gehirn, ein breites Band aus Nervenfasern tief im Spalt zwischen den Großhirnhälften. Seine Durchtrennung ist ein letzter Ausweg bei schwerer Epilepsie."@de ,
+                        "El mayor haz de sustancia blanca del encéfalo, una ancha banda de fibras nerviosas en lo profundo de la cisura entre los hemisferios. Seccionarlo es un tratamiento de último recurso para la epilepsia grave."@es ,
+                        "Le plus grand faisceau de substance blanche du cerveau, une large bande de fibres nerveuses au fond de la scissure interhémisphérique. Le sectionner est un traitement de dernier recours contre l'épilepsie sévère."@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

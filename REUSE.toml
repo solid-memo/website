@@ -58,6 +58,7 @@ SPDX-License-Identifier = "MIT"
 [[annotations]]
 path = [
     "decks/academy-award-best-picture/*.ttl",
+    "decks/brain-regions/*.ttl",
     "decks/capitals-of-the-world/*.ttl",
     "decks/chemical-compounds/*.ttl",
     "decks/chess-openings/*.ttl",
