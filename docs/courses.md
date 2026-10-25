@@ -109,7 +109,11 @@ domain's
 - The options of a question are the card's back and each of its
   distractors, shuffled (`choicesOf`). The text is shown in the reader's
   language, or in the deck's card language first when the learner chose
-  one ([i18n.md](i18n.md#which-language)).
+  one ([i18n.md](i18n.md#which-language)). That choice is the course's
+  language: on the course's page, its chapters and their final reviews,
+  the course's title and description, its chapters' titles and
+  descriptions and its steps' theory follow it too, while the app's own
+  text stays in the app's language.
 - A retired chapter or step (`owl:deprecated true`) is left out of the
   outline (`courseOutlineFromRecords`), with every step of a retired
   chapter.
@@ -201,10 +205,11 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    answering; every step starts on its theory, at its first chunk, the
    one the chapter resumes at included, so leaving and coming back
    shows it again. Moving to another chunk puts the focus on "Part 2 of
-   3", so a screen reader reads the chunk from its start. When the
-   reader's language is switched to one with fewer chunks (which a
-   release checked by the library never has), a chunk past the last
-   shows the last.
+   3", so a screen reader reads the chunk from its start. The chunks
+   are counted in the language the theory is shown in, the course's
+   first. When the reader's or the course's language is switched to
+   one with fewer chunks (which a release checked by the library never
+   has), a chunk past the last shows the last.
 3. **The final review.** Once every step is done, the chapter's final
    review comes next, whether the learner gets there with Next after
    the last step or from the course's page. It opens on a word before
@@ -359,7 +364,9 @@ same way, and suggests its ids so
 2. Add the chapters and steps, each with `sm:formatVersion 1`,
    `schema:isPartOf` and a `schema:position` of its own among its
    siblings. A chapter's title and a step's theory are language-tagged
-   text, one per language, one of them English.
+   text, one per language, one of them English. A learner reads them in
+   the app's language, or in the course's language first when they chose
+   one.
 3. Write every question as a card (format 5, or 6 for one with a front
    label) with text on its back. Ask it from one place only: one step's
    `sm:checkedBy`, or one chapter's `sm:reviewQuestion`.
@@ -385,7 +392,9 @@ same way, and suggests its ids so
    it, `---` underlines the line above as a heading, which the check
    refuses). Every language of the theory
    has as many chunks, none of them empty: no break first, last, or
-   right after another ([deck-library.md](deck-library.md#markdown-rules)).
+   right after another ([deck-library.md](deck-library.md#markdown-rules)),
+   so the chunk a learner is at is the same in whichever language it is
+   shown.
    Break at a change of topic, where a learner could pause, and keep a
    chunk to about a screenful; a short theory needs no breaks.
 8. Keep the attribution and the review rounds as every authored deck

@@ -15,9 +15,10 @@ import type { CompletedChapter } from "./CourseContainer";
 import { Confetti } from "./Confetti";
 import { DataText } from "./DataText";
 import { CheckIcon, LibraryIcon } from "./icons";
+import { useCourseText } from "./cardLanguage";
 import { useI18n, type I18n } from "./i18n";
 import { linkify } from "./linkify";
-import { ReaderText } from "./ReaderText";
+import { CourseText } from "./ReaderText";
 
 function stateLabel(state: ChapterState, t: I18n["t"]): string {
   switch (state) {
@@ -89,7 +90,8 @@ export function CourseScreen({
   /** Shown under the blurb: the offer of a newer release. */
   notice?: ComponentChildren;
 }) {
-  const { t, tx, readerText, readerLang } = useI18n();
+  const { t, tx } = useI18n();
+  const { cardText, cardLang } = useCourseText();
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
   const doneCount = progress.chapters.filter((chapter) => chapter.state === "done").length;
   const library =
@@ -104,15 +106,15 @@ export function CourseScreen({
       <section class="course">
         <header>
           <h2>
-            <ReaderText text={title} />
+            <CourseText text={title} />
           </h2>
           <span class="hint">
             {t("course.chaptersDone", { done: doneCount, count: outline.chapters.length })}
           </span>
         </header>
         {description !== undefined && (
-          <p class="deck-description" lang={readerLang(description)}>
-            {linkify(readerText(description))}
+          <p class="deck-description" lang={cardLang(description)}>
+            {linkify(cardText(description))}
           </p>
         )}
         {notice}
@@ -121,7 +123,7 @@ export function CourseScreen({
             <p>
               {justCompleted!.finishedCourse
                 ? t("course.courseCompleted")
-                : tx("course.chapterCompleted", { chapter: <ReaderText text={completed.title} /> })}
+                : tx("course.chapterCompleted", { chapter: <CourseText text={completed.title} /> })}
             </p>
             {continueHref !== undefined && <p>{t("course.continueOrStop")}</p>}
           </div>
@@ -164,10 +166,10 @@ export function CourseScreen({
                     {t("course.chapterNumber", { number: index + 1 })}
                   </span>{" "}
                   {state === "locked" ? (
-                    <ReaderText text={chapter.title} />
+                    <CourseText text={chapter.title} />
                   ) : (
                     <a href={chapterHref(chapter)}>
-                      <ReaderText text={chapter.title} />
+                      <CourseText text={chapter.title} />
                     </a>
                   )}
                 </h3>

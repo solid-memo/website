@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
+import { CourseLanguage } from "./cardLanguage";
 import { APP_COURSE_LINKS, CourseLinksContext, type CourseLinks } from "./courseLinks";
 import { courseHref } from "./router";
 import { makeUseCasesFake } from "../test/useCasesFake";
@@ -59,6 +60,27 @@ const rightAnswers = (useCases: UseCases) =>
     .mockImplementation(async () => ({ effect: "review", state: null }));
 
 describe("ChapterReviewContainer", () => {
+  it("names the chapter in its course's language first", () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CourseLanguage language="sv">
+          <ChapterReviewContainer
+            useCases={makeUseCasesFake()}
+            instance={courseInstance}
+            course={course}
+            chapter={course.outline.chapters[0]!}
+            onCompleted={vi.fn()}
+            random={noShuffle}
+          />
+        </CourseLanguage>
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
+      "Final review: Länkade data",
+    );
+    expect(screen.getByText("Länkade data")).toHaveAttribute("lang", "sv");
+  });
+
   it("opens on a word before the review, with the way on to it and back to the chapters", () => {
     const useCases = makeUseCasesFake();
     renderReview(useCases);

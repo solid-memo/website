@@ -7,6 +7,7 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import { choicesOf, type CourseChapter } from "@solid-memo/domain/course";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterPlayerScreen, type StepPhase } from "./ChapterPlayerScreen";
+import { CourseLanguage } from "./cardLanguage";
 import { courseCards, courseOutline, noShuffle } from "../test/course";
 
 function screenOf(
@@ -179,6 +180,19 @@ describe("ChapterPlayerScreen", () => {
       expect(part()).toHaveFocus();
       rerenderAt(0, 1);
       expect(screen.getByRole("heading", { name: "Step 2 of 2" })).toHaveFocus();
+    });
+
+    it("shows the chapter's title and its theory, chunks counted, in the course's language first", () => {
+      const chapter = chunked({ en: CHUNKED, sv: "Första *delen*.\n\n---\n\nSista delen." });
+      const { container } = render(
+        <CourseLanguage language="sv">
+          {screenOf(chapter, "read", 1, vi.fn(), vi.fn())}
+        </CourseLanguage>,
+      );
+      expect(screen.getByText("Part 2 of 2")).toBeInTheDocument();
+      expect(theoryOf(container)).toHaveAttribute("lang", "sv");
+      expect(theoryOf(container)).toHaveTextContent(/^Sista delen\.$/);
+      expect(screen.getByText("Länkade data")).toHaveAttribute("lang", "sv");
     });
 
     it("shows theory in one chunk as always: no part, no Back", () => {

@@ -73,8 +73,8 @@ import {
 } from "./resolveRoute";
 import { ValidationContainer } from "./ValidationContainer";
 import { WebIdDocumentContainer } from "./WebIdDocumentContainer";
-import { CardLanguage } from "./cardLanguage";
-import { useI18n, type CardReader, type I18n } from "./i18n";
+import { CardLanguage, CourseLanguage } from "./cardLanguage";
+import { useI18n, type I18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
@@ -85,7 +85,9 @@ import { queryKeys } from "./queryKeys";
 /**
  * The breadcrumbs' names of what the route has open, each "" (or no
  * language) when nothing is: a card of the open deck named in the deck's
- * card language first (`cards`), the rest as `readerText` names them.
+ * card language first (`cards`); the deck and the chapter, on a
+ * course's route (`onCourse`), in the course's language first, else as
+ * `readerText` names them; the rest as `readerText` names them.
  */
 function crumbNamesOf(
   open: {
@@ -97,21 +99,24 @@ function crumbNamesOf(
   },
   readerText: I18n["readerText"],
   readerLang: I18n["readerLang"],
-  { cardText, cardLang }: CardReader,
+  cardReader: I18n["cardReader"],
+  onCourse: boolean,
 ): CrumbNames {
   const { deck, card, libraryDeck, libraryCard, chapter } = open;
+  const { cardText, cardLang } = cardReader(deck?.cardLanguage);
+  const course = cardReader(onCourse ? deck?.cardLanguage : undefined);
   return {
-    deck: deck === null ? "" : readerText(deck.title),
+    deck: deck === null ? "" : course.cardText(deck.title),
     card: card === null ? "" : cardName(card, cardText),
     libraryDeck: libraryDeck === null ? "" : readerText(libraryDeck.title),
     libraryCard: libraryCard === null ? "" : cardName(libraryCard, readerText),
-    chapter: chapter === null ? "" : readerText(chapter.title),
-    deckLang: deck === null ? undefined : readerLang(deck.title),
+    chapter: chapter === null ? "" : course.cardText(chapter.title),
+    deckLang: deck === null ? undefined : course.cardLang(deck.title),
     cardLang: card === null ? undefined : cardLang(cardNameText(card, cardText)),
     libraryDeckLang: libraryDeck === null ? undefined : readerLang(libraryDeck.title),
     libraryCardLang:
       libraryCard === null ? undefined : readerLang(cardNameText(libraryCard, readerText)),
-    chapterLang: chapter === null ? undefined : readerLang(chapter.title),
+    chapterLang: chapter === null ? undefined : course.cardLang(chapter.title),
   };
 }
 
@@ -529,7 +534,8 @@ export function Workspace({
             },
             readerText,
             readerLang,
-            cardReader(activeDeck?.cardLanguage),
+            cardReader,
+            isCourseRoute,
           ),
           t,
         );
@@ -912,19 +918,21 @@ export function Workspace({
             }
           />
         );
+      // A course's own text and its questions' cards, in its course language first.
       case "course":
         return (
-          <CourseContainer
-            useCases={useCases}
-            instance={activeInstance!}
-            course={activeCourse!}
-            justCompleted={justCompleted ?? undefined}
-          />
+          <CourseLanguage language={activeDeck!.cardLanguage}>
+            <CourseContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              course={activeCourse!}
+              justCompleted={justCompleted ?? undefined}
+            />
+          </CourseLanguage>
         );
       case "courseChapter":
-        // The cards of the chapter's questions; its title and theory are not card text.
         return (
-          <CardLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
+          <CourseLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
             <ChapterPlayerContainer
               useCases={useCases}
               instance={activeInstance!}
@@ -932,11 +940,11 @@ export function Workspace({
               chapter={activeChapter!}
               onReview={() => navigate({ ...route, screen: "courseReview" })}
             />
-          </CardLanguage>
+          </CourseLanguage>
         );
       case "courseReview":
         return (
-          <CardLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
+          <CourseLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
             <ChapterReviewContainer
               useCases={useCases}
               instance={activeInstance!}
@@ -947,7 +955,7 @@ export function Workspace({
                 navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
               }}
             />
-          </CardLanguage>
+          </CourseLanguage>
         );
       case "preferences":
         return (

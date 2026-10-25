@@ -8,7 +8,7 @@ import { isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
 import { DataProse, useProseChunks } from "./DataText";
 import { useI18n, type ErrorText } from "./i18n";
-import { ReaderText } from "./ReaderText";
+import { CourseText } from "./ReaderText";
 
 /** Which half of a step is shown: its theory, or its questions. */
 export type StepPhase = "read" | "answer";
@@ -39,7 +39,9 @@ export type StepPhase = "read" | "answer";
  * and the button on to the questions. Moving to another chunk of the
  * same step puts the focus on which part it is, so the chunk is read
  * from its start. A chunk past the last, as when switching the reader's
- * language leaves fewer, shows the last. Theory in one chunk shows as it
+ * or the course's language leaves fewer, shows the last. The chapter's
+ * title and its theory are in the course's language first under its
+ * CourseLanguage (CourseText, DataProse). Theory in one chunk shows as it
  * always has.
  */
 export function ChapterPlayerScreen({
@@ -114,7 +116,7 @@ export function ChapterPlayerScreen({
     <section class="course-player">
       <header>
         <h2>
-          <ReaderText text={chapter.title} />
+          <CourseText text={chapter.title} />
         </h2>
       </header>
       <article class="course-step">

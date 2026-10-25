@@ -2936,6 +2936,64 @@ describe("Workspace", () => {
       ).toEqual(["Decks", "Solid fundamentals", "Course", "Linked data", "Final review"]);
     });
 
+    it("shows a course's own text, and names it in the trail, in its course language first", async () => {
+      const swedish = {
+        ...courseDeck,
+        title: { en: "Solid fundamentals", sv: "Solids grunder" },
+        cardLanguage: "sv",
+      };
+      const [first, second] = courseOutline.chapters;
+      const [step, ...steps] = first!.steps;
+      const outline = {
+        ...courseOutline,
+        chapters: [
+          {
+            ...first!,
+            steps: [
+              { ...step!, theory: { ...step!.theory, sv: "Saker namnges av IRI:er." } },
+              ...steps,
+            ],
+          },
+          second!,
+        ],
+      };
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(
+        courseUseCases({
+          listDecks: vi.fn(async () => [swedish]),
+          getCourse: vi.fn(async () => ({ ...makeCourse(), deck: swedish, outline })),
+        }),
+      );
+      const start = await screen.findByRole("link", { name: "Start the course" });
+      expect(screen.getByRole("heading", { level: 2 }).querySelector("[lang]")).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Solids grunder");
+      expect(screen.getByRole("link", { name: "Länkade data" }).firstElementChild).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      // A text not in it, and the app's own text, are shown as before.
+      expect(screen.getByText("Pods")).not.toHaveAttribute("lang");
+      expect(screen.getByText("A course on Solid.")).not.toHaveAttribute("lang");
+      const trail = () => within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+      expect(trail().getByRole("link", { name: "Solids grunder" })).toBeInTheDocument();
+      expect(document.title).toBe("Course – Solids grunder – Solid Memo");
+
+      fireEvent.click(start);
+      expect(await screen.findByRole("heading", { name: "Step 1 of 2" })).toBeInTheDocument();
+      expect(document.querySelector(".course-theory")).toHaveAttribute("lang", "sv");
+      expect(document.querySelector(".course-theory")).toHaveTextContent(
+        "Saker namnges av IRI:er.",
+      );
+      expect(trail().getByRole("link", { name: "Länkade data" }).closest("[lang]")).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      await waitFor(() => expect(document.title).toBe("Länkade data – Course – Solid Memo"));
+    });
+
     it("takes the learner back to the course from a chapter completed, cheering it once", async () => {
       const completed: string[] = [];
       const answers: Record<string, string> = {

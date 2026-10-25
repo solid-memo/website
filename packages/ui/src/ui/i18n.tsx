@@ -186,11 +186,14 @@ export interface I18n {
   /**
    * How the card text of a deck whose card language is `language` is
    * shown: in that language first, then as `readerText` (this language,
-   * the browser's, English, the first the text has). Only a card's text
+   * the browser's, English, the first the text has). A card's text
    * follows it (its sides, notes, labels, picture descriptions and
-   * wrong options), never a deck's title, description or keywords.
-   * With no language, the same as `readerText` and `readerLang`. A
-   * component under a deck's CardLanguage takes it with useCardText.
+   * wrong options), never a deck's keywords; a deck's title and
+   * description only on a course's screens, where all of the course's
+   * own text follows it (its chapters' titles and descriptions, its
+   * steps' theory). With no language, the same as `readerText` and
+   * `readerLang`. A component under a deck's CardLanguage takes it with
+   * useCardText; one under a course's CourseLanguage, with useCourseText.
    */
   cardReader(language: string | undefined): CardReader;
   /**

@@ -16,7 +16,7 @@ import {
   plainDataText,
   useProseChunks,
 } from "./DataText";
-import { CardLanguage } from "./cardLanguage";
+import { CardLanguage, CourseLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
 
 function html(children: preact.ComponentChildren): string {
@@ -50,7 +50,7 @@ describe("DataText", () => {
     );
   });
 
-  it("shows card text in the deck's card language first, as DataLine does, but never prose", () => {
+  it("shows card text in the deck's card language first, as DataLine does, but not prose", () => {
     const text = { en: "house", sv: "hus" };
     expect(
       html(
@@ -61,6 +61,18 @@ describe("DataText", () => {
         </CardLanguage>,
       ),
     ).toBe('<p lang="sv">hus</p><span lang="sv">hus</span><div class="theory"><p>house</p></div>');
+  });
+
+  it("shows a course's text, prose too, in its course language first", () => {
+    const text = { en: "house", sv: "hus" };
+    expect(
+      html(
+        <CourseLanguage language="sv">
+          <DataText text={text} markdown={false} />
+          <DataProse text={text} markdown={false} class="theory" />
+        </CourseLanguage>,
+      ),
+    ).toBe('<p lang="sv">hus</p><div class="theory" lang="sv"><p>hus</p></div>');
   });
 
   it("shows Markdown past the parser's limits as plain text", () => {
@@ -111,7 +123,7 @@ describe("useProseChunks", () => {
     return <>{useProseChunks(text, markdown)}</>;
   }
 
-  it("counts the chunks DataProse shows a text in, in the reader's language", () => {
+  it("counts the chunks DataProse shows a text in, in the language it shows it in", () => {
     const text = { en: "a\n\n---\n\nb\n\n---\n\nc", sv: "a\n\n---\n\nb" };
     expect(html(<Count text={text} markdown />)).toBe("3");
     const swedish = render(
@@ -120,6 +132,13 @@ describe("useProseChunks", () => {
       </I18nProvider>,
     );
     expect(swedish.container).toHaveTextContent("2");
+    expect(
+      html(
+        <CourseLanguage language="sv">
+          <Count text={text} markdown />
+        </CourseLanguage>,
+      ),
+    ).toBe("2");
   });
 
   it("is one for plain text and for text past the parser's limits", () => {
