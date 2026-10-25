@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.10.0](https://github.com/solid-memo/website/compare/v6.9.0...v6.10.0) (2026-10-25)
+
+### Features
+
+* **ui:** offer logging in on the landing page, before creating a Pod ([4f8017a](https://github.com/solid-memo/website/commit/4f8017a6f6a6c1a8160219d4acbe529855addf57)), closes [#299](https://github.com/solid-memo/website/issues/299)
+
 ## [6.9.0](https://github.com/solid-memo/website/compare/v6.8.0...v6.9.0) (2026-10-24)
 
 ### Features
