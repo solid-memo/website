@@ -6,8 +6,8 @@ import { cardLabel, cardLabelText, isMarkdown, type CardContent } from "@solid-m
 import type { LangText } from "@solid-memo/domain/langText";
 import { labelText } from "@solid-memo/markdown/plainText";
 import { breakable } from "./breakable";
-import { useCardText } from "./cardLanguage";
-import { useI18n, type I18n } from "./i18n";
+import { useCardText, useCourseText } from "./cardLanguage";
+import type { I18n } from "./i18n";
 import { MarkdownBlocks, MarkdownInlines } from "./Markdown";
 import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache";
 
@@ -17,7 +17,8 @@ import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache
  * page's, as ReaderText does (docs/markdown.md). Under a deck's
  * CardLanguage, it is card text, shown in the deck's card language first
  * (useCardText); so are DataLine and DataLineContent. A chapter's
- * description is shown outside one. Text not in Markdown
+ * description is shown under its course's CourseLanguage, which is a
+ * CardLanguage too, in the course's language first. Text not in Markdown
  * (`markdown` false) renders exactly as plain text always has: a
  * paragraph of the text as written, which may wrap after a slash
  * (`breaks`, breakable).
@@ -66,8 +67,10 @@ export function DataText({
 
 /**
  * Text from data that is prose of its own, such as a step's theory: a
- * `div` of the given class, in the reader's language as ReaderText is
- * (never a deck's card language: theory is no card's text).
+ * `div` of the given class, in the reader's language as ReaderText is,
+ * but in the course's language first under its CourseLanguage
+ * (useCourseText; never a plain deck's card language: theory is no
+ * card's text).
  * Plain text is split into paragraphs at its blank lines; Markdown is
  * shown a chunk at a time, `chunk` (0 first, below useProseChunks), the
  * chunks split at its top-level thematic breaks, which show nothing
@@ -85,9 +88,9 @@ export function DataProse({
   chunk?: number;
   class: string;
 }) {
-  const { readerText, readerLang } = useI18n();
-  const shown = readerText(text);
-  const lang = readerLang(text);
+  const { cardText, cardLang } = useCourseText();
+  const shown = cardText(text);
+  const lang = cardLang(text);
   const chunks = markdown ? markdownChunks(shown) : null;
   if (chunks !== null) {
     return (
@@ -109,10 +112,13 @@ export function DataProse({
   );
 }
 
-/** How many chunks DataProse shows a text in, in the reader's language: one for plain text. */
+/**
+ * How many chunks DataProse shows a text in, in the language it shows it
+ * in (the course's first, under its CourseLanguage): one for plain text.
+ */
 export function useProseChunks(text: LangText, markdown: boolean): number {
-  const { readerText } = useI18n();
-  return (markdown ? markdownChunks(readerText(text))?.length : undefined) ?? 1;
+  const { cardText } = useCourseText();
+  return (markdown ? markdownChunks(cardText(text))?.length : undefined) ?? 1;
 }
 
 /**

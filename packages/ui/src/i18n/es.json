@@ -332,7 +332,9 @@
       "one": "{done} de {count} paso completado",
       "many": "{done} de {count} de pasos completados",
       "other": "{done} de {count} pasos completados"
-    }
+    },
+    "preferencesButton": "Preferencias",
+    "preferencesLabel": "Preferencias del curso"
   },
   "chapterPlayer": {
     "step": "Paso {number} de {count}",
@@ -685,6 +687,12 @@
       "hint": "El idioma en que se muestran primero las tarjetas de este mazo, dondequiera que aparezcan. Una tarjeta sin texto en ese idioma se muestra como siempre. El nombre y la descripción del mazo no cambian.",
       "none": "Las tarjetas de este mazo no indican ningún idioma para elegir.",
       "save": "Guardar idioma de las tarjetas"
+    },
+    "courseLanguage": {
+      "label": "Idioma del curso",
+      "hint": "El idioma en que se muestra primero este curso: su título y su descripción, sus capítulos con su teoría y las tarjetas de sus preguntas. El texto que no está en ese idioma se muestra como siempre.",
+      "none": "Este curso no indica ningún idioma para elegir.",
+      "save": "Guardar idioma del curso"
     },
     "languages": {
       "heading": "Idiomas",

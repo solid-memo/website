@@ -165,6 +165,22 @@ describe("CourseContainer", () => {
     // Nor a library to add decks from: no button to it, and no empty row of actions.
     expect(screen.queryByRole("link", { name: "Deck library" })).toBeNull();
     expect(document.querySelector(".actions")).toBeNull();
+    // Nor preferences: the course is no learner's deck.
+    expect(screen.queryByRole("link", { name: "Course preferences" })).toBeNull();
+  });
+
+  it("links to the course's preferences beside its title, where its course language is chosen", () => {
+    const course = makeCourse();
+    render(<Page course={course} />);
+    const preferences = screen.getByRole("link", { name: "Course preferences" });
+    expect(preferences).toHaveTextContent("Preferences");
+    expect(preferences).toHaveAttribute(
+      "href",
+      routeToHash({ screen: "deckPreferences", instanceUrl, deckUrl: course.deck.url }),
+    );
+    expect(preferences.closest("header")).toContainElement(
+      screen.getByRole("heading", { level: 2 }),
+    );
   });
 
   it("offers the deck library after the way on, as a secondary button", () => {

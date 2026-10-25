@@ -299,8 +299,9 @@ data.
 │                        (sm:deckNewCardsPerDay/MaxReviewsPerDay), and
 │                        for a course the chapters completed
 │                        (sm:completedChapter); the language its
-│                        card text is shown in first
-│                        (sm:deckCardLanguage, outside the shape);
+│                        card text (and a course's text) is shown
+│                        in first (sm:deckCardLanguage, outside the
+│                        shape);
 │                        beside each deck its
 │                        dcat:Distribution (#deck-X-cards) and the
 │                        foaf:Agent nodes of its creators (#agent-…);
@@ -586,7 +587,10 @@ graph LR
   its fronts, backs, notes, labels, picture descriptions and wrong
   options then rank that language ahead of the app's, and a card
   without text in it is shown as usual ([i18n.md](i18n.md#which-language)).
-  The deck's title, description and keywords do not follow it. Like
+  On a deck that is a course it ranks all of the course's text too: the
+  course's title and description, its chapters' titles and descriptions
+  and its steps' theory, on the course's own screens. The keywords, and
+  a plain deck's title and description, do not follow it. Like
   `sm:position` and `sm:completedChapter` it belongs to no shape, so
   `DeckV6` is unchanged: every other write of the deck keeps it as the
   entry has it (`withDeck`), so a deck read before it changed cannot

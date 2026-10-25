@@ -4,7 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 import type { Card, Deck } from "./deck";
-import { cardLanguageTag, preferableCardLanguages, withCardLanguage } from "./deckCardLanguage";
+import type { CourseChapter } from "./course";
+import {
+  cardLanguageTag,
+  preferableCardLanguages,
+  preferableCourseLanguages,
+  withCardLanguage,
+} from "./deckCardLanguage";
 
 const deck: Deck = {
   id: "deck-1",
@@ -72,5 +78,58 @@ describe("preferableCardLanguages", () => {
     ];
     expect(preferableCardLanguages(cards)).toEqual(["en", "en-gb", "fr", "sv"]);
     expect(preferableCardLanguages([])).toEqual([]);
+  });
+});
+
+describe("preferableCourseLanguages", () => {
+  function chapter(
+    title: CourseChapter["title"],
+    description: CourseChapter["description"],
+    theories: CourseChapter["title"][],
+  ): CourseChapter {
+    return {
+      id: "ch-1",
+      url: "https://library.example/c.ttl#ch-1",
+      position: 1,
+      title,
+      description,
+      steps: theories.map((theory, index) => ({
+        id: `step-${index}`,
+        url: `https://library.example/c.ttl#step-${index}`,
+        position: index,
+        theory,
+        questionIds: [],
+      })),
+      reviewQuestionIds: [],
+    };
+  }
+
+  it("offers the languages of its cards, its release's and its own text, in order", () => {
+    const release = {
+      title: { en: "Basics", de: "Grundlagen" },
+      description: { en: "About", "": "untagged" },
+      cards: [{ ...card("q-1", { en: "Q", ko: "질문" }, { en: "A" }), formatVersion: 7 }],
+    };
+    const outline = {
+      chapters: [
+        chapter({ en: "One", es: "Uno" }, { fr: "Un" }, [{ en: "Theory", sv: "Teori" }]),
+        chapter({ en: "Two" }, undefined, [{ zxx: "404" }]),
+      ],
+    };
+    const cards = [card("mine", { ar: "بيت" }, { en: "house" })];
+    expect(preferableCourseLanguages(cards, release, outline)).toEqual([
+      "ar",
+      "de",
+      "en",
+      "es",
+      "fr",
+      "ko",
+      "sv",
+    ]);
+  });
+
+  it("offers the release's languages before any question is answered", () => {
+    const release = { title: { en: "Basics", sv: "Grunder" }, cards: [] };
+    expect(preferableCourseLanguages([], release, { chapters: [] })).toEqual(["en", "sv"]);
   });
 });

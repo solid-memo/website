@@ -250,6 +250,16 @@ describe("DeckPreferencesScreen", () => {
     expect(props.onSave).not.toHaveBeenCalled();
   });
 
+  it("names a course's choice its course language", () => {
+    const props = renderScreen({ course: true });
+    fireEvent.input(screen.getByRole("combobox", { name: "Course language" }), {
+      target: { value: "sv" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save course language" }));
+    expect(props.onSetCardLanguage).toHaveBeenCalledWith("sv");
+    expect(screen.queryByRole("combobox", { name: "Card language" })).not.toBeInTheDocument();
+  });
+
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>

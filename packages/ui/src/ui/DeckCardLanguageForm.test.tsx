@@ -79,6 +79,23 @@ describe("DeckCardLanguageForm", () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
+  it("names a course's choice its course language, in words of its own", () => {
+    const { onSave, unmount } = renderForm({ course: true, value: "sv" });
+    const course = screen.getByRole("combobox", { name: "Course language" });
+    expect(course).toHaveValue("sv");
+    expect(course).toHaveAccessibleDescription(
+      "The language this course is shown in first: its title and description, its chapters and their theory, and the cards of its questions. Text not in it is shown as usual.",
+    );
+    expect(screen.getByRole("option", { name: "The app's language" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save course language" }));
+    expect(onSave).toHaveBeenLastCalledWith("sv");
+    unmount();
+    renderForm({ course: true, languages: [] });
+    expect(screen.getByRole("combobox", { name: "Course language" })).toHaveAccessibleDescription(
+      "This course states no language to choose.",
+    );
+  });
+
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
@@ -89,5 +106,23 @@ describe("DeckCardLanguageForm", () => {
       "Appens språk",
     );
     expect(screen.getByRole("button", { name: "Spara kortens språk" })).toBeInTheDocument();
+  });
+
+  it("speaks Swedish for a course", () => {
+    render(
+      <I18nProvider locale="sv" onChoose={() => undefined}>
+        <DeckCardLanguageForm
+          value={undefined}
+          languages={["sv"]}
+          course
+          busy={false}
+          onSave={vi.fn()}
+        />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole("combobox", { name: "Kursens språk" })).toHaveDisplayValue(
+      "Appens språk",
+    );
+    expect(screen.getByRole("button", { name: "Spara kursens språk" })).toBeInTheDocument();
   });
 });

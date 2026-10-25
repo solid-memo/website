@@ -10,7 +10,7 @@ import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { Loading } from "./Loading";
-import { ReaderText } from "./ReaderText";
+import { CourseText } from "./ReaderText";
 
 /**
  * How the chapter's completion stands, once every question is answered
@@ -76,7 +76,7 @@ export function ChapterReviewScreen({
   return (
     <section class="course-review">
       <header>
-        <h2>{tx("chapterReview.heading", { chapter: <ReaderText text={chapterTitle} /> })}</h2>
+        <h2>{tx("chapterReview.heading", { chapter: <CourseText text={chapterTitle} /> })}</h2>
         {started && card !== null && (
           <span class="hint">{t("chapterReview.position", { position, total })}</span>
         )}

@@ -23,6 +23,8 @@ export interface CourseLinks {
   decksHref?(instanceUrl: string): string;
   /** The deck library, which a course's page points to beside its way on; none where there is no library to add decks from. */
   libraryHref?(instanceUrl: string): string;
+  /** The course's preferences, where its course language is chosen; none where the course is no learner's deck. */
+  preferencesHref?(instanceUrl: string, deckUrl: string): string;
 }
 
 /** Solid Memo's course routes. */
@@ -34,6 +36,8 @@ export const APP_COURSE_LINKS: CourseLinks = {
     routeToHash({ screen: "courseReview", instanceUrl, deckUrl, chapterUrl }),
   decksHref,
   libraryHref,
+  preferencesHref: (instanceUrl, deckUrl) =>
+    routeToHash({ screen: "deckPreferences", instanceUrl, deckUrl }),
 };
 
 export const CourseLinksContext = createContext<CourseLinks>(APP_COURSE_LINKS);

@@ -326,7 +326,9 @@
     "stepsDone": {
       "one": "{done} of {count} step done",
       "other": "{done} of {count} steps done"
-    }
+    },
+    "preferencesButton": "Preferences",
+    "preferencesLabel": "Course preferences"
   },
   "chapterPlayer": {
     "step": "Step {number} of {count}",
@@ -659,6 +661,12 @@
       "hint": "The language this deck's cards are shown in first, wherever they appear. A card without text in it is shown as usual. The deck's name and description are not affected.",
       "none": "This deck's cards state no language to choose.",
       "save": "Save card language"
+    },
+    "courseLanguage": {
+      "label": "Course language",
+      "hint": "The language this course is shown in first: its title and description, its chapters and their theory, and the cards of its questions. Text not in it is shown as usual.",
+      "none": "This course states no language to choose.",
+      "save": "Save course language"
     },
     "languages": {
       "heading": "Languages",

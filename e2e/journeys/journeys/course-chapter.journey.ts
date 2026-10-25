@@ -8,7 +8,10 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
 import type { Answers } from "../pages/CourseQuestion.ts";
 
 /**
- * A learner works through a course's first chapter (docs/courses.md, "The
+ * A learner reads a course in a language of its own first (docs/i18n.md,
+ * "Which language"), chosen on its preferences: its title, chapters and
+ * theory in Swedish, the app's own words in English; then, back in the
+ * app's language, works through its first chapter (docs/courses.md, "The
  * learner's flow"): each step's theory a chunk at a time, then its
  * questions without it, each answer adding its card to the deck; the
  * word before the final review; the review, where a question answered
@@ -38,6 +41,30 @@ test("work through a course's first chapter and its final review @course", async
   await app.step("03 · Start the course for newcomers", async () => {
     course = await app.decks.newcomerCourseTitle();
     await app.decks.startNewcomerCourse(course);
+  });
+
+  await app.step(
+    "03b · Choose Swedish as the course's language: its title and chapters in it, the app's words in English",
+    async () => {
+      await app.course.openPreferences();
+      await app.deckPreferences.chooseCourseLanguage("sv");
+      await app.deckPreferences.backToCourse();
+      await app.course.expectCourseLanguage("sv");
+    },
+  );
+
+  await app.step("03c · A chapter's title and theory in Swedish too", async () => {
+    await app.course.start();
+    await app.chapter.expectCourseLanguage("sv");
+    await app.chrome.breadcrumb("breadcrumbs.course");
+  });
+
+  await app.step("03d · Back to the app's language for the course", async () => {
+    await app.course.openPreferences();
+    await app.deckPreferences.chooseCourseLanguage(null);
+    await app.deckPreferences.backToCourse();
+    await app.course.expectCourseLanguage(null);
+    await app.course.expectShown(course);
   });
 
   await app.step(

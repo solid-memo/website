@@ -15,9 +15,10 @@ import type { CompletedChapter } from "./CourseContainer";
 import { Confetti } from "./Confetti";
 import { DataText } from "./DataText";
 import { CheckIcon, LibraryIcon } from "./icons";
+import { useCourseText } from "./cardLanguage";
 import { useI18n, type I18n } from "./i18n";
 import { linkify } from "./linkify";
-import { ReaderText } from "./ReaderText";
+import { CourseText } from "./ReaderText";
 
 function stateLabel(state: ChapterState, t: I18n["t"]): string {
   switch (state) {
@@ -46,7 +47,9 @@ const SPARKLES = 8;
  * the Studio's trial). Beside the way on, or back, a secondary button
  * leads to the deck library where there is one, since a course runs
  * alongside other decks. A notice (a newer release of the course on
- * offer) goes under the blurb.
+ * offer) goes under the blurb. Beside the title, a button leads to the
+ * course's preferences where there are any (none in the trial), where
+ * its course language is chosen.
  *
  * Coming back from a chapter just completed, the page cheers: a word
  * that the chapter is done, above the button on, which takes the focus
@@ -67,6 +70,7 @@ export function CourseScreen({
   continueHref,
   decksHref,
   libraryHref,
+  preferencesHref,
   justCompleted,
   notice,
 }: {
@@ -84,12 +88,15 @@ export function CourseScreen({
   decksHref?: string;
   /** The deck library, offered after the way on or back; no button without one. */
   libraryHref?: string;
+  /** The course's preferences, linked beside its title; no button without them. */
+  preferencesHref?: string;
   /** The chapter the learner has just completed, to cheer about. */
   justCompleted?: CompletedChapter;
   /** Shown under the blurb: the offer of a newer release. */
   notice?: ComponentChildren;
 }) {
-  const { t, tx, readerText, readerLang } = useI18n();
+  const { t, tx } = useI18n();
+  const { cardText, cardLang } = useCourseText();
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
   const doneCount = progress.chapters.filter((chapter) => chapter.state === "done").length;
   const library =
@@ -104,15 +111,20 @@ export function CourseScreen({
       <section class="course">
         <header>
           <h2>
-            <ReaderText text={title} />
+            <CourseText text={title} />
           </h2>
           <span class="hint">
             {t("course.chaptersDone", { done: doneCount, count: outline.chapters.length })}
           </span>
+          {preferencesHref !== undefined && (
+            <a class="button" href={preferencesHref} aria-label={t("course.preferencesLabel")}>
+              {t("course.preferencesButton")}
+            </a>
+          )}
         </header>
         {description !== undefined && (
-          <p class="deck-description" lang={readerLang(description)}>
-            {linkify(readerText(description))}
+          <p class="deck-description" lang={cardLang(description)}>
+            {linkify(cardText(description))}
           </p>
         )}
         {notice}
@@ -121,7 +133,7 @@ export function CourseScreen({
             <p>
               {justCompleted!.finishedCourse
                 ? t("course.courseCompleted")
-                : tx("course.chapterCompleted", { chapter: <ReaderText text={completed.title} /> })}
+                : tx("course.chapterCompleted", { chapter: <CourseText text={completed.title} /> })}
             </p>
             {continueHref !== undefined && <p>{t("course.continueOrStop")}</p>}
           </div>
@@ -164,10 +176,10 @@ export function CourseScreen({
                     {t("course.chapterNumber", { number: index + 1 })}
                   </span>{" "}
                   {state === "locked" ? (
-                    <ReaderText text={chapter.title} />
+                    <CourseText text={chapter.title} />
                   ) : (
                     <a href={chapterHref(chapter)}>
-                      <ReaderText text={chapter.title} />
+                      <CourseText text={chapter.title} />
                     </a>
                   )}
                 </h3>

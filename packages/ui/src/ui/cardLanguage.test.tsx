@@ -5,9 +5,9 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import type { LangText } from "@solid-memo/domain/langText";
-import { CardLanguage, useCardText } from "./cardLanguage";
+import { CardLanguage, CourseLanguage, useCardText } from "./cardLanguage";
 import { createI18n } from "./i18n";
-import { CardText, ReaderText } from "./ReaderText";
+import { CardText, CourseText, ReaderText } from "./ReaderText";
 
 const HOUSE: LangText = { en: "house", sv: "hus", ko: "집" };
 
@@ -58,6 +58,34 @@ describe("useCardText", () => {
     );
     expect(screen.getByRole("heading")).toHaveTextContent("Words");
     expect(screen.getByText("집")).toHaveAttribute("lang", "ko");
+  });
+});
+
+describe("CourseLanguage", () => {
+  it("shows a course's own text and its cards in its course language first", () => {
+    render(
+      <CourseLanguage language="ko">
+        <h2>
+          <CourseText text={{ en: "Words", ko: "단어" }} />
+        </h2>
+        <p>
+          <CardText text={HOUSE} />
+        </p>
+      </CourseLanguage>,
+    );
+    expect(screen.getByText("단어")).toHaveAttribute("lang", "ko");
+    expect(screen.getByText("집")).toHaveAttribute("lang", "ko");
+  });
+
+  it("leaves a course's text to the reader's order under a plain deck's CardLanguage", () => {
+    render(
+      <CardLanguage language="ko">
+        <h2>
+          <CourseText text={{ en: "Words", ko: "단어" }} />
+        </h2>
+      </CardLanguage>,
+    );
+    expect(screen.getByRole("heading")).toHaveTextContent("Words");
   });
 });
 

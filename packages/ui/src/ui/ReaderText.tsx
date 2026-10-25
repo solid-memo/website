@@ -5,7 +5,7 @@
 import { Fragment } from "preact";
 import type { LangText } from "@solid-memo/domain/langText";
 import { breakable } from "./breakable";
-import { useCardText } from "./cardLanguage";
+import { useCardText, useCourseText } from "./cardLanguage";
 import { useI18n } from "./i18n";
 
 /**
@@ -22,12 +22,22 @@ export function ReaderText({ text, breaks = false }: { text: LangText; breaks?: 
 
 /**
  * A card's text, as ReaderText, but in the deck's card language first
- * when the screen is under its CardLanguage (useCardText); a deck's or a
- * chapter's title stays a ReaderText.
+ * when the screen is under its CardLanguage (useCardText); a deck's title
+ * stays a ReaderText, and a course's is a CourseText.
  */
 export function CardText({ text, breaks = false }: { text: LangText; breaks?: boolean }) {
   const { cardText, cardLang } = useCardText();
   return <Marked shown={cardText(text)} lang={cardLang(text)} breaks={breaks} />;
+}
+
+/**
+ * A course's own text, such as its or a chapter's title, as ReaderText,
+ * but in the course's language first on a screen under its
+ * CourseLanguage (useCourseText).
+ */
+export function CourseText({ text }: { text: LangText }) {
+  const { cardText, cardLang } = useCourseText();
+  return <Marked shown={cardText(text)} lang={cardLang(text)} breaks={false} />;
 }
 
 /** Text as shown, in a span marked with its language when that is not the page's. */

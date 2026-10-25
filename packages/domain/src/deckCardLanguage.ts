@@ -4,14 +4,19 @@
 
 import { AppError } from "./appError";
 import { cardLanguages, UNSTATED } from "./cardQuery";
-import type { Card, Deck } from "./deck";
+import type { CourseOutline } from "./course";
+import type { CardContent, Deck } from "./deck";
+import type { LibraryDeckContent } from "./library";
 import { canonicalTag, NO_LANGUAGE } from "./languageTag";
 
 /**
  * A deck's card language: the language the learner wants the deck's
- * card text shown in first. It ranks card text only, ahead of the app's
- * language and the browser's; a card without text in it is shown as
- * usual, and the deck's title, description and keywords never follow it.
+ * card text shown in first, ahead of the app's language and the
+ * browser's. On a deck that is a course it ranks all of the course's
+ * text too: its title and description, its chapters' titles and
+ * descriptions and its steps' theory. A text not in it is shown as
+ * usual; the deck's keywords, and the title and description of a deck
+ * that is no course, never follow it.
  */
 
 /**
@@ -43,6 +48,40 @@ export function withCardLanguage(deck: Deck, language: string | null): Deck {
  * their fronts and backs, in order, without untagged text and text in no
  * language.
  */
-export function preferableCardLanguages(cards: readonly Card[]): string[] {
+export function preferableCardLanguages(
+  cards: readonly Pick<CardContent, "front" | "back">[],
+): string[] {
   return cardLanguages(cards).filter((tag) => tag !== UNSTATED && tag !== NO_LANGUAGE);
+}
+
+/**
+ * The languages a course can be shown in first: those its deck's cards
+ * and its release's cards state (preferableCardLanguages), and those its
+ * release's title and description, its chapters' titles and
+ * descriptions and its steps' theory state, in order, without untagged
+ * text and text in no language. A course's deck starts with no cards,
+ * each joining it as its question is first answered, so the release
+ * tells what the course can be read in.
+ */
+export function preferableCourseLanguages(
+  cards: readonly Pick<CardContent, "front" | "back">[],
+  release: Pick<LibraryDeckContent, "title" | "description" | "cards">,
+  outline: Pick<CourseOutline, "chapters">,
+): string[] {
+  const texts = [
+    release.title,
+    release.description ?? {},
+    ...outline.chapters.flatMap((chapter) => [
+      chapter.title,
+      chapter.description ?? {},
+      ...chapter.steps.map((step) => step.theory),
+    ]),
+  ];
+  const tags = new Set([
+    ...preferableCardLanguages([...cards, ...release.cards]),
+    ...texts
+      .flatMap((text) => Object.keys(text))
+      .filter((tag) => tag !== "" && tag !== NO_LANGUAGE),
+  ]);
+  return [...tags].sort();
 }

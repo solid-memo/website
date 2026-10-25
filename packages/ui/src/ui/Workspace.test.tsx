@@ -14,6 +14,7 @@ import {
   type Deck,
 } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -2934,6 +2935,99 @@ describe("Workspace", () => {
           .getAllByRole("link")
           .map((l) => l.textContent),
       ).toEqual(["Decks", "Solid fundamentals", "Course", "Linked data", "Final review"]);
+    });
+
+    it("shows a course's own text, and names it in the trail, in its course language first", async () => {
+      const swedish = {
+        ...courseDeck,
+        title: { en: "Solid fundamentals", sv: "Solids grunder" },
+        cardLanguage: "sv",
+      };
+      const [first, second] = courseOutline.chapters;
+      const [step, ...steps] = first!.steps;
+      const outline = {
+        ...courseOutline,
+        chapters: [
+          {
+            ...first!,
+            steps: [
+              { ...step!, theory: { ...step!.theory, sv: "Saker namnges av IRI:er." } },
+              ...steps,
+            ],
+          },
+          second!,
+        ],
+      };
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(
+        courseUseCases({
+          listDecks: vi.fn(async () => [swedish]),
+          getCourse: vi.fn(async () => ({ ...makeCourse(), deck: swedish, outline })),
+        }),
+      );
+      const start = await screen.findByRole("link", { name: "Start the course" });
+      expect(screen.getByRole("heading", { level: 2 }).querySelector("[lang]")).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Solids grunder");
+      expect(screen.getByRole("link", { name: "Länkade data" }).firstElementChild).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      // A text not in it, and the app's own text, are shown as before.
+      expect(screen.getByText("Pods")).not.toHaveAttribute("lang");
+      expect(screen.getByText("A course on Solid.")).not.toHaveAttribute("lang");
+      const trail = () => within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+      expect(trail().getByRole("link", { name: "Solids grunder" })).toBeInTheDocument();
+      expect(document.title).toBe("Course – Solids grunder – Solid Memo");
+
+      fireEvent.click(start);
+      expect(await screen.findByRole("heading", { name: "Step 1 of 2" })).toBeInTheDocument();
+      expect(document.querySelector(".course-theory")).toHaveAttribute("lang", "sv");
+      expect(document.querySelector(".course-theory")).toHaveTextContent(
+        "Saker namnges av IRI:er.",
+      );
+      expect(trail().getByRole("link", { name: "Länkade data" }).closest("[lang]")).toHaveAttribute(
+        "lang",
+        "sv",
+      );
+      await waitFor(() => expect(document.title).toBe("Länkade data – Course – Solid Memo"));
+    });
+
+    it("chooses a course's language from its page, and shows the course in it", async () => {
+      let current: Deck = courseDeck;
+      const useCases = courseUseCases({
+        listDecks: vi.fn(async () => [current]),
+        getCourse: vi.fn(async () => ({ ...makeCourse(), deck: current })),
+        deckRelease: vi.fn(async () => makeCourse().release),
+        setDeckCardLanguage: vi.fn(async (deck: Deck, language: string | null) => {
+          current = withCardLanguage(deck, language);
+          return current;
+        }),
+      });
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Course preferences" }));
+      const select = await screen.findByRole("combobox", { name: "Course language" });
+      // No card is in the deck yet: the course's outline states Swedish.
+      await waitFor(() =>
+        expect(within(select).getByRole("option", { name: /svenska/ })).toBeInTheDocument(),
+      );
+      fireEvent.input(select, { target: { value: "sv" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save course language" }));
+      await waitFor(() =>
+        expect(useCases.setDeckCardLanguage).toHaveBeenCalledWith(courseDeck, "sv"),
+      );
+
+      window.location.hash = routeToHash(courseRoute);
+      await waitFor(() =>
+        expect(
+          screen.getByRole("link", { name: "Länkade data" }).firstElementChild,
+        ).toHaveAttribute("lang", "sv"),
+      );
+      // The app's own text stays in the app's language.
+      expect(screen.getByRole("link", { name: "Start the course" })).not.toHaveAttribute("lang");
     });
 
     it("takes the learner back to the course from a chapter completed, cheering it once", async () => {

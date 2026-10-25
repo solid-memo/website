@@ -238,11 +238,11 @@ solid-memo:deckMaxReviewsPerDay
 solid-memo:deckCardLanguage
     a owl:DatatypeProperty ;
     rdfs:label "deck card language" ;
-    rdfs:comment "The language, as a lower-case BCP 47 tag, the learner wants this deck's card text shown in first: its fronts, backs, notes, labels, picture descriptions and wrong options (distractors). A card without text in it falls back to the usual order (the app's language, then the browser's, then English). The deck's own title, description and keywords are not affected. Absent means the usual order." ;
+    rdfs:comment "The language, as a lower-case BCP 47 tag, the learner wants this deck's card text shown in first: its fronts, backs, notes, labels, picture descriptions and wrong options (distractors). On a deck that is a course it ranks all of the course's text too: the course's title and description, each chapter's title and description and each step's theory. A text with no value in that language falls back to the usual order (the app's language, then the browser's, then English). The deck's keywords, and the title and description of a deck that is no course, are not affected. Absent means the usual order." ;
     rdfs:domain solid-memo:Deck ;
     rdfs:range xsd:string ;
     rdfs:isDefinedBy <> ;
-    skos:historyNote "Added in 1.24. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it." .
+    skos:historyNote "Added in 1.24. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it. Its definition took in a course's text after 1.25, without a version bump, as no term was added and no stored value changed its meaning." .
 
 #################### Card ####################
 

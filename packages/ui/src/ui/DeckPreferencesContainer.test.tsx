@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { AppError } from "@solid-memo/domain/appError";
@@ -132,6 +132,141 @@ describe("DeckPreferencesContainer", () => {
     // The statistics name cards by the deck in their report, read before the choice.
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cardProgress"] });
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  describe("of a course", () => {
+    const sourceUrl = "https://library.example/decks/course/v1.ttl";
+    const course: Deck = { ...deck, sourceUrl, course: true };
+    const release = {
+      url: sourceUrl,
+      title: { en: "Basics", de: "Grundlagen" },
+      description: { en: "About", fr: "À propos" },
+      cards: [],
+      isCourse: true,
+    } as unknown as LibraryDeckContent;
+    const outline = {
+      releaseUrl: sourceUrl,
+      chapters: [
+        {
+          id: "ch-1",
+          url: `${sourceUrl}#ch-1`,
+          position: 1,
+          title: { en: "One", sv: "Ett" },
+          steps: [
+            {
+              id: "s-1",
+              url: `${sourceUrl}#s-1`,
+              position: 1,
+              theory: { en: "Theory", ko: "설명" },
+              questionIds: [],
+            },
+          ],
+          reviewQuestionIds: [],
+        },
+      ],
+    };
+    const options = (select: HTMLElement) =>
+      Array.from(select.querySelectorAll("option")).map((o) => o.value);
+
+    it("offers the languages the course states as its course language, before any card is in it", async () => {
+      const useCases = makeUseCasesFake({
+        deckRelease: vi.fn(async () => release),
+        getCourseSummary: vi.fn(async () => ({ outline, answeredCardIds: [] })),
+      });
+      const { queryClient } = renderContainer(useCases, course);
+      const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+      const select = await screen.findByRole("combobox", { name: "Course language" });
+      await waitFor(() => expect(options(select)).toEqual(["", "de", "en", "fr", "ko", "sv"]));
+      expect(useCases.getCourseSummary).toHaveBeenCalledWith(course);
+      fireEvent.input(select, { target: { value: "sv" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save course language" }));
+      await waitFor(() => expect(useCases.setDeckCardLanguage).toHaveBeenCalledWith(course, "sv"));
+      // The course's screens read it from the deck list.
+      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] }));
+    });
+
+    it("lists none but the choice while the course's release or outline is read", async () => {
+      const useCases = makeUseCasesFake({
+        deckRelease: vi.fn(async () => release),
+        getCourseSummary: vi.fn(() => new Promise<never>(() => undefined)),
+      });
+      renderContainer(useCases, { ...course, cardLanguage: "sv" });
+      const select = await screen.findByRole("combobox", { name: "Course language" });
+      await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalled());
+      expect(options(select)).toEqual(["", "sv"]);
+      expect(select).toHaveAccessibleDescription(/^The language this course is shown in first/);
+      cleanup();
+
+      const pending = makeUseCasesFake({
+        deckRelease: vi.fn(() => new Promise<never>(() => undefined)),
+      });
+      renderContainer(pending, { ...course, cardLanguage: "sv" });
+      const waiting = await screen.findByRole("combobox", { name: "Course language" });
+      await waitFor(() => expect(pending.deckRelease).toHaveBeenCalled());
+      expect(options(waiting)).toEqual(["", "sv"]);
+    });
+
+    it("offers what can be read when the course's outline or release cannot be", async () => {
+      const card: Card = {
+        id: "c1",
+        url: `${deck.cardsDocumentUrl}#c1`,
+        front: { es: "agua" },
+        back: { en: "water" },
+        createdAt: "",
+        formatVersion: 7,
+      };
+      const unreadable = vi.fn(async () => {
+        throw new Error("unreadable");
+      });
+      const outlineless = makeUseCasesFake({
+        listCards: vi.fn(async () => [card]),
+        deckRelease: vi.fn(async () => release),
+        getCourseSummary: unreadable,
+      });
+      renderContainer(outlineless, course);
+      let select = await screen.findByRole("combobox", { name: "Course language" });
+      await waitFor(() => expect(options(select)).toEqual(["", "de", "en", "es", "fr"]));
+      cleanup();
+
+      renderContainer(
+        makeUseCasesFake({
+          listCards: vi.fn(async () => [card]),
+          deckRelease: unreadable,
+          getCourseSummary: unreadable,
+        }),
+        course,
+      );
+      select = await screen.findByRole("combobox", { name: "Course language" });
+      await waitFor(() => expect(options(select)).toEqual(["", "en", "es"]));
+      cleanup();
+
+      // A deck that says it is a course though it is from no release.
+      renderContainer(
+        makeUseCasesFake({ listCards: vi.fn(async () => [card]), getCourseSummary: unreadable }),
+        { ...deck, course: true },
+      );
+      select = await screen.findByRole("combobox", { name: "Course language" });
+      await waitFor(() => expect(options(select)).toEqual(["", "en", "es"]));
+    });
+
+    it("tells a copy made before its deck said so by its release", async () => {
+      const useCases = makeUseCasesFake({
+        deckRelease: vi.fn(async () => release),
+        getCourseSummary: vi.fn(async () => ({ outline, answeredCardIds: [] })),
+      });
+      renderContainer(useCases, { ...deck, sourceUrl });
+      expect(await screen.findByRole("combobox", { name: "Course language" })).toBeInTheDocument();
+    });
+
+    it("reads no outline for a release that is no course", async () => {
+      const useCases = makeUseCasesFake({
+        deckRelease: vi.fn(async () => ({ ...release, isCourse: undefined })),
+      });
+      renderContainer(useCases, { ...deck, sourceUrl });
+      expect(await screen.findByRole("combobox", { name: "Card language" })).toBeInTheDocument();
+      await waitFor(() => expect(useCases.deckRelease).toHaveBeenCalled());
+      expect(useCases.getCourseSummary).not.toHaveBeenCalled();
+    });
   });
 
   it("shows why the card language could not be saved", async () => {

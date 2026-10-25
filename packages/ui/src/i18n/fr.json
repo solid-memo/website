@@ -332,7 +332,9 @@
       "one": "Étapes terminées : {done} sur {count}",
       "many": "Étapes terminées : {done} sur {count}",
       "other": "Étapes terminées : {done} sur {count}"
-    }
+    },
+    "preferencesButton": "Préférences",
+    "preferencesLabel": "Préférences du cours"
   },
   "chapterPlayer": {
     "step": "Étape {number} sur {count}",
@@ -685,6 +687,12 @@
       "hint": "La langue dans laquelle les cartes de ce paquet s’affichent en priorité, où qu’elles apparaissent. Une carte sans texte dans cette langue s’affiche comme d’habitude. Le nom et la description du paquet ne changent pas.",
       "none": "Les cartes de ce paquet n’indiquent aucune langue à choisir.",
       "save": "Enregistrer la langue des cartes"
+    },
+    "courseLanguage": {
+      "label": "Langue du cours",
+      "hint": "La langue dans laquelle ce cours s’affiche en priorité : son titre et sa description, ses chapitres et leur théorie, et les cartes de ses questions. Un texte qui n’existe pas dans cette langue s’affiche comme d’habitude.",
+      "none": "Ce cours n’indique aucune langue à choisir.",
+      "save": "Enregistrer la langue du cours"
     },
     "languages": {
       "heading": "Langues",
