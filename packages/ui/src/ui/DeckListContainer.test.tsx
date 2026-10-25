@@ -17,6 +17,7 @@ import { makeUseCasesFake } from "../test/useCasesFake";
 import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
+import { HIGHLIGHTS } from "./highlights";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -274,6 +275,14 @@ describe("DeckListContainer", () => {
     await screen.findByRole("link", { name: "Kanji N5" });
     expect(screen.queryByRole("complementary", { name: "Your courses" })).toBeNull();
     expect(useCases.getCourseSummary).not.toHaveBeenCalled();
+  });
+
+  it("asks which of the app's highlights are new", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kanji N5" });
+    expect(useCases.unseenHighlights).toHaveBeenCalledWith(HIGHLIGHTS.map(({ id }) => id));
+    expect(screen.queryByRole("complementary", { name: /^New in/ })).toBeNull();
   });
 
   it("invites a learner on SM-2 to FSRS-6 above the list", async () => {

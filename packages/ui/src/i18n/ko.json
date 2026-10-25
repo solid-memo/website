@@ -601,6 +601,11 @@
     "switch": "FSRS-6으로 바꾸기",
     "notNow": "나중에"
   },
+  "whatsNew": {
+    "heading": "Solid Memo {version}의 새로운 기능",
+    "close": "닫기",
+    "highlight": {}
+  },
   "deckPreferences": {
     "loading": "설정을 불러오는 중…",
     "heading": "덱 설정: {deck}",

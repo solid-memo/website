@@ -625,6 +625,11 @@
     "switch": "Zu FSRS-6 wechseln",
     "notNow": "Nicht jetzt"
   },
+  "whatsNew": {
+    "heading": "Neu in Solid Memo {version}",
+    "close": "Schließen",
+    "highlight": {}
+  },
   "deckPreferences": {
     "loading": "Einstellungen werden geladen…",
     "heading": "Einstellungen: {deck}",

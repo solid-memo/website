@@ -211,6 +211,39 @@ checks it). At the end of the file, a section written by hand sums up
 what the first version, 1.0.0, contains, which its generated entry
 lists only in part.
 
+## Highlights for users
+
+A release worth announcing can bring highlights: a sentence or two,
+written by hand for users, in every app language, of what it brings
+them. The app shows the highlights a browser has not shown yet in a
+card at the top of the deck list, newest first, until it is closed
+([user-guide.md](user-guide.md#your-decks)). A patch or an internal
+change brings none, so it never shows the card.
+
+A highlight has an id, not a version: semantic-release picks the
+version only as it releases, after the highlight is written. The
+browser keeps the ids it has shown (`solid-memo:seenHighlights`,
+[privacy.md](privacy.md)). A first visit keeps them all without
+showing any, so a new user is not greeted with a list of changes, and
+so is a browser that had kept none.
+
+To add one:
+
+1. Add `{ id, text }` at the top of `HIGHLIGHTS` in
+   [highlights.ts](../packages/ui/src/ui/highlights.ts). The id is
+   kebab-case, such as `landing-login`, and is never reused or renamed:
+   a renamed highlight shows again.
+2. Add its text as `whatsNew.highlight.<the id in camelCase>`, such as
+   `whatsNew.highlight.landingLogin`, to `en.json` and every other
+   language's file ([i18n.md](i18n.md#messages)).
+
+[highlights.test.ts](../packages/ui/src/ui/highlights.test.ts) holds
+the ids to kebab-case, each once, and each text to its key;
+[i18n.test.tsx](../packages/ui/src/ui/i18n.test.tsx) holds every
+language to the keys English has. A highlight shown long ago can be
+taken out of the list and the message files, so they don't grow
+forever.
+
 ## What each stage checks
 
 A change to `main` meets CI up to four times on its way to the site,

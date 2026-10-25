@@ -108,6 +108,11 @@ straight to your decks. "Log out", at the top, ends the session.
 
 The deck list is home. From the top:
 
+- **New in Solid Memo**: when the app has new highlights this browser
+  has not shown, a card lists them, newest first, under the version's
+  number. **Close** puts it away until a later version brings more, on
+  this browser only. A first visit shows none, and a version that only
+  fixes things brings none.
 - **Today**: once you have studied today, a strip with your streak (days
   in a row), a word of praise, and the day's numbers, with a link to
   all your statistics ([statistics.md](statistics.md#the-today-strip)).

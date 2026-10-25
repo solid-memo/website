@@ -16,6 +16,7 @@ import { Loading } from "./Loading";
 import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { SchedulerInvitationContainer } from "./SchedulerInvitation";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
+import { WhatsNewContainer } from "./WhatsNew";
 import {
   courseHref,
   deckHref,
@@ -41,6 +42,8 @@ import {
  * (NewcomerCourseContainer), which opens once started. A learner still
  * on SM-2 is invited to switch to FSRS-6 above the list
  * (SchedulerInvitationContainer), until they switch or answer "Not now".
+ * The highlights of a version this browser has not shown are at the top
+ * (WhatsNewContainer), until closed.
  */
 export function DeckListContainer({
   useCases,
@@ -76,6 +79,7 @@ export function DeckListContainer({
 
   return (
     <>
+      <WhatsNewContainer useCases={useCases} />
       <TodaySummaryContainer
         useCases={useCases}
         instance={instance}
