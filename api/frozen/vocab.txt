@@ -191,6 +191,7 @@ topics:music: topic
 topics:mythology: topic
 topics:physics: topic
 topics:portuguese: topic
+topics:psychology: topic
 topics:science: topic
 topics:spanish: topic
 topics:sports: topic
