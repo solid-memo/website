@@ -12,12 +12,19 @@ import { Screen } from "./Screen.ts";
  * English, not the app's.
  */
 export class CssLogin extends Screen {
+  /**
+   * Fills the login in once its Email has taken the focus its autofocus
+   * gives it: on a page slow to load, that comes late, and taken while
+   * the password is typed, sends the password into Email.
+   */
   async logIn(account: CssAccount): Promise<void> {
     await this.intent("Log in at the Solid server", async () => {
       await expect(this.page.getByRole("heading", { name: "Log in" })).toBeVisible({
         timeout: 30_000,
       });
-      await this.page.getByRole("textbox", { name: "Email" }).fill(account.email);
+      const email = this.page.getByRole("textbox", { name: "Email" });
+      await expect(email).toBeFocused();
+      await email.fill(account.email);
       await this.page.getByRole("textbox", { name: "Password" }).fill(account.password);
       await this.page.getByRole("button", { name: "Log in" }).click();
     });
