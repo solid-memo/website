@@ -742,8 +742,8 @@ a.hero-brand {
   text-decoration: none;
 }
 
-main.landing > h1,
-main.landing > a.hero-brand > h1 {
+main.landing > h1:not(.hero-heading),
+main.landing > a.hero-brand > h1:not(.hero-heading) {
   margin: 0.25rem 0 0.4rem;
   font-size: 2.8rem;
   text-align: center;
@@ -755,6 +755,11 @@ main.landing > a.hero-brand > h1 {
   text-align: center;
   text-wrap: balance;
   color: var(--text-muted);
+}
+
+/* The picture as the heading: it spells the name, so no text beside it. */
+h1.hero-heading {
+  margin: 0;
 }
 
 img.hero {

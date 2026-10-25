@@ -600,19 +600,30 @@ function SiteHeader({ link }: { link: AppIdentity["headerLink"] }) {
   );
 }
 
+/** The name the landing picture spells out in its letters. */
+const PICTURE_NAME = "Solid Memo";
+
 /**
- * The landing picture, decorative, over the app's name as the page's
- * heading. Given `home`, both are one link home, which the landing
+ * The landing picture and the app's name as the page's heading. Where
+ * the name is what the picture spells, the picture is the heading, so
+ * the name is not shown twice; any other name (the Studio's, a site's
+ * own) is the heading's text under the picture, which is then
+ * decorative. Given `home`, they are one link home, which the landing
  * follows by starting over (pressed where the hash already is home, the
  * link alone would not change a thing).
  */
 function Hero({ name, home }: { name: string; home?: { href: string; onFollow: () => void } }) {
-  const hero = (
-    <>
-      <img class="hero" src={illustrationUrl} alt="" width={640} height={427} />
-      <h1>{name}</h1>
-    </>
-  );
+  const hero =
+    name === PICTURE_NAME ? (
+      <h1 class="hero-heading">
+        <img class="hero" src={illustrationUrl} alt={name} width={640} height={427} />
+      </h1>
+    ) : (
+      <>
+        <img class="hero" src={illustrationUrl} alt="" width={640} height={427} />
+        <h1>{name}</h1>
+      </>
+    );
   if (home === undefined) return hero;
   return (
     <a class="brand hero-brand" href={home.href} onClick={home.onFollow}>
