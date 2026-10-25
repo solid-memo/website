@@ -535,6 +535,7 @@ screenshot of each.
 | A card in Markdown | [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts) | 04–07 |
 | The course for newcomers, from an empty deck list, and the way to the deck library beside it | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–07 |
 | A course's first chapter and its final review | [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts) | 03–08 |
+| Showing a course's title, chapters and theory in another language than the app's, and back | course-chapter | 03b–03d |
 | A course's answers and chapters in the statistics, and its most-confused options | course-chapter | 09–10 |
 | Adding a course from a link and playing it | [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts), second journey | 03–05 |
 | Solid Memo Studio | [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts) | 06–31 |

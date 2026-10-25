@@ -301,7 +301,10 @@ else offers nothing.
   `newcomer-course.journey.ts`, which expects an offer, and
   `course-chapter.journey.ts`, which works through the offered course's
   first chapter (its theory in chunks), are to be retired or moved to
-  another way in too ([testing.md](testing.md)).
+  another way in too ([testing.md](testing.md)). A course named instead
+  is read in Swedish by `course-chapter.journey.ts`: its title,
+  description, every chapter's title and its first step's theory state
+  Swedish, or the journey's course language changes with it.
 
 ## Use cases and ports
 

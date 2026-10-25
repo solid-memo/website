@@ -47,6 +47,44 @@ export class Course extends Screen {
     await this.app.chrome.expectBreadcrumbHere("breadcrumbs.course");
   }
 
+  /** The button beside the course's title: its preferences open, with its course language. */
+  async openPreferences(): Promise<void> {
+    await this.intent("Open the course's preferences", async () => {
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("course.preferencesLabel"), exact: true })
+        .click();
+      await this.app.chrome.expectBreadcrumbHere("breadcrumbs.preferences");
+    });
+  }
+
+  /**
+   * The course's own text, its title, description and chapters' titles,
+   * is shown in its course language `tag` (null: the app's, as the page
+   * is), marked with it, while the page and the app's own words stay in
+   * the app's language.
+   */
+  async expectCourseLanguage(tag: string | null): Promise<void> {
+    const course = this.page.getByRole("main").locator(".course");
+    const title = course.locator("header h2");
+    const chapters = course.locator(".course-chapter h3");
+    await expect(this.page.locator("html")).toHaveAttribute("lang", this.app.locale);
+    if (tag === null) {
+      await expect(title.locator("[lang]")).toHaveCount(0);
+      await expect(chapters.locator("[lang]")).toHaveCount(0);
+    } else {
+      await expect(title.locator(`[lang="${tag}"]`)).toHaveCount(1);
+      await expect(course.locator(".deck-description")).toHaveAttribute("lang", tag);
+      await expect(chapters.first()).toBeVisible();
+      // Every chapter's title, and only its title: its number is the app's.
+      await expect(chapters.locator(`[lang="${tag}"]`)).toHaveCount(await chapters.count());
+      await expect(chapters.first()).toContainText(this.t("course.chapterNumber", { number: 1 }));
+    }
+    await expect(
+      course.getByRole("link", { name: this.t("course.start"), exact: true }),
+    ).toBeVisible();
+  }
+
   /** "Start the course": its first chapter opens at its first step. */
   async start(): Promise<void> {
     await this.intent("Start the course", async () => {

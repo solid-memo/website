@@ -41,6 +41,27 @@ export class Chapter extends Screen {
   }
 
   /**
+   * The chapter's own text, its title and its step's theory, is shown in
+   * its course's language `tag`, marked with it, and so is its crumb in
+   * the trail, while the page and the app's own words ("Step 1 of 3")
+   * stay in the app's language.
+   */
+  async expectCourseLanguage(tag: string): Promise<void> {
+    await expect(this.page.locator("html")).toHaveAttribute("lang", this.app.locale);
+    await expect(this.title.locator(`[lang="${tag}"]`)).toHaveCount(1);
+    await expect(this.page.getByRole("main").locator(".course-theory")).toHaveAttribute(
+      "lang",
+      tag,
+    );
+    await expect(this.app.chrome.breadcrumbs.locator('[aria-current="page"]')).toHaveAttribute(
+      "lang",
+      tag,
+    );
+    await expect(this.step).toBeVisible();
+    await expect(this.continue.or(this.toQuestions)).toBeVisible();
+  }
+
+  /**
    * Reads the step's theory chunk by chunk ("Part 2 of 3", Continue),
    * then goes on to its questions, which the theory is not shown with.
    * The step's number and how many chunks it has.
