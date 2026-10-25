@@ -723,9 +723,12 @@ describe("AppShell", () => {
       "href",
       "https://igrant.io/datapod.html",
     );
-    // The picture is decorative; the product name is the page's heading.
-    expect(container.querySelector("img.hero")).toHaveAttribute("alt", "");
-    expect(screen.getByRole("heading", { level: 1, name: "Solid Memo" })).toBeInTheDocument();
+    // The picture spells the product name, so it is the page's heading: the name is not shown twice.
+    const heading = screen.getByRole("heading", { level: 1, name: "Solid Memo" });
+    expect(within(heading).getByRole("img", { name: "Solid Memo" })).toBe(
+      container.querySelector("img.hero"),
+    );
+    expect(heading).toHaveTextContent(/^$/);
     // Both are one link home, as the masthead's logo and name are.
     const home = screen.getByRole("link", { name: "Solid Memo" });
     expect(home).toHaveAttribute("href", "#/");
@@ -756,10 +759,15 @@ describe("AppShell", () => {
       oidcIssuer: "https://pods.school.example/",
       signUpUrl: "https://school.example/join",
     };
-    renderApp(makeUseCases(), { appName: "Example School Cards", providers: [school] });
+    const { container } = renderApp(makeUseCases(), {
+      appName: "Example School Cards",
+      providers: [school],
+    });
+    // The picture spells another name: it is decorative, and the site's own name is the heading's text.
     expect(
       await screen.findByRole("heading", { level: 1, name: "Example School Cards" }),
-    ).toBeInTheDocument();
+    ).toHaveTextContent("Example School Cards");
+    expect(container.querySelector("img.hero")).toHaveAttribute("alt", "");
     await waitFor(() => expect(document.title).toBe("Log in – Example School Cards"));
     expect(screen.getByRole("link", { name: /Example School Pods/ })).toHaveAttribute(
       "href",
