@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.11.0](https://github.com/solid-memo/website/compare/v6.10.2...v6.11.0) (2026-10-25)
+
+### Features
+
+* **ui:** let the landing picture be the heading where it spells the name ([157146b](https://github.com/solid-memo/website/commit/157146b45a78ade6e9b02ae7e90698129121eafd)), closes [#308](https://github.com/solid-memo/website/issues/308)
+
 ## [6.10.2](https://github.com/solid-memo/website/compare/v6.10.1...v6.10.2) (2026-10-25)
 
 ### Bug Fixes
