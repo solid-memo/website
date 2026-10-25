@@ -1079,15 +1079,14 @@
     "tryHeading": "Prova direkt",
     "tryAsGuest": "Prova utan att logga in",
     "tryAsGuestHint": "Inget konto behövs: studera som gäst. Det du lär dig sparas i den här webbläsaren, och du kan flytta det till din egen pod när du loggar in.",
-    "connectHeading": "Anslut din Pod",
-    "providerHeading": "Eller välj din leverantör",
-    "providerHint": "Har du inte ditt WebID till hands? Välj var din Pod finns och logga in där — ditt WebID följer med inloggningen.",
-    "setUpHeading": "Skaffa din Solid Pod",
-    "intro": "Dina data sparas i en Solid Pod som du själv styr över. Skapa en hos en Pod-leverantör, eller anslut en Pod som du redan har.",
+    "logInHeading": "Logga in med din Pod",
+    "webIdHeading": "Eller använd ditt WebID",
+    "providerHint": "Välj var din Pod finns och logga in där. Ditt WebID följer med inloggningen.",
+    "setUpHeading": "Ingen Pod än?",
+    "intro": "Dina data sparas i en Solid Pod som du själv styr över. Skapa en hos en Pod-leverantör och logga sedan in med den ovanför.",
     "createPodLabel": "Skapa en Pod hos {provider} (öppnas i en ny flik)",
     "createPod": "Skapa en Pod ↗",
-    "createPodHint": "Du skapar din Pod på leverantörens webbplats, i en ny flik. När du är klar kommer du tillbaka hit och ansluter den.",
-    "havePod": "Jag har redan en Pod"
+    "createPodHint": "Du skapar din Pod på leverantörens webbplats, i en ny flik. När du är klar kommer du tillbaka hit och loggar in."
   },
   "guest": {
     "instanceName": "Mina studier"
@@ -1545,8 +1544,7 @@
   "webIdForm": {
     "help": "Ditt WebID är webbadressen som identifierar dig, och du får den av din Pod-leverantör. Du loggar in på leverantörens egen sida — Solid Memo ser aldrig ditt lösenord.",
     "redirecting": "Skickar dig vidare…",
-    "logIn": "Logga in med Solid",
-    "back": "Tillbaka"
+    "logIn": "Logga in med Solid"
   },
   "workspace": {
     "loadingInstances": "Läser in dina Solid Memo-instanser…",

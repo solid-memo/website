@@ -18,11 +18,17 @@ export class Onboarding extends Screen {
     });
   }
 
-  /** Expects the landing page's first step, as on a first visit: "I already have a Pod" and the rest. */
+  /**
+   * Expects the landing page as on a first visit: the guest's offer first,
+   * then logging in, then creating a Pod.
+   */
   async expectStart(): Promise<void> {
-    await expect(
-      this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") }),
-    ).toBeVisible();
+    await expect(this.page.getByRole("main").getByRole("heading", { level: 2 })).toHaveText([
+      this.t("onboardingFlow.tryHeading"),
+      this.t("onboardingFlow.logInHeading"),
+      this.t("onboardingFlow.setUpHeading"),
+    ]);
+    await expect(this.webIdField).toBeVisible();
   }
 
   private get webIdField(): Locator {
@@ -32,7 +38,6 @@ export class Onboarding extends Screen {
   /** Starts the login with a WebID; the browser goes on to its identity provider. */
   async logInWithWebId(webId: string): Promise<void> {
     await this.intent("Log in with the WebID", async () => {
-      await this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") }).click();
       await this.submitWebId(webId);
     });
   }
@@ -97,10 +102,11 @@ export class Onboarding extends Screen {
     });
   }
 
+  /** Expects the landing page as after logging out here: logging in comes first. */
   async expectLoggedOut(): Promise<void> {
-    await expect(
-      this.page.getByRole("heading", { name: this.t("onboardingFlow.connectHeading") }),
-    ).toBeVisible();
+    await expect(this.page.getByRole("main").getByRole("heading", { level: 2 }).first()).toHaveText(
+      this.t("onboardingFlow.logInHeading"),
+    );
     await expect(this.webIdField).toBeVisible();
   }
 }

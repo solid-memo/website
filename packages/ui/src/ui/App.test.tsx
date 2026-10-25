@@ -40,10 +40,16 @@ function makeUseCases(overrides: Partial<UseCases> = {}): UseCases {
   return makeUseCasesFake(overrides);
 }
 
-/** Walk the signed-out onboarding to the WebID step and submit it. */
+/** The landing's sections, by their headings, in order. */
+function landingSections() {
+  return within(screen.getByRole("main"))
+    .getAllByRole("heading", { level: 2 })
+    .map((heading) => heading.textContent);
+}
+
+/** Type a WebID into the signed-out landing's form and submit it. */
 async function submitWebId(webId: string) {
-  fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
-  fireEvent.input(screen.getByLabelText("WebID"), { target: { value: webId } });
+  fireEvent.input(await screen.findByLabelText("WebID"), { target: { value: webId } });
   fireEvent.click(screen.getByRole("button", { name: "Log in with Solid" }));
 }
 
@@ -529,7 +535,7 @@ describe("AppShell", () => {
     it("starts with a link past the header that focuses the main content, leaving the route alone", async () => {
       window.location.hash = "#/";
       const { container } = renderApp(makeUseCases());
-      await screen.findByRole("heading", { name: "Set up your Solid Pod" });
+      await screen.findByRole("heading", { name: "Log in with your Pod" });
       const skip = screen.getByRole("link", { name: "Skip to content" });
       // The first thing in the page, so the first Tab stop.
       expect(container.firstElementChild).toBe(skip);
@@ -711,7 +717,7 @@ describe("AppShell", () => {
   it("starts the Pod onboarding when no session is restored", async () => {
     const { container } = renderApp(makeUseCases());
     expect(
-      await screen.findByRole("heading", { name: "Set up your Solid Pod" }),
+      await screen.findByRole("heading", { name: "Log in with your Pod" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /iGrant\.io Data Pod/ })).toHaveAttribute(
       "href",
@@ -728,21 +734,19 @@ describe("AppShell", () => {
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
     expect(
-      within(screen.getByRole("main")).getByRole("heading", { name: "Set up your Solid Pod" }),
+      within(screen.getByRole("main")).getByRole("heading", { name: "Log in with your Pod" }),
     ).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Log in – Solid Memo"));
   });
 
-  it("starts the onboarding over from its home link, wherever in it the user is", async () => {
+  it("starts the onboarding over from its home link, the form emptied", async () => {
     renderApp(makeUseCases());
-    fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
-    expect(screen.queryByRole("heading", { name: "Try it right away" })).toBeNull();
+    fireEvent.input(await screen.findByLabelText("WebID"), { target: { value: "https://" } });
 
     fireEvent.click(screen.getByRole("link", { name: "Solid Memo" }));
 
     expect(screen.getByRole("heading", { name: "Try it right away" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "I already have a Pod" })).toBeInTheDocument();
-    expect(screen.queryByLabelText("WebID")).toBeNull();
+    expect(screen.getByLabelText("WebID")).toHaveValue("");
   });
 
   it("is called by the site's own name, and suggests the site's own Pod providers", async () => {
@@ -802,8 +806,7 @@ describe("AppShell", () => {
     const useCases = makeUseCases({ loginWithProvider });
     renderApp(useCases);
 
-    fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
-    fireEvent.click(screen.getByRole("button", { name: "Inrupt PodSpaces" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Inrupt PodSpaces" }));
 
     expect(loginWithProvider).toHaveBeenCalledWith("https://login.inrupt.com");
     expect(useCases.loginWithWebId).not.toHaveBeenCalled();
@@ -819,8 +822,7 @@ describe("AppShell", () => {
         }),
       }),
     );
-    fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
-    fireEvent.click(screen.getByRole("button", { name: "solidweb.me" }));
+    fireEvent.click(await screen.findByRole("button", { name: "solidweb.me" }));
 
     expect(await screen.findByText("provider unreachable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "solidweb.me" })).toBeEnabled();
@@ -1029,15 +1031,15 @@ describe("AppShell", () => {
     expect(alert).toHaveAttribute("role", "alert");
     expect(alert).toHaveFocus();
     expect(alert.previousElementSibling).toHaveClass("tagline");
-    expect(screen.getByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
+    expect(landingSections()).toEqual(["Log in with your Pod", "Try it right away", "No Pod yet?"]);
 
-    // Home is the first step, as on a first visit, without the reason the user came back.
+    // Home is the landing as on a first visit, without the reason the user came back.
     fireEvent.click(screen.getByRole("link", { name: "Solid Memo" }));
-    expect(screen.getByRole("heading", { name: "Try it right away" })).toBeInTheDocument();
+    expect(landingSections()).toEqual(["Try it right away", "Log in with your Pod", "No Pod yet?"]);
     expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
   });
 
-  it("logs out and returns to the WebID form", async () => {
+  it("logs out to the landing, logging in first", async () => {
     const useCases = makeUseCases({
       restoreSession: vi.fn(async () => restored),
     });
@@ -1049,6 +1051,7 @@ describe("AppShell", () => {
       expect(useCases.logout).toHaveBeenCalledOnce();
     });
     expect(await screen.findByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
+    expect(landingSections()).toEqual(["Log in with your Pod", "Try it right away", "No Pod yet?"]);
   });
 
   describe("as a guest", () => {
@@ -1187,7 +1190,7 @@ describe("AppShell", () => {
       fireEvent.click(screen.getByRole("button", { name: "Discard" }));
       fireEvent.click(screen.getByRole("button", { name: "Delete it" }));
       expect(
-        await screen.findByRole("heading", { name: "Set up your Solid Pod" }),
+        await screen.findByRole("heading", { name: "Log in with your Pod" }),
       ).toBeInTheDocument();
       expect(useCases.discardGuest).toHaveBeenCalledOnce();
     });

@@ -250,7 +250,7 @@ export class Chrome extends Screen {
         .getByRole("button", { name: this.t("app.logOut") })
         .click();
       await expect(
-        this.page.getByRole("heading", { name: this.t("onboardingFlow.connectHeading") }),
+        this.page.getByRole("heading", { name: this.t("onboardingFlow.logInHeading") }),
       ).toBeVisible();
     });
   }

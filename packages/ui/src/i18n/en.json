@@ -1079,15 +1079,14 @@
     "tryHeading": "Try it right away",
     "tryAsGuest": "Try it without logging in",
     "tryAsGuestHint": "No account needed: study as a guest. What you learn is kept in this browser, and you can move it into your own Pod whenever you log in.",
-    "connectHeading": "Connect your Pod",
-    "providerHeading": "Or pick your provider",
-    "providerHint": "No WebID at hand? Choose where your Pod lives and log in there — your WebID comes back with the login.",
-    "setUpHeading": "Set up your Solid Pod",
-    "intro": "Your data is stored in a Solid Pod that you control. Create one with a Pod provider, or connect a Pod you already have.",
+    "logInHeading": "Log in with your Pod",
+    "webIdHeading": "Or use your WebID",
+    "providerHint": "Pick where your Pod lives and log in there. Your WebID comes back with the login.",
+    "setUpHeading": "No Pod yet?",
+    "intro": "Your data is stored in a Solid Pod that you control. Create one with a Pod provider, then log in with it above.",
     "createPodLabel": "Create a Pod with {provider} (opens in a new tab)",
     "createPod": "Create a Pod ↗",
-    "createPodHint": "Creating a Pod happens on the provider's site, in a new tab. When you are done, come back here and connect it.",
-    "havePod": "I already have a Pod"
+    "createPodHint": "Creating a Pod happens on the provider's site, in a new tab. When you are done, come back here and log in."
   },
   "guest": {
     "instanceName": "My study"
@@ -1545,8 +1544,7 @@
   "webIdForm": {
     "help": "Your WebID is the web address that identifies you, given to you by your Pod provider. You will log in on your provider's own page — Solid Memo never sees your password.",
     "redirecting": "Redirecting…",
-    "logIn": "Log in with Solid",
-    "back": "Back"
+    "logIn": "Log in with Solid"
   },
   "workspace": {
     "loadingInstances": "Loading your Solid Memo instances…",

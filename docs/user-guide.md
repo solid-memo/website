@@ -69,14 +69,13 @@ The first screen offers three ways in
   as a guest, add a deck from the library and study a few cards. Then
   log in, choose to move your study into a new instance, and the cards
   you studied are in your Pod, each where you left it.
-- **Connect your Pod.** Type your WebID and press "Log in with Solid",
-  or pick your provider from the list under it. You log in on the
-  provider's page and come back to Solid Memo, which reads your profile
-  to find your Pod and says "Your Pod is connected." Press Continue
-  ([authentication.md](authentication.md)).
-- **Set up your Solid Pod.** No Pod yet? "Create a Pod" opens a
-  provider's sign-up page in a new tab. Come back when you are done,
-  and choose "I already have a Pod".
+- **Log in with your Pod.** Pick your provider, or type your WebID
+  under "Or use your WebID" and press "Log in with Solid". You log in
+  on the provider's page and come back to Solid Memo, which reads your
+  profile to find your Pod and says "Your Pod is connected." Press
+  Continue ([authentication.md](authentication.md)).
+- **No Pod yet?** "Create a Pod" opens a provider's sign-up page in a
+  new tab. Come back when you are done, and log in.
 
 The first time you log in, Solid Memo asks for a name for your
 instance and where in your Pod to keep it. If your Pod has more than

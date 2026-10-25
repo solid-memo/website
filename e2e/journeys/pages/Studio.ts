@@ -54,7 +54,7 @@ export class Studio extends Screen {
       ).toBeVisible();
       await expect(this.page.getByText(this.t("studio.tagline"))).toBeVisible();
       await expect(
-        this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") }),
+        this.page.getByRole("heading", { name: this.t("onboardingFlow.logInHeading") }),
       ).toBeVisible();
     });
   }

@@ -174,8 +174,8 @@ made the software, wherever it runs.
 ## VITE_POD_PROVIDERS
 
 The Pod providers the site suggests ([onboarding.md](onboarding.md#pod-providers)):
-every one on the login step, for logging in without typing a WebID, and
-those with a `signUpUrl` on the first step, for creating a Pod. A JSON
+every one on the landing page, for logging in without typing a WebID, and
+those with a `signUpUrl` under it, for creating a Pod. A JSON
 array on one line:
 
 ```sh

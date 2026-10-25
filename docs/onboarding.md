@@ -9,18 +9,16 @@ stays behind use cases (see [boundaries.md](boundaries.md)).
 ```mermaid
 stateDiagram-v2
     accTitle: Onboarding
-    accDescr: Without a session, the learner tries the app as a guest, creates a Pod or logs in with a WebID or a provider, and the app then discovers their storage.
-    [*] --> Choose: no session
+    accDescr: Without a session, the learner tries the app as a guest, logs in with a provider or a WebID, or creates a Pod first, and the app then discovers their storage.
+    [*] --> Landing: no session
     [*] --> App: session silently restored
     [*] --> Guest: a guest studied here before
-    Choose --> Guest: Try it without logging in
-    Guest --> WebID: Keep my study — log in
-    Choose --> ProviderSite: Create a Pod (new tab)
-    ProviderSite --> Choose: user comes back
-    Choose --> WebID: I already have a Pod
-    WebID --> Choose: Back
-    WebID --> IdP: valid https WebID: Solid-OIDC redirect
-    WebID --> IdP: a suggested provider: same redirect
+    Landing --> Guest: Try it without logging in
+    Guest --> Landing: Keep my study — log in
+    Landing --> ProviderSite: Create a Pod (new tab)
+    ProviderSite --> Landing: user comes back
+    Landing --> IdP: a suggested provider: Solid-OIDC redirect
+    Landing --> IdP: valid https WebID: same redirect
     IdP --> Discovering: redirect back (origin "login")
     Discovering --> Connected: storage found
     Discovering --> NoPod: profile has no storage link
@@ -33,12 +31,16 @@ stateDiagram-v2
 
 | Step | Component |
 |---|---|
-| Choose, WebID | `OnboardingFlow` + `WebIdForm` |
+| Landing | `OnboardingFlow` + `WebIdForm` |
 | Discovering, Connected, NoPod, Failed | `PodConnectionScreen` |
 | Orchestration (session, account query) | `AppShell` (in `App.tsx`), the one shell of the site's page around Solid Memo and the [Studio](studio.md) alike |
 
-A user who logged out or whose session expired starts at **WebID**, not
-**Choose**. A guest studies in a pod kept in the browser until they log in
+The landing is one page: the guest's offer, then logging in (a button
+per suggested provider, and the WebID form under them), then creating a
+Pod. Logging in comes before creating a Pod, so someone who has a Pod
+logs in in one click. For a user who logged out or whose session
+expired, and for a guest logging in, logging in comes first, before
+the guest's offer. A guest studies in a pod kept in the browser until they log in
 and keep their study in their Pod, added to an instance they have or as a
 new one ([guest-mode.md](guest-mode.md)). A silently restored session skips onboarding entirely:
 `SessionGateway.restore()` reports `origin: "login"` only when a login
@@ -58,13 +60,13 @@ provider is adding a list entry. A build can suggest a list of its own
 instead, in `VITE_POD_PROVIDERS` ([configuration.md](configuration.md#vite_pod_providers));
 `AppShell` takes the list as its `providers`:
 
-- providers **with a `signUpUrl`** are offered on the first step for
-  creating a Pod ([which ones](#offered-for-creating-a-pod));
-- **every** provider is suggested on the WebID step under "Or pick your
-  provider", for users who do not want to type their WebID. Picking one
+- **every** provider is a button under "Log in with your Pod", for
+  users who do not want to type their WebID. Picking one
   calls `loginWithProvider(oidcIssuer)`, which starts the same Solid-OIDC
   redirect directly at that issuer; the WebID then arrives with the session,
-  and Pod discovery proceeds exactly as after a WebID login.
+  and Pod discovery proceeds exactly as after a WebID login;
+- providers **with a `signUpUrl`** are offered under it, under "No Pod
+  yet?", for creating a Pod ([which ones](#offered-for-creating-a-pod)).
 
 Issuers are the exact values each provider advertises in its
 `/.well-known/openid-configuration`.

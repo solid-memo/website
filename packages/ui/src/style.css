@@ -1190,19 +1190,20 @@ a.hint:hover {
   font-weight: 650;
 }
 
-.provider-login {
+/* Under the provider buttons, set apart: logging in by typing a WebID. */
+.webid-login {
   margin-top: 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border);
 }
 
-.provider-login h3 {
-  margin: 0 0 0.35rem;
+.webid-login h3 {
+  margin: 0;
   font-size: 1.1rem;
 }
 
-.provider-login .hint {
-  margin-bottom: 0;
+.webid-login form {
+  margin-top: 0.5rem;
 }
 
 .onboarding-actions {

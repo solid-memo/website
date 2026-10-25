@@ -1140,15 +1140,14 @@
     "tryHeading": "Pruébalo ahora mismo",
     "tryAsGuest": "Probar sin iniciar sesión",
     "tryAsGuestHint": "No necesitas cuenta: estudia en modo invitado. Lo que aprendas se guarda en este navegador, y puedes trasladarlo a tu propio Pod cuando inicies sesión.",
-    "connectHeading": "Conecta tu Pod",
-    "providerHeading": "O elige tu proveedor",
-    "providerHint": "¿No tienes tu WebID a mano? Elige dónde está tu Pod e inicia sesión allí — tu WebID vuelve con el inicio de sesión.",
-    "setUpHeading": "Configura tu Pod de Solid",
-    "intro": "Tus datos se guardan en un Pod de Solid que tú controlas. Crea uno con un proveedor de Pods o conecta un Pod que ya tengas.",
+    "logInHeading": "Inicia sesión con tu Pod",
+    "webIdHeading": "O usa tu WebID",
+    "providerHint": "Elige dónde está tu Pod e inicia sesión allí. Tu WebID vuelve con el inicio de sesión.",
+    "setUpHeading": "¿Aún no tienes un Pod?",
+    "intro": "Tus datos se guardan en un Pod de Solid que tú controlas. Crea uno con un proveedor de Pods y luego inicia sesión con él arriba.",
     "createPodLabel": "Crear un Pod con {provider} (se abre en una pestaña nueva)",
     "createPod": "Crear un Pod ↗",
-    "createPodHint": "El Pod se crea en el sitio del proveedor, en una pestaña nueva. Cuando termines, vuelve aquí y conéctalo.",
-    "havePod": "Ya tengo un Pod"
+    "createPodHint": "El Pod se crea en el sitio del proveedor, en una pestaña nueva. Cuando termines, vuelve aquí e inicia sesión."
   },
   "guest": {
     "instanceName": "Mi espacio de estudio"
@@ -1617,8 +1616,7 @@
   "webIdForm": {
     "help": "Tu WebID es la dirección web que te identifica y que te da tu proveedor de Pods. Iniciarás sesión en la propia página de tu proveedor — Solid Memo nunca ve tu contraseña.",
     "redirecting": "Redirigiendo…",
-    "logIn": "Iniciar sesión con Solid",
-    "back": "Volver"
+    "logIn": "Iniciar sesión con Solid"
   },
   "workspace": {
     "loadingInstances": "Cargando tus instancias de Solid Memo…",
