@@ -228,6 +228,19 @@ export function createSessionUseCases({
     return versions;
   }
   /**
+   * Throw unless the study can be registered where the user chose: in a
+   * type index of theirs already there, or one that can be made in a
+   * storage their WebID leads to, never beside the study (typeIndex.ts),
+   * so a move that could not end is refused before anything is copied.
+   */
+  async function ensureRegistrable(webId: string, target: RegistrationTarget): Promise<void> {
+    const options = await instanceRepository.getRegistrationOptions(webId);
+    const exists = target === "private" ? options.privateIndexExists : options.publicIndexExists;
+    if (!exists && (await storageGateway.discoverStorages(webId)).length === 0) {
+      throw new AppError("typeIndexNoStorage", { webId });
+    }
+  }
+  /**
    * Throw unless the container still lists the same resources (`listed`
    * lists them as they were listed), each at the version it was copied at.
    */
@@ -484,6 +497,7 @@ export function createSessionUseCases({
       try {
         // Listing the guest's instance, making sure the target is free, creating it.
         progress.start(3);
+        await ensureRegistrable(session.webId, registrationTarget);
         const resources = await listed();
         progress.stepped();
         await instanceCopier.ensureAbsent(target);

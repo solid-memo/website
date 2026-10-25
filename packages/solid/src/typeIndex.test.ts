@@ -289,17 +289,51 @@ describe("createTypeIndex", () => {
     expect(getUrl(profileThing, SOLID.publicTypeIndex)).toBe(PUBLIC_INDEX);
   });
 
-  it("falls back to the origin root when no candidate advertises a storage", async () => {
+  it("refuses, writing nothing, when the WebID leads to no storage", async () => {
     mockDatasets({ [WEBID]: profileDataset() });
     const fetch = vi.fn(async () => new Response(null, { status: 200 })) as typeof globalThis.fetch;
 
-    const indexUrl = await createTypeIndex(
-      "private",
-      WEBID,
-      "https://alice.example/deep/path/main/",
-      fetch,
+    await expect(
+      createTypeIndex("private", WEBID, "https://alice.example/deep/path/main/", fetch),
+    ).rejects.toMatchObject({ code: "typeIndexNoStorage" });
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("keeps the index in the user's storage, not on the server of an instance elsewhere", async () => {
+    mockDatasets({ [WEBID]: profileDataset() });
+    // Both servers say where a storage is; only the WebID's is the user's.
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const headers = new Headers();
+      if (["https://alice.example/", "https://attacker.example/"].includes(String(input))) {
+        headers.set("Link", '<http://www.w3.org/ns/pim/space#Storage>; rel="type"');
+      }
+      return new Response(null, { status: 200, headers });
+    }) as typeof globalThis.fetch;
+
+    await expect(
+      createTypeIndex("public", WEBID, "https://attacker.example/open/", fetch),
+    ).resolves.toBe(PUBLIC_INDEX);
+    const saveUrls = vi.mocked(saveSolidDatasetAt).mock.calls.map(([url]) => url);
+    expect(saveUrls).toEqual([PUBLIC_INDEX, PROFILE_DOC]);
+    expect(vi.mocked(fetch).mock.calls.map(([url]) => String(url))).not.toContain(
+      "https://attacker.example/",
     );
-    expect(indexUrl).toBe(PRIVATE_INDEX);
+  });
+
+  it("uses the storage the profile names that the instance is in, else the first", async () => {
+    const work = "https://work.example/alice/";
+    mockDatasets({
+      [WEBID]: profileDataset((t) =>
+        t.addIri(PIM.storage, "https://alice.example/").addIri(PIM.storage, work),
+      ),
+    });
+
+    await expect(
+      createTypeIndex("private", WEBID, `${work}solid-memo/main/`, noFetch),
+    ).resolves.toBe(`${work}settings/privateTypeIndex.ttl`);
+    await expect(
+      createTypeIndex("private", WEBID, "https://attacker.example/open/", noFetch),
+    ).resolves.toBe(PRIVATE_INDEX);
   });
 
   it("keeps walking when a HEAD request fails", async () => {
@@ -488,7 +522,9 @@ describe("ensureTypeIndex", () => {
   });
 
   it("creates the index when missing", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({
+      [WEBID]: profileDataset((t) => t.addIri(PIM.storage, "https://alice.example/")),
+    });
     const fetch = vi.fn(async () => new Response(null, { status: 200 })) as typeof globalThis.fetch;
 
     await expect(

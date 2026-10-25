@@ -14,6 +14,7 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import type { LibraryCard, LibraryDeck } from "@solid-memo/domain/library";
 import type { Session } from "@solid-memo/domain/session";
+import type { Storage } from "@solid-memo/domain/storage";
 import { Breadcrumbs, breadcrumbsFor, type CrumbNames } from "./Breadcrumbs";
 import { BrowserContainer } from "./BrowserContainer";
 import { CardContainer } from "./CardContainer";
@@ -174,6 +175,19 @@ function checkedScreen(
     return reported ? null : <Loading label={t("workspace.checkingData")} />;
   }
   return deckSetAside ? <p class="hint">{t("workspace.deckSetAside")}</p> : screen();
+}
+
+/** Whether a route needs the storages the storage picker offers: it, and the instance creator. */
+function readsStorages(route: RouteRef | null) {
+  return route?.screen === "storagePicker" || route?.screen === "instanceCreator";
+}
+
+/**
+ * The storages the instance creator may open with: those the storage
+ * picker offers, and those added by hand there; undefined until read.
+ */
+function offeredStorages(listed: readonly Storage[] | undefined, added: readonly Storage[]) {
+  return listed === undefined ? undefined : [...listed, ...added];
 }
 
 /**
@@ -441,8 +455,11 @@ export function Workspace({
   const storagesQuery = useQuery({
     queryKey: queryKeys.storages(webId),
     queryFn: () => useCases.listStorages(session),
-    enabled: route?.screen === "storagePicker",
+    enabled: readsStorages(route),
   });
+  // The storages added by hand on the storage picker, which the instance creator may open with too;
+  // for this page load only, never from a link.
+  const [addedStorages, setAddedStorages] = useState<readonly Storage[]>([]);
 
   // A route whose data says it cannot open goes where resolveRoute says,
   // once what decides it is read; none is a Back stop.
@@ -455,7 +472,7 @@ export function Workspace({
     libraryCard: libraryCardLookup,
     course: courseLookupOf(needsCourse, courseQuery),
     courseRereading: courseQuery.isFetching,
-    storages: storagesQuery.data,
+    storages: offeredStorages(storagesQuery.data, addedStorages),
   });
   useEffect(() => {
     if (redirect === null) return;
@@ -472,12 +489,14 @@ export function Workspace({
 
   const manualStorageMutation = useMutation({
     mutationFn: (url: string) => useCases.addManualStorage(url),
-    onSuccess: (storage) =>
+    onSuccess: (storage) => {
+      setAddedStorages((added) => [...added, storage]);
       navigate({
         screen: "instanceCreator",
         storageUrl: storage.url,
         source: storage.source,
-      }),
+      });
+    },
   });
 
   const createInstanceMutation = useMutation({
@@ -633,15 +652,24 @@ export function Workspace({
           />
         );
       case "instanceCreator":
+        // Until its storage is known to be one the picker offers (resolveRoute).
         return (
-          <InstanceCreator
-            storage={{ url: route.storageUrl, source: route.source }}
-            options={registrationOptions}
-            busy={createInstanceMutation.isPending}
-            error={errorText(createInstanceMutation.error)}
-            onCreate={(args) => createInstanceMutation.mutate(args)}
-            backHref={routeToHash({ screen: "instancePicker" })}
-          />
+          lookupWaiting(
+            true,
+            storagesQuery,
+            redirect !== null || storagesQuery.data === undefined,
+            t("workspace.discoveringStorages"),
+            errorText,
+          ) ?? (
+            <InstanceCreator
+              storage={{ url: route.storageUrl, source: route.source }}
+              options={registrationOptions}
+              busy={createInstanceMutation.isPending}
+              error={errorText(createInstanceMutation.error)}
+              onCreate={(args) => createInstanceMutation.mutate(args)}
+              backHref={routeToHash({ screen: "instancePicker" })}
+            />
+          )
         );
       case "home":
         return (

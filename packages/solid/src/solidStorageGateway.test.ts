@@ -5,11 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getPodUrlAllFrom, getProfileAll } from "@inrupt/solid-client";
 import { readDataset } from "./datasets";
-import {
-  candidateStorageUrls,
-  createSolidStorageGateway,
-  hasStorageLink,
-} from "./solidStorageGateway";
+import { createSolidStorageGateway, hasStorageLink } from "./solidStorageGateway";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
@@ -27,16 +23,6 @@ function headResponse(linkHeader?: string): Response {
   }
   return new Response(null, { status: 200, headers });
 }
-
-describe("candidateStorageUrls", () => {
-  it("lists the document and each ancestor container up to the root", () => {
-    expect(candidateStorageUrls(WEBID)).toEqual([
-      "https://alice.example/profile/card",
-      "https://alice.example/profile/",
-      "https://alice.example/",
-    ]);
-  });
-});
 
 describe("hasStorageLink", () => {
   it("is false without a Link header", () => {
@@ -119,6 +105,12 @@ describe("createSolidStorageGateway", () => {
       const gateway = createSolidStorageGateway({ fetch });
 
       await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([]);
+      // The document, then each ancestor container up to the root.
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        "https://alice.example/profile/card",
+        "https://alice.example/profile/",
+        "https://alice.example/",
+      ]);
     });
   });
 

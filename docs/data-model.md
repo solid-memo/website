@@ -128,7 +128,14 @@ flowchart LR
   `foaf:isPrimaryTopicOf`), plus `pim:preferencesFile` for the private one.
 - **Missing indexes** (normal on Community Solid Server pods): the user is
   warned and chooses — create the private index (document under
-  `<storage>settings/` plus a profile link) or register publicly. The link
+  `<storage>settings/` plus a profile link) or register publicly. The
+  storage is one of those the WebID leads to, as for **Storage** above
+  but never one typed by hand: the one the instance is in, else the
+  first. It is never the server of an instance elsewhere (one attached
+  by URL, or in a storage typed by hand), where every Solid app would
+  then read the user's registrations and write its own. With none, it
+  is refused (`typeIndexNoStorage`, `ownStorageFor` in
+  [typeIndex.ts](../packages/solid/src/typeIndex.ts)). The link
   goes in the WebID document when it is writable, else in the first
   extended profile that accepts it (Inrupt PodSpaces: the WebID document on
   `id.inrupt.com` is read-only; `<storage>profile` is the writable one). An

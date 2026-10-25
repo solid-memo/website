@@ -348,4 +348,33 @@ describe("resolveRoute", () => {
       expect(resolve({ screen: "instancePicker" }, { storages: [storageA] })).toBeNull();
     });
   });
+
+  describe("the instance creator", () => {
+    const creator = (storageUrl: string, source: Storage["source"]): RouteRef => ({
+      screen: "instanceCreator",
+      storageUrl,
+      source,
+    });
+
+    it("opens with a storage the picker offers, or one added by hand", () => {
+      const manual: Storage = { url: "https://other.example/", source: "manual" };
+      const storages = [storageA, storageB, manual];
+      expect(resolve(creator(storageB.url, storageB.source), { storages })).toBeNull();
+      expect(resolve(creator(manual.url, "manual"), { storages })).toBeNull();
+    });
+
+    it("waits for the storages before it opens", () => {
+      expect(resolve(creator("https://evil.example/open/", "profile"))).toBeNull();
+    });
+
+    it("goes back to the picker for a storage a link names that the picker does not offer", () => {
+      const storages = [storageA];
+      expect(resolve(creator("https://evil.example/open/", "profile"), { storages })).toEqual(
+        go({ screen: "storagePicker" }),
+      );
+      expect(resolve(creator(storageA.url, "manual"), { storages })).toEqual(
+        go({ screen: "storagePicker" }),
+      );
+    });
+  });
 });

@@ -45,7 +45,11 @@ export interface Loaded {
   course: Lookup<Course>;
   /** Whether the course is being read afresh, so its progress may be behind. */
   courseRereading: boolean;
-  /** The storages the storage picker offers, undefined until they are read. */
+  /**
+   * The storages the storage picker offers, and those the user added by
+   * hand there, undefined until they are read: the only ones the instance
+   * creator opens with.
+   */
   storages: readonly Storage[] | undefined;
 }
 
@@ -178,7 +182,9 @@ function lookupRedirect(route: RouteRef, loaded: Loaded): Redirect | null {
  * link to a library deck (#/try), the instance, the deck, the statistics'
  * range and tab, the card, the library deck, the library card and the
  * course; the storage picker with a single storage goes on to the
- * instance creator. Each is a replace, never a Back stop (docs/routing.md).
+ * instance creator, and the instance creator with a storage the picker
+ * does not offer goes back to it. Each is a replace, never a Back stop
+ * (docs/routing.md).
  */
 export function resolveRoute(route: RouteRef | null, loaded: Loaded): Redirect | null {
   const { instances } = loaded;
@@ -189,6 +195,14 @@ export function resolveRoute(route: RouteRef | null, loaded: Loaded): Redirect |
   if (route!.screen === "storagePicker" && loaded.storages?.length === 1) {
     const [storage] = loaded.storages;
     return go({ screen: "instanceCreator", storageUrl: storage!.url, source: storage!.source });
+  }
+  // A link may name any address; an instance and its registrations go only where the user chose.
+  if (
+    route!.screen === "instanceCreator" &&
+    loaded.storages !== undefined &&
+    !loaded.storages.some((s) => s.url === route.storageUrl && s.source === route.source)
+  ) {
+    return go({ screen: "storagePicker" });
   }
   return null;
 }

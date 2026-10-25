@@ -72,6 +72,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo could not link its private list of your data from your profile. Check that Solid Memo may edit your profile, then try again.",
   publicTypeIndexNotLinked:
     "Solid Memo could not link its public list of your data from your profile. Check that Solid Memo may edit your profile, then try again.",
+  typeIndexNoStorage:
+    "Your profile names no storage of yours, so Solid Memo has nowhere to keep its list of your data. Ask your Pod provider to add your Pod's storage to your profile, then try again.",
   storageInaccessible:
     "Solid Memo cannot open that storage. Check the address, and that you are logged in with the account that owns it.",
   notAnInstanceNoMeta:
