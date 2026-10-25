@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.13.0](https://github.com/solid-memo/website/compare/v6.12.0...v6.13.0) (2026-10-25)
+
+### Features
+
+* **ui:** choose a course's language from the course's page ([327abe7](https://github.com/solid-memo/website/commit/327abe70f47c53451c6a5d6897ca7ddb1fe6a305)), closes [#312](https://github.com/solid-memo/website/issues/312)
+* **ui:** show a course's theory and titles in its course language ([6f1d58f](https://github.com/solid-memo/website/commit/6f1d58fd00d4ea90126994265a254fd56bedaaee)), closes [#312](https://github.com/solid-memo/website/issues/312)
+* **vocab:** let a course's card language cover its theory and titles ([28acbc4](https://github.com/solid-memo/website/commit/28acbc47172aef4feddf2d3111e2117cb5299b6d)), closes [#312](https://github.com/solid-memo/website/issues/312)
+
 ## [6.12.0](https://github.com/solid-memo/website/compare/v6.11.0...v6.12.0) (2026-10-25)
 
 ### Features
