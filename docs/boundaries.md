@@ -118,9 +118,12 @@ library could take their place there alone
 
 | Module | What it has |
 |---|---|
+| [interface.ts](../packages/solid/src/client/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type; it imports no library |
 | [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built |
-| [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size |
-| [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, the Turtle and JSON-LD parsers, and `HttpError` for a failed request |
+| [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, for `resources.ts` and `rdf.ts` alone |
+| [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, conditional reads and writes among them, and the Turtle and JSON-LD parsers |
+| [sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests; it imports no library |
+| [inrupt.ts](../packages/solid/src/client/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |
 | [session.ts](../packages/solid/src/client/session.ts) | the sign-in client, on `@inrupt/solid-client-authn-browser` |
 | [access.ts](../packages/solid/src/client/access.ts) | the public-read grant ([below](#access-control)) |
 
@@ -131,12 +134,15 @@ documents are read.
 
 `npm run check:boundaries`
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_IN`)
-lets only these files, outside tests, import any `@inrupt/` package,
-with any import: named, a namespace, a subpath such as
+lets only these files but `interface.ts`, outside tests, import any
+`@inrupt/` package, with any import: named, a namespace, a subpath such as
 `@inrupt/solid-client/universal`, or a dynamic `import()`. Such an
 import elsewhere is reported once, not again by the access-control
-rule. Tests mock the client modules, not the
-libraries.
+rule. Tests mock the client modules, not the libraries, and the
+client modules' own tests run the contract in
+[src/testing/contract/](../packages/solid/src/testing/contract/),
+which another implementation must pass too
+([vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)).
 
 ## Files without a vendor library
 

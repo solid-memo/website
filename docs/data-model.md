@@ -1450,7 +1450,9 @@ by one.
   (as in the digest). The end-to-end tests hold all of this against
   real servers, that one included ([testing.md](testing.md)).
 - **An edit's PATCH body is written by Solid Memo** (`patchBody` in
-  `datasets.ts`), not by `@inrupt/solid-client`: one triple a line, a
+  [client/sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts),
+  sent by `writeDocument` in `client/resources.ts`), not by
+  `@inrupt/solid-client`: one triple a line, a
   space before each `.`. node-solid-server's parser fails on a triple
   whose closing `.` touches the term before it (`<#a> <#b> 1.}`), as
   `@inrupt/solid-client` writes them. That server finds a decimal only

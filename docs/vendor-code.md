@@ -66,56 +66,76 @@ ports, use cases).
 The mapper layer bridges the two: pure functions in
 `packages/solid/src/mappers/` translate the RDF module's own types
 (`Dataset`, `Subject`, from `client/rdf.ts`) into domain types. Those
-types are the package's own names for the library's types, so no
-Inrupt import appears outside `client/`, and no RDF type crosses
-upward past a mapper.
+types are the app's own, in `client/interface.ts`, which names no
+library, so no Inrupt import appears outside `client/`, and no RDF
+type crosses upward past a mapper.
 
 ## Cost of swapping a vendor
 
 - **Inrupt clients** → a second implementation of the four client
   modules in `packages/solid/src/client/` (`rdf.ts`, `resources.ts`,
   `session.ts`, `access.ts`) and of
-  `packages/shacl/src/turtleDocument.ts`. Their interface is the
-  current library's type shapes: `Dataset`, `Subject`, `NamedSubject`,
-  `SubjectBuilder` and `FetchedDataset` are aliases of its types.
-  Callers read `subject.url` and build a subject with
-  `buildThing(...).addX().build()`. A replacement must provide those
-  shapes, or every caller changes too. Given them, their callers, the
-  RDF mappers and the record ↔ model mappers don't change.
-  What a replacement must match is pinned in two places:
-  - **The client modules' unit tests** (`rdf.test.ts`,
-    `resources.test.ts`, `session.test.ts`, `access.test.ts`,
-    `linearDataset.test.ts`) pin the data model: `getThingAll` leaves
-    out blank-node subjects, and `getThing` finds one by its `_:label`.
-    A subject made by name resolves against the URL its dataset was
-    read from. `getDatetime` throws on some literals and gives an
-    invalid date past the JavaScript date range. Language tags read
-    back in lower case. `getDecimal` reads as `parseFloat` does, and a
-    decimal is written as JavaScript spells it (`1`, not `1.0`). The
-    change log (`changesOf`) and the source (`sourceOf`) behave as
-    their comments in `rdf.ts` say. They pin the methods and URLs of
-    the requests, a new document as a PUT with `If-None-Match: *`, and
-    a file's Content-Type. A failed request rejects with `HttpError`,
-    carrying `statusCode`, `response`, the library's error as its
-    `cause`, and a message that says what the server was asked and how
-    it answered; `retryable.ts` and `typeIndex.ts` read them. A text
-    that doesn't parse rejects with the parser's error, not an
-    `HttpError`. Turtle and JSON-LD parse in every graph the text
-    names, with relative IRIs resolved against the document's URL, and
-    `linearDataset.ts` reads what the library reads, in one pass. On
-    sign-in, `restore()` completes a login or restores the session
-    silently, and says which, with the WebID and the page a silent
-    restore left; `fetch` uses the current session, never one from
-    before a login. The grant writes only the document's own ACL, read
-    for everyone, and gives false on a pod without access control.
+  `packages/shacl/src/turtleDocument.ts`. Their interface is the app's
+  own. The types are in `client/interface.ts` (`Dataset`, `Subject`,
+  the `SubjectBuilder` with only the methods the code uses, `HttpError`,
+  `SessionClient`, `GrantPublicRead`), which names no library. The
+  functions keep the names they have, each with a signature of those
+  types. A replacement exports the same, and its
+  callers, the RDF mappers and the record ↔ model mappers don't change.
+  The current one hands the library's objects through
+  `client/inrupt.ts`, the one place that converts them; it and
+  `client/linearDataset.ts` are the current implementation's own, used
+  by the other client modules alone. Sign-in and pod
+  data can be switched apart: the composition root passes the sign-in
+  client to `createSolidSession`. The SPARQL Update bodies of the
+  app's PATCH requests (`client/sparqlUpdate.ts`) name no library
+  either, so a replacement can send the same ones. What a replacement
+  must match is pinned in two places:
+  - **The contract tests** in `packages/solid/src/testing/contract/`
+    take an implementation, and each client module's own test file runs
+    them against the current one. The RDF module's pin the data model:
+    `getThingAll` leaves out blank-node subjects, and `getThing` finds
+    one by its `_:label`. A subject made by name resolves against the
+    URL its dataset was read from. `getDatetime` throws on some literals
+    and gives an invalid date past the JavaScript date range. Language
+    tags read back in lower case. `getDecimal` reads as `parseFloat`
+    does, and a decimal is written as JavaScript spells it (`1`, not
+    `1.0`). The change log (`changesOf`) and the source (`sourceOf`)
+    behave as their comments in `rdf.ts` say. The resource module's pin
+    the requests that `datasets.ts` builds its cache and its
+    preconditions on. A read asks the pod and never the browser's
+    cache, and with `ifNoneMatch` says when the document isn't
+    modified (304). A new document is one PUT with `If-None-Match: *`.
+    An edit is one PATCH of the app's own body, `If-Match` the version
+    given, sent once more after a 409 with its decimals spelled as
+    numbers. An edit too large for one PATCH, or asked to be whole, is
+    one PUT. A write holding a term Turtle can't write as it is is
+    refused before anything is sent (`writableTerms.ts`). A write gives
+    the ETag the pod answered, and a delete takes `If-Match`. They pin a file's Content-Type too. A failed
+    request rejects with `HttpError`, carrying `statusCode`, `response`
+    and a message naming the URL and the status; `retryable.ts` and
+    `typeIndex.ts` read them. A text that doesn't parse rejects with
+    the parser's error, not an `HttpError`. Turtle and JSON-LD parse in
+    every graph the text names, with relative IRIs resolved against the
+    document's URL, and `getSolidDatasetLinear` reads what
+    `getSolidDataset` reads, in one pass. On sign-in, `restore()`
+    completes a login or restores the session silently, and says which,
+    with the WebID and the page a silent restore left; `fetch` uses the
+    current session, never one from before a login. A harness of the
+    implementation's own sets up what the identity provider holds. The
+    grant writes only the document's own ACL, read for everyone, and
+    gives false on a pod without access control.
     `solidReleasePublisher.test.ts` runs that grant behind the
     publisher's fence, on a WAC pod and an ACP one held in memory: it
-    asks by URL, and writes only the release's own ACL or ACR.
+    asks by URL, and writes only the release's own ACL or ACR. What is
+    the current library's alone, its error messages, its subject
+    shapes, its request fixes and its sign-in events, is tested beside
+    the contract, not in it.
   - **The end-to-end tests against real Solid servers** (`e2e/pod/`)
     cover what the unit tests don't check. Each server must take the
     requests' Accept and Content-Type headers. A saved edit goes as a
-    PATCH with the body `datasets.ts` writes. The grant's ACL and ACR
-    writes must work on the servers themselves.
+    PATCH with the body `client/sparqlUpdate.ts` writes. The grant's ACL
+    and ACR writes must work on the servers themselves.
 - **rdf-validate-shacl** → `packages/shacl/src/engine.ts`, the only
   module that imports it (`packages/shacl/node/shacl.ts` calls its
   `createEngine`); the rest sees only the `ShapeEngine` interface (one
