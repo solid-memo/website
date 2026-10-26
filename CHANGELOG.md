@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.14.2](https://github.com/solid-memo/website/compare/v6.14.1...v6.14.2) (2026-10-26)
+
+### Bug Fixes
+
+* **composition:** read a release outside the user's own pod as no one ([c77f899](https://github.com/solid-memo/website/commit/c77f8999bf11546f6b5fff783da261b94736f53e))
+
 ## [6.14.1](https://github.com/solid-memo/website/compare/v6.14.0...v6.14.1) (2026-10-26)
 
 ### Bug Fixes
