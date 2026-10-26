@@ -284,6 +284,16 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
   });
 
+  it("leaves out an answer whose study day is not a real date, which the statistics could not count from", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const given = answer("2026-09-21");
+    await log.append(INSTANCE, given);
+    // The shape's pattern lets a day of the 31st of September through.
+    await log.append(INSTANCE, { ...answer("2026-09-31"), answeredAt: given.answeredAt });
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
+  });
+
   it("reads a month again only when its document changed since the version known", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });
