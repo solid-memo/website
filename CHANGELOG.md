@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.14.1](https://github.com/solid-memo/website/compare/v6.14.0...v6.14.1) (2026-10-26)
+
+### Bug Fixes
+
+* **domain:** read a desired retention outside its range as the default ([010a784](https://github.com/solid-memo/website/commit/010a78491ec5c4ff9c78cdadc09dd113607bea09))
+* **solid:** leave out an answer whose study day is not a real date ([ed96cb3](https://github.com/solid-memo/website/commit/ed96cb36c9979cf3450a1be9446f209b9d8bd6a7))
+* **solid:** name a date the app cannot read in the instance check ([dae2562](https://github.com/solid-memo/website/commit/dae25625627094d06f933de4e5bf25c41d912f10))
+* **solid:** read a date past the years a JavaScript date holds as none ([13f4dc6](https://github.com/solid-memo/website/commit/13f4dc6794b6de7c5b92739818ffbfda293f3e2b))
+
 ## [6.14.0](https://github.com/solid-memo/website/compare/v6.13.0...v6.14.0) (2026-10-26)
 
 ### Features
