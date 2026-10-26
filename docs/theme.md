@@ -1,16 +1,16 @@
 # Theme
 
-The app comes light or dark. The user chooses with the sun/moon toggle at
-the top of every screen, or under Appearance in the study preferences,
-where a third choice, "As my browser", follows `prefers-color-scheme`
-(and keeps following it as it changes). Until anything is chosen, that
-is what the app does. Beside it, the preferences choose the
-[colors](#palettes) and the [text size](#text-size), in either theme.
+The app comes light or dark. The user chooses with the sun/moon toggle
+at the top of every screen, or under Appearance in the study
+preferences, where "As my browser" follows `prefers-color-scheme` as
+it changes and is the default. The preferences choose the
+[colors](#palettes) and the [text size](#text-size) too, in either
+theme.
 
 ## Where the choice is kept
 
 The theme, the [palette](#palettes) and the [text size](#text-size)
-are each kept the same way.
+are kept the same way.
 
 ```mermaid
 flowchart LR
@@ -22,70 +22,61 @@ flowchart LR
 ```
 
 - **In the pod**, in the instance's preferences
-  ([preferences format 6](shapes.md)): `sm:theme`, a concept of
-  `sm:Themes` (`sm:systemTheme`, `sm:lightTheme`, `sm:darkTheme`);
-  `sm:palette`, a concept of `sm:Palettes` (`sm:standardPalette`,
-  `sm:highContrastPalette`, `sm:colorVisionPalette`,
-  `sm:parchmentPalette`); and `sm:textSize`, a concept of
-  `sm:TextSizes` (`sm:defaultTextSize`, `sm:largeTextSize`,
-  `sm:largerTextSize`, `sm:largestTextSize`). These are the choices
-  that count, and they follow the user to every device. They are
-  written once the instance has preferences: a new instance is made
-  with them, the theme, palette and text size shown at the time among
-  them; an instance made before has them after the user's first save of
-  the study preferences (which saves what is shown at the time), and
-  until then a choice is kept on the device alone.
+  ([preferences format 6](shapes.md)): `sm:theme`, `sm:palette` and
+  `sm:textSize`, concepts of `sm:Themes`, `sm:Palettes` and
+  `sm:TextSizes` ([vocab.md](vocab.md#concept-schemes) lists their
+  concepts). These choices count, and follow the user to every device.
+  A new instance is made with the choices shown at the time. One made
+  before gets them at the user's first save of the study preferences,
+  which saves what's shown then; until then a choice is kept on the
+  device alone.
 - **On the device**, by the `ThemePreference`, `PalettePreference` and
   `TextSizePreference` ports
   ([localStorageThemePreference.ts](../packages/browser/src/localStorageThemePreference.ts),
-  key `solid-memo:theme`, "As my browser" no key at all; the palette's
-  and the text size's below). They are what the sign-in screens and the
-  first paint have, before any pod is reached. Opening an instance
-  whose preferences say otherwise copies their choices here
-  (`instanceTheme`, `instancePalette`, `instanceTextSize`).
+  key `solid-memo:theme`, "As my browser" no key; the palette's and
+  the text size's below). The sign-in screens and the first paint
+  read these before any pod is reached. Opening an instance whose
+  preferences differ copies their choices here (`instanceTheme`,
+  `instancePalette`, `instanceTextSize`).
 
-The writes to an instance's preferences go one after another, the theme's,
-the palette's and the text size's alike, and whether logging in skips
-the Connected screen ([onboarding.md](onboarding.md#skipping-the-connected-screen)),
-so a later choice is never overwritten by an earlier one. A save of the study preferences, a
-switch of scheduler and "Not now" to the invitation to FSRS-6 wait for
-them, so none is refused for the version a choice made. A write that
-fails (another device saved the preferences meanwhile, say) is undone:
-the app reads the preferences back and shows what they hold. A page
-reloaded before a write is done opens the instance with the choice its
-preferences held before, and shows that one: the choice made just
-before the reload is lost, the theme's as much as the palette's or the
-text size's.
+Writes to an instance's preferences, the one that says whether logging
+in skips the Connected screen among them
+([onboarding.md](onboarding.md#skipping-the-connected-screen)), go one
+after another, so an earlier choice never overwrites a later one. A save
+of the study preferences, a switch of scheduler and "Not now" to the
+invitation to FSRS-6 wait for them, so none is refused for the version
+a choice made. A failed write (another device saved meanwhile, say) is
+undone: the app reads the preferences back and shows what they hold. A
+reload before a write is done opens the instance with the choice its
+preferences held before and shows it: the newer choice is lost.
 
 The palette's shape lists no concepts, as `sm:textFormat`'s lists none
-([vocab.md](vocab.md#versioning-policy)): a palette of a later version,
-or one of the user's own ([below](#palettes-of-ones-own)), needs no new
-format. This version shows a palette it does not know as Standard, and
-keeps it: a save of the preferences, or a switch of scheduler, writes
-it back as it was while Standard is shown, and only choosing another
-palette replaces it. A palette of the user's own is one it knows: a
-choice of a built-in palette replaces it. The text size's shape lists
-its four, as the theme's lists its three.
+([vocab.md](vocab.md#versioning-policy)), so a later version's
+palette, or one of the user's own ([below](#palettes-of-ones-own)),
+needs no new format. One this version doesn't know shows as Standard
+and is kept through a save of the preferences or a switch of
+scheduler, until another is chosen. A palette of the user's own is one
+it knows, and choosing a built-in palette replaces it. The theme's
+shape lists its three, the text size's its four.
 
 ## Showing it
 
-The stylesheet's dark colors hang off `<html data-theme="dark">`. A small
-script in `apps/web/index.html` (the page the [Studio](studio.md) is
-in too) sets the attribute from the device's
-choice, else the browser's, before the first paint, so a page never
-flashes in the other theme; `packages/ui/src/ui/theme.tsx` takes over from there and also
-sets the `theme-color` meta tags for the browser's own chrome, in the
-page's background (`--bg`) as the stylesheet has it.
+The stylesheet's dark colors hang off `<html data-theme="dark">`. A
+small script in `apps/web/index.html` (the page the [Studio](studio.md)
+is in too) sets the attribute before the first paint, from the
+device's choice, else the browser's, so a page never flashes in the
+other theme. From there `packages/ui/src/ui/theme.tsx` takes over and
+sets the `theme-color` meta tags for the browser's chrome to the
+page's background (`--bg`).
 
 ## Palettes
 
-Apart from light and dark, the colors come in palettes, each for what
-it does for the reader, and each in the light theme and in the dark.
-The user chooses under Colors in the study preferences, each palette
-with a one-line description and a swatch drawn in its own colors (an
-element marked with its `data-palette`, which its blocks style too);
-when the browser asks for more contrast (`prefers-contrast: more`),
-the preferences suggest High contrast. A choice takes effect at once:
+The colors come in palettes, each in both themes. The user chooses
+under Colors in the study preferences, where each palette has a
+one-line description and a swatch drawn in its own colors (an element
+marked with its `data-palette`, which its blocks style too). When the
+browser asks for more contrast (`prefers-contrast: more`), the
+preferences suggest High contrast. A choice takes effect at once:
 
 | Palette | Id | What it does |
 |---|---|---|
@@ -95,32 +86,31 @@ the preferences suggest High contrast. A choice takes effect at once:
 | Parchment (low glare) | `parchment` | Warm surfaces darker than white in the light theme, warm browns in the dark, for readers whom a bright page dazzles, the dimmer text raised to 4.5:1. |
 
 The choice is kept in the instance's preferences and on the device, as
-the theme is ([Where the choice is kept](#where-the-choice-is-kept)):
+the theme is ([Where the choice is kept](#where-the-choice-is-kept)),
 on the device by the `PalettePreference` port
 ([localStoragePalettePreference.ts](../packages/browser/src/localStoragePalettePreference.ts),
-key `solid-memo:palette`; Standard is no key at all). It is shown as
-`<html data-palette>`: the script in `apps/web/index.html` sets it
-before the first paint, and `theme.tsx` from there, before it sets the
-`theme-color` meta tags from the palette's background; Standard goes
-without. The script takes any value of the form an id has (lowercase
+key `solid-memo:palette`; Standard is no key). It's shown as
+`<html data-palette>` (none for Standard), set as `data-theme` is
+([Showing it](#showing-it)); `theme.tsx` sets it before setting the
+`theme-color` meta tags from the palette's background. The
+`index.html` script takes any value shaped like an id (lowercase
 letters and hyphens, at most 32), so a later palette needs no new
-script, and one this version does not have shows as Standard.
+script, and an unknown one shows as Standard.
 
 ## Color roles
 
 Every color the site and the Studio draw with is a role, a custom
 property such as `--bg`, `--text`, `--primary-fill` or `--grade-0`, set
 in [`palettes.css`](../packages/ui/src/palettes.css), which `style.css`
-imports. `style.css` and `studio.css` name the roles and write out no
-color of their own; they may mix two roles (`color-mix(in srgb, …)`),
-as a hovered answer button's tint does.
+imports. `style.css` and `studio.css` write out no color, only roles,
+two of which they may mix (`color-mix(in srgb, …)`), as a hovered answer
+button's tint does.
 
-A palette is two blocks of `palettes.css`: one for the light theme, one
-for the dark. Standard's are `:root` and `:root[data-theme="dark"]`.
-Another palette's blocks are `:root[data-palette="…"]` and
-`:root[data-palette="…"][data-theme="dark"]`, after Standard's; a
-palette with no blocks shows as Standard. Each block sets every role,
-so no block leans on another.
+A palette is two blocks of `palettes.css`, light and dark: Standard's
+`:root` and `:root[data-theme="dark"]`, then another palette's
+`:root[data-palette="…"]` and
+`:root[data-palette="…"][data-theme="dark"]`. A palette with no blocks
+shows as Standard. Each block sets every role.
 
 The roles fall into groups:
 
@@ -144,31 +134,29 @@ The roles fall into groups:
 - **Depth**: `--shadow-sm`, `--shadow`, `--ring` (the focus ring of a
   field) and `--zoom-backdrop`.
 
-A block writes a color only as `#rrggbb`, as `#rrggbbaa` for one seen
-through (its alpha in 255ths, as the browser keeps it), as
-`transparent`, as another role (`var()`), or as a mix of these; a
-shadow is lengths and such colors. `style.test.ts` checks that every
-block sets every role in these forms, that `style.css` writes out no
-color (`studio.test.ts` checks the same of `studio.css`), and the
-contrast of the pairs that hold text in every block: text and muted
-text on every surface, the text on a primary fill, links, danger and warning text, the masthead's text, and an answer
-button's text on its grade's tint ([accessibility.md](accessibility.md#checked-automatically)),
-at 4.5:1, and fields' edges and a chart's steps (WCAG 1.4.11) at 3:1,
-or in High contrast at 7:1 and 4.5:1 (`contrastTargets`).
+A block writes a color only as `#rrggbb`, `#rrggbbaa` for one seen
+through (its alpha in 255ths, as the browser keeps it), `transparent`,
+another role (`var()`) or a mix of these. A shadow is lengths and such
+colors. `style.test.ts` checks that every
+block sets every role in these forms and, with `studio.test.ts`, that
+the stylesheets write out no color. In every block it
+checks the contrast of the pairs that hold text
+([accessibility.md](accessibility.md#checked-automatically) lists
+them) at 4.5:1, and of fields' edges and a chart's steps (WCAG 1.4.11)
+at 3:1; in High contrast, 7:1 and 4.5:1 (`contrastTargets`).
 
-The answer buttons of Color-blind friendly are checked as protanopia,
-deuteranopia and tritanopia see them too: each deficiency simulated by
-Machado, Oliveira and Fernandes' model (2009), each grade at least
-0.08 apart from the next in OKLab, four times what is just
-noticeable. In every palette the buttons' names, not their colors, say
-which grade is which.
-The tests read the blocks with
-[`testing/contrast.ts`](../packages/domain/src/testing/contrast.ts).
-WCAG's contrast ratio and the mixing of colors are the app's own
+Color-blind friendly's answer buttons are also checked as protanopia,
+deuteranopia and tritanopia see them. `style.test.ts` simulates each
+with Machado, Oliveira and Fernandes' model (2009), and needs each
+grade at least 0.08 from the next in OKLab, four times the smallest
+noticeable difference. In every palette the buttons' names, not their
+colors, say which grade is which. The tests read the blocks with
+[`testing/contrast.ts`](../packages/domain/src/testing/contrast.ts);
+WCAG's contrast ratio and color mixing are the app's own
 [`contrast.ts`](../packages/domain/src/contrast.ts), which the palette
 editor's check (`checkPalette`) uses too.
 
-Some colors stay fixed on purpose, whatever the palette:
+Some colors stay fixed whatever the palette:
 
 - the pictures, `illustration.svg` and `favicon.svg`;
 - the static About page (`apps/web/public/about/`) and the docs' own
@@ -182,23 +170,22 @@ Some colors stay fixed on purpose, whatever the palette:
 
 ## Palette sources
 
-The palettes' colors are ours, but some are taken from published
-color schemes, whose authors are credited here. Only the values are
-taken, and no file of theirs is copied:
+Some of the palettes' colors come from published color schemes,
+credited here; only the values are taken, no file:
 
 - **Color-blind friendly**: blue, sky blue, orange, yellow and
   vermilion (`#0072b2`, `#56b4e9`, `#e69f00`, `#f0e442`, `#d55e00`)
-  are Masataka Okabe's and Kei Ito's palette for Color Universal
-  Design, [Color Universal Design](https://jfly.uni-koeln.de/color/),
-  darkened where they are text. The palette is not certified, and
-  does not carry the CUD mark.
-- **Parchment**: the surfaces, the text and the accents are derived
-  from Jan Warchoł's [Selenized](https://github.com/jan-warchol/selenized),
-  under the MIT license (copyright 2021 Jan Warchoł), which
-  `palettes.css` credits in its header, as does `customPalette.ts`,
-  which keeps a copy of the built-in palettes' colors; its dim text is darkened to
-  4.5:1, and the dark theme's surfaces are warm browns of ours in
-  place of Selenized's teal.
+  are Masataka Okabe's and Kei Ito's
+  [Color Universal Design](https://jfly.uni-koeln.de/color/) palette,
+  darkened where they're text. The palette isn't certified and doesn't
+  carry the CUD mark.
+- **Parchment**: the surfaces, the text and the accents derive from
+  Jan Warchoł's [Selenized](https://github.com/jan-warchol/selenized),
+  under the MIT license (copyright 2021 Jan Warchoł). `palettes.css`
+  credits it in its header, as does `customPalette.ts`, which keeps a
+  copy of the built-in palettes' colors. Its dim text is darkened to
+  4.5:1, and the dark theme's surfaces are the project's own warm
+  browns in place of Selenized's teal.
 - **High contrast**: the blue, yellow and red accents (`#004488`,
   `#ddaa33`, `#bb5566`) are Paul Tol's high-contrast scheme, from his
   technical note SRON/EPS/TN/09-002 and
@@ -208,12 +195,11 @@ taken, and no file of theirs is copied:
 ## Palettes of one's own
 
 Under Colors, "Design a palette" opens the palette editor
-(`#/palette?instance=…`, [routing.md](routing.md#route-scheme)), and
-each palette of the user's own is listed after the built-in ones, with
-its swatch and a link to edit it. In the editor the user names the
-palette, chooses the palette it is based on, and chooses a color for
-each role it may set, in the light theme and in the dark, each field
-starting at the base's color:
+(`#/palette?instance=…`, [routing.md](routing.md#route-scheme)). The
+user's own palettes are listed after the built-in ones, each with its
+swatch and a link to edit it. In the editor the user names the
+palette, chooses its base, and in each theme a color for each role
+below, starting at the base's:
 
 | Role | What it colors |
 |---|---|
@@ -225,107 +211,103 @@ starting at the base's color:
 | `--link`, `--danger`, `--warning-text` | Links, and danger and warning text |
 | `--grade-0` to `--grade-5` | The answer buttons, from 0 (Blackout, or Again) to 5 (Easy) |
 
-These are the roles a reader chooses for what they read by; every
-other role is the base's. A few go with a role the palette sets, and
-are mixed from it once the palette changes it, so that they still go
-together: a hovered surface (6% of the text over the surface), a
-strong border (20% of the text over the border), a hovered button
-(20% of the text over its fill), the primary color's, a link's, the
-danger's and the warning's tints, and the danger's and the warning's
-borders (`DERIVED` in
-[customPalette.ts](../packages/domain/src/customPalette.ts)). A
-chart's steps are mixed as the base mixes them, from the primary
-color, the text and the sunken surface the palette has (`SERIES`
-there). The masthead and the decoration stay the base's.
+Every other role is the base's, except a few mixed from a role the
+palette changes (`DERIVED` in
+[customPalette.ts](../packages/domain/src/customPalette.ts)). A hovered
+surface is 6% of the text over the surface; a strong border, 20% of
+the text over the border; a hovered button, 20% of the text over its
+fill. The tints of the primary color, a link, danger and warning, and
+the borders of danger and warning, are mixed too. A chart's steps are
+mixed as the base mixes them, from the palette's primary color, text
+and sunken surface (`SERIES` there).
 
-A preview in each theme shows the colors as they are. Below it, a table
-measures every pair that holds text, or that must be seen, against the
-contrast it needs, as each color is chosen, and a live region says how
-they stand: text, muted text, links, danger and warning text on every
-surface, and on their tints; muted text and links on the primary
-color's tint, as on the course card; a link on its hovered tint; the
-text on a button; an answer button's text and muted text on its tint,
-and on its tint under the pointer; and a field's edge, the focus ring
-and a chart's steps on the surfaces (`CHECKED_PAIRS`).
-These are the pairs `style.test.ts` checks of the built-in palettes,
-of the roles a palette of one's own paints, and `style.test.ts` fails
-on any it checks that the list leaves out. A pair needs what the base needs
-(`contrastTargets`): 4.5:1 for text and 3:1 for edges, or 7:1 and 4.5:1
-on High contrast. A palette with a pair below that is saved only
-after "Use anyway"; one whose text is below 3:1 on the background or on a
-surface is not saved at all. Saving it ("Save and use") shows the app
-in it from then on, as choosing it under Colors does.
+Below a preview in each theme, a table measures, as each color is
+chosen, every pair that holds text or must be seen against the
+contrast it needs; a live region says how they stand.
+The pairs (`CHECKED_PAIRS`) are:
+
+- text, muted text, links, danger and warning text on every surface,
+  and on their tints;
+- muted text and links on the primary color's tint, as on the course
+  card;
+- a link on its hovered tint;
+- the text on a button;
+- an answer button's text and muted text on its tint, and on its tint
+  under the pointer;
+- a field's edge, the focus ring and a chart's steps on the surfaces.
+
+`style.test.ts` checks these pairs in the built-in palettes, among the
+roles a palette of one's own paints, and fails on a pair it checks
+that the list leaves out. A pair needs what the base needs
+([Color roles](#color-roles)). A palette with a pair below that is
+saved only after "Use anyway"; one whose text is below 3:1 on the
+background or on a surface isn't saved. "Save and use" shows
+the app in it from then on, as choosing it under Colors does.
 
 "Reset colors", under Colors and in the editor, goes back to Standard.
-It is drawn in Standard's own colors, the element around it marked
-with `data-palette="standard"` (which palettes.css styles, as it
-styles the swatches), so it can be read and pressed whatever a palette
-does to the page.
+It's drawn in Standard's colors (its element marked
+`data-palette="standard"`, which `palettes.css` styles as the
+swatches), so it can be read and pressed whatever a palette does to
+the page.
 
 ### Where a palette of one's own is kept
 
 - **In the pod**, in the instance's `palettes.ttl`: one `sm:Palette`
-  per palette at `#palette-<id>`, with its name (`dcterms:title`,
-  language-tagged, in the page's language), its base (`sm:basedOn`, a
-  concept of `sm:Palettes`) and its colors in each theme
-  (`sm:lightColors`, `sm:darkColors`), each an `sm:ColorSet` beside it,
-  `#palette-<id>-light` and `#palette-<id>-dark`, with a property for
-  each color it sets (`sm:textColor` and the like; palette and color
-  set format 1, [shapes.md](shapes.md)). The preferences choose it by
-  its address in `sm:palette`, so it needs no new preferences format,
-  and it follows the user to every device as a built-in palette does.
-- **On the device**, `solid-memo:palette` holds its base, and
-  `solid-memo:palette-colors` the palette itself and the colors to
-  paint in each theme, for the first paint
+  per palette at `#palette-<id>`, its name in the page's language, and
+  its color sets (`sm:ColorSet`) at `#palette-<id>-light` and
+  `#palette-<id>-dark` (palette and color set format 1, whose
+  properties [shapes.md](shapes.md) lists). The preferences choose it
+  by its address in `sm:palette`, so it needs no new preferences
+  format, and it follows the user to every device as a built-in
+  palette does.
+- **On the device**, `solid-memo:palette` holds its base. For the first
+  paint, `solid-memo:palette-colors` holds the palette and the colors
+  to paint in each theme
   ([localStorageCustomPalettePreference.ts](../packages/browser/src/localStorageCustomPalettePreference.ts),
   the `CustomPalettePreference` port). Opening the instance copies the
   pod's palette there; choosing a built-in palette removes it.
 
 ### How a palette of one's own is held safe
 
-The pod is data anyone who may write it may have written, and a
-palette is painted on every screen, so its colors are held to a few
-rules wherever they are read and wherever they are painted:
+Anyone who may write the pod may have written a palette. Wherever
+it's read and painted:
 
 - **Only the instance's own palettes are read.** A palette is read
   only when `sm:palette` names a subject of the instance's
-  `palettes.ttl` (`isPaletteOf`), and its color sets only as subjects
-  of the same document; a palette at an address outside the document
-  is not listed. Any other address in `sm:palette` is a palette this
-  version does not know: it is never fetched, and shows as Standard.
+  `palettes.ttl` (`isPaletteOf`), its color sets only as subjects of
+  the same document; one at an address outside the document isn't
+  listed. Any other address in `sm:palette` is never fetched and shows
+  as Standard.
 - **A color is `#rrggbb`, and nothing else.** The color set's shape
-  says so (`sh:pattern`) and is closed, so a property no color is,
-  such as a picture, is reported. Data that does not conform is
-  reported by the instance's check, not blocked
-  ([validation.md](validation.md)), so the code holds to the rule
-  again: `parsePalette` keeps only the listed roles, each `#rrggbb`,
-  and leaves out any other value, whatever the shape said of it.
+  says so (`sh:pattern`) and is closed, so a property that isn't a
+  color, such as a picture, is reported. The instance's check reports
+  data that doesn't conform without blocking it
+  ([validation.md](validation.md)), so `parsePalette` keeps only the
+  listed roles, each `#rrggbb`, and drops any other value.
 - **Colors reach a style one property at a time.** A palette is
   painted on the root with `style.setProperty`, only for the roles it
   may paint (`PAINTED_ROLES`), each value checked against `#rrggbb`
-  again where it is set (`paletteStyle` in
-  [theme.tsx](../packages/ui/src/ui/theme.tsx)). No CSS text, `url()`
-  or `var()` from the pod, or from the device's copy, ever reaches a
-  style. The swatches and the editor's preview are painted the same
-  way.
+  again (`paletteStyle` in [theme.tsx](../packages/ui/src/ui/theme.tsx)).
+  No CSS text, `url()` or `var()` from the pod or the device's copy
+  reaches a style. The swatches and the editor's preview are painted
+  the same way.
 - **The first paint checks again.** The script in `apps/web/index.html`
-  reads `solid-memo:palette-colors` for the theme it sets, and sets a
-  color only for a role a palette may paint, by name, and only if it
-  is `#rrggbb`; anything else in the key paints nothing.
-- **Unreadable text is not painted.** A palette read from the pod or
-  from the device whose text is below 3:1 on the background or on a
-  surface (`isReadable`), as another app may have written it, is shown
-  as its base, and the device's copy is forgotten, so no screen,
-  whether signing in or choosing an instance, is painted in it. The
-  preferences keep naming it, as they keep any palette this version
-  does not show.
+  reads `solid-memo:palette-colors` for the theme it sets, and paints
+  only roles a palette may paint, by name, with `#rrggbb` values;
+  anything else in the key paints nothing.
+- **Unreadable text isn't painted.** Another app may write a palette
+  whose text is below 3:1 on the background or on a surface
+  (`isReadable`). Read from the pod or the device, it's shown as its
+  base on every screen, signing in and choosing an instance included. The
+  device's copy is forgotten. The preferences keep naming it, as they
+  keep any palette this version doesn't show.
 - **A palette low in contrast can be left.** A palette saved with "Use
   anyway", or written by another app with pairs below what they need
   but its text readable, is painted with the colors it has. "Reset
   colors", in Standard's colors, gets the user out of it.
 
-The journeys' accessibility checks take a palette of the user's own
-off the page while they check each built-in palette
+The journeys' accessibility checks take a palette of one's own off the
+page while they check each built-in palette
 ([testing.md](testing.md#user-journeys)).
 
 ## Text size
@@ -333,83 +315,77 @@ off the page while they check each built-in palette
 The text comes in four sizes: Default, the browser's own, then Large,
 Larger and Largest, at 112.5%, 125% and 150% of it. The user chooses
 under Text size in the study preferences, each size with a sample line
-at that size, and the choice takes effect at once. It is kept in the
+at that size, and the choice takes effect at once. It's kept in the
 instance's preferences and on the device, as the theme is: on the
 device by the `TextSizePreference` port
 ([localStorageTextSizePreference.ts](../packages/browser/src/localStorageTextSizePreference.ts),
-key `solid-memo:textSize`; Default is no key at all). It is shown as
-`<html data-text-size>`: the script in `apps/web/index.html` sets it
-before the first paint, and `theme.tsx` from there; Default goes
-without. Each size sets the root's font size as a percentage, so the
-browser's own text size is multiplied in, and `--text-scale` (1.125,
-1.25 or 1.5) with it. The Studio is on the same page, so it follows
-too; its Comfortable layout is a setting of its own, and the two
-multiply.
+key `solid-memo:textSize`; Default is no key). It's shown as
+`<html data-text-size>` (none for Default), set as `data-palette` is.
+Each size sets the root's font size as a percentage, which the
+browser's text size multiplies, and `--text-scale` (1.125, 1.25 or
+1.5). The Studio follows; its Comfortable layout is a separate
+setting, and the two multiply.
 
 The text is sized in `rem`, its line heights without a unit and its
 letter spacing in `em`, so the root's font size scales nearly all of
-it, the browser's own text size and the size chosen alike. What does
-not follow the root's font size is kept to a few places, and made to:
+it. What doesn't is kept to a few places, and made to follow:
 
 - **What the window sizes**: the card's question and answer are sized
-  by the window's width (`vw`), within bounds in `rem`. The `vw` term
-  is multiplied by `--text-scale`, 1 by default, which a larger text
-  size raises.
-- **Breakpoints** are in `rem`. A media query reads `rem` as the
-  browser's own font size, not the root's, so a breakpoint follows the
-  browser's text size but not the page's. The deck list's is a
-  container query instead, in `em` of the list, so it follows both:
-  narrower than 17em, a deck's study action and menu go under its name
-  rather than beside it.
+  by the window's width (`vw`), within bounds in `rem`, the `vw` term
+  multiplied by `--text-scale` (1 by default).
+- **Breakpoints** are in `rem`, which a media query reads as the
+  browser's font size, so they follow the browser's text
+  size but not the page's. The deck list's is a container query in
+  `em` of the list, which follows both: narrower than 17em, a deck's
+  study action and menu go under its name rather than beside it.
 - **The Studio's panes**: a splitter's least and most sizes are in
   pixels for a root font size of 16px, and as much larger as the root's
   font size is ([`splitter.ts`](../apps/studio/src/ui/shell/splitter.ts)).
-- **What could widen the page** at 320px in the largest text does
-  not: a field is no wider than what it is in, though its own width is
-  in characters, and on a narrow screen a card table's cells keep less
-  room about their text and its column names may break.
+- **What could widen the page** at 320px in the largest text doesn't.
+  A field is no wider than what it's in, though its width is in
+  characters. On a narrow screen a card table's cells keep less room
+  around their text, and its column names may break.
 - **Text that could be cut short** wraps instead: the name of the
   group a dragged deck would land in, a bar chart's names under its
-  bars, and the Studio's instance switcher. Who is signed in, which the
-  Studio's header still cuts short to keep it one row, has the whole
-  line as its title.
+  bars, and the Studio's instance switcher. The Studio's header still
+  cuts short who is signed in, to keep one row, with the whole line as
+  its title.
 
 `style.test.ts` and `studio.test.ts` fail on a font size in `px` other
-than the focus proxy's 16px (with less, a phone would zoom the page as
-the proxy takes the focus), on a breakpoint in `px`, and on a `vw` font
-size without `--text-scale`.
+than the focus proxy's 16px; with less, a phone zooms the page as the
+proxy takes the focus. They fail on a breakpoint in `px` too, and on a
+`vw` font size without `--text-scale`.
 
 ## Korean text
 
 Korean, on a Korean page or in card text marked `lang="ko"` on another,
-has its own `:lang(ko)` rules in `style.css`: Korean fonts (Apple SD
-Gothic Neo, Malgun Gothic, Noto Sans KR) ahead of the Japanese ones,
-which hold Hangul too but draw it with Japanese shapes and metrics;
-Fredoka and Bangers stay first for the Latin letters. Lines break between
-words, not syllables (`word-break: keep-all`). Headings, which Bangers
-cannot draw in Korean, are bold, and neither they nor the uppercase
-labels are tracked apart. Code, `kbd`, `samp` and `pre` keep the
-monospace font (`--font-mono`), which the Korean font rule would
-otherwise take from them.
+has its own `:lang(ko)` rules in `style.css`. Korean fonts (Apple SD
+Gothic Neo, Malgun Gothic, Noto Sans KR) come ahead of the Japanese
+ones, which hold Hangul but draw it with Japanese shapes and metrics.
+Fredoka and Bangers stay first for the Latin letters. Lines break
+between words, not syllables (`word-break: keep-all`). Headings, which
+Bangers can't draw in Korean, are bold, and neither they nor the
+uppercase labels are tracked apart. Code, `kbd`, `samp` and `pre` keep
+the monospace font (`--font-mono`) over the Korean font rule.
 
 ## Arabic text
 
 Arabic in card text marked `lang="ar"` has its own `:lang(ar)` rules in
-`style.css`: Noto Naskh Arabic, a book hand that draws the vowel marks
-clearly, bundled like Fredoka (only its Arabic files are fetched, and
-only for Arabic text), after Fredoka for the Latin letters and before
-the systems' Arabic fonts (Geeza Pro, Segoe UI, Tahoma). Arabic letters
-join, so no Arabic text is tracked apart: not headings, not the card's
-question (tightened for Latin letters), not the uppercase labels.
-Headings, which Bangers cannot draw in Arabic, are bold in the Arabic
-font, and code keeps the monospace font, as in Korean. Arabic, like any
-language written right to left, runs right to left in its own isolated
-box ([i18n.md](i18n.md#text-in-the-users-languages)).
+`style.css`. Its font is Noto Naskh Arabic, a book hand that draws the
+vowel marks legibly, bundled like Fredoka: only its Arabic files are
+fetched, and only for Arabic text. It comes after Fredoka for the Latin
+letters and before the systems' Arabic fonts (Geeza Pro, Segoe UI,
+Tahoma). Arabic letters join, so no Arabic text is tracked apart: not
+headings, not the card's question (tightened for Latin letters), not
+the uppercase labels. Headings, which Bangers can't draw in Arabic, are
+bold in the Arabic font, and code keeps the monospace font, as in
+Korean. Like any right-to-left language, Arabic runs right to left in
+its own isolated box ([i18n.md](i18n.md#text-in-the-users-languages)).
 
 ## German text
 
 German, on a German page or in card text marked `lang="de"` on another,
 is hyphenated at line ends (`hyphens: auto` under `:lang(de)`), so a
-long compound word ("Wiederholungsintervall") breaks at a syllable with
-a hyphen rather than at any letter. Spanish and French need no rules of
+long compound word ("Wiederholungsintervall") breaks at a syllable, with
+a hyphen, not at any letter. Spanish and French need no rules of
 their own: Fredoka and Bangers draw their letters.

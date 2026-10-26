@@ -1,23 +1,24 @@
 # Testing
 
-Every change to Solid Memo is checked by automated tests
-before it is published. Small tests check each part of the code on its
-own, every line of it; larger ones run the app against real Solid
-servers and click through it in a real browser. This page says what
-each kind covers, how to run them, and how to read a failure.
+Automated tests check every change to Solid Memo before it's
+published: unit tests cover every line of each part of the code, and
+larger tests run the app against real Solid servers and in a real
+browser. This page says what each kind covers, how to run them, and
+how to read a failure.
 
-Unit tests with [Vitest](https://vitest.dev/) in every package, in node
-unless the package runs in the browser: `ui`, `web`, `studio`, `solid` and `browser`
-run in `happy-dom`, and the UI's tests use `@testing-library/preact`
-([vitest.shared.ts](../vitest.shared.ts)). Coverage is enforced at
-**100%** (statements, branches, functions, lines) per package: each
-package's own tests cover its own code — `npm test` fails below that.
+Every package has unit tests with [Vitest](https://vitest.dev/), in
+node unless the package runs in the browser: `ui`, `web`, `studio`,
+`solid` and `browser` run in `happy-dom`, and the UI's tests use
+`@testing-library/preact` ([vitest.shared.ts](../vitest.shared.ts)).
+Each package's own tests cover **100%** of its code (statements,
+branches, functions, lines), or `npm test` fails
+([Coverage policy](#coverage-policy)).
 
 ## Commands
 
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
-npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
+npm run check     # Biome's lint, markdownlint, cspell and the prose check, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
 npm run check:ci  # npm run check without the deck library, as CI's check job runs it (its library job checks the library)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
@@ -25,6 +26,7 @@ npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
+npm run lint:prose         # the docs' prose rules, per page kind (docs/style.md#the-prose-check), as npm run check runs it; -- docs/srs.md for one page
 npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
 npm run lint:workflows     # actionlint and zizmor over .github/, as CI's workflows job runs them (needs them; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
@@ -50,11 +52,11 @@ npm run screenshots   # retake the app's screenshots on a phone's screen (below)
 npm run check:providers   # the Pod providers onboarding suggests answer with their issuers (needs the network)
 ```
 
-`npm run test:pod` runs `e2e/pod/` once against each Solid server
+`npm run test:pod` runs `e2e/pod/` against each Solid server
 [servers.ts](../e2e/pod/servers.ts) knows, which its global setup
-([globalSetup.ts](../e2e/pod/globalSetup.ts)) starts in Docker, each on a
-free port of 127.0.0.1 and told that URL, and takes down after (or as
-the run ends, on Ctrl-C); the test names say which server and version:
+([globalSetup.ts](../e2e/pod/globalSetup.ts)) starts in Docker, on a
+free port of 127.0.0.1 and told that URL, and takes down after the run
+or on Ctrl-C. The test names say which server and version:
 
 | Id | Server | Image | Tier |
 |---|---|---|---|
@@ -66,143 +68,142 @@ the run ends, on Ctrl-C); the test names say which server and version:
 | `css-8` | Community Solid Server 8, still in alpha, in memory | its own, pinned by digest | advisory |
 | `pivot` | Pivot, the server of solidcommunity.net (the Community Solid Server 7 with Pivot's components), in memory | built here from its lockfile ([servers/pivot/](../e2e/pod/servers/pivot/Dockerfile)) with a configuration of its own, its root open | advisory |
 | `nextcloud` | Solid-Nextcloud: Nextcloud 32 with the Solid app, on SQLite, the pod `apps/solid/~alice/storage/` | built here from a commit of the app ([servers/nextcloud/](../e2e/pod/servers/nextcloud/Dockerfile)), installed on every start, alice's pod opened by a hook | advisory |
-| `jss` | JavaScript Solid Server, files in the container, open to anyone (`--public`, which skips its access control) | built here from its lockfile ([servers/jss/](../e2e/pod/servers/jss/Dockerfile)), unmodified and pushed nowhere (it is AGPL) | advisory |
+| `jss` | JavaScript Solid Server, files in the container, open to anyone (`--public`, which skips its access control) | built here from its lockfile ([servers/jss/](../e2e/pod/servers/jss/Dockerfile)), unmodified and pushed nowhere (it's AGPL) | advisory |
 
 A **blocking** server's tests gate CI, and so deploys and Renovate's
-merges: every test passes or skips, for a reason the tests give. An
-**advisory** server's results are reported, not a gate: the Interop
-workflow ([interop.yml](../.github/workflows/interop.yml)) runs them on
-pushes to `main` that touch the app's Solid code, weekly, and by hand,
-and a job fails only on a test failing that
-`e2e/pod/servers/<id>/expected-failures.json` (`{ "<file> > <test>":
-"<why>" }`, the test named without its server) does not list, or when
-no test ran ([compare.ts](../e2e/pod/compare.ts) says which in the job's
-summary, and what passes though listed, to take off the list). CI still
-checks that every advisory server starts and meets the contract, so a
-change that breaks one is not merged unnoticed, and Renovate merges an
-advisory server's updates once that passes, as it does a blocking one's. Solid-Nextcloud's SQLite
-refuses writes made at once, so with it in a run the test files run one
-at a time (`serialFiles` in servers.ts); what it fails, and why, is its
-`expected-failures.json`. css-8 becomes blocking at
-8.0.0, and css-6 then goes.
+merges: every test passes, or skips for a reason it gives. An
+**advisory** server's results are reported, not a gate, by the Interop workflow
+([interop.yml](../.github/workflows/interop.yml)), weekly, by hand, and
+on pushes to `main` that touch the app's Solid code. A job fails only
+when no test ran, or a test fails that
+`e2e/pod/servers/<id>/expected-failures.json`
+(`{ "<file> > <test>": "<why>" }`, the test named without its server)
+doesn't list.
+[compare.ts](../e2e/pod/compare.ts) names these in the job's summary,
+with what passes though listed, to take off the list. CI still checks
+that every advisory server starts and meets the contract (`contract`),
+so a change that breaks one isn't merged unnoticed. Renovate merges its
+updates once that passes, as it does a blocking one's.
+Solid-Nextcloud's SQLite refuses concurrent writes, so with it in a run
+the test files run one at a time (`serialFiles` in `servers.ts`). What
+it fails, and why, is in its `expected-failures.json`. css-8 becomes blocking at 8.0.0,
+and css-6 then goes.
 
-Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`. It may
-ask only for `E2E_PORT` (the port on 127.0.0.1 the harness picked, which
-the server must be told) and `E2E_SECRET` (a password made up for the
-run), publishes on 127.0.0.1 only, and gets nothing of the host; `npm
-test` checks that of every one ([servers.test.ts](../e2e/pod/servers.test.ts)).
-Images built here are tagged `localhost/solid-memo-e2e-<id>:local` and
-pushed nowhere; the others are pulled once. Before the tests, every
-server must meet a contract ([contract.ts](../e2e/pod/contract.ts)): a
-document anyone writes in its pod root reads back, is listed there at the
-URL it was written to, and deletes. A server that is not open, or does
-not know the URL it is reached at, fails there, saying so, not in every
-test. What a server prints goes to `e2e/pod/logs/<id>.log`, which CI
-keeps when a job fails.
+Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`,
+asking only for `E2E_PORT` (the port on 127.0.0.1 the harness picked,
+which the server must be told) and `E2E_SECRET` (a password made up for the run). It publishes on
+127.0.0.1 only and gets nothing of the host, as `npm test` checks
+([servers.test.ts](../e2e/pod/servers.test.ts)). Images built here are
+tagged `localhost/solid-memo-e2e-<id>:local`, pushed nowhere; others
+are pulled once. Before the tests, every server must meet a
+contract ([contract.ts](../e2e/pod/contract.ts)): a document anyone
+writes in its pod root reads back, is listed there at the URL it was
+written to, and deletes. A server that isn't open, or doesn't know the
+URL it's reached at, fails there, saying so, not in every test. What a server prints goes
+to `e2e/pod/logs/<id>.log`, which CI keeps when a job fails.
 
 The tests' fetch sends every request with `Connection: close`
-([setup.ts](../e2e/pod/setup.ts)). Node 24's fetch can write a request
-onto a pooled connection the server closed while a long synchronous
-stretch (a big update, on a slow runner) kept it from noticing, and
-then fails it without resending it; a browser resends it, so the app
-needs no retry. The Fetch standard forbids the header, but Node's fetch
-honors it, and `npm test` checks that it still does
-([connections.test.ts](../e2e/pod/connections.test.ts)).
+([setup.ts](../e2e/pod/setup.ts)). Node 24's fetch can fail, without
+resending, a request it wrote onto a pooled connection the server
+closed during a long synchronous stretch (a big update, on a slow
+runner). A browser resends, so the app needs no retry. The Fetch
+standard forbids the header; Node's fetch honors it, as `npm test`
+checks ([connections.test.ts](../e2e/pod/connections.test.ts)).
 
-`SOLID_SERVERS=css-7,nss-5` runs the suite against some only (`all`
-against every one; unset, the blocking ones; `css-8` for the advisory);
-`SOLID_SERVER_URL` against a server of your own instead, which must let
-anyone read and write, as `npm run pod`'s does (`SOLID_SERVER_NAME` names
-it in the tests; `NODE_EXTRA_CA_CERTS` trusts its certificate, if a CA of
-your own signed it). CI runs one job per blocking server, side by side, none
-stopping the others ([migrations.md](migrations.md#proof-on-a-real-server));
-Renovate keeps each server on its major (`renovate.json5`), and which
-servers each workflow runs is the table's in servers.ts (`npm test`
-checks). `MEASURE_ANSWER_LOG=1` adds a measurement of reading a large
-answer log to `history.integration.test.ts`: two years of answers,
-seeded in about a minute and a half a server, then the today strip's
-read on a second page load, its timings printed
-(shown with `--silent=false`; [statistics.md](statistics.md#loading)).
-`MEASURE_GRADES=1` adds one of grading to `grading.integration.test.ts`:
-a session's grades on a deck of 2,000 states, the requests, bytes and
-time of each printed ([srs.md](srs.md#what-a-grade-costs)). CI runs
-neither.
+`SOLID_SERVERS=css-7,nss-5` runs the suite against some servers only
+(`all`, every one; `css-8`, the advisory; unset, the blocking ones).
+`SOLID_SERVER_URL` runs it against a contributor's own server, which
+must let anyone read and write, as `npm run pod`'s does.
+`SOLID_SERVER_NAME` names it in the tests; `NODE_EXTRA_CA_CERTS`
+trusts a certificate the contributor's own CA signed. CI runs one job
+per blocking server, side by side, none stopping the others
+([migrations.md](migrations.md#proof-on-a-real-server)).
+Renovate keeps each server on its major (`renovate.json5`). The table
+in `servers.ts` says which servers each workflow runs
+([below](#the-merge-queue)).
 
-**In CI the images come from GitHub's cache**, not Docker Hub, whose
-limit on pulls without an account the runners share: each job restores
+`MEASURE_ANSWER_LOG=1` makes `history.integration.test.ts` seed two
+years of answers (about a minute and a half a server) and print the
+today strip's read timings on a second page load (with
+`--silent=false`; [statistics.md](statistics.md#loading)).
+`MEASURE_GRADES=1` makes `grading.integration.test.ts` print each
+grade's requests, bytes and time for a session on a deck of 2,000
+states ([srs.md](srs.md#what-a-grade-costs)). CI runs neither.
+
+**In CI the images come from GitHub's cache**, not Docker Hub (the
+runners share its limit on pulls without an account). Each job restores
 its server's images ([e2e-images](../.github/actions/e2e-images/action.yml)),
-and only when the cache has none under the job's key does it pull or
-build them, then, on `main`, save them ([e2e/pod/images.ts](../e2e/pod/images.ts)).
-Where `main`'s run skips the jobs that would save them
+and pulls or builds them only when the cache has none under the job's
+key, saving them on `main` ([e2e/pod/images.ts](../e2e/pod/images.ts)).
+Where `main`'s run skips those jobs
 ([releasing.md](releasing.md#what-each-stage-checks)), CI's `warm` jobs
-save the images of every server, blocking and advisory, that the cache
-lacks (`node e2e/pod/servers.ts keys all` names their keys).
-A pull request and the merge queue read `main`'s images but save none:
-GitHub keeps what a run saves under its ref, so their copies would never
-be read again, and they would count toward the repository's 10 GB of
-caches, past which GitHub evicts the least recently used. A pull request
-that changes an image (a Renovate digest update, say) pulls it, until
-`main` has saved it; then the next `caches` job deletes `main`'s older
-entry of that image, which no run of `main` reads again.
-The key is what names the images (`node e2e/pod/servers.ts key <id>`):
-the compose file, which pins a pulled image by digest, or, for an image
-built here, a hash of its compose file and of every file of its build
-context that Docker is sent (what `.dockerignore` keeps out is left out,
-so `expected-failures.json` changes nothing) and whether each is
-executable. `prepare` tags a built image with that hash
-(`localhost/solid-memo-e2e-<id>:inputs-<hash>`), lets older such tags go,
-and skips the build when an image of the current tag is there, as it is
-after a load. The journeys' images are keyed by their compose file. The
-jobs use Docker's containerd image store, which keeps the digest a loaded
-image was pulled by (the classic store forgets it, and compose would pull
-the image again), switching to it on a runner whose Docker does not
-already; an image pulled by digest is saved under the tag its reference
-names. What the cache does not have yet (a job's first run, or after an
-image changes) is pulled through `mirror.gcr.io`, Google's mirror of
-Docker Hub, set as Docker's registry mirror in the same step; Docker goes
-to Docker Hub for what the mirror lacks. A cache that cannot be saved or
-loaded only warns: the job pulls or builds, as before.
+save what the cache lacks, for every server
+(`node e2e/pod/servers.ts keys all` names their keys).
 
-They need Docker: Docker Engine 28.3.3 or later on Linux (before it, a
-port published on 127.0.0.1 could be reached from the local network,
-CVE-2025-54388), or Docker Desktop. A run killed before its teardown
-leaves its servers; the next run takes them down, as does `npm run
-pod:clean`. `npm run pod`'s server lets anyone read and write: keep no
-real data in it, and stop it when done.
+A pull request and the merge queue read `main`'s images but save none
+(caches saved under their ref are never read, yet count toward the
+repository's 10 GB, past which GitHub evicts the least recently used). A
+pull request that changes an image (a Renovate digest update, say) pulls
+it until `main` has saved it, and the next `caches` job deletes `main`'s
+older entry.
 
-The servers differ in what they enforce, and the tests ask each rather
-than assume ([serverTraits.ts](../e2e/pod/src/serverTraits.ts)):
+The key (`node e2e/pod/servers.ts key <id>`) is, for a pulled image,
+its compose file, which pins it by digest. For an image built here,
+it's a hash of its compose file and of every file of its build context
+that Docker is sent, with whether each is executable; what
+`.dockerignore` keeps out, such as `expected-failures.json`, changes
+nothing. `prepare` tags a built image with that hash
+(`localhost/solid-memo-e2e-<id>:inputs-<hash>`), lets older such tags
+go, and skips the build when the current tag is there, as after a load.
+The journeys' images are keyed by their compose file.
+
+Where a runner's Docker doesn't use it already, the jobs switch Docker
+to its containerd image store, which keeps the digest a loaded image
+was pulled by (the classic store doesn't, and compose would pull it
+again). An image pulled by digest is saved under the tag its reference
+names. What the cache lacks (a job's first run, or after an image
+changes) is pulled through `mirror.gcr.io`, Google's mirror of Docker
+Hub. The same step sets it as Docker's registry mirror; Docker falls
+back to Docker Hub for what the mirror lacks. A cache that can't be saved or loaded only
+warns, and the job pulls or builds.
+
+The tests need Docker Desktop, or Docker Engine 28.3.3 or later on Linux
+(CVE-2025-54388: earlier, a port on 127.0.0.1 is reachable from the
+local network). The next run or `npm run pod:clean` takes down the
+servers a killed run left. `npm run pod`'s server lets anyone read and
+write: a contributor keeps no real data in it, and stops it when done.
+
+The tests ask each server what it enforces
+([serverTraits.ts](../e2e/pod/src/serverTraits.ts)):
 
 - **node-solid-server** gives no ETag (nor a modification time) on a
-  read and ignores `If-Match`, so there an edit cannot be made
-  conditional and the test that proves an edit is refused is skipped;
-  without ETags no [digest](data-model.md#the-digest) is kept either, so
-  the test of two pages learning at once is skipped, and the others
-  check that every visit reads everything. (5.7.4 also ignored
-  `If-None-Match: *` on a PUT; 5.8.8 and 6.0.0 enforce it.) Its parser
-  knows no SPARQL-style `PREFIX` directive: no one can patch such a
-  document there, so the documents an update's tests write by hand use
-  `@prefix` ([migrations.md](migrations.md#the-pod-migration)). Its
-  PATCH finds a decimal only as JavaScript spells its number (`1`, not
-  the `1.0` it serves for a whole one), so the app sends a deletion it
-  refuses for that once more, so spelled
+  read and ignores `If-Match`, so the test that proves an edit is
+  refused is skipped. Without ETags no
+  [digest](data-model.md#the-digest) is kept: the test of two pages
+  learning at once is skipped, and the others check that every visit
+  reads everything. (5.7.4 ignored `If-None-Match: *` on a PUT too;
+  5.8.8 and 6.0.0 enforce it.) Its parser knows no SPARQL-style
+  `PREFIX` directive, so no one can patch such a document there, and the
+  documents an update's tests write by hand
+  use `@prefix` ([migrations.md](migrations.md#the-pod-migration)). Its
+  PATCH finds a decimal only as JavaScript spells it (`1`, not the
+  `1.0` it serves for a whole one); when it refuses a deletion for that
+  reason, the app sends it again with the number spelled that way
   ([data-model.md](data-model.md#write-discipline)).
-- **Community Solid Server 6** builds its ETag from the modification time
-  in whole seconds: an edit in the same second as a read keeps the ETag,
-  so a changed document looks unchanged. The tests edit within the
-  second, so there the test that proves an edit is refused and the
-  digest's tests are skipped. 7 stamps milliseconds. The tests of an
-  update whose write a change made elsewhere refuses instead wait for
-  the next second before they make that change, where the server's ETag
-  does not change on every edit, and so run there too; on
-  node-solid-server, which ignores `If-Match`, they are skipped.
+- **Community Solid Server 6** builds its ETag from the modification
+  time in whole seconds (7 uses milliseconds), so a document the tests
+  edit in the same second as a read looks unchanged. The test that
+  proves an edit is refused and the digest's tests are skipped. The
+  tests of an update whose write a change made elsewhere refuses wait
+  for the next second before making that change where the server's ETag
+  doesn't change on every edit, and so run there too
+  (on node-solid-server they're skipped).
 
-Every skip says why. Everything else runs on every server. A test may
-skip only where the server does something the Solid Protocol allows and
-the app copes with, as above; what the app needs and has no way around (a
-PATCH it can send, an ACL it can write, every insert of several at once
-kept) is never a reason to skip, and a probe that cannot tell throws.
-What the tests need only for themselves they ask of the server too: an
+Every skip says why, and everything else runs on every server. A test
+skips only where the server does something the Solid Protocol allows and
+the app copes with. What the app needs is never a reason: a PATCH it
+can send, an ACL it can write, every insert of several at once kept. A probe that
+can't tell throws. The tests ask the server for what they need too: an
 ACL document is where its `Link rel="acl"` says, and a change "another
 app" makes is an N3 Patch, a SPARQL Update or the whole document, as its
 `Accept-Patch` allows. What each blocking server does is pinned
@@ -211,115 +212,108 @@ a release that changes it fails there, not as tests quietly starting or
 stopping to skip, and the pin moves by hand once the change is
 understood. The tests of the format update and of the library upgrade
 check that a document a write of theirs left alone, or failed on, is as
-it was "byte for byte": the bytes the server serves for it, asked for as
-the app asks (`Accept: text/turtle`), before and after
-([migrations.md](migrations.md#proof-on-a-real-server),
+it was "byte for byte". They compare the bytes served before and after,
+asked for as the app asks (`Accept: text/turtle`) (`migrations.md`,
 [the upgrade's](migrations.md#proof-of-the-upgrade-on-a-real-server)).
 
-The Community Solid Server's in-memory store (the one these tests use)
-cuts a document short after a PATCH to it when the document holds
-characters outside ASCII (`å`, `ä`, `ö`), even when the patch itself is
-ASCII: it stores as many bytes as there were characters. Its file store
-does not; keep test data that is patched ASCII, or measure on
-`-c @css:config/file.json -f <dir>`. A release's draft is written whole
-(PUT) for this, and because node-solid-server stores a boolean a PATCH
-inserts (`owl:deprecated true`) as false: its tests
+The Community Solid Server's in-memory store, which these tests use,
+cuts a document with characters outside ASCII (`å`, `ä`, `ö`) short
+after any PATCH, storing as many bytes as there were characters; its
+file store doesn't. So patched test data is kept ASCII, or a measurement
+runs on the file store (`-c @css:config/file.json -f <dir>`). A
+release's draft is written whole (PUT) for this reason, and because
+node-solid-server stores a boolean a PATCH inserts
+(`owl:deprecated true`) as false. Its tests
 ([releaseDrafts.integration.test.ts](../e2e/pod/src/releaseDrafts.integration.test.ts))
-take the library's largest course, its text as it is, through a draft
-on every server, each step within a time budget.
+take the library's largest course, its text as it is, through a draft on
+every server, each step within a time budget.
 
 Publishing a release
 ([releases.integration.test.ts](../e2e/pod/src/releases.integration.test.ts))
 is the app's only write of access control. The tests write anonymously,
-as every server lets anyone write, so "no login" is what the release's
-own ACL (Web Access Control) or ACR (Access Control Policies, `css-acp`,
-blocking so that the ACR's write gates CI as the ACL's does) says once
-published: the test reads that document, not only the
-release. A second release at the same address is refused, and leaves
-the first as it was. A publishing cut short after the release is
-written (its catalog link refused once) is finished by publishing
-again; deleting the instance then keeps the release and its folder,
-and says so (`keptReleases`). node-solid-server refuses the PATCH
-`@inrupt/solid-client` writes an ACL with, and the Community Solid
-Server answers an ACR not written yet with 404; the publisher takes
-both in its stride (`accessFetch`). Solid-Nextcloud names a folder's
-ACL as each of its documents', so the release stays private there
-(its `expected-failures.json`). A release on another origin whose
+so the test reads the release's own ACL (Web Access Control) or ACR
+(Access Control Policies, `css-acp`, blocking so the ACR's write gates
+CI) to find "no login" there once published. A second release at the
+same address is refused, leaving the first as it was. A publishing cut
+short after the release is written (its catalog link refused once)
+finishes when published again; deleting the instance then keeps the
+release and its folder, saying so (`keptReleases`). The publisher copes
+(`accessFetch`) with node-solid-server refusing the PATCH
+`@inrupt/solid-client` writes an ACL with, and with the Community Solid
+Server answering 404 for an ACR not written yet. Solid-Nextcloud names a
+folder's ACL as each of its documents', so the release stays private
+there (its `expected-failures.json`). A release on another origin whose
 server names an access control on the real server as its own
 ([releaseAccess.integration.test.ts](../e2e/pod/src/releaseAccess.integration.test.ts))
 leads no request there, by publishing or by **Make it public**. On
-`css-6`, whose ETags are whole seconds, the learner reads the second
-release's catalog as a later visit would.
+`css-6`, the learner reads the second release's catalog as a later visit
+would.
 
-solid-server 6.0.0 is packaged with faults its image works around: it
-lacks the root ACL template it copies on first start (so the image has
-one in its config folder), and it lists its own commit-hook tool
-`@fastify/pre-commit` as a dependency, whose install script would put a
-git hook in place; 5.8.8 does too. The image installs without install
-scripts. node-solid-server prints every request it handles (`solid:*`),
-so its log runs to tens of megabytes.
+The image of solid-server 6.0.0 puts the root ACL template the package
+lacks, copied on first start, in its config folder. It installs without
+install scripts, as 6.0.0, like 5.8.8, lists `@fastify/pre-commit`,
+whose install script puts a git hook in place, as a dependency.
+node-solid-server logs every request (`solid:*`), so its log runs to
+tens of megabytes.
 
-The vocabulary, the deck library and the pod catalog fixtures are also
-cross-checked by pySHACL in CI (`npm run crosscheck`;
-see [validation.md](validation.md#the-ci-cross-check)). The script has
-tests of its own, with Python's standard `unittest`
+In CI, pySHACL cross-checks the vocabulary, the deck library and the
+pod catalog fixtures (`npm run crosscheck`;
+[validation.md](validation.md#the-ci-cross-check)). The script's own
+tests use Python's standard `unittest`
 ([scripts/test_shacl_crosscheck.py](../scripts/test_shacl_crosscheck.py),
-`npm run test:crosscheck`): each builds a small repository in a
-temporary folder, a few lines of Turtle in place of DCAT-AP, SkoHub's
-shapes, the deck library and the fixtures, and runs the script's checks
-on it, so they read none of the real documents and need no network.
-They cover how it picks and targets shapes, where it stops (a shape
-DCAT-AP adds, `rdfs:subClassOf`, a subject with no shape) and what it
-reports when a document fails. The same command runs the tests of the
-taxonomy deck's generator
+`npm run test:crosscheck`), each on a small repository in a temporary
+folder, a few lines of Turtle standing in for DCAT-AP, SkoHub's shapes,
+the deck library and the fixtures. They read none of the real
+documents and need no network. They cover how the script picks and targets shapes, where it stops (a shape DCAT-AP adds,
+`rdfs:subClassOf`, a subject with no shape) and what it reports when a
+document fails.
+
+The same command runs the tests of the taxonomy deck's generator
 ([scripts/test_taxonomy_deck.py](../scripts/test_taxonomy_deck.py),
-[deck-library.md](deck-library.md#the-taxonomy-deck)), and of the
-script that gives label decks their languages from Wikidata
+[deck-library.md](deck-library.md#the-taxonomy-deck)) and of the script
+that gives label decks their languages from Wikidata
 ([scripts/test_wikidata_labels.py](../scripts/test_wikidata_labels.py),
-[deck-library.md](deck-library.md#languages-from-wikidata)), each against
-a fake taxonomy or Wikidata of its own. CI's
-`crosscheck` job runs them all before the cross-check; `npm run check`
-does not, as it needs no Python. The generator itself runs weekly, and
-by hand, in the [Taxonomy workflow](../.github/workflows/taxonomy.yml),
-which proposes each new version of its deck as a pull request. The Wikidata
-labels script checks its decks against the revisions they record weekly,
-and by hand, in the [Wikidata workflow](../.github/workflows/wikidata.yml),
-never on a pull request.
+[deck-library.md](deck-library.md#languages-from-wikidata)), each
+against a fake taxonomy or Wikidata of its own. CI's `crosscheck` job
+runs them all before the cross-check; `npm run check`, which needs no
+Python, doesn't. The generator runs weekly and by hand in the
+[Taxonomy workflow](../.github/workflows/taxonomy.yml), which proposes
+each new deck version as a pull request. The Wikidata script checks its
+decks against the revisions they record, weekly and by hand, in the
+[Wikidata workflow](../.github/workflows/wikidata.yml). Neither runs on
+a pull request.
 
 ## User journeys
 
-`e2e/journeys/` drives the built app (`npx turbo run build --filter=@solid-memo/web`,
-served by `vite preview` at `http://127.0.0.1:4173/`, the [Studio](studio.md)
-at `#/studio`) in Chromium, and a few of them in Firefox, WebKit and on
-a phone ([below](#browsers)), with
-[Playwright](https://playwright.dev/), through whole journeys a user
-takes: logging in with a WebID at a real identity provider, setting
-preferences, making and studying decks, grouping them, importing from
-the library, starting the library's course for newcomers from an empty
-deck list and working through its first chapter and final review,
-describing a deck in two languages, validating the
-instance, logging out, and opening the Studio to manage an
-instance's decks and its drafts of releases, drawing it as a graph
-whose links out of the pod are never fetched, writing a course in one
-and test-playing it in the trial, the instance's decks and statistics
-unchanged after, then publishing it, public, which someone with no
-login then reads, and another user adds from its link and plays. Each
-journey runs against a fresh account, pod
-and WebID on a Community Solid Server 7
-([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
-setup starts in Docker and takes down after. The app logs in only with
-https WebIDs and issuers, so the server sits behind Caddy at
+`e2e/journeys/` drives the built app with
+[Playwright](https://playwright.dev/) in Chromium, and a few journeys
+in Firefox, WebKit and on a phone ([below](#browsers)). The app is
+built with `npx turbo run build --filter=@solid-memo/web` and served by
+`vite preview` at `http://127.0.0.1:4173/`, the [Studio](studio.md) at
+`#/studio`. The journeys log in with a WebID at a real identity
+provider, set preferences, make, study and group decks, and import from
+the library. A newcomer starts the library's newcomers' course from an empty deck
+list through its first chapter and final review. A user describes a
+deck in two languages, validates the instance and logs out. In the
+Studio, a user manages an instance's decks and release drafts, and
+draws the instance as a graph whose links out of the pod are never
+fetched. A user writes a course in a draft, test-plays it in the trial
+(the instance's decks and statistics unchanged) and publishes it:
+someone with no login reads it, and another user adds it from its link
+and plays it.
+
+Each journey runs against a fresh account, pod and WebID on a Community
+Solid Server 7 the global setup starts in Docker and takes down after
+([css/compose.yml](../e2e/journeys/css/compose.yml)). The app logs in
+only with https WebIDs and issuers, so the server sits behind Caddy at
 `https://127.0.0.1:<port>/` with Caddy's own certificate, which the
-browser is told to accept. The server shares Caddy's network, so it
-reaches its own https address too (to read the WebIDs it checks tokens
-for). It keeps its pods in files, not in memory, because the journeys
-PATCH Swedish text (see above). The journeys need Docker and the
-browsers (`npm run browsers -w @solid-memo/e2e-journeys` installs
-Chromium, Firefox and WebKit, with the system libraries they need), and CI
-runs them on every pull request and in the merge queue, and on `main`
-only where the code has not passed them yet
-([releasing.md](releasing.md#what-each-stage-checks)). They block, as
-the blocking servers do.
+browser accepts. Sharing Caddy's network, the server reaches its own
+https address to read the WebIDs it checks tokens for. It keeps its pods
+in files, as the journeys PATCH Swedish text (see above). The journeys
+need Docker and the browsers
+(`npm run browsers -w @solid-memo/e2e-journeys` installs Chromium,
+Firefox and WebKit, with their system libraries). CI runs them as a gate
+([below](#deterministic-and-timing-dependent-jobs)).
 
 Further journeys go through:
 
@@ -329,139 +323,131 @@ Further journeys go through:
   of new cards and the statistics come back as before the session;
 - coming back on the next study day to review a deck, forgetting some
   cards, and reading recall, lapses and the hardest cards in the
-  statistics, with no leech to cram yet (a leech takes more study days
-  than a journey's time zones hold, so cramming is covered by the unit
-  tests);
+  statistics, with no leech to cram yet. Unit tests cover cramming: a
+  leech takes more study days than a journey's time zones hold;
 - a second instance in another folder: switching between the two,
   reloading, and deleting one whose folder another app also writes to,
   which is kept, and the app says why;
 - logging out and back in, and in on a second device, onto the same
-  instance, after a WebID the form refuses and a consent refused, the
-  dark theme, High contrast and Larger text following through the pod
-  (and kept through a reload), then a palette of one's own designed,
-  its too little contrast used anyway, found on a third device, and the
-  colors reset to Standard; and the Connected screen skipped from the
-  next login on, on the second and third devices too, until it is shown
-  again from Preferences;
+  instance, after a WebID the form refuses and a consent refused. The
+  dark theme, High contrast and Larger text follow through the pod and
+  a reload. A palette of one's own is designed, used despite too little
+  contrast, found on a third device, and reset to Standard. The
+  Connected screen is skipped from the next login on, on every device,
+  until the learner turns it back on in Preferences;
 - updating a copy of a library deck's first release to its second,
-  offered in Solid Memo and in the Studio, the day's study kept;
-- trying Solid Memo as a guest and moving the guest's study into a new
+  offered in Solid Memo and the Studio, the day's study kept;
+- trying Solid Memo as a guest and moving the study into a new
   instance in the pod, the move first cut off and its partial copy
   removed;
-- a screen that fails while it renders (the Studio's code, swapped for
-  code that throws): "Something went wrong" under the header that still
-  works, its details copied and its report link filled in, and the way
-  back to the start;
+- a screen that fails while it renders (the Studio's code swapped for
+  code that throws): "Something went wrong" under the working header,
+  its details copied, its report link filled in, and the way back;
 - what Solid Memo leaves alone in a pod
   ([pod-safety.journey.ts](../e2e/journeys/journeys/pod-safety.journey.ts)),
-  each journey reading the user's pod with plain requests after an
-  everyday action to find their documents as they were, the same status
-  and content and none added: an instance another user shares, whose
-  catalog names the user's profile and a private document as its decks'
-  documents, by their addresses or spelled to resolve there, its deck
-  removed and the instance deleted, the Studio's health naming those
-  decks; a draft there whose chapter has an id Solid Memo does not
-  accept, which the Studio does not open, saying why; a release
-  published and made public where the server names an access control
-  elsewhere in the pod as the release's, the user's private document
-  still unreadable to someone with no login; a deck's document that
-  another app also writes to, kept with that app's data when the
-  instance is deleted, which the picker says; and an instance laid out
-  flat at the pod's root, with an older deck that is read and studied,
-  then changed and removed once the user confirms its documents on the
-  Studio's health screen.
+  each journey reading the pod with plain requests after an everyday
+  action and finding the documents as they were, none added:
+  - an instance another user shares, whose catalog names the user's
+    profile and a private document as its decks' documents, by address
+    or spelled to resolve there. Its deck is removed, the instance
+    deleted, and the Studio's health screen names those decks;
+  - a draft there whose chapter has an id Solid Memo doesn't accept,
+    which the Studio doesn't open, saying why;
+  - a release published and made public where the server names an
+    access control elsewhere in the pod as the release's, the user's
+    private document still unreadable without a login;
+  - a deck's document Solid Memo and another app both write to, kept
+    with that app's data when the instance is deleted, as the picker
+    says;
+  - an instance laid out flat at the pod's root, its older deck read,
+    studied, changed, and removed once the user confirms its documents
+    on the Studio's health screen.
 
 ### Browsers
 
 Every journey runs in desktop Chromium, the `chromium` project in
-[playwright.config.ts](../e2e/journeys/playwright.config.ts). Three
-more projects run only the journeys tagged `@guest` and
-`@reload`: `firefox` (desktop Firefox), `webkit` (desktop Safari's
-engine) and `phone` (an iPhone 14's screen and touch, on WebKit). Those
-journeys go through what differs most between engines: the login's
-redirects to the identity provider and back, a guest's study kept in the
-browser's storage through them, the silent restore of a session after a
-reload, and a page narrow enough to lay out for a phone. The other
-journeys test the app's logic, which is the same in every engine, so
-running them all in each would about triple the time for little gain. A
-journey tagged with one of the two runs in every browser; tag another
-only when what it tests differs between engines. A step of such a
-journey that tests the app's logic again names the projects it runs in
-(`app.step(title, body, { in: ["chromium"] })`), and the report shows
-it skipped in the others, as the reload journey's statistics and the
-shared link's import are. CI runs them in five
-jobs side by side: Chromium's journeys in two shards
-(`npx playwright test --shard`), `journeys (chromium-1)` and
-`journeys (chromium-2)`, and each other project's in a job of its own,
-`journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`. The
-run waits for the slowest job, and each job pays the setup again, about
-a minute. Chromium's journeys run fully parallel
-(`fullyParallel: true`), each a unit the shards and workers share out,
-so a file of several journeys, such as `pod-safety`, is spread over
-both shards; a file whose journeys depend on each other runs them in
-turn (`test.describe.configure({ mode: "serial" })`). A job a project makes its own, rather than a shard of all
-three, keeps WebKit's and the phone's journeys, the slowest, from
-landing in one job. The [user guide](user-guide.md#supported-browsers)
-says which browsers Solid Memo supports.
+[playwright.config.ts](../e2e/journeys/playwright.config.ts); three
+more run only the journeys tagged `@guest` and `@reload`:
+`firefox` (desktop Firefox), `webkit` (desktop Safari's engine) and
+`phone` (an iPhone 14's screen and touch, on WebKit). Those journeys
+cover what differs most between engines: the login's redirects to the
+identity provider and back, a guest's study kept in storage through
+them, a session's silent restore after a reload, and a phone-width
+layout. A journey gets one of the two tags only when what it tests
+differs between engines; the others test the app's logic. A step of a
+tagged journey that tests the app's logic names the projects it runs
+in (`app.step(title, body, { in: ["chromium"] })`), and the report
+shows it skipped elsewhere, as for the reload journey's statistics and
+the shared link's import.
 
-The engines differ in three ways the journeys allow for:
+CI runs them in five jobs side by side, each paying about a minute of
+setup. Chromium's run in two shards (`npx playwright test --shard`),
+`journeys (chromium-1)` and `journeys (chromium-2)`, and each other
+project, WebKit's and the phone's the slowest, in a job of its own,
+`journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`.
+Chromium's journeys run fully parallel (`fullyParallel: true`), so a
+file of several, such as `pod-safety`, spreads over both shards; a file
+whose journeys depend on each other runs them in turn
+(`test.describe.configure({ mode: "serial" })`). The
+[user guide](user-guide.md#supported-browsers) says which browsers
+Solid Memo supports.
+
+The journeys allow for three differences between engines:
 
 - Only Chromium lets a page read the clipboard back, so "Copy link"
   takes the link from the app's call to write it
   ([LibraryDeck.ts](../e2e/journeys/pages/LibraryDeck.ts)).
 - Firefox keeps no blank first page in a new tab's history, so a
-  journey that goes Back to the page before the app opens one of its
-  own first.
-- WebKit logs a fetch to another origin that it cut off, such as one
-  still running when the page is left, as an error in the page's
-  script. Playwright reports that as a page error, though the app
-  caught the fetch's rejection. `diagnostics.json` lists it with the
-  console, where Chromium and Firefox log the same, so it fails no
-  journey ([pageErrors.ts](../e2e/journeys/harness/pageErrors.ts)).
+  journey that goes Back to before the app opens a page of its own
+  first.
+- WebKit logs a cut-off fetch to another origin, such as one still
+  running when the page is left, as a script error, which Playwright
+  reports as a page error though the app caught the rejection. It fails
+  no journey: `diagnostics.json` lists it with the console,
+  where Chromium and Firefox log the same
+  ([pageErrors.ts](../e2e/journeys/harness/pageErrors.ts)).
 
-WebKit on Linux needs system libraries that `npm run browsers` installs
-with `sudo`. Without them, the `webkit` and `phone` projects run in
+WebKit on Linux needs system libraries `npm run browsers` installs with
+`sudo`; without them, the `webkit` and `phone` projects run in
 Playwright's Docker image of the same version
 (`mcr.microsoft.com/playwright:v<version>-noble`), with `--network host`
 and `JOURNEY_SERVER_URL` pointing at a server that
 `npm run css -w @solid-memo/e2e-journeys` keeps up.
 
 **In CI the browsers and their system libraries come from GitHub's
-cache**, not the Internet. The browsers are kept under Playwright's
-version. The system libraries are the packages the runner image lacks,
-which `npx playwright install-deps` would install from Ubuntu's mirror,
-kept as their `.deb` files and installed from them
+cache**, the browsers under Playwright's version. The system libraries
+the runner image lacks are kept as the `.deb` files
+`npx playwright install-deps` would fetch from Ubuntu's mirror, and
+installed from them
 ([playwright-deps](../.github/actions/playwright-deps/action.yml)). The
-mirror stalls often enough, for minutes and at times past a job's
-timeout, that a job should not depend on it. Their key is the runner
-image's (`ImageOS`, `ImageVersion`), which fixes what is installed
-already, with playwright-core's version, which fixes the list, so a new
-image or a new Playwright is a new entry. Only when the cache has none
-does a job ask the mirror, each `apt-get` given three minutes and one
-more try, and only on `main` does it save what it downloaded, as for
-the images. The `caches` job keeps `main`'s two newest entries per
-browser, as GitHub rolls a new image out over days.
+mirror often stalls for minutes, at times past a job's timeout.
+Their key is the runner image's (`ImageOS`, `ImageVersion`) with
+playwright-core's version. A job asks the mirror only when the cache
+has none, each `apt-get` given three minutes and one more try, and
+saves the download only on `main`. The `caches` job keeps
+`main`'s two newest entries per browser (GitHub rolls a new image out
+over days).
 
-The journeys must run the same way every time. Each page's
-`Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
-replays it). The browser's time zone is one where it is about noon, far
-from the day boundary; the later-day journey moves the zone past the
-boundary itself, since the Solid server refuses a DPoP proof more than
-two minutes off its clock, so the browser's clock cannot move instead. Requests to any host other than 127.0.0.1 fail
-the journey: so the Studio journey's graph, which shows a library
-release and a source outside the pod, shows they are never fetched. A journey
-never asserts which card a shuffled queue shows, only how many there
-are.
+The journeys run the same way every time:
 
-**Accessibility.** Each step's end checks the screen it leaves the app
-on with [axe](https://github.com/dequelabs/axe-core) in each palette
-and theme, and its reflow at the largest text size
-(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
-Only the colors change between palettes, so the others run only the
-rules colors can break. A palette of the user's own, painted on the
-root's style, is taken off while they run and put back after: the
-built-in palettes are what the checks hold to, and a palette of one's
-own is the user's, measured by its editor
+- Each page's `Math.random` is seeded (the seed is in the report;
+  `JOURNEY_SEED=<n>` replays it).
+- The browser's time zone is one where it's about noon. The later-day
+  journey moves the zone past the day boundary, not the clock: the
+  Solid server refuses a DPoP proof more than two minutes off its own.
+- A request to any host but 127.0.0.1 fails the journey (so the Studio
+  journey proves its graph's library release and outside source are
+  never fetched).
+- A journey never asserts which card a shuffled queue shows, only how
+  many there are.
+
+**Accessibility.** At each step's end, the harness checks the screen the
+step leaves the app on with
+[axe](https://github.com/dequelabs/axe-core), in each palette and theme,
+and its reflow at the largest text size (`App.step`,
+[harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)). A
+palette of the user's own, painted on the root's style, is taken off
+while they run and put back after; its editor measures it
 ([theme.md](theme.md#palettes-of-ones-own)).
 
 | Check | Palettes and themes | Rules | Where |
@@ -470,64 +456,58 @@ own is the user's, measured by its editor
 | axe | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
 | Reflow | Standard, light, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
 
-The checks run in a step of their own, "Accessibility", within the
-journey's step, so the report shows how long they took. Chromium and the phone run it;
-desktop Firefox and WebKit leave it out, as their projects' metadata
-says (`accessibility: false`, [accessibility.md](accessibility.md)). A violation fails the journey, which goes on to its end so that every
-screen is checked. A violation let pass is listed in that file's
-`KNOWN_EXCEPTIONS`, with its reason. The Solid server's own pages, its
-login, are not checked. What the app aims for, and what else is
-checked, is in [accessibility.md](accessibility.md).
+The checks run in a step of their own, "Accessibility", inside the
+journey's step, timed in the report; desktop Firefox and WebKit leave it
+out (`accessibility: false` in their projects' metadata). A violation
+fails the journey, which goes on to its end; one let pass is in
+`KNOWN_EXCEPTIONS` in `harness/accessibility.ts`, with its reason. The
+Solid server's own pages, its login, aren't checked.
+[accessibility.md](accessibility.md) says what the app aims for, and
+what else is checked.
 
 **When a journey fails**, the CI job's summary names it, the step it
-failed in (the spec's numbered step › the page object's action) and the
-error, and the browser it failed in. The job's
-`journeys-<chromium|engines>-<attempt>` artifact holds everything else:
+failed in (the spec's numbered step › the page object's action), the
+error, and the browser. The job's
+`journeys-<chromium|engines>-<attempt>` artifact holds the rest:
 
-- `test-results/<journey>/trace.zip`: the whole journey, replayable step
-  by step. Each step shows the page before and after every action, the
-  network (the login's redirects included) and the console. Open it with
-  `npx playwright show-trace <trace.zip>` or at
-  <https://trace.playwright.dev>. Traces hold the throwaway account's
-  password and tokens, which is harmless.
+- `test-results/<journey>/trace.zip`: the whole journey, each step
+  showing the page before and after every action, the network (the
+  login's redirects included) and the console. It holds the throwaway
+  account's password and tokens, which is harmless. `npx playwright show-trace <trace.zip>`
+  or <https://trace.playwright.dev> opens it.
 - `playwright-report/`: the steps as a tree, with a screenshot at the
   end of each journey step, a video, and these attachments:
   - `diagnostics.json`: console, page errors, failed and refused
     requests, the seed, the time zone;
   - `css.log`: the server's log for the journey's time;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;
-  - `<step> · accessibility, <palette>, <theme>.json`: what axe found on a step's
-    screen, when it found a violation;
+  - `<step> · accessibility, <palette>, <theme>.json`: what axe found on
+    a step's screen, when it found a violation;
   - `<step> · reflow.png`: the screen at the largest text size and 320px
-    wide, when it did not reflow.
-  Open the report with `npx playwright show-report <dir>`.
+    wide, when it didn't reflow.
+  `npx playwright show-report <dir>` opens the report.
 - `logs/css.log`: the server's whole log.
 
-**The latest report is online** at <https://journeys.solid-memo.com/>,
-a site of its own that each deploy publishes
-([deployment.md](deployment.md#the-journeys-report)): the report of the CI run on the release
-commit the site runs (after a deploy by hand, still the last release's), every browser's
-journeys in one, as the `journeys-report` job merges them from every
-journeys job (Playwright's blob reports, one a job). As the release commit's run
-skips the journeys, it takes their reports from the run that ran them
-on its code, usually the merge queue's
-([releasing.md](releasing.md#what-each-stage-checks)). It shows every
-journey's steps and screenshots, and its **Trace** link opens the
-step-by-step timeline in the browser, at <https://trace.playwright.dev>,
-which fetches the trace from the report's site
-([deployment.md](deployment.md#the-journeys-report)). In the merge
-queue, and on `main` when its run runs them, the journeys always keep
-their traces for this. The report is public and
-holds the throwaway accounts' passwords and tokens, which die with the
-run's server, and it is kept out of search engines (`robots.txt`).
-Since only a green run on a release commit deploys, a failure on
-`main` is read from the run's artifact, as is the report of a commit
-between two versions.
+**The latest report is online** at
+<https://journeys.solid-memo.com/>, a site of its own that each deploy
+publishes ([deployment.md](deployment.md#the-journeys-report)). It's the
+release commit's, every browser's journeys merged by the `journeys-report` job
+from the blob reports of the run that ran them on its code, usually the
+merge queue's ([releasing.md](releasing.md#what-each-stage-checks)).
+After a deploy by hand, it's still the last release's. Its **Trace**
+link opens the timeline at `trace.playwright.dev`, which fetches the
+trace from the report's site; in the merge queue, and on `main` when
+its run runs them, the journeys always keep their traces. The report is
+public, kept out of search engines (`robots.txt`), and its throwaway
+passwords and tokens die with the run's server. A failure on
+`main`, or the report of a commit between two versions, is read from
+the run's artifact.
 
 A run by hand (Actions › CI › Run workflow) with *trace* checked keeps
-traces for passing journeys on any branch. Locally, `JOURNEY_TRACE=on
-npm run journeys` does the same, and `npm run journeys:report -w
-@solid-memo/e2e-journeys` serves the report so its traces open.
+traces for passing journeys on any branch. Locally,
+`JOURNEY_TRACE=on npm run journeys` does the same, and
+`npm run journeys:report -w @solid-memo/e2e-journeys` serves the report
+so its traces open.
 
 ### Writing a journey
 
@@ -546,204 +526,178 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
 ```
 
 - **Fixtures** ([fixtures.ts](../e2e/journeys/fixtures.ts)): `account`
-  is a fresh account, pod and WebID; `runId` names what the run makes;
-  `otherApp` writes to the pod as an app other than Solid Memo;
-  `app` is the app as page objects, and `newDevice` opens it again
-  in a browser context of its own, as on a second device.
+  is a fresh account, pod and WebID, and `runId` names what the run
+  makes. `otherApp` writes to the pod as another app. `app` is the app
+  as page objects, and `newDevice` opens it in a browser context of its
+  own, as on a second device.
 - **Page objects** ([pages/](../e2e/journeys/pages/)): one per screen,
   registered on [App.ts](../e2e/journeys/pages/App.ts). Their methods
-  are what a user does, and each is a step of its own in the report.
-  They find elements by role and accessible name, with the app's own text
+  are what a user does, each a step in the report. They find elements
+  by role and accessible name in the app's own text
   ([harness/strings.ts](../e2e/journeys/harness/strings.ts) reads
-  `packages/ui/src/i18n/`), so a journey follows the language it switches
-  to. They never use CSS classes; where the app gives no accessible
-  name, the app gets one. A table's cell is found by its column's
-  header (`cellOf`, [tables.ts](../e2e/journeys/pages/tables.ts)), not
-  by where it stands, and a text's language picker through its field,
-  which the picker's text describes (`chooseLanguageOf`,
-  [languages.ts](../e2e/journeys/pages/languages.ts)). The Studio's
-  sections are followed in its sidebar, and a deck's or a draft's
-  screens in its tabs, each found in its navigation by name
-  (`studioSection`, `studioTab` in
-  [Chrome.ts](../e2e/journeys/pages/Chrome.ts)), since the trail names
-  the same screens; `quickOpen` goes through the palette.
-- **Flows** ([flows/](../e2e/journeys/flows/)): the steps many journeys
+  `packages/ui/src/i18n/`), following the language a journey switches
+  to, never by CSS class: where the app gives no accessible name, the
+  app gets one. They find a table's cell by its column's header
+  (`cellOf`, [tables.ts](../e2e/journeys/pages/tables.ts)), and a
+  text's language picker through the field its text describes
+  (`chooseLanguageOf`, [languages.ts](../e2e/journeys/pages/languages.ts)).
+  They find the Studio's sections by name in its sidebar and a deck's
+  or a draft's screens in its tabs, not the trail, which names the same
+  screens (`studioSection`, `studioTab` in
+  [Chrome.ts](../e2e/journeys/pages/Chrome.ts)); `quickOpen` goes
+  through the palette.
+- **Flows** ([flows/](../e2e/journeys/flows/)): steps many journeys
   share, such as logging in.
 - **Dialogs**: a step that expects the browser's `confirm` (Solid
-  Memo's) names it with `app.expectDialog(pattern)`; any other such
-  dialog fails the journey. The Studio asks in a dialog of its own
-  (`ConfirmDialog`), also for what the components it shares with Solid
-  Memo ask (`AskFirst`: a wrong option, a card, an instance), which a
-  step answers as a user does, by its heading and its button; so do its
-  component tests
+  Memo's) names it with `app.expectDialog(pattern)`; any other fails the
+  journey. The Studio asks in its own dialog (`ConfirmDialog`), for its
+  shared components' questions too (`AskFirst`: a wrong option, a card,
+  an instance), which a step answers by its heading and button, as the
+  Studio's component tests do
   ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
 - **One after another**: a journey that needs what another made is in
-  its file, after it, and the file runs in turn (`mode: "serial"`): the
-  course the Studio's course journey publishes is added from its link by
-  the next journey in
+  its file, after it, and the file runs in turn (`mode: "serial"`). In
   [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts),
-  which is skipped when the first fails.
+  the next journey adds the published course from its link, and is
+  skipped when the first fails.
 
-The harness's own code (`harness/`) has unit tests (`npm test`, so `npm
-run check`). The page objects and journeys are themselves tests, run by
-`npm run journeys`, and have no coverage of their own, as with
-`e2e/pod`.
+The harness's own code (`harness/`) has unit tests (`npm test`); the
+page objects and journeys are tests, run by `npm run journeys`.
 
 ### Screenshots
 
 The app's screenshots
 ([apps/web/public/screenshots/](../apps/web/public/screenshots/)),
-which the README, `publiccode.yml` and the About page show, are taken
-by [app.screenshots.ts](../e2e/journeys/screenshots/app.screenshots.ts)
-with its own config
-([screenshots.config.ts](../e2e/journeys/screenshots.config.ts)):
-`npm run screenshots`, after `npx turbo run build --filter=@solid-memo/web`,
-retakes them all in about ten minutes. It is no test, and neither
-`npm run check` nor CI runs it. It drives the built app in Chromium on a
-phone's screen, 390 by 844 pixels at twice the density, in English,
-as a guest, so with no Solid server. It studies three library decks
-day after day for eight weeks on a clock of its own (`page.clock`),
-from a fixed date and with a seeded shuffle, so that the statistics
-have a history to show and each run comes out much as the last. Then it takes
-each screen, scrolled to its breadcrumbs. The deck pictures come from
-Wikimedia, as the decks name them, so it needs the network. A screen
-that changes is retaken by running it again and committing the
-pictures; the README's and the About page's alt text describes what
-they show.
+shown by the README, `publiccode.yml` and the About page, are taken by
+[app.screenshots.ts](../e2e/journeys/screenshots/app.screenshots.ts)
+([screenshots.config.ts](../e2e/journeys/screenshots.config.ts)).
+After `npx turbo run build --filter=@solid-memo/web`,
+`npm run screenshots` retakes them all in about ten minutes; it's no
+test, and neither `npm run check` nor CI runs it. It drives the built
+app in Chromium on a phone's screen, 390 by 844 pixels at twice the
+density, in English, as a guest, with no Solid server. It studies three
+library decks daily for eight weeks on its own clock (`page.clock`),
+from a fixed date with a seeded shuffle, so the statistics have a
+history and each run comes out much as the last. Then it takes each
+screen, scrolled to its breadcrumbs. It needs the network for the deck
+pictures, from Wikimedia. A changed screen is retaken by running it
+again and committing the pictures, whose alt text in the README and the
+About page describes them.
 
 ## Continuous integration
 
 [ci.yml](../.github/workflows/ci.yml) runs on every pull request, a
 fork's included, in the merge queue ([below](#the-merge-queue)), on
-every push to `main`, and by hand. A branch's pushes alone run nothing,
-so a pull request's commits are not checked twice for one push. Its
-jobs, side by side, each [deterministic or timing-dependent](#deterministic-and-timing-dependent-jobs):
+every push to `main`, and by hand, not on a branch's pushes alone. Its
+jobs run side by side, each
+[deterministic or timing-dependent](#deterministic-and-timing-dependent-jobs):
 
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), with Chromium's headless shell and its system libraries from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s. The merge queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
-| `site` | deterministic | `npm run build`, once for the whole run, the docs' diagrams drawn in Chromium's headless shell as in `check`; the site is kept a week as the run's `site` artifact, so a `journeys` job run again still finds it, and the `journeys` jobs test that build, which the deploy ships ([deployment.md](deployment.md#the-build-ci-tested)) |
-| `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over what that run made, its site, kept as this run's `site` artifact, and, but on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
+| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
+| `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships ([deployment.md](deployment.md#the-build-ci-tested)) |
+| `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over that run's site as this run's `site` artifact and, except on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
-| `library` | deterministic | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
-| `crosscheck` | deterministic | the Python scripts' tests (the cross-check's, the taxonomy deck generator's and the Wikidata labels script's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
+| `library` | deterministic | the change against its base. The deck library: no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)). The public API: no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
+| `crosscheck` | deterministic | the Python scripts' tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
-| `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: every one in Chromium, in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each ([Browsers](#browsers)) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `journeys.solid-memo.com` ([User journeys](#user-journeys)); when this run skipped them, their runs come from the run that tested its code (the gate's `tested-by`). When the journeys passed, or were skipped by the gate, it fails without every job's report (when the `site` job's failure skipped them, it has none to merge, and the run fails already); its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
-| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `check`'s |
+| `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: all in Chromium in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each (Browsers, above) |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when the `site` job's failure skipped them. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
+| `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
-| `commits` | deterministic | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes `main`'s older Turbo caches, the newest holding what they do; the CodeQL databases GitHub's code scanning saves for each run on `main` but the newest of each language, the only one it reads; each end-to-end server's images but the newest, the only ones `main`'s runs read; and the browsers' system libraries but the two newest of each browser ([Browsers](#browsers)). The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
-| `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another and the jobs that test are skipped, `warm` looks up the caches they would have saved, each server's images, the journeys' server's, the journeys' browsers and Chromium's headless shell, and the browsers' system libraries, and `warm-images` and `warm-browsers` pull, build or download only what is missing, and save it; `warm-pip` installs the Python tools, so setup-python saves pip's caches where `main` lacks them. Like `caches`, they fail neither the run nor `ci-ok` |
+| `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |
+| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes all but the newest of `main`'s Turbo caches, of the CodeQL databases per language, and of each end-to-end server's images, and all but the two newest of the browsers' system libraries per browser. It's the one job whose token can write (`actions: write`). It runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another, they save only the caches the skipped jobs would have saved and `main` lacks (`releasing.md`), failing neither the run nor `ci-ok` |
 | `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches` and the `warm` jobs aside |
 
-**`ci-ok` is the one check a merge to `main` waits for**: the ruleset
-on `main` (a setting of the repository, Settings › Rules) is to require
-it and nothing else, and Renovate merges its updates
+**`ci-ok` is the one check a merge to `main` waits for.** The ruleset
+on `main` (Settings › Rules) requires it alone, so it stays fixed as
+jobs and matrix servers come and go, and Renovate merges its updates
 through a pull request once it passes (`automergeType: 'pr'` in
-`renovate.json5`), as anyone's change is merged. It runs even when a job
-before it failed, and fails unless every one passed, or was skipped by
-the gate's choice: the jobs that test when the run reuses another, the
-two that reuse when it tests. A matrix job's
-checks are named per server, and jobs come and go, so the ruleset names
-this job alone. Deploys follow a
-green run on a release commit on `main`
-([deployment.md](deployment.md#github-pages-automatic)). Every check of
-`ns/` and `decks/` runs here, the comparison with the base included, so
-`ci-ok` gates them all and nothing is checked twice.
+`renovate.json5`). It runs even when a job before it failed, and fails
+unless every job passed or was skipped by the gate's choice: the
+testing jobs when the run reuses another, the two reusing ones when it
+tests. Every check of `ns/` and `decks/`, the comparison with the base
+included, is under it. Deploys follow a green run on a release commit
+on `main` ([deployment.md](deployment.md#github-pages-automatic)).
 
 ### Deterministic and timing-dependent jobs
 
 A **deterministic** job gives the same answer on any runner: types,
 lint, unit tests, request counts, the docs. A **timing-dependent** one
-can fail on sound code because the runner was busy or a real server
-was slow: the end-to-end tests against real servers (`pod`,
-`contract`) and the user journeys in every browser. Each
-job in [ci.yml](../.github/workflows/ci.yml) says which it is, in its
-comment and in the table above, and a new job is given its kind when it
-is added. Both kinds run where a tree is tested, in a pull request and
-the merge queue, and block there; neither runs again on a push to
-`main` the queue passed or on a release commit, whose code they already
-ran on ([releasing.md](releasing.md#what-each-stage-checks)). A job that
-runs always blocks.
+can fail on sound code on a busy runner or a slow server:
+the end-to-end tests against real servers (`pod`, `contract`) and the
+user journeys. Each job in [ci.yml](../.github/workflows/ci.yml) states
+its kind in its comment, from when it's added.
+Both kinds run where a tree is tested, in a pull request and the merge
+queue, not again on a push to `main` the queue passed or on a release
+commit ([releasing.md](releasing.md#what-each-stage-checks)). A job
+that runs always blocks.
 
-A timing-dependent job that fails where it runs is fixed, not retried:
-the journeys' waits, for one, are made to hold, with no second try
-(`retries: 0` in
+A timing-dependent job that fails is fixed, not retried: the journeys'
+waits, for one, are made to hold (`retries: 0` in
 [playwright.config.ts](../e2e/journeys/playwright.config.ts)).
 
-**Count, don't time, where the answer can be counted.** A regression
-in network use, round trips growing from linear to quadratic, is caught
-by counting the requests a use case makes against a fake pod, as the
-Solid adapters' tests do; a count is deterministic, so it can block at
-every stage. Time is measured only for CPU work, and then as a ratio of
-two runs on the same machine (the growth tests,
-[growth.ts](../packages/domain/src/testing/growth.ts)), not against a
-budget in milliseconds. The pod tests that time a server only print
-what they measure, and fail on none of it.
+**Count, don't time, where the answer can be counted.** The Solid
+adapters' tests count the requests a use case makes against a fake pod,
+catching round trips growing from linear to quadratic, for example, at
+every stage. Time is measured only
+for CPU work, as a ratio of two runs on the same machine (the growth
+tests, [growth.ts](../packages/domain/src/testing/growth.ts)), not
+against a budget in milliseconds. The pod tests that time a server only
+print what they measure.
 
 ### The merge queue
 
-A pull request is merged through GitHub's merge queue, never straight
-to `main`: the ruleset on `main` requires it, in place of a branch up
-to date with `main`. Once the pull request's own `ci-ok` passes, "Merge
-when ready" (or Renovate's automerge, which turns on GitHub's
-auto-merge) adds it to the queue. GitHub then builds a branch,
-`gh-readonly-queue/main/…`, of `main`, the pull requests ahead of it
-and this one, and runs ci.yml on it (`merge_group`). When `ci-ok`
-passes there, `main` moves to exactly that commit; when it fails, the
-pull request leaves the queue, its timeline saying why, and the ones
-behind it are built again without it. So `main` only ever gets a commit
-CI passed as it lands, and no one has to bring a branch up to date with
-`main`: each pull request had to be, and CI run on it again, before it
-could merge, and again whenever another merged first. The queue merges
-with a merge commit, so a pull request's commits keep their SHAs on
-`main`, and the merge commit names the pull request.
+The ruleset on `main` requires a pull request to merge through GitHub's
+merge queue, in place of a branch up to date with `main`. Once the pull
+request's own `ci-ok` passes, "Merge when ready" adds it to the queue,
+as does Renovate's automerge through GitHub's auto-merge. GitHub then
+builds a branch, `gh-readonly-queue/main/…`, of `main`, the pull
+requests ahead and this one, and runs `ci.yml` on it (`merge_group`).
+When `ci-ok` passes there, `main` moves to exactly that commit. When it
+fails, the pull request leaves the queue, its timeline saying why, and
+the ones behind are built again without it. So `main` only gets commits
+CI passed as they land. The queue merges with a merge commit, so a
+pull request's commits keep their SHAs on `main`. The merge commit
+names the pull request.
 
-A queue run checks what a pull request run checks, with two
-differences: `commits` lints nothing, the commits having been linted in
-their pull request, and the base `library` compares with is the commit
-of `main` the queue built on, so the pull requests ahead are part of
-the change. Each queue branch is its own
-concurrency group, and release.yml and deploy.yml follow push runs on
-`main` alone, so a queue run releases and deploys nothing.
+A queue run checks what a pull request run checks, except that
+`commits` lints nothing and `library` compares with the commit of
+`main` the queue built on, the pull requests ahead included. Each queue
+branch is its own concurrency group. A queue run releases and deploys
+nothing: release.yml and deploy.yml follow push runs on `main` alone.
 
-A newer run for the same pull request or branch cancels the one still
-going, so a pull request pushed to again is checked once, at its latest
-commit. Runs on `main` are never canceled: a release follows a push
-run on `main` that passed ([releasing.md](releasing.md#what-a-release-does)),
-and the deploy follows one on the release commit
-([deployment.md](deployment.md#github-pages-automatic)), so a canceled
-run would hold either back. Each event has its own concurrency group,
-so a run by hand does not cancel a push run, and push runs on `main`
-go one at a time, in order. A push waiting its turn is replaced by a
-newer one, which the next release includes; a release commit's run has
-a group of its own, since only it can deploy its version, so no newer
-push replaces it.
+A newer run for a pull request or branch cancels the one still going.
+Runs on `main` are never canceled: a release follows a push run that
+passed ([releasing.md](releasing.md#what-a-release-does)), and the
+deploy one on the release commit
+([deployment.md](deployment.md#github-pages-automatic)). Each event has
+its own concurrency group, so a run by hand doesn't cancel a push run,
+and push runs on `main` go one at a time, in order. A waiting one is
+replaced by a newer one, which the next release includes. A release
+commit's run, the only one that can deploy its version, has a group of
+its own, which no newer push replaces.
 
-A fork's pull request runs the same jobs, and its results are public.
-That is safe because the jobs only read: the token of every job it runs
-can read the repository and nothing more (`caches`, the one job whose
-token can delete caches, runs on `main` alone), no job uses a secret,
-and no checkout keeps the token (`persist-credentials: false`). A fork's
-run may restore the caches `main`'s runs saved; what it saves (npm's,
-pip's and Playwright's browsers, not Turbo's, the images' or the
-browsers' system libraries) is kept for its own
-pull request only. No pull request run's artifact reaches `main`:
-`reuse` takes over only those of a run of this repository's own, the
-merge queue's run that passed the commit `main` moved to or, for a
-release commit whose parent skipped the queue, that parent's push run
-on `main`. Either ran the code that landed, as `main`'s own run would
-have.
+A fork's pull request runs the same jobs, with public results: every
+job's token can only read the repository, no job uses a secret, no
+checkout keeps the token (`persist-credentials: false`), and `caches`
+runs on `main` alone. A fork's run may restore the
+caches `main`'s runs saved, and what it saves (npm's, pip's and
+Playwright's browsers, not Turbo's, the images' or the browsers' system
+libraries) is kept for its own pull request only. No pull request run's
+artifact reaches `main`: `reuse` takes over only this repository's own
+merge queue run that passed the commit `main` moved to or, for a
+release commit whose parent skipped the queue, that parent's push run.
 
-The job ids `pod` and `contract`, and their `matrix.server` lists, are
-read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that
-each workflow runs the servers [servers.ts](../e2e/pod/servers.ts) says
-it should; keep them when changing the workflow. The workflows are
-among the test's inputs (`e2e/pod/turbo.json`), so a change to a matrix
-alone runs it again.
+[servers.test.ts](../e2e/pod/servers.test.ts) reads the job ids `pod`
+and `contract` and their `matrix.server` lists, which a change to the
+workflow keeps, to check that each workflow runs the servers
+[servers.ts](../e2e/pod/servers.ts) names. The workflows are among the
+test's inputs (`e2e/pod/turbo.json`), so a change to a matrix alone
+runs it again.
 
 ### The workflows
 
@@ -753,76 +707,77 @@ and the local actions in [.github/](../.github/):
 - [actionlint](https://github.com/rhysd/actionlint) checks their syntax,
   their expressions' contexts and types, and, with
   [shellcheck](https://www.shellcheck.net/), the shell of every `run:`.
-- [zizmor](https://docs.zizmor.sh/), offline, checks their security: an
-  expression written into a script, where a value could run as code
-  (passed to the script as an environment variable instead), a job given
-  rights it does not use, a trigger that runs with more rights than the
-  change that set it off. A finding that is meant stays, with a
-  `# zizmor: ignore[<audit>]` comment on its line that says why (the
-  `workflow_run` triggers of [deploy.yml](../.github/workflows/deploy.yml)
-  and [release.yml](../.github/workflows/release.yml), whose jobs act
-  only on CI's push runs on `main`); an audit turned off is in
+- [zizmor](https://docs.zizmor.sh/), offline, checks their security. It
+  flags an expression written into a script, where a value could run as
+  code (the fix passes it as an environment variable). It flags a job
+  given rights it doesn't use, and a trigger that runs with more rights
+  than the change that set it off. A finding that's meant stays, with a
+  `# zizmor: ignore[<audit>]` comment on its line that says why, as on
+  the `workflow_run` triggers of
+  [deploy.yml](../.github/workflows/deploy.yml) and
+  [release.yml](../.github/workflows/release.yml), whose jobs act only
+  on CI's push runs on `main`. An audit turned off is in
   [.github/zizmor.yml](../.github/zizmor.yml), with its reason.
 
-Neither is an npm package, so neither is part of `npm run check`: both
-are pinned in [requirements-lint.txt](../scripts/requirements-lint.txt),
-which Renovate updates, and `pip install -r scripts/requirements-lint.txt`
+Neither is an npm package or part of `npm run check`. Both are pinned
+in [requirements-lint.txt](../scripts/requirements-lint.txt), which
+Renovate updates. `pip install -r scripts/requirements-lint.txt`
 installs them, or `uv run --no-project --with-requirements
 scripts/requirements-lint.txt npm run lint:workflows` runs them without
-installing them. That every action is pinned is `check:actions`'s, in
-`npm run check` ([The repository's own checks](#the-repositorys-own-checks)).
+installing. `check:actions`, in `npm run check`, checks that every
+action is pinned
+([The repository's own checks](#the-repositorys-own-checks)).
 
 ### Code scanning
 
-GitHub's [CodeQL](https://codeql.github.com/) also reads the code, for
-security flaws and coding errors such as a regular expression that
+GitHub's [CodeQL](https://codeql.github.com/) reads the code for
+security flaws and coding errors, such as a regular expression that
 filters HTML badly or checks only part of a hostname. It runs in
-GitHub's default setup, a setting of the repository, so no workflow
-file in `.github/workflows/` holds it. It analyzes each language CodeQL
-supports that it finds here, including TypeScript and JavaScript. It
-runs on each push to `main`, on pull requests to `main` from branches
-of this repository (not from forks), and once a week
-([GitHub's docs](https://docs.github.com/en/code-security/concepts/code-scanning/setup-types)).
+GitHub's default setup (a repository setting, not a workflow), over
+every language CodeQL supports that it finds here, TypeScript and
+JavaScript among them. It runs on each push to `main`, on pull requests
+to `main` from this repository's branches (not forks), and weekly
+([GitHub's
+docs](https://docs.github.com/en/code-security/concepts/code-scanning/setup-types)).
 
-Its alerts are listed under the repository's Security tab, as code
-scanning alerts. CodeQL does not gate a merge: the ruleset requires
-`ci-ok` alone ([above](#continuous-integration)). An alert is fixed
-like any other change, in a pull request. The fix's commit says what
-CodeQL flagged and why the change fixes it, and names the alert by its
-number when the alert is already open on `main`. An alert that a pull
-request's own scan raises is fixed in that same pull request. An alert
+Its alerts are under the repository's Security tab. CodeQL doesn't gate
+a merge ([above](#continuous-integration)). An alert is fixed in a pull
+request like any change, one a pull request's own scan raises in that
+pull request. The commit says what CodeQL flagged and why the change
+fixes it, with the alert's number when it's open on `main`. An alert
 closes once the fix is on `main` and the next scan no longer finds it.
-The first five alerts were fixed this way, in #96 and #99 to #102: an
-HTML page is now read with a DOM parser instead of regular expressions,
-and text and URLs are compared as strings or by their parsed origin
-instead of with patterns.
+The first five alerts were fixed this way, in #96 and #99 to #102: HTML
+is now read with a DOM parser, not regular expressions, and text and
+URLs are compared as strings or by parsed origin, not with patterns.
 
 ### The repository's own checks
 
 `npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
 fails on a TypeScript, JSON or CSS file it would format otherwise, or
 that breaks one of its lint rules ([style.md](style.md#formatting)).
-Then `npm run lint:markdown` and `npm run lint:spelling` check the
-Markdown's style and spelling ([Documentation](#documentation)). It
-ends with checks of the repository as a whole, plain Node scripts in
+Then `npm run lint:markdown`, `npm run lint:spelling` and
+`npm run lint:prose` check the Markdown's style, spelling and prose
+([Documentation](#documentation)). It ends with
+checks of the repository as a whole, plain Node scripts in
 [scripts/](../scripts/):
 
 - `check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts)):
   the imports between packages ([boundaries.md](boundaries.md)).
 - `check:exports` ([checkExports.ts](../scripts/checkExports.ts)): code
-  that is not a test uses every export of the apps and packages, as
+  that isn't a test uses every export of the apps and packages, as
   [Coverage policy](#coverage-policy) asks.
-- `check:docs` ([checkDocs.ts](../scripts/checkDocs.ts)): every page in
-  `docs/` is listed once in [the docs' index](docs.ttl), in one group,
-  and every page the index lists is there; no two positions in a group
-  are tied, and every page has a summary in English
+- `check:docs` ([checkDocs.ts](../scripts/checkDocs.ts)):
+  [the docs' index](docs.ttl) lists every page in `docs/` once, in one
+  group, and only those, with no two positions in a group tied, and
+  every page with a summary in English and a kind
   ([markdown.md](markdown.md#the-docs-index)). For a page the index
-  does not list, it prints the block to add. And every `npm run <script>`
-  in the repository's Markdown, `CHANGELOG.md` aside, names a script of
-  the root `package.json`, or of the workspace it names with `-w`.
-- `check:dependencies` ([checkDependencies.ts](../scripts/checkDependencies.ts)):
-  the app ships released versions of other code only, or the exceptions
-  [vendor-code.md](vendor-code.md#maturity) explains.
+  doesn't list, it prints the block to add. Every `npm run <script>` in the repository's Markdown, `CHANGELOG.md` aside,
+  names a script of the root `package.json`, or of the workspace it
+  names with `-w`.
+- `check:dependencies`
+  ([checkDependencies.ts](../scripts/checkDependencies.ts)): the app
+  ships only released versions of other code, or the exceptions in
+  [vendor-code.md](vendor-code.md#maturity).
 - `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
   library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
   own `dcterms:license` says ([style.md](style.md#licenses)).
@@ -830,169 +785,159 @@ ends with checks of the repository as a whole, plain Node scripts in
   action a workflow or a local action uses from outside the repository
   is pinned to a full commit SHA, its version in a comment after it
   (`uses: actions/checkout@<sha> # v7.0.1`), as Renovate keeps them
-  ([releasing.md](releasing.md#the-deploy-key)). A tag can be moved to
-  other code, a commit cannot. Local actions (`./.github/actions/`) are
-  the repository's own.
+  ([releasing.md](releasing.md#the-deploy-key)). Local actions
+  (`./.github/actions/`) are exempt.
 - `check:keys` ([checkQueryKeys.ts](../scripts/checkQueryKeys.ts)): no
   screen of Solid Memo or the Studio writes a query key out as an
   array; each is made by a function of the keys modules
   ([architecture.md](architecture.md#query-keys)). Tests write theirs
-  out, so that they fail when a key changes.
-- `check:scripts`: these scripts' own tests and types, at 100%
-  coverage like a package's (`scripts/vitest.config.ts`).
+  out, and fail when a key changes.
+- `check:scripts`: these scripts' tests and types, at 100% coverage
+  (`scripts/vitest.config.ts`).
 
 ## Documentation
 
-The project's Markdown (`docs/`, the READMEs, `AGENTS.md`) is checked
-for its style and spelling by `npm run check` (so in CI's `check` job),
-and for its links, with publiccode.yml and every file's license, by
-CI's `docs` job:
+`npm run check`, and so CI's `check` job, checks the style and spelling
+of the Markdown (`docs/`, the READMEs, `AGENTS.md`) and the prose of
+the pages in `docs/`, and CI's `docs` job the rest:
 
-- **Style**: [markdownlint](https://github.com/DavidAnson/markdownlint)'s
-  rules, all of them but those [.markdownlint-cli2.jsonc](../.markdownlint-cli2.jsonc)
-  turns off, each with its reason (line length and the table delimiter
-  rows' spacing). `npm run lint:markdown` runs it alone. A
-  placeholder such as `<title>` goes in backticks, or a renderer takes
-  it for HTML and drops it.
-- **Spelling**: [cspell](https://cspell.org/) checks the Markdown, the
-  English messages (`packages/ui/src/i18n/en.json`, their text, not their
-  keys) and the docs' index (`docs/docs.ttl`, its text, not its prefixes
-  and addresses) in American English, the one standard
-  ([style.md](style.md#language)). [cspell.config.yaml](../cspell.config.yaml)
-  says what it reads and skips (`decks/`, `ns/`, the generated code, the
-  other languages' catalogs), flags the British spellings its dictionary
-  would let through, each with its fix, and lists the real
-  words it does not know: standards, names, other languages' examples.
-  A word is added there only when it is spelled right.
-  `npm run lint:spelling` runs it alone.
-- **Links**: [lychee](https://lychee.cli.rs/), offline, checks that every
-  link to a file or a heading in the repository resolves
-  ([lychee.toml](../lychee.toml)). The web's addresses are checked
-  weekly, and by hand, by the [Links workflow](../.github/workflows/links.yml),
-  so a site that is down for an hour fails no one's change; a link it
-  finds broken is fixed, or excluded in `lychee.toml` with a reason.
+- **Style**:
+  [markdownlint](https://github.com/DavidAnson/markdownlint)'s rules,
+  all of them but those
+  [.markdownlint-cli2.jsonc](../.markdownlint-cli2.jsonc) turns off,
+  each with its reason (line length and the table delimiter rows'
+  spacing). `npm run lint:markdown` runs it alone. A placeholder such as
+  `<title>` goes in backticks, or a renderer drops it as HTML.
+- **Spelling**: [cspell](https://cspell.org/) checks for American
+  English ([style.md](style.md#language)) in the Markdown, the English
+  messages (`packages/ui/src/i18n/en.json`, not their keys) and the
+  docs' index (`docs/docs.ttl`, not its prefixes and addresses).
+  Its configuration, [cspell.config.yaml](../cspell.config.yaml), says
+  what it reads and skips (`decks/`, `ns/`, the generated code,
+  the other languages' catalogs). It flags the British spellings its
+  dictionary would let through, each with its fix, and lists the real
+  words it doesn't know (standards, names, other languages' examples),
+  only when spelled right. `npm run lint:spelling` runs it alone.
+- **Prose**: each page in `docs/` follows the writing rules for its
+  kind ([style.md](style.md#the-prose-check)), as
+  [prose.json](../prose.json) has them: sentence length, filler, voice,
+  contractions and links. `npm run lint:prose` runs it alone, and
+  `npm run lint:prose -- docs/srs.md` checks one page. It's the
+  project's own script, so nothing needs installing.
+- **Links**: [lychee](https://lychee.cli.rs/), offline, checks that
+  every link to a file or a heading in the repository resolves
+  ([lychee.toml](../lychee.toml)). The
+  [Links workflow](../.github/workflows/links.yml) checks the web's
+  addresses weekly and by hand, apart from any change. A broken one is
+  fixed, or excluded in `lychee.toml` with a reason.
 - **publiccode.yml**: once the repository has one, the
   [publiccode.yml parser](https://github.com/italia/publiccode-parser-go)
-  validates it against the standard, and the files it names; the Links
-  workflow also checks the addresses it names. The built site's test
-  checks that those on the site's own domain, such as its
-  `documentation`, are pages the build serves. Without one, the step
-  says so and passes ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
+  validates it against the standard, and the files it names. The Links
+  workflow checks the addresses it names, and the built site's test
+  that those on the site's own domain, such as its `documentation`, are
+  pages the build serves. Without one, the step says so and passes
+  ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
 - **Licenses**: [reuse](https://reuse.software/) (`npm run lint:reuse`,
   `reuse lint`) checks that every file in the repository states its
   copyright and license, in an SPDX header or in
-  [REUSE.toml](../REUSE.toml), and that the text of every license used
-  is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). The
-  job installs no npm packages, so only the repository's own files are
-  there. reuse is pinned in
+  [REUSE.toml](../REUSE.toml), and that every license used has its text
+  in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). The job
+  installs no npm packages, so it sees only the repository's own files.
+  reuse is pinned in
   [requirements-lint.txt](../scripts/requirements-lint.txt), from PyPI,
-  not as a Docker image, which Docker Hub's limit on pulls without an
-  account, shared by the runners, could refuse. It is not part of
-  `npm run check`, since reuse is a Python tool:
+  not as a Docker image (Docker Hub's pull limit could refuse it), and
+  isn't in `npm run check`:
   `pip install -r scripts/requirements-lint.txt` installs it, or
   `uv run --no-project --with-requirements scripts/requirements-lint.txt reuse lint`
-  runs it without installing it.
-
-That every page is listed in the index is `npm run check`'s
-(`check:docs`, above).
+  runs it without installing.
 
 ## Pod providers
 
 Onboarding suggests the providers in
 [podProvider.ts](../packages/domain/src/podProvider.ts)
-(`POD_PROVIDERS`), and logs a learner in at the issuer an entry names.
-The tests' Solid servers all run in Docker, so none of them is one of
-these. `npm run check:providers`
-([checkProviders.ts](../scripts/checkProviders.ts)) checks each
-provider instead. Its issuer must answer
+(`POD_PROVIDERS`) and logs a learner in at the issuer an entry names.
+`npm run check:providers`
+([checkProviders.ts](../scripts/checkProviders.ts)) checks each, as
+no test server is one. Its issuer must answer
 `<issuer>/.well-known/openid-configuration` with JSON whose `issuer` is
-the entry's `oidcIssuer`, character for character, as the login compares
-them. Its `signUpUrl`, where it has one, must answer too, to a request
-that asks for HTML as a browser does. A request that
-fails or answers 5xx is tried three times. The
-[Links workflow](../.github/workflows/links.yml) runs the check weekly,
-and by hand, in a job of its own. It is not a gate, so a provider that
-is down for an hour fails no one's change. A failure is an entry to fix,
-with the provider's new issuer, or to remove.
+the entry's `oidcIssuer`, character for character, as the login
+compares them. Its `signUpUrl`, if any, must answer a request asking
+for HTML as a browser does. A request that fails or answers 5xx is
+tried three times. The [Links workflow](../.github/workflows/links.yml)
+runs the check weekly and by hand, in its own job, not as a gate. A
+failure means an entry to fix, with the new issuer, or to remove.
 
 ## Without the network
 
-Apart from the end-to-end tests' Docker images and the browsers,
-installed once for the journeys and the docs' diagrams, and the Pod
-providers' check, nothing needs the network: the vocabulary, the shapes and the deck library are read from
-the repository's `ns/` and `decks/`, at the IRIs the site publishes
-them under.
+Only the end-to-end tests' Docker images, the browsers (installed once)
+and the Pod providers' check need the network. The vocabulary, the
+shapes and the deck library are read from `ns/` and `decks/`, at the
+IRIs the site publishes them under.
 
 ## Coverage policy
 
-100% of every package's `src/` (and `tooling/` or `node/` where it has
-one), set up once in [vitest.shared.ts](../vitest.shared.ts), with these
-documented exclusions:
+Coverage is 100% of every package's `src/` (and `tooling/` or `node/`
+where it has one), set up once in [vitest.shared.ts](../vitest.shared.ts),
+with these documented exclusions:
 
-- `apps/web/src/main.tsx` — the app's entry point: it calls the
-  composition root and renders the page, handing it the Studio's lazy
-  import, no logic (configured in
-  [vitest.config.ts](../apps/web/vitest.config.ts)). The page itself
-  (`src/App.tsx`) is covered in `happy-dom`, with a stand-in for the
-  Studio; the tests of the built site and of the Studio's old address
-  run in node. The composition root itself (`packages/composition/`) is
-  covered: its test wires the app as a page does, over the site's
-  documents read from this repository.
+- `apps/web/src/main.tsx` — the app's entry point, with no logic
+  (excluded in [vitest.config.ts](../apps/web/vitest.config.ts)): it
+  renders the page from the composition root, with the Studio's lazy
+  import. The page (`src/App.tsx`) is covered in
+  `happy-dom`, with a stand-in for the Studio; the tests of the built
+  site and of the Studio's old address run in node. The composition
+  root (`packages/composition/`) is covered by a test that wires the app
+  as a page does, over the site's documents in this repository.
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`,
   `@solid-memo/ui/test/fakes/*`, `@solid-memo/browser/testing/fakeLocks`,
   `@solid-memo/application/testing/noPorts`), not product code.
-- `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
-  logic is unit-tested (what they make of a server's answers, the
-  journeys' time zone, seed, text and CI summary), but no threshold
-  applies.
+- `e2e/pod/` and `e2e/journeys/` — they're tests. Their harnesses'
+  logic (what they make of a server's answers, the journeys' time zone,
+  seed, text and CI summary) is unit-tested, with no threshold.
 
-Code that cannot reach 100% is restructured until it can (e.g. an
-unreachable defensive branch is removed rather than excluded). New code
-ships with its tests in the same change; coverage never dips.
+Code that can't reach 100% is restructured until it can: an
+unreachable defensive branch is removed, not excluded. New code ships
+with its tests in the same change, and coverage never dips.
 
-Coverage cannot see code that only its own test runs: a function
-nothing else calls is covered all the same. `npm run check:exports`
-([checkExports.ts](../scripts/checkExports.ts), in `npm run check`)
-finds it, as an export that code other than tests neither imports
-(nor imports its module whole, nor calls from a `package.json` script)
-nor uses in its own file. Such an export is removed with its tests, or
-put to use; a helper only tests need goes to a `testing/` folder. It
-reads exports, not the members of a port's interface: a port method no
-use case calls is still found by reading.
+Code only its own test runs counts as covered.
+`npm run check:exports` ([checkExports.ts](../scripts/checkExports.ts),
+in `npm run check`) finds it: an export that code other than tests
+neither imports (nor imports its module whole, nor calls from a
+`package.json` script) nor uses in its own file. Such an export is
+removed with its tests, or put to use; a helper only tests need goes to
+a `testing/` folder. The check reads exports, not a port's members: a
+port method no use case calls is found by reading.
 
-A test may take 30 seconds, not vitest's 5, also set in
-[vitest.shared.ts](../vitest.shared.ts). CI runs every package's tests
-at once with coverage on, and its runner takes some tests fifty times
-as long as a laptop does. The generator's check of `ns/`, for example,
-takes 0.1 s on a laptop and ran out of 5 s on CI. A test that hangs
-still fails. For the same reason, a test of speed is timed against the
-same machine, never against the clock (see Domain and Markdown below).
+A test may take 30 seconds, not vitest's 5 (`vitest.shared.ts`). CI,
+running every package's tests at once with coverage on, takes some
+tests fifty times as long as a laptop (the generator's check of `ns/`:
+0.1 s against over 5 s). A test that hangs still fails.
 
 ## Strategy per layer
 
-Dependency inversion gives every layer a seam that makes mocks trivial:
+Dependency inversion gives every layer a seam for its fakes:
 
 | Layer | Seam | Technique |
 |---|---|---|
-| Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. What runs over a whole deck or log is timed at two sizes, in the CPU time of its own process, not against the clock (CI runs the tests, coverage on, many times slower than a laptop): eight times the input must take less than four times as long as an eighth of it done eight times over, which a linear pass meets (about one) and work growing with the input does not (about eight) — `queryCards` over 5,000 cards, `lapseIndex`, `chainIndexOf` and `statisticsOf` over years of answers, `instanceGraphOf` over an instance's cards and answers (`growth` in `src/testing/growth.ts`), and, in the Studio, the graph's layout and routes over a deck's cards. |
-| Application | ports | Inject fake port objects (`vi.fn` per method): the fixtures and fake ports in [fakePorts.ts](../packages/application/src/testing/fakePorts.ts), and `NO_PORTS` ([noPorts.ts](../packages/application/src/testing/noPorts.ts)) for the ports a test has no use for, which the tests of other packages spread too. Each slice is tested in its own `<feature>.test.ts`, the stores the slices share in theirs. No module mocking. |
-| UI | `UseCases` prop | Render with a fake `UseCases`: `makeUseCasesFake` ([useCasesFake.ts](../packages/ui/src/test/useCasesFake.ts)) makes every slice's fake ([test/fakes/](../packages/ui/src/test/fakes/)) in one object, so each calls the others through it; a screen that takes a slice (the trial's) can be given that slice's fake alone. Assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
-| Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
-| Infrastructure I/O shells | injected `fetch` + `vi.mock` | Mock `@inrupt/*` module functions; assert the shell orchestrates fetch → map → return. |
-| Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set), exactly as the browser reads them. |
-| The round trip (`packages/solid/src/releaseDrafts.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` made a draft in a pod kept in memory, as an import makes one, then published again at its own address (`assemble`): its triples come back, apart from what publishing sets (the format versions it writes, its time of change), a blank node compared by what it says. A task of its own, `test:roundtrip`, which `npm run check` runs and Turbo runs again only when `decks/`, `ns/` or the package change; the unit tests take three releases (a course, one with blank nodes, a plain deck) the same way. |
-| The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read through `createSolidDeckLibrary` over a fetch that serves the repository's files at their IRIs, as the app reads them: the index lists every deck, each release reads with every card it has (its retired ones retired), and a course's outline has every chapter and step it has in use, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this is what the app makes of them. The check's rules (`packages/domain/src/release/`) have tests of their own, and a golden test, `packages/shacl/node/deckLibrary.golden.test.ts`, keeps as text what they say of published releases with faults put in. |
+| Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. What runs over a whole deck or log is timed at two sizes in its own process's CPU time: eight times the input must take under four times as long as an eighth of it done eight times (a linear pass gives about one, work growing with the input about eight). The growth tests (`growth` in `src/testing/growth.ts`) time `queryCards` over 5,000 cards, `lapseIndex`, `chainIndexOf` and `statisticsOf` over years of answers, `instanceGraphOf` over an instance's cards and answers, and the Studio's graph layout and routes over a deck's cards. |
+| Application | ports | Fake ports are injected (`vi.fn` per method): the fixtures and fake ports in [fakePorts.ts](../packages/application/src/testing/fakePorts.ts), and `NO_PORTS` ([noPorts.ts](../packages/application/src/testing/noPorts.ts)), which other packages' tests spread too, for the ports a test doesn't use. Each slice is tested in its own `<feature>.test.ts`, the stores the slices share in theirs. No module mocking. |
+| UI | `UseCases` prop | Screens render with a fake `UseCases`: `makeUseCasesFake` ([useCasesFake.ts](../packages/ui/src/test/useCasesFake.ts)) makes every slice's fake ([test/fakes/](../packages/ui/src/test/fakes/)) in one object, each calling the others through it. A screen that takes a slice (the trial's) can be given that slice's fake alone. Assertions use testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
+| Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions, fed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
+| Infrastructure I/O shells | injected `fetch` + `vi.mock` | `@inrupt/*` module functions are mocked; the tests assert the shell's fetch → map → return. |
+| Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says. A record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read as the browser reads them, through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set). |
+| The round trip (`packages/solid/src/releaseDrafts.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` becomes a draft in a pod kept in memory, as an import makes one, and is published again at its own address (`assemble`), its triples coming back apart from what publishing sets (the format versions, its time of change), a blank node compared by what it says. Its task, `test:roundtrip`, in `npm run check`, runs again only when `decks/`, `ns/` or the package change. The unit tests take three releases the same way: a course, one with blank nodes, a plain deck. |
+| The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read as the app reads them, through `createSolidDeckLibrary` over a fetch serving the repository's files at their IRIs. The index lists every deck, and each release reads with all its cards (its retired ones retired). A course's outline has every chapter and step it uses, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this tests what the app makes of them. Its rules (`packages/domain/src/release/`) have their own tests, and a golden test, `packages/shacl/node/deckLibrary.golden.test.ts`, keeps as text what they say of published releases with faults put in. |
 | Markdown (`packages/markdown/`) | none needed | Pure functions over strings: every node in both profiles, the folds, the chunks of a step's theory, each rule for a release (`markdownProblems`), the limits at every entry point, and the cmark and commonmark.js pathological inputs at the length cap within a time budget ([markdown.md](markdown.md)). |
-| The docs' diagrams (`packages/site/`) | an injected `launch` | What a block must have, the settings, the keys and `checkSvg` are pure functions (`diagrams.test.ts`); `FONT_CHARS` is held to the `cmap` of the installed Fredoka file, read from its WOFF2. `drawDiagrams.test.ts` draws through a fake browser whose `evaluate(fn, arg)` calls `fn(arg)` in node, with a fake `mermaid` and `document.fonts`, so the callbacks the drawing page runs are covered: cache hits, a hit that fails `checkSvg`, misses written under a temporary name, the font's notice in every drawing, a block Mermaid refuses at the page's line, Chromium missing when drawing is required and when it is optional, and `DOCS_DIAGRAMS=skip`, in CI too, drawing nothing and starting no browser. One test draws in the real Chromium with the official Mermaid, a flowchart, a sequence diagram and a state diagram in both themes, with a timeout of its own (120 s). It is the only test of the real launch, so under `DOCS_DIAGRAMS=skip`, which skips it, the package's coverage and `npm run check` fail ([markdown.md](markdown.md#diagrams)). |
-| The docs as a site (`packages/site/`) | an injected `Io` and `draw`, a fake browser | `docsSite.test.ts` renders docs held in memory: each kind of link from the README and from a page, and that no address starts with `/`; every problem, with its file and line; escaping; the page's frame, the figure and the figure without drawings; the font's license beside the drawings and in the footer of a page with a figure; and an archive. It also renders the repository's own `docs/` with a fake `draw` and checks that each page has as many links, tables and figures as its source, so a docs edit that breaks a link fails `npm run check` (the task's inputs hold `docs/` and the Markdown at the root). `publishDocs.test.ts` runs the Vite plugin's build hook and its dev server's middleware with a fake browser ([markdown.md](markdown.md#the-docs-as-a-site)). |
-| A release's docs as an archive (`scripts/docsArchive.ts`) | an injected `Io` and `draw` | `docsArchive.test.ts` packs the repository's own `docs/` with a `draw` that makes drawings as `drawDiagrams` does, with the system's `tar`, and lists and unpacks the archive: every entry under `docs/`, in order, the font's license among them, every drawing safe to serve (`checkSvg`) and carrying the font's notice, and a page linking the release's tag and the latest docs at the site's origin, and never indexed; the origin is read from `CNAME`, as the site's build reads it. Nothing is written when the diagrams were not drawn, a drawing is unsafe or lacks the notice, or the docs have problems. The script's own `draw` is held to drawing in Chromium under `DOCS_DIAGRAMS=skip` too, and its repository address to `apps/web`'s `.env` files, as the site's build reads them ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). |
-| The version a deployed site states (`scripts/siteVersion.ts`) | an injected `Io`: the site's files in memory, the repository's version | `siteVersion.test.ts` gives a built site the repository's version: the app's page and every page of the docs state it, and nothing else is written; a page that states none is named and nothing is written, and a site not built, a version that is not `X.Y.Z` or a call without one folder are refused. `withSiteVersion` (`config.test.ts`) and `withDocsVersion` (`docsSite.test.ts`) make a page the one a build at the new version writes. |
-| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, with its messages in English, the messages of every language but English are each a chunk of their own, which the page fetches only when it speaks that language ([i18n.md](i18n.md#loading-a-language)), what the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of JavaScript gzipped (394 kB in October 2026, against 405, lowered from 640 to 420 when the other languages' messages stopped coming up front, and to 405 when the Studio's messages moved to its chunk; 640 had been raised from 600 for the Studio graph's messages in each language, from 610 for the palettes, the text sizes and preferences format 6, which the preferences' screen and the first instance read need, from 620 for the palette editor, its messages in each language and the built-in palettes' colors it starts from, and from 630 for the cram of the leeches and its messages in each language; past it, the test names the largest modules, and a change that needs the weight raises the budget, saying why), and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). It also checks the docs the build publishes: a page for each `docs/*.md`, each with the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address and ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link leading to a heading, a page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure for each Mermaid block, its light and dark drawings safe to serve (`checkSvg`) and carrying the font's notice; the font's license beside them, as the package has it; the sitemap listing every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, a page the build serves. It draws in the real Chromium, as the build does; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source instead, and nothing is drawn. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME` and the root's `package.json`, which the build reads, `publiccode.yml`, and the Markdown at the root, whose headings the docs' links lead to. |
+| The docs' diagrams (`packages/site/`) | an injected `launch` | What a block must have, the settings, the keys and `checkSvg` are pure functions (`diagrams.test.ts`); `FONT_CHARS` is held to the `cmap` of the installed Fredoka file, read from its WOFF2. `drawDiagrams.test.ts` draws through a fake browser (`evaluate(fn, arg)` calls `fn(arg)` in node), a fake `mermaid` and `document.fonts`, covering the drawing page's callbacks: cache hits, a hit failing `checkSvg`, misses written under a temporary name, the font's notice in every drawing, a block Mermaid refuses at the page's line, Chromium missing when drawing is required or optional, and `DOCS_DIAGRAMS=skip`, in CI too, drawing nothing and starting no browser. One test, the only one of the real launch, draws a flowchart, a sequence diagram and a state diagram in both themes in the real Chromium with the official Mermaid (timeout 120 s); `DOCS_DIAGRAMS=skip` skips it, so the package's coverage and `npm run check` fail ([markdown.md](markdown.md#diagrams)). |
+| The docs as a site (`packages/site/`) | an injected `Io` and `draw`, a fake browser | `docsSite.test.ts` renders docs held in memory: each kind of link from the README and from a page, and that no address starts with `/`; every problem, with its file and line; escaping; the page's frame, the figure and the figure without drawings; the font's license beside the drawings and in the footer of a page with a figure; and an archive. It renders the repository's own `docs/` with a fake `draw`, each page with as many links, tables and figures as its source, so a docs edit that breaks a link fails `npm run check`. The task's inputs hold `docs/` and the Markdown at the root. `publishDocs.test.ts` runs the Vite plugin's build hook and its dev server's middleware with a fake browser ([markdown.md](markdown.md#the-docs-as-a-site)). |
+| A release's docs as an archive (`scripts/docsArchive.ts`) | an injected `Io` and `draw` | `docsArchive.test.ts` packs the repository's own `docs/` with the system's `tar` and a `draw` like `drawDiagrams`, then lists and unpacks the archive: every entry under `docs/`, in order, the font's license among them, every drawing safe (`checkSvg`) with the font's notice. A page links the release's tag and the latest docs at the site's origin (read from `CNAME`, as the site's build does), and is never indexed. Nothing is written when the diagrams weren't drawn, a drawing is unsafe or lacks the notice, or the docs have problems. The script's own `draw` is held to drawing in Chromium under `DOCS_DIAGRAMS=skip` too, and its repository address to `apps/web`'s `.env` files, as the site's build reads it ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). |
+| The version a deployed site states (`scripts/siteVersion.ts`) | an injected `Io`: the site's files in memory, the repository's version | `siteVersion.test.ts` gives a built site the repository's version: the app's page and every page of the docs state it, and nothing else changes. A page that states none is named, and nothing is written; a site not built, a version that isn't `X.Y.Z` or a call without one folder is refused. `withSiteVersion` (`config.test.ts`) and `withDocsVersion` (`docsSite.test.ts`) make a page the one a build at the new version writes. |
+| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it. The bundle has no HTML sink but Preact's own. The [Studio](studio.md) is a chunk loaded only lazily, with its messages in English. Each other language's messages are a chunk the page fetches only when it speaks that language ([i18n.md](i18n.md#loading-a-language)). What the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of gzipped JavaScript: 394 kB in October 2026, against 405. The budget rose from 600 to 610 for the Studio graph's messages in each language, to 620 for the palettes, the text sizes and preferences format 6 (which the preferences' screen and the first instance read need), to 630 for the palette editor, its messages in each language and the built-in palettes' colors it starts from, and to 640 for the cram of the leeches and its messages in each language. It fell to 420 when the other languages' messages stopped coming up front, and to 405 when the Studio's messages moved to its chunk. Past the budget, the test names the largest modules; a change that needs the weight raises the budget, saying why. The page's Content Security Policy must still let its inline script run ([markdown.md](markdown.md#safety)). Of the published docs, it checks a page per `docs/*.md`: the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address, ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link to a heading, page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure per Mermaid block, its light and dark drawings safe (`checkSvg`) with the font's notice, and the font's license beside them; a sitemap of every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, served. It draws in the real Chromium; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source, and draws nothing. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME`, the root's `package.json`, `publiccode.yml`, and the Markdown at the root. |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `createAppUseCases` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
-| User journeys | the built app in a browser | `e2e/journeys/` drives the app in Chromium (Playwright) through whole journeys, logging in at a real identity provider (Community Solid Server 7 behind TLS) ([User journeys](#user-journeys)). |
+| User journeys | the built app in a browser | `e2e/journeys/` drives the app through whole journeys ([User journeys](#user-journeys)). |
 
 ```mermaid
 graph LR
@@ -1009,12 +954,11 @@ graph LR
 
 - Tests are colocated: `foo.ts` ↔ `foo.test.ts`.
 - Test files follow the same import boundaries as their subject
-  ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts` parses Turtle
-  through `@inrupt/solid-client` for the SHACL tests.
+  ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts`
+  parses Turtle through `@inrupt/solid-client` for the SHACL tests.
 - Node tooling tests may read the repository's `ns/` and `decks/`
   (through `NS_ROOT` and `DECKS_ROOT`) and the vocab package's `vendor/`
-  and `fixtures/` (through `VOCAB_ROOT`): they are the fixtures.
-- Preact-compat note: `@tanstack/react-query` must be inlined in the vitest
-  server deps so the `react → preact/compat` alias applies (see
-  `apps/web/vitest.config.ts`, `apps/studio/vitest.config.ts` and
-  `packages/ui/vitest.config.ts`).
+  and `fixtures/` (through `VOCAB_ROOT`) as their fixtures.
+- `@tanstack/react-query` must be inlined in the vitest server deps so
+  the `react → preact/compat` alias applies (`apps/web/vitest.config.ts`,
+  `apps/studio/vitest.config.ts` and `packages/ui/vitest.config.ts`).

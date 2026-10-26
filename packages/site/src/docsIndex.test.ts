@@ -41,6 +41,7 @@ function page(name: string, of: string, position: string, abstract = '"a page."@
     "    a schema:TechArticle ;",
     `    schema:isPartOf <#${of}> ;`,
     `    schema:position ${position} ;`,
+    '    schema:learningResourceType "reference" ;',
     `    dcterms:abstract ${abstract} .`,
     "",
   ].join("\n");
@@ -82,6 +83,7 @@ describe("readDocsIndex", () => {
             {
               name: "c.md",
               summary: [{ type: "text", value: "a page." }],
+              kind: "reference",
               position: 5,
               line: line("<c.md>"),
             },
@@ -95,6 +97,7 @@ describe("readDocsIndex", () => {
             {
               name: "a.md",
               summary: [{ type: "text", value: "a page." }],
+              kind: "reference",
               position: 10,
               line: line("<a.md>"),
             },
@@ -107,6 +110,7 @@ describe("readDocsIndex", () => {
                 { type: "text", value: " " },
                 { type: "strong", children: [{ type: "text", value: "page" }] },
               ],
+              kind: "reference",
               position: 20,
               line: line("<b.md>"),
             },
@@ -216,10 +220,24 @@ describe("readDocsIndex", () => {
     expect(problems.map((problem) => problem.what)).toEqual([
       "<a.md> has no schema:isPartOf: it needs exactly one",
       "<a.md> has no dcterms:abstract: it needs exactly one",
+      "<a.md> has no schema:learningResourceType: it needs exactly one",
       "<a.md> has no schema:position: it needs exactly one",
       "<#g> has no pages",
     ]);
     expect(index!.groups[0]!.pages).toEqual([]);
+  });
+
+  it("reads a page's kind, one of the four as a plain string", () => {
+    const kinded = (kind: string) =>
+      group("g", "10") + page("a.md", "g", "10").replace('"reference"', kind);
+    const { index } = readDocsIndex(PREFIXES + DOCS + kinded('"how-to"'));
+    expect(index!.groups[0]!.pages[0]!.kind).toBe("how-to");
+    const wrong =
+      '<a.md>\'s schema:learningResourceType is not one of "tutorial", "how-to", "reference", "explanation"';
+    expect(whats(kinded('"guide"'))).toEqual([wrong]);
+    expect(whats(kinded('"tutorial"@en'))).toEqual([wrong]);
+    const { index: unread } = readDocsIndex(PREFIXES + DOCS + kinded("<#tutorial>"));
+    expect(unread!.groups[0]!.pages[0]!.kind).toBe("reference");
   });
 
   it("needs text in English", () => {
@@ -429,6 +447,7 @@ function indexOf(groups: Record<string, string[]>): DocsIndex {
       pages: names.map((name, place) => ({
         name,
         summary: [],
+        kind: "reference",
         position: (place + 1) * 10,
         line: 100 + place,
       })),
@@ -474,6 +493,7 @@ describe("pageBlock", () => {
         "    a schema:TechArticle ;",
         "    schema:isPartOf <#h> ;",
         "    schema:position 30 ;",
+        '    schema:learningResourceType "reference" ;',
         '    dcterms:abstract "what the page covers, in one line."@en .',
       ].join("\n"),
     );

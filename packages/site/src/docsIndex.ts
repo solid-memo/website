@@ -28,12 +28,24 @@ export const DOCS_BASE = "https://solid-memo.com/docs/";
 /** A problem of the docs, at a file and, when one says it, a line (from 1). */
 export type DocsProblem = { file: string; line: number | null; what: string };
 
+/**
+ * What a page is for, which decides how it is written
+ * (docs/style.md#page-kinds): a tutorial takes a newcomer through,
+ * a how-to gives the steps for one task, a reference states the rules
+ * and facts, and an explanation says why.
+ */
+export const PAGE_KINDS = ["tutorial", "how-to", "reference", "explanation"] as const;
+
+export type PageKind = (typeof PAGE_KINDS)[number];
+
 /** A page as the index lists it. */
 export type IndexedPage = {
   /** Its file in docs/, such as `srs.md`. */
   name: string;
   /** What it covers: one line of Markdown phrasing, without links. */
   summary: MdInline[];
+  /** Its kind; "reference" when the index names none (a problem already). */
+  kind: PageKind;
   /** Its place in its group. */
   position: number;
   /** The index's line that names it; null when it is not written as `<name.md>`. */
@@ -61,12 +73,14 @@ export type DocsIndex = {
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const XSD_INTEGER = "http://www.w3.org/2001/XMLSchema#integer";
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const DCTERMS = "http://purl.org/dc/terms/";
 const SCHEMA = "https://schema.org/";
 const TITLE = `${DCTERMS}title`;
 const ABSTRACT = `${DCTERMS}abstract`;
 const IS_PART_OF = `${SCHEMA}isPartOf`;
 const POSITION = `${SCHEMA}position`;
+const KIND = `${SCHEMA}learningResourceType`;
 const COLLECTION = `${SCHEMA}Collection`;
 const ARTICLE = `${SCHEMA}TechArticle`;
 
@@ -77,6 +91,7 @@ const SHORT: Record<string, string> = {
   [ABSTRACT]: "dcterms:abstract",
   [IS_PART_OF]: "schema:isPartOf",
   [POSITION]: "schema:position",
+  [KIND]: "schema:learningResourceType",
   [COLLECTION]: "schema:Collection",
   [ARTICLE]: "schema:TechArticle",
 };
@@ -85,7 +100,7 @@ const SHORT: Record<string, string> = {
 const KINDS = {
   docs: { type: COLLECTION, properties: [RDF_TYPE, TITLE] },
   group: { type: COLLECTION, properties: [RDF_TYPE, TITLE, IS_PART_OF, POSITION] },
-  page: { type: ARTICLE, properties: [RDF_TYPE, IS_PART_OF, POSITION, ABSTRACT] },
+  page: { type: ARTICLE, properties: [RDF_TYPE, IS_PART_OF, POSITION, KIND, ABSTRACT] },
 };
 
 /** A group's fragment, which becomes a heading's id: lowercase words and hyphens. */
@@ -187,6 +202,20 @@ function positionOf(reading: Reading, subject: string, line: number | null): num
   return null;
 }
 
+/** A page's kind, a plain string of PAGE_KINDS; null, with a problem, for anything else. */
+function kindOf(reading: Reading, subject: string, line: number | null): PageKind | null {
+  const value = oneValue(reading, subject, line, KIND);
+  if (value === null) return null;
+  const kind = PAGE_KINDS.find((one) => one === value.value);
+  if (value.termType === "Literal" && value.datatype.value === XSD_STRING && kind !== undefined)
+    return kind;
+  reading.at(
+    line,
+    `${written(subject)}'s schema:learningResourceType is not one of ${PAGE_KINDS.map((one) => `"${one}"`).join(", ")}`,
+  );
+  return null;
+}
+
 /** Whether a subject is typed as its kind and has only that kind's properties, each problem listed. */
 function checkShape(
   { subjects, at }: Reading,
@@ -234,6 +263,7 @@ function readPage(reading: Reading, text: string, subject: string, relative: str
   return {
     name: relative,
     summary: abstract === null ? [] : summaryOf(abstract, `<${relative}>`, line, reading.at),
+    kind: kindOf(reading, subject, line) ?? "reference",
     line,
     group: part?.termType === "NamedNode" ? part.value : null,
     position: positionOf(reading, subject, line),
@@ -327,7 +357,13 @@ export function readDocsIndex(text: string): {
         title: group.title,
         line: group.line,
         pages: ordered(group.pages, (page) => `<${page.name}>`, at).map(
-          ({ name, summary, position, line }) => ({ name, summary, position: position ?? 0, line }),
+          ({ name, summary, kind, position, line }) => ({
+            name,
+            summary,
+            kind,
+            position: position ?? 0,
+            line,
+          }),
         ),
       };
     }),
@@ -405,6 +441,7 @@ export function pageBlock(index: DocsIndex, name: string): string {
     "    a schema:TechArticle ;",
     `    schema:isPartOf <#${group?.id ?? "group"}> ;`,
     `    schema:position ${last + 10} ;`,
+    '    schema:learningResourceType "reference" ;',
     '    dcterms:abstract "what the page covers, in one line."@en .',
   ].join("\n");
 }

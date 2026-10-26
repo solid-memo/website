@@ -289,6 +289,8 @@ English is the authoritative language of the code, the docs and the
 discussions. Write in plain English with American spelling ("license",
 "color", "organize"); `npm run lint:spelling`, part of `npm run check`,
 checks the Markdown and the English messages for it
-([docs/style.md](docs/style.md#language)). A
+([docs/style.md](docs/style.md#language)). The docs follow the writing
+rules in [docs/style.md](docs/style.md#writing), which
+`npm run lint:prose` checks. A
 translation of the app follows the English messages in
 `packages/ui/src/i18n/en.json`.
