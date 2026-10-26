@@ -28,6 +28,7 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { getSolidDatasetOrNull } from "./datasets";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
+import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
 import { toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
 import { storedVersionOf } from "./records";
@@ -88,12 +89,18 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
         ...quadsOf(cards),
         ...quadsOf(reviews),
       ];
+      refuseUnwritable(quads);
       if (format === "jsonld") return jsonLdOf(quads, DECK_FILE_PREFIXES);
       return solidDatasetAsTurtle(datasetFromQuads(quads), { prefixes: { ...DECK_FILE_PREFIXES } });
     },
 
     async readDeckFile(text, format, baseUrl) {
-      const dataset = datasetFromQuads(await parseDeckFile(text, format, baseUrl));
+      // A triple with a term Turtle cannot write as it is (JSON-LD can hold one) is left out: saved, it would say more than was read (GHSA-x937-hx25-qfp4).
+      const dataset = datasetFromQuads(
+        (await parseDeckFile(text, format, baseUrl)).filter(
+          (quad) => unwritableTermOf(quad) === undefined,
+        ),
+      );
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);
       const typed = (type: string) =>

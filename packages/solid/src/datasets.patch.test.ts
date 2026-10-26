@@ -19,7 +19,7 @@ import {
 } from "./client/rdf";
 import { datasetFrom } from "./testing/datasets";
 import type { Quad, Term } from "@rdfjs/types";
-import { patchBody, saveDataset } from "./datasets";
+import { appendAllToDocument, patchBody, saveDataset } from "./datasets";
 
 vi.mock("./client/rdf", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/rdf")>();
@@ -204,5 +204,68 @@ describe("patchBody", () => {
       await expect(saveDataset(DOC, decimalEdit("1.0"), fetch)).rejects.toThrow();
       expect(sent).toHaveLength(2);
     });
+  });
+});
+
+describe("a write of a term Turtle cannot write as it is (GHSA-x937-hx25-qfp4)", () => {
+  const INJECTED = `https://img.example/a.png#p> . <${DOC}> <http://purl.org/dc/terms/isPartOf> <https://attacker.example/o`;
+  const injected = triple(named(`${DOC}#card`), `${NS}frontImage`, named(INJECTED));
+  const clean = triple(named(`${DOC}#card`), `${NS}front`, named(`${DOC}#x`));
+  const unsent = () => {
+    const sent: string[] = [];
+    const fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      sent.push(String(init?.body));
+      return new Response("", { status: 205 });
+    }) as typeof globalThis.fetch;
+    return { sent, fetch };
+  };
+
+  it("is refused, nothing sent, as a new document", async () => {
+    const { sent, fetch } = unsent();
+    await expect(saveDataset(DOC, datasetFromQuads([injected]), fetch)).rejects.toMatchObject({
+      code: "unwritableTerm",
+    });
+    expect(sent).toEqual([]);
+  });
+
+  it("is refused, nothing sent, as an edit's addition or deletion", async () => {
+    const added = unsent();
+    await expect(
+      saveDataset(DOC, edit([clean], [clean, injected]), added.fetch),
+    ).rejects.toMatchObject({
+      code: "unwritableTerm",
+    });
+    const deleted = unsent();
+    withBlankNode({
+      additions: [],
+      deletions: [
+        triple({ termType: "BlankNode", value: "b x> . <y" } as Term, `${NS}p`, named(`${DOC}#a`)),
+      ],
+    });
+    await expect(saveDataset(DOC, edit([clean], []), deleted.fetch)).rejects.toMatchObject({
+      code: "unwritableTerm",
+    });
+    expect([...added.sent, ...deleted.sent]).toEqual([]);
+  });
+
+  it("is refused, nothing sent, where an edit is written as the whole document", async () => {
+    const { sent, fetch } = unsent();
+    const other = triple(named(`${DOC}#other`), `${NS}p`, named(`${DOC}#y`));
+    await expect(
+      saveDataset(DOC, edit([injected, clean], [injected]), fetch, { whole: true }),
+    ).rejects.toMatchObject({ code: "unwritableTerm" });
+    expect(sent).toEqual([]);
+    // An edit that writes only its changes leaves the rest as the pod holds it.
+    await saveDataset(DOC, edit([injected, clean], [injected, clean, other]), fetch);
+    expect(sent).toHaveLength(1);
+  });
+
+  it("is refused, nothing sent, as an addition without a read", async () => {
+    const { sent, fetch } = unsent();
+    const thing = getThing(datasetFromQuads([injected]), `${DOC}#card`)!;
+    await expect(appendAllToDocument(DOC, [thing], fetch)).rejects.toMatchObject({
+      code: "unwritableTerm",
+    });
+    expect(sent).toEqual([]);
   });
 });

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_BASE, type DeckFileFormat } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
@@ -369,6 +369,56 @@ describe("readDeckFile", () => {
     const read = await archive.readDeckFile(json, "jsonld", base);
     expect(read.cards.map((card) => card.id)).toEqual(["c1"]);
     expect(victim in {}).toBe(false);
+  });
+
+  it("leaves out a triple with a term Turtle cannot write as it is, which would say more once saved", async () => {
+    const deck = (card: object) =>
+      JSON.stringify({
+        "@context": { sm: SM_NS, dcterms: "http://purl.org/dc/terms/" },
+        "@graph": [
+          {
+            "@id": "#deck",
+            "@type": "sm:Deck",
+            "dcterms:title": "Hand",
+            "sm:cardsDocument": { "@id": "cards" },
+            "sm:reviewsDocument": { "@id": "reviews" },
+          },
+          { "@id": "cards#c1", "@type": "sm:Card", "sm:front": "A", "sm:back": "B", ...card },
+        ],
+      });
+    const injected = `https://img.example/a.png#p> . <${base}> <http://purl.org/dc/terms/isPartOf> <https://attacker.example/o`;
+    for (const card of [
+      { "sm:frontImage": { "@id": injected } },
+      { [`${SM_NS}frontImage> <https://attacker.example/o> . <${base}cards#c1> <${SM_NS}x`]: "y" },
+      {
+        "sm:frontImage": {
+          "@id": "_:b x> . <https://attacker.example/s> <https://attacker.example/p> _:c",
+        },
+      },
+    ]) {
+      const read = await archive.readDeckFile(deck(card), "jsonld", base);
+      expect(read.cards).toMatchObject([{ id: "c1", front: { "": "A" } }]);
+      expect(JSON.stringify(read)).not.toContain("attacker");
+    }
+    // A card whose own text cannot be written is not read: it is left out and counted.
+    const typed = await archive.readDeckFile(
+      deck({
+        "sm:back": { "@value": "B", "@type": "https://t.example/t#a>attacker" },
+      }),
+      "jsonld",
+      base,
+    );
+    expect(typed.cards).toEqual([]);
+    expect(typed.dropped).toEqual([`${base.replace(/[^/]*$/, "")}cards#c1`]);
+    const encoded = await archive.readDeckFile(
+      deck({
+        "sm:frontImage": { "@id": "https://img.example/a.png#p%3E" },
+        "sm:formatVersion": CARD_FORMAT_VERSION,
+      }),
+      "jsonld",
+      base,
+    );
+    expect(encoded.cards[0]?.frontImageUrl).toBe("https://img.example/a.png#p%3E");
   });
 
   it("refuses JSON-LD whose context would be fetched from elsewhere", async () => {

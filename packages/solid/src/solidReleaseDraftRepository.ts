@@ -68,6 +68,7 @@ import {
 import { draftSubjects } from "./ownership";
 import { recordThing, removeUnlessNewer, storedVersionOf } from "./records";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
+import { refuseUnwritable } from "./writableTerms";
 import { turtleOf } from "./turtleWriter";
 import { SM } from "./vocab";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
@@ -356,6 +357,8 @@ export function createSolidReleaseDraftRepository({
     async parseRelease(text, format) {
       const base = "https://file.solid-memo.invalid/release.ttl";
       const quads = await parseDeckFile(text, format, base);
+      // A draft keeps a release's triples as they are: one Turtle cannot write as it is would say more once saved (GHSA-x937-hx25-qfp4).
+      refuseUnwritable(quads);
       const roots = [
         ...new Set(
           quads

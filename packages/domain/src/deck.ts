@@ -8,7 +8,7 @@ import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./la
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { tidiedDistractor } from "./distractors";
-import { isHttpUrl } from "./webId";
+import { isHttpUrl, isWritableIri } from "./webId";
 
 /**
  * Format version written on every deck and card this app creates. A
@@ -557,9 +557,17 @@ function unstatedSide(
   return was !== undefined && tidied(was, formatted) === text[""] ? undefined : needsLanguage(part);
 }
 
+/**
+ * An image address as typed, trimmed, each character Turtle cannot
+ * write in an IRI percent-encoded (`a b.png` is `a%20b.png`): a browser
+ * loads it the same, and a pod can hold it (isWritableIri).
+ */
 function normalizeImageUrl(value: string | undefined): string | undefined {
   const trimmed = value?.trim() ?? "";
-  return trimmed === "" ? undefined : trimmed;
+  if (trimmed === "") return undefined;
+  return [...trimmed]
+    .map((character) => (isWritableIri(character) ? character : encodeURIComponent(character)))
+    .join("");
 }
 
 /** Whether a side has no text: it is a picture only. */
