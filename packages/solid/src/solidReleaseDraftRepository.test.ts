@@ -865,6 +865,26 @@ describe("readRelease and parseRelease", () => {
     expect(jsonld.url).toBe(`${DECKS}capitals/v1.ttl`);
   });
 
+  it("refuse a file with a term Turtle cannot write as it is, which a draft would keep (GHSA-x937-hx25-qfp4)", async () => {
+    const pod = await draftPod();
+    for (const extra of [
+      { [`${SM}image`]: { "@id": "https://img.example/a.png#p> . <https://evil.example/s" } },
+      {
+        [`${SM}image`]: { "@id": "_:b x> . <https://evil.example/s> <https://evil.example/p> _:c" },
+      },
+    ]) {
+      const text = JSON.stringify({
+        "@id": `${DECKS}capitals/v1.ttl`,
+        "@type": `${SM}Deck`,
+        [`${SM}studyDirection`]: { "@id": `${SM}frontToBack` },
+        ...extra,
+      });
+      await expect(pod.repository.parseRelease(text, "jsonld")).rejects.toMatchObject({
+        code: "unwritableTerm",
+      });
+    }
+  });
+
   it("refuse a file of no one release", async () => {
     const pod = await draftPod();
     for (const text of [

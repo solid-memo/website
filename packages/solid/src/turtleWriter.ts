@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad, Term } from "@rdfjs/types";
+import { refuseUnwritable } from "./writableTerms";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
@@ -18,7 +19,9 @@ const LOCAL_NAME = /^[A-Za-z_][A-Za-z0-9_-]*$/;
  * block per subject, in the order given (`order`, the rest after in the
  * order met), its types first; a blank node named once written in place
  * (`[ … ]`). Text is written on one line, its quotes, backslashes and
- * line breaks escaped; integers and booleans bare. No vendor library
+ * line breaks escaped; integers and booleans bare. A term written as it
+ * is, an IRI or a blank node's label, that Turtle cannot write so is
+ * refused (writableTerms.ts). No vendor library
  * writes Turtle with a base in the browser (docs/boundaries.md).
  */
 export function turtleOf(
@@ -33,6 +36,7 @@ export function turtleOf(
   const named = new Map<string, number>();
   const namedBy = new Map<string, string>();
   for (const quad of quads) {
+    refuseUnwritable([quad]);
     const key = keyOf(quad.subject);
     const statements = bySubject.get(key);
     if (statements === undefined) bySubject.set(key, [quad]);

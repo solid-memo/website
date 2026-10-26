@@ -35,7 +35,7 @@ describe("turtleOf", () => {
         quadOf(BASE, `${SM}formatVersion`, literal("6", `${XSD}integer`)),
         quadOf(BASE, RDF_TYPE, iri(`${SM}Deck`)),
         quadOf(BASE, RDF_TYPE, iri("http://www.w3.org/ns/dcat#Dataset")),
-        quadOf(BASE, "https://other.example/says", iri("https://other.example/a b")),
+        quadOf(BASE, "https://other.example/says", iri("https://other.example/a%20b")),
       ],
       { base: BASE, prefixes: PREFIXES, order: [BASE] },
     );
@@ -47,12 +47,37 @@ describe("turtleOf", () => {
     a solid-memo:Deck ,
       <http://www.w3.org/ns/dcat#Dataset> ;
     solid-memo:formatVersion 6 ;
-    <https://other.example/says> <https://other.example/a b> .
+    <https://other.example/says> <https://other.example/a%20b> .
 
 <#se>
     a solid-memo:Card ;
     solid-memo:front "Sweden"@en .
 `);
+  });
+
+  it.each([
+    [
+      "an IRI",
+      quadOf(BASE, `${SM}image`, iri("https://img.example/a#p> . <https://evil.example/s")),
+    ],
+    ["a predicate", quadOf(BASE, "https://other.example/p> <https://evil.example/o", literal("x"))],
+    ["a datatype", quadOf(BASE, `${SM}a`, literal("1", "https://other.example/t> . <x"))],
+    [
+      "a blank node's label",
+      quadOf(BASE, `${SM}checksum`, blank("b x> . <https://evil.example/s")),
+    ],
+    [
+      "a language tag",
+      quadOf(
+        BASE,
+        `${SM}front`,
+        literal("x", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString", "en . <x"),
+      ),
+    ],
+  ])("refuses %s Turtle cannot write as it is", (_, quad) => {
+    expect(() => turtleOf([quad], { base: BASE, prefixes: PREFIXES })).toThrow(
+      expect.objectContaining({ code: "unwritableTerm" }),
+    );
   });
 
   it("writes text on one line, escaped, and typed literals with their type", () => {

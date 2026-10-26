@@ -1739,6 +1739,7 @@
     "guestPodStartFailed": "Le travail en mode invité sur cet appareil n’a pas pu être ouvert. Rechargez la page et réessayez.",
     "guestStorageAborted": "Ce navigateur a refusé d’enregistrer une modification du travail en mode invité. Vérifiez qu’il a assez de place pour conserver des données, puis réessayez.",
     "addFailed": "Solid Memo n’a pas pu enregistrer dans votre Pod. Vérifiez votre connexion et réessayez.",
+    "unwritableTerm": "Solid Memo n’a pas enregistré ceci : cela contient une adresse qui ne peut pas être écrite telle quelle dans un Pod. Rien n’a été modifié.",
     "draftGone": "Ce brouillon n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "releaseUnreadable": "Solid Memo ne peut pas lire de publication à l’adresse {url}. Vérifiez l’adresse et assurez-vous que la publication y est bien publiée.",
     "notAReleaseFile": "Ce fichier ne contient pas exactement une publication de paquet ou de cours. Choisissez une publication enregistrée en Turtle ou en JSON-LD.",

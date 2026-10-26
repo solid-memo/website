@@ -26,6 +26,7 @@ import {
   solidDatasetAsTurtle,
 } from "./client/resources";
 import { unlessNewer } from "./records";
+import { refuseUnwritable } from "./writableTerms";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 
@@ -515,7 +516,8 @@ function withIfMatch(
 }
 
 /**
- * The fetch, with the PATCH the Solid client library sends given our body
+ * The fetch, refusing a write of a term Turtle cannot write as it is
+ * (writableTerms.ts), with the PATCH the Solid client library sends given our body
  * (patchBody, sent again with its deleted decimals spelled as numbers
  * where a conflict (409) may come of their spelling), or sent as a PUT of the whole dataset (its every triple,
  * the edit applied) when that body is larger than MAX_PATCH_BYTES, or
@@ -528,12 +530,15 @@ function ownPatches(
   whole: boolean,
 ): typeof globalThis.fetch {
   return async (input, init) => {
+    if (init?.method === "PUT") refuseUnwritable(toRdfJsDataset(dataset));
     if (init?.method !== "PATCH") return fetch(input, init);
     const body = patchBody(dataset) ?? init.body;
     if (
       !whole &&
       (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)
     ) {
+      const changes = changesOf(dataset);
+      refuseUnwritable([...(changes?.additions ?? []), ...(changes?.deletions ?? [])]);
       const response = await fetch(input, { ...init, body });
       // node-solid-server finds no decimal deleted as it served it (`1.0`, `2.50`), only as it reads it (`1`,
       // `2.5`), and applies nothing (409): sent once more, decimals so spelled. A deletion of a triple that is
@@ -544,6 +549,7 @@ function ownPatches(
         ? response
         : fetch(input, { ...init, body: respelled });
     }
+    refuseUnwritable(toRdfJsDataset(dataset));
     const headers = new Headers(init.headers);
     headers.set("Content-Type", "text/turtle");
     return fetch(input, {
@@ -585,9 +591,9 @@ export async function appendAllToDocument(
   const batches: (string | null)[][] = [];
   let size = 0;
   for (const thing of things) {
-    const lines = [...toRdfJsDataset(setThing(createSolidDataset(), thing))].map((quad) =>
-      tripleLine(quad, false),
-    );
+    const quads = [...toRdfJsDataset(setThing(createSolidDataset(), thing))];
+    refuseUnwritable(quads);
+    const lines = quads.map((quad) => tripleLine(quad, false));
     const bytes = encoder.encode(lines.join("\n")).length + 1;
     if (batches.length === 0 || size + bytes > MAX_PATCH_BYTES) {
       batches.push(lines);

@@ -14,6 +14,23 @@ function parseUrl(value: string): URL | null {
   }
 }
 
+/** What Turtle leaves out of an IRI written between `<` and `>` (IRIREF), controls and space aside. */
+const NOT_IN_IRI = new Set('<>"{}|^`\\');
+
+/**
+ * True for a value Turtle can write as an IRI (`<…>`) as it is: no
+ * control character, space or one of `<>"{}|^`\`. A URL parser keeps
+ * these in a fragment, and a writer that does not escape them ends the
+ * IRI there, so the rest is read as statements of their own
+ * (GHSA-x937-hx25-qfp4).
+ */
+export function isWritableIri(value: string): boolean {
+  for (const character of value) {
+    if (character.codePointAt(0)! <= 0x20 || NOT_IN_IRI.has(character)) return false;
+  }
+  return true;
+}
+
 function hasCredentials(url: URL): boolean {
   return url.username !== "" || url.password !== "";
 }
@@ -25,7 +42,7 @@ function hasCredentials(url: URL): boolean {
  */
 export function isSecureUrl(value: string): boolean {
   const url = parseUrl(value);
-  return url !== null && url.protocol === "https:" && !hasCredentials(url);
+  return url !== null && url.protocol === "https:" && !hasCredentials(url) && isWritableIri(value);
 }
 
 const LINKABLE_PROTOCOLS = ["https:", "http:", "mailto:"];
@@ -58,7 +75,7 @@ export function validateWebId(input: string): WebIdValidation {
     return { ok: false, error: new AppError("webIdEmpty") };
   }
   const url = parseUrl(trimmed);
-  if (url === null) {
+  if (url === null || !isWritableIri(url.href)) {
     return { ok: false, error: new AppError("webIdInvalidUrl") };
   }
   if (url.protocol !== "https:") {

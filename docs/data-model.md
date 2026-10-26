@@ -1284,7 +1284,8 @@ An import reads the file as the pod is read, with the same mappers:
 - relative IRIs are resolved against `https://file.solid-memo.invalid/`
   and the file's name (`DECK_FILE_BASE`);
 - a JSON-LD context named by its address (or `@import`) is refused, as
-  reading it would fetch that address.
+  reading it would fetch that address;
+- a triple with a term Turtle can't write as it is is left out (below).
 
 The deck is then written as a new deck of the instance (`importedDeck`).
 It keeps the file's deck id, so a deck exported, removed and imported
@@ -1351,6 +1352,17 @@ by one.
   replaces that inheritance and can lock the owner out (WAC) or expose
   data). Otherwise access control stays whatever the user's server
   dictates.
+- **No write holds a term Turtle can't write as it is.** Such a term is
+  an IRI with a control character, a space or one of `` <>"{}|^`\ ``. So
+  is a blank node label or a language tag outside Turtle's grammar, text
+  typed `rdf:langString` without a language, a base direction, or a
+  quoted triple. JSON-LD can hold such a term, and the writers don't escape it,
+  so a `>` would end an IRI and the rest be read as statements no check
+  saw. A PATCH, a PUT, an insert-only PATCH, a release's Turtle and an
+  export are refused with `unwritableTerm` before anything is sent
+  ([writableTerms.ts](../packages/solid/src/writableTerms.ts)). An
+  imported deck leaves such triples out; a release read from a file is
+  refused, as a draft keeps its triples as they are.
 - Mutations always follow read → modify → save
   ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`). The save sends a PATCH

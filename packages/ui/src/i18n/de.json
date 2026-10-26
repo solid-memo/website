@@ -1665,6 +1665,7 @@
     "guestPodStartFailed": "Der Lernstand als Gast auf diesem Gerät konnte nicht geöffnet werden. Lade die Seite neu und versuche es erneut.",
     "guestStorageAborted": "Dieser Browser hat sich geweigert, eine Änderung am Lernstand als Gast zu speichern. Prüfe, ob er genug Platz für Daten hat, und versuche es dann erneut.",
     "addFailed": "Solid Memo konnte nicht in deinem Pod speichern. Prüfe deine Verbindung und versuche es erneut.",
+    "unwritableTerm": "Solid Memo hat das nicht gespeichert: Es enthält eine Adresse, die so nicht in einen Pod geschrieben werden kann. Nichts wurde geändert.",
     "draftGone": "Diesen Entwurf gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App gelöscht.",
     "releaseUnreadable": "Solid Memo kann unter {url} keine Ausgabe lesen. Prüfe die Adresse und ob die Ausgabe dort veröffentlicht ist.",
     "notAReleaseFile": "Diese Datei enthält nicht genau eine Ausgabe eines Stapels oder Kurses. Wähle eine Ausgabe, die als Turtle oder JSON-LD gespeichert ist.",

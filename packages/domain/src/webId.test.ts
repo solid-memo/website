@@ -4,7 +4,7 @@
 
 import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
-import { isHttpUrl, isLinkableUrl, isSecureUrl, validateWebId } from "./webId";
+import { isHttpUrl, isLinkableUrl, isSecureUrl, isWritableIri, validateWebId } from "./webId";
 
 describe("isHttpUrl", () => {
   it.each(["https://flagcdn.com/h80/af.png", "http://localhost:3000/a.png"])(
@@ -25,6 +25,30 @@ describe("isHttpUrl", () => {
   });
 });
 
+describe("isWritableIri", () => {
+  it("accepts what Turtle writes between < and > as it is", () => {
+    expect(isWritableIri("https://pod.example/deck.ttl#card-1?é=%20")).toBe(true);
+    expect(isWritableIri("")).toBe(true);
+  });
+
+  it.each([
+    "a>b",
+    "a<b",
+    'a"b',
+    "a{b",
+    "a}b",
+    "a|b",
+    "a^b",
+    "a`b",
+    "a\\b",
+    "a b",
+    "a\tb",
+    "a\u0000b",
+  ])("rejects %j", (value) => {
+    expect(isWritableIri(value)).toBe(false);
+  });
+});
+
 describe("isSecureUrl", () => {
   it("accepts an https URL", () => {
     expect(isSecureUrl("https://datapod.igrant.io")).toBe(true);
@@ -41,6 +65,10 @@ describe("isSecureUrl", () => {
   it("rejects embedded credentials", () => {
     expect(isSecureUrl("https://user@issuer.example")).toBe(false);
     expect(isSecureUrl("https://:secret@issuer.example")).toBe(false);
+  });
+
+  it("rejects a URL Turtle cannot write as an IRI", () => {
+    expect(isSecureUrl("https://issuer.example/#a>b")).toBe(false);
   });
 });
 
@@ -87,6 +115,13 @@ describe("validateWebId", () => {
     const result = validateWebId("alice");
     expect(result.ok).toBe(false);
     expect(result).toEqual({ ok: false, error: new AppError("webIdInvalidUrl") });
+  });
+
+  it("rejects a URL Turtle cannot write as an IRI, as normalized", () => {
+    expect(validateWebId("https://alice.example/profile/card#me|x")).toEqual({
+      ok: false,
+      error: new AppError("webIdInvalidUrl"),
+    });
   });
 
   it("rejects a non-https URL", () => {

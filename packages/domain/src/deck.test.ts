@@ -353,6 +353,23 @@ describe("validateCardContent", () => {
     });
   });
 
+  it("percent-encodes what a pod cannot hold in a picture's URL, the rest as typed", () => {
+    expect(
+      validateCardContent({
+        front: {},
+        back: { en: "Mona Lisa" },
+        frontImageUrl: "https://Upload.example/a/Mona Lisa.jpg?x=a|b{c}#f>g",
+      }),
+    ).toEqual({
+      ok: true,
+      content: {
+        front: {},
+        back: { en: "Mona Lisa" },
+        frontImageUrl: "https://Upload.example/a/Mona%20Lisa.jpg?x=a%7Cb%7Bc%7D#f%3Eg",
+      },
+    });
+  });
+
   it("accepts pictures on both sides, with or without text", () => {
     expect(
       validateCardContent({

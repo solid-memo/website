@@ -1665,6 +1665,7 @@
     "guestPodStartFailed": "Gäststudierna på den här enheten gick inte att öppna. Läs in sidan igen och försök på nytt.",
     "guestStorageAborted": "Webbläsaren vägrade spara en ändring i gäststudierna. Kontrollera att den har plats att spara data och försök sedan igen.",
     "addFailed": "Solid Memo kunde inte spara i din Pod. Kontrollera anslutningen och försök igen.",
+    "unwritableTerm": "Solid Memo sparade inte detta: det innehåller en adress som inte kan skrivas till en Pod som den är. Inget ändrades.",
     "draftGone": "Det utkastet finns inte längre. Det kanske togs bort i en annan flik eller app.",
     "releaseUnreadable": "Solid Memo kan inte läsa någon utgåva på {url}. Kontrollera adressen och att utgåvan är publicerad där.",
     "notAReleaseFile": "Den filen innehåller inte en utgåva av en kortlek eller kurs. Välj en utgåva sparad som Turtle eller JSON-LD.",
