@@ -56,7 +56,8 @@ import { graphsOf } from "./linearDataset";
  * subject they give is one the library made (inrupt.ts).
  *
  * What the app relies on of them, beyond their names, a second
- * implementation must do alike (rdf.test.ts holds each to the library):
+ * implementation must do alike (the contract in
+ * src/testing/contract/rdf.ts, which rdf.test.ts runs against this one):
  *
  * - getThingAll leaves out subjects that are blank nodes; getThing finds
  *   one by its `_:label`.

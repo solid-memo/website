@@ -9,8 +9,10 @@ import type { Literal, Quad } from "@rdfjs/types";
  * give, and the error a failed request rejects with, with no library
  * behind them. rdf.ts, resources.ts, session.ts and access.ts implement
  * it over the current library and export these again; another
- * implementation exports the same. No Solid client library is imported
- * here (scripts/checkBoundaries.ts).
+ * implementation exports the same, and passes the same contract tests
+ * (src/testing/contract/), which each module's own tests run against
+ * this one. No Solid client library is imported here
+ * (scripts/checkBoundaries.ts).
  */
 
 /**

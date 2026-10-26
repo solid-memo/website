@@ -9,7 +9,7 @@ import { type Dataset, getBoolean, getThingAll, getUrlAll, type Subject } from "
 import { parseAuthor } from "@solid-memo/domain/author";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
-import { getSolidDatasetLinear } from "./client/linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 import { RDF, SM } from "./vocab";
 

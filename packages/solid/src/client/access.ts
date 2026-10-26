@@ -8,10 +8,12 @@ import type { GrantPublicRead } from "./interface";
 export type { GrantPublicRead } from "./interface";
 
 /**
- * The public-read grant over @inrupt/solid-client's universal access
- * (`setPublicAccess`, read only), the only implementation so far: it
- * writes the document's own ACL on a server with Web Access Control and
- * its ACR on one with Access Control Policies, for that document alone.
+ * The public-read grant (GrantPublicRead, interface.ts) over
+ * @inrupt/solid-client's universal access (`setPublicAccess`, read
+ * only), the only implementation so far; another implementation passes
+ * the same contract (src/testing/contract/access.ts). It writes the
+ * document's own ACL on a server with Web Access Control and its ACR on
+ * one with Access Control Policies, for that document alone.
  * Its requests go through accessFetch, which makes them as the servers
  * tested take them. It asks by URL, never with a Request, so a fence
  * around `fetch` (solidReleasePublisher.ts) can read where each goes.

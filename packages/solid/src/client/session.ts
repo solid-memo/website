@@ -15,7 +15,8 @@ import type { SessionClient } from "./interface";
 /**
  * The sign-in client (SessionClient, interface.ts) over
  * @inrupt/solid-client-authn-browser, the only implementation so far, so
- * that the rest of the package names no library.
+ * that the rest of the package names no library; another implementation
+ * passes the same contract (src/testing/contract/session.ts).
  */
 
 export type { SessionClient } from "./interface";

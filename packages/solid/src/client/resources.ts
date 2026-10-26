@@ -39,8 +39,9 @@ import { refuseUnwritable } from "../writableTerms";
  * Reading and writing a pod's resources: documents as datasets (rdf.ts),
  * containers and files, of the types in interface.ts. A thin layer over
  * @inrupt/solid-client, the only implementation so far, so that the rest
- * of the package names no library. The operations keep the names the
- * library gives them, and its requests: their Accept and Content-Type
+ * of the package names no library; another implementation passes the
+ * same contract (src/testing/contract/resources.ts). The operations
+ * keep the names the library gives them, and its requests: their Accept and Content-Type
  * headers and the URLs they ask for. readDocument and writeDocument are
  * the app's own: the conditional reads and writes datasets.ts builds its
  * cache and its preconditions on, with the PATCH bodies the app writes
