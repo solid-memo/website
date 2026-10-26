@@ -340,7 +340,9 @@ Further journeys go through:
   dark theme, High contrast and Larger text following through the pod
   (and kept through a reload), then a palette of one's own designed,
   its too little contrast used anyway, found on a third device, and the
-  colors reset to Standard;
+  colors reset to Standard; and the Connected screen skipped from the
+  next login on, on the second and third devices too, until it is shown
+  again from Preferences;
 - updating a copy of a library deck's first release to its second,
   offered in Solid Memo and in the Studio, the day's study kept;
 - trying Solid Memo as a guest and moving the guest's study into a new

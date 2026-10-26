@@ -135,7 +135,8 @@ previous session (`restorePreviousSession: true`). It returns a domain
 `EstablishedSession` (`{ session, origin }`) or `null`. `origin` is
 `"login"` when the library emitted its `LOGIN` event (a login redirect just
 completed) and `"restored"` otherwise; the UI shows the "Pod connected"
-onboarding step only for the former.
+onboarding step only for the former, unless every instance's preferences
+say to skip it ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
 
 Solid Memo and the Studio are one page, so they share this one session
 ([studio.md](studio.md)): a login in either is a login in both. A

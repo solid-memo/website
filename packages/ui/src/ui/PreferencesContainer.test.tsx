@@ -17,14 +17,19 @@ const instance: Instance = {
   name: "Japanese study",
 };
 
-function renderContainer(useCases: UseCases) {
+function renderContainer(useCases: UseCases, offersConnectedScreen = true) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   const onBack = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <PreferencesContainer useCases={useCases} instance={instance} onBack={onBack} />
+      <PreferencesContainer
+        useCases={useCases}
+        instance={instance}
+        offersConnectedScreen={offersConnectedScreen}
+        onBack={onBack}
+      />
     </QueryClientProvider>,
   );
   return { onBack, queryClient };
@@ -79,6 +84,55 @@ describe("PreferencesContainer", () => {
       schedulerInvitationDismissed: false,
       palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
       textSize: "default",
+    });
+  });
+
+  describe("the Connected screen", () => {
+    const SHOW = "Show the screen that says your Pod is connected";
+
+    it("saves the learner's choice first, then the preferences, and reads it again", async () => {
+      const useCases = makeUseCasesFake();
+      const { onBack } = renderContainer(useCases);
+      fireEvent.click(await screen.findByRole("checkbox", { name: SHOW }));
+      fireEvent.submit(screen.getByRole("button", { name: "Save" }).closest("form")!);
+      await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+      expect(useCases.chooseConnectedScreen).toHaveBeenCalledWith(instance.url, false);
+      expect(vi.mocked(useCases.chooseConnectedScreen).mock.invocationCallOrder[0]).toBeLessThan(
+        vi.mocked(useCases.savePreferences).mock.invocationCallOrder[0]!,
+      );
+      expect(useCases.connectedScreenShown).toHaveBeenCalledTimes(2);
+    });
+
+    it("leaves it as stored when the learner did not change it", async () => {
+      const useCases = makeUseCasesFake();
+      const { onBack } = renderContainer(useCases);
+      await screen.findByRole("checkbox", { name: SHOW });
+      fireEvent.submit(screen.getByRole("button", { name: "Save" }).closest("form")!);
+      await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+      expect(useCases.chooseConnectedScreen).not.toHaveBeenCalled();
+    });
+
+    it("is not offered to a guest", async () => {
+      const useCases = makeUseCasesFake();
+      const { onBack } = renderContainer(useCases, false);
+      fireEvent.submit((await screen.findByRole("button", { name: "Save" })).closest("form")!);
+      await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+      expect(screen.queryByRole("checkbox", { name: SHOW })).not.toBeInTheDocument();
+      expect(useCases.connectedScreenShown).not.toHaveBeenCalled();
+      expect(useCases.chooseConnectedScreen).not.toHaveBeenCalled();
+    });
+
+    it("shows why the choice could not be saved, and saves nothing else", async () => {
+      const useCases = makeUseCasesFake({
+        chooseConnectedScreen: vi.fn(async () => {
+          throw new Error("write refused");
+        }),
+      });
+      renderContainer(useCases);
+      fireEvent.click(await screen.findByRole("checkbox", { name: SHOW }));
+      fireEvent.submit(screen.getByRole("button", { name: "Save" }).closest("form")!);
+      expect(await screen.findByText("write refused")).toBeInTheDocument();
+      expect(useCases.savePreferences).not.toHaveBeenCalled();
     });
   });
 

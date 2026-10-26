@@ -91,14 +91,63 @@ export class Onboarding extends Screen {
     });
   }
 
-  /** Back from the identity provider: the pod it found, then on. */
-  async continueConnected(pod: string): Promise<void> {
-    await this.intent("Continue with the connected Pod", async () => {
-      await expect(
-        this.page.getByRole("heading", { name: this.t("podConnection.connectedHeading") }),
-      ).toBeVisible({ timeout: 30_000 });
-      await expect(this.page.getByRole("main").locator(`a[href="${pod}"]`)).toBeVisible();
-      await this.page.getByRole("button", { name: this.t("podConnection.continue") }).click();
+  /**
+   * Back from the identity provider: the pod it found, then on; with
+   * `skipNextTime`, the box checked that skips this screen from now on,
+   * and on once the instance's preferences say so.
+   */
+  async continueConnected(
+    pod: string,
+    { skipNextTime = false }: { skipNextTime?: boolean } = {},
+  ): Promise<void> {
+    await this.intent(
+      skipNextTime
+        ? "Continue with the connected Pod, not to be shown this screen again"
+        : "Continue with the connected Pod",
+      async () => {
+        await expect(
+          this.page.getByRole("heading", { name: this.t("podConnection.connectedHeading") }),
+        ).toBeVisible({ timeout: 30_000 });
+        await expect(this.page.getByRole("main").locator(`a[href="${pod}"]`)).toBeVisible();
+        if (skipNextTime)
+          await this.page
+            .getByRole("checkbox", { name: this.t("podConnection.skipNextTime") })
+            .check();
+        // The choice is saved after the app opens: one PUT of the preferences.
+        const saved = skipNextTime
+          ? this.page.waitForResponse(
+              (response) =>
+                response.request().method() === "PUT" &&
+                response.url().endsWith("/preferences.ttl") &&
+                response.ok(),
+            )
+          : null;
+        await this.page.getByRole("button", { name: this.t("podConnection.continue") }).click();
+        await saved;
+      },
+    );
+  }
+
+  /**
+   * Before the identity provider sends the browser back: notes whether
+   * the Connected screen shows at any time, for expectConnectedSkipped.
+   */
+  async watchConnected(): Promise<void> {
+    await this.page.addInitScript((heading) => {
+      new MutationObserver(() => {
+        for (const h2 of document.querySelectorAll("h2"))
+          if (h2.textContent === heading) sessionStorage.setItem("journeyConnectedShown", "yes");
+      }).observe(document, { childList: true, subtree: true });
+    }, this.t("podConnection.connectedHeading"));
+  }
+
+  /** Back from the identity provider: the app opens, the Connected screen skipped (watchConnected). */
+  async expectConnectedSkipped(): Promise<void> {
+    await this.intent("Check that the Connected screen is skipped", async () => {
+      await this.app.decks.expectShown();
+      expect(
+        await this.page.evaluate(() => sessionStorage.getItem("journeyConnectedShown")),
+      ).toBeNull();
     });
   }
 

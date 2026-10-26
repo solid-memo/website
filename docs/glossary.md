@@ -324,6 +324,9 @@ it most. The specifications' versions and status are in
   decks, or the deck library's index of its decks. The published
   shapes and vocabulary, which never change, keep its British spelling
   in their text. [data-model.md](data-model.md#the-catalog).
+- **Connected screen**: the screen after a login that says "Your Pod is
+  connected.", which the learner may choose to skip from then on.
+  [onboarding.md](onboarding.md#skipping-the-connected-screen).
 - **Course**: a library deck with chapters and steps that teach before
   they ask. [courses.md](courses.md).
 - **Deck**: a set of cards studied together. [data-model.md](data-model.md#decks-and-cards).

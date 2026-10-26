@@ -48,6 +48,7 @@ sm:chosenDistractor: property, range sm:Distractor, domain sm:Answer
 sm:colorVisionPalette: concept
 sm:completedChapter: property, range sm:Chapter, domain sm:Deck
 sm:conformedTo: property, range xsd:string, domain sm:DocumentReceipt
+sm:connectedScreenSkipped: property, range xsd:boolean, domain sm:Preferences
 sm:dangerColor: property, range xsd:string, domain sm:ColorSet
 sm:darkColors: property, range sm:ColorSet, domain sm:Palette
 sm:darkTheme: concept

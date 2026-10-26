@@ -10,10 +10,13 @@ import {
   getInteger,
   getStringNoLocale,
   getThing,
+  getUrl,
   mockSolidDatasetFrom,
   saveSolidDatasetAt,
   setThing,
   type SolidDataset,
+  type ThingBuilder,
+  type ThingPersisted,
 } from "@inrupt/solid-client";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
@@ -171,6 +174,188 @@ describe("savePreferences", () => {
     expect(url).toBe(DOCUMENT);
     expect(init.method).toBe("PUT");
     expect(String(init.body)).toContain("schedulerInvitationDismissed> true");
+  });
+
+  it("keeps a stored choice to skip the Connected screen, which it never writes", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(DOCUMENT),
+        buildThing(createThing({ url: `${DOCUMENT}#it` }))
+          .addBoolean(SM.connectedScreenSkipped, true)
+          .build(),
+      ),
+    );
+
+    await makeRepository().savePreferences(INSTANCE, preferences);
+
+    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
+    expect(getBoolean(thing, SM.connectedScreenSkipped)).toBe(true);
+  });
+});
+
+describe("markConnectedScreen", () => {
+  const SUBJECT = `${DOCUMENT}#it`;
+
+  /** Preferences stored at `version`, with the choice when `skipped` is given, and another app's triple. */
+  function stored(version: number, skipped?: boolean) {
+    const builder = buildThing(createThing({ url: SUBJECT }))
+      .addIri(RDF.type, SM.Preferences)
+      .addInteger(SM.formatVersion, version)
+      .addInteger(SM.newCardsPerDay, 7)
+      .addStringNoLocale("https://other.example/#note", "kept");
+    return setThing(
+      mockSolidDatasetFrom(DOCUMENT),
+      (skipped === undefined
+        ? builder
+        : builder.addBoolean(SM.connectedScreenSkipped, skipped)
+      ).build(),
+    );
+  }
+
+  function saved() {
+    const [saveUrl, dataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(saveUrl).toBe(DOCUMENT);
+    return getThing(dataset as SolidDataset, SUBJECT)!;
+  }
+
+  it("sets the choice on the preferences as stored, their format and every other triple kept, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(5));
+    const checkWrite = vi.fn(async () => undefined);
+    await expect(
+      makeRepository(checkWrite).markConnectedScreen(INSTANCE, true, null),
+    ).resolves.toBe("written");
+    const thing = saved();
+    expect(getBoolean(thing, SM.connectedScreenSkipped)).toBe(true);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
+    expect(getInteger(thing, SM.newCardsPerDay)).toBe(7);
+    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [SUBJECT], "pod");
+  });
+
+  it("removes it to show the screen again, leaving no triple", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(6, true));
+    await expect(makeRepository().markConnectedScreen(INSTANCE, false, null)).resolves.toBe(
+      "written",
+    );
+    expect(getBoolean(saved(), SM.connectedScreenSkipped)).toBeNull();
+  });
+
+  it("writes nothing when the preferences already say so", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(6, true));
+    await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe(
+      "unchanged",
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(6));
+    await expect(makeRepository().markConnectedScreen(INSTANCE, false, null)).resolves.toBe(
+      "unchanged",
+    );
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("refuses preferences a newer version of the app wrote, before sending anything", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(7));
+    await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("gives preferences that do not fit their shape the choice alone, never the defaults, and it reads back", async () => {
+    // Format 2 must state every field: this one states one.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(2));
+    const repository = makeRepository();
+    await repository.markConnectedScreen(INSTANCE, true, DEFAULT_PREFERENCES);
+    const thing = saved();
+    expect(getBoolean(thing, SM.connectedScreenSkipped)).toBe(true);
+    expect(getInteger(thing, SM.formatVersion)).toBe(2);
+    expect(getInteger(thing, SM.maxReviewsPerDay)).toBeNull();
+
+    // They still read as no preferences, but the choice counts at the next login.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(mockSolidDatasetFrom(DOCUMENT), thing),
+    );
+    await expect(repository.getPreferences(INSTANCE)).resolves.toBeNull();
+    await expect(repository.connectedScreenSkipped(INSTANCE)).resolves.toBe(true);
+  });
+
+  it("makes the preferences it is given, with the choice, where there are none", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(
+      makeRepository().markConnectedScreen(INSTANCE, true, {
+        ...DEFAULT_PREFERENCES,
+        theme: "dark",
+      }),
+    ).resolves.toBe("written");
+    const thing = saved();
+    expect(getBoolean(thing, SM.connectedScreenSkipped)).toBe(true);
+    expect(getInteger(thing, SM.formatVersion)).toBe(6);
+    expect(getUrl(thing, SM.theme)).toBe(SM.darkTheme);
+  });
+
+  it("writes nothing where there are no preferences and none are given", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe("none");
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe("none");
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("writes the whole document, not a PATCH, which node-solid-server stores a true in as false", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(6));
+    const fetch = vi.fn(async () => new Response("", { status: 205 }));
+    await createSolidPreferencesRepository({
+      fetch: fetch as unknown as typeof globalThis.fetch,
+    }).markConnectedScreen(INSTANCE, true, null);
+    const [, , options] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    await options!.fetch!(DOCUMENT, { method: "PATCH", body: "INSERT DATA {};" });
+    const [, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    expect(init.method).toBe("PUT");
+    expect(String(init.body)).toContain("connectedScreenSkipped> true");
+  });
+});
+
+describe("connectedScreenSkipped", () => {
+  const SUBJECT = `${DOCUMENT}#it`;
+
+  /** A subject at `version` holding only its type and this value of the choice. */
+  function holding(
+    version: number,
+    add: (b: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
+  ) {
+    return setThing(
+      mockSolidDatasetFrom(DOCUMENT),
+      add(
+        buildThing(createThing({ url: SUBJECT }))
+          .addIri(RDF.type, SM.Preferences)
+          .addInteger(SM.formatVersion, version),
+      ).build(),
+    );
+  }
+
+  it("is false with no document, or no subject in it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(false);
+  });
+
+  it("reads a true whatever the format, a newer one too, and whether or not they fit their shape", async () => {
+    for (const version of [2, 6, 7]) {
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+        holding(version, (b) => b.addBoolean(SM.connectedScreenSkipped, true)),
+      );
+      await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(true);
+    }
+  });
+
+  it("reads anything but a true as showing the screen", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(holding(6, (b) => b));
+    await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      holding(6, (b) => b.addStringNoLocale(SM.connectedScreenSkipped, "yes")),
+    );
+    await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(false);
   });
 });
 

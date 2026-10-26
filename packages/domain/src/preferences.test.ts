@@ -10,6 +10,7 @@ import {
   keptPalette,
   NEW_INSTANCE_PREFERENCES,
   shownPalette,
+  skipsConnectedScreen,
 } from "./preferences";
 
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
@@ -46,6 +47,22 @@ describe("invitesToFsrs", () => {
 
   it("invites nobody on FSRS-6", () => {
     expect(invitesToFsrs(NEW_INSTANCE_PREFERENCES)).toBe(false);
+  });
+});
+
+describe("skipsConnectedScreen", () => {
+  it("shows the screen to a learner with no instances, where nothing can say to skip it", () => {
+    expect(skipsConnectedScreen([])).toBe(false);
+  });
+
+  it("shows it while one instance says to", () => {
+    expect(skipsConnectedScreen([false])).toBe(false);
+    expect(skipsConnectedScreen([true, false])).toBe(false);
+  });
+
+  it("skips it when every instance says so", () => {
+    expect(skipsConnectedScreen([true])).toBe(true);
+    expect(skipsConnectedScreen([true, true])).toBe(true);
   });
 });
 

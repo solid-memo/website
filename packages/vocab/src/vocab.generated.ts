@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.25 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.26 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -140,6 +140,8 @@ export const SM = {
   palette: `${SM_NS}palette`,
   /** How large the app shows its text, against the browser's own text size: a concept of solid-memo:TextSizes. (Added in 1.22 for preferences format 6.) */
   textSize: `${SM_NS}textSize`,
+  /** Whether logging in goes straight to the app, without the screen that says the learner's Pod is connected. The screen is skipped only when the preferences of every one of the learner's instances say so. Absent means the screen is shown. (Added in 1.26. On preferences it is outside the preferences format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  connectedScreenSkipped: `${SM_NS}connectedScreenSkipped`,
   /** The palette of solid-memo:Palettes a user's palette is based on, whose colors it has where it sets none. A palette this reader does not know is read as the standard one. (Added in 1.23 for palette format 1.) */
   basedOn: `${SM_NS}basedOn`,
   /** A user's palette's colors in the light theme. (Added in 1.23 for palette format 1.) */

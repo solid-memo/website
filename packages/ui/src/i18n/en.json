@@ -1211,7 +1211,9 @@
     "continueAnyway": "Continue anyway",
     "connectedHeading": "Your Pod is connected.",
     "identityProvider": "Identity provider",
-    "continue": "Continue"
+    "continue": "Continue",
+    "skipNextTime": "Don't show this screen after logging in",
+    "skipHint": "Kept in the preferences of each of your instances. You can show this screen again in any instance's Preferences. An instance where the choice cannot be saved keeps showing it."
   },
   "preferences": {
     "language": {
@@ -1284,6 +1286,11 @@
         "label": "Warn only",
         "hint": "Invalid data is reported, and the app keeps working with it."
       }
+    },
+    "connectedScreen": {
+      "legend": "After logging in",
+      "show": "Show the screen that says your Pod is connected",
+      "hint": "Logging in skips it only when it is off in every one of your instances, and shows it when their preferences cannot be read."
     },
     "developer": {
       "legend": "Developer settings",

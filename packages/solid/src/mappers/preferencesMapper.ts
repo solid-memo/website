@@ -25,7 +25,11 @@ export function toPreferences(thing: Thing): StoredPreferences | null {
   };
 }
 
-/** The preferences subject as this app writes it, in place when it exists. */
+/**
+ * The preferences subject as this app writes it, in place when it
+ * exists: what no shape owns, sm:connectedScreenSkipped among it, is
+ * kept as stored.
+ */
 export function toPreferencesThing(
   url: string,
   preferences: StudyPreferences,

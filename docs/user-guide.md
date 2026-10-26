@@ -73,7 +73,12 @@ The first screen offers three ways in
   under "Or use your WebID" and press "Log in with Solid". You log in
   on the provider's page and come back to Solid Memo, which reads your
   profile to find your Pod and says "Your Pod is connected." Press
-  Continue ([authentication.md](authentication.md)).
+  Continue ([authentication.md](authentication.md)). Check "Don't show
+  this screen after logging in" first, and the next login goes straight
+  on, on every device: the choice is kept in each of your instances.
+  Turn it back on in any instance's Preferences. An instance where the
+  choice cannot be saved keeps showing the screen
+  ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
 - **No Pod yet?** "Create a Pod" opens a provider's sign-up page in a
   new tab. Come back when you are done, and log in.
 
@@ -380,6 +385,7 @@ of your answers, and nothing turns them off
 | Desired retention | With FSRS-6: how likely you are to remember a card when it comes back, from 70% to 97%, 90% to start with. Higher means more reviews. |
 | Answer buttons | 0 to 5, or Again · Hard · Good · Easy. FSRS-6 always uses the four; your choice is kept for SM-2. |
 | When data does not conform | What to do when data in your Pod is not in the form Solid Memo expects: block the instance, set the faulty deck aside (the default), or only warn ([validation.md](validation.md)). |
+| After logging in | Whether logging in shows the screen that says your Pod is connected. Logging in skips it only when it is off in every one of your instances, and shows it when their preferences cannot be read ([onboarding.md](onboarding.md#skipping-the-connected-screen)). Not offered to a guest. |
 | Developer mode | Shows developer tools: your WebID document, and a check of the instance against Solid Memo's data shapes. |
 
 Press **Save**. A deck's own preferences can set different daily limits
@@ -550,6 +556,7 @@ screenshot of each.
 | A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |
 | The dark theme, High contrast and Larger text, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–05, 08–11 |
 | A palette of one's own, with too little contrast used anyway, found on a third device, then the colors reset | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 12–14 |
+| Skipping the Connected screen, kept in the Pod and found on another device, then shown again | returning-learner.journey.ts | 08, 11, 13, 15 |
 | A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
 | Exporting a deck as a file and importing it again, with its progress | studio.journey.ts | 21–23 |
 | Switching the scheduler to FSRS-6 from the deck list's invitation, then reviewing with it | [later-day.journey.ts](../e2e/journeys/journeys/later-day.journey.ts) | 03, 06–09 |

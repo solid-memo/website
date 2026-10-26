@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useState } from "preact/hooks";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { ErrorMessage } from "../ErrorMessage";
 import { ExternalLink } from "../ExternalLink";
@@ -12,12 +13,14 @@ import { Loading } from "../Loading";
  * Post-login onboarding step: shows Pod discovery in progress, then the
  * connected account (or why there is none) before entering the app. The
  * WebID is shown by the profile's name when it has one, linked to the
- * WebID itself.
+ * WebID itself. When the learner has an instance, it offers to skip the
+ * screen from now on (docs/onboarding.md, Skipping the Connected screen).
  */
 export function PodConnectionScreen({
   account,
   busy,
   error,
+  offerSkip,
   onRetry,
   onContinue,
   onLogout,
@@ -25,11 +28,15 @@ export function PodConnectionScreen({
   account: SolidAccount | undefined;
   busy: boolean;
   error: ErrorText | null;
+  /** Offer "Don't show this screen after logging in": the learner has instances to keep it in. */
+  offerSkip: boolean;
   onRetry: () => void;
-  onContinue: () => void;
+  /** Enter the app; `skip` when the learner checked the box. */
+  onContinue: (skip: boolean) => void;
   onLogout: () => void;
 }) {
   const { t, tx } = useI18n();
+  const [skip, setSkip] = useState(false);
   const discovering = (
     <section class="onboarding" aria-busy="true">
       <h2>{t("podConnection.discoveringHeading")}</h2>
@@ -70,7 +77,7 @@ export function PodConnectionScreen({
           <button class="primary" onClick={onRetry}>
             {t("podConnection.tryAgain")}
           </button>
-          <button onClick={onContinue}>{t("podConnection.continueAnyway")}</button>
+          <button onClick={() => onContinue(false)}>{t("podConnection.continueAnyway")}</button>
           <button onClick={onLogout}>{t("podConnection.logOut")}</button>
         </div>
       </section>
@@ -98,8 +105,24 @@ export function PodConnectionScreen({
           </>
         )}
       </dl>
+      {offerSkip && (
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={skip}
+              aria-describedby="pod-connection-skip-hint"
+              onChange={(event) => setSkip(event.currentTarget.checked)}
+            />
+            {t("podConnection.skipNextTime")}
+          </label>
+          <p id="pod-connection-skip-hint" class="hint">
+            {t("podConnection.skipHint")}
+          </p>
+        </div>
+      )}
       <div class="onboarding-actions">
-        <button class="primary" onClick={onContinue}>
+        <button class="primary" onClick={() => onContinue(skip)}>
           {t("podConnection.continue")}
         </button>
       </div>

@@ -42,6 +42,8 @@ describe("queryKeys", () => {
       queryKeys.studyCounts(DECK),
       queryKeys.allPreferences(),
       queryKeys.preferences(INSTANCE),
+      queryKeys.connectedScreen(WEB_ID),
+      queryKeys.connectedScreenShown(INSTANCE),
       queryKeys.instanceAppearance(INSTANCE),
       queryKeys.instanceAppearancePart(INSTANCE, "textSize"),
       queryKeys.palettes(INSTANCE),
@@ -93,6 +95,8 @@ describe("queryKeys", () => {
       ["studyQueue", DECK, "counts"],
       ["preferences"],
       ["preferences", INSTANCE],
+      ["preferences", "connectedScreen", WEB_ID],
+      ["preferences", "connectedScreenShown", INSTANCE],
       ["instanceAppearance", INSTANCE],
       ["instanceAppearance", INSTANCE, "textSize"],
       ["palettes", INSTANCE],
@@ -140,6 +144,8 @@ describe("queryKeys", () => {
     expectUnder(queryKeys.studyQueue(DECK), queryKeys.allStudyQueues());
     expectUnder(queryKeys.studyCounts(DECK), queryKeys.studyQueue(DECK));
     expectUnder(queryKeys.preferences(INSTANCE), queryKeys.allPreferences());
+    expectUnder(queryKeys.connectedScreen(WEB_ID), queryKeys.allPreferences());
+    expectUnder(queryKeys.connectedScreenShown(INSTANCE), queryKeys.allPreferences());
     expectUnder(
       queryKeys.instanceAppearancePart(INSTANCE, "theme"),
       queryKeys.instanceAppearance(INSTANCE),

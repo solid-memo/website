@@ -62,6 +62,18 @@ export const queryKeys = {
   allPreferences: () => ["preferences"],
   /** An instance's preferences: under allPreferences. */
   preferences: (instanceUrl: string | null) => [...queryKeys.allPreferences(), instanceUrl],
+  /** Whether logging in skips the Connected screen, for a WebID's instances: under allPreferences. */
+  connectedScreen: (webId: string | undefined) => [
+    ...queryKeys.allPreferences(),
+    "connectedScreen",
+    webId,
+  ],
+  /** Whether an instance's preferences show the Connected screen: under allPreferences. */
+  connectedScreenShown: (instanceUrl: string) => [
+    ...queryKeys.allPreferences(),
+    "connectedScreenShown",
+    instanceUrl,
+  ],
   /** How an instance's preferences show the app, to refetch it after a write. */
   instanceAppearance: (instanceUrl: string) => ["instanceAppearance", instanceUrl],
   /** One part of how an instance's preferences show the app: under instanceAppearance. */

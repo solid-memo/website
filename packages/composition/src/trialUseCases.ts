@@ -111,6 +111,7 @@ export function createTrialUseCases(
       ...createPreferenceUseCases({
         ...NO_DEVICE,
         preferencesRepository,
+        instanceRepository,
         deckRepository,
         reviewStateRepository,
         preferenceStore,

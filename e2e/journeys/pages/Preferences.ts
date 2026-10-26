@@ -163,6 +163,25 @@ export class Preferences extends Screen {
     });
   }
 
+  private get showConnectedScreen(): Locator {
+    return this.form
+      .getByRole("group", { name: this.t("preferences.connectedScreen.legend") })
+      .getByRole("checkbox", { name: this.t("preferences.connectedScreen.show") });
+  }
+
+  /** Checks or clears "Show the screen that says your Pod is connected"; kept once saved. */
+  async setShowConnectedScreen(on: boolean): Promise<void> {
+    await this.intent(`${on ? "Show" : "Skip"} the Connected screen after logging in`, async () => {
+      await this.showConnectedScreen.setChecked(on);
+    });
+  }
+
+  async expectShowConnectedScreen(on: boolean): Promise<void> {
+    await this.intent(`Check that logging in ${on ? "shows" : "skips"} the Connected screen`, () =>
+      expect(this.showConnectedScreen).toBeChecked({ checked: on }),
+    );
+  }
+
   /** Saves; the app goes back to Decks once the pod has the preferences. */
   async save(): Promise<void> {
     await this.intent("Save the preferences", async () => {

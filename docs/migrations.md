@@ -416,6 +416,23 @@ no format version:
 - **No re-check.** No shape file changed, so the rules' hash did not
   move, and the check does not read the term.
 
+Whether logging in skips the Connected screen (vocabulary 1.26,
+`sm:connectedScreenSkipped`, [onboarding.md](onboarding.md#skipping-the-connected-screen)) needs
+no migration and moved no format version:
+
+- **It belongs to no shape**, so `PreferencesV6` is unchanged. Every
+  writer of the preferences keeps it: this version sets or removes it
+  only on the preferences as they are then (`markConnectedScreen`, the
+  format they are stored in kept) and keeps it as stored on every other
+  write of them, and an older one keeps it as a triple its shape does
+  not own. An older version ignores it and shows the screen, as before.
+- **Read apart from the shape.** This version reads it on the
+  preferences whatever their format, and whether or not they fit their
+  shape (`connectedScreenSkipped`), so a choice written on preferences
+  that do not fit counts, though they read as none.
+- **No re-check.** No shape file changed, so the rules' hash did not
+  move, and the check does not read the term.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape

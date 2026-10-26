@@ -15,7 +15,7 @@ import { memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
 import type { SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
 import type { ReviewState } from "@solid-memo/domain/review";
 import type { Locale } from "@solid-memo/domain/locale";
-import { sm2s, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
+import { sm2s, instance, deck, card, makeDeps, memoryLog, session } from "./testing/fakePorts";
 
 describe("preferences", () => {
   const noon = new Date(2026, 8, 21, 12, 0);
@@ -70,7 +70,10 @@ describe("preferences", () => {
     }
 
     function stored(palette: string) {
-      return { preferences: { ...DEFAULT_PREFERENCES, palette }, formatVersion: 6 };
+      return {
+        preferences: { ...DEFAULT_PREFERENCES, palette },
+        formatVersion: 6,
+      };
     }
 
     it("shows the chosen palette, and keeps a new choice on this device", async () => {
@@ -537,7 +540,10 @@ describe("preferences", () => {
     }
 
     function stored(textSize: TextSize) {
-      return { preferences: { ...DEFAULT_PREFERENCES, textSize }, formatVersion: 6 };
+      return {
+        preferences: { ...DEFAULT_PREFERENCES, textSize },
+        formatVersion: 6,
+      };
     }
 
     it("shows the chosen size, and keeps a new choice on this device", async () => {
@@ -606,7 +612,10 @@ describe("preferences", () => {
     }
 
     function stored(theme: ThemeChoice) {
-      return { preferences: { ...DEFAULT_PREFERENCES, theme }, formatVersion: 4 };
+      return {
+        preferences: { ...DEFAULT_PREFERENCES, theme },
+        formatVersion: 4,
+      };
     }
 
     it("keeps the theme chosen on this device", async () => {
@@ -1007,6 +1016,226 @@ describe("preferences", () => {
         ...DEFAULT_PREFERENCES,
         palette: own,
       });
+    });
+  });
+
+  describe("the Connected screen", () => {
+    const other = { url: "https://alice.example/solid-memo/other/", name: "Other" };
+    const META = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 2 };
+    const stored = { preferences: DEFAULT_PREFERENCES, formatVersion: 6 };
+
+    /** The deps with these instances, each saying whether to skip it; an Error is a read that fails. */
+    function storing(byInstance: Record<string, boolean | Error>) {
+      const deps = makeDeps();
+      vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue(
+        Object.keys(byInstance).map((url) => (url === instance.url ? instance : other)),
+      );
+      vi.mocked(deps.preferencesRepository.connectedScreenSkipped).mockImplementation(
+        async (url) => {
+          const value = byInstance[url];
+          if (value instanceof Error) throw value;
+          return value;
+        },
+      );
+      return deps;
+    }
+
+    describe("connectedScreenChoice", () => {
+      it("skips it when every instance says so", async () => {
+        const deps = storing({ [instance.url]: true, [other.url]: true });
+        await expect(createUseCases(deps).connectedScreenChoice(session)).resolves.toEqual({
+          instances: [instance, other],
+          skipped: true,
+        });
+      });
+
+      it("shows it while one says to, or cannot be read", async () => {
+        for (const second of [false, new Error("500")]) {
+          const deps = storing({ [instance.url]: true, [other.url]: second });
+          await expect(createUseCases(deps).connectedScreenChoice(session)).resolves.toEqual({
+            instances: [instance, other],
+            skipped: false,
+          });
+        }
+      });
+
+      it("shows it to a learner with no instances", async () => {
+        await expect(createUseCases(storing({})).connectedScreenChoice(session)).resolves.toEqual({
+          instances: [],
+          skipped: false,
+        });
+      });
+
+      it("rejects when the instances cannot be listed", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.instanceRepository.listInstances).mockRejectedValue(new Error("offline"));
+        await expect(createUseCases(deps).connectedScreenChoice(session)).rejects.toThrow(
+          "offline",
+        );
+      });
+    });
+
+    describe("skipConnectedScreen", () => {
+      it("marks every instance's preferences", async () => {
+        const deps = makeDeps();
+        await createUseCases(deps).skipConnectedScreen([instance, other]);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledWith(
+          instance.url,
+          true,
+          null,
+        );
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledWith(
+          other.url,
+          true,
+          null,
+        );
+        expect(deps.instanceRepository.readMeta).not.toHaveBeenCalled();
+        expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+      });
+
+      it("makes no more requests for preferences that say so already", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.markConnectedScreen).mockResolvedValue("unchanged");
+        await createUseCases(deps).skipConnectedScreen([instance]);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledOnce();
+        expect(deps.instanceRepository.readMeta).not.toHaveBeenCalled();
+      });
+
+      it("makes the defaults, shown as this device shows the app, where an instance has no preferences", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.markConnectedScreen).mockResolvedValueOnce("none");
+        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(META);
+        const useCases = createUseCases({
+          ...deps,
+          themePreference: { chosen: () => "dark", choose: vi.fn() },
+        });
+        await useCases.skipConnectedScreen([instance]);
+        expect(deps.instanceRepository.readMeta).toHaveBeenCalledWith(instance.url);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenLastCalledWith(
+          instance.url,
+          true,
+          { ...DEFAULT_PREFERENCES, theme: "dark" },
+        );
+      });
+
+      it("makes nothing where no instance is, a registration whose meta document is gone", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.markConnectedScreen).mockResolvedValue("none");
+        await createUseCases(deps).skipConnectedScreen([instance]);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledOnce();
+      });
+
+      it("marks again when the preferences changed, or were made, elsewhere meanwhile", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.markConnectedScreen)
+          .mockRejectedValueOnce(new AppError("changedElsewhere"))
+          .mockResolvedValueOnce("none")
+          .mockRejectedValueOnce(new AppError("createdElsewhere"))
+          .mockResolvedValueOnce("written");
+        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(META);
+        await createUseCases(deps).skipConnectedScreen([instance]);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledTimes(4);
+      });
+
+      it("saves the others, and rejects with the first failure once all are done", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.markConnectedScreen).mockImplementation(
+          async (url) => {
+            if (url === instance.url) throw new AppError("writtenByNewerApp");
+            return "written";
+          },
+        );
+        await expect(
+          createUseCases(deps).skipConnectedScreen([instance, other]),
+        ).rejects.toMatchObject({ code: "writtenByNewerApp" });
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledWith(
+          other.url,
+          true,
+          null,
+        );
+      });
+
+      it("writes nothing without instances", async () => {
+        const deps = makeDeps();
+        await createUseCases(deps).skipConnectedScreen([]);
+        expect(deps.preferencesRepository.markConnectedScreen).not.toHaveBeenCalled();
+      });
+
+      it("waits its turn behind a choice of how the app is shown, and a save waits for it", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored);
+        let written: () => void = () => undefined;
+        vi.mocked(deps.preferencesRepository.savePreferences).mockImplementationOnce(
+          () => new Promise<void>((resolve) => (written = resolve)),
+        );
+        const useCases = createUseCases(deps);
+        const chosen = useCases.chooseTextSize("large", instance.url);
+        const skipped = useCases.skipConnectedScreen([instance]);
+        const saved = useCases.savePreferences(instance.url, DEFAULT_PREFERENCES);
+        await vi.waitFor(() =>
+          expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledOnce(),
+        );
+        expect(deps.preferencesRepository.markConnectedScreen).not.toHaveBeenCalled();
+        written();
+        await Promise.all([chosen, skipped, saved]);
+        const marked = vi.mocked(deps.preferencesRepository.markConnectedScreen).mock
+          .invocationCallOrder[0];
+        expect(marked).toBeLessThan(
+          vi.mocked(deps.preferencesRepository.savePreferences).mock.invocationCallOrder[1],
+        );
+      });
+    });
+
+    describe("connectedScreenShown", () => {
+      it("shows it unless the preferences say to skip it", async () => {
+        const deps = storing({ [instance.url]: false, [other.url]: true });
+        const useCases = createUseCases(deps);
+        await expect(useCases.connectedScreenShown(instance.url)).resolves.toBe(true);
+        await expect(useCases.connectedScreenShown(other.url)).resolves.toBe(false);
+      });
+    });
+
+    describe("chooseConnectedScreen", () => {
+      it("skips it, making the defaults where there are none, or shows it, making none", async () => {
+        const deps = makeDeps();
+        const useCases = createUseCases({
+          ...deps,
+          themePreference: { chosen: () => "light", choose: vi.fn() },
+        });
+        await useCases.chooseConnectedScreen(instance.url, false);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenLastCalledWith(
+          instance.url,
+          true,
+          { ...DEFAULT_PREFERENCES, theme: "light" },
+        );
+        await useCases.chooseConnectedScreen(instance.url, true);
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenLastCalledWith(
+          instance.url,
+          false,
+          null,
+        );
+      });
+
+      it("rejects when the preferences cannot be written", async () => {
+        const deps = makeDeps();
+        vi.mocked(deps.preferencesRepository.markConnectedScreen).mockRejectedValue(
+          new Error("403"),
+        );
+        await expect(
+          createUseCases(deps).chooseConnectedScreen(instance.url, true),
+        ).rejects.toThrow("403");
+      });
+    });
+
+    it("a save of the preferences never writes the choice", async () => {
+      const deps = storing({ [instance.url]: true });
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored);
+      await createUseCases(deps).savePreferences(instance.url, DEFAULT_PREFERENCES);
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
+        instance.url,
+        DEFAULT_PREFERENCES,
+      );
+      expect(deps.preferencesRepository.markConnectedScreen).not.toHaveBeenCalled();
     });
   });
 });

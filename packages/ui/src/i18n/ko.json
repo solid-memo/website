@@ -1146,7 +1146,9 @@
     "continueAnyway": "그래도 계속",
     "connectedHeading": "Pod가 연결됐어요.",
     "identityProvider": "ID 제공자",
-    "continue": "계속"
+    "continue": "계속",
+    "skipNextTime": "로그인한 뒤 이 화면을 보여 주지 않기",
+    "skipHint": "모든 인스턴스의 설정에 저장돼요. 어느 인스턴스의 설정에서든 이 화면을 다시 보이게 할 수 있어요. 선택을 저장할 수 없는 인스턴스에서는 이 화면이 계속 보여요."
   },
   "preferences": {
     "language": {
@@ -1219,6 +1221,11 @@
         "label": "경고만 표시",
         "hint": "잘못된 데이터를 알리고, 앱은 그 데이터로 계속 작동해요."
       }
+    },
+    "connectedScreen": {
+      "legend": "로그인한 뒤",
+      "show": "Pod가 연결됐다고 알려 주는 화면 보이기",
+      "hint": "모든 인스턴스에서 꺼져 있을 때만 로그인할 때 이 화면을 건너뛰고, 설정을 읽을 수 없으면 보여 줘요."
     },
     "developer": {
       "legend": "개발자 설정",

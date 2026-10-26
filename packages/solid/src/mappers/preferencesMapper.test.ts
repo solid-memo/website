@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildThing,
   createThing,
+  getBoolean,
   getInteger,
   getStringNoLocale,
   getUrl,
@@ -41,7 +42,10 @@ describe("toPreferences", () => {
       .addStringNoLocale(SM.answerScale, "minimal")
       .addBoolean(SM.developerMode, true)
       .build();
-    expect(toPreferences(thing)).toEqual({ preferences: FULL, formatVersion: 2 });
+    expect(toPreferences(thing)).toEqual({
+      preferences: FULL,
+      formatVersion: 2,
+    });
   });
 
   it("fills a format-1 document's missing fields with defaults", () => {
@@ -104,7 +108,10 @@ describe("toPreferencesThing", () => {
   it("writes the current format, in place when the subject exists", () => {
     const fresh = toPreferencesThing(SUBJECT, FULL, null);
     expect(getInteger(fresh, SM.formatVersion)).toBe(6);
-    expect(toPreferences(fresh)).toEqual({ preferences: FULL, formatVersion: 6 });
+    expect(toPreferences(fresh)).toEqual({
+      preferences: FULL,
+      formatVersion: 6,
+    });
     const existing = buildThing(createThing({ url: SUBJECT }))
       .addInteger(SM.newCardsPerDay, 99)
       .addStringNoLocale("https://other.example/#note", "kept")
@@ -112,6 +119,14 @@ describe("toPreferencesThing", () => {
     const rewritten = toPreferencesThing(SUBJECT, FULL, existing);
     expect(getInteger(rewritten, SM.newCardsPerDay)).toBe(10);
     expect(getStringNoLocale(rewritten, "https://other.example/#note")).toBe("kept");
+  });
+
+  it("keeps whether logging in skips the Connected screen, which no shape owns", () => {
+    const stored = buildThing(toPreferencesThing(SUBJECT, FULL, null))
+      .addBoolean(SM.connectedScreenSkipped, true)
+      .build();
+    const rewritten = toPreferencesThing(SUBJECT, { ...FULL, newCardsPerDay: 3 }, stored);
+    expect(getBoolean(rewritten, SM.connectedScreenSkipped)).toBe(true);
   });
 
   it("writes a palette this version does not know as it was read", () => {

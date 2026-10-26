@@ -1211,7 +1211,9 @@
     "continueAnyway": "Fortsätt ändå",
     "connectedHeading": "Din Pod är ansluten.",
     "identityProvider": "Identitetsleverantör",
-    "continue": "Fortsätt"
+    "continue": "Fortsätt",
+    "skipNextTime": "Visa inte den här skärmen efter inloggning",
+    "skipHint": "Sparas i inställningarna för var och en av dina instanser. Du kan visa den här skärmen igen under Inställningar i vilken instans som helst. En instans där valet inte kan sparas fortsätter att visa skärmen."
   },
   "preferences": {
     "language": {
@@ -1284,6 +1286,11 @@
         "label": "Varna bara",
         "hint": "Ogiltig data rapporteras, och appen fortsätter att arbeta med den."
       }
+    },
+    "connectedScreen": {
+      "legend": "Efter inloggning",
+      "show": "Visa skärmen som säger att din Pod är ansluten",
+      "hint": "Inloggningen hoppar bara över skärmen när den är avstängd i alla dina instanser, och visar den när deras inställningar inte går att läsa."
     },
     "developer": {
       "legend": "Utvecklarinställningar",

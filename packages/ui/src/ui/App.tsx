@@ -29,6 +29,7 @@ import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
+import { useConnectedScreen } from "./onboarding/useConnectedScreen";
 import { usePanelFocus } from "./panelFocus";
 import {
   applyCustomColors,
@@ -355,6 +356,13 @@ function AppContent({
     queryFn: () => useCases.discoverAccount(session!),
     enabled: session !== null && connecting,
   });
+  const connected = useConnectedScreen({
+    useCases,
+    session,
+    connecting,
+    account: accountQuery,
+    onEnter: () => setConnecting(false),
+  });
 
   async function startLogin(login: () => Promise<void>) {
     setAuthError(null);
@@ -491,10 +499,14 @@ function AppContent({
           <Hero name={t(identity.name)} />
           <PodConnectionScreen
             account={accountQuery.data}
-            busy={accountQuery.isFetching}
+            busy={accountQuery.isFetching || connected.waiting}
             error={errorText(accountQuery.error)}
-            onRetry={() => void accountQuery.refetch()}
-            onContinue={() => setConnecting(false)}
+            offerSkip={connected.offerSkip}
+            onRetry={() => {
+              void accountQuery.refetch();
+              connected.retry();
+            }}
+            onContinue={connected.enter}
             onLogout={handleLogout}
           />
         </main>

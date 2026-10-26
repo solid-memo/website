@@ -163,6 +163,9 @@ string, so other applications can look up what it means:
   ([The language of text](#the-language-of-text)). 1.25's
   `sm:MonthSummary` and its properties joined a new shape, month
   summary format 1, in the digest ([The answer log](#the-answer-log)).
+  1.26's `sm:connectedScreenSkipped` is written on the preferences
+  outside `PreferencesV6`, as `sm:deckCardLanguage` is on a deck, so the
+  preferences format did not move ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
   A shape may take a
   term of another vocabulary too, which is no `sm:` term and so moves no
   vocabulary version: card format 7 took `dcterms:subject`, what a card
@@ -393,6 +396,7 @@ SM-2 ones ([#191](https://github.com/solid-memo/website/issues/191)):
 | `sm:studyScheduler` | object property | Preferences → a concept of `sm:Schedulers` |
 | `sm:desiredRetention` | datatype property | Preferences → `xsd:decimal` (a share: 0.9 is 90%) |
 | `sm:schedulerInvitationDismissed` | datatype property | Preferences → `xsd:boolean` (the learner answered "Not now" to the invitation to switch to FSRS-6) |
+| `sm:connectedScreenSkipped` | datatype property | Preferences → `xsd:boolean`, outside the shape (whether logging in skips the Connected screen; 1.26) |
 | `sm:scheduledWith` | object property | DeckSchedule → a concept of `sm:Schedulers` |
 
 - **An FSRS-6 state is a review state.** The frozen domains of

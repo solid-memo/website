@@ -32,6 +32,12 @@ export interface ReturningLogin {
    * earlier), so it skips its login and asks only for consent.
    */
   knownToServer?: boolean;
+  /**
+   * What the Connected screen meets: "continue", it shows and the learner
+   * goes on (the default); "skip", the learner checks the box that skips
+   * it from now on; "skipped", every instance says so, and it does not show.
+   */
+  connectedScreen?: "continue" | "skip" | "skipped";
 }
 
 /**
@@ -44,13 +50,22 @@ export async function logInToInstance(
   app: App,
   account: CssAccount,
   instanceName: string,
-  { loggedOutHere = false, knownToServer = false }: ReturningLogin = {},
+  {
+    loggedOutHere = false,
+    knownToServer = false,
+    connectedScreen = "continue",
+  }: ReturningLogin = {},
 ): Promise<void> {
   if (loggedOutHere) await app.onboarding.logInAgainWithWebId(account.webId);
   else await app.onboarding.logInWithWebId(account.webId);
   if (!knownToServer) await app.cssLogin.logIn(account);
+  if (connectedScreen === "skipped") await app.onboarding.watchConnected();
   await app.cssLogin.authorize(account.webId);
-  await app.onboarding.continueConnected(account.pod);
+  if (connectedScreen === "skipped") await app.onboarding.expectConnectedSkipped();
+  else
+    await app.onboarding.continueConnected(account.pod, {
+      skipNextTime: connectedScreen === "skip",
+    });
   await app.decks.expectShown();
   await app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
   await app.chrome.expectInstance(instanceName);
