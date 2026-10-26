@@ -1495,6 +1495,12 @@ over the `ReleaseDraftRepository` port.
 - What a release before a draft published is read from that release
   (`dcat:prev`), once. While it can't be read, everything the draft has
   counts as published.
+- A release that isn't in the library is read as no one, so its server
+  learns nothing of who opens the draft. One in the user's own pod (a
+  storage of theirs, or an instance they registered) is read as the
+  user, since a release the pod wouldn't share is its owner's alone.
+  A redirect from there isn't followed
+  ([ownPodFetch.ts](../packages/solid/src/ownPodFetch.ts)).
 - Making or deleting a draft is held until the data check is done, and
   while the catalog is set aside ([below](#data-set-aside)).
 - A draft made with a deleted draft's name has its URL, so what the

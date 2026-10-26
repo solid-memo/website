@@ -19,3 +19,9 @@ export const authFetch: typeof globalThis.fetch = async (input, init) => {
   }
   return response;
 };
+
+/** The logged-in user's WebID, as the default session has it now; none when logged out. */
+export function sessionWebId(): string | undefined {
+  const { isLoggedIn, webId } = getDefaultSession().info;
+  return isLoggedIn ? webId : undefined;
+}

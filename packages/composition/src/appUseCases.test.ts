@@ -60,6 +60,17 @@ vi.mock(
 vi.mock("@solid-memo/solid/solidReleasePublisher", recorded("createSolidReleasePublisher"));
 vi.mock("@solid-memo/solid/solidInstanceGraphReader", recorded("createSolidInstanceGraphReader"));
 
+/** The login: who is logged in, and the addresses requested with their credentials. */
+const login = vi.hoisted(() => ({ webId: undefined as string | undefined, sent: [] as string[] }));
+vi.mock("@solid-memo/solid/authFetch", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  authFetch: (input: RequestInfo | URL, init?: RequestInit) => {
+    login.sent.push(String(input instanceof Request ? input.url : input));
+    return globalThis.fetch(input, init);
+  },
+  sessionWebId: () => login.webId,
+}));
+
 const SERVED = "http://localhost:5173/";
 
 /** The requests that reached the network, each by its address and method. */
@@ -80,6 +91,8 @@ async function settled(): Promise<void> {
 
 beforeEach(() => {
   requests = [];
+  login.webId = undefined;
+  login.sent = [];
   vi.stubGlobal("fetch", vi.fn(servedSiteNetwork));
 });
 afterEach(() => {
@@ -146,6 +159,7 @@ describe("createAppUseCases", () => {
     ).rejects.toMatchObject({
       code: "releaseUnreadable",
     });
+    expect(requests.some(({ url }) => url.startsWith(GUEST_ORIGIN))).toBe(false);
     // A guest publishes nothing: their pod is this browser's.
     await expect(useCases.listPublishedReleases(instance!.url)).resolves.toEqual([]);
     await expect(
@@ -156,6 +170,62 @@ describe("createAppUseCases", () => {
     ).rejects.toMatchObject({
       code: "guestCannotPublish",
     });
+  });
+
+  it("reads a release in the user's own pod as the user, any other as no one", async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input).startsWith(`${alice}profile/card`)
+          ? Promise.resolve(
+              new Response(
+                `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+                {
+                  headers: { "Content-Type": "text/turtle" },
+                },
+              ),
+            )
+          : servedSiteNetwork(input, init),
+      ),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const nextVersionOf = (url: string) =>
+      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url });
+
+    const elsewhere = "https://attacker.example/r.ttl";
+    await expect(nextVersionOf(elsewhere)).rejects.toMatchObject({ code: "releaseUnreadable" });
+    expect(login.sent).not.toContain(elsewhere);
+    expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+      elsewhere,
+      expect.objectContaining({ credentials: "omit" }),
+    );
+
+    const own = `${alice}memo/releases/capitals/v1.ttl`;
+    await expect(nextVersionOf(own)).rejects.toMatchObject({ code: "releaseUnreadable" });
+    expect(login.sent).toContain(own);
+    expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+      own,
+      expect.objectContaining({ redirect: "error" }),
+    );
+  });
+
+  it("reads a release as no one when the user's own pod cannot be found", async () => {
+    login.webId = "https://bob.example/profile/card#me";
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const elsewhere = "https://attacker.example/r.ttl";
+    await expect(
+      useCases.createReleaseDraft("https://bob.example/memo/", {
+        kind: "nextVersionOf",
+        url: elsewhere,
+      }),
+    ).rejects.toMatchObject({ code: "releaseUnreadable" });
+    expect(login.sent).not.toContain(elsewhere);
+    expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+      elsewhere,
+      expect.objectContaining({ credentials: "omit" }),
+    );
   });
 
   it("reads a guest's instance as a graph from this browser, fetching nothing it names", {

@@ -116,6 +116,11 @@ The browser contacts these, each when it's needed:
   the learner's own cards, wherever their pictures are.
 - **The address of a deck or release added by link**
   ([deck-library.md](deck-library.md#from-a-link)).
+- **The server of a release a Studio draft follows**, or whose next
+  version the Studio starts, once a page load. It's asked as no one,
+  unless it's the learner's own pod. Starting a next version also asks,
+  as no one, the servers of the documents the release names its series
+  and publisher in ([studio.md](studio.md#drafts)).
 
 Links the learner follows, such as a deck's sources, lead to those
 sites as any link does.
