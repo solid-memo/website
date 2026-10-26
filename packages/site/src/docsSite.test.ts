@@ -100,6 +100,7 @@ function docsTtl(groups: [string, string, string[]][], title = "Docs"): string {
         "    a schema:TechArticle ;",
         `    schema:isPartOf <#${id}> ;`,
         `    schema:position ${(at + 1) * 10} ;`,
+        '    schema:learningResourceType "reference" ;',
         `    dcterms:abstract "what ${listed} *covers*."@en .`,
       ]),
     ]),
@@ -308,10 +309,10 @@ describe("renderDocsSite", () => {
       }),
     ).toEqual([
       "docs/three.md: docs/docs.ttl does not list the page",
-      "docs/docs.ttl:21: lists gone.md, which is not in docs/",
+      "docs/docs.ttl:22: lists gone.md, which is not in docs/",
       `docs/docs.ttl:5: the docs' title, "Docs", is not the README's, "Doc"`,
       'docs/docs.ttl:9: <#part>: the README already has a heading with the id "part"',
-      'docs/docs.ttl:27: <#main>: the README already has a heading with the id "main"',
+      'docs/docs.ttl:29: <#main>: the README already has a heading with the id "main"',
     ]);
     // A README that does not open with its title is a problem of its own, not the index's.
     expect(
@@ -511,7 +512,7 @@ describe("renderDocsSite", () => {
       "docs/drawn.md: docs/docs.ttl does not list the page",
       "docs/nested.md: docs/docs.ttl does not list the page",
       "docs/two.md: docs/docs.ttl does not list the page",
-      "docs/docs.ttl:39: lists gone.md, which is not in docs/",
+      "docs/docs.ttl:43: lists gone.md, which is not in docs/",
       'docs/README.md:6: a link to "gone.md": no such page',
       'docs/README.md:7: a link to "#nowhere": no such heading',
       'docs/README.md:7: a link to "one.md#nowhere": one.md has no such heading',

@@ -48,5 +48,9 @@ This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
   header, which `npm run lint:reuse` checks; a new deck is listed in
   `REUSE.toml` under its license, which `npm run check:reuse` (in
   `npm run check`) checks ([docs/style.md](docs/style.md#licenses)).
+- **Docs prose** follows the writing rules for the page's kind in
+  [docs/style.md](docs/style.md#writing); `npm run lint:prose` checks
+  them (`-- docs/<page>.md` for one page). A new
+  page gets a kind in `docs/docs.ttl`.
 - **Spelling** is American English; `npm run lint:spelling`, part of
   `npm run check`, checks Markdown, `en.json` and `docs/docs.ttl` ([docs/style.md](docs/style.md#language)).

@@ -25,6 +25,7 @@ npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
+npm run lint:prose         # the docs' prose rules, per page kind (docs/style.md#the-prose-check), -- docs/srs.md for one page (not in npm run check)
 npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
 npm run lint:workflows     # actionlint and zizmor over .github/, as CI's workflows job runs them (needs them; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
@@ -815,7 +816,7 @@ ends with checks of the repository as a whole, plain Node scripts in
 - `check:docs` ([checkDocs.ts](../scripts/checkDocs.ts)): every page in
   `docs/` is listed once in [the docs' index](docs.ttl), in one group,
   and every page the index lists is there; no two positions in a group
-  are tied, and every page has a summary in English
+  are tied, and every page has a summary in English and a kind
   ([markdown.md](markdown.md#the-docs-index)). For a page the index
   does not list, it prints the block to add. And every `npm run <script>`
   in the repository's Markdown, `CHANGELOG.md` aside, names a script of

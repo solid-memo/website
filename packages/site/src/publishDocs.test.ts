@@ -39,6 +39,7 @@ const INDEX = [
   "    a schema:TechArticle ;",
   "    schema:isPartOf <#pages> ;",
   "    schema:position 10 ;",
+  '    schema:learningResourceType "reference" ;',
   '    dcterms:abstract "the first page."@en .',
   "",
 ].join("\n");

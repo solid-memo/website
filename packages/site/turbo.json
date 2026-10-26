@@ -10,6 +10,7 @@
         "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/package.json",
+        "$TURBO_ROOT$/prose.json",
         "$TURBO_ROOT$/docs/**",
         "$TURBO_ROOT$/*.md"
       ],

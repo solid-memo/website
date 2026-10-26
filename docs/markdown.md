@@ -493,6 +493,7 @@ is committed: it exists in the build and in each release's archive.
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;
     schema:position 20 ;
+    schema:learningResourceType "reference" ;
     dcterms:abstract "the import rules between packages, as `npm run check:boundaries` enforces them."@en .
 ~~~
 
@@ -503,7 +504,9 @@ is committed: it exists in the build and in each release's archive.
   Its id is lowercase words and hyphens, and is its heading's id on
   `docs/`, so it may not be one of the README's.
 - **A page** is its file's name, `<srs.md>`, a `schema:TechArticle`
-  that is `schema:isPartOf` one group, with a `schema:position` in it
+  that is `schema:isPartOf` one group, with a `schema:position` in it,
+  a `schema:learningResourceType`, its kind (`"tutorial"`, `"how-to"`,
+  `"reference"` or `"explanation"`, [style.md](style.md#page-kinds)),
   and a `dcterms:abstract`, the line on what it covers. Its title is
   its own heading, never written here, so the two cannot differ.
 - **Order** is a whole number from 0 on each group and page, the way

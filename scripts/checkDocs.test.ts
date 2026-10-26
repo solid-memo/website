@@ -24,12 +24,14 @@ const INDEX = `@base <https://solid-memo.com/docs/> .
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;
     schema:position 10 ;
+    schema:learningResourceType "reference" ;
     dcterms:abstract "the layers."@en .
 
 <boundaries.md>
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;
     schema:position 30 ;
+    schema:learningResourceType "reference" ;
     dcterms:abstract "the import rules."@en .
 `;
 
@@ -39,6 +41,7 @@ const PRIVACY = `docs/privacy.md: docs/docs.ttl does not list the page; add it t
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;
     schema:position 40 ;
+    schema:learningResourceType "reference" ;
     dcterms:abstract "what the page covers, in one line."@en .
 `;
 
@@ -50,7 +53,7 @@ describe("docsIndexProblems", () => {
   it("names a page the index does not list, with its block, and a page it lists that is gone", () => {
     expect(docsIndexProblems(["README.md", "architecture.md", "privacy.md"], INDEX)).toEqual([
       PRIVACY,
-      "docs/docs.ttl:22: lists boundaries.md, which is not in docs/",
+      "docs/docs.ttl:23: lists boundaries.md, which is not in docs/",
     ]);
   });
 
@@ -60,12 +63,12 @@ describe("docsIndexProblems", () => {
         ["README.md", "architecture.md", "boundaries.md"],
         INDEX.replace("schema:position 30", "schema:position 10"),
       ),
-    ).toEqual(["docs/docs.ttl:22: <boundaries.md> has the position of <architecture.md>, 10"]);
+    ).toEqual(["docs/docs.ttl:23: <boundaries.md> has the position of <architecture.md>, 10"]);
   });
 
   it("stops at Turtle that does not parse", () => {
     expect(docsIndexProblems(["README.md", "srs.md"], `${INDEX}<srs.md`)).toEqual([
-      expect.stringMatching(/^docs\/docs\.ttl:27: not Turtle: /),
+      expect.stringMatching(/^docs\/docs\.ttl:29: not Turtle: /),
     ]);
   });
 });

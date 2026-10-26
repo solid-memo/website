@@ -257,6 +257,94 @@ runs it without installing it.
   renderers', and a diagram one of them accepts another can reject or
   draw differently.
 
+## Page kinds
+
+Each page in `docs/` is one of four kinds, which its entry in the docs'
+index names (`schema:learningResourceType`,
+[markdown.md](markdown.md#the-docs-index)). The kind decides the page's
+voice, and which rules of the [prose check](#the-prose-check) apply to
+it. `npm run check:docs` fails on a page without one.
+
+| Kind | What it's for | Voice |
+|---|---|---|
+| `tutorial` | Takes a newcomer through the app or the code, step by step. | "you", and imperatives for the steps |
+| `how-to` | The steps for one task. | "you", and imperatives for the steps |
+| `reference` | The rules and facts: what a part does, and the limits that apply. | Neutral |
+| `explanation` | Why a part is designed the way it is. | Neutral |
+
+A page that mixes kinds takes the kind of most of its text. The README,
+the docs' own page, isn't in the index and is a reference page.
+
+## Writing
+
+The rules for the docs' prose are all on this page: no outside style
+guide applies. The user guide and the pages beside it in "Using the app"
+are written for a learner. Every other page is written for a new
+contributor, who knows TypeScript but not this codebase or Solid.
+
+**Checked** marks a rule that `npm run lint:prose` checks, and
+**Review** a rule only a reviewer can judge.
+
+- **One idea per sentence**, in the active voice and the present tense.
+  **Checked:** a sentence has at most 40 words, and "will", "won't",
+  "shall" and "going to" are errors. **Review:** the active voice, and
+  one idea per sentence.
+- **No filler.** A word that adds nothing is cut. **Checked:** "just",
+  "simply", "really", "very", "actually", "of course", "in order to",
+  "note that" and the rest of the `filler` list are errors, and "also",
+  "as well", "itself" and "themselves" appear at most once a section.
+- **Voice.** Tutorials and how-tos address the reader as "you" and give
+  the steps as imperatives. Reference and explanation pages stay
+  neutral and name who acts: "the learner", "a contributor", "the
+  check". **Checked:** "you" and "your" are errors on reference and
+  explanation pages.
+- **Contractions** everywhere: "don't", "isn't", "can't". **Checked:**
+  "do not", "is not", "cannot" and the other negations are errors, each
+  with its contraction.
+- **No "we" or "our".** The project, or what acts, is named instead:
+  "Solid Memo's servers". **Checked.**
+- **Plain words.** "for example" and "that is", not "e.g." and "i.e.";
+  no exclamation marks. **Checked.**
+- **Links.** A page or file is linked once a section, at its first
+  mention. Later mentions are code spans (`testing.md`) or plain words.
+  A link's text says where it leads, never "here" or "this".
+  **Checked.**
+- **Reasoning.** A reference page states the rule and its result, not
+  the argument for why it holds. An explanation page is where a design
+  is argued. **Review.**
+- **Em dashes** have a space on each side — like this. **Checked.**
+- **Every fact kept.** A shorter text keeps what the longer one said.
+  **Review.**
+
+The [Docs](#docs) and [Language](#language) sections apply as well:
+plain English, American spelling (`npm run lint:spelling`), examples
+that are real.
+
+## The prose check
+
+`npm run lint:prose` reads every page in `docs/` against the rules in
+[prose.json](../prose.json), each with its reason as its message. [checkProse.ts](../scripts/checkProse.ts) runs
+it, and [prose.ts](../packages/site/src/prose.ts) holds the rules'
+logic. It's the project's own code: it runs offline, and no package's
+update changes what it accepts.
+
+```sh
+npm run lint:prose                    # every page
+npm run lint:prose -- docs/srs.md     # the pages it names
+```
+
+- **What it reads:** paragraphs, list items, block quotes and table
+  cells. It leaves out code blocks and code spans, link addresses, text
+  in double quotes (a message the app shows, a quoted title), and
+  headings, which links lead to by their text.
+- **Kinds:** a rule names the page kinds it applies to; a rule that
+  names none applies to every page. Each page's kind comes from
+  `docs/docs.ttl`, so no list of pages is kept by hand.
+- **A problem** is printed as `docs/<page>:<line>: <what> (<rule>)`, and
+  any problem fails the check.
+- **A rule that's wrong** for text that's right is changed in
+  `prose.json`, for every page. A page has no way to switch a rule off.
+
 ## Language
 
 English is the authoritative language of the code, the docs, commit
@@ -264,8 +352,8 @@ messages, issues and pull requests. The app's messages are translated
 into the other languages it speaks ([i18n.md](i18n.md)); English is
 their source.
 
-- **Plain English.** Short sentences in the active voice; everyday words
-  over jargon. A term a newcomer may not know (pod, WebID, SHACL) is
+- **Plain English.** Short sentences in the active voice, as
+  [Writing](#writing) says; everyday words over jargon. A term a newcomer may not know (pod, WebID, SHACL) is
   explained or linked the first time a page uses it.
 - **American spelling** is the one standard: license, color, organize,
   catalog, behavior, toward, canceled, learned; a box is checked, not

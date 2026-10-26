@@ -1,0 +1,158 @@
+{
+  "$comment": "The docs' prose rules, which npm run lint:prose checks (docs/style.md#the-prose-check). A rule's kinds name the page kinds it applies to; without them it applies to every page.",
+  "rules": [
+    {
+      "check": "sentence",
+      "id": "sentence-length",
+      "message": "one idea per sentence: split it, or cut what it repeats",
+      "maxWords": 40
+    },
+    {
+      "check": "words",
+      "id": "filler",
+      "message": "it adds nothing, so cut it",
+      "terms": [
+        "actually",
+        "all the same",
+        "basically",
+        "clearly",
+        "in fact",
+        "in order to",
+        "just",
+        "needless to say",
+        "note that",
+        "obviously",
+        "of course",
+        "please",
+        "quite",
+        "really",
+        "simply",
+        "very"
+      ]
+    },
+    {
+      "check": "words",
+      "id": "filler-once",
+      "message": "say it once a section at most, where it adds something",
+      "terms": [
+        "also",
+        "as well",
+        "itself",
+        "themselves"
+      ],
+      "perSection": 1
+    },
+    {
+      "check": "words",
+      "id": "no-we",
+      "message": "name the project or what acts (\"Solid Memo's servers\")",
+      "terms": [
+        "let's",
+        "our",
+        "ours",
+        "ourselves",
+        "us",
+        "we",
+        "we'd",
+        "we'll",
+        "we're",
+        "we've"
+      ]
+    },
+    {
+      "check": "words",
+      "id": "neutral-voice",
+      "message": "a reference or explanation page is neutral: name who acts (\"the learner\", \"a contributor\")",
+      "terms": [
+        "you",
+        "you'd",
+        "you'll",
+        "you're",
+        "you've",
+        "your",
+        "yours",
+        "yourself",
+        "yourselves"
+      ],
+      "kinds": [
+        "reference",
+        "explanation"
+      ]
+    },
+    {
+      "check": "words",
+      "id": "present-tense",
+      "message": "say what is, in the present tense",
+      "terms": [
+        "going to",
+        "shall",
+        "will",
+        "won't"
+      ]
+    },
+    {
+      "check": "words",
+      "id": "contraction",
+      "message": "the docs use contractions",
+      "terms": {
+        "are not": "aren't",
+        "can not": "can't",
+        "cannot": "can't",
+        "could not": "couldn't",
+        "did not": "didn't",
+        "does not": "doesn't",
+        "do not": "don't",
+        "had not": "hadn't",
+        "has not": "hasn't",
+        "have not": "haven't",
+        "is not": "isn't",
+        "should not": "shouldn't",
+        "was not": "wasn't",
+        "were not": "weren't",
+        "would not": "wouldn't"
+      }
+    },
+    {
+      "check": "words",
+      "id": "plain-words",
+      "message": "plain English over abbreviations",
+      "terms": {
+        "e.g.": "for example",
+        "etc.": "and so on, or list them all",
+        "i.e.": "that is"
+      }
+    },
+    {
+      "check": "pattern",
+      "id": "spaced-dash",
+      "message": "an em dash has a space on each side",
+      "pattern": "\\S—|—\\S"
+    },
+    {
+      "check": "pattern",
+      "id": "no-exclamation",
+      "message": "the docs state, they don't exclaim",
+      "pattern": "!"
+    },
+    {
+      "check": "linkText",
+      "id": "link-text",
+      "message": "a link's text says where it leads",
+      "terms": [
+        "click here",
+        "here",
+        "link",
+        "more",
+        "read more",
+        "this",
+        "this link",
+        "this page"
+      ]
+    },
+    {
+      "check": "linkOnce",
+      "id": "link-once",
+      "message": "link a thing once a section, at its first mention, and write it as a code span after"
+    }
+  ]
+}
