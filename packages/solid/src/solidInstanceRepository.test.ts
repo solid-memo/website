@@ -6,17 +6,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
-  deleteContainer,
-  deleteSolidDataset,
+  type Dataset,
   getInteger,
-  getSolidDataset,
   getStringNoLocale,
   getThing,
-  mockSolidDatasetFrom,
-  saveSolidDatasetAt,
   setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
+import {
+  deleteContainer,
+  deleteSolidDataset,
+  getSolidDatasetLinear,
+  saveSolidDatasetAt,
+} from "./client/resources";
+import { datasetFrom } from "./testing/datasets";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import {
   addRegistrations,
@@ -31,11 +33,11 @@ import {
 import { DCTERMS, SM } from "./vocab";
 import { deleteInstanceData } from "./instanceData";
 
-vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
+vi.mock("./client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/resources")>();
   return {
     ...actual,
-    getSolidDataset: vi.fn(),
+    getSolidDatasetLinear: vi.fn(),
     saveSolidDatasetAt: vi.fn(),
     deleteSolidDataset: vi.fn(),
     deleteContainer: vi.fn(),
@@ -60,7 +62,7 @@ function metaWith(...others: ReturnType<typeof createThing>[]) {
       .addUrl(RDF_TYPE, SM.Instance)
       .build(),
     ...others,
-  ].reduce((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(META));
+  ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(META));
 }
 
 function makeRepository(
@@ -75,7 +77,7 @@ function makeRepository(
 }
 
 beforeEach(() => {
-  vi.mocked(getSolidDataset).mockReset();
+  vi.mocked(getSolidDatasetLinear).mockReset();
   vi.mocked(saveSolidDatasetAt).mockReset();
   vi.mocked(deleteSolidDataset).mockReset();
   vi.mocked(deleteContainer).mockReset();
@@ -284,7 +286,7 @@ describe("createInstance", () => {
 
     const [metaUrl, metaDataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(metaUrl).toBe(`${CONTAINER}meta.ttl`);
-    const meta = getThing(metaDataset as SolidDataset, `${CONTAINER}meta.ttl#it`)!;
+    const meta = getThing(metaDataset as Dataset, `${CONTAINER}meta.ttl#it`)!;
     expect(getStringNoLocale(meta, DCTERMS.title)).toBe("Main");
     expect(getInteger(meta, SM.formatVersion)).toBe(2);
 
@@ -385,7 +387,7 @@ describe("createInstance", () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({ privateIndexUrl: null, publicIndexUrl: null });
     vi.mocked(createTypeIndex).mockRejectedValue(new Error("cannot create index"));
     // The meta.ttl just written, as the pod serves it: the instance's #it and nothing else.
-    vi.mocked(getSolidDataset).mockResolvedValue(metaWith());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(metaWith());
     await expect(
       makeRepository().createInstance({
         webId: WEBID,
@@ -403,7 +405,7 @@ describe("createInstance", () => {
   it("takes back only the instance's own subject of a meta.ttl that holds something else too", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({ privateIndexUrl: null, publicIndexUrl: null });
     vi.mocked(createTypeIndex).mockRejectedValue(new Error("cannot create index"));
-    vi.mocked(getSolidDataset).mockResolvedValue(
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(
       metaWith(
         buildThing(createThing({ url: `${META}#note` }))
           .addStringNoLocale(NOTE, "hi")
@@ -449,11 +451,11 @@ describe("attachInstance", () => {
     if (withTitle) {
       thing = thing.addStringNoLocale(DCTERMS.title, "Attached");
     }
-    return setThing(mockSolidDatasetFrom(`${CONTAINER}meta.ttl`), thing.build());
+    return setThing(datasetFrom(`${CONTAINER}meta.ttl`), thing.build());
   }
 
   it("registers an existing instance, and nothing else of it, and returns its name", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset(true));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(metaDataset(true));
     vi.mocked(ensureTypeIndex).mockResolvedValue(PRIVATE_INDEX);
 
     await expect(
@@ -474,7 +476,7 @@ describe("attachInstance", () => {
   });
 
   it("falls back to the container slug when meta.ttl has no title", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset(false));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(metaDataset(false));
     vi.mocked(ensureTypeIndex).mockResolvedValue(PRIVATE_INDEX);
 
     await expect(
@@ -487,7 +489,7 @@ describe("attachInstance", () => {
   });
 
   it("rejects a container without a readable meta.ttl", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValue(new Error("404"));
+    vi.mocked(getSolidDatasetLinear).mockRejectedValue(new Error("404"));
 
     await expect(
       makeRepository().attachInstance({
@@ -499,7 +501,7 @@ describe("attachInstance", () => {
   });
 
   it("registers the instance at its address as a request sends it, and no address that is not an http(s) folder's", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset(true));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(metaDataset(true));
     vi.mocked(ensureTypeIndex).mockResolvedValue(PRIVATE_INDEX);
     await expect(
       makeRepository().attachInstance({
@@ -508,7 +510,7 @@ describe("attachInstance", () => {
         registrationTarget: "private",
       }),
     ).resolves.toEqual({ url: CONTAINER, name: "Attached" });
-    vi.mocked(getSolidDataset).mockClear();
+    vi.mocked(getSolidDatasetLinear).mockClear();
     for (const instanceUrl of ["not an address", "urn:x:main", `${CONTAINER}?x`]) {
       await expect(
         makeRepository().attachInstance({
@@ -518,11 +520,11 @@ describe("attachInstance", () => {
         }),
       ).rejects.toMatchObject({ code: "notAnInstanceNoMeta", vars: { url: instanceUrl } });
     }
-    expect(getSolidDataset).not.toHaveBeenCalled();
+    expect(getSolidDatasetLinear).not.toHaveBeenCalled();
   });
 
   it("rejects a meta.ttl without the #it subject", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(`${CONTAINER}meta.ttl`));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(datasetFrom(`${CONTAINER}meta.ttl`));
 
     await expect(
       makeRepository().attachInstance({
@@ -611,7 +613,7 @@ describe("readMeta and upgradeMeta", () => {
 
   function metaDataset() {
     return setThing(
-      mockSolidDatasetFrom(META),
+      datasetFrom(META),
       buildThing(createThing({ url: `${META}#it` }))
         .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
         .addStringNoLocale(DCTERMS.title, "Main")
@@ -622,21 +624,21 @@ describe("readMeta and upgradeMeta", () => {
   }
 
   it("reads the meta document, null when it is missing or has no subject", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(metaDataset());
     await expect(makeRepository().readMeta(CONTAINER)).resolves.toEqual(meta);
-    vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
+    vi.mocked(getSolidDatasetLinear).mockRejectedValue({ statusCode: 404 });
     await expect(makeRepository().readMeta(CONTAINER)).resolves.toBeNull();
-    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(datasetFrom(META));
     await expect(makeRepository().readMeta(CONTAINER)).resolves.toBeNull();
   });
 
   it("brings an outdated subject up to this app's format as read, in place, checked first", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(metaDataset());
     const checkWrite = vi.fn(async () => undefined);
     await expect(makeRepository(checkWrite).upgradeMeta(CONTAINER)).resolves.toBe(true);
     const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(url).toBe(META);
-    const thing = getThing(saved as SolidDataset, `${META}#it`)!;
+    const thing = getThing(saved as Dataset, `${META}#it`)!;
     expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Main");
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
     expect(getInteger(thing, SM.formatVersion)).toBe(2);
@@ -644,7 +646,7 @@ describe("readMeta and upgradeMeta", () => {
   });
 
   it("writes nothing for a subject up to date, missing or unreadable, or no meta document", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(
       setThing(
         metaDataset(),
         buildThing(getThing(metaDataset(), `${META}#it`)!)
@@ -653,18 +655,18 @@ describe("readMeta and upgradeMeta", () => {
       ),
     );
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
-    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(datasetFrom(META));
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
-    vi.mocked(getSolidDataset).mockResolvedValue(
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(META),
+        datasetFrom(META),
         buildThing(createThing({ url: `${META}#it` }))
           .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
           .build(),
       ),
     );
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
-    vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
+    vi.mocked(getSolidDatasetLinear).mockRejectedValue({ statusCode: 404 });
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
@@ -693,9 +695,9 @@ describe("saveMeta", () => {
   const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
 
   it("rewrites the subject in place, keeping foreign triples, checked first", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(META),
+        datasetFrom(META),
         buildThing(createThing({ url: `${META}#it` }))
           .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
           .addStringNoLocale(DCTERMS.title, "Main")
@@ -708,7 +710,7 @@ describe("saveMeta", () => {
     await makeRepository(checkWrite).saveMeta(CONTAINER, { ...meta, name: "Renamed" });
     const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(url).toBe(META);
-    const thing = getThing(saved as SolidDataset, `${META}#it`)!;
+    const thing = getThing(saved as Dataset, `${META}#it`)!;
     expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Renamed");
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
     expect(getInteger(thing, SM.formatVersion)).toBe(2);
@@ -716,11 +718,11 @@ describe("saveMeta", () => {
   });
 
   it("refuses to save when the meta document or its subject is missing", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
+    vi.mocked(getSolidDatasetLinear).mockRejectedValue({ statusCode: 404 });
     await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toMatchObject({
       code: "noMetaToUpdate",
     });
-    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(datasetFrom(META));
     await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toMatchObject({
       code: "noMetaToUpdate",
     });

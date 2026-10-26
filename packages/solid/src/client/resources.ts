@@ -20,7 +20,7 @@ import {
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
-import type { Dataset, FetchedDataset } from "./rdf";
+import { type Dataset, datasetAt, type FetchedDataset } from "./rdf";
 
 /**
  * Reading and writing a pod's resources: documents as datasets (rdf.ts),
@@ -164,13 +164,7 @@ export function parseQuads(
     parser.onQuad((quad) => quads.push(quad));
     parser.onError(reject);
     parser.onComplete(() => resolve(quads));
-    parser.parse(text, {
-      internal_resourceInfo: {
-        sourceIri: baseUrl,
-        isRawData: false,
-        contentType: MEDIA_TYPES[format],
-      },
-    } as WithServerResourceInfo);
+    parser.parse(text, datasetAt(baseUrl, MEDIA_TYPES[format]));
   });
 }
 

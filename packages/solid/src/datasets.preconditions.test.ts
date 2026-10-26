@@ -7,10 +7,10 @@ import {
   buildThing,
   createSolidDataset,
   createThing,
+  type Dataset,
   setThing,
   toRdfJsDataset,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import {
   deleteDataset,
   getSolidDatasetOrNull,
@@ -22,10 +22,10 @@ import {
 } from "./datasets";
 
 /**
- * The preconditions through the real @inrupt/solid-client, against a fake
- * pod that holds one document and answers as a Solid server does: 412
- * when If-Match names another version, or If-None-Match: * finds one, and
- * 304 when a read's If-None-Match names the version there. With
+ * The preconditions through the real Solid client library (client/),
+ * against a fake pod that holds one document and answers as a Solid
+ * server does: 412 when If-Match names another version, or
+ * If-None-Match: * finds one, and 304 when a read's If-None-Match names the version there. With
  * `written`, a write gives the document a new version and answers with
  * it (`"w1"`, `"w2"`…; weak with `W/` before), from the URL written to
  * unless `answeredFrom` is "nowhere", as a mocked fetch answers.
@@ -105,7 +105,7 @@ function pod({
 }
 
 /** A dataset's objects, each a line, for a look at what it holds. */
-const objectsOf = (dataset: SolidDataset) =>
+const objectsOf = (dataset: Dataset) =>
   [...toRdfJsDataset(dataset)].map((quad) => `"${quad.object.value}"`);
 
 const edited = <T extends Parameters<typeof setThing>[0]>(dataset: T) =>

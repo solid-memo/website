@@ -6,17 +6,16 @@ import {
   buildThing,
   createSolidDataset,
   createThing,
-  getThing,
-  setThing,
   getDecimal,
   getInteger,
   getStringNoLocale,
   getStringNoLocaleAll,
-  getStringWithLocale,
-  getStringWithLocaleAll,
+  getThing,
   getUrl,
   getUrlAll,
-} from "@inrupt/solid-client";
+  setThing,
+} from "./client/rdf";
+import { getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
 import type { Literal } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";

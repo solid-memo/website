@@ -8,16 +8,16 @@ import { readVersioned, recordThing } from "./records";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { MIGRATIONS, migrate, stepFor } from "@solid-memo/domain/shapes/migrations";
 import {
-  toRdfJsDataset,
-  mockSolidDatasetFrom,
-  setThing,
   buildThing,
   createThing,
-  getSolidDataset,
   getThing,
   getThingAll,
   getUrlAll,
-} from "@inrupt/solid-client";
+  setThing,
+  toRdfJsDataset,
+} from "./client/rdf";
+import { getSolidDataset } from "./client/resources";
+import { datasetFrom } from "./testing/datasets";
 import { createEngine, mergeDatasets } from "@solid-memo/shacl/engine";
 import { coreOnly, PROFILES, REFERENCE_DATA } from "@solid-memo/shacl/profiles";
 import { datasetFromTurtle, turtleFetch } from "@solid-memo/shacl/testing/turtle";
@@ -555,7 +555,7 @@ async function violationsOf(shape: ShapeName, version: number, record: object) {
   ];
   const thing = recordThing(URL_, descriptor, record, null);
   const data = toRdfJsDataset(
-    setThing(mockSolidDatasetFrom("https://pod.example/solid-memo/a/doc.ttl"), thing),
+    setThing(datasetFrom("https://pod.example/solid-memo/a/doc.ttl"), thing),
   );
   const engine = createEngine(await loader.load(descriptor));
   return engine.validateNode(data, URL_, descriptor.shapeIri);
@@ -595,7 +595,7 @@ describe("shapes, descriptors and migrations", () => {
       .addStringNoLocale(SM.frontImage, "https://flagcdn.com/se.svg")
       .build();
     const data = toRdfJsDataset(
-      setThing(mockSolidDatasetFrom("https://pod.example/solid-memo/a/doc.ttl"), thing),
+      setThing(datasetFrom("https://pod.example/solid-memo/a/doc.ttl"), thing),
     );
     const engine = createEngine(await loader.load(SHAPES.card[2]));
     const violations = await engine.validateNode(data, URL_, SHAPES.card[2].shapeIri);
@@ -731,7 +731,7 @@ describe("what the app writes, under DCAT-AP", () => {
     keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"] },
   };
   const catalogDocument = () =>
-    withCatalog(withDeck(mockSolidDatasetFrom(CATALOG), deck), CATALOG, {
+    withCatalog(withDeck(datasetFrom(CATALOG), deck), CATALOG, {
       title: "Main",
       description: "Flashcard decks of the Solid Memo instance Main.",
       publisher: { webId: PUBLISHER, name: "Alice" },

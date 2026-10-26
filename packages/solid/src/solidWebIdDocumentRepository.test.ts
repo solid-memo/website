@@ -3,17 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import {
-  buildThing,
-  createThing,
-  getSolidDataset,
-  mockSolidDatasetFrom,
-  setThing,
-} from "@inrupt/solid-client";
+import { buildThing, createThing, setThing } from "./client/rdf";
+import { getSolidDataset } from "./client/resources";
+import { datasetFrom } from "./testing/datasets";
 import { createSolidWebIdDocumentRepository } from "./solidWebIdDocumentRepository";
 
-vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
+vi.mock("./client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/resources")>();
   return { ...actual, getSolidDataset: vi.fn() };
 });
 
@@ -22,7 +18,7 @@ describe("createSolidWebIdDocumentRepository", () => {
     const webId = "https://alice.example/profile/card#me";
     const documentUrl = "https://alice.example/profile/card";
     const dataset = setThing(
-      mockSolidDatasetFrom(documentUrl),
+      datasetFrom(documentUrl),
       buildThing(createThing({ url: webId }))
         .addStringNoLocale("http://xmlns.com/foaf/0.1/name", "Alice")
         .build(),

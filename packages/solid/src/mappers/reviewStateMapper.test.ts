@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, getThing, removeAll } from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, getThing } from "../client/rdf";
 import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import {
   namesAnotherScheduler,
@@ -60,15 +60,9 @@ describe("review state mapping", () => {
 
   it("rejects subjects that are not sm:ReviewState", () => {
     const thing = thingOf(state);
-    const wrongType = {
-      ...thing,
-      predicates: {
-        ...thing.predicates,
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
-          namedNodes: ["https://solid-memo.com/ns/vocab/v1.ttl#Card"],
-        },
-      },
-    };
+    const wrongType = buildThing(thing)
+      .setUrl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Card)
+      .build();
     expect(toReviewState(wrongType, documents)).toBeNull();
   });
 
@@ -81,14 +75,9 @@ describe("review state mapping", () => {
     "lastReviewedAt",
   ])("rejects a subject missing sm:%s", (field) => {
     const thing = thingOf(state);
-    const withoutField = {
-      ...thing,
-      predicates: Object.fromEntries(
-        Object.entries(thing.predicates).filter(
-          ([predicate]) => predicate !== `https://solid-memo.com/ns/vocab/v1.ttl#${field}`,
-        ),
-      ),
-    };
+    const withoutField = buildThing(thing)
+      .removeAll(`https://solid-memo.com/ns/vocab/v1.ttl#${field}`)
+      .build();
     expect(toReviewState(withoutField, documents)).toBeNull();
   });
 
@@ -119,21 +108,16 @@ describe("review state mapping", () => {
     "previousLastReviewedAt",
   ])("treats a snapshot missing sm:%s as absent, keeping the state", (field) => {
     const thing = thingOf({ ...state, previous: snapshot });
-    const partial = {
-      ...thing,
-      predicates: Object.fromEntries(
-        Object.entries(thing.predicates).filter(
-          ([predicate]) => predicate !== `https://solid-memo.com/ns/vocab/v1.ttl#${field}`,
-        ),
-      ),
-    };
+    const partial = buildThing(thing)
+      .removeAll(`https://solid-memo.com/ns/vocab/v1.ttl#${field}`)
+      .build();
     expect(toReviewState(partial, documents)).toEqual(state);
   });
 });
 
 describe("what a review state is of", () => {
   const written = thingOf({ ...state, direction: "back-to-front" });
-  const without = (predicate: string) => removeAll(written, predicate);
+  const without = (predicate: string) => buildThing(written).removeAll(predicate).build();
 
   it("goes by sm:reviewOf and sm:reviewDirection, whatever the subject", () => {
     const named = toReviewStateThing(
@@ -157,7 +141,9 @@ describe("what a review state is of", () => {
       direction: "back-to-front",
     });
     const elsewhere = toReviewStateThing(documents, state, null, `${REVIEWS_DOC}#rs-1`);
-    expect(toReviewState(removeAll(elsewhere, SM.reviewDirection), documents)).toMatchObject({
+    expect(
+      toReviewState(buildThing(elsewhere).removeAll(SM.reviewDirection).build(), documents),
+    ).toMatchObject({
       cardId: "card-1",
       direction: "front-to-back",
     });
@@ -245,7 +231,8 @@ describe("FSRS-6 state mapping", () => {
   });
 
   it("is another app's for a literal that spells sm:fsrs6, or FSRS-6 beside another scheduler", () => {
-    const literal = buildThing(removeAll(written, SM.scheduler))
+    const literal = buildThing(written)
+      .removeAll(SM.scheduler)
       .addStringNoLocale(SM.scheduler, SM.fsrs6)
       .build();
     expect(namesAnotherScheduler(literal)).toBe(true);
@@ -257,8 +244,10 @@ describe("FSRS-6 state mapping", () => {
   });
 
   it("is read by its links alone: not without either, nor of a card elsewhere", () => {
-    expect(toFsrsState(removeAll(written, SM.reviewOf), documents)).toBeNull();
-    expect(toFsrsState(removeAll(written, SM.reviewDirection), documents)).toBeNull();
+    expect(toFsrsState(buildThing(written).removeAll(SM.reviewOf).build(), documents)).toBeNull();
+    expect(
+      toFsrsState(buildThing(written).removeAll(SM.reviewDirection).build(), documents),
+    ).toBeNull();
     expect(
       toFsrsState(written, {
         ...documents,
@@ -269,7 +258,7 @@ describe("FSRS-6 state mapping", () => {
   });
 
   it("is not read without a field its shape requires", () => {
-    expect(toFsrsState(removeAll(written, SM.stability), documents)).toBeNull();
+    expect(toFsrsState(buildThing(written).removeAll(SM.stability).build(), documents)).toBeNull();
   });
 
   it("is written beside the SM-2 state of the same prompt", () => {

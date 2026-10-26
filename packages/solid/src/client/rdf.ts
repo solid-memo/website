@@ -80,6 +80,19 @@ export interface Source {
   readonly key: object;
 }
 
+/**
+ * An empty dataset of the document at `url`, as a read of it as
+ * `contentType` begins: sourceOf names the document, and subjects made
+ * by name resolve against it. A parser is handed one to resolve the
+ * text's relative IRIs against `url` (resources.ts parseQuads).
+ */
+export function datasetAt(url: string, contentType = "text/turtle"): FetchedDataset {
+  return {
+    ...createSolidDataset(),
+    internal_resourceInfo: { sourceIri: url, isRawData: false, contentType, linkedResources: {} },
+  };
+}
+
 /** Where a dataset came from; undefined for one built here and never saved. */
 export function sourceOf(dataset: object): Source | undefined {
   const info = (dataset as Partial<WithServerResourceInfo>).internal_resourceInfo;

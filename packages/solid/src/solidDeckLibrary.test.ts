@@ -3,20 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  buildThing,
-  createThing,
-  getSolidDataset,
-  getThing,
-  mockSolidDatasetFrom,
-  setThing,
-} from "@inrupt/solid-client";
+import { buildThing, createThing, getThing, setThing } from "./client/rdf";
+import { getSolidDatasetLinear } from "./client/resources";
+import { datasetFrom } from "./testing/datasets";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 
-vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
-  return { ...actual, getSolidDataset: vi.fn() };
+vi.mock("./client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/resources")>();
+  return { ...actual, getSolidDatasetLinear: vi.fn() };
 });
 
 const INDEX = "https://solid-memo.com/decks/index.ttl";
@@ -31,7 +26,7 @@ function makeLibrary() {
 function deckDocument() {
   return setThing(
     setThing(
-      mockSolidDatasetFrom(DOC),
+      datasetFrom(DOC),
       buildThing(createThing({ url: DOC }))
         .addIri(RDF.type, SM.Deck)
         .addStringNoLocale(DCTERMS.title, "Capitals")
@@ -46,26 +41,26 @@ function deckDocument() {
 }
 
 beforeEach(() => {
-  vi.mocked(getSolidDataset).mockReset();
+  vi.mocked(getSolidDatasetLinear).mockReset();
 });
 
 describe("listLibraryDecks", () => {
   it("reads the decks the index's catalog lists", async () => {
     const index = setThing(
-      mockSolidDatasetFrom(INDEX),
+      datasetFrom(INDEX),
       buildThing(createThing({ url: INDEX }))
         .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
         .addStringNoLocale(DCTERMS.title, "The library")
         .build(),
     );
-    vi.mocked(getSolidDataset).mockResolvedValue(index);
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(index);
 
     await expect(makeLibrary().listLibraryDecks()).resolves.toEqual([]);
-    expect(getSolidDataset).toHaveBeenCalledWith(INDEX, expect.objectContaining({ fetch }));
+    expect(getSolidDatasetLinear).toHaveBeenCalledWith(INDEX, expect.objectContaining({ fetch }));
   });
 
   it("propagates a failed index read", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValue(new Error("offline"));
+    vi.mocked(getSolidDatasetLinear).mockRejectedValue(new Error("offline"));
     await expect(makeLibrary().listLibraryDecks()).rejects.toThrow("offline");
   });
 });
@@ -73,7 +68,7 @@ describe("listLibraryDecks", () => {
 describe("the index", () => {
   function indexDocument() {
     return setThing(
-      mockSolidDatasetFrom(INDEX),
+      datasetFrom(INDEX),
       buildThing(createThing({ url: INDEX }))
         .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
         .build(),
@@ -81,7 +76,7 @@ describe("the index", () => {
   }
 
   it("is read once, for every reader of it, concurrent or later", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(indexDocument());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(indexDocument());
     const library = makeLibrary();
     const [decks, view, sameDecks] = await Promise.all([
       library.listLibraryDecks(),
@@ -91,43 +86,43 @@ describe("the index", () => {
     expect(sameDecks).toBe(decks);
     expect(await library.listLibraryDecks()).toBe(decks);
     expect(await library.readLibraryIndex()).toBe(view);
-    expect(getSolidDataset).toHaveBeenCalledTimes(1);
+    expect(getSolidDatasetLinear).toHaveBeenCalledTimes(1);
   });
 
   it("is read again after a failed read", async () => {
-    vi.mocked(getSolidDataset)
+    vi.mocked(getSolidDatasetLinear)
       .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValue(indexDocument());
     const library = makeLibrary();
     await expect(library.readLibraryIndex()).rejects.toThrow("offline");
     await expect(library.listLibraryDecks()).resolves.toEqual([]);
     await expect(library.readLibraryIndex()).resolves.toMatchObject({ url: INDEX });
-    expect(getSolidDataset).toHaveBeenCalledTimes(2);
+    expect(getSolidDatasetLinear).toHaveBeenCalledTimes(2);
   });
 });
 
 describe("readLibraryIndex", () => {
   it("reads what the index says that places a release", async () => {
     const index = setThing(
-      mockSolidDatasetFrom(INDEX),
+      datasetFrom(INDEX),
       buildThing(createThing({ url: INDEX }))
         .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
         .addIri(DCTERMS.publisher, `${INDEX}#me`)
         .build(),
     );
-    vi.mocked(getSolidDataset).mockResolvedValue(index);
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(index);
     await expect(makeLibrary().readLibraryIndex()).resolves.toEqual({
       url: INDEX,
       publisher: `${INDEX}#me`,
       releases: [],
     });
-    expect(getSolidDataset).toHaveBeenCalledWith(INDEX, expect.objectContaining({ fetch }));
+    expect(getSolidDatasetLinear).toHaveBeenCalledWith(INDEX, expect.objectContaining({ fetch }));
   });
 });
 
 describe("fetchLibraryDeck", () => {
   it("fetches the document and maps its content", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(deckDocument());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(deckDocument());
 
     await expect(makeLibrary().fetchLibraryDeck(DOC)).resolves.toEqual({
       url: DOC,
@@ -144,11 +139,11 @@ describe("fetchLibraryDeck", () => {
         { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
       ],
     });
-    expect(getSolidDataset).toHaveBeenCalledWith(DOC, expect.objectContaining({ fetch }));
+    expect(getSolidDatasetLinear).toHaveBeenCalledWith(DOC, expect.objectContaining({ fetch }));
   });
 
   it("reads a release once, for every reader of it, concurrent or later", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(deckDocument());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(deckDocument());
     const library = makeLibrary();
     const [first, second] = await Promise.all([
       library.fetchLibraryDeck(DOC),
@@ -156,17 +151,17 @@ describe("fetchLibraryDeck", () => {
     ]);
     expect(await library.fetchLibraryDeck(DOC)).toBe(first);
     expect(second).toBe(first);
-    expect(getSolidDataset).toHaveBeenCalledTimes(1);
+    expect(getSolidDatasetLinear).toHaveBeenCalledTimes(1);
   });
 
   it("reads a release again after a failed read", async () => {
-    vi.mocked(getSolidDataset)
+    vi.mocked(getSolidDatasetLinear)
       .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValue(deckDocument());
     const library = makeLibrary();
     await expect(library.fetchLibraryDeck(DOC)).rejects.toThrow("offline");
     await expect(library.fetchLibraryDeck(DOC)).resolves.toMatchObject({ url: DOC });
-    expect(getSolidDataset).toHaveBeenCalledTimes(2);
+    expect(getSolidDatasetLinear).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -192,7 +187,7 @@ describe("fetchCourseOutline", () => {
   }
 
   it("reads the outline from the same read of the release as its content", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(courseDocument());
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(courseDocument());
     const library = makeLibrary();
     const [outline, content] = await Promise.all([
       library.fetchCourseOutline(DOC),
@@ -221,11 +216,11 @@ describe("fetchCourseOutline", () => {
     });
     expect(content.isCourse).toBe(true);
     expect(await library.fetchCourseOutline(DOC)).toBe(outline);
-    expect(getSolidDataset).toHaveBeenCalledTimes(1);
+    expect(getSolidDatasetLinear).toHaveBeenCalledTimes(1);
   });
 
   it("reads the release again after a failed read", async () => {
-    vi.mocked(getSolidDataset)
+    vi.mocked(getSolidDatasetLinear)
       .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValue(deckDocument());
     const library = makeLibrary();

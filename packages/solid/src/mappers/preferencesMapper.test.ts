@@ -10,8 +10,7 @@ import {
   getInteger,
   getStringNoLocale,
   getUrl,
-  setDecimal,
-} from "@inrupt/solid-client";
+} from "../client/rdf";
 import { toPreferences, toPreferencesThing } from "./preferencesMapper";
 import { RDF, SM } from "../vocab";
 
@@ -93,11 +92,9 @@ describe("toPreferences", () => {
 
   it("reads a desired retention outside the shape's range as the default", () => {
     const stored = (desiredRetention: number) =>
-      setDecimal(
-        toPreferencesThing(SUBJECT, { ...FULL, scheduler: "fsrs6" }, null),
-        SM.desiredRetention,
-        desiredRetention,
-      );
+      buildThing(toPreferencesThing(SUBJECT, { ...FULL, scheduler: "fsrs6" }, null))
+        .setDecimal(SM.desiredRetention, desiredRetention)
+        .build();
     expect(toPreferences(stored(-1))?.preferences.desiredRetention).toBe(0.9);
     expect(toPreferences(stored(2))?.preferences.desiredRetention).toBe(0.9);
     expect(toPreferences(stored(0.75))?.preferences.desiredRetention).toBe(0.75);

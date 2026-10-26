@@ -8,19 +8,18 @@ import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import {
   buildThing,
   createThing,
-  mockSolidDatasetFrom,
+  type Dataset,
   setThing,
-  type SolidDataset,
-  type ThingBuilder,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+  type SubjectBuilder,
+} from "../client/rdf";
+import { getSolidDataset } from "../client/resources";
+import { datasetFrom } from "../testing/datasets";
 import {
   toCourseOutline,
   toLibraryDeckContent,
   toLibraryDecks,
   toLibraryIndexView,
 } from "./libraryMapper";
-import { getSolidDataset } from "@inrupt/solid-client";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
 
@@ -32,10 +31,7 @@ const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 const FLAG = "https://flagcdn.com/af.svg";
 const LANGUAGE = "http://publications.europa.eu/resource/authority/language/";
 
-function thing(
-  url: string,
-  build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
-) {
+function thing(url: string, build: (t: SubjectBuilder) => SubjectBuilder) {
   return build(buildThing(createThing({ url }))).build();
 }
 
@@ -315,11 +311,8 @@ function datasetFromIndex(turtle: string) {
 }
 
 describe("toLibraryDeckContent", () => {
-  function deckDocument(...things: ReturnType<typeof thing>[]): SolidDataset {
-    return things.reduce(
-      (dataset, t) => setThing(dataset, t),
-      mockSolidDatasetFrom(DOC) as SolidDataset,
-    );
+  function deckDocument(...things: ReturnType<typeof thing>[]): Dataset {
+    return things.reduce((dataset, t) => setThing(dataset, t), datasetFrom(DOC) as Dataset);
   }
 
   it("maps the deck and its well-formed cards, keeping the fragment ids", () => {

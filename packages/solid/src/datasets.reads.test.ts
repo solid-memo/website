@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, createThing, setThing } from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
 import { deleteDataset, getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
 
 /**
- * Reading the same document more than once, through the real
- * @inrupt/solid-client, against a fake pod that answers If-None-Match as
+ * Reading the same document more than once, through the real Solid
+ * client library (client/), against a fake pod that answers If-None-Match as
  * a Solid server does: 304 when it names the current version.
  */
 const DOC = "https://pod.example/doc.ttl";

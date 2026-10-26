@@ -11,6 +11,7 @@ import {
   changesOf,
   createSolidDataset,
   createThing,
+  datasetAt,
   datasetFromQuads,
   fromRdfJsDataset,
   getDatetime,
@@ -163,6 +164,17 @@ describe("sourceOf", () => {
   it("is undefined for a dataset built here", () => {
     expect(sourceOf(createSolidDataset())).toBeUndefined();
     expect(sourceOf(datasetFromQuads([]))).toBeUndefined();
+  });
+});
+
+describe("datasetAt", () => {
+  it("is empty, of the document at the URL, as a read of it begins", () => {
+    const dataset = datasetAt(URL_);
+    expect(isEmptyDataset(dataset)).toBe(true);
+    expect(sourceOf(dataset)!.url).toBe(URL_);
+    expect(changesOf(dataset)).toBeUndefined();
+    const named = setThing(dataset, createThing({ name: "a" }));
+    expect(getThing(named, `${URL_}#a`)).not.toBeNull();
   });
 });
 
