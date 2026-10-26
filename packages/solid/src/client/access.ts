@@ -3,16 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { universalAccess } from "@inrupt/solid-client";
+import type { GrantPublicRead } from "./interface";
 
-/**
- * Make the document at `url` readable by everyone, and nothing else:
- * whether the pod says it now is. Rejects when the requests fail. Only
- * `fetch` is used, for every request it makes.
- */
-export type GrantPublicRead = (
-  url: string,
-  options: { fetch: typeof globalThis.fetch },
-) => Promise<boolean>;
+export type { GrantPublicRead } from "./interface";
 
 /**
  * The public-read grant over @inrupt/solid-client's universal access

@@ -5,7 +5,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
-  type Changes,
   changesOf,
   createSolidDataset,
   createThing,
@@ -17,6 +16,7 @@ import {
   toRdfJsDataset,
   withQuads,
 } from "./client/rdf";
+import type { Changes } from "./client/interface";
 import { datasetFrom } from "./testing/datasets";
 import type { Quad, Term } from "@rdfjs/types";
 import { appendAllToDocument, patchBody, saveDataset } from "./datasets";

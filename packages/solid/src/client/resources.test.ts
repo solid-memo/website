@@ -5,14 +5,16 @@
 import { FetchError, getSolidDataset as libraryGetSolidDataset } from "@inrupt/solid-client";
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, createThing, getThing, setThing } from "./rdf";
+import { HttpError } from "./interface";
 import {
-  HttpError,
   createContainerAt,
   deleteContainer,
   deleteFile,
   deleteSolidDataset,
   getFile,
   getProfileStorages,
+  getSourceUrl,
+  hasResourceInfo,
   getSolidDataset,
   getSolidDatasetLinear,
   overwriteFile,
@@ -133,6 +135,15 @@ describe("writing resources", () => {
       ["PUT", "https://pod.example/decks/", "text/turtle"],
       ["PUT", "https://pod.example/a.png", "image/png"],
     ]);
+  });
+});
+
+describe("getSourceUrl and hasResourceInfo", () => {
+  it("name the document a dataset was read from, and none for one built here", async () => {
+    const read = await getSolidDataset(URL_, { fetch: pod().fetch });
+    expect([getSourceUrl(read), hasResourceInfo(read)]).toEqual([URL_, true]);
+    const built = createSolidDataset();
+    expect([getSourceUrl(built), hasResourceInfo(built)]).toEqual([null, false]);
   });
 });
 

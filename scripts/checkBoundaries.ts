@@ -85,13 +85,14 @@ export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
  * package (`files`), with any import. The Solid client libraries, any
  * `@inrupt/` package, are used behind the app's own modules in
  * packages/solid/src/client/, so another library takes their place there
- * alone (docs/vendor-code.md); shacl, which may not import solid, reads
+ * alone (docs/vendor-code.md), but for their interface (interface.ts),
+ * which names no library; shacl, which may not import solid, reads
  * Turtle through one module of its own.
  */
 export const VENDOR_ONLY_IN: { specifier: RegExp; files: Record<string, RegExp> }[] = [
   {
     specifier: /^@inrupt\//,
-    files: { solid: /^src\/client\//, shacl: /^src\/turtleDocument\.ts$/ },
+    files: { solid: /^src\/client\/(?!interface\.ts$)/, shacl: /^src\/turtleDocument\.ts$/ },
   },
 ];
 

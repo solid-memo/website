@@ -8,50 +8,43 @@ import {
   deleteFile as libraryDeleteFile,
   deleteSolidDataset as libraryDeleteSolidDataset,
   FetchError,
+  getContainedResourceUrlAll as libraryGetContainedResourceUrlAll,
   getFile as libraryGetFile,
-  getJsonLdParser,
-  getPodUrlAllFrom,
-  getProfileAll,
+  getJsonLdParser as libraryGetJsonLdParser,
+  getPodUrlAllFrom as libraryGetPodUrlAllFrom,
+  getProfileAll as libraryGetProfileAll,
   getSolidDataset as libraryGetSolidDataset,
-  getTurtleParser,
+  getTurtleParser as libraryGetTurtleParser,
   overwriteFile as libraryOverwriteFile,
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
-  type WithServerResourceInfo,
+  solidDatasetAsTurtle as librarySolidDatasetAsTurtle,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
+import { fetchedDataset, serverDataset, solidDataset, sourcedDataset } from "./inrupt";
+import {
+  type Dataset,
+  type FetchedDataset,
+  HttpError,
+  type RequestOptions,
+  type SourcedDataset,
+} from "./interface";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
-import { type Dataset, datasetAt, type FetchedDataset } from "./rdf";
+import { datasetAt, sourceOf } from "./rdf";
 
 /**
  * Reading and writing a pod's resources: documents as datasets (rdf.ts),
- * containers and files. A thin layer over @inrupt/solid-client, the only
- * implementation so far, so that the rest of the package names no
- * library. The operations keep the names the library gives them, and its
- * requests: their Accept and Content-Type headers, the URLs they ask
- * for, and the PATCH a saved edit sends (datasets.ts writes its own body
- * and leaves the library's where it writes none).
+ * containers and files, of the types in interface.ts. A thin layer over
+ * @inrupt/solid-client, the only implementation so far, so that the rest
+ * of the package names no library. The operations keep the names the
+ * library gives them, and its requests: their Accept and Content-Type
+ * headers, the URLs they ask for, and the PATCH a saved edit sends
+ * (datasets.ts writes its own body and leaves the library's where it
+ * writes none).
  *
  * A request the server answers with a failure rejects with an HttpError,
  * whose message is the library's: what the server was asked, and how it
  * answered. Its cause is the library's own error, with its stack.
  */
-
-/** The server answered a request with a failure: `statusCode` says which. */
-export class HttpError extends Error {
-  /** The response's status. */
-  readonly statusCode: number;
-
-  constructor(
-    message: string,
-    /** The server's response. */
-    readonly response: Response,
-    options?: ErrorOptions,
-  ) {
-    super(message, options);
-    this.name = "HttpError";
-    this.statusCode = response.status;
-  }
-}
 
 /** The request's result, its failure an HttpError where the server answered with one. */
 async function answered<T>(request: () => Promise<T>): Promise<T> {
@@ -64,14 +57,9 @@ async function answered<T>(request: () => Promise<T>): Promise<T> {
   }
 }
 
-/** How a request is sent: through `fetch`, the browser's own when none is given. */
-export interface RequestOptions {
-  fetch?: typeof globalThis.fetch;
-}
-
 /** The document at `url`, as a dataset. */
 export function getSolidDataset(url: string, options?: RequestOptions): Promise<FetchedDataset> {
-  return answered(() => libraryGetSolidDataset(url, options));
+  return answered(async () => fetchedDataset(await libraryGetSolidDataset(url, options)));
 }
 
 /** The document at `url`, as getSolidDataset reads it, but built in time linear in its size (linearDataset.ts). */
@@ -79,7 +67,7 @@ export function getSolidDatasetLinear(
   url: string,
   options: { fetch: typeof globalThis.fetch },
 ): Promise<FetchedDataset> {
-  return answered(() => libraryGetSolidDatasetLinear(url, options));
+  return answered(async () => fetchedDataset(await libraryGetSolidDatasetLinear(url, options)));
 }
 
 /**
@@ -92,7 +80,9 @@ export function saveSolidDatasetAt(
   dataset: Dataset,
   options: RequestOptions,
 ): Promise<FetchedDataset> {
-  return answered(() => librarySaveSolidDatasetAt(url, dataset, options));
+  return answered(async () =>
+    fetchedDataset(await librarySaveSolidDatasetAt(url, solidDataset(dataset), options)),
+  );
 }
 
 /** Delete the document at `url`. */
@@ -110,11 +100,8 @@ export function deleteContainer(url: string, options: RequestOptions): Promise<v
   return answered(() => libraryDeleteContainer(url, options));
 }
 
-/** A file's contents, with what the server said of it. */
-export type FetchedFile = Blob & WithServerResourceInfo;
-
 /** The file at `url`, as it is. */
-export function getFile(url: string, options: RequestOptions): Promise<FetchedFile> {
+export function getFile(url: string, options: RequestOptions): Promise<Blob> {
   return answered(() => libraryGetFile(url, options));
 }
 
@@ -143,8 +130,16 @@ export type ProfileStorages = (
 ) => Promise<string[]>;
 
 /** The profile lookup over the library's `getProfileAll` and `getPodUrlAllFrom`. */
-export const getProfileStorages: ProfileStorages = async (webId, options) =>
-  getPodUrlAllFrom(await answered(() => getProfileAll(webId, options)), webId);
+export const getProfileStorages: ProfileStorages = async (webId, { fetch, webIdProfile }) =>
+  libraryGetPodUrlAllFrom(
+    await answered(() =>
+      libraryGetProfileAll(webId, {
+        fetch,
+        webIdProfile: serverDataset(webIdProfile),
+      }),
+    ),
+    webId,
+  );
 
 const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as const;
 
@@ -158,19 +153,37 @@ export function parseQuads(
   format: keyof typeof MEDIA_TYPES,
   baseUrl: string,
 ): Promise<Quad[]> {
-  const parser = format === "turtle" ? getTurtleParser() : getJsonLdParser();
+  const parser = format === "turtle" ? libraryGetTurtleParser() : libraryGetJsonLdParser();
   return new Promise((resolve, reject) => {
     const quads: Quad[] = [];
     parser.onQuad((quad) => quads.push(quad));
     parser.onError(reject);
     parser.onComplete(() => resolve(quads));
-    parser.parse(text, datasetAt(baseUrl, MEDIA_TYPES[format]));
+    parser.parse(text, serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format])));
   });
 }
 
-export {
-  getContainedResourceUrlAll,
-  getSourceUrl,
-  hasResourceInfo,
-  solidDatasetAsTurtle,
-} from "@inrupt/solid-client";
+/** The URL of the document a dataset was read from or saved to; null for one built here. */
+export function getSourceUrl(dataset: SourcedDataset): string;
+export function getSourceUrl(dataset: Dataset): string | null;
+export function getSourceUrl(dataset: Dataset): string | null {
+  return sourceOf(dataset)?.url ?? null;
+}
+
+/** Whether a dataset knows the document it was read from or saved to. */
+export function hasResourceInfo<T extends Dataset>(dataset: T): dataset is T & SourcedDataset {
+  return sourceOf(dataset) !== undefined;
+}
+
+/** The URLs of the resources a container, read as a dataset, says it contains. */
+export function getContainedResourceUrlAll(container: SourcedDataset): string[] {
+  return libraryGetContainedResourceUrlAll(sourcedDataset(container));
+}
+
+/** A dataset as Turtle text, with `prefixes` for the IRIs it names. */
+export function solidDatasetAsTurtle(
+  dataset: Dataset,
+  options?: { prefixes?: Record<string, string> },
+): Promise<string> {
+  return librarySolidDatasetAsTurtle(solidDataset(dataset), options);
+}

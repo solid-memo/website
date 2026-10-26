@@ -5,6 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
+  createThing,
   type Dataset,
   getPropertyAll,
   getThing,
@@ -125,7 +126,7 @@ function stateAt(subject: string, written: ReviewState = state) {
 
 /** Another scheduler's state at `subject`: no SM-2 fields Solid Memo could read. */
 function otherSchedulerAt(subject: string) {
-  return buildThing({ url: `${deck.reviewsDocumentUrl}#${subject}` })
+  return buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#${subject}` }))
     .addUrl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.ReviewState)
     .addUrl(SM.reviewOf, `${deck.cardsDocumentUrl}#card-1`)
     .addUrl(SM.scheduler, FSRS)
@@ -648,7 +649,7 @@ describe("FSRS-6 states, this app's own", () => {
 
   it("are written at a new subject when the one named for them holds something else", async () => {
     // Another app's subject where this app would name the FSRS-6 state.
-    const theirs = buildThing({ url: `${deck.reviewsDocumentUrl}#card-1@fsrs6` })
+    const theirs = buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#card-1@fsrs6` }))
       .addStringNoLocale("https://other.example/#note", "mine")
       .build();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), theirs));
