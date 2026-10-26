@@ -8,10 +8,13 @@ import {
   type NamedSubject,
   asUrl,
   createSolidDataset,
+  datasetFromQuads,
   getThing,
   getThingAll,
   getUrlAll,
+  isEmptyDataset,
   setThing,
+  withQuads,
 } from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
@@ -48,9 +51,7 @@ import {
   saveDataset,
   versionOf,
 } from "./datasets";
-import { graphsOf } from "./linearDataset";
 import {
-  datasetOf,
   draftEntries,
   draftFromQuads,
   draftIriOf,
@@ -172,7 +173,7 @@ export function createSolidReleaseDraftRepository({
     // A version is 1, 2, …: a draft is numbered after it.
     if (release === null || !/^[1-9][0-9]*$/.test(release.root.version ?? "1"))
       throw new AppError("releaseUnreadable", { url });
-    const dataset = datasetOf(quads);
+    const dataset = datasetFromQuads(quads);
     const root = getThing(dataset, url)!;
     if (storedVersionOf(root) > LATEST_VERSION.libraryDeck) {
       throw new AppError("libraryDeckTooNew", {
@@ -231,7 +232,7 @@ export function createSolidReleaseDraftRepository({
       const written: string[] = [];
       try {
         for (const [url, entries] of byDocument) {
-          const dataset = datasetOf(entries.flatMap(entryQuads));
+          const dataset = datasetFromQuads(entries.flatMap(entryQuads));
           await checkWrite(dataset, shapedSubjects(entries), "draft");
           await saveDataset(url, dataset, fetch);
           written.push(url);
@@ -267,11 +268,7 @@ export function createSolidReleaseDraftRepository({
         const stored = read.documents.get(url);
         const { dataset, made } = changedDocument(stored, touched.get(url)!);
         await checkWrite(dataset, shapedSubjects(made.map(({ entry }) => entry)), "draft");
-        if (
-          stored !== undefined &&
-          url !== before.url &&
-          Object.keys(dataset.graphs.default).length === 0
-        ) {
+        if (stored !== undefined && url !== before.url && isEmptyDataset(dataset)) {
           // A chapter's document with nothing left in it goes, as it was read.
           await deleteDataset(url, stored, fetch);
         } else {
@@ -588,21 +585,23 @@ function rewritten(
   entry: DraftEntry,
   was: DraftEntry | undefined,
 ): NamedSubject {
-  const empty: NamedSubject = { type: "Subject", url: entry.subject, predicates: {} };
   const base =
     entry.shaped === undefined
-      ? (existing ?? empty)
+      ? existing
       : recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, existing);
   const removed = new Set((was?.raw ?? []).map(tripleKey));
-  const kept = quadsOf(setThing(createSolidDataset(), base)).filter(
-    (quad) => !removed.has(tripleKey(asTriple(quad))),
-  );
+  const kept =
+    base === null
+      ? []
+      : quadsOf(setThing(createSolidDataset(), base)).filter(
+          (quad) => !removed.has(tripleKey(asTriple(quad))),
+        );
   const quads = [
     ...kept,
     ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
   ];
   // The entry says something of its subject (a record's type, or a statement): the subject is there.
-  return graphsOf(quads).default[entry.subject] as NamedSubject;
+  return getThing(datasetFromQuads(quads), entry.subject)!;
 }
 
 function asTriple(quad: Quad): DraftTriple {
@@ -652,11 +651,7 @@ function withBlankNodes(
       .filter(({ entry }) => entry.subject.startsWith("_:"))
       .flatMap(({ entry }) => entryQuads(entry)),
   ];
-  return Object.freeze({
-    ...dataset,
-    graphs: graphsOf(quads),
-    internal_changeLog: { additions: [], deletions: [] },
-  }) as Dataset;
+  return withQuads(dataset, quads);
 }
 
 /**

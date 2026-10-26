@@ -11,7 +11,7 @@ import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
-import { getSolidDatasetLinear } from "../linearDataset";
+import { getSolidDatasetLinear } from "../client/linearDataset";
 import { createLocalPod } from "../localPod";
 import { createMemoryResourceStore } from "../memoryResourceStore";
 import { createShaclShapeValidator } from "../shaclShapeValidator";

@@ -6,6 +6,7 @@ import {
   type Dataset,
   type Subject,
   createSolidDataset,
+  datasetFromQuads,
   getThing,
   getUrlAll,
   setThing,
@@ -35,7 +36,6 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
-import { graphsOf } from "../linearDataset";
 import { readRecord, readVersioned, recordThing } from "../records";
 import { DCTERMS, SM } from "../vocab";
 
@@ -101,7 +101,7 @@ function subjectTerm(value: string): Term {
   ) as Term;
 }
 
-/** A statement as a quad of the default graph, plain data that linearDataset's graphsOf and turtleOf read. */
+/** A statement as a quad of the default graph, plain data that datasetFromQuads and turtleOf read. */
 export function quadOf(subject: string, predicate: string, object: ReleaseTerm): Quad {
   const term =
     object.kind === "literal"
@@ -135,11 +135,6 @@ export function tripleKey(triple: DraftTriple): string {
   return `${triple.subject} ${triple.predicate} ${value}`;
 }
 
-/** Triples as a dataset, built in one pass. */
-export function datasetOf(quads: Iterable<Quad>): Dataset {
-  return Object.freeze({ ...createSolidDataset(), graphs: graphsOf(quads) });
-}
-
 /** The quads of a dataset. */
 export function quadsOf(dataset: Dataset): Quad[] {
   return [...toRdfJsDataset(dataset)] as Quad[];
@@ -166,7 +161,7 @@ export function draftIriOf(container: string, draftUrl: string): (iri: string) =
  * sm:Deck at `url` with its shape's required fields).
  */
 export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraft | null {
-  const dataset = datasetOf(quads);
+  const dataset = datasetFromQuads(quads);
   /** For each shaped subject, the predicates its shape owns, and the types. */
   const owned = new Map<string, { predicates: Set<string>; types: Set<string> }>();
   const own = (

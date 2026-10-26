@@ -6,6 +6,7 @@ import {
   type Dataset,
   type Subject,
   asUrl,
+  datasetFromQuads,
   getThing,
   getThingAll,
   getUrlAll,
@@ -38,8 +39,8 @@ import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
-import { getSolidDatasetLinear } from "./linearDataset";
-import { datasetOf, draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
+import { getSolidDatasetLinear } from "./client/linearDataset";
+import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 
 /** The IRIs a subject has as values of a predicate, among its own quads: what pickShape asks of a subject. */
@@ -470,7 +471,7 @@ export function createShaclShapeValidator({
       // The release as assembled at the draft's own address, then every IRI moved where it is published.
       // Quads as the engine reads them (a dataset's: terms that compare), not the plain data a draft's are.
       const assembled = quadsOf(
-        datasetOf(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())),
+        datasetFromQuads(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())),
       );
       const release = mapIris(mergeDatasets(assembled), (iri) => moved(iri, draft.url, asUrl));
       const quads = [...(release as Iterable<Quad>)];
@@ -630,5 +631,5 @@ function withSeriesEntry(
       link(series, `${DCAT_NS}hasCurrentVersion`, asUrl),
     );
   }
-  return quadsOf(datasetOf([...index, ...added]));
+  return quadsOf(datasetFromQuads([...index, ...added]));
 }

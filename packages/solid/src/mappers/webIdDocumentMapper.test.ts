@@ -10,37 +10,9 @@ import {
   setThing,
   type Thing,
 } from "@inrupt/solid-client";
-import { toPropertyValues, toSubject, toWebIdDocument } from "./webIdDocumentMapper";
+import { toSubject, toWebIdDocument } from "./webIdDocumentMapper";
 
 const SUBJECT = "https://alice.example/profile/card#me";
-
-describe("toPropertyValues", () => {
-  it("returns an empty list when the objects carry nothing", () => {
-    expect(toPropertyValues({})).toEqual([]);
-  });
-
-  it("maps named nodes, literals, language strings and blank nodes", () => {
-    const values = toPropertyValues({
-      namedNodes: ["https://iri.example/x"],
-      literals: {
-        "http://www.w3.org/2001/XMLSchema#integer": ["42"],
-      },
-      langStrings: { en: ["hello"] },
-      blankNodes: ["_:b0", { predicates: {} } as never],
-    });
-    expect(values).toEqual([
-      { type: "iri", value: "https://iri.example/x" },
-      {
-        type: "literal",
-        value: "42",
-        dataType: "http://www.w3.org/2001/XMLSchema#integer",
-      },
-      { type: "langString", value: "hello", language: "en" },
-      { type: "blankNode", value: "_:b0" },
-      { type: "blankNode", value: "[blank node]" },
-    ]);
-  });
-});
 
 describe("toSubject", () => {
   it("maps a Thing's url and predicates", () => {

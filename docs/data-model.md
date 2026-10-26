@@ -1460,7 +1460,7 @@ by one.
   may keep a document the pod gives a modification time and no
   `Cache-Control` for days, and answer a plain read with it.
 - Reading builds the dataset in one pass
-  ([linearDataset.ts](../packages/solid/src/linearDataset.ts)):
+  ([linearDataset.ts](../packages/solid/src/client/linearDataset.ts)):
   `@inrupt/solid-client` copies the whole graph for every quad, which
   took 9 s for a deck of 3,000 cards.
 - 404 is a normal state for not-yet-created documents; repositories

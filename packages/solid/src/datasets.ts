@@ -2,27 +2,25 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  deleteSolidDataset,
-  saveSolidDatasetAt,
-  solidDatasetAsTurtle,
-  type WithChangeLog,
-  type WithServerResourceInfo,
-} from "@inrupt/solid-client";
+import { deleteSolidDataset, saveSolidDatasetAt, solidDatasetAsTurtle } from "@inrupt/solid-client";
 import {
   type Dataset,
   type FetchedDataset,
   type Subject,
+  changesOf,
   createSolidDataset,
   getThing,
+  localNameOf,
   removeThing,
   removeUrl,
   setThing,
+  sourceOf,
   toRdfJsDataset,
+  withQuads,
 } from "./client/rdf";
 
 import type { Literal, Quad } from "@rdfjs/types";
-import { getSolidDatasetLinear, graphsOf } from "./linearDataset";
+import { getSolidDatasetLinear } from "./client/linearDataset";
 import { unlessNewer } from "./records";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -32,7 +30,7 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
  * write never silently undoes someone else's (docs/data-model.md#write-discipline):
  *
  * - every read remembers the document's ETag, with the dataset it returned
- *   (keyed by its resource info, which edits of the dataset keep);
+ *   (keyed by its source's key, which edits of the dataset keep);
  * - saving an edit of a dataset read from the same URL sends
  *   `If-Match: <that ETag>`: had the document changed since, the pod
  *   answers 412 and nothing is written;
@@ -187,8 +185,8 @@ export function readDatasetSince(
 
 /** The version (ETag) a dataset was read at; undefined when the pod gave none. */
 export function versionOf(dataset: object): string | undefined {
-  const info = resourceInfoOf(dataset);
-  return info === undefined ? undefined : ETAGS.get(info);
+  const source = sourceOf(dataset);
+  return source === undefined ? undefined : ETAGS.get(source.key);
 }
 
 async function fetchDataset(
@@ -234,8 +232,8 @@ async function fetchDataset(
     known.delete(document);
     throw error;
   }
-  const info = resourceInfoOf(dataset);
-  if (etag !== null && info !== undefined) ETAGS.set(info, etag);
+  const source = sourceOf(dataset);
+  if (etag !== null && source !== undefined) ETAGS.set(source.key, etag);
   if (etag !== null) known.set(document, { etag, dataset });
   else known.delete(document);
   return dataset;
@@ -271,9 +269,9 @@ export async function saveDataset<T extends Dataset>(
   fetch: typeof globalThis.fetch,
   { whole = false }: { whole?: boolean } = {},
 ): Promise<void> {
-  const info = resourceInfoOf(dataset);
-  const isEdit = info !== undefined && info.sourceIri === url;
-  const etag = isEdit ? strong(ETAGS.get(info)) : undefined;
+  const source = sourceOf(dataset);
+  const isEdit = source !== undefined && source.url === url;
+  const etag = isEdit ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   let answered: string | undefined;
   let saved: FetchedDataset;
@@ -293,13 +291,13 @@ export async function saveDataset<T extends Dataset>(
       throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
     throw error;
   }
-  if (info !== undefined) ETAGS.delete(info);
+  if (source !== undefined) ETAGS.delete(source.key);
   // Only where a precondition held does the document hold just what was written.
   const version = strong(answered);
   if (version === undefined || (isEdit && etag === undefined)) return;
-  const savedInfo = resourceInfoOf(saved);
-  if (savedInfo?.sourceIri !== url) return;
-  ETAGS.set(savedInfo, version);
+  const savedSource = sourceOf(saved);
+  if (savedSource?.url !== url) return;
+  ETAGS.set(savedSource.key, version);
   readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: saved });
 }
 
@@ -317,7 +315,7 @@ function withWrittenETag(
 
 /** Whether `dataset` was read from (or last saved to) `url`: a save of it is an edit there, If-Match its version. */
 export function isReadFrom(dataset: object, url: string): boolean {
-  return resourceInfoOf(dataset)?.sourceIri === url;
+  return sourceOf(dataset)?.url === url;
 }
 
 /** Delete a document read before, only if it is unchanged since (If-Match). */
@@ -326,8 +324,8 @@ export async function deleteDataset(
   dataset: Dataset,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
-  const info = resourceInfoOf(dataset);
-  const etag = info !== undefined && info.sourceIri === url ? strong(ETAGS.get(info)) : undefined;
+  const source = sourceOf(dataset);
+  const etag = source?.url === url ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   try {
     await deleteSolidDataset(url, { fetch: withIfMatch(fetch, etag) });
@@ -436,19 +434,14 @@ async function removeOwnedOnce(
   }
   const gone = quads.filter(isGone);
   if (gone.length === 0) return "kept";
-  const etag = strong(ETAGS.get(resourceInfoOf(dataset)!));
+  const etag = strong(ETAGS.get(sourceOf(dataset)!.key));
   if (
     gone.some(
       (quad) => quad.subject.termType === "BlankNode" || quad.object.termType === "BlankNode",
     )
   ) {
     if (etag === undefined) return "kept";
-    const rest = Object.freeze({
-      ...dataset,
-      graphs: graphsOf(left),
-      internal_changeLog: { additions: [], deletions: [] },
-    }) as FetchedDataset;
-    await saveDataset(url, rest, fetch, { whole: true });
+    await saveDataset(url, withQuads(dataset, left), fetch, { whole: true });
     return "kept";
   }
   const edited = statements.reduce(
@@ -611,8 +604,6 @@ export async function appendAllToDocument(
   }
 }
 
-/** Where @inrupt/solid-client names a Thing that has no URL yet: `<#name>` in the document. */
-const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
 
@@ -629,7 +620,7 @@ const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
  * read is not found there (ownPatches).
  */
 export function patchBody(dataset: Dataset, decimalsAsNumbers = false): string | null {
-  const changes = (dataset as Partial<WithChangeLog>).internal_changeLog;
+  const changes = changesOf(dataset);
   if (changes === undefined) return null;
   const block = (operation: string, quads: readonly Quad[], asNumbers: boolean): string | null => {
     const triples = quads.map((quad) => tripleLine(quad, asNumbers));
@@ -653,7 +644,8 @@ function tripleLine(quad: Quad, decimalsAsNumbers: boolean): string | null {
 }
 
 function iri(value: string): string {
-  return value.startsWith(LOCAL_NODE) ? `<#${value.slice(LOCAL_NODE.length)}>` : `<${value}>`;
+  const name = localNameOf(value);
+  return name === undefined ? `<${value}>` : `<#${name}>`;
 }
 
 function literal(term: Literal, decimalsAsNumbers: boolean): string {
@@ -668,12 +660,6 @@ function literal(term: Literal, decimalsAsNumbers: boolean): string {
 
 function strong(etag: string | undefined): string | undefined {
   return etag === undefined || etag.startsWith("W/") ? undefined : etag;
-}
-
-function resourceInfoOf(
-  dataset: object,
-): WithServerResourceInfo["internal_resourceInfo"] | undefined {
-  return (dataset as Partial<WithServerResourceInfo>).internal_resourceInfo;
 }
 
 function statusOf(error: unknown): number | undefined {

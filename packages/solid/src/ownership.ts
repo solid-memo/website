@@ -10,6 +10,7 @@ import {
   getThing,
   getThingAll,
   getUrlAll,
+  propertiesOf,
   toRdfJsDataset,
 } from "./client/rdf";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
@@ -167,12 +168,12 @@ function termKey(term: { termType: string; value: string }): string {
  */
 export function isDeckBackLink(dataset: Dataset, thing: Subject): boolean {
   if (!hasResourceInfo(dataset) || !isSameUrl(thing.url, getSourceUrl(dataset))) return false;
-  const predicates = Object.entries(thing.predicates);
+  const properties = propertiesOf(thing);
   const partOf = getUrlAll(thing, DCTERMS.isPartOf);
   return (
-    predicates.length === 1 &&
-    predicates[0]![0] === DCTERMS.isPartOf &&
-    Object.keys(predicates[0]![1]).length === 1 &&
+    properties.length === 1 &&
+    properties[0]!.predicate === DCTERMS.isPartOf &&
+    properties[0]!.values.every((value) => value.type === "iri") &&
     partOf.length > 0 &&
     partOf.every(isCatalogEntry)
   );

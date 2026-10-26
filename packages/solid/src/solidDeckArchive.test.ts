@@ -7,7 +7,7 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_BASE, type DeckFileFormat } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { createSolidDeckArchive } from "./solidDeckArchive";
+import { createSolidDeckArchive, parseDeckFile } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { fakePod } from "./testing/fakePod";
@@ -312,6 +312,14 @@ describe("readDeckFile", () => {
     await expect(
       archive.readDeckFile('{"@id": 5, "@type": {}}', "jsonld", base),
     ).rejects.toMatchObject({ code: "deckFileUnreadable" });
+  });
+
+  it("refuses as unreadable a text the parser throws on at once, not only one it reports", async () => {
+    // Not a string: the Turtle parser takes it for a stream and throws before it reads.
+    const text = {} as unknown as string;
+    await expect(parseDeckFile(text, "turtle", base)).rejects.toMatchObject({
+      code: "deckFileUnreadable",
+    });
   });
 
   it("reads JSON-LD written by hand, its context inline", async () => {
