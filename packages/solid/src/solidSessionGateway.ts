@@ -9,7 +9,8 @@ import {
   login,
   logout,
 } from "@inrupt/solid-client-authn-browser";
-import { getIriAll, getSolidDataset, getThing } from "@inrupt/solid-client";
+import { getSolidDataset } from "@inrupt/solid-client";
+import { getThing, getUrlAll } from "./client/rdf";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";
 import { isSecureUrl } from "@solid-memo/domain/webId";
@@ -30,7 +31,7 @@ async function discoverOidcIssuer(webId: string): Promise<string> {
   if (!profile) {
     throw new AppError("webIdNoSubject", { webId });
   }
-  const issuers = getIriAll(profile, SOLID_OIDC_ISSUER);
+  const issuers = getUrlAll(profile, SOLID_OIDC_ISSUER);
   if (issuers.length === 0) {
     throw new AppError("webIdNoIssuer", { webId });
   }

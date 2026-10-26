@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { toRdfJsDataset } from "@inrupt/solid-client";
+import { toRdfJsDataset } from "./client/rdf";
 import type { Quad, Term } from "@rdfjs/types";
 import { getSolidDatasetLinear } from "./linearDataset";
 

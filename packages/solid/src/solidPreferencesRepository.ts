@@ -2,13 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  buildThing,
-  createSolidDataset,
-  getBoolean,
-  getThing,
-  setThing,
-} from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, getBoolean, getThing, setThing } from "./client/rdf";
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";

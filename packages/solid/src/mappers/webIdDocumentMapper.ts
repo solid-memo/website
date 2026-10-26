@@ -2,14 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  asUrl,
-  getSourceUrl,
-  getThingAll,
-  type SolidDataset,
-  type Thing,
-  type WithResourceInfo,
-} from "@inrupt/solid-client";
+import { getSourceUrl } from "@inrupt/solid-client";
+import { asUrl, getThingAll, type SourcedDataset, type Subject as RdfSubject } from "../client/rdf";
 import type {
   Property,
   PropertyValue,
@@ -17,14 +11,14 @@ import type {
   WebIdDocument,
 } from "@solid-memo/domain/webIdDocument";
 
-export function toWebIdDocument(dataset: SolidDataset & WithResourceInfo): WebIdDocument {
+export function toWebIdDocument(dataset: SourcedDataset): WebIdDocument {
   return {
     url: getSourceUrl(dataset),
     subjects: getThingAll(dataset).map(toSubject),
   };
 }
 
-export function toSubject(thing: Thing): Subject {
+export function toSubject(thing: RdfSubject): Subject {
   return {
     url: asUrl(thing),
     properties: Object.entries(thing.predicates).map(
@@ -36,7 +30,7 @@ export function toSubject(thing: Thing): Subject {
   };
 }
 
-export function toPropertyValues(objects: Thing["predicates"][string]): PropertyValue[] {
+export function toPropertyValues(objects: RdfSubject["predicates"][string]): PropertyValue[] {
   const values: PropertyValue[] = [];
   for (const iri of objects.namedNodes ?? []) {
     values.push({ type: "iri", value: iri });

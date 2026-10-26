@@ -3,17 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type NamedSubject,
+  type Subject,
   asUrl,
+  getTermAll,
   getThing,
   getThingAll,
-  getTermAll,
   getUrl,
   getUrlAll,
   setThing,
-  type SolidDataset,
-  type Thing,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "../client/rdf";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { GradedPrompt, PromptStates } from "@solid-memo/domain/grading";
 import {
@@ -60,7 +60,7 @@ export interface ReviewDocuments extends ReviewedDeck {
  * for any other value of sm:scheduler, a literal too, which is another
  * app's scheduler.
  */
-function schedulerOf(thing: Thing): Scheduler | null {
+function schedulerOf(thing: Subject): Scheduler | null {
   const terms = getTermAll(thing, SM.scheduler);
   const all = (iri: string) =>
     terms.every((term) => term.termType === "NamedNode" && term.value === iri);
@@ -74,12 +74,12 @@ function schedulerOf(thing: Thing): Scheduler | null {
  * literal too. Such a state is another app's: never read, written over
  * or removed.
  */
-export function namesAnotherScheduler(thing: Thing): boolean {
+export function namesAnotherScheduler(thing: Subject): boolean {
   return schedulerOf(thing) === null;
 }
 
 /** What a subject says of the card, direction and scheduler it is of, in any format. */
-function linksOf(thing: Thing): ReviewLinks {
+function linksOf(thing: Subject): ReviewLinks {
   const links: ReviewLinks = {};
   const reviewOf = getUrl(thing, SM.reviewOf);
   const direction = getUrl(thing, SM.reviewDirection);
@@ -89,7 +89,7 @@ function linksOf(thing: Thing): ReviewLinks {
   return links;
 }
 
-const isReviewState = (thing: Thing) => getUrlAll(thing, RDF.type).includes(SM.ReviewState);
+const isReviewState = (thing: Subject) => getUrlAll(thing, RDF.type).includes(SM.ReviewState);
 
 /**
  * The card and direction a subject typed sm:ReviewState is of as an SM-2
@@ -97,7 +97,7 @@ const isReviewState = (thing: Thing) => getUrlAll(thing, RDF.type).includes(SM.R
  * subject, and for a state this app does not schedule by SM-2
  * (reviewKeyOfSubject).
  */
-function keyOfSubject(thing: Thing, deck: ReviewedDeck): ReviewKey | null {
+function keyOfSubject(thing: Subject, deck: ReviewedDeck): ReviewKey | null {
   if (!isReviewState(thing)) return null;
   return reviewKeyOfSubject(asUrl(thing), deck, linksOf(thing));
 }
@@ -107,7 +107,7 @@ function keyOfSubject(thing: Thing, deck: ReviewedDeck): ReviewKey | null {
  * sm:fsrs6 is of, by its links alone (fsrsKeyOfLinks), whether or not
  * its fields fit its shape; null for any other subject.
  */
-function fsrsKeyOfSubject(thing: Thing, deck: ReviewedDeck): ReviewKey | null {
+function fsrsKeyOfSubject(thing: Subject, deck: ReviewedDeck): ReviewKey | null {
   if (!isReviewState(thing) || schedulerOf(thing) !== "fsrs6") return null;
   return fsrsKeyOfLinks(deck, linksOf(thing));
 }
@@ -125,7 +125,7 @@ const sameKey = (a: ReviewKey, b: ReviewKey) =>
  * calendar label, not an instant — xsd:date round-trips risk timezone
  * off-by-one shifts.
  */
-export function toReviewState(thing: Thing, deck: ReviewedDeck): ReviewState | null {
+export function toReviewState(thing: Subject, deck: ReviewedDeck): ReviewState | null {
   const read = readVersioned(thing, "reviewState");
   if (read === null) return null;
   const key = reviewKeyOfSubject(asUrl(thing), deck, linksOf(thing));
@@ -142,7 +142,7 @@ export function toReviewState(thing: Thing, deck: ReviewedDeck): ReviewState | n
  * the subject is not an sm:ReviewState naming sm:fsrs6 alone that fits
  * its format's shape, or names a card elsewhere.
  */
-export function toFsrsState(thing: Thing, deck: ReviewedDeck): FsrsState | null {
+export function toFsrsState(thing: Subject, deck: ReviewedDeck): FsrsState | null {
   const read = readVersioned(thing, "fsrsReviewState");
   if (read === null) return null;
   const key = fsrsKeyOfSubject(thing, deck);
@@ -163,9 +163,9 @@ interface Read<T> {
 
 /** Each state of the document `read` maps a subject to, with its subject: one per card and direction (pickReviewStates, the subject `named` names first). */
 function readOf<T extends ReviewKey>(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
-  read: (thing: Thing, deck: ReviewedDeck) => T | null,
+  read: (thing: Subject, deck: ReviewedDeck) => T | null,
   named: (reviewsDocumentUrl: string, key: ReviewKey) => string,
 ): Read<T>[] {
   const states = getThingAll(dataset).flatMap((thing) => {
@@ -179,7 +179,7 @@ function readOf<T extends ReviewKey>(
 
 /** Each SM-2 and FSRS-6 state of the document this app reads, with its subject. */
 function readBoth(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
 ): { sm2: Read<ReviewState>[]; fsrs: Read<FsrsState>[] } {
   return {
@@ -192,7 +192,7 @@ function readBoth(
  * The deck's review states in its reviews document: the SM-2 states and
  * the FSRS-6 states, each one per card and direction, in document order.
  */
-export function toReviewStates(dataset: SolidDataset, documents: ReviewDocuments): ReviewStates {
+export function toReviewStates(dataset: Dataset, documents: ReviewDocuments): ReviewStates {
   const read = readBoth(dataset, documents);
   return {
     sm2: read.sm2.map(({ state }) => state),
@@ -203,13 +203,13 @@ export function toReviewStates(dataset: SolidDataset, documents: ReviewDocuments
 /** How one kind of state is written: where it is named, how a subject is read as one, and its subject. */
 interface Kind<T> {
   named: (reviewsDocumentUrl: string, key: ReviewKey) => string;
-  keyOf: (thing: Thing, deck: ReviewedDeck) => ReviewKey | null;
+  keyOf: (thing: Subject, deck: ReviewedDeck) => ReviewKey | null;
   thing: (
     documents: ReviewDocuments,
     state: T,
-    existing: ThingPersisted | null,
+    existing: NamedSubject | null,
     subjectUrl: string,
-  ) => ThingPersisted;
+  ) => NamedSubject;
 }
 
 const SM2_KIND: Kind<ReviewState> = {
@@ -233,7 +233,7 @@ const FSRS_KIND: Kind<FsrsState> = {
  * subject), a new subject `#review-<id>`, which names its card.
  */
 function newSubjectFor<T>(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   kind: Kind<T>,
   key: ReviewKey,
@@ -263,11 +263,11 @@ export interface StatesToWrite {
  * in their order.
  */
 export function withReviewStates(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   states: StatesToWrite,
   newId: () => string,
-): { dataset: SolidDataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[] } {
   return writeBoth(dataset, documents, readBoth(dataset, documents), states, newId);
 }
 
@@ -279,12 +279,12 @@ export function withReviewStates(
  * document's states are read once.
  */
 export function withGradedReviewState(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   key: ReviewKey,
   grade: (current: PromptStates) => GradedPrompt,
   newId: () => string,
-): { dataset: SolidDataset; subjects: string[]; current: PromptStates; state: GradedPrompt } {
+): { dataset: Dataset; subjects: string[]; current: PromptStates; state: GradedPrompt } {
   const read = readBoth(dataset, documents);
   const current: PromptStates = {
     sm2: read.sm2.find((stored) => sameKey(stored.key, key))?.state ?? null,
@@ -297,12 +297,12 @@ export function withGradedReviewState(
 
 /** The document with both kinds' states written, each at the subject `read` has it at, else a new one. */
 function writeBoth(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   read: { sm2: readonly Read<ReviewState>[]; fsrs: readonly Read<FsrsState>[] },
   states: StatesToWrite,
   newId: () => string,
-): { dataset: SolidDataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[] } {
   const sm2 = writeStates(dataset, documents, SM2_KIND, read.sm2, states.sm2, newId);
   const fsrs = writeStates(sm2.dataset, documents, FSRS_KIND, read.fsrs, states.fsrs ?? [], newId);
   return { dataset: fsrs.dataset, subjects: [...sm2.subjects, ...fsrs.subjects] };
@@ -310,13 +310,13 @@ function writeBoth(
 
 /** The document with `states` of one kind written, each at the subject `read` has it at, else a new one. */
 function writeStates<T extends ReviewKey>(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   kind: Kind<T>,
   read: readonly { url: string; key: ReviewKey }[],
   states: readonly T[],
   newId: () => string,
-): { dataset: SolidDataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[] } {
   const subjectOf = new Map(read.map(({ url, key }) => [reviewKeyOf(key), url]));
   let updated = dataset;
   const subjects: string[] = [];
@@ -343,10 +343,10 @@ export interface StatesToRemove {
  * direction, which the app never read, stays.
  */
 export function withoutReadReviewStates(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   keys: StatesToRemove,
-): SolidDataset {
+): Dataset {
   const read = readBoth(dataset, documents);
   const removed = (states: readonly Read<unknown>[], keys: readonly ReviewKey[] = []) => {
     const gone = new Set(keys.map(reviewKeyOf));
@@ -366,10 +366,10 @@ export function withoutReadReviewStates(
  * or not. Another scheduler's states, and any other subject, stay.
  */
 export function withoutReviewStates(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documents: ReviewDocuments,
   keys: readonly ReviewKey[],
-): SolidDataset {
+): Dataset {
   return getThingAll(dataset)
     .filter((thing) => {
       const key = keyOfSubject(thing, documents) ?? fsrsKeyOfSubject(thing, documents);
@@ -386,9 +386,9 @@ export function withoutReviewStates(
 export function toReviewStateThing(
   documents: ReviewDocuments,
   state: ReviewState,
-  existing: ThingPersisted | null,
+  existing: NamedSubject | null,
   subjectUrl: string,
-): ThingPersisted {
+): NamedSubject {
   return recordThing(
     subjectUrl,
     REVIEW_STATE_V2,
@@ -405,9 +405,9 @@ export function toReviewStateThing(
 export function toFsrsStateThing(
   documents: ReviewDocuments,
   state: FsrsState,
-  existing: ThingPersisted | null,
+  existing: NamedSubject | null,
   subjectUrl: string,
-): ThingPersisted {
+): NamedSubject {
   return recordThing(
     subjectUrl,
     FSRS_REVIEW_STATE_V1,

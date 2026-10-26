@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
+import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
 import type { Answer } from "@solid-memo/domain/answer";
 import { answerFromRecord, answerToRecord } from "@solid-memo/domain/answerRecord";
 import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
@@ -16,7 +16,7 @@ import { readVersioned, recordThing } from "../records";
  * that fits its shape, or its study day is not a real date (the shape's
  * pattern lets "2026-13-01" through, and the statistics count days from it).
  */
-export function toAnswer(thing: Thing): Answer | null {
+export function toAnswer(thing: Subject): Answer | null {
   const read = readVersioned(thing, "answer");
   if (read === null || !isStudyDay(read.record.data.studyDay)) return null;
   return answerFromRecord(
@@ -26,6 +26,6 @@ export function toAnswer(thing: Thing): Answer | null {
 }
 
 /** An answer as a new subject of its month's document. */
-export function toAnswerThing(documentUrl: string, answer: Answer): ThingPersisted {
+export function toAnswerThing(documentUrl: string, answer: Answer): NamedSubject {
   return recordThing(`${documentUrl}#${answer.id}`, ANSWER_V1, answerToRecord(answer), null);
 }

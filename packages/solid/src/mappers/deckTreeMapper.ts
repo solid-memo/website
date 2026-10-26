@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
   asUrl,
   buildThing,
   getInteger,
@@ -11,8 +12,7 @@ import {
   getUrl,
   getUrlAll,
   setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+} from "../client/rdf";
 import { deckGroupFromRecord, deckGroupToRecord } from "@solid-memo/domain/deckGroupRecord";
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
@@ -40,12 +40,12 @@ import { toDecks } from "./deckMapper";
  * a newer format than this app's makes the whole layout read-only.
  */
 
-function groupThings(dataset: SolidDataset) {
+function groupThings(dataset: Dataset) {
   return getThingAll(dataset).filter((thing) => getUrlAll(thing, RDF.type).includes(SM.DeckGroup));
 }
 
 /** The arrangement a catalog document (at `catalogUrl`) states. */
-export function toStoredLayout(dataset: SolidDataset, catalogUrl: string): StoredLayout {
+export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayout {
   const things = groupThings(dataset);
   const readOnly = things.some((thing) => storedVersionOf(thing) > LATEST_VERSION.deckGroup);
   const groups: StoredGroup[] = [];
@@ -83,10 +83,10 @@ export function toStoredLayout(dataset: SolidDataset, catalogUrl: string): Store
  * is gone is dropped as its list is written.
  */
 export function withTreeChanges(
-  dataset: SolidDataset,
+  dataset: Dataset,
   catalogUrl: string,
   changes: TreeChanges,
-): { dataset: SolidDataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[] } {
   const layout = toStoredLayout(dataset, catalogUrl);
   const deckUrls = new Set(layout.decks.map((deck) => deck.url));
   const groupUrls = new Set(layout.groups.map((entry) => entry.group.url));

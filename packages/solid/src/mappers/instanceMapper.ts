@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
+import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
 import type { Instance, InstanceMeta } from "@solid-memo/domain/instance";
 import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import { instanceMetaFromRecord, instanceMetaToRecord } from "@solid-memo/domain/instanceRecord";
@@ -25,7 +25,7 @@ export function toInstance(registration: InstanceRegistration): Instance {
 }
 
 /** The meta document's subject as an InstanceMeta; null when it does not fit. */
-export function toInstanceMeta(thing: Thing): InstanceMeta | null {
+export function toInstanceMeta(thing: Subject): InstanceMeta | null {
   const read = readVersioned(thing, "instance");
   if (read === null) return null;
   return instanceMetaFromRecord(
@@ -38,7 +38,7 @@ export function toInstanceMeta(thing: Thing): InstanceMeta | null {
 export function toInstanceMetaThing(
   url: string,
   meta: InstanceMeta,
-  existing: ThingPersisted | null,
-): ThingPersisted {
+  existing: NamedSubject | null,
+): NamedSubject {
   return recordThing(url, INSTANCE_V2, instanceMetaToRecord(meta), existing);
 }

@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
   buildThing,
   createSolidDataset,
   createThing,
   getThingAll,
   getUrlAll,
   setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { Deck } from "@solid-memo/domain/deck";
 import { AppError } from "@solid-memo/domain/appError";
 import {
@@ -50,7 +50,7 @@ type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocum
 export type DocumentStanding = "owned" | "adoptable" | "unclaimed";
 
 /** What dcterms:isPartOf the document itself (`<>`, spelled any way a request sends it) states. */
-function partOfOf(dataset: SolidDataset, url: string): string[] {
+function partOfOf(dataset: Dataset, url: string): string[] {
   return getThingAll(dataset)
     .filter((thing) => isSameUrl(thing.url, url))
     .flatMap((thing) => getUrlAll(thing, DCTERMS.isPartOf));
@@ -61,7 +61,7 @@ function partOfOf(dataset: SolidDataset, url: string): string[] {
  * dcterms:isPartOf the deck's catalog entry, added once. Any other
  * dcterms:isPartOf stays (another app may point two decks at one document).
  */
-function withPartOf(dataset: SolidDataset, url: string, deckUrl: string): SolidDataset {
+function withPartOf(dataset: Dataset, url: string, deckUrl: string): Dataset {
   if (ownsDocument(partOfOf(dataset, url), deckUrl)) return dataset;
   const document =
     getThingAll(dataset).find((thing) => isSameUrl(thing.url, url)) ?? createThing({ url });
@@ -110,7 +110,7 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
   async function standing(
     deck: DeckPlace,
     url: string,
-    dataset: SolidDataset | null,
+    dataset: Dataset | null,
   ): Promise<DocumentStanding> {
     const instance = instanceOf(deck);
     if (dataset !== null && ownsDocument(partOfOf(dataset, url), deck.url)) return "owned";
@@ -137,7 +137,7 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
       if (found.some((other) => isSameUrl(other, url))) continue;
       if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance))) continue;
-      let dataset: SolidDataset | null;
+      let dataset: Dataset | null;
       try {
         dataset = await getSolidDatasetOrNull(url, fetch);
       } catch {
@@ -167,7 +167,7 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
      * dataset not read from `url` is a new document, made only where
      * there is none yet (If-None-Match: *).
      */
-    async writable(deck: DeckPlace, url: string, dataset: SolidDataset): Promise<SolidDataset> {
+    async writable(deck: DeckPlace, url: string, dataset: Dataset): Promise<Dataset> {
       const read = isReadFrom(dataset, url) ? dataset : null;
       if ((await standing(deck, url, read)) === "unclaimed")
         throw new AppError("deckDocumentUnclaimed", { deck: deck.title });

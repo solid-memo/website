@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type Subject,
   asUrl,
   getThing,
   getThingAll,
   getUrlAll,
   toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import type { DocumentContext, ShapeValidator } from "@solid-memo/application/ports";
 import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domain/validation";
@@ -151,7 +151,7 @@ function isForeignMember(
  * so the check names it, and a repair may remove the entry, and nothing
  * else.
  */
-function placeViolations(thing: Thing, documentUrl: string): Violation[] {
+function placeViolations(thing: Subject, documentUrl: string): Violation[] {
   const instance = instanceUrlOfDeck(documentUrl);
   const misplaced = (value: string, path?: string): Violation => ({
     ...(path === undefined ? {} : { path }),
@@ -302,7 +302,7 @@ export function createShaclShapeValidator({
    * dataset needs (a description), which the release check asks of it.
    */
   async function subjectViolations(
-    dataset: SolidDataset,
+    dataset: Dataset,
     subjects: readonly string[],
     context: WriteContext,
   ): Promise<string[]> {
@@ -356,7 +356,7 @@ export function createShaclShapeValidator({
    */
   async function reportOf(
     url: string,
-    dataset: SolidDataset | null,
+    dataset: Dataset | null,
     context: DocumentContext,
   ): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };

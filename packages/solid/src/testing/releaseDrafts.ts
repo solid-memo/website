@@ -4,7 +4,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { toRdfJsDataset } from "@inrupt/solid-client";
+import { toRdfJsDataset } from "../client/rdf";
 import type { Quad } from "@rdfjs/types";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";

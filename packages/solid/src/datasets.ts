@@ -3,29 +3,29 @@
 // SPDX-License-Identifier: MIT
 
 import {
-  createSolidDataset,
   deleteSolidDataset,
-  getThing,
-  type getSolidDataset,
-  removeThing,
-  removeUrl,
   saveSolidDatasetAt,
-  setThing,
   solidDatasetAsTurtle,
-  toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
   type WithChangeLog,
   type WithServerResourceInfo,
 } from "@inrupt/solid-client";
+import {
+  type Dataset,
+  type FetchedDataset,
+  type Subject,
+  createSolidDataset,
+  getThing,
+  removeThing,
+  removeUrl,
+  setThing,
+  toRdfJsDataset,
+} from "./client/rdf";
 
 import type { Literal, Quad } from "@rdfjs/types";
 import { getSolidDatasetLinear, graphsOf } from "./linearDataset";
 import { unlessNewer } from "./records";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-
-type Dataset = Awaited<ReturnType<typeof getSolidDataset>>;
 
 /**
  * Reading and writing pod documents with HTTP preconditions, so that a
@@ -99,8 +99,8 @@ export class PreconditionFailedError extends AppError {
 const READS = new WeakMap<
   typeof globalThis.fetch,
   {
-    inFlight: Map<string, Promise<Dataset>>;
-    known: Map<string, { etag: string; dataset: Dataset }>;
+    inFlight: Map<string, Promise<FetchedDataset>>;
+    known: Map<string, { etag: string; dataset: FetchedDataset }>;
   }
 >();
 
@@ -114,7 +114,7 @@ function readsOf(fetch: typeof globalThis.fetch) {
 }
 
 /** Fetch a dataset, remembering its ETag for a later conditional write; see READS. */
-export function readDataset(url: string, fetch: typeof globalThis.fetch): Promise<Dataset> {
+export function readDataset(url: string, fetch: typeof globalThis.fetch): Promise<FetchedDataset> {
   const { inFlight, known } = readsOf(fetch);
   const key = documentUrlOf(url);
   const shared = inFlight.get(key);
@@ -134,7 +134,10 @@ export function readDataset(url: string, fetch: typeof globalThis.fetch): Promis
  * one that changed since is refused (PreconditionFailedError), to be read
  * again.
  */
-export function keptDataset(url: string, fetch: typeof globalThis.fetch): Dataset | undefined {
+export function keptDataset(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): FetchedDataset | undefined {
   const kept = READS.get(fetch)?.known.get(documentUrlOf(url));
   return kept === undefined || strong(kept.etag) === undefined ? undefined : kept.dataset;
 }
@@ -165,11 +168,11 @@ export function readDatasetSince(
   url: string,
   version: string,
   fetch: typeof globalThis.fetch,
-): Promise<Dataset | typeof UNCHANGED | null> {
+): Promise<FetchedDataset | typeof UNCHANGED | null> {
   const { inFlight, known } = readsOf(fetch);
   const key = `${documentUrlOf(url)}\n${version}`;
   const shared = inFlight.get(key);
-  if (shared !== undefined) return shared as Promise<Dataset | typeof UNCHANGED | null>;
+  if (shared !== undefined) return shared as Promise<FetchedDataset | typeof UNCHANGED | null>;
   const read = fetchDataset(url, fetch, known, version)
     .catch((error: unknown) => {
       if (statusOf(error) === 404) return null;
@@ -178,7 +181,7 @@ export function readDatasetSince(
     .finally(() => {
       if (inFlight.get(key) === read) inFlight.delete(key);
     });
-  inFlight.set(key, read as Promise<Dataset>);
+  inFlight.set(key, read as Promise<FetchedDataset>);
   return read;
 }
 
@@ -191,26 +194,26 @@ export function versionOf(dataset: object): string | undefined {
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
-  known: Map<string, { etag: string; dataset: Dataset }>,
-): Promise<Dataset>;
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
+): Promise<FetchedDataset>;
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
-  known: Map<string, { etag: string; dataset: Dataset }>,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
   since: string,
-): Promise<Dataset | typeof UNCHANGED>;
+): Promise<FetchedDataset | typeof UNCHANGED>;
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
-  known: Map<string, { etag: string; dataset: Dataset }>,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
   since?: string,
-): Promise<Dataset | typeof UNCHANGED> {
+): Promise<FetchedDataset | typeof UNCHANGED> {
   const document = documentUrlOf(url);
   const before = known.get(document);
   const asked = since ?? before?.etag;
   let etag: string | null = null;
   let notModified = false;
-  let dataset: Dataset;
+  let dataset: FetchedDataset;
   try {
     dataset = await getSolidDatasetLinear(url, {
       fetch: async (input, init) => {
@@ -245,7 +248,7 @@ async function fetchDataset(
 export async function getSolidDatasetOrNull(
   url: string,
   fetch: typeof globalThis.fetch,
-): Promise<Dataset | null> {
+): Promise<FetchedDataset | null> {
   try {
     return await readDataset(url, fetch);
   } catch (error) {
@@ -262,7 +265,7 @@ export async function getSolidDatasetOrNull(
  * small it is: for a bulk edit of text, which Community Solid Server's
  * in-memory store cuts short when a PATCH holds characters beyond ASCII.
  */
-export async function saveDataset<T extends SolidDataset>(
+export async function saveDataset<T extends Dataset>(
   url: string,
   dataset: T,
   fetch: typeof globalThis.fetch,
@@ -273,7 +276,7 @@ export async function saveDataset<T extends SolidDataset>(
   const etag = isEdit ? strong(ETAGS.get(info)) : undefined;
   forgetRead(url, fetch);
   let answered: string | undefined;
-  let saved: Dataset;
+  let saved: FetchedDataset;
   try {
     saved = await saveSolidDatasetAt(url, dataset, {
       fetch: ownPatches(
@@ -320,7 +323,7 @@ export function isReadFrom(dataset: object, url: string): boolean {
 /** Delete a document read before, only if it is unchanged since (If-Match). */
 export async function deleteDataset(
   url: string,
-  dataset: SolidDataset,
+  dataset: Dataset,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   const info = resourceInfoOf(dataset);
@@ -376,7 +379,7 @@ export type Removal = "absent" | "deleted" | "kept";
  */
 export async function removeOwned(
   url: string,
-  owns: (dataset: SolidDataset) => Owned,
+  owns: (dataset: Dataset) => Owned,
   fetch: typeof globalThis.fetch,
 ): Promise<Removal> {
   try {
@@ -389,7 +392,7 @@ export async function removeOwned(
 
 async function removeOwnedOnce(
   url: string,
-  owns: (dataset: SolidDataset) => Owned,
+  owns: (dataset: Dataset) => Owned,
   fetch: typeof globalThis.fetch,
 ): Promise<Removal> {
   let served = false;
@@ -399,7 +402,7 @@ async function removeOwnedOnce(
     served = response.ok;
     return response;
   }) as typeof globalThis.fetch;
-  let dataset: Dataset | null;
+  let dataset: FetchedDataset | null;
   try {
     dataset = await getSolidDatasetOrNull(url, noting);
   } catch (error) {
@@ -444,7 +447,7 @@ async function removeOwnedOnce(
       ...dataset,
       graphs: graphsOf(left),
       internal_changeLog: { additions: [], deletions: [] },
-    }) as Dataset;
+    }) as FetchedDataset;
     await saveDataset(url, rest, fetch, { whole: true });
     return "kept";
   }
@@ -460,7 +463,7 @@ async function removeOwnedOnce(
 }
 
 /** Whether a newer version of the app wrote the subject (unlessNewer): it is never removed. */
-function isNewer(dataset: SolidDataset, subject: string): boolean {
+function isNewer(dataset: Dataset, subject: string): boolean {
   const thing = getThing(dataset, subject);
   try {
     if (thing !== null) unlessNewer(thing);
@@ -524,7 +527,7 @@ function withIfMatch(
  */
 function ownPatches(
   fetch: typeof globalThis.fetch,
-  dataset: SolidDataset,
+  dataset: Dataset,
   whole: boolean,
 ): typeof globalThis.fetch {
   return async (input, init) => {
@@ -564,7 +567,7 @@ function ownPatches(
  */
 export function appendToDocument(
   url: string,
-  thing: Thing,
+  thing: Subject,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   return appendAllToDocument(url, [thing], fetch);
@@ -578,7 +581,7 @@ export function appendToDocument(
  */
 export async function appendAllToDocument(
   url: string,
-  things: readonly Thing[],
+  things: readonly Subject[],
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   const encoder = new TextEncoder();
@@ -625,7 +628,7 @@ const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
  * one with `.0` (`1` written, `1.0` served), so a deletion spelled as
  * read is not found there (ownPatches).
  */
-export function patchBody(dataset: SolidDataset, decimalsAsNumbers = false): string | null {
+export function patchBody(dataset: Dataset, decimalsAsNumbers = false): string | null {
   const changes = (dataset as Partial<WithChangeLog>).internal_changeLog;
   if (changes === undefined) return null;
   const block = (operation: string, quads: readonly Quad[], asNumbers: boolean): string | null => {

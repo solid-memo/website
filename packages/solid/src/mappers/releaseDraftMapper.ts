@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type Subject,
   createSolidDataset,
   getThing,
   getUrlAll,
   setThing,
   toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+} from "../client/rdf";
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import {
@@ -136,12 +136,12 @@ export function tripleKey(triple: DraftTriple): string {
 }
 
 /** Triples as a dataset, built in one pass. */
-export function datasetOf(quads: Iterable<Quad>): SolidDataset {
+export function datasetOf(quads: Iterable<Quad>): Dataset {
   return Object.freeze({ ...createSolidDataset(), graphs: graphsOf(quads) });
 }
 
 /** The quads of a dataset. */
-export function quadsOf(dataset: SolidDataset): Quad[] {
+export function quadsOf(dataset: Dataset): Quad[] {
   return [...toRdfJsDataset(dataset)] as Quad[];
 }
 
@@ -201,7 +201,7 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
   for (const subject of subjects) {
     const id = idIn({ url }, subject);
     if (id === null) continue;
-    const thing = getThing(dataset, subject) as Thing;
+    const thing = getThing(dataset, subject) as Subject;
     const types = getUrlAll(thing, RDF_TYPE);
     const kinds = KINDS.filter(({ shape }) => types.includes(LATEST(shape).targetClass));
     if (kinds.length !== 1) continue;

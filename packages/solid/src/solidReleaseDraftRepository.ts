@@ -2,18 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { getContainedResourceUrlAll, getSolidDataset } from "@inrupt/solid-client";
 import {
+  type Dataset,
+  type NamedSubject,
   asUrl,
   createSolidDataset,
-  getContainedResourceUrlAll,
-  getSolidDataset,
   getThing,
   getThingAll,
   getUrlAll,
   setThing,
-  type SolidDataset,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
@@ -86,7 +85,7 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
 /** Each of a draft's documents as read last, by URL, and the version they were at together. */
 interface Read {
   version: string;
-  documents: Map<string, SolidDataset>;
+  documents: Map<string, Dataset>;
 }
 
 /**
@@ -325,7 +324,7 @@ export function createSolidReleaseDraftRepository({
     },
 
     async readRelease(url) {
-      let dataset: SolidDataset;
+      let dataset: Dataset;
       try {
         dataset = await readDataset(url, releaseFetch);
       } catch {
@@ -396,7 +395,7 @@ export function createSolidReleaseDraftRepository({
 }
 
 /** The version of each of a draft's documents, in order: a draft changed when any of them did, or one came or went. */
-function versionOfDocuments(urls: readonly string[], datasets: readonly SolidDataset[]): string {
+function versionOfDocuments(urls: readonly string[], datasets: readonly Dataset[]): string {
   return JSON.stringify(urls.map((url, at) => [url, versionOf(datasets[at]!)]));
 }
 
@@ -543,15 +542,15 @@ function changesByDocument(
  * its blank nodes.
  */
 function changedDocument(
-  stored: SolidDataset | undefined,
+  stored: Dataset | undefined,
   changes: DocumentChanges,
-): { dataset: SolidDataset; made: MadeEntry[] } {
+): { dataset: Dataset; made: MadeEntry[] } {
   const gone = changes.gone.map(inDocument);
   const made = changes.made.map(({ entry, was }) => ({
     entry: inDocument(entry),
     ...(was === undefined ? {} : { was: inDocument(was) }),
   }));
-  let dataset: SolidDataset = stored ?? createSolidDataset();
+  let dataset: Dataset = stored ?? createSolidDataset();
   const blank = [
     ...gone,
     ...made.flatMap(({ entry, was }) => [entry, ...(was === undefined ? [] : [was])]),
@@ -585,11 +584,11 @@ function involvesBlank(entry: DraftEntry): boolean {
  * else the document says of it kept.
  */
 function rewritten(
-  existing: ThingPersisted | null,
+  existing: NamedSubject | null,
   entry: DraftEntry,
   was: DraftEntry | undefined,
-): ThingPersisted {
-  const empty: ThingPersisted = { type: "Subject", url: entry.subject, predicates: {} };
+): NamedSubject {
+  const empty: NamedSubject = { type: "Subject", url: entry.subject, predicates: {} };
   const base =
     entry.shaped === undefined
       ? (existing ?? empty)
@@ -603,7 +602,7 @@ function rewritten(
     ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
   ];
   // The entry says something of its subject (a record's type, or a statement): the subject is there.
-  return graphsOf(quads).default[entry.subject] as ThingPersisted;
+  return graphsOf(quads).default[entry.subject] as NamedSubject;
 }
 
 function asTriple(quad: Quad): DraftTriple {
@@ -638,10 +637,10 @@ function inDocument(entry: DraftEntry): DraftEntry {
  * names now put in, as the document is written whole.
  */
 function withBlankNodes(
-  dataset: SolidDataset,
+  dataset: Dataset,
   gone: readonly DraftEntry[],
   made: readonly MadeEntry[],
-): SolidDataset {
+): Dataset {
   const before = new Set(
     [...gone, ...made.flatMap(({ was }) => (was === undefined ? [] : [was]))]
       .filter((entry) => entry.subject.startsWith("_:"))
@@ -657,7 +656,7 @@ function withBlankNodes(
     ...dataset,
     graphs: graphsOf(quads),
     internal_changeLog: { additions: [], deletions: [] },
-  }) as SolidDataset;
+  }) as Dataset;
 }
 
 /**

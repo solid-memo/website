@@ -3,15 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type NamedSubject,
+  type SubjectBuilder,
   buildThing,
   createSolidDataset,
   getThing,
   getUrlAll,
   setThing,
-  type SolidDataset,
-  type ThingBuilder,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { LangText } from "@solid-memo/domain/langText";
 import { copyKeywords, noKeywords, type LangTexts } from "@solid-memo/domain/keywords";
 import type { DeckRepository } from "@solid-memo/application/ports";
@@ -102,7 +102,7 @@ export function createSolidDeckRepository({
   /** Save a document once the subjects the write touched are checked. */
   async function save(
     url: string,
-    dataset: SolidDataset,
+    dataset: Dataset,
     subjects: readonly string[],
     options?: { whole?: boolean },
   ): Promise<void> {
@@ -117,7 +117,7 @@ export function createSolidDeckRepository({
    */
   async function saveCardsDocument(
     deck: Deck,
-    dataset: SolidDataset,
+    dataset: Dataset,
     subjects: readonly string[],
     options?: { whole?: boolean },
   ): Promise<void> {
@@ -315,7 +315,7 @@ export function createSolidDeckRepository({
     async upgradeCards(deck): Promise<boolean> {
       const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) return false;
-      let updated: SolidDataset = dataset;
+      let updated: Dataset = dataset;
       const subjects: string[] = [];
       // Each card stored in an older format, as read and brought up to date in memory, written in this app's.
       for (const card of toCards(dataset).filter(isOutdated)) {
@@ -332,7 +332,7 @@ export function createSolidDeckRepository({
     async stateCardLanguages(deck, cardIds, languages): Promise<number> {
       const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) return 0;
-      let updated: SolidDataset = dataset;
+      let updated: Dataset = dataset;
       const stated: string[] = [];
       for (const id of cardIds) {
         const thing = getThing(updated, `${deck.cardsDocumentUrl}#${id}`);
@@ -518,7 +518,7 @@ export function createSolidDeckRepository({
   async function editEntry(
     deck: Deck,
     change: (stored: Deck) => {
-      edit: (entry: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>;
+      edit: (entry: SubjectBuilder) => SubjectBuilder;
       deck: Deck;
     } | null,
     checked = false,
@@ -693,7 +693,7 @@ export function createSolidDeckRepository({
    * Returns the subjects written, for the write check.
    */
   function withCardChanges(
-    dataset: SolidDataset,
+    dataset: Dataset,
     deck: Deck,
     {
       save: saved,
@@ -702,7 +702,7 @@ export function createSolidDeckRepository({
       save: (CardContent & { id: string; createdAt?: string; retired?: true })[];
       remove: string[];
     },
-  ): { dataset: SolidDataset; subjects: string[] } {
+  ): { dataset: Dataset; subjects: string[] } {
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
     let updated = dataset;
     const subjects: string[] = [];
@@ -730,11 +730,11 @@ export function createSolidDeckRepository({
    * distractors'.
    */
   function withCard(
-    dataset: SolidDataset,
+    dataset: Dataset,
     deck: Deck,
     card: CardContent & { id: string; createdAt?: string; retired?: true },
-    existing: ThingPersisted | null,
-  ): { dataset: SolidDataset; subjects: string[] } {
+    existing: NamedSubject | null,
+  ): { dataset: Dataset; subjects: string[] } {
     const before = existing === null ? [] : getUrlAll(existing, SM.distractor);
     const distractors = card.distractors ?? [];
     const thing = withSuggestedAnswers(
@@ -774,7 +774,7 @@ export function createSolidDeckRepository({
    * as completeChapter adds one) and the card language
    * (sm:deckCardLanguage, as setCardLanguage sets it).
    */
-  function withOwnTerms(dataset: SolidDataset, deck: Deck): SolidDataset {
+  function withOwnTerms(dataset: Dataset, deck: Deck): Dataset {
     let builder = buildThing(getThing(dataset, deck.url)!);
     if (deck.course === true) builder = builder.addIri(RDF.type, SCHEMA.Course);
     for (const url of deck.completedChapters ?? [])
@@ -794,8 +794,8 @@ export function createSolidDeckRepository({
   function cardThing(
     deck: Deck,
     card: CardContent & { id: string; createdAt?: string; retired?: true },
-    existing: ThingPersisted | null,
-  ): ThingPersisted {
+    existing: NamedSubject | null,
+  ): NamedSubject {
     return recordThing(
       `${deck.cardsDocumentUrl}#${card.id}`,
       CARD_V7,
@@ -806,7 +806,7 @@ export function createSolidDeckRepository({
 }
 
 /** The cards document without the card and the distractors it names. */
-function withoutCard(dataset: SolidDataset, cardUrl: string): SolidDataset {
+function withoutCard(dataset: Dataset, cardUrl: string): Dataset {
   const card = getThing(dataset, cardUrl);
   const distractors = card === null ? [] : getUrlAll(card, SM.distractor);
   return [cardUrl, ...distractors].reduce(

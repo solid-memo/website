@@ -3,19 +3,21 @@
 // SPDX-License-Identifier: MIT
 
 import {
-  asUrl,
-  createSolidDataset,
   getJsonLdParser,
-  getThing,
-  getThingAll,
   getTurtleParser,
-  getUrlAll,
   solidDatasetAsTurtle,
-  toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
   type WithServerResourceInfo,
 } from "@inrupt/solid-client";
+import {
+  type Dataset,
+  type Subject,
+  asUrl,
+  createSolidDataset,
+  getThing,
+  getThingAll,
+  getUrlAll,
+  toRdfJsDataset,
+} from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
 import type { DeckArchive } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
@@ -161,17 +163,17 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
 }
 
 /** The triples of a document read; none of one there is none of. */
-function quadsOf(dataset: SolidDataset | null): Quad[] {
+function quadsOf(dataset: Dataset | null): Quad[] {
   return dataset === null ? [] : ([...toRdfJsDataset(dataset)] as Quad[]);
 }
 
 /** Triples as a dataset, built in one pass (linearDataset.ts). */
-function datasetOf(quads: readonly Quad[]): SolidDataset {
+function datasetOf(quads: readonly Quad[]): Dataset {
   return Object.freeze({ ...createSolidDataset(), graphs: graphsOf(quads) });
 }
 
 /** Refuse a subject of a deck's kinds in a newer format than this app reads, as the pod's own are read only by a newer app. */
-function refuseNewer(thing: Thing): void {
+function refuseNewer(thing: Subject): void {
   const types = getUrlAll(thing, RDF.type);
   const schedulers = getUrlAll(thing, SM.scheduler);
   for (const { type, scheduler, shape } of KINDS) {

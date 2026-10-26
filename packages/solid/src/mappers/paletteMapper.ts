@@ -2,14 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  asUrl,
-  getThing,
-  getThingAll,
-  getUrlAll,
-  setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+import { type Dataset, asUrl, getThing, getThingAll, getUrlAll, setThing } from "../client/rdf";
 import type { CustomPalette } from "@solid-memo/domain/customPalette";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import {
@@ -40,7 +33,7 @@ function isIn(iri: string, documentUrl: string): boolean {
 }
 
 /** The color set at `iri` in the palette's document, as its latest record; null when there is none it can read. */
-function colorSetOf(dataset: SolidDataset, iri: string, documentUrl: string): ColorSetV1 | null {
+function colorSetOf(dataset: Dataset, iri: string, documentUrl: string): ColorSetV1 | null {
   if (!isIn(iri, documentUrl)) return null;
   const thing = getThing(dataset, iri);
   const read = thing === null ? null : readVersioned(thing, "colorSet");
@@ -52,7 +45,7 @@ function colorSetOf(dataset: SolidDataset, iri: string, documentUrl: string): Co
  * order written: each a subject of that document, as a palette the
  * preferences name must be (isPaletteOf).
  */
-export function toPalettes(dataset: SolidDataset, documentUrl: string): CustomPalette[] {
+export function toPalettes(dataset: Dataset, documentUrl: string): CustomPalette[] {
   return getThingAll(dataset)
     .filter(
       (thing) => getUrlAll(thing, RDF.type).includes(SM.Palette) && isIn(asUrl(thing), documentUrl),
@@ -80,10 +73,10 @@ export function toPalettes(dataset: SolidDataset, documentUrl: string): CustomPa
  * Triples this app does not know survive (recordThing).
  */
 export function withPalette(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documentUrl: string,
   palette: CustomPalette,
-): { dataset: SolidDataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[] } {
   const existing = getThing(dataset, palette.url);
   const read = existing === null ? null : readVersioned(existing, "palette");
   const place = (theme: "light" | "dark") => {
