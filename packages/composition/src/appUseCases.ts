@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
-import { authFetch, sessionWebId } from "@solid-memo/solid/authFetch";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
-import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
+import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
 import { createSolidDeckArchive } from "@solid-memo/solid/solidDeckArchive";
@@ -42,6 +41,8 @@ import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
+import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createTrialUseCases } from "./trialUseCases";
 
@@ -79,6 +80,8 @@ export function createAppUseCases({
   ruleset,
   indexedDB,
 }: AppOptions): UseCases {
+  /** The logged-in user's session, and the fetch that acts as them (docs/authentication.md). */
+  const session = createSolidSession({ clientName, site: servedSite, clientId });
   /** A guest's pod, kept in this browser (docs/guest-mode.md). */
   const guestStore =
     indexedDB === undefined
@@ -99,7 +102,7 @@ export function createAppUseCases({
    * user, to any other.
    */
   const writeFence = createWriteFence(
-    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }),
+    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: session.fetch }),
   );
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
@@ -117,7 +120,10 @@ export function createAppUseCases({
   const checkWrite = shapeValidator.checkSubjects;
   const now = () => new Date();
   const randomId = () => crypto.randomUUID();
-  const storageGateway = createSolidStorageGateway({ fetch: podFetch });
+  const storageGateway = createSolidStorageGateway({
+    fetch: podFetch,
+    profileStorages: getProfileStorages,
+  });
   const instanceRepository = createSolidInstanceRepository({
     fetch: podFetch,
     checkWrite,
@@ -140,7 +146,7 @@ export function createAppUseCases({
       remote: createOwnPodFetch({
         fetch: podFetch,
         publicFetch: anonymousFetch,
-        webId: sessionWebId,
+        webId: session.webId,
         ownFolders: async (webId) => {
           const [storages, instances] = await Promise.all([
             storageGateway.discoverStorages(webId).catch(() => []),
@@ -153,7 +159,7 @@ export function createAppUseCases({
   });
 
   return createUseCases({
-    sessionGateway: createSolidSessionGateway({ clientName, site: servedSite, clientId }),
+    sessionGateway: session.sessionGateway,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway,
     instanceRepository,
@@ -196,6 +202,7 @@ export function createAppUseCases({
       fetch: podFetch,
       shareFetch,
       publicFetch: anonymousFetch,
+      grantPublicRead,
     }),
     // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.
     trialSandbox: (draft) => createTrialUseCases(draft, { podFetch, shapeValidator, ruleset }),

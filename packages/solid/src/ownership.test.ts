@@ -3,14 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import {
-  buildThing,
-  createThing,
-  mockSolidDatasetFrom,
-  setThing,
-  type SolidDataset,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+import { buildThing, createThing, type Dataset, type NamedSubject, setThing } from "./client/rdf";
+import { datasetFrom } from "./testing/datasets";
 import { readDataset } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -27,11 +21,8 @@ const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
 const DCAT_DISTRIBUTION = "http://www.w3.org/ns/dcat#distribution";
 const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
 
-function documentOf(...things: ThingPersisted[]): SolidDataset {
-  return things.reduce<SolidDataset>(
-    (dataset, thing) => setThing(dataset, thing),
-    mockSolidDatasetFrom(DOC),
-  );
+function documentOf(...things: NamedSubject[]): Dataset {
+  return things.reduce<Dataset>((dataset, thing) => setThing(dataset, thing), datasetFrom(DOC));
 }
 
 const subject = (id: string) =>
@@ -126,7 +117,7 @@ describe("foreignSubjects", () => {
 });
 
 /** A document as a pod serves it, read as Solid Memo reads it: its Turtle at `url`. */
-async function served(url: string, turtle: string): Promise<SolidDataset> {
+async function served(url: string, turtle: string): Promise<Dataset> {
   const local = createLocalPod({
     root: "https://pod.example/",
     store: createMemoryResourceStore(),

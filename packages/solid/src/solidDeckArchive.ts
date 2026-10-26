@@ -2,30 +2,23 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { parseQuads, solidDatasetAsTurtle } from "./client/resources";
 import {
+  type Dataset,
+  type Subject,
   asUrl,
-  createSolidDataset,
-  getJsonLdParser,
+  datasetFromQuads,
   getThing,
   getThingAll,
-  getTurtleParser,
   getUrlAll,
-  solidDatasetAsTurtle,
   toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
-  type WithServerResourceInfo,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
 import type { DeckArchive } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card } from "@solid-memo/domain/deck";
-import {
-  DECK_FILE_TYPES,
-  type DeckFileFormat,
-  type FormatUpgrade,
-} from "@solid-memo/domain/deckFile";
+import type { DeckFileFormat, FormatUpgrade } from "@solid-memo/domain/deckFile";
 import {
   REVIEW_STATE_FORMAT_VERSION,
   type FsrsState,
@@ -35,7 +28,6 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { getSolidDatasetOrNull } from "./datasets";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
-import { graphsOf } from "./linearDataset";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
 import { toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
 import { storedVersionOf } from "./records";
@@ -72,9 +64,9 @@ const KINDS: readonly { type: string; scheduler?: string; shape: ShapeName }[] =
  * triples as they are, so what another app said of the deck, its cards
  * or their states goes with them; only the deck's place among its
  * groups (sm:position) is left behind, and a course's progress unless
- * asked for. Turtle is written by @inrupt/solid-client
- * (solidDatasetAsTurtle) and read by it (getTurtleParser), JSON-LD read
- * by it too (getJsonLdParser) and written here (jsonLd.ts).
+ * asked for. Turtle is written and read as pod documents
+ * are (solidDatasetAsTurtle, parseQuads), JSON-LD read so too and
+ * written here (jsonLd.ts).
  */
 export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fetch }): DeckArchive {
   return {
@@ -97,11 +89,11 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
         ...quadsOf(reviews),
       ];
       if (format === "jsonld") return jsonLdOf(quads, DECK_FILE_PREFIXES);
-      return solidDatasetAsTurtle(datasetOf(quads), { prefixes: { ...DECK_FILE_PREFIXES } });
+      return solidDatasetAsTurtle(datasetFromQuads(quads), { prefixes: { ...DECK_FILE_PREFIXES } });
     },
 
     async readDeckFile(text, format, baseUrl) {
-      const dataset = datasetOf(await parseDeckFile(text, format, baseUrl));
+      const dataset = datasetFromQuads(await parseDeckFile(text, format, baseUrl));
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);
       const typed = (type: string) =>
@@ -161,17 +153,12 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
 }
 
 /** The triples of a document read; none of one there is none of. */
-function quadsOf(dataset: SolidDataset | null): Quad[] {
+function quadsOf(dataset: Dataset | null): Quad[] {
   return dataset === null ? [] : ([...toRdfJsDataset(dataset)] as Quad[]);
 }
 
-/** Triples as a dataset, built in one pass (linearDataset.ts). */
-function datasetOf(quads: readonly Quad[]): SolidDataset {
-  return Object.freeze({ ...createSolidDataset(), graphs: graphsOf(quads) });
-}
-
 /** Refuse a subject of a deck's kinds in a newer format than this app reads, as the pod's own are read only by a newer app. */
-function refuseNewer(thing: Thing): void {
+function refuseNewer(thing: Subject): void {
   const types = getUrlAll(thing, RDF.type);
   const schedulers = getUrlAll(thing, SM.scheduler);
   for (const { type, scheduler, shape } of KINDS) {
@@ -200,22 +187,10 @@ export function parseDeckFile(
   baseUrl: string,
 ): Promise<Quad[]> {
   if (format === "jsonld") refuseRemoteContexts(text);
-  const parser = format === "turtle" ? getTurtleParser() : getJsonLdParser();
-  return new Promise((resolve, reject) => {
-    const quads: Quad[] = [];
-    parser.onQuad((quad) => {
-      if (quad.graph.termType === "DefaultGraph") quads.push(quad);
-    });
-    parser.onError((error) =>
-      reject(new AppError("deckFileUnreadable", { reason: String(error) })),
-    );
-    parser.onComplete(() => resolve(quads));
-    parser.parse(text, {
-      internal_resourceInfo: {
-        sourceIri: baseUrl,
-        isRawData: false,
-        contentType: DECK_FILE_TYPES[format].mediaType,
-      },
-    } as WithServerResourceInfo);
-  });
+  return parseQuads(text, format, baseUrl).then(
+    (quads) => quads.filter((quad) => quad.graph.termType === "DefaultGraph"),
+    (error: unknown) => {
+      throw new AppError("deckFileUnreadable", { reason: String(error) });
+    },
+  );
 }

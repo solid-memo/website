@@ -14,11 +14,11 @@ Every specification below is open; the drafts and de facto ones are in
 
 | Standard | Version | Status | Where used | Open |
 |---|---|---|---|---|
-| [Solid Protocol](https://solidproject.org/TR/protocol) | 0.11.0 | W3C Solid Community Group draft | Reading and writing the pod: [`packages/solid/src/`](../packages/solid/src/) through `@inrupt/solid-client`; the storage found by `pim:storage` ([data-model.md](data-model.md#discovery-chain)) | Yes (draft) |
-| [Solid-OIDC](https://solidproject.org/TR/oidc) | 0.1.0 | W3C Solid Community Group draft | Login and session restore: [`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts) through `@inrupt/solid-client-authn-browser`, and the site's Client ID Document, which [`clientId.ts`](../packages/site/src/clientId.ts) writes ([authentication.md](authentication.md#the-client-id-document)) | Yes (draft) |
+| [Solid Protocol](https://solidproject.org/TR/protocol) | 0.11.0 | W3C Solid Community Group draft | Reading and writing the pod: [`packages/solid/src/`](../packages/solid/src/) through its client modules ([`client/`](../packages/solid/src/client/)) on `@inrupt/solid-client`; the storage found by `pim:storage` ([data-model.md](data-model.md#discovery-chain)) | Yes (draft) |
+| [Solid-OIDC](https://solidproject.org/TR/oidc) | 0.1.0 | W3C Solid Community Group draft | Login and session restore: [`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts) through the sign-in client, [`client/session.ts`](../packages/solid/src/client/session.ts), on `@inrupt/solid-client-authn-browser`, and the site's Client ID Document, which [`clientId.ts`](../packages/site/src/clientId.ts) writes ([authentication.md](authentication.md#the-client-id-document)) | Yes (draft) |
 | [WebID](https://www.w3.org/2005/Incubator/webid/spec/identity/) and the [Solid WebID Profile](https://solid.github.io/webid-profile/) | WebID 1.0 (2014); Solid WebID Profile 1.0.0 | W3C Incubator Group editor's draft; W3C Solid Community Group draft | The user's identity; the profile gives the issuer, storage and type indexes ([authentication.md](authentication.md), [onboarding.md](onboarding.md), `data-model.md`) | Yes (draft) |
 | [Type Indexes](https://solid.github.io/type-indexes/) | 1.0.0 | Editor's draft | Finding and registering an instance: [`typeIndex.ts`](../packages/solid/src/typeIndex.ts) ([data-model.md](data-model.md#registrations)) | Yes (draft) |
-| [Web Access Control](https://solidproject.org/TR/wac) and [Access Control Policy](https://solidproject.org/TR/acp) | WAC 1.0.0; ACP 0.9.0 | W3C Solid Community Group drafts | Making a published release public: [`solidReleasePublisher.ts`](../packages/solid/src/solidReleasePublisher.ts), through `@inrupt/solid-client`'s universal access, which speaks whichever the pod uses ([boundaries.md](boundaries.md)) | Yes (draft) |
+| [Web Access Control](https://solidproject.org/TR/wac) and [Access Control Policy](https://solidproject.org/TR/acp) | WAC 1.0.0; ACP 0.9.0 | W3C Solid Community Group drafts | Making a published release public: [`solidReleasePublisher.ts`](../packages/solid/src/solidReleasePublisher.ts), through `@inrupt/solid-client`'s universal access in [`client/access.ts`](../packages/solid/src/client/access.ts), which speaks whichever the pod uses ([boundaries.md](boundaries.md)) | Yes (draft) |
 | [Linked Data Platform](https://www.w3.org/TR/ldp/) | 1.0 | W3C Recommendation | Containers in the pod and the guest's pod: [`localPod.ts`](../packages/solid/src/localPod.ts) ([guest-mode.md](guest-mode.md)) | Yes |
 
 ## Linked data
@@ -119,9 +119,9 @@ the way of others working with Solid Memo's code or data.
   [Linked Web Storage Working Group](https://www.w3.org/groups/wg/lws/)
   is taking toward a Recommendation, are what every Solid server and
   app implements. Solid Memo's tests run against several servers
-  ([testing.md](testing.md)). Its code for them, through the Inrupt
-  client libraries, is all in one package, `@solid-memo/solid`
-  ([vendor-code.md](vendor-code.md)), so a change in the
+  ([testing.md](testing.md)). Its code for them is all in one package, `@solid-memo/solid`,
+  and its calls to the Inrupt client libraries in that package's
+  `src/client/` ([vendor-code.md](vendor-code.md)), so a change in the
   specifications is a change there.
 - **The type indexes** are how Solid apps find each other's data
   today; Solid Memo finds and advertises its instances through them.

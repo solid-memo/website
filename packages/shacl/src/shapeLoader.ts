@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getSolidDataset, toRdfJsDataset } from "@inrupt/solid-client";
 import type { DatasetCore } from "@rdfjs/types";
 import { PROFILES, REFERENCE_DATA, type ProfileName } from "./profiles";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
+import { readTurtleDocument } from "./turtleDocument";
 
 /**
  * The shape documents, fetched once each and parsed the way pod
@@ -41,7 +41,7 @@ export function createShapeLoader({
   function fetchOnce(url: string): Promise<DatasetCore> {
     let dataset = loaded.get(url);
     if (dataset === undefined) {
-      dataset = getSolidDataset(url, { fetch }).then(toRdfJsDataset);
+      dataset = readTurtleDocument(url, fetch);
       loaded.set(url, dataset);
     }
     return dataset;

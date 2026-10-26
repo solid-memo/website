@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import type { DeckLibrary } from "@solid-memo/application/ports";
-import type { SolidDataset } from "@inrupt/solid-client";
+import type { Dataset } from "./client/rdf";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 import { AppError } from "@solid-memo/domain/appError";
 import { catalogLinks } from "./catalogLinks";
-import { getSolidDatasetLinear } from "./linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 import {
   toCourseOutline,
   toLibraryDeckContent,
@@ -48,20 +48,20 @@ export interface SolidDeckLibraryDeps {
  * as anyone reads it, as the fetch reads everything: no login is sent.
  */
 export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps): DeckLibrary {
-  const releases = new Map<string, Promise<SolidDataset>>();
+  const releases = new Map<string, Promise<Dataset>>();
   const contents = new Map<string, Promise<LibraryDeckContent>>();
   const outlines = new Map<string, Promise<CourseOutline>>();
-  const indexes = new Map<string, Promise<SolidDataset>>();
+  const indexes = new Map<string, Promise<Dataset>>();
   const decks = new Map<string, Promise<LibraryDeck[]>>();
   const views = new Map<string, Promise<LibraryIndexView>>();
 
   /** The index's document, read once. */
-  function index(): Promise<SolidDataset> {
+  function index(): Promise<Dataset> {
     return kept(indexes, indexUrl, () => getSolidDatasetLinear(indexUrl, { fetch }));
   }
 
   /** The release's document, read once. */
-  function release(url: string): Promise<SolidDataset> {
+  function release(url: string): Promise<Dataset> {
     return kept(releases, url, () => getSolidDatasetLinear(url, { fetch }));
   }
 
@@ -89,7 +89,7 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
     },
 
     async readRelease(url) {
-      let dataset: SolidDataset;
+      let dataset: Dataset;
       try {
         dataset = await getSolidDatasetLinear(url, { fetch });
       } catch {

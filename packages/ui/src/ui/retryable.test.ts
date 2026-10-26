@@ -6,7 +6,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it } from "vitest";
 import { retryable } from "./retryable";
 
-/** An error as an @inrupt read throws it, with the response's status. */
+/** An error as a failed read of a pod throws it (an HttpError), with the response's status. */
 function inruptError(statusCode: number): Error {
   return Object.assign(new Error(`Fetching the Resource failed: ${statusCode}.`), { statusCode });
 }

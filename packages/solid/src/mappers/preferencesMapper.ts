@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
+import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
 import { preferencesFromRecord, preferencesToRecord } from "@solid-memo/domain/preferencesRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
@@ -14,7 +14,7 @@ import { readVersioned, recordThing } from "../records";
  * sm:Preferences that fits its format's shape. A format-1 document may
  * lack any field: the migration fills in the defaults.
  */
-export function toPreferences(thing: Thing): StoredPreferences | null {
+export function toPreferences(thing: Subject): StoredPreferences | null {
   const read = readVersioned(thing, "preferences");
   if (read === null) return null;
   return {
@@ -33,7 +33,7 @@ export function toPreferences(thing: Thing): StoredPreferences | null {
 export function toPreferencesThing(
   url: string,
   preferences: StudyPreferences,
-  existing: ThingPersisted | null,
-): ThingPersisted {
+  existing: NamedSubject | null,
+): NamedSubject {
   return recordThing(url, PREFERENCES_V6, preferencesToRecord(preferences), existing);
 }

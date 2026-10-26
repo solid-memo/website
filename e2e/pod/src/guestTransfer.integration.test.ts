@@ -38,6 +38,7 @@ import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPrefere
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
@@ -157,7 +158,10 @@ function app() {
     sessionGateway: undefined as never,
     deckLibrary: library,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
-    storageGateway: createSolidStorageGateway({ fetch: podFetch }),
+    storageGateway: createSolidStorageGateway({
+      fetch: podFetch,
+      profileStorages: getProfileStorages,
+    }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, ...ids }),
     deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, ...ids }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),

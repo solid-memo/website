@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SolidDataset } from "@inrupt/solid-client";
+import type { Dataset } from "./client/rdf";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
 
 /**
@@ -21,7 +21,7 @@ export type WriteContext = Exclude<ShapeContext, "any" | "library">;
  * without one, nothing is checked.
  */
 export type WriteCheck = (
-  dataset: SolidDataset,
+  dataset: Dataset,
   subjects: readonly string[],
   context: WriteContext,
 ) => Promise<void>;

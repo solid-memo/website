@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { getJsonLdParser, type WithServerResourceInfo } from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
 import { termOf } from "./ntriples";
+import { parseQuads } from "./client/resources";
 
 const EX = "https://example.org/ns#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
@@ -28,18 +28,10 @@ const quad = (subject: Term, predicate: string, object: Term) =>
 
 /** The triples a JSON-LD text holds, as N-Triples lines, sorted. */
 async function triplesOf(text: string): Promise<string[]> {
-  const parser = getJsonLdParser();
-  const lines: string[] = [];
-  parser.onQuad((q) =>
-    lines.push(`${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`),
-  );
-  await new Promise<void>((resolve) => {
-    parser.onComplete(resolve);
-    parser.parse(text, {
-      internal_resourceInfo: { sourceIri: "https://base.example/", isRawData: false },
-    } as WithServerResourceInfo);
-  });
-  return lines.sort();
+  const quads = await parseQuads(text, "jsonld", "https://base.example/");
+  return quads
+    .map((q) => `${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`)
+    .sort();
 }
 
 describe("jsonLdOf", () => {

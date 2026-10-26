@@ -5,27 +5,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
-  createContainerAt,
   createThing,
+  type Dataset,
+  getDatetime,
+  getThing,
+  getUrl,
+  setThing,
+} from "./client/rdf";
+import {
+  createContainerAt,
   deleteContainer,
   deleteFile,
   getFile,
   getSolidDataset,
-  getThing,
-  getUrl,
-  getDatetime,
-  mockContainerFrom,
-  mockSolidDatasetFrom,
   overwriteFile,
   saveSolidDatasetAt,
-  setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+} from "./client/resources";
+import { containerFrom, datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
 
-vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
+vi.mock("./client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/resources")>();
   return {
     ...actual,
     createContainerAt: vi.fn(),
@@ -92,7 +93,7 @@ describe("copyResource", () => {
   it("copies a Turtle document with every IRI under the old container moved, and nothing else", async () => {
     vi.mocked(getSolidDataset).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(`${FROM}catalog.ttl`),
+        datasetFrom(`${FROM}catalog.ttl`),
         buildThing(createThing({ url: `${FROM}catalog.ttl#deck-1` }))
           .addIri(`${SM}cardsDocument`, `${FROM}decks/deck-1.ttl`)
           .addIri(
@@ -109,8 +110,8 @@ describe("copyResource", () => {
     await copier(fetch).copyResource(`${FROM}catalog.ttl`, `${TO}catalog.ttl`, MOVE);
     const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(url).toBe(`${TO}catalog.ttl`);
-    expect(getThing(saved as SolidDataset, `${FROM}catalog.ttl#deck-1`)).toBeNull();
-    const deck = getThing(saved as SolidDataset, `${TO}catalog.ttl#deck-1`)!;
+    expect(getThing(saved as Dataset, `${FROM}catalog.ttl#deck-1`)).toBeNull();
+    const deck = getThing(saved as Dataset, `${TO}catalog.ttl#deck-1`)!;
     expect(getUrl(deck, `${SM}cardsDocument`)).toBe(`${TO}decks/deck-1.ttl`);
     expect(getUrl(deck, "http://www.w3.org/ns/prov#wasDerivedFrom")).toBe(
       "https://solid-memo.com/decks/capitals/v1.ttl",
@@ -125,7 +126,7 @@ describe("copyResource", () => {
     const user = "https://alice.example/profile/card#me";
     vi.mocked(getSolidDataset).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(`${FROM}catalog.ttl`),
+        datasetFrom(`${FROM}catalog.ttl`),
         buildThing(createThing({ url: `${FROM}catalog.ttl#catalog` }))
           .addIri("http://purl.org/dc/terms/publisher", guest)
           .addIri("http://purl.org/dc/terms/rightsHolder", "https://someone.example/#me")
@@ -139,7 +140,7 @@ describe("copyResource", () => {
       ...MOVE,
       renames: { [guest]: user },
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as SolidDataset;
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as Dataset;
     const catalog = getThing(saved, `${TO}catalog.ttl#catalog`)!;
     expect(getUrl(catalog, "http://purl.org/dc/terms/publisher")).toBe(user);
     expect(getUrl(catalog, "http://purl.org/dc/terms/rightsHolder")).toBe(
@@ -198,7 +199,7 @@ describe("the version a copy was made from", () => {
       options: { fetch: typeof fetch },
     ) => {
       await options.fetch(url, { headers: { Accept: "text/turtle" } });
-      return mockSolidDatasetFrom(url);
+      return datasetFrom(url);
     }) as never);
     const version = await copier(source.fetch).copyResource(
       `${FROM}catalog.ttl`,
@@ -359,9 +360,9 @@ describe("listResources and deleteRecursively", () => {
   function container(url: string, children: string[]) {
     let thing = buildThing(createThing({ url }));
     for (const child of children) thing = thing.addIri(LDP_CONTAINS, child);
-    return setThing(mockContainerFrom(url), thing.build());
+    return setThing(containerFrom(url), thing.build());
   }
-  const tree: Record<string, SolidDataset> = {
+  const tree: Record<string, Dataset> = {
     // The listing also names the container itself and a stranger outside it: neither is followed.
     [FROM]: container(FROM, [
       `${FROM}meta.ttl`,

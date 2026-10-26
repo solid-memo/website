@@ -6,27 +6,26 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
+  type Dataset,
   getDecimal,
   getInteger,
   getLiteralAll,
   getStringNoLocale,
-  getStringWithLocale,
   getThing,
   getUrl,
   getUrlAll,
-  mockSolidDatasetFrom,
-  saveSolidDatasetAt,
+  type NamedSubject,
   setThing,
-  type SolidDataset,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
+import { saveSolidDatasetAt } from "./client/resources";
+import { datasetFrom, getStringWithLocale } from "./testing/datasets";
 import type { Repair } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createSolidRepairRepository } from "./solidRepairRepository";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
-vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
+vi.mock("./client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/resources")>();
   return { ...actual, saveSolidDatasetAt: vi.fn() };
 });
 vi.mock("./datasets", async (importOriginal) => ({
@@ -39,10 +38,10 @@ const REVIEWS = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
 const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 
-function documentOf(url: string, ...things: ThingPersisted[]): never {
-  return things.reduce<SolidDataset>(
+function documentOf(url: string, ...things: NamedSubject[]): never {
+  return things.reduce<Dataset>(
     (dataset, thing) => setThing(dataset, thing),
-    mockSolidDatasetFrom(url),
+    datasetFrom(url),
   ) as never;
 }
 
@@ -59,8 +58,8 @@ function repair(
   return { kind, documentUrl, subjectUrl, version };
 }
 
-function saved(index = 0): SolidDataset {
-  return vi.mocked(saveSolidDatasetAt).mock.calls[index][1] as SolidDataset;
+function saved(index = 0): Dataset {
+  return vi.mocked(saveSolidDatasetAt).mock.calls[index][1] as Dataset;
 }
 
 beforeEach(() => {

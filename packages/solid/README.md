@@ -1,28 +1,38 @@
 # @solid-memo/solid
 
-The adapters for Solid pods, over Inrupt's
-[`@inrupt/solid-client`](https://github.com/inrupt/solid-client-js) and
-`@inrupt/solid-client-authn-browser`: the session (Solid-OIDC), the
+The adapters for Solid pods: the session (Solid-OIDC), the
 repositories of decks, cards, review state and preferences, the type
 index, the instance copier, the write fence, the shape validator, the
 deck archive (decks as Turtle or JSON-LD files), the drafts and the
 publishing of releases, an instance's documents read for its graph,
 and the guest's pod kept in the browser.
 
+They read and write pods through modules of the package's own in
+`src/client/`: the RDF data model (`rdf.ts`), reading and writing
+resources (`resources.ts`), the sign-in client (`session.ts`) and the
+public-read grant (`access.ts`). These are the only implementation so far,
+over Inrupt's
+[`@inrupt/solid-client`](https://github.com/inrupt/solid-client-js) and
+`@inrupt/solid-client-authn-browser`, and another library would replace
+them alone ([vendor-code.md](../../docs/vendor-code.md#cost-of-swapping-a-vendor)).
+
 ## Exports
 
 `@solid-memo/solid/<module>` is `src/<module>.ts`, one adapter per
 module, such as `solidSessionGateway`, `solidDeckRepository`,
-`solidReleasePublisher` and `localGuestPod`. `src/testing/` holds an
-in-memory pod for tests.
+`solidReleasePublisher` and `localGuestPod`, and
+`@solid-memo/solid/client/<module>` is a client module.
+`src/testing/` holds an in-memory pod, dataset fixtures (`datasets.ts`)
+and a fake sign-in client for tests.
 
 ## Boundaries
 
 It may import `application`, `domain`, `vocab` and `shacl`, and
 implements `application`'s ports. Only `composition` and `e2e/pod` may
-import it. The Inrupt libraries are used here alone, and their access
-control in `src/solidReleasePublisher.ts` alone
-([boundaries.md](../../docs/boundaries.md#access-control)).
+import it. Of its files, only those in `src/client/` import the Inrupt
+libraries, and only `src/client/access.ts` their access control
+([boundaries.md](../../docs/boundaries.md#the-solid-client-libraries)).
+Tests mock the client modules, not the libraries.
 
 ## Tests
 

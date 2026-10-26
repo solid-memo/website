@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { createSolidDataset, type SolidDataset } from "@inrupt/solid-client";
+import { type Dataset, createSolidDataset } from "./client/rdf";
 import type { ReviewStateRepository } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { PromptStates } from "@solid-memo/domain/grading";
@@ -57,7 +57,7 @@ export function createSolidReviewStateRepository({
    */
   async function saveReviews(
     deck: Deck,
-    { dataset, subjects }: { dataset: SolidDataset; subjects: readonly string[] },
+    { dataset, subjects }: { dataset: Dataset; subjects: readonly string[] },
   ): Promise<void> {
     const written = await guard.writable(deck, deck.reviewsDocumentUrl, dataset);
     await checkWrite(written, subjects, "pod");
@@ -88,7 +88,7 @@ export function createSolidReviewStateRepository({
     // A grade: an edit of the document as last read or written, when its version is known, with no read
     // first; read again only when it changed since (412), as another device's grade changes it.
     async gradeReviewState(deck, key, grade) {
-      const save = async (dataset: SolidDataset) => {
+      const save = async (dataset: Dataset) => {
         const written = withGradedReviewState(dataset, deck, key, grade, randomId);
         await saveReviews(deck, written);
         return { state: written.state, current: written.current };

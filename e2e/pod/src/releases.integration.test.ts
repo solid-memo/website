@@ -33,6 +33,7 @@ import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRe
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createPodFence } from "@solid-memo/solid/podFence";
+import { grantPublicRead } from "@solid-memo/solid/client/access";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
@@ -88,6 +89,7 @@ function publisherOver(network: typeof globalThis.fetch) {
     fetch: createPodFence(network),
     shareFetch: createPodFence(network, { accessControl: true }),
     publicFetch: network,
+    grantPublicRead,
   });
 }
 

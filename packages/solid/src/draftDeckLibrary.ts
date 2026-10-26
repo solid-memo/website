@@ -9,7 +9,8 @@ import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { toCourseOutline, toLibraryCards } from "./mappers/libraryMapper";
-import { datasetOf, draftQuads } from "./mappers/releaseDraftMapper";
+import { datasetFromQuads } from "./client/rdf";
+import { draftQuads } from "./mappers/releaseDraftMapper";
 
 /**
  * A library of one release, the draft as it is in memory (docs/studio.md,
@@ -25,7 +26,7 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
   /** The draft's statements, for the release at `url` (the draft's own only). */
   function release(url: string) {
     if (url !== draft.url) throw new AppError("releaseUnreadable", { url });
-    return datasetOf(draftQuads(draft));
+    return datasetFromQuads(draftQuads(draft));
   }
   const listed = () => draftLibraryDeck(draft);
 

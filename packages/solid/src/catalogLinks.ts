@@ -2,13 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  buildThing,
-  getThing,
-  getUrlAll,
-  setThing,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+import { type NamedSubject, buildThing, getThing, getUrlAll, setThing } from "./client/rdf";
 import { AppError } from "@solid-memo/domain/appError";
 import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
@@ -74,7 +68,7 @@ async function changeCatalog(
   instanceUrl: string,
   fetch: typeof globalThis.fetch,
   adding: boolean,
-  change: (node: ThingPersisted) => ThingPersisted | null,
+  change: (node: NamedSubject) => NamedSubject | null,
 ): Promise<void> {
   const url = catalogUrlOf(instanceUrl);
   for (let attempt = 1; ; attempt++) {

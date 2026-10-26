@@ -3,62 +3,46 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
-import { authFetch, SESSION_EXPIRED_EVENT, sessionWebId } from "./authFetch";
+import { createAuthFetch, SESSION_EXPIRED_EVENT } from "./authFetch";
+import { fakeSessionClient } from "./testing/fakeSessionClient";
 
-vi.mock("@inrupt/solid-client-authn-browser");
-
-describe("authFetch", () => {
-  it("delegates to the current default session's fetch", async () => {
+describe("createAuthFetch", () => {
+  it("delegates to the client's fetch", async () => {
+    const client = fakeSessionClient();
     const response = new Response("ok");
-    const sessionFetch = vi.fn(async () => response);
-    vi.mocked(getDefaultSession).mockReturnValue({
-      fetch: sessionFetch,
-    } as never);
+    client.fetch.mockResolvedValue(response);
 
-    const result = await authFetch("https://pod.example/resource", {
+    const result = await createAuthFetch(client)("https://pod.example/resource", {
       method: "HEAD",
     });
 
     expect(result).toBe(response);
-    expect(sessionFetch).toHaveBeenCalledWith("https://pod.example/resource", {
+    expect(client.fetch).toHaveBeenCalledWith("https://pod.example/resource", {
       method: "HEAD",
     });
   });
 
   it("announces expired sessions on a 401 response", async () => {
-    vi.mocked(getDefaultSession).mockReturnValue({
-      fetch: vi.fn(async () => new Response(null, { status: 401 })),
-    } as never);
+    const client = fakeSessionClient();
+    client.fetch.mockResolvedValue(new Response(null, { status: 401 }));
     const listener = vi.fn();
     window.addEventListener(SESSION_EXPIRED_EVENT, listener);
 
-    await authFetch("https://pod.example/resource");
+    await createAuthFetch(client)("https://pod.example/resource");
 
     expect(listener).toHaveBeenCalledOnce();
     window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
   });
 
   it("stays silent on non-401 responses", async () => {
-    vi.mocked(getDefaultSession).mockReturnValue({
-      fetch: vi.fn(async () => new Response(null, { status: 403 })),
-    } as never);
+    const client = fakeSessionClient();
+    client.fetch.mockResolvedValue(new Response(null, { status: 403 }));
     const listener = vi.fn();
     window.addEventListener(SESSION_EXPIRED_EVENT, listener);
 
-    await authFetch("https://pod.example/resource");
+    await createAuthFetch(client)("https://pod.example/resource");
 
     expect(listener).not.toHaveBeenCalled();
     window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
-  });
-});
-
-describe("sessionWebId", () => {
-  it("is the default session's WebID while logged in, none otherwise", () => {
-    const webId = "https://alice.example/profile/card#me";
-    vi.mocked(getDefaultSession).mockReturnValue({ info: { isLoggedIn: true, webId } } as never);
-    expect(sessionWebId()).toBe(webId);
-    vi.mocked(getDefaultSession).mockReturnValue({ info: { isLoggedIn: false } } as never);
-    expect(sessionWebId()).toBeUndefined();
   });
 });

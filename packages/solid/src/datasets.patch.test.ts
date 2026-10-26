@@ -2,16 +2,29 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
+  type Changes,
+  changesOf,
   createSolidDataset,
   createThing,
-  mockSolidDatasetFrom,
+  type Dataset,
+  datasetFromQuads,
+  getThing,
+  removeThing,
   setThing,
-} from "@inrupt/solid-client";
+  toRdfJsDataset,
+  withQuads,
+} from "./client/rdf";
+import { datasetFrom } from "./testing/datasets";
 import type { Quad, Term } from "@rdfjs/types";
 import { patchBody, saveDataset } from "./datasets";
+
+vi.mock("./client/rdf", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/rdf")>();
+  return { ...actual, changesOf: vi.fn(actual.changesOf) };
+});
 
 const DOC = "https://pod.example/doc.ttl";
 const NS = "https://example.com/ns#";
@@ -19,22 +32,55 @@ const NS = "https://example.com/ns#";
 const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
 
 const named = (value: string) => ({ termType: "NamedNode", value }) as Term;
-const changes = (additions: Partial<Quad>[], deletions: Partial<Quad>[] = []) =>
+const blank = { termType: "BlankNode", value: "b0" } as Term;
+const triple = (subject: Term, predicate: string, object: Term) =>
   ({
-    ...createSolidDataset(),
-    internal_changeLog: { additions, deletions },
-  }) as unknown as Parameters<typeof patchBody>[0];
+    subject,
+    predicate: named(predicate),
+    object,
+    graph: { termType: "DefaultGraph", value: "" },
+  }) as Quad;
+
+/**
+ * DOC read holding `before`, each of its subjects then set to what
+ * `after` says of it, or removed where that says nothing: the changes
+ * delete the triples `after` lacks and add those `before` lacks.
+ */
+function edit(before: Quad[], after: Quad[]): Dataset {
+  let dataset = withQuads(datasetFrom(DOC), before);
+  const next = datasetFromQuads(after);
+  const ids = new Set(
+    [...before, ...after].map(({ subject }) =>
+      subject.termType === "BlankNode" ? `_:${subject.value}` : subject.value,
+    ),
+  );
+  for (const id of ids) {
+    const subject = getThing(next, id);
+    dataset = subject === null ? removeThing(dataset, id) : setThing(dataset, subject);
+  }
+  return dataset;
+}
+
+/**
+ * Changes as the RDF module may report them, of a triple with a blank
+ * node, which no edit through its operations records as one.
+ */
+const withBlankNode = (changes: Changes) => vi.mocked(changesOf).mockReturnValue(changes);
+
+afterEach(() => {
+  vi.mocked(changesOf).mockReset();
+});
 
 describe("patchBody", () => {
   it("writes each change as one N-Triples line, closed by a space and a dot, deletions first", () => {
     const read = setThing(
-      mockSolidDatasetFrom(DOC),
+      datasetFrom(DOC),
       buildThing(createThing({ url: `${DOC}#it` }))
         .addInteger(`${NS}n`, 1)
         .build(),
     );
     const edited = setThing(
-      { ...read, internal_changeLog: { additions: [], deletions: [] } },
+      withQuads(read, toRdfJsDataset(read)),
       buildThing(createThing({ url: `${DOC}#it` }))
         .addInteger(`${NS}n`, 2)
         .addUrl(`${NS}see`, "https://example.com/x")
@@ -61,65 +107,42 @@ describe("patchBody", () => {
   it("spells a deleted decimal as its number when asked, every addition as it is", () => {
     const decimal = (value: string) =>
       ({ termType: "Literal", value, language: "", datatype: named(XSD_DECIMAL) }) as Term;
-    const triple = (predicate: string, value: string) =>
-      ({
-        subject: named(`${DOC}#it`),
-        predicate: named(`${NS}${predicate}`),
-        object: decimal(value),
-      }) as Quad;
-    const edit = changes(
-      [triple("e", "3.0")],
-      [triple("d", "1.0"), triple("f", "2.50"), triple("g", "2.6")],
-    );
+    const of = (predicate: string, value: string) =>
+      triple(named(`${DOC}#it`), `${NS}${predicate}`, decimal(value));
+    const edited = edit([of("d", "1.0"), of("f", "2.50"), of("g", "2.6")], [of("e", "3.0")]);
     const line = (predicate: string, value: string) =>
       `<${DOC}#it> <${NS}${predicate}> "${value}"^^<${XSD_DECIMAL}> .`;
     const insert = `INSERT DATA {\n${line("e", "3.0")}\n};\n`;
-    expect(patchBody(edit)).toBe(
+    expect(patchBody(edited)).toBe(
       `DELETE DATA {\n${line("d", "1.0")}\n${line("f", "2.50")}\n${line("g", "2.6")}\n};\n${insert}`,
     );
-    expect(patchBody(edit, true)).toBe(
+    expect(patchBody(edited, true)).toBe(
       `DELETE DATA {\n${line("d", "1")}\n${line("f", "2.5")}\n${line("g", "2.6")}\n};\n${insert}`,
     );
   });
 
-  it("names a Thing without a URL yet by its fragment in the document", () => {
-    const local = {
-      termType: "NamedNode",
-      value: "https://inrupt.com/.well-known/sdk-local-node/new",
-    } as Term;
-    expect(
-      patchBody(changes([{ subject: local, predicate: named(`${NS}p`), object: local } as Quad])),
-    ).toBe(`INSERT DATA {\n<#new> <${NS}p> <#new> .\n};\n`);
+  it("names a subject without a URL yet by its fragment in the document", () => {
+    const local = createThing({ name: "new" });
+    const added = setThing(createSolidDataset(), buildThing(local).addUrl(`${NS}p`, local).build());
+    expect(patchBody(added)).toBe(`INSERT DATA {\n<#new> <${NS}p> <#new> .\n};\n`);
   });
 
-  it("leaves the body to @inrupt/solid-client for a blank node, or a dataset without changes recorded", () => {
-    const blank = { termType: "BlankNode", value: "b0" } as Term;
-    expect(
-      patchBody(
-        changes([
-          { subject: named(`${DOC}#a`), predicate: named(`${NS}p`), object: blank } as Quad,
-        ]),
-      ),
-    ).toBeNull();
-    expect(
-      patchBody(
-        changes(
-          [],
-          [{ subject: blank, predicate: named(`${NS}p`), object: named(`${DOC}#a`) } as Quad],
-        ),
-      ),
-    ).toBeNull();
+  it("leaves the body to the Solid client library for a blank node, or a dataset without changes recorded", () => {
+    expect(patchBody(createSolidDataset())).toBeNull();
+    withBlankNode({ additions: [triple(named(`${DOC}#a`), `${NS}p`, blank)], deletions: [] });
+    expect(patchBody(createSolidDataset())).toBeNull();
+    withBlankNode({ additions: [], deletions: [triple(blank, `${NS}p`, named(`${DOC}#a`))] });
     expect(patchBody(createSolidDataset())).toBeNull();
   });
 
-  it("is sent in place of @inrupt/solid-client's, which is sent when ours cannot name a change", async () => {
+  it("is sent in place of the Solid client library's, which is sent when ours cannot name a change", async () => {
     const sent: string[] = [];
     const pod = (async (_input: RequestInfo | URL, init?: RequestInit) => {
       sent.push(String(init?.body));
       return new Response("", { status: 205 });
     }) as typeof globalThis.fetch;
     const edited = setThing(
-      mockSolidDatasetFrom(DOC),
+      datasetFrom(DOC),
       buildThing(createThing({ url: `${DOC}#it` }))
         .addInteger(`${NS}n`, 2)
         .build(),
@@ -128,42 +151,25 @@ describe("patchBody", () => {
     expect(sent[0]).toBe(
       `INSERT DATA {\n<${DOC}#it> <${NS}n> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .\n};\n`,
     );
-    const blank = { termType: "BlankNode", value: "b0", equals: () => false } as unknown as Term;
-    const withBlank = {
-      ...mockSolidDatasetFrom(DOC),
-      internal_changeLog: {
-        additions: [
-          {
-            subject: named(`${DOC}#a`),
-            predicate: named(`${NS}p`),
-            object: blank,
-            graph: { termType: "DefaultGraph", value: "" },
-          },
-        ],
-        deletions: [],
-      },
-    } as unknown as Parameters<typeof saveDataset>[1];
-    await saveDataset(DOC, withBlank, pod);
-    // @inrupt/solid-client's own body, which starts with a space where ours starts with the statement.
+    withBlankNode({ additions: [triple(named(`${DOC}#a`), `${NS}p`, blank)], deletions: [] });
+    await saveDataset(DOC, edited, pod);
+    // The library's own body, which starts with a space where ours starts with the statement.
     expect(sent[1]).toMatch(/^ INSERT DATA \{/);
   });
 
   describe("refused for a triple it cannot find to delete (409)", () => {
     const decimalEdit = (value: string) =>
-      ({
-        ...mockSolidDatasetFrom(DOC),
-        internal_changeLog: {
-          additions: [],
-          deletions: [
-            {
-              subject: named(`${DOC}#it`),
-              predicate: named(`${NS}d`),
-              object: { termType: "Literal", value, language: "", datatype: named(XSD_DECIMAL) },
-              graph: { termType: "DefaultGraph", value: "" },
-            },
-          ],
-        },
-      }) as unknown as Parameters<typeof saveDataset>[1];
+      edit(
+        [
+          triple(named(`${DOC}#it`), `${NS}d`, {
+            termType: "Literal",
+            value,
+            language: "",
+            datatype: named(XSD_DECIMAL),
+          } as Term),
+        ],
+        [],
+      );
     /** A pod that answers each PATCH in turn, recording its body. */
     const pod = (...statuses: number[]) => {
       const sent: string[] = [];
@@ -187,23 +193,9 @@ describe("patchBody", () => {
       const once = pod(409, 200);
       await expect(saveDataset(DOC, decimalEdit("2.6"), once.fetch)).rejects.toThrow();
       expect(once.sent).toHaveLength(1);
-      const blank = { termType: "BlankNode", value: "b0", equals: () => false } as unknown as Term;
-      const withBlank = {
-        ...mockSolidDatasetFrom(DOC),
-        internal_changeLog: {
-          additions: [],
-          deletions: [
-            {
-              subject: blank,
-              predicate: named(`${NS}d`),
-              object: named(`${DOC}#a`),
-              graph: { termType: "DefaultGraph", value: "" },
-            },
-          ],
-        },
-      } as unknown as Parameters<typeof saveDataset>[1];
+      withBlankNode({ additions: [], deletions: [triple(blank, `${NS}d`, named(`${DOC}#a`))] });
       const unnamed = pod(409, 200);
-      await expect(saveDataset(DOC, withBlank, unnamed.fetch)).rejects.toThrow();
+      await expect(saveDataset(DOC, decimalEdit("1.0"), unnamed.fetch)).rejects.toThrow();
       expect(unnamed.sent).toHaveLength(1);
     });
 

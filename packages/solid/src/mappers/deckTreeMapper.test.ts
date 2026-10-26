@@ -3,15 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import {
-  getInteger,
-  getSolidDataset,
-  getStringWithLocale,
-  getThing,
-  getUrl,
-  getUrlAll,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+import { type Dataset, getInteger, getThing, getUrl, getUrlAll } from "../client/rdf";
+import { getSolidDataset } from "../client/resources";
+import { getStringWithLocale } from "../testing/datasets";
 import {
   applyDeckTreeEdit,
   buildTree,
@@ -52,18 +46,18 @@ const groupTtl = (
 const rootTtl = (groups = "", publisher = `dcterms:publisher <${ME}> ;`) =>
   `<#catalog> a dcat:Catalog ; dcterms:title "Main" ; dcterms:description "My decks." ; ${publisher} dcat:dataset <#a>, <#b>, <#c> ${groups}.\n`;
 
-function document(turtle: string): Promise<SolidDataset> {
+function document(turtle: string): Promise<Dataset> {
   return getSolidDataset(CATALOG, { fetch: turtleFetch(PREFIXES + turtle) });
 }
 
 /** The document an edit leaves, as the repository writes it. */
-function edited(dataset: SolidDataset, edit: DeckTreeEdit) {
+function edited(dataset: Dataset, edit: DeckTreeEdit) {
   const stored = toStoredLayout(dataset, CATALOG);
   const after = applyDeckTreeEdit(buildTree(stored), edit);
   return { ...withTreeChanges(dataset, CATALOG, treeChanges(stored, after)), after };
 }
 
-const ids = (dataset: SolidDataset) =>
+const ids = (dataset: Dataset) =>
   JSON.parse(
     JSON.stringify(buildTree(toStoredLayout(dataset, CATALOG)).children, (key, value) =>
       key === "deck" ? value.id : key === "group" ? value.url.split("#")[1] : value,

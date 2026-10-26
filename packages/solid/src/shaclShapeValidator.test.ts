@@ -7,15 +7,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
+  type Dataset,
   fromRdfJsDataset,
   getThing,
-  mockSolidDatasetFrom,
   setThing,
+  type SubjectBuilder,
   toRdfJsDataset,
-  type SolidDataset,
-  type ThingBuilder,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
+import { datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
@@ -48,7 +47,7 @@ function dateTime(value: string): never {
 }
 
 /** The dataset with a catalog's link to a blank-node member, `[ a dcat:Dataset ]`, as another app may write one: Solid Memo never does. */
-function withBlankMember(dataset: SolidDataset, catalog: string, label: string): SolidDataset {
+function withBlankMember(dataset: Dataset, catalog: string, label: string): Dataset {
   const term = (termType: string, value: string) => ({ termType, value });
   const graph = term("DefaultGraph", "");
   const quads = [
@@ -70,7 +69,7 @@ function withBlankMember(dataset: SolidDataset, catalog: string, label: string):
 }
 
 function catalog() {
-  let dataset = mockSolidDatasetFrom(DOC);
+  let dataset = datasetFrom(DOC);
   dataset = setThing(
     dataset,
     buildThing(createThing({ url: `${DOC}#deck-1` }))
@@ -171,7 +170,7 @@ describe("createShaclShapeValidator", () => {
     const release = "https://alice.example/releases/capitals/v1.ttl";
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(release),
+        datasetFrom(release),
         buildThing(createThing({ url: release }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, DCAT.Dataset)
@@ -212,7 +211,7 @@ describe("createShaclShapeValidator", () => {
           "https://pod.example/solid-memo/b/decks/deck-4.ttl",
           `${instance}reviews/x.ttl`,
         ),
-      ].reduce(setThing, mockSolidDatasetFrom(DOC)),
+      ].reduce(setThing, datasetFrom(DOC)),
     );
     const { validator } = makeValidator();
     const report = await validator.validateDocument(DOC);
@@ -251,7 +250,7 @@ describe("createShaclShapeValidator", () => {
     const doc = `${instance}catalog.ttl`;
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(doc),
+        datasetFrom(doc),
         buildThing(createThing({ url: "https://pod.example/kortlekar-%C3%A5/catalog.ttl#deck-1" }))
           .addIri(RDF.type, SM.Deck)
           .addInteger(SM.formatVersion, 6)
@@ -305,7 +304,7 @@ describe("createShaclShapeValidator", () => {
           .addLiteral(DCTERMS.modified, dateTime(far)),
       ]
         .map((builder) => builder.build())
-        .reduce(setThing, mockSolidDatasetFrom(DOC)),
+        .reduce(setThing, datasetFrom(DOC)),
     );
     const validator = createShaclShapeValidator({
       fetch: vi.fn() as unknown as typeof fetch,
@@ -442,7 +441,7 @@ describe("createShaclShapeValidator", () => {
 
   it("reports what another app wrote — no Solid Memo class, format stamp or link from a subject of Solid Memo's — with warnings only", async () => {
     const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
-    let dataset = mockSolidDatasetFrom(DOC);
+    let dataset = datasetFrom(DOC);
     for (const [id, stamped] of [
       ["agent-mine", true],
       ["agent-theirs", false],
@@ -499,7 +498,7 @@ describe("createShaclShapeValidator", () => {
 
   it("holds a catalog and its publisher that lost their stamps as Solid Memo's, warning only about its links to another app's members", async () => {
     const alice = "https://alice.example/profile/card#me";
-    let dataset = mockSolidDatasetFrom(DOC);
+    let dataset = datasetFrom(DOC);
     for (const thing of [
       // Another app rewrote the catalog and its publisher without the triples it does not know, sm:formatVersion among them.
       buildThing(createThing({ url: `${DOC}#catalog` }))
@@ -562,7 +561,7 @@ describe("createShaclShapeValidator", () => {
   it("holds a DCAT deck to DCAT-AP with the site's own profile and reference data", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(DOC),
+        datasetFrom(DOC),
         buildThing(createThing({ url: `${DOC}#deck-1` }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
@@ -610,10 +609,7 @@ describe("createShaclShapeValidator", () => {
         .addInteger(SM.formatVersion, 1)
         .addStringWithLocale(SM.distractorText, "火", "ja")
         .build(),
-    ].reduce<SolidDataset>(
-      (dataset, thing) => setThing(dataset, thing),
-      mockSolidDatasetFrom(CARDS),
-    );
+    ].reduce<Dataset>((dataset, thing) => setThing(dataset, thing), datasetFrom(CARDS));
     const state = {
       cardId: "card-1",
       direction: "front-to-back" as const,
@@ -657,10 +653,7 @@ describe("createShaclShapeValidator", () => {
         .addIri(SM.reviewOf, `${CARDS}#card-1`)
         .addIri(SM.scheduler, "https://fsrs.example/ns#fsrs")
         .build(),
-    ].reduce<SolidDataset>(
-      (dataset, thing) => setThing(dataset, thing),
-      mockSolidDatasetFrom(REVIEWS),
-    );
+    ].reduce<Dataset>((dataset, thing) => setThing(dataset, thing), datasetFrom(REVIEWS));
     vi.mocked(getSolidDatasetOrNull).mockImplementation(
       async (url) => (url === CARDS ? cards : reviews) as never,
     );
@@ -711,7 +704,7 @@ describe("createShaclShapeValidator", () => {
     ]);
     const dataset = setThing(
       setThing(
-        mockSolidDatasetFrom(DOC),
+        datasetFrom(DOC),
         buildThing(createThing({ url: `${DOC}#deck-1` }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
@@ -733,10 +726,10 @@ describe("createShaclShapeValidator", () => {
       shapesFetch,
       ...SHAPE_SOURCES,
     });
-    type Builder = ThingBuilder<ThingPersisted>;
+    type Builder = SubjectBuilder;
     const deck = (build: (t: Builder) => Builder) =>
       setThing(
-        mockSolidDatasetFrom(DOC),
+        datasetFrom(DOC),
         build(
           buildThing(createThing({ url: `${DOC}#deck-1` }))
             .addIri(RDF.type, SM.Deck)
@@ -776,7 +769,7 @@ describe("createShaclShapeValidator", () => {
     });
 
     it("holds a catalog's members of its own document to their class, not those another document describes or another app wrote", async () => {
-      const written = withCatalog(mockSolidDatasetFrom(DOC), DOC, {
+      const written = withCatalog(datasetFrom(DOC), DOC, {
         title: "Main",
         description: "My decks.",
         publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
@@ -819,7 +812,7 @@ describe("createShaclShapeValidator", () => {
 
     it("holds a draft to the draft shapes and not yet to DCAT-AP, and an instance's deck to the pod's", async () => {
       const draft = setThing(
-        mockSolidDatasetFrom(DOC),
+        datasetFrom(DOC),
         buildThing(createThing({ url: DOC }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
@@ -842,7 +835,7 @@ describe("createShaclShapeValidator", () => {
 
     it("checks a draft's document against the draft shapes, without DCAT-AP, when told it is a draft's", async () => {
       const draft = setThing(
-        mockSolidDatasetFrom(DOC),
+        datasetFrom(DOC),
         buildThing(createThing({ url: DOC }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")

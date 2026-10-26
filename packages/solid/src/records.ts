@@ -3,6 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type NamedSubject,
+  type Subject,
+  type SubjectBuilder,
   buildThing,
   createThing,
   getBoolean,
@@ -13,15 +17,11 @@ import {
   getStringByLocaleAll,
   getStringNoLocale,
   getStringNoLocaleAll,
-  getUrl,
   getThing,
+  getUrl,
   getUrlAll,
   removeThing,
-  type SolidDataset,
-  type Thing,
-  type ThingBuilder,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { Literal, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,
@@ -45,7 +45,7 @@ import { AppError } from "@solid-memo/domain/appError";
 type FieldValue = string | number | boolean | readonly string[] | LangText | LangTexts;
 
 /** One field's value; undefined when absent, null when a required one is. */
-function readField(thing: Thing, field: FieldDescriptor): FieldValue | null | undefined {
+function readField(thing: Subject, field: FieldDescriptor): FieldValue | null | undefined {
   if (field.cardinality === "many") {
     switch (field.kind) {
       case "iri":
@@ -65,7 +65,7 @@ function readField(thing: Thing, field: FieldDescriptor): FieldValue | null | un
 }
 
 function readScalar(
-  thing: Thing,
+  thing: Subject,
   field: FieldDescriptor,
 ): string | number | boolean | LangText | null {
   switch (field.kind) {
@@ -104,7 +104,7 @@ function readScalar(
  * unanchored pattern lets through and then throws on, such as
  * "T2026-01-01T00:00:00Z".
  */
-export function readDatetime(thing: Thing, predicate: string): Date | null {
+export function readDatetime(thing: Subject, predicate: string): Date | null {
   let date: Date | null;
   try {
     date = getDatetime(thing, predicate);
@@ -139,7 +139,7 @@ export function isUnreadableDatetime(term: Term): boolean {
 }
 
 /** A subject's values of a predicate that isUnreadableDatetime, in stored order. */
-export function unreadableDatetimes(thing: Thing, predicate: string): string[] {
+export function unreadableDatetimes(thing: Subject, predicate: string): string[] {
   return getLiteralAll(thing, predicate)
     .filter(isUnreadableDatetime)
     .map((literal) => literal.value);
@@ -150,7 +150,7 @@ export function unreadableDatetimes(thing: Thing, predicate: string): string[] {
  * value of each language: the shapes allow one); null when there are none.
  * Untagged literals are not part of a text.
  */
-export function readText(thing: Thing, predicate: string): LangText | null {
+export function readText(thing: Subject, predicate: string): LangText | null {
   const text: LangText = Object.fromEntries(
     [...getStringByLocaleAll(thing, predicate)].map(([language, values]) => [
       language.toLowerCase(),
@@ -161,7 +161,7 @@ export function readText(thing: Thing, predicate: string): LangText | null {
 }
 
 /** A text that may also be untagged: the untagged literal under the empty tag. */
-function readAnyText(thing: Thing, predicate: string): LangText | null {
+function readAnyText(thing: Subject, predicate: string): LangText | null {
   const untagged = getStringNoLocale(thing, predicate);
   const text = readText(thing, predicate) ?? {};
   return untagged === null
@@ -178,7 +178,7 @@ function readAnyText(thing: Thing, predicate: string): LangText | null {
  * field that may also be untagged, the untagged values under the empty
  * tag. Empty ({}) when there are none.
  */
-function readTexts(thing: Thing, predicate: string, untagged: boolean): LangTexts {
+function readTexts(thing: Subject, predicate: string, untagged: boolean): LangTexts {
   const texts: Record<string, string[]> = {};
   const add = (tag: string, values: readonly string[]) => {
     texts[tag] = [...new Set([...(texts[tag] ?? []), ...values])];
@@ -197,7 +197,7 @@ function readTexts(thing: Thing, predicate: string, untagged: boolean): LangText
  * The subject as a record of the shape; null when a required field is
  * missing (or an enum holds a value the shape does not list).
  */
-export function readRecord<T>(thing: Thing, descriptor: ShapeDescriptor<T>): T | null {
+export function readRecord<T>(thing: Subject, descriptor: ShapeDescriptor<T>): T | null {
   const record: Record<string, FieldValue> = {};
   for (const field of descriptor.fields) {
     const value = readField(thing, field);
@@ -208,12 +208,12 @@ export function readRecord<T>(thing: Thing, descriptor: ShapeDescriptor<T>): T |
 }
 
 /** What a subject says about its format: absent means 1. */
-export function storedVersionOf(thing: Thing): number {
+export function storedVersionOf(thing: Subject): number {
   return getInteger(thing, SM.formatVersion) ?? 1;
 }
 
 /** Whether the subject has every value the shape fixes (an FSRS-6 state's scheduler). */
-function hasFixedValues(thing: Thing, descriptor: ShapeDescriptor): boolean {
+function hasFixedValues(thing: Subject, descriptor: ShapeDescriptor): boolean {
   return descriptor.fixedValues.every((fixed) =>
     getUrlAll(thing, fixed.predicate).includes(fixed.value),
   );
@@ -227,7 +227,7 @@ function hasFixedValues(thing: Thing, descriptor: ShapeDescriptor): boolean {
  * not fit its shape.
  */
 export function readVersioned<S extends ShapeName>(
-  thing: Thing,
+  thing: Subject,
   shape: S,
 ): { storedVersion: number; record: VersionedRecord[S] } | null {
   const storedVersion = storedVersionOf(thing);
@@ -247,10 +247,10 @@ export function readVersioned<S extends ShapeName>(
  * does not mention survives.
  */
 export function applyRecord<T>(
-  builder: ThingBuilder<ThingPersisted>,
+  builder: SubjectBuilder,
   descriptor: ShapeDescriptor<T>,
   record: T,
-): ThingBuilder<ThingPersisted> {
+): SubjectBuilder {
   for (const predicate of descriptor.absent) builder.removeAll(predicate);
   for (const field of descriptor.fields) {
     builder.removeAll(field.predicate);
@@ -282,7 +282,7 @@ export function applyRecord<T>(
 }
 
 function addValue(
-  builder: ThingBuilder<ThingPersisted>,
+  builder: SubjectBuilder,
   field: FieldDescriptor,
   value: string | number | boolean,
 ): void {
@@ -329,8 +329,8 @@ export function recordThing<T>(
   url: string,
   descriptor: ShapeDescriptor<T>,
   record: T,
-  existing: ThingPersisted | null,
-): ThingPersisted {
+  existing: NamedSubject | null,
+): NamedSubject {
   if (existing !== null && storedVersionOf(existing) > descriptor.version) {
     throw new AppError("writtenByNewerApp", {
       url,
@@ -358,7 +358,7 @@ export function recordThing<T>(
  * kind's latest version counts, not its class's others'. A subject of no
  * class this app writes is not its to judge, and passes.
  */
-export function unlessNewer<T extends Thing>(thing: T): T {
+export function unlessNewer<T extends Subject>(thing: T): T {
   const types = getUrlAll(thing, RDF.type);
   const latest = (Object.keys(LATEST_VERSION) as ShapeName[])
     .map((shape) => (SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]])
@@ -372,7 +372,7 @@ export function unlessNewer<T extends Thing>(thing: T): T {
 }
 
 /** The dataset without the subject, unless a newer version of the app wrote it (unlessNewer). */
-export function removeUnlessNewer<D extends SolidDataset>(dataset: D, url: string): D {
+export function removeUnlessNewer<D extends Dataset>(dataset: D, url: string): D {
   const thing = getThing(dataset, url);
   if (thing !== null) unlessNewer(thing);
   return removeThing(dataset, url);

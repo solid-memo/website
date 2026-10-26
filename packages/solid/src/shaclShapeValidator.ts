@@ -3,14 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type Subject,
   asUrl,
+  datasetFromQuads,
   getThing,
   getThingAll,
   getUrlAll,
   toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import type { DocumentContext, ShapeValidator } from "@solid-memo/application/ports";
 import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domain/validation";
@@ -38,8 +39,8 @@ import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
-import { getSolidDatasetLinear } from "./linearDataset";
-import { datasetOf, draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
+import { getSolidDatasetLinear } from "./client/resources";
+import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 
 /** The IRIs a subject has as values of a predicate, among its own quads: what pickShape asks of a subject. */
@@ -151,7 +152,7 @@ function isForeignMember(
  * so the check names it, and a repair may remove the entry, and nothing
  * else.
  */
-function placeViolations(thing: Thing, documentUrl: string): Violation[] {
+function placeViolations(thing: Subject, documentUrl: string): Violation[] {
   const instance = instanceUrlOfDeck(documentUrl);
   const misplaced = (value: string, path?: string): Violation => ({
     ...(path === undefined ? {} : { path }),
@@ -302,7 +303,7 @@ export function createShaclShapeValidator({
    * dataset needs (a description), which the release check asks of it.
    */
   async function subjectViolations(
-    dataset: SolidDataset,
+    dataset: Dataset,
     subjects: readonly string[],
     context: WriteContext,
   ): Promise<string[]> {
@@ -356,7 +357,7 @@ export function createShaclShapeValidator({
    */
   async function reportOf(
     url: string,
-    dataset: SolidDataset | null,
+    dataset: Dataset | null,
     context: DocumentContext,
   ): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };
@@ -470,7 +471,7 @@ export function createShaclShapeValidator({
       // The release as assembled at the draft's own address, then every IRI moved where it is published.
       // Quads as the engine reads them (a dataset's: terms that compare), not the plain data a draft's are.
       const assembled = quadsOf(
-        datasetOf(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())),
+        datasetFromQuads(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())),
       );
       const release = mapIris(mergeDatasets(assembled), (iri) => moved(iri, draft.url, asUrl));
       const quads = [...(release as Iterable<Quad>)];
@@ -630,5 +631,5 @@ function withSeriesEntry(
       link(series, `${DCAT_NS}hasCurrentVersion`, asUrl),
     );
   }
-  return quadsOf(datasetOf([...index, ...added]));
+  return quadsOf(datasetFromQuads([...index, ...added]));
 }

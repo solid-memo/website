@@ -3,41 +3,43 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type FetchedDataset,
+  type Subject,
+  changesOf,
   createSolidDataset,
-  deleteSolidDataset,
   getThing,
-  type getSolidDataset,
+  localNameOf,
   removeThing,
   removeUrl,
-  saveSolidDatasetAt,
   setThing,
-  solidDatasetAsTurtle,
+  sourceOf,
   toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
-  type WithChangeLog,
-  type WithServerResourceInfo,
-} from "@inrupt/solid-client";
+  withQuads,
+} from "./client/rdf";
 
 import type { Literal, Quad } from "@rdfjs/types";
-import { getSolidDatasetLinear, graphsOf } from "./linearDataset";
+import {
+  deleteSolidDataset,
+  getSolidDatasetLinear,
+  saveSolidDatasetAt,
+  solidDatasetAsTurtle,
+} from "./client/resources";
 import { unlessNewer } from "./records";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-
-type Dataset = Awaited<ReturnType<typeof getSolidDataset>>;
 
 /**
  * Reading and writing pod documents with HTTP preconditions, so that a
  * write never silently undoes someone else's (docs/data-model.md#write-discipline):
  *
  * - every read remembers the document's ETag, with the dataset it returned
- *   (keyed by its resource info, which edits of the dataset keep);
+ *   (keyed by its source's key, which edits of the dataset keep);
  * - saving an edit of a dataset read from the same URL sends
  *   `If-Match: <that ETag>`: had the document changed since, the pod
  *   answers 412 and nothing is written;
- * - saving a new dataset is a creation, which @inrupt/solid-client sends
- *   with `If-None-Match: *`: had the document appeared meanwhile, 412;
+ * - saving a new dataset is a creation, which the Solid client library
+ *   sends with `If-None-Match: *`: had the document appeared meanwhile, 412;
  * - deleting a document read before sends `If-Match` too, and so does
  *   removing what Solid Memo owns of one (removeOwned).
  *
@@ -99,8 +101,8 @@ export class PreconditionFailedError extends AppError {
 const READS = new WeakMap<
   typeof globalThis.fetch,
   {
-    inFlight: Map<string, Promise<Dataset>>;
-    known: Map<string, { etag: string; dataset: Dataset }>;
+    inFlight: Map<string, Promise<FetchedDataset>>;
+    known: Map<string, { etag: string; dataset: FetchedDataset }>;
   }
 >();
 
@@ -114,7 +116,7 @@ function readsOf(fetch: typeof globalThis.fetch) {
 }
 
 /** Fetch a dataset, remembering its ETag for a later conditional write; see READS. */
-export function readDataset(url: string, fetch: typeof globalThis.fetch): Promise<Dataset> {
+export function readDataset(url: string, fetch: typeof globalThis.fetch): Promise<FetchedDataset> {
   const { inFlight, known } = readsOf(fetch);
   const key = documentUrlOf(url);
   const shared = inFlight.get(key);
@@ -134,7 +136,10 @@ export function readDataset(url: string, fetch: typeof globalThis.fetch): Promis
  * one that changed since is refused (PreconditionFailedError), to be read
  * again.
  */
-export function keptDataset(url: string, fetch: typeof globalThis.fetch): Dataset | undefined {
+export function keptDataset(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): FetchedDataset | undefined {
   const kept = READS.get(fetch)?.known.get(documentUrlOf(url));
   return kept === undefined || strong(kept.etag) === undefined ? undefined : kept.dataset;
 }
@@ -165,11 +170,11 @@ export function readDatasetSince(
   url: string,
   version: string,
   fetch: typeof globalThis.fetch,
-): Promise<Dataset | typeof UNCHANGED | null> {
+): Promise<FetchedDataset | typeof UNCHANGED | null> {
   const { inFlight, known } = readsOf(fetch);
   const key = `${documentUrlOf(url)}\n${version}`;
   const shared = inFlight.get(key);
-  if (shared !== undefined) return shared as Promise<Dataset | typeof UNCHANGED | null>;
+  if (shared !== undefined) return shared as Promise<FetchedDataset | typeof UNCHANGED | null>;
   const read = fetchDataset(url, fetch, known, version)
     .catch((error: unknown) => {
       if (statusOf(error) === 404) return null;
@@ -178,39 +183,39 @@ export function readDatasetSince(
     .finally(() => {
       if (inFlight.get(key) === read) inFlight.delete(key);
     });
-  inFlight.set(key, read as Promise<Dataset>);
+  inFlight.set(key, read as Promise<FetchedDataset>);
   return read;
 }
 
 /** The version (ETag) a dataset was read at; undefined when the pod gave none. */
 export function versionOf(dataset: object): string | undefined {
-  const info = resourceInfoOf(dataset);
-  return info === undefined ? undefined : ETAGS.get(info);
+  const source = sourceOf(dataset);
+  return source === undefined ? undefined : ETAGS.get(source.key);
 }
 
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
-  known: Map<string, { etag: string; dataset: Dataset }>,
-): Promise<Dataset>;
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
+): Promise<FetchedDataset>;
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
-  known: Map<string, { etag: string; dataset: Dataset }>,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
   since: string,
-): Promise<Dataset | typeof UNCHANGED>;
+): Promise<FetchedDataset | typeof UNCHANGED>;
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
-  known: Map<string, { etag: string; dataset: Dataset }>,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
   since?: string,
-): Promise<Dataset | typeof UNCHANGED> {
+): Promise<FetchedDataset | typeof UNCHANGED> {
   const document = documentUrlOf(url);
   const before = known.get(document);
   const asked = since ?? before?.etag;
   let etag: string | null = null;
   let notModified = false;
-  let dataset: Dataset;
+  let dataset: FetchedDataset;
   try {
     dataset = await getSolidDatasetLinear(url, {
       fetch: async (input, init) => {
@@ -231,8 +236,8 @@ async function fetchDataset(
     known.delete(document);
     throw error;
   }
-  const info = resourceInfoOf(dataset);
-  if (etag !== null && info !== undefined) ETAGS.set(info, etag);
+  const source = sourceOf(dataset);
+  if (etag !== null && source !== undefined) ETAGS.set(source.key, etag);
   if (etag !== null) known.set(document, { etag, dataset });
   else known.delete(document);
   return dataset;
@@ -245,7 +250,7 @@ async function fetchDataset(
 export async function getSolidDatasetOrNull(
   url: string,
   fetch: typeof globalThis.fetch,
-): Promise<Dataset | null> {
+): Promise<FetchedDataset | null> {
   try {
     return await readDataset(url, fetch);
   } catch (error) {
@@ -257,23 +262,23 @@ export async function getSolidDatasetOrNull(
 /**
  * Save a dataset: an edit of the document it was read from only if that
  * is unchanged (If-Match), a new dataset only if nothing is there yet
- * (If-None-Match: *, sent by @inrupt/solid-client). `whole` writes an
+ * (If-None-Match: *, sent by the Solid client library). `whole` writes an
  * edit as one PUT of the whole document (with the same If-Match) however
  * small it is: for a bulk edit of text, which Community Solid Server's
  * in-memory store cuts short when a PATCH holds characters beyond ASCII.
  */
-export async function saveDataset<T extends SolidDataset>(
+export async function saveDataset<T extends Dataset>(
   url: string,
   dataset: T,
   fetch: typeof globalThis.fetch,
   { whole = false }: { whole?: boolean } = {},
 ): Promise<void> {
-  const info = resourceInfoOf(dataset);
-  const isEdit = info !== undefined && info.sourceIri === url;
-  const etag = isEdit ? strong(ETAGS.get(info)) : undefined;
+  const source = sourceOf(dataset);
+  const isEdit = source !== undefined && source.url === url;
+  const etag = isEdit ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   let answered: string | undefined;
-  let saved: Dataset;
+  let saved: FetchedDataset;
   try {
     saved = await saveSolidDatasetAt(url, dataset, {
       fetch: ownPatches(
@@ -290,13 +295,13 @@ export async function saveDataset<T extends SolidDataset>(
       throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
     throw error;
   }
-  if (info !== undefined) ETAGS.delete(info);
+  if (source !== undefined) ETAGS.delete(source.key);
   // Only where a precondition held does the document hold just what was written.
   const version = strong(answered);
   if (version === undefined || (isEdit && etag === undefined)) return;
-  const savedInfo = resourceInfoOf(saved);
-  if (savedInfo?.sourceIri !== url) return;
-  ETAGS.set(savedInfo, version);
+  const savedSource = sourceOf(saved);
+  if (savedSource?.url !== url) return;
+  ETAGS.set(savedSource.key, version);
   readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: saved });
 }
 
@@ -314,17 +319,17 @@ function withWrittenETag(
 
 /** Whether `dataset` was read from (or last saved to) `url`: a save of it is an edit there, If-Match its version. */
 export function isReadFrom(dataset: object, url: string): boolean {
-  return resourceInfoOf(dataset)?.sourceIri === url;
+  return sourceOf(dataset)?.url === url;
 }
 
 /** Delete a document read before, only if it is unchanged since (If-Match). */
 export async function deleteDataset(
   url: string,
-  dataset: SolidDataset,
+  dataset: Dataset,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
-  const info = resourceInfoOf(dataset);
-  const etag = info !== undefined && info.sourceIri === url ? strong(ETAGS.get(info)) : undefined;
+  const source = sourceOf(dataset);
+  const etag = source?.url === url ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   try {
     await deleteSolidDataset(url, { fetch: withIfMatch(fetch, etag) });
@@ -376,7 +381,7 @@ export type Removal = "absent" | "deleted" | "kept";
  */
 export async function removeOwned(
   url: string,
-  owns: (dataset: SolidDataset) => Owned,
+  owns: (dataset: Dataset) => Owned,
   fetch: typeof globalThis.fetch,
 ): Promise<Removal> {
   try {
@@ -389,7 +394,7 @@ export async function removeOwned(
 
 async function removeOwnedOnce(
   url: string,
-  owns: (dataset: SolidDataset) => Owned,
+  owns: (dataset: Dataset) => Owned,
   fetch: typeof globalThis.fetch,
 ): Promise<Removal> {
   let served = false;
@@ -399,7 +404,7 @@ async function removeOwnedOnce(
     served = response.ok;
     return response;
   }) as typeof globalThis.fetch;
-  let dataset: Dataset | null;
+  let dataset: FetchedDataset | null;
   try {
     dataset = await getSolidDatasetOrNull(url, noting);
   } catch (error) {
@@ -433,19 +438,14 @@ async function removeOwnedOnce(
   }
   const gone = quads.filter(isGone);
   if (gone.length === 0) return "kept";
-  const etag = strong(ETAGS.get(resourceInfoOf(dataset)!));
+  const etag = strong(ETAGS.get(sourceOf(dataset)!.key));
   if (
     gone.some(
       (quad) => quad.subject.termType === "BlankNode" || quad.object.termType === "BlankNode",
     )
   ) {
     if (etag === undefined) return "kept";
-    const rest = Object.freeze({
-      ...dataset,
-      graphs: graphsOf(left),
-      internal_changeLog: { additions: [], deletions: [] },
-    }) as Dataset;
-    await saveDataset(url, rest, fetch, { whole: true });
+    await saveDataset(url, withQuads(dataset, left), fetch, { whole: true });
     return "kept";
   }
   const edited = statements.reduce(
@@ -460,7 +460,7 @@ async function removeOwnedOnce(
 }
 
 /** Whether a newer version of the app wrote the subject (unlessNewer): it is never removed. */
-function isNewer(dataset: SolidDataset, subject: string): boolean {
+function isNewer(dataset: Dataset, subject: string): boolean {
   const thing = getThing(dataset, subject);
   try {
     if (thing !== null) unlessNewer(thing);
@@ -501,7 +501,7 @@ function termKey(term: { termType: string; value: string }): string {
   return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
-/** The fetch, with `If-Match` added to the request that writes (the only one @inrupt/solid-client makes for it). */
+/** The fetch, with `If-Match` added to the request that writes (the only one the Solid client library makes for it). */
 function withIfMatch(
   fetch: typeof globalThis.fetch,
   etag: string | undefined,
@@ -515,16 +515,16 @@ function withIfMatch(
 }
 
 /**
- * The fetch, with the PATCH @inrupt/solid-client sends given our body
+ * The fetch, with the PATCH the Solid client library sends given our body
  * (patchBody, sent again with its deleted decimals spelled as numbers
  * where a conflict (409) may come of their spelling), or sent as a PUT of the whole dataset (its every triple,
  * the edit applied) when that body is larger than MAX_PATCH_BYTES, or
- * always (`whole`); other headers kept. @inrupt/solid-client takes the
- * answer as its PATCH's.
+ * always (`whole`); other headers kept. The library takes the answer as
+ * its PATCH's.
  */
 function ownPatches(
   fetch: typeof globalThis.fetch,
-  dataset: SolidDataset,
+  dataset: Dataset,
   whole: boolean,
 ): typeof globalThis.fetch {
   return async (input, init) => {
@@ -564,7 +564,7 @@ function ownPatches(
  */
 export function appendToDocument(
   url: string,
-  thing: Thing,
+  thing: Subject,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   return appendAllToDocument(url, [thing], fetch);
@@ -578,7 +578,7 @@ export function appendToDocument(
  */
 export async function appendAllToDocument(
   url: string,
-  things: readonly Thing[],
+  things: readonly Subject[],
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   const encoder = new TextEncoder();
@@ -608,8 +608,6 @@ export async function appendAllToDocument(
   }
 }
 
-/** Where @inrupt/solid-client names a Thing that has no URL yet: `<#name>` in the document. */
-const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
 
@@ -617,7 +615,7 @@ const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
  * The SPARQL Update of a dataset's changes, one triple a line in
  * N-Triples form, every triple closed by " .": what every Solid server
  * parses, node-solid-server's too. Null when a change has a blank node,
- * which DELETE DATA cannot name; then @inrupt/solid-client's body is sent.
+ * which DELETE DATA cannot name; then the Solid client library's body is sent.
  *
  * `decimalsAsNumbers` spells each decimal deleted as JavaScript spells
  * its number (`1` for `1.0`, `2.5` for `2.50`): how node-solid-server
@@ -625,8 +623,8 @@ const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
  * one with `.0` (`1` written, `1.0` served), so a deletion spelled as
  * read is not found there (ownPatches).
  */
-export function patchBody(dataset: SolidDataset, decimalsAsNumbers = false): string | null {
-  const changes = (dataset as Partial<WithChangeLog>).internal_changeLog;
+export function patchBody(dataset: Dataset, decimalsAsNumbers = false): string | null {
+  const changes = changesOf(dataset);
   if (changes === undefined) return null;
   const block = (operation: string, quads: readonly Quad[], asNumbers: boolean): string | null => {
     const triples = quads.map((quad) => tripleLine(quad, asNumbers));
@@ -650,7 +648,8 @@ function tripleLine(quad: Quad, decimalsAsNumbers: boolean): string | null {
 }
 
 function iri(value: string): string {
-  return value.startsWith(LOCAL_NODE) ? `<#${value.slice(LOCAL_NODE.length)}>` : `<${value}>`;
+  const name = localNameOf(value);
+  return name === undefined ? `<${value}>` : `<#${name}>`;
 }
 
 function literal(term: Literal, decimalsAsNumbers: boolean): string {
@@ -665,12 +664,6 @@ function literal(term: Literal, decimalsAsNumbers: boolean): string {
 
 function strong(etag: string | undefined): string | undefined {
   return etag === undefined || etag.startsWith("W/") ? undefined : etag;
-}
-
-function resourceInfoOf(
-  dataset: object,
-): WithServerResourceInfo["internal_resourceInfo"] | undefined {
-  return (dataset as Partial<WithServerResourceInfo>).internal_resourceInfo;
 }
 
 function statusOf(error: unknown): number | undefined {

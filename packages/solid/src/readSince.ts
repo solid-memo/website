@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SolidDataset } from "@inrupt/solid-client";
+import type { Dataset } from "./client/rdf";
 import type { Since } from "@solid-memo/application/ports";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { getSolidDatasetOrNull, readDatasetSince, UNCHANGED, versionOf } from "./datasets";
@@ -16,7 +16,7 @@ export async function readSince(
   url: string,
   version: string | undefined,
   fetch: typeof globalThis.fetch,
-): Promise<Since<SolidDataset | null>> {
+): Promise<Since<Dataset | null>> {
   const read =
     version === undefined || version === ABSENT_VERSION
       ? await getSolidDatasetOrNull(url, fetch)

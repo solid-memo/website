@@ -3,103 +3,67 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  EVENTS,
-  events,
-  handleIncomingRedirect,
-  login as authnLogin,
-  logout as authnLogout,
-} from "@inrupt/solid-client-authn-browser";
-import { getIriAll, getSolidDataset, getThing } from "@inrupt/solid-client";
+import { getSolidDataset } from "./client/resources";
+import { getThing, getUrlAll } from "./client/rdf";
 import { createSolidSessionGateway } from "./solidSessionGateway";
 import { SESSION_EXPIRED_EVENT } from "./authFetch";
+import { fakeSessionClient } from "./testing/fakeSessionClient";
 
-vi.mock("@inrupt/solid-client-authn-browser");
-vi.mock("@inrupt/solid-client");
+vi.mock("./client/resources");
+vi.mock("./client/rdf");
 
 const WEBID = "https://alice.example/profile/card#me";
 const SITE = "https://memo.example/";
-const OPTIONS = { clientName: "Test App", site: SITE };
-
-/** Minimal stand-in for the default session's event emitter. */
-function makeEmitter() {
-  type Listener = (...args: unknown[]) => void;
-  const listeners = new Map<string, Set<Listener>>();
-  return {
-    on: vi.fn((event: string, listener: Listener) => {
-      listeners.set(event, (listeners.get(event) ?? new Set()).add(listener));
-    }),
-    off: vi.fn((event: string, listener: Listener) => {
-      listeners.get(event)?.delete(listener);
-    }),
-    emit(event: string, ...args: unknown[]) {
-      listeners.get(event)?.forEach((listener) => listener(...args));
-    },
-    count: (event: string) => listeners.get(event)?.size ?? 0,
-  };
-}
 
 describe("createSolidSessionGateway", () => {
-  let emitter: ReturnType<typeof makeEmitter>;
+  let client: ReturnType<typeof fakeSessionClient>;
+  let options: Parameters<typeof createSolidSessionGateway>[0];
 
   beforeEach(() => {
     vi.resetAllMocks();
-    emitter = makeEmitter();
-    vi.mocked(events).mockReturnValue(emitter as never);
+    client = fakeSessionClient();
+    options = { clientName: "Test App", site: SITE, client };
     window.sessionStorage.clear();
     window.history.replaceState(null, "", window.location.pathname);
   });
 
+  /** What the client's restore finds: a session, and how it came. */
+  function restored(fromLogin: boolean, restoredFrom: string | null = null) {
+    client.restore.mockResolvedValue({ webId: WEBID, fromLogin, restoredFrom });
+  }
+
   describe("restore", () => {
     it("returns a restored session when no login redirect completed", async () => {
-      vi.mocked(handleIncomingRedirect).mockResolvedValue({
-        isLoggedIn: true,
-        webId: WEBID,
-        sessionId: "s",
-      });
-      const gateway = createSolidSessionGateway(OPTIONS);
+      restored(false);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).resolves.toEqual({
         session: { webId: WEBID },
         origin: "restored",
       });
-      expect(handleIncomingRedirect).toHaveBeenCalledWith({
-        restorePreviousSession: true,
-      });
     });
 
-    it("reports a login when the library announces one", async () => {
-      vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
-        emitter.emit(EVENTS.LOGIN);
-        return { isLoggedIn: true, webId: WEBID, sessionId: "s" };
-      });
-      const gateway = createSolidSessionGateway(OPTIONS);
+    it("reports a login when the client reports one", async () => {
+      restored(true);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).resolves.toEqual({
         session: { webId: WEBID },
         origin: "login",
       });
     });
 
-    it("stops listening for logins and restores afterward, even on failure", async () => {
-      vi.mocked(handleIncomingRedirect).mockRejectedValue(new Error("boom"));
-      const gateway = createSolidSessionGateway(OPTIONS);
+    it("passes on the client's failure", async () => {
+      client.restore.mockRejectedValue(new Error("boom"));
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).rejects.toThrow("boom");
-      expect(emitter.count(EVENTS.LOGIN)).toBe(0);
-      expect(emitter.count(EVENTS.SESSION_RESTORED)).toBe(0);
     });
 
     it("returns to the hash a login set off from, and tells the routers", async () => {
-      vi.mocked(getSolidDataset).mockResolvedValue({} as never);
-      vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue(["https://issuer.example"]);
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       window.history.replaceState(null, "", "#/studio");
       await gateway.loginWithIssuer("https://issuer.example");
       // The identity provider sends the user back without the hash.
       window.history.replaceState(null, "", window.location.pathname);
-      vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
-        emitter.emit(EVENTS.LOGIN);
-        return { isLoggedIn: true, webId: WEBID, sessionId: "s" };
-      });
+      restored(true);
       const onHashChange = vi.fn();
       window.addEventListener("hashchange", onHashChange);
 
@@ -112,45 +76,22 @@ describe("createSolidSessionGateway", () => {
     });
 
     it("returns to the hash a silent restore left from", async () => {
-      vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
-        emitter.emit(EVENTS.SESSION_RESTORED, "https://memo.example/#/studio?instance=x");
-        return { isLoggedIn: true, webId: WEBID, sessionId: "s" };
-      });
-      const gateway = createSolidSessionGateway(OPTIONS);
+      restored(false, "https://memo.example/#/studio?instance=x");
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).resolves.toMatchObject({ origin: "restored" });
       expect(window.location.hash).toBe("#/studio?instance=x");
     });
 
     it("forgets the login's hash when the login did not complete", async () => {
       window.sessionStorage.setItem("solid-memo:login-hash", "#/studio");
-      vi.mocked(handleIncomingRedirect).mockResolvedValue(undefined);
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).resolves.toBeNull();
       expect(window.location.hash).toBe("");
       expect(window.sessionStorage.getItem("solid-memo:login-hash")).toBeNull();
     });
 
-    it("returns null when there is no session info", async () => {
-      vi.mocked(handleIncomingRedirect).mockResolvedValue(undefined);
-      const gateway = createSolidSessionGateway(OPTIONS);
-      await expect(gateway.restore()).resolves.toBeNull();
-    });
-
-    it("returns null when not logged in", async () => {
-      vi.mocked(handleIncomingRedirect).mockResolvedValue({
-        isLoggedIn: false,
-        sessionId: "s",
-      });
-      const gateway = createSolidSessionGateway(OPTIONS);
-      await expect(gateway.restore()).resolves.toBeNull();
-    });
-
-    it("returns null when logged in but without a WebID", async () => {
-      vi.mocked(handleIncomingRedirect).mockResolvedValue({
-        isLoggedIn: true,
-        sessionId: "s",
-      });
-      const gateway = createSolidSessionGateway(OPTIONS);
+    it("returns null when the client finds no one", async () => {
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).resolves.toBeNull();
     });
   });
@@ -159,17 +100,17 @@ describe("createSolidSessionGateway", () => {
     it("discovers the OIDC issuer from the WebID document and starts login", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue(["https://issuer.example"]);
+      vi.mocked(getUrlAll).mockReturnValue(["https://issuer.example"]);
 
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await gateway.login(WEBID);
 
       expect(getThing).toHaveBeenCalledWith(expect.anything(), WEBID);
-      expect(getIriAll).toHaveBeenCalledWith(
+      expect(getUrlAll).toHaveBeenCalledWith(
         expect.anything(),
         "http://www.w3.org/ns/solid/terms#oidcIssuer",
       );
-      expect(authnLogin).toHaveBeenCalledWith({
+      expect(client.login).toHaveBeenCalledWith({
         oidcIssuer: "https://issuer.example",
         redirectUrl: SITE,
         clientName: "Test App",
@@ -180,33 +121,33 @@ describe("createSolidSessionGateway", () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue(null);
 
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.login(WEBID)).rejects.toThrow(
         `Your WebID profile does not describe you.`,
       );
-      expect(authnLogin).not.toHaveBeenCalled();
+      expect(client.login).not.toHaveBeenCalled();
     });
 
     it("rejects when the profile declares no solid:oidcIssuer", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue([]);
+      vi.mocked(getUrlAll).mockReturnValue([]);
 
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.login(WEBID)).rejects.toThrow(
         "Your WebID profile does not say where you log in.",
       );
-      expect(authnLogin).not.toHaveBeenCalled();
+      expect(client.login).not.toHaveBeenCalled();
     });
   });
 
   describe("loginWithIssuer", () => {
     it("starts login at the given issuer without reading any profile", async () => {
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await gateway.loginWithIssuer("https://login.inrupt.com");
 
       expect(getSolidDataset).not.toHaveBeenCalled();
-      expect(authnLogin).toHaveBeenCalledWith({
+      expect(client.login).toHaveBeenCalledWith({
         oidcIssuer: "https://login.inrupt.com",
         redirectUrl: SITE,
         clientName: "Test App",
@@ -217,11 +158,11 @@ describe("createSolidSessionGateway", () => {
   describe("the client ID", () => {
     it("is the site's Client ID Document, when the page is served from its folder", async () => {
       const gateway = createSolidSessionGateway({
-        ...OPTIONS,
+        ...options,
         clientId: `${SITE}clientid.jsonld`,
       });
       await gateway.loginWithIssuer("https://login.inrupt.com");
-      expect(authnLogin).toHaveBeenCalledWith({
+      expect(client.login).toHaveBeenCalledWith({
         oidcIssuer: "https://login.inrupt.com",
         redirectUrl: SITE,
         clientName: "Test App",
@@ -237,11 +178,11 @@ describe("createSolidSessionGateway", () => {
         null,
         undefined,
       ]) {
-        vi.mocked(authnLogin).mockClear();
-        await createSolidSessionGateway({ ...OPTIONS, clientId }).loginWithIssuer(
+        client.login.mockClear();
+        await createSolidSessionGateway({ ...options, clientId }).loginWithIssuer(
           "https://login.inrupt.com",
         );
-        expect(authnLogin, String(clientId)).toHaveBeenCalledWith({
+        expect(client.login, String(clientId)).toHaveBeenCalledWith({
           oidcIssuer: "https://login.inrupt.com",
           redirectUrl: SITE,
           clientName: "Test App",
@@ -254,9 +195,9 @@ describe("createSolidSessionGateway", () => {
     it("returns the issuer declared in the profile, not the WebID origin", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue(["https://idp.elsewhere.example"]);
+      vi.mocked(getUrlAll).mockReturnValue(["https://idp.elsewhere.example"]);
 
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe(
         "https://idp.elsewhere.example",
       );
@@ -265,34 +206,34 @@ describe("createSolidSessionGateway", () => {
     it("skips issuers that are not https URLs", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue(["http://insecure.example", "https://issuer.example"]);
+      vi.mocked(getUrlAll).mockReturnValue(["http://insecure.example", "https://issuer.example"]);
 
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe("https://issuer.example");
     });
 
     it("rejects when no declared issuer is an https URL", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue(["javascript:alert(1)"]);
+      vi.mocked(getUrlAll).mockReturnValue(["javascript:alert(1)"]);
 
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       await expect(gateway.login(WEBID)).rejects.toThrow("not a secure https:// address");
-      expect(authnLogin).not.toHaveBeenCalled();
+      expect(client.login).not.toHaveBeenCalled();
     });
   });
 
   describe("logout", () => {
-    it("delegates to the authn library", async () => {
-      const gateway = createSolidSessionGateway(OPTIONS);
+    it("delegates to the client", async () => {
+      const gateway = createSolidSessionGateway(options);
       await gateway.logout();
-      expect(authnLogout).toHaveBeenCalledOnce();
+      expect(client.logout).toHaveBeenCalledOnce();
     });
   });
 
   describe("onSessionExpired", () => {
     it("notifies while subscribed and stops after unsubscribe", () => {
-      const gateway = createSolidSessionGateway(OPTIONS);
+      const gateway = createSolidSessionGateway(options);
       const listener = vi.fn();
       const unsubscribe = gateway.onSessionExpired(listener);
 

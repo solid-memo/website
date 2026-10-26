@@ -5,17 +5,11 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  getBoolean,
-  getThingAll,
-  getUrlAll,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+import { type Dataset, getBoolean, getThingAll, getUrlAll, type Subject } from "./client/rdf";
 import { parseAuthor } from "@solid-memo/domain/author";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
-import { getSolidDatasetLinear } from "./linearDataset";
+import { getSolidDatasetLinear } from "./client/linearDataset";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 import { RDF, SM } from "./vocab";
 
@@ -49,16 +43,16 @@ const siteFetch: typeof globalThis.fetch = async (input) => {
 
 const library = createSolidDeckLibrary({ fetch: siteFetch, indexUrl: `${DECKS}index.ttl` });
 
-const documents = new Map<string, Promise<SolidDataset>>();
+const documents = new Map<string, Promise<Dataset>>();
 
 /** The subjects of a type a release document has, and those of them it does not retire. */
 async function subjectsOf(url: string, type: string): Promise<{ all: string[]; inUse: string[] }> {
   if (!documents.has(url)) documents.set(url, getSolidDatasetLinear(url, { fetch: siteFetch }));
   const dataset = await documents.get(url)!;
-  const things = getThingAll(dataset).filter((thing: Thing) =>
+  const things = getThingAll(dataset).filter((thing: Subject) =>
     getUrlAll(thing, RDF.type).includes(type),
   );
-  const id = (thing: Thing) => thing.url.slice(thing.url.indexOf("#") + 1);
+  const id = (thing: Subject) => thing.url.slice(thing.url.indexOf("#") + 1);
   return {
     all: things.map(id).sort(),
     inUse: things

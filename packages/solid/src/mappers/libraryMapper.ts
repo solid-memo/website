@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type Subject,
   asUrl,
   getInteger,
   getStringNoLocale,
@@ -11,9 +13,7 @@ import {
   getThingAll,
   getUrl,
   getUrlAll,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+} from "../client/rdf";
 import { directionOfConcept } from "@solid-memo/domain/concepts";
 import { copyKeywords } from "@solid-memo/domain/keywords";
 import { agentUrlOf } from "@solid-memo/domain/agentRecord";
@@ -43,7 +43,7 @@ import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
  * document of relative IRIs, so every URL here is where it can be
  * fetched from.
  */
-export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
+export function toLibraryDecks(index: Dataset): LibraryDeck[] {
   const catalog = getThingAll(index).find((thing) =>
     getUrlAll(thing, RDF.type).includes(DCAT.Catalog),
   );
@@ -65,7 +65,7 @@ export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
  * Studio's release check, domain/release/releaseCheck.ts): its address,
  * its catalog's publisher, and every release of every deck it lists.
  */
-export function toLibraryIndexView(indexUrl: string, index: SolidDataset): LibraryIndexView {
+export function toLibraryIndexView(indexUrl: string, index: Dataset): LibraryIndexView {
   const catalog = getThingAll(index).find((thing) =>
     getUrlAll(thing, RDF.type).includes(DCAT.Catalog),
   );
@@ -77,7 +77,7 @@ export function toLibraryIndexView(indexUrl: string, index: SolidDataset): Libra
 }
 
 function toLibraryDeck(
-  index: SolidDataset,
+  index: Dataset,
   seriesUrl: string,
   names: ReadonlyMap<string, string>,
 ): LibraryDeck | null {
@@ -120,7 +120,7 @@ function toLibraryDeck(
 }
 
 /** `isCourse` for a release that is also typed schema:Course. */
-function courseOf(release: Thing): { isCourse?: true } {
+function courseOf(release: Subject): { isCourse?: true } {
   return getUrlAll(release, RDF.type).includes(SCHEMA.Course) ? { isCourse: true } : {};
 }
 
@@ -130,7 +130,7 @@ function courseOf(release: Thing): { isCourse?: true } {
  * release's own document. None when it names no contact, or a contact
  * with no web page, such as the email the library's older versions name.
  */
-function contactOf(release: Thing, dataset: SolidDataset): { contact?: string } {
+function contactOf(release: Subject, dataset: Dataset): { contact?: string } {
   const point = getUrl(release, DCAT.contactPoint);
   const thing = point === null ? null : getThing(dataset, point);
   const url = thing === null ? null : getUrl(thing, VCARD.hasURL);
@@ -138,7 +138,7 @@ function contactOf(release: Thing, dataset: SolidDataset): { contact?: string } 
 }
 
 /** A release by URL, with what the index says about it (maybe nothing). */
-function toLibraryRelease(index: SolidDataset, url: string): LibraryRelease {
+function toLibraryRelease(index: Dataset, url: string): LibraryRelease {
   const thing = getThing(index, url);
   if (thing === null) return { url, version: "?" };
   const issued = readDatetime(thing, DCTERMS.issued);
@@ -152,7 +152,7 @@ function toLibraryRelease(index: SolidDataset, url: string): LibraryRelease {
 }
 
 /** A source by URL, plus whatever the index says about it (maybe nothing). */
-function toLibrarySource(url: string, thing: Thing | null): LibrarySource {
+function toLibrarySource(url: string, thing: Subject | null): LibrarySource {
   if (thing === null) return { url, authors: [] };
   const title = getStringNoLocale(thing, DCTERMS.title);
   const license = getUrl(thing, DCTERMS.license);
@@ -172,7 +172,7 @@ function toLibrarySource(url: string, thing: Thing | null): LibrarySource {
  * it would silently drop whatever the newer format added. Older formats
  * are brought up to the current one in memory.
  */
-export function toLibraryDeckContent(url: string, dataset: SolidDataset): LibraryDeckContentOf {
+export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeckContentOf {
   const things = getThingAll(dataset);
   const deck = things.find((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck));
   const formatVersion = deck === undefined ? 1 : storedVersionOf(deck);
@@ -214,7 +214,7 @@ export function toLibraryDeckContent(url: string, dataset: SolidDataset): Librar
  * describes (library deck format 6 describes its series in it), else the
  * release alone, as the release says of itself.
  */
-export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): LibraryDeck {
+export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryDeck {
   // Where a mistake in it is reported is read with its content when asked (UseCases.reportPlace).
   const {
     cards,
@@ -252,7 +252,7 @@ export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): Lib
  * does not fit is left out) and brought up to the current format. A
  * release with none — no course — has an empty outline.
  */
-export function toCourseOutline(releaseUrl: string, dataset: SolidDataset): CourseOutline {
+export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOutline {
   const chapters: { url: string; data: ChapterV1 }[] = [];
   const steps: { url: string; data: StepV1 }[] = [];
   for (const thing of getThingAll(dataset)) {
@@ -269,13 +269,13 @@ export function toCourseOutline(releaseUrl: string, dataset: SolidDataset): Cour
 type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
 
 /** The cards of the release at `url`, each with its distractors; a card that does not fit its shape is left out. */
-export function toLibraryCards(url: string, dataset: SolidDataset): LibraryCard[] {
+export function toLibraryCards(url: string, dataset: Dataset): LibraryCard[] {
   return getThingAll(dataset)
     .map((thing) => toLibraryCard(url, thing, dataset))
     .filter((card): card is LibraryCard => card !== null);
 }
 
-function toLibraryCard(url: string, thing: Thing, dataset: SolidDataset): LibraryCard | null {
+function toLibraryCard(url: string, thing: Subject, dataset: Dataset): LibraryCard | null {
   if (!getUrlAll(thing, RDF.type).includes(SM.Card)) return null;
   const formatVersion = storedVersionOf(thing);
   if (formatVersion > LATEST_VERSION.card) {

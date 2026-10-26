@@ -1406,8 +1406,8 @@ decks, cards and review states cover it (`data-model.md`). While the data
 check is under way, or the catalog is set aside, the import is held
 ([below](#data-set-aside)); a file can still be read.
 
-Each write passes the shape check. Turtle and JSON-LD go through
-`@inrupt/solid-client`, and files through the browser's own `Blob` and
+Each write passes the shape check. Turtle and JSON-LD go through the
+Solid client library, behind `client/resources.ts`, and files through the browser's own `Blob` and
 file input: no new library
 ([boundaries.md](boundaries.md#files-without-a-vendor-library)). Unit
 tests take a deck with Markdown, pictures, wrong options (one retired),

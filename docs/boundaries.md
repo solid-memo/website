@@ -20,8 +20,11 @@ imports and fails on:
 - a node-only import (`node:*`, `n3`, `@solid-memo/turtle`,
   `@solid-memo/site`, any package's `tooling/` or `node/` entry) in
   browser code;
+- an import of a Solid client library, any `@inrupt/` package, from
+  any file but `solid`'s client modules and `shacl`'s Turtle reader,
+  tests aside ([below](#the-solid-client-libraries));
 - an import of `@inrupt/solid-client`'s access control from any file
-  but the release publisher's, tests aside ([below](#access-control)).
+  but the public-read grant's, tests aside ([below](#access-control)).
 
 Test files follow their subject's rules and, like the vitest configs,
 may use the root `package.json`'s shared test tooling.
@@ -94,7 +97,7 @@ listed:
 
 | Library | Package | Notes |
 |---|---|---|
-| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` uses `@inrupt/solid-client` to parse shapes; deck files use it ([below](#files-without-a-vendor-library)); its access control only in `src/solidReleasePublisher.ts` ([below](#access-control)) |
+| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `src/client/` only ([below](#the-solid-client-libraries)); `shacl` uses `@inrupt/solid-client` in `src/turtleDocument.ts` only, to parse shapes; its access control only in `src/client/access.ts` ([below](#access-control)) |
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | components; in `web`, `main.tsx`, which renders the page, and `App.tsx`, the page; in `studio`, its screens |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
@@ -105,6 +108,36 @@ listed:
 | `@axe-core/playwright` | `e2e-journeys` | `pages/App.ts` only: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
 | `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, both node-only in the check: Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, not shipped ([vendor-code.md](vendor-code.md#maturity)) |
 
+## The Solid client libraries
+
+The rest of the code calls the Solid client libraries through modules
+of the app's own, in
+[packages/solid/src/client/](../packages/solid/src/client/), so another
+library could take their place there alone
+([vendor-code.md](vendor-code.md)):
+
+| Module | What it has |
+|---|---|
+| [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built |
+| [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size |
+| [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, the Turtle and JSON-LD parsers, and `HttpError` for a failed request |
+| [session.ts](../packages/solid/src/client/session.ts) | the sign-in client, on `@inrupt/solid-client-authn-browser` |
+| [access.ts](../packages/solid/src/client/access.ts) | the public-read grant ([below](#access-control)) |
+
+`shacl` may not import `solid`, so it reads a shape's Turtle with a
+module of its own,
+[turtleDocument.ts](../packages/shacl/src/turtleDocument.ts), as pod
+documents are read.
+
+`npm run check:boundaries`
+([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_IN`)
+lets only these files, outside tests, import any `@inrupt/` package,
+with any import: named, a namespace, a subpath such as
+`@inrupt/solid-client/universal`, or a dynamic `import()`. Such an
+import elsewhere is reported once, not again by the access-control
+rule. Tests mock the client modules, not the
+libraries.
+
 ## Files without a vendor library
 
 A deck saved as a file, or read from one ([studio.md](studio.md#import-and-export)),
@@ -113,8 +146,9 @@ needs no library of its own:
 - `solid` writes Turtle with `@inrupt/solid-client`'s
   `solidDatasetAsTurtle` and JSON-LD with
   [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
-  triples. It reads both with the library's `getTurtleParser` and
-  `getJsonLdParser`.
+  triples. It reads both with `parseQuads`, on the library's Turtle and
+  JSON-LD parsers. Both are in
+  [client/resources.ts](../packages/solid/src/client/resources.ts).
 - `browser`'s `FileExchange` port saves and opens files with what the
   browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):
   a `Blob` behind a link with `download`, and a hidden
@@ -126,19 +160,22 @@ The app changes access in one place only: a published release becomes
 readable by everyone ([studio.md](studio.md#publishing-a-release)).
 Only the `ReleasePublisher` port's adapter,
 [solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
-makes that write: `@inrupt/solid-client`'s
-`universalAccess.setPublicAccess`, read only, for the release's
-document, writing its own ACL (Web Access Control) or ACR (Access
-Control Policies). The publisher's fetch refuses another origin, or a
-write of anything but `<release>.acl` or `<release>.acr`, whatever the
-server names as the release's access control. No folder's access
-control changes.
+makes that write, with the grant it is given:
+[client/access.ts](../packages/solid/src/client/access.ts) has
+`@inrupt/solid-client`'s `universalAccess.setPublicAccess`, read only,
+for the release's document, writing its own ACL (Web Access Control) or
+ACR (Access Control Policies). The publisher's fetch refuses another
+origin, or a write of anything but `<release>.acl` or `<release>.acr`,
+whatever the server names as the release's access control. No folder's
+access control changes.
 
 `npm run check:boundaries`
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`)
-lets only that file, outside tests, import `@inrupt/solid-client`'s
+lets only `client/access.ts`, outside tests, import `@inrupt/solid-client`'s
 access control (`universalAccess`, the `acp_*` modules, the ACL
-functions) or all of the library (`import * as`). At run time, the
+functions) or all of the library (`import * as`). Another client
+module may import the rest of the library, never its access control.
+At run time, the
 [pod fence](#the-pod-fence) refuses any other module's ACL or ACR
 write.
 

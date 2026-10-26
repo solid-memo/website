@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type NamedSubject,
+  type Subject,
   asUrl,
   buildThing,
   createThing,
@@ -13,10 +16,7 @@ import {
   getUrlAll,
   removeThing,
   setThing,
-  type SolidDataset,
-  type Thing,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+} from "../client/rdf";
 import { agentUrlOf, authorFromAgentRecord } from "@solid-memo/domain/agentRecord";
 import {
   catalogFromRecord,
@@ -52,7 +52,7 @@ import { readVersioned, recordThing, removeUnlessNewer, unlessNewer } from "../r
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 
 /** Every agent of a document by URL, named "Name <email>". */
-export function agentNamesOf(dataset: SolidDataset): Map<string, string> {
+export function agentNamesOf(dataset: Dataset): Map<string, string> {
   const names = new Map<string, string>();
   for (const thing of getThingAll(dataset)) {
     const read = readVersioned(thing, "agent");
@@ -74,7 +74,7 @@ export function agentNamesOf(dataset: SolidDataset): Map<string, string> {
  * reports its entry, which a repair may remove (docs/data-model.md,
  * "Where an instance's documents are").
  */
-export function toDecks(dataset: SolidDataset, catalogUrl: string): Deck[] {
+export function toDecks(dataset: Dataset, catalogUrl: string): Deck[] {
   const names = agentNamesOf(dataset);
   return getThingAll(dataset)
     .map((thing) => toDeck(thing, names))
@@ -96,7 +96,7 @@ export function toDecks(dataset: SolidDataset, catalogUrl: string): Deck[] {
  * which name the agents the migration gives it.
  */
 export function toDeck(
-  thing: Thing,
+  thing: Subject,
   agentNames: ReadonlyMap<string, string> = new Map(),
 ): Deck | null {
   const read = readVersioned(thing, "deck");
@@ -134,7 +134,7 @@ export function toDeck(
  * says: a deck read before one changed cannot undo it by a save of its
  * own fields.
  */
-export function withDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
+export function withDeck(dataset: Dataset, deck: Deck): Dataset {
   let updated = setThing(
     dataset,
     recordThing(deck.url, DECK_V6, deckToRecord(deck), getThing(dataset, deck.url)),
@@ -166,7 +166,7 @@ export function deckSubjects(deck: Deck): string[] {
  * siblings keep their positions: the gap is read as if it were not there
  * (domain/deckTree.ts buildTree), and the next arrangement closes it.
  */
-export function withoutDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
+export function withoutDeck(dataset: Dataset, deck: Deck): Dataset {
   let updated = removeUnlessNewer(
     removeUnlessNewer(dataset, deck.url),
     distributionUrlOf(deck.url),
@@ -189,12 +189,12 @@ export function withoutDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
   );
 }
 
-function isTyped(dataset: SolidDataset, url: string, type: string): boolean {
+function isTyped(dataset: Dataset, url: string, type: string): boolean {
   const thing = getThing(dataset, url);
   return thing !== null && getUrlAll(thing, RDF.type).includes(type);
 }
 
-function deckUrlsOf(dataset: SolidDataset): string[] {
+function deckUrlsOf(dataset: Dataset): string[] {
   return getThingAll(dataset)
     .filter((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))
     .map(asUrl);
@@ -206,11 +206,7 @@ function deckUrlsOf(dataset: SolidDataset): string[] {
  * a dataset another app listed in the catalog is not this app's to
  * drop (docs/data-model.md "Write discipline").
  */
-function withCatalogDataset(
-  dataset: SolidDataset,
-  deckUrl: string,
-  change: "add" | "remove",
-): SolidDataset {
+function withCatalogDataset(dataset: Dataset, deckUrl: string, change: "add" | "remove"): Dataset {
   const catalog = getThing(dataset, `${documentUrlOf(deckUrl)}#catalog`);
   if (catalog === null) return dataset;
   const listed = getUrlAll(catalog, DCAT.dataset).includes(deckUrl);
@@ -230,7 +226,7 @@ function withCatalogDataset(
  * node beside it (or by the WebID when there is none); null when the
  * document has no catalog that fits its shape.
  */
-export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog | null {
+export function toCatalog(dataset: Dataset, documentUrl: string): Catalog | null {
   const url = `${documentUrl}#catalog`;
   const thing = getThing(dataset, url);
   const read = thing === null ? null : readVersioned(thing, "catalog");
@@ -253,11 +249,7 @@ export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog |
  * the document still names it a license elsewhere; with nothing else said
  * of it, it goes.
  */
-export function withCatalog(
-  dataset: SolidDataset,
-  documentUrl: string,
-  catalog: Catalog,
-): SolidDataset {
+export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Catalog): Dataset {
   const url = `${documentUrl}#catalog`;
   const existing = getThing(dataset, url);
   const before = existing === null ? [] : getUrlAll(existing, DCTERMS.license);
@@ -303,7 +295,7 @@ export function withCatalog(
 }
 
 /** Agent nodes this app wrote (`#agent-…`) that nothing in the document names. */
-function withoutStrayAgents(dataset: SolidDataset, documentUrl: string): SolidDataset {
+function withoutStrayAgents(dataset: Dataset, documentUrl: string): Dataset {
   const named = new Set(
     getThingAll(dataset).flatMap((thing) => [
       ...getUrlAll(thing, DCTERMS.creator),
@@ -321,7 +313,7 @@ function withoutStrayAgents(dataset: SolidDataset, documentUrl: string): SolidDa
  * from the same document; null when the subject is not an sm:Card that
  * fits its format's shape, or a side has neither text nor a picture.
  */
-export function toCard(thing: Thing, dataset: SolidDataset): Card | null {
+export function toCard(thing: Subject, dataset: Dataset): Card | null {
   const read = readCard(thing);
   if (read === null) return null;
   return cardFromRecord(
@@ -340,7 +332,7 @@ export function toCard(thing: Thing, dataset: SolidDataset): Card | null {
  * format-4 cards, and an app's first write of an older card in format 7
  * would otherwise delete what another app wrote of it.
  */
-export function readCard(thing: Thing): { storedVersion: number; data: CardV7 } | null {
+export function readCard(thing: Subject): { storedVersion: number; data: CardV7 } | null {
   const read = readVersioned(thing, "card");
   if (read === null) return null;
   const data = migrate("card", read.record, { subject: asUrl(thing) });
@@ -352,14 +344,14 @@ export function readCard(thing: Thing): { storedVersion: number; data: CardV7 } 
 }
 
 /** Every card of a cards document. */
-export function toCards(dataset: SolidDataset): Card[] {
+export function toCards(dataset: Dataset): Card[] {
   return getThingAll(dataset)
     .map((thing) => toCard(thing, dataset))
     .filter((card): card is Card => card !== null);
 }
 
 /** A distractor subject, a retired one marked so; null when it is not an sm:Distractor that fits its shape, or its text is empty. */
-export function toDistractor(thing: Thing): Distractor | null {
+export function toDistractor(thing: Subject): Distractor | null {
   const read = readVersioned(thing, "distractor");
   if (read === null) return null;
   return distractorFromRecord(
@@ -375,7 +367,7 @@ export function toDistractor(thing: Thing): Distractor | null {
  * left out. A retired one (owl:deprecated true) is kept, marked so, for
  * the card's editor and its learners' history; it is never offered.
  */
-export function distractorsOf(dataset: SolidDataset, urls: readonly string[]): Distractor[] {
+export function distractorsOf(dataset: Dataset, urls: readonly string[]): Distractor[] {
   return urls
     .map((url) => getThing(dataset, url))
     .map((thing) => (thing === null ? null : toDistractor(thing)))
@@ -390,11 +382,11 @@ export function distractorsOf(dataset: SolidDataset, urls: readonly string[]): D
  * longer removed. Returns the URLs written, for the write check.
  */
 export function withDistractors(
-  dataset: SolidDataset,
+  dataset: Dataset,
   documentUrl: string,
   distractors: readonly Distractor[],
   before: readonly string[],
-): { dataset: SolidDataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[] } {
   const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
   let updated = before
     .filter((url) => !subjects.includes(url))
@@ -421,10 +413,10 @@ export function withDistractors(
  * another app's, stays. Readers go by sm:distractor alone.
  */
 export function withSuggestedAnswers(
-  card: ThingPersisted,
+  card: NamedSubject,
   before: readonly string[],
   distractors: readonly string[],
-): ThingPersisted {
+): NamedSubject {
   const builder = buildThing(card);
   for (const url of before)
     if (!distractors.includes(url)) builder.removeUrl(SCHEMA.suggestedAnswer, url);

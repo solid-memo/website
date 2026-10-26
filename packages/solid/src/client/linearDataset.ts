@@ -35,9 +35,8 @@ export async function getSolidDatasetLinear(
     fetch: options.fetch,
     parsers: { "text/turtle": collectingTurtleParser(collected) },
   });
-  // A dataset solid-client did not parse with our parser is its own already.
-  if (collected.quads === undefined) return described;
-  return Object.freeze({ ...described, graphs: graphsOf(collected.quads) });
+  // solid-client parses what it returns with the parser for its type; ours is the only one it has.
+  return Object.freeze({ ...described, graphs: graphsOf(collected.quads!) });
 }
 
 /** solid-client's Turtle parser, whose quads go to `collected` instead of to solid-client. */

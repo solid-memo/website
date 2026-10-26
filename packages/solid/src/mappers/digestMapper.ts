@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { asUrl, getThingAll, type ThingPersisted, type SolidDataset } from "@inrupt/solid-client";
+import { type Dataset, type NamedSubject, asUrl, getThingAll } from "../client/rdf";
 import {
   monthSummaryFromRecord,
   monthSummaryToRecord,
@@ -32,7 +32,7 @@ import { readVersioned, recordThing } from "../records";
  * learned again. A schedule of an older format is brought up to the
  * latest (one of format 1 counted SM-2's due days).
  */
-export function toDigest(dataset: SolidDataset): InstanceDigest {
+export function toDigest(dataset: Dataset): InstanceDigest {
   const digest = emptyDigest();
   for (const thing of getThingAll(dataset)) {
     const receipt = readVersioned(thing, "documentReceipt");
@@ -61,23 +61,23 @@ export function toDigest(dataset: SolidDataset): InstanceDigest {
 export function toReceiptThing(
   url: string,
   receipt: DocumentReceipt,
-  existing: ThingPersisted | null,
-): ThingPersisted {
+  existing: NamedSubject | null,
+): NamedSubject {
   return recordThing(url, DOCUMENT_RECEIPT_V1, receiptToRecord(receipt), existing);
 }
 
 export function toScheduleThing(
   url: string,
   schedule: StoredSchedule,
-  existing: ThingPersisted | null,
-): ThingPersisted {
+  existing: NamedSubject | null,
+): NamedSubject {
   return recordThing(url, DECK_SCHEDULE_V2, scheduleToRecord(schedule), existing);
 }
 
 export function toMonthSummaryThing(
   url: string,
   summary: StoredMonthSummary,
-  existing: ThingPersisted | null,
-): ThingPersisted {
+  existing: NamedSubject | null,
+): NamedSubject {
   return recordThing(url, MONTH_SUMMARY_V1, monthSummaryToRecord(summary), existing);
 }

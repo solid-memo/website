@@ -2,17 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { getSourceUrl, hasResourceInfo } from "./client/resources";
 import {
+  type Dataset,
+  type Subject,
   getInteger,
-  getSourceUrl,
   getThing,
   getThingAll,
   getUrlAll,
-  hasResourceInfo,
+  propertiesOf,
   toRdfJsDataset,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
@@ -42,7 +42,7 @@ const WRITTEN_BESIDE = [
  * all it says is that it is a deck's (isDeckBackLink). Every other
  * subject of the document is another app's.
  */
-export function solidMemoSubjects(dataset: SolidDataset): Set<string> {
+export function solidMemoSubjects(dataset: Dataset): Set<string> {
   return withWrittenBeside(
     dataset,
     getThingAll(dataset).filter((thing) => isSolidMemos(dataset, thing)),
@@ -50,7 +50,7 @@ export function solidMemoSubjects(dataset: SolidDataset): Set<string> {
 }
 
 /** Whether the subject is Solid Memo's by what it says itself (solidMemoSubjects). */
-function isSolidMemos(dataset: SolidDataset, thing: Thing): boolean {
+function isSolidMemos(dataset: Dataset, thing: Subject): boolean {
   return (
     isDeckBackLink(dataset, thing) ||
     (!namesAnotherScheduler(thing) &&
@@ -61,7 +61,7 @@ function isSolidMemos(dataset: SolidDataset, thing: Thing): boolean {
 }
 
 /** The subjects, and what they name as creator, publisher or distribution, and what those name, on. */
-function withWrittenBeside(dataset: SolidDataset, things: readonly Thing[]): Set<string> {
+function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<string> {
   const pending = things.map((thing) => thing.url);
   const owned = new Set(pending);
   for (let url = pending.pop(); url !== undefined; url = pending.pop()) {
@@ -82,7 +82,7 @@ function withWrittenBeside(dataset: SolidDataset, things: readonly Thing[]): Set
  * of one of `classes`, with what they name beside them. Anything else
  * in it is kept.
  */
-export function subjectsOfClasses(...classes: string[]): (dataset: SolidDataset) => Set<string> {
+export function subjectsOfClasses(...classes: string[]): (dataset: Dataset) => Set<string> {
   return (dataset) =>
     withWrittenBeside(
       dataset,
@@ -107,7 +107,7 @@ export function subjectsOfClasses(...classes: string[]): (dataset: SolidDataset)
  *
  * Anything else in it is kept.
  */
-export function deckDocumentSubjects(entries: readonly string[]): (dataset: SolidDataset) => Owned {
+export function deckDocumentSubjects(entries: readonly string[]): (dataset: Dataset) => Owned {
   const deckSubjects = subjectsOfClasses(SM.Card, SM.Distractor, SM.ReviewState);
   const isLeaving = (url: string) => entries.some((entry) => isSameUrl(entry, url));
   return (dataset) => {
@@ -133,7 +133,7 @@ export function deckDocumentSubjects(entries: readonly string[]): (dataset: Soli
  * how the release was made, its sources, its license, its series. A
  * subject nothing of the draft leads to is another app's, and kept.
  */
-export function draftSubjects(dataset: SolidDataset): Set<string> {
+export function draftSubjects(dataset: Dataset): Set<string> {
   const links = new Map<string, string[]>();
   for (const quad of toRdfJsDataset(dataset)) {
     const from = termKey(quad.subject);
@@ -166,14 +166,14 @@ function termKey(term: { termType: string; value: string }): string {
  * (isCatalogEntry), as Solid Memo writes it on a deck's cards and
  * reviews documents (deckPlace.ts withPartOf).
  */
-export function isDeckBackLink(dataset: SolidDataset, thing: Thing): boolean {
+export function isDeckBackLink(dataset: Dataset, thing: Subject): boolean {
   if (!hasResourceInfo(dataset) || !isSameUrl(thing.url, getSourceUrl(dataset))) return false;
-  const predicates = Object.entries(thing.predicates);
+  const properties = propertiesOf(thing);
   const partOf = getUrlAll(thing, DCTERMS.isPartOf);
   return (
-    predicates.length === 1 &&
-    predicates[0]![0] === DCTERMS.isPartOf &&
-    Object.keys(predicates[0]![1]).length === 1 &&
+    properties.length === 1 &&
+    properties[0]!.predicate === DCTERMS.isPartOf &&
+    properties[0]!.values.every((value) => value.type === "iri") &&
     partOf.length > 0 &&
     partOf.every(isCatalogEntry)
   );
@@ -185,12 +185,12 @@ function isCatalogEntry(url: string): boolean {
 }
 
 /** The subjects that are the document at `url` itself (`<>`), spelled any way a request sends it. */
-function documentThings(dataset: SolidDataset, url: string): Thing[] {
+function documentThings(dataset: Dataset, url: string): Subject[] {
   return getThingAll(dataset).filter((thing) => isSameUrl(thing.url, url));
 }
 
 /** The decks a subject says it is part of: its dcterms:isPartOf naming a catalog's entry (isCatalogEntry). */
-function deckBackLinks(thing: Thing): string[] {
+function deckBackLinks(thing: Subject): string[] {
   return getUrlAll(thing, DCTERMS.isPartOf).filter(isCatalogEntry);
 }
 
@@ -199,12 +199,12 @@ function deckBackLinks(thing: Thing): string[] {
  * document itself (`<>`) states as dcterms:isPartOf naming a catalog's
  * entry, this instance's or another one's (deckPlace.ts withPartOf).
  */
-export function deckBackLinksOf(dataset: SolidDataset, url: string): string[] {
+export function deckBackLinksOf(dataset: Dataset, url: string): string[] {
   return documentThings(dataset, url).flatMap(deckBackLinks);
 }
 
 /** The subjects of a document another app wrote: every one that is not Solid Memo's (solidMemoSubjects). */
-export function foreignSubjects(dataset: SolidDataset): Set<string> {
+export function foreignSubjects(dataset: Dataset): Set<string> {
   const owned = solidMemoSubjects(dataset);
   return new Set(
     getThingAll(dataset)

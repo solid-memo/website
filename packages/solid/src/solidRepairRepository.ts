@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  type Dataset,
+  type Subject,
   buildThing,
   getInteger,
   getStringNoLocale,
@@ -11,9 +13,7 @@ import {
   getUrlAll,
   removeThing,
   setThing,
-  type SolidDataset,
-  type Thing,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import type { RepairRepository } from "@solid-memo/application/ports";
 import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/domain/dcat";
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
@@ -64,7 +64,7 @@ export function createSolidRepairRepository({
         if (dataset === null) continue;
         const repaired = repairs
           .filter((r) => r.documentUrl === documentUrl)
-          .reduce<SolidDataset>((current, repair) => applyRepair(current, repair), dataset);
+          .reduce<Dataset>((current, repair) => applyRepair(current, repair), dataset);
         await saveDataset(documentUrl, repaired, fetch);
       }
     },
@@ -82,7 +82,7 @@ const MEMBERSHIP = [
   { link: DCAT.catalog, types: [DCAT.Catalog, SM.DeckGroup] },
 ];
 
-function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
+function applyRepair(dataset: Dataset, repair: Repair): Dataset {
   const thing = getThing(dataset, repair.subjectUrl);
   if (thing === null) return dataset;
   // A repair is of what this version found: never of a subject a newer one has written since.
@@ -101,11 +101,7 @@ function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
  * deck group any more. Only those links go: who else names it — a deck
  * its creator, the catalog its publisher — is left as it is.
  */
-function withoutMembershipsOf(
-  dataset: SolidDataset,
-  documentUrl: string,
-  url: string,
-): SolidDataset {
+function withoutMembershipsOf(dataset: Dataset, documentUrl: string, url: string): Dataset {
   return getThingAll(dataset)
     .filter(
       (thing) =>
@@ -131,7 +127,7 @@ function withoutMembershipsOf(
  * there, and its link stays, as does one another app described in this
  * document, whatever its class.
  */
-function withoutDanglingMembers(dataset: SolidDataset, documentUrl: string, thing: Thing): Thing {
+function withoutDanglingMembers(dataset: Dataset, documentUrl: string, thing: Subject): Subject {
   const foreign = foreignSubjects(dataset);
   const describes = (url: string, types: string[]) => {
     const member = getThing(dataset, url);
@@ -150,9 +146,9 @@ function withoutDanglingMembers(dataset: SolidDataset, documentUrl: string, thin
 }
 
 function repairedThing(
-  thing: Thing,
+  thing: Subject,
   repair: Repair & { kind: Exclude<RepairKind, "remove-subject" | "drop-dangling-members"> },
-): Thing {
+): Subject {
   const builder = buildThing(thing);
   switch (repair.kind) {
     case "describe-deck": {

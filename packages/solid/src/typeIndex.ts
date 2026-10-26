@@ -2,11 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { getProfileStorages, getSourceUrl } from "./client/resources";
 import {
+  type Dataset,
+  type SourcedDataset,
+  type Subject,
   buildThing,
   createSolidDataset,
   createThing,
-  getSourceUrl,
   getStringNoLocale,
   getThing,
   getThingAll,
@@ -14,10 +17,7 @@ import {
   getUrlAll,
   removeThing,
   setThing,
-  type SolidDataset,
-  type Thing,
-  type WithResourceInfo,
-} from "@inrupt/solid-client";
+} from "./client/rdf";
 import {
   getSolidDatasetOrNull,
   PreconditionFailedError,
@@ -89,10 +89,7 @@ export async function locateTypeIndexes(webId: string, fetch: Fetch): Promise<Ty
  * and excluding the WebID document itself (which is commonly its own
  * foaf:isPrimaryTopicOf).
  */
-function extendedProfileUrls(
-  profile: Thing,
-  profileDataset: SolidDataset & WithResourceInfo,
-): string[] {
+function extendedProfileUrls(profile: Subject, profileDataset: SourcedDataset): string[] {
   const self = new Set([stripFragment(profile.url), stripFragment(getSourceUrl(profileDataset))]);
   const urls = [
     ...getUrlAll(profile, RDFS.seeAlso),
@@ -110,7 +107,7 @@ async function readSubjectSafely(
   documentUrl: string,
   webId: string,
   fetch: Fetch,
-): Promise<Thing | null> {
+): Promise<Subject | null> {
   try {
     const dataset = await readDataset(documentUrl, fetch);
     return getThing(dataset, webId);
@@ -311,7 +308,7 @@ const DATA_CLASS_TARGETS: Record<
  * exact IRI, so a resource anywhere else below the container, another
  * app's, is never taken for the instance's.
  */
-function registeredOf(registration: Thing, dataClass: DataClass, container: string): string[] {
+function registeredOf(registration: Subject, dataClass: DataClass, container: string): string[] {
   const { forClass, target } = DATA_CLASS_TARGETS[dataClass];
   if (!getUrlAll(registration, RDF.type).includes(SOLID.TypeRegistration)) return [];
   if (!getUrlAll(registration, SOLID.forClass).includes(forClass)) return [];
@@ -337,7 +334,7 @@ const ATTEMPTS = 3;
 async function changeIndex<R>(
   indexUrl: string,
   fetch: Fetch,
-  change: (dataset: SolidDataset & WithResourceInfo) => { dataset: SolidDataset; result: R },
+  change: (dataset: SourcedDataset) => { dataset: Dataset; result: R },
 ): Promise<R> {
   for (let attempt = 1; ; attempt++) {
     const read = await readDataset(indexUrl, fetch);
@@ -388,7 +385,7 @@ export async function addRegistrations(
     const missing = classes.filter(
       (dataClass) => !things.some((thing) => registeredOf(thing, dataClass, container).length > 0),
     );
-    const updated = missing.reduce<SolidDataset>((current, dataClass) => {
+    const updated = missing.reduce<Dataset>((current, dataClass) => {
       const { forClass, predicate, target, idPrefix } = DATA_CLASS_TARGETS[dataClass];
       return setThing(
         current,
@@ -422,7 +419,7 @@ export async function removeInstanceRegistrations(
 ): Promise<void> {
   const container = ensureTrailingSlash(containerUrl);
   await changeIndex(indexUrl, fetch, (dataset) => {
-    let updated: SolidDataset = dataset;
+    let updated: Dataset = dataset;
     for (const thing of getThingAll(dataset)) {
       const ours = DATA_CLASSES.flatMap((dataClass) => registeredOf(thing, dataClass, container));
       updated = withoutRegistered(updated, thing, ours);
@@ -432,7 +429,7 @@ export async function removeInstanceRegistrations(
 }
 
 /** What a registration registers, under either predicate. */
-function registeredUrls(registration: Thing): string[] {
+function registeredUrls(registration: Subject): string[] {
   return [
     ...getUrlAll(registration, SOLID.instanceContainer),
     ...getUrlAll(registration, SOLID.instance),
@@ -441,10 +438,10 @@ function registeredUrls(registration: Thing): string[] {
 
 /** The index without the registration's links to `urls`: the whole registration when it registers nothing else. */
 function withoutRegistered(
-  dataset: SolidDataset,
-  registration: Thing,
+  dataset: Dataset,
+  registration: Subject,
   urls: readonly string[],
-): SolidDataset {
+): Dataset {
   if (urls.length === 0) return dataset;
   if (registeredUrls(registration).every((url) => urls.includes(url)))
     return removeThing(dataset, registration);
@@ -469,7 +466,7 @@ export async function renameInstanceRegistrations(
 ): Promise<void> {
   const container = ensureTrailingSlash(containerUrl);
   await changeIndex(indexUrl, fetch, (dataset) => {
-    let updated: SolidDataset = dataset;
+    let updated: Dataset = dataset;
     for (const thing of getThingAll(dataset)) {
       const ours = DATA_CLASSES.some(
         (dataClass) => registeredOf(thing, dataClass, container).length > 0,
@@ -492,9 +489,12 @@ export async function renameInstanceRegistrations(
  * first. Throws when the WebID leads to none.
  */
 async function ownStorageFor(url: string, webId: string, fetch: Fetch): Promise<string> {
-  const storages = (await createSolidStorageGateway({ fetch }).discoverStorages(webId)).map(
-    (storage) => ensureTrailingSlash(storage.url),
-  );
+  const storages = (
+    await createSolidStorageGateway({
+      fetch,
+      profileStorages: getProfileStorages,
+    }).discoverStorages(webId)
+  ).map((storage) => ensureTrailingSlash(storage.url));
   const storage = storages.find((root) => url.startsWith(root)) ?? storages[0];
   if (storage === undefined) throw new AppError("typeIndexNoStorage", { webId });
   return storage;

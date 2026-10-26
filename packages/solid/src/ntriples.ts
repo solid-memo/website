@@ -2,16 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { toRdfJsDataset } from "@inrupt/solid-client";
+import { toRdfJsDataset } from "./client/rdf";
 import type { Quad, Term } from "@rdfjs/types";
-import { getSolidDatasetLinear } from "./linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 
 /**
  * A Turtle document as N-Triples lines, its relative IRIs resolved
  * against `url`: how the pods kept outside a server (localPod.ts, and
- * the one tests use) store documents, built in one pass (linearDataset.ts),
+ * the one tests use) store documents, built in one pass (client/linearDataset.ts),
  * so a large document is stored in time linear in its size. Rejects when
  * the Turtle does not parse.
  */

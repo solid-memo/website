@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getThing, getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
+import { type Dataset, getThing, getThingAll, getUrlAll } from "./client/rdf";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
 import {
   cardsContainerOf,
@@ -85,7 +85,7 @@ export async function deleteInstanceData(
     (url) => monthOfHistoryUrl(container, url) !== null,
   );
   const kept: string[] = [];
-  const remove = async (url: string, owns: (dataset: SolidDataset) => Owned) => {
+  const remove = async (url: string, owns: (dataset: Dataset) => Owned) => {
     if ((await removeOwned(url, owns, fetch)) === "kept") kept.push(url);
   };
   const deckSubjects = deckDocumentSubjects(named.map(({ entry }) => entry));
@@ -133,7 +133,7 @@ const UNREADABLE = Symbol("unreadable");
 async function readCatalog(
   url: string,
   fetch: typeof globalThis.fetch,
-): Promise<SolidDataset | null | typeof UNREADABLE> {
+): Promise<Dataset | null | typeof UNREADABLE> {
   let served = false;
   // A fetch of its own, so the read is not one remembered from before.
   const noting = (async (input, init) => {
@@ -150,7 +150,7 @@ async function readCatalog(
 }
 
 /** The drafts the instance's catalog links that are in its `drafts/`: a link elsewhere is never followed to a delete. */
-function draftsOf(catalog: SolidDataset, container: string): string[] {
+function draftsOf(catalog: Dataset, container: string): string[] {
   const node = getThing(catalog, catalogNodeUrlOf(container));
   return node === null
     ? []
@@ -164,10 +164,7 @@ function draftsOf(catalog: SolidDataset, container: string): string[] {
  * names, whether or not the deck fits its shape, each with the entry
  * naming it: entries of this document only.
  */
-function deckDocumentsOf(
-  catalog: SolidDataset,
-  catalogUrl: string,
-): { entry: string; url: string }[] {
+function deckDocumentsOf(catalog: Dataset, catalogUrl: string): { entry: string; url: string }[] {
   return getThingAll(catalog)
     .filter(
       (thing) =>

@@ -6,25 +6,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
+  type Dataset,
   getBoolean,
   getInteger,
   getStringNoLocale,
   getThing,
   getUrl,
-  mockSolidDatasetFrom,
-  saveSolidDatasetAt,
   setThing,
-  type SolidDataset,
-  type ThingBuilder,
-  type ThingPersisted,
-} from "@inrupt/solid-client";
+  type SubjectBuilder,
+} from "./client/rdf";
+import { saveSolidDatasetAt } from "./client/resources";
+import { datasetFrom } from "./testing/datasets";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { getSolidDatasetOrNull } from "./datasets";
 import { RDF, SM } from "./vocab";
 
-vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
+vi.mock("./client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./client/resources")>();
   return { ...actual, saveSolidDatasetAt: vi.fn() };
 });
 vi.mock("./datasets", async (importOriginal) => ({
@@ -56,14 +55,14 @@ describe("getPreferences", () => {
   });
 
   it("returns null when the document has no #it subject", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await expect(makeRepository().getPreferences(INSTANCE)).resolves.toBeNull();
   });
 
   it("maps a stored document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(DOCUMENT),
+        datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
           .addIri(RDF.type, SM.Preferences)
           .addInteger(SM.newCardsPerDay, 5)
@@ -131,7 +130,7 @@ describe("savePreferences", () => {
 
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(DOCUMENT);
-    const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
+    const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(5);
     expect(getInteger(thing, SM.maxReviewsPerDay)).toBe(42);
     expect(getInteger(thing, SM.dayBoundaryHour)).toBe(3);
@@ -143,7 +142,7 @@ describe("savePreferences", () => {
   it("rewrites the subject in place in an existing document, keeping foreign triples", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(DOCUMENT),
+        datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
           .addInteger(SM.newCardsPerDay, 99)
           .addStringNoLocale("https://other.example/#note", "kept")
@@ -154,20 +153,20 @@ describe("savePreferences", () => {
     await makeRepository().savePreferences(INSTANCE, preferences);
 
     const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
+    const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(5);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
     expect(getInteger(thing, SM.formatVersion)).toBe(6);
   });
 
   it("writes the whole document, not a PATCH, which node-solid-server stores a true in as false", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     const fetch = vi.fn(async () => new Response("", { status: 205 }));
     await createSolidPreferencesRepository({
       fetch: fetch as unknown as typeof globalThis.fetch,
     }).savePreferences(INSTANCE, { ...preferences, schedulerInvitationDismissed: true });
 
-    // The PATCH @inrupt/solid-client would send for the edit goes out as a PUT of the document.
+    // The PATCH the Solid client library would send for the edit goes out as a PUT of the document.
     const [, , options] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     await options!.fetch!(DOCUMENT, { method: "PATCH", body: "INSERT DATA {};" });
     const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
@@ -179,7 +178,7 @@ describe("savePreferences", () => {
   it("keeps a stored choice to skip the Connected screen, which it never writes", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(DOCUMENT),
+        datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
           .addBoolean(SM.connectedScreenSkipped, true)
           .build(),
@@ -189,7 +188,7 @@ describe("savePreferences", () => {
     await makeRepository().savePreferences(INSTANCE, preferences);
 
     const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
+    const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getBoolean(thing, SM.connectedScreenSkipped)).toBe(true);
   });
 });
@@ -205,7 +204,7 @@ describe("markConnectedScreen", () => {
       .addInteger(SM.newCardsPerDay, 7)
       .addStringNoLocale("https://other.example/#note", "kept");
     return setThing(
-      mockSolidDatasetFrom(DOCUMENT),
+      datasetFrom(DOCUMENT),
       (skipped === undefined
         ? builder
         : builder.addBoolean(SM.connectedScreenSkipped, skipped)
@@ -216,7 +215,7 @@ describe("markConnectedScreen", () => {
   function saved() {
     const [saveUrl, dataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(DOCUMENT);
-    return getThing(dataset as SolidDataset, SUBJECT)!;
+    return getThing(dataset as Dataset, SUBJECT)!;
   }
 
   it("sets the choice on the preferences as stored, their format and every other triple kept, checked first", async () => {
@@ -272,9 +271,7 @@ describe("markConnectedScreen", () => {
     expect(getInteger(thing, SM.maxReviewsPerDay)).toBeNull();
 
     // They still read as no preferences, but the choice counts at the next login.
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(mockSolidDatasetFrom(DOCUMENT), thing),
-    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(datasetFrom(DOCUMENT), thing));
     await expect(repository.getPreferences(INSTANCE)).resolves.toBeNull();
     await expect(repository.connectedScreenSkipped(INSTANCE)).resolves.toBe(true);
   });
@@ -296,7 +293,7 @@ describe("markConnectedScreen", () => {
   it("writes nothing where there are no preferences and none are given", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe("none");
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe("none");
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
@@ -319,12 +316,9 @@ describe("connectedScreenSkipped", () => {
   const SUBJECT = `${DOCUMENT}#it`;
 
   /** A subject at `version` holding only its type and this value of the choice. */
-  function holding(
-    version: number,
-    add: (b: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
-  ) {
+  function holding(version: number, add: (b: SubjectBuilder) => SubjectBuilder) {
     return setThing(
-      mockSolidDatasetFrom(DOCUMENT),
+      datasetFrom(DOCUMENT),
       add(
         buildThing(createThing({ url: SUBJECT }))
           .addIri(RDF.type, SM.Preferences)
@@ -336,7 +330,7 @@ describe("connectedScreenSkipped", () => {
   it("is false with no document, or no subject in it", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(false);
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await expect(makeRepository().connectedScreenSkipped(INSTANCE)).resolves.toBe(false);
   });
 
@@ -363,7 +357,7 @@ describe("upgradePreferences", () => {
   /** Preferences as an older app wrote them: format 1, a field left out, another app's triple beside them. */
   function older() {
     return setThing(
-      mockSolidDatasetFrom(DOCUMENT),
+      datasetFrom(DOCUMENT),
       buildThing(createThing({ url: `${DOCUMENT}#it` }))
         .addIri(RDF.type, SM.Preferences)
         .addInteger(SM.newCardsPerDay, 7)
@@ -378,7 +372,7 @@ describe("upgradePreferences", () => {
     await expect(makeRepository(checkWrite).upgradePreferences(INSTANCE)).resolves.toBe(true);
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(DOCUMENT);
-    const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
+    const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(7);
     expect(getInteger(thing, SM.maxReviewsPerDay)).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
@@ -387,7 +381,7 @@ describe("upgradePreferences", () => {
   });
 
   it("writes nothing for preferences up to date, none, or no preferences document", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await makeRepository().savePreferences(INSTANCE, DEFAULT_PREFERENCES);
     const current = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Parameters<
       typeof setThing
@@ -395,11 +389,11 @@ describe("upgradePreferences", () => {
     vi.mocked(saveSolidDatasetAt).mockReset();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(current as never);
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(
-        mockSolidDatasetFrom(DOCUMENT),
+        datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
           .addInteger(SM.newCardsPerDay, 7)
           .build(),

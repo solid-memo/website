@@ -2,13 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  createSolidDataset,
-  getThing,
-  removeThing,
-  setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+import { type Dataset, createSolidDataset, getThing, removeThing, setThing } from "./client/rdf";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
 import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
@@ -133,10 +127,10 @@ export function createSolidDigestRepository({
 /** The digest document holding `next`: only the subjects that differ from `stored` are written or removed. */
 function withDigest(
   instanceUrl: string,
-  dataset: SolidDataset,
+  dataset: Dataset,
   stored: InstanceDigest | null,
   next: InstanceDigest,
-): { updated: SolidDataset; subjects: string[] } {
+): { updated: Dataset; subjects: string[] } {
   let updated = dataset;
   const subjects: string[] = [];
   const differs = (a: unknown, b: unknown) => JSON.stringify(a) !== JSON.stringify(b);

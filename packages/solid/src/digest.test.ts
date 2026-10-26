@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, createThing, setThing } from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
   ABSENT_VERSION,

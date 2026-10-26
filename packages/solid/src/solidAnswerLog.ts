@@ -2,13 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  createSolidDataset,
-  getThingAll,
-  removeThing,
-  setThing,
-  type SolidDataset,
-} from "@inrupt/solid-client";
+import { type Dataset, createSolidDataset, getThingAll, removeThing, setThing } from "./client/rdf";
 import type { AnswerLog } from "@solid-memo/application/ports";
 import { monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
 import {
@@ -30,7 +24,7 @@ import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { unlessNewer } from "./records";
 
 /** The answers of a month's document (none when there is none), each that fits its shape. */
-function answersIn(dataset: SolidDataset | null): Answer[] {
+function answersIn(dataset: Dataset | null): Answer[] {
   return dataset === null ? [] : getThingAll(dataset).flatMap((thing) => toAnswer(thing) ?? []);
 }
 

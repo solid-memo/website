@@ -28,6 +28,7 @@ import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidRepairRepository } from "./solidRepairRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { createSolidStorageGateway } from "./solidStorageGateway";
+import { getProfileStorages } from "./client/resources";
 import { createSolidWebIdDocumentRepository } from "./solidWebIdDocumentRepository";
 import { createWriteFence } from "./writeFence";
 
@@ -120,7 +121,10 @@ async function app() {
     } as never,
     deckLibrary: undefined as never,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
-    storageGateway: createSolidStorageGateway({ fetch: podFetch }),
+    storageGateway: createSolidStorageGateway({
+      fetch: podFetch,
+      profileStorages: getProfileStorages,
+    }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, ...ids }),
     deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, ...ids }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
