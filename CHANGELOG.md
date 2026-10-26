@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.14.0](https://github.com/solid-memo/website/compare/v6.13.0...v6.14.0) (2026-10-26)
+
+### Features
+
+* **ui:** let the learner skip the Connected screen after logging in ([10b136e](https://github.com/solid-memo/website/commit/10b136e0a2db1d15561339f4990be7bb5325dd32)), closes [#317](https://github.com/solid-memo/website/issues/317)
+* **vocab:** keep in the pod whether logging in skips the Connected screen ([342acbd](https://github.com/solid-memo/website/commit/342acbdbaf6e24a9ac0f33a3ec06194d7592b2b5)), closes [#317](https://github.com/solid-memo/website/issues/317)
+
 ## [6.13.0](https://github.com/solid-memo/website/compare/v6.12.0...v6.13.0) (2026-10-25)
 
 ### Features
