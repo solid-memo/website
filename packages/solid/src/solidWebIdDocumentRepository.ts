@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getSolidDataset } from "@inrupt/solid-client";
+import { getSolidDataset } from "./client/resources";
 import type { WebIdDocumentRepository } from "@solid-memo/application/ports";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import { toWebIdDocument } from "./mappers/webIdDocumentMapper";

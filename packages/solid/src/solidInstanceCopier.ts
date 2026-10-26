@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { createContainerAt, getFile, getSolidDataset, overwriteFile } from "@inrupt/solid-client";
+import { createContainerAt, getFile, getSolidDataset, overwriteFile } from "./client/resources";
 import { fromRdfJsDataset, toRdfJsDataset } from "./client/rdf";
 import type { ContainerMove, InstanceCopier } from "@solid-memo/application/ports";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";

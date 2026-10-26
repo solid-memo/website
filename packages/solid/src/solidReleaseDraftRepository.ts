@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getContainedResourceUrlAll, getSolidDataset } from "@inrupt/solid-client";
+import { getContainedResourceUrlAll, getSolidDataset } from "./client/resources";
 import {
   type Dataset,
+  type FetchedDataset,
   type NamedSubject,
   asUrl,
   createSolidDataset,
@@ -437,7 +438,7 @@ export async function draftDocumentsIn(
   const container = draftContainerOf(draftUrl);
   // The listing is read afresh, never answered from what was read before: a server whose ETag
   // outlives edits made in the same second would say a document just made is not there.
-  let listing: Awaited<ReturnType<typeof getSolidDataset>>;
+  let listing: FetchedDataset;
   try {
     listing = await getSolidDataset(container, { fetch });
   } catch (error) {

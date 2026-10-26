@@ -2,16 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getSolidDataset, toRdfJsDataset } from "@inrupt/solid-client";
 import type { DatasetCore } from "@rdfjs/types";
+import { readTurtleDocument } from "../turtleDocument";
 
 /**
  * A Turtle document as an RDF/JS dataset, parsed the way the app parses
- * pod documents (through @inrupt/solid-client), for tests of the SHACL
+ * pod documents (readTurtleDocument), for tests of the SHACL
  * modules. `url` is what relative IRIs resolve against.
  */
-export async function datasetFromTurtle(turtle: string, url: string): Promise<DatasetCore> {
-  return toRdfJsDataset(await getSolidDataset(url, { fetch: turtleFetch(turtle) }));
+export function datasetFromTurtle(turtle: string, url: string): Promise<DatasetCore> {
+  return readTurtleDocument(url, turtleFetch(turtle));
 }
 
 /** A fetch that answers every request with the given Turtle. */

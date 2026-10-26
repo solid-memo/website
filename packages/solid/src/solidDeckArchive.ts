@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { solidDatasetAsTurtle } from "@inrupt/solid-client";
+import { parseQuads, solidDatasetAsTurtle } from "./client/resources";
 import {
   type Dataset,
   type Subject,
@@ -11,7 +11,6 @@ import {
   getThing,
   getThingAll,
   getUrlAll,
-  parseQuads,
   toRdfJsDataset,
 } from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
@@ -65,9 +64,9 @@ const KINDS: readonly { type: string; scheduler?: string; shape: ShapeName }[] =
  * triples as they are, so what another app said of the deck, its cards
  * or their states goes with them; only the deck's place among its
  * groups (sm:position) is left behind, and a course's progress unless
- * asked for. Turtle is written by @inrupt/solid-client
- * (solidDatasetAsTurtle) and read by it (parseQuads), JSON-LD read
- * by it too and written here (jsonLd.ts).
+ * asked for. Turtle is written and read as pod documents
+ * are (solidDatasetAsTurtle, parseQuads), JSON-LD read so too and
+ * written here (jsonLd.ts).
  */
 export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fetch }): DeckArchive {
   return {

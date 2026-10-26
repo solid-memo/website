@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { deleteSolidDataset, saveSolidDatasetAt, solidDatasetAsTurtle } from "@inrupt/solid-client";
 import {
   type Dataset,
   type FetchedDataset,
@@ -20,7 +19,12 @@ import {
 } from "./client/rdf";
 
 import type { Literal, Quad } from "@rdfjs/types";
-import { getSolidDatasetLinear } from "./client/linearDataset";
+import {
+  deleteSolidDataset,
+  getSolidDatasetLinear,
+  saveSolidDatasetAt,
+  solidDatasetAsTurtle,
+} from "./client/resources";
 import { unlessNewer } from "./records";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -34,8 +38,8 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
  * - saving an edit of a dataset read from the same URL sends
  *   `If-Match: <that ETag>`: had the document changed since, the pod
  *   answers 412 and nothing is written;
- * - saving a new dataset is a creation, which @inrupt/solid-client sends
- *   with `If-None-Match: *`: had the document appeared meanwhile, 412;
+ * - saving a new dataset is a creation, which the Solid client library
+ *   sends with `If-None-Match: *`: had the document appeared meanwhile, 412;
  * - deleting a document read before sends `If-Match` too, and so does
  *   removing what Solid Memo owns of one (removeOwned).
  *
@@ -258,7 +262,7 @@ export async function getSolidDatasetOrNull(
 /**
  * Save a dataset: an edit of the document it was read from only if that
  * is unchanged (If-Match), a new dataset only if nothing is there yet
- * (If-None-Match: *, sent by @inrupt/solid-client). `whole` writes an
+ * (If-None-Match: *, sent by the Solid client library). `whole` writes an
  * edit as one PUT of the whole document (with the same If-Match) however
  * small it is: for a bulk edit of text, which Community Solid Server's
  * in-memory store cuts short when a PATCH holds characters beyond ASCII.
@@ -497,7 +501,7 @@ function termKey(term: { termType: string; value: string }): string {
   return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
-/** The fetch, with `If-Match` added to the request that writes (the only one @inrupt/solid-client makes for it). */
+/** The fetch, with `If-Match` added to the request that writes (the only one the Solid client library makes for it). */
 function withIfMatch(
   fetch: typeof globalThis.fetch,
   etag: string | undefined,
@@ -511,12 +515,12 @@ function withIfMatch(
 }
 
 /**
- * The fetch, with the PATCH @inrupt/solid-client sends given our body
+ * The fetch, with the PATCH the Solid client library sends given our body
  * (patchBody, sent again with its deleted decimals spelled as numbers
  * where a conflict (409) may come of their spelling), or sent as a PUT of the whole dataset (its every triple,
  * the edit applied) when that body is larger than MAX_PATCH_BYTES, or
- * always (`whole`); other headers kept. @inrupt/solid-client takes the
- * answer as its PATCH's.
+ * always (`whole`); other headers kept. The library takes the answer as
+ * its PATCH's.
  */
 function ownPatches(
   fetch: typeof globalThis.fetch,
@@ -611,7 +615,7 @@ const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
  * The SPARQL Update of a dataset's changes, one triple a line in
  * N-Triples form, every triple closed by " .": what every Solid server
  * parses, node-solid-server's too. Null when a change has a blank node,
- * which DELETE DATA cannot name; then @inrupt/solid-client's body is sent.
+ * which DELETE DATA cannot name; then the Solid client library's body is sent.
  *
  * `decimalsAsNumbers` spells each decimal deleted as JavaScript spells
  * its number (`1` for `1.0`, `2.5` for `2.50`): how node-solid-server

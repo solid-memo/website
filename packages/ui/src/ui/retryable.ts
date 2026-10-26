@@ -9,7 +9,7 @@ function passing(status: number): boolean {
   return status === 408 || status === 429 || status >= 500;
 }
 
-/** The status an @inrupt read's error carries, if it has one. */
+/** The status a pod read's error carries (@solid-memo/solid's HttpError), if it has one. */
 function statusOf(error: unknown): number | undefined {
   const candidate = error as { statusCode?: number; response?: { status?: number } } | null;
   return candidate?.statusCode ?? candidate?.response?.status;

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getSourceUrl } from "@inrupt/solid-client";
+import { getSourceUrl } from "./client/resources";
 import {
   type Dataset,
   type SourcedDataset,

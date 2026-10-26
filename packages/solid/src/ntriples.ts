@@ -4,7 +4,7 @@
 
 import { toRdfJsDataset } from "./client/rdf";
 import type { Quad, Term } from "@rdfjs/types";
-import { getSolidDatasetLinear } from "./client/linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 

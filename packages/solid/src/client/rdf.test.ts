@@ -22,7 +22,6 @@ import {
   getThingAll,
   isEmptyDataset,
   localNameOf,
-  parseQuads,
   propertiesOf,
   setThing,
   sourceOf,
@@ -237,30 +236,5 @@ describe("localNameOf", () => {
     const [added] = changesOf(setThing(createSolidDataset(), thing))!.additions;
     expect(localNameOf(added!.subject.value)).toBe("new");
     expect(localNameOf(`${URL_}#new`)).toBeUndefined();
-  });
-});
-
-describe("parseQuads", () => {
-  it("reads Turtle, its relative IRIs resolved against the base", async () => {
-    const quads = await parseQuads(`<#a> <${EX}p> "x" .`, "turtle", URL_);
-    expect(quads.map((one) => [one.subject.value, one.object.value])).toEqual([[`${URL_}#a`, "x"]]);
-  });
-
-  it("reads JSON-LD, in every graph it names", async () => {
-    const quads = await parseQuads(
-      JSON.stringify({
-        "@id": "https://example.com/g",
-        "@graph": [{ "@id": "#a", [`${EX}p`]: "x" }],
-      }),
-      "jsonld",
-      URL_,
-    );
-    expect(quads.map((one) => [one.subject.value, one.graph.value])).toEqual([
-      [`${URL_}#a`, "https://example.com/g"],
-    ]);
-  });
-
-  it("rejects a text that does not parse", async () => {
-    await expect(parseQuads("<#a> <#b> .", "turtle", URL_)).rejects.toBeDefined();
   });
 });

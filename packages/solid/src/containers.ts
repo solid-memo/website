@@ -7,7 +7,8 @@ import {
   deleteFile,
   getContainedResourceUrlAll,
   getSolidDataset,
-} from "@inrupt/solid-client";
+} from "./client/resources";
+import type { SourcedDataset } from "./client/rdf";
 import { getSolidDatasetOrNull } from "./datasets";
 
 /**
@@ -20,10 +21,7 @@ import { getSolidDatasetOrNull } from "./datasets";
  */
 
 /** What a container lists that lies below it. */
-function childrenOf(
-  container: Parameters<typeof getContainedResourceUrlAll>[0],
-  containerUrl: string,
-): string[] {
+function childrenOf(container: SourcedDataset, containerUrl: string): string[] {
   return getContainedResourceUrlAll(container).filter(
     (child) => child.startsWith(containerUrl) && child !== containerUrl,
   );
@@ -87,7 +85,7 @@ export async function deleteContainerIfEmpty(
   containerUrl: string,
   fetch: typeof globalThis.fetch,
 ): Promise<boolean> {
-  let container: Parameters<typeof getContainedResourceUrlAll>[0];
+  let container: SourcedDataset;
   try {
     container = await getSolidDataset(containerUrl, { fetch });
   } catch (error) {

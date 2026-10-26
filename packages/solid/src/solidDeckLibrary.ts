@@ -9,7 +9,7 @@ import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 import { AppError } from "@solid-memo/domain/appError";
 import { catalogLinks } from "./catalogLinks";
-import { getSolidDatasetLinear } from "./client/linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 import {
   toCourseOutline,
   toLibraryDeckContent,

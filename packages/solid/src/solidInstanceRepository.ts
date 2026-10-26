@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { deleteContainer } from "@inrupt/solid-client";
+import { deleteContainer } from "./client/resources";
 import { createSolidDataset, getThing, setThing } from "./client/rdf";
 import type { InstanceRepository } from "@solid-memo/application/ports";
 import {

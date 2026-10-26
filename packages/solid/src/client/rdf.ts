@@ -4,8 +4,6 @@
 
 import {
   createSolidDataset,
-  getJsonLdParser,
-  getTurtleParser,
   type SolidDataset,
   type Thing,
   type ThingBuilder,
@@ -147,34 +145,6 @@ function valuesOf(objects: Subject["predicates"][string]): PropertyValue[] {
     });
   }
   return values;
-}
-
-const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as const;
-
-/**
- * The quads of a Turtle or JSON-LD text, its relative IRIs resolved
- * against `baseUrl`, parsed as a pod's documents are: in every graph the
- * text names. Rejects with the parser's error on a text that does not parse.
- */
-export function parseQuads(
-  text: string,
-  format: keyof typeof MEDIA_TYPES,
-  baseUrl: string,
-): Promise<Quad[]> {
-  const parser = format === "turtle" ? getTurtleParser() : getJsonLdParser();
-  return new Promise((resolve, reject) => {
-    const quads: Quad[] = [];
-    parser.onQuad((quad) => quads.push(quad));
-    parser.onError(reject);
-    parser.onComplete(() => resolve(quads));
-    parser.parse(text, {
-      internal_resourceInfo: {
-        sourceIri: baseUrl,
-        isRawData: false,
-        contentType: MEDIA_TYPES[format],
-      },
-    } as WithServerResourceInfo);
-  });
 }
 
 /** Where the library names a subject that has no URL yet: `<#name>` in the document it is saved to. */

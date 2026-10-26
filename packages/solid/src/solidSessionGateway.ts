@@ -9,7 +9,7 @@ import {
   login,
   logout,
 } from "@inrupt/solid-client-authn-browser";
-import { getSolidDataset } from "@inrupt/solid-client";
+import { getSolidDataset } from "./client/resources";
 import { getThing, getUrlAll } from "./client/rdf";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";

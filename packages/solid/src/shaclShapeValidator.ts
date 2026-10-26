@@ -39,7 +39,7 @@ import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
-import { getSolidDatasetLinear } from "./client/linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 
