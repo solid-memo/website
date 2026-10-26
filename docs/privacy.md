@@ -1,91 +1,83 @@
 # Privacy
 
-What Solid Memo does with personal data: where what you study is
-stored, what stays in your browser, what the site's host and other
-servers see, and what the project itself has published.
-
-In short: Solid Memo has no server of its own and no accounts. What
-you study is stored in your own pod, or, before you log in, in your
-browser. The app has no analytics, sets no cookies and does not track
-you.
+What Solid Memo does with personal data. It has no server of its own
+and no accounts: a learner's study is in their own pod or, before they
+log in, in the browser. The app has no analytics, sets no cookies and
+doesn't track anyone.
 
 ## In your pod
 
-When you are logged in, everything Solid Memo knows about your study is
-in your [pod](glossary.md#solid-and-the-web), in an instance folder
-(`solid-memo/<name>/` by default): your decks and cards, the review
-state of each card, the log of your answers, your preferences, your
-drafts and a digest that makes the next visit faster.
-[data-model.md](data-model.md) lists every document. Solid Memo reads
-and writes them from your browser, straight to your pod's server. It
-keeps no copy anywhere else.
+Once the learner logs in, all their study is in their
+[pod](glossary.md#solid-and-the-web), in an instance folder
+(`solid-memo/<name>/` by default). It holds decks and cards, each
+card's review state, the answer log, preferences, drafts, and a digest
+that speeds up the next visit ([data-model.md](data-model.md) lists
+every document). The app reads and writes them from the browser,
+straight to the pod's server, and keeps no other copy.
 
-Drawing an instance as a graph in the [Studio](studio.md) reads those
-documents, and your WebID profile to find your storages, as logging in
-does, so that it can tell which addresses are in your pod
+The [Studio](studio.md)'s graph of an instance reads those documents
+and, as logging in does, the WebID profile, whose storages tell which
+addresses are in the pod
 ([`instanceGraph.ts`](../packages/application/src/instanceGraph.ts)).
-The addresses the documents name, such as your WebID, a library release
-or a card's picture, are drawn as they are and never fetched, whether
-they are in your pod or not.
+It draws addresses the documents name, such as the WebID, a library
+release or a card's picture, as they are, and never fetches them, in
+the pod or not.
 
-Your pod's server decides who else may read them. Solid Memo registers
-the review states, the answers and the drafts only in your **private**
-type index, since they say what you studied and how well
-([data-model.md](data-model.md#discovery-chain)). The one thing it
-makes public is a release you publish from the
-[Studio](studio.md): it is meant to be read by others, and it carries
-the authors' names, and their email addresses when you give them.
+The pod's server decides who else may read them. Solid Memo registers
+the review states, the answers and the drafts only in the learner's
+**private** type index
+([data-model.md](data-model.md#discovery-chain)). Only a release the
+learner publishes from the Studio is public; it carries the authors'
+names, and their email addresses when given.
 
-Each answer in the log says which card you answered, when, and how
-well. Since vocabulary 1.19 it also says how long you took to recall
-the answer and, in study, to grade it (not counting the time the app
-was hidden, nor a wait of more than ten minutes), the day the card was
-due, and your device's offset from UTC when you answered, which hints
-at the time zone you were in ([data-model.md](data-model.md#the-answer-log),
-[statistics.md](statistics.md#response-times)). The app records them
-with every answer, in study and in a course, with no setting to turn
-it off. They say how fast you remember and at what hour you study, so
-they are as personal as the rest of the log, and stay in the same
-private documents.
+Each answer in the log records the card, when, and how well. Since
+vocabulary 1.19, it records too how long the learner took to recall
+the answer and, in study, to grade it, leaving out time the app was
+hidden and any wait over ten minutes. It records the day the card was
+due and the device's offset from UTC at answer time, which hints at
+the learner's time zone then
+([data-model.md](data-model.md#the-answer-log),
+[statistics.md](statistics.md#response-times)). These go with every
+answer, in study and in a course, and no setting turns them off. They
+stay in the log's private documents.
 
 The digest keeps a summary of each past month of the log, so the strip
-above the deck list need not read the months again
-([data-model.md](data-model.md#the-digest)): each study day's numbers
-of answers, new cards, reviews and lapses, how many reviews of young
-cards were remembered, and how many answers took each second. It says
-when and how much you studied, as the log does, and stays in your pod
-beside it, in the instance's `digest.ttl`.
+above the deck list needn't reread them
+([data-model.md](data-model.md#the-digest)). For each study day, it
+counts answers, new cards, reviews, lapses, remembered reviews of
+young cards, and how many answers took each second. It's the
+instance's `digest.ttl`, beside the log.
 
 ## In the browser
 
-Before you log in, you study as a guest, in a pod kept in the browser's
-IndexedDB (database `solid-memo-guest-pod`,
+Before logging in, the learner studies as a guest, in a pod kept in the
+browser's IndexedDB (database `solid-memo-guest-pod`,
 [`indexedDbResourceStore.ts`](../packages/browser/src/indexedDbResourceStore.ts),
-[guest-mode.md](guest-mode.md)). It stays on that device until you move
-it into your own pod, or clear the site's data.
+[guest-mode.md](guest-mode.md)). It stays on that device until the
+learner moves it into their own pod.
 
-The app also keeps a few choices on the device, in `localStorage`, so
-they hold before any pod is reached and stay out of your pod:
+A few choices stay in `localStorage`, out of the pod and in force
+before any pod is reached:
 
 | Key | What | Written by |
 |---|---|---|
-| `solid-memo:language` | the language you chose | [`localStorageLanguagePreference.ts`](../packages/browser/src/localStorageLanguagePreference.ts) |
-| `solid-memo:theme` | light, dark or the browser's, a copy of your preferences' once they are saved | [`localStorageThemePreference.ts`](../packages/browser/src/localStorageThemePreference.ts) |
-| `solid-memo:palette` | the colors you chose (none for Standard), a copy of your preferences' too | [`localStoragePalettePreference.ts`](../packages/browser/src/localStoragePalettePreference.ts) |
-| `solid-memo:palette-colors` | the colors of a palette of your own you chose, its name among them, for the first paint, a copy of your Pod's (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
-| `solid-memo:textSize` | the text size you chose (none for Default), a copy of your preferences' too | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
-| `solid-memo:seenHighlights` | which highlights of new versions this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
-| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages you picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
-| `solid-memo:collapsedGroups.<instance URL>` | which deck groups you folded | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
+| `solid-memo:language` | the chosen language | [`localStorageLanguagePreference.ts`](../packages/browser/src/localStorageLanguagePreference.ts) |
+| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageThemePreference.ts`](../packages/browser/src/localStorageThemePreference.ts) |
+| `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | [`localStoragePalettePreference.ts`](../packages/browser/src/localStoragePalettePreference.ts) |
+| `solid-memo:palette-colors` | a chosen custom palette's colors and name, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
+| `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
+| `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
+| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
+| `solid-memo:collapsedGroups.<instance URL>` | which deck groups the learner folded | `remembered.ts` |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
-| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; the commands you used last in its palette; and, by instance URL, your saved views, your pins and the decks and drafts you opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
+| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
 
-During a login, `sessionStorage` holds the page you were on
-(`solid-memo:login-hash`), to bring you back to it
+During a login, `sessionStorage` holds the page the learner was on
+(`solid-memo:login-hash`), to bring them back to it
 ([`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts)).
-The authentication library (`@inrupt/solid-client-authn-browser`) keeps
-what it needs to restore your session, such as your identity provider
-and the app's registration with it, in the browser's storage.
+The authentication library (`@inrupt/solid-client-authn-browser`)
+stores in the browser what it needs to restore the session, such as
+the identity provider and the app's registration with it.
 
 None of this leaves the device. Clearing the site's data removes it
 all, the guest's pod included.
@@ -93,89 +85,86 @@ all, the guest's pod included.
 ## What the site's host sees
 
 The site is static files on GitHub Pages ([deployment.md](deployment.md)).
-Loading a page sends GitHub the usual request: your IP address, your
-browser's user agent and the address asked for, under
+Loading a page sends GitHub the learner's IP address, the browser's
+user agent and the address asked for, under
 [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
-The deck library is served from the same site, so GitHub also sees
-which deck versions the app fetches. GitHub never sees your pod's data:
-the app speaks to your pod directly.
+The deck library comes from the same site, so GitHub sees which deck
+versions the app fetches. GitHub never sees pod data.
 
-A copy of Solid Memo run by someone else is served by their host, and
-may read its deck library from another address
+Someone else's copy of Solid Memo is served by their host and may
+read its deck library from elsewhere
 (`VITE_LIBRARY_INDEX_URL`, [deck-library.md](deck-library.md#reading-it)).
 
 ## Other servers your browser contacts
 
-The app contacts these from your browser, each when it is needed:
+The browser contacts these, each when it's needed:
 
-- **Your WebID's server**, to read your profile when you log in
+- **The WebID's server**, to read the learner's profile at login
   ([authentication.md](authentication.md)).
-- **Your identity provider**, which handles the login itself. It sees
-  that you logged in to Solid Memo, and may read Solid Memo's Client ID
-  Document from the site to learn who it is: that request comes from the
-  provider, not from your browser
-  ([authentication.md](authentication.md#the-client-id-document)). A provider you pick from the
-  suggestions ([onboarding.md](onboarding.md)) is one of the providers
-  in [`podProvider.ts`](../packages/domain/src/podProvider.ts); none of
-  them is run by the project.
-- **Your pod's server**, for everything you study.
-- **The servers of pictures on cards.** A card's picture is loaded
-  from where it is: for the library's decks, image hosts such as
-  `flagcdn.com`, `upload.wikimedia.org`, `thumb.wikimedia.org` and
-  `iiif.micr.io`; for your own cards, wherever their pictures are.
-  Each sees a request from your browser.
-- **The address of a deck or release you add by link**
+- **The identity provider**, which handles the login and sees that the
+  learner logged in to Solid Memo. The provider, not the browser,
+  may fetch Solid Memo's Client ID Document from the site to learn
+  who the app is
+  ([authentication.md](authentication.md#the-client-id-document)). A
+  provider picked from the suggestions ([onboarding.md](onboarding.md))
+  is one in [`podProvider.ts`](../packages/domain/src/podProvider.ts);
+  the project runs none of them.
+- **The pod's server**, for everything the learner studies.
+- **The servers of pictures on cards**, each seeing a request from the
+  browser: for the library's decks, image hosts such as `flagcdn.com`,
+  `upload.wikimedia.org`, `thumb.wikimedia.org` and `iiif.micr.io`; for
+  the learner's own cards, wherever their pictures are.
+- **The address of a deck or release added by link**
   ([deck-library.md](deck-library.md#from-a-link)).
 
-Links you follow, such as a deck's sources, take you to those sites as
-any link does.
+Links the learner follows, such as a deck's sources, lead to those
+sites as any link does.
 
 ## No analytics, no cookies, no tracking
 
-The app runs no analytics or tracking script, and sets no cookies of
-its own. Its Content Security Policy lets the page run scripts from
-the site alone, and one inline script it names by its hash ([`apps/web/index.html`](../apps/web/index.html), checked
-by [`build.test.ts`](../apps/web/src/build.test.ts)). The project
-learns nothing about who uses the app.
+The app runs no analytics or tracking script and sets no cookies
+of its own. Its Content Security Policy allows scripts from the site
+alone, plus one inline script named by its hash
+([`apps/web/index.html`](../apps/web/index.html), checked by
+[`build.test.ts`](../apps/web/src/build.test.ts)). The project learns
+nothing about who uses the app.
 
 ## When something goes wrong
 
-When a screen fails while it renders, the app shows "Something went
-wrong" in its place, under the same header and above the same footer,
-and an error nothing else caught (in a button's handler, say) gets a
-notice that can be closed ([`ErrorGuard.tsx`](../packages/ui/src/ui/ErrorGuard.tsx)).
-Neither sends anything: the error stays in your browser, logged to its
-console. It leaves the browser only if you take it out yourself:
+When a screen fails to render, the app shows "Something went wrong" in
+its place, between the same header and footer. An error nothing else
+caught (in a button's handler, say) gets a closable notice
+([`ErrorGuard.tsx`](../packages/ui/src/ui/ErrorGuard.tsx)). Neither
+sends anything: the error goes to the browser's console and leaves
+only if the learner takes it out:
 
-- **Copy details** copies the app's version and commit, the route
-  you were at without its values (`#/study?instance=&deck=`), and the
-  error's message and stack.
-- **Report it** opens the project's bug form on GitHub with the same
-  details filled in. Nothing is sent until you submit the form there.
+- **Copy details** copies the app's version and commit, the route the
+  learner was at without its values (`#/study?instance=&deck=`), and
+  the error's message and stack.
+- **Report it** opens the project's bug form on GitHub, filled in with
+  the same details and sent only when the learner submits it.
 
-Every address is taken out of the details first, so they name no pod,
-WebID, deck or card, and carry no token
-([`errorReport.ts`](../packages/domain/src/errorReport.ts)). Only the
-paths of the site's own scripts are kept, which say where the code
-broke. An error's message can still quote other text, such as a card's;
-the details are shown under "Technical details" to read before you
-send them.
+The app first strips every address from the details, except the
+paths of the site's own scripts (which show where the code broke), so
+they name no pod, WebID, deck or card, and carry no token
+([`errorReport.ts`](../packages/domain/src/errorReport.ts)). An
+error's message can still quote other text, such as a card's. The
+details appear under "Technical details" for the learner to read
+before sending.
 
 ## What the project has published
 
-The library's deck versions name who compiled them. The first 205
-published versions name the maintainer, Anton Wiklund, as their
-creator, with his email address as `foaf:mbox`. A published version is
-never edited ([deck-library.md](deck-library.md#a-version)), so those
-versions keep it. Every version since names a project contact instead:
-a `dcat:contactPoint` that points at the
+Each library deck version names who compiled it. The first 205 name
+the maintainer, Anton Wiklund, as creator, with his email address as
+`foaf:mbox`, and keep it: a published version is never edited
+([deck-library.md](deck-library.md#a-version)). Later versions name a
+project contact instead: a `dcat:contactPoint` pointing at the
 [issue tracker](https://github.com/solid-memo/website/issues), with no
 personal email address ([deck-library.md](deck-library.md#contact)).
 The library's index gives no email address.
 
-The maintainer's email address is also published, on purpose, in
+The maintainer's email address is published on purpose in
 [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md#enforcement), as the private
-contact for code of conduct reports. Mail to that address about
-anything else, such as a deck published with it, is answered with a
-pointer to the public channels
-([GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).
+contact for code of conduct reports. Mail to it about anything else,
+such as a deck published with it, gets a pointer to the public
+channels ([GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).
