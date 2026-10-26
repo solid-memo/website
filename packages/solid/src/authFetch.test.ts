@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
-import { authFetch, SESSION_EXPIRED_EVENT } from "./authFetch";
+import { authFetch, SESSION_EXPIRED_EVENT, sessionWebId } from "./authFetch";
 
 vi.mock("@inrupt/solid-client-authn-browser");
 
@@ -50,5 +50,15 @@ describe("authFetch", () => {
 
     expect(listener).not.toHaveBeenCalled();
     window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
+  });
+});
+
+describe("sessionWebId", () => {
+  it("is the default session's WebID while logged in, none otherwise", () => {
+    const webId = "https://alice.example/profile/card#me";
+    vi.mocked(getDefaultSession).mockReturnValue({ info: { isLoggedIn: true, webId } } as never);
+    expect(sessionWebId()).toBe(webId);
+    vi.mocked(getDefaultSession).mockReturnValue({ info: { isLoggedIn: false } } as never);
+    expect(sessionWebId()).toBeUndefined();
   });
 });

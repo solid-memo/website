@@ -154,7 +154,8 @@ The composition root injects repositories' `fetch`:
 calls the current default session's fetch, never one captured before
 login. A router in front sends the guest's URLs to the browser's pod
 ([guest-mode.md](guest-mode.md)). Every pod read goes through
-authFetch, the WebID document's too. The storage gateway hands
+authFetch, the WebID document's too. A release outside the user's own
+pod is read without it ([studio.md](studio.md#drafts)). The storage gateway hands
 @inrupt/solid-client the profile it read, so that library doesn't fetch
 it with the browser's fetch.
 

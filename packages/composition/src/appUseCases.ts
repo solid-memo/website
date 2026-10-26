@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
-import { authFetch } from "@solid-memo/solid/authFetch";
+import { authFetch, sessionWebId } from "@solid-memo/solid/authFetch";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
@@ -37,6 +37,7 @@ import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
+import { createOwnPodFetch } from "@solid-memo/solid/ownPodFetch";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
@@ -116,17 +117,46 @@ export function createAppUseCases({
   const checkWrite = shapeValidator.checkSubjects;
   const now = () => new Date();
   const randomId = () => crypto.randomUUID();
+  const storageGateway = createSolidStorageGateway({ fetch: podFetch });
+  const instanceRepository = createSolidInstanceRepository({
+    fetch: podFetch,
+    checkWrite,
+    now,
+    randomId,
+  });
+  /**
+   * A release is read where it is published: the site's where the site
+   * serves it, a guest's from this browser, one in the user's own pod
+   * (their storages, the instances they registered) as the user, since
+   * a release the pod would not share is the owner's alone; any other as
+   * no one, so the server it names learns nothing of who reads it.
+   */
+  const releaseFetch = routedFetch({
+    origin: SITE,
+    local: siteFetch,
+    remote: routedFetch({
+      origin: GUEST_ORIGIN,
+      local: podFetch,
+      remote: createOwnPodFetch({
+        fetch: podFetch,
+        publicFetch: anonymousFetch,
+        webId: sessionWebId,
+        ownFolders: async (webId) => {
+          const [storages, instances] = await Promise.all([
+            storageGateway.discoverStorages(webId).catch(() => []),
+            instanceRepository.listInstances(webId).catch(() => []),
+          ]);
+          return [...storages, ...instances].map(({ url }) => url);
+        },
+      }),
+    }),
+  });
 
   return createUseCases({
     sessionGateway: createSolidSessionGateway({ clientName, site: servedSite, clientId }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
-    storageGateway: createSolidStorageGateway({ fetch: podFetch }),
-    instanceRepository: createSolidInstanceRepository({
-      fetch: podFetch,
-      checkWrite,
-      now,
-      randomId,
-    }),
+    storageGateway,
+    instanceRepository,
     deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, now, randomId }),
     deckLibrary: createSolidDeckLibrary({
       fetch: siteFetch,
@@ -156,8 +186,7 @@ export function createAppUseCases({
     fileExchange: createBrowserFileExchange(),
     releaseDraftRepository: createSolidReleaseDraftRepository({
       fetch: podFetch,
-      // A library release is read where the site serves it, any other where it is published.
-      releaseFetch: routedFetch({ origin: SITE, local: siteFetch, remote: podFetch }),
+      releaseFetch,
       // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
       publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: anonymousFetch }),
       checkWrite,
