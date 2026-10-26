@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.14.3](https://github.com/solid-memo/website/compare/v6.14.2...v6.14.3) (2026-10-26)
+
+### Bug Fixes
+
+* **solid:** refuse terms Turtle cannot write, so an import adds no statements ([8874a04](https://github.com/solid-memo/website/commit/8874a04af467784c8e7c168f5d1f18e11e85a830))
+
 ## [6.14.2](https://github.com/solid-memo/website/compare/v6.14.1...v6.14.2) (2026-10-26)
 
 ### Bug Fixes
