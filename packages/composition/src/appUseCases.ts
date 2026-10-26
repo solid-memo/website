@@ -43,6 +43,7 @@ import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewS
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { grantPublicRead } from "@solid-memo/solid/client/access";
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
+import { createSessionClient } from "@solid-memo/solid/client/session";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createTrialUseCases } from "./trialUseCases";
 
@@ -80,8 +81,12 @@ export function createAppUseCases({
   ruleset,
   indexedDB,
 }: AppOptions): UseCases {
-  /** The logged-in user's session, and the fetch that acts as them (docs/authentication.md). */
-  const session = createSolidSession({ clientName, site: servedSite, clientId });
+  /** The logged-in user's session on the sign-in client chosen here, and the fetch that acts as them (docs/authentication.md). */
+  const session = createSolidSession(createSessionClient(), {
+    clientName,
+    site: servedSite,
+    clientId,
+  });
   /** A guest's pod, kept in this browser (docs/guest-mode.md). */
   const guestStore =
     indexedDB === undefined

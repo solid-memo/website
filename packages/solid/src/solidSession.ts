@@ -4,7 +4,7 @@
 
 import type { SessionGateway } from "@solid-memo/application/ports";
 import { createAuthFetch } from "./authFetch";
-import { createSessionClient } from "./client/session";
+import type { SessionClient } from "./client/session";
 import { createSolidSessionGateway, type SessionGatewayOptions } from "./solidSessionGateway";
 
 /** The user's session: the gateway the app logs in by, and the fetch it reads and writes pods with. */
@@ -16,9 +16,14 @@ export interface SolidSession {
   webId: () => string | undefined;
 }
 
-/** The session, both of its halves on one sign-in client (client/session.ts). */
-export function createSolidSession(options: SessionGatewayOptions): SolidSession {
-  const client = createSessionClient();
+/**
+ * The session, both of its halves on one sign-in client, which the
+ * composition root chooses (client/session.ts is the only one so far).
+ */
+export function createSolidSession(
+  client: SessionClient,
+  options: SessionGatewayOptions,
+): SolidSession {
   return {
     sessionGateway: createSolidSessionGateway({ ...options, client }),
     fetch: createAuthFetch(client),

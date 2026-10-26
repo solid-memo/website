@@ -3,21 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it, vi } from "vitest";
-import { createSessionClient } from "./client/session";
 import { createSolidSession } from "./solidSession";
 import { fakeSessionClient } from "./testing/fakeSessionClient";
-
-vi.mock("./client/session");
 
 it("logs in and fetches through one sign-in client", async () => {
   const client = fakeSessionClient();
   client.fetch.mockResolvedValue(new Response(null, { status: 401 }));
-  vi.mocked(createSessionClient).mockReturnValue(client);
   const expired = vi.fn();
 
   client.webId.mockReturnValue("https://alice.example/profile/card#me");
 
-  const { sessionGateway, fetch, webId } = createSolidSession({
+  const { sessionGateway, fetch, webId } = createSolidSession(client, {
     clientName: "Test App",
     site: "https://memo.example/",
   });
@@ -26,7 +22,6 @@ it("logs in and fetches through one sign-in client", async () => {
   await fetch("https://pod.example/resource");
   unsubscribe();
 
-  expect(createSessionClient).toHaveBeenCalledOnce();
   expect(client.login).toHaveBeenCalledWith({
     oidcIssuer: "https://issuer.example",
     redirectUrl: "https://memo.example/",

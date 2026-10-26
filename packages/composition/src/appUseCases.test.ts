@@ -66,8 +66,8 @@ vi.mock("@solid-memo/solid/solidSession", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/solid/solidSession")>();
   return {
     ...original,
-    createSolidSession: (options: Parameters<typeof original.createSolidSession>[0]) => ({
-      ...original.createSolidSession(options),
+    createSolidSession: (...args: Parameters<typeof original.createSolidSession>) => ({
+      ...original.createSolidSession(...args),
       fetch: (input: RequestInfo | URL, init?: RequestInit) => {
         login.sent.push(String(input instanceof Request ? input.url : input));
         return globalThis.fetch(input, init);
