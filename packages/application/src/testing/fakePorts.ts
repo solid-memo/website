@@ -208,6 +208,8 @@ export function makeDeps() {
     getPreferences: vi.fn(async () => null),
     savePreferences: vi.fn(async () => undefined),
     upgradePreferences: vi.fn(async () => true),
+    connectedScreenSkipped: vi.fn(async () => false),
+    markConnectedScreen: vi.fn(async (): Promise<"written" | "unchanged" | "none"> => "written"),
   };
   const reviewStateRepository: ReviewStateRepository = {
     listReviewStates: vi.fn(async (): Promise<ReviewStates> => ({ sm2: [], fsrs: [] })),

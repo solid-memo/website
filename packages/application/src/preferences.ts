@@ -15,12 +15,15 @@ import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { isPaletteOf, isSameUrl, paletteUrlOf } from "@solid-memo/domain/instanceLayout";
+import type { Instance } from "@solid-memo/domain/instance";
 import {
   DEFAULT_PREFERENCES,
   keptPalette,
   shownPalette,
+  skipsConnectedScreen,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
+import type { Session } from "@solid-memo/domain/session";
 import {
   SWITCH_STEPS,
   switchedStates,
@@ -30,6 +33,7 @@ import {
 } from "@solid-memo/domain/schedulerSwitch";
 import type {
   DeckRepository,
+  InstanceRepository,
   PreferencesRepository,
   ReviewStateRepository,
   LanguagePreference,
@@ -41,9 +45,18 @@ import type {
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { stepReporter } from "./progress";
+import { again } from "./writes";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
 import type { DigestStore } from "./digestStore";
+
+/** What logging in needs to know about the Connected screen. */
+export interface ConnectedScreenChoice {
+  /** The learner's instances, where "Don't show this screen after logging in" is saved. */
+  readonly instances: readonly Instance[];
+  /** Whether every instance says to skip the screen (skipsConnectedScreen). */
+  readonly skipped: boolean;
+}
 
 export interface PreferenceUseCases {
   /**
@@ -181,6 +194,33 @@ export interface PreferenceUseCases {
    * saved with it.
    */
   dismissSchedulerInvitation(instanceUrl: string): Promise<void>;
+  /**
+   * Whether logging in skips the Connected screen: the learner's
+   * instances listed, and each one's preferences read. An instance whose
+   * preferences cannot be read says to show it. Rejects when the
+   * instances cannot be listed.
+   */
+  connectedScreenChoice(session: Session): Promise<ConnectedScreenChoice>;
+  /**
+   * Skip the Connected screen from now on, in every instance's
+   * preferences (markConnectedScreen), each in its turn after the
+   * instance's other writes of its preferences, and again when it changed
+   * meanwhile. An instance with no preferences gets new ones (the
+   * defaults, shown as this device shows the app) only when its meta
+   * document reads, so nothing is made at an address where no instance
+   * is. Rejects with the first failure once all are done; an instance not
+   * saved keeps showing the screen.
+   */
+  skipConnectedScreen(instances: readonly Instance[]): Promise<void>;
+  /** Whether logging in shows the Connected screen, as this instance's preferences say. */
+  connectedScreenShown(instanceUrl: string): Promise<boolean>;
+  /**
+   * Show or skip the Connected screen after logging in, as this
+   * instance's preferences say, in its turn after the instance's other
+   * writes of its preferences. Preferences with none stored are made
+   * (the defaults, shown as this device shows the app) to skip it.
+   */
+  chooseConnectedScreen(instanceUrl: string, shown: boolean): Promise<void>;
 }
 
 /**
@@ -215,6 +255,7 @@ export function createPreferenceUseCases({
   textSizePreference,
   paletteRepository,
   preferencesRepository,
+  instanceRepository,
   deckRepository,
   reviewStateRepository,
   preferenceStore,
@@ -229,6 +270,7 @@ export function createPreferenceUseCases({
   textSizePreference: TextSizePreference;
   paletteRepository: PaletteRepository;
   preferencesRepository: PreferencesRepository;
+  instanceRepository: Pick<InstanceRepository, "listInstances" | "readMeta">;
   deckRepository: DeckRepository;
   reviewStateRepository: ReviewStateRepository;
   preferenceStore: PreferenceStore;
@@ -250,6 +292,32 @@ export function createPreferenceUseCases({
     return isOwn(preferences.palette)
       ? preferences.palette
       : keptPalette(stored, shownPalette(preferences), isOwn);
+  }
+
+  /**
+   * Set whether logging in skips the Connected screen in an instance's
+   * preferences, again while they keep changing elsewhere, and once more
+   * when new ones were made elsewhere first: then only the choice is
+   * written on them.
+   */
+  async function marking(
+    instanceUrl: string,
+    skipped: boolean,
+    created: StudyPreferences | null,
+  ): Promise<"written" | "unchanged" | "none"> {
+    const mark = () =>
+      again(() => preferencesRepository.markConnectedScreen(instanceUrl, skipped, created));
+    try {
+      return await mark();
+    } catch (error) {
+      if (!(error instanceof AppError && error.code === "createdElsewhere")) throw error;
+      return mark();
+    }
+  }
+
+  /** The defaults, shown as this device shows the app: what an instance with no preferences is given. */
+  function created(instanceUrl: string): StudyPreferences {
+    return preferenceStore.withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);
   }
 
   return {
@@ -429,6 +497,39 @@ export function createPreferenceUseCases({
       await preferencesRepository.savePreferences(instanceUrl, {
         ...preferences,
         schedulerInvitationDismissed: true,
+      });
+    },
+    async connectedScreenChoice(session) {
+      const instances = await instanceRepository.listInstances(session.webId);
+      const skipped = await Promise.all(
+        instances.map((instance) =>
+          preferencesRepository.connectedScreenSkipped(instance.url).catch(() => false),
+        ),
+      );
+      return { instances, skipped: skipsConnectedScreen(skipped) };
+    },
+    async skipConnectedScreen(instances) {
+      const results = await Promise.allSettled(
+        instances.map((instance) =>
+          preferenceStore.inTurn(instance.url, async () => {
+            if ((await marking(instance.url, true, null)) !== "none") return;
+            // No preferences: made only where the instance's meta document says an instance is.
+            if ((await instanceRepository.readMeta(instance.url)) === null) return;
+            await marking(instance.url, true, created(instance.url));
+          }),
+        ),
+      );
+      const failed = results.find(
+        (result): result is PromiseRejectedResult => result.status === "rejected",
+      );
+      if (failed !== undefined) throw failed.reason;
+    },
+    async connectedScreenShown(instanceUrl) {
+      return !(await preferencesRepository.connectedScreenSkipped(instanceUrl));
+    },
+    chooseConnectedScreen(instanceUrl, shown) {
+      return preferenceStore.inTurn(instanceUrl, async () => {
+        await marking(instanceUrl, !shown, shown ? null : created(instanceUrl));
       });
     },
   };

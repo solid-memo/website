@@ -282,7 +282,10 @@ data.
 │                        sm:desiredRetention,
 │                        sm:schedulerInvitationDismissed, sm:palette
 │                        (a concept of sm:Palettes, or another IRI,
-│                        kept), sm:textSize, sm:formatVersion 6
+│                        kept), sm:textSize, sm:formatVersion 6;
+│                        whether logging in skips the Connected
+│                        screen (sm:connectedScreenSkipped true,
+│                        outside the shape)
 ├── palettes.ttl    the palettes the user designed, if any: one
 │                        sm:Palette per palette (#palette-<id>),
 │                        dcterms:title, sm:basedOn, sm:lightColors and

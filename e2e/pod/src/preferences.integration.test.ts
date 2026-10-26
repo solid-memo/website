@@ -11,6 +11,9 @@
  * back as written, true among them, which node-solid-server stores as
  * false when a PATCH inserts it. The palette and the text size chosen are
  * kept there, and a palette this version does not know outlives a save.
+ * Whether logging in skips the Connected screen, a true outside the
+ * preferences' shape, is written and read back the same way, kept by a
+ * save, and written with new preferences where there were none.
  */
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
@@ -155,6 +158,35 @@ describe.each(SERVERS)("preferences on $name", ({ url: server }) => {
       palette: later,
       newCardsPerDay: 3,
     });
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+  });
+
+  it("keeps whether logging in skips the Connected screen, through a save, the instance still conforming", async () => {
+    const instanceUrl = await seed(server);
+    const instance = { url: instanceUrl, name: "Main" };
+    expect(await page().connectedScreenShown(instanceUrl)).toBe(true);
+
+    await page().skipConnectedScreen([instance]);
+    expect(await page().connectedScreenShown(instanceUrl)).toBe(false);
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+
+    const stored = await page().getPreferences(instanceUrl);
+    await page().savePreferences(instanceUrl, { ...stored, newCardsPerDay: 4 });
+    expect(await page().connectedScreenShown(instanceUrl)).toBe(false);
+
+    await page().chooseConnectedScreen(instanceUrl, true);
+    expect(await page().connectedScreenShown(instanceUrl)).toBe(true);
+    expect(await page().getPreferences(instanceUrl)).toMatchObject({ newCardsPerDay: 4 });
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+  });
+
+  it("makes preferences that skip the Connected screen where an instance has none", async () => {
+    const instanceUrl = await seed(server);
+    const response = await fetch(`${instanceUrl}preferences.ttl`, { method: "DELETE" });
+    expect(response.ok).toBe(true);
+
+    await page().skipConnectedScreen([{ url: instanceUrl, name: "Main" }]);
+    expect(await page().connectedScreenShown(instanceUrl)).toBe(false);
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 });

@@ -272,6 +272,7 @@ export function createUseCases({
       textSizePreference,
       paletteRepository,
       preferencesRepository,
+      instanceRepository,
       deckRepository,
       reviewStateRepository,
       preferenceStore,

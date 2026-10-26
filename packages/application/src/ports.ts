@@ -673,6 +673,30 @@ export interface PreferencesRepository {
    * (nothing when they are up to date already, or there are none).
    */
   upgradePreferences(instanceUrl: string): Promise<boolean>;
+  /**
+   * Whether the preferences say logging in skips the Connected screen
+   * (sm:connectedScreenSkipped true), read on the subject whatever its
+   * format, a newer one too, and whether or not it fits its shape: so a
+   * choice markConnectedScreen wrote on any preferences counts. False
+   * when there are none, or a value that is not true is stated.
+   */
+  connectedScreenSkipped(instanceUrl: string): Promise<boolean>;
+  /**
+   * Set whether logging in skips the Connected screen
+   * (sm:connectedScreenSkipped, outside the preferences' shape) on the
+   * preferences as stored, every other triple kept, in ONE save of the
+   * whole document made only if it is still as it was read (If-Match).
+   * Preferences of a newer format are refused (writtenByNewerApp). When
+   * the instance has no preferences subject, `created` is written with
+   * it, in this app's format, made only if nothing is there yet; with
+   * `created` null nothing is written. "unchanged" when they already say
+   * so, "none" when there was nothing to write it on.
+   */
+  markConnectedScreen(
+    instanceUrl: string,
+    skipped: boolean,
+    created: StudyPreferences | null,
+  ): Promise<"written" | "unchanged" | "none">;
 }
 
 /**

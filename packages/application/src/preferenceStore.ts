@@ -20,9 +20,10 @@ import type {
 
 /**
  * An instance's preferences as the use cases share them: read once for
- * callers that ask at once, and the choices of how the app is shown (a
- * theme, a palette, a text size) written into them one after another,
- * and kept on this device for the next visit's first paint.
+ * callers that ask at once, and written one after another: the choices
+ * of how the app is shown (a theme, a palette, a text size), kept on
+ * this device too for the next visit's first paint, and whether logging
+ * in skips the Connected screen.
  */
 export function createPreferenceStore({
   preferencesRepository,
@@ -54,38 +55,50 @@ export function createPreferenceStore({
     );
   }
   /**
-   * Each instance's writes of a theme, a palette or a text size, one
-   * after another, so a later choice is never overwritten by an earlier,
-   * nor refused for a version an earlier one changed.
+   * Each instance's writes of its preferences, one after another: the
+   * choices of how the app is shown (a theme, a palette, a text size) and
+   * whether logging in skips the Connected screen. So a later choice is
+   * never overwritten by an earlier, nor refused for a version an
+   * earlier one changed.
    */
-  const appearanceWrites = new Map<string, Promise<void>>();
+  const writes = new Map<string, Promise<void>>();
+  /**
+   * Make a write of an instance's preferences once the ones queued before
+   * it are done, failed ones too. The next read is made afresh.
+   */
+  function inTurn(instanceUrl: string, write: () => Promise<void>): Promise<void> {
+    const previous = writes.get(instanceUrl) ?? Promise.resolve();
+    const next = previous
+      .catch(() => undefined)
+      .then(write)
+      // A read begun before the write holds what it replaced.
+      .finally(() => preferenceReads.delete(instanceUrl));
+    writes.set(instanceUrl, next);
+    return next;
+  }
   /**
    * Write a choice of how the app is shown into an instance's
-   * preferences, once the earlier ones are written: `changed` gives the
-   * preferences with the choice in them, or null when they already hold
-   * it. Nothing is written while the instance has no preferences.
+   * preferences, in its turn (inTurn): `changed` gives the preferences
+   * with the choice in them, or null when they already hold it. Nothing
+   * is written while the instance has no preferences.
    */
   function writeAppearance(
     instanceUrl: string,
     changed: (preferences: StudyPreferences) => StudyPreferences | null,
   ): Promise<void> {
-    const previous = appearanceWrites.get(instanceUrl) ?? Promise.resolve();
-    const write = previous
-      .catch(() => undefined)
-      .then(async () => {
-        const stored = await preferencesRepository.getPreferences(instanceUrl);
-        const next = stored === null ? null : changed(stored.preferences);
-        if (next === null) return;
-        await preferencesRepository.savePreferences(instanceUrl, next);
-        // A read begun before the write holds what it replaced: the next read is made afresh.
-        preferenceReads.delete(instanceUrl);
-      });
-    appearanceWrites.set(instanceUrl, write);
-    return write;
+    return inTurn(instanceUrl, async () => {
+      const stored = await preferencesRepository.getPreferences(instanceUrl);
+      const next = stored === null ? null : changed(stored.preferences);
+      if (next === null) return;
+      await preferencesRepository.savePreferences(instanceUrl, next);
+    });
   }
-  /** Once the appearance writes made so far are done, failed ones too: what a save of all the preferences waits for. */
+  /**
+   * Once every write of the instance's preferences queued so far is done,
+   * failed ones too: what a save of all the preferences waits for.
+   */
   function afterAppearanceWrites(instanceUrl: string): Promise<void> {
-    return (appearanceWrites.get(instanceUrl) ?? Promise.resolve()).catch(() => undefined);
+    return (writes.get(instanceUrl) ?? Promise.resolve()).catch(() => undefined);
   }
   /**
    * Keep on this device how saved preferences show the app, for the next
@@ -124,6 +137,7 @@ export function createPreferenceStore({
   return {
     stored: readStoredPreferences,
     get: getPreferences,
+    inTurn,
     writeAppearance,
     afterAppearanceWrites,
     keepAppearance,

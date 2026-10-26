@@ -120,6 +120,16 @@ export function invitesToFsrs(
 }
 
 /**
+ * Whether logging in skips the Connected screen, from what each of the
+ * learner's instances says (sm:connectedScreenSkipped): only when there
+ * are instances and every one says so. An instance with no preferences,
+ * or whose preferences cannot be read, says to show it.
+ */
+export function skipsConnectedScreen(skipped: readonly boolean[]): boolean {
+  return skipped.length > 0 && skipped.every((s) => s);
+}
+
+/**
  * The grading buttons a session shows: the stored answer scale under
  * SM-2; under FSRS-6 always Again, Hard, Good and Easy, the four ratings
  * it knows. The stored scale is kept for switching back.

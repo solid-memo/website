@@ -4,6 +4,7 @@
 
 import { vi } from "vitest";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import type { InstanceUseCases } from "@solid-memo/application/instances";
 import type { PreferenceUseCases } from "@solid-memo/application/preferences";
 
 /**
@@ -14,7 +15,10 @@ import type { PreferenceUseCases } from "@solid-memo/application/preferences";
  */
 export function makePreferenceUseCasesFake(
   overrides: Partial<PreferenceUseCases> = {},
-  fake: PreferenceUseCases = {} as PreferenceUseCases,
+  // Alone, a login finds the learner has no instances.
+  fake: PreferenceUseCases & Pick<InstanceUseCases, "listInstances"> = {
+    listInstances: vi.fn(async () => []),
+  } as unknown as PreferenceUseCases & Pick<InstanceUseCases, "listInstances">,
 ): PreferenceUseCases {
   return Object.assign(
     fake,
@@ -47,6 +51,14 @@ export function makePreferenceUseCasesFake(
         failed: [],
       })),
       dismissSchedulerInvitation: vi.fn(async () => undefined),
+      // Nothing says to skip the Connected screen: it shows, as it did before the choice was offered.
+      connectedScreenChoice: vi.fn(async (session) => ({
+        instances: await fake.listInstances(session),
+        skipped: false,
+      })),
+      skipConnectedScreen: vi.fn(async () => undefined),
+      connectedScreenShown: vi.fn(async () => true),
+      chooseConnectedScreen: vi.fn(async () => undefined),
     } satisfies PreferenceUseCases,
     overrides,
   );
