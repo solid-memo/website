@@ -1,22 +1,21 @@
 # Policy
 
-The rules Solid Memo's code is based on: which public policy applies
-(none), which published rules from outside the project the code
-follows, and the project's own rules, written as data the code checks.
+The rules Solid Memo's code follows: public policy (none), published
+rules from outside the project, and the project's own rules, written
+as data the code checks.
 
 ## No public policy applies
 
-Solid Memo implements no law, regulation or government policy. It is a
-volunteer project, not built for or by a public organization, and no
-public body has asked it to carry out a policy. If that changes, the
-policy and the code that implements it will be added here.
-
-What the app does with personal data is in [privacy.md](privacy.md).
+Solid Memo, a volunteer project, implements no law, regulation or
+government policy: no public organization built it, had it built or
+asked it to carry one out. If that changes, this page names the policy
+and the code that implements it. What the app does with personal data
+is in [privacy.md](privacy.md).
 
 ## Rules from outside the project
 
-Each of these is a published rule the code follows as written, or with
-the departures listed. The formats Solid Memo reads and writes are in
+The code follows each rule below as published, or with the listed
+departures. The formats Solid Memo reads and writes are in
 [standards.md](standards.md).
 
 | Rule | Version | Published at | Implemented in | Checked by |
@@ -31,76 +30,78 @@ the departures listed. The formats Solid Memo reads and writes are in
 ### SM-2
 
 Woźniak, P. A. (1990). *Optimization of learning*. Master's thesis,
-University of Technology in Poznań. SuperMemo publishes the algorithm's
+University of Technology in Poznań. SuperMemo publishes the
 description as
 [Application of a computer to improve the results obtained in working with the SuperMemo method](https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method).
-Solid Memo uses the ease factor and interval formulas as published: an
-ease factor of 2.5 to start, never below 1.3, intervals of 1 day, 6
-days, then the last interval times the ease factor, and a lapse (a
-grade under 3) starting the card's repetitions again without changing
-its ease factor. It departs from the description in two recorded ways:
+Solid Memo uses the ease factor and interval formulas as published:
 
-- Intervals are rounded to whole days, and counted in study days, not
-  calendar days ([srs.md](srs.md#study-days-and-the-queue)).
-- The description repeats every card graded under 4 at the end of the
-  session until each scores 4 or more. Solid Memo repeats only a card
-  graded 0 or 1 (Again, on the four-button scale), within the session
-  ([srs.md](srs.md#the-sm-2-transition)). A card graded 2 is a lapse
-  and starts its repetitions again, but is not repeated that session,
-  and a correct but hard answer (3) ends the card's day too.
+- The ease factor starts at 2.5, never below 1.3.
+- Intervals: 1 day, 6 days, then the last interval times the ease
+  factor.
+- A lapse (a grade under 3) restarts the repetitions, keeping the ease
+  factor.
+
+Its two recorded departures from the description:
+
+- Intervals are whole study days, not calendar days
+  ([srs.md](srs.md#study-days-and-the-queue)).
+- Solid Memo repeats only a card graded 0 or 1 (Again, on the
+  four-button scale), within the session, not each card under 4 at the
+  session's end until it scores 4 or more
+  ([srs.md](srs.md#the-sm-2-transition)). A 2 (a lapse) or a 3 (correct
+  but hard) ends the card's day.
 
 The answer scales and a course's multiple-choice answers map onto the
-same grades; they do not change the algorithm ([srs.md](srs.md#answer-scales)).
+same grades, without changing the algorithm ([srs.md](srs.md#answer-scales)).
 
 ### FSRS-6
 
-FSRS-6 is the sixth version of the Free Spaced Repetition Scheduler, by
-Jarrett Ye and the Open Spaced Repetition project, described in
+FSRS-6, by Jarrett Ye and the Open Spaced Repetition project, is
+described in
 [The Algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm).
-Solid Memo reimplements its formulas and its 21 default parameters as
+Solid Memo reimplements FSRS-6's formulas and 21 default parameters as
 the reference implementation,
 [fsrs-rs v6.6.2](https://github.com/open-spaced-repetition/fsrs-rs/tree/v6.6.2)
-(BSD-3-Clause), gives them; no code is copied from it. It fixes what
-FSRS-6 leaves to the app ([srs.md](srs.md#decisions-fixed-in-code-fsrs-6)):
+(BSD-3-Clause), gives them, copying no code. What FSRS-6 leaves to the
+app is fixed
+([srs.md](srs.md#decisions-fixed-in-code-fsrs-6)):
 
-- The parameters are the defaults, not trained on the learner's answers.
-- Days are whole study days, and a second review the same study day
-  takes FSRS-6's same-day formula.
-- Intervals are rounded, from 1 day to 36,500, without fuzz.
-- A prompt without a current FSRS-6 state has one estimated from its
-  SM-2 state, as fsrs-rs's `memory_state_from_sm2` does at a retention
-  of 90%.
+- Default parameters, not trained on the learner's answers.
+- Whole study days; a second review the same study day takes the
+  same-day formula.
+- Intervals rounded, from 1 to 36,500 days, without fuzz.
+- A prompt without a current FSRS-6 state gets one estimated from its
+  SM-2 state, like fsrs-rs's `memory_state_from_sm2` at 90% retention.
 
 ### CLDR plural rules
 
-A plural message gives one form for each plural category of its
-language ("1 card", "2 cards"). The categories, and which number falls
-in which, are the Unicode CLDR plural rules
+A plural message gives one form per plural category of its language
+("1 card", "2 cards"). The Unicode CLDR plural rules set the categories
+and which numbers fall in each
 ([by language](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html)).
-The app does not ship them: it asks the browser's `Intl.PluralRules`,
-so the CLDR version is whichever the browser has. The tests run on
-Node.js, which has its own copy of CLDR, and the journeys
-([`strings.ts`](../e2e/journeys/harness/strings.ts)) pick each plural
-form in the browser they drive, as the app does.
+The app asks the browser's `Intl.PluralRules` instead of shipping
+them, so the CLDR version is the browser's. The tests use Node.js's
+copy; the journeys ([`strings.ts`](../e2e/journeys/harness/strings.ts))
+pick each form in the browser they drive, as the app does.
 
 ## The project's own rules
 
-The project's own rules are written as data, in formats a machine can
-read, and live in this repository beside the code that applies them.
+These rules are machine-readable data in this repository, beside the
+code that applies them.
 
 | Rule | Where it is written | What applies it |
 |---|---|---|
 | The shape of every document in a pod and in the library | SHACL shapes in [`ns/shapes/`](../ns/shapes/) ([shapes.md](shapes.md)) | the app in the browser and `npm run library:check` (rdf-validate-shacl), and pySHACL in CI ([validation.md](validation.md)) |
 | The meaning of every Solid Memo term | the vocabulary in [`ns/vocab/`](../ns/vocab/) ([vocab.md](vocab.md)) | the constants generated from it, kept in step by `npm run generate:check` |
-| What a library deck version must state, beyond the shapes: its place, its series, its publisher, the version before it and its license | [`libraryRules.ts`](../packages/domain/src/release/libraryRules.ts) ([deck-library.md](deck-library.md#checks)) | `npm run library:check`, and the Studio's check for the library |
-| What the repository's library asks of a deck: a title, description and keywords in every language the app speaks (`LIBRARY_LANGUAGES`, from `LOCALES` in [`locale.ts`](../packages/domain/src/locale.ts)), a description of each picture on a card in English and the card's other languages, the theme `EDUC` | `repoPolicy` in [`curationRules.ts`](../packages/domain/src/release/curationRules.ts) | the Studio's check for the library; `npm run library:check` for the languages and picture descriptions of each deck's newest version, and the library deck shapes for the rest |
+| What a library deck version must state, beyond the shapes: its place, series, publisher, previous version and license | [`libraryRules.ts`](../packages/domain/src/release/libraryRules.ts) ([deck-library.md](deck-library.md#checks)) | `npm run library:check`, and the Studio's check for the library |
+| What the repository's library asks of a deck: a title, description and keywords in every language the app speaks (`LIBRARY_LANGUAGES`, from `LOCALES` in [`locale.ts`](../packages/domain/src/locale.ts)), each card picture described in English and the card's other languages, the theme `EDUC` | `repoPolicy` in [`curationRules.ts`](../packages/domain/src/release/curationRules.ts) | the Studio's check for the library; `npm run library:check` for the languages and picture descriptions of each deck's newest version, and the library deck shapes for the rest |
 | What a page may load and run | the Content Security Policy in [`apps/web/index.html`](../apps/web/index.html) ([markdown.md](markdown.md)) | the browser; [`build.test.ts`](../apps/web/src/build.test.ts) checks it |
 
-Every published version of a shape or of a deck is frozen: a change is
-a new version beside it ([shapes.md](shapes.md), [deck-library.md](deck-library.md)).
-So a rule the published shapes do not state, such as that a library
-deck version names its license, is added as a library rule, not by
-editing a shape.
+Every published version of a shape or deck is frozen: a change is a
+new version beside it (`shapes.md`,
+[deck-library.md](deck-library.md)). A rule the published shapes
+don't state, such as a library deck version naming its license, goes
+into the library rules, not an edited shape.
 
-No policy outside the project is based on this code. If one is, the
-code it is based on is the code in this repository.
+No outside policy is based on this code; one that is would be based
+on the code in this repository.
