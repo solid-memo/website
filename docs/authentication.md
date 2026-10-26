@@ -159,8 +159,9 @@ captured before login.
 the session gateway on one client. A router in front sends the guest's URLs to the browser's pod
 ([guest-mode.md](guest-mode.md)). Every pod read goes through
 authFetch, the WebID document's too. A release outside the user's own
-pod is read without it ([studio.md](studio.md#drafts)). The storage gateway hands
-@inrupt/solid-client the profile it read, so that library doesn't fetch
+pod is read without it ([studio.md](studio.md#drafts)). The storage
+gateway hands the profile lookup (`getProfileStorages`, in
+`client/resources.ts`) the profile it read, so the lookup doesn't fetch
 it with the browser's fetch.
 
 ## Logout

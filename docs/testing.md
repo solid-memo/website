@@ -924,8 +924,8 @@ Dependency inversion gives every layer a seam for its fakes:
 | Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. What runs over a whole deck or log is timed at two sizes in its own process's CPU time: eight times the input must take under four times as long as an eighth of it done eight times (a linear pass gives about one, work growing with the input about eight). The growth tests (`growth` in `src/testing/growth.ts`) time `queryCards` over 5,000 cards, `lapseIndex`, `chainIndexOf` and `statisticsOf` over years of answers, `instanceGraphOf` over an instance's cards and answers, and the Studio's graph layout and routes over a deck's cards. |
 | Application | ports | Fake ports are injected (`vi.fn` per method): the fixtures and fake ports in [fakePorts.ts](../packages/application/src/testing/fakePorts.ts), and `NO_PORTS` ([noPorts.ts](../packages/application/src/testing/noPorts.ts)), which other packages' tests spread too, for the ports a test doesn't use. Each slice is tested in its own `<feature>.test.ts`, the stores the slices share in theirs. No module mocking. |
 | UI | `UseCases` prop | Screens render with a fake `UseCases`: `makeUseCasesFake` ([useCasesFake.ts](../packages/ui/src/test/useCasesFake.ts)) makes every slice's fake ([test/fakes/](../packages/ui/src/test/fakes/)) in one object, each calling the others through it. A screen that takes a slice (the trial's) can be given that slice's fake alone. Assertions use testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
-| Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions, fed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
-| Infrastructure I/O shells | injected `fetch` + `vi.mock` | `@inrupt/*` module functions are mocked; the tests assert the shell's fetch → map → return. |
+| Infrastructure mappers | none needed | Pure `Dataset`/`Subject` → domain functions, fed in-memory datasets built with `datasetFrom`/`buildThing` ([datasets.ts](../packages/solid/src/testing/datasets.ts)). |
+| Infrastructure I/O shells | injected `fetch` + `vi.mock` | The app's client modules (`client/resources`, `client/rdf`, `client/session`) are mocked, or given a fake (`fakeSessionClient.ts` in `packages/solid/src/testing/`); the tests assert the shell's fetch → map → return. Only the client modules' own tests use the Solid client libraries, to hold each module to them. |
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says. A record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read as the browser reads them, through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set). |
 | The round trip (`packages/solid/src/releaseDrafts.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` becomes a draft in a pod kept in memory, as an import makes one, and is published again at its own address (`assemble`), its triples coming back apart from what publishing sets (the format versions, its time of change), a blank node compared by what it says. Its task, `test:roundtrip`, in `npm run check`, runs again only when `decks/`, `ns/` or the package change. The unit tests take three releases the same way: a course, one with blank nodes, a plain deck. |
 | The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read as the app reads them, through `createSolidDeckLibrary` over a fetch serving the repository's files at their IRIs. The index lists every deck, and each release reads with all its cards (its retired ones retired). A course's outline has every chapter and step it uses, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this tests what the app makes of them. Its rules (`packages/domain/src/release/`) have their own tests, and a golden test, `packages/shacl/node/deckLibrary.golden.test.ts`, keeps as text what they say of published releases with faults put in. |
@@ -942,12 +942,12 @@ Dependency inversion gives every layer a seam for its fakes:
 ```mermaid
 graph LR
     accTitle: How each layer is tested
-    accDescr: Pure functions are tested with plain calls, use cases with fake ports, components with fake use cases, mappers with in-memory datasets and I/O shells with mocked Inrupt libraries.
+    accDescr: Pure functions are tested with plain calls, use cases with fake ports, components with fake use cases, mappers with in-memory datasets and I/O shells with mocked client modules.
     D["domain<br/>pure fns"] -->|plain calls| T1[tests]
     A["application<br/>use cases"] -->|fake ports| T2[tests]
     U["ui<br/>components"] -->|fake UseCases| T3[tests]
     M["infra mappers<br/>pure fns"] -->|in-memory datasets| T4[tests]
-    S["infra I/O shells"] -->|vi.mock @inrupt/*| T5[tests]
+    S["infra I/O shells"] -->|vi.mock client modules| T5[tests]
 ```
 
 ## Conventions
@@ -955,7 +955,7 @@ graph LR
 - Tests are colocated: `foo.ts` ↔ `foo.test.ts`.
 - Test files follow the same import boundaries as their subject
   ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts`
-  parses Turtle through `@inrupt/solid-client` for the SHACL tests.
+  parses Turtle through `src/turtleDocument.ts` for the SHACL tests.
 - Node tooling tests may read the repository's `ns/` and `decks/`
   (through `NS_ROOT` and `DECKS_ROOT`) and the vocab package's `vendor/`
   and `fixtures/` (through `VOCAB_ROOT`) as their fixtures.

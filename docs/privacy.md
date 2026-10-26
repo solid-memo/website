@@ -75,8 +75,9 @@ before any pod is reached:
 During a login, `sessionStorage` holds the page the learner was on
 (`solid-memo:login-hash`), to bring them back to it
 ([`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts)).
-The authentication library (`@inrupt/solid-client-authn-browser`)
-stores in the browser what it needs to restore the session, such as
+The authentication library under the sign-in client
+([`client/session.ts`](../packages/solid/src/client/session.ts),
+`@inrupt/solid-client-authn-browser`) stores in the browser what it needs to restore the session, such as
 the identity provider and the app's registration with it.
 
 None of this leaves the device. Clearing the site's data removes it

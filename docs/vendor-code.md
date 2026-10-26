@@ -7,7 +7,7 @@ confined, and what replacing one would cost.
 
 | Vendor | Packages | Confined to | Role |
 |---|---|---|---|
-| Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/`; its universal access API in `client/access.ts` alone | RDF datasets, pod I/O, Solid-OIDC auth, and the app's one access-control write: a published release made readable by everyone, on WAC or ACP ([boundaries.md](boundaries.md#access-control)) |
+| Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/client/` ([boundaries.md](boundaries.md#the-solid-client-libraries)), and `packages/shacl/src/turtleDocument.ts` for reading shapes; its universal access API in `client/access.ts` alone | RDF datasets, pod I/O, Solid-OIDC auth, and the app's one access-control write: a published release made readable by everyone, on WAC or ACP ([boundaries.md](boundaries.md#access-control)) |
 | TanStack | `@tanstack/react-query` (via `preact/compat`) | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Async-state caching and invalidation |
 | Preact | `preact` | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Rendering |
 | Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers`, `@fontsource-variable/noto-naskh-arabic` (all SIL OFL-1.1) | `packages/ui/src/style.css` (`@import`), and, for the diagrams' Fredoka ([markdown.md](markdown.md#the-diagrams-font)), `packages/site/src/drawDiagrams.ts` | Typefaces, self-hosted: bundled into `dist/` with no third-party font requests. Fredoka for text, Bangers (comic lettering) for `h1`/`h2`, Noto Naskh Arabic for Arabic text. |
@@ -64,16 +64,58 @@ and express the app in its own vocabulary (`Session`, `WebIdDocument`,
 ports, use cases).
 
 The mapper layer bridges the two: pure functions in
-`packages/solid/src/mappers/` translate Inrupt's RDF types
-(`SolidDataset`, `Thing`) into domain types. Vendor types never cross
+`packages/solid/src/mappers/` translate the RDF module's own types
+(`Dataset`, `Subject`, from `client/rdf.ts`) into domain types. Those
+types are the package's own names for the library's types, so no
+Inrupt import appears outside `client/`, and no RDF type crosses
 upward past a mapper.
 
 ## Cost of swapping a vendor
 
-- **Inrupt clients** → `packages/solid/src/` only. Another RDF library
-  (rdflib, LDO) or plain HTTP means rewriting only the port
-  implementations and `records.ts`: the record ↔ model mappers are
-  domain code, the shape descriptors data.
+- **Inrupt clients** → a second implementation of the four client
+  modules in `packages/solid/src/client/` (`rdf.ts`, `resources.ts`,
+  `session.ts`, `access.ts`) and of
+  `packages/shacl/src/turtleDocument.ts`. Their interface is the
+  current library's type shapes: `Dataset`, `Subject`, `NamedSubject`,
+  `SubjectBuilder` and `FetchedDataset` are aliases of its types.
+  Callers read `subject.url` and build a subject with
+  `buildThing(...).addX().build()`. A replacement must provide those
+  shapes, or every caller changes too. Given them, their callers, the
+  RDF mappers and the record ↔ model mappers don't change.
+  What a replacement must match is pinned in two places:
+  - **The client modules' unit tests** (`rdf.test.ts`,
+    `resources.test.ts`, `session.test.ts`, `access.test.ts`,
+    `linearDataset.test.ts`) pin the data model: `getThingAll` leaves
+    out blank-node subjects, and `getThing` finds one by its `_:label`.
+    A subject made by name resolves against the URL its dataset was
+    read from. `getDatetime` throws on some literals and gives an
+    invalid date past the JavaScript date range. Language tags read
+    back in lower case. `getDecimal` reads as `parseFloat` does, and a
+    decimal is written as JavaScript spells it (`1`, not `1.0`). The
+    change log (`changesOf`) and the source (`sourceOf`) behave as
+    their comments in `rdf.ts` say. They pin the methods and URLs of
+    the requests, a new document as a PUT with `If-None-Match: *`, and
+    a file's Content-Type. A failed request rejects with `HttpError`,
+    carrying `statusCode`, `response`, the library's error as its
+    `cause`, and a message that says what the server was asked and how
+    it answered; `retryable.ts` and `typeIndex.ts` read them. A text
+    that doesn't parse rejects with the parser's error, not an
+    `HttpError`. Turtle and JSON-LD parse in every graph the text
+    names, with relative IRIs resolved against the document's URL, and
+    `linearDataset.ts` reads what the library reads, in one pass. On
+    sign-in, `restore()` completes a login or restores the session
+    silently, and says which, with the WebID and the page a silent
+    restore left; `fetch` uses the current session, never one from
+    before a login. The grant writes only the document's own ACL, read
+    for everyone, and gives false on a pod without access control.
+    `solidReleasePublisher.test.ts` runs that grant behind the
+    publisher's fence, on a WAC pod and an ACP one held in memory: it
+    asks by URL, and writes only the release's own ACL or ACR.
+  - **The end-to-end tests against real Solid servers** (`e2e/pod/`)
+    cover what the unit tests don't check. Each server must take the
+    requests' Accept and Content-Type headers. A saved edit goes as a
+    PATCH with the body `datasets.ts` writes. The grant's ACL and ACR
+    writes must work on the servers themselves.
 - **rdf-validate-shacl** → `packages/shacl/src/engine.ts`, the only
   module that imports it (`packages/shacl/node/shacl.ts` calls its
   `createEngine`); the rest sees only the `ShapeEngine` interface (one

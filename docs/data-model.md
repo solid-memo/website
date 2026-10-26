@@ -37,8 +37,8 @@ app's too. The data check only warns about them
 ```mermaid
 flowchart LR
     accTitle: From pod data to the domain model
-    accDescr: A Thing is read as a versioned shape record, migrated to the latest record and mapped to the domain model, and a model is written back the same way in reverse.
-    thing["Inrupt Thing"] -->|readVersioned| record["shape record<br/>e.g. CardV1"]
+    accDescr: A subject is read as a versioned shape record, migrated to the latest record and mapped to the domain model, and a model is written back the same way in reverse.
+    thing["Subject<br/>(client/rdf.ts)"] -->|readVersioned| record["shape record<br/>e.g. CardV1"]
     record -->|migrate| latest["latest record<br/>CardV2"]
     latest -->|cardFromRecord| model["domain model<br/>Card"]
     model -->|cardToRecord| latest
@@ -1383,9 +1383,9 @@ by one.
     preferences is always one PUT too, since node-solid-server stores a
     boolean a PATCH inserts as false (the preferences hold two, the
     developer settings and "Not now" to switching to FSRS-6);
-  - a creation is sent with `If-None-Match: *` (by
-    `@inrupt/solid-client` for datasets and containers, by the copier
-    for files); had something appeared there meanwhile, 412;
+  - a creation is sent with `If-None-Match: *` (by the Solid client
+    library, behind `client/resources.ts`, for datasets and containers,
+    by the copier for files); had something appeared there meanwhile, 412;
   - deleting a document read before sends `If-Match` too. Every removal
     of Solid Memo's data from a document (deleting an instance, a deck
     or a draft, or taking back what a failed creation wrote) goes

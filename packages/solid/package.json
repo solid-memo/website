@@ -1,6 +1,6 @@
 {
   "name": "@solid-memo/solid",
-  "description": "Solid Memo's adapters for Solid pods, over Inrupt's solid-client.",
+  "description": "Solid Memo's adapters for Solid pods, over the Solid client libraries behind modules of its own.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",
