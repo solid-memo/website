@@ -18,7 +18,7 @@ branches, functions, lines), or `npm test` fails
 
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
-npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
+npm run check     # Biome's lint, markdownlint, cspell and the prose check, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
 npm run check:ci  # npm run check without the deck library, as CI's check job runs it (its library job checks the library)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
@@ -26,7 +26,7 @@ npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
-npm run lint:prose         # the docs' prose rules, per page kind (docs/style.md#the-prose-check), -- docs/srs.md for one page (not in npm run check)
+npm run lint:prose         # the docs' prose rules, per page kind (docs/style.md#the-prose-check), as npm run check runs it; -- docs/srs.md for one page
 npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
 npm run lint:workflows     # actionlint and zizmor over .github/, as CI's workflows job runs them (needs them; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
@@ -755,8 +755,9 @@ URLs are compared as strings or by parsed origin, not with patterns.
 `npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
 fails on a TypeScript, JSON or CSS file it would format otherwise, or
 that breaks one of its lint rules ([style.md](style.md#formatting)).
-Then `npm run lint:markdown` and `npm run lint:spelling` check the
-Markdown's style and spelling ([Documentation](#documentation)). It ends with
+Then `npm run lint:markdown`, `npm run lint:spelling` and
+`npm run lint:prose` check the Markdown's style, spelling and prose
+([Documentation](#documentation)). It ends with
 checks of the repository as a whole, plain Node scripts in
 [scripts/](../scripts/):
 
@@ -797,8 +798,8 @@ checks of the repository as a whole, plain Node scripts in
 ## Documentation
 
 `npm run check`, and so CI's `check` job, checks the style and spelling
-of the Markdown (`docs/`, the READMEs, `AGENTS.md`), and CI's `docs`
-job the rest:
+of the Markdown (`docs/`, the READMEs, `AGENTS.md`) and the prose of
+the pages in `docs/`, and CI's `docs` job the rest:
 
 - **Style**:
   [markdownlint](https://github.com/DavidAnson/markdownlint)'s rules,
@@ -817,6 +818,12 @@ job the rest:
   dictionary would let through, each with its fix, and lists the real
   words it doesn't know (standards, names, other languages' examples),
   only when spelled right. `npm run lint:spelling` runs it alone.
+- **Prose**: each page in `docs/` follows the writing rules for its
+  kind ([style.md](style.md#the-prose-check)), as
+  [prose.json](../prose.json) has them: sentence length, filler, voice,
+  contractions and links. `npm run lint:prose` runs it alone, and
+  `npm run lint:prose -- docs/srs.md` checks one page. It's the
+  project's own script, so nothing needs installing.
 - **Links**: [lychee](https://lychee.cli.rs/), offline, checks that
   every link to a file or a heading in the repository resolves
   ([lychee.toml](../lychee.toml)). The

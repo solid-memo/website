@@ -300,8 +300,8 @@ The [Docs](#docs) and [Language](#language) sections apply as well.
 
 ## The prose check
 
-`npm run lint:prose` checks every page in `docs/` against the rules in
-[prose.json](../prose.json), each with its reason as its message.
+`npm run lint:prose`, part of `npm run check`, checks every page in
+`docs/` against the rules in [prose.json](../prose.json), each with its reason as its message.
 [checkProse.ts](../scripts/checkProse.ts) runs it, and
 [prose.ts](../packages/site/src/prose.ts) holds the rules' logic: the
 project's own code, so it runs offline, and no package's update

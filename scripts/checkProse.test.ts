@@ -100,6 +100,14 @@ describe("main", () => {
 });
 
 describe("the repository's docs", () => {
+  it("all follow the prose rules for their kind", () => {
+    const io = { ...defaultIo(`${import.meta.dirname}/..`), log: vi.fn() };
+    expect(main(["node"], io)).toBe(0);
+    expect(io.log.mock.calls.at(-1)?.[0]).toMatch(
+      /^\d+ pages follow the prose rules in prose\.json\.$/,
+    );
+  });
+
   it("are checked by the script entry", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const process = {
