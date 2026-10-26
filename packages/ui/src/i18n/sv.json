@@ -1427,6 +1427,7 @@
       "recomputeDue": "Räkna om när kortet ska repeteras nästa gång",
       "nameAgent": "Namnge personen eller organisationen efter dess adress",
       "dropDanglingMembers": "Ta bort länkarna till kortlekar och grupper som inte finns kvar",
+      "dropUnreadableDate": "Ta bort datum som ligger för långt fram eller tillbaka i tiden för att läsas",
       "removeSubject": "Ta bort det"
     }
   },
@@ -1554,7 +1555,8 @@
       "MinLength": "Texten är för kort.",
       "MaxLength": "Texten är för lång.",
       "Closed": "Egenskapen är inte tillåten här.",
-      "DeckPlace": "Kortlekens post finns inte i instansens katalog, eller så anger den ett dokument på en adress som ingen kortleks dokument får ha, till exempel en annan resurs åtkomstkontroll eller ett av instansens egna dokument. Solid Memo använder den inte."
+      "DeckPlace": "Kortlekens post finns inte i instansens katalog, eller så anger den ett dokument på en adress som ingen kortleks dokument får ha, till exempel en annan resurs åtkomstkontroll eller ett av instansens egna dokument. Solid Memo använder den inte.",
+      "DateTimeRange": "Det här datumet ligger för långt fram eller tillbaka i tiden för att Solid Memo ska kunna läsa det, så det läses som inget datum."
     }
   },
   "webIdDocument": {

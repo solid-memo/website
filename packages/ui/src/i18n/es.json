@@ -1494,6 +1494,7 @@
       "recomputeDue": "Volver a calcular el día del próximo repaso",
       "nameAgent": "Dar a la persona u organización el nombre de su dirección",
       "dropDanglingMembers": "Quitar los enlaces a mazos y grupos que ya no existen",
+      "dropUnreadableDate": "Quitar las fechas demasiado lejanas en el futuro o en el pasado para leerse",
       "removeSubject": "Eliminarlo"
     }
   },
@@ -1626,7 +1627,8 @@
       "MinLength": "El texto es demasiado corto.",
       "MaxLength": "El texto es demasiado largo.",
       "Closed": "La propiedad no está permitida aquí.",
-      "DeckPlace": "La entrada del mazo no está en el catálogo de su instancia, o indica un documento en una dirección que ningún documento de un mazo puede tener, como el control de acceso de otro recurso o uno de los documentos propios de la instancia. Solid Memo no lo usa."
+      "DeckPlace": "La entrada del mazo no está en el catálogo de su instancia, o indica un documento en una dirección que ningún documento de un mazo puede tener, como el control de acceso de otro recurso o uno de los documentos propios de la instancia. Solid Memo no lo usa.",
+      "DateTimeRange": "Esta fecha está demasiado lejos en el futuro o en el pasado para que Solid Memo la lea, así que se lee como si no hubiera fecha."
     }
   },
   "webIdDocument": {

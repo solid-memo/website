@@ -9,7 +9,11 @@ import {
   type InvalidDataPolicy,
 } from "@solid-memo/domain/invalidDataPolicy";
 import { LOCALES } from "@solid-memo/domain/locale";
-import type { Scheduler } from "@solid-memo/domain/fsrs";
+import {
+  MAX_DESIRED_RETENTION,
+  MIN_DESIRED_RETENTION,
+  type Scheduler,
+} from "@solid-memo/domain/fsrs";
 import { paintedColors, type CustomPalette } from "@solid-memo/domain/customPalette";
 import { isPaletteOf } from "@solid-memo/domain/instanceLayout";
 import { shown } from "@solid-memo/domain/langText";
@@ -426,8 +430,8 @@ export function PreferencesScreen({
         <input
           id="pref-retention"
           type="number"
-          min="70"
-          max="97"
+          min={percentOf(MIN_DESIRED_RETENTION)}
+          max={percentOf(MAX_DESIRED_RETENTION)}
           step="1"
           value={retention}
           onInput={(e) => setRetention(e.currentTarget.value)}

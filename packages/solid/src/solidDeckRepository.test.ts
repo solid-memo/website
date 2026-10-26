@@ -99,6 +99,16 @@ function catalogWithDeck() {
   );
 }
 
+/** A document as the pod serves it, parsed from its Turtle. */
+async function fromTurtle(url: string, turtle: string) {
+  const response = new Response(turtle, { headers: { "Content-Type": "text/turtle" } });
+  Object.defineProperty(response, "url", { value: url });
+  return responseToSolidDataset(response);
+}
+
+// A valid date-time whose year is past what a JavaScript date holds.
+const OUT_OF_RANGE = '"300000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>';
+
 beforeEach(() => {
   vi.mocked(getSolidDatasetOrNull).mockReset();
   vi.mocked(saveSolidDatasetAt).mockReset();
@@ -116,6 +126,23 @@ describe("listDecks", () => {
     const decks = await makeRepository().listDecks(INSTANCE);
     expect(decks).toHaveLength(1);
     expect(decks[0].title.en).toBe("Kanji N5");
+  });
+
+  it("lists a deck whose creation time is past what a date holds, as one without it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await fromTurtle(
+        CATALOG,
+        `<${deck.url}> a <${SM.Deck}>;
+          <${DCTERMS.title}> "Kanji N5";
+          <${DCTERMS.created}> ${OUT_OF_RANGE};
+          <${SM.cardsDocument}> <${deck.cardsDocumentUrl}>;
+          <${SM.reviewsDocument}> <${deck.reviewsDocumentUrl}>.`,
+      ),
+    );
+    const decks = await makeRepository().listDecks(INSTANCE);
+    expect(decks).toHaveLength(1);
+    expect(decks[0].title.en).toBe("Kanji N5");
+    expect(decks[0].createdAt).toBe("");
   });
 });
 
@@ -212,6 +239,23 @@ describe("applyCardChanges", () => {
       getDatetime(getThing(saved, `${deck.cardsDocumentUrl}#no`)!, DCTERMS.created)?.toISOString(),
     ).toBe("2026-09-21T10:00:00.000Z");
     expect(getThing(saved, `${deck.cardsDocumentUrl}#is`)).toBeNull();
+  });
+
+  it("writes a card whose creation time is past what a date holds as one without it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await fromTurtle(
+        deck.cardsDocumentUrl,
+        `<${deck.cardsDocumentUrl}#se> a <${SM.Card}>; <${DCTERMS.created}> ${OUT_OF_RANGE}.`,
+      ),
+    );
+    await makeRepository().applyCardChanges(deck, {
+      save: [{ id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" } }],
+      remove: [],
+    });
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    const se = getThing(saved, `${deck.cardsDocumentUrl}#se`)!;
+    expect(getStringNoLocale(se, SM.back)).toBe("Stockholm");
+    expect(getDatetime(se, DCTERMS.created)?.toISOString()).toBe("2026-09-21T10:00:00.000Z");
   });
 
   it("retires a card and brings one back, stating owl:deprecated only on a retired card", async () => {
@@ -1064,6 +1108,21 @@ describe("listCards", () => {
     const cards = await makeRepository().listCards(deck);
     expect(cards).toHaveLength(1);
     expect(cards[0].front).toEqual({ "": "水" });
+  });
+
+  it("reads a card whose creation time is past what a date holds, as one without it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await fromTurtle(
+        deck.cardsDocumentUrl,
+        `<${card.url}> a <${SM.Card}>;
+          <${SM.front}> "水"; <${SM.back}> "water";
+          <${DCTERMS.created}> ${OUT_OF_RANGE}.`,
+      ),
+    );
+    const cards = await makeRepository().listCards(deck);
+    expect(cards).toHaveLength(1);
+    expect(cards[0].front).toEqual({ "": "水" });
+    expect(cards[0].createdAt).toBe("");
   });
 });
 

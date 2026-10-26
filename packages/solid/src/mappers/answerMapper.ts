@@ -5,15 +5,20 @@
 import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
 import type { Answer } from "@solid-memo/domain/answer";
 import { answerFromRecord, answerToRecord } from "@solid-memo/domain/answerRecord";
+import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { ANSWER_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 
-/** An answer-log subject as an Answer; null when it is not an sm:Answer that fits its shape. */
+/**
+ * An answer-log subject as an Answer; null when it is not an sm:Answer
+ * that fits its shape, or its study day is not a real date (the shape's
+ * pattern lets "2026-13-01" through, and the statistics count days from it).
+ */
 export function toAnswer(thing: Thing): Answer | null {
   const read = readVersioned(thing, "answer");
-  if (read === null) return null;
+  if (read === null || !isStudyDay(read.record.data.studyDay)) return null;
   return answerFromRecord(
     fragmentIdOf(asUrl(thing)),
     migrate("answer", read.record, { subject: asUrl(thing) }),

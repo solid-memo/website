@@ -260,6 +260,22 @@ describe("toLibraryDecks", () => {
     expect(deck).not.toHaveProperty("versionNotes");
   });
 
+  it("lists a release issued past the years a date holds without when it was issued", async () => {
+    const index = await datasetFromIndex(
+      INDEX_TURTLE.replace(
+        'dcterms:issued "2026-09-21T10:00:00Z"^^xsd:dateTime',
+        'dcterms:issued "300000-01-01T00:00:00Z"^^xsd:dateTime',
+      ),
+    );
+    const [deck] = toLibraryDecks(index);
+    expect(deck.releases[0]).toEqual({
+      url: "https://solid-memo.com/decks/capitals/v1.ttl",
+      version: "1",
+      notes: "First.",
+    });
+    expect(deck.releases[1].issued).toBe("2026-09-22T10:00:00.000Z");
+  });
+
   it("lists nothing for a document without a catalog", async () => {
     expect(toLibraryDecks(await datasetFromIndex(`<#x> a <${SM.Card}> .`))).toEqual([]);
   });

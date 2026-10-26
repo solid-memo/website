@@ -4,7 +4,6 @@
 
 import {
   buildThing,
-  getDatetime,
   getInteger,
   getStringNoLocale,
   getThing,
@@ -18,12 +17,20 @@ import {
 import type { RepairRepository } from "@solid-memo/application/ports";
 import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/domain/dcat";
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
+import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { foreignSubjects } from "./ownership";
-import { readText, unlessNewer } from "./records";
+import {
+  datetimeLiteral,
+  readDatetime,
+  readText,
+  unlessNewer,
+  unreadableDatetimes,
+} from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+
 const SNAPSHOT = [
   SM.previousEaseFactor,
   SM.previousIntervalDays,
@@ -175,12 +182,26 @@ function repairedThing(
       return snapshot.reduce((b, predicate) => b.removeAll(predicate), builder).build();
     }
     case "recompute-due": {
-      const last = getDatetime(thing, SM.lastReviewedAt);
+      const last = readDatetime(thing, SM.lastReviewedAt);
       const interval = getInteger(thing, SM.intervalDays);
       if (last === null || interval === null) return thing;
-      const due = new Date(last.getTime() + interval * 86_400_000).toISOString().slice(0, 10);
-      return builder.setStringNoLocale(SM.due, due).build();
+      const due = new Date(last.getTime() + interval * 86_400_000);
+      // A due day past the years a study day holds leaves the due as it is.
+      const day = Number.isNaN(due.getTime()) ? "" : due.toISOString().slice(0, 10);
+      return isStudyDay(day) ? builder.setStringNoLocale(SM.due, day).build() : thing;
     }
+    case "drop-unreadable-date":
+      // Only the dates the app reads as none: a readable value of the same field stays.
+      return (repair.predicates ?? [])
+        .reduce(
+          (b, predicate) =>
+            unreadableDatetimes(thing, predicate).reduce(
+              (next, value) => next.removeLiteral(predicate, datetimeLiteral(value)),
+              b,
+            ),
+          builder,
+        )
+        .build();
     case "name-agent": {
       const url = repair.subjectUrl;
       const name = url.includes("#") ? url.slice(url.indexOf("#") + 1) : url;

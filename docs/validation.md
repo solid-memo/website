@@ -105,6 +105,25 @@ flowchart LR
   does not use such a deck at all, so it is never set aside: the notice
   names the problem, and removing the entry is all that is offered. A
   draft's deck is a draft's, and not held to it.
+- **A date the app cannot read** is checked beside its shape, wherever
+  the subject is (an instance's, a release's or a draft's): a value of
+  one of the shape's date fields that is a valid `xsd:dateTime` but
+  past what a JavaScript date holds (after 13 September 275760, or
+  before 20 April -271821) is one SHACL finds valid, and the app reads
+  it as no date (`readDatetime` in
+  [records.ts](../packages/solid/src/records.ts)).
+  It is a violation of the subject (`DateTimeRange`, `dateViolations`
+  in [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)),
+  with the date as its value; a value that is no date-time at all is
+  the shape's to name, and named once. The app reads an optional date
+  as absent, and a [repair](#repair) drops it; a subject that needs the
+  date (an answer's time, a review state's reviews, the instance's
+  creation) does not fit its shape, and is the user's to fix or remove.
+  The release check names such a date as an error, and a release added
+  from a link, or a copy's upgrade from one, that has one is refused.
+  The write check does
+  not look for it: the app writes no such date, and a subject that has
+  one can still be written to.
 - **A deck whose documents are unclaimed** (they do not say they are
   the deck's, and are outside the instance's own folder:
   [data-model.md](data-model.md#where-an-instances-documents-are)) is
@@ -352,6 +371,8 @@ the subject's own stored format:
 | A malformed due day | Recomputed from the last review and the interval |
 | An agent without a name | Named after its IRI |
 | A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
+| A date the app cannot read (`DateTimeRange`) of a field the subject's shape and format make optional | Those dates dropped, every such date of the subject in one repair; a readable value of the same field, and every other field, are kept |
+| A review state's undo snapshot with a date the app cannot read | The snapshot dropped, as for half a snapshot |
 
 Every other problem is listed with its document linked, to be fixed
 there or removed (after a confirmation). Removing a subject also drops

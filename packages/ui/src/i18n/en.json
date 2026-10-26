@@ -1427,6 +1427,7 @@
       "recomputeDue": "Recompute the review's due day",
       "nameAgent": "Name the person or organization after their address",
       "dropDanglingMembers": "Drop the links to decks and groups that are gone",
+      "dropUnreadableDate": "Drop the dates too far in the future or the past to read",
       "removeSubject": "Remove it"
     }
   },
@@ -1554,7 +1555,8 @@
       "MinLength": "The text is too short.",
       "MaxLength": "The text is too long.",
       "Closed": "The property is not allowed here.",
-      "DeckPlace": "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it."
+      "DeckPlace": "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it.",
+      "DateTimeRange": "This date is too far in the future or the past for Solid Memo to read, so it reads as no date."
     }
   },
   "webIdDocument": {

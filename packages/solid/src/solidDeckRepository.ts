@@ -5,7 +5,6 @@
 import {
   buildThing,
   createSolidDataset,
-  getDatetime,
   getThing,
   getUrlAll,
   setThing,
@@ -71,7 +70,7 @@ import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
-import { recordThing, removeUnlessNewer, unlessNewer } from "./records";
+import { readDatetime, recordThing, removeUnlessNewer, unlessNewer } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
@@ -710,7 +709,7 @@ export function createSolidDeckRepository({
     for (const card of saved) {
       const existing = getThing(updated, urlOf(card.id));
       const createdAt =
-        existing === null ? undefined : getDatetime(existing, DCTERMS.created)?.toISOString();
+        existing === null ? undefined : readDatetime(existing, DCTERMS.created)?.toISOString();
       const written = withCard(
         updated,
         deck,

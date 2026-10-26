@@ -9,6 +9,7 @@ import {
   getDatetime,
   getDecimal,
   getInteger,
+  getLiteralAll,
   getStringByLocaleAll,
   getStringNoLocale,
   getStringNoLocaleAll,
@@ -21,6 +22,7 @@ import {
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
+import type { Literal, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,
   type LangText,
@@ -84,7 +86,7 @@ function readScalar(
     case "boolean":
       return getBoolean(thing, field.predicate);
     case "dateTime":
-      return getDatetime(thing, field.predicate)?.toISOString() ?? null;
+      return readDatetime(thing, field.predicate)?.toISOString() ?? null;
     case "iri":
       return getUrl(thing, field.predicate);
     case "iriEnum": {
@@ -92,6 +94,55 @@ function readScalar(
       return value !== null && field.values!.includes(value) ? value : null;
     }
   }
+}
+
+/**
+ * A date-time value; null when there is none, or when the library
+ * cannot make a date of it: one past what a JavaScript date holds
+ * (after 13 September 275760, or before 20 April -271821), which it
+ * reads as an invalid date rather than none, or a lexical form its
+ * unanchored pattern lets through and then throws on, such as
+ * "T2026-01-01T00:00:00Z".
+ */
+export function readDatetime(thing: Thing, predicate: string): Date | null {
+  let date: Date | null;
+  try {
+    date = getDatetime(thing, predicate);
+  } catch {
+    return null;
+  }
+  return date === null || Number.isNaN(date.getTime()) ? null : date;
+}
+
+const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+const PROBE = "https://solid-memo.com/probe";
+
+/** An xsd:dateTime literal of this lexical form, as a subject holds it. */
+export function datetimeLiteral(value: string): Literal {
+  return {
+    termType: "Literal",
+    value,
+    language: "",
+    datatype: { termType: "NamedNode", value: XSD_DATETIME },
+  } as Literal;
+}
+
+/**
+ * Whether a term is an xsd:dateTime that readDatetime does not read as
+ * a date: what the instance and release checks name (DateTimeRange),
+ * and what a repair of an optional one drops.
+ */
+export function isUnreadableDatetime(term: Term): boolean {
+  if (term.termType !== "Literal" || term.datatype.value !== XSD_DATETIME) return false;
+  const probe = buildThing(createThing()).addLiteral(PROBE, datetimeLiteral(term.value)).build();
+  return readDatetime(probe, PROBE) === null;
+}
+
+/** A subject's values of a predicate that isUnreadableDatetime, in stored order. */
+export function unreadableDatetimes(thing: Thing, predicate: string): string[] {
+  return getLiteralAll(thing, predicate)
+    .filter(isUnreadableDatetime)
+    .map((literal) => literal.value);
 }
 
 /**

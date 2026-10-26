@@ -17,6 +17,7 @@ import {
   getUrl,
   getUrlAll,
 } from "@inrupt/solid-client";
+import type { Literal } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { LATEST_VERSION, type CardV5 } from "@solid-memo/vocab/types.generated";
@@ -34,17 +35,31 @@ import {
 } from "@solid-memo/vocab/descriptors.generated";
 import {
   applyRecord,
+  datetimeLiteral,
+  isUnreadableDatetime,
   readRecord,
   readVersioned,
   recordThing,
   removeUnlessNewer,
   storedVersionOf,
   unlessNewer,
+  unreadableDatetimes,
 } from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
 
 const URL_ = "https://pod.example/x.ttl#it";
 const EX = "https://example.com/ns#";
+
+/**
+ * A valid xsd:dateTime past the year 275760, which a JavaScript date
+ * cannot hold: the library reads it as an invalid date, not as none.
+ */
+const FAR_DATE = {
+  termType: "Literal",
+  value: "300000-01-01T00:00:00Z",
+  language: "",
+  datatype: { termType: "NamedNode", value: "http://www.w3.org/2001/XMLSchema#dateTime" },
+} as Literal;
 
 interface Thing {
   name: string;
@@ -321,6 +336,19 @@ describe("readRecord", () => {
       .build();
     expect(readRecord(thing, THING)).toEqual({ name: "Ann", tags: [], links: [], concepts: [] });
   });
+
+  it("treats a date past what a JavaScript date holds as absent, so a required one does not fit", () => {
+    const thing = buildThing(createThing({ url: URL_ }))
+      .addStringNoLocale(`${EX}name`, "Ann")
+      .addLiteral(`${EX}when`, FAR_DATE)
+      .build();
+    expect(readRecord(thing, THING)).toEqual({ name: "Ann", tags: [], links: [], concepts: [] });
+    const required: ShapeDescriptor<{ when: string }> = {
+      ...THING,
+      fields: [{ name: "when", predicate: `${EX}when`, kind: "dateTime", cardinality: "one" }],
+    } as unknown as ShapeDescriptor<{ when: string }>;
+    expect(readRecord(thing, required)).toBeNull();
+  });
 });
 
 describe("language-tagged text", () => {
@@ -500,6 +528,25 @@ describe("a shape that fixes a value (an FSRS-6 review state's scheduler)", () =
   });
 });
 
+describe("unreadableDatetimes", () => {
+  it("names the date-times of a predicate readDatetime reads as none, and only those", () => {
+    const thing = buildThing(createThing({ url: URL_ }))
+      .addLiteral(`${EX}when`, FAR_DATE)
+      .addDatetime(`${EX}when`, new Date("2026-01-01T00:00:00Z"))
+      .addStringNoLocale(`${EX}when`, "300000-01-01T00:00:00Z")
+      .addLiteral(`${EX}other`, FAR_DATE)
+      .build();
+    expect(unreadableDatetimes(thing, `${EX}when`)).toEqual(["300000-01-01T00:00:00Z"]);
+    expect(unreadableDatetimes(thing, `${EX}none`)).toEqual([]);
+    expect(isUnreadableDatetime(datetimeLiteral("275760-09-13T00:00:00Z"))).toBe(false);
+    expect(isUnreadableDatetime(datetimeLiteral("-300000-01-01T00:00:00Z"))).toBe(true);
+    expect(isUnreadableDatetime(datetimeLiteral("soon"))).toBe(true);
+    // The library's pattern lets this through, then throws on it.
+    expect(isUnreadableDatetime(datetimeLiteral("T2026-01-01T00:00:00Z"))).toBe(true);
+    expect(isUnreadableDatetime(FAR_DATE.datatype)).toBe(false);
+  });
+});
+
 describe("readVersioned", () => {
   const card = (version?: number, front = "Sweden") => {
     const b = buildThing(createThing({ url: URL_ }))
@@ -541,6 +588,24 @@ describe("readVersioned", () => {
       .addInteger(SM.formatVersion, 1)
       .build();
     expect(readVersioned(noBack, "card")).toBeNull();
+  });
+
+  it("reads a date past what a JavaScript date holds as absent, and a subject that needs it as not fitting", () => {
+    const instance = (created: Literal | string) => {
+      const b = buildThing(createThing({ url: URL_ }))
+        .addIri(RDF.type, SM.Instance)
+        .addStringNoLocale(DCTERMS.title, "Home")
+        .addInteger(SM.formatVersion, 2)
+        .addLiteral(DCTERMS.modified, FAR_DATE);
+      if (typeof created === "string") b.addDatetime(DCTERMS.created, new Date(created));
+      else b.addLiteral(DCTERMS.created, created);
+      return b.build();
+    };
+    expect(readVersioned(instance("2026-01-01T00:00:00.000Z"), "instance")).toEqual({
+      storedVersion: 2,
+      record: { version: 2, data: { title: "Home", created: "2026-01-01T00:00:00.000Z" } },
+    });
+    expect(readVersioned(instance(FAR_DATE), "instance")).toBeNull();
   });
 });
 

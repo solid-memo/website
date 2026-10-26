@@ -26,7 +26,15 @@ const DCAT = "http://www.w3.org/ns/dcat#";
 
 const checked = (
   url: string,
-  shape: "deck" | "reviewState" | "fsrsReviewState" | "agent" | "card" | "catalog" | "deckGroup",
+  shape:
+    | "deck"
+    | "reviewState"
+    | "fsrsReviewState"
+    | "agent"
+    | "card"
+    | "catalog"
+    | "deckGroup"
+    | "instance",
   violations: Violation[],
   version = 3,
 ): SubjectReport => ({
@@ -150,5 +158,63 @@ describe("planRepair", () => {
         },
       ],
     });
+  });
+
+  it("drops the unreadable dates of a subject's optional fields in one repair, and leaves one it needs to the user", () => {
+    const unreadable = (path: string): Violation => ({
+      ...v("DateTimeRange", path),
+      message: { en: "This date is too far in the future or the past." },
+      builtIn: true,
+      value: "300000-01-01T00:00:00Z",
+    });
+    const report = summarize(INSTANCE, [
+      {
+        url: CATALOG,
+        status: "checked",
+        subjects: [
+          checked(
+            `${CATALOG}#deck-1`,
+            "deck",
+            [unreadable(`${DC}created`), unreadable(`${DC}modified`), unreadable(`${DC}created`)],
+            6,
+          ),
+          // Format 1 had no date of change: no field of the deck's to drop it from.
+          checked(`${CATALOG}#deck-2`, "deck", [unreadable(`${DC}modified`)], 1),
+          checked(`${CATALOG}#it`, "instance", [unreadable(`${DC}created`)], 2),
+          { url: `${CATALOG}#pub`, status: "profiled", violations: [unreadable(`${DC}created`)] },
+        ],
+      },
+      {
+        url: REVIEWS,
+        status: "checked",
+        subjects: [
+          // The undo snapshot's date goes with the snapshot; the last review is the state's own.
+          checked(
+            `${REVIEWS}#a`,
+            "reviewState",
+            [unreadable(`${SM}previousLastReviewedAt`), unreadable(`${SM}lastReviewedAt`)],
+            2,
+          ),
+          checked(
+            `${REVIEWS}#a@fsrs6`,
+            "fsrsReviewState",
+            [unreadable(`${SM}previousLastReviewedAt`)],
+            1,
+          ),
+        ],
+      },
+    ]);
+    const plan = planRepair(report);
+    expect(plan.repairs.map((r) => [r.subjectUrl.split("#")[1], r.kind, r.predicates])).toEqual([
+      ["deck-1", "drop-unreadable-date", [`${DC}created`, `${DC}modified`]],
+      ["a", "drop-snapshot", undefined],
+      ["a@fsrs6", "drop-snapshot", undefined],
+    ]);
+    expect(plan.unrepairable.map((u) => [u.subjectUrl.split("#")[1], u.violations])).toEqual([
+      ["deck-2", [unreadable(`${DC}modified`)]],
+      ["it", [unreadable(`${DC}created`)]],
+      ["pub", [unreadable(`${DC}created`)]],
+      ["a", [unreadable(`${SM}lastReviewedAt`)]],
+    ]);
   });
 });

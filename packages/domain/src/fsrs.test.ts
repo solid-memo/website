@@ -16,6 +16,7 @@ import {
   ratingOfGrade,
   recallNow,
   retrievability,
+  usableDesiredRetention,
   type FsrsMemory,
   type FsrsRating,
 } from "./fsrs";
@@ -204,6 +205,19 @@ describe("fsrsInterval", () => {
     expect([at(0.8), at(0.9), at(0.95)]).toEqual([8, 2, 1]);
     memory = nextMemory(memory, 3, 8);
     expect(at(0.8)).toBe(75);
+  });
+});
+
+describe("usableDesiredRetention", () => {
+  it("keeps a desired retention from 70% to 97%", () => {
+    expect([0.7, 0.85, 0.9, 0.97].map(usableDesiredRetention)).toEqual([0.7, 0.85, 0.9, 0.97]);
+  });
+
+  it("is the default for one outside that range or no number at all", () => {
+    const outside = [-1, 0, 0.69, 0.98, 1, 2, Number.NaN, Number.POSITIVE_INFINITY];
+    expect(outside.map(usableDesiredRetention)).toEqual(
+      outside.map(() => DEFAULT_DESIRED_RETENTION),
+    );
   });
 });
 
