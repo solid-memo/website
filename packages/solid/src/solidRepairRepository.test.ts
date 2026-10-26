@@ -36,6 +36,7 @@ vi.mock("./datasets", async (importOriginal) => ({
 const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
 const REVIEWS = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 
 function documentOf(url: string, ...things: ThingPersisted[]): never {
   return things.reduce<SolidDataset>(
@@ -195,6 +196,47 @@ describe("applyRepairs", () => {
     expect(getStringNoLocale(a, SM.previousDue)).toBeNull();
     expect(getStringNoLocale(a, SM.due)).toBe("2026-09-27");
     expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#b`)!, SM.due)).toBe("soon");
+  });
+
+  it("leaves a due day as it is when the last review or the next one is past what a date holds", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        REVIEWS,
+        buildThing(createThing({ url: `${REVIEWS}#a` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addStringNoLocale(SM.due, "soon")
+          // A valid xsd:dateTime the library reads as an invalid date.
+          .addLiteral(SM.lastReviewedAt, {
+            termType: "Literal",
+            value: "300000-01-01T00:00:00Z",
+            language: "",
+            datatype: { termType: "NamedNode", value: XSD_DATETIME },
+          } as never)
+          .addInteger(SM.intervalDays, 6)
+          .build(),
+        buildThing(createThing({ url: `${REVIEWS}#b` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addStringNoLocale(SM.due, "soon")
+          .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
+          .addInteger(SM.intervalDays, 100_000_000)
+          .build(),
+        // Within what a date holds, but past the four-digit years of a study day.
+        buildThing(createThing({ url: `${REVIEWS}#c` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addStringNoLocale(SM.due, "soon")
+          .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
+          .addInteger(SM.intervalDays, 3_000_000)
+          .build(),
+      ),
+    );
+    await repository().applyRepairs([
+      repair("recompute-due", `${REVIEWS}#a`, 2, REVIEWS),
+      repair("recompute-due", `${REVIEWS}#b`, 2, REVIEWS),
+      repair("recompute-due", `${REVIEWS}#c`, 2, REVIEWS),
+    ]);
+    expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#a`)!, SM.due)).toBe("soon");
+    expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#b`)!, SM.due)).toBe("soon");
+    expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#c`)!, SM.due)).toBe("soon");
   });
 
   it("drops an FSRS-6 state's half-written snapshot, its own four terms", async () => {

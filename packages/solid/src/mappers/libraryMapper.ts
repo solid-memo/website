@@ -4,7 +4,6 @@
 
 import {
   asUrl,
-  getDatetime,
   getInteger,
   getStringNoLocale,
   getStringNoLocaleAll,
@@ -27,7 +26,7 @@ import type {
 } from "@solid-memo/domain/library";
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { readVersioned, storedVersionOf } from "../records";
+import { readDatetime, readVersioned, storedVersionOf } from "../records";
 import { agentNamesOf, distractorsOf, readCard } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
 import { courseOutlineFromRecords, type CourseOutline } from "@solid-memo/domain/course";
@@ -142,7 +141,7 @@ function contactOf(release: Thing, dataset: SolidDataset): { contact?: string } 
 function toLibraryRelease(index: SolidDataset, url: string): LibraryRelease {
   const thing = getThing(index, url);
   if (thing === null) return { url, version: "?" };
-  const issued = getDatetime(thing, DCTERMS.issued);
+  const issued = readDatetime(thing, DCTERMS.issued);
   const notes = getStringNoLocale(thing, ADMS.versionNotes);
   return {
     url,

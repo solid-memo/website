@@ -84,7 +84,7 @@ function readScalar(
     case "boolean":
       return getBoolean(thing, field.predicate);
     case "dateTime":
-      return getDatetime(thing, field.predicate)?.toISOString() ?? null;
+      return readDatetime(thing, field.predicate)?.toISOString() ?? null;
     case "iri":
       return getUrl(thing, field.predicate);
     case "iriEnum": {
@@ -92,6 +92,16 @@ function readScalar(
       return value !== null && field.values!.includes(value) ? value : null;
     }
   }
+}
+
+/**
+ * A date-time value; null when there is none, or when its year is
+ * beyond what a JavaScript date holds (past 275760), which the
+ * library reads as an invalid date rather than none.
+ */
+export function readDatetime(thing: Thing, predicate: string): Date | null {
+  const date = getDatetime(thing, predicate);
+  return date === null || Number.isNaN(date.getTime()) ? null : date;
 }
 
 /**
