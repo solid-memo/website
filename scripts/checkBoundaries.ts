@@ -16,9 +16,13 @@
  * - code that runs in the browser imports nothing node-only (node:*, n3,
  *   Mermaid and Playwright, the Turtle tooling, the site's build, a
  *   package's tooling/ or node/ entry points).
- * - some exports of a vendor package may be imported only from certain
- *   files: `@inrupt/solid-client`'s access control, by the release
- *   publisher alone (docs/boundaries.md, Access control).
+ * - some vendor packages may be imported only from certain files: the
+ *   Solid client libraries, any `@inrupt/` package, by the client modules
+ *   of the solid package and the shacl package's Turtle reader alone
+ *   (docs/boundaries.md, Vendor libraries); and some exports of one only
+ *   from certain files:
+ *   `@inrupt/solid-client`'s access control, by the public-read grant alone
+ *   (docs/boundaries.md, Access control).
  *
  * Test files and configs may also use the shared test tooling from the
  * root package.json.
@@ -75,6 +79,21 @@ export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
   // Where the repository's folders are; vocab's generator and data are not the site's build.
   site: { vocab: /^@solid-memo\/vocab\/tooling\/root$/ },
 };
+
+/**
+ * Vendor packages that only certain files may import, tests aside, by
+ * package (`files`), with any import. The Solid client libraries, any
+ * `@inrupt/` package, are used behind the app's own modules in
+ * packages/solid/src/client/, so another library takes their place there
+ * alone (docs/vendor-code.md); shacl, which may not import solid, reads
+ * Turtle through one module of its own.
+ */
+export const VENDOR_ONLY_IN: { specifier: RegExp; files: Record<string, RegExp> }[] = [
+  {
+    specifier: /^@inrupt\//,
+    files: { solid: /^src\/client\//, shacl: /^src\/turtleDocument\.ts$/ },
+  },
+];
 
 /**
  * Vendor exports that only certain files may import, tests aside, by
@@ -194,10 +213,25 @@ function workspaceImportProblems(
   return problems;
 }
 
-/** The vendor exports a file imports that VENDOR_ONLY_FROM keeps to other files (fileProblems). */
+/** Which files a vendor rule allows, by package, for a problem's text. */
+const onlyFiles = (files: Record<string, RegExp>) =>
+  Object.entries(files)
+    .map(([folder, pattern]) => `${folder} files matching ${pattern}`)
+    .join(", ");
+
+/** Whether VENDOR_ONLY_IN keeps `specifier` from this file, which fileProblems reports already. */
+const keptOut = (short: string, file: string, specifier: string) =>
+  VENDOR_ONLY_IN.some((rule) => rule.specifier.test(specifier) && !rule.files[short]?.test(file));
+
+/**
+ * The vendor exports a file imports that VENDOR_ONLY_FROM keeps to other
+ * files (fileProblems); none of a package the file may not import at all,
+ * reported once already.
+ */
 function vendorImportProblems(where: string, short: string, file: string, text: string): string[] {
   const problems: string[] = [];
   for (const [, braces, namespace, specifier] of text.matchAll(NAMED_IMPORT)) {
+    if (keptOut(short, file, specifier!)) continue;
     for (const rule of VENDOR_ONLY_FROM) {
       if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
       const names =
@@ -211,11 +245,8 @@ function vendorImportProblems(where: string, short: string, file: string, text: 
                   .split(/\s+as\s+/)[0]!,
             );
       for (const name of names.filter((one) => one === "*" || rule.names.test(one))) {
-        const only = Object.entries(rule.files)
-          .map(([folder, pattern]) => `${folder} files matching ${pattern}`)
-          .join(", ");
         problems.push(
-          `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${only} may.`,
+          `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${onlyFiles(rule.files)} may.`,
         );
       }
     }
@@ -270,6 +301,12 @@ function fileProblems(
       if (!declared.has(name) && !shared && !declared.has(`@types/${name}`)) {
         problems.push(`${where}: imports ${name}, which package.json does not declare.`);
       }
+    }
+    const vendor = VENDOR_ONLY_IN.find((rule) => rule.specifier.test(specifier!));
+    if (vendor !== undefined && !test && !vendor.files[short]?.test(file)) {
+      problems.push(
+        `${where}: may not import "${specifier}": only ${onlyFiles(vendor.files)} may.`,
+      );
     }
     if (
       BROWSER[short]?.test(file) &&

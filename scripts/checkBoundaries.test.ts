@@ -252,12 +252,64 @@ describe("boundaryProblems", () => {
     ]);
   });
 
+  it("fails on any @inrupt/ package imported outside the client modules and shacl's Turtle reader, tests aside, once an import", () => {
+    const solid = workspace(
+      "solid",
+      {
+        "src/client/rdf.ts": 'import { getThing } from "@inrupt/solid-client";',
+        "src/client/session.ts": 'import { login } from "@inrupt/solid-client-authn-browser";',
+        "src/datasets.ts": [
+          'import { getThing } from "@inrupt/solid-client";',
+          'import * as authn from "@inrupt/solid-client-authn-browser";',
+          'import type { UrlString } from "@inrupt/solid-client/universal";',
+          'const lazy = () => import("@inrupt/solid-client");',
+          'import { thing } from "@inrupt/solid-client-vocab";',
+          'import * as solid from "@inrupt/solid-client";',
+          'import { universalAccess } from "@inrupt/solid-client";',
+        ].join("\n"),
+        "src/datasets.test.ts": 'vi.mock("@inrupt/solid-client");',
+        "src/testing/pod.ts": 'import { getThing } from "@inrupt/solid-client";',
+      },
+      {
+        "@inrupt/solid-client": "*",
+        "@inrupt/solid-client-authn-browser": "*",
+        "@inrupt/solid-client-vocab": "*",
+      },
+    );
+    const shacl = workspace(
+      "shacl",
+      {
+        "src/turtleDocument.ts": 'import { getSolidDataset } from "@inrupt/solid-client";',
+        "src/shapeLoader.ts": 'import { getSolidDataset } from "@inrupt/solid-client";',
+      },
+      { "@inrupt/solid-client": "*" },
+    );
+    const ui = workspace(
+      "ui",
+      { "src/ui/App.tsx": 'import { login } from "@inrupt/solid-client-authn-browser";' },
+      { "@inrupt/solid-client-authn-browser": "*" },
+    );
+    const only =
+      "only solid files matching /^src\\/client\\//, shacl files matching /^src\\/turtleDocument\\.ts$/ may.";
+    expect(boundaryProblems([solid, shacl, ui], TOOLING)).toEqual([
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client-authn-browser": ${only}`,
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client/universal": ${only}`,
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client-vocab": ${only}`,
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/shacl/src/shapeLoader.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/ui/src/ui/App.tsx: may not import "@inrupt/solid-client-authn-browser": ${only}`,
+    ]);
+  });
+
   it("fails on access control imported from @inrupt/solid-client outside the public-read grant", () => {
     const solid = workspace(
       "solid",
       {
         "src/client/access.ts": 'import { universalAccess } from "@inrupt/solid-client";',
-        "src/solidPod.ts": [
+        "src/client/pod.ts": [
           "import {",
           "  getSolidDataset,",
           "  type AclDataset,",
@@ -265,14 +317,14 @@ describe("boundaryProblems", () => {
           '} from "@inrupt/solid-client";',
           'import * as solid from "@inrupt/solid-client/universal";',
         ].join("\n"),
-        "src/solidPod.test.ts": 'import { universalAccess } from "@inrupt/solid-client";',
+        "src/client/pod.test.ts": 'import { universalAccess } from "@inrupt/solid-client";',
       },
       { "@inrupt/solid-client": "*" },
     );
     expect(problems(solid)).toEqual([
-      "packages/solid/src/solidPod.ts: may not import AclDataset from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
-      "packages/solid/src/solidPod.ts: may not import universalAccess from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
-      "packages/solid/src/solidPod.ts: may not import everything from @inrupt/solid-client/universal: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
+      "packages/solid/src/client/pod.ts: may not import AclDataset from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
+      "packages/solid/src/client/pod.ts: may not import universalAccess from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
+      "packages/solid/src/client/pod.ts: may not import everything from @inrupt/solid-client/universal: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
     ]);
   });
 });
