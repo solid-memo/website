@@ -68,6 +68,24 @@ const MAX_INTERVAL_DAYS = 36_500;
 /** The chance of recall FSRS-6 aims at when a card falls due, unless the learner chooses another. */
 export const DEFAULT_DESIRED_RETENTION = 0.9;
 
+/** The lowest desired retention a learner may choose, as the preferences' shape allows. */
+export const MIN_DESIRED_RETENTION = 0.7;
+
+/** The highest desired retention a learner may choose, as the preferences' shape allows. */
+export const MAX_DESIRED_RETENTION = 0.97;
+
+/**
+ * The desired retention to schedule by: the stored one when it is a
+ * number the preferences' shape allows, the default otherwise. Outside
+ * that range FSRS-6 has no interval (a share of 1 or more, or of 0 or
+ * less, gives none), so every grade would be refused.
+ */
+export function usableDesiredRetention(stored: number): number {
+  return stored >= MIN_DESIRED_RETENTION && stored <= MAX_DESIRED_RETENTION
+    ? stored
+    : DEFAULT_DESIRED_RETENTION;
+}
+
 /**
  * The retention an SM-2 schedule is taken to have kept when FSRS-6
  * memory is estimated from it (fsrs-rs's `sm2_retention`, Anki's

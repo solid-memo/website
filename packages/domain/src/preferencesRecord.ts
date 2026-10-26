@@ -12,6 +12,7 @@ import {
   textSizeOfConcept,
   themeOfConcept,
 } from "./concepts";
+import { usableDesiredRetention } from "./fsrs";
 import type { StudyPreferences } from "./preferences";
 import type { PreferencesV6 } from "@solid-memo/vocab/types.generated";
 
@@ -20,7 +21,9 @@ import type { PreferencesV6 } from "@solid-memo/vocab/types.generated";
  * fields, the invalid data policy, the theme, the scheduler and the text
  * size as concepts in the record and by their notations in the model.
  * The palette is the concept's IRI in both, so one this version does not
- * know is kept as it is.
+ * know is kept as it is. A desired retention outside the range the
+ * shape allows reads as the default: preferences that do not fit their
+ * shape are still used, and FSRS-6 has no interval for such a share.
  */
 export function preferencesFromRecord(data: PreferencesV6): StudyPreferences {
   return {
@@ -32,7 +35,7 @@ export function preferencesFromRecord(data: PreferencesV6): StudyPreferences {
     invalidDataPolicy: policyOfConcept(data.invalidDataPolicy)!,
     theme: themeOfConcept(data.theme)!,
     scheduler: schedulerOfConcept(data.scheduler)!,
-    desiredRetention: data.desiredRetention,
+    desiredRetention: usableDesiredRetention(data.desiredRetention),
     schedulerInvitationDismissed: data.schedulerInvitationDismissed,
     palette: data.palette,
     textSize: textSizeOfConcept(data.textSize)!,

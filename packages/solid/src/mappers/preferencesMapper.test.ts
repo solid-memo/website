@@ -10,6 +10,7 @@ import {
   getInteger,
   getStringNoLocale,
   getUrl,
+  setDecimal,
 } from "@inrupt/solid-client";
 import { toPreferences, toPreferencesThing } from "./preferencesMapper";
 import { RDF, SM } from "../vocab";
@@ -88,6 +89,18 @@ describe("toPreferences", () => {
       palette: SM.standardPalette,
       textSize: "default" as const,
     });
+  });
+
+  it("reads a desired retention outside the shape's range as the default", () => {
+    const stored = (desiredRetention: number) =>
+      setDecimal(
+        toPreferencesThing(SUBJECT, { ...FULL, scheduler: "fsrs6" }, null),
+        SM.desiredRetention,
+        desiredRetention,
+      );
+    expect(toPreferences(stored(-1))?.preferences.desiredRetention).toBe(0.9);
+    expect(toPreferences(stored(2))?.preferences.desiredRetention).toBe(0.9);
+    expect(toPreferences(stored(0.75))?.preferences.desiredRetention).toBe(0.75);
   });
 
   it("is null for a format-2 document missing a field, or a subject of another class", () => {

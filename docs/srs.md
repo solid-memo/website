@@ -340,7 +340,10 @@ stored, so FSRS-6 is never turned on without its states.
   list counts from the documents again.
 - **The desired retention** (70% to 97%, stored as a share) is saved
   like any preference. It sets the interval of each review from then
-  on; the due days already set stay.
+  on; the due days already set stay. A stored one outside that range,
+  or no number, is read as the default 90%: preferences that do not
+  fit their shape are still used, and FSRS-6 has no interval for a
+  share of 1 or more.
 
 ### FSRS-6 worked examples
 
