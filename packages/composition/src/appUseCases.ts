@@ -41,6 +41,8 @@ import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
+import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createTrialUseCases } from "./trialUseCases";
 
@@ -118,7 +120,10 @@ export function createAppUseCases({
   const checkWrite = shapeValidator.checkSubjects;
   const now = () => new Date();
   const randomId = () => crypto.randomUUID();
-  const storageGateway = createSolidStorageGateway({ fetch: podFetch });
+  const storageGateway = createSolidStorageGateway({
+    fetch: podFetch,
+    profileStorages: getProfileStorages,
+  });
   const instanceRepository = createSolidInstanceRepository({
     fetch: podFetch,
     checkWrite,
@@ -197,6 +202,7 @@ export function createAppUseCases({
       fetch: podFetch,
       shareFetch,
       publicFetch: anonymousFetch,
+      grantPublicRead,
     }),
     // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.
     trialSandbox: (draft) => createTrialUseCases(draft, { podFetch, shapeValidator, ruleset }),

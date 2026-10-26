@@ -81,7 +81,8 @@ export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
  * package (`files`); a namespace import counts as importing them all.
  * Who may read something is changed in one place only: the access
  * control of @inrupt/solid-client (universal access, ACP, the ACL
- * functions) is the release publisher's.
+ * functions) is the public-read grant's, which the release publisher is
+ * given.
  */
 export const VENDOR_ONLY_FROM: {
   specifier: RegExp;
@@ -92,7 +93,7 @@ export const VENDOR_ONLY_FROM: {
     specifier: /^@inrupt\/solid-client(\/|$)/,
     names:
       /^(universalAccess|access|acp_\w+|\w*Ac[lr]\w*|(get|set)(Agent|Group|Public)(Resource|Default)?Access(All)?|getEffectiveAccess)$/,
-    files: { solid: /^src\/solidReleasePublisher\.ts$/ },
+    files: { solid: /^src\/client\/access\.ts$/ },
   },
 ];
 

@@ -16,6 +16,7 @@
 import { describe, expect, inject, it } from "vitest";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
 import { createPodFence } from "@solid-memo/solid/podFence";
+import { grantPublicRead } from "@solid-memo/solid/client/access";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 
 const SERVERS = inject("solidServers");
@@ -119,6 +120,7 @@ describe.each(SERVERS)("making a release public on $name", ({ url: server }) => 
         fetch: createPodFence(userFetch),
         shareFetch: createPodFence(userFetch, { accessControl: true }),
         publicFetch: fetch,
+        grantPublicRead,
       });
       if (how === "publish") {
         await releasePublisher

@@ -29,6 +29,7 @@ import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRe
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 
 /** What a trial takes from the page it is played in. */
@@ -99,7 +100,7 @@ export function createTrialUseCases(
   return {
     useCases: {
       ...createInstanceUseCases({
-        storageGateway: createSolidStorageGateway({ fetch }),
+        storageGateway: createSolidStorageGateway({ fetch, profileStorages: getProfileStorages }),
         instanceRepository,
         deckRepository,
         preferencesRepository,

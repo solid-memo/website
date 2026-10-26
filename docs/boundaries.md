@@ -94,7 +94,7 @@ listed:
 
 | Library | Package | Notes |
 |---|---|---|
-| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` uses `@inrupt/solid-client` to parse shapes; deck files use it ([below](#files-without-a-vendor-library)); its access control only in `src/solidReleasePublisher.ts` ([below](#access-control)) |
+| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` uses `@inrupt/solid-client` to parse shapes; deck files use it ([below](#files-without-a-vendor-library)); its access control only in `src/client/access.ts` ([below](#access-control)) |
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | components; in `web`, `main.tsx`, which renders the page, and `App.tsx`, the page; in `studio`, its screens |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
@@ -126,17 +126,18 @@ The app changes access in one place only: a published release becomes
 readable by everyone ([studio.md](studio.md#publishing-a-release)).
 Only the `ReleasePublisher` port's adapter,
 [solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
-makes that write: `@inrupt/solid-client`'s
-`universalAccess.setPublicAccess`, read only, for the release's
-document, writing its own ACL (Web Access Control) or ACR (Access
-Control Policies). The publisher's fetch refuses another origin, or a
-write of anything but `<release>.acl` or `<release>.acr`, whatever the
-server names as the release's access control. No folder's access
-control changes.
+makes that write, with the grant it is given:
+[client/access.ts](../packages/solid/src/client/access.ts) has
+`@inrupt/solid-client`'s `universalAccess.setPublicAccess`, read only,
+for the release's document, writing its own ACL (Web Access Control) or
+ACR (Access Control Policies). The publisher's fetch refuses another
+origin, or a write of anything but `<release>.acl` or `<release>.acr`,
+whatever the server names as the release's access control. No folder's
+access control changes.
 
 `npm run check:boundaries`
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`)
-lets only that file, outside tests, import `@inrupt/solid-client`'s
+lets only `client/access.ts`, outside tests, import `@inrupt/solid-client`'s
 access control (`universalAccess`, the `acp_*` modules, the ACL
 functions) or all of the library (`import * as`). At run time, the
 [pod fence](#the-pod-fence) refuses any other module's ACL or ACR

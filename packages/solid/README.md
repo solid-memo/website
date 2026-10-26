@@ -21,7 +21,7 @@ in-memory pod for tests.
 It may import `application`, `domain`, `vocab` and `shacl`, and
 implements `application`'s ports. Only `composition` and `e2e/pod` may
 import it. The Inrupt libraries are used here alone, and their access
-control in `src/solidReleasePublisher.ts` alone
+control in `src/client/access.ts` alone
 ([boundaries.md](../../docs/boundaries.md#access-control)).
 
 ## Tests

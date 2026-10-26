@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { universalAccess } from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
 import type { ReleasePublisher } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { addCatalogLink, catalogLinks } from "./catalogLinks";
+import type { GrantPublicRead } from "./client/access";
 import { parseDeckFile } from "./solidDeckArchive";
 import { RDF, SM } from "./vocab";
 
@@ -23,11 +23,12 @@ import { RDF, SM } from "./vocab";
  * so publishing again finishes it.
  *
  * This is the only place the app changes who may read something. It
- * asks `@inrupt/solid-client`'s universal access (`setPublicAccess`),
- * which writes the release's own ACL on a server with Web Access Control
- * and its ACR on one with Access Control Policies, for that document
- * alone: read for everyone, nothing else, and nothing for its folder or
- * any other document. A pod that will not (it has neither, or refuses
+ * asks `grantPublicRead` (client/access.ts), which writes the release's
+ * own ACL on a server with Web Access Control and its ACR on one with
+ * Access Control Policies, for that document alone: read for everyone,
+ * nothing else, and nothing for its folder or any other document.
+ * Whatever grant it is given, the fence around it (accessControlFetch)
+ * keeps it to that. A pod that will not (it has neither, or refuses
  * the write) leaves the release readable by its owner alone. So does a
  * server that names any other access control as the release's
  * (`rel="acl"`): only the release's own, beside it (`<release>.acl` or
@@ -46,10 +47,12 @@ export function createSolidReleasePublisher({
   fetch,
   shareFetch,
   publicFetch,
+  grantPublicRead,
 }: {
   fetch: typeof globalThis.fetch;
   shareFetch: typeof globalThis.fetch;
   publicFetch: typeof globalThis.fetch;
+  grantPublicRead: GrantPublicRead;
 }): ReleasePublisher {
   /**
    * Make the release readable by everyone: whether the pod says it now
@@ -57,12 +60,7 @@ export function createSolidReleasePublisher({
    */
   async function share(url: string): Promise<boolean> {
     try {
-      const access = await universalAccess.setPublicAccess(
-        url,
-        { read: true },
-        { fetch: accessFetch(accessControlFetch(shareFetch, url)) },
-      );
-      return access?.read === true;
+      return await grantPublicRead(url, { fetch: accessControlFetch(shareFetch, url) });
     } catch {
       return false;
     }
@@ -185,7 +183,7 @@ function accessControlFetch(
   const { origin } = new URL(release);
   const own = new Set([`${release}.acl`, `${release}.acr`]);
   return async (input, init) => {
-    // The library asks by URL, never with a Request.
+    // The grant asks by URL (client/access.ts): a Request, whose text is no URL, is refused.
     const url = new URL(String(input));
     const method = (init?.method ?? "GET").toUpperCase();
     const read = method === "GET" || method === "HEAD";
@@ -195,52 +193,6 @@ function accessControlFetch(
     if (response.url !== "" && new URL(response.url).origin !== origin)
       throw new TypeError(`Answered from another origin: ${response.url}`);
     return response;
-  };
-}
-
-const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlResource";
-
-/**
- * The fetch the access write is made with, so that it is made as the
- * Solid servers tested take it:
- *
- * - a space is put before each "." that ends a statement in a PATCH
- *   body, right after an IRI or a string. @inrupt/solid-client writes an
- *   ACL's PATCH with that "." touching the term before it
- *   (`<…#Agent>.}`), which node-solid-server's parser takes for a path
- *   and refuses (400), as it does every PATCH of the library's
- *   (datasets.ts, patchBody); an ACL holds no other kind of term;
- * - an Access Control Resource not written yet, which the Community
- *   Solid Server answers 404 (its Link saying what it is), is read as
- *   one that says only that it is one, which the write then makes. The
- *   library would otherwise take the server for one without ACP, and
- *   change nothing.
- */
-export function accessFetch(fetch: typeof globalThis.fetch): typeof globalThis.fetch {
-  return async (input, init) => {
-    if (init?.method === "PATCH") {
-      // The library sends a PATCH's body as text.
-      return fetch(input, {
-        ...init,
-        body: (init.body as string).replace(/(>|(?<!\\)")\.(?=\s|\})/g, "$1 ."),
-      });
-    }
-    const response = await fetch(input, init);
-    const link = response.headers.get("Link") ?? "";
-    const method = init?.method ?? "GET";
-    if (
-      (method !== "GET" && method !== "HEAD") ||
-      response.status !== 404 ||
-      !link.includes(`<${ACCESS_CONTROL_RESOURCE}>`)
-    )
-      return response;
-    const body = method === "HEAD" ? null : `<> a <${ACCESS_CONTROL_RESOURCE}> .`;
-    const empty = new Response(body, {
-      status: 200,
-      headers: { "Content-Type": "text/turtle", Link: link },
-    });
-    Object.defineProperty(empty, "url", { value: response.url });
-    return empty;
   };
 }
 

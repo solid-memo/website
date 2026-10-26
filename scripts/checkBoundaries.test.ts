@@ -252,11 +252,11 @@ describe("boundaryProblems", () => {
     ]);
   });
 
-  it("fails on access control imported from @inrupt/solid-client outside the release publisher", () => {
+  it("fails on access control imported from @inrupt/solid-client outside the public-read grant", () => {
     const solid = workspace(
       "solid",
       {
-        "src/solidReleasePublisher.ts": 'import { universalAccess } from "@inrupt/solid-client";',
+        "src/client/access.ts": 'import { universalAccess } from "@inrupt/solid-client";',
         "src/solidPod.ts": [
           "import {",
           "  getSolidDataset,",
@@ -270,9 +270,9 @@ describe("boundaryProblems", () => {
       { "@inrupt/solid-client": "*" },
     );
     expect(problems(solid)).toEqual([
-      "packages/solid/src/solidPod.ts: may not import AclDataset from @inrupt/solid-client: only solid files matching /^src\\/solidReleasePublisher\\.ts$/ may.",
-      "packages/solid/src/solidPod.ts: may not import universalAccess from @inrupt/solid-client: only solid files matching /^src\\/solidReleasePublisher\\.ts$/ may.",
-      "packages/solid/src/solidPod.ts: may not import everything from @inrupt/solid-client/universal: only solid files matching /^src\\/solidReleasePublisher\\.ts$/ may.",
+      "packages/solid/src/solidPod.ts: may not import AclDataset from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
+      "packages/solid/src/solidPod.ts: may not import universalAccess from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
+      "packages/solid/src/solidPod.ts: may not import everything from @inrupt/solid-client/universal: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
     ]);
   });
 });

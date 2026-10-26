@@ -10,7 +10,8 @@ import {
   FetchError,
   getFile as libraryGetFile,
   getJsonLdParser,
-  getProfileAll as libraryGetProfileAll,
+  getPodUrlAllFrom,
+  getProfileAll,
   getSolidDataset as libraryGetSolidDataset,
   getTurtleParser,
   overwriteFile as libraryOverwriteFile,
@@ -131,16 +132,19 @@ export function deleteFile(url: string, options: RequestOptions): Promise<void> 
   return answered(() => libraryDeleteFile(url, options));
 }
 
-/** An agent's profile documents: the WebID document and those it names as more of the profile. */
-export type Profiles = Awaited<ReturnType<typeof libraryGetProfileAll<FetchedDataset>>>;
-
-/** The profile documents of `webId`, its WebID document as already read (`webIdProfile`). */
-export function getProfileAll(
+/**
+ * The storages the profile of `webId` names (pim:storage): in its WebID
+ * document, as already read (`webIdProfile`), and in the documents that
+ * names as more of the profile, each read through `fetch`.
+ */
+export type ProfileStorages = (
   webId: string,
   options: RequestOptions & { webIdProfile: FetchedDataset },
-): Promise<Profiles> {
-  return answered(() => libraryGetProfileAll(webId, options));
-}
+) => Promise<string[]>;
+
+/** The profile lookup over the library's `getProfileAll` and `getPodUrlAllFrom`. */
+export const getProfileStorages: ProfileStorages = async (webId, options) =>
+  getPodUrlAllFrom(await answered(() => getProfileAll(webId, options)), webId);
 
 const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as const;
 
@@ -172,7 +176,6 @@ export function parseQuads(
 
 export {
   getContainedResourceUrlAll,
-  getPodUrlAllFrom,
   getSourceUrl,
   hasResourceInfo,
   solidDatasetAsTurtle,

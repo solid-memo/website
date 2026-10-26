@@ -12,8 +12,7 @@ import {
   deleteFile,
   deleteSolidDataset,
   getFile,
-  getPodUrlAllFrom,
-  getProfileAll,
+  getProfileStorages,
   getSolidDataset,
   getSolidDatasetLinear,
   overwriteFile,
@@ -137,7 +136,7 @@ describe("writing resources", () => {
   });
 });
 
-describe("getProfileAll", () => {
+describe("getProfileStorages", () => {
   it("finds the pods a WebID document names", async () => {
     const webId = "https://alice.example/profile/card#me";
     const { fetch } = pod(
@@ -145,8 +144,9 @@ describe("getProfileAll", () => {
       `<#me> <http://www.w3.org/ns/pim/space#storage> <https://alice.example/> .`,
     );
     const webIdProfile = await getSolidDataset("https://alice.example/profile/card", { fetch });
-    const profiles = await getProfileAll(webId, { fetch, webIdProfile });
-    expect(getPodUrlAllFrom(profiles, webId)).toEqual(["https://alice.example/"]);
+    await expect(getProfileStorages(webId, { fetch, webIdProfile })).resolves.toEqual([
+      "https://alice.example/",
+    ]);
   });
 });
 

@@ -23,6 +23,7 @@ import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPaletteRepository } from "./solidPaletteRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidStorageGateway } from "./solidStorageGateway";
+import { getProfileStorages } from "./client/resources";
 import { fakePod } from "./testing/fakePod";
 import { locateTypeIndexes } from "./typeIndex";
 
@@ -270,7 +271,10 @@ async function storageLines(): Promise<string[]> {
     const pod = examplePod();
     await pod.put(PROFILE, profile);
     if (other !== undefined) await pod.put(elsewhere, other);
-    const [found] = await createSolidStorageGateway({ fetch: pod.fetch }).discoverStorages(WEBID);
+    const [found] = await createSolidStorageGateway({
+      fetch: pod.fetch,
+      profileStorages: getProfileStorages,
+    }).discoverStorages(WEBID);
     if (found?.url === STORAGE && found.source === "profile")
       lines.push(`WebID: its storage found by pim:storage in ${place}`);
   }
@@ -283,7 +287,10 @@ async function storageLines(): Promise<string[]> {
           headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
         })
       : walked.fetch(input, init)) as typeof globalThis.fetch;
-  const [byLink] = await createSolidStorageGateway({ fetch }).discoverStorages(WEBID);
+  const [byLink] = await createSolidStorageGateway({
+    fetch,
+    profileStorages: getProfileStorages,
+  }).discoverStorages(WEBID);
   if (byLink?.url === STORAGE && byLink.source === "linkHeader")
     lines.push(
       "WebID: its storage found by a Link rel=type pim:Storage header, walking up from the WebID",

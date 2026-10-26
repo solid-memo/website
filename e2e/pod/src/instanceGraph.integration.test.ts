@@ -22,6 +22,7 @@ import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository
 import { createSolidInstanceGraphReader } from "@solid-memo/solid/solidInstanceGraphReader";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 
@@ -54,7 +55,10 @@ function page() {
     instanceCopier: undefined as never,
     shapeValidator,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: recording }),
-    storageGateway: createSolidStorageGateway({ fetch: recording }),
+    storageGateway: createSolidStorageGateway({
+      fetch: recording,
+      profileStorages: getProfileStorages,
+    }),
     instanceRepository: createSolidInstanceRepository(deps),
     deckRepository: createSolidDeckRepository(deps),
     preferencesRepository: createSolidPreferencesRepository(deps),

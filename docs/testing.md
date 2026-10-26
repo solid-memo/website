@@ -237,8 +237,8 @@ CI) to find "no login" there once published. A second release at the
 same address is refused, leaving the first as it was. A publishing cut
 short after the release is written (its catalog link refused once)
 finishes when published again; deleting the instance then keeps the
-release and its folder, saying so (`keptReleases`). The publisher copes
-(`accessFetch`) with node-solid-server refusing the PATCH
+release and its folder, saying so (`keptReleases`). The public-read grant copes
+(`accessFetch`, in `client/access.ts`) with node-solid-server refusing the PATCH
 `@inrupt/solid-client` writes an ACL with, and with the Community Solid
 Server answering 404 for an ACR not written yet. Solid-Nextcloud names a
 folder's ACL as each of its documents', so the release stays private

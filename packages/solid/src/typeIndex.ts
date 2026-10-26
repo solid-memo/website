@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getSourceUrl } from "./client/resources";
+import { getProfileStorages, getSourceUrl } from "./client/resources";
 import {
   type Dataset,
   type SourcedDataset,
@@ -489,9 +489,12 @@ export async function renameInstanceRegistrations(
  * first. Throws when the WebID leads to none.
  */
 async function ownStorageFor(url: string, webId: string, fetch: Fetch): Promise<string> {
-  const storages = (await createSolidStorageGateway({ fetch }).discoverStorages(webId)).map(
-    (storage) => ensureTrailingSlash(storage.url),
-  );
+  const storages = (
+    await createSolidStorageGateway({
+      fetch,
+      profileStorages: getProfileStorages,
+    }).discoverStorages(webId)
+  ).map((storage) => ensureTrailingSlash(storage.url));
   const storage = storages.find((root) => url.startsWith(root)) ?? storages[0];
   if (storage === undefined) throw new AppError("typeIndexNoStorage", { webId });
   return storage;
