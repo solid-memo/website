@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
-import { authFetch, sessionWebId } from "@solid-memo/solid/authFetch";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
-import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
+import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
 import { createSolidDeckArchive } from "@solid-memo/solid/solidDeckArchive";
@@ -79,6 +78,8 @@ export function createAppUseCases({
   ruleset,
   indexedDB,
 }: AppOptions): UseCases {
+  /** The logged-in user's session, and the fetch that acts as them (docs/authentication.md). */
+  const session = createSolidSession({ clientName, site: servedSite, clientId });
   /** A guest's pod, kept in this browser (docs/guest-mode.md). */
   const guestStore =
     indexedDB === undefined
@@ -99,7 +100,7 @@ export function createAppUseCases({
    * user, to any other.
    */
   const writeFence = createWriteFence(
-    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }),
+    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: session.fetch }),
   );
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
@@ -140,7 +141,7 @@ export function createAppUseCases({
       remote: createOwnPodFetch({
         fetch: podFetch,
         publicFetch: anonymousFetch,
-        webId: sessionWebId,
+        webId: session.webId,
         ownFolders: async (webId) => {
           const [storages, instances] = await Promise.all([
             storageGateway.discoverStorages(webId).catch(() => []),
@@ -153,7 +154,7 @@ export function createAppUseCases({
   });
 
   return createUseCases({
-    sessionGateway: createSolidSessionGateway({ clientName, site: servedSite, clientId }),
+    sessionGateway: session.sessionGateway,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway,
     instanceRepository,

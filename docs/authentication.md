@@ -4,10 +4,12 @@ Login, session restore and logout against a Solid identity provider use
 [Solid-OIDC](https://solidproject.org/TR/oidc), which builds on
 [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)
 and [DPoP](https://www.rfc-editor.org/rfc/rfc9449);
-[standards.md](standards.md) lists their status. All authentication
+[standards.md](standards.md) lists their status. The authentication
 code is in
 [packages/solid/src/solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts),
-behind the `SessionGateway` port.
+behind the `SessionGateway` port. It signs in through
+[client/session.ts](../packages/solid/src/client/session.ts), the only
+file that calls the authentication library.
 
 ## Login flow
 
@@ -150,9 +152,11 @@ Memo's decks.
 ## Authenticated requests
 
 The composition root injects repositories' `fetch`:
-[authFetch](../packages/solid/src/authFetch.ts), a lazy wrapper that
-calls the current default session's fetch, never one captured before
-login. A router in front sends the guest's URLs to the browser's pod
+[authFetch](../packages/solid/src/authFetch.ts), a wrapper around the
+sign-in client's fetch, which calls the current session's, never one
+captured before login.
+[solidSession.ts](../packages/solid/src/solidSession.ts) makes it and
+the session gateway on one client. A router in front sends the guest's URLs to the browser's pod
 ([guest-mode.md](guest-mode.md)). Every pod read goes through
 authFetch, the WebID document's too. A release outside the user's own
 pod is read without it ([studio.md](studio.md#drafts)). The storage gateway hands

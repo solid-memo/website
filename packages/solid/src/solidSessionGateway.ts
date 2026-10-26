@@ -2,15 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  EVENTS,
-  events,
-  handleIncomingRedirect,
-  login,
-  logout,
-} from "@inrupt/solid-client-authn-browser";
 import { getSolidDataset } from "./client/resources";
 import { getThing, getUrlAll } from "./client/rdf";
+import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";
 import { isSecureUrl } from "@solid-memo/domain/webId";
@@ -60,8 +54,8 @@ function returnTo(hash: string): void {
 }
 
 /** Who the app says it is when the user logs in, and where it is served. */
-interface SessionGatewayOptions {
-  /** The name it registers under when the authn library registers it dynamically. */
+export interface SessionGatewayOptions {
+  /** The name it registers under when the provider registers it dynamically. */
   clientName: string;
   /** The folder the page is served from, ending in a slash: where the provider sends the user back to. */
   site: string;
@@ -74,56 +68,40 @@ interface SessionGatewayOptions {
   clientId?: string | null;
 }
 
+/** The session gateway over a sign-in client (client/session.ts). */
 export function createSolidSessionGateway({
   clientName,
   site,
   clientId,
-}: SessionGatewayOptions): SessionGateway {
+  client,
+}: SessionGatewayOptions & { client: SessionClient }): SessionGateway {
   const ownClientId = clientId != null && new URL(".", clientId).href === site;
 
   /** Redirects the browser to the identity provider; does not return. */
   async function startLogin(oidcIssuer: string): Promise<void> {
     window.sessionStorage.setItem(LOGIN_HASH_KEY, window.location.hash);
-    await login({
+    await client.login({
       oidcIssuer,
       // The site's folder, not the page's path, so /index.html sends the user back to / too.
       redirectUrl: site,
       clientName,
-      // With a provider that does not list the webid scope, the library registers the app by its name instead.
+      // With a provider that does not list the webid scope, the client registers the app by its name instead.
       ...(ownClientId && { clientId }),
     });
   }
 
   return {
     async restore() {
-      // Set by the listener below, so not narrowed to its first value.
-      let origin = "restored" as SessionOrigin;
-      const onLogin = () => {
-        origin = "login";
-      };
+      const { webId, fromLogin, restoredFrom } = await client.restore();
+      const loginHash = window.sessionStorage.getItem(LOGIN_HASH_KEY) ?? "";
+      window.sessionStorage.removeItem(LOGIN_HASH_KEY);
+      if (webId === null) return null;
       // A silent restore leaves the page for the identity provider and
-      // comes back without its hash; the library reports the page it left.
-      let restoredFrom = "";
-      const onRestored = (url: string) => {
-        restoredFrom = new URL(url).hash;
-      };
-      events().on(EVENTS.LOGIN, onLogin);
-      events().on(EVENTS.SESSION_RESTORED, onRestored);
-      try {
-        const info = await handleIncomingRedirect({
-          restorePreviousSession: true,
-        });
-        const loginHash = window.sessionStorage.getItem(LOGIN_HASH_KEY) ?? "";
-        window.sessionStorage.removeItem(LOGIN_HASH_KEY);
-        if (info?.isLoggedIn && info.webId) {
-          returnTo(origin === "login" ? loginHash : restoredFrom);
-          return { session: { webId: info.webId }, origin };
-        }
-        return null;
-      } finally {
-        events().off(EVENTS.LOGIN, onLogin);
-        events().off(EVENTS.SESSION_RESTORED, onRestored);
-      }
+      // comes back without its hash; the client reports the page it left.
+      const restoredHash = restoredFrom === null ? "" : new URL(restoredFrom).hash;
+      returnTo(fromLogin ? loginHash : restoredHash);
+      const origin: SessionOrigin = fromLogin ? "login" : "restored";
+      return { session: { webId }, origin };
     },
 
     discoverOidcIssuer,
@@ -135,7 +113,7 @@ export function createSolidSessionGateway({
     loginWithIssuer: startLogin,
 
     async logout() {
-      await logout();
+      await client.logout();
     },
 
     onSessionExpired(listener) {

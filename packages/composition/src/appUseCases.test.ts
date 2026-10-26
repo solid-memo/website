@@ -62,14 +62,20 @@ vi.mock("@solid-memo/solid/solidInstanceGraphReader", recorded("createSolidInsta
 
 /** The login: who is logged in, and the addresses requested with their credentials. */
 const login = vi.hoisted(() => ({ webId: undefined as string | undefined, sent: [] as string[] }));
-vi.mock("@solid-memo/solid/authFetch", async (importOriginal) => ({
-  ...(await importOriginal<object>()),
-  authFetch: (input: RequestInfo | URL, init?: RequestInit) => {
-    login.sent.push(String(input instanceof Request ? input.url : input));
-    return globalThis.fetch(input, init);
-  },
-  sessionWebId: () => login.webId,
-}));
+vi.mock("@solid-memo/solid/solidSession", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/solid/solidSession")>();
+  return {
+    ...original,
+    createSolidSession: (options: Parameters<typeof original.createSolidSession>[0]) => ({
+      ...original.createSolidSession(options),
+      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+        login.sent.push(String(input instanceof Request ? input.url : input));
+        return globalThis.fetch(input, init);
+      },
+      webId: () => login.webId,
+    }),
+  };
+});
 
 const SERVED = "http://localhost:5173/";
 
