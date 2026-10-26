@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import type { SubjectReport, ValidationReport, Violation } from "./validation";
@@ -33,6 +35,12 @@ export type RepairKind =
    * document no longer describes, as a removal elsewhere leaves them.
    */
   | "drop-dangling-members"
+  /**
+   * Drop the dates of optional fields the app cannot read (a year past
+   * what a JavaScript date holds), which it reads as absent anyway: the
+   * values of the repair's `predicates` that are such dates, and only those.
+   */
+  | "drop-unreadable-date"
   /** Remove the subject: the user's choice, for what cannot be repaired. */
   | "remove-subject";
 
@@ -42,6 +50,8 @@ export interface Repair {
   subjectUrl: string;
   /** The stored format of the subject, which the repair writes in. */
   version: number;
+  /** "drop-unreadable-date" only: the optional date fields whose unreadable values it drops. */
+  predicates?: readonly string[];
 }
 
 /** A subject with problems no repair covers, and what they are: one violation per message. */
@@ -56,9 +66,28 @@ export interface RepairPlan {
   unrepairable: Unrepairable[];
 }
 
-/** The repair that answers one violation of a subject of a shape; null when none does. */
-function repairFor(shape: ShapeName | null, violation: Violation): RepairKind | null {
+/** The shape's descriptor at a version: one a checked subject was checked against. */
+function descriptorOf(shape: ShapeName, version: number): ShapeDescriptor {
+  return (SHAPES[shape] as Record<number, ShapeDescriptor>)[version]!;
+}
+
+/** The repair that answers one violation of a subject of a shape at a version; null when none does. */
+function repairFor(
+  shape: ShapeName | null,
+  version: number,
+  violation: Violation,
+): RepairKind | null {
   const { path, constraint } = violation;
+  if (constraint === "DateTimeRange" && shape !== null) {
+    // An undo snapshot's date goes with the rest of the snapshot; a date the subject needs is the user's to decide.
+    if (
+      (shape === "reviewState" || shape === "fsrsReviewState") &&
+      path === `${SM}previousLastReviewedAt`
+    )
+      return "drop-snapshot";
+    const field = descriptorOf(shape, version).fields.find((f) => f.predicate === path);
+    return field?.cardinality === "optional" ? "drop-unreadable-date" : null;
+  }
   if (shape === "deck" && path === `${DCTERMS}description` && constraint === "MinCount")
     return "describe-deck";
   if (
@@ -108,13 +137,26 @@ export function planRepair(report: ValidationReport): RepairPlan {
       if (problems === null) continue;
       const left = new Map<string, Violation>();
       for (const violation of problems.violations.filter((v) => v.severity === "violation")) {
-        const kind = repairFor(problems.shape, violation);
+        const kind = repairFor(problems.shape, problems.version, violation);
         if (kind === null) {
           const key = shown(violation.message);
           if (!left.has(key)) left.set(key, violation);
           continue;
         }
-        if (!repairs.some((r) => r.kind === kind && r.subjectUrl === subject.url)) {
+        const same = repairs.find((r) => r.kind === kind && r.subjectUrl === subject.url);
+        if (kind === "drop-unreadable-date") {
+          // One repair of the subject drops every unreadable optional date it has.
+          const predicates = [...(same?.predicates ?? []), violation.path!];
+          if (same !== undefined) same.predicates = [...new Set(predicates)];
+          else
+            repairs.push({
+              kind,
+              documentUrl: document.url,
+              subjectUrl: subject.url,
+              version: problems.version,
+              predicates,
+            });
+        } else if (same === undefined) {
           repairs.push({
             kind,
             documentUrl: document.url,

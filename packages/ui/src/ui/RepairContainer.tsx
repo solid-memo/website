@@ -23,6 +23,7 @@ export function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
     "recompute-due": t("repair.action.recomputeDue"),
     "name-agent": t("repair.action.nameAgent"),
     "drop-dangling-members": t("repair.action.dropDanglingMembers"),
+    "drop-unreadable-date": t("repair.action.dropUnreadableDate"),
     "remove-subject": t("repair.action.removeSubject"),
   };
 }

@@ -8,6 +8,7 @@ import {
   createThing,
   getDecimal,
   getInteger,
+  getLiteralAll,
   getStringNoLocale,
   getStringWithLocale,
   getThing,
@@ -237,6 +238,51 @@ describe("applyRepairs", () => {
     expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#a`)!, SM.due)).toBe("soon");
     expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#b`)!, SM.due)).toBe("soon");
     expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#c`)!, SM.due)).toBe("soon");
+  });
+
+  it("drops only the unreadable dates of the fields it names, a readable one and the rest kept", async () => {
+    const dateTime = (value: string) =>
+      ({
+        termType: "Literal",
+        value,
+        language: "",
+        datatype: { termType: "NamedNode", value: XSD_DATETIME },
+      }) as never;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        CATALOG,
+        buildThing(createThing({ url: `${CATALOG}#deck-1` }))
+          .addIri(RDF.type, SM.Deck)
+          .addStringNoLocale(DCTERMS.title, "Capitals")
+          .addLiteral(DCTERMS.created, dateTime("300000-01-01T00:00:00Z"))
+          .addLiteral(DCTERMS.created, dateTime("2026-01-01T00:00:00Z"))
+          .addLiteral(DCTERMS.modified, dateTime("-300000-01-01T00:00:00Z"))
+          // A field the repair does not name is not its to change.
+          .addLiteral(DCTERMS.issued, dateTime("300000-01-01T00:00:00Z"))
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+          .addIri(RDF.type, SM.Deck)
+          .addLiteral(DCTERMS.created, dateTime("300000-01-01T00:00:00Z"))
+          .build(),
+      ),
+    );
+    await repository().applyRepairs([
+      {
+        ...repair("drop-unreadable-date", `${CATALOG}#deck-1`, 6),
+        predicates: [DCTERMS.created, DCTERMS.modified],
+      },
+      // With no field named, nothing is dropped.
+      repair("drop-unreadable-date", `${CATALOG}#deck-2`, 6),
+    ]);
+    const values = (url: string, predicate: string) =>
+      getLiteralAll(getThing(saved(), url)!, predicate).map((literal) => literal.value);
+    expect(values(`${CATALOG}#deck-1`, DCTERMS.created)).toEqual(["2026-01-01T00:00:00Z"]);
+    expect(values(`${CATALOG}#deck-1`, DCTERMS.modified)).toEqual([]);
+    expect(values(`${CATALOG}#deck-1`, DCTERMS.issued)).toEqual(["300000-01-01T00:00:00Z"]);
+    expect(getStringNoLocale(getThing(saved(), `${CATALOG}#deck-1`)!, DCTERMS.title)).toBe(
+      "Capitals",
+    );
+    expect(values(`${CATALOG}#deck-2`, DCTERMS.created)).toEqual(["300000-01-01T00:00:00Z"]);
   });
 
   it("drops an FSRS-6 state's half-written snapshot, its own four terms", async () => {

@@ -1427,6 +1427,7 @@
       "recomputeDue": "Fälligkeitstag der Wiederholung neu berechnen",
       "nameAgent": "Person oder Organisation nach ihrer Adresse benennen",
       "dropDanglingMembers": "Links zu nicht mehr vorhandenen Stapeln und Gruppen entfernen",
+      "dropUnreadableDate": "Daten entfernen, die zu weit in der Zukunft oder Vergangenheit liegen, um gelesen zu werden",
       "removeSubject": "Entfernen"
     }
   },
@@ -1554,7 +1555,8 @@
       "MinLength": "Der Text ist zu kurz.",
       "MaxLength": "Der Text ist zu lang.",
       "Closed": "Die Eigenschaft ist hier nicht erlaubt.",
-      "DeckPlace": "Der Eintrag des Stapels steht nicht im Katalog seiner Instanz, oder er nennt ein Dokument unter einer Adresse, die kein Dokument eines Stapels haben darf, etwa die Zugriffskontrolle einer anderen Ressource oder eines der eigenen Dokumente der Instanz. Solid Memo verwendet ihn nicht."
+      "DeckPlace": "Der Eintrag des Stapels steht nicht im Katalog seiner Instanz, oder er nennt ein Dokument unter einer Adresse, die kein Dokument eines Stapels haben darf, etwa die Zugriffskontrolle einer anderen Ressource oder eines der eigenen Dokumente der Instanz. Solid Memo verwendet ihn nicht.",
+      "DateTimeRange": "Dieses Datum liegt zu weit in der Zukunft oder Vergangenheit, als dass Solid Memo es lesen könnte, daher gilt es als kein Datum."
     }
   },
   "webIdDocument": {

@@ -35,12 +35,15 @@ import {
 } from "@solid-memo/vocab/descriptors.generated";
 import {
   applyRecord,
+  datetimeLiteral,
+  isUnreadableDatetime,
   readRecord,
   readVersioned,
   recordThing,
   removeUnlessNewer,
   storedVersionOf,
   unlessNewer,
+  unreadableDatetimes,
 } from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
 
@@ -522,6 +525,25 @@ describe("a shape that fixes a value (an FSRS-6 review state's scheduler)", () =
     );
     expect(unlessNewer(stamped(1, SM.fsrs6))).toEqual(stamped(1, SM.fsrs6));
     expect(unlessNewer(stamped(2, SM.sm2))).toEqual(stamped(2, SM.sm2));
+  });
+});
+
+describe("unreadableDatetimes", () => {
+  it("names the date-times of a predicate readDatetime reads as none, and only those", () => {
+    const thing = buildThing(createThing({ url: URL_ }))
+      .addLiteral(`${EX}when`, FAR_DATE)
+      .addDatetime(`${EX}when`, new Date("2026-01-01T00:00:00Z"))
+      .addStringNoLocale(`${EX}when`, "300000-01-01T00:00:00Z")
+      .addLiteral(`${EX}other`, FAR_DATE)
+      .build();
+    expect(unreadableDatetimes(thing, `${EX}when`)).toEqual(["300000-01-01T00:00:00Z"]);
+    expect(unreadableDatetimes(thing, `${EX}none`)).toEqual([]);
+    expect(isUnreadableDatetime(datetimeLiteral("275760-09-13T00:00:00Z"))).toBe(false);
+    expect(isUnreadableDatetime(datetimeLiteral("-300000-01-01T00:00:00Z"))).toBe(true);
+    expect(isUnreadableDatetime(datetimeLiteral("soon"))).toBe(true);
+    // The library's pattern lets this through, then throws on it.
+    expect(isUnreadableDatetime(datetimeLiteral("T2026-01-01T00:00:00Z"))).toBe(true);
+    expect(isUnreadableDatetime(FAR_DATE.datatype)).toBe(false);
   });
 });
 

@@ -35,6 +35,17 @@ vi.mock("./datasets", async (importOriginal) => ({
 }));
 
 const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
+const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+
+/** An xsd:dateTime literal of this lexical form, valid or not. */
+function dateTime(value: string): never {
+  return {
+    termType: "Literal",
+    value,
+    language: "",
+    datatype: { termType: "NamedNode", value: XSD_DATETIME },
+  } as never;
+}
 
 /** The dataset with a catalog's link to a blank-node member, `[ a dcat:Dataset ]`, as another app may write one: Solid Memo never does. */
 function withBlankMember(dataset: SolidDataset, catalog: string, label: string): SolidDataset {
@@ -257,6 +268,78 @@ describe("createShaclShapeValidator", () => {
       ),
     ).not.toContain("DeckPlace");
   });
+
+  it("names a date the app cannot read, which SHACL finds valid, wherever the subject is, as a warning only another app's", async () => {
+    // Past what a JavaScript date holds either way; the last moment it holds.
+    const [far, before, last] = [
+      "300000-01-01T00:00:00Z",
+      "-300000-01-01T00:00:00Z",
+      "275760-09-13T00:00:00Z",
+    ];
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      [
+        buildThing(createThing({ url: `${DOC}#deck-1` }))
+          .addIri(RDF.type, SM.Deck)
+          .addInteger(SM.formatVersion, 6)
+          .addLiteral(DCTERMS.created, dateTime(far))
+          .addLiteral(DCTERMS.modified, dateTime(last)),
+        buildThing(createThing({ url: `${DOC}#state` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addInteger(SM.formatVersion, 2)
+          .addLiteral(SM.lastReviewedAt, dateTime(before)),
+        buildThing(createThing({ url: `${DOC}#it` }))
+          .addIri(RDF.type, SM.Instance)
+          .addInteger(SM.formatVersion, 2)
+          .addLiteral(DCTERMS.created, dateTime(far)),
+        buildThing(createThing({ url: `${DOC}#card` }))
+          .addIri(RDF.type, SM.Card)
+          .addInteger(SM.formatVersion, 7)
+          .addLiteral(DCTERMS.created, dateTime("soon")),
+        buildThing(createThing({ url: `${DOC}#card-2` }))
+          .addIri(RDF.type, SM.Card)
+          .addInteger(SM.formatVersion, 7)
+          .addLiteral(DCTERMS.created, dateTime("T2026-01-01T00:00:00Z")),
+        // Another app's catalog: no stamp, and nothing of Solid Memo's names it.
+        buildThing(createThing({ url: `${DOC}#theirs` }))
+          .addIri(RDF.type, DCAT.Catalog)
+          .addLiteral(DCTERMS.modified, dateTime(far)),
+      ]
+        .map((builder) => builder.build())
+        .reduce(setThing, mockSolidDatasetFrom(DOC)),
+    );
+    const validator = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const dates = async (context?: "library") =>
+      Object.fromEntries(
+        (await validator.validateDocument(DOC, context)).subjects.map((subject) => [
+          subject.url,
+          subject.status === "checked"
+            ? subject.violations
+                .filter((v) => v.path === DCTERMS.created || v.constraint === "DateTimeRange")
+                .map((v) => [v.constraint, v.path, v.value, v.severity, v.builtIn])
+            : [],
+        ]),
+      );
+    expect(await dates()).toEqual({
+      [`${DOC}#deck-1`]: [["DateTimeRange", DCTERMS.created, far, "violation", true]],
+      [`${DOC}#state`]: [["DateTimeRange", SM.lastReviewedAt, before, "violation", true]],
+      [`${DOC}#it`]: [["DateTimeRange", DCTERMS.created, far, "violation", true]],
+      // Named once, by the shape: what is no date-time at all is no date of the far past or future.
+      [`${DOC}#card`]: [["Datatype", DCTERMS.created, "soon", "violation", true]],
+      // One the library throws on is the shape's too, and does not stop the check.
+      [`${DOC}#card-2`]: [
+        ["Datatype", DCTERMS.created, "T2026-01-01T00:00:00Z", "violation", true],
+      ],
+      [`${DOC}#theirs`]: [["DateTimeRange", DCTERMS.modified, far, "warning", true]],
+    });
+    // A release reads its dates as an instance does.
+    expect((await dates("library"))[`${DOC}#deck-1`]).toEqual([
+      ["DateTimeRange", DCTERMS.created, far, "violation", true],
+    ]);
+  }, 60_000);
 
   it("reports a missing document as missing, without loading anything", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
@@ -881,6 +964,42 @@ describe("validateRelease", () => {
       constraint: "Class",
       builtIn: true,
     });
+  }, 60_000);
+
+  it("names a date of the release its readers cannot read as an error, and a value no date-time at all once", async () => {
+    const base = courseDraft();
+    const created = (value: string) => ({
+      subject: of("card-1"),
+      predicate: DCTERMS.created,
+      object: { kind: "literal" as const, value, language: "", datatype: XSD_DATETIME },
+    });
+    const draft = {
+      ...base,
+      triples: [
+        ...base.triples,
+        {
+          subject: of("card-1"),
+          predicate: RDF.type,
+          object: { kind: "iri" as const, value: SM.Card },
+        },
+        created("300000-01-01T00:00:00Z"),
+        created("soon"),
+      ],
+    };
+    const dates = (await validator.validateRelease(draft, AT))
+      .filter((p) => p.subject === of("card-1") && p.field === DCTERMS.created)
+      .map((p) => [
+        p.severity,
+        "constraint" in p.params ? p.params.constraint : undefined,
+        "value" in p.params ? p.params.value : undefined,
+      ]);
+    expect(dates).toEqual(
+      expect.arrayContaining([
+        ["error", "DateTimeRange", "300000-01-01T00:00:00Z"],
+        ["error", "Datatype", "soon"],
+      ]),
+    );
+    expect(dates.filter(([, , value]) => value === "soon")).toHaveLength(1);
   }, 60_000);
 
   it("checks a review state in a release against the shape its scheduler picks, an IRI only", async () => {

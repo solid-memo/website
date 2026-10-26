@@ -20,10 +20,17 @@ import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { foreignSubjects } from "./ownership";
-import { readDatetime, readText, unlessNewer } from "./records";
+import {
+  datetimeLiteral,
+  readDatetime,
+  readText,
+  unlessNewer,
+  unreadableDatetimes,
+} from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+
 const SNAPSHOT = [
   SM.previousEaseFactor,
   SM.previousIntervalDays,
@@ -183,6 +190,18 @@ function repairedThing(
       const day = Number.isNaN(due.getTime()) ? "" : due.toISOString().slice(0, 10);
       return isStudyDay(day) ? builder.setStringNoLocale(SM.due, day).build() : thing;
     }
+    case "drop-unreadable-date":
+      // Only the dates the app reads as none: a readable value of the same field stays.
+      return (repair.predicates ?? [])
+        .reduce(
+          (b, predicate) =>
+            unreadableDatetimes(thing, predicate).reduce(
+              (next, value) => next.removeLiteral(predicate, datetimeLiteral(value)),
+              b,
+            ),
+          builder,
+        )
+        .build();
     case "name-agent": {
       const url = repair.subjectUrl;
       const name = url.includes("#") ? url.slice(url.indexOf("#") + 1) : url;

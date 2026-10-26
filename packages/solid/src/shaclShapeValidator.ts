@@ -22,7 +22,7 @@ import {
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
-import { storedVersionOf } from "./records";
+import { isUnreadableDatetime, storedVersionOf, unreadableDatetimes } from "./records";
 import type { WriteCheck, WriteContext } from "./writeCheck";
 import { foreignSubjects, isDeckBackLink } from "./ownership";
 import { RDF, SM, SM_NS } from "./vocab";
@@ -174,6 +174,42 @@ function placeViolations(thing: Thing, documentUrl: string): Violation[] {
 
 const DECK_PLACE =
   "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it.";
+
+/**
+ * The dates of a subject the app cannot read: each value of one of its
+ * shape's date fields that is an xsd:dateTime readDatetime reads as no
+ * date (one past what a JavaScript date holds, or a lexical form the
+ * library cannot read). SHACL finds such a value valid, and the app reads it as
+ * absent, so a subject that needs it does not fit its shape. A value
+ * the shape's own check already names (one that is no xsd:dateTime at
+ * all) is not named again. Wherever the subject is (an instance's, a
+ * release's or a draft's), the app reads its dates the same way.
+ */
+function dateViolations(
+  descriptor: ShapeDescriptor,
+  unreadable: (predicate: string) => readonly string[],
+  found: readonly Violation[],
+): Violation[] {
+  return descriptor.fields
+    .filter((field) => field.kind === "dateTime")
+    .flatMap(({ predicate }) =>
+      unreadable(predicate)
+        .filter((value) => !found.some((v) => v.path === predicate && v.value === value))
+        .map(
+          (value): Violation => ({
+            path: predicate,
+            message: { en: DATE_TIME_RANGE },
+            builtIn: true,
+            value,
+            severity: "violation",
+            constraint: "DateTimeRange",
+          }),
+        ),
+    );
+}
+
+const DATE_TIME_RANGE =
+  "This date is too far in the future or the past for Solid Memo to read, so it reads as no date.";
 
 /**
  * What is wrong with another app's data is reported, never acted on: a
@@ -355,8 +391,14 @@ export function createShaclShapeValidator({
         continue;
       }
       const engine = await engineFor(pick.descriptor);
+      const found = await engine.validateNode(data, subject, pick.descriptor.shapeIri);
       const violations = [
-        ...(await engine.validateNode(data, subject, pick.descriptor.shapeIri)),
+        ...found,
+        ...dateViolations(
+          pick.descriptor,
+          (predicate) => unreadableDatetimes(thing, predicate),
+          found,
+        ),
         ...(context === "pod" && pick.descriptor.shape === "deck"
           ? placeViolations(thing, url)
           : []),
@@ -470,7 +512,13 @@ export function createShaclShapeValidator({
           continue;
         }
         const engine = await engineFor(pick.descriptor);
-        for (const v of await engine.validateNode(release, subject, pick.descriptor.shapeIri)) {
+        const found = await engine.validateNode(release, subject, pick.descriptor.shapeIri);
+        // A date the library's readers cannot read is an error of the release, as one the shape names is.
+        const unreadable = (predicate: string) =>
+          own
+            .filter((q) => q.predicate.value === predicate && isUnreadableDatetime(q.object))
+            .map((q) => q.object.value);
+        for (const v of [...found, ...dateViolations(pick.descriptor, unreadable, found)]) {
           problems.push(shapeProblem(subject, v, v.severity === "violation" ? "error" : "warning"));
         }
       }
