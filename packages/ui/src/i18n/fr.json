@@ -1276,7 +1276,9 @@
     "continueAnyway": "Continuer quand même",
     "connectedHeading": "Votre Pod est connecté.",
     "identityProvider": "Fournisseur d’identité",
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "skipNextTime": "Ne plus afficher cet écran après la connexion",
+    "skipHint": "Enregistré dans les préférences de chacune de vos instances. Vous pouvez réafficher cet écran dans les Préférences de n’importe quelle instance. Une instance où ce choix ne peut pas être enregistré continue d’afficher cet écran."
   },
   "preferences": {
     "language": {
@@ -1349,6 +1351,11 @@
         "label": "Avertir seulement",
         "hint": "Les données non valides sont signalées, et l’application continue de les utiliser."
       }
+    },
+    "connectedScreen": {
+      "legend": "Après la connexion",
+      "show": "Afficher l’écran indiquant que votre Pod est connecté",
+      "hint": "À la connexion, cet écran n’est ignoré que s’il est désactivé dans toutes vos instances, et il s’affiche quand leurs préférences ne peuvent pas être lues."
     },
     "developer": {
       "legend": "Paramètres pour développeurs",

@@ -9,7 +9,7 @@ stays behind use cases (see [boundaries.md](boundaries.md)).
 ```mermaid
 stateDiagram-v2
     accTitle: Onboarding
-    accDescr: Without a session, the learner tries the app as a guest, logs in with a provider or a WebID, or creates a Pod first, and the app then discovers their storage.
+    accDescr: Without a session, the learner tries the app as a guest, logs in with a provider or a WebID, or creates a Pod first, and the app then discovers their storage, and shows that it is connected unless every instance says to skip it.
     [*] --> Landing: no session
     [*] --> App: session silently restored
     [*] --> Guest: a guest studied here before
@@ -20,7 +20,8 @@ stateDiagram-v2
     Landing --> IdP: a suggested provider: Solid-OIDC redirect
     Landing --> IdP: valid https WebID: same redirect
     IdP --> Discovering: redirect back (origin "login")
-    Discovering --> Connected: storage found
+    Discovering --> Connected: storage found, not skipped
+    Discovering --> App: storage found, every instance skips Connected
     Discovering --> NoPod: profile has no storage link
     Discovering --> Failed: error
     Failed --> Discovering: Try again
@@ -33,7 +34,7 @@ stateDiagram-v2
 |---|---|
 | Landing | `OnboardingFlow` + `WebIdForm` |
 | Discovering, Connected, NoPod, Failed | `PodConnectionScreen` |
-| Orchestration (session, account query) | `AppShell` (in `App.tsx`), the one shell of the site's page around Solid Memo and the [Studio](studio.md) alike |
+| Orchestration (session, account query, Connected screen choice: `useConnectedScreen`) | `AppShell` (in `App.tsx`), the one shell of the site's page around Solid Memo and the [Studio](studio.md) alike |
 
 The landing is one page: the guest's offer, then logging in (a button
 per suggested provider, and the WebID form under them), then creating a
@@ -50,6 +51,56 @@ Onboarding ends on an instance's deck list. A new instance has no decks
 yet, so the list offers the deck library's course for newcomers under
 its heading, started in one click
 ([courses.md](courses.md#the-course-for-newcomers)).
+
+## Skipping the Connected screen
+
+The Connected screen says nothing new to a learner who logs in often,
+so it offers "Don't show this screen after logging in". The choice is
+kept in the preferences of each of the learner's instances
+(`sm:connectedScreenSkipped`, outside the preferences' shape,
+[migrations.md](migrations.md)), so it follows them to every device:
+
+- **Read beside the account.** `connectedScreenChoice` lists the
+  learner's instances (the type indexes) and reads the choice in each
+  one's preferences, while `discoverAccount` runs. The screen is skipped
+  only when there is at least one instance and every one says so
+  (`skipsConnectedScreen`). An instance whose preferences cannot be
+  read counts as showing it; the choice is read whatever format the
+  preferences are stored in, a newer one too, and whether or not they
+  fit their shape (`connectedScreenSkipped`).
+- **Discovering waits only so long.** Once storage is found, the
+  Discovering screen stays while the choice is read, for 3 seconds at
+  most (`CONNECTED_SCREEN_WAIT_MS`); then the Connected screen shows,
+  and stays though the choice comes back later. No Pod found and a
+  failed discovery show at once, and are never skipped. When the
+  instances cannot be listed the screen shows, without the box. "Try
+  again" reads the choice again too.
+- **No instance, no box.** With no instance there is nowhere to keep
+  the choice: the screen shows as before, without it.
+- **Saved after Continue.** Continue enters the app at once; the box
+  checked, `skipConnectedScreen` then saves the choice in every
+  instance, each in its turn after the instance's other writes of its
+  preferences, in one PUT of the whole document, If-Match, as "Not now"
+  to FSRS-6 is ([theme.md](theme.md#where-the-choice-is-kept)). An
+  instance with no preferences gets new ones (the defaults, shown as
+  this device shows the app) only when its meta document reads, so
+  nothing is written at a registration whose instance is gone.
+  Preferences that do not fit their shape gain the choice alone, which
+  counts all the same.
+- **An instance not saved keeps showing it.** Preferences of a newer
+  format are never written (`writtenByNewerApp`), and a write may fail:
+  such an instance keeps showing the screen until the write succeeds,
+  after an update of the app for a newer format. No notice says so; the
+  box's hint does.
+- **Shown again from Preferences.** Each instance's Preferences offers
+  "Show the screen that says your Pod is connected" (not to a guest,
+  who never logs in). Turning it on in any one instance brings the
+  screen back. A form sends the choice only when the learner changed
+  it, so one opened before the box was checked never undoes it, and
+  every other save of the preferences keeps it as stored.
+- **New instances show it.** A new instance, or one made from a guest's
+  study, has no choice stored, so the screen shows again until the box
+  is checked again.
 
 ## Pod providers
 

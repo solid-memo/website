@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { PreferencesScreen } from "./PreferencesScreen";
 import { I18nProvider } from "./i18n";
 import { ThemeProvider } from "./theme";
@@ -98,7 +98,7 @@ describe("PreferencesScreen", () => {
     expect(onChoose).toHaveBeenCalledWith("system");
     expect(onSave).not.toHaveBeenCalled();
     fireEvent.submit(container.querySelector("form")!);
-    expect(onSave).toHaveBeenCalledWith({ ...DEFAULT_PREFERENCES, theme: "dark" });
+    expect(onSave).toHaveBeenCalledWith({ ...DEFAULT_PREFERENCES, theme: "dark" }, undefined);
   });
 
   describe("colors and text size", () => {
@@ -201,11 +201,14 @@ describe("PreferencesScreen", () => {
     it("saves the palette and the text size shown with the preferences", () => {
       const { container, onSave } = renderAppearance();
       fireEvent.submit(container.querySelector("form")!);
-      expect(onSave).toHaveBeenCalledWith({
-        ...DEFAULT_PREFERENCES,
-        palette: "https://solid-memo.com/ns/vocab/v1.ttl#colorVisionPalette",
-        textSize: "larger",
-      });
+      expect(onSave).toHaveBeenCalledWith(
+        {
+          ...DEFAULT_PREFERENCES,
+          palette: "https://solid-memo.com/ns/vocab/v1.ttl#colorVisionPalette",
+          textSize: "larger",
+        },
+        undefined,
+      );
     });
 
     it("keeps a palette this version does not know while Standard is shown", () => {
@@ -227,7 +230,7 @@ describe("PreferencesScreen", () => {
       );
       expect(screen.getByRole("radio", { name: /^Standard/ })).toBeChecked();
       fireEvent.submit(container.querySelector("form")!);
-      expect(onSave).toHaveBeenCalledWith(preferences);
+      expect(onSave).toHaveBeenCalledWith(preferences, undefined);
     });
 
     it("says nothing of it otherwise", () => {
@@ -319,11 +322,14 @@ describe("PreferencesScreen", () => {
         // Shown over a base, it is no High contrast: the hint stays.
         expect(screen.getByText(/asks for more contrast/)).toBeInTheDocument();
         fireEvent.submit(container.querySelector("form")!);
-        expect(onSave).toHaveBeenCalledWith({
-          ...DEFAULT_PREFERENCES,
-          theme: "light",
-          palette: READING.url,
-        });
+        expect(onSave).toHaveBeenCalledWith(
+          {
+            ...DEFAULT_PREFERENCES,
+            theme: "light",
+            palette: READING.url,
+          },
+          undefined,
+        );
         const reset = screen.getByRole("button", { name: "Reset colors" });
         expect(reset.closest("[data-palette]")).toHaveAttribute("data-palette", "standard");
         fireEvent.click(reset);
@@ -346,11 +352,14 @@ describe("PreferencesScreen", () => {
         </ThemeProvider>,
       );
       fireEvent.submit(container.querySelector("form")!);
-      expect(onSave).toHaveBeenCalledWith({
-        ...DEFAULT_PREFERENCES,
-        theme: "light",
-        palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
-      });
+      expect(onSave).toHaveBeenCalledWith(
+        {
+          ...DEFAULT_PREFERENCES,
+          theme: "light",
+          palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+        },
+        undefined,
+      );
     });
 
     it("offers no Reset colors in the Standard colors", () => {
@@ -443,11 +452,14 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText(/0 to 5 scale/)).toBeChecked();
 
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith({
-      ...DEFAULT_PREFERENCES,
-      scheduler: "fsrs6",
-      desiredRetention: 0.85,
-    });
+    expect(props.onSave).toHaveBeenCalledWith(
+      {
+        ...DEFAULT_PREFERENCES,
+        scheduler: "fsrs6",
+        desiredRetention: 0.85,
+      },
+      undefined,
+    );
   });
 
   it("keeps the stored retention when SM-2 is chosen again after the field was changed", () => {
@@ -456,7 +468,7 @@ describe("PreferencesScreen", () => {
     fireEvent.input(screen.getByLabelText("Desired retention (%)"), { target: { value: "50" } });
     fireEvent.click(screen.getByLabelText(/^SM-2/));
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES);
+    expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES, undefined);
   });
 
   it("prefills FSRS-6 and its retention, and keeps them as they are", () => {
@@ -469,12 +481,42 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText(/^FSRS-6/)).toBeChecked();
     expect(screen.getByLabelText("Desired retention (%)")).toHaveValue(97);
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith(preferences);
+    expect(props.onSave).toHaveBeenCalledWith(preferences, undefined);
   });
 
   it("keeps developer mode off by default", () => {
     renderScreen();
     expect(screen.getByLabelText("Developer mode")).not.toBeChecked();
+  });
+
+  describe("the Connected screen", () => {
+    const SHOW = "Show the screen that says your Pod is connected";
+
+    it("is offered as the preferences say, its hint tied to it", () => {
+      renderScreen({ connectedScreenShown: true });
+      const show = screen.getByRole("checkbox", { name: SHOW });
+      expect(screen.getByRole("group", { name: "After logging in" })).toContainElement(show);
+      expect(show).toBeChecked();
+      expect(show).toHaveAccessibleDescription(
+        "Logging in skips it only when it is off in every one of your instances, and shows it when their preferences cannot be read.",
+      );
+    });
+
+    it("is not offered without a choice to show, a guest's", () => {
+      renderScreen();
+      expect(screen.queryByRole("checkbox", { name: SHOW })).not.toBeInTheDocument();
+    });
+
+    it("saves the choice with the preferences, and disables it while saving", () => {
+      const { props, container } = renderScreen({ connectedScreenShown: false });
+      expect(screen.getByRole("checkbox", { name: SHOW })).not.toBeChecked();
+      fireEvent.click(screen.getByRole("checkbox", { name: SHOW }));
+      fireEvent.submit(container.querySelector("form")!);
+      expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES, true);
+      cleanup();
+      renderScreen({ connectedScreenShown: true, busy: true });
+      expect(screen.getByRole("checkbox", { name: SHOW })).toBeDisabled();
+    });
   });
 
   it("activates developer mode under Developer settings", () => {
@@ -485,14 +527,17 @@ describe("PreferencesScreen", () => {
 
     fireEvent.click(screen.getByLabelText("Developer mode"));
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith({
-      ...DEFAULT_PREFERENCES,
-      developerMode: true,
-      invalidDataPolicy: "block-subject" as const,
-      theme: "system",
-      scheduler: "sm2",
-      desiredRetention: 0.9,
-    });
+    expect(props.onSave).toHaveBeenCalledWith(
+      {
+        ...DEFAULT_PREFERENCES,
+        developerMode: true,
+        invalidDataPolicy: "block-subject" as const,
+        theme: "system",
+        scheduler: "sm2",
+        desiredRetention: 0.9,
+      },
+      undefined,
+    );
   });
 
   it("switches the answer scale and saves it", () => {
@@ -506,10 +551,13 @@ describe("PreferencesScreen", () => {
     fireEvent.click(screen.getByLabelText(/Again · Hard · Good · Easy/));
     fireEvent.submit(container.querySelector("form")!);
 
-    expect(props.onSave).toHaveBeenCalledWith({
-      ...DEFAULT_PREFERENCES,
-      answerScale: "minimal",
-    });
+    expect(props.onSave).toHaveBeenCalledWith(
+      {
+        ...DEFAULT_PREFERENCES,
+        answerScale: "minimal",
+      },
+      undefined,
+    );
   });
 
   it("offers what to do with invalid data, labeled from the vocabulary, and saves the choice", () => {
@@ -528,10 +576,13 @@ describe("PreferencesScreen", () => {
     fireEvent.click(screen.getByLabelText(/Block the instance/));
     fireEvent.submit(container.querySelector("form")!);
 
-    expect(props.onSave).toHaveBeenCalledWith({
-      ...DEFAULT_PREFERENCES,
-      invalidDataPolicy: "block-instance",
-    });
+    expect(props.onSave).toHaveBeenCalledWith(
+      {
+        ...DEFAULT_PREFERENCES,
+        invalidDataPolicy: "block-instance",
+      },
+      undefined,
+    );
   });
 
   it("saves the edited preferences as numbers", () => {
@@ -546,20 +597,23 @@ describe("PreferencesScreen", () => {
       target: { value: "0" },
     });
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith({
-      newCardsPerDay: 15,
-      maxReviewsPerDay: 120,
-      dayBoundaryHour: 0,
-      answerScale: "sm2",
-      developerMode: false,
-      invalidDataPolicy: "block-subject" as const,
-      theme: "system",
-      scheduler: "sm2",
-      desiredRetention: 0.9,
-      schedulerInvitationDismissed: false,
-      palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
-      textSize: "default",
-    });
+    expect(props.onSave).toHaveBeenCalledWith(
+      {
+        newCardsPerDay: 15,
+        maxReviewsPerDay: 120,
+        dayBoundaryHour: 0,
+        answerScale: "sm2",
+        developerMode: false,
+        invalidDataPolicy: "block-subject" as const,
+        theme: "system",
+        scheduler: "sm2",
+        desiredRetention: 0.9,
+        schedulerInvitationDismissed: false,
+        palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+        textSize: "default",
+      },
+      undefined,
+    );
   });
 
   it("shows busy state and errors", () => {

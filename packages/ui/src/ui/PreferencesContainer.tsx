@@ -23,15 +23,21 @@ import { queryKeys } from "./queryKeys";
  * to FSRS-6 with its progress, deck by deck, then how it ended, which
  * the learner closes, or, when a deck could not be switched, tries
  * again. The form shows again with what was last saved, so a switch that
- * failed or did not finish keeps the learner's choices.
+ * failed or did not finish keeps the learner's choices. Whether logging
+ * in shows the Connected screen is offered when `offersConnectedScreen`,
+ * and saved first, only when the learner changed it: a form read before
+ * it changed elsewhere does not undo that.
  */
 export function PreferencesContainer({
   useCases,
   instance,
+  offersConnectedScreen,
   onBack,
 }: {
   useCases: UseCases;
   instance: Instance;
+  /** Offer whether logging in shows the Connected screen: not to a guest, who never logs in. */
+  offersConnectedScreen: boolean;
   onBack: () => void;
 }) {
   const { t, errorText } = useI18n();
@@ -54,16 +60,30 @@ export function PreferencesContainer({
     queryKey: queryKeys.palettes(instance.url),
     queryFn: () => useCases.listPalettes(instance.url),
   });
+  // Not offered while it cannot be read.
+  const connectedScreenQuery = useQuery({
+    queryKey: queryKeys.connectedScreenShown(instance.url),
+    queryFn: () => useCases.connectedScreenShown(instance.url),
+    enabled: offersConnectedScreen,
+  });
 
   const saveMutation = useMutation({
-    /** The preferences to save, and the scheduler they replace. */
-    mutationFn: ({
+    /**
+     * The preferences to save, and the scheduler they replace; whether
+     * logging in shows the Connected screen, and what the form read of it.
+     */
+    mutationFn: async ({
       preferences,
       stored,
+      connectedScreen = null,
     }: {
       preferences: StudyPreferences;
       stored: Scheduler;
+      connectedScreen?: { shown: boolean; read: boolean } | null;
     }): Promise<SwitchOutcome | null> => {
+      // Queued before the save, which waits for it.
+      if (connectedScreen !== null && connectedScreen.shown !== connectedScreen.read)
+        await useCases.chooseConnectedScreen(instance.url, connectedScreen.shown);
       if (preferences.scheduler === stored)
         return useCases.savePreferences(instance.url, preferences).then(() => null);
       // Only a switch to FSRS-6 writes the decks, and takes long enough to show how far it is.
@@ -78,6 +98,9 @@ export function PreferencesContainer({
       if (outcome !== null) await queryClient.invalidateQueries();
       else {
         await queryClient.invalidateQueries({ queryKey: queryKeys.preferences(instance.url) });
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.connectedScreenShown(instance.url),
+        });
         // The first save puts the theme, the palette and the text size into the instance's preferences.
         await queryClient.invalidateQueries({
           queryKey: queryKeys.instanceAppearance(instance.url),
@@ -116,11 +139,16 @@ export function PreferencesContainer({
       instanceUrl={instance.url}
       preferences={submitted ?? preferencesQuery.data}
       palettes={palettesQuery.data}
+      connectedScreenShown={connectedScreenQuery.data}
       busy={saveMutation.isPending}
       error={errorText(saveMutation.error)}
-      onSave={(preferences) => {
+      onSave={(preferences, shown) => {
         setSubmitted(preferences);
-        saveMutation.mutate({ preferences, stored: preferencesQuery.data!.scheduler });
+        saveMutation.mutate({
+          preferences,
+          stored: preferencesQuery.data!.scheduler,
+          connectedScreen: shown === undefined ? null : { shown, read: connectedScreenQuery.data! },
+        });
       }}
     />
   );

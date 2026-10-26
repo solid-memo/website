@@ -45,8 +45,9 @@ flowchart LR
   (`instanceTheme`, `instancePalette`, `instanceTextSize`).
 
 The writes to an instance's preferences go one after another, the theme's,
-the palette's and the text size's alike, so a later choice is never
-overwritten by an earlier one. A save of the study preferences, a
+the palette's and the text size's alike, and whether logging in skips
+the Connected screen ([onboarding.md](onboarding.md#skipping-the-connected-screen)),
+so a later choice is never overwritten by an earlier one. A save of the study preferences, a
 switch of scheduler and "Not now" to the invitation to FSRS-6 wait for
 them, so none is refused for the version a choice made. A write that
 fails (another device saved the preferences meanwhile, say) is undone:

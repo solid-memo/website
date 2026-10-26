@@ -25,7 +25,10 @@ import { logInAndCreateInstance, logInToInstance } from "../flows/logIn.ts";
  * browser's text size, takes on the first device's when the instance
  * opens. There the learner designs a palette of their own, warned of a
  * pair with too little contrast and using it anyway; a third device
- * finds it in the pod, and resets the colors to Standard.
+ * finds it in the pod, and resets the colors to Standard. Logging back
+ * in, the learner chooses not to be shown the Connected screen again:
+ * the pod keeps it, so the second and third devices skip it, until the
+ * third shows it again from Preferences (docs/onboarding.md).
  */
 test("a returning learner @returning", async ({ app, account, runId, newDevice }) => {
   const instance = `Journey ${runId}`;
@@ -69,9 +72,13 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   );
 
   await app.step(
-    "08 · Log in with the WebID: the Solid server asks only for consent, and the instance opens",
+    "08 · Log in with the WebID: the Solid server asks only for consent, and the instance opens, the Connected screen not to be shown again",
     async () => {
-      await logInToInstance(app, account, instance, { loggedOutHere: true, knownToServer: true });
+      await logInToInstance(app, account, instance, {
+        loggedOutHere: true,
+        knownToServer: true,
+        connectedScreen: "skip",
+      });
       await app.chrome.expectTheme("dark");
     },
   );
@@ -95,9 +102,12 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   });
 
   await device.step(
-    "11 · Log in again and let Solid Memo use the Pod: the instance opens, in the dark theme, High contrast and Larger text",
+    "11 · Log in again and let Solid Memo use the Pod: the instance opens, without the Connected screen, in the dark theme, High contrast and Larger text",
     async () => {
-      await logInToInstance(device, account, instance, { knownToServer: true });
+      await logInToInstance(device, account, instance, {
+        knownToServer: true,
+        connectedScreen: "skipped",
+      });
       await device.chrome.expectTheme("dark");
       await device.preferences.open();
       await device.preferences.expectTheme("dark");
@@ -121,13 +131,14 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   const third = await newDevice();
 
   await third.step(
-    "13 · On a third device, log in: the palette of one's own comes from the Pod",
+    "13 · On a third device, log in, without the Connected screen: the palette of one's own comes from the Pod",
     async () => {
       await third.onboarding.visit();
-      await logInToInstance(third, account, instance);
+      await logInToInstance(third, account, instance, { connectedScreen: "skipped" });
       await third.chrome.expectTheme("dark");
       await third.preferences.open();
       await third.preferences.expectOwnPalette("Evening", EVENING);
+      await third.preferences.expectShowConnectedScreen(false);
     },
   );
 
@@ -138,6 +149,19 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
     await third.chrome.reload();
     await third.preferences.open();
     await third.preferences.expectPalette("standard");
+  });
+
+  await third.step("15 · Show the Connected screen again, which the Pod keeps", async () => {
+    await third.preferences.setShowConnectedScreen(true);
+    await third.preferences.save();
+    await third.chrome.reload();
+    await third.preferences.open();
+    await third.preferences.expectShowConnectedScreen(true);
+    // Back to Decks, where the next login opens.
+    await third.preferences.save();
+    await third.chrome.logOut();
+    await third.onboarding.expectLoggedOut();
+    await logInToInstance(third, account, instance, { loggedOutHere: true, knownToServer: true });
   });
 });
 

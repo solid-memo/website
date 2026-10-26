@@ -1211,7 +1211,9 @@
     "continueAnyway": "Trotzdem fortfahren",
     "connectedHeading": "Dein Pod ist verbunden.",
     "identityProvider": "Identitätsanbieter",
-    "continue": "Weiter"
+    "continue": "Weiter",
+    "skipNextTime": "Diesen Bildschirm nach dem Anmelden nicht mehr anzeigen",
+    "skipHint": "Wird in den Einstellungen jeder deiner Instanzen gespeichert. In den Einstellungen jeder Instanz kannst du diesen Bildschirm wieder anzeigen lassen. Eine Instanz, in der die Wahl nicht gespeichert werden kann, zeigt diesen Bildschirm weiter an."
   },
   "preferences": {
     "language": {
@@ -1284,6 +1286,11 @@
         "label": "Nur warnen",
         "hint": "Ungültige Daten werden gemeldet, und die App arbeitet weiter damit."
       }
+    },
+    "connectedScreen": {
+      "legend": "Nach dem Anmelden",
+      "show": "Den Bildschirm anzeigen, der sagt, dass dein Pod verbunden ist",
+      "hint": "Beim Anmelden wird dieser Bildschirm nur übersprungen, wenn er in allen deinen Instanzen ausgeschaltet ist, und angezeigt, wenn ihre Einstellungen nicht gelesen werden können."
     },
     "developer": {
       "legend": "Entwicklereinstellungen",

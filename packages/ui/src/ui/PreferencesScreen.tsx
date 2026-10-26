@@ -117,12 +117,15 @@ function policyOption(
  * the caller decides what saving a change of it takes (switchScheduler).
  * The desired retention, a percent from 70 to 97, can be set only while
  * FSRS-6 is chosen, and the answer buttons only while SM-2 is, as FSRS-6
- * always uses the four; each keeps its value meanwhile.
+ * always uses the four; each keeps its value meanwhile. Whether logging
+ * in shows the Connected screen is offered when it is given, and saved
+ * with them.
  */
 export function PreferencesScreen({
   instanceUrl,
   preferences,
   palettes = [],
+  connectedScreenShown,
   busy,
   error,
   onSave,
@@ -131,9 +134,15 @@ export function PreferencesScreen({
   preferences: StudyPreferences;
   /** The palettes the user designed in the instance, offered beside the built-in ones. */
   palettes?: readonly CustomPalette[];
+  /**
+   * Whether logging in shows the Connected screen, as the instance's
+   * preferences say; not offered while undefined (a guest's, or not read).
+   */
+  connectedScreenShown?: boolean;
   busy: boolean;
   error: ErrorText | null;
-  onSave: (preferences: StudyPreferences) => void;
+  /** Save the preferences, with whether logging in shows the Connected screen when it is offered. */
+  onSave: (preferences: StudyPreferences, connectedScreenShown: boolean | undefined) => void;
 }) {
   const { t, locale } = useI18n();
   const { choose: chooseLocale, failure: localeFailure } = useChooseLocale();
@@ -167,31 +176,37 @@ export function PreferencesScreen({
   const [answerScale, setAnswerScale] = useState<AnswerScale>(preferences.answerScale);
   const fsrs = scheduler === "fsrs6";
   const [developerMode, setDeveloperMode] = useState(preferences.developerMode);
+  // The learner's choice once made; until then, as the preferences say, read after the form showed too.
+  const [connectedChoice, setConnectedChoice] = useState<boolean | null>(null);
+  const showsConnected = connectedChoice ?? connectedScreenShown;
   const [invalidDataPolicy, setInvalidDataPolicy] = useState<InvalidDataPolicy>(
     preferences.invalidDataPolicy,
   );
 
   function handleSubmit(event: Event) {
     event.preventDefault();
-    onSave({
-      newCardsPerDay: Number(newCardsPerDay),
-      maxReviewsPerDay: Number(maxReviewsPerDay),
-      dayBoundaryHour: Number(dayBoundaryHour),
-      answerScale,
-      developerMode,
-      invalidDataPolicy,
-      theme: themeChoice,
-      scheduler,
-      // The field is disabled, so unchecked, while SM-2 is chosen: what
-      // it holds then is not the learner's to save.
-      desiredRetention: fsrs ? Number(retention) / 100 : preferences.desiredRetention,
-      schedulerInvitationDismissed: preferences.schedulerInvitationDismissed,
-      // As shown, but one this version does not know stays while Standard is shown; one of the user's own does not.
-      palette:
-        customPalette?.url ??
-        keptPalette(preferences, palette, (iri) => isPaletteOf(instanceUrl, iri)),
-      textSize,
-    });
+    onSave(
+      {
+        newCardsPerDay: Number(newCardsPerDay),
+        maxReviewsPerDay: Number(maxReviewsPerDay),
+        dayBoundaryHour: Number(dayBoundaryHour),
+        answerScale,
+        developerMode,
+        invalidDataPolicy,
+        theme: themeChoice,
+        scheduler,
+        // The field is disabled, so unchecked, while SM-2 is chosen: what
+        // it holds then is not the learner's to save.
+        desiredRetention: fsrs ? Number(retention) / 100 : preferences.desiredRetention,
+        schedulerInvitationDismissed: preferences.schedulerInvitationDismissed,
+        // As shown, but one this version does not know stays while Standard is shown; one of the user's own does not.
+        palette:
+          customPalette?.url ??
+          keptPalette(preferences, palette, (iri) => isPaletteOf(instanceUrl, iri)),
+        textSize,
+      },
+      showsConnected,
+    );
   }
 
   return (
@@ -463,6 +478,24 @@ export function PreferencesScreen({
             </label>
           ))}
         </fieldset>
+        {showsConnected !== undefined && (
+          <fieldset>
+            <legend>{t("preferences.connectedScreen.legend")}</legend>
+            <label>
+              <input
+                type="checkbox"
+                checked={showsConnected}
+                onChange={(e) => setConnectedChoice(e.currentTarget.checked)}
+                aria-describedby="pref-connected-screen-hint"
+                disabled={busy}
+              />
+              {t("preferences.connectedScreen.show")}
+            </label>
+            <p id="pref-connected-screen-hint" class="hint">
+              {t("preferences.connectedScreen.hint")}
+            </p>
+          </fieldset>
+        )}
         <fieldset>
           <legend>{t("preferences.developer.legend")}</legend>
           <label>

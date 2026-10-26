@@ -1276,7 +1276,9 @@
     "continueAnyway": "Continuar de todos modos",
     "connectedHeading": "Tu Pod está conectado.",
     "identityProvider": "Proveedor de identidad",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "skipNextTime": "No mostrar esta pantalla después de iniciar sesión",
+    "skipHint": "Se guarda en las preferencias de cada una de tus instancias. Puedes volver a mostrar esta pantalla en las Preferencias de cualquier instancia. Una instancia en la que no se pueda guardar la elección seguirá mostrando esta pantalla."
   },
   "preferences": {
     "language": {
@@ -1349,6 +1351,11 @@
         "label": "Solo avisar",
         "hint": "Se informa de los datos no válidos, y la aplicación sigue funcionando con ellos."
       }
+    },
+    "connectedScreen": {
+      "legend": "Después de iniciar sesión",
+      "show": "Mostrar la pantalla que dice que tu Pod está conectado",
+      "hint": "Al iniciar sesión, esta pantalla solo se omite cuando está desactivada en todas tus instancias, y se muestra cuando no se pueden leer sus preferencias."
     },
     "developer": {
       "legend": "Ajustes de desarrollador",

@@ -165,7 +165,7 @@ string, so other applications can look up what it means:
   summary format 1, in the digest ([The answer log](#the-answer-log)).
   1.26's `sm:connectedScreenSkipped` is written on the preferences
   outside `PreferencesV6`, as `sm:deckCardLanguage` is on a deck, so the
-  preferences format did not move ([onboarding.md](onboarding.md#flow)).
+  preferences format did not move ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
   A shape may take a
   term of another vocabulary too, which is no `sm:` term and so moves no
   vocabulary version: card format 7 took `dcterms:subject`, what a card

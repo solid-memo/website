@@ -61,11 +61,13 @@ export class Studio extends Screen {
 
   /**
    * Back from a login set off at the Studio's landing page: the Studio
-   * again, at the route the login left from, not Solid Memo.
+   * again, at the route the login left from, not Solid Memo. An account
+   * with no instance leaves that route for the instances as soon as they
+   * are listed, which may be at once: the login lists them already.
    */
   async expectBackAfterLogin(): Promise<void> {
     await this.intent("Come back to the Studio after the login", async () => {
-      await expect(this.page).toHaveURL(/\/#\/studio\/$/);
+      await expect(this.page).toHaveURL(/\/#\/studio\/(instances)?$/);
       await expect(
         this.page
           .getByRole("banner")

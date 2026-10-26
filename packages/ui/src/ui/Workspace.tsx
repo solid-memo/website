@@ -963,6 +963,8 @@ export function Workspace({
             <PreferencesContainer
               useCases={useCases}
               instance={activeInstance!}
+              // A guest never logs in, so never sees the Connected screen.
+              offersConnectedScreen={session.guest !== true}
               onBack={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
             />
             {/* A guest's pod is on this device: no other app looks there. */}

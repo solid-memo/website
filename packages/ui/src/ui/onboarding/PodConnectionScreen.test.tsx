@@ -19,6 +19,7 @@ function renderScreen(overrides: Partial<Parameters<typeof PodConnectionScreen>[
     account: undefined,
     busy: false,
     error: null,
+    offerSkip: false,
     onRetry: vi.fn(),
     onContinue: vi.fn(),
     onLogout: vi.fn(),
@@ -50,7 +51,27 @@ describe("PodConnectionScreen", () => {
     }
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    expect(onContinue).toHaveBeenCalledOnce();
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(false);
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  });
+
+  it("offers to skip the screen from now on, unchecked, before Continue", () => {
+    const { onContinue } = renderScreen({ account, offerSkip: true });
+    const skip = screen.getByRole("checkbox", { name: "Don't show this screen after logging in" });
+    expect(skip).not.toBeChecked();
+    expect(skip).not.toHaveFocus();
+    expect(skip).toHaveAccessibleDescription(
+      "Kept in the preferences of each of your instances. You can show this screen again in any instance's Preferences. An instance where the choice cannot be saved keeps showing it.",
+    );
+    const continueButton = screen.getByRole("button", { name: "Continue" });
+    // Before Continue in the tab order.
+    expect(skip.compareDocumentPosition(continueButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+
+    fireEvent.click(skip);
+    fireEvent.click(continueButton);
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(true);
   });
 
   it("shows the profile's name in place of the WebID, linked to it", () => {
@@ -79,8 +100,10 @@ describe("PodConnectionScreen", () => {
     const { onRetry, onLogout } = renderScreen({
       error: "profile unreachable",
       account,
+      offerSkip: true,
     });
     expect(screen.getByRole("alert")).toHaveTextContent("profile unreachable");
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalledOnce();
@@ -91,7 +114,10 @@ describe("PodConnectionScreen", () => {
   it("explains a profile without a storage link and offers ways forward", () => {
     const { onRetry, onContinue, onLogout } = renderScreen({
       account: { webId: account.webId },
+      offerSkip: true,
     });
+    // Not a screen to skip: it says what is wrong.
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "No Pod found" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: newTab(account.webId) })).toHaveAttribute(
       "href",
@@ -101,7 +127,7 @@ describe("PodConnectionScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole("button", { name: "Continue anyway" }));
-    expect(onContinue).toHaveBeenCalledOnce();
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(false);
     fireEvent.click(screen.getByRole("button", { name: "Log out" }));
     expect(onLogout).toHaveBeenCalledOnce();
   });

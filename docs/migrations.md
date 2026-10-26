@@ -417,7 +417,7 @@ no format version:
   move, and the check does not read the term.
 
 Whether logging in skips the Connected screen (vocabulary 1.26,
-`sm:connectedScreenSkipped`, [onboarding.md](onboarding.md#flow)) needs
+`sm:connectedScreenSkipped`, [onboarding.md](onboarding.md#skipping-the-connected-screen)) needs
 no migration and moved no format version:
 
 - **It belongs to no shape**, so `PreferencesV6` is unchanged. Every

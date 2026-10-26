@@ -597,6 +597,24 @@ describe("AppShell", () => {
       await waitFor(() => expect(document.title).toBe("Log in – Solid Memo Studio"));
     });
 
+    it("skips the Connected screen too when every instance says so", async () => {
+      renderStudio(
+        makeUseCases({
+          restoreSession: vi.fn(async () => loggedIn),
+          discoverAccount: vi.fn(async () => ({
+            webId: session.webId,
+            podUrl: "https://alice.example/",
+          })),
+          connectedScreenChoice: vi.fn(async () => ({ instances: [], skipped: true })),
+        }),
+      );
+      expect(await screen.findByRole("link", { name: "Solid Memo Studio" })).toHaveAttribute(
+        "href",
+        "#/studio",
+      );
+      expect(screen.queryByRole("heading", { name: "Your Pod is connected." })).toBeNull();
+    });
+
     it("links its wordmark to its own home once signed in", async () => {
       renderStudio(makeUseCases({ restoreSession: vi.fn(async () => restored) }));
       expect(await screen.findByRole("link", { name: "Solid Memo Studio" })).toHaveAttribute(
@@ -948,7 +966,8 @@ describe("AppShell", () => {
       await waitFor(() => {
         expect(useCases.discoverAccount).toHaveBeenCalledWith(session);
       });
-      expect(useCases.listInstances).not.toHaveBeenCalled();
+      // The workspace is not there yet.
+      expect(screen.queryByRole("button", { name: "Log out" })).toBeNull();
 
       await act(async () =>
         resolveAccount({
@@ -1001,6 +1020,120 @@ describe("AppShell", () => {
         await screen.findByRole("heading", { name: "Your Pod is connected." }),
       ).toBeInTheDocument();
       expect(discoverAccount).toHaveBeenCalledTimes(2);
+    });
+
+    describe("the Connected screen", () => {
+      const instance = { url: "https://alice.example/solid-memo/main/", name: "Main" };
+      const account: SolidAccount = {
+        webId: session.webId,
+        name: "Alice",
+        podUrl: "https://alice.example/",
+      };
+      const CONNECTED = "Your Pod is connected.";
+      const SKIP = "Don't show this screen after logging in";
+
+      /** Whether the Connected screen's heading shows at any time from now. */
+      function watchConnected() {
+        let shown = false;
+        const observer = new MutationObserver(() => {
+          if (screen.queryByRole("heading", { name: CONNECTED }) !== null) shown = true;
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        return () => {
+          observer.disconnect();
+          return shown;
+        };
+      }
+
+      /** Logging in, the account found with storage. */
+      function loggingIn(overrides: Partial<UseCases> = {}) {
+        return makeUseCases({
+          restoreSession: vi.fn(async () => loggedIn),
+          discoverAccount: vi.fn(async () => account),
+          listInstances: vi.fn(async () => [instance]),
+          ...overrides,
+        });
+      }
+
+      it("is skipped when every instance says so: the app opens, named as logged in", async () => {
+        const shown = watchConnected();
+        renderApp(
+          loggingIn({
+            connectedScreenChoice: vi.fn(async () => ({ instances: [instance], skipped: true })),
+          }),
+        );
+        expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
+        expect(screen.getByText(/Logged in as/)).toHaveTextContent("Logged in as Alice");
+        expect(shown()).toBe(false);
+      });
+
+      it("offers to skip it from now on, saved in every instance on Continue", async () => {
+        const useCases = loggingIn();
+        renderApp(useCases);
+        expect(await screen.findByRole("heading", { name: CONNECTED })).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("checkbox", { name: SKIP }));
+        fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+        expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
+        expect(useCases.skipConnectedScreen).toHaveBeenCalledWith([instance]);
+      });
+
+      it("offers nothing to skip to a learner with no instances", async () => {
+        const useCases = loggingIn({ listInstances: vi.fn(async () => []) });
+        renderApp(useCases);
+        expect(await screen.findByRole("heading", { name: CONNECTED })).toBeInTheDocument();
+        expect(screen.queryByRole("checkbox", { name: SKIP })).toBeNull();
+      });
+
+      it("keeps discovering while the choice is read, and shows a failure or a missing Pod at once", async () => {
+        const pending = () => new Promise<never>(() => undefined);
+        const useCases = loggingIn({ connectedScreenChoice: vi.fn(pending) });
+        const { unmount } = renderApp(useCases);
+        await waitFor(() => expect(useCases.discoverAccount).toHaveBeenCalled());
+        // The account is found: still Discovering while the choice is read.
+        await act(async () => undefined);
+        expect(screen.getByRole("heading", { name: "Discovering your Pod…" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: CONNECTED })).toBeNull();
+        unmount();
+
+        const failing = renderApp(
+          loggingIn({
+            connectedScreenChoice: vi.fn(pending),
+            discoverAccount: vi.fn(async () => {
+              throw new Error("profile unreachable");
+            }),
+          }),
+        );
+        expect(await screen.findByText("profile unreachable")).toBeInTheDocument();
+        failing.unmount();
+
+        renderApp(
+          loggingIn({
+            connectedScreenChoice: vi.fn(async () => ({ instances: [instance], skipped: true })),
+            discoverAccount: vi.fn(async () => ({ webId: session.webId })),
+          }),
+        );
+        expect(await screen.findByRole("heading", { name: "No Pod found" })).toBeInTheDocument();
+      });
+
+      it("reads the choice again on Try again", async () => {
+        const useCases = loggingIn({
+          discoverAccount: vi
+            .fn<UseCases["discoverAccount"]>()
+            .mockRejectedValueOnce(new Error("profile unreachable"))
+            .mockResolvedValueOnce(account),
+        });
+        renderApp(useCases);
+        fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
+        expect(await screen.findByRole("heading", { name: CONNECTED })).toBeInTheDocument();
+        expect(useCases.connectedScreenChoice).toHaveBeenCalledTimes(2);
+      });
+
+      it("is not asked about by a session restored without a login", async () => {
+        const useCases = makeUseCases({ restoreSession: vi.fn(async () => restored) });
+        renderApp(useCases);
+        expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
+        expect(useCases.connectedScreenChoice).not.toHaveBeenCalled();
+      });
     });
 
     it("logs out from a failed discovery", async () => {
