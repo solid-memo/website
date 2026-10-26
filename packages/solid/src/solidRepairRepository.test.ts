@@ -17,7 +17,7 @@ import {
   type NamedSubject,
   setThing,
 } from "./client/rdf";
-import { saveSolidDatasetAt } from "./client/resources";
+import { writeDocument } from "./client/resources";
 import { datasetFrom, getStringWithLocale } from "./testing/datasets";
 import type { Repair } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull } from "./datasets";
@@ -26,7 +26,10 @@ import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
-  return { ...actual, saveSolidDatasetAt: vi.fn() };
+  return {
+    ...actual, // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
+  };
 });
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -59,12 +62,12 @@ function repair(
 }
 
 function saved(index = 0): Dataset {
-  return vi.mocked(saveSolidDatasetAt).mock.calls[index][1] as Dataset;
+  return vi.mocked(writeDocument).mock.calls[index][1] as Dataset;
 }
 
 beforeEach(() => {
   vi.mocked(getSolidDatasetOrNull).mockReset();
-  vi.mocked(saveSolidDatasetAt).mockReset();
+  vi.mocked(writeDocument).mockReset();
 });
 
 describe("applyRepairs", () => {
@@ -83,7 +86,7 @@ describe("applyRepairs", () => {
     ).rejects.toMatchObject({
       code: "writtenByNewerApp",
     });
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("fills in a deck's description and direction, in the deck's own format, with one write per document", async () => {
@@ -106,7 +109,7 @@ describe("applyRepairs", () => {
       repair("describe-deck", `${CATALOG}#deck-2`, 2),
       repair("direct-deck", `${CATALOG}#deck-2`, 2),
     ]);
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
     const one = getThing(saved(), `${CATALOG}#deck-1`)!;
     expect(getStringNoLocale(one, DCTERMS.description)).toBe("Flashcards: Capitals.");
     expect(getUrl(one, SM.studyDirection)).toBe(SM.frontToBack);
@@ -455,6 +458,6 @@ describe("applyRepairs", () => {
   it("skips a document that is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await repository().applyRepairs([repair("describe-deck", `${CATALOG}#deck-1`)]);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });

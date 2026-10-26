@@ -36,7 +36,7 @@ const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlRes
  *   library writes an ACL's PATCH with that "." touching the term before
  *   it (`<…#Agent>.}`), which node-solid-server's parser takes for a
  *   path and refuses (400), as it does every PATCH of the library's
- *   (datasets.ts, patchBody); an ACL holds no other kind of term;
+ *   (sparqlUpdate.ts); an ACL holds no other kind of term;
  * - for the Community Solid Server, an Access Control Resource not
  *   written yet, which it answers 404 (its Link saying what it is), is
  *   read as one that says only that it is one, which the write then

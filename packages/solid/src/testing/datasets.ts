@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { DocumentRead, DocumentWrite } from "../client/interface";
 import {
+  type Dataset,
   datasetAt,
   type FetchedDataset,
   getStringByLocaleAll,
@@ -33,6 +35,16 @@ export function containerFrom(url: string): FetchedDataset {
 /** The document at `url`, read as holding `turtle`. */
 export async function datasetOfTurtle(url: string, turtle: string): Promise<FetchedDataset> {
   return withQuads(datasetFrom(url), await parseQuads(turtle, "turtle", url));
+}
+
+/** A write as a test's pod takes it: the dataset as given, saved with no version (writeDocument). */
+export async function writtenAsGiven(_url: string, dataset: Dataset): Promise<DocumentWrite> {
+  return { dataset: dataset as FetchedDataset, etag: undefined };
+}
+
+/** A read of `dataset` as a test's pod gives it, with no version (readDocument). */
+export function readOf(dataset: Dataset): DocumentRead {
+  return { dataset: dataset as FetchedDataset, etag: undefined };
 }
 
 /** A subject's strings of a property in `locale` (any case). */

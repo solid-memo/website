@@ -19,7 +19,8 @@ import {
 import type { Changes } from "./client/interface";
 import { datasetFrom } from "./testing/datasets";
 import type { Quad, Term } from "@rdfjs/types";
-import { appendAllToDocument, patchBody, saveDataset } from "./datasets";
+import { appendAllToDocument, saveDataset } from "./datasets";
+import { patchBody } from "./client/sparqlUpdate";
 
 vi.mock("./client/rdf", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/rdf")>();

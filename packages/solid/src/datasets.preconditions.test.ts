@@ -15,11 +15,11 @@ import {
   deleteDataset,
   getSolidDatasetOrNull,
   keptDataset,
-  MAX_PATCH_BYTES,
   PreconditionFailedError,
   readDataset,
   saveDataset,
 } from "./datasets";
+import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
 
 /**
  * The preconditions through the real Solid client library (client/),

@@ -109,6 +109,21 @@ export class HttpError extends Error {
 }
 
 /**
+ * What a read of a document gave: the dataset, with the version (ETag)
+ * the pod gave it, or that the document is still at the version asked
+ * about (304).
+ */
+export type DocumentRead =
+  | { readonly dataset: FetchedDataset; readonly etag: string | undefined }
+  | { readonly notModified: true };
+
+/** What a write of a document gave: the dataset as now saved there, and the version (ETag) the pod answered with. */
+export interface DocumentWrite {
+  readonly dataset: FetchedDataset;
+  readonly etag: string | undefined;
+}
+
+/**
  * The sign-in client: the Solid-OIDC session the browser keeps for this
  * tab. What the app does around a login, the route it returns to and the
  * issuer it asks a WebID for, is solidSessionGateway.ts's.

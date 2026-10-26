@@ -17,7 +17,7 @@ import {
   getUrlAll,
   setThing,
 } from "./client/rdf";
-import { deleteSolidDataset, saveSolidDatasetAt, solidDatasetAsTurtle } from "./client/resources";
+import { deleteSolidDataset, writeDocument, solidDatasetAsTurtle } from "./client/resources";
 import {
   datasetFrom,
   datasetOfTurtle,
@@ -36,7 +36,8 @@ vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
   return {
     ...actual,
-    saveSolidDatasetAt: vi.fn(),
+    // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
     deleteSolidDataset: vi.fn(),
   };
 });
@@ -105,7 +106,7 @@ const OUT_OF_RANGE = '"300000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchem
 
 beforeEach(() => {
   vi.mocked(getSolidDatasetOrNull).mockReset();
-  vi.mocked(saveSolidDatasetAt).mockReset();
+  vi.mocked(writeDocument).mockReset();
   vi.mocked(deleteSolidDataset).mockReset();
 });
 
@@ -195,7 +196,7 @@ describe("checked writes", () => {
     await expect(makeRepository(checkWrite).createDeck(INSTANCE, { en: "New" })).rejects.toThrow(
       "does not conform",
     );
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -224,8 +225,8 @@ describe("applyCardChanges", () => {
       ],
       remove: ["is"],
     });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     const se = getThing(saved, `${deck.cardsDocumentUrl}#se`)!;
     expect(getStringNoLocale(se, SM.back)).toBe("Stockholm");
     expect(getDatetime(se, DCTERMS.created)?.toISOString()).toBe("2026-01-01T00:00:00.000Z");
@@ -246,7 +247,7 @@ describe("applyCardChanges", () => {
       save: [{ id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" } }],
       remove: [],
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     const se = getThing(saved, `${deck.cardsDocumentUrl}#se`)!;
     expect(getStringNoLocale(se, SM.back)).toBe("Stockholm");
     expect(getDatetime(se, DCTERMS.created)?.toISOString()).toBe("2026-09-21T10:00:00.000Z");
@@ -271,7 +272,7 @@ describe("applyCardChanges", () => {
       ],
       remove: [],
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getBoolean(getThing(saved, `${deck.cardsDocumentUrl}#yu`)!, OWL_DEPRECATED)).toBeNull();
     expect(getBoolean(getThing(saved, `${deck.cardsDocumentUrl}#se`)!, OWL_DEPRECATED)).toBe(true);
   });
@@ -286,7 +287,7 @@ describe("applyCardChanges", () => {
       save: [{ id: "no", front: { en: "Norway" }, back: { en: "Oslo" }, distractors }],
       remove: [],
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     const urls = distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`);
     const no = getThing(saved, `${deck.cardsDocumentUrl}#no`)!;
     expect(getUrlAll(no, SM.distractor).sort()).toEqual(urls);
@@ -305,7 +306,7 @@ describe("applyCardChanges", () => {
       ],
       remove: [],
     });
-    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getUrlAll(getThing(again, `${deck.cardsDocumentUrl}#no`)!, SM.distractor)).toEqual([
       urls[0],
     ]);
@@ -322,10 +323,7 @@ describe("applyCardChanges", () => {
       remove: [],
     });
     expect(
-      getThing(
-        vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset,
-        `${deck.cardsDocumentUrl}#no`,
-      ),
+      getThing(vi.mocked(writeDocument).mock.calls[0][1] as Dataset, `${deck.cardsDocumentUrl}#no`),
     ).not.toBeNull();
   });
 
@@ -342,7 +340,7 @@ describe("applyCardChanges", () => {
       ],
       remove: [],
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(
       getDatetime(getThing(saved, `${deck.cardsDocumentUrl}#no`)!, DCTERMS.created)?.toISOString(),
     ).toBe("2026-01-02T03:04:05.000Z");
@@ -356,7 +354,7 @@ describe("applyCardChanges", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(deck.cardsDocumentUrl));
     vi.mocked(versionOf).mockReturnValueOnce('"v1"');
     await makeRepository().applyCardChanges(deck, changes, { whole: true, version: '"v1"' });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
     // Changed since it was read: nothing is written.
     vi.mocked(versionOf).mockReturnValueOnce('"v2"');
     await expect(
@@ -373,11 +371,11 @@ describe("applyCardChanges", () => {
     await expect(
       makeRepository().applyCardChanges(deck, changes, { version: "absent" }),
     ).rejects.toMatchObject({ code: "createdElsewhere" });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
     // Still missing, it is created.
     vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(null);
     await makeRepository().applyCardChanges(deck, changes, { version: "absent" });
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -405,7 +403,7 @@ describe("addDeck", () => {
       [added.url, `${added.url}-cards`],
       "pod",
     );
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
     expect(saveUrl).toBe(CATALOG);
     const thing = getThing(saved as Dataset, added.url)!;
     expect(getUrl(thing, SM.cardsDocument)).toBe(added.cardsDocumentUrl);
@@ -421,7 +419,7 @@ describe("addDeck", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     const { completedChapters: _chapters, course: _course, ...plain } = added;
     await makeRepository().addDeck(plain);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
     expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([]);
     expect(getUrlAll(getThing(saved, added.url)!, RDF.type)).not.toContain(SCHEMA.Course);
   });
@@ -431,7 +429,7 @@ describe("addDeck", () => {
     await expect(makeRepository().addDeck(deck)).rejects.toMatchObject({
       code: "createdElsewhere",
     });
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   const preconditionFailed = () =>
@@ -439,16 +437,16 @@ describe("addDeck", () => {
 
   it("reads the catalog again and adds the entry to it when it changed elsewhere meanwhile, a few times at most", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(preconditionFailed());
+    vi.mocked(writeDocument).mockRejectedValueOnce(preconditionFailed());
     await expect(makeRepository().addDeck(added)).resolves.toEqual({ ...added, formatVersion: 6 });
     expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(2);
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
 
-    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValue(preconditionFailed());
+    vi.mocked(writeDocument).mockReset().mockRejectedValue(preconditionFailed());
     await expect(makeRepository().addDeck(added)).rejects.toMatchObject({
       code: "changedElsewhere",
     });
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
+    expect(writeDocument).toHaveBeenCalledTimes(3);
   });
 
   it("refuses an entry another tab wrote meanwhile, and gives up at once on any other failure", async () => {
@@ -461,16 +459,16 @@ describe("addDeck", () => {
     vi.mocked(getSolidDatasetOrNull)
       .mockResolvedValueOnce(catalogWithDeck())
       .mockResolvedValueOnce(withAdded);
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(preconditionFailed());
+    vi.mocked(writeDocument).mockRejectedValueOnce(preconditionFailed());
     await expect(makeRepository().addDeck(added)).rejects.toMatchObject({
       code: "createdElsewhere",
     });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
 
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
-    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValueOnce(new Error("403"));
+    vi.mocked(writeDocument).mockReset().mockRejectedValueOnce(new Error("403"));
     await expect(makeRepository().addDeck(added)).rejects.toThrow("403");
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
   });
 });
 
@@ -489,7 +487,7 @@ describe("readCatalog and saveCatalog", () => {
   it("write the catalog into a new catalog document, and read it back", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().saveCatalog(INSTANCE, catalog);
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(CATALOG);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
     await expect(makeRepository().readCatalog(INSTANCE)).resolves.toEqual(catalog);
@@ -498,7 +496,7 @@ describe("readCatalog and saveCatalog", () => {
   it("write the catalog beside the decks of an existing catalog document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     await makeRepository().saveCatalog(INSTANCE, catalog);
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
     expect(
       getUrlAll(
@@ -533,8 +531,8 @@ describe("upgradeDecks", () => {
     const checkWrite = vi.fn(async () => undefined);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithTwo());
     await expect(makeRepository(checkWrite).upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(url).toBe(CATALOG);
     const entry = getThing(saved as Dataset, deck.url)!;
     expect(getInteger(entry, SM.formatVersion)).toBe(6);
@@ -562,7 +560,7 @@ describe("upgradeDecks", () => {
       ),
     );
     await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(true);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
     const entry = getThing(saved, deck.url)!;
     expect(getInteger(entry, SM.formatVersion)).toBe(6);
     expect(getStringNoLocale(entry, SM.deckCardLanguage)).toBe("ko");
@@ -580,22 +578,22 @@ describe("upgradeDecks", () => {
     );
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(withCatalog);
     await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getStringNoLocale(getThing(saved, `${CATALOG}#catalog`)!, DCTERMS.title)).toBe("Theirs");
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(datasetFrom(CATALOG), getThing(catalogWithTwo(), `${CATALOG}#deck-2`)!),
     );
     await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(false);
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
   });
 
   it("creates the catalog document for a catalog alone, and writes nothing where there is neither", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(false);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
     await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
     expect(
-      getThing(vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset, `${CATALOG}#catalog`),
+      getThing(vi.mocked(writeDocument).mock.calls[0][1] as Dataset, `${CATALOG}#catalog`),
     ).not.toBeNull();
   });
 });
@@ -617,7 +615,7 @@ describe("createDeck", () => {
       formatVersion: 6,
       authors: [],
     });
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(CATALOG);
     const thing = getThing(saved as Dataset, created.url)!;
     expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Kanji N5");
@@ -636,7 +634,7 @@ describe("createDeck", () => {
 
     await makeRepository().createDeck(INSTANCE, { en: "Second deck" });
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
     expect(getThing(saved as Dataset, `${CATALOG}#deck-fixed`)).not.toBeNull();
   });
@@ -688,7 +686,7 @@ describe("importDeck", () => {
       themes: content.themes,
       keywords: content.keywords,
     });
-    const calls = vi.mocked(saveSolidDatasetAt).mock.calls;
+    const calls = vi.mocked(writeDocument).mock.calls;
     expect(calls.map((c) => c[0])).toEqual([imported.cardsDocumentUrl, CATALOG]);
     const cards = calls[0][1] as Dataset;
     const sweden = getThing(cards, `${imported.cardsDocumentUrl}#sweden`)!;
@@ -753,7 +751,7 @@ describe("importDeck", () => {
       [`${doc}#q`, `${doc}#q-d1`],
       "pod",
     );
-    const cards = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const cards = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getUrlAll(getThing(cards, `${doc}#q`)!, SM.distractor)).toEqual([`${doc}#q-d1`]);
     const distractor = getThing(cards, `${doc}#q-d1`)!;
     expect(getUrlAll(distractor, RDF.type)).toContain(SM.Distractor);
@@ -770,7 +768,7 @@ describe("importDeck", () => {
       description: { ...content.description, sv: "Från Wikipedia." },
     });
 
-    const catalog = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const catalog = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     const entry = getThing(catalog, imported.url)!;
     expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe(content.title.en);
     expect(getStringWithLocale(entry, DCTERMS.title, "sv")).toBe("Huvudstäder");
@@ -786,17 +784,17 @@ describe("importDeck", () => {
     });
 
     expect(imported.course).toBe(true);
-    const catalog = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const catalog = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     const types = getUrlAll(getThing(catalog, imported.url)!, RDF.type);
     expect(types).toEqual(expect.arrayContaining([SM.Deck, DCAT.Dataset, SCHEMA.Course]));
   });
 
   it("leaves the catalog alone when the cards document fails to save", async () => {
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(new Error("403"));
+    vi.mocked(writeDocument).mockRejectedValueOnce(new Error("403"));
 
     await expect(makeRepository().importDeck(INSTANCE, content)).rejects.toThrow("403");
     expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(1);
+    expect(writeDocument).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -807,7 +805,7 @@ describe("renameDeck", () => {
     const renamed = await makeRepository().renameDeck(deck, { en: "Kanji N4" });
 
     expect(renamed).toEqual({ ...deck, title: { en: "Kanji N4" }, formatVersion: 6 });
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(CATALOG);
     const thing = getThing(saved as Dataset, deck.url)!;
     expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Kanji N4");
@@ -821,7 +819,7 @@ describe("renameDeck", () => {
 
     await makeRepository().renameDeck(deck, { en: "Kanji N4", sv: "Kanji N4 (svenska)" });
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, deck.url)!;
     expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Kanji N4");
     expect(getStringWithLocale(thing, DCTERMS.title, "sv")).toBe("Kanji N4 (svenska)");
@@ -832,7 +830,7 @@ describe("renameDeck", () => {
     await expect(makeRepository().renameDeck(deck, { en: "x" })).rejects.toThrow(
       "no longer exists",
     );
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("rejects when the deck is no longer in the catalog", async () => {
@@ -840,7 +838,7 @@ describe("renameDeck", () => {
     await expect(makeRepository().renameDeck(deck, { en: "x" })).rejects.toThrow(
       "no longer exists",
     );
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -861,7 +859,7 @@ describe("saveDeck", () => {
     });
 
     expect(saved).toEqual({ ...deck, direction: "bidirectional", formatVersion: 6 });
-    const [saveUrl, dataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, dataset] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(CATALOG);
     const thing = getThing(dataset as Dataset, deck.url)!;
     expect(getUrl(thing, SM.studyDirection)).toBe(SM.bidirectional);
@@ -885,7 +883,7 @@ describe("saveDeck", () => {
     const saved = await makeRepository().saveDeck({ ...deck, newCardsPerDay: 5 });
 
     expect(saved).toEqual({ ...deck, newCardsPerDay: 5, formatVersion: 6 });
-    const [, dataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, dataset] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(dataset as Dataset, deck.url)!;
     expect(getInteger(thing, SM.deckNewCardsPerDay)).toBe(5);
     expect(getInteger(thing, SM.deckMaxReviewsPerDay)).toBeNull();
@@ -903,7 +901,7 @@ describe("saveDeck", () => {
     );
     await makeRepository().saveDeck(deck);
     await makeRepository().saveDeck({ ...deck, cardLanguage: "ko" });
-    for (const [, dataset] of vi.mocked(saveSolidDatasetAt).mock.calls) {
+    for (const [, dataset] of vi.mocked(writeDocument).mock.calls) {
       const thing = getThing(dataset as Dataset, deck.url)!;
       expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
     }
@@ -915,7 +913,7 @@ describe("saveDeck", () => {
   it("rejects when the deck is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().saveDeck(deck)).rejects.toThrow("no longer exists");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -950,7 +948,7 @@ describe("saveDecks", () => {
       ["deck-3", 3, 6],
       ["deck-2", 3, 6],
     ]);
-    const saves = vi.mocked(saveSolidDatasetAt).mock.calls;
+    const saves = vi.mocked(writeDocument).mock.calls;
     expect(saves.map(([url]) => url)).toEqual([
       CATALOG,
       "https://pod.example/solid-memo/b/catalog.ttl",
@@ -965,7 +963,7 @@ describe("saveDecks", () => {
   it("writes nothing of a document when one of its decks is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     await expect(makeRepository().saveDecks([deck, second])).rejects.toThrow("no longer exists");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -995,8 +993,8 @@ describe("removeDecks", () => {
       deck.reviewsDocumentUrl,
       second.cardsDocumentUrl,
     ]);
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(getThing(saved as Dataset, deck.url)).toBeNull();
     expect(getThing(saved as Dataset, second.url)).toBeNull();
   });
@@ -1015,7 +1013,7 @@ describe("removeDeck", () => {
     };
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     await makeRepository().saveDeck(authored);
-    let catalog = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    let catalog = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     vi.mocked(getSolidDatasetOrNull)
       .mockReset()
       .mockResolvedValue(
@@ -1027,9 +1025,9 @@ describe("removeDeck", () => {
         ) as never,
       );
     await makeRepository().saveDeck(other);
-    catalog = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    catalog = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getThing(catalog, `${CATALOG}#agent-anton-wiklund`)).not.toBeNull();
-    vi.mocked(saveSolidDatasetAt).mockReset();
+    vi.mocked(writeDocument).mockReset();
     vi.mocked(getSolidDatasetOrNull)
       .mockReset()
       .mockImplementation((async (url: string) =>
@@ -1039,7 +1037,7 @@ describe("removeDeck", () => {
 
     expect(deleteSolidDataset).toHaveBeenCalledWith(deck.cardsDocumentUrl, expect.anything());
     expect(deleteSolidDataset).toHaveBeenCalledWith(deck.reviewsDocumentUrl, expect.anything());
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(CATALOG);
     expect(getThing(saved as Dataset, deck.url)).toBeNull();
     expect(getThing(saved as Dataset, `${deck.url}-cards`)).toBeNull();
@@ -1062,7 +1060,7 @@ describe("removeDeck", () => {
 
     expect(deleteSolidDataset).toHaveBeenCalledOnce();
     expect(deleteSolidDataset).toHaveBeenCalledWith(deck.reviewsDocumentUrl, expect.anything());
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(getThing(saved as Dataset, deck.url)).toBeNull();
     expect(getThing(saved as Dataset, `${CATALOG}#deck-2`)).not.toBeNull();
   });
@@ -1073,7 +1071,7 @@ describe("removeDeck", () => {
     await makeRepository().removeDeck(deck);
 
     expect(deleteSolidDataset).not.toHaveBeenCalled();
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -1132,7 +1130,7 @@ describe("addCard", () => {
       createdAt: "2026-09-21T10:00:00.000Z",
       formatVersion: 7,
     });
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
     const thing = getThing(saved as Dataset, created.url)!;
     expect(getStringNoLocale(thing, SM.front)).toBe("火");
@@ -1155,7 +1153,7 @@ describe("addCard", () => {
     });
 
     expect(created.frontImageUrl).toBe(FLAG);
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, created.url)!;
     expect(getStringNoLocale(thing, SM.front)).toBeNull();
     expect(getUrl(thing, SM.frontImage)).toBe(FLAG);
@@ -1180,7 +1178,7 @@ describe("addCard", () => {
     const created = await makeRepository().addCard(deck, content);
 
     expect(created).toMatchObject(content);
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, created.url)!;
     expect(getStringWithLocale(thing, SM.frontImageDescription, "en")).toBe(
       "A blue flag with a yellow cross",
@@ -1205,7 +1203,7 @@ describe("addCard", () => {
       backImageUrl: FLAG,
     });
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, created.url)!;
     expect(getStringNoLocale(thing, SM.back)).toBeNull();
     expect(getUrl(thing, SM.backImage)).toBe(FLAG);
@@ -1243,7 +1241,7 @@ describe("updateCard", () => {
       frontImageUrl: FLAG,
       formatVersion: 7,
     });
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
     const thing = getThing(saved as Dataset, card.url)!;
     expect(getStringNoLocale(thing, SM.front)).toBe("수영하다");
@@ -1265,7 +1263,7 @@ describe("updateCard", () => {
     );
 
     expect(updated.subjects).toEqual(subjects);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getUrlAll(getThing(saved, card.url)!, DCTERMS.subject)).toEqual(subjects);
   });
 
@@ -1283,7 +1281,7 @@ describe("updateCard", () => {
     );
 
     expect(kept.distractors).toEqual(distractors);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getUrlAll(getThing(saved, card.url)!, SM.distractor)).toEqual(
       distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`),
     );
@@ -1298,7 +1296,7 @@ describe("updateCard", () => {
     });
 
     expect(replaced.distractors).toEqual([distractors[1]]);
-    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getThing(again, `${deck.cardsDocumentUrl}#card-1-d1`)).toBeNull();
     expect(
       getStringWithLocale(
@@ -1326,7 +1324,7 @@ describe("updateCard", () => {
       back: { "": "water" },
       distractors,
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getUrlAll(getThing(saved, card.url)!, SCHEMA.suggestedAnswer).sort()).toEqual(
       [theirs, ...distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`)].sort(),
     );
@@ -1338,7 +1336,7 @@ describe("updateCard", () => {
       distractors: [distractors[1]],
     });
 
-    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getUrlAll(getThing(again, card.url)!, SCHEMA.suggestedAnswer).sort()).toEqual(
       [theirs, `${deck.cardsDocumentUrl}#card-1-d2`].sort(),
     );
@@ -1354,7 +1352,7 @@ describe("updateCard", () => {
     );
 
     expect(kept.textFormat).toBe(SM.markdown);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getUrlAll(getThing(saved, card.url)!, SM.textFormat)).toEqual([SM.markdown]);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       saved as Awaited<ReturnType<typeof getSolidDatasetOrNull>>,
@@ -1367,7 +1365,7 @@ describe("updateCard", () => {
     });
 
     expect(plain.textFormat).toBe(SM.plainText);
-    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getUrlAll(getThing(again, card.url)!, SM.textFormat)).toEqual([SM.plainText]);
   });
 
@@ -1382,9 +1380,7 @@ describe("updateCard", () => {
     );
     await makeRepository().updateCard(deck, card, { front: { "": "水" }, back: { "": "water" } });
 
-    const [first, second] = vi
-      .mocked(saveSolidDatasetAt)
-      .mock.calls.map((call) => call[1] as Dataset);
+    const [first, second] = vi.mocked(writeDocument).mock.calls.map((call) => call[1] as Dataset);
     expect(getUrlAll(getThing(first!, card.url)!, SM.textFormat)).toEqual([unknown]);
     expect(getUrlAll(getThing(second!, card.url)!, SM.textFormat)).toEqual([]);
   });
@@ -1399,7 +1395,7 @@ describe("updateCard", () => {
 
     await makeRepository().updateCard(deck, card, content);
 
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       await datasetOfTurtle(deck.cardsDocumentUrl, await solidDatasetAsTurtle(saved)),
     );
@@ -1417,7 +1413,7 @@ describe("updateCard", () => {
     );
 
     expect(updated.retired).toBe(true);
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getBoolean(getThing(saved, card.url)!, OWL_DEPRECATED)).toBe(true);
   });
 
@@ -1426,7 +1422,7 @@ describe("updateCard", () => {
     await expect(
       makeRepository().updateCard(deck, card, { front: { "": "x" }, back: { "": "y" } }),
     ).rejects.toThrow("can no longer be found");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("rejects when the card no longer exists", async () => {
@@ -1434,7 +1430,7 @@ describe("updateCard", () => {
     await expect(
       makeRepository().updateCard(deck, card, { front: { "": "x" }, back: { "": "y" } }),
     ).rejects.toThrow("no longer exists");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -1464,8 +1460,8 @@ describe("upgradeCards", () => {
 
     await expect(makeRepository(checkWrite).upgradeCards(deck)).resolves.toBe(true);
 
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
     const upgraded = getThing(saved as Dataset, card.url)!;
     expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
@@ -1486,7 +1482,7 @@ describe("upgradeCards", () => {
 
     await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const upgraded = getThing(saved as Dataset, card.url)!;
     expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
     expect(getUrlAll(upgraded, DCTERMS.subject)).toEqual([subject]);
@@ -1499,7 +1495,7 @@ describe("upgradeCards", () => {
     await expect(makeRepository().upgradeCards(deck)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeCards(deck)).resolves.toBe(false);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -1541,8 +1537,8 @@ describe("stateCardLanguages", () => {
       }),
     ).resolves.toBe(2);
 
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(1);
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(writeDocument).toHaveBeenCalledTimes(1);
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
     expect(checkWrite).toHaveBeenCalledWith(
       expect.anything(),
@@ -1574,7 +1570,7 @@ describe("stateCardLanguages", () => {
     await expect(
       makeRepository().stateCardLanguages(deck, ["card-1"], { front: "ja" }),
     ).resolves.toBe(0);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -1594,7 +1590,7 @@ describe("removeCard", () => {
       code: "writtenByNewerApp",
     });
     expect(
-      vi.mocked(saveSolidDatasetAt).mock.calls.filter(([url]) => url === deck.cardsDocumentUrl),
+      vi.mocked(writeDocument).mock.calls.filter(([url]) => url === deck.cardsDocumentUrl),
     ).toEqual([]);
   });
 
@@ -1625,11 +1621,11 @@ describe("removeCard", () => {
     await makeRepository().removeCard(deck, card);
 
     const cardsSave = vi
-      .mocked(saveSolidDatasetAt)
+      .mocked(writeDocument)
       .mock.calls.find(([url]) => url === deck.cardsDocumentUrl)!;
     expect(getThing(cardsSave[1] as Dataset, card.url)).toBeNull();
     const reviewsSave = vi
-      .mocked(saveSolidDatasetAt)
+      .mocked(writeDocument)
       .mock.calls.find(([url]) => url === deck.reviewsDocumentUrl)!;
     expect(getThing(reviewsSave[1] as Dataset, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
     expect(
@@ -1659,7 +1655,7 @@ describe("removeCard", () => {
 
     await makeRepository().removeCard(deck, card);
 
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-1`)).toBeNull();
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)).not.toBeNull();
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-2`)).not.toBeNull();
@@ -1691,9 +1687,7 @@ describe("removeCard", () => {
       url: `${deck.cardsDocumentUrl}#gone`,
     });
 
-    const [first, second] = vi
-      .mocked(saveSolidDatasetAt)
-      .mock.calls.map((call) => call[1] as Dataset);
+    const [first, second] = vi.mocked(writeDocument).mock.calls.map((call) => call[1] as Dataset);
     expect(getThing(first, card.url)).toBeNull();
     expect(getThing(first, distractor)).toBeNull();
     expect(getThing(first, `${deck.cardsDocumentUrl}#other`)).not.toBeNull();
@@ -1703,7 +1697,7 @@ describe("removeCard", () => {
   it("does nothing when neither document exists", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().removeCard(deck, card);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -1739,8 +1733,8 @@ describe("library upgrade writes", () => {
       license: CC0,
       formatVersion: 6,
     });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(url).toBe(CATALOG);
     const thing = getThing(saved as Dataset, deck.url)!;
     expect(getUrl(thing, SM.cardsDocument)).toBe(deck.cardsDocumentUrl);
@@ -1763,7 +1757,7 @@ describe("library upgrade writes", () => {
     ).rejects.toThrow("changed while");
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeDeckEntry(current, next)).rejects.toThrow("changed while");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("deleteDocument deletes a document of the deck there is, and nothing when it is gone", async () => {
@@ -1790,7 +1784,7 @@ describe("the cards document itself", () => {
     await expect(
       makeRepository().addCard(deck, { front: { "": "火" }, back: { "": "fire" } }),
     ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("is part of the deck once, keeping what else it is part of, through every write", async () => {
@@ -1804,7 +1798,7 @@ describe("the cards document itself", () => {
       ) as never,
     );
     await makeRepository().addCard(deck, { front: { "": "火" }, back: { "": "fire" } });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
     expect(getUrlAll(getThing(saved, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([
       other,
       deck.url,
@@ -1816,7 +1810,7 @@ describe("the cards document itself", () => {
       id: "card-fixed",
       url: `${deck.cardsDocumentUrl}#card-fixed`,
     });
-    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as Dataset;
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getUrlAll(getThing(again, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([
       other,
       deck.url,

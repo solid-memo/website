@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { MAX_PATCH_BYTES, PreconditionFailedError, removeOwned } from "./datasets";
+import { PreconditionFailedError, removeOwned } from "./datasets";
+import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { subjectsOfClasses } from "./ownership";

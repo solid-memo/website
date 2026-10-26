@@ -6,10 +6,8 @@ import {
   type Dataset,
   type FetchedDataset,
   type Subject,
-  changesOf,
   createSolidDataset,
   getThing,
-  localNameOf,
   removeThing,
   removeUrl,
   setThing,
@@ -18,13 +16,9 @@ import {
   withQuads,
 } from "./client/rdf";
 
-import type { Literal, Quad } from "@rdfjs/types";
-import {
-  deleteSolidDataset,
-  getSolidDatasetLinear,
-  saveSolidDatasetAt,
-  solidDatasetAsTurtle,
-} from "./client/resources";
+import type { Quad } from "@rdfjs/types";
+import { deleteSolidDataset, readDocument, writeDocument } from "./client/resources";
+import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
 import { unlessNewer } from "./records";
 import { refuseUnwritable } from "./writableTerms";
 import { AppError } from "@solid-memo/domain/appError";
@@ -39,21 +33,16 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
  * - saving an edit of a dataset read from the same URL sends
  *   `If-Match: <that ETag>`: had the document changed since, the pod
  *   answers 412 and nothing is written;
- * - saving a new dataset is a creation, which the Solid client library
- *   sends with `If-None-Match: *`: had the document appeared meanwhile, 412;
+ * - saving a new dataset is a creation, sent with `If-None-Match: *`
+ *   (client/resources.ts writeDocument): had the document appeared
+ *   meanwhile, 412;
  * - deleting a document read before sends `If-Match` too, and so does
  *   removing what Solid Memo owns of one (removeOwned).
  *
- * An edit's PATCH body is written here (patchBody), not by
- * @inrupt/solid-client: node-solid-server's parser fails on a triple whose
- * closing "." touches the term before it (`<#a> <#b> 1.}`), which is how
- * @inrupt/solid-client writes every patch, so no edit could be saved
- * there. Ours has one triple a line, a space before each ".". An edit too
- * large for one PATCH (MAX_PATCH_BYTES) is written as one PUT of the whole
- * document instead, with the same If-Match: node-solid-server reads a
- * PATCH body of at most 100 kB, and past that parses "[object Object]"
- * and fails, so an edit of every card of a large deck (a format update)
- * could not be saved there.
+ * What goes over the wire, the PATCH of an edit or the PUT of a whole
+ * document too large for one PATCH (MAX_PATCH_BYTES), each with the same
+ * If-Match, is writeDocument's; this module decides which version a
+ * write is conditional on, and keeps what a read or write learned.
  *
  * A 412 becomes a PreconditionFailedError naming the document. Weak
  * ETags (`W/"…"`) are never sent in `If-Match`, where the comparison is
@@ -67,9 +56,6 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
  * the next read downloads the document.
  */
 const ETAGS = new WeakMap<object, string>();
-
-/** The largest PATCH body sent; a larger edit is a PUT of the whole document. Well under 100 kB. */
-export const MAX_PATCH_BYTES = 64 * 1024;
 
 /** The pod refused a write because the document is not as Solid Memo last saw it. */
 export class PreconditionFailedError extends AppError {
@@ -96,8 +82,8 @@ export class PreconditionFailedError extends AppError {
  * there before, unless the write kept its own dataset (above): then that
  * is what is known. Both are kept by document: a read by one of its
  * subjects (a WebID, `card#me`) is forgotten by a write to the document
- * (`card`). Every read asks the pod (`cache: "no-store"`): this is the
- * only cache.
+ * (`card`). Every read asks the pod, never the browser's cache
+ * (readDocument): this is the only cache.
  */
 const READS = new WeakMap<
   typeof globalThis.fetch,
@@ -213,33 +199,19 @@ async function fetchDataset(
 ): Promise<FetchedDataset | typeof UNCHANGED> {
   const document = documentUrlOf(url);
   const before = known.get(document);
-  const asked = since ?? before?.etag;
-  let etag: string | null = null;
-  let notModified = false;
-  let dataset: FetchedDataset;
+  let read: Awaited<ReturnType<typeof readDocument>>;
   try {
-    dataset = await getSolidDatasetLinear(url, {
-      fetch: async (input, init) => {
-        const headers = new Headers(init?.headers);
-        if (asked !== undefined) headers.set("If-None-Match", asked);
-        // The pod is asked every time; what is kept is kept here. A browser would answer a plain read from its
-        // own cache, which a pod that gives a modification time and no Cache-Control lets it keep for days.
-        const response = await fetch(input, { ...init, headers, cache: "no-store" });
-        // @inrupt/solid-client fails on a 304 without saying its status: noted here.
-        notModified = response.status === 304;
-        etag = response.headers.get("ETag");
-        return response;
-      },
-    });
+    read = await readDocument(url, { fetch, ifNoneMatch: since ?? before?.etag });
   } catch (error) {
-    if (notModified && since !== undefined) return UNCHANGED;
-    if (notModified && before !== undefined) return before.dataset;
     known.delete(document);
     throw error;
   }
+  // Asked without `since`, the version asked about is the one `before` was read at.
+  if ("notModified" in read) return since === undefined ? before!.dataset : UNCHANGED;
+  const { dataset, etag } = read;
   const source = sourceOf(dataset);
-  if (etag !== null && source !== undefined) ETAGS.set(source.key, etag);
-  if (etag !== null) known.set(document, { etag, dataset });
+  if (etag !== undefined && source !== undefined) ETAGS.set(source.key, etag);
+  if (etag !== undefined) known.set(document, { etag, dataset });
   else known.delete(document);
   return dataset;
 }
@@ -263,10 +235,8 @@ export async function getSolidDatasetOrNull(
 /**
  * Save a dataset: an edit of the document it was read from only if that
  * is unchanged (If-Match), a new dataset only if nothing is there yet
- * (If-None-Match: *, sent by the Solid client library). `whole` writes an
- * edit as one PUT of the whole document (with the same If-Match) however
- * small it is: for a bulk edit of text, which Community Solid Server's
- * in-memory store cuts short when a PATCH holds characters beyond ASCII.
+ * (If-None-Match: *). `whole` writes an edit as one PUT of the whole
+ * document (with the same If-Match) however small it is (writeDocument).
  */
 export async function saveDataset<T extends Dataset>(
   url: string,
@@ -278,19 +248,9 @@ export async function saveDataset<T extends Dataset>(
   const isEdit = source !== undefined && source.url === url;
   const etag = isEdit ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
-  let answered: string | undefined;
-  let saved: FetchedDataset;
+  let written: Awaited<ReturnType<typeof writeDocument>>;
   try {
-    saved = await saveSolidDatasetAt(url, dataset, {
-      fetch: ownPatches(
-        withIfMatch(
-          withWrittenETag(fetch, (sent) => (answered = sent)),
-          etag,
-        ),
-        dataset,
-        whole,
-      ),
-    });
+    written = await writeDocument(url, dataset, { fetch, ifMatch: etag, whole });
   } catch (error) {
     if (statusOf(error) === 412)
       throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
@@ -298,24 +258,12 @@ export async function saveDataset<T extends Dataset>(
   }
   if (source !== undefined) ETAGS.delete(source.key);
   // Only where a precondition held does the document hold just what was written.
-  const version = strong(answered);
+  const version = strong(written.etag);
   if (version === undefined || (isEdit && etag === undefined)) return;
-  const savedSource = sourceOf(saved);
+  const savedSource = sourceOf(written.dataset);
   if (savedSource?.url !== url) return;
   ETAGS.set(savedSource.key, version);
-  readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: saved });
-}
-
-/** The fetch, telling `noted` the ETag the pod answered a write with (undefined when it gave none). */
-function withWrittenETag(
-  fetch: typeof globalThis.fetch,
-  noted: (etag: string | undefined) => void,
-): typeof globalThis.fetch {
-  return async (input, init) => {
-    const response = await fetch(input, init);
-    noted(response.headers.get("ETag") ?? undefined);
-    return response;
-  };
+  readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: written.dataset });
 }
 
 /** Whether `dataset` was read from (or last saved to) `url`: a save of it is an edit there, If-Match its version. */
@@ -333,7 +281,7 @@ export async function deleteDataset(
   const etag = source?.url === url ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   try {
-    await deleteSolidDataset(url, { fetch: withIfMatch(fetch, etag) });
+    await deleteSolidDataset(url, { fetch, ifMatch: etag });
   } catch (error) {
     if (statusOf(error) === 412) throw new PreconditionFailedError(url, "unchanged");
     throw error;
@@ -502,65 +450,6 @@ function termKey(term: { termType: string; value: string }): string {
   return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
-/** The fetch, with `If-Match` added to the request that writes (the only one the Solid client library makes for it). */
-function withIfMatch(
-  fetch: typeof globalThis.fetch,
-  etag: string | undefined,
-): typeof globalThis.fetch {
-  if (etag === undefined) return fetch;
-  return (input, init) => {
-    const headers = new Headers(init?.headers);
-    headers.set("If-Match", etag);
-    return fetch(input, { ...init, headers });
-  };
-}
-
-/**
- * The fetch, refusing a write of a term Turtle cannot write as it is
- * (writableTerms.ts), with the PATCH the Solid client library sends given our body
- * (patchBody, sent again with its deleted decimals spelled as numbers
- * where a conflict (409) may come of their spelling), or sent as a PUT of the whole dataset (its every triple,
- * the edit applied) when that body is larger than MAX_PATCH_BYTES, or
- * always (`whole`); other headers kept. The library takes the answer as
- * its PATCH's.
- */
-function ownPatches(
-  fetch: typeof globalThis.fetch,
-  dataset: Dataset,
-  whole: boolean,
-): typeof globalThis.fetch {
-  return async (input, init) => {
-    if (init?.method === "PUT") refuseUnwritable(toRdfJsDataset(dataset));
-    if (init?.method !== "PATCH") return fetch(input, init);
-    const body = patchBody(dataset) ?? init.body;
-    if (
-      !whole &&
-      (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)
-    ) {
-      const changes = changesOf(dataset);
-      refuseUnwritable([...(changes?.additions ?? []), ...(changes?.deletions ?? [])]);
-      const response = await fetch(input, { ...init, body });
-      // node-solid-server finds no decimal deleted as it served it (`1.0`, `2.50`), only as it reads it (`1`,
-      // `2.5`), and applies nothing (409): sent once more, decimals so spelled. A deletion of a triple that is
-      // gone fails again, as it should; one found the second time names the same number.
-      if (response.status !== 409) return response;
-      const respelled = patchBody(dataset, true);
-      return respelled === null || respelled === body
-        ? response
-        : fetch(input, { ...init, body: respelled });
-    }
-    refuseUnwritable(toRdfJsDataset(dataset));
-    const headers = new Headers(init.headers);
-    headers.set("Content-Type", "text/turtle");
-    return fetch(input, {
-      ...init,
-      method: "PUT",
-      headers,
-      body: await solidDatasetAsTurtle(dataset),
-    });
-  };
-}
-
 /**
  * Add a subject's triples to a document without reading it first: one
  * insert-only PATCH, with no precondition, since inserting a subject no
@@ -612,60 +501,6 @@ export async function appendAllToDocument(
     });
     if (!response.ok) throw new AppError("addFailed", { url, status: response.status });
   }
-}
-
-const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
-const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
-
-/**
- * The SPARQL Update of a dataset's changes, one triple a line in
- * N-Triples form, every triple closed by " .": what every Solid server
- * parses, node-solid-server's too. Null when a change has a blank node,
- * which DELETE DATA cannot name; then the Solid client library's body is sent.
- *
- * `decimalsAsNumbers` spells each decimal deleted as JavaScript spells
- * its number (`1` for `1.0`, `2.5` for `2.50`): how node-solid-server
- * reads a decimal in the document it patches, though it serves a whole
- * one with `.0` (`1` written, `1.0` served), so a deletion spelled as
- * read is not found there (ownPatches).
- */
-export function patchBody(dataset: Dataset, decimalsAsNumbers = false): string | null {
-  const changes = changesOf(dataset);
-  if (changes === undefined) return null;
-  const block = (operation: string, quads: readonly Quad[], asNumbers: boolean): string | null => {
-    const triples = quads.map((quad) => tripleLine(quad, asNumbers));
-    if (triples.includes(null)) return null;
-    return triples.length === 0 ? "" : `${operation} {\n${triples.join("\n")}\n};\n`;
-  };
-  const deletions = block("DELETE DATA", changes.deletions, decimalsAsNumbers);
-  const additions = block("INSERT DATA", changes.additions, false);
-  return deletions === null || additions === null ? null : deletions + additions;
-}
-
-function tripleLine(quad: Quad, decimalsAsNumbers: boolean): string | null {
-  const { subject, predicate, object } = quad;
-  if (
-    subject.termType !== "NamedNode" ||
-    (object.termType !== "NamedNode" && object.termType !== "Literal")
-  ) {
-    return null;
-  }
-  return `${iri(subject.value)} ${iri(predicate.value)} ${object.termType === "Literal" ? literal(object, decimalsAsNumbers) : iri(object.value)} .`;
-}
-
-function iri(value: string): string {
-  const name = localNameOf(value);
-  return name === undefined ? `<${value}>` : `<#${name}>`;
-}
-
-function literal(term: Literal, decimalsAsNumbers: boolean): string {
-  const value =
-    decimalsAsNumbers && term.datatype.value === XSD_DECIMAL
-      ? String(Number.parseFloat(term.value))
-      : term.value;
-  const text = `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
-  if (term.language !== "") return `${text}@${term.language}`;
-  return term.datatype.value === XSD_STRING ? text : `${text}^^<${term.datatype.value}>`;
 }
 
 function strong(etag: string | undefined): string | undefined {

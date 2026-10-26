@@ -15,7 +15,7 @@ import {
   setThing,
   type SubjectBuilder,
 } from "./client/rdf";
-import { saveSolidDatasetAt } from "./client/resources";
+import { writeDocument } from "./client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
@@ -24,7 +24,10 @@ import { RDF, SM } from "./vocab";
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
-  return { ...actual, saveSolidDatasetAt: vi.fn() };
+  return {
+    ...actual, // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
+  };
 });
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -45,7 +48,7 @@ function makeRepository(
 
 beforeEach(() => {
   vi.mocked(getSolidDatasetOrNull).mockReset();
-  vi.mocked(saveSolidDatasetAt).mockReset();
+  vi.mocked(writeDocument).mockReset();
 });
 
 describe("getPreferences", () => {
@@ -103,7 +106,7 @@ describe("savePreferences, checked", () => {
       makeRepository(checkWrite).savePreferences(INSTANCE, DEFAULT_PREFERENCES),
     ).rejects.toThrow("does not conform");
     expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${DOCUMENT}#it`], "pod");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -128,7 +131,7 @@ describe("savePreferences", () => {
 
     await makeRepository().savePreferences(INSTANCE, preferences);
 
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(DOCUMENT);
     const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(5);
@@ -152,7 +155,7 @@ describe("savePreferences", () => {
 
     await makeRepository().savePreferences(INSTANCE, preferences);
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(5);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
@@ -161,18 +164,18 @@ describe("savePreferences", () => {
 
   it("writes the whole document, not a PATCH, which node-solid-server stores a true in as false", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
-    const fetch = vi.fn(async () => new Response("", { status: 205 }));
-    await createSolidPreferencesRepository({
-      fetch: fetch as unknown as typeof globalThis.fetch,
-    }).savePreferences(INSTANCE, { ...preferences, schedulerInvitationDismissed: true });
+    await makeRepository().savePreferences(INSTANCE, {
+      ...preferences,
+      schedulerInvitationDismissed: true,
+    });
 
-    // The PATCH the Solid client library would send for the edit goes out as a PUT of the document.
-    const [, , options] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    await options!.fetch!(DOCUMENT, { method: "PATCH", body: "INSERT DATA {};" });
-    const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    // writeDocument sends such an edit as a PUT of the document (client/resources.ts).
+    const [url, saved, options] = vi.mocked(writeDocument).mock.calls[0];
     expect(url).toBe(DOCUMENT);
-    expect(init.method).toBe("PUT");
-    expect(String(init.body)).toContain("schedulerInvitationDismissed> true");
+    expect(options.whole).toBe(true);
+    expect(getBoolean(getThing(saved, `${DOCUMENT}#it`)!, SM.schedulerInvitationDismissed)).toBe(
+      true,
+    );
   });
 
   it("keeps a stored choice to skip the Connected screen, which it never writes", async () => {
@@ -187,7 +190,7 @@ describe("savePreferences", () => {
 
     await makeRepository().savePreferences(INSTANCE, preferences);
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getBoolean(thing, SM.connectedScreenSkipped)).toBe(true);
   });
@@ -213,7 +216,7 @@ describe("markConnectedScreen", () => {
   }
 
   function saved() {
-    const [saveUrl, dataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, dataset] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(DOCUMENT);
     return getThing(dataset as Dataset, SUBJECT)!;
   }
@@ -249,7 +252,7 @@ describe("markConnectedScreen", () => {
     await expect(makeRepository().markConnectedScreen(INSTANCE, false, null)).resolves.toBe(
       "unchanged",
     );
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("refuses preferences a newer version of the app wrote, before sending anything", async () => {
@@ -257,7 +260,7 @@ describe("markConnectedScreen", () => {
     await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).rejects.toMatchObject({
       code: "writtenByNewerApp",
     });
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("gives preferences that do not fit their shape the choice alone, never the defaults, and it reads back", async () => {
@@ -295,20 +298,15 @@ describe("markConnectedScreen", () => {
     await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe("none");
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await expect(makeRepository().markConnectedScreen(INSTANCE, true, null)).resolves.toBe("none");
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("writes the whole document, not a PATCH, which node-solid-server stores a true in as false", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(6));
-    const fetch = vi.fn(async () => new Response("", { status: 205 }));
-    await createSolidPreferencesRepository({
-      fetch: fetch as unknown as typeof globalThis.fetch,
-    }).markConnectedScreen(INSTANCE, true, null);
-    const [, , options] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    await options!.fetch!(DOCUMENT, { method: "PATCH", body: "INSERT DATA {};" });
-    const [, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
-    expect(init.method).toBe("PUT");
-    expect(String(init.body)).toContain("connectedScreenSkipped> true");
+    await makeRepository().markConnectedScreen(INSTANCE, true, null);
+    const [, saved, options] = vi.mocked(writeDocument).mock.calls[0];
+    expect(options.whole).toBe(true);
+    expect(getBoolean(getThing(saved, `${DOCUMENT}#it`)!, SM.connectedScreenSkipped)).toBe(true);
   });
 });
 
@@ -370,7 +368,7 @@ describe("upgradePreferences", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(older());
     const checkWrite = vi.fn(async () => undefined);
     await expect(makeRepository(checkWrite).upgradePreferences(INSTANCE)).resolves.toBe(true);
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(DOCUMENT);
     const thing = getThing(saved as Dataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(7);
@@ -383,10 +381,8 @@ describe("upgradePreferences", () => {
   it("writes nothing for preferences up to date, none, or no preferences document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
     await makeRepository().savePreferences(INSTANCE, DEFAULT_PREFERENCES);
-    const current = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Parameters<
-      typeof setThing
-    >[0];
-    vi.mocked(saveSolidDatasetAt).mockReset();
+    const current = vi.mocked(writeDocument).mock.calls[0][1] as Parameters<typeof setThing>[0];
+    vi.mocked(writeDocument).mockReset();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(current as never);
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
@@ -402,6 +398,6 @@ describe("upgradePreferences", () => {
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });

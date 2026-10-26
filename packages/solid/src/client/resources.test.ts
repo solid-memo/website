@@ -19,7 +19,7 @@ import {
   getSolidDatasetLinear,
   overwriteFile,
   parseQuads,
-  saveSolidDatasetAt,
+  writeDocument,
 } from "./resources";
 
 const URL_ = "https://pod.example/decks/deck.ttl";
@@ -67,7 +67,7 @@ describe("HttpError", () => {
 
   it("is what a refused write rejects with", async () => {
     const { fetch } = pod(412, "");
-    await expect(saveSolidDatasetAt(URL_, createSolidDataset(), { fetch })).rejects.toMatchObject({
+    await expect(writeDocument(URL_, createSolidDataset(), { fetch })).rejects.toMatchObject({
       statusCode: 412,
     });
   });
@@ -108,8 +108,8 @@ describe("writing resources", () => {
         .addStringNoLocale(`${EX}p`, "x")
         .build(),
     );
-    const saved = await saveSolidDatasetAt(URL_, dataset, { fetch });
-    expect(getThing(saved, `${URL_}#a`)).not.toBeNull();
+    const saved = await writeDocument(URL_, dataset, { fetch });
+    expect(getThing(saved.dataset, `${URL_}#a`)).not.toBeNull();
     await deleteSolidDataset(URL_, { fetch: pod(204).fetch });
     expect(requests.map(({ method, headers }) => [method, headers.get("If-None-Match")])).toEqual([
       ["PUT", "*"],
