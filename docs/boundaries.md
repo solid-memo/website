@@ -1,51 +1,49 @@
 # Boundaries
 
-Import rules between packages. These are the load-bearing walls of the
-codebase; a change that violates them is wrong even if it works.
+Import rules between packages: a change that breaks them is wrong even
+when it works.
 
 ## Enforcement
 
-`npm run check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts),
-run by `npm run check` and in CI) reads every import of every workspace
-package and fails on:
+`npm run check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts))
+runs in `npm run check` and in CI. It reads every workspace package's
+imports and fails on:
 
 - a relative import that leaves its package;
-- an import of a workspace package its layer may not use (the table
-  below), or from a file that may not use it, or a static import of one
-  that may only be loaded lazily, or an entry point of one other than
-  those it may use (`site` takes only `tooling/root` of `vocab`);
-- an import of any package its `package.json` does not declare — npm
-  hoists every dependency to the root, so an undeclared import would
-  otherwise resolve and pass the type check;
+- a workspace package the layer or the importing file may not use
+  (the table below);
+- a static import of a package that may only be loaded lazily;
+- an entry point the importer may not use;
+- an import of a package the importer's `package.json` doesn't
+  declare (npm hoists it to the root, where it would still resolve and
+  type-check);
 - a node-only import (`node:*`, `n3`, `@solid-memo/turtle`,
-  `@solid-memo/site`, any package's `tooling/` or `node/` entry) in code that runs in the
-  browser.
+  `@solid-memo/site`, any package's `tooling/` or `node/` entry) in
+  browser code;
 - an import of `@inrupt/solid-client`'s access control from any file
-  but the release publisher's, tests aside
-  ([below](#access-control)).
+  but the release publisher's, tests aside ([below](#access-control)).
 
-Test files follow the same rules as their subject; they and the vitest
-configs may also use the shared test tooling of the root `package.json`.
+Test files follow their subject's rules and, like the vitest configs,
+may use the root `package.json`'s shared test tooling.
 
 ### An example
 
-A screen in `ui` may use what the use cases give it, since `ui` may
-import `application` (the [table](#layers) below):
+A screen in `ui` may import `application` (the [table](#layers)
+below):
 
 ```ts
 // packages/ui/src/ui/DeckListContainer.tsx
 import type { UseCases } from "@solid-memo/application/useCases";
 ```
 
-It may not reach for an adapter, such as the guest's pod in `solid`:
+It may not import an adapter, such as the guest's pod in `solid`:
 
 ```ts
 // packages/ui/src/ui/SomeScreen.tsx
 import { createLocalPod } from "@solid-memo/solid/localPod";
 ```
 
-The check names the file and the rule, once for each problem, and
-fails:
+The check names the file and rule per problem, and fails:
 
 ```text
 packages/ui/src/ui/SomeScreen.tsx: @solid-memo/ui may not import @solid-memo/solid.
@@ -53,17 +51,17 @@ packages/ui/src/ui/SomeScreen.tsx: imports @solid-memo/solid, which package.json
 2 boundary problem(s).
 ```
 
-The fix is a use case: the screen calls one on `UseCases`, and
-`composition` wires the adapter behind its port. A package that may
-import another only from some files says which. Importing the
-composition root anywhere in `apps/web` but its entry point gives:
+The fix is a use case on `UseCases`, with `composition` wiring the
+adapter behind its port. A rule that allows only some files names them;
+importing the composition root anywhere in `apps/web` but its entry
+point gives:
 
 ```text
 apps/web/src/App.tsx: only files matching /^src\/main\.tsx$/ may import @solid-memo/composition.
 ```
 
-When every import keeps to the rules, the check prints "Every package
-keeps to its boundaries."
+With no problem, the check prints "Every package keeps to its
+boundaries."
 
 ## Layers
 
@@ -72,7 +70,7 @@ keeps to its boundaries."
 | `turtle` | — | |
 | `markdown` | — | |
 | `vocab` | `turtle` | `turtle`: `tooling/` only |
-| `site` | `vocab`, `turtle`, `markdown` | `vocab`: `tooling/root` alone, where the repository's folders are; `turtle` to read the docs' index ([markdown.md](markdown.md#the-docs-index)); `markdown` to read the docs, which it renders ([markdown.md](markdown.md#the-docs-as-a-site)) |
+| `site` | `vocab`, `turtle`, `markdown` | `vocab`: `tooling/root` alone (the repository's folders); `turtle` for the docs' index ([markdown.md](markdown.md#the-docs-index)); `markdown` to render the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |
 | `shacl` | `domain`, `vocab`, `turtle`, `markdown` | `turtle`, `markdown`: `node/` only |
@@ -80,32 +78,32 @@ keeps to its boundaries."
 | `browser` | `application`, `domain` | |
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
-| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `site` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()`; `site`: `vite.config.ts` and tests only, the site's build, which renders the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
+| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `site` | `composition`, and `studio` with a dynamic `import()`: `src/main.tsx` only; `site`: `vite.config.ts` (the site's build, which renders the docs) and tests only |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
-| `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for the app's messages and the Studio's |
+| `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for their messages |
 
-Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
-`solid`, `browser`, `composition`, `ui`, `web` and `studio`; `vocab`'s
-`tooling/`, `turtle` and `site` are node-only.
+Browser code is the `src/` of `markdown`, `vocab`, `domain`,
+`application`, `shacl`, `solid`, `browser`, `composition`, `ui`, `web`
+and `studio`.
 
 ## Vendor libraries
 
-Each is a dependency of only the packages listed (and so, by the check,
-used nowhere else):
+Each library is a dependency of, and allowed in, only the packages
+listed:
 
 | Library | Package | Notes |
 |---|---|---|
-| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents; deck files are written and read with it too ([below](#files-without-a-vendor-library)); its access control (universal access, ACP, the ACL functions) only in `src/solidReleasePublisher.ts` ([below](#access-control)) |
-| `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` to render the page and `App.tsx`, the page; in `studio`, its screens |
-| `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the docs' diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
+| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` uses `@inrupt/solid-client` to parse shapes; deck files use it ([below](#files-without-a-vendor-library)); its access control only in `src/solidReleasePublisher.ts` ([below](#access-control)) |
+| `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | components; in `web`, `main.tsx`, which renders the page, and `App.tsx`, the page; in `studio`, its screens |
+| `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
-| `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
+| `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser`, `composition` | tests only: IndexedDB in node, for the guest's pod's store |
-| `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness also talks to the Solid server with its request API |
+| `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness talks to the Solid server with its request API |
 | `@axe-core/playwright` | `e2e-journeys` | `pages/App.ts` only: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
-| `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, never in the browser (the check holds both node-only): Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, so Mermaid's packages before 1.0.0 are not shipped ([vendor-code.md](vendor-code.md#maturity)) |
+| `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, both node-only in the check: Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, not shipped ([vendor-code.md](vendor-code.md#maturity)) |
 
 ## Files without a vendor library
 
@@ -113,112 +111,110 @@ A deck saved as a file, or read from one ([studio.md](studio.md#import-and-expor
 needs no library of its own:
 
 - `solid` writes Turtle with `@inrupt/solid-client`'s
-  `solidDatasetAsTurtle`, and reads Turtle and JSON-LD with its
-  `getTurtleParser` and `getJsonLdParser`. JSON-LD is written by
+  `solidDatasetAsTurtle` and JSON-LD with
   [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
-  triples. n3 and `@solid-memo/turtle` stay out of the browser.
-- `browser` saves and opens files with what the browser has
-  ([fileExchange.ts](../packages/browser/src/fileExchange.ts)): a `Blob`
-  behind a link with `download`, and a hidden `<input type="file">`.
-  It is the `FileExchange` port; the UI never touches a file itself.
+  triples. It reads both with the library's `getTurtleParser` and
+  `getJsonLdParser`.
+- `browser`'s `FileExchange` port saves and opens files with what the
+  browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):
+  a `Blob` behind a link with `download`, and a hidden
+  `<input type="file">`. The UI never touches a file.
 
 ## Access control
 
-The app changes who may read something in one place only: a release it
-publishes is made readable by everyone
-([studio.md](studio.md#publishing-a-release)). That write is confined to
-the `ReleasePublisher` port's adapter,
+The app changes access in one place only: a published release becomes
+readable by everyone ([studio.md](studio.md#publishing-a-release)).
+Only the `ReleasePublisher` port's adapter,
 [solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
-which calls `@inrupt/solid-client`'s `universalAccess.setPublicAccess`
-for the release's document alone, asking read and nothing else. The
-library writes that document's own ACL (Web Access Control) or ACR
-(Access Control Policies). The fetch it is given takes only that one:
-a request to another origin, or a write of anything but
-`<release>.acl` or `<release>.acr`, is refused, whatever the server
-names as the release's access control. No other module imports
-`universalAccess`, or writes an ACL or an ACR; no folder's access
-control is changed.
-`npm run check:boundaries` enforces the imports
-([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`):
-outside tests, only that file may import `@inrupt/solid-client`'s access
-control (`universalAccess`, the `acp_*` modules, the ACL functions), or
-all of the library at once (`import * as`). That no other module
-writes an ACL or an ACR with a plain request, the pod fence holds
-while the app runs (below).
+makes that write: `@inrupt/solid-client`'s
+`universalAccess.setPublicAccess`, read only, for the release's
+document, writing its own ACL (Web Access Control) or ACR (Access
+Control Policies). The publisher's fetch refuses another origin, or a
+write of anything but `<release>.acl` or `<release>.acr`, whatever the
+server names as the release's access control. No folder's access
+control changes.
+
+`npm run check:boundaries`
+([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`)
+lets only that file, outside tests, import `@inrupt/solid-client`'s
+access control (`universalAccess`, the `acp_*` modules, the ACL
+functions) or all of the library (`import * as`). At run time, the
+[pod fence](#the-pod-fence) refuses any other module's ACL or ACR
+write.
 
 ## The pod fence
 
-Every pod adapter is given one fetch
-([appUseCases.ts](../packages/composition/src/appUseCases.ts)), and it
-passes two fences before it reaches the guest's pod or the network:
+Every pod adapter's one fetch
+([appUseCases.ts](../packages/composition/src/appUseCases.ts)) passes
+two fences before the guest's pod or the network:
 
 - **The pod fence**
   ([podFence.ts](../packages/solid/src/podFence.ts), `createPodFence`)
-  lets every read (GET, HEAD, OPTIONS) through. A request of any other
-  method is refused before it is sent (`writeRefused`) unless its
-  address is one Solid Memo may write to (`isSafeWriteUrl` in
-  [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)):
-  in the form a request sends it, http(s) with no query or fragment,
-  with no dot segment, no empty segment (`//`), nothing encoded a
-  server might read as a step elsewhere or as another name (an encoded
-  slash, backslash or percent sign, an overlong byte, a letter or digit
-  encoded), and not an access control or metadata resource (`.acl`,
-  `.acr`, `.meta`, in any case). Addresses come from pod data anyone
-  may have written, so the fence holds whichever code sends the write.
-  Which documents an instance's code may write is still the adapters'
-  to check, where the instance is known
-  ([data-model.md](data-model.md#where-an-instances-documents-are)):
+  lets reads (GET, HEAD, OPTIONS) through and refuses other methods
+  before they're sent (`writeRefused`), unless the address is safe to
+  write (`isSafeWriteUrl` in
+  [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). Such
+  an address, as sent:
+  - is http(s), with no query, fragment, dot segment or empty segment
+    (`//`);
+  - has nothing encoded a server might read as a step elsewhere or
+    another name: a slash, backslash, percent sign, letter or digit, or
+    an overlong byte;
+  - isn't an access control or metadata resource (`.acl`, `.acr`,
+    `.meta`, in any case).
+
+  It holds for every write and sender (addresses come from pod data
+  anyone may have written). Where the instance is known,
+  adapters still check which documents its code may write
+  ([data-model.md](data-model.md#where-an-instances-documents-are));
   the type index, the profile link, registrations, releases and copies
-  are written outside instances too.
+  are written outside instances.
 - **The write fence**
   ([writeFence.ts](../packages/solid/src/writeFence.ts)) keeps an
   instance being moved or copied read-only
   ([guest-mode.md](guest-mode.md)).
 
-The release publisher alone gets a second fetch for the access control
-it writes: the same fences, its pod fence letting a document's own ACL
-or ACR (`<document>.acl`, `<document>.acr`) through, never a folder's.
-It uses it only inside its own check, which allows the release's two
-([Access control](#access-control)). A Studio trial never writes a
-pod: its fetch refuses every method but GET and HEAD
-([studio.md](studio.md#the-trial)).
+The release publisher alone gets a second fetch for its access
+control, through the same fences, whose pod fence lets a document's own
+ACL or ACR (`<document>.acl`, `<document>.acr`) through, never a
+folder's. It's used only inside the publisher's check, which allows the
+release's two ([Access control](#access-control)). A Studio trial's
+fetch allows only GET and HEAD ([studio.md](studio.md#the-trial)).
 
 ## Further rules
 
-- UI components never import ports or adapters. They receive `UseCases`,
-  or the slices of it they use, as a prop.
+- UI components never import ports or adapters; they get `UseCases`,
+  or the slices they use, as a prop.
 - Generated files (`packages/vocab/src/*.generated.ts`) are never edited
   by hand: change the vocabulary or the shapes in `ns/` and run
   `npm run generate` ([shapes.md](shapes.md), [vocab.md](vocab.md)).
 - Modules reachable from `vite.config.ts` spell out `.ts` on relative
-  imports: Vite can load the config with Node's own loader, which needs
-  them. Imports between packages go through `exports` and carry no
-  extension.
+  imports. Vite can load the config with Node's own loader, which
+  needs them.
+  Imports between packages go through `exports`, with no extension.
 - Only `composition` wires the layers together
   ([appUseCases.ts](../packages/composition/src/appUseCases.ts), and a
   Studio trial's [trialUseCases.ts](../packages/composition/src/trialUseCases.ts)),
-  every port, or a "none" it means, such as a trial's `NO_DEVICE`. The
-  site's `apps/web/src/main.tsx` calls `@solid-memo/composition`, with
-  what is its own (its name, where it is served, the build's values),
-  and renders its components.
-- The Studio is loaded lazily: `apps/web/src/main.tsx` alone imports
-  `@solid-memo/studio`, with `import()`, so the Studio stays a chunk of
-  its own that learners never download ([studio.md](studio.md)).
-- The site's stylesheet is `ui`'s `src/style.css`, which
-  `apps/web/src/main.tsx` imports; it styles `ui`'s components, and
-  none that only the Studio shows. Its colors are the roles of
-  `src/palettes.css`, which it imports itself ([theme.md](theme.md#color-roles)). The Studio's own,
-  `apps/studio/src/ui/studio.css`, is imported by its shell alone
-  (`shell/StudioShell.tsx`, a relative import inside the package), so
-  it ships with the Studio's chunk, and every rule in it holds only
-  under `:root[data-surface="studio"]`
-  ([studio.md](studio.md#layout)).
+  every port, or a "none" it means, such as a trial's `NO_DEVICE`.
+  `apps/web/src/main.tsx` calls `@solid-memo/composition` with the
+  site's own values (its name, where it's served, the build's), and
+  renders its components.
+- The Studio is loaded lazily (the [table](#layers)), a chunk of its
+  own that learners never download ([studio.md](studio.md)).
+- `ui`'s `src/style.css`, the site's stylesheet, imported by
+  `apps/web/src/main.tsx`, styles `ui`'s components (none only the
+  Studio shows) with the color roles of `src/palettes.css`, which it
+  imports ([theme.md](theme.md#color-roles)).
+- The Studio's stylesheet, `apps/studio/src/ui/studio.css`, imported
+  only by `shell/StudioShell.tsx` (a relative import inside the
+  package), so it ships in the Studio's chunk. Its rules hold only under
+  `:root[data-surface="studio"]` ([studio.md](studio.md#layout)).
 
 ## Adding a dependency
 
-1. Decide which single package it belongs to, and add it to that
-   package's `package.json` (`npm install <lib> -w @solid-memo/<package>`).
-2. If it performs I/O, wrap it behind a port in
-   `packages/application/src/ports.ts` and implement the port in an
-   adapter package.
+1. Add it to the one package it belongs to
+   (`npm install <lib> -w @solid-memo/<package>`).
+2. If it performs I/O, put it behind a port in
+   `packages/application/src/ports.ts`, implemented in an adapter
+   package.
 3. Add it to the vendor table above.

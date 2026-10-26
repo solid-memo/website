@@ -1,18 +1,17 @@
 # Deployment
 
 Solid Memo builds to plain static files — no server-side code — so it
-publishes to any static host. The primary path is GitHub Pages,
-deployed automatically by CI, one released version at a time.
+publishes to any static host. The main path is GitHub Pages, which CI
+deploys one released version at a time.
 
 ## GitHub Pages (automatic)
 
-This deployment is live at **<https://solid-memo.com/>**, and it runs a
-released version, never a commit between two versions
+This deployment is live at **<https://solid-memo.com/>** and runs a
+released version, never a commit between two
 ([releasing.md](releasing.md)). `.github/workflows/deploy.yml` runs when
-the CI workflow has finished on `main` (`workflow_run`), and deploys
-only if CI passed on a release commit, the one a version tag
-(`vX.Y.Z`) names, and only the newest version, once its GitHub release
-is made:
+the CI workflow has finished on `main` (`workflow_run`). It deploys only
+if CI passed on a release commit, the one a version tag (`vX.Y.Z`)
+names, and only the newest version, once its GitHub release is made:
 
 ```mermaid
 flowchart LR
@@ -27,117 +26,99 @@ flowchart LR
     release -->|"yes, by hand"| check["npm run check,<br/>npm run build"] --> guard
 ```
 
-A red CI run never deploys, and neither does a green one on a commit
-that is not a release. Only `main` deploys, and only from this
-repository:
+Only `main` deploys, and only from this repository:
 
-- **After CI on a release.** A release ([releasing.md](releasing.md))
-  follows a green CI run on `main`, in a workflow of its own. It pushes
-  a commit to `main` that sets the new version,
-  `chore(release): X.Y.Z`, and tags it `vX.Y.Z`. CI runs on that commit,
-  testing nothing again, as the code is its parent's: it takes over the
-  site the run that tested its parent built, the build the user
-  journeys ran on ([releasing.md](releasing.md#what-each-stage-checks)).
-  Once it passes, the deploy ships that site
-  ([below](#the-build-ci-tested)), so the site's footer shows the new
-  version. The deploy looks for a version
-  tag that names the commit CI checked, and deploys nothing when there
-  is none: any other push to `main`, a merged pull request or a
-  Renovate update, goes live with the next version, which includes it.
-  Only a plain version tag counts (`vX.Y.Z`, no `-rc.1`). The tag is
-  pushed just after the release commit and is there long before CI on
-  it has finished; for a release commit, the deploy still looks again
-  for about two minutes before it gives up.
-- **Only the newest release.** A tag is not enough. The deploy also
-  checks that the tag is the newest version on `main` (the highest
-  `vX.Y.Z` tag), that the commit it names is that version's release
-  commit (`chore(release): X.Y.Z`), and that the version has a GitHub
-  release, which semantic-release makes seconds after the tag, so it
-  looks again for about a minute. A re-run of CI, or of the deploy, on
-  an older release commit then deploys nothing, and says so in a
-  notice: the site never goes back to an older version. When the
-  newest version's tag names another commit, or the version has no
-  GitHub release, the run fails and deploys nothing
-  ([releasing.md](releasing.md#when-a-release-fails)), so the site never
-  runs a version the releases page does not list. The deploy job looks
-  for the newest version again just before it deploys, so re-running
-  only the failed jobs of an older run cannot put that version back
-  either.
-- **Only this repository's pushes.** CI also runs on pull requests, a
-  fork's included ([testing.md](testing.md#continuous-integration)),
-  and a fork's branch may be named `main` too. So the deploy checks that
-  the CI run it follows was for a push to `main` in this repository
-  (`workflow_run.event`, `head_branch` and `head_repository`), and
-  skips any other. CI never cancels a run on `main`, and a run of CI by
-  hand has a concurrency group of its own, so it cannot cancel the push
-  run a deploy waits for. Push runs on `main` go one at a time, and a
-  newer push replaces one waiting, except a release commit's, which has
-  a group of its own, so a newer push cannot hold back its deploy
-  ([testing.md](testing.md#continuous-integration)). Deploys that may
-  deploy, by hand or after CI on a release commit, go one at a time
-  (concurrency group `pages`), none canceled; a newer one replaces one
-  waiting, and deploys the same version or a newer one. Any other run
-  has a group of its own, so it cannot replace a release's deploy. A
-  re-run of CI on an older release commit is the exception: nothing
-  tells it apart before it runs, so it may replace a newer release's
-  deploy waiting its turn, and then deploys nothing. If it did, run the
-  deploy by hand.
+- **After CI on a release.** The release workflow follows a green CI
+  run on `main`: it pushes a commit to `main` that sets the new
+  version, `chore(release): X.Y.Z`, and tags it `vX.Y.Z`. CI on that
+  commit tests nothing again and takes over the site its parent's run
+  built ([releasing.md](releasing.md#what-each-stage-checks)). Once
+  that run passes, the deploy ships the site
+  ([below](#the-build-ci-tested)), with the new version in the footer.
+  A commit without a version tag isn't
+  deployed: any other push to `main`, such as a merged pull request or
+  a Renovate update, goes live with the next version. Only a plain
+  version tag counts (`vX.Y.Z`, no `-rc.1`). For a release commit, the
+  deploy looks again for the tag for about two minutes.
+- **Only the newest release.** The deploy checks that the tag is the
+  newest version on `main` (the highest `vX.Y.Z` tag), that it names
+  that version's release commit (`chore(release): X.Y.Z`), and that the
+  version has a GitHub release. semantic-release makes that release
+  seconds after the tag, so the deploy looks again for about a minute.
+  On an older release commit,
+  a re-run of CI or of the deploy deploys nothing and says so in a
+  notice, so the site never goes back to an older version. When the
+  newest tag names another commit, or the version has no GitHub
+  release, the run fails and deploys nothing
+  ([releasing.md](releasing.md#when-a-release-fails)), so the site
+  never runs a version the releases page doesn't list. The deploy job
+  checks again right before it deploys, so re-running an older run's
+  failed jobs can't put that version back.
+- **Only this repository's pushes.** The deploy follows only a CI run
+  for a push to `main` in this repository (`workflow_run.event`,
+  `head_branch` and `head_repository`), not a pull request's
+  ([testing.md](testing.md#continuous-integration)), even a fork's
+  branch named `main`.
+- **Concurrency.** CI never cancels a run on `main`. Push runs on
+  `main` go one at a time, and a newer push replaces one waiting. A run
+  of CI by hand has a group of its own (it can't cancel the push run a
+  deploy waits for), and so does a release commit's run (a newer push
+  can't hold back its deploy). Deploys by hand or after CI on a release
+  commit go one at a time (group `pages`), none canceled; a newer one
+  replaces one waiting and deploys the same version or a newer one. Any
+  other run has a group of its own, so it can't replace a release's
+  deploy. Exception: a re-run of CI on an older release commit may
+  replace a newer release's waiting deploy and deploy nothing. If it
+  does, run the deploy by hand.
 - **By hand** (Actions › Deploy to GitHub Pages › Run workflow, from
   `main`; from any other branch the job is skipped). It deploys the
-  newest version, the highest `vX.Y.Z` tag on `main`, not `main` as it
-  is, so it puts the site back on that version, after a deploy that
-  failed, say. It checks that version as above: its release commit and
-  its GitHub release.
-  No CI run is behind it, so it runs `npm run check` on that version
-  and builds it, Chromium installed first
-  ([.github/actions/chromium](../.github/actions/chromium/action.yml)),
-  as the build draws the docs' diagrams ([markdown.md](markdown.md#diagrams)).
-  It has no Turbo cache, so it takes about as long as CI's `check` and
-  `site` jobs one after the other.
+  newest version, not the head of `main`, for example to put the site
+  back on it after a failed deploy, and checks its release commit and
+  GitHub release as above. It installs Chromium
+  ([.github/actions/chromium](../.github/actions/chromium/action.yml))
+  for the docs' diagrams ([markdown.md](markdown.md#diagrams)), runs
+  `npm run check` on that version, and builds it. Without a Turbo
+  cache, it takes about as long as CI's `check` and `site` jobs in a
+  row.
 
-The workflow enables Pages for the repository on its first run, and
-stops before deploying if the vocabulary, the deck library or the docs
-are missing from the site, or the docs' diagrams were not drawn. CI's
-checks of `ns/` and `decks/`, the comparison of the deck library with
-its base included
-([deck-library.md](deck-library.md#checks)), are among those a deploy
-waits for. The `github-pages`
-environment should also be limited to `main` in the repository's
-settings (Settings › Environments), so nothing but this workflow's runs
-on `main` can deploy. The workflow runs from `main` even when it deploys
-a tag, so that limit holds. Since a tag picks what is deployed, version
-tags must be protected too: a ruleset on `refs/tags/v*` lets only the
-release's deploy key and an admin create them
+The workflow enables Pages on its first run, and stops before
+deploying if the site lacks the vocabulary, the deck
+library or the docs, or the docs' diagrams weren't drawn. A deploy
+waits for CI's checks of `ns/` and `decks/`, among them the deck
+library's comparison with its base
+([deck-library.md](deck-library.md#checks)). The `github-pages`
+environment should be limited to `main` (Settings › Environments), so
+only this workflow's runs on `main` can deploy; the workflow runs from
+`main` even when it deploys a tag. Version tags must be protected
+too, since a tag picks what's deployed: a ruleset on `refs/tags/v*`
+lets only the release's deploy key and an admin create them
 ([releasing.md](releasing.md#the-deploy-key)).
 
 ### The build CI tested
 
-After CI on a release commit, the deploy builds nothing. It downloads
-the `site` artifact of that CI run: the site the run that tested the
-release commit's parent built, the merge queue's as a rule, which every
-user journey ran on, and which the release commit's run took over (its
-`reuse` job); or the release commit's own build, when that run tested
-its tree
-([releasing.md](releasing.md#what-each-stage-checks)). So the site
-deployed is the one tested, and a deploy cannot fail on what a build
-would fetch, Chromium or its system libraries.
+After CI on a release commit, the deploy builds nothing: it downloads
+that run's `site` artifact. As a rule, that's the site the merge
+queue's run built for the parent, which every user journey ran on and
+the release commit's run took over (its `reuse` job). When the release
+commit's run tested its tree, it's that run's own build
+([releasing.md](releasing.md#what-each-stage-checks)). The site
+deployed is the one tested, and a deploy can't fail on what a build
+fetches, such as Chromium or its system libraries.
 
-That site was built before the release wrote the new version, so it
-states the version before it. The version is stated in the pages
-alone, never in the scripts, whose files are named by a hash of their
-content ([configuration.md](configuration.md#what-a-build-computes)),
-so `npm run site:version -- apps/web/dist`
-([siteVersion.ts](../scripts/siteVersion.ts)) puts the released one,
-from the release commit's `package.json`, in the app's page
-(`index.html`, which the footer and error reports read it from) and in
-the header of every page of the docs, and changes nothing else. It
-refuses a site with a page that states no version. The site still
-names the commit it was built from, in the footer and in the docs'
-links into the repository: as a rule the release commit's parent, which
-is on `main` with the same code and docs as the release commit, or the
-release commit itself when its run tested its tree. A version released
-before the site was kept this way has no such artifact, so a deploy
-after CI on its release commit builds it, as deploys did then.
+That site states the version before the release, and only its pages
+state it; the scripts' files are named by a hash of their content
+([configuration.md](configuration.md#what-a-build-computes)).
+`npm run site:version -- apps/web/dist`
+([siteVersion.ts](../scripts/siteVersion.ts)) writes the released
+version, from the release commit's `package.json`, into the header of
+every docs page and into `index.html`, where the footer and error
+reports read it. It changes nothing else, and refuses a site with a
+page that states no version. The footer and the docs' links into the
+repository still name the commit the site was built from. As a rule
+that's the parent, which is on `main` with the release commit's code
+and docs, or the release commit when its run tested its tree. A version
+released before sites were kept this way has no such artifact, so a
+deploy after CI on its release commit builds it.
 
 ### What the artifact contains
 
@@ -147,26 +128,26 @@ data it reads:
 | Path | From | What |
 |---|---|---|
 | `/` (`index.html`, `assets/`) | `apps/web/`, `apps/studio/` | The app, [Solid Memo Studio](studio.md) at `#/studio` included, in a chunk of its own under `assets/`. |
-| `/about/index.html` | `apps/web/public/about/` | What Solid Memo is, for learners, deck authors, technologists and decision makers: plain HTML, in English, that search engines and browsers without script can read. It runs no script, so it follows the browser's light or dark, not the theme chosen in the app; [aboutPage.test.ts](../apps/web/src/aboutPage.test.ts) checks its policy and its links. It has a link preview of its own (`og:` and `twitter:` tags), with the site's picture. `sitemap.xml` lists it, the app's footer links to it, and so does the site's page in a `<noscript>`. Its links to the docs lead to `/docs/` on the same site. |
-| `/clientid.jsonld` | written by the build, from [CNAME](../CNAME) and `VITE_APP_NAME` | The site's Client ID Document, which identity providers read when a user logs in on the domain in `CNAME` ([authentication.md](authentication.md#the-client-id-document)). Pages serves it as `application/ld+json`. Without a `CNAME`, there is none. |
-| `/robots.txt`, `/sitemap.xml` | written by the build, from [CNAME](../CNAME) | `robots.txt` keeps search engines out of `/journeys/`, the report's old address, and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, except a page whose `<meta name="robots">` says `noindex` (the Studio's and the journeys' report's old addresses), on the domain in `CNAME` ([below](#custom-domain-optional)). Without a `CNAME`, there is no sitemap, and `robots.txt` names none. |
-| `/docs/` (`index.html`, `<page>/index.html`, `diagrams/`, `docs.css`) | [`docs/`](README.md), rendered by the build | These docs as static pages, in English, at the version deployed: the README at `/docs/`, with the list of pages from their index, [docs.ttl](docs.ttl), and every other page at `/docs/<page>/` ([markdown.md](markdown.md#the-docs-as-a-site)). Like the About page they run no script, so they follow the browser's light or dark. Their diagrams are drawn as the site is built, light and dark, as SVG files in `diagrams/` with the font's license, `OFL-Fredoka.txt`, beside them. Their links into the repository lead to `VITE_REPO_URL` at the commit built ([configuration.md](configuration.md#vite_repo_url)). The app's footer, the About page, the site's page in a `<noscript>`, and `publiccode.yml`'s `documentation` link to `/docs/`. These addresses may change in any version: they are not part of the public API ([releasing.md](releasing.md#the-public-api)). |
+| `/about/index.html` | `apps/web/public/about/` | What Solid Memo is, for learners, deck authors, technologists and decision makers: plain HTML in English that search engines and browsers without script can read. It runs no script, so it follows the browser's light or dark, not the app's theme. [aboutPage.test.ts](../apps/web/src/aboutPage.test.ts) checks its policy and links. It has its own link preview (`og:` and `twitter:` tags), with the site's picture. `sitemap.xml` lists it; the app's footer and the site's page in a `<noscript>` link to it. Its docs links lead to `/docs/` on the same site. |
+| `/clientid.jsonld` | written by the build, from [CNAME](../CNAME) and `VITE_APP_NAME` | The site's Client ID Document, which identity providers read when a user logs in on the domain in `CNAME` ([authentication.md](authentication.md#the-client-id-document)). Pages serves it as `application/ld+json`. Without a `CNAME`, there's none. |
+| `/robots.txt`, `/sitemap.xml` | written by the build, from `CNAME` | `robots.txt` keeps search engines out of `/journeys/`, the report's old address, and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, on the domain in `CNAME` ([below](#custom-domain-optional)), except a page whose `<meta name="robots">` says `noindex`: the Studio's and the journeys' report's old addresses. Without a `CNAME`, there's no sitemap, and `robots.txt` names none. |
+| `/docs/` (`index.html`, `<page>/index.html`, `diagrams/`, `docs.css`) | [`docs/`](README.md), rendered by the build | These docs as static pages in English at the deployed version, the README at `/docs/` listing the pages from [docs.ttl](docs.ttl), with diagrams drawn as SVG files in `diagrams/` and links into the repository at `VITE_REPO_URL` ([configuration.md](configuration.md#vite_repo_url)) at the commit built ([markdown.md](markdown.md#the-docs-as-a-site)). Like the About page, they run no script and follow the browser's light or dark. The app's footer, the About page, the site's page in a `<noscript>`, and `publiccode.yml`'s `documentation` link to `/docs/`. These addresses may change in any version: they aren't part of the public API ([releasing.md](releasing.md#the-public-api)). |
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
 | `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
 | `/journeys/index.html` | `apps/web/public/journeys/` | The user journeys' report's old address: a page that sends `/journeys/#x` on to `https://journeys.solid-memo.com/#x`, where the report now lives ([below](#the-journeys-report)). |
 
-Vite copies `ns/`, `decks/` and `vendor/` as they are
+Vite copies `ns/`, `decks/` and `vendor/` unchanged
 (`turtleDirectoryPlugin` in
 [publishTurtle.ts](../packages/site/src/publishTurtle.ts)), and
 serves them the same way in `npm run dev` and `npm start`.
 
 Pages serves a `.ttl` file as `text/turtle` with
-`Access-Control-Allow-Origin: *`, so any app or tool can read it, but
-it negotiates no content and lists no folders: an address without the
-extension, or a folder such as `/decks/`, is a 404. That is why every
-IRI of the vocabulary, the shapes and the library ends in `.ttl`.
+`Access-Control-Allow-Origin: *`. It negotiates no content and lists no
+folders (an address without the extension, or a folder such as
+`/decks/`, is a 404), so every IRI of the vocabulary, the shapes and
+the library ends in `.ttl`.
 
 One-time setup on a new machine or fork:
 
@@ -175,68 +156,71 @@ gh auth login
 gh repo create <user>/solid-memo --public --source . --push
 ```
 
-(GitHub Pages on the free plan requires a public repository.) The
-deploy workflow deploys only a commit a version tag names, so a fork
-deploys its own changes once it releases versions of its own, with a
-deploy key of its own ([releasing.md](releasing.md#the-deploy-key)).
-It deploys to `https://<user>.github.io/<repository>/`; its app works there,
-but the IRIs it reads still name `https://solid-memo.com/`, which
-`siteFetch` ([appUseCases.ts](../packages/composition/src/appUseCases.ts)) maps to wherever the
-site is served. A fork gives its build its own name, repository link and
-Pod providers in `VITE_` variables ([configuration.md](configuration.md)),
-and [reuse.md](reuse.md) walks through running a copy.
+GitHub Pages on the free plan requires a public repository. A fork
+deploys its changes once it releases its own versions, with its own
+deploy key ([releasing.md](releasing.md#the-deploy-key)), to
+`https://<user>.github.io/<repository>/`, where its app works. The
+vocabulary, shape and library IRIs name `https://solid-memo.com/` on
+any domain; `siteFetch`
+([appUseCases.ts](../packages/composition/src/appUseCases.ts)) maps
+them to wherever the site is served
+([reuse.md](reuse.md#what-stays-the-same)). A fork sets its own name,
+repository link and Pod providers in `VITE_` variables
+([configuration.md](configuration.md)); [reuse.md](reuse.md) walks
+through running a copy.
 
 ## The journeys' report
 
 The user journeys' report ([testing.md](testing.md#user-journeys)),
 every browser's in one with each journey's trace, is published at
-<https://journeys.solid-memo.com/>, a site of its own, not beside the
-app, so the report, which is Playwright's scripts, does not run on the
-app's origin. After the site is deployed, the deploy workflow's `journeys`
-job takes the `journeys-report` artifact of the CI run on the release
-commit and force-pushes it, as one commit with no parent, over `main`
-of the repository [solid-memo/journeys](https://github.com/solid-memo/journeys),
-which GitHub Pages serves from that branch. So that repository holds no
-code, only the newest report, with beside it a `CNAME` naming the
-domain, a `.nojekyll`, so Pages serves the files as they are, and a
-`robots.txt` that keeps search engines out. A deploy by hand has no CI
-run, so it publishes no report, and the last one stays.
+<https://journeys.solid-memo.com/>, a site of its own, so Playwright's
+scripts don't run on the app's origin. After the site is deployed, the
+deploy workflow's `journeys` job force-pushes the `journeys-report`
+artifact of the CI run on the release commit, as one commit with no
+parent, over `main` of
+[solid-memo/journeys](https://github.com/solid-memo/journeys), which
+GitHub Pages serves from that branch. That repository holds only the
+newest report, a `CNAME` naming the domain, a `.nojekyll` so Pages
+serves the files unchanged, and a `robots.txt` that keeps search
+engines out. A deploy
+by hand publishes no report, and the last one stays.
 
-The report's own trace viewer is not published. It opens a trace from
-any address its `trace` parameter names, or that a page which opens it
-sends it, and shows that trace's pages on the site it is served from,
-so on `journeys.solid-memo.com` it would show anyone's pages at a
-solid-memo.com address. The job publishes
-[e2e/journeys/report/trace/](../e2e/journeys/report/trace/) in its
-place: an `index.html` at the address the report's **Trace** links
-open, which sends a trace of the report's, a file of its `data/` folder
-named as the report names a trace, on to Playwright's own copy of the
-viewer, <https://trace.playwright.dev/>, and any other trace nowhere;
-and a `sw.bundle.js` at the address of the viewer's service worker,
-which a browser that opened a trace before fetches as that worker's
-update, and which unregisters itself. That browser's next visit under
-`/trace/` is the one that fetches it, so the old worker still answers
-that visit; no answer from the site can come before it. The viewer at
-trace.playwright.dev fetches the trace from this site, which Pages
-serves with `Access-Control-Allow-Origin: *`; it needs no account and
+The report's own trace viewer isn't published. It opens a trace from
+any address its `trace` parameter names or a page sends it, and shows
+the trace's pages on the site that serves it: anyone's pages at a
+solid-memo.com address. In its place, the job publishes
+[e2e/journeys/report/trace/](../e2e/journeys/report/trace/), two files:
+
+- An `index.html` at the address the report's **Trace** links open. It
+  sends a trace of the report's, a file of its `data/` folder named as
+  the report names a trace, on to Playwright's own copy of the viewer,
+  <https://trace.playwright.dev/>. Any other trace goes nowhere.
+- A `sw.bundle.js` at the address of the viewer's service worker. A
+  browser that opened a trace before fetches it as that worker's
+  update on its next visit under `/trace/`, which the old worker still
+  answers, and the update unregisters itself.
+
+The viewer at trace.playwright.dev fetches the trace from this site
+(served with `Access-Control-Allow-Origin: *`), needs no account and
 sends the trace nowhere.
 
-Until v4.1.2 the report was published beside the app, at `/journeys/`.
-A browser that opened a trace there registered the trace viewer's
-service worker, and a registration outlives its script: the worker
-still loads any trace a link names and serves its pages on the app's
-origin. So the app, as it starts, unregisters every service worker
-under `journeys/` ([journeysWorkers.ts](../apps/web/src/journeysWorkers.ts));
-it registers none of its own.
+Until v4.1.2 the report was published at `/journeys/`. A browser that
+opened a trace there registered the viewer's service worker. The
+registration outlives its script, so the worker still loads any trace
+a link names and serves its pages on the app's origin. The app, as it
+starts, unregisters every service worker under `journeys/`
+([journeysWorkers.ts](../apps/web/src/journeysWorkers.ts)), and
+registers none of its own.
 
-The job pushes with a deploy key: its public half is the journeys
-repository's, with write access, and its private half is the secret
+The job pushes with a deploy key: the public half, with write access,
+is the journeys repository's, and the private half is the secret
 `JOURNEYS_DEPLOY_KEY` of the `journeys` environment here, which admits
 only `main`, as the `release` environment does
 ([releasing.md](releasing.md#the-deploy-key)). Without the secret, as
-in a fork, the job publishes nothing and says so. `journeys.solid-memo.com`
-is a `CNAME` record pointing at `solid-memo.github.io`, and the journeys
-repository's Pages settings name it, with HTTPS enforced.
+in a fork, the job publishes nothing and says so.
+`journeys.solid-memo.com` is a `CNAME` record pointing at
+`solid-memo.github.io`, and the journeys repository's Pages settings
+name it, with HTTPS enforced.
 
 ## Why any static host works, unconfigured
 
@@ -247,21 +231,21 @@ repository's Pages settings name it, with HTTPS enforced.
   `index.html` without rewrite rules.
 - The Solid OIDC redirect URL derives from the page's address at
   runtime. The only auth setting tied to an origin is the domain in
-  `CNAME`, which the build writes the Client ID Document for: the app
-  logs in with it on that domain alone, and on any other address it
+  `CNAME`, which the build writes the Client ID Document for. The app
+  logs in with it on that domain alone. On any other address it
   registers at each login, as it does without a `CNAME`
   ([authentication.md](authentication.md#the-client-id-document)).
-  HTTPS is required, which GitHub Pages provides.
+  HTTPS is required; GitHub Pages provides it.
 - The Content Security Policy is a meta tag in `index.html`, not a
-  header, for GitHub Pages sets none: it travels with the page to any
+  header (GitHub Pages sets none), so it travels with the page to any
   host ([markdown.md](markdown.md#safety)). A host that can set headers
-  may add the directives a meta tag cannot carry, such as
+  may add the directives a meta tag can't carry, such as
   `frame-ancestors`.
 
 ## Custom domain (optional)
 
-Nothing in the app depends on a domain: the same build serves from any
-origin. To serve a GitHub Pages deployment from a domain of your own:
+Nothing in the app depends on a domain: the same build serves from
+any origin. To serve a GitHub Pages deployment from a custom domain:
 
 1. At the domain's DNS provider, point it at GitHub Pages: for a
    subdomain (`memo.example.org`), a `CNAME` record to
@@ -272,85 +256,79 @@ origin. To serve a GitHub Pages deployment from a domain of your own:
 2. In the repository, set it under Settings → Pages → Custom domain.
    GitHub checks the DNS and provisions the certificate; then turn on
    Enforce HTTPS.
-3. Verify the domain in your account's or organization's settings
+3. Verify the domain in the account's or organization's settings
    (Pages → Add a domain), so no other repository can claim it.
 
 The deploy workflow publishes through `actions/deploy-pages`, which
-takes the domain from that setting only: a `CNAME` file in the
-repository is not read for that. On another host, follow its own steps.
+takes the domain from that setting only, not from a `CNAME` file.
+Another host has steps of its own.
 
-The build reads it, though: `siteMapPlugin` in
-[siteMap.ts](../packages/site/src/siteMap.ts) writes
-`sitemap.xml` and the `Sitemap:` line of `robots.txt` on the domain
-that `CNAME` names, since a sitemap's addresses are absolute, and
-`clientIdPlugin` in [clientId.ts](../packages/site/src/clientId.ts)
-writes the Client ID Document there, which names the domain too
-([authentication.md](authentication.md#the-client-id-document)). So
-write your domain into `CNAME` too, a bare hostname such as
-`memo.example.org`; the build fails on anything else, a scheme, a path
-or a port. Without a domain, delete `CNAME`: the build then writes
-`robots.txt` without a sitemap, and no Client ID Document. The deploy's
-guard checks that there are both whenever `CNAME` is there.
-
-The vocabulary, shape and library IRIs name `https://solid-memo.com/`
-whatever domain serves the site; the app reads them from where it is
-served ([reuse.md](reuse.md#what-stays-the-same)).
+The build reads `CNAME`: `siteMapPlugin` in
+[siteMap.ts](../packages/site/src/siteMap.ts) writes `sitemap.xml` and
+the `Sitemap:` line of `robots.txt` on its domain, and `clientIdPlugin`
+in [clientId.ts](../packages/site/src/clientId.ts) writes the Client ID
+Document, which names it
+([authentication.md](authentication.md#the-client-id-document)).
+Write the domain into `CNAME` too, as a bare hostname such as
+`memo.example.org`. The build fails on anything else, such as a
+scheme, a path or a port. Without a domain, delete `CNAME`: the build
+then writes `robots.txt` without a sitemap, and no Client ID Document.
+Whenever `CNAME` is there, the
+deploy's guard checks that the site has both.
 
 ### This deployment
 
 One.com's DNS points `solid-memo.com` at GitHub Pages, and the custom
 domain is set in the repository's settings. [CNAME](../CNAME) records
 that setting, and the build writes the sitemap and the Client ID
-Document, <https://solid-memo.com/clientid.jsonld>, on that domain. The IRIs
-above resolve on the web because this domain serves this site.
+Document, <https://solid-memo.com/clientid.jsonld>, on that domain,
+where the vocabulary, shape and library IRIs resolve.
 
 ## Manual publish (any static web space)
 
-`npm run browsers` once, as the build draws the docs' diagrams in
-Chromium ([markdown.md](markdown.md#diagrams)); `npm run build`, then
-upload the **contents** of `apps/web/dist/` to the web root (or any
-subfolder) via SFTP or a file manager, `ns/`, `decks/`, `vendor/`,
-`docs/` and `studio/` included. The sitemap and `robots.txt` name the
-root of the domain in [CNAME](../CNAME): for another domain, write
-yours there first, and for a subfolder, delete `CNAME`, since the
-sitemap's addresses would leave the subfolder out. Verify a build
-locally with `npm start` (builds, then serves `dist/` at
-`http://localhost:4173`), or `npm run preview -w @solid-memo/web` to serve
-the last build. Both builds need Chromium; without it, a build fails
-with a message that names `npm run browsers`, unless
-`DOCS_DIAGRAMS=skip` is set, which builds the docs with each diagram's
-source in place of its drawing ([configuration.md](configuration.md#docs_diagrams)).
+A manual publish runs `npm run browsers` once, for the docs'
+diagrams ([markdown.md](markdown.md#diagrams)), and `npm run build`.
+It uploads the **contents** of `apps/web/dist/`,
+`ns/`, `decks/`, `vendor/`, `docs/` and `studio/` included, to the web
+root or any subfolder via SFTP or a file manager. The sitemap and
+`robots.txt` name the root of the domain in [CNAME](../CNAME): for
+another domain, that domain goes into `CNAME` first; for a subfolder,
+`CNAME` is deleted, as the sitemap would leave the subfolder out.
+`npm start` builds, then serves `dist/` at `http://localhost:4173`;
+`npm run preview -w @solid-memo/web` serves the last build. Without
+Chromium, a build fails with a message that names `npm run browsers`,
+unless `DOCS_DIAGRAMS=skip` puts each diagram's source in place of its
+drawing ([configuration.md](configuration.md#docs_diagrams)).
 
 ## A release's docs as an archive
 
 `npm run docs:archive -- X.Y.Z` renders the docs of release X.Y.Z
 ([markdown.md](markdown.md#the-docs-as-a-site)): the same pages as
-`/docs/`, their links into the repository at the tag `vX.Y.Z`, never
-indexed, and each with a note that links the latest docs at the
-site's origin, from [CNAME](../CNAME), as the header's link to the
-site does, so the pages work wherever the archive is unpacked. It
-packs them into `release-assets/docs-X.Y.Z.tar.gz`, which git ignores:
-the pages, `docs.css`, every diagram's light and dark drawing and the
-font's license, `OFL-Fredoka.txt`, all under `docs/`
+`/docs/`, never indexed, with links into the repository at the tag
+`vX.Y.Z`. Each page links to the latest docs at the site's origin,
+from [CNAME](../CNAME), as the header's link to the site does, so the
+pages work wherever the archive is unpacked. The script packs into
+`release-assets/docs-X.Y.Z.tar.gz`, which git ignores, the pages,
+`docs.css`, every diagram's light and dark drawing and the font's
+license, `OFL-Fredoka.txt`, all under `docs/`
 ([docsArchive.ts](../scripts/docsArchive.ts)). The repository's
-address is the one the site's build takes (`VITE_REPO_URL`,
+address is the site build's (`VITE_REPO_URL`,
 [configuration.md](configuration.md#vite_repo_url)).
 
-An archive is rendered once, by that release's own code, and never
-again, so it is never written without its drawings: it draws every
-diagram in Chromium whatever `DOCS_DIAGRAMS` says, fails without it,
-and checks each drawing as the build does (`checkSvg`, and the font's
-notice in it) before it packs them, with the system's `tar`. The
-archive's address and contents are not part of the public API
+An archive is rendered once, by that release's own code. It draws
+every diagram in Chromium, ignoring `DOCS_DIAGRAMS`, and fails without
+Chromium. It checks each drawing as the build does (`checkSvg`, and
+the font's notice in it), then packs them with the system's `tar`. The
+archive's address and contents aren't part of the public API
 ([releasing.md](releasing.md#the-public-api)).
 
-Every release makes its archive and attaches it to its GitHub release,
-as "Documentation X.Y.Z (HTML)" ([release.config.mjs](../release.config.mjs)):
+Every release attaches its archive to its GitHub release, as
+"Documentation X.Y.Z (HTML)" ([release.config.mjs](../release.config.mjs)).
 semantic-release runs `npm run docs:archive` with the new version
-before it commits, so a release whose docs cannot be drawn is not
-made, and it publishes the GitHub release only once the archive is
-uploaded ([releasing.md](releasing.md#what-a-release-does)). The
-release workflow then attests the archive, so whoever downloads it can
+before it commits, so a release whose docs can't be drawn isn't made,
+and publishes the GitHub release only once the archive is uploaded
+([releasing.md](releasing.md#what-a-release-does)). The release
+workflow then attests the archive, so anyone who downloads it can
 check that the release workflow made it on `main`:
 
 ```sh
@@ -360,23 +338,21 @@ gh attestation verify docs-X.Y.Z.tar.gz --repo solid-memo/website \
 ```
 
 When the upload fails, the release stays a draft, which the deploy
-refuses; the release workflow's `docs` job, run by hand with the tag,
-attests and attaches the archive and publishes it, and it replaces an
-archive that is not attested ([releasing.md](releasing.md#when-a-release-fails)).
+refuses. The release workflow's `docs` job, run by hand with the tag,
+then attests and attaches the archive, replacing one that isn't
+attested, and publishes the release
+([releasing.md](releasing.md#when-a-release-fails)).
 
 ## Older releases' docs
 
-The site serves the docs of the deployed version only, at `/docs/`.
-An older release's docs are in the repository at its tag
+The site serves only the deployed version's docs, at `/docs/`. An
+older release's docs are in the repository at its tag
 (`<repository>/tree/vX.Y.Z/docs`, where GitHub draws their diagrams
 too), and since 3.3.0 in the archive its GitHub release carries
 ([above](#a-releases-docs-as-an-archive)).
 
-The site used to serve each release's docs at `/docs/X.Y.Z/` too
-(#280). Each copy took several megabytes, and nearly every release is a
-minor one, so the copies grew with every release toward GitHub Pages'
-limit of 1 GB a site, and each deploy downloaded and checked all of
-them.
-The app runs only the newest version, so only its docs are of use on
-the site; those addresses were never indexed and never part of the
-public API ([releasing.md](releasing.md#the-public-api)).
+Until #280 the site served each release's docs at `/docs/X.Y.Z/` too.
+The copies, several megabytes each, grew toward GitHub Pages' limit of
+1 GB a site, and each deploy downloaded and checked them all. Those
+addresses were never indexed and never part of the public API
+([releasing.md](releasing.md#the-public-api)).
