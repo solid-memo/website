@@ -1,0 +1,179 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import type { Literal, Quad } from "@rdfjs/types";
+
+/**
+ * The client modules' interface: the types their operations take and
+ * give, and the error a failed request rejects with, with no library
+ * behind them. rdf.ts, resources.ts, session.ts and access.ts implement
+ * it over the current library and export these again; another
+ * implementation exports the same, and passes the same contract tests
+ * (src/testing/contract/), which each module's own tests run against
+ * this one. No Solid client library is imported here
+ * (scripts/checkBoundaries.ts).
+ */
+
+/**
+ * A document's triples, as read from a pod or built to be written. What
+ * else it holds is the implementation's: only its operations read it.
+ */
+export interface Dataset {
+  readonly type: "Dataset";
+}
+
+declare const sourced: unique symbol;
+declare const fetched: unique symbol;
+
+/** A dataset that knows the document it came from (getSourceUrl). */
+export interface SourcedDataset extends Dataset {
+  readonly [sourced]: true;
+}
+
+/** A dataset as read from a pod, with what the server said of it. */
+export interface FetchedDataset extends SourcedDataset {
+  readonly [fetched]: true;
+}
+
+/** The triples of one subject of a dataset, by a URL or local to it. */
+export interface Subject {
+  readonly type: "Subject";
+  /** The subject's IRI; for one made by name and not saved yet, one only the implementation reads (localNameOf). */
+  readonly url: string;
+}
+
+/** A subject with a URL of its own; the types do not tell it from one made by name. */
+export type NamedSubject = Subject;
+
+/** Adds a subject's triples one call at a time (buildThing): each call gives the builder again. */
+export interface SubjectBuilder {
+  addIri(property: string, value: string | Subject): SubjectBuilder;
+  addUrl(property: string, value: string | Subject): SubjectBuilder;
+  addBoolean(property: string, value: boolean): SubjectBuilder;
+  addDatetime(property: string, value: Date): SubjectBuilder;
+  addDecimal(property: string, value: number): SubjectBuilder;
+  addInteger(property: string, value: number): SubjectBuilder;
+  addLiteral(property: string, value: Literal): SubjectBuilder;
+  addStringNoLocale(property: string, value: string): SubjectBuilder;
+  addStringWithLocale(property: string, value: string, locale: string): SubjectBuilder;
+  setIri(property: string, value: string | Subject): SubjectBuilder;
+  setInteger(property: string, value: number): SubjectBuilder;
+  setStringNoLocale(property: string, value: string): SubjectBuilder;
+  removeAll(property: string): SubjectBuilder;
+  removeLiteral(property: string, value: Literal): SubjectBuilder;
+  removeUrl(property: string, value: string | Subject): SubjectBuilder;
+  /** The subject with every triple added. */
+  build(): NamedSubject;
+}
+
+/** What has changed in a dataset since it was read or built, to be written as a patch. */
+export interface Changes {
+  readonly additions: readonly Quad[];
+  readonly deletions: readonly Quad[];
+}
+
+/** The document a dataset was read from, or saved to. */
+export interface Source {
+  /** The document's URL. */
+  readonly url: string;
+  /** The same object for the dataset and every edit of it, and for no other: a key to keep what is known of the read (an ETag). */
+  readonly key: object;
+}
+
+/** A value of a subject's property, by its kind: what a WebID document shows. */
+export type PropertyValue =
+  | { type: "iri"; value: string }
+  | { type: "literal"; value: string; dataType: string }
+  | { type: "langString"; value: string; language: string }
+  | { type: "blankNode"; value: string };
+
+/** How a request is sent: through `fetch`, the browser's own when none is given. */
+export interface RequestOptions {
+  fetch?: typeof globalThis.fetch;
+}
+
+/** The server answered a request with a failure: `statusCode` says which. */
+export class HttpError extends Error {
+  /** The response's status. */
+  readonly statusCode: number;
+
+  constructor(
+    message: string,
+    /** The server's response. */
+    readonly response: Response,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "HttpError";
+    this.statusCode = response.status;
+  }
+}
+
+/**
+ * What a read of a document gave: the dataset, with the version (ETag)
+ * the pod gave it, or that the document is still at the version asked
+ * about (304).
+ */
+export type DocumentRead =
+  | { readonly dataset: FetchedDataset; readonly etag: string | undefined }
+  | { readonly notModified: true };
+
+/** What a write of a document gave: the dataset as now saved there, and the version (ETag) the pod answered with. */
+export interface DocumentWrite {
+  readonly dataset: FetchedDataset;
+  readonly etag: string | undefined;
+}
+
+/**
+ * The sign-in client: the Solid-OIDC session the browser keeps for this
+ * tab. What the app does around a login, the route it returns to and the
+ * issuer it asks a WebID for, is solidSessionGateway.ts's.
+ */
+export interface SessionClient {
+  /**
+   * Completes a login the identity provider sent the user back from or,
+   * failing that, restores the previous session, silently.
+   */
+  restore(): Promise<RestoredSession>;
+  /** Sends the browser to the identity provider; does not return. */
+  login(options: LoginOptions): Promise<void>;
+  /** Ends the session. */
+  logout(): Promise<void>;
+  /** Fetches as the session's user: the current session's, never one from before a login. */
+  fetch: typeof globalThis.fetch;
+  /** The logged-in user's WebID, as the session has it now; none when logged out. */
+  webId(): string | undefined;
+}
+
+/** What restore found. */
+export interface RestoredSession {
+  /** The user's WebID; null when no one is logged in. */
+  webId: string | null;
+  /** Whether a login just completed, not a silent restore. */
+  fromLogin: boolean;
+  /** The page a silent restore left for the identity provider, if it left one. */
+  restoredFrom: string | null;
+}
+
+/** Where a login goes, and who the app says it is. */
+export interface LoginOptions {
+  /** The identity provider. */
+  oidcIssuer: string;
+  /** Where the provider sends the user back to. */
+  redirectUrl: string;
+  /** The name the app registers under when the provider registers it dynamically. */
+  clientName: string;
+  /** The app's Client ID Document, when it is the client ID. */
+  clientId?: string;
+}
+
+/**
+ * Make the document at `url` readable by everyone, and nothing else:
+ * whether the pod says it now is. Rejects when the requests fail. Only
+ * `fetch` is used, for every request it makes.
+ */
+export type GrantPublicRead = (
+  url: string,
+  options: { fetch: typeof globalThis.fetch },
+) => Promise<boolean>;

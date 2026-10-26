@@ -93,7 +93,8 @@ describe("toPreferences", () => {
   it("reads a desired retention outside the shape's range as the default", () => {
     const stored = (desiredRetention: number) =>
       buildThing(toPreferencesThing(SUBJECT, { ...FULL, scheduler: "fsrs6" }, null))
-        .setDecimal(SM.desiredRetention, desiredRetention)
+        .removeAll(SM.desiredRetention)
+        .addDecimal(SM.desiredRetention, desiredRetention)
         .build();
     expect(toPreferences(stored(-1))?.preferences.desiredRetention).toBe(0.9);
     expect(toPreferences(stored(2))?.preferences.desiredRetention).toBe(0.9);

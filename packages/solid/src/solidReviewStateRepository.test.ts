@@ -5,6 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
+  createThing,
   type Dataset,
   getPropertyAll,
   getThing,
@@ -12,7 +13,7 @@ import {
   getUrl,
   setThing,
 } from "./client/rdf";
-import { saveSolidDatasetAt } from "./client/resources";
+import { writeDocument } from "./client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { getSolidDatasetOrNull, keptDataset } from "./datasets";
@@ -32,7 +33,10 @@ const FSRS = "https://fsrs.example/ns#fsrs";
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
-  return { ...actual, saveSolidDatasetAt: vi.fn() };
+  return {
+    ...actual, // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
+  };
 });
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -125,7 +129,7 @@ function stateAt(subject: string, written: ReviewState = state) {
 
 /** Another scheduler's state at `subject`: no SM-2 fields Solid Memo could read. */
 function otherSchedulerAt(subject: string) {
-  return buildThing({ url: `${deck.reviewsDocumentUrl}#${subject}` })
+  return buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#${subject}` }))
     .addUrl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.ReviewState)
     .addUrl(SM.reviewOf, `${deck.cardsDocumentUrl}#card-1`)
     .addUrl(SM.scheduler, FSRS)
@@ -141,7 +145,7 @@ function documentOf(...things: ReturnType<typeof stateAt>[]) {
 }
 
 function savedDataset(): Dataset {
-  return vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Dataset;
+  return vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
 }
 
 /** Write `state` as a grade of its prompt that makes it whatever is stored. */
@@ -156,7 +160,7 @@ function writeState(repository: ReturnType<typeof makeRepository>, of: Deck, wri
 beforeEach(() => {
   vi.mocked(getSolidDatasetOrNull).mockReset();
   vi.mocked(keptDataset).mockReset();
-  vi.mocked(saveSolidDatasetAt).mockReset();
+  vi.mocked(writeDocument).mockReset();
 });
 
 /** A prompt with no state of either kind. */
@@ -227,7 +231,7 @@ describe("gradeReviewState", () => {
 
     await writeState(makeRepository(), deck, state);
 
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
     const thing = getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual(state);
@@ -239,7 +243,7 @@ describe("gradeReviewState", () => {
 
     await writeState(makeRepository(), deck, updated);
 
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
     const thing = getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual(updated);
   });
@@ -260,19 +264,19 @@ describe("gradeReviewState", () => {
     const other: ReviewState = { ...state, cardId: "card-2" };
     vi.mocked(keptDataset).mockReturnValue(reviewsDataset());
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), named(other)));
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
 
     await writeState(makeRepository(), deck, { ...state, repetitions: 3 });
 
     expect(getSolidDatasetOrNull).toHaveBeenCalledOnce();
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+    const [, saved] = vi.mocked(writeDocument).mock.calls[1];
     expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-2`)).not.toBeNull();
   });
 
   it("passes on another failure of the edit of what is kept, reading nothing", async () => {
     vi.mocked(keptDataset).mockReturnValue(reviewsDataset());
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 500 });
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 500 });
 
     await expect(writeState(makeRepository(), deck, state)).rejects.toEqual({
       statusCode: 500,
@@ -317,7 +321,7 @@ describe("grading", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(datasetFrom(deck.reviewsDocumentUrl), named(theirs)),
     );
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
     const grade = vi.fn(({ sm2: current }: PromptStates) => ({
       sm2: { ...current!, repetitions: current!.repetitions + 1 },
     }));
@@ -333,7 +337,7 @@ describe("grading", () => {
       state: { sm2: { ...theirs, repetitions: 6 } },
       current: { sm2: theirs, fsrs: null },
     });
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[1];
     const thing = getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual({ ...theirs, repetitions: 6 });
   });
@@ -355,8 +359,8 @@ describe("applyReviewChanges", () => {
       remove: [{ cardId: "card-2", direction: "front-to-back" }],
     });
 
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
     const dataset = saved as Dataset;
     expect(toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
@@ -386,7 +390,7 @@ describe("applyReviewChanges", () => {
       [`${deck.reviewsDocumentUrl}#card-1`],
       "pod",
     );
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("creates a deck's reviews document with its states in one write, each naming its card, checked first, reading nothing", async () => {
@@ -399,8 +403,8 @@ describe("applyReviewChanges", () => {
       [`${deck.reviewsDocumentUrl}#card-1`, `${deck.reviewsDocumentUrl}#card-1@back-to-front`],
       "pod",
     );
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
     const dataset = saved as Dataset;
     expect(toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
@@ -417,13 +421,13 @@ describe("applyReviewChanges", () => {
       save: [],
       remove: [{ cardId: "card-2", direction: "front-to-back" }],
     });
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("creates the reviews document for states to save, as a card moved in with its progress brings", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().applyReviewChanges(deck, { save: [state], remove: [] });
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(url).toBe(deck.reviewsDocumentUrl);
     expect(
       toReviewState(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck),
@@ -488,7 +492,7 @@ describe("states that name their card", () => {
       state,
     );
 
-    vi.mocked(saveSolidDatasetAt).mockReset();
+    vi.mocked(writeDocument).mockReset();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
     await repository.applyReviewChanges(deck, {
       save: [],
@@ -623,7 +627,7 @@ describe("FSRS-6 states, this app's own", () => {
       current: { sm2: state, fsrs },
     });
     expect(grade).toHaveBeenCalledWith({ sm2: state, fsrs });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
     const saved = savedDataset();
     const at = getThing(saved, `${deck.reviewsDocumentUrl}#card-1@fsrs6`)!;
     expect(toFsrsState(at, deck)).toEqual(graded);
@@ -648,7 +652,7 @@ describe("FSRS-6 states, this app's own", () => {
 
   it("are written at a new subject when the one named for them holds something else", async () => {
     // Another app's subject where this app would name the FSRS-6 state.
-    const theirs = buildThing({ url: `${deck.reviewsDocumentUrl}#card-1@fsrs6` })
+    const theirs = buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#card-1@fsrs6` }))
       .addStringNoLocale("https://other.example/#note", "mine")
       .build();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), theirs));
@@ -770,7 +774,7 @@ describe("upgradeReviewStates", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(older(state), named(current)));
     const checkWrite = vi.fn(async () => undefined);
     await expect(makeRepository(checkWrite).upgradeReviewStates(deck)).resolves.toBe(true);
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
     const saved = savedDataset();
     const upgraded = getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(upgraded, deck)).toEqual(state);
@@ -783,7 +787,7 @@ describe("upgradeReviewStates", () => {
     await expect(makeRepository().upgradeReviewStates(deck)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeReviewStates(deck)).resolves.toBe(false);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -809,7 +813,7 @@ describe("writeFsrsStates", () => {
     await makeRepository(checkWrite).writeFsrsStates(deck, fromSm2);
 
     expect(fromSm2).toHaveBeenCalledWith({ sm2: [state], fsrs: [stale] });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
     const saved = savedDataset();
     expect(toFsrsState(getThing(saved, fsrsAt)!, deck)).toEqual({ ...fsrs, due: state.due });
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
@@ -823,26 +827,26 @@ describe("writeFsrsStates", () => {
     vi.mocked(getSolidDatasetOrNull)
       .mockResolvedValueOnce(documentOf(named(state)))
       .mockResolvedValue(documentOf(named(theirs)));
-    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
 
     await makeRepository().writeFsrsStates(deck, fromSm2);
 
     expect(fromSm2).toHaveBeenCalledTimes(2);
-    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    const [, saved] = vi.mocked(writeDocument).mock.calls[1];
     expect(toFsrsState(getThing(saved as Dataset, fsrsAt)!, deck)?.due).toBe("2026-10-01");
 
-    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValue({ statusCode: 412 });
+    vi.mocked(writeDocument).mockReset().mockRejectedValue({ statusCode: 412 });
     await expect(makeRepository().writeFsrsStates(deck, fromSm2)).rejects.toThrow();
-    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
+    expect(writeDocument).toHaveBeenCalledTimes(3);
   });
 
   it("passes on another failure at once", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state)));
-    vi.mocked(saveSolidDatasetAt).mockRejectedValue({ statusCode: 500 });
+    vi.mocked(writeDocument).mockRejectedValue({ statusCode: 500 });
     await expect(makeRepository().writeFsrsStates(deck, fromSm2)).rejects.toEqual({
       statusCode: 500,
     });
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
   });
 
   it("writes nothing when there is no document, or no state to write", async () => {
@@ -852,6 +856,6 @@ describe("writeFsrsStates", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf());
     await makeRepository().writeFsrsStates(deck, fromSm2);
     expect(fromSm2).toHaveBeenCalledOnce();
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });

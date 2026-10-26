@@ -7,7 +7,8 @@ and [DPoP](https://www.rfc-editor.org/rfc/rfc9449);
 [standards.md](standards.md) lists their status. The authentication
 code is in
 [packages/solid/src/solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts),
-behind the `SessionGateway` port. It signs in through
+behind the `SessionGateway` port. It signs in through the sign-in client
+the composition root passes it, the one in
 [client/session.ts](../packages/solid/src/client/session.ts), the only
 file that calls the authentication library.
 

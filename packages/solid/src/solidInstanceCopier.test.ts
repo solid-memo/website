@@ -19,7 +19,7 @@ import {
   getFile,
   getSolidDataset,
   overwriteFile,
-  saveSolidDatasetAt,
+  writeDocument,
 } from "./client/resources";
 import { containerFrom, datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
@@ -35,7 +35,8 @@ vi.mock("./client/resources", async (importOriginal) => {
     getFile: vi.fn(),
     getSolidDataset: vi.fn(),
     overwriteFile: vi.fn(),
-    saveSolidDatasetAt: vi.fn(),
+    // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
   };
 });
 vi.mock("./datasets", async (importOriginal) => ({
@@ -108,7 +109,7 @@ describe("copyResource", () => {
       [`${FROM}catalog.ttl`]: { headers: { "Content-Type": "text/turtle; charset=utf-8" } },
     });
     await copier(fetch).copyResource(`${FROM}catalog.ttl`, `${TO}catalog.ttl`, MOVE);
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(url).toBe(`${TO}catalog.ttl`);
     expect(getThing(saved as Dataset, `${FROM}catalog.ttl#deck-1`)).toBeNull();
     const deck = getThing(saved as Dataset, `${TO}catalog.ttl#deck-1`)!;
@@ -140,7 +141,7 @@ describe("copyResource", () => {
       ...MOVE,
       renames: { [guest]: user },
     });
-    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as Dataset;
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
     const catalog = getThing(saved, `${TO}catalog.ttl#catalog`)!;
     expect(getUrl(catalog, "http://purl.org/dc/terms/publisher")).toBe(user);
     expect(getUrl(catalog, "http://purl.org/dc/terms/rightsHolder")).toBe(

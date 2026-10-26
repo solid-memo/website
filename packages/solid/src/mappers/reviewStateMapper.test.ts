@@ -61,7 +61,7 @@ describe("review state mapping", () => {
   it("rejects subjects that are not sm:ReviewState", () => {
     const thing = thingOf(state);
     const wrongType = buildThing(thing)
-      .setUrl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Card)
+      .setIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Card)
       .build();
     expect(toReviewState(wrongType, documents)).toBeNull();
   });

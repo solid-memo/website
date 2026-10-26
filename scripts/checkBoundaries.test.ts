@@ -252,12 +252,13 @@ describe("boundaryProblems", () => {
     ]);
   });
 
-  it("fails on any @inrupt/ package imported outside the client modules and shacl's Turtle reader, tests aside, once an import", () => {
+  it("fails on any @inrupt/ package imported outside the client modules (their interface aside) and shacl's Turtle reader, tests aside, once an import", () => {
     const solid = workspace(
       "solid",
       {
         "src/client/rdf.ts": 'import { getThing } from "@inrupt/solid-client";',
         "src/client/session.ts": 'import { login } from "@inrupt/solid-client-authn-browser";',
+        "src/client/interface.ts": 'import type { Thing } from "@inrupt/solid-client";',
         "src/datasets.ts": [
           'import { getThing } from "@inrupt/solid-client";',
           'import * as authn from "@inrupt/solid-client-authn-browser";',
@@ -290,8 +291,9 @@ describe("boundaryProblems", () => {
       { "@inrupt/solid-client-authn-browser": "*" },
     );
     const only =
-      "only solid files matching /^src\\/client\\//, shacl files matching /^src\\/turtleDocument\\.ts$/ may.";
+      "only solid files matching /^src\\/client\\/(?!interface\\.ts$)/, shacl files matching /^src\\/turtleDocument\\.ts$/ may.";
     expect(boundaryProblems([solid, shacl, ui], TOOLING)).toEqual([
+      `packages/solid/src/client/interface.ts: may not import "@inrupt/solid-client": ${only}`,
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client-authn-browser": ${only}`,
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client/universal": ${only}`,

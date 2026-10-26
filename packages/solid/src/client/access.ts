@@ -3,22 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import { universalAccess } from "@inrupt/solid-client";
+import type { GrantPublicRead } from "./interface";
+
+export type { GrantPublicRead } from "./interface";
 
 /**
- * Make the document at `url` readable by everyone, and nothing else:
- * whether the pod says it now is. Rejects when the requests fail. Only
- * `fetch` is used, for every request it makes.
- */
-export type GrantPublicRead = (
-  url: string,
-  options: { fetch: typeof globalThis.fetch },
-) => Promise<boolean>;
-
-/**
- * The public-read grant over @inrupt/solid-client's universal access
- * (`setPublicAccess`, read only), the only implementation so far: it
- * writes the document's own ACL on a server with Web Access Control and
- * its ACR on one with Access Control Policies, for that document alone.
+ * The public-read grant (GrantPublicRead, interface.ts) over
+ * @inrupt/solid-client's universal access (`setPublicAccess`, read
+ * only), the only implementation so far; another implementation passes
+ * the same contract (src/testing/contract/access.ts). It writes the
+ * document's own ACL on a server with Web Access Control and its ACR on
+ * one with Access Control Policies, for that document alone.
  * Its requests go through accessFetch, which makes them as the servers
  * tested take them. It asks by URL, never with a Request, so a fence
  * around `fetch` (solidReleasePublisher.ts) can read where each goes.
@@ -43,7 +38,7 @@ const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlRes
  *   library writes an ACL's PATCH with that "." touching the term before
  *   it (`<…#Agent>.}`), which node-solid-server's parser takes for a
  *   path and refuses (400), as it does every PATCH of the library's
- *   (datasets.ts, patchBody); an ACL holds no other kind of term;
+ *   (sparqlUpdate.ts); an ACL holds no other kind of term;
  * - for the Community Solid Server, an Access Control Resource not
  *   written yet, which it answers 404 (its Link saying what it is), is
  *   read as one that says only that it is one, which the write then

@@ -10,8 +10,9 @@ and the guest's pod kept in the browser.
 They read and write pods through modules of the package's own in
 `src/client/`: the RDF data model (`rdf.ts`), reading and writing
 resources (`resources.ts`), the sign-in client (`session.ts`) and the
-public-read grant (`access.ts`). These are the only implementation so far,
-over Inrupt's
+public-read grant (`access.ts`), of the types in `interface.ts`, which
+names no library. These are the only implementation so far, over
+Inrupt's
 [`@inrupt/solid-client`](https://github.com/inrupt/solid-client-js) and
 `@inrupt/solid-client-authn-browser`, and another library would replace
 them alone ([vendor-code.md](../../docs/vendor-code.md#cost-of-swapping-a-vendor)).
@@ -22,8 +23,9 @@ them alone ([vendor-code.md](../../docs/vendor-code.md#cost-of-swapping-a-vendor
 module, such as `solidSessionGateway`, `solidDeckRepository`,
 `solidReleasePublisher` and `localGuestPod`, and
 `@solid-memo/solid/client/<module>` is a client module.
-`src/testing/` holds an in-memory pod, dataset fixtures (`datasets.ts`)
-and a fake sign-in client for tests.
+`src/testing/` holds an in-memory pod, dataset fixtures (`datasets.ts`),
+a fake sign-in client for tests, and the contract tests every
+implementation of the client modules passes (`contract/`).
 
 ## Boundaries
 

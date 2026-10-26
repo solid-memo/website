@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
 import { createSolidAnswerLog } from "./solidAnswerLog";
 import type { WriteCheck } from "./writeCheck";
-import { MAX_PATCH_BYTES } from "./datasets";
+import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const HISTORY = `${INSTANCE}history/`;
