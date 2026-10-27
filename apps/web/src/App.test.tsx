@@ -198,4 +198,22 @@ describe("App", () => {
     );
     expect(screen.queryByRole("heading", { name: "The Studio's screens" })).toBeNull();
   });
+
+  it("shows no app, nor restores a session or fetches the Studio, inside another page's frame", async () => {
+    window.history.replaceState(null, "", "#/studio");
+    const top = vi.spyOn(window, "top", "get").mockReturnValue({} as Window);
+    try {
+      const useCases = makeUseCasesFake();
+      const loadStudio = vi.fn(async () => studioModule);
+      renderApp(useCases, loadStudio, "Memo Site");
+      const link = screen.getByRole("link", { name: "Open it in a new tab" });
+      expect(link).toHaveAttribute("href", window.location.href);
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(screen.queryByRole("button")).toBeNull();
+      expect(useCases.restoreSession).not.toHaveBeenCalled();
+      expect(loadStudio).not.toHaveBeenCalled();
+    } finally {
+      top.mockRestore();
+    }
+  });
 });

@@ -112,6 +112,11 @@
     "reportIssue": "Report an issue",
     "discussions": "Discussions"
   },
+  "framed": {
+    "title": "Open this page in a tab of its own",
+    "explain": "This page is shown inside another site, which could hide what you click on. It opens only in a tab of its own.",
+    "open": "Open it in a new tab"
+  },
   "crash": {
     "title": "Something went wrong",
     "explain": "An error stopped this screen. Try again, or go to the start.",

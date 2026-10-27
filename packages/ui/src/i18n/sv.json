@@ -112,6 +112,11 @@
     "reportIssue": "Rapportera ett problem",
     "discussions": "Diskussioner"
   },
+  "framed": {
+    "title": "Öppna sidan i en egen flik",
+    "explain": "Den här sidan visas inuti en annan webbplats, som kan dölja vad du klickar på. Den öppnas bara i en egen flik.",
+    "open": "Öppna den i en ny flik"
+  },
   "crash": {
     "title": "Något gick fel",
     "explain": "Ett fel stoppade den här vyn. Försök igen, eller gå till början.",

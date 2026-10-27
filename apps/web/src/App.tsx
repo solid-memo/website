@@ -9,6 +9,7 @@ import type { PodProvider } from "@solid-memo/domain/podProvider";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "@solid-memo/ui/App";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import type { SiteSource } from "@solid-memo/ui/Footer";
+import { FramedPage, isFramed } from "@solid-memo/ui/Framed";
 import { addCatalogs, useI18n, type Catalogs } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { isStudioHash } from "@solid-memo/ui/router";
@@ -29,21 +30,31 @@ export interface StudioModule {
  * only once a Studio route is opened, so a learner never downloads it.
  * `source` is the build's version and repository, shown in the footer;
  * `appName` and `providers`, the site's name and the Pod providers it
- * suggests (src/config.ts).
+ * suggests (src/config.ts). Framed by another page, which could lay its
+ * own over the buttons, it shows no app at all (docs/deployment.md).
  */
-export function App({
-  useCases,
-  source,
-  appName,
-  providers,
-  loadStudio,
-}: {
+export function App(props: SiteProps) {
+  if (isFramed(window)) {
+    return (
+      <FramedPage
+        locale={props.useCases.language(navigator.languages)}
+        appName={props.appName}
+        href={window.location.href}
+      />
+    );
+  }
+  return <Site {...props} />;
+}
+
+interface SiteProps {
   useCases: UseCases;
   source: SiteSource;
   appName: string;
   providers: readonly PodProvider[];
   loadStudio: () => Promise<StudioModule>;
-}) {
+}
+
+function Site({ useCases, source, appName, providers, loadStudio }: SiteProps) {
   const [inStudio, setInStudio] = useState(() => isStudioHash(window.location.hash));
   // A link from one app to the other is a hash link within the page.
   useEffect(() => {

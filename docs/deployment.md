@@ -241,6 +241,15 @@ name it, with HTTPS enforced.
   host ([markdown.md](markdown.md#safety)). A host that can set headers
   may add the directives a meta tag can't carry, such as
   `frame-ancestors`.
+- No header forbids framing either (`X-Frame-Options` or
+  `frame-ancestors`), so the app checks for itself
+  ([`Framed.tsx`](../packages/ui/src/ui/Framed.tsx), from
+  `apps/web/src/App.tsx`). In a frame of any page, whatever its origin,
+  it shows no app: only that it opens in a tab of its own, with a link
+  that opens the same address in a new tab. Another site can then
+  neither lay its page over the app's buttons nor lead a click to them.
+  Nothing of Solid Memo's frames the app. The About page and the docs
+  hold no actions, so they have no such check.
 
 ## Custom domain (optional)
 
