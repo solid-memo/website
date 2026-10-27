@@ -139,7 +139,10 @@ describe("fetchLibraryDeck", () => {
         { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
       ],
     });
-    expect(getSolidDatasetLinear).toHaveBeenCalledWith(DOC, expect.objectContaining({ fetch }));
+    // Through the fetch given, under the limits of a release.
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 404 }));
+    await vi.mocked(getSolidDatasetLinear).mock.calls[0]![1].fetch(DOC);
+    expect(fetch).toHaveBeenCalledWith(DOC, undefined);
   });
 
   it("reads a release once, for every reader of it, concurrent or later", async () => {

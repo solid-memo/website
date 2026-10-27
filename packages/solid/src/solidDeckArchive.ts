@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { ReadLimitError, type ReadLimits } from "./client/interface";
 import { parseQuads, solidDatasetAsTurtle } from "./client/resources";
 import {
   type Dataset,
@@ -183,20 +184,40 @@ function refuseNewer(thing: Subject): void {
 }
 
 /**
+ * The most an import reads of a deck file: a wide margin over a deck of
+ * tens of thousands of cards with their progress, as the app exports it
+ * from a pod, which has no limit of its own. A file is the user's to
+ * choose; one with no end would hold the tab until it ran out of memory.
+ */
+const DECK_FILE_LIMITS: ReadLimits = {
+  bytes: 64 * 1024 * 1024,
+  quads: 1_000_000,
+  characters: 256 * 1024 * 1024,
+};
+
+/**
  * The file's triples, its relative IRIs resolved against `baseUrl`;
- * deckFileUnreadable when it does not parse. A deck file is triples:
- * statements in a named graph (JSON-LD can say them, Turtle cannot) are
- * not the file's and are left out (GHSA-m4hj-7c28-fq4h).
+ * deckFileUnreadable when it does not parse, deckFileTooLarge when it
+ * is larger than `limits` allow (its characters, which are no more than
+ * its bytes, then its triples and their terms: quadTally); no limits for
+ * a text from the user's own pod. A deck file is triples: statements in
+ * a named graph (JSON-LD can say them, Turtle cannot) are not the file's
+ * and are left out (GHSA-m4hj-7c28-fq4h).
  */
 export function parseDeckFile(
   text: string,
   format: DeckFileFormat,
   baseUrl: string,
+  limits: ReadLimits | null = DECK_FILE_LIMITS,
 ): Promise<Quad[]> {
+  const tooLarge = () => new AppError("deckFileTooLarge", { ...limits });
+  if (limits !== null && text.length > limits.bytes) throw tooLarge();
+  // The depth is checked, in refuseRemoteContexts, before anything recurses into the document.
   const checked = format === "jsonld" ? refuseRemoteContexts(text) : text;
-  return parseQuads(checked, format, baseUrl).then(
-    (quads) => quads.filter((quad) => quad.graph.termType === "DefaultGraph"),
+  return parseQuads(checked, format, baseUrl, limits ?? undefined).then(
+    (parsed) => parsed.filter((quad) => quad.graph.termType === "DefaultGraph"),
     (error: unknown) => {
+      if (error instanceof ReadLimitError) throw tooLarge();
       throw new AppError("deckFileUnreadable", { reason: String(error) });
     },
   );

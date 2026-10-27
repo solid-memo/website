@@ -182,6 +182,43 @@ describe("buildTree", () => {
     expect(shape(buildTree(stored))).toEqual([["g0"], ["g1", ["g2", ["a1"]]]]);
   });
 
+  it("reads a group nested deeper than 16 groups at the top level, with what it holds", () => {
+    const urls = Array.from({ length: 20 }, (_, at) => `g${String(at).padStart(2, "0")}`);
+    const stored = layout(["a"], {
+      groups: urls.map((url, at) =>
+        group(url, at === 19 ? { decks: ["a"] } : { groups: [urls[at + 1]!] }),
+      ),
+      rootGroups: ["g00"],
+    });
+    const nested = (from: number, to: number, inner: Shape[]): Shape =>
+      from === to ? [urls[from]!, ...inner] : [urls[from]!, nested(from + 1, to, inner)];
+    expect(shape(buildTree(stored))).toEqual([nested(0, 15, []), nested(16, 19, ["a"])]);
+  });
+
+  it("reads a chain of ten thousand groups, a cycle at its end, as groups no deeper than 16", () => {
+    const urls = Array.from({ length: 10_000 }, (_, at) => `g${String(at).padStart(5, "0")}`);
+    const stored = layout(["a"], {
+      groups: urls.map((url, at) => group(url, { groups: [urls[(at + 1) % urls.length]!] })),
+    });
+    const built = buildTree(stored);
+    const depthOf = (node: TreeNode): number =>
+      node.kind === "deck" ? 0 : 1 + Math.max(0, ...node.children.map(depthOf));
+    expect(built.children).toHaveLength(1 + 10_000 / 16);
+    expect(Math.max(...built.children.map(depthOf))).toBe(16);
+    const chain = (from: number, count: number): Shape =>
+      count === 1 ? [urls[from]!] : [urls[from]!, chain(from + 1, count - 1)];
+    expect(shape(built).slice(1, 3)).toEqual([chain(0, 16), chain(16, 16)]);
+    // An edit sets the pod straight: each group lifted is written at the top level.
+    const after = applyDeckTreeEdit(built, {
+      kind: "move",
+      node: "a",
+      to: { parent: "g00000", after: null },
+    });
+    const changes = treeChanges(stored, after);
+    expect(changes.rootGroups).toHaveLength(10_000 / 16);
+    expect(changes.members.get("g00015")).toEqual({ decks: [], groups: [] });
+  });
+
   it("keeps a tree in a newer format read-only", () => {
     expect(buildTree(layout(["a"], { readOnly: true })).readOnly).toBe(true);
     expect(buildTree(layout(["a"])).readOnly).toBe(false);

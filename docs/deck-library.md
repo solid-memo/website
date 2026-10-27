@@ -925,6 +925,22 @@ flowchart LR
   with every version the document describes. Format 6 describes the
   series in the release, and a `decks/` release at an older format
   lists only itself. It's read afresh each time, never kept.
+- Every release is read under `RELEASE_LIMITS`
+  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)): 32 MiB
+  of body, 400,000 triples, and 64 Mi characters in the terms of those
+  triples, which a Turtle prefix can make far longer than the body. That
+  leaves a wide margin over the largest release in `decks/`, and a test
+  fails once a release there reaches a quarter of any limit. A body past
+  the limit is canceled as soon as it's past it, or before it's read
+  when its `Content-Length` says so. Parsing stops keeping triples at
+  the first one past either of the other limits, before any are built
+  into a dataset. Each case refuses the release (`releaseTooLarge`),
+  however the release is read. The same limits apply to a creator's
+  catalog read for the release's series, to a release the Studio reads,
+  opens as a file, or checks against the library's shapes. The library's
+  index, which comes with the site and grows with the library, and the
+  user's own pod documents aren't limited. A deck file has limits of its
+  own, in `data-model.md`.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDocument(url, "library")`). A subject that breaks its
   shape refuses the release (`releaseNotConforming`); warnings don't. A
@@ -951,9 +967,13 @@ flowchart LR
   creator's catalog, which links what its instance published
   (`sm:publishedRelease`, [data-model.md](data-model.md)).
   `DeckLibrary.publishedBeside` takes the first catalog that links the
-  release in the folders above it, nearest first, read as anyone reads
-  them, and reads each release it links but those the copy's release
-  lists. The newest of the same series is the copy's upgrade
+  release in the folders above it, nearest first and eight folders at
+  most, read as anyone reads them. The app then reads the releases it
+  links but those the copy's release lists: 16 at most, four at once,
+  those named as the copy's release first (`…/<name>/vN.ttl`), the
+  highest version first. A catalog is its creator's to write, so it may
+  link any number of releases. The newest of the same series is the
+  copy's upgrade
   (`listLibraryUpdates`, `planLibraryUpgrade`, the Studio's
   [library copies](studio.md#library-copies)). `listLibraryUpdates`
   reads each release once for all the copies. For a catalog its owner

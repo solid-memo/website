@@ -66,14 +66,14 @@ export function createSolidReleasePublisher({
     }
   }
 
-  /** Whether the document at `url` states what `turtle` does, its time of issue aside; not when it cannot be read. */
+  /** Whether the document at `url` states what `turtle` does, its time of issue aside; not when it cannot be read. Both are the user's own, read with no limits. */
   async function isThisRelease(url: string, turtle: string): Promise<boolean> {
     try {
       const response = await fetch(url, { headers: { Accept: "text/turtle" } });
       if (!response.ok) return false;
       const [there, here] = await Promise.all([
-        parseDeckFile(await response.text(), "turtle", url),
-        parseDeckFile(turtle, "turtle", url),
+        parseDeckFile(await response.text(), "turtle", url, null),
+        parseDeckFile(turtle, "turtle", url, null),
       ]);
       return statementsOf(there, url) === statementsOf(here, url);
     } catch {
@@ -88,12 +88,12 @@ export function createSolidReleasePublisher({
     );
   }
 
-  /** Whether the document at `url` is a release: its own subject a deck (`<> a sm:Deck`); not when it cannot be read. */
+  /** Whether the document at `url` is a release: its own subject a deck (`<> a sm:Deck`); not when it cannot be read. It is the user's own, read with no limits. */
   async function isRelease(url: string): Promise<boolean> {
     try {
       const response = await fetch(url, { headers: { Accept: "text/turtle" } });
       if (!response.ok) return false;
-      return (await parseDeckFile(await response.text(), "turtle", url)).some(
+      return (await parseDeckFile(await response.text(), "turtle", url, null)).some(
         (quad) =>
           quad.subject.value === url &&
           quad.predicate.value === RDF.type &&

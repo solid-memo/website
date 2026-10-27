@@ -90,6 +90,21 @@ describe("reading documents", () => {
       `The Resource at [${URL_}] has a MIME type of [application/json], but the only parsers available are for the following MIME types: [text/turtle].`,
     );
   });
+  it("fails as the browser fails a body that cannot be read, past no limit", async () => {
+    const broken = new Error("The connection was reset.");
+    const failing = () =>
+      new Response(
+        new ReadableStream({
+          pull(controller) {
+            controller.error(broken);
+          },
+        }),
+        { headers: { "Content-Type": "text/turtle" } },
+      );
+    await expect(
+      resources.getSolidDatasetLinear(URL_, { fetch: pod(failing).fetch }),
+    ).rejects.toThrow(broken.message);
+  });
 });
 
 describe("writeDocument", () => {

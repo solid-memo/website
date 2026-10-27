@@ -27,11 +27,14 @@ import {
   type DocumentWrite,
   type FetchedDataset,
   HttpError,
+  ReadLimitError,
+  type ReadLimits,
   type RequestOptions,
   type SourcedDataset,
 } from "./interface";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
 import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
+import { quadTally } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
 
@@ -276,48 +279,70 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
 /**
  * The quads of a Turtle or JSON-LD text, its relative IRIs resolved
  * against `baseUrl`, parsed as a pod's documents are: in every graph the
- * text names. Rejects with the parser's error on a text that does not parse.
- * JSON-LD is read with no fetch at all: a context named by its address
- * is refused (parseJsonLd).
+ * text names. Rejects with the parser's error on a text that does not
+ * parse, and with a ReadLimitError at the first quad past `limits`
+ * (quadTally; the text's own size is its caller's to check: it holds the
+ * text already). JSON-LD is read with no fetch at all: a context named
+ * by its address is refused (parseJsonLd).
  */
 export function parseQuads(
   text: string,
   format: keyof typeof MEDIA_TYPES,
   baseUrl: string,
+  limits?: ReadLimits,
 ): Promise<Quad[]> {
-  if (format === "jsonld") return parseJsonLd(text, baseUrl);
-  const parser = libraryGetTurtleParser();
   return new Promise((resolve, reject) => {
     const quads: Quad[] = [];
-    parser.onQuad((quad) => quads.push(quad));
+    const past = quadTally(limits);
+    let refused = false;
+    const onQuad = (quad: Quad) => {
+      if (refused) return;
+      if (!past(quad)) return void quads.push(quad);
+      refused = true;
+      quads.length = 0;
+      // The tally is past limits only under some.
+      reject(new ReadLimitError(baseUrl, limits!));
+    };
+    const done = () => resolve(quads);
+    if (format === "jsonld") {
+      parseJsonLd(text, baseUrl, { onQuad, onError: reject, done });
+      return;
+    }
+    const parser = libraryGetTurtleParser();
+    parser.onQuad(onQuad);
     parser.onError(reject);
-    parser.onComplete(() => resolve(quads));
+    parser.onComplete(done);
     parser.parse(text, serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format])));
   });
 }
 
 /**
- * The quads of a JSON-LD text, by the parser @inrupt/solid-client reads
- * JSON-LD with, but given a document loader that loads nothing. The
- * library's loader fetches every context the text names by its address
- * (or `@import`s), from the user's browser; here such a text is refused
+ * Parse a JSON-LD text by the parser @inrupt/solid-client reads JSON-LD
+ * with, but given a document loader that loads nothing. The library's
+ * loader fetches every context the text names by its address (or
+ * `@import`s), from the user's browser; here such a text is refused
  * instead, as one that does not parse, whatever check came before.
  */
-function parseJsonLd(text: string, baseUrl: string): Promise<Quad[]> {
-  return new Promise((resolve, reject) => {
-    const quads: Quad[] = [];
-    const parser = new JsonLdParser({
-      baseIRI: baseUrl,
-      documentLoader: {
-        load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
-      },
-    });
-    parser.on("data", (quad: Quad) => quads.push(quad));
-    parser.on("error", reject);
-    parser.on("end", () => resolve(quads));
-    parser.write(text);
-    parser.end();
+function parseJsonLd(
+  text: string,
+  baseUrl: string,
+  {
+    onQuad,
+    onError,
+    done,
+  }: { onQuad: (quad: Quad) => void; onError: (error: Error) => void; done: () => void },
+): void {
+  const parser = new JsonLdParser({
+    baseIRI: baseUrl,
+    documentLoader: {
+      load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
+    },
   });
+  parser.on("data", onQuad);
+  parser.on("error", onError);
+  parser.on("end", done);
+  parser.write(text);
+  parser.end();
 }
 
 /** The URL of the document a dataset was read from or saved to; null for one built here. */

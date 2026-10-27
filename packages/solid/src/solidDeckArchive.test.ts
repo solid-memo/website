@@ -7,6 +7,7 @@ import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/de
 import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
+import { RELEASE_LIMITS } from "./client/readLimits";
 import { createSolidDeckArchive, parseDeckFile } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
@@ -483,5 +484,47 @@ describe("readDeckFile", () => {
     } finally {
       fetch.mockRestore();
     }
+  });
+
+  it("refuses JSON nested deeper than a deck file's, however deep, before the parser reads it", async () => {
+    const nested = (depth: number) =>
+      `{"@id": "#deck", "${SM_NS}p": ${"[".repeat(depth - 1)}"x"${"]".repeat(depth - 1)}}`;
+    await expect(archive.readDeckFile(nested(12), "jsonld", base)).rejects.toMatchObject({
+      code: "notADeckFile",
+    });
+    for (const depth of [13, 100_000]) {
+      await expect(archive.readDeckFile(nested(depth), "jsonld", base)).rejects.toMatchObject({
+        code: "deckFileUnreadable",
+        vars: { reason: "The file nests deeper than 12 levels." },
+      });
+    }
+  });
+
+  it("refuses a file larger than a deck file may be, in characters, triples or their terms, though larger than a release may be", async () => {
+    const bytes = 64 * 1024 * 1024;
+    const quads = 1_000_000;
+    const tooLarge = expect.objectContaining({
+      code: "deckFileTooLarge",
+      vars: expect.objectContaining({ bytes, quads }),
+    });
+    expect(() => parseDeckFile(" ".repeat(bytes + 1), "turtle", base)).toThrow(tooLarge);
+    const triples = (count: number) =>
+      `<#a> <${SM_NS}p> ${Array.from({ length: count }, (_, n) => n).join(",")} .`;
+    // More triples than a release's, as a deck with its progress has: read.
+    await expect(
+      parseDeckFile(triples(RELEASE_LIMITS.quads + 1), "turtle", base),
+    ).resolves.toHaveLength(RELEASE_LIMITS.quads + 1);
+    await expect(archive.readDeckFile(triples(quads + 1), "turtle", base)).rejects.toMatchObject({
+      code: "deckFileTooLarge",
+    });
+    const prefix = `https://example.com/${"n".repeat(100_000)}/`;
+    const lines = Array.from({ length: 4_000 }, (_, at) => `p:s${at} p:p p:o${at} .`).join("\n");
+    await expect(
+      archive.readDeckFile(`@prefix p: <${prefix}> .\n${lines}`, "turtle", base),
+    ).rejects.toMatchObject({ code: "deckFileTooLarge" });
+    // A release file is held to a release's limits.
+    await expect(
+      parseDeckFile(triples(RELEASE_LIMITS.quads + 1), "turtle", base, RELEASE_LIMITS),
+    ).rejects.toMatchObject({ code: "deckFileTooLarge", vars: RELEASE_LIMITS });
   });
 });

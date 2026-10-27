@@ -67,6 +67,8 @@ import {
 } from "./mappers/releaseDraftMapper";
 import { draftSubjects } from "./ownership";
 import { recordThing, removeUnlessNewer, storedVersionOf } from "./records";
+import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
+import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
 import { refuseUnwritable } from "./writableTerms";
 import { turtleOf } from "./turtleWriter";
@@ -103,7 +105,8 @@ interface Read {
  * Releases are read, never written, with `releaseFetch`: a library
  * release is read where the site serves it. The documents a release
  * names its series and publisher in are read with `publicFetch`, as no
- * one: what they say is copied into a draft to be published.
+ * one: what they say is copied into a draft to be published. Both are
+ * read under RELEASE_LIMITS: a release may be anyone's, on any server.
  */
 export function createSolidReleaseDraftRepository({
   fetch,
@@ -118,6 +121,8 @@ export function createSolidReleaseDraftRepository({
 }): ReleaseDraftRepository {
   /** Each draft's documents as last read, so an edit is written only if they are still so. */
   const reads = new Map<string, Read>();
+  const releases = limitedFetch(releaseFetch, RELEASE_LIMITS);
+  const published = limitedFetch(publicFetch, RELEASE_LIMITS);
 
   /** The drafts the instance's catalog links, as their places say: a link anywhere but a draft's place in the instance is not followed. */
   async function linked(
@@ -325,9 +330,9 @@ export function createSolidReleaseDraftRepository({
     async readRelease(url) {
       let dataset: Dataset;
       try {
-        dataset = await readDataset(url, releaseFetch);
-      } catch {
-        throw new AppError("releaseUnreadable", { url });
+        dataset = await readDataset(url, releases);
+      } catch (error) {
+        throw releaseReadError(url, error);
       }
       return readReleaseQuads(quadsOf(dataset), url);
     },
@@ -345,7 +350,7 @@ export function createSolidReleaseDraftRepository({
       // One that cannot be read says nothing: the draft is made without it, and the release check finds what it lacks.
       const read = await Promise.all(
         documents.map((url) =>
-          readDataset(url, publicFetch).then(
+          readDataset(url, published).then(
             (dataset) => quadsOf(dataset).map(asTriple),
             () => [],
           ),
@@ -356,7 +361,8 @@ export function createSolidReleaseDraftRepository({
 
     async parseRelease(text, format) {
       const base = "https://file.solid-memo.invalid/release.ttl";
-      const quads = await parseDeckFile(text, format, base);
+      // A release file is held to what a release read from anywhere is: one past it no one could read once published.
+      const quads = await parseDeckFile(text, format, base, RELEASE_LIMITS);
       // A draft keeps a release's triples as they are: one Turtle cannot write as it is would say more once saved (GHSA-x937-hx25-qfp4).
       refuseUnwritable(quads);
       const roots = [

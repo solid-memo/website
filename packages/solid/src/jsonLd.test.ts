@@ -92,4 +92,16 @@ describe("refuseRemoteContexts", () => {
       '{"@context":{}}',
     );
   });
+
+  it("refuses a document nested deeper than a deck file's before writing it again, which would overflow the stack", () => {
+    const depth = 100_000;
+    const nested = `{"@context": {}, "a": ${"[".repeat(depth)}1${"]".repeat(depth)}}`;
+    expect(() => JSON.stringify(JSON.parse(nested))).toThrow(RangeError);
+    expect(() => refuseRemoteContexts(nested)).toThrow(
+      expect.objectContaining({
+        code: "deckFileUnreadable",
+        vars: { reason: "The file nests deeper than 12 levels." },
+      }),
+    );
+  });
 });

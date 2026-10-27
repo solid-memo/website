@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { RELEASE_LIMITS } from "./client/readLimits";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 
 /**
@@ -95,6 +96,38 @@ describe("readRelease", () => {
     await expect(library.readRelease(V2)).rejects.toMatchObject({ code: "releaseUnreadable" });
     await expect(library.readRelease(V1)).rejects.toMatchObject({ code: "notADeck" });
   });
+
+  it("refuses a release larger than a release may be, in bytes or in triples, before reading it all", async () => {
+    // A server that says the body is a gigabyte.
+    const huge = async (input: RequestInfo | URL) => {
+      const response = new Response(STANDALONE, {
+        status: 200,
+        headers: { "Content-Type": "text/turtle", "Content-Length": String(2 ** 30) },
+      });
+      Object.defineProperty(response, "url", { value: String(input) });
+      return response;
+    };
+    await expect(libraryOver(huge).readRelease(V2)).rejects.toMatchObject({
+      code: "releaseTooLarge",
+      vars: { url: V2, bytes: RELEASE_LIMITS.bytes, quads: RELEASE_LIMITS.quads },
+    });
+    const many = `<#it> <${SM}p> ${Array.from({ length: RELEASE_LIMITS.quads + 1 }, (_, at) => at).join(",")} .`;
+    await expect(libraryOver(serving({ [V2]: many })).readRelease(V2)).rejects.toMatchObject({
+      code: "releaseTooLarge",
+    });
+  });
+
+  it("refuses a short release whose prefix makes its terms longer than a release's, before building any of it", async () => {
+    // Some hundred kilobytes, far within the bytes and triples, that a prefix makes gigabytes of terms.
+    const prefix = `https://alice.example/${"n".repeat(100_000)}/`;
+    const lines = Array.from({ length: 4_000 }, (_, at) => `p:s${at} p:p p:o${at} .`).join("\n");
+    const amplified = `@prefix p: <${prefix}> .\n${lines}`;
+    expect(amplified.length).toBeLessThan(RELEASE_LIMITS.bytes / 100);
+    const library = libraryOver(serving({ [V2]: amplified }));
+    await expect(library.readRelease(V2)).rejects.toMatchObject({ code: "releaseTooLarge" });
+    // So is a release the library reads for a copy's content.
+    await expect(library.fetchLibraryDeck(V2)).rejects.toMatchObject({ code: "releaseTooLarge" });
+  });
 });
 
 describe("publishedBeside", () => {
@@ -114,6 +147,23 @@ describe("publishedBeside", () => {
       `${instance}releases/catalog.ttl`,
       `${instance}catalog.ttl`,
     ]);
+  });
+
+  it("looks no more than eight folders up, however deep the release's address", async () => {
+    const deep = `https://alice.example/${"a/".repeat(1_000)}v1.ttl`;
+    const fetch = serving({
+      "https://alice.example/catalog.ttl": catalog("https://alice.example/", [deep]),
+    });
+    await expect(libraryOver(fetch).publishedBeside(deep)).resolves.toBeNull();
+    expect(fetch.asked).toHaveLength(8);
+  });
+
+  it("passes over a catalog larger than a release may be", async () => {
+    const instance = "https://alice.example/solid-memo/main/";
+    const fetch = serving({
+      [`${instance}catalog.ttl`]: `${catalog(instance, [V1, V2])}\n${"#".repeat(RELEASE_LIMITS.bytes)}`,
+    });
+    await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toBeNull();
   });
 
   it("is null when no catalog that links the release can be read, up to the host's root", async () => {

@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { HttpError } from "../../client/interface";
+import { HttpError, ReadLimitError } from "../../client/interface";
+import { limitedFetch } from "../../client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
 import { type DataClient, turtleAt } from "./rdf";
 
@@ -160,6 +161,59 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(quads(linear).sort()).toEqual(quads(plain).sort());
       expect(getSourceUrl(linear)).toBe(URL_);
       expect(Object.isFrozen(linear)).toBe(true);
+    });
+  });
+
+  describe("read limits", () => {
+    const turtle = `<#a> <${EX}p> "x", "y", "z" .`;
+
+    it("reads a document within its limits as any other", async () => {
+      const fetch = limitedFetch(turtleAt(turtle), {
+        bytes: turtle.length,
+        quads: 3,
+        characters: 1000,
+      });
+      const dataset = await getSolidDatasetLinear(URL_, { fetch });
+      expect(getThing(dataset, `${URL_}#a`)).not.toBeNull();
+      const answer = await readDocument(URL_, { fetch });
+      expect("dataset" in answer).toBe(true);
+    });
+
+    it("refuses a body past its bytes, and a document past its triples, with a ReadLimitError", async () => {
+      const limits = [
+        { bytes: turtle.length - 1, quads: 3, characters: 1000 },
+        { bytes: turtle.length, quads: 2, characters: 1000 },
+        { bytes: turtle.length, quads: 3, characters: 200 },
+      ];
+      for (const limit of limits) {
+        const fetch = limitedFetch(turtleAt(turtle), limit);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+        ]) {
+          const error = await read().catch((failure: unknown) => failure);
+          expect(error).toBeInstanceOf(ReadLimitError);
+          expect(error).toMatchObject({ name: "ReadLimitError", url: URL_, limits: limit });
+        }
+      }
+    });
+
+    it("counts the characters of the terms a prefix stands for, not of the text that says them", async () => {
+      const long = `${EX}${"n".repeat(10_000)}/`;
+      const objects = Array.from({ length: 50 }, (_, at) => `p:o${at}`).join(", ");
+      const text = `@prefix p: <${long}> . p:a p:p ${objects} .`;
+      const limits = { bytes: text.length, quads: 50, characters: 100_000 };
+      const fetch = limitedFetch(turtleAt(text), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", limits });
+      }
+      const within = limitedFetch(turtleAt(text), { ...limits, characters: 50 * 3 * 10_100 });
+      expect(
+        getThing(await getSolidDatasetLinear(URL_, { fetch: within }), `${long}a`),
+      ).not.toBeNull();
     });
   });
 
@@ -434,6 +488,48 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         expect(fetch).not.toHaveBeenCalled();
       } finally {
         fetch.mockRestore();
+      }
+    });
+
+    it("rejects a text past its limits' triples, in either format, with a ReadLimitError", async () => {
+      const limits = { bytes: 1000, quads: 2, characters: 1000 };
+      const texts = [
+        [`<#a> <${EX}p> "x", "y" .`, `<#a> <${EX}p> "x", "y", "z" .`],
+        [
+          JSON.stringify({ "@id": "#a", [`${EX}p`]: ["x", "y"] }),
+          JSON.stringify({ "@id": "#a", [`${EX}p`]: ["x", "y", "z"] }),
+        ],
+      ] as const;
+      for (const [format, [within, past]] of [
+        ["turtle", texts[0]],
+        ["jsonld", texts[1]],
+      ] as const) {
+        await expect(parseQuads(within, format, URL_, limits)).resolves.toHaveLength(2);
+        const error = await parseQuads(past, format, URL_, limits).catch(
+          (failure: unknown) => failure,
+        );
+        expect(error).toBeInstanceOf(ReadLimitError);
+        expect(error).toMatchObject({ url: URL_, limits });
+      }
+    });
+
+    it("rejects a text whose terms, as a prefix or a context makes them, are past its limits' characters", async () => {
+      const long = `${EX}${"n".repeat(10_000)}/`;
+      const limits = { bytes: 1000, quads: 100, characters: 100_000 };
+      const names = Array.from({ length: 50 }, (_, at) => `o${at}`);
+      const texts = {
+        turtle: `@prefix p: <${long}> . p:a p:p ${names.map((name) => `p:${name}`).join(", ")} .`,
+        jsonld: JSON.stringify({
+          "@context": { "@vocab": long, x: long },
+          "@id": "x:a",
+          p: names.map((name) => ({ "@id": `x:${name}` })),
+        }),
+      };
+      for (const format of ["turtle", "jsonld"] as const) {
+        await expect(parseQuads(texts[format], format, URL_, limits)).rejects.toMatchObject({
+          name: "ReadLimitError",
+          limits,
+        });
       }
     });
   });

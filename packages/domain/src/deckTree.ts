@@ -327,7 +327,14 @@ export function applyDeckTreeEdit(tree: DeckTree, edit: DeckTreeEdit): DeckTree 
   }
 }
 
-/** Each grouped node's group as the layout states it, one each (`buildTree` steps 1 to 4); the rest are at the top level. */
+/**
+ * How deep groups nest: a group further down is read at the top level,
+ * the groups it holds under it, so neither the tree nor the screen
+ * nests without end.
+ */
+const MAX_GROUP_DEPTH = 16;
+
+/** Each grouped node's group as the layout states it, one each (see `buildTree`); the rest are at the top level. */
 function parentsOf(stored: StoredLayout): Map<string, string> {
   const decks = new Set(stored.decks.map((deck) => deck.url));
   const groups = new Set(stored.groups.map((entry) => entry.group.url));
@@ -344,16 +351,35 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
     }
   }
   // A group that cannot reach the top level is in a cycle: lift its lowest member to the top, until none is.
-  for (const { group } of byUrl) {
+  // Each group is walked up from once: one reached again is on this walk's cycle, or reaches the top already.
+  const walked = new Map<string, number>();
+  for (const [walk, { group }] of byUrl.entries()) {
     const chain: string[] = [];
     let at: string | undefined = group.url;
-    while (at !== undefined && !chain.includes(at)) {
+    while (at !== undefined && !walked.has(at)) {
+      walked.set(at, walk);
       chain.push(at);
       at = parents.get(at);
     }
-    if (at !== undefined) {
+    if (at !== undefined && walked.get(at) === walk) {
       const cycle = chain.slice(chain.indexOf(at));
       parents.delete(cycle.sort()[0]!);
+    }
+  }
+  // A group deeper than MAX_GROUP_DEPTH is lifted to the top, where those it holds count their depth from.
+  const depths = new Map<string, number>();
+  for (const { group } of byUrl) {
+    const chain: string[] = [];
+    let at: string | undefined = group.url;
+    while (at !== undefined && !depths.has(at)) {
+      chain.push(at);
+      at = parents.get(at);
+    }
+    let depth = at === undefined ? 0 : depths.get(at)!;
+    for (const url of chain.reverse()) {
+      depth = depth === MAX_GROUP_DEPTH ? 1 : depth + 1;
+      if (depth === 1) parents.delete(url);
+      depths.set(url, depth);
     }
   }
   return parents;
@@ -364,8 +390,9 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
  * group listing itself, and a deck linked as a group or a group as a deck
  * are left out; a node listed by several parents is where the top level
  * lists it, else in the group with the lowest URL; a cycle of groups is
- * broken by lifting its lowest-URL group to the top level; and whatever
- * no group lists is at the top level. Within a parent, members come by
+ * broken by lifting its lowest-URL group to the top level; a group
+ * nested deeper than MAX_GROUP_DEPTH is at the top level, with what it
+ * holds; and whatever no group lists is at the top level. Within a parent, members come by
  * position, those without one (or with a negative one) last, and in
  * document order on a tie: decks before groups, which a pod written by
  * this app never ties.
@@ -393,14 +420,20 @@ export function buildTree(stored: StoredLayout): DeckTree {
   const rank = (entry: Entry) =>
     entry.position !== undefined && entry.position >= 0 ? entry.position : Infinity;
   entries.sort((a, b) => rank(a) - rank(b) || a.order - b.order);
+  const members = new Map<ParentId, Entry[]>();
+  for (const entry of entries) {
+    const parent = parents.get(entry.id) ?? null;
+    const list = members.get(parent);
+    if (list === undefined) members.set(parent, [entry]);
+    else list.push(entry);
+  }
+  // As deep as MAX_GROUP_DEPTH, no deeper.
   const childrenIn = (parent: ParentId): TreeNode[] =>
-    entries
-      .filter((entry) => (parents.get(entry.id) ?? null) === parent)
-      .map((entry) =>
-        "deck" in entry
-          ? { kind: "deck", deck: entry.deck }
-          : { kind: "group", group: entry.group, children: childrenIn(entry.id) },
-      );
+    (members.get(parent) ?? []).map((entry) =>
+      "deck" in entry
+        ? { kind: "deck", deck: entry.deck }
+        : { kind: "group", group: entry.group, children: childrenIn(entry.id) },
+    );
   return { children: childrenIn(null), readOnly: stored.readOnly };
 }
 
