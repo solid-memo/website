@@ -5,7 +5,9 @@
 /**
  * `npm run check:dependencies`: the app ships only released versions of
  * other code (docs/vendor-code.md#maturity). It walks package-lock.json
- * from the app the site serves (apps/web, which loads apps/studio) over
+ * from the app the site serves (apps/web, which loads apps/studio), and
+ * from the Solid client a build may put in place of Inrupt's
+ * (packages/solid-memo-client, scripts/solidClient.ts), over
  * what each package needs at run time (`dependencies`, the
  * `optionalDependencies` npm installed, and the `peerDependencies` not
  * marked optional), and fails on a version before 1.0.0 or with a
@@ -36,7 +38,7 @@ export type LockEntry = {
 export type Lockfile = { packages: Record<string, LockEntry> };
 
 /** The workspace packages whose run-time dependencies are shipped. */
-export const SHIPPED = ["apps/web"];
+export const SHIPPED = ["apps/web", "packages/solid-memo-client"];
 
 /** The unready versions the app may ship, and why (docs/vendor-code.md#maturity). */
 export const ALLOWED: Record<string, string> = {

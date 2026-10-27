@@ -149,6 +149,7 @@ describe("main", () => {
           name: "@solid-memo/web",
           dependencies: Object.fromEntries(Object.keys(ALLOWED).map((name) => [name, "*"])),
         },
+        "packages/solid-memo-client": { name: "@solid-memo/solid-memo-client" },
         ...Object.fromEntries(
           Object.keys(ALLOWED).map((name) => [`node_modules/${name}`, { version: "0.1.0" }]),
         ),

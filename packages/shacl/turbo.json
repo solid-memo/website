@@ -10,7 +10,9 @@
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/greek-alphabet/v1.ttl",
         "$TURBO_ROOT$/decks/git-commands/v1.ttl",
-        "$TURBO_ROOT$/decks/solid-fundamentals/v1.ttl"
+        "$TURBO_ROOT$/decks/solid-fundamentals/v1.ttl",
+        "$TURBO_ROOT$/packages/solid-memo-client/src/**",
+        "$TURBO_ROOT$/packages/solid-memo-client/package.json"
       ]
     },
     "library:check": {

@@ -12,7 +12,10 @@
  *   (`import * as`, `export *`, a dynamic `import()`), tests aside;
  * - its own file uses it too (it is exported for a test to reach, and
  *   runs all the same);
- * - a package.json script calls it (`import('…').then((m) => m.run(…))`).
+ * - a package.json script calls it (`import('…').then((m) => m.run(…))`);
+ * - it is a module's that replaces another when the build is asked to
+ *   (scripts/solidClient.ts), and that module's export of the same name
+ *   is used.
  *
  * Tests are the test files, helpers and configs of checkBoundaries.ts
  * (isTestFile), and the end-to-end tests in e2e/. Default exports (a
@@ -23,6 +26,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, normalize, resolve } from "node:path";
 import { parseSync } from "vite";
 import { isTestFile, sourceFiles } from "./checkBoundaries.ts";
+import { REPLACEMENTS } from "./solidClient.ts";
 
 /** A workspace package: its folder from the root, its manifest, and its source by path. */
 export type Package = {
@@ -198,8 +202,15 @@ export function isTest(dir: string, file: string): boolean {
   return dir.startsWith("e2e/") || isTestFile(file);
 }
 
-/** The exports nothing but tests uses, as `<file>: <name>` lines from the root. */
-export function unusedExports(packages: readonly Package[]): string[] {
+/**
+ * The exports nothing but tests uses, as `<file>: <name>` lines from the
+ * root. `replacements` names, by module, the one that replaces it in some
+ * builds, whose exports are used where the module's are.
+ */
+export function unusedExports(
+  packages: readonly Package[],
+  replacements: Record<string, string> = {},
+): string[] {
   const sources = new Map<string, string>();
   const tests = new Set<string>();
   for (const pkg of packages) {
@@ -233,6 +244,10 @@ export function unusedExports(packages: readonly Package[]): string[] {
       const target = resolveImport(specifier, file, packages, (path) => sources.has(path));
       if (target !== null) use(target, names);
     }
+  }
+  for (const [module, replacement] of Object.entries(replacements)) {
+    const imported = used.get(module);
+    if (imported !== undefined) use(replacement, imported === "*" ? "*" : [...imported]);
   }
   const problems: string[] = [];
   for (const [file, { exports }] of records) {
@@ -274,7 +289,7 @@ export function defaultIo(root: string): ExportsIo {
 
 /** Exit code: 0 when code that is not a test uses every export. */
 export function main(io: ExportsIo): number {
-  const problems = unusedExports(io.packages());
+  const problems = unusedExports(io.packages(), REPLACEMENTS);
   for (const problem of problems) io.log(problem);
   if (problems.length > 0) {
     io.log(

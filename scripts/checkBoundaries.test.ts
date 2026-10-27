@@ -82,19 +82,25 @@ describe("boundaryProblems", () => {
     ]);
   });
 
-  it("fails on a relative import that leaves the package, a vitest config's shared setup aside", () => {
+  it("fails on a relative import that leaves the package, a config's shared setup aside", () => {
     expect(
       problems(
         workspace("turtle", {
           "src/a.ts": 'import { b } from "../../domain/src/b.ts";\nimport { c } from "./c.ts";',
           "src/deep/d.ts": 'import { e } from "../e.ts";',
           "vitest.config.ts": 'import { packageConfig } from "../../vitest.shared.ts";',
+          "vitest.roundtrip.config.ts": 'import { packageConfig } from "../../vitest.shared.ts";',
+          "vite.config.ts": 'import { solidClientPlugin } from "../../scripts/solidClient.ts";',
           "tooling/x.ts": 'import { y } from "../../vitest.shared.ts";',
+          "tooling/y.ts": 'import { z } from "../../scripts/solidClient.ts";',
+          "vite.other.config.ts": 'import { z } from "../../scripts/checkBoundaries.ts";',
         }),
       ),
     ).toEqual([
       'packages/turtle/src/a.ts: "../../domain/src/b.ts" reaches outside the package.',
       'packages/turtle/tooling/x.ts: "../../vitest.shared.ts" reaches outside the package.',
+      'packages/turtle/tooling/y.ts: "../../scripts/solidClient.ts" reaches outside the package.',
+      'packages/turtle/vite.other.config.ts: "../../scripts/checkBoundaries.ts" reaches outside the package.',
     ]);
   });
 
@@ -303,6 +309,46 @@ describe("boundaryProblems", () => {
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
       `packages/shacl/src/shapeLoader.ts: may not import "@inrupt/solid-client": ${only}`,
       `packages/ui/src/ui/App.tsx: may not import "@inrupt/solid-client-authn-browser": ${only}`,
+    ]);
+  });
+
+  it("lets solid-memo-client use n3 in the browser and import solid, and no package import it", () => {
+    const client = workspace(
+      "solid-memo-client",
+      {
+        "src/rdf.ts": [
+          'import { DataFactory } from "n3";',
+          'import type { Dataset } from "@solid-memo/solid/client/interface";',
+        ].join("\n"),
+        "src/oidcStore.ts": 'import { readFileSync } from "node:fs";',
+      },
+      { n3: "*", "@solid-memo/solid": "*" },
+    );
+    const composition = workspace(
+      "composition",
+      { "src/a.ts": 'import { getThing } from "@solid-memo/solid-memo-client/rdf";' },
+      { "@solid-memo/solid-memo-client": "*" },
+    );
+    expect(boundaryProblems([client, composition], TOOLING)).toEqual([
+      'packages/solid-memo-client/src/oidcStore.ts: runs in the browser, so may not import "node:fs".',
+      "packages/composition/src/a.ts: @solid-memo/composition may not import @solid-memo/solid-memo-client.",
+    ]);
+  });
+
+  it("fails on any @inrupt/ package in solid-memo-client, its tests too, once an import", () => {
+    const client = workspace(
+      "solid-memo-client",
+      {
+        "src/rdf.ts": 'import { getThing } from "@inrupt/solid-client";',
+        "src/rdf.test.ts": 'vi.mock("@inrupt/solid-client-authn-browser");',
+        "src/access.ts": 'import { universalAccess } from "@inrupt/solid-client";',
+      },
+      { "@inrupt/solid-client": "*", "@inrupt/solid-client-authn-browser": "*" },
+    );
+    expect(problems(client)).toEqual([
+      'packages/solid-memo-client/src/rdf.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
+      'packages/solid-memo-client/src/rdf.test.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client-authn-browser".',
+      'packages/solid-memo-client/src/access.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
     ]);
   });
 

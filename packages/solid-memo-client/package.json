@@ -1,0 +1,29 @@
+{
+  "name": "@solid-memo/solid-memo-client",
+  "description": "A second implementation of Solid Memo's Solid client modules, on no Inrupt library: the RDF data model, reading and writing resources, Solid-OIDC sign-in and the public-read grant, chosen at build time with SOLID_CLIENT=solid-memo-client.",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@solid-memo/solid": "*",
+    "jsonld-streaming-parser": "^5.0.0",
+    "n3": "^2.0.0",
+    "oauth4webapi": "^3.8.8"
+  },
+  "devDependencies": {
+    "@rdfjs/types": "^2.0.1",
+    "@types/n3": "^1.26.4",
+    "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^21.0.0"
+  }
+}

@@ -4,6 +4,7 @@
 
 import { defineConfig } from "vitest/config";
 import { SERVERS, serversNamed } from "./servers.ts";
+import { solidClientPlugin } from "../../scripts/solidClient.ts";
 
 /**
  * Against real Solid servers (docs/testing.md), which globalSetup.ts
@@ -20,6 +21,7 @@ const serial =
   );
 
 export default defineConfig({
+  plugins: [solidClientPlugin()],
   test: {
     include: ["src/**/*.integration.test.ts"],
     // Naming any reporter drops the one Vitest adds on GitHub Actions: named

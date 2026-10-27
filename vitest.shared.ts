@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { defineConfig, type ViteUserConfig } from "vitest/config";
+import { solidClientPlugin } from "./scripts/solidClient.ts";
 
 /**
  * The test setup every package shares (docs/testing.md): each package's
@@ -27,6 +28,7 @@ export function packageConfig({
   test?: NonNullable<ViteUserConfig["test"]>;
 } = {}) {
   return defineConfig({
+    plugins: [solidClientPlugin()],
     test: {
       environment,
       testTimeout: 30_000,
