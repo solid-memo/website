@@ -68,6 +68,7 @@ path = [
     "decks/country-calling-codes/*.ttl",
     "decks/country-code-top-level-domains/*.ttl",
     "decks/danish-monarchs/*.ttl",
+    "decks/dcat-and-dcat-ap/*.ttl",
     "decks/derivatives/*.ttl",
     "decks/english-and-british-monarchs/*.ttl",
     "decks/english-basics/*.ttl",

@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-25T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-27T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -35,6 +35,7 @@
                  <#country-calling-codes> ,
                  <#country-code-top-level-domains> ,
                  <#danish-monarchs> ,
+                 <#dcat-and-dcat-ap> ,
                  <#derivatives> ,
                  <#english-and-british-monarchs> ,
                  <#english-basics> ,
@@ -3020,6 +3021,243 @@
     dcat:downloadURL <https://solid-memo.com/decks/danish-monarchs/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#dcat-and-dcat-ap>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "DCAT and DCAT-AP"@en ,
+                  "DCAT och DCAT-AP"@sv ,
+                  "DCAT과 DCAT-AP"@ko ,
+                  "DCAT und DCAT-AP"@de ,
+                  "DCAT y DCAT-AP"@es ,
+                  "DCAT et DCAT-AP"@fr ;
+    dcterms:description "Learn DCAT, the W3C vocabulary for describing datasets and data catalogs on the web, and DCAT-AP, the profile of it that Europe's data portals use to exchange those descriptions. The course starts with just enough RDF and Turtle to read DCAT, then follows an invented environment agency as it describes one dataset: the DCAT model, titles, themes and coverage in time and space, distributions and data services, publisher, contact point and license, series, versions and related resources. It then turns to DCAT-AP: what an application profile is, how senders and receivers conform, its mandatory, recommended and optional properties class by class, its controlled vocabularies, validation with SHACL, harvesting and high-value datasets. A closing chapter covers DCAT-AP-SE, the Swedish profile, and how catalogs reach Sveriges dataportal. 10 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English, Swedish, Korean, German, Spanish and French. The facts come from DCAT 3 (W3C Recommendation, August 2024), DCAT-AP 3.0.1 and DCAT-AP-SE 3.0.1, checked in October 2026."@en ,
+                        "Lär dig DCAT, W3C:s vokabulär för att beskriva datamängder och datakataloger på webben, och DCAT-AP, den profil av DCAT som Europas dataportaler använder för att utbyta sådana beskrivningar. Kursen börjar med precis så mycket RDF och Turtle som behövs för att läsa DCAT och följer sedan en påhittad miljömyndighet när den beskriver en datamängd: DCAT-modellen, titlar, teman och täckning i tid och rum, distributioner och datatjänster, utgivare, kontaktuppgift och licens, serier, versioner och relaterade resurser. Därefter går den över till DCAT-AP: vad en tillämpningsprofil är, hur avsändare och mottagare överensstämmer med den, dess obligatoriska, rekommenderade och valfria egenskaper klass för klass, dess kontrollerade vokabulärer, validering med SHACL, skördning och värdefulla datamängder. Ett avslutande kapitel tar upp DCAT-AP-SE, den svenska profilen, och hur kataloger når Sveriges dataportal. 10 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns på engelska, svenska, koreanska, tyska, spanska och franska. Fakta kommer från DCAT 3 (W3C-rekommendation, augusti 2024), DCAT-AP 3.0.1 och DCAT-AP-SE 3.0.1, kontrollerade i oktober 2026."@sv ,
+                        "웹에서 데이터셋과 데이터 카탈로그를 기술하는 W3C 어휘인 DCAT과, 유럽의 데이터 포털들이 그런 기술을 주고받을 때 쓰는 DCAT의 프로파일인 DCAT-AP를 배웁니다. 코스는 DCAT을 읽는 데 꼭 필요한 만큼의 RDF와 Turtle로 시작한 뒤, 가상의 환경청이 데이터셋 하나를 기술하는 과정을 따라갑니다. DCAT 모델, 제목, 테마, 시간적·공간적 범위, 배포판과 데이터 서비스, 발행자, 연락처, 라이선스, 시리즈, 버전, 관련 리소스를 다룹니다. 이어서 DCAT-AP로 넘어가 응용 프로파일이 무엇인지, 송신자와 수신자가 각각 어떻게 적합성을 갖추는지, 클래스별 필수·권장·선택 속성, 통제 어휘, SHACL을 이용한 검증, 하베스팅, 고가치 데이터셋을 살펴봅니다. 마지막 챕터는 스웨덴 프로파일인 DCAT-AP-SE와, 카탈로그가 스웨덴의 국가 데이터 포털인 Sveriges dataportal에 이르는 방법을 다룹니다. 짧은 단계로 이루어진 챕터 10개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제입니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 코스는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 제공됩니다. 내용은 DCAT 3(W3C 권고안, 2024년 8월), DCAT-AP 3.0.1, DCAT-AP-SE 3.0.1에서 가져왔으며 2026년 10월에 확인했습니다."@ko ,
+                        "Lerne DCAT kennen, das W3C-Vokabular zur Beschreibung von Datensätzen und Datenkatalogen im Web, und DCAT-AP, das Profil von DCAT, mit dem Europas Datenportale diese Beschreibungen austauschen. Der Kurs beginnt mit gerade so viel RDF und Turtle, wie du zum Lesen von DCAT brauchst, und begleitet dann eine erfundene Umweltbehörde, während sie einen Datensatz beschreibt: das DCAT-Modell, Titel, Themen und die zeitliche und räumliche Abdeckung, Distributionen und Datenservices, Herausgeber, Kontaktpunkt und Lizenz, Serien, Versionen und verwandte Ressourcen. Danach geht es um DCAT-AP: was ein Anwendungsprofil ist, wie Sender und Empfänger ihm entsprechen, seine verpflichtenden, empfohlenen und optionalen Eigenschaften Klasse für Klasse, seine kontrollierten Vokabulare, die Validierung mit SHACL, Harvesting und hochwertige Datensätze. Ein abschließendes Kapitel behandelt DCAT-AP-SE, das schwedische Profil, und wie Kataloge zu Sveriges dataportal gelangen. 10 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch verfügbar. Die Fakten stammen aus DCAT 3 (W3C-Empfehlung, August 2024), DCAT-AP 3.0.1 und DCAT-AP-SE 3.0.1, geprüft im Oktober 2026."@de ,
+                        "Aprende DCAT, el vocabulario del W3C para describir conjuntos de datos y catálogos de datos en la web, y DCAT-AP, el perfil de DCAT que usan los portales de datos de Europa para intercambiar esas descripciones. El curso empieza con lo justo de RDF y Turtle para leer DCAT y luego sigue a una agencia de medio ambiente inventada mientras describe un conjunto de datos: el modelo de DCAT; títulos, temas y cobertura temporal y geográfica; distribuciones y servicios de datos; publicador, punto de contacto y licencia; series, versiones y recursos relacionados. Después pasa a DCAT-AP: qué es un perfil de aplicación, cómo lo cumplen emisores y receptores, sus propiedades obligatorias, recomendadas y opcionales clase por clase, sus vocabularios controlados, la validación con SHACL, la recolección y los conjuntos de datos de alto valor. Un capítulo final trata DCAT-AP-SE, el perfil sueco, y cómo llegan los catálogos a Sveriges dataportal. 10 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso está en inglés, sueco, coreano, alemán, español y francés. La información procede de DCAT 3 (Recomendación del W3C, agosto de 2024), DCAT-AP 3.0.1 y DCAT-AP-SE 3.0.1, comprobados en octubre de 2026."@es ,
+                        "Découvrez DCAT, le vocabulaire du W3C pour décrire les jeux de données et les catalogues de données sur le Web, et DCAT-AP, le profil de DCAT qu’utilisent les portails de données européens pour échanger ces descriptions. Le cours commence par juste assez de RDF et de Turtle pour lire DCAT, puis suit une agence de l’environnement fictive qui décrit un jeu de données : le modèle DCAT, les titres, les thèmes et la couverture dans le temps et dans l’espace, les distributions et les services de données, l’éditeur, le point de contact et la licence, les séries, les versions et les ressources liées. Il passe ensuite à DCAT-AP : ce qu’est un profil d’application, comment émetteurs et récepteurs s’y conforment, ses propriétés obligatoires, recommandées et facultatives classe par classe, ses vocabulaires contrôlés, la validation avec SHACL, le moissonnage et les jeux de données de forte valeur. Un dernier chapitre présente DCAT-AP-SE, le profil suédois, et la façon dont les catalogues parviennent jusqu’à Sveriges dataportal. 10 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours existe en anglais, en suédois, en coréen, en allemand, en espagnol et en français. Les informations proviennent de DCAT 3 (Recommandation du W3C, août 2024), de DCAT-AP 3.0.1 et de DCAT-AP-SE 3.0.1, vérifiées en octobre 2026."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:linked-data ;
+    dcat:keyword "DCAT"@en ,
+                 "DCAT-AP"@en ,
+                 "DCAT-AP-SE"@en ,
+                 "metadata"@en ,
+                 "open data"@en ,
+                 "data catalog"@en ,
+                 "data portal"@en ,
+                 "linked data"@en ,
+                 "RDF"@en ,
+                 "DCAT"@sv ,
+                 "DCAT-AP"@sv ,
+                 "DCAT-AP-SE"@sv ,
+                 "metadata"@sv ,
+                 "öppna data"@sv ,
+                 "datakatalog"@sv ,
+                 "dataportal"@sv ,
+                 "länkade data"@sv ,
+                 "RDF"@sv ,
+                 "DCAT"@ko ,
+                 "DCAT-AP"@ko ,
+                 "DCAT-AP-SE"@ko ,
+                 "메타데이터"@ko ,
+                 "오픈 데이터"@ko ,
+                 "데이터 카탈로그"@ko ,
+                 "데이터 포털"@ko ,
+                 "링크드 데이터"@ko ,
+                 "RDF"@ko ,
+                 "DCAT"@de ,
+                 "DCAT-AP"@de ,
+                 "DCAT-AP-SE"@de ,
+                 "Metadaten"@de ,
+                 "Open Data"@de ,
+                 "Datenkatalog"@de ,
+                 "Datenportal"@de ,
+                 "Linked Data"@de ,
+                 "RDF"@de ,
+                 "DCAT"@es ,
+                 "DCAT-AP"@es ,
+                 "DCAT-AP-SE"@es ,
+                 "metadatos"@es ,
+                 "datos abiertos"@es ,
+                 "catálogo de datos"@es ,
+                 "portal de datos"@es ,
+                 "datos enlazados"@es ,
+                 "RDF"@es ,
+                 "DCAT"@fr ,
+                 "DCAT-AP"@fr ,
+                 "DCAT-AP-SE"@fr ,
+                 "métadonnées"@fr ,
+                 "données ouvertes"@fr ,
+                 "catalogue de données"@fr ,
+                 "portail de données"@fr ,
+                 "données liées"@fr ,
+                 "RDF"@fr ;
+    dcat:first <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl> .
+
+<https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "DCAT and DCAT-AP"@en ,
+                  "DCAT och DCAT-AP"@sv ,
+                  "DCAT과 DCAT-AP"@ko ,
+                  "DCAT und DCAT-AP"@de ,
+                  "DCAT y DCAT-AP"@es ,
+                  "DCAT et DCAT-AP"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Learn DCAT, the W3C vocabulary for describing datasets and data catalogs on the web, and DCAT-AP, the profile of it that Europe's data portals use to exchange those descriptions. The course starts with just enough RDF and Turtle to read DCAT, then follows an invented environment agency as it describes one dataset: the DCAT model, titles, themes and coverage in time and space, distributions and data services, publisher, contact point and license, series, versions and related resources. It then turns to DCAT-AP: what an application profile is, how senders and receivers conform, its mandatory, recommended and optional properties class by class, its controlled vocabularies, validation with SHACL, harvesting and high-value datasets. A closing chapter covers DCAT-AP-SE, the Swedish profile, and how catalogs reach Sveriges dataportal. 10 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English, Swedish, Korean, German, Spanish and French. The facts come from DCAT 3 (W3C Recommendation, August 2024), DCAT-AP 3.0.1 and DCAT-AP-SE 3.0.1, checked in October 2026."@en ,
+                        "Lär dig DCAT, W3C:s vokabulär för att beskriva datamängder och datakataloger på webben, och DCAT-AP, den profil av DCAT som Europas dataportaler använder för att utbyta sådana beskrivningar. Kursen börjar med precis så mycket RDF och Turtle som behövs för att läsa DCAT och följer sedan en påhittad miljömyndighet när den beskriver en datamängd: DCAT-modellen, titlar, teman och täckning i tid och rum, distributioner och datatjänster, utgivare, kontaktuppgift och licens, serier, versioner och relaterade resurser. Därefter går den över till DCAT-AP: vad en tillämpningsprofil är, hur avsändare och mottagare överensstämmer med den, dess obligatoriska, rekommenderade och valfria egenskaper klass för klass, dess kontrollerade vokabulärer, validering med SHACL, skördning och värdefulla datamängder. Ett avslutande kapitel tar upp DCAT-AP-SE, den svenska profilen, och hur kataloger når Sveriges dataportal. 10 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns på engelska, svenska, koreanska, tyska, spanska och franska. Fakta kommer från DCAT 3 (W3C-rekommendation, augusti 2024), DCAT-AP 3.0.1 och DCAT-AP-SE 3.0.1, kontrollerade i oktober 2026."@sv ,
+                        "웹에서 데이터셋과 데이터 카탈로그를 기술하는 W3C 어휘인 DCAT과, 유럽의 데이터 포털들이 그런 기술을 주고받을 때 쓰는 DCAT의 프로파일인 DCAT-AP를 배웁니다. 코스는 DCAT을 읽는 데 꼭 필요한 만큼의 RDF와 Turtle로 시작한 뒤, 가상의 환경청이 데이터셋 하나를 기술하는 과정을 따라갑니다. DCAT 모델, 제목, 테마, 시간적·공간적 범위, 배포판과 데이터 서비스, 발행자, 연락처, 라이선스, 시리즈, 버전, 관련 리소스를 다룹니다. 이어서 DCAT-AP로 넘어가 응용 프로파일이 무엇인지, 송신자와 수신자가 각각 어떻게 적합성을 갖추는지, 클래스별 필수·권장·선택 속성, 통제 어휘, SHACL을 이용한 검증, 하베스팅, 고가치 데이터셋을 살펴봅니다. 마지막 챕터는 스웨덴 프로파일인 DCAT-AP-SE와, 카탈로그가 스웨덴의 국가 데이터 포털인 Sveriges dataportal에 이르는 방법을 다룹니다. 짧은 단계로 이루어진 챕터 10개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제입니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 코스는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 제공됩니다. 내용은 DCAT 3(W3C 권고안, 2024년 8월), DCAT-AP 3.0.1, DCAT-AP-SE 3.0.1에서 가져왔으며 2026년 10월에 확인했습니다."@ko ,
+                        "Lerne DCAT kennen, das W3C-Vokabular zur Beschreibung von Datensätzen und Datenkatalogen im Web, und DCAT-AP, das Profil von DCAT, mit dem Europas Datenportale diese Beschreibungen austauschen. Der Kurs beginnt mit gerade so viel RDF und Turtle, wie du zum Lesen von DCAT brauchst, und begleitet dann eine erfundene Umweltbehörde, während sie einen Datensatz beschreibt: das DCAT-Modell, Titel, Themen und die zeitliche und räumliche Abdeckung, Distributionen und Datenservices, Herausgeber, Kontaktpunkt und Lizenz, Serien, Versionen und verwandte Ressourcen. Danach geht es um DCAT-AP: was ein Anwendungsprofil ist, wie Sender und Empfänger ihm entsprechen, seine verpflichtenden, empfohlenen und optionalen Eigenschaften Klasse für Klasse, seine kontrollierten Vokabulare, die Validierung mit SHACL, Harvesting und hochwertige Datensätze. Ein abschließendes Kapitel behandelt DCAT-AP-SE, das schwedische Profil, und wie Kataloge zu Sveriges dataportal gelangen. 10 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch verfügbar. Die Fakten stammen aus DCAT 3 (W3C-Empfehlung, August 2024), DCAT-AP 3.0.1 und DCAT-AP-SE 3.0.1, geprüft im Oktober 2026."@de ,
+                        "Aprende DCAT, el vocabulario del W3C para describir conjuntos de datos y catálogos de datos en la web, y DCAT-AP, el perfil de DCAT que usan los portales de datos de Europa para intercambiar esas descripciones. El curso empieza con lo justo de RDF y Turtle para leer DCAT y luego sigue a una agencia de medio ambiente inventada mientras describe un conjunto de datos: el modelo de DCAT; títulos, temas y cobertura temporal y geográfica; distribuciones y servicios de datos; publicador, punto de contacto y licencia; series, versiones y recursos relacionados. Después pasa a DCAT-AP: qué es un perfil de aplicación, cómo lo cumplen emisores y receptores, sus propiedades obligatorias, recomendadas y opcionales clase por clase, sus vocabularios controlados, la validación con SHACL, la recolección y los conjuntos de datos de alto valor. Un capítulo final trata DCAT-AP-SE, el perfil sueco, y cómo llegan los catálogos a Sveriges dataportal. 10 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso está en inglés, sueco, coreano, alemán, español y francés. La información procede de DCAT 3 (Recomendación del W3C, agosto de 2024), DCAT-AP 3.0.1 y DCAT-AP-SE 3.0.1, comprobados en octubre de 2026."@es ,
+                        "Découvrez DCAT, le vocabulaire du W3C pour décrire les jeux de données et les catalogues de données sur le Web, et DCAT-AP, le profil de DCAT qu’utilisent les portails de données européens pour échanger ces descriptions. Le cours commence par juste assez de RDF et de Turtle pour lire DCAT, puis suit une agence de l’environnement fictive qui décrit un jeu de données : le modèle DCAT, les titres, les thèmes et la couverture dans le temps et dans l’espace, les distributions et les services de données, l’éditeur, le point de contact et la licence, les séries, les versions et les ressources liées. Il passe ensuite à DCAT-AP : ce qu’est un profil d’application, comment émetteurs et récepteurs s’y conforment, ses propriétés obligatoires, recommandées et facultatives classe par classe, ses vocabulaires contrôlés, la validation avec SHACL, le moissonnage et les jeux de données de forte valeur. Un dernier chapitre présente DCAT-AP-SE, le profil suédois, et la façon dont les catalogues parviennent jusqu’à Sveriges dataportal. 10 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours existe en anglais, en suédois, en coréen, en allemand, en espagnol et en français. Les informations proviennent de DCAT 3 (Recommandation du W3C, août 2024), de DCAT-AP 3.0.1 et de DCAT-AP-SE 3.0.1, vérifiées en octobre 2026."@fr ;
+    prov:wasDerivedFrom <https://www.w3.org/TR/vocab-dcat-3/> ,
+                        <https://www.w3.org/TR/vocab-dcat-2/> ,
+                        <https://www.w3.org/TR/turtle/> ,
+                        <https://semiceu.github.io/DCAT-AP/releases/3.0.1/> ,
+                        <https://semiceu.github.io/DCAT-AP/releases/3.0.0-hvd/> ,
+                        <https://github.com/SEMICeu/DCAT-AP/tree/4470b8ea907b7eb9ec55ab22befd1ecd2210ff32> ,
+                        <https://github.com/DIGGSweden/DCAT-AP-SE/tree/6b5124b8cb480a62b834f19abffa3de41b09dfb5> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#compilation> ;
+    dcterms:created "2026-10-27T00:00:00Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:linked-data ;
+    dcat:keyword "DCAT"@en ,
+                 "DCAT-AP"@en ,
+                 "DCAT-AP-SE"@en ,
+                 "metadata"@en ,
+                 "open data"@en ,
+                 "data catalog"@en ,
+                 "data portal"@en ,
+                 "linked data"@en ,
+                 "RDF"@en ,
+                 "DCAT"@sv ,
+                 "DCAT-AP"@sv ,
+                 "DCAT-AP-SE"@sv ,
+                 "metadata"@sv ,
+                 "öppna data"@sv ,
+                 "datakatalog"@sv ,
+                 "dataportal"@sv ,
+                 "länkade data"@sv ,
+                 "RDF"@sv ,
+                 "DCAT"@ko ,
+                 "DCAT-AP"@ko ,
+                 "DCAT-AP-SE"@ko ,
+                 "메타데이터"@ko ,
+                 "오픈 데이터"@ko ,
+                 "데이터 카탈로그"@ko ,
+                 "데이터 포털"@ko ,
+                 "링크드 데이터"@ko ,
+                 "RDF"@ko ,
+                 "DCAT"@de ,
+                 "DCAT-AP"@de ,
+                 "DCAT-AP-SE"@de ,
+                 "Metadaten"@de ,
+                 "Open Data"@de ,
+                 "Datenkatalog"@de ,
+                 "Datenportal"@de ,
+                 "Linked Data"@de ,
+                 "RDF"@de ,
+                 "DCAT"@es ,
+                 "DCAT-AP"@es ,
+                 "DCAT-AP-SE"@es ,
+                 "metadatos"@es ,
+                 "datos abiertos"@es ,
+                 "catálogo de datos"@es ,
+                 "portal de datos"@es ,
+                 "datos enlazados"@es ,
+                 "RDF"@es ,
+                 "DCAT"@fr ,
+                 "DCAT-AP"@fr ,
+                 "DCAT-AP-SE"@fr ,
+                 "métadonnées"@fr ,
+                 "données ouvertes"@fr ,
+                 "catalogue de données"@fr ,
+                 "portail de données"@fr ,
+                 "données liées"@fr ,
+                 "RDF"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-27T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#dcat-and-dcat-ap> ;
+    dcat:isVersionOf <#dcat-and-dcat-ap> ;
+    dcat:contactPoint <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#turtle> ;
+    solid-memo:cardCount 128 .
+
+<https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://www.w3.org/copyright/software-license-2023/>
+    a dcterms:LicenseDocument .
+
+<https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<https://solid-memo.com/decks/dcat-and-dcat-ap/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://www.w3.org/TR/vocab-dcat-3/>
+    dcterms:title "Data Catalog Vocabulary (DCAT) – Version 3" ;
+    dcterms:creator "W3C" ;
+    dcterms:license <https://www.w3.org/copyright/software-license-2023/> .
+
+<https://www.w3.org/TR/vocab-dcat-2/>
+    dcterms:title "Data Catalog Vocabulary (DCAT) – Version 2" ;
+    dcterms:creator "W3C" ;
+    dcterms:license <https://www.w3.org/copyright/software-license-2023/> .
+
+<https://www.w3.org/TR/turtle/>
+    dcterms:title "RDF 1.1 Turtle: Terse RDF Triple Language" ;
+    dcterms:creator "W3C" ;
+    dcterms:title "RDF 1.1 Turtle" .
+
+<https://semiceu.github.io/DCAT-AP/releases/3.0.1/>
+    dcterms:title "DCAT-AP 3.0.1: DCAT Application Profile for data portals in Europe" ;
+    dcterms:creator "SEMIC, Interoperable Europe, European Commission" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://semiceu.github.io/DCAT-AP/releases/3.0.0-hvd/>
+    dcterms:title "DCAT-AP for High-Value Datasets 3.0.0" ;
+    dcterms:creator "SEMIC, Interoperable Europe, European Commission" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://github.com/SEMICeu/DCAT-AP/tree/4470b8ea907b7eb9ec55ab22befd1ecd2210ff32>
+    dcterms:title "SEMICeu/DCAT-AP: source repository of DCAT-AP" ;
+    dcterms:creator "SEMIC, Interoperable Europe, European Commission" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://github.com/DIGGSweden/DCAT-AP-SE/tree/6b5124b8cb480a62b834f19abffa3de41b09dfb5>
+    dcterms:title "DCAT-AP-SE: the Swedish profile of DCAT-AP, source repository" ;
+    dcterms:creator "Myndigheten för digital förvaltning (DIGG)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
 
 <#derivatives>
     a dcat:DatasetSeries ,
@@ -15739,16 +15977,8 @@
     dcterms:title "RDF 1.1 TriG" ;
     dcterms:creator "W3C" .
 
-<https://www.w3.org/TR/turtle/>
-    dcterms:title "RDF 1.1 Turtle" ;
-    dcterms:creator "W3C" .
-
 <https://www.w3.org/TR/vcard-rdf/>
     dcterms:title "vCard Ontology — for describing People and Organizations" ;
-    dcterms:creator "W3C" .
-
-<https://www.w3.org/TR/vocab-dcat-3/>
-    dcterms:title "Data Catalog Vocabulary (DCAT) – Version 3" ;
     dcterms:creator "W3C" .
 
 <https://www.w3.org/TR/webarch/>
