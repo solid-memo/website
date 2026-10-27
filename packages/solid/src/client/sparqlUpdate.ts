@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Literal, Quad } from "@rdfjs/types";
-import type { Dataset } from "./interface";
-import { changesOf, localNameOf } from "./rdf";
+import type { Changes } from "./interface";
 
 /**
  * The SPARQL Update bodies of the PATCH requests the app sends: a saved
@@ -26,10 +25,19 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
 
 /**
- * The SPARQL Update of a dataset's changes, one triple a line in
- * N-Triples form, every triple closed by " .": what every Solid server
- * parses, node-solid-server's too. Null when the dataset has no change
- * log, or a change has a blank node, which DELETE DATA cannot name.
+ * How a client names a subject made by name and not saved yet (rdf.ts
+ * localNameOf): `#name` in the document, or undefined for an IRI of its
+ * own. Each client names them its own way, so its caller passes it.
+ */
+export type LocalNameOf = (iri: string) => string | undefined;
+
+/**
+ * The SPARQL Update of a dataset's changes (rdf.ts changesOf), one
+ * triple a line in N-Triples form, every triple closed by " .": what
+ * every Solid server parses, node-solid-server's too. Null when the
+ * dataset has no change log (`changes` undefined), or a change has a
+ * blank node, which DELETE DATA cannot name. It names no client: the
+ * caller passes its changes and how it names a subject made by name.
  *
  * `decimalsAsNumbers` spells each decimal deleted as JavaScript spells
  * its number (`1` for `1.0`, `2.5` for `2.50`): how node-solid-server
@@ -37,11 +45,14 @@ const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
  * one with `.0` (`1` written, `1.0` served), so a deletion spelled as
  * read is not found there (writeDocument).
  */
-export function patchBody(dataset: Dataset, decimalsAsNumbers = false): string | null {
-  const changes = changesOf(dataset);
+export function patchBody(
+  changes: Changes | undefined,
+  localNameOf: LocalNameOf,
+  decimalsAsNumbers = false,
+): string | null {
   if (changes === undefined) return null;
   const block = (operation: string, quads: readonly Quad[], asNumbers: boolean): string | null => {
-    const triples = quads.map((quad) => tripleLine(quad, asNumbers));
+    const triples = quads.map((quad) => tripleLine(quad, localNameOf, asNumbers));
     if (triples.includes(null)) return null;
     return triples.length === 0 ? "" : `${operation} {\n${triples.join("\n")}\n};\n`;
   };
@@ -51,7 +62,11 @@ export function patchBody(dataset: Dataset, decimalsAsNumbers = false): string |
 }
 
 /** A quad as one N-Triples line, closed by " ."; null for one with a blank node. */
-export function tripleLine(quad: Quad, decimalsAsNumbers: boolean): string | null {
+export function tripleLine(
+  quad: Quad,
+  localNameOf: LocalNameOf,
+  decimalsAsNumbers: boolean,
+): string | null {
   const { subject, predicate, object } = quad;
   if (
     subject.termType !== "NamedNode" ||
@@ -59,12 +74,11 @@ export function tripleLine(quad: Quad, decimalsAsNumbers: boolean): string | nul
   ) {
     return null;
   }
+  const iri = (value: string) => {
+    const name = localNameOf(value);
+    return name === undefined ? `<${value}>` : `<#${name}>`;
+  };
   return `${iri(subject.value)} ${iri(predicate.value)} ${object.termType === "Literal" ? literal(object, decimalsAsNumbers) : iri(object.value)} .`;
-}
-
-function iri(value: string): string {
-  const name = localNameOf(value);
-  return name === undefined ? `<${value}>` : `<#${name}>`;
 }
 
 function literal(term: Literal, decimalsAsNumbers: boolean): string {

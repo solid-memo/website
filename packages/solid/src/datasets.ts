@@ -6,8 +6,10 @@ import {
   type Dataset,
   type FetchedDataset,
   type Subject,
+  changesOf,
   createSolidDataset,
   getThing,
+  localNameOf,
   removeThing,
   removeUrl,
   setThing,
@@ -402,7 +404,7 @@ async function removeOwnedOnce(
       setThing(current, removeUrl(getThing(current, subject)!, predicate, object)),
     owned.reduce((current, subject) => removeThing(current, subject), dataset),
   );
-  const body = patchBody(edited)!;
+  const body = patchBody(changesOf(edited), localNameOf)!;
   if (etag === undefined && new TextEncoder().encode(body).length > MAX_PATCH_BYTES) return "kept";
   await saveDataset(url, edited, fetch);
   return "kept";
@@ -482,7 +484,7 @@ export async function appendAllToDocument(
   for (const thing of things) {
     const quads = [...toRdfJsDataset(setThing(createSolidDataset(), thing))];
     refuseUnwritable(quads);
-    const lines = quads.map((quad) => tripleLine(quad, false));
+    const lines = quads.map((quad) => tripleLine(quad, localNameOf, false));
     const bytes = encoder.encode(lines.join("\n")).length + 1;
     if (batches.length === 0 || size + bytes > MAX_PATCH_BYTES) {
       batches.push(lines);
