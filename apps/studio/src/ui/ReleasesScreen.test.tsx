@@ -61,7 +61,21 @@ describe("ReleasesScreen", () => {
     // A release its address names otherwise is named by its address.
     expect(screen.getByRole("link", { name: ELSEWHERE })).toHaveAttribute("href", ELSEWHERE);
     expect(screen.getByRole("cell", { name: "Everyone" })).toBeInTheDocument();
+    // Made public only once the user says so: Cancel leaves it as it is.
     fireEvent.click(screen.getByRole("button", { name: `Make ${ELSEWHERE} public` }));
+    const asked = screen.getByRole("dialog", { name: "Make the release public" });
+    expect(asked).toHaveTextContent(
+      `Anyone with its address will be able to read ${ELSEWHERE}. The Studio can't make it private again.`,
+    );
+    fireEvent.click(within(asked).getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(onMakePublic).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: `Make ${ELSEWHERE} public` }));
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "Make the release public" })).getByRole("button", {
+        name: "Make it public",
+      }),
+    );
     expect(onMakePublic).toHaveBeenCalledWith(ELSEWHERE);
     fireEvent.click(
       screen.getByRole("button", { name: "Start the next version of solid, version 2" }),

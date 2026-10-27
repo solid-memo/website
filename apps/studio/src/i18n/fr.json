@@ -392,6 +392,7 @@
       "forgetDirection": "Oublier la progression de la carte",
       "restartCourse": "Recommencer le cours",
       "deleteDraft": "Supprimer le brouillon",
+      "makePublic": "Rendre la publication publique",
       "deletePart": {
         "chapter": "Supprimer le chapitre",
         "step": "Supprimer l’étape",
@@ -1522,6 +1523,7 @@
       "public": "Toute personne disposant de son adresse peut la lire.",
       "private": "Vous seul pouvez la lire : votre Pod ne l’a pas rendue publique. Réessayez, ou rendez-la lisible par tous avec les outils de votre fournisseur de Pod.",
       "makePublic": "La rendre publique",
+      "makePublicConfirm": "Toute personne qui a son adresse pourra lire {release}. Le Studio ne peut pas la rendre privée de nouveau.",
       "makingPublic": "Ouverture de la publication à tous…",
       "nextHint": "Une publication n’est jamais modifiée. Pour la modifier, commencez sa version suivante : un nouveau brouillon qui conserve tout ce que cette publication a publié.",
       "downloadHeading": "Téléchargement",

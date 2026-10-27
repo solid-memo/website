@@ -392,6 +392,7 @@
       "forgetDirection": "Olvidar el progreso de la tarjeta",
       "restartCourse": "Reiniciar el curso",
       "deleteDraft": "Eliminar el borrador",
+      "makePublic": "Hacer pública la publicación",
       "deletePart": {
         "chapter": "Eliminar el capítulo",
         "step": "Eliminar el paso",
@@ -1522,6 +1523,7 @@
       "public": "Cualquiera con su dirección puede leerla.",
       "private": "Solo tú puedes leerla: tu Pod no la hizo pública. Inténtalo de nuevo, o haz que todo el mundo pueda leerla con las herramientas de tu proveedor de Pods.",
       "makePublic": "Hacerla pública",
+      "makePublicConfirm": "Cualquiera que tenga su dirección podrá leer {release}. El Studio no puede volver a hacerla privada.",
       "makingPublic": "Haciéndola pública…",
       "nextHint": "Una publicación nunca se cambia. Para cambiarla, empieza su siguiente versión: un borrador nuevo que conserva todo lo que esta publicación contiene.",
       "downloadHeading": "Descarga",

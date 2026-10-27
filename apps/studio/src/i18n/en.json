@@ -378,6 +378,7 @@
       "forgetDirection": "Forget the card's progress",
       "restartCourse": "Restart the course",
       "deleteDraft": "Delete the draft",
+      "makePublic": "Make the release public",
       "deletePart": {
         "chapter": "Delete the chapter",
         "step": "Delete the step",
@@ -1448,6 +1449,7 @@
       "public": "Anyone with its address can read it.",
       "private": "Only you can read it: your Pod did not make it public. Try again, or make it readable by everyone with your Pod provider's tools.",
       "makePublic": "Make it public",
+      "makePublicConfirm": "Anyone with its address will be able to read {release}. The Studio can't make it private again.",
       "makingPublic": "Making the release public…",
       "nextHint": "A release is never changed. To change it, start its next version: a new draft that keeps everything this release published.",
       "downloadHeading": "Download",

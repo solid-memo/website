@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -165,6 +165,11 @@ describe("ReleasePublishScreen", () => {
       screen.getByText(/Only you can read it: your Pod did not make it public/),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Make it public" }));
+    // Made public only once the user says so, in a question that names it.
+    expect(makePublic.run).not.toHaveBeenCalled();
+    const asked = screen.getByRole("dialog", { name: "Make the release public" });
+    expect(asked).toHaveTextContent(`Anyone with its address will be able to read ${TARGET}.`);
+    fireEvent.click(within(asked).getByRole("button", { name: "Make it public" }));
     expect(makePublic.run).toHaveBeenCalledWith(TARGET);
   });
 
