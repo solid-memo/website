@@ -3578,7 +3578,7 @@ table.contrast-table tr.refused td:last-child {
 /* Under the pointer a chosen language darkens; one still to choose, or
    refused, keeps its warning or danger color. */
 .text-with-language
-> button:hover:not([aria-disabled="true"], .language-unchosen, [aria-invalid="true"]) {
+  > button:hover:not([aria-disabled="true"], .language-unchosen, [aria-invalid="true"]) {
   color: var(--text);
 }
 
