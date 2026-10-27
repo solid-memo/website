@@ -241,6 +241,15 @@ describe("provenanceProblems", () => {
     expect(counted(provenanceProblems(course(["17 chapters."], true)))).toEqual([]);
   });
 
+  it("reads a long run of digits and commas in one pass, a count after leading commas still counting", () => {
+    const started = performance.now();
+    expect(counted(provenanceProblems(course([`${"1,".repeat(50_000)}x`])))).toEqual([]);
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(counted(provenanceProblems(course(["(,17 chapters; a1,5 steps"])))).toEqual([
+      ["chapters", 17, 1],
+    ]);
+  });
+
   it("counts a deck's sources and cards, never the chapters of a book it names", () => {
     const deck = model({
       sources: [iri("https://a.example/")],

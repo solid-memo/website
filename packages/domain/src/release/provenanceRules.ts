@@ -74,21 +74,28 @@ export function provenanceOf(
  * a book's chapters).
  * Cards are often counted in parts ("15 chemical-name cards", "near 80
  * cards"), so only a total counts: "466 cards in all". A number may have
- * thousands commas ("1,398").
+ * thousands commas ("1,398"). A count begins only where its run of
+ * digits and commas begins: begun later in the run it would end where
+ * the run's own does, and trying it from each digit would take time
+ * quadratic in the run.
  */
 const COUNTED: readonly { what: CountedThing; course: boolean; words: RegExp }[] = [
-  { what: "chapters", course: true, words: /\b(\d[\d,]*)\s+(?:chapters?|kapitel)(?![\p{L}\d])/giu },
-  { what: "steps", course: true, words: /\b(\d[\d,]*)\s+(?:steps?|steg)(?![\p{L}\d])/giu },
+  {
+    what: "chapters",
+    course: true,
+    words: /\b(?<!\d,*)(\d[\d,]*)\s+(?:chapters?|kapitel)(?![\p{L}\d])/giu,
+  },
+  { what: "steps", course: true, words: /\b(?<!\d,*)(\d[\d,]*)\s+(?:steps?|steg)(?![\p{L}\d])/giu },
   {
     what: "sources",
     course: false,
-    words: /\b(\d[\d,]*)\s+(?:sources?|documents?|källor|källa|dokument)(?![\p{L}\d])/giu,
+    words: /\b(?<!\d,*)(\d[\d,]*)\s+(?:sources?|documents?|källor|källa|dokument)(?![\p{L}\d])/giu,
   },
   {
     what: "cards",
     course: false,
     words:
-      /\b(\d[\d,]*)\s+(?:cards?|questions?|kort|frågor|fråga)\s+(?:in all|in total|i allt|totalt|sammanlagt)(?![\p{L}\d])/giu,
+      /\b(?<!\d,*)(\d[\d,]*)\s+(?:cards?|questions?|kort|frågor|fråga)\s+(?:in all|in total|i allt|totalt|sammanlagt)(?![\p{L}\d])/giu,
   },
 ];
 
