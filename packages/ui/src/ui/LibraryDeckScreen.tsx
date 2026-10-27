@@ -3,14 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useId, useRef, useState } from "preact/hooks";
-import { licenseLabel } from "@solid-memo/domain/license";
 import { keywordsIn } from "@solid-memo/domain/keywords";
 import { topicLabels, type LibraryDeck, type LibrarySource } from "@solid-memo/domain/library";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import { AuthorNames } from "./AuthorName";
 import { cardLanguageNames } from "./cardLanguageNames";
 import { ErrorMessage } from "./ErrorMessage";
-import { ExternalLink } from "./ExternalLink";
+import { DataLink, LicenseLink } from "./DataLink";
 import { useI18n, type ErrorText } from "./i18n";
 import { LibraryIcon } from "./icons";
 import { linkify } from "./linkify";
@@ -27,7 +26,7 @@ import { ReportMistake } from "./ReportMistake";
  * join the learner's deck as its questions are answered. Everything
  * shown comes from the library index, or from a release added from a
  * link (`host`, where it is published, then said, with what it is), so
- * any link in it goes through ExternalLink. A release from a link has no
+ * any link in it shows where it leads (DataLink). A release from a link has no
  * card list or preview to link to, nor a link to the deck to copy. A
  * mistake in the release is reported where `reportPlace` says
  * (ReportMistake): to the library for one the library's index lists,
@@ -161,7 +160,7 @@ export function LibraryDeckScreen({
           <>
             <dt>{t("libraryDeck.licence")}</dt>
             <dd>
-              <ExternalLink url={deck.license}>{licenseLabel(deck.license)}</ExternalLink>
+              <LicenseLink url={deck.license} />
             </dd>
           </>
         )}
@@ -274,15 +273,13 @@ function SourceLine({ source }: { source: LibrarySource }) {
   const hasLicense = source.license !== undefined;
   return (
     <>
-      <ExternalLink url={source.url}>{source.title ?? source.url}</ExternalLink>
+      <DataLink url={source.url} label={source.title} />
       {(hasAuthors || hasLicense) && (
         <span class="hint">
           {" — "}
           {hasAuthors && <AuthorNames authors={source.authors} />}
           {hasAuthors && hasLicense && " · "}
-          {hasLicense && (
-            <ExternalLink url={source.license!}>{licenseLabel(source.license!)}</ExternalLink>
-          )}
+          {hasLicense && <LicenseLink url={source.license!} />}
         </span>
       )}
     </>

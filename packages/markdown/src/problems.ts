@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { liveLink } from "./links.ts";
+import { liveLink, writtenHost } from "./links.ts";
 import { MAX_CHARS, hiddenControls, inspectMarkdown } from "./parse.ts";
 
 /**
@@ -124,11 +124,15 @@ const HOST = /^(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+\p{L}{2,}(?:[:/
  * anywhere, as may text taken for a host name that is none, a file's
  * name such as `package.json`, which this flags too: the app shows the
  * host beside every link, the defense against a link that misleads.
+ * The host counts as the text writes it (writtenHost), not as the URL
+ * parser reads it, which decodes escapes and full-width dots into a host
+ * the text does not show.
  */
 function leadsTo(text: string, href: string): boolean {
   const trimmed = text.trim();
   const named = ADDRESS.test(trimmed) ? trimmed : HOST.test(trimmed) ? `https://${trimmed}` : null;
   if (named === null || !URL.canParse(named)) return true;
-  const bare = (url: string) => new URL(url).hostname.replace(/^www\./, "");
-  return bare(named) === bare(href);
+  const written = writtenHost(named);
+  const bare = (host: string) => host.replace(/^www\./, "");
+  return written !== null && bare(written) === bare(new URL(href).host);
 }

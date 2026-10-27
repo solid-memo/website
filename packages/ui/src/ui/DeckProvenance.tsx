@@ -4,9 +4,8 @@
 
 import type { ComponentChildren } from "preact";
 import type { LangText } from "@solid-memo/domain/langText";
-import { licenseLabel } from "@solid-memo/domain/license";
 import { AuthorNames } from "./AuthorName";
-import { ExternalLink } from "./ExternalLink";
+import { LicenseLink } from "./DataLink";
 import { useI18n } from "./i18n";
 import { linkify } from "./linkify";
 
@@ -15,8 +14,8 @@ import { linkify } from "./linkify";
  * it the deck's description when it has one: who made a deck, under what
  * terms, when it last changed, and where its content came from. Renders
  * nothing when none is stated, as for most home-made decks. The license
- * URL and any URL in the description come from deck data, so they go
- * through ExternalLink.
+ * URL and any URL in the description come from deck data, so they show
+ * where they lead (LicenseLink, linkify).
  */
 export function DeckProvenance({
   authors,
@@ -39,7 +38,7 @@ export function DeckProvenance({
     );
   }
   if (license !== undefined) {
-    parts.push(<ExternalLink url={license}>{licenseLabel(license)}</ExternalLink>);
+    parts.push(<LicenseLink url={license} />);
   }
   if (modifiedAt !== undefined) {
     parts.push(<span>{t("deckProvenance.updated", { date: formatDate(modifiedAt) })}</span>);

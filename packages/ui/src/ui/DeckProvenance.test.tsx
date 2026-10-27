@@ -64,7 +64,7 @@ describe("DeckProvenance", () => {
       "By Anton WiklundFlags from https://flagcdn.com (opens in a new tab), listed at https://flagpedia.net/index (opens in a new tab). Enjoy!",
     );
     expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
-      "https://flagcdn.com",
+      "https://flagcdn.com/",
       "https://flagpedia.net/index",
     ]);
     expect(

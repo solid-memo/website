@@ -159,6 +159,32 @@ describe("Markdown from data stays text", () => {
     ]);
   });
 
+  it("shows the host of an address written so that it opens another host", () => {
+    const md = rendered(
+      "<https://login.bank.example%2E%65%76%69%6C%2E%63%6F%6D/> <https://bank.example\u3002evil.com/> <https://bank.example\uFF0Eevil.com/> <https://bank.example\uFF61evil.com/> <https://\uFF42ank.example/>",
+    );
+    expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "https://login.bank.example.evil.com/",
+      "https://bank.example.evil.com/",
+      "https://bank.example.evil.com/",
+      "https://bank.example.evil.com/",
+      "https://bank.example/",
+    ]);
+    expect([...md.querySelectorAll(".md-link-host")].map((host) => host.textContent)).toEqual([
+      " (login.bank.example.evil.com)",
+      " (bank.example.evil.com)",
+      " (bank.example.evil.com)",
+      " (bank.example.evil.com)",
+      " (bank.example)",
+    ]);
+  });
+
+  it("needs no host beside an address that differs from its link only in case", () => {
+    const md = rendered("<HTTPS://Example.ORG/Path>");
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.org/Path");
+    expect(md.querySelector(".md-link-host")).toBeNull();
+  });
+
   it("isolates a link and its host from a bidi override in the text before them", () => {
     const md = rendered(
       "See \u202E<https://evil.example/#moc.knab//:sptth> and [moc.knab.xyz](https://moc.knab.xyz.example)",

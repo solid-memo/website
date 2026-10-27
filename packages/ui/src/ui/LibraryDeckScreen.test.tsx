@@ -184,7 +184,7 @@ describe("LibraryDeckScreen", () => {
       within(sources[0]).getByRole("link", { name: newTab("List of national capitals") }),
     ).toHaveAttribute("href", WIKIPEDIA);
     expect(sources[0]).toHaveTextContent(
-      `List of national capitals${NEW_TAB} — Wikipedia contributors · ${licenseLabel(BY_SA)}`,
+      `List of national capitals${NEW_TAB} (en.wikipedia.org) — Wikipedia contributors · ${licenseLabel(BY_SA)}`,
     );
     expect(
       within(sources[0]).getByRole("link", { name: newTab(licenseLabel(BY_SA)) }),
@@ -195,6 +195,16 @@ describe("LibraryDeckScreen", () => {
     );
     expect(sources[1]).toHaveTextContent(WIKIDATA);
     expect(sources[1].textContent).not.toContain("—");
+  });
+
+  it("shows the host beside a source whose title reads as another address", () => {
+    renderScreen({
+      deck: {
+        ...capitals,
+        sources: [{ url: "https://evil.example/", title: WIKIPEDIA, authors: [] }],
+      },
+    });
+    expect(fact("Source")).toHaveTextContent(`${WIKIPEDIA}${NEW_TAB} (evil.example)`);
   });
 
   it("uses the plural for several authors and the singular for one source", () => {
