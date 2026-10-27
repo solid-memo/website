@@ -129,7 +129,9 @@ function tryRedirect(instances: readonly Instance[], libraryDeck: Lookup<Library
 /**
  * For a course's routes: a deck that is no copy of a release, to its page;
  * a chapter the course does not have or still locked, to the course; a
- * final review too soon, to its chapter.
+ * chapter with no step (outlineOfCards leaves out a step that asks none
+ * of the release's cards), to its final review; a final review too
+ * soon, to its chapter.
  */
 function courseRedirect(route: CourseRoute, deck: Deck, loaded: Loaded) {
   const { instanceUrl, deckUrl } = route;
@@ -138,8 +140,10 @@ function courseRedirect(route: CourseRoute, deck: Deck, loaded: Loaded) {
   }
   const course = found(loaded.course);
   if (course === null || route.screen === "course") return null;
-  if (openChapterOf(course, route.chapterUrl).activeChapter === null) {
-    return go({ screen: "course", instanceUrl, deckUrl });
+  const { activeChapter } = openChapterOf(course, route.chapterUrl);
+  if (activeChapter === null) return go({ screen: "course", instanceUrl, deckUrl });
+  if (route.screen === "courseChapter" && activeChapter.steps.length === 0) {
+    return go({ ...route, screen: "courseReview" });
   }
   return reviewTooSoon(route, course, loaded.courseRereading)
     ? go({ ...route, screen: "courseChapter" })

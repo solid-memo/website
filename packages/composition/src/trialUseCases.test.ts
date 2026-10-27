@@ -137,7 +137,7 @@ describe("createTrialUseCases", () => {
     expect(deck.sourceUrl).toBe(DRAFT);
     const course = await useCases.getCourse(deck);
     expect(course.outline.chapters.map((chapter) => chapter.id)).toEqual(["ch-a"]);
-    const question = course.cards["q-a-1a"]!;
+    const question = course.cards.get("q-a-1a")!;
     await useCases.answerCourseQuestion(played.url, deck, question, { correct: true }, new Date());
     expect((await useCases.getCourse(deck)).answeredCardIds).toEqual(["q-a-1a"]);
 

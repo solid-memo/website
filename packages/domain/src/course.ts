@@ -123,6 +123,35 @@ export function courseOutlineFromRecords(
   };
 }
 
+/**
+ * The outline asking only cards of its release (`cardIds`, by fragment
+ * id): a question that names no such card is left out, and a step left
+ * with none goes with it, as a step is checked by at least one; so does
+ * a chapter left with no step and no review question, as it would have
+ * no final review to pass. The player, the progress and the statistics
+ * then go by the same questions. A release the Studio checked names no
+ * other (courseRules); one from elsewhere may name anything,
+ * `constructor` too.
+ */
+export function outlineOfCards(
+  outline: CourseOutline,
+  cardIds: ReadonlySet<string>,
+): CourseOutline {
+  const cards = (ids: readonly string[]) => ids.filter((id) => cardIds.has(id));
+  return {
+    ...outline,
+    chapters: outline.chapters
+      .map((chapter) => ({
+        ...chapter,
+        steps: chapter.steps
+          .map((step) => ({ ...step, questionIds: cards(step.questionIds) }))
+          .filter((step) => step.questionIds.length > 0),
+        reviewQuestionIds: cards(chapter.reviewQuestionIds),
+      }))
+      .filter((chapter) => chapter.steps.length > 0 || chapter.reviewQuestionIds.length > 0),
+  };
+}
+
 /** Subjects' fragment ids, in order. */
 function idsOf(urls: readonly string[]): string[] {
   return urls.map(fragmentIdOf).sort();

@@ -34,7 +34,7 @@ export async function answerChapter(
     ]),
   ];
   for (const id of ids) {
-    const card = course.cards[id]!;
+    const card = course.cards.get(id)!;
     // A question the course asks has wrong options (trialProblems).
     const choice = choicesOf(card, inOrder).find((option) => option.correct === correct)!;
     await useCases.answerCourseQuestion(

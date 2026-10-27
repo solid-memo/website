@@ -7,7 +7,14 @@ import type { Card } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import type { Storage } from "@solid-memo/domain/storage";
-import { CH1, CH2, courseDeck, courseLibraryDeck, makeCourse } from "../test/course";
+import {
+  CH1,
+  CH2,
+  courseDeck,
+  courseLibraryDeck,
+  makeCourse,
+  makeSteplessCourse,
+} from "../test/course";
 import { type Loaded, type Lookup, resolveRoute } from "./resolveRoute";
 import { routeToHash, type RouteRef } from "./router";
 
@@ -311,6 +318,14 @@ describe("resolveRoute", () => {
       expect(resolve(chapter(CH2), read)).toEqual(go(courseRoute));
       expect(resolve(chapter(`${CH1}-gone`), read)).toEqual(go(courseRoute));
       expect(resolve({ ...review, chapterUrl: CH2 }, read)).toEqual(go(courseRoute));
+    });
+
+    it("goes to the final review for a chapter with no step, open or done", () => {
+      for (const course of [makeSteplessCourse(), makeSteplessCourse(["r-1"], [CH1])]) {
+        const read = { deck: found(courseDeck), course: found(course) };
+        expect(resolve(chapter(CH1), read)).toEqual(go(review));
+        expect(resolve(review, read)).toBeNull();
+      }
     });
 
     it("goes to the chapter for a final review with steps not done, once the course is read afresh", () => {

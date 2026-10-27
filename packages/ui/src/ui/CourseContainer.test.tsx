@@ -11,7 +11,14 @@ import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { CourseContainer } from "./CourseContainer";
 import { CourseLinksContext, type CourseLinks } from "./courseLinks";
 import { decksHref, libraryHref, routeToHash } from "./router";
-import { CH1, CH2, courseDeck, courseInstance, makeCourse } from "../test/course";
+import {
+  CH1,
+  CH2,
+  courseDeck,
+  courseInstance,
+  makeCourse,
+  makeSteplessCourse,
+} from "../test/course";
 import { makeUseCasesFake } from "../test/useCasesFake";
 
 const instanceUrl = courseInstance.url;
@@ -126,6 +133,21 @@ describe("CourseContainer", () => {
     expect(within(chapterItem(/Pods/)).getByRole("link", { name: "Pods" })).toHaveAttribute(
       "href",
       chapter(CH2),
+    );
+  });
+
+  it("opens a chapter with no step at its final review, whether open or done", () => {
+    const { unmount } = render(<Page course={makeSteplessCourse()} />);
+    expect(screen.getByRole("link", { name: "Start the course" })).toHaveAttribute(
+      "href",
+      review(CH1),
+    );
+    unmount();
+
+    render(<Page course={makeSteplessCourse(["r-1"], [CH1])} />);
+    expect(within(chapterItem(/Linked data/)).getByRole("link")).toHaveAttribute(
+      "href",
+      review(CH1),
     );
   });
 

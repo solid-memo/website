@@ -54,7 +54,7 @@ export function ChapterReviewContainer({
   const [position, setPosition] = useState(0);
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
   const cardId = queue[position];
-  const card = cardId === undefined ? null : course.cards[cardId]!;
+  const card = cardId === undefined ? null : course.cards.get(cardId)!;
   const choices = useMemo(() => (card === null ? [] : choicesOf(card, random)), [position]);
   const answerMutation = useCourseAnswer(useCases, instance, course, (checked) => {
     setAnswer(checked);

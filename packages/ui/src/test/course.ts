@@ -138,7 +138,7 @@ export function makeCourse(answeredCardIds: string[] = [], completed: string[] =
       isCourse: true,
     },
     outline: courseOutline,
-    cards: Object.fromEntries(courseCards.map((card) => [card.id, card])),
+    cards: new Map(courseCards.map((card) => [card.id, card])),
     answeredCardIds,
     progress: courseProgress(courseOutline, answeredCardIds, completed),
   };
@@ -146,3 +146,22 @@ export function makeCourse(answeredCardIds: string[] = [], completed: string[] =
 
 /** A random source that leaves a shuffle in order. */
 export const noShuffle = () => 0.999999;
+
+/**
+ * The course as makeCourse makes it, with the first chapter's steps left
+ * out: a chapter left with only its final review, as outlineOfCards
+ * leaves one whose steps ask none of the release's cards.
+ */
+export function makeSteplessCourse(
+  answeredCardIds: string[] = [],
+  completed: string[] = [],
+): Course {
+  const course = makeCourse(answeredCardIds, completed);
+  const outline: CourseOutline = {
+    ...course.outline,
+    chapters: course.outline.chapters.map((chapter) =>
+      chapter.url === CH1 ? { ...chapter, steps: [] } : chapter,
+    ),
+  };
+  return { ...course, outline, progress: courseProgress(outline, answeredCardIds, completed) };
+}

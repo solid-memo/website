@@ -23,7 +23,7 @@ import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import { defaultCatalogDescription } from "@solid-memo/domain/catalog";
 import type { CourseOutline } from "@solid-memo/domain/course";
-import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
@@ -47,13 +47,29 @@ const BY = "https://creativecommons.org/licenses/by/4.0/";
 const RELEASE = "https://solid-memo.test/decks/metadata/v1.ttl";
 const at = (id: string) => `${RELEASE}#${id}`;
 
+// A chapter is read only with a step asking one of the release's cards.
 const chapter = (id: string, position: number): CourseOutline["chapters"][number] => ({
   id,
   url: at(id),
   position,
   title: { en: id },
-  steps: [],
+  steps: [
+    {
+      id: `${id}-1`,
+      url: at(`${id}-1`),
+      position: 0,
+      theory: { en: id },
+      questionIds: [`q-${id}`],
+    },
+  ],
   reviewQuestionIds: [],
+});
+
+const card = (id: string): LibraryCard => ({
+  id,
+  front: { en: `${id}?` },
+  back: { en: id },
+  formatVersion: 5,
 });
 
 const content: LibraryDeckContent = {
@@ -67,7 +83,7 @@ const content: LibraryDeckContent = {
   version: "1",
   themes: [],
   keywords: {},
-  cards: [],
+  cards: [card("q-ch-1"), card("q-ch-2")],
   isCourse: true,
 };
 
@@ -79,7 +95,7 @@ const course: LibraryDeck = {
   themes: [],
   keywords: {},
   title: content.title,
-  cardCount: 0,
+  cardCount: content.cards.length,
   languages: [],
   authors: [],
   direction: "front-to-back",

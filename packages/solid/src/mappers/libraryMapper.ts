@@ -29,7 +29,11 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { readDatetime, readVersioned, storedVersionOf } from "../records";
 import { agentNamesOf, distractorsOf, readCard } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
-import { courseOutlineFromRecords, type CourseOutline } from "@solid-memo/domain/course";
+import {
+  courseOutlineFromRecords,
+  outlineOfCards,
+  type CourseOutline,
+} from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
@@ -249,7 +253,8 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
 /**
  * A fetched release's course outline (see domain/course.ts): its
  * chapter and step subjects, each read with its format's shape (one that
- * does not fit is left out) and brought up to the current format. A
+ * does not fit is left out) and brought up to the current format, asking
+ * only cards of the release that fit their shape (outlineOfCards). A
  * release with none — no course — has an empty outline.
  */
 export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOutline {
@@ -263,7 +268,9 @@ export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOut
     const step = readVersioned(thing, "step");
     if (step !== null) steps.push({ url, data: migrate("step", step.record, { subject: url }) });
   }
-  return courseOutlineFromRecords(releaseUrl, chapters, steps);
+  // A question asks one of the release's cards, as the player looks it up among them.
+  const cardIds = new Set(toLibraryCards(releaseUrl, dataset).map((card) => card.id));
+  return outlineOfCards(courseOutlineFromRecords(releaseUrl, chapters, steps), cardIds);
 }
 
 type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
