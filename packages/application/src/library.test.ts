@@ -221,6 +221,46 @@ describe("the deck library", () => {
     ).resolves.toBeNull();
     expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
   });
+  it("addReleaseLanguages leaves a release added from a link as it is, whatever languages its server adds", async () => {
+    const deps = makeDeps();
+    const linked = "https://creator.example/decks/birds.ttl";
+    const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: linked };
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValue({
+      ...libraryContent,
+      url: linked,
+      title: { en: "Capitals", sv: "Huvudstäder" },
+    });
+    await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toBeNull();
+    expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+  });
+  it("addReleaseLanguages fills in a copy of an older release the index lists", async () => {
+    const deps = makeDeps();
+    const older = "https://solid-memo.com/releases/capitals-1.ttl";
+    const current = "https://solid-memo.com/decks/capitals/v2.ttl";
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
+      {
+        ...libraryDeck,
+        url: current,
+        version: "2",
+        releases: [
+          { url: older, version: "1" },
+          { url: current, version: "2" },
+        ],
+      },
+    ]);
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValueOnce({
+      ...libraryContent,
+      url: older,
+      title: { en: "Capitals", sv: "Huvudstäder" },
+    });
+    const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: older };
+    await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toMatchObject({
+      title: { en: "Capitals", sv: "Huvudstäder" },
+    });
+    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(older);
+    expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
+  });
   it("deckRelease reads the release a copy came from; none for a home-made deck", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);

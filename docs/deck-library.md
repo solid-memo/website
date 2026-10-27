@@ -951,6 +951,11 @@ flowchart LR
   one in between are checked against the library's shapes
   (`checkLinkedRelease`); one that breaks them refuses the upgrade
   (`releaseNotConforming`).
+- A copy from a link isn't given its release's new title or description
+  languages when its page opens (`addReleaseLanguages`,
+  [migrations.md](migrations.md)). Its release stays on the creator's
+  server, which can change it after the import, so only an upgrade the
+  user agrees to writes what a release from a link says.
 
 ### Reporting a mistake
 

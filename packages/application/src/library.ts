@@ -87,7 +87,10 @@ export interface LibraryUseCases {
    * Give an imported deck the languages its own release states its title
    * and description in and the copy lacks, where the copy's English is
    * the release's, and save it; null when that adds nothing (or the deck
-   * is not from the library). Nothing the user wrote changes.
+   * is not from the library). Nothing the user wrote changes. Only a copy
+   * of a series the library's index lists: a release added from a link
+   * stays where its server keeps it, which can change it at any time, so
+   * its texts come only with an upgrade the user agrees to.
    */
   addReleaseLanguages(deck: Deck): Promise<Deck | null>;
   /**
@@ -317,6 +320,8 @@ export function createLibraryUseCases({
     },
     async addReleaseLanguages(deck) {
       if (deck.sourceUrl === undefined) return null;
+      const indexed = await deckLibrary.listLibraryDecks();
+      if (!indexed.some((libraryDeck) => isCopyOf(deck, libraryDeck))) return null;
       const updated = withReleaseLanguages(
         deck,
         await deckLibrary.fetchLibraryDeck(deck.sourceUrl),
