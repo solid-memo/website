@@ -9,11 +9,18 @@ import { shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
+import { createLocalPod } from "@solid-memo/solid/localPod";
+import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
 
-/** What each pod adapter was made with, by its factory's name, as the composition wires it. */
-const { given, recorded } = vi.hoisted(() => {
+/**
+ * What each pod adapter was made with, by its factory's name, as the
+ * composition wires it; and, by the same name, how a test changes what
+ * the factory made.
+ */
+const { given, altered, recorded } = vi.hoisted(() => {
   const given = new Map<string, Record<string, typeof globalThis.fetch>>();
+  const altered = new Map<string, (made: object) => object>();
   /** A module whose factory `name` is the original, its options recorded. */
   const recorded =
     (name: string) =>
@@ -26,11 +33,12 @@ const { given, recorded } = vi.hoisted(() => {
         ...original,
         [name]: (options: Record<string, typeof globalThis.fetch>) => {
           given.set(name, options);
-          return factory(options);
+          const made = factory(options) as object;
+          return altered.get(name)?.(made) ?? made;
         },
       };
     };
-  return { given, recorded };
+  return { given, altered, recorded };
 });
 vi.mock(
   "@solid-memo/solid/solidWebIdDocumentRepository",
@@ -90,12 +98,59 @@ function servedSiteNetwork(input: RequestInfo | URL, init?: RequestInit): Promis
   return shapesFetch(`${SITE}${url.slice(SERVED.length)}`);
 }
 
+/**
+ * A pod at `root`, kept in memory, as a server would answer: with the
+ * address each response came from; without `storage`, its root is not
+ * said to be a storage.
+ */
+function podAt(root: string, { storage = true } = {}): typeof globalThis.fetch {
+  const pod = createLocalPod({
+    root,
+    store: createMemoryResourceStore(),
+    newEtag: () => `"${crypto.randomUUID()}"`,
+  });
+  return async (input, init) => {
+    const answered = await pod(input, init);
+    const headers = new Headers(answered.headers);
+    if (!storage) headers.delete("Link");
+    const response = new Response(answered.body, { status: answered.status, headers });
+    Object.defineProperty(response, "url", {
+      value: String(input instanceof Request ? input.url : input).replace(/#.*/, ""),
+    });
+    return response;
+  };
+}
+
+/** A network with the served site and `pods` on it, each request to a pod recorded with how it was sent. */
+function podsNetwork(pods: Record<string, typeof globalThis.fetch>) {
+  const sent: { url: string; method: string; credentials?: RequestCredentials }[] = [];
+  const network = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input instanceof Request ? input.url : input);
+    const root = Object.keys(pods).find((origin) => url.startsWith(origin));
+    if (root === undefined) return servedSiteNetwork(input, init);
+    sent.push({
+      url,
+      method: init?.method ?? (input instanceof Request ? input.method : "GET"),
+      credentials: init?.credentials,
+    });
+    return pods[root]!(input, init);
+  });
+  vi.stubGlobal("fetch", network);
+  return sent;
+}
+
+/** Writes `body` to `url` in `pod` as Turtle, as anyone who may write there can. */
+async function put(pod: typeof globalThis.fetch, url: string, body: string): Promise<void> {
+  await pod(url, { method: "PUT", headers: { "Content-Type": "text/turtle" }, body });
+}
+
 /** Lets granted Web Locks run their callbacks, and released ones pass on. */
 async function settled(): Promise<void> {
   for (let turn = 0; turn < 5; turn++) await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 beforeEach(() => {
+  altered.clear();
   requests = [];
   login.webId = undefined;
   login.sent = [];
@@ -219,6 +274,14 @@ describe("createAppUseCases", () => {
 
   it("reads a release as no one when the user's own pod cannot be found", async () => {
     login.webId = "https://bob.example/profile/card#me";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input).startsWith("https://bob.example/")
+          ? Promise.reject(new TypeError("Failed to fetch"))
+          : servedSiteNetwork(input, init),
+      ),
+    );
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const elsewhere = "https://attacker.example/r.ttl";
     await expect(
@@ -232,6 +295,238 @@ describe("createAppUseCases", () => {
       elsewhere,
       expect.objectContaining({ credentials: "omit" }),
     );
+  });
+
+  it("reads a release in an instance the user registered as the user when their storages cannot be found", async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    altered.set("createSolidStorageGateway", (made) => ({
+      ...made,
+      discoverStorages: () => Promise.reject(new TypeError("Failed to fetch")),
+    }));
+    const documents: Record<string, string> = {
+      [`${alice}profile/card`]: `<${login.webId}>
+        <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${alice}settings/private.ttl>.`,
+      [`${alice}settings/private.ttl`]: `<#memo>
+        a <http://www.w3.org/ns/solid/terms#TypeRegistration>;
+        <http://www.w3.org/ns/solid/terms#forClass> <https://solid-memo.com/ns/vocab/v1.ttl#Instance>;
+        <http://www.w3.org/ns/solid/terms#instanceContainer> <${alice}memo/>.`,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input instanceof Request ? input.url : input).replace(/#.*/, "");
+        const body = documents[url];
+        if (body === undefined) return servedSiteNetwork(input, init);
+        const response = new Response(body, { headers: { "Content-Type": "text/turtle" } });
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    expect((await useCases.listInstances({ webId: login.webId })).map(({ url }) => url)).toEqual([
+      `${alice}memo/`,
+    ]);
+    const own = `${alice}memo/releases/capitals/v1.ttl`;
+    await expect(
+      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url: own }),
+    ).rejects.toMatchObject({ code: "releaseUnreadable" });
+    expect(login.sent).toContain(own);
+  });
+
+  it("sends the user's credentials only into their own pod, reading a deck's documents elsewhere as no one and writing nothing there", {
+    timeout: 30_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    // A deck from a guest's study, its entry moved into Alice's instance.
+    const guest = createAppUseCases({ ...options, indexedDB: undefined });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+    const made = await guest.createDeck(instance!.url, { en: "Capitals" });
+    const entry = `${alice}memo/catalog.ttl#deck-1`;
+    const deckAt = (cards: string, reviews: string) => ({
+      ...made,
+      url: entry,
+      cardsDocumentUrl: cards,
+      reviewsDocumentUrl: reviews,
+    });
+    /** A document saying it is the deck's: what anyone who may write it can state. */
+    const owned = (url: string) => `<${url}> <http://purl.org/dc/terms/isPartOf> <${entry}>.`;
+    const documents = new Map([
+      [
+        `${alice}profile/card`,
+        `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+      ],
+      ["https://attacker.example/cards.ttl", owned("https://attacker.example/cards.ttl")],
+      ["https://attacker.example/reviews.ttl", owned("https://attacker.example/reviews.ttl")],
+      [`${alice}memo/decks/deck-1.ttl`, owned(`${alice}memo/decks/deck-1.ttl`)],
+      ["https://store.example/", ""],
+      [
+        "https://store.example/memo/decks/deck-1.ttl",
+        owned("https://store.example/memo/decks/deck-1.ttl"),
+      ],
+    ]);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input instanceof Request ? input.url : input).replace(/#.*/, "");
+        const body = documents.get(url);
+        if (body === undefined) return servedSiteNetwork(input, init);
+        requests.push({ url, method: init?.method ?? "GET" });
+        const response = new Response(body, {
+          headers: { "Content-Type": "text/turtle", ETag: '"1"' },
+        });
+        // As the network answers, with the address it was read from.
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const elsewhere = deckAt(
+      "https://attacker.example/cards.ttl",
+      "https://attacker.example/reviews.ttl",
+    );
+
+    expect(await useCases.listCards(elsewhere)).toEqual([]);
+    await expect(
+      useCases.addCard(elsewhere, { front: { en: "Sweden" }, back: { en: "Stockholm" } }),
+    ).rejects.toMatchObject({ code: "writeOutsidePod", vars: { host: "attacker.example" } });
+    // Removing the deck keeps its documents there, whatever they say.
+    await expect(useCases.removeDeck(elsewhere)).resolves.toEqual({
+      keptDocuments: ["https://attacker.example/cards.ttl", "https://attacker.example/reviews.ttl"],
+    });
+    expect(login.sent.filter((url) => url.startsWith("https://attacker.example/"))).toEqual([]);
+    expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+      "https://attacker.example/cards.ttl",
+      expect.objectContaining({ credentials: "omit" }),
+    );
+    expect(
+      requests.filter(
+        ({ url, method }) => url.startsWith("https://attacker.example/") && method !== "GET",
+      ),
+    ).toEqual([]);
+
+    // A deck whose documents are in the user's own pod is read as the user.
+    const own = `${alice}memo/decks/deck-1.ttl`;
+    expect(await useCases.listCards(deckAt(own, own))).toEqual([]);
+    expect(login.sent).toContain(own);
+    // So is one in a storage the user entered by hand, once they have.
+    const entered = "https://store.example/memo/decks/deck-1.ttl";
+    await useCases.listCards(deckAt(entered, entered));
+    expect(login.sent).not.toContain(entered);
+    await useCases.addManualStorage("https://store.example/");
+    await useCases.listCards(deckAt(entered, entered));
+    expect(login.sent).toContain(entered);
+  });
+
+  it("studies a deck whose catalog names its documents on another server without the user's credentials there, writing nothing there", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const attacker = "https://attacker.example/";
+    const pod = podAt(alice);
+    const theirs = podAt(attacker);
+    const sent = podsNetwork({ [alice]: pod, [attacker]: theirs });
+    login.webId = `${alice}profile/card#me`;
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+    const instance = await useCases.createInstance(session, {
+      containerUrl: `${alice}memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const made = await useCases.createDeck(instance.url, { en: "Capitals" });
+    await useCases.addCard(made, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    // The deck's documents copied to another server, each saying it is the deck's, and the catalog naming them.
+    const moved = (text: string) =>
+      text
+        .replaceAll(made.cardsDocumentUrl, `${attacker}cards.ttl`)
+        .replaceAll(made.reviewsDocumentUrl, `${attacker}reviews.ttl`);
+    const text = async (url: string) => (await pod(url)).text();
+    await put(theirs, `${attacker}cards.ttl`, moved(await text(made.cardsDocumentUrl)));
+    const reviews = `<${attacker}reviews.ttl> <http://purl.org/dc/terms/isPartOf> <${made.url}>.`;
+    await put(theirs, `${attacker}reviews.ttl`, reviews);
+    await put(pod, `${alice}memo/catalog.ttl`, moved(await text(`${alice}memo/catalog.ttl`)));
+    login.sent = [];
+    sent.length = 0;
+
+    const [deck] = await useCases.listDecks(instance.url);
+    expect(deck!.cardsDocumentUrl).toBe(`${attacker}cards.ttl`);
+    const [card] = await useCases.listCards(deck!);
+    expect(card!.front).toEqual({ en: "Sweden" });
+    // Answering writes the answer's state to the reviews document: refused before it is sent.
+    const now = new Date();
+    const [prompt] = (await useCases.getStudyQueue(instance.url, deck!, now)).newPrompts;
+    await expect(useCases.recordReview(instance.url, deck!, prompt!, 4, now)).rejects.toMatchObject(
+      { code: "writeOutsidePod", vars: { host: "attacker.example" } },
+    );
+    // Once the reviews document no longer says it is the deck's, the data check finds it unclaimed; claiming it is refused too.
+    await put(theirs, `${attacker}reviews.ttl`, "");
+    expect((await useCases.checkInstance(instance.url)).unclaimed).toEqual([
+      expect.objectContaining({ documents: [`${attacker}reviews.ttl`] }),
+    ]);
+    await expect(useCases.claimDeckDocuments(instance.url, deck!.url)).rejects.toMatchObject({
+      code: "writeOutsidePod",
+    });
+    // An export reads them as no one too.
+    await given.get("createSolidDeckArchive")!.fetch(`${attacker}cards.ttl`);
+
+    const there = sent.filter(({ url }) => url.startsWith(attacker));
+    expect(there.length).toBeGreaterThan(0);
+    expect(there.filter(({ method }) => !["GET", "HEAD"].includes(method))).toEqual([]);
+    expect(there.every(({ credentials }) => credentials === "omit")).toBe(true);
+    expect(login.sent.filter((url) => url.startsWith(attacker))).toEqual([]);
+    // The user's own pod is still theirs.
+    expect(login.sent).toContain(`${alice}memo/catalog.ttl`);
+    // What the digest learned is written back after, into Alice's pod: until it is, the network stays.
+    await vi.waitFor(async () => {
+      const before = sent.length;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(sent.length).toBe(before);
+    });
+  });
+
+  it("moves a guest's study into a folder the user enters, though their profile names no storage", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const pod = podAt(alice, { storage: false });
+    podsNetwork({ [alice]: pod });
+    const webId = `${alice}profile/card#me`;
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${webId}> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${alice}settings/private.ttl>.`,
+    );
+    await put(
+      pod,
+      `${alice}settings/private.ttl`,
+      "<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument>.",
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
+    await useCases.addCard(deck, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    login.webId = webId;
+    const session = { webId };
+    expect(await useCases.listStorages(session)).toEqual([]);
+
+    const outcome = await useCases.transferGuestStudy(session, instance!, {
+      containerUrl: `${alice}memo/`,
+      registrationTarget: "private",
+    });
+    expect(outcome).toMatchObject({ ok: true, instance: { url: `${alice}memo/` } });
+    const [moved] = await useCases.listDecks(`${alice}memo/`);
+    expect((await useCases.listCards(moved!)).map((card) => card.front)).toEqual([
+      { en: "Sweden" },
+    ]);
   });
 
   it("reads a guest's instance as a graph from this browser, fetching nothing it names", {

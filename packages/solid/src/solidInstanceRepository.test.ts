@@ -599,6 +599,32 @@ describe("deleteInstance", () => {
     );
   });
 
+  it("deletes the data through its own fetch, the registrations through the pod's", async () => {
+    vi.mocked(deleteInstanceData).mockResolvedValue({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: null,
+    });
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const dataFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const repository = createSolidInstanceRepository({
+      fetch,
+      dataFetch,
+      now: () => new Date(),
+      randomId: () => "fixed-id",
+    });
+
+    await repository.deleteInstance({ webId: WEBID, instance });
+
+    expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, dataFetch);
+    expect(locateTypeIndexes).toHaveBeenCalledWith(WEBID, fetch);
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, fetch);
+  });
+
   it("keeps the registration when deleting the data fails", async () => {
     vi.mocked(deleteInstanceData).mockRejectedValue(new Error("403"));
 

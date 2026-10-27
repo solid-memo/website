@@ -104,6 +104,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.",
   writeRefused:
     "Solid Memo stopped a change to your Pod for safety: it would have been saved at an address Solid Memo never saves to. Nothing was changed.",
+  writeOutsidePod:
+    "Solid Memo did not save this: it is kept on {host}, outside your Pod, and Solid Memo saves only to your Pod. Nothing was changed.",
   deckChangedSinceOffer:
     "The deck changed since the update was offered, perhaps in another tab or app, so nothing was changed. Look at the offer again.",
   deckChangedDuringUpgrade:

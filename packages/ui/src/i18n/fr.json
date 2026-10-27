@@ -1715,6 +1715,7 @@
     "resourceChangedDuringCopy": "Une partie de votre travail dans ce navigateur a changé pendant sa copie, peut-être dans un autre onglet, elle est donc conservée ici. Réessayez.",
     "guestStudyBeingMoved": "Solid Memo déplace votre travail de ce navigateur vers votre Pod et n’y enregistre rien d’ici là. Attendez la fin, puis réessayez.",
     "writeRefused": "Solid Memo a arrêté une modification de votre Pod par sécurité : elle aurait été enregistrée à une adresse où Solid Memo n’enregistre jamais rien. Rien n’a été modifié.",
+    "writeOutsidePod": "Solid Memo n’a pas enregistré ceci : c’est conservé sur {host}, hors de votre Pod, et Solid Memo n’enregistre que dans votre Pod. Rien n’a été modifié.",
     "deckChangedSinceOffer": "Le paquet a changé depuis que la mise à jour a été proposée, peut-être dans un autre onglet ou une autre application, rien n’a donc été modifié. Consultez de nouveau la proposition.",
     "deckChangedDuringUpgrade": "Le paquet a changé pendant sa mise à jour, peut-être dans un autre onglet ou une autre application. Réessayez.",
     "changedElsewhere": "Cet élément a été modifié ailleurs depuis que Solid Memo l’a lu, peut-être dans un autre onglet ou une autre application, rien n’a donc été enregistré. Rechargez la page et réessayez.",

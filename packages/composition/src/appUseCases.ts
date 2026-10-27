@@ -37,6 +37,7 @@ import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { createOwnPodFetch } from "@solid-memo/solid/ownPodFetch";
+import { createOwnPodGate } from "@solid-memo/solid/ownPodGate";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
@@ -112,10 +113,31 @@ export function createAppUseCases({
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
   const shareFetch = createPodFence(writeFence.fetch, { accessControl: true });
+  /**
+   * The fetch of the adapters that read and write an instance's data,
+   * whose catalog may name a deck's documents on any server: behind the
+   * pod fence, the credential gate (docs/boundaries.md) sends a request
+   * as the user only into the user's own pod (ownFolders) and reads
+   * anywhere else as no one, writing nothing there; a guest's pod is
+   * this browser's.
+   */
+  const dataFetch = createPodFence(
+    routedFetch({
+      origin: GUEST_ORIGIN,
+      local: writeFence.fetch,
+      remote: createOwnPodGate({
+        fetch: writeFence.fetch,
+        publicFetch: anonymousFetch,
+        webId: session.webId,
+        ownFolders,
+        revision: () => folderRevision,
+      }),
+    }),
+  );
   const siteFetch = createSiteFetch(servedSite);
 
   const shapeValidator = createShaclShapeValidator({
-    fetch: podFetch,
+    fetch: dataFetch,
     shapesFetch: siteFetch,
     shapesBaseUrl: SHAPES_BASE,
     vocabBaseUrl: VOCAB_BASE,
@@ -125,16 +147,67 @@ export function createAppUseCases({
   const checkWrite = shapeValidator.checkSubjects;
   const now = () => new Date();
   const randomId = () => crypto.randomUUID();
-  const storageGateway = createSolidStorageGateway({
+  const podStorages = createSolidStorageGateway({
     fetch: podFetch,
     profileStorages: getProfileStorages,
   });
-  const instanceRepository = createSolidInstanceRepository({
+  /**
+   * The folders the user entered or made on this page: a storage entered
+   * by hand (probeStorage), the folder a guest's study is moved into
+   * (createContainer), theirs for this page as the storages their profile
+   * names are. Each change to the user's folders here moves
+   * `folderRevision`, so the credential gate asks for them again.
+   */
+  const entered = new Set<string>();
+  let folderRevision = 0;
+  const changed = () => {
+    folderRevision++;
+  };
+  const storageGateway: typeof podStorages = {
+    ...podStorages,
+    async probeStorage(url) {
+      const storage = await podStorages.probeStorage(url);
+      entered.add(storage.url);
+      changed();
+      return storage;
+    },
+  };
+  const podInstances = createSolidInstanceRepository({
     fetch: podFetch,
+    dataFetch,
     checkWrite,
     now,
     randomId,
   });
+  const instanceRepository: typeof podInstances = {
+    ...podInstances,
+    createInstance: (args) => podInstances.createInstance(args).finally(changed),
+    attachInstance: (args) => podInstances.attachInstance(args).finally(changed),
+    deleteInstance: (args) => podInstances.deleteInstance(args).finally(changed),
+  };
+  const podCopier = createSolidInstanceCopier({ fetch: podFetch });
+  const instanceCopier: typeof podCopier = {
+    ...podCopier,
+    async createContainer(url) {
+      await podCopier.createContainer(url);
+      entered.add(url);
+      changed();
+    },
+  };
+  /**
+   * The folders of the user's own pod: their storages, the instances they
+   * registered and the folders they entered or made on this page. With
+   * `orNone`, a list that cannot be read names none, the others still
+   * counting.
+   */
+  async function ownFolders(webId: string, orNone = false): Promise<string[]> {
+    const settled = <T>(listed: Promise<T[]>) => (orNone ? listed.catch(() => []) : listed);
+    const [storages, instances] = await Promise.all([
+      settled(storageGateway.discoverStorages(webId)),
+      settled(instanceRepository.listInstances(webId)),
+    ]);
+    return [...[...storages, ...instances].map(({ url }) => url), ...entered];
+  }
   /**
    * A release is read where it is published: the site's where the site
    * serves it, a guest's from this browser, one in the user's own pod
@@ -152,13 +225,8 @@ export function createAppUseCases({
         fetch: podFetch,
         publicFetch: anonymousFetch,
         webId: session.webId,
-        ownFolders: async (webId) => {
-          const [storages, instances] = await Promise.all([
-            storageGateway.discoverStorages(webId).catch(() => []),
-            instanceRepository.listInstances(webId).catch(() => []),
-          ]);
-          return [...storages, ...instances].map(({ url }) => url);
-        },
+        // A release in a folder that cannot be found is read as no one.
+        ownFolders: (webId) => ownFolders(webId, true),
       }),
     }),
   });
@@ -168,18 +236,18 @@ export function createAppUseCases({
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway,
     instanceRepository,
-    deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, now, randomId }),
+    deckRepository: createSolidDeckRepository({ fetch: dataFetch, checkWrite, now, randomId }),
     deckLibrary: createSolidDeckLibrary({
       fetch: siteFetch,
       // The library is published with the site, from decks/.
       indexUrl: libraryIndexUrl ?? `${SITE}decks/index.ttl`,
     }),
-    preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
-    paletteRepository: createSolidPaletteRepository({ fetch: podFetch, checkWrite }),
-    reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
+    preferencesRepository: createSolidPreferencesRepository({ fetch: dataFetch, checkWrite }),
+    paletteRepository: createSolidPaletteRepository({ fetch: dataFetch, checkWrite }),
+    reviewStateRepository: createSolidReviewStateRepository({ fetch: dataFetch, checkWrite }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: podFetch }),
-    instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
+    repairRepository: createSolidRepairRepository({ fetch: dataFetch }),
+    instanceCopier,
     updateJournal: createLocalStorageUpdateJournal(),
     languagePreference: createLocalStorageLanguagePreference(),
     themePreference: createLocalStorageThemePreference(),
@@ -188,15 +256,15 @@ export function createAppUseCases({
     textSizePreference: createLocalStorageTextSizePreference(),
     seenHighlights: createLocalStorageSeenHighlights(),
     writeFence,
-    digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
-    answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
+    digestRepository: createSolidDigestRepository({ fetch: dataFetch, checkWrite }),
+    answerLog: createSolidAnswerLog({ fetch: dataFetch, checkWrite }),
     ruleset,
     // Its profile is written through the fences too, as every pod write is.
     guestPod: createLocalGuestPod({ fetch: podFetch, store: guestStore }),
-    deckArchive: createSolidDeckArchive({ fetch: podFetch }),
+    deckArchive: createSolidDeckArchive({ fetch: dataFetch }),
     fileExchange: createBrowserFileExchange(),
     releaseDraftRepository: createSolidReleaseDraftRepository({
-      fetch: podFetch,
+      fetch: dataFetch,
       releaseFetch,
       // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
       publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: anonymousFetch }),
@@ -210,9 +278,10 @@ export function createAppUseCases({
       grantPublicRead,
     }),
     // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.
-    trialSandbox: (draft) => createTrialUseCases(draft, { podFetch, shapeValidator, ruleset }),
+    trialSandbox: (draft) =>
+      createTrialUseCases(draft, { podFetch: dataFetch, shapeValidator, ruleset }),
     // Read as every pod read is: a guest's from this browser, a document read already with its version.
-    instanceGraphReader: createSolidInstanceGraphReader({ fetch: podFetch }),
+    instanceGraphReader: createSolidInstanceGraphReader({ fetch: dataFetch }),
   });
 }
 

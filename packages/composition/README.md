@@ -1,8 +1,8 @@
 # @solid-memo/composition
 
 The composition root: the one place where the layers meet. It puts
-every adapter behind its port, sets up the guest's pod and the write
-fence, reads the site's documents from where it is served, and builds
+every adapter behind its port, sets up the guest's pod, the write
+fence and the credential gate, reads the site's documents from where it is served, and builds
 the use cases over them.
 
 ## Exports

@@ -36,7 +36,8 @@ type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocum
  * instance's documents are"):
  *
  * - "owned": it says it is the deck's (`<> dcterms:isPartOf <entry>`),
- *   wherever it is;
+ *   wherever it is (the app's fetch, the credential gate, still writes
+ *   nothing outside the user's own pod: ownPodGate.ts);
  * - "adoptable": it does not yet, nor that it is any other deck's (of
  *   this instance or another, deckBackLinksOf), but it is in the
  *   instance's folder and that folder is the instance's own (not a

@@ -171,8 +171,12 @@ captured before login.
 [solidSession.ts](../packages/solid/src/solidSession.ts) makes it and
 the session gateway on one client. A router in front sends the guest's URLs to the browser's pod
 ([guest-mode.md](guest-mode.md)). Every pod read goes through
-authFetch, the WebID document's too. A release outside the user's own
-pod is read without it ([studio.md](studio.md#drafts)). The storage
+authFetch, the WebID document's too. An instance's data is sent with it
+only into the user's own pod, their storages and the instances they
+registered. A deck's document elsewhere is read without it and never
+written ([the credential gate](boundaries.md#the-credential-gate)). A
+release outside the user's own pod is read without it
+([studio.md](studio.md#drafts)). The storage
 gateway hands the profile lookup (`getProfileStorages`, in
 `client/resources.ts`) the profile it read, so the lookup doesn't fetch
 it with the browser's fetch.

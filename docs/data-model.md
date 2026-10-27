@@ -409,7 +409,15 @@ No document Solid Memo names has any.
   access control or metadata resource (`.acl`, `.acr`, `.meta`), or one
   of the instance's own documents (its meta, preferences, palettes,
   catalog and digest, `history/`, `drafts/`, `releases/`). New decks are
-  made in `decks/` and `reviews/`.
+  made in `decks/` and `reviews/`. One outside the user's own pod (their
+  storages and the instances they registered) is read as no one, and
+  nothing is written to or deleted there, whatever it says
+  (`writeOutsidePod`, [boundaries.md](boundaries.md#the-credential-gate)).
+  Removing its deck, or deleting its instance, keeps it, and says so.
+  In an instance from someone else's pod, only documents in the
+  instance's folder are the user's: a deck whose documents lie
+  elsewhere in that pod can be read only if they're public, and can't
+  be studied.
 - **A deck's document is written to, or deleted, only when it says it is
   the deck's**: the document states
   `<> dcterms:isPartOf <catalog.ttl#deck-X>`, naming this deck's entry

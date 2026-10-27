@@ -144,13 +144,22 @@ const OUT_OF_PLACE = /[?#;]|%(?:2f|5c|25|00|c0|c1|u)|(?:^|\/)(?:\.|%2e|\/)/i;
  * writes or deletes there.
  */
 export function isDocumentIn(url: string, container: string): boolean {
+  return isInFolder(url, container) && !canonicalUrlOf(url)!.endsWith("/");
+}
+
+/**
+ * Whether `url` is the folder `container` itself, or a document or a
+ * folder in it, as a request would resolve both (canonicalUrlOf), with
+ * nothing after the folder a server might read as a step out of it
+ * (OUT_OF_PLACE): isDocumentIn, folders included.
+ */
+export function isInFolder(url: string, container: string): boolean {
   const resolved = canonicalUrlOf(url);
   const root = canonicalUrlOf(ensureTrailingSlash(container));
   return (
     resolved !== null &&
     root !== null &&
     resolved.startsWith(root) &&
-    !resolved.endsWith("/") &&
     !OUT_OF_PLACE.test(resolved.slice(root.length))
   );
 }
@@ -246,7 +255,8 @@ export function isDeckDocumentAddress(instanceUrl: string, url: string): boolean
  * catalog (`<instance>catalog.ttl#…`), and its cards and reviews
  * documents where a deck's document may be read (isSafeDocumentUrl), none
  * of them one of the instance's own documents. Where they are is free;
- * whether one may be written to is what it says (ownsDocument). A deck
+ * whether one may be written to is what it says (ownsDocument), and only
+ * in the user's own pod (the credential gate, docs/boundaries.md). A deck
  * the catalog names otherwise is not read, written or deleted through
  * (docs/data-model.md, "Where an instance's documents are").
  */
