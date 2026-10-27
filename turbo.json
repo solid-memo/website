@@ -1,5 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "SOLID_CLIENT"
+  ],
+  "globalDependencies": [
+    "scripts/solidClient.ts"
+  ],
   "tasks": {
     "transit": {
       "dependsOn": [

@@ -148,6 +148,7 @@ words:
   - Deque
   - elkjs
   - Fernandes
+  - Filip
   - flagcdn
   - Forgejo
   - Fredoka
@@ -180,12 +181,15 @@ words:
   - Selenized
   - shellcheck
   - skohub
+  - Skokan
   - solidcommunity
   - solidproject
   - solidweb
   - SRON
   - Tahoma
   - Warchoł
+  # oauth4webapi, solid-memo-client's OAuth library
+  - webapi
   - Wiklund
   - Woźniak
   - Zazuko

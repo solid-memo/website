@@ -241,7 +241,14 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
           headers.get("Content-Type"),
           body,
         ]),
-      ).toEqual([["PATCH", '"v1"', "application/sparql-update", patchBody(edited)]]);
+      ).toEqual([
+        [
+          "PATCH",
+          '"v1"',
+          "application/sparql-update",
+          patchBody(rdf.changesOf(edited), rdf.localNameOf),
+        ],
+      ]);
     });
 
     it("sends a PATCH refused as a conflict once more, its deleted decimals spelled as numbers", async () => {
@@ -256,8 +263,8 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       const { fetch, sent } = pod({ status: 409, body: "" }, { status: 205, body: "" });
       await writeDocument(URL_, edited, { fetch });
       expect(sent.map(({ method, body }) => [method, body])).toEqual([
-        ["PATCH", patchBody(edited)],
-        ["PATCH", patchBody(edited, true)],
+        ["PATCH", patchBody(rdf.changesOf(edited), rdf.localNameOf)],
+        ["PATCH", patchBody(rdf.changesOf(edited), rdf.localNameOf, true)],
       ]);
       expect(String(sent[1]!.body)).toContain(`"1"^^<${XSD}decimal>`);
     });

@@ -11,11 +11,14 @@ They read and write pods through modules of the package's own in
 `src/client/`: the RDF data model (`rdf.ts`), reading and writing
 resources (`resources.ts`), the sign-in client (`session.ts`) and the
 public-read grant (`access.ts`), of the types in `interface.ts`, which
-names no library. These are the only implementation so far, over
+names no library. These are the default implementation, over
 Inrupt's
 [`@inrupt/solid-client`](https://github.com/inrupt/solid-client-js) and
 `@inrupt/solid-client-authn-browser`, and another library would replace
 them alone ([vendor-code.md](../../docs/vendor-code.md#cost-of-swapping-a-vendor)).
+[`solid-memo-client`](../solid-memo-client/README.md) is a second one,
+with no Inrupt library, which a build takes with
+`SOLID_CLIENT=solid-memo-client`.
 
 ## Exports
 

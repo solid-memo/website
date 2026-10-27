@@ -19,8 +19,9 @@
  * - some vendor packages may be imported only from certain files: the
  *   Solid client libraries, any `@inrupt/` package, by the client modules
  *   of the solid package and the shacl package's Turtle reader alone
- *   (docs/boundaries.md, Vendor libraries); and some exports of one only
- *   from certain files:
+ *   (docs/boundaries.md, Vendor libraries), and never, tests included, by
+ *   solid-memo-client, the client that replaces them; and some exports of
+ *   one only from certain files:
  *   `@inrupt/solid-client`'s access control, by the public-read grant alone
  *   (docs/boundaries.md, Access control).
  *
@@ -51,6 +52,9 @@ export const LAYERS: Record<string, string[]> = {
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
+  // A second implementation of solid's client modules, which it tests with solid's contract. No package
+  // imports it: the build puts it in their place when SOLID_CLIENT names it (scripts/solidClient.ts).
+  "solid-memo-client": ["solid"],
   // The journeys drive the built app in a browser; they read only its text.
   "e2e-journeys": ["ui", "studio"],
 };
@@ -97,6 +101,14 @@ export const VENDOR_ONLY_IN: { specifier: RegExp; files: Record<string, RegExp> 
 ];
 
 /**
+ * Vendor packages a package never imports, tests and configs included:
+ * solid-memo-client is the Solid client without Inrupt's libraries.
+ */
+export const VENDOR_NEVER_IN: Record<string, RegExp> = {
+  "solid-memo-client": /^@inrupt\//,
+};
+
+/**
  * Vendor exports that only certain files may import, tests aside, by
  * package (`files`); a namespace import counts as importing them all.
  * Who may read something is changed in one place only: the access
@@ -140,6 +152,16 @@ export const BROWSER: Record<string, RegExp> = {
   ui: /^src\//,
   web: /^src\//,
   studio: /^src\//,
+  "solid-memo-client": /^src\//,
+};
+
+/**
+ * The node-only packages a package's browser code may import all the
+ * same: solid-memo-client reads and writes Turtle with n3, which
+ * Inrupt's client bundles too.
+ */
+export const BROWSER_MAY_USE: Record<string, RegExp> = {
+  "solid-memo-client": /^n3$/,
 };
 export const NODE_ONLY = [
   /^node:/,
@@ -151,6 +173,12 @@ export const NODE_ONLY = [
   /^@solid-memo\/site(\/|$)/,
   /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
 ];
+
+/**
+ * The root's shared setup, which a package's Vite and Vitest configs may
+ * import from its folder: the test setup and the Solid client switch.
+ */
+const SHARED_SETUP = /^\.\.\/\.\.\/(vitest\.shared|scripts\/solidClient)\.ts$/;
 
 /** A test file, test helper or config, which may also use the shared test tooling. */
 export const isTestFile = (path: string) =>
@@ -255,6 +283,26 @@ function vendorImportProblems(where: string, short: string, file: string, text: 
   return problems;
 }
 
+/**
+ * What one import of a vendor package breaks (fileProblems): the package
+ * may never import it (VENDOR_NEVER_IN), or only other files may
+ * (VENDOR_ONLY_IN), tests aside.
+ */
+function vendorPackageProblems(
+  where: string,
+  name: string,
+  file: string,
+  specifier: string,
+): string[] {
+  const short = name.replace("@solid-memo/", "");
+  if (VENDOR_NEVER_IN[short]?.test(specifier)) {
+    return [`${where}: ${name} may not import "${specifier}".`];
+  }
+  const vendor = VENDOR_ONLY_IN.find((rule) => rule.specifier.test(specifier));
+  if (vendor === undefined || isTestFile(file) || vendor.files[short]?.test(file)) return [];
+  return [`${where}: may not import "${specifier}": only ${onlyFiles(vendor.files)} may.`];
+}
+
 /** What one source file of a workspace package imports against its boundaries. */
 function fileProblems(
   workspace: Workspace,
@@ -274,9 +322,8 @@ function fileProblems(
   for (const [statement, specifier] of text.matchAll(IMPORT)) {
     if (specifier!.startsWith(".")) {
       const target = join(dirname(file), specifier!);
-      // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
-      const shared =
-        /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
+      // Every package's configs (vite.config.ts, vitest.config.ts, one of a task of its own) share the root's setup.
+      const shared = /^vite(st(\.\w+)?)?\.config\.ts$/.test(file) && SHARED_SETUP.test(specifier!);
       if (target.startsWith("..") && !shared)
         problems.push(`${where}: "${specifier}" reaches outside the package.`);
       continue;
@@ -303,16 +350,12 @@ function fileProblems(
         problems.push(`${where}: imports ${name}, which package.json does not declare.`);
       }
     }
-    const vendor = VENDOR_ONLY_IN.find((rule) => rule.specifier.test(specifier!));
-    if (vendor !== undefined && !test && !vendor.files[short]?.test(file)) {
-      problems.push(
-        `${where}: may not import "${specifier}": only ${onlyFiles(vendor.files)} may.`,
-      );
-    }
+    problems.push(...vendorPackageProblems(where, manifest.name, file, specifier!));
     if (
       BROWSER[short]?.test(file) &&
       !test &&
-      NODE_ONLY.some((pattern) => pattern.test(specifier!))
+      NODE_ONLY.some((pattern) => pattern.test(specifier!)) &&
+      !BROWSER_MAY_USE[short]?.test(specifier!)
     ) {
       problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
     }

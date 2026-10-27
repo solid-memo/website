@@ -19,15 +19,19 @@ imports and fails on:
   type-check);
 - a node-only import (`node:*`, `n3`, `@solid-memo/turtle`,
   `@solid-memo/site`, any package's `tooling/` or `node/` entry) in
-  browser code;
+  browser code, `n3` in `solid-memo-client` aside;
 - an import of a Solid client library, any `@inrupt/` package, from
   any file but `solid`'s client modules and `shacl`'s Turtle reader,
-  tests aside ([below](#the-solid-client-libraries));
+  tests aside, and from any file of `solid-memo-client`, tests included
+  ([below](#the-solid-client-libraries));
 - an import of `@inrupt/solid-client`'s access control from any file
   but the public-read grant's, tests aside ([below](#access-control)).
 
 Test files follow their subject's rules and, like the vitest configs,
-may use the root `package.json`'s shared test tooling.
+may use the root `package.json`'s shared test tooling. A package's Vite
+and Vitest configs may import the root's shared setup:
+`vitest.shared.ts` and the Solid client switch,
+`scripts/solidClient.ts`.
 
 ### An example
 
@@ -84,11 +88,12 @@ boundaries."
 | `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `site` | `composition`, and `studio` with a dynamic `import()`: `src/main.tsx` only; `site`: `vite.config.ts` (the site's build, which renders the docs) and tests only |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
+| `solid-memo-client` | `solid` | No package imports it: the build puts its modules in place of `solid`'s client modules ([below](#the-solid-client-libraries)) |
 | `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for their messages |
 
 Browser code is the `src/` of `markdown`, `vocab`, `domain`,
-`application`, `shacl`, `solid`, `browser`, `composition`, `ui`, `web`
-and `studio`.
+`application`, `shacl`, `solid`, `browser`, `composition`, `ui`, `web`,
+`studio` and `solid-memo-client`.
 
 ## Vendor libraries
 
@@ -102,8 +107,9 @@ listed:
 | `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
-| `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | in `e2e-pod`, the server contract and the tests |
-| `fake-indexeddb` | `browser`, `composition` | tests only: IndexedDB in node, for the guest's pod's store |
+| `n3` | `turtle`, the node tooling of `shacl`, `e2e-pod` and `solid-memo-client` | in `e2e-pod`, the server contract and the tests; in `solid-memo-client`, in the browser too |
+| `jsonld-streaming-parser`, `oauth4webapi` | `solid-memo-client` | the JSON-LD parser; Solid-OIDC sign-in |
+| `fake-indexeddb` | `browser`, `composition`, `solid-memo-client` | tests only: IndexedDB in node, for the guest's pod's store and the sign-in session |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness talks to the Solid server with its request API |
 | `@axe-core/playwright` | `e2e-journeys` | `pages/App.ts` only: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
 | `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, both node-only in the check: Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, not shipped ([vendor-code.md](vendor-code.md#maturity)) |
@@ -132,6 +138,17 @@ module of its own,
 [turtleDocument.ts](../packages/shacl/src/turtleDocument.ts), as pod
 documents are read.
 
+A second implementation of `rdf.ts`, `resources.ts`, `session.ts`,
+`access.ts` and `shacl`'s `turtleDocument.ts`, with no Inrupt library,
+is in [packages/solid-memo-client/](../packages/solid-memo-client/README.md).
+Inrupt's is the default; with `SOLID_CLIENT=solid-memo-client`, the Vite
+plugin in [scripts/solidClient.ts](../scripts/solidClient.ts) resolves
+every import of those modules to that package's module of the same name.
+It imports no `@inrupt/` package, tests included, and no package
+imports it (`VENDOR_NEVER_IN` and the layer table).
+[solid-memo-client.md](solid-memo-client.md) says what it's built on
+and how it differs.
+
 `npm run check:boundaries`
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_IN`)
 lets only these files but `interface.ts`, outside tests, import any
@@ -155,6 +172,10 @@ needs no library of its own:
   triples. It reads both with `parseQuads`, on the library's Turtle and
   JSON-LD parsers. Both are in
   [client/resources.ts](../packages/solid/src/client/resources.ts).
+  With `SOLID_CLIENT=solid-memo-client`, that package's `resources.ts`
+  writes and reads Turtle with `n3`, and reads JSON-LD with
+  `jsonld-streaming-parser`; `jsonLd.ts` writes JSON-LD on either
+  client.
 - `browser`'s `FileExchange` port saves and opens files with what the
   browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):
   a `Blob` behind a link with `download`, and a hidden
@@ -173,7 +194,10 @@ for the release's document, writing its own ACL (Web Access Control) or
 ACR (Access Control Policies). The publisher's fetch refuses another
 origin, or a write of anything but `<release>.acl` or `<release>.acr`,
 whatever the server names as the release's access control. No folder's
-access control changes.
+access control changes. With `SOLID_CLIENT=solid-memo-client`, the
+grant is `solid-memo-client`'s `access.ts`, which writes the release's own ACL
+or ACR with `fetch` and `n3`
+([solid-memo-client.md](solid-memo-client.md#the-public-read-grant)).
 
 `npm run check:boundaries`
 ([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`)

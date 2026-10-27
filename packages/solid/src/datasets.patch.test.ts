@@ -11,6 +11,7 @@ import {
   type Dataset,
   datasetFromQuads,
   getThing,
+  localNameOf,
   removeThing,
   setThing,
   toRdfJsDataset,
@@ -72,6 +73,10 @@ afterEach(() => {
   vi.mocked(changesOf).mockReset();
 });
 
+/** The PATCH body of a dataset's changes, as this client records and names them. */
+const bodyOf = (dataset: Dataset, decimalsAsNumbers = false) =>
+  patchBody(changesOf(dataset), localNameOf, decimalsAsNumbers);
+
 describe("patchBody", () => {
   it("writes each change as one N-Triples line, closed by a space and a dot, deletions first", () => {
     const read = setThing(
@@ -89,7 +94,7 @@ describe("patchBody", () => {
         .addStringWithLocale(`${NS}t`, "hej", "sv")
         .build(),
     );
-    expect(patchBody(edited)).toBe(
+    expect(bodyOf(edited)).toBe(
       [
         "DELETE DATA {",
         `<${DOC}#it> <${NS}n> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
@@ -114,10 +119,10 @@ describe("patchBody", () => {
     const line = (predicate: string, value: string) =>
       `<${DOC}#it> <${NS}${predicate}> "${value}"^^<${XSD_DECIMAL}> .`;
     const insert = `INSERT DATA {\n${line("e", "3.0")}\n};\n`;
-    expect(patchBody(edited)).toBe(
+    expect(bodyOf(edited)).toBe(
       `DELETE DATA {\n${line("d", "1.0")}\n${line("f", "2.50")}\n${line("g", "2.6")}\n};\n${insert}`,
     );
-    expect(patchBody(edited, true)).toBe(
+    expect(bodyOf(edited, true)).toBe(
       `DELETE DATA {\n${line("d", "1")}\n${line("f", "2.5")}\n${line("g", "2.6")}\n};\n${insert}`,
     );
   });
@@ -125,15 +130,15 @@ describe("patchBody", () => {
   it("names a subject without a URL yet by its fragment in the document", () => {
     const local = createThing({ name: "new" });
     const added = setThing(createSolidDataset(), buildThing(local).addUrl(`${NS}p`, local).build());
-    expect(patchBody(added)).toBe(`INSERT DATA {\n<#new> <${NS}p> <#new> .\n};\n`);
+    expect(bodyOf(added)).toBe(`INSERT DATA {\n<#new> <${NS}p> <#new> .\n};\n`);
   });
 
   it("leaves the body to the Solid client library for a blank node, or a dataset without changes recorded", () => {
-    expect(patchBody(createSolidDataset())).toBeNull();
-    withBlankNode({ additions: [triple(named(`${DOC}#a`), `${NS}p`, blank)], deletions: [] });
-    expect(patchBody(createSolidDataset())).toBeNull();
-    withBlankNode({ additions: [], deletions: [triple(blank, `${NS}p`, named(`${DOC}#a`))] });
-    expect(patchBody(createSolidDataset())).toBeNull();
+    expect(bodyOf(createSolidDataset())).toBeNull();
+    const additions = [triple(named(`${DOC}#a`), `${NS}p`, blank)];
+    expect(patchBody({ additions, deletions: [] }, localNameOf)).toBeNull();
+    const deletions = [triple(blank, `${NS}p`, named(`${DOC}#a`))];
+    expect(patchBody({ additions: [], deletions }, localNameOf)).toBeNull();
   });
 
   it("is sent in place of the Solid client library's, which is sent when ours cannot name a change", async () => {

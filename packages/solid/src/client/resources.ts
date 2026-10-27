@@ -31,7 +31,7 @@ import {
   type SourcedDataset,
 } from "./interface";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
-import { changesOf, datasetAt, sourceOf, toRdfJsDataset } from "./rdf";
+import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
 
@@ -170,19 +170,19 @@ function ownPatches(
   return async (input, init) => {
     if (init?.method === "PUT") refuseUnwritable(toRdfJsDataset(dataset));
     if (init?.method !== "PATCH") return fetch(input, init);
-    const body = patchBody(dataset) ?? init.body;
+    const changes = changesOf(dataset);
+    const body = patchBody(changes, localNameOf) ?? init.body;
     if (
       !whole &&
       (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)
     ) {
-      const changes = changesOf(dataset);
       refuseUnwritable([...(changes?.additions ?? []), ...(changes?.deletions ?? [])]);
       const response = await fetch(input, { ...init, body });
       // node-solid-server finds no decimal deleted as it served it (`1.0`, `2.50`), only as it reads it (`1`,
       // `2.5`), and applies nothing (409): sent once more, decimals so spelled. A deletion of a triple that is
       // gone fails again, as it should; one found the second time names the same number.
       if (response.status !== 409) return response;
-      const respelled = patchBody(dataset, true);
+      const respelled = patchBody(changes, localNameOf, true);
       return respelled === null || respelled === body
         ? response
         : fetch(input, { ...init, body: respelled });

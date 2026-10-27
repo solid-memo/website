@@ -7,7 +7,7 @@ confined, and what replacing one would cost.
 
 | Vendor | Packages | Confined to | Role |
 |---|---|---|---|
-| Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/client/` ([boundaries.md](boundaries.md#the-solid-client-libraries)), and `packages/shacl/src/turtleDocument.ts` for reading shapes; its universal access API in `client/access.ts` alone | RDF datasets, pod I/O, Solid-OIDC auth, and the app's one access-control write: a published release made readable by everyone, on WAC or ACP ([boundaries.md](boundaries.md#access-control)) |
+| Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/client/` ([boundaries.md](boundaries.md#the-solid-client-libraries)), and `packages/shacl/src/turtleDocument.ts` for reading shapes; its universal access API in `client/access.ts` alone | RDF datasets, pod I/O, Solid-OIDC auth, and the app's one access-control write: a published release made readable by everyone, on WAC or ACP ([boundaries.md](boundaries.md#access-control)). The default client: a build with `SOLID_CLIENT=solid-memo-client` ships none of it ([solid-memo-client.md](solid-memo-client.md)) |
 | TanStack | `@tanstack/react-query` (via `preact/compat`) | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Async-state caching and invalidation |
 | Preact | `preact` | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Rendering |
 | Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers`, `@fontsource-variable/noto-naskh-arabic` (all SIL OFL-1.1) | `packages/ui/src/style.css` (`@import`), and, for the diagrams' Fredoka ([markdown.md](markdown.md#the-diagrams-font)), `packages/site/src/drawDiagrams.ts` | Typefaces, self-hosted: bundled into `dist/` with no third-party font requests. Fredoka for text, Bangers (comic lettering) for `h1`/`h2`, Noto Naskh Arabic for Arabic text. |
@@ -17,6 +17,8 @@ confined, and what replacing one would cost.
 | Microsoft | `playwright` (Apache-2.0), `@playwright/test` | `packages/site/src/drawDiagrams.ts`; `e2e/journeys/` | Starting the diagrams' Chromium; driving the built app through the user journeys ([testing.md](testing.md#user-journeys)). One pinned version, which fixes the Chromium build |
 | Deque | `@axe-core/playwright` (MPL-2.0; with `axe-core`) | `e2e/journeys/pages/App.ts` | Checking each screen the user journeys visit against WCAG's rules, in the tests only, never in the app. Pinned |
 | RDF/JS community | `n3` | `@solid-memo/turtle`, the node tooling of `shacl`, and `e2e/pod/` (the server contract and tests) | Build-time Turtle parsing for the generators and validation; reading and writing pod documents in the end-to-end tests |
+| RDF/JS community | `n3` (MIT), `jsonld-streaming-parser` (MIT) | `@solid-memo/solid-memo-client` | In place of Inrupt's clients, with `SOLID_CLIENT=solid-memo-client`: RDF/JS terms, and parsing and writing Turtle (`n3`); parsing JSON-LD (`jsonld-streaming-parser`) |
+| Filip Skokan | `oauth4webapi` (MIT) | `@solid-memo/solid-memo-client` (`src/session.ts`, `src/oidcLogin.ts`, `src/oidcSession.ts`, and `src/oidcStore.ts` for its types) | In place of Inrupt's clients: Solid-OIDC's discovery, dynamic registration, authorization-code flow with PKCE, token requests and DPoP proofs |
 
 ## Maturity
 
@@ -25,7 +27,9 @@ prerelease tag (`-alpha`, `-beta`, `-rc`). `npm run check` fails on any
 other version among the app's run-time dependencies, kept by the bundle
 or not, the workspace's own packages aside
 ([checkDependencies.ts](../scripts/checkDependencies.ts) walks
-`package-lock.json` from `apps/web`). Development tools aren't shipped
+`package-lock.json` from `apps/web`, and from
+`packages/solid-memo-client`, which a build can ship in place of
+Inrupt's libraries). Development tools aren't shipped
 or checked.
 
 Mermaid, which draws the docs' diagrams, is the only development tool
@@ -75,16 +79,22 @@ type crosses upward past a mapper.
 - **Inrupt clients** → a second implementation of the four client
   modules in `packages/solid/src/client/` (`rdf.ts`, `resources.ts`,
   `session.ts`, `access.ts`) and of
-  `packages/shacl/src/turtleDocument.ts`. Their interface is the app's
+  `packages/shacl/src/turtleDocument.ts`. One exists:
+  `@solid-memo/solid-memo-client`, on `n3`, `jsonld-streaming-parser`
+  and `oauth4webapi`, which a build or a test run takes in place of
+  Inrupt's with `SOLID_CLIENT=solid-memo-client`
+  ([solid-memo-client.md](solid-memo-client.md#switching-clients)).
+  Inrupt's stays the default, and the switch's plugin,
+  `scripts/solidClient.ts`, names it so. Their interface is the app's
   own. The types are in `client/interface.ts` (`Dataset`, `Subject`,
   the `SubjectBuilder` with only the methods the code uses, `HttpError`,
   `SessionClient`, `GrantPublicRead`), which names no library. The
   functions keep the names they have, each with a signature of those
   types. A replacement exports the same, and its
   callers, the RDF mappers and the record ↔ model mappers don't change.
-  The current one hands the library's objects through
+  Inrupt's hands the library's objects through
   `client/inrupt.ts`, the one place that converts them; it and
-  `client/linearDataset.ts` are the current implementation's own, used
+  `client/linearDataset.ts` are that implementation's own, used
   by the other client modules alone. Sign-in and pod
   data can be switched apart: the composition root passes the sign-in
   client to `createSolidSession`. The SPARQL Update bodies of the
@@ -93,7 +103,8 @@ type crosses upward past a mapper.
   must match is pinned in two places:
   - **The contract tests** in `packages/solid/src/testing/contract/`
     take an implementation, and each client module's own test file runs
-    them against the current one. The RDF module's pin the data model:
+    them against Inrupt's, as `solid-memo-client`'s run them against
+    its own. The RDF module's pin the data model:
     `getThingAll` leaves out blank-node subjects, and `getThing` finds
     one by its `_:label`. A subject made by name resolves against the
     URL its dataset was read from. `getDatetime` throws on some literals
@@ -130,12 +141,14 @@ type crosses upward past a mapper.
     asks by URL, and writes only the release's own ACL or ACR. What is
     the current library's alone, its error messages, its subject
     shapes, its request fixes and its sign-in events, is tested beside
-    the contract, not in it.
+    the contract, not in it, in each implementation.
   - **The end-to-end tests against real Solid servers** (`e2e/pod/`)
     cover what the unit tests don't check. Each server must take the
     requests' Accept and Content-Type headers. A saved edit goes as a
     PATCH with the body `client/sparqlUpdate.ts` writes. The grant's ACL
-    and ACR writes must work on the servers themselves.
+    and ACR writes must work on the servers themselves. CI runs them on
+    `solid-memo-client` too, in advisory jobs
+    ([testing.md](testing.md#continuous-integration)).
 - **rdf-validate-shacl** → `packages/shacl/src/engine.ts`, the only
   module that imports it (`packages/shacl/node/shacl.ts` calls its
   `createEngine`); the rest sees only the `ShapeEngine` interface (one

@@ -13,6 +13,7 @@ import { appVersion, commitSha, siteDefines } from "@solid-memo/site/siteBuild";
 import { clientIdPlugin } from "@solid-memo/site/clientId";
 import { siteMapPlugin, siteOrigin } from "@solid-memo/site/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
+import { solidClientPlugin } from "../../scripts/solidClient.ts";
 
 /**
  * The settings the page reads (docs/configuration.md), checked as the
@@ -42,6 +43,7 @@ export default defineConfig({
   define: siteDefines({ origin }),
   base: "./",
   plugins: [
+    solidClientPlugin(),
     settings,
     preact(),
     // Published with the site: the vocabulary and the shapes (ns/) and the deck

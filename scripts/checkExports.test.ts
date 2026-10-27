@@ -234,6 +234,36 @@ describe("unusedExports", () => {
     ]);
   });
 
+  it("keeps a replacement's exports where the module it replaces is used, by name or whole", () => {
+    const packages = [
+      pkg("solid", {
+        "src/rdf.ts": "export const used = 1;\nexport const unused = 2;",
+        "src/access.ts": "export const grant = 1;",
+        "src/session.ts": "export const login = 1;",
+        "src/app.ts":
+          'import { used } from "./rdf";\nimport * as access from "./access";\nconsole.log(used, access);',
+      }),
+      pkg("other", {
+        "src/rdf.ts": "export const used = 1;\nexport const unused = 2;\nexport const extra = 3;",
+        "src/access.ts": "export const grant = 1;\nexport const extra = 2;",
+        "src/session.ts": "export const login = 1;",
+      }),
+    ];
+    expect(
+      unusedExports(packages, {
+        "packages/solid/src/rdf.ts": "packages/other/src/rdf.ts",
+        "packages/solid/src/access.ts": "packages/other/src/access.ts",
+        "packages/solid/src/session.ts": "packages/other/src/session.ts",
+      }),
+    ).toEqual([
+      "packages/other/src/rdf.ts: extra",
+      "packages/other/src/rdf.ts: unused",
+      "packages/other/src/session.ts: login",
+      "packages/solid/src/rdf.ts: unused",
+      "packages/solid/src/session.ts: login",
+    ]);
+  });
+
   it("leaves out the tests' own exports, the end-to-end tests' and the generated files'", () => {
     const packages = [
       pkg("domain", {
