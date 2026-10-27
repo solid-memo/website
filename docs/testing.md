@@ -110,6 +110,10 @@ closed during a long synchronous stretch (a big update, on a slow
 runner). A browser resends, so the app needs no retry. The Fetch
 standard forbids the header; Node's fetch honors it, as `npm test`
 checks ([connections.test.ts](../e2e/pod/connections.test.ts)).
+It follows no redirect either, as the app's fetch with the user's
+credentials doesn't
+([authentication.md](authentication.md#authenticated-requests)). A
+server that answers a pod request with a redirect fails the tests.
 
 `SOLID_SERVERS=css-7,nss-5` runs the suite against some servers only
 (`all`, every one; `css-8`, the advisory; unset, the blocking ones).

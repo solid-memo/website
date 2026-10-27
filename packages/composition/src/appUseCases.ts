@@ -5,6 +5,7 @@
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
+import { anonymousFetch } from "@solid-memo/solid/authFetch";
 import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
@@ -18,10 +19,7 @@ import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRe
 import { createSolidPaletteRepository } from "@solid-memo/solid/solidPaletteRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
-import {
-  anonymousFetch,
-  createSolidReleasePublisher,
-} from "@solid-memo/solid/solidReleasePublisher";
+import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageCustomPalettePreference } from "@solid-memo/browser/localStorageCustomPalettePreference";
@@ -105,7 +103,8 @@ export function createAppUseCases({
    * writes to, an access control's among them (podFence.ts), and the
    * write fence, so a guest's study being moved cannot be written
    * (docs/guest-mode.md); then to the guest's pod or, as the logged-in
-   * user, to any other.
+   * user, to any other, following no redirect to an address the fences
+   * never checked (authFetch.ts).
    */
   const writeFence = createWriteFence(
     routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: session.fetch }),

@@ -571,6 +571,25 @@ describe("createSessionClient, over oauth4webapi", () => {
     await expect(client.fetch("https://pod.example/a")).resolves.toMatchObject({ status: 401 });
   });
 
+  it("sends the caller's redirect mode on, the nonce retry's too, so authFetch's redirect: error holds", async () => {
+    const { client } = await logIn();
+    const pod = vi
+      .fn<typeof globalThis.fetch>()
+      .mockResolvedValueOnce(
+        new Response(null, {
+          status: 401,
+          headers: { "www-authenticate": 'DPoP error="use_dpop_nonce"', "dpop-nonce": "n" },
+        }),
+      )
+      .mockResolvedValueOnce(new Response("ok"));
+    provider.pod = pod;
+    await client.fetch("https://pod.example/a", { method: "PUT", redirect: "error" });
+    expect(pod.mock.calls.map(([input, init]) => [input, init?.redirect])).toEqual([
+      ["https://pod.example/a", "error"],
+      ["https://pod.example/a", "error"],
+    ]);
+  });
+
   it("refreshes the access token before it expires, and stores the rotated refresh token", async () => {
     provider.accessTtl = 10;
     const pod = vi.fn(async () => new Response("ok"));

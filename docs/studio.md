@@ -1499,8 +1499,8 @@ over the `ReleaseDraftRepository` port.
   learns nothing of who opens the draft. One in the user's own pod (a
   storage of theirs, or an instance they registered) is read as the
   user, since a release the pod wouldn't share is its owner's alone.
-  A redirect from there isn't followed
-  ([ownPodFetch.ts](../packages/solid/src/ownPodFetch.ts)).
+  A redirect from there isn't followed, as none is with the user's
+  credentials ([authentication.md](authentication.md#authenticated-requests)).
 - Making or deleting a draft is held until the data check is done, and
   while the catalog is set aside ([below](#data-set-aside)).
 - A draft made with a deleted draft's name has its URL, so what the

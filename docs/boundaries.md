@@ -245,6 +245,13 @@ two fences before the guest's pod or the network:
   instance being moved or copied read-only
   ([guest-mode.md](guest-mode.md)).
 
+The fences check the address a request asks for, not one a server
+redirects it to. Behind them, the fetch that carries the user's
+credentials follows no redirect, so a write never reaches an address
+the pod fence didn't check. A write that redirects is refused
+(`redirectRefused`), and a read that redirects is sent again as no one
+([authentication.md](authentication.md#authenticated-requests)).
+
 The release publisher alone gets a second fetch for its access
 control, through the same fences, whose pod fence lets a document's own
 ACL or ACR (`<document>.acl`, `<document>.acr`) through, never a
@@ -270,7 +277,9 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   the instances they registered. On this page it's also a storage they
   entered by hand and the folder they moved a guest's study into. Each
   counts with what's in it (`isInFolder` in `instanceLayout.ts`). For
-  an instance in someone else's pod, only its own folder counts.
+  an instance in someone else's pod, only its own folder counts. It
+  goes through the same fences and login fetch as any pod request, so
+  it follows no redirect either.
 - **Anywhere else** a read is sent as no one (`credentials: "omit"`),
   and a write is refused before it's sent (`writeOutsidePod`). A
   catalog may name a deck's documents on any server

@@ -1647,6 +1647,7 @@
     "guestStudyBeingMoved": "Solid Memo flyttar dina studier i den här webbläsaren till din Pod och sparar inget i dem förrän det är klart. Vänta tills det är klart och försök sedan igen.",
     "writeRefused": "Solid Memo stoppade en ändring i din Pod av säkerhetsskäl: den skulle ha sparats på en adress där Solid Memo aldrig sparar något. Inget ändrades.",
     "writeOutsidePod": "Solid Memo sparade inte detta: det finns på {host}, utanför din Pod, och Solid Memo sparar bara i din Pod. Inget ändrades.",
+    "redirectRefused": "Solid Memo stoppade en ändring i din Pod av säkerhetsskäl: din Pod skickade den vidare till en annan adress, och Solid Memo sparar bara på den adress den bad om.",
     "deckChangedSinceOffer": "Kortleken ändrades efter att uppdateringen erbjöds, kanske i en annan flik eller app, så inget ändrades. Titta på erbjudandet igen.",
     "deckChangedDuringUpgrade": "Kortleken ändrades medan den uppdaterades, kanske i en annan flik eller app. Försök igen.",
     "changedElsewhere": "Det här ändrades någon annanstans, kanske i en annan flik eller app, efter att Solid Memo läste det, så inget sparades. Läs in sidan igen och försök på nytt.",

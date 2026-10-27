@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink } from "./catalogLinks";
 import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
 import { createPodFence } from "./podFence";
-import { anonymousFetch, createSolidReleasePublisher } from "./solidReleasePublisher";
+import { createSolidReleasePublisher } from "./solidReleasePublisher";
 
 const RELEASE = `${INSTANCE}releases/solid/v1.ttl`;
 const CATALOG = `${INSTANCE}catalog.ttl`;
@@ -423,16 +423,5 @@ describe("isPublic and listPublished", () => {
   it("lists nothing for an instance without a catalog", async () => {
     const { publisher } = await publisherPod();
     await expect(publisher.listPublished(`${POD}solid-memo/other/`)).resolves.toEqual([]);
-  });
-});
-
-describe("anonymousFetch", () => {
-  afterEach(() => vi.unstubAllGlobals());
-
-  it("sends no credentials", async () => {
-    const fetch = vi.fn(async () => new Response(null));
-    vi.stubGlobal("fetch", fetch);
-    await anonymousFetch(RELEASE, { method: "HEAD" });
-    expect(fetch).toHaveBeenCalledWith(RELEASE, { method: "HEAD", credentials: "omit" });
   });
 });

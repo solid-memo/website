@@ -149,6 +149,9 @@ The session's requests are in
 - **A request** carries `Authorization: DPoP` with the access token and
   a proof of its method and its URL. It's sent once more when the pod
   answers 401 asking for a DPoP nonce, if its body can be sent again.
+  Both tries keep the caller's redirect mode, so authFetch's
+  `redirect: "error"` holds
+  ([authentication.md](authentication.md#authenticated-requests)).
   The access token is refreshed 30 seconds before it expires.
 - **Every write of the stored session**, a refresh, a login's save or a
   logout's clear, holds the Web Lock `solid-memo:oidc-session`. A
