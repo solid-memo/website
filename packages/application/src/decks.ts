@@ -125,13 +125,13 @@ function groupTitle(title: LangText): LangText {
  */
 function deckKeywords(keywords: LangTexts, deck: Deck): LangTexts {
   const stored = new Set(Object.keys(deck.keywords ?? {}).map((tag) => tag.toLowerCase()));
-  const canonical: Record<string, string[]> = {};
+  const canonical = new Map<string, string[]>();
   for (const [tag, list] of Object.entries(keywords)) {
     const stated = tag === "" || stored.has(tag.toLowerCase()) ? tag : canonicalTag(tag);
     if (stated === null) throw new AppError("textLanguageInvalid", { tag });
-    canonical[stated] = [...(canonical[stated] ?? []), ...list];
+    canonical.set(stated, [...(canonical.get(stated) ?? []), ...list]);
   }
-  return canonical;
+  return Object.fromEntries(canonical);
 }
 
 /**

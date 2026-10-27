@@ -22,8 +22,14 @@ const LANGUAGE_STRINGS = new Set([
   "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString",
 ]);
 
-/** A language tag as Turtle reads one after `@` (LANGTAG). */
-const LANGUAGE = /^[a-zA-Z]+(?:-[a-zA-Z0-9]+)*$/;
+/**
+ * A language tag as Turtle reads one after `@` (LANGTAG), its subtags no
+ * longer than 8 characters as BCP 47 has them: the parser that reads the
+ * pod (n3) refuses a longer one, so a document holding one could no
+ * longer be read at all. A tag named like a member of Object.prototype
+ * ("constructor") is one of those.
+ */
+const LANGUAGE = /^[a-zA-Z]{1,8}(?:-[a-zA-Z0-9]{1,8})*$/;
 
 /**
  * Whether Turtle can write a term as it is. No writer the app uses (the

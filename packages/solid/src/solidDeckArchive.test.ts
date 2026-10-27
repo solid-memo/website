@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
-import { DECK_FILE_BASE, type DeckFileFormat } from "@solid-memo/domain/deckFile";
+import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createSolidDeckArchive, parseDeckFile } from "./solidDeckArchive";
@@ -419,6 +419,44 @@ describe("readDeckFile", () => {
       base,
     );
     expect(encoded.cards[0]?.frontImageUrl).toBe("https://img.example/a.png#p%3E");
+  });
+
+  it("leaves out text in a language the pod's parser cannot read, so the imported deck reads back", async () => {
+    const { pod, deck } = await podWithDeck();
+    const archive = createSolidDeckArchive({ fetch: pod.fetch });
+    const json = JSON.parse(
+      await archive.exportDeck(deck, { format: "jsonld", withProgress: false }),
+    );
+    const entry = json["@graph"].find((node: { "@id": string }) => node["@id"] === deck.url);
+    for (const key of ["dcterms:title", "dcterms:description", "dcat:keyword"]) {
+      entry[key] = [entry[key], { "@value": "x", "@language": "constructor" }].flat();
+    }
+    const read = await archive.readDeckFile(
+      JSON.stringify(json),
+      "jsonld",
+      `${DECK_FILE_BASE}deck`,
+    );
+    expect(read.deck).toMatchObject({
+      title: deck.title,
+      description: deck.description,
+      keywords: deck.keywords,
+    });
+    const repository = createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date("2026-10-02T10:00:00.000Z"),
+      randomId: () => "id",
+    });
+    const imported = importedDeck(INSTANCE, read, {
+      withProgress: false,
+      decks: await repository.listDecks(INSTANCE),
+      freshId: "imported",
+      now: "2026-10-02T10:00:00.000Z",
+    });
+    await repository.applyCardChanges(imported.deck, { save: imported.cards, remove: [] });
+    await repository.registerDeck(imported.deck);
+    const decks = await repository.listDecks(INSTANCE);
+    expect(decks.map((listed) => listed.title)).toEqual([deck.title, deck.title]);
+    expect(await repository.listCards(decks[1]!)).toHaveLength(read.cards.length);
   });
 
   it("refuses JSON-LD whose context would be fetched from elsewhere", async () => {

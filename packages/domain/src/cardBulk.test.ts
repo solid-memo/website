@@ -447,4 +447,16 @@ describe("changedTexts", () => {
     expect(changedTexts(before, before)).toEqual([]);
     expect(changedTexts(card("p"), card("p"))).toEqual([]);
   });
+
+  it("takes a language named like a member of Object.prototype as any other", () => {
+    expect(
+      changedTexts(
+        card("c", { front: { constructor: "cat" } }),
+        card("c", { front: { en: "cat" } }),
+      ),
+    ).toEqual([
+      { part: "front", tag: "constructor", before: "cat" },
+      { part: "front", tag: "en", after: "cat" },
+    ]);
+  });
 });

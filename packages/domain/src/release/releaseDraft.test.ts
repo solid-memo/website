@@ -266,6 +266,13 @@ describe("applyDraftChange", () => {
       });
     });
 
+    it("take an id named like a member of Object.prototype as any other", () => {
+      const draft = made(courseDraft(), { kind: "addChapter", id: "constructor" });
+      expect(draft.chapters.map((chapter) => chapter.id)).toContain("constructor");
+      const deleted = made(draft, { kind: "delete", of: "chapter", id: "constructor" });
+      expect(deleted.chapters.map((chapter) => chapter.id)).not.toContain("constructor");
+    });
+
     it("changes a chapter's text, leaving what it asks", () => {
       const draft = made(courseDraft(), {
         kind: "editChapter",
@@ -1206,6 +1213,11 @@ describe("the notes of the making", () => {
     expect(makingNotesOf(cleared)).toEqual({});
     expect(attributionOf(cleared)).not.toBeNull();
     expect(makingNotesOf(deckDraft())).toEqual({});
+    expect(
+      makingNotesOf(
+        made(deckDraft(), { kind: "setMakingNotes", notes: { constructor: "a", toString: "b" } }),
+      ),
+    ).toEqual({ constructor: "a", toString: "b" });
     expect(made(deckDraft(), { kind: "setMakingNotes", notes: { en: " " } })).toEqual(deckDraft());
   });
 
@@ -1295,6 +1307,14 @@ describe("publishedIdsOf", () => {
       },
       activities: ["older", "compilation"],
     });
+  });
+
+  it("keeps an id named like a member of Object.prototype as any other", () => {
+    const release = courseDraft({ ids: { constructor: "card" as const }, activities: [] });
+    const chapter = { ...release.chapters[0]!, id: "__proto__" };
+    const { ids } = publishedIdsOf({ ...release, chapters: [...release.chapters, chapter] });
+    expect(Object.entries(ids)).toContainEqual(["constructor", "card"]);
+    expect(Object.entries(ids)).toContainEqual(["__proto__", "chapter"]);
   });
 
   it("counts an activity of another document as none of the release's", () => {

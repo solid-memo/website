@@ -1354,7 +1354,8 @@ by one.
   dictates.
 - **No write holds a term Turtle can't write as it is.** Such a term is
   an IRI with a control character, a space or one of `` <>"{}|^`\ ``. So
-  is a blank node label or a language tag outside Turtle's grammar, text
+  is a blank node label or a language tag outside Turtle's grammar, a
+  language subtag over 8 characters, which the pod's parser refuses, text
   typed `rdf:langString` without a language, a base direction, or a
   quoted triple. JSON-LD can hold such a term, and the writers don't escape it,
   so a `>` would end an IRI and the rest be read as statements no check

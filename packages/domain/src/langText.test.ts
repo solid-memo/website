@@ -120,6 +120,18 @@ describe("text whose languages the user states", () => {
   });
 });
 
+describe("a language named like a member of Object.prototype", () => {
+  it("is a language the text is not in, unless the text has it", () => {
+    for (const wanted of ["constructor", "constructor-x", "__proto__"]) {
+      expect(shownTag({ en: "Capitals" }, [wanted])).toBe("en");
+      expect(shown({ en: "Capitals" }, [wanted])).toBe("Capitals");
+    }
+    expect(shown({ en: "Capitals", constructor: "Huvudstäder" }, ["constructor"])).toBe(
+      "Huvudstäder",
+    );
+  });
+});
+
 describe("tidiedStated", () => {
   it("trims every language and leaves out an empty one, empty when none is left", () => {
     expect(tidiedStated({ sv: " Huvudstäder ", en: " " })).toEqual({ sv: "Huvudstäder" });
@@ -139,6 +151,18 @@ describe("tidiedStated", () => {
     // An emptied one is no language at all, so it does not clash.
     expect(tidiedStated({ EN: " ", en: "Capitals" })).toEqual({ en: "Capitals" });
     expect(() => tidiedStated({ EN: "Capitals", en: "Capitals" })).toThrow("has en twice");
+  });
+
+  it("keeps a tag named like a member of Object.prototype as any other", () => {
+    expect(tidiedStated({ Constructor: " Capitals ", sv: "Huvudstäder" })).toEqual({
+      constructor: "Capitals",
+      sv: "Huvudstäder",
+    });
+    const proto = tidiedStated(Object.fromEntries([["__proto__", "Capitals"]]));
+    expect(Object.entries(proto)).toEqual([["__proto__", "Capitals"]]);
+    expect(() => tidiedStated({ constructor: "a", CONSTRUCTOR: "b" })).toThrow(
+      "has constructor twice",
+    );
   });
 });
 

@@ -584,7 +584,7 @@ function refuseId(draft: ReleaseDraft, id: string): DraftRefusal | null {
   if (!DRAFT_ID.test(id)) return { refused: "idInvalid", id };
   if (
     idsInUse(draft).has(id) ||
-    id in draft.published.ids ||
+    Object.hasOwn(draft.published.ids, id) ||
     draft.published.activities.includes(id)
   )
     return { refused: "idTaken", id };
@@ -959,7 +959,7 @@ function deleteSubject(
         .map((one) => ({ of: "distractor" as const, id: one })),
     );
   }
-  const published = going.find((subject) => subject.id in draft.published.ids);
+  const published = going.find((subject) => Object.hasOwn(draft.published.ids, subject.id));
   if (published !== undefined) return { refused: "published", ...published };
   // A card asked by what goes stays, asked from nowhere; what is in use is numbered again.
   return renumberedOutline(
@@ -1474,7 +1474,7 @@ export function attributionOf(draft: ReleaseDraft): { ai: boolean; text: string 
 export function makingNotesOf(draft: ReleaseDraft): LangText {
   const making = ownMakingOf(draft);
   const attributions = attributionsOf(draft);
-  const notes: Record<string, string[]> = {};
+  const notes = new Map<string, string[]>();
   for (const triple of draft.triples) {
     if (
       triple.subject !== making ||
@@ -1483,10 +1483,11 @@ export function makingNotesOf(draft: ReleaseDraft): LangText {
       isAttribution(attributions, triple)
     )
       continue;
-    (notes[triple.object.language] ??= []).push(triple.object.value);
+    const { language, value } = triple.object;
+    notes.set(language, [...(notes.get(language) ?? []), value]);
   }
   return Object.fromEntries(
-    Object.entries(notes).map(([language, paragraphs]) => [language, paragraphs.join("\n\n")]),
+    [...notes].map(([language, paragraphs]) => [language, paragraphs.join("\n\n")]),
   );
 }
 
@@ -1590,12 +1591,12 @@ function setMakingNotes(draft: ReleaseDraft, notes: LangText): ReleaseDraft {
 
 /** The ids an earlier release published and the activities it carries, of a release read whole: every subject it has, retired or not. */
 export function publishedIdsOf(release: ReleaseDraft): PublishedIds {
-  const ids: Record<string, ReleaseKind> = { ...release.published.ids };
+  const ids = new Map<string, ReleaseKind>(Object.entries(release.published.ids));
   for (const kind of Object.keys(NODES) as DraftKind[]) {
-    for (const node of release[NODES[kind]]) ids[node.id] = kind;
+    for (const node of release[NODES[kind]]) ids.set(node.id, kind);
   }
   return {
-    ids,
+    ids: Object.fromEntries(ids),
     activities: [...new Set([...release.published.activities, ...activitiesOf(release)])],
   };
 }
