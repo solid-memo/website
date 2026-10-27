@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_BASE, type DeckFileFormat } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
@@ -431,6 +431,19 @@ describe("readDeckFile", () => {
       await expect(archive.readDeckFile(json, "jsonld", base)).rejects.toMatchObject({
         code: "deckFileUnreadable",
       });
+    }
+  });
+
+  it("reads JSON-LD whose key is named twice as JSON.parse does, fetching nothing", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch");
+    try {
+      // The first "@context" is lost to JSON.parse, so the check never sees it.
+      const json = `{"@context": "https://evil.example/c", "@context": {"sm": "${SM_NS}"},
+        "@id": "#deck", "@type": "sm:Deck"}`;
+      await expect(parseDeckFile(json, "jsonld", base)).resolves.toHaveLength(1);
+      expect(fetch).not.toHaveBeenCalled();
+    } finally {
+      fetch.mockRestore();
     }
   });
 });

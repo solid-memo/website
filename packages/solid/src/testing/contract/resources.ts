@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { HttpError } from "../../client/interface";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
 import { type DataClient, turtleAt } from "./rdf";
@@ -422,6 +422,19 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
 
     it("rejects a text that does not parse", async () => {
       await expect(parseQuads("<#a> <#b> .", "turtle", URL_)).rejects.toBeDefined();
+    });
+
+    it("rejects JSON-LD that names a context elsewhere, fetching nothing", async () => {
+      const fetch = vi.spyOn(globalThis, "fetch");
+      try {
+        for (const context of ["https://evil.example/c", { "@import": "https://evil.example/c" }]) {
+          const json = JSON.stringify({ "@context": context, "@id": "#a", [`${EX}p`]: "x" });
+          await expect(parseQuads(json, "jsonld", URL_)).rejects.toBeDefined();
+        }
+        expect(fetch).not.toHaveBeenCalled();
+      } finally {
+        fetch.mockRestore();
+      }
     });
   });
 }

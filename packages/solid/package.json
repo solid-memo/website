@@ -21,7 +21,8 @@
     "@solid-memo/application": "*",
     "@solid-memo/domain": "*",
     "@solid-memo/shacl": "*",
-    "@solid-memo/vocab": "*"
+    "@solid-memo/vocab": "*",
+    "jsonld-streaming-parser": "^5.0.1"
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",

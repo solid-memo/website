@@ -10,7 +10,6 @@ import {
   FetchError,
   getContainedResourceUrlAll as libraryGetContainedResourceUrlAll,
   getFile as libraryGetFile,
-  getJsonLdParser as libraryGetJsonLdParser,
   getPodUrlAllFrom as libraryGetPodUrlAllFrom,
   getProfileAll as libraryGetProfileAll,
   getSolidDataset as libraryGetSolidDataset,
@@ -20,6 +19,7 @@ import {
   solidDatasetAsTurtle as librarySolidDatasetAsTurtle,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
+import { JsonLdParser } from "jsonld-streaming-parser";
 import { fetchedDataset, serverDataset, solidDataset, sourcedDataset } from "./inrupt";
 import {
   type Dataset,
@@ -277,19 +277,46 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * The quads of a Turtle or JSON-LD text, its relative IRIs resolved
  * against `baseUrl`, parsed as a pod's documents are: in every graph the
  * text names. Rejects with the parser's error on a text that does not parse.
+ * JSON-LD is read with no fetch at all: a context named by its address
+ * is refused (parseJsonLd).
  */
 export function parseQuads(
   text: string,
   format: keyof typeof MEDIA_TYPES,
   baseUrl: string,
 ): Promise<Quad[]> {
-  const parser = format === "turtle" ? libraryGetTurtleParser() : libraryGetJsonLdParser();
+  if (format === "jsonld") return parseJsonLd(text, baseUrl);
+  const parser = libraryGetTurtleParser();
   return new Promise((resolve, reject) => {
     const quads: Quad[] = [];
     parser.onQuad((quad) => quads.push(quad));
     parser.onError(reject);
     parser.onComplete(() => resolve(quads));
     parser.parse(text, serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format])));
+  });
+}
+
+/**
+ * The quads of a JSON-LD text, by the parser @inrupt/solid-client reads
+ * JSON-LD with, but given a document loader that loads nothing. The
+ * library's loader fetches every context the text names by its address
+ * (or `@import`s), from the user's browser; here such a text is refused
+ * instead, as one that does not parse, whatever check came before.
+ */
+function parseJsonLd(text: string, baseUrl: string): Promise<Quad[]> {
+  return new Promise((resolve, reject) => {
+    const quads: Quad[] = [];
+    const parser = new JsonLdParser({
+      baseIRI: baseUrl,
+      documentLoader: {
+        load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
+      },
+    });
+    parser.on("data", (quad: Quad) => quads.push(quad));
+    parser.on("error", reject);
+    parser.on("end", () => resolve(quads));
+    parser.write(text);
+    parser.end();
   });
 }
 
