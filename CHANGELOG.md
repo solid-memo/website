@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.15.0](https://github.com/solid-memo/website/compare/v6.14.3...v6.15.0) (2026-10-27)
+
+### Features
+
+* **decks:** add a course on DCAT, DCAT-AP and DCAT-AP-SE ([3a4762c](https://github.com/solid-memo/website/commit/3a4762c43861cdd83571f384fd1fa2910c65b812)), closes [#329](https://github.com/solid-memo/website/issues/329)
+
 ## [6.14.3](https://github.com/solid-memo/website/compare/v6.14.2...v6.14.3) (2026-10-26)
 
 ### Bug Fixes
