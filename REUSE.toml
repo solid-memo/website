@@ -41,6 +41,9 @@ path = [
     # Written by tools (.gitattributes).
     "packages/vocab/src/*.generated.ts",
     "packages/shacl/node/deckLibrary.golden.txt",
+    # The Python tools' lock files, which `uv pip compile` writes whole
+    # (docs/testing.md#the-workflows).
+    "scripts/requirements-*.txt",
     # The public API, one promise a line, each file written by a test
     # (api/README.md).
     "api/**/*.txt",

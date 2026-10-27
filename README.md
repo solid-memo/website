@@ -126,8 +126,8 @@ You need Node 24 (see [`.nvmrc`](.nvmrc)) and npm; Chromium for
 installs it once (on Linux, a machine that lacks the system libraries
 it needs gets them with `sudo npx playwright install-deps chromium`);
 Docker Engine 28.3.3 or later (or Docker Desktop) for the
-end-to-end tests; and, for the optional pySHACL cross-check, Python 3
-with [`scripts/requirements-ci.txt`](scripts/requirements-ci.txt)
+end-to-end tests; and, for the optional pySHACL cross-check, Python
+3.9 or later with [`scripts/requirements-ci.txt`](scripts/requirements-ci.txt)
 installed. The [dev container](.devcontainer/devcontainer.json) has all
 of them.
 

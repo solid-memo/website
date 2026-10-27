@@ -361,7 +361,15 @@ every Monday, and by hand (Actions › Taxonomy › Run workflow):
 - Its `check` job runs `--check`.
 - For a taxonomy version the deck lacks, its `update` job runs
   `--verify`, makes the next version, and checks it as CI's `library`
-  and `crosscheck` jobs do. Only then does it open the issue "Taxonomy
+  and `crosscheck` jobs do. It holds no secret, and its token only
+  reads. It fails if anything in `decks/` changed but the new version
+  and the index. It hands those two files and the version notes to the
+  `publish` job as an artifact of the run.
+- The `publish` job takes that artifact from its own run, and refuses
+  it if it holds any other file. It refuses notes that aren't one line
+  as the script writes it, or that hold an issue reference, an address,
+  a mention or the word "breaking", which GitHub or semantic-release
+  would act on. It then opens the issue "Taxonomy
   version N is out" (label `deck`), unless one is open already.
 - It pushes a commit to the branch `taxonomy-deck` whose `Closes:`
   lines close that issue and those of earlier taxonomy versions still
@@ -377,7 +385,7 @@ every Monday, and by hand (Actions › Taxonomy › Run workflow):
 
 ### The taxonomy app
 
-The `update` job pushes and opens the pull request with the token of a
+The `publish` job pushes and opens the pull request with the token of a
 GitHub App, which starts workflows as a person's does. The workflow's
 own token starts none, so CI and `ci-ok` would never run, blocking the
 merge. Only this workflow can use it: the App's private key is a secret
@@ -405,13 +413,17 @@ A maintainer sets it up once:
    Leave no repository variable or secret of either name: a job whose
    environment lacks one reads the repository's.
 
-The job makes the token, which lasts an hour, after the script and the
-checks, for the steps that open the issue, push and open the pull
-request. The App needs no bypass of the ruleset on `main`; it pushes
-only `taxonomy-deck`. Until the App is set up, the `update` job fails
-at the token step, and the failure issue links that run. To change the
-key, a maintainer generates a new one in the App's settings, replaces
-the environment's secret, then deletes the old key there.
+GitHub hands a job its environment's secrets when the job starts, so
+any code the job runs could read the key, however late the token is
+made. The `publish` job runs only `git`, `gh`, the runner's own tools
+and pinned actions. It installs no package and runs no script of the
+repository; everything installed runs in the `update` job, which holds
+no secret. The token lasts an hour. The App needs no bypass of the
+ruleset on `main`; it pushes only `taxonomy-deck`. Until the App is set
+up, the `publish` job fails at the token step, and the failure issue
+links that run. To change the key, a maintainer generates a new one in
+the App's settings, replaces the environment's secret, then deletes
+the old key there.
 
 ## Languages from Wikidata
 

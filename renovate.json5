@@ -50,7 +50,28 @@
     // and where its source and release notes are: the commit is the record
     // of the decision (docs/standard-for-public-code.md, criterion 6), and
     // its pull request has the notes in full.
-    commitBody: '{{#each upgrades}}{{#if (equals updateType \'lockFileMaintenance\')}}- package-lock.json: every dependency to the newest version its range allows (lock file maintenance)\n{{else}}- {{{depName}}} {{{displayFrom}}} → {{{displayTo}}} ({{{updateType}}}{{#if depType}}, {{{depType}}}{{/if}}) in {{{packageFile}}}{{#if sourceUrl}}; source and release notes: {{{sourceUrl}}}{{/if}}\n{{/if}}{{/each}}\nWhy: renovate.json5 keeps every dependency current, within the versions it allows, so that fixes arrive while they are small; the update was merged only after CI passed on it.',
+    commitBody: '{{#each upgrades}}{{#if (equals updateType \'lockFileMaintenance\')}}{{#if (equals manager \'pip-compile\')}}- {{{packageFile}}}, compiled again: every package its pins need to the newest version they allow (lock file maintenance)\n{{else}}- package-lock.json: every dependency to the newest version its range allows (lock file maintenance)\n{{/if}}{{else}}- {{{depName}}} {{{displayFrom}}} → {{{displayTo}}} ({{{updateType}}}{{#if depType}}, {{{depType}}}{{/if}}) in {{{packageFile}}}{{#if sourceUrl}}; source and release notes: {{{sourceUrl}}}{{/if}}\n{{/if}}{{/each}}\nWhy: renovate.json5 keeps every dependency current, within the versions it allows, so that fixes arrive while they are small; the update was merged only after CI passed on it.',
+    // The Python tools CI installs are pinned in scripts/requirements-*.in
+    // and compiled by `uv pip compile`, with what they need and every
+    // file's hash, into the requirements-*.txt pip installs
+    // (docs/testing.md#the-workflows): Renovate bumps a pin and compiles
+    // its .txt again. pip_requirements would bump a .txt alone and leave
+    // its hashes stale, so it is off; these are the only requirements
+    // files. A bump moves only the pins: on the first of each month,
+    // Renovate compiles both files again, so that the packages the tools
+    // need get their fixes too. That compiles in versions of any age, so
+    // a person merges it, after reading what moved.
+    'pip-compile': {
+        managerFilePatterns: ['/^scripts/requirements-[a-z]+\\.txt$/'],
+        lockFileMaintenance: {
+            enabled: true,
+            schedule: ['* 0-3 1 * *'],
+            automerge: false,
+        },
+    },
+    pip_requirements: {
+        enabled: false,
+    },
     customManagers: [
         // A tool a workflow downloads, its version after a comment that
         // names it (`# renovate: datasource=github-releases depName=<owner>/<repo>`).

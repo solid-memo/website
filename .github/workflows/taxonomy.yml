@@ -13,6 +13,9 @@ name: Taxonomy
 # issue, or updates the one already open. The pull request is opened with
 # the taxonomy app's token, so CI runs on it like on anyone's; merging it
 # through the merge queue publishes the version. A failure opens an issue.
+# The version is made and checked in one job, with no secret, and pushed
+# from another, which holds the app's key and runs nothing installed
+# (docs/deck-library.md#the-taxonomy-app).
 
 on:
   schedule:
@@ -71,14 +74,16 @@ jobs:
             echo "update=$UPDATE" >> "$GITHUB_OUTPUT"
           fi
 
+  # Makes the deck's next version and checks it, with no secret and a
+  # token that can only read: everything installed runs here (npm's and
+  # PyPI's packages, the scripts), so none of it runs where the taxonomy
+  # app's key is. The files it made go to the publish job as an artifact
+  # of this run.
   update:
     needs: check
     if: needs.check.outputs.update == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # The taxonomy app's key lives here, and the environment admits only
-    # main (docs/deck-library.md#the-taxonomy-app).
-    environment: labour-market-deck
     permissions:
       contents: read
     env:
@@ -107,9 +112,8 @@ jobs:
           python3 scripts/taxonomy_deck.py --to "$NEWEST" --cache-dir ~/.cache/taxonomy
           --notes-file "$RUNNER_TEMP/notes.txt"
 
-      # The checks of CI's library and crosscheck jobs, before anything is
-      # pushed; the pull request then runs all of CI. Nothing installed here
-      # runs with a token that can write (docs/releasing.md#the-deploy-key).
+      # The checks of CI's library and crosscheck jobs; the pull request
+      # then runs all of CI.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
@@ -118,12 +122,112 @@ jobs:
       - run: npm run format:turtle
       - run: npm run library
       - run: npm run library:check -- --base HEAD
-      - run: pip install -r "$GITHUB_WORKSPACE/scripts/requirements-ci.txt"
+      - run: pip install --require-hashes -r "$GITHUB_WORKSPACE/scripts/requirements-ci.txt"
         working-directory: ${{ runner.temp }}
       - run: python scripts/shacl_crosscheck.py
 
-      # The token is made only now, for the steps that open the issue, push
-      # and open the pull request, and lasts an hour.
+      # The new version and the index, the only files a new version
+      # changes, with its notes. Anything else changed in decks/ stops the
+      # run, rather than being left out of the pull request unseen.
+      - name: The files to publish
+        run: |
+          version="decks/swedish-labour-market-taxonomy-occupation-names/v$NEXT.ttl"
+          changed="$(git add --intent-to-add decks && git diff --name-only -- decks | sort)"
+          expected="$(printf '%s\n' decks/index.ttl "$version" | sort)"
+          if [ "$changed" != "$expected" ]; then
+            echo "::error::The new version changed other files in decks/ than $version and decks/index.ttl:"
+            echo "$changed"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/deck/$(dirname "$version")"
+          cp decks/index.ttl "$RUNNER_TEMP/deck/decks/index.ttl"
+          cp "$version" "$RUNNER_TEMP/deck/$version"
+          cp "$RUNNER_TEMP/notes.txt" "$RUNNER_TEMP/deck/notes.txt"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: taxonomy-deck
+          path: ${{ runner.temp }}/deck/
+          if-no-files-found: error
+          retention-days: 1
+
+  # Opens the issue, pushes the new version and opens the pull request
+  # with the taxonomy app's token. The app's key is a secret of this job's
+  # environment, and GitHub hands a job its secrets when it starts, so
+  # the job installs and runs nothing but git, gh and the runner's own
+  # tools: no package, no script of the repository
+  # (docs/deck-library.md#the-taxonomy-app). It takes the update job's
+  # files from this run alone, and only the files a new version changes.
+  publish:
+    needs: [check, update]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The taxonomy app's key lives here, and the environment admits only
+    # main (docs/deck-library.md#the-taxonomy-app).
+    environment: labour-market-deck
+    permissions:
+      contents: read
+    env:
+      NEWEST: ${{ needs.check.outputs.newest }}
+      NEXT: ${{ needs.check.outputs.next }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # No run-id: the artifact of this run, which only the update job
+      # uploads.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: taxonomy-deck
+          path: ${{ runner.temp }}/deck
+      # The artifact holds the new version, the index and the notes, as
+      # plain files, and nothing else; the version is new and the index
+      # is there already. Only those two files are staged.
+      - name: The artifact holds only the new version
+        run: |
+          if ! [[ "$NEWEST" =~ ^[0-9]+$ && "$NEXT" =~ ^[0-9]+$ ]]; then
+            echo "::error::Unexpected taxonomy or deck version: $NEWEST, $NEXT."
+            exit 1
+          fi
+          version="decks/swedish-labour-market-taxonomy-occupation-names/v$NEXT.ttl"
+          found="$(cd "$RUNNER_TEMP/deck" && find . -mindepth 1 ! -type d | sort)"
+          expected="$(printf './%s\n' decks/index.ttl "$version" notes.txt | sort)"
+          if [ "$found" != "$expected" ]; then
+            echo "::error::The artifact holds other files than $version, decks/index.ttl and notes.txt:"
+            echo "$found"
+            exit 1
+          fi
+          for file in decks/index.ttl "$version" notes.txt; do
+            if [ -L "$RUNNER_TEMP/deck/$file" ] || ! [ -f "$RUNNER_TEMP/deck/$file" ]; then
+              echo "::error::$file in the artifact is not a plain file."
+              exit 1
+            fi
+          done
+          # The notes go into the commit and the pull request: one line, as
+          # the script writes it, with nothing GitHub or semantic-release
+          # would act on (an issue reference, an address, a mention, a
+          # breaking change).
+          notes="$RUNNER_TEMP/deck/notes.txt"
+          if [ "$(wc -c < "$notes")" -gt 65536 ] || [ "$(grep -c '' "$notes")" != 1 ] \
+            || ! grep -qE "^(Adds taxonomy|Makes the deck's version) " "$notes" \
+            || grep -qiE '#[0-9]|://|@|breaking' "$notes"; then
+            echo "::error::The artifact's notes.txt is not the version notes the script writes."
+            exit 1
+          fi
+          if [ -e "$version" ] || ! [ -f decks/index.ttl ] || [ -L decks/index.ttl ]; then
+            echo "::error::$version exists already, or decks/index.ttl does not."
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/deck/decks/index.ttl" decks/index.ttl
+          cp "$RUNNER_TEMP/deck/$version" "$version"
+          git add -- decks/index.ttl "$version"
+          status="$(git status --porcelain --untracked-files=all)"
+          if [ "$status" != "$(printf 'M  decks/index.ttl\nA  %s' "$version")" ]; then
+            echo "::error::Other files than $version and decks/index.ttl changed:"
+            echo "$status"
+            exit 1
+          fi
+
+      # The token lasts an hour.
       - id: app
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
@@ -166,18 +270,17 @@ jobs:
           title="feat(decks): add taxonomy version $NEWEST to the occupation names deck"
           why="Arbetsförmedlingen has published version $NEWEST of its labor market taxonomy. This is version $NEXT of the deck of new and changed occupation names, made from it by the weekly taxonomy workflow, as the deck promises one version per taxonomy version (docs/deck-library.md#the-taxonomy-deck)."
           git switch -c "$BRANCH"
-          git add decks
           # The body wrapped at 72 columns (docs/style.md#commits); the pull
           # request's, Markdown, is not.
           git commit -m "$title" -m "$(fold -s -w 72 <<< "$why" | sed 's/ *$//')" \
-            -m "$(fold -s -w 72 "$RUNNER_TEMP/notes.txt" | sed 's/ *$//')" -m "$CLOSES"
+            -m "$(fold -s -w 72 "$RUNNER_TEMP/deck/notes.txt" | sed 's/ *$//')" -m "$CLOSES"
           git push --force "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" "HEAD:refs/heads/$BRANCH"
           body="$(cat <<EOF
           ## What and why
 
           $why
 
-          $(cat "$RUNNER_TEMP/notes.txt")
+          $(cat "$RUNNER_TEMP/deck/notes.txt")
 
           Made by [the taxonomy workflow]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID), which first made the cards of the deck's newest version again from the taxonomy and found them unchanged, then checked the new version as CI's library and crosscheck jobs do. Merging it publishes the version.
 
@@ -191,7 +294,7 @@ jobs:
           fi
 
   failed:
-    needs: [check, update]
+    needs: [check, update, publish]
     if: failure()
     runs-on: ubuntu-latest
     timeout-minutes: 5
