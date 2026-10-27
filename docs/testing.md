@@ -8,7 +8,7 @@ how to read a failure.
 
 Every package has unit tests with [Vitest](https://vitest.dev/), in
 node unless the package runs in the browser: `ui`, `web`, `studio`,
-`solid` and `browser` run in `happy-dom`, and the UI's tests use
+`solid`, `solid-memo-client` and `browser` run in `happy-dom`, and the UI's tests use
 `@testing-library/preact` ([vitest.shared.ts](../vitest.shared.ts)).
 Each package's own tests cover **100%** of its code (statements,
 branches, functions, lines), or `npm test` fails
@@ -38,6 +38,7 @@ npm run test:crosscheck   # the Python scripts' own tests (the cross-check's, th
 npm run check:closes -- --base origin/main   # a commit since the branch left main closes an issue (add --body-file <file> for the pull request's body), as CI's commits job checks it (CONTRIBUTING.md)
 npm run check:breaking -- --base origin/main   # the public API against where the branch left main, as CI's library job checks it (docs/releasing.md)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
+SOLID_CLIENT=solid-memo-client npm run test:pod   # the same on the Solid client with no Inrupt library (docs/solid-memo-client.md); with a package's test:unit, or npm run build, too
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
 npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, in memory, to poke at by hand
 npm run pod:clean # take down the servers an interrupted run left
@@ -115,9 +116,15 @@ checks ([connections.test.ts](../e2e/pod/connections.test.ts)).
 `SOLID_SERVER_URL` runs it against a contributor's own server, which
 must let anyone read and write, as `npm run pod`'s does.
 `SOLID_SERVER_NAME` names it in the tests; `NODE_EXTRA_CA_CERTS`
-trusts a certificate the contributor's own CA signed. CI runs one job
-per blocking server, side by side, none stopping the others
-([migrations.md](migrations.md#proof-on-a-real-server)).
+trusts a certificate the contributor's own CA signed.
+CI runs one job per blocking server, side by side, none stopping the
+others ([migrations.md](migrations.md#proof-on-a-real-server)).
+`SOLID_CLIENT=solid-memo-client` runs the suite, or a package's unit
+tests (`test:unit`, without coverage), on the Solid client with no
+Inrupt library in place of Inrupt's, the default
+([solid-memo-client.md](solid-memo-client.md#switching-clients)).
+CI runs the suite so on each blocking server too, in advisory jobs
+([Continuous integration](#continuous-integration)).
 Renovate keeps each server on its major (`renovate.json5`). The table
 in `servers.ts` says which servers each workflow runs
 ([below](#the-merge-queue)).
@@ -603,6 +610,8 @@ jobs run side by side, each
 | `crosscheck` | deterministic | the Python scripts' tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | timing-dependent | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
+| `solid-memo-client (unit)` | deterministic | advisory: with `SOLID_CLIENT=solid-memo-client`, `solid`'s unit tests without those of the four Inrupt modules the client replaces (`src/client/{access,rdf,resources,session}.test.ts`), `solid`'s round trip, and the unit tests of `shacl`, `composition` and `web`, each step run even when one before it failed. `web`'s build test builds the site without the docs' diagrams (`DOCS_DIAGRAMS=skip`), so the job installs no Chromium; `check` draws them. npm runs them, not Turbo, so no result comes from a cache, and without coverage. The client's own tests are `check`'s ([solid-memo-client.md](solid-memo-client.md#tests)) |
+| `solid-memo-client (<server>)` | timing-dependent | advisory: the end-to-end tests with `SOLID_CLIENT=solid-memo-client`, one job per blocking server, on the images in `pod`'s cache, which it restores and only `pod` saves. What the server printed is kept when the job fails. Neither of the `solid-memo-client` jobs fails the run or `ci-ok` when it fails (`continue-on-error`), so neither holds back a merge, a release or a deploy |
 | `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: all in Chromium in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each (Browsers, above) |
 | `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed, it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when the `site` job's failure skipped them. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
@@ -610,7 +619,7 @@ jobs run side by side, each
 | `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |
 | `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes all but the newest of `main`'s Turbo caches, of the CodeQL databases per language, and of each end-to-end server's images, and all but the two newest of the browsers' system libraries per browser. It's the one job whose token can write (`actions: write`). It runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another, they save only the caches the skipped jobs would have saved and `main` lacks (`releasing.md`), failing neither the run nor `ci-ok` |
-| `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches` and the `warm` jobs aside |
+| `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches`, the `warm` jobs and the `solid-memo-client` jobs aside |
 
 **`ci-ok` is the one check a merge to `main` waits for.** The ruleset
 on `main` (Settings › Rules) requires it alone, so it stays fixed as
@@ -634,7 +643,7 @@ its kind in its comment, from when it's added.
 Both kinds run where a tree is tested, in a pull request and the merge
 queue, not again on a push to `main` the queue passed or on a release
 commit ([releasing.md](releasing.md#what-each-stage-checks)). A job
-that runs always blocks.
+that runs always blocks, the advisory `solid-memo-client` jobs aside.
 
 A timing-dependent job that fails is fixed, not retried: the journeys'
 waits, for one, are made to hold (`retries: 0` in
@@ -692,8 +701,8 @@ artifact reaches `main`: `reuse` takes over only this repository's own
 merge queue run that passed the commit `main` moved to or, for a
 release commit whose parent skipped the queue, that parent's push run.
 
-[servers.test.ts](../e2e/pod/servers.test.ts) reads the job ids `pod`
-and `contract` and their `matrix.server` lists, which a change to the
+[servers.test.ts](../e2e/pod/servers.test.ts) reads the job ids `pod`,
+`solid-memo-client-pod` and `contract` and their `matrix.server` lists, which a change to the
 workflow keeps, to check that each workflow runs the servers
 [servers.ts](../e2e/pod/servers.ts) names. The workflows are among the
 test's inputs (`e2e/pod/turbo.json`), so a change to a matrix alone
@@ -925,7 +934,7 @@ Dependency inversion gives every layer a seam for its fakes:
 | Application | ports | Fake ports are injected (`vi.fn` per method): the fixtures and fake ports in [fakePorts.ts](../packages/application/src/testing/fakePorts.ts), and `NO_PORTS` ([noPorts.ts](../packages/application/src/testing/noPorts.ts)), which other packages' tests spread too, for the ports a test doesn't use. Each slice is tested in its own `<feature>.test.ts`, the stores the slices share in theirs. No module mocking. |
 | UI | `UseCases` prop | Screens render with a fake `UseCases`: `makeUseCasesFake` ([useCasesFake.ts](../packages/ui/src/test/useCasesFake.ts)) makes every slice's fake ([test/fakes/](../packages/ui/src/test/fakes/)) in one object, each calling the others through it. A screen that takes a slice (the trial's) can be given that slice's fake alone. Assertions use testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
 | Infrastructure mappers | none needed | Pure `Dataset`/`Subject` → domain functions, fed in-memory datasets built with `datasetFrom`/`buildThing` ([datasets.ts](../packages/solid/src/testing/datasets.ts)). |
-| Infrastructure I/O shells | injected `fetch` + `vi.mock` | The app's client modules (`client/resources`, `client/rdf`, `client/session`) are mocked, or given a fake (`fakeSessionClient.ts` in `packages/solid/src/testing/`); the tests assert the shell's fetch → map → return. Only the client modules' own tests use the Solid client libraries: each runs its module's contract, in [src/testing/contract/](../packages/solid/src/testing/contract/), against the current implementation, and tests beside it what is the library's alone ([vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)). |
+| Infrastructure I/O shells | injected `fetch` + `vi.mock` | The app's client modules (`client/resources`, `client/rdf`, `client/session`) are mocked, or given a fake (`fakeSessionClient.ts` in `packages/solid/src/testing/`); the tests assert the shell's fetch → map → return. Only the client modules' own tests use the Solid client libraries: each runs its module's contract, in [src/testing/contract/](../packages/solid/src/testing/contract/), against Inrupt's implementation, and tests beside it what is the library's alone ([vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)). `solid-memo-client`'s tests run the same contract against its own. |
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says. A record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read as the browser reads them, through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set). |
 | The round trip (`packages/solid/src/releaseDrafts.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` becomes a draft in a pod kept in memory, as an import makes one, and is published again at its own address (`assemble`), its triples coming back apart from what publishing sets (the format versions, its time of change), a blank node compared by what it says. Its task, `test:roundtrip`, in `npm run check`, runs again only when `decks/`, `ns/` or the package change. The unit tests take three releases the same way: a course, one with blank nodes, a plain deck. |
 | The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read as the app reads them, through `createSolidDeckLibrary` over a fetch serving the repository's files at their IRIs. The index lists every deck, and each release reads with all its cards (its retired ones retired). A course's outline has every chapter and step it uses, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this tests what the app makes of them. Its rules (`packages/domain/src/release/`) have their own tests, and a golden test, `packages/shacl/node/deckLibrary.golden.test.ts`, keeps as text what they say of published releases with faults put in. |

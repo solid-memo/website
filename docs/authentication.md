@@ -10,7 +10,11 @@ code is in
 behind the `SessionGateway` port. It signs in through the sign-in client
 the composition root passes it, the one in
 [client/session.ts](../packages/solid/src/client/session.ts), the only
-file that calls the authentication library.
+file that calls the authentication library. A build with
+`SOLID_CLIENT=solid-memo-client` passes another sign-in client in its
+place, on `oauth4webapi` and no Inrupt library
+([solid-memo-client.md](solid-memo-client.md#sign-in)); this page
+describes the default, Inrupt's, and says where the other differs.
 
 ## Login flow
 
@@ -32,7 +36,9 @@ PKCE flow. On its own domain the app names itself by its
 [Client ID Document](#the-client-id-document); elsewhere, or with a
 provider whose `scopes_supported` lacks `webid`, the library registers
 dynamically under the site's name (`VITE_APP_NAME`,
-[configuration.md](configuration.md)). The provider returns the learner to
+[configuration.md](configuration.md)). `solid-memo-client`'s sign-in
+client leaves the protocol to a library too, `oauth4webapi`, and
+chooses the client the same way. The provider returns the learner to
 the page's address without `index.html` or a hash.
 
 ```mermaid
@@ -150,6 +156,12 @@ routers. A reload returns to the screen it left, and a login started
 at the Studio's landing page (`#/studio`) to the Studio, not to Solid
 Memo's decks.
 
+`solid-memo-client`'s sign-in client restores a session from a
+refresh token it keeps in IndexedDB, with the DPoP key pair, and
+leaves the page only when it has none, or the provider refuses it. Its
+access tokens stay in memory
+([solid-memo-client.md](solid-memo-client.md#what-a-session-keeps)).
+
 ## Authenticated requests
 
 The composition root injects repositories' `fetch`:
@@ -168,4 +180,7 @@ it with the browser's fetch.
 ## Logout
 
 `logout()` clears the session through the authn library, and the UI
-clears the react-query cache: no pod data outlives its session.
+clears the react-query cache: no pod data outlives its session. On
+`solid-memo-client`, `logout()` deletes the stored session from
+IndexedDB, and keeps the provider's registration of the app. Neither
+client ends the session at the provider.

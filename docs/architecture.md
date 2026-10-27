@@ -18,6 +18,7 @@ The layers meet only in the composition root.
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
 | `@solid-memo/vocab` | `packages/vocab/` | The data contract: TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), its generator (`tooling/`), vendored profiles (`vendor/`) and fixtures. |
 | `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods, over the Solid client modules in `src/client/` ([vendor-code.md](vendor-code.md)): repositories, type index, instance copier, pod and write fences, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), release drafts and a release's Turtle ([data-model.md](data-model.md#drafts-and-releases)), and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
+| `@solid-memo/solid-memo-client` | `packages/solid-memo-client/` | A second implementation of `solid`'s client modules and `shacl`'s Turtle reader, with no Inrupt library, which the build puts in their place with `SOLID_CLIENT=solid-memo-client` ([solid-memo-client.md](solid-memo-client.md)). Inrupt's stays the default. |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); in `node/`, validation of Turtle files and the deck library's index and checks, Markdown rules included (`npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Browser adapters: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads or opened from disk (`FileExchange`). |
 | `@solid-memo/site` | `packages/site/` | Node-only build of the site, used only by `apps/web`'s `vite.config.ts` and tests and by the root scripts that archive and check the docs: the build values (`siteBuild`), `robots.txt` and sitemap (`siteMap`), the Vite plugin publishing `ns/` and `decks/` (`publishTurtle`; see `deployment.md`), and the docs' build: the pages `docs/docs.ttl` lists, read with `turtle` and `markdown` and rendered to static pages, Mermaid drawn in Chromium ([markdown.md](markdown.md#the-docs-as-a-site)). Of `vocab` it imports only `tooling/root`, where the repository's folders are. |
@@ -58,6 +59,7 @@ graph TD
     shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
+    client["solid-memo-client<br/>the second Solid client"] --> solid
     journeys["e2e/journeys"] -. "harness/strings.ts only" .-> ui
 ```
 
@@ -77,7 +79,11 @@ order, cached by input: the files of the task's package and its
 dependencies. The few that read `ns/` or `decks/` add them
 in their package's `turbo.json` (`vocab`, `site`, `shacl`, `solid`,
 `composition`, `apps/web` and `apps/studio`), so a deck edit reruns
-only the tasks that read the library.
+only the tasks that read the library. Every task's hash holds
+`SOLID_CLIENT` and `scripts/solidClient.ts`, the switch between the
+Solid clients, and the tasks the switch reaches hold
+`packages/solid-memo-client/src/` among their inputs
+([solid-memo-client.md](solid-memo-client.md#switching-clients)).
 
 A test that reads a file outside its package adds it the same way
 (`e2e/pod`'s the workflows, `site`'s the root's `package.json` and

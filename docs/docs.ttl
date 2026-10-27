@@ -70,6 +70,13 @@
     schema:learningResourceType "explanation" ;
     dcterms:abstract "which third-party technology the app depends on, where each is confined, and what replacing one would cost."@en .
 
+<solid-memo-client.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 35 ;
+    schema:learningResourceType "reference" ;
+    dcterms:abstract "the second Solid client, on no Inrupt library: what it replaces, switching to it with SOLID_CLIENT=solid-memo-client, how it signs in and keeps the session, the public-read grant, how it differs from Inrupt's, and its tests."@en .
+
 <testing.md>
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;
