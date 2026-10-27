@@ -411,6 +411,93 @@ jobs:
           path: e2e/pod/logs/
           retention-days: 7
 
+  # The second Solid client, solid-memo-client (packages/solid-memo-client),
+  # put in place of Inrupt's by SOLID_CLIENT (scripts/solidClient.ts) and
+  # run through the tests of the packages that use it: solid's, its round
+  # trip included, shacl's, composition's and web's, without the tests of
+  # the Inrupt modules it replaces, which test those modules themselves.
+  # Its own tests are check's, in npm run check. Advisory: it only
+  # reports, so a failure fails neither the run nor ci-ok, and holds back
+  # no merge, release or deploy. vitest runs straight, not through Turbo,
+  # so no result is read from a cache, and without coverage, which the
+  # replaced modules' tests left out would lower. web's build test builds
+  # the site without the docs' diagrams (DOCS_DIAGRAMS=skip), which need
+  # Chromium and have nothing of the client: check draws them.
+  # Deterministic.
+  solid-memo-client:
+    name: solid-memo-client (unit)
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    env:
+      SOLID_CLIENT: solid-memo-client
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session}.test.ts'
+      - if: success() || failure()
+        run: npm run test:roundtrip -w @solid-memo/solid
+      - if: success() || failure()
+        run: npm run test:unit -w @solid-memo/shacl
+      - if: success() || failure()
+        run: npm run test:unit -w @solid-memo/composition
+      - if: success() || failure()
+        run: npm run test:unit -w @solid-memo/web
+        env:
+          DOCS_DIAGRAMS: skip
+
+  # The end-to-end tests of pod, on each blocking server, with
+  # solid-memo-client in place of Inrupt's client, as the job above.
+  # The images come from pod's cache entries, which this job only
+  # restores: pod saves them. Advisory, as the job above: a failure fails
+  # neither the run nor ci-ok. Timing-dependent: real servers, started on
+  # a shared runner.
+  solid-memo-client-pod:
+    name: solid-memo-client (${{ matrix.server }})
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        server: [css-7, css-6, nss-6, nss-5, css-acp]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: key
+        run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/e2e-images
+        with:
+          name: pod-${{ matrix.server }}
+          key: ${{ steps.key.outputs.key }}
+      - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
+      - run: npm run test:pod
+        env:
+          SOLID_SERVERS: ${{ matrix.server }}
+          SOLID_CLIENT: solid-memo-client
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: solid-memo-client-logs-${{ matrix.server }}
+          path: e2e/pod/logs/
+          retention-days: 7
+
   # The advisory servers (docs/testing.md) only report, in the Interop
   # workflow, but each must still start and meet the harness's contract:
   # a change that breaks one fails here, not unnoticed until Interop runs.
@@ -1086,7 +1173,8 @@ jobs:
   # (jobs=all), every job that tests it must pass, and when it reuses the
   # run that did (jobs=reuse), reuse must pass, and release-files too on
   # a release commit, the jobs that test being skipped. journeys-report,
-  # caches and the warm jobs are not among them. Every job it needs is
+  # caches, the warm jobs and the advisory solid-memo-client jobs are not
+  # among them. Every job it needs is
   # the gate or in one of its two lists, or it fails. A matrix job's
   # checks are named per server, and jobs come and go; this name stays.
   ci-ok:

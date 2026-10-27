@@ -163,8 +163,9 @@ describe("the workflows' servers", () => {
   };
   const tier = (wanted: string) => SERVER_IDS.filter((id) => SERVERS[id].tier === wanted);
 
-  it("are the table's: CI tests the blocking ones, checks the advisory ones start; Interop tests those", () => {
+  it("are the table's: CI tests the blocking ones, with each client, checks the advisory ones start; Interop tests those", () => {
     expect(matrix("ci.yml", "pod")).toEqual(tier("blocking"));
+    expect(matrix("ci.yml", "solid-memo-client-pod")).toEqual(tier("blocking"));
     expect(matrix("ci.yml", "contract")).toEqual(tier("advisory"));
     expect(matrix("interop.yml", "pod")).toEqual(tier("advisory"));
   });
