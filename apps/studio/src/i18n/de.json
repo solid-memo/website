@@ -378,6 +378,7 @@
       "forgetDirection": "Fortschritt der Karte zurücksetzen",
       "restartCourse": "Kurs neu beginnen",
       "deleteDraft": "Entwurf löschen",
+      "makePublic": "Ausgabe öffentlich machen",
       "deletePart": {
         "chapter": "Kapitel löschen",
         "step": "Schritt löschen",
@@ -1448,6 +1449,7 @@
       "public": "Alle, die ihre Adresse kennen, können sie lesen.",
       "private": "Nur du kannst sie lesen: Dein Pod hat sie nicht öffentlich gemacht. Versuche es erneut, oder mach sie mit den Werkzeugen deines Pod-Anbieters für alle lesbar.",
       "makePublic": "Öffentlich machen",
+      "makePublicConfirm": "Alle, die die Adresse kennen, können {release} dann lesen. Das Studio kann sie nicht wieder privat machen.",
       "makingPublic": "Die Ausgabe wird öffentlich gemacht…",
       "nextHint": "Eine Ausgabe wird nie geändert. Um sie zu ändern, beginne ihre nächste Version: einen neuen Entwurf, der alles behält, was diese Ausgabe veröffentlicht hat.",
       "downloadHeading": "Herunterladen",

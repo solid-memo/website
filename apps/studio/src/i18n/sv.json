@@ -378,6 +378,7 @@
       "forgetDirection": "Glöm kortets framsteg",
       "restartCourse": "Börja om kursen",
       "deleteDraft": "Ta bort utkastet",
+      "makePublic": "Gör utgåvan offentlig",
       "deletePart": {
         "chapter": "Ta bort kapitlet",
         "step": "Ta bort steget",
@@ -1448,6 +1449,7 @@
       "public": "Alla som har dess adress kan läsa den.",
       "private": "Bara du kan läsa den: din Pod gjorde den inte offentlig. Försök igen, eller gör den läsbar för alla med verktygen hos din Pod-leverantör.",
       "makePublic": "Gör den offentlig",
+      "makePublicConfirm": "Alla som har adressen kommer att kunna läsa {release}. Studion kan inte göra den privat igen.",
       "makingPublic": "Gör utgåvan offentlig…",
       "nextHint": "En utgåva ändras aldrig. För att ändra den börjar du på nästa version: ett nytt utkast som behåller allt som den här utgåvan gav ut.",
       "downloadHeading": "Ladda ner",

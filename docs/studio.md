@@ -2125,7 +2125,10 @@ or names another access control than the release's own (the folder's,
 say) keeps the release written and listed, readable by its owner
 alone. The draft is released anyway. The screen says so ("Only you can
 read it"), with **Make it public**, which tries the access again
-(`makeReleasePublic`; `publicAccessRefused` when it still fails).
+(`makeReleasePublic`; `publicAccessRefused` when it still fails). It
+asks first, in a ConfirmDialog that names the release and says the
+Studio can't make it private again, both on the release screen and in
+the releases screen's table.
 
 **Make it public** acts only on a release that meets all of these:
 

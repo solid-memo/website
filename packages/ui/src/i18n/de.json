@@ -112,6 +112,11 @@
     "reportIssue": "Problem melden",
     "discussions": "Diskussionen"
   },
+  "framed": {
+    "title": "Diese Seite in einem eigenen Tab öffnen",
+    "explain": "Diese Seite wird in einer anderen Website angezeigt, die verbergen könnte, worauf du klickst. Sie öffnet sich nur in einem eigenen Tab.",
+    "open": "In einem neuen Tab öffnen"
+  },
   "crash": {
     "title": "Etwas ist schiefgelaufen",
     "explain": "Ein Fehler hat diese Ansicht angehalten. Versuche es erneut oder geh zum Anfang.",

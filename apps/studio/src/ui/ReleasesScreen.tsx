@@ -13,6 +13,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { useConfirm } from "./shell/ConfirmDialog";
 import { DataTable } from "./shell/DataTable";
 import { nextSort, sortedRows, type TableSort } from "./shell/tableModel";
 
@@ -22,8 +23,9 @@ type ReleaseColumn = "release" | "readers" | "draft";
 /**
  * The releases an instance published (docs/studio.md, Releases), as its
  * catalog links them: each by its address, with a link to copy,
- * whether anyone can read it (and, if not, a way to try again), the
- * draft it was published from, while the instance has it (`draftOf`),
+ * whether anyone can read it (and, if not, a way to try again, once the
+ * user confirms it), the draft it was published from, while the
+ * instance has it (`draftOf`),
  * and its next version to start as a draft. A release is never changed here.
  * The table is a DataTable: a column's header sorts it by the column,
  * then the other way, then as the catalog lists them, Enter opens the
@@ -66,6 +68,7 @@ export function ReleasesScreen({
   const { t, locale, readerText } = useI18n();
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState<TableSort<ReleaseColumn>>();
+  const { ask, dialog } = useConfirm();
   /** A release as its address names it ("capitals, version 2"), or its address. */
   const nameOf = (url: string) => {
     const place = releasePlaceOf(url);
@@ -153,7 +156,16 @@ export function ReleasesScreen({
                               release: nameOf(release.url),
                             })}
                             disabled={makingPublic !== null}
-                            onClick={() => onMakePublic(release.url)}
+                            onClick={() =>
+                              ask({
+                                heading: t("studio.confirm.makePublic"),
+                                text: t("studio.publish.makePublicConfirm", {
+                                  release: nameOf(release.url),
+                                }),
+                                action: t("studio.publish.makePublic"),
+                                onConfirm: () => onMakePublic(release.url),
+                              })
+                            }
                           >
                             {t("studio.publish.makePublic")}
                           </button>
@@ -211,6 +223,7 @@ export function ReleasesScreen({
           : starting !== null && t("studio.releases.starting")}
       </p>
       <ErrorMessage error={publicError ?? startError} />
+      {dialog}
       <p>
         <a href={draftsHref}>{t("studio.releases.drafts")}</a>
       </p>

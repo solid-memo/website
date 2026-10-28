@@ -364,6 +364,7 @@
       "forgetDirection": "카드의 진행 상황 초기화",
       "restartCourse": "코스 다시 시작",
       "deleteDraft": "초안 삭제",
+      "makePublic": "릴리스 공개",
       "deletePart": {
         "chapter": "챕터 삭제",
         "step": "단계 삭제",
@@ -1374,6 +1375,7 @@
       "public": "주소를 아는 사람은 누구나 읽을 수 있어요.",
       "private": "나만 읽을 수 있어요. Pod가 공개로 설정하지 않았어요. 다시 시도하거나, Pod 제공자의 도구로 누구나 읽을 수 있게 설정해 주세요.",
       "makePublic": "공개하기",
+      "makePublicConfirm": "주소를 아는 사람은 누구나 {release}을(를) 읽을 수 있게 돼요. Studio에서는 다시 비공개로 바꿀 수 없어요.",
       "makingPublic": "릴리스를 공개하는 중…",
       "nextHint": "릴리스는 절대 바뀌지 않아요. 바꾸려면 다음 버전을 시작해 주세요. 이 릴리스가 게시한 내용을 모두 담은 새 초안이 만들어져요.",
       "downloadHeading": "다운로드",

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { AppError } from "@solid-memo/domain/appError";
@@ -45,6 +45,15 @@ function renderContainer(useCases: UseCases, onStarted = vi.fn()) {
   return { invalidate, remove, onStarted };
 }
 
+/** Answers the question the Studio asks before it makes a release public with its action. */
+function confirmMakePublic() {
+  fireEvent.click(
+    within(screen.getByRole("dialog", { name: "Make the release public" })).getByRole("button", {
+      name: "Make it public",
+    }),
+  );
+}
+
 describe("ReleasesContainer", () => {
   it("lists the instance's releases, makes one public again, and reads them afresh", async () => {
     let shared = false;
@@ -57,6 +66,7 @@ describe("ReleasesContainer", () => {
     const { invalidate } = renderContainer(useCases);
     expect(screen.getByText("Reading the releases…")).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Make solid, version 1 public" }));
+    confirmMakePublic();
     expect(await screen.findByRole("cell", { name: "Everyone" })).toBeInTheDocument();
     expect(useCases.makeReleasePublic).toHaveBeenCalledWith(
       instanceA.url,
@@ -119,6 +129,7 @@ describe("ReleasesContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Make solid, version 1 public" }));
+    confirmMakePublic();
     expect(await screen.findByText("Making the release public…")).toBeInTheDocument();
     finish();
     await waitFor(() =>

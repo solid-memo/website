@@ -2193,6 +2193,12 @@ describe("StudioWorkspace", () => {
       expect(screen.getByText(/Only you can read it/)).toBeInTheDocument();
       expect(useCases.isReleasePublic).not.toHaveBeenCalled();
       fireEvent.click(screen.getByRole("button", { name: "Make it public" }));
+      fireEvent.click(
+        within(screen.getByRole("dialog", { name: "Make the release public" })).getByRole(
+          "button",
+          { name: "Make it public" },
+        ),
+      );
       await waitFor(() =>
         expect(useCases.makeReleasePublic).toHaveBeenCalledWith(
           instanceA.url,

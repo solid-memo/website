@@ -18,6 +18,7 @@ import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
 import { useActivity } from "./shell/activity";
+import { useConfirm } from "./shell/ConfirmDialog";
 
 /** What the publishing part of the release screen links to. */
 export interface ReleasePublishLinks {
@@ -47,7 +48,8 @@ interface Action<T> {
  *   release check's errors are counted, with a link to it; publishing
  *   checks again, the shapes too, and an error stops it.
  * - **Released**: where it is, a link to copy, whether anyone can read
- *   it (if not, a way to try again), and the next version to start.
+ *   it (if not, a way to try again, once the user confirms it), and the
+ *   next version to start.
  * - **Download .ttl**: the release at its address in the library, and
  *   the steps that send it to the library's `decks/` as a pull request.
  *
@@ -261,6 +263,7 @@ function Released({
   startNext: Action<string>;
 }) {
   const { t, tx } = useI18n();
+  const { ask, dialog } = useConfirm();
   return (
     <>
       <p>{tx("studio.publish.releasedAt", { url: <a href={url}>{url}</a> })}</p>
@@ -277,7 +280,15 @@ function Released({
           <button
             type="button"
             aria-disabled={makePublic.pending}
-            onClick={() => !makePublic.pending && makePublic.run(url)}
+            onClick={() =>
+              !makePublic.pending &&
+              ask({
+                heading: t("studio.confirm.makePublic"),
+                text: t("studio.publish.makePublicConfirm", { release: url }),
+                action: t("studio.publish.makePublic"),
+                onConfirm: () => makePublic.run(url),
+              })
+            }
           >
             {t("studio.publish.makePublic")}
           </button>
@@ -285,6 +296,7 @@ function Released({
       )}
       <p role="status">{makePublic.pending && t("studio.publish.makingPublic")}</p>
       <ErrorMessage error={makePublic.error} />
+      {dialog}
       <p class="hint">{t("studio.publish.nextHint")}</p>
       <ReadOnlyNotice reason={hold} subject="catalogue" healthHref={healthHref} />
       <button

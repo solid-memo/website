@@ -156,12 +156,23 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Asks again to make the release at `url` public, from its release screen: the pod does not, and the screen says so. */
+  /** Asks again to make the release at `url` public, from its release screen, confirming the question that names it: the pod does not, and the screen says so. */
   async makePublicRefused(url: string): Promise<void> {
     await this.intent("Make the release public; the pod does not", async () => {
       await this.publishPart
         .getByRole("button", { name: this.t("studio.publish.makePublic"), exact: true })
         .click();
+      const dialog = this.page.getByRole("dialog", {
+        name: this.t("studio.confirm.makePublic"),
+        exact: true,
+      });
+      await expect(
+        dialog.getByText(this.tp("studio.publish.makePublicConfirm", { release: url })),
+      ).toBeVisible();
+      await dialog
+        .getByRole("button", { name: this.t("studio.publish.makePublic"), exact: true })
+        .click();
+      await expect(dialog).toHaveCount(0);
       await expect(
         this.publishPart
           .getByRole("alert")

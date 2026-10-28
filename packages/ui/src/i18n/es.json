@@ -114,6 +114,11 @@
     "reportIssue": "Informar de un problema",
     "discussions": "Debates"
   },
+  "framed": {
+    "title": "Abre esta página en una pestaña propia",
+    "explain": "Esta página se muestra dentro de otro sitio, que podría ocultar dónde haces clic. Solo se abre en una pestaña propia.",
+    "open": "Abrirla en una pestaña nueva"
+  },
   "crash": {
     "title": "Algo salió mal",
     "explain": "Un error detuvo esta pantalla. Inténtalo de nuevo o ve al inicio.",

@@ -114,6 +114,11 @@
     "reportIssue": "Signaler un problème",
     "discussions": "Discussions"
   },
+  "framed": {
+    "title": "Ouvrez cette page dans son propre onglet",
+    "explain": "Cette page est affichée dans un autre site, qui pourrait cacher ce sur quoi vous cliquez. Elle ne s’ouvre que dans son propre onglet.",
+    "open": "L’ouvrir dans un nouvel onglet"
+  },
   "crash": {
     "title": "Une erreur s’est produite",
     "explain": "Une erreur a arrêté cet écran. Réessayez, ou revenez au début.",
