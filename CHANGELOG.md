@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.16.2](https://github.com/solid-memo/website/compare/v6.16.1...v6.16.2) (2026-10-28)
+
+### Bug Fixes
+
+* **domain:** look language tags and draft ids up as data, not properties ([6284ac6](https://github.com/solid-memo/website/commit/6284ac6a44eb380f1113e11e9618d17133bc5b9c))
+* **solid:** read JSON-LD with a parser that fetches no context ([3b9acf8](https://github.com/solid-memo/website/commit/3b9acf8f5b3da622b953955400db9b92d148df03))
+
 ## [6.16.1](https://github.com/solid-memo/website/compare/v6.16.0...v6.16.1) (2026-10-28)
 
 ### Bug Fixes
