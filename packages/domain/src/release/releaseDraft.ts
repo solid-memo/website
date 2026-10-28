@@ -672,6 +672,20 @@ export function liveSteps(draft: ReleaseDraft, chapter: string): DraftNode<Draft
   );
 }
 
+/** The steps in use of every chapter, by the chapter's IRI, each chapter's in their order: one pass over the steps, not one per chapter. */
+export function liveStepsByChapter(draft: ReleaseDraft): Map<string, DraftNode<DraftStepV1>[]> {
+  const byChapter = new Map<string, DraftNode<DraftStepV1>[]>();
+  for (const node of draft.steps) {
+    const { chapter, deprecated } = node.data;
+    if (deprecated === true || chapter === undefined) continue;
+    const under = byChapter.get(chapter);
+    if (under === undefined) byChapter.set(chapter, [node]);
+    else under.push(node);
+  }
+  for (const steps of byChapter.values()) inOrder(steps);
+  return byChapter;
+}
+
 function inOrder<T extends { position?: number }>(nodes: DraftNode<T>[]): DraftNode<T>[] {
   const at = (node: DraftNode<T>) => node.data.position ?? Number.POSITIVE_INFINITY;
   // Ids are unique: two never compare equal.

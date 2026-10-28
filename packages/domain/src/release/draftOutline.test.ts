@@ -10,6 +10,7 @@ import {
   chapterOfStep,
   distractorChanges,
   draftCardLanguages,
+  draftCardFinder,
   draftCardOf,
   draftCardRows,
   draftOutline,
@@ -17,6 +18,7 @@ import {
   retiredChapters,
   retiredSteps,
 } from "./draftOutline.ts";
+import { growth } from "../testing/growth.ts";
 import { applyDraftChanges, type ReleaseDraft } from "./releaseDraft.ts";
 
 const course = courseDraft();
@@ -32,6 +34,40 @@ describe("the outline", () => {
         ["ch-b", []],
       ],
     );
+    const free = { id: "free", data: { checkedBy: [] } };
+    expect(draftOutline({ ...course, steps: [...course.steps, free] })).toEqual(
+      draftOutline(course),
+    );
+  });
+
+  it("is built in time that grows with the chapters and steps, not with their product", () => {
+    // Eight times the chapters and steps take about as long as an eighth of
+    // them eight times over (the sorts add a little); looking through every
+    // step for each chapter would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many: ReleaseDraft = {
+          ...course,
+          chapters: Array.from({ length: count }, (_, i) => ({
+            id: `ch-${i}`,
+            data: { title: { en: `${i}` }, course: course.url, position: i, reviewQuestion: [] },
+          })),
+          steps: Array.from({ length: count }, (_, i) => ({
+            id: `st-${i}`,
+            data: {
+              theory: { en: `${i}` },
+              chapter: of(`ch-${count - 1 - i}`),
+              position: 0,
+              checkedBy: [],
+            },
+          })),
+        };
+        return () => draftOutline(many);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("lists what is retired apart, by id", () => {
@@ -143,6 +179,40 @@ describe("a card of the draft", () => {
         "c",
       )!.content.distractors,
     ).toBeUndefined();
+  });
+
+  it("is found alike by a finder built once, which a page showing many cards uses", () => {
+    const draft = changed(course, { kind: "retire", of: "distractor", id: "q-a-1a-d2" });
+    const find = draftCardFinder(draft);
+    for (const id of [...draft.cards.map((node) => node.id), "nowhere"])
+      expect(find(id)).toEqual(draftCardOf(draft, id));
+  });
+
+  it("is found by the finder in time that grows with the cards, not with their square", () => {
+    // Looking through every card and wrong option for each card would take
+    // eight times as long for eight times the cards.
+    const ratio = growth(
+      (count) => {
+        const many: ReleaseDraft = {
+          ...course,
+          cards: Array.from({ length: count }, (_, i) => ({
+            id: `q-${i}`,
+            data: card(`${i}`, { distractor: [of(`d-${i}`)] }),
+          })),
+          distractors: Array.from({ length: count }, (_, i) => ({
+            id: `d-${i}`,
+            data: { text: { en: `${i}` } },
+          })),
+        };
+        return () => {
+          const find = draftCardFinder(many);
+          for (let i = 0; i < count; i++) find(`q-${count - 1 - i}`);
+        };
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("states its content for a change, without its wrong options or retirement", () => {

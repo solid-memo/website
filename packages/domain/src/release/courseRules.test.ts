@@ -18,6 +18,7 @@ import {
   text,
 } from "../testing/releaseModel";
 import { EDUCATION_THEME } from "../dcat";
+import { growth } from "../testing/growth";
 import { courseProblems, readinessProblems } from "./courseRules";
 import type { ReleaseProblem } from "./problems";
 
@@ -269,6 +270,26 @@ describe("courseProblems", () => {
     expect(brief(problems)).toEqual([
       { code: "chapterWithoutStep", subject: at("ch-1"), params: {} },
     ]);
+  });
+
+  it("checks a course in time that grows with its chapters and steps, not with their product", () => {
+    // Eight times the chapters and steps take about as long as an eighth of
+    // them eight times over; looking through every step for each chapter
+    // would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = course({
+          chapters: Array.from({ length: count }, (_, i) => chapter(`ch-${i}`, i)),
+          steps: Array.from({ length: count }, (_, i) =>
+            step(`st-${i}`, `ch-${count - 1 - i}`, 0, []),
+          ),
+        });
+        return () => courseProblems(many);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

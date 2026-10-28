@@ -13,6 +13,7 @@ import {
   type ReleaseCard,
   type ReleaseDistractor,
   type ReleaseModel,
+  type ReleaseStep,
   type ReleaseSubject,
   type ReleaseTerm,
 } from "./releaseModel.ts";
@@ -100,8 +101,11 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
   const clashes = (members: readonly { iri: string; positions: readonly string[] }[]) => {
     const at = new Map<string, string[]>();
     for (const member of members) {
-      for (const position of member.positions)
-        at.set(position, [...(at.get(position) ?? []), member.iri]);
+      for (const position of member.positions) {
+        const sharing = at.get(position);
+        if (sharing === undefined) at.set(position, [member.iri]);
+        else sharing.push(member.iri);
+      }
     }
     return [...at].filter(([, sharing]) => sharing.length > 1);
   };
@@ -114,8 +118,18 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
       ),
     );
   }
+  // The steps in use by the chapters they are part of, in one pass over
+  // them, not one per chapter: a release may have thousands of each.
+  const stepsOf = new Map<string, ReleaseStep[]>();
+  for (const step of steps.filter(inUse)) {
+    for (const part of new Set(step.isPartOf)) {
+      const under = stepsOf.get(part);
+      if (under === undefined) stepsOf.set(part, [step]);
+      else under.push(step);
+    }
+  }
   for (const chapter of chapters) {
-    const ofChapter = steps.filter((step) => inUse(step) && step.isPartOf.includes(chapter.iri));
+    const ofChapter = stepsOf.get(chapter.iri) ?? [];
     for (const [position, sharing] of clashes(ofChapter)) {
       problems.push(
         problem(
@@ -144,7 +158,7 @@ function inUse(subject: ReleaseSubject): boolean {
 function outlineProblems(model: ReleaseModel): ReleaseProblem[] {
   const { url, chapters, steps } = model;
   const problems: ReleaseProblem[] = [];
-  const chapterIris = chapters.map((chapter) => chapter.iri);
+  const chapterIris = new Set(chapters.map((chapter) => chapter.iri));
 
   const course = model.types.includes(`${SCHEMA_NS}Course`);
   if (!course && chapters.length + steps.length > 0)
@@ -175,7 +189,7 @@ function outlineProblems(model: ReleaseModel): ReleaseProblem[] {
     }
   }
   for (const step of steps) {
-    for (const part of step.isPartOf.filter((part) => !chapterIris.includes(part))) {
+    for (const part of step.isPartOf.filter((part) => !chapterIris.has(part))) {
       problems.push(
         problem(
           step.iri,
