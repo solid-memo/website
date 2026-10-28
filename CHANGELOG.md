@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.6](https://github.com/solid-memo/website/compare/v6.17.5...v6.17.6) (2026-10-28)
+
+### Bug Fixes
+
+* **application:** skip an unclaimed document in every spelling of its address ([c6367a9](https://github.com/solid-memo/website/commit/c6367a9709a462b4596522e54b957f960c7129bb))
+
 ## [6.17.5](https://github.com/solid-memo/website/compare/v6.17.4...v6.17.5) (2026-10-28)
 
 ### Bug Fixes
