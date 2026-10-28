@@ -13,6 +13,13 @@ import { isHttpUrl } from "./webId";
  */
 export type ReportPlace = { library: true } | { library: false; contact?: string };
 
+/** True for a contact page a report may lead to: an http(s) address with no `user@` before the host. */
+function isContactPage(contact: string): boolean {
+  if (!isHttpUrl(contact)) return false;
+  const { username, password } = new URL(contact);
+  return username === "" && password === "";
+}
+
 /** The issue form a mistake in a library release is reported with: the repository's .github/ISSUE_TEMPLATE/deck.yml. */
 const DECK_FORM = "deck.yml";
 
@@ -24,7 +31,8 @@ const DECK_FORM = "deck.yml";
  * the card's address with a line asking what is wrong. For a release
  * from a link it is the release's contact page, which no one fills in
  * for it. Null when there is nowhere to report it: a release from a
- * link with no web page for a contact, or a library release with no
+ * link with no web page for a contact (an http(s) address with no user
+ * name or password before the host), or a library release with no
  * repository known (`repoUrl` null). The library's tracker is never
  * the place to report someone else's release.
  */
@@ -35,7 +43,7 @@ export function mistakeReportUrl(
   cardId?: string,
 ): string | null {
   if (!place.library)
-    return place.contact !== undefined && isHttpUrl(place.contact) ? place.contact : null;
+    return place.contact !== undefined && isContactPage(place.contact) ? place.contact : null;
   if (repoUrl === null) return null;
   const card = cardId === undefined ? [] : [`Card: ${releaseUrl}#${cardId}`, ""];
   const query = new URLSearchParams({

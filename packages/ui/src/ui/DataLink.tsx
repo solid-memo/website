@@ -38,7 +38,12 @@ export function LicenseLink({ url }: { url: string }) {
   return <ExternalLink url={url}>{name}</ExternalLink>;
 }
 
-function webLink(url: string): { href: string; host: string } | null {
+/**
+ * The link `url` is followed as when a release gives it outside
+ * Markdown: an http(s) address with no `user@` before the host, with
+ * the host to show beside it; null for any other.
+ */
+export function webLink(url: string): { href: string; host: string } | null {
   if (!URL.canParse(url)) return null;
   const parsed = new URL(url);
   if (!/^https?:$/.test(parsed.protocol) || parsed.username !== "" || parsed.password !== "")
