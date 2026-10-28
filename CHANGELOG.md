@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.0](https://github.com/solid-memo/website/compare/v6.16.3...v6.17.0) (2026-10-28)
+
+### Features
+
+* **decks:** finish the Korean at the Table story in ten chapters ([48194b9](https://github.com/solid-memo/website/commit/48194b9b7deb2d762ce75d8a18d0697c9fe3eb25)), closes [#132](https://github.com/solid-memo/website/issues/132) [#132](https://github.com/solid-memo/website/issues/132)
+
+### Bug Fixes
+
+* **domain:** read a stated count in one pass ([3c32139](https://github.com/solid-memo/website/commit/3c321396bee9a46eb12008fbb88a33a20582ec81))
+* **domain:** read an author literal in one pass ([dad6c8e](https://github.com/solid-memo/website/commit/dad6c8e29126d084785ad7d6226e49f48ecbeb13))
+
 ## [6.16.3](https://github.com/solid-memo/website/compare/v6.16.2...v6.16.3) (2026-10-28)
 
 ### Bug Fixes
