@@ -57,7 +57,12 @@ async function completeRedirect(
   } catch (error) {
     // The provider said no: the user declined, or (prompt=none) has no session there.
     if (!isRefusal(error)) throw error;
-    if (silent) await exclusively(clearSession);
+    // Only the session it went to restore: another tab may have logged in elsewhere since.
+    if (silent) {
+      await exclusively(async () => {
+        if ((await loadSession())?.issuer === as.issuer) await clearSession();
+      });
+    }
     return LOGGED_OUT;
   }
   const { tokens, webId } = completed;
@@ -85,7 +90,7 @@ export function createSessionClient(): SessionClient {
       if (stored === undefined) return LOGGED_OUT;
       const as = await discover(stored.issuer);
       const refreshed = await refreshStored(as, stored.webId);
-      // Logged out, or in as someone else, in another tab since: no silent login brings it back.
+      // Logged out, or in as someone else or at another provider, in another tab since: no silent login brings it back.
       if (refreshed === "gone") return LOGGED_OUT;
       if (refreshed !== undefined) {
         setCurrentSession(new OidcSession(as, refreshed.stored, refreshed.tokens));

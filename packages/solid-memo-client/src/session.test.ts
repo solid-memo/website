@@ -669,11 +669,54 @@ describe("createSessionClient, over oauth4webapi", () => {
     expect(memory.session).toBeUndefined();
   });
 
+  it("ends the stored session when its provider refuses the silent login", async () => {
+    storedSession(WEBID);
+    void createSessionClient().restore();
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalled());
+    const request = lastAuthorization();
+    window.history.replaceState(
+      null,
+      "",
+      `/?error=login_required&state=${request.get("state")}&iss=${encodeURIComponent(ISSUER)}`,
+    );
+    await expect(createSessionClient().restore()).resolves.toMatchObject({ webId: null });
+    expect(memory.session).toBeUndefined();
+  });
+
+  it.each([
+    ["a logout", () => undefined],
+    [
+      "a login at another provider",
+      (session: StoredSession) => ({ ...session, issuer: "https://other-idp.example/" }),
+    ],
+  ])(
+    "leaves the stored session as %s in another tab left it, when its provider refuses the silent login",
+    async (_, replace) => {
+      storedSession(WEBID);
+      void createSessionClient().restore();
+      await vi.waitFor(() => expect(navigate).toHaveBeenCalled());
+      const request = lastAuthorization();
+      const other = memory.session && replace(memory.session);
+      memory.session = other;
+      window.history.replaceState(
+        null,
+        "",
+        `/?error=login_required&state=${request.get("state")}&iss=${encodeURIComponent(ISSUER)}`,
+      );
+      await expect(createSessionClient().restore()).resolves.toMatchObject({ webId: null });
+      expect(memory.session).toBe(other);
+    },
+  );
+
   it.each([
     ["a logout", () => undefined],
     [
       "a login as someone else",
       (session: StoredSession) => ({ ...session, webId: "https://bob.example/profile/card#me" }),
+    ],
+    [
+      "a login at another provider",
+      (session: StoredSession) => ({ ...session, issuer: "https://other-idp.example/" }),
     ],
   ])(
     "stays logged out when %s in another tab replaces the session it restores",
@@ -756,6 +799,28 @@ describe("createSessionClient, over oauth4webapi", () => {
     await client.fetch("https://pod.example/b");
     expect(provider.tokenRequests.at(-1)?.parameters.get("refresh_token")).toBe("refresh-other");
     expect(proofKey(pod, 1)).toEqual(await publicJwk(otherKeys));
+  });
+
+  it("sends nothing to its provider, and keeps the session, after a login at another provider in another tab", async () => {
+    provider.accessTtl = 10;
+    const pod = vi.fn(async () => new Response("ok"));
+    const { client } = await logIn();
+    provider.pod = pod;
+    // Another tab logged the same WebID in at another provider, as a client of its own.
+    const other: StoredSession = {
+      issuer: "https://other-idp.example/",
+      client: { client_id: "other-1", client_secret: "other-secret" },
+      redirectUrl: REDIRECT,
+      keys: await oauth.generateKeyPair("ES256"),
+      webId: WEBID,
+      refreshToken: "refresh-other",
+    };
+    memory.session = other;
+    await client.fetch("https://pod.example/a");
+    expect(provider.tokenRequests).toHaveLength(1);
+    expect(pod).toHaveBeenCalledWith("https://pod.example/a", undefined);
+    expect(client.webId()).toBeUndefined();
+    expect(memory.session).toBe(other);
   });
 
   it("stores a login after a refresh under way, which cannot store the older session over it", async () => {
