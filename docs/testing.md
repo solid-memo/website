@@ -819,7 +819,10 @@ checks of the repository as a whole, plain Node scripts in
 - `check:dependencies`
   ([checkDependencies.ts](../scripts/checkDependencies.ts)): the app
   ships only released versions of other code, or the exceptions in
-  [vendor-code.md](vendor-code.md#maturity).
+  [vendor-code.md](vendor-code.md#maturity). Every package in the
+  lockfile comes from the npm registry with its integrity hash, no
+  install script but the listed ones, and the root `.npmrc` turns install
+  scripts off ([vendor-code.md](vendor-code.md#installing)).
 - `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
   library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
   own `dcterms:license` says ([style.md](style.md#licenses)).
@@ -828,7 +831,8 @@ checks of the repository as a whole, plain Node scripts in
   is pinned to a full commit SHA, its version in a comment after it
   (`uses: actions/checkout@<sha> # v7.0.1`), as Renovate keeps them
   ([releasing.md](releasing.md#the-deploy-key)). Local actions
-  (`./.github/actions/`) are exempt.
+  (`./.github/actions/`) are exempt. Every npm command that installs
+  packages says `--ignore-scripts`.
 - `check:keys` ([checkQueryKeys.ts](../scripts/checkQueryKeys.ts)): no
   screen of Solid Memo or the Studio writes a query key out as an
   array; each is made by a function of the keys modules
