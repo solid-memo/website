@@ -422,7 +422,14 @@ No document Solid Memo names has any.
   the deck's**: the document states
   `<> dcterms:isPartOf <catalog.ttl#deck-X>`, naming this deck's entry
   (`ownsDocument`; [below](#decks-and-cards)), which only someone who
-  may write the document can state.
+  may write the document can state. A draft made from a release holds
+  what others wrote, so it never keeps a statement that one of its
+  documents is `dcterms:isPartOf` anything (`draftEntries`). A release
+  (`<> a sm:Deck`) is never a deck's document, whatever it says, nor is
+  a draft's own document in its folder: its release document,
+  `cards.ttl` or a chapter's. It's unclaimed, and claiming leaves it as it is
+  (`isDeckItself` and `isDraftDocument` in
+  [deckPlace.ts](../packages/solid/src/deckPlace.ts)).
 - **An older document that doesn't say so** (from an earlier version, a
   repair or a copy) is the deck's in the instance's own folder, unless
   that folder is the root of a pod or a storage (typed `pim:Storage`).
@@ -449,10 +456,9 @@ No document Solid Memo names has any.
   documents". Once the user confirms, each document is made to say it's
   the deck's: one write made only while it's as read (`If-Match`), or
   only where there's none (`claimDeckDocuments`;
-  `createDeckDocumentGuard` in
-  [deckPlace.ts](../packages/solid/src/deckPlace.ts)). Removing a
-  deck, or deleting its instance, takes out a document's cards and
-  review states only when every deck it names is leaving; otherwise only
+  `createDeckDocumentGuard` in `deckPlace.ts`). Removing a deck, or
+  deleting its instance, takes out a document's cards and review states
+  only when every deck it names is leaving; otherwise only
   the leaving deck's `dcterms:isPartOf` goes (`deckDocumentSubjects` in
   [ownership.ts](../packages/solid/src/ownership.ts)).
 - **Any other deck is left alone.** It isn't listed (`toDecks` in

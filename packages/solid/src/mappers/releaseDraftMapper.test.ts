@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { courseDraft, deckDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft";
+import { courseDraft, deckDraft, DRAFT, link, of } from "@solid-memo/domain/testing/releaseDraft";
 import { quadsOfTurtle } from "../testing/releaseDrafts";
 import {
   draftEntries,
@@ -236,6 +236,53 @@ describe("draftEntries", () => {
     expect(
       entryQuads(entries.get("_:b0")!).map((quad) => [quad.subject.termType, quad.object.value]),
     ).toEqual([["BlankNode", `${CONTAINER}cards.ttl#q-loose`]]);
+  });
+
+  it("leaves out a statement that one of its documents is part of something, as a release it was made from may say", () => {
+    const IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
+    const deck = "https://attacker.example/a/catalog.ttl#deck-x";
+    const draft = courseDraft();
+    const entries = draftEntries({
+      ...draft,
+      triples: [
+        ...draft.triples,
+        link(DRAFT, IS_PART_OF, deck),
+        link(DRAFT.replace("https://pod.example/", "https://POD.example:443/"), IS_PART_OF, deck),
+        link(of("compilation"), IS_PART_OF, deck),
+      ],
+    });
+    const raw = [...entries.values()].flatMap((entry) =>
+      entry.raw.map((triple) => [entry.document, triple.subject, triple.predicate]),
+    );
+    expect(raw.filter(([, , predicate]) => predicate === IS_PART_OF)).toEqual([
+      [DRAFT, of("compilation"), IS_PART_OF],
+    ]);
+  });
+
+  it("leaves out a statement that its cards or a chapter's document is part of something, though a card names it as a distractor", () => {
+    const IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
+    const deck = "https://attacker.example/a/catalog.ttl#deck-x";
+    const cards = `${CONTAINER}cards.ttl`;
+    const chapter = `${CONTAINER}chapter-ch-a.ttl`;
+    const draft = courseDraft();
+    const named = { "q-loose": cards, "q-a-1a": chapter } as Record<string, string>;
+    const entries = draftEntries({
+      ...draft,
+      cards: draft.cards.map((node) =>
+        named[node.id] === undefined
+          ? node
+          : {
+              ...node,
+              data: { ...node.data, distractor: [...node.data.distractor, named[node.id]!] },
+            },
+      ),
+      triples: [...draft.triples, link(cards, IS_PART_OF, deck), link(chapter, IS_PART_OF, deck)],
+    });
+    const raw = [...entries.values()].flatMap((entry) =>
+      entry.raw.map((triple) => [entry.document, triple.subject, triple.predicate]),
+    );
+    expect(raw.filter(([, subject]) => subject === cards || subject === chapter)).toEqual([]);
+    expect(raw.filter(([, , predicate]) => predicate === IS_PART_OF)).toEqual([]);
   });
 
   it("tell an entry that changed from one that did not", () => {

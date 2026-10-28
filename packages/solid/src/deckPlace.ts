@@ -22,11 +22,17 @@ import {
   isSameUrl,
   ownsDocument,
 } from "@solid-memo/domain/instanceLayout";
+import {
+  draftContainerOf,
+  draftPlaceOf,
+  isDraftDocumentName,
+  RELEASE_DOCUMENT,
+} from "@solid-memo/domain/release/draftLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { getSolidDatasetOrNull, isReadFrom, saveDataset } from "./datasets";
 import { deckBackLinksOf } from "./ownership";
 import { hasStorageLink } from "./solidStorageGateway";
-import { DCTERMS } from "./vocab";
+import { DCTERMS, RDF, SM } from "./vocab";
 
 /** A deck as the guard needs it: its entry, its title for an error, and its two documents. */
 type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocumentUrl">;
@@ -37,7 +43,8 @@ type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocum
  *
  * - "owned": it says it is the deck's (`<> dcterms:isPartOf <entry>`),
  *   wherever it is (the app's fetch, the credential gate, still writes
- *   nothing outside the user's own pod: ownPodGate.ts);
+ *   nothing outside the user's own pod: ownPodGate.ts), and it is not a
+ *   deck itself (isDeckItself);
  * - "adoptable": it does not yet, nor that it is any other deck's (of
  *   this instance or another, deckBackLinksOf), but it is in the
  *   instance's folder and that folder is the instance's own (not a
@@ -46,7 +53,9 @@ type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocum
  * - "unclaimed": anywhere else, or when it says it is another deck's, it
  *   does not say so, and Solid Memo never says it by itself: it is read,
  *   never written to or deleted, until the user claims it
- *   (claimDocuments).
+ *   (claimDocuments). A document that is a deck itself, or one of a
+ *   draft's (isDraftDocument), is unclaimed whatever it says, and is
+ *   never claimed.
  */
 export type DocumentStanding = "owned" | "adoptable" | "unclaimed";
 
@@ -55,6 +64,43 @@ function partOfOf(dataset: Dataset, url: string): string[] {
   return getThingAll(dataset)
     .filter((thing) => isSameUrl(thing.url, url))
     .flatMap((thing) => getUrlAll(thing, DCTERMS.isPartOf));
+}
+
+/**
+ * Whether the document itself (`<>`, spelled any way a request sends it)
+ * is an sm:Deck: a release, or a draft's release document. No deck's
+ * cards or reviews are kept in one, and what it says of itself is what
+ * the release it was made from said, so it is never a deck's document.
+ */
+function isDeckItself(dataset: Dataset, url: string): boolean {
+  return getThingAll(dataset).some(
+    (thing) => isSameUrl(thing.url, url) && getUrlAll(thing, RDF.type).includes(SM.Deck),
+  );
+}
+
+/**
+ * Whether the document is one of a draft's (draftLayout.ts): its release
+ * document, its cards document or a chapter's, in a draft's container,
+ * as a request sends the address (canonicalUrlOf) or a server that
+ * decodes it reads it. What a draft holds is what the release it was
+ * made from said, which may name any of its documents as one of its
+ * subjects, so none of them is a deck's document, whatever it says.
+ */
+function isDraftDocument(url: string): boolean {
+  const sent = canonicalUrlOf(url) ?? url;
+  let read: string;
+  try {
+    read = decodeURI(sent);
+  } catch {
+    read = sent;
+  }
+  return [sent, read].some((one) => {
+    const container = draftContainerOf(one);
+    return (
+      isDraftDocumentName(one.slice(container.length)) &&
+      draftPlaceOf(`${container}${RELEASE_DOCUMENT}`) !== null
+    );
+  });
 }
 
 /**
@@ -114,6 +160,8 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     dataset: Dataset | null,
   ): Promise<DocumentStanding> {
     const instance = instanceOf(deck);
+    if (isDraftDocument(url) || (dataset !== null && isDeckItself(dataset, url)))
+      return "unclaimed";
     if (dataset !== null && ownsDocument(partOfOf(dataset, url), deck.url)) return "owned";
     if (!isDocumentIn(url, instance)) return "unclaimed";
     if (dataset === null) return "adoptable";
@@ -179,11 +227,14 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
      * Claim the deck's unclaimed documents, as the user confirmed: each
      * says it is the deck's from then on, in one write made only while it
      * is as read (If-Match), or, where there is none, made with that alone
-     * (If-None-Match: *). Nothing else in it changes.
+     * (If-None-Match: *). Nothing else in it changes. One that is a deck
+     * itself (isDeckItself) is left as it is.
      */
     async claim(deck: DeckPlace): Promise<void> {
       for (const url of await unclaimed(deck)) {
+        if (isDraftDocument(url)) continue;
         const dataset = (await getSolidDatasetOrNull(url, fetch)) ?? createSolidDataset();
+        if (isDeckItself(dataset, url)) continue;
         await saveDataset(url, withPartOf(dataset, url, deck.url), fetch);
       }
     },

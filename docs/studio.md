@@ -1466,6 +1466,11 @@ A new draft starts from
   (`releaseToDraft` in
   [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)).
 
+Either way, the draft doesn't keep a statement that one of its
+documents is `dcterms:isPartOf` anything, which to a deck would say the
+document is that deck's
+([data-model.md](data-model.md#where-an-instances-documents-are)).
+
 A release is made a draft only if its version is 1, 2, … and every id
 in it has letters A to Z, digits, `.`, `_` and `-`, starting with a
 letter or digit (`unsupportedIdOf`). A chapter's document is named
