@@ -45,4 +45,12 @@ describe("mistakeReportUrl", () => {
       mistakeReportUrl({ library: false, contact: "mailto:bo@example.org" }, REPO, RELEASE),
     ).toBeNull();
   });
+
+  it("has nowhere to report a release from a link whose contact names a user before the host", () => {
+    for (const contact of [
+      "https://solid-memo.com@bob.example/report",
+      "https://:secret@bob.example/report",
+    ])
+      expect(mistakeReportUrl({ library: false, contact }, REPO, RELEASE)).toBeNull();
+  });
 });

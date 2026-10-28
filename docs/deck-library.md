@@ -1013,7 +1013,11 @@ reported (`ReportPlace`):
   no dropdown from the query, so "What is it" is left to the learner.
 - **A release from a link** leads to the web page its contact names
   (`dcat:contactPoint`'s `vcard:hasURL`, read with the release as
-  `LibraryDeckContent.contact`), unfilled. With none, or only an email,
-  there's no link (never the library's tracker).
+  `LibraryDeckContent.contact`), unfilled. The release names this page
+  itself, so the link follows it as a release's other links are
+  followed (`DataLink`, [Safety](markdown.md#safety)): http(s) with no
+  `user@` before the host, and the host shown beside the link. With
+  none, only an email, or an address that rule refuses, there's no link
+  (never the library's tracker).
 - **A deck the learner wrote**, with no release, has no link, nor has
   a Studio [trial](studio.md#the-trial) (`createTrialUseCases`).

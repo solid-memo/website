@@ -356,6 +356,8 @@ describe("LibraryDeckScreen", () => {
   describe("reporting a mistake", () => {
     const REPO = "https://github.com/solid-memo/website";
     const reportLink = () => screen.queryByRole("link", { name: /Report a mistake/ });
+    const reportHost = () =>
+      reportLink()!.closest(".report-mistake")!.querySelector(".md-link-host");
     function renderWithRepo(overrides: Partial<Parameters<typeof LibraryDeckScreen>[0]> = {}) {
       render(
         <RepoUrl.Provider value={REPO}>
@@ -378,18 +380,35 @@ describe("LibraryDeckScreen", () => {
       expect(`${url.origin}${url.pathname}`).toBe(`${REPO}/issues/new`);
       expect(url.searchParams.get("template")).toBe("deck.yml");
       expect(url.searchParams.get("deck")).toBe(capitals.url);
+      expect(reportHost()).toBeNull();
     });
 
     it("reports a mistake in another release to the contact it names, and nowhere when it names none or while its place is read", () => {
       const contact = "https://bob.example/issues";
       renderWithRepo({ host: "bob.example", reportPlace: { library: false, contact } });
       expect(reportLink()).toHaveAttribute("href", contact);
+      expect(reportHost()).toHaveTextContent("(bob.example)");
       cleanup();
       renderWithRepo({ host: "bob.example", reportPlace: { library: false } });
       expect(reportLink()).toBeNull();
       cleanup();
       renderWithRepo();
       expect(reportLink()).toBeNull();
+    });
+
+    it("follows another release's contact as its other links are followed, never with a user before the host", () => {
+      renderWithRepo({
+        host: "bob.example",
+        reportPlace: { library: false, contact: "https://solid-memo.com@bob.example/report" },
+      });
+      expect(reportLink()).toBeNull();
+      cleanup();
+      renderWithRepo({
+        host: "bob.example",
+        reportPlace: { library: false, contact: "http://bob.example/report" },
+      });
+      expect(reportLink()).toHaveAttribute("href", "http://bob.example/report");
+      expect(reportHost()).toHaveTextContent("(bob.example)");
     });
   });
 });
