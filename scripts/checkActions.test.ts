@@ -19,6 +19,8 @@ const PINNED = `jobs:
       - uses: ./.github/actions/chromium
       # - uses: actions/checkout@v7, a comment, is not read.
       - run: echo "uses: actions/checkout@v7"
+      - run: npm ci --ignore-scripts
+        # Run it after npm ci, a comment, is not read.
 `;
 
 describe("fileProblems", () => {
@@ -48,6 +50,92 @@ describe("fileProblems", () => {
       `release.yml:2: actions/attest@${SHA} names no version after it (# vX.Y.Z), which Renovate updates.`,
     ]);
   });
+
+  it("refuses an npm ci that runs the packages' install scripts", () => {
+    const yaml = `      - run: npm ci\n      - run: npm ci --prefer-offline # --ignore-scripts\n`;
+    expect(fileProblems("deploy.yml", yaml)).toEqual([
+      "deploy.yml:1: npm ci without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:2: npm ci without --ignore-scripts runs the packages' install scripts.",
+    ]);
+  });
+
+  it("refuses a flag that turns install scripts back on", () => {
+    const yaml = [
+      "      - run: npm ci --ignore-scripts=false",
+      "      - run: npm ci --ignore-scripts false",
+      "      - run: npm ci --ignore-scripts --no-ignore-scripts",
+      "      - run: npm ci --ignore-scripts-x",
+      "      - run: npm ci --ignore-scripts=true && npm run build",
+    ].join("\n");
+    expect(fileProblems("deploy.yml", yaml)).toEqual([
+      "deploy.yml:1: npm ci without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:2: npm ci without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:3: npm ci without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:4: npm ci without --ignore-scripts runs the packages' install scripts.",
+    ]);
+  });
+
+  it("refuses npm's other installs without the flag", () => {
+    const commands = [
+      "install",
+      "i",
+      "clean-install",
+      "ic",
+      "install-test",
+      "install-ci-test",
+      "cit",
+      "add",
+      "update",
+      "up",
+      "upgrade",
+      "dedupe",
+      "ddp",
+      "link",
+      "rebuild",
+    ];
+    const yaml = commands
+      .flatMap((command) => [
+        `      - run: npm ${command} x`,
+        `      - run: npm ${command} --ignore-scripts`,
+      ])
+      .join("\n");
+    expect(fileProblems("ci.yml", yaml)).toEqual(
+      commands.map(
+        (command, index) =>
+          `ci.yml:${2 * index + 1}: npm ${command} without --ignore-scripts runs the packages' install scripts.`,
+      ),
+    );
+  });
+
+  it("reads past npm's own options before the command", () => {
+    const yaml = [
+      "      - run: npm -w x install",
+      "      - run: npm --prefix . ci",
+      "      - run: npm --silent ci",
+      "      - run: npm --prefix=. ci",
+      "      - run: npm --prefix . ci --ignore-scripts",
+      "      - run: npm --prefix . run ci",
+    ].join("\n");
+    expect(fileProblems("deploy.yml", yaml)).toEqual([
+      "deploy.yml:1: npm install without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:2: npm ci without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:3: npm ci without --ignore-scripts runs the packages' install scripts.",
+      "deploy.yml:4: npm ci without --ignore-scripts runs the packages' install scripts.",
+    ]);
+  });
+
+  it("refuses npm_config_ignore_scripts set to anything but true", () => {
+    const yaml = `    env:
+      npm_config_ignore_scripts: false
+      NPM_CONFIG_IGNORE_SCRIPTS: "true"
+      - run: npm_config_ignore_scripts= npm run build
+      # npm_config_ignore_scripts: false, a comment, is not read.
+`;
+    expect(fileProblems("deploy.yml", yaml)).toEqual([
+      "deploy.yml:2: npm_config_ignore_scripts other than true runs the packages' install scripts.",
+      "deploy.yml:4: npm_config_ignore_scripts other than true runs the packages' install scripts.",
+    ]);
+  });
 });
 
 describe("main", () => {
@@ -64,7 +152,9 @@ describe("main", () => {
   it("says so and returns 0 when every action is pinned", () => {
     const io = fakeIo({ ".github/workflows/ci.yml": PINNED });
     expect(main(io)).toBe(0);
-    expect(io.logs).toEqual(["All 1 workflows and actions pin every action they use to a commit."]);
+    expect(io.logs).toEqual([
+      "All 1 workflows and actions pin every action they use to a commit, and install no package's script.",
+    ]);
   });
 
   it("logs each problem and returns 1", () => {

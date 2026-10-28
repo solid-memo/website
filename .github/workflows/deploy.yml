@@ -163,7 +163,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      # No package's install script runs (docs/vendor-code.md#installing),
+      # though the release checked out may predate the root .npmrc.
+      - run: npm ci --ignore-scripts
       # After CI on the release commit, the site that run carries (its site
       # artifact): the build of the tree the merge queue tested, and the
       # user journeys ran on, which its reuse job took over, or its own

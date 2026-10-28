@@ -124,7 +124,7 @@ jobs:
           path: .turbo/cache
           key: turbo-check-${{ github.sha }}
           restore-keys: turbo-check-
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       # Chromium, which site's tests draw the docs' Mermaid diagrams in
       # (docs/markdown.md).
       - uses: ./.github/actions/chromium
@@ -255,7 +255,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - uses: ./.github/actions/chromium
       - run: npm run build
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -288,7 +288,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       # On a push to the default branch, compare with the commit the push
       # moved it from; in the merge queue, with the commit of the
       # default branch the queue built on, so the pull requests ahead
@@ -382,7 +382,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: key
         run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
       - id: images
@@ -441,7 +441,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session}.test.ts'
       - if: success() || failure()
         run: npm run test:roundtrip -w @solid-memo/solid
@@ -479,7 +479,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: key
         run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/e2e-images
@@ -520,7 +520,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: key
         run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
       - id: images
@@ -610,7 +610,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -694,7 +694,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - if: needs.gate.outputs.jobs == 'all'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -801,7 +801,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run lint
       - run: npm run lint:markdown
       - run: npm run lint:spelling
@@ -840,7 +840,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       # shell: bash runs with pipefail, so a listing that fails fails the
       # step instead of finding every cache missing.
       - name: What main's cache lacks
@@ -912,7 +912,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: key
         env:
           JOURNEYS_KEY: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
@@ -971,7 +971,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: key
         run: |
           if [ "$BROWSERS" = shell ]; then
@@ -1137,7 +1137,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - if: github.event_name == 'pull_request'
-        run: npm ci
+        run: npm ci --ignore-scripts
       - if: github.event_name == 'pull_request'
         name: npx commitlint --from <base> --to <head>
         env:

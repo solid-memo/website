@@ -61,6 +61,43 @@ Another allowed package goes into `ALLOWED` in `checkDependencies.ts`
 and this table: the check fails on an allowed package the page doesn't
 name, and on one the app no longer ships before 1.0.0.
 
+## Installing
+
+No package runs code of its own while it's installed. A package's
+install script runs with whatever the machine holds: a contributor's
+files, or a CI job's tokens, whose build becomes the site. The root
+[.npmrc](../.npmrc) turns install scripts off (`ignore-scripts=true`),
+and every `npm ci` in the workflows says `--ignore-scripts` too. The
+deploy checks out a release that may be older than the `.npmrc`.
+`npm run check:actions` fails on an npm command that installs packages
+without the flag: `ci`, `install`, `install-test`, `install-ci-test`,
+`update`, `dedupe`, `link` or `rebuild`, under any of npm's names for it
+and after any of npm's own options. It fails on
+`npm_config_ignore_scripts` set to anything but `true` too. `npm run check:dependencies` fails when the last
+`ignore-scripts` in the `.npmrc` isn't `true`, as npm reads the last.
+
+`npm run check:dependencies` checks the lockfile, `package-lock.json`,
+for what an install fetches. It fails on any package that:
+
+- comes from anywhere but `https://registry.npmjs.org/`, such as a git
+  repository or another server;
+- has no integrity hash, which `npm ci` checks the download against;
+- has an install script, unless the list below names it.
+
+The workspace's own packages, and those a package carries in its
+own tarball, aren't fetched, so they're left out.
+
+| Package | Why its install script is no loss |
+|---|---|
+| `fsevents` | File watching on macOS, an optional dependency of Vite and others. Its package carries the binary built; its script only builds it again. |
+
+Another package with an install script goes into `INSTALL_SCRIPTS` in
+`checkDependencies.ts` and this table, once it's clear the package works
+without the script. The check fails on a listed package this page
+doesn't name, and on one no package in the lockfile matches.
+Playwright's browsers come from a command run on purpose
+(`npm run browsers`), not an install script.
+
 ## Vendor-independent code
 
 `packages/domain/src/` and `packages/application/src/` import no vendor

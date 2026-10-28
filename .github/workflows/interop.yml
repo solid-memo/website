@@ -64,7 +64,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - id: key
         run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
       - id: images

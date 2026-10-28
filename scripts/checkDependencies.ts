@@ -18,6 +18,12 @@
  * The exceptions are ALLOWED, each with its reason, and each must be
  * named in docs/vendor-code.md and still be shipped, so the list and the
  * page cannot drift from what the app is made of.
+ *
+ * It also checks how every package is installed (docs/vendor-code.md#installing):
+ * the root .npmrc turns install scripts off, every package in the
+ * lockfile comes from the npm registry with its integrity hash, and none
+ * but the ones in INSTALL_SCRIPTS asks to run a script when installed;
+ * each of those must be named in docs/vendor-code.md and still ask.
  */
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -28,6 +34,9 @@ export type LockEntry = {
   version?: string;
   link?: boolean;
   resolved?: string;
+  integrity?: string;
+  hasInstallScript?: boolean;
+  inBundle?: boolean;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
@@ -49,6 +58,68 @@ export const ALLOWED: Record<string, string> = {
   process:
     "The browser's stand-in for Node's process, which readable-stream asks for; final at 0.11.",
 };
+
+/** The packages that ask to run a script when installed, and why that is no loss with scripts off. */
+export const INSTALL_SCRIPTS: Record<string, string> = {
+  fsevents:
+    "File watching on macOS, an optional dependency of Vite and others; its package carries the binary built, which its script only builds again.",
+};
+
+/** Where every package in the lockfile comes from. */
+const REGISTRY = "https://registry.npmjs.org/";
+
+/** What is wrong with how the lockfile's packages are installed; none when the check passes. */
+export function installProblems(
+  lock: Lockfile,
+  npmrc: string,
+  installScripts: Record<string, string>,
+  vendorDoc: string,
+): string[] {
+  const problems: string[] = [];
+  const withScripts = new Set<string>();
+  // npm reads the last `ignore-scripts` of the file, spaces around `=` or not.
+  const ignoreScripts = npmrc
+    .split("\n")
+    .map((line) => /^\s*ignore-scripts\s*=(.*)$/.exec(line)?.[1]?.trim())
+    .filter((value) => value !== undefined);
+  if (ignoreScripts.at(-1) !== "true") {
+    problems.push(".npmrc: does not say `ignore-scripts=true`, so `npm ci` runs install scripts.");
+  }
+  for (const [location, entry] of Object.entries(lock.packages)) {
+    // The workspace's own packages, links to them, and what a package
+    // carries inside its own tarball are not fetched on their own.
+    if (!location.includes("node_modules/") || entry.link === true || entry.inBundle === true) {
+      continue;
+    }
+    const name =
+      entry.name ?? location.slice(location.lastIndexOf("node_modules/") + "node_modules/".length);
+    if (!entry.resolved?.startsWith(REGISTRY)) {
+      problems.push(`${location}: resolved from ${entry.resolved}, not from ${REGISTRY}.`);
+    }
+    if (entry.integrity === undefined) {
+      problems.push(`${location}: no integrity hash.`);
+    }
+    if (entry.hasInstallScript === true) withScripts.add(name);
+    if (entry.hasInstallScript === true && !(name in installScripts)) {
+      problems.push(
+        `${location}: has an install script, which does not run: depend on another package, or add it to INSTALL_SCRIPTS in scripts/checkDependencies.ts.`,
+      );
+    }
+  }
+  for (const name of Object.keys(installScripts)) {
+    if (!withScripts.has(name)) {
+      problems.push(
+        `${name}: in INSTALL_SCRIPTS in scripts/checkDependencies.ts, but no package of that name has an install script; take it off.`,
+      );
+    }
+    if (!vendorDoc.includes(`\`${name}\``)) {
+      problems.push(
+        `${name}: in INSTALL_SCRIPTS in scripts/checkDependencies.ts, but docs/vendor-code.md does not name it.`,
+      );
+    }
+  }
+  return problems;
+}
 
 /** A version before 1.0.0, or one with a prerelease tag. */
 export function isUnready(version: string): boolean {
@@ -152,6 +223,7 @@ export function dependencyProblems(
 export type DependenciesIo = {
   lockfile(): Lockfile;
   vendorDoc(): string;
+  npmrc(): string;
   log(message: string): void;
 };
 
@@ -159,17 +231,23 @@ export function defaultIo(root: string): DependenciesIo {
   return {
     lockfile: () => JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8")) as Lockfile,
     vendorDoc: () => readFileSync(join(root, "docs/vendor-code.md"), "utf8"),
+    npmrc: () => readFileSync(join(root, ".npmrc"), "utf8"),
     log: (message) => console.log(message),
   };
 }
 
-/** Exit code: 0 when the app ships only released versions, or allowed ones. */
+/** Exit code: 0 when the app ships only released versions, or allowed ones, installed as they should be. */
 export function main(io: DependenciesIo): number {
-  const problems = dependencyProblems(io.lockfile(), SHIPPED, ALLOWED, io.vendorDoc());
+  const lock = io.lockfile();
+  const vendorDoc = io.vendorDoc();
+  const problems = [
+    ...dependencyProblems(lock, SHIPPED, ALLOWED, vendorDoc),
+    ...installProblems(lock, io.npmrc(), INSTALL_SCRIPTS, vendorDoc),
+  ];
   for (const problem of problems) io.log(problem);
   if (problems.length > 0) return 1;
   io.log(
-    "The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity).",
+    "The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity), installed from the registry without install scripts (docs/vendor-code.md#installing).",
   );
   return 0;
 }
