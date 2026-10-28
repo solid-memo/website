@@ -14,6 +14,7 @@ import {
 } from "../client/rdf";
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
+import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import {
   draftDocuments,
   draftDocumentUrl,
@@ -260,7 +261,10 @@ export interface DraftEntry {
  * with every IRI it names mapped the same way. A chapter's document is
  * named after its id, so a draft with an id no draft can have (DRAFT_ID)
  * is refused (draftIdUnsupported): its documents might not be in its
- * container.
+ * container. A statement that one of its documents itself (`<>`, spelled
+ * any way a request sends it) is dcterms:isPartOf something is left out:
+ * it is what the release the draft was made from said, and to a deck
+ * it would say the document is the deck's to write (ownsDocument).
  */
 export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
   const unsupported = unsupportedIdOf(draft);
@@ -298,13 +302,12 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
   }
   draft.triples.forEach((triple, at) => {
     const key = triple.subject;
+    const subject = key.startsWith("_:") ? key : podIri(key);
+    const document = entries.get(key)?.document ?? documentOf(key);
+    if (triple.predicate === DCTERMS.isPartOf && isSameUrl(subject, document)) return;
     let entry = entries.get(key);
     if (entry === undefined) {
-      entry = {
-        document: documentOf(key),
-        subject: key.startsWith("_:") ? key : podIri(key),
-        raw: [],
-      };
+      entry = { document, subject, raw: [] };
       entries.set(key, entry);
     }
     entry.raw.push(pod.triples[at]!);

@@ -280,7 +280,10 @@ export function isDeckInPlace(
  * values it states), compared as a request sends the address. Only
  * someone who may write the document can state it, so it is what lets
  * Solid Memo write to the document or delete it (docs/data-model.md,
- * "Where an instance's documents are"), wherever it is.
+ * "Where an instance's documents are"), wherever it is. Solid Memo
+ * copies what others wrote into one document only, a draft made from a
+ * release, and leaves this out of it; a release or a draft is still no
+ * deck's document, whatever it says (deckPlace.ts).
  */
 export function ownsDocument(partOf: readonly string[], deckUrl: string): boolean {
   return partOf.some((url) => isSameUrl(url, deckUrl));

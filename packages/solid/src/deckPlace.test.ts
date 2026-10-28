@@ -465,6 +465,78 @@ describe("a deck whose documents do not say they are its own", () => {
   });
 });
 
+describe("a deck whose document is a deck itself: a release", () => {
+  it("is read, but never written to, claimed or deleted through, though it says it is the deck's", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    await p.decks.addCard(deck, UNO);
+    const release = `${ALICE}releases/spanish-v2.ttl`;
+    await p.put(release, deckDocument(deck, `<> a <${SM}Deck> .`));
+    await plant(p, deck, deck.cardsDocumentUrl, release);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([release]);
+    const before = await p.text(release);
+
+    p.writes.length = 0;
+    await expect(
+      p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
+    ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+    await p.decks.claimDocuments(listed!);
+    await p.decks.removeDeck(listed!);
+    expect(p.writes.filter((write) => write.endsWith(release))).toEqual([]);
+    expect(await p.text(release)).toBe(before);
+  });
+});
+
+describe("a deck whose document is one of a draft's, as a draft made from a release may hold", () => {
+  for (const name of ["release.ttl", "cards.ttl", "chapter-intro.ttl"]) {
+    it(`is read, but never written to, claimed or deleted through, though it says it is the deck's: ${name}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+      await p.decks.addCard(deck, UNO);
+      const container = `${ALICE}drafts/spanish/v2/`;
+      await p.put(`${container}release.ttl`, `<> a <${SM}Deck> .`);
+      const document = `${container}${name}`;
+      if (name !== "release.ttl")
+        await p.put(document, deckDocument(deck, cardTurtle("q1", "uno")));
+      await plant(p, deck, deck.cardsDocumentUrl, document);
+      const [listed] = await p.decks.listDecks(BOB);
+      await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([document]);
+      const before = await p.text(document);
+
+      p.writes.length = 0;
+      await expect(
+        p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
+      ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+      await p.decks.claimDocuments(listed!);
+      await p.decks.removeDeck(listed!);
+      expect(p.writes.filter((write) => write.endsWith(document))).toEqual([]);
+      expect(await p.text(document)).toBe(before);
+    });
+  }
+
+  it("is one however its address is spelled, and an address that is none is no draft's", async () => {
+    const p = await pod();
+    const guard = createDeckDocumentGuard(p.fetch);
+    const deck = {
+      url: `${ALICE}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${ALICE}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${ALICE}reviews/deck-1.ttl`,
+    };
+    for (const url of [
+      `${ALICE}drafts/spanish/v2/c%61rds.ttl`,
+      `https://POD.example:443/alice/solid-memo/main/drafts/spanish/v2/chapter-intro.ttl`,
+      `${ALICE}%E0%A4%A/drafts/spanish/v2/cards.ttl`,
+    ])
+      await expect(guard.standing(deck, url, null)).resolves.toBe("unclaimed");
+    await expect(guard.standing(deck, `${ALICE}drafts/spanish/v2/notes.ttl`, null)).resolves.toBe(
+      "adoptable",
+    );
+    await expect(guard.standing(deck, "no address", null)).resolves.toBe("unclaimed");
+  });
+});
+
 describe("removing a deck whose document holds another app's data too", () => {
   it("takes out only the deck's cards and its saying it is the deck's, keeps the document, and names it", async () => {
     const p = await pod();
