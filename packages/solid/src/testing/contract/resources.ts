@@ -491,6 +491,14 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       }
     });
 
+    it("reads JSON-LD as it streams: a context after a node's other keys does not parse", async () => {
+      const node = { "@id": "#a", "@type": "ex:T", "ex:p": "x" };
+      const after = JSON.stringify({ ...node, "@context": { ex: EX } });
+      await expect(parseQuads(after, "jsonld", URL_)).rejects.toBeDefined();
+      const first = JSON.stringify({ "@context": { ex: EX }, ...node });
+      await expect(parseQuads(first, "jsonld", URL_)).resolves.toHaveLength(2);
+    });
+
     it("rejects a text past its limits' triples, in either format, with a ReadLimitError", async () => {
       const limits = { bytes: 1000, quads: 2, characters: 1000 };
       const texts = [

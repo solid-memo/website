@@ -88,16 +88,32 @@ function termValue(term: Term, compact: (iri: string) => string): Value {
 const MAX_JSON_DEPTH = 12;
 
 /**
+ * How many contexts a top-level node's `@context` may list: a file this
+ * app exports states one. The parser builds each from the one before, a
+ * copy of every term so far, so a long list of contexts takes time far
+ * beyond linear in its length.
+ */
+const MAX_CONTEXTS = 8;
+
+/**
  * Refuse JSON-LD that names a context elsewhere (a URL, or `@import`):
  * reading it would fetch that address from the user's browser. A file
- * this app exports states its context in full. Refuse JSON nested deeper
- * than MAX_JSON_DEPTH too, before anything recurses into it. Throws
+ * this app exports states its context in full. Refuse a context anywhere
+ * but on a top-level node (the document, or a node of a top-level array),
+ * and one that lists more than MAX_CONTEXTS: the parser applies a context
+ * inside a term definition (a scoped one) again at every use of the term,
+ * and one on a node on top of all the terms it inherits, so a small file
+ * of such contexts holds the tab for minutes. A file this app exports
+ * states its context once, at the top. Refuse JSON nested deeper than
+ * MAX_JSON_DEPTH too, before anything recurses into it. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
  *
  * Gives the document checked, written again: the parser is to read that
  * text, not the file's, so that both see the same document. A key named
  * twice in an object is one key to JSON.parse, which keeps the last; a
- * streaming parser may act on the first.
+ * streaming parser may act on the first. Each object's `@context` comes
+ * first in it (written): the parser reads the text as it streams, which
+ * it can only with the context before the rest.
  */
 export function refuseRemoteContexts(text: string): string {
   let json: unknown;
@@ -106,6 +122,7 @@ export function refuseRemoteContexts(text: string): string {
   } catch (error) {
     throw new AppError("deckFileUnreadable", { reason: String(error) });
   }
+  const topLevel = new Set(Array.isArray(json) ? json : [json]);
   // A walk of its own, not a recursion, which a file nested deeper than the call stack would end.
   const pending: [value: unknown, depth: number][] = [[json, 0]];
   while (pending.length > 0) {
@@ -117,23 +134,47 @@ export function refuseRemoteContexts(text: string): string {
       });
     }
     for (const [key, child] of Object.entries(value)) {
-      if (key === "@context" && remote(child)) {
-        throw new AppError("deckFileUnreadable", {
-          reason: "The file names a JSON-LD context elsewhere.",
-        });
-      }
+      if (key === "@context") refuseContext(child, topLevel.has(value));
       pending.push([child, depth + 1]);
     }
   }
-  // Only now, the depth known to be within MAX_JSON_DEPTH: JSON.stringify recurses.
-  return JSON.stringify(json);
+  // Only now, the depth known to be within MAX_JSON_DEPTH: written recurses.
+  return written(json);
 }
 
-/** Whether a context is, or holds, one named by its address. */
-function remote(context: unknown): boolean {
+/**
+ * JSON as text, each object's `@context` first. JSON.stringify writes an
+ * object's keys in their order, but one that reads as an integer before
+ * every other.
+ */
+function written(value: unknown): string {
+  if (typeof value !== "object" || value === null) return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(written).join(",")}]`;
+  const entries = Object.entries(value).sort(
+    ([a], [b]) => Number(b === "@context") - Number(a === "@context"),
+  );
+  return `{${entries.map(([key, child]) => `${JSON.stringify(key)}:${written(child)}`).join(",")}}`;
+}
+
+/** Throws deckFileUnreadable unless a context is stated in full, on a top-level node, in at most MAX_CONTEXTS. */
+function refuseContext(context: unknown, onTopLevelNode: boolean): void {
   const contexts = Array.isArray(context) ? context : [context];
-  return contexts.some(
-    (one) =>
-      typeof one === "string" || (typeof one === "object" && one !== null && "@import" in one),
+  if (contexts.some(remote)) {
+    throw new AppError("deckFileUnreadable", {
+      reason: "The file names a JSON-LD context elsewhere.",
+    });
+  }
+  if (!onTopLevelNode || contexts.length > MAX_CONTEXTS) {
+    throw new AppError("deckFileUnreadable", {
+      reason: `The file states a JSON-LD context below its top level, or lists more than ${MAX_CONTEXTS}.`,
+    });
+  }
+}
+
+/** Whether a context is one named by its address, or holds one. */
+function remote(context: unknown): boolean {
+  return (
+    typeof context === "string" ||
+    (typeof context === "object" && context !== null && "@import" in context)
   );
 }

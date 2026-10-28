@@ -1298,6 +1298,17 @@ An import reads the file as the pod is read, with the same mappers:
   reading it would fetch that address. The parser reads the document as
   the check saw it, so a key named twice is the last one for both, and
   its document loader fetches nothing;
+- a JSON-LD context below the top level (in a term's definition, or on
+  a node inside the document) is refused, as is a list of more than 8
+  contexts (`deckFileUnreadable`). The parser applies a term's context
+  again at every use of the term, and builds each context from a copy
+  of all the terms before it, so a small file of such contexts holds
+  the tab for minutes. A file this app exports states its context once,
+  at the top;
+- the parser reads the document as it streams, each object written
+  again with its context first. A parser that held every node to the
+  end would match each against every typed one, in time growing with
+  the square of the nodes;
 - JSON nested deeper than 12 levels is refused (`deckFileUnreadable`),
   before anything else reads it: the JSON-LD parser takes time far
   beyond linear in the depth, and a file this app exports nests 5;

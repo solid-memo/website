@@ -87,10 +87,41 @@ describe("refuseRemoteContexts", () => {
     ).not.toThrow();
   });
 
+  it("lets a context listed on each node of a top-level array pass", () => {
+    const node = { "@context": [{ ex: EX }, { a: `${EX}a` }], "@id": `${EX}n`, a: "x" };
+    expect(() => refuseRemoteContexts(JSON.stringify([node, node]))).not.toThrow();
+  });
+
+  it("refuses a context below the top level, which the parser applies again at every use", () => {
+    const below = {
+      reason: "The file states a JSON-LD context below its top level, or lists more than 8.",
+    };
+    const scoped = { "@id": `${EX}p`, "@context": { t: `${EX}t` } };
+    for (const document of [
+      // A term's scoped context, and a type's.
+      { "@context": { p: scoped }, "@id": `${EX}n`, p: { t: "x" } },
+      { "@context": [{ ex: EX }, { T: scoped }], "@id": `${EX}n`, "@type": "T" },
+      // A node's own, below the top level.
+      { "@context": { ex: EX }, "@graph": [{ "@context": { q: `${EX}q` }, q: "x" }] },
+      [[{ "@context": { ex: EX } }]],
+      // More contexts than a file needs, each built from the one before.
+      { "@context": Array.from({ length: 9 }, (_, i) => ({ [`t${i}`]: `${EX}t${i}` })) },
+    ]) {
+      expect(() => refuseRemoteContexts(JSON.stringify(document))).toThrow(
+        expect.objectContaining({ code: "deckFileUnreadable", vars: below }),
+      );
+    }
+  });
+
   it("gives the document it checked, a key named twice as JSON.parse keeps it", () => {
     expect(refuseRemoteContexts('{"@context": "https://evil.example/c", "@context": {}}')).toBe(
       '{"@context":{}}',
     );
+  });
+
+  it("writes each object's context first, before a key that reads as an integer too", () => {
+    const text = '[{"5": "x", "@id": "n", "@context": {"b": "y", "1": "z"}}]';
+    expect(refuseRemoteContexts(text)).toBe('[{"@context":{"1":"z","b":"y"},"5":"x","@id":"n"}]');
   });
 
   it("refuses a document nested deeper than a deck file's before writing it again, which would overflow the stack", () => {
