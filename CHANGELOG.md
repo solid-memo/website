@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.2](https://github.com/solid-memo/website/compare/v6.17.1...v6.17.2) (2026-10-28)
+
+### Bug Fixes
+
+* **solid:** bound what a release, a deck file and the deck groups take in ([66ebd85](https://github.com/solid-memo/website/commit/66ebd857620ac8fd65e828a147f8f7fbba84ee61))
+
 ## [6.17.1](https://github.com/solid-memo/website/compare/v6.17.0...v6.17.1) (2026-10-28)
 
 ### Bug Fixes
