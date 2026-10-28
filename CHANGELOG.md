@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.16.3](https://github.com/solid-memo/website/compare/v6.16.2...v6.16.3) (2026-10-28)
+
+### Bug Fixes
+
+* **domain:** ask only a course release's own cards as its questions ([b6f88fe](https://github.com/solid-memo/website/commit/b6f88fe70669f6703c320d4572f719f5beae4ce8))
+
 ## [6.16.2](https://github.com/solid-memo/website/compare/v6.16.1...v6.16.2) (2026-10-28)
 
 ### Bug Fixes
