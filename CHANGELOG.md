@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.7](https://github.com/solid-memo/website/compare/v6.17.6...v6.17.7) (2026-10-28)
+
+### Bug Fixes
+
+* **domain:** build a course's outline in one pass over its steps ([880c551](https://github.com/solid-memo/website/commit/880c551a9e621af0a994d85f869c775af56c0ccc))
+
 ## [6.17.6](https://github.com/solid-memo/website/compare/v6.17.5...v6.17.6) (2026-10-28)
 
 ### Bug Fixes
