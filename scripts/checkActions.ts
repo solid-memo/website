@@ -19,6 +19,12 @@
  * (docs/vendor-code.md#installing).
  * The root .npmrc says so too, but a job may check out a commit from
  * before it.
+ *
+ * A tool a workflow downloads, its version after a `# renovate:`
+ * comment, has the SHA-256 of the file it downloads on the line after
+ * its version (`<NAME>_SHA256: <hash>`), which the workflow checks the
+ * file against: checksums published beside the file can be replaced
+ * with it.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -42,6 +48,11 @@ const IGNORE_SCRIPTS = /\s--ignore-scripts(?:=true)?(?=\s|$)/;
 /** A flag or a setting that turns install scripts back on. */
 const SCRIPTS_ON = /\s--(?:no-ignore-scripts|ignore-scripts(?:=(?!true(?:\s|$))|\s+false\b))/;
 const CONFIG = /\bnpm_config_ignore_scripts\b(?!\s*[:=]\s*(["']?)true\1(?:\s|$))/i;
+
+/** A tool a workflow downloads: its comment, version and hash, as renovate.json5 reads them. */
+const DOWNLOAD = /^\s*# renovate: datasource=\S+ depName=(\S+)/;
+const DOWNLOAD_VERSION = /^\s*[A-Z_]+: \S+$/;
+const DOWNLOAD_SHA256 = /^\s*([A-Z_]+_SHA256): [0-9a-f]{64}$/;
 
 /** What is wrong with each `uses:`, npm install and npm setting of one file; none when every one is as it should be. */
 export function fileProblems(path: string, yaml: string): string[] {
@@ -76,6 +87,28 @@ export function fileProblems(path: string, yaml: string): string[] {
   });
 }
 
+/** What is wrong with each tool one file downloads; none when each names its hash and checks it. */
+export function downloadProblems(path: string, yaml: string): string[] {
+  const lines = yaml.split("\n");
+  return lines.flatMap((line, index) => {
+    const download = DOWNLOAD.exec(line);
+    if (download === null) return [];
+    const where = `${path}:${index + 1}: ${download[1]}`;
+    const sha256 = DOWNLOAD_VERSION.test(lines[index + 1] ?? "")
+      ? DOWNLOAD_SHA256.exec(lines[index + 2] ?? "")
+      : null;
+    if (sha256 === null) {
+      return [
+        `${where} names no version and SHA-256 after it (<NAME>_VERSION: and <NAME>_SHA256: on the next lines), which the workflow checks the download against.`,
+      ];
+    }
+    if (!yaml.includes(`$${sha256[1]}`)) {
+      return [`${where}: nothing checks the download against ${sha256[1]}.`];
+    }
+    return [];
+  });
+}
+
 export type ActionsIo = {
   /** Every workflow and local action, as a path from the repository's root. */
   files(): string[];
@@ -96,14 +129,17 @@ export function defaultIo(root: string): ActionsIo {
   };
 }
 
-/** Exit code: 0 when every external action is pinned to a commit, and no npm install runs an install script. */
+/** Exit code: 0 when every external action is pinned to a commit, every download to its hash, and no npm install runs an install script. */
 export function main(io: ActionsIo): number {
   const files = io.files();
-  const problems = files.flatMap((path) => fileProblems(path, io.read(path)));
+  const problems = files.flatMap((path) => {
+    const yaml = io.read(path);
+    return [...fileProblems(path, yaml), ...downloadProblems(path, yaml)];
+  });
   for (const problem of problems) io.log(problem);
   if (problems.length > 0) return 1;
   io.log(
-    `All ${files.length} workflows and actions pin every action they use to a commit, and install no package's script.`,
+    `All ${files.length} workflows and actions pin every action they use to a commit and every tool they download to its hash, and install no package's script.`,
   );
   return 0;
 }

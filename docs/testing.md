@@ -832,7 +832,10 @@ checks of the repository as a whole, plain Node scripts in
   (`uses: actions/checkout@<sha> # v7.0.1`), as Renovate keeps them
   ([releasing.md](releasing.md#the-deploy-key)). Local actions
   (`./.github/actions/`) are exempt. Every npm command that installs
-  packages says `--ignore-scripts`.
+  packages says `--ignore-scripts`. Every tool after a `# renovate:`
+  download comment has its version on the next line and the SHA-256 of
+  its file on the line after (`<NAME>_SHA256:`), which the workflow
+  checks the download against.
 - `check:keys` ([checkQueryKeys.ts](../scripts/checkQueryKeys.ts)): no
   screen of Solid Memo or the Studio writes a query key out as an
   array; each is made by a function of the keys modules
@@ -883,6 +886,11 @@ the pages in `docs/`, and CI's `docs` job the rest:
   that those on the site's own domain, such as its `documentation`, are
   pages the build serves. Without one, the step says so and passes
   ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
+  The step downloads the parser from its release and checks the archive
+  against the SHA-256 committed beside its version, not against the
+  checksums the release publishes, which could be replaced with the
+  archive. Renovate updates the version and the hash together, and a
+  person merges that update.
 - **Licenses**: [reuse](https://reuse.software/) (`npm run lint:reuse`,
   `reuse lint`) checks that every file in the repository states its
   copyright and license, in an SPDX header or in

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { defaultIo, fileProblems, main, run } from "./checkActions.ts";
+import { defaultIo, downloadProblems, fileProblems, main, run } from "./checkActions.ts";
 
 const SHA = "3d3c42e5aac5ba805825da76410c181273ba90b1";
 
@@ -138,6 +138,59 @@ describe("fileProblems", () => {
   });
 });
 
+const HASH = "211847305611417ac0b76af5169086232ea6c75ff6ae686227b6972a41599dd7";
+
+const DOWNLOAD = `      env:
+        # renovate: datasource=github-release-attachments depName=owner/tool
+        TOOL_VERSION: v1.2.3
+        TOOL_SHA256: ${HASH}
+      run: |
+        curl -fsSLO "https://github.com/owner/tool/releases/download/$TOOL_VERSION/tool.tar.gz"
+        echo "$TOOL_SHA256  tool.tar.gz" | sha256sum -c -
+`;
+
+describe("downloadProblems", () => {
+  it("accepts a download with its version and the SHA-256 the workflow checks", () => {
+    expect(downloadProblems("action.yml", DOWNLOAD)).toEqual([]);
+    expect(downloadProblems("ci.yml", PINNED)).toEqual([]);
+  });
+
+  it("refuses a download that names no SHA-256, or not after its version", () => {
+    const yaml = `        # renovate: datasource=github-releases depName=owner/tool
+        TOOL_VERSION: v1.2.3
+      run: |
+        curl -fsSLO "$base/checksums.txt"
+        # renovate: datasource=github-release-attachments depName=owner/other
+        OTHER_SHA256: ${HASH}
+        OTHER_VERSION: v1.0.0
+        # renovate: datasource=github-release-attachments depName=owner/short
+        SHORT_VERSION: v1.0.0
+        SHORT_SHA256: 2118473056
+        # renovate: datasource=github-release-attachments depName=owner/end
+        # renovate: datasource=github-release-attachments depName=owner/last
+        LAST_VERSION: v1.0.0`;
+    const why =
+      "names no version and SHA-256 after it (<NAME>_VERSION: and <NAME>_SHA256: on the next lines), which the workflow checks the download against.";
+    expect(downloadProblems("action.yml", yaml)).toEqual([
+      `action.yml:1: owner/tool ${why}`,
+      `action.yml:5: owner/other ${why}`,
+      `action.yml:8: owner/short ${why}`,
+      `action.yml:11: owner/end ${why}`,
+      `action.yml:12: owner/last ${why}`,
+    ]);
+    expect(
+      downloadProblems("action.yml", "# renovate: datasource=github-releases depName=owner/tool"),
+    ).toEqual([`action.yml:1: owner/tool ${why}`]);
+  });
+
+  it("refuses a SHA-256 that nothing checks the download against", () => {
+    const yaml = DOWNLOAD.replace("$TOOL_SHA256", "$(grep tool.tar.gz checksums.txt)");
+    expect(downloadProblems("action.yml", yaml)).toEqual([
+      "action.yml:2: owner/tool: nothing checks the download against TOOL_SHA256.",
+    ]);
+  });
+});
+
 describe("main", () => {
   function fakeIo(files: Record<string, string>) {
     const logs: string[] = [];
@@ -153,7 +206,7 @@ describe("main", () => {
     const io = fakeIo({ ".github/workflows/ci.yml": PINNED });
     expect(main(io)).toBe(0);
     expect(io.logs).toEqual([
-      "All 1 workflows and actions pin every action they use to a commit, and install no package's script.",
+      "All 1 workflows and actions pin every action they use to a commit and every tool they download to its hash, and install no package's script.",
     ]);
   });
 
@@ -161,16 +214,18 @@ describe("main", () => {
     const io = fakeIo({
       ".github/workflows/ci.yml": PINNED,
       ".github/actions/chromium/action.yml": "    - uses: actions/cache@v6\n",
+      ".github/actions/tool/action.yml": DOWNLOAD.replace(/TOOL_SHA256: \w+/, "TOOL_SHA256: none"),
     });
     expect(main(io)).toBe(1);
     expect(io.logs).toEqual([
       ".github/actions/chromium/action.yml:1: actions/cache@v6 is not pinned to a full commit SHA (owner/repo@<sha> # vX.Y.Z).",
+      ".github/actions/tool/action.yml:2: owner/tool names no version and SHA-256 after it (<NAME>_VERSION: and <NAME>_SHA256: on the next lines), which the workflow checks the download against.",
     ]);
   });
 });
 
 describe("the repository's workflows", () => {
-  it("pin every action they use to a commit", () => {
+  it("pin every action they use to a commit, and every tool they download to its hash", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const process = { exitCode: undefined as number | string | null | undefined };
     run(process);
@@ -188,5 +243,6 @@ describe("the repository's workflows", () => {
       true,
     );
     expect(io.read(".github/workflows/release.yml")).toContain("uses:");
+    expect(io.read(".github/actions/publiccode/action.yml")).toMatch(/_SHA256: [0-9a-f]{64}\n/);
   });
 });
