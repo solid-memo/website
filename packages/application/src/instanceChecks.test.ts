@@ -154,6 +154,29 @@ describe("instance checks", () => {
       vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
     ).not.toContain(deck.reviewsDocumentUrl);
   });
+  it("checks an unclaimed document in no spelling of its address", async () => {
+    const { deps, useCases } = setup();
+    const named = { ...deck, reviewsDocumentUrl: "https://ALICE.example/notes/n.ttl" };
+    deps.deckRepository.listDecks = vi.fn(async () => [
+      { ...named, cardsDocumentUrl: "https://alice.example/notes/n.ttl" },
+    ]);
+    deps.deckRepository.unclaimedDocuments = vi.fn(async () => [
+      "https://alice.example/notes/n.ttl",
+    ]);
+    await useCases.checkInstance(instance.url);
+    await useCases.validateInstance(instance.url);
+    await useCases.checkDeck(
+      instance.url,
+      { ...named, cardsDocumentUrl: "https://alice.example:443/notes/n.ttl" },
+      { plain: (value) => value, check: () => [] },
+    );
+    const checked = [
+      ...vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls,
+      ...vi.mocked(deps.shapeValidator.validateDocument).mock.calls,
+    ].map(([url]) => url);
+    expect(checked).toContain(`${instance.url}catalog.ttl`);
+    expect(checked.filter((url) => url.includes("/notes/"))).toEqual([]);
+  });
   it("claims a deck's documents as the user confirmed, a deck of the instance only", async () => {
     const { deps, useCases } = setup();
     await useCases.claimDeckDocuments(instance.url, deck.url);
