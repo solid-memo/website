@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.8](https://github.com/solid-memo/website/compare/v6.17.7...v6.17.8) (2026-10-28)
+
+### Bug Fixes
+
+* **web:** serve a self-unregistering worker at the old trace viewer's address ([40a2f6f](https://github.com/solid-memo/website/commit/40a2f6fbe134541e4271ca8809203b96dc435f9a))
+
 ## [6.17.7](https://github.com/solid-memo/website/compare/v6.17.6...v6.17.7) (2026-10-28)
 
 ### Bug Fixes
