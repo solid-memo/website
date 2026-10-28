@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.1](https://github.com/solid-memo/website/compare/v6.17.0...v6.17.1) (2026-10-28)
+
+### Bug Fixes
+
+* **solid:** follow no redirect with the user's credentials ([d327d9c](https://github.com/solid-memo/website/commit/d327d9c3a7c811e3c5ce2d8e463c8e1105425b6d))
+* **ui:** show where a link in deck text leads, as its address is written ([bbd322d](https://github.com/solid-memo/website/commit/bbd322d9bdee16eaab172f79ec2281d941c4ba02))
+
 ## [6.17.0](https://github.com/solid-memo/website/compare/v6.16.3...v6.17.0) (2026-10-28)
 
 ### Features
