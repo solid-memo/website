@@ -765,7 +765,10 @@ a deck that had none (`Flashcards: <title>.`) gives way to the
 release's description. A copy upgraded before upgrades brought these
 texts along gets its own release's languages the same way, once a
 session when its page opens (`addReleaseLanguages`); nothing the user
-wrote changes. The notice lists
+wrote changes. That applies only to a copy of a series the library's
+index lists. A release added from a link stays on its creator's server,
+which can change it at any time, so a copy of one gets new languages
+only from an upgrade the user agrees to. The notice lists
 the notes of every release in between.
 
 Nothing is offered for a release that isn't newer, uses a card format
