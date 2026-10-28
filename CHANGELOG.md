@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.5](https://github.com/solid-memo/website/compare/v6.17.4...v6.17.5) (2026-10-28)
+
+### Bug Fixes
+
+* **solid:** refuse JSON-LD contexts below the top level of a deck file ([2d41bc0](https://github.com/solid-memo/website/commit/2d41bc078b56cd884426a9592bcb22d973daa30f))
+
 ## [6.17.4](https://github.com/solid-memo/website/compare/v6.17.3...v6.17.4) (2026-10-28)
 
 ### Bug Fixes
