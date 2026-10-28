@@ -74,12 +74,17 @@
     },
     customManagers: [
         // A tool a workflow downloads, its version after a comment that
-        // names it (`# renovate: datasource=github-releases depName=<owner>/<repo>`).
+        // names it (`# renovate: datasource=github-release-attachments
+        // depName=<owner>/<repo>`), and the SHA-256 of the file it
+        // downloads after that (`<NAME>_SHA256:`), which the workflow
+        // checks the file against: github-release-attachments finds the
+        // file of the current version by that hash, and writes the same
+        // file's hash in the new version with it (npm run check:actions).
         {
             customType: 'regex',
             managerFilePatterns: ['/^\\.github/(workflows|actions)/.+\\.ya?ml$/'],
             matchStrings: [
-                '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+: (?<currentValue>\\S+)',
+                '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+: (?<currentValue>\\S+)\\s+[A-Z_]+_SHA256: (?<currentDigest>[0-9a-f]{64})',
             ],
         },
         // The commit of Solid-Nextcloud its end-to-end tests' image builds,
@@ -173,6 +178,15 @@
         {
             matchDepNames: ['solidproject/community-server'],
             matchUpdateTypes: ['digest'],
+            automerge: false,
+        },
+        // A tool a workflow downloads is checked against the hash its
+        // update writes, and that hash is read from the same release as
+        // the file: a person merges the update, after reading the release.
+        // A file replaced in the release no longer matches the committed
+        // hash, so the step fails until a person looks at it.
+        {
+            matchDatasources: ['github-release-attachments'],
             automerge: false,
         },
         // Playwright and the browser it downloads move together: one pinned
