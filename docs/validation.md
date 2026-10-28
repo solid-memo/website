@@ -124,7 +124,8 @@ flowchart LR
   instance's own folder (the same `data-model.md` section). It's no
   violation: nothing is blocked or set aside, and the deck is still
   read and studied from. Those documents aren't
-  checked, since a repair writes to the document. Solid Memo's data
+  checked, under any spelling of their address (`isSameUrl`), since a
+  repair writes to the document. Solid Memo's data
   check and the
   Studio's Health screen show them (`UnclaimedDecksNotice`) with "These
   are this deck's documents", which claims them once the user confirms

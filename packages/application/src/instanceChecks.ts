@@ -8,6 +8,7 @@ import {
   catalogUrlOf,
   historyUrlOf,
   instanceDocumentUrls,
+  isSameUrl,
 } from "@solid-memo/domain/instanceLayout";
 import {
   summarize,
@@ -80,6 +81,17 @@ export interface InstanceCheckUseCases {
 }
 
 /**
+ * Whether the document at `url` is one of these decks' unclaimed ones,
+ * in whatever spelling (isSameUrl): a deck may name one document twice,
+ * and only the first spelling is listed as unclaimed.
+ */
+function isUnclaimed(url: string, unclaimed: readonly UnclaimedDeck[]): boolean {
+  return unclaimed.some((deck) =>
+    deck.documents.some((document) => isSameUrl(documentUrlOf(document), documentUrlOf(url))),
+  );
+}
+
+/**
  * The checks of an instance against Solid Memo's shapes (docs/validation.md):
  * the quick one made when it is opened, which spares a document the digest
  * says conformed and has not changed since, the full one of every document,
@@ -135,8 +147,9 @@ export function createInstanceCheckUseCases({
   }
   /**
    * The instance's documents, then its drafts': each with where it is,
-   * which picks its shapes. An unclaimed document is not checked: it may
-   * be anyone's, and a repair of what the check finds writes to it.
+   * which picks its shapes. An unclaimed document is not checked, in any
+   * spelling of its address (isUnclaimed): it may be anyone's, and a
+   * repair of what the check finds writes to it.
    */
   function documentsToCheck(
     instanceUrl: string,
@@ -144,10 +157,9 @@ export function createInstanceCheckUseCases({
     drafts: readonly string[],
     unclaimed: readonly UnclaimedDeck[],
   ): { url: string; context: DocumentContext }[] {
-    const skipped = new Set(unclaimed.flatMap((deck) => deck.documents.map(documentUrlOf)));
     return [
       ...instanceDocumentUrls(instanceUrl, decks)
-        .filter((url) => !skipped.has(url))
+        .filter((url) => !isUnclaimed(url, unclaimed))
         .map((url) => ({ url, context: "pod" as const })),
       ...drafts.map((url) => ({ url, context: "draft" as const })),
     ];
@@ -219,9 +231,8 @@ export function createInstanceCheckUseCases({
       const [report, cards, release] = await Promise.all([
         Promise.all([digestStore.of(instanceUrl), unclaimedDecksOf([deck])]).then(
           async ([digest, unclaimed]) => {
-            const skipped = new Set(unclaimed.flatMap((one) => one.documents));
             const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
-              (url) => !skipped.has(url),
+              (url) => !isUnclaimed(url, unclaimed),
             );
             return withUnclaimed(
               await checkDocuments(
