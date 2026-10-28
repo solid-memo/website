@@ -48,13 +48,15 @@ export function draftContainerOf(draftUrl: string): string {
  * anyone may have written, so the address is taken only in the
  * instance's `drafts/` as a request would send it (isDocumentIn), and
  * with no dot segment (`..`, `%2e%2E`; hasDotSegment), which would lead
- * elsewhere than its name and instance say.
+ * elsewhere than its name and instance say. Its version is a safe
+ * integer, so that draftUrlOf names the same draft again.
  */
 export function draftPlaceOf(
   draftUrl: string,
 ): { instanceUrl: string; name: string; version: number } | null {
   const match = /^(.*\/)drafts\/([^/]+)\/v([1-9][0-9]*)\/release\.ttl$/.exec(draftUrl);
   return match === null ||
+    !Number.isSafeInteger(Number(match[3])) ||
     hasDotSegment(draftUrl) ||
     !isDocumentIn(draftUrl, draftsContainerOf(match[1]!))
     ? null

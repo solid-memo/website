@@ -474,7 +474,8 @@ No document Solid Memo names has any.
   [solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts)).
 - **A draft** the catalog links (`sm:releaseDraft`) is one only at
   `<instance>drafts/<name>/v<N>/release.ttl`, in the instance's
-  `drafts/` as a request sends it and with no dot segment
+  `drafts/` as a request sends it, with no dot segment, and with N a
+  safe integer, so the address names the same draft again
   (`draftPlaceOf`). A name that's a dot segment is no draft's.
 - **A release** the catalog links (`sm:publishedRelease`) is listed only
   at an http(s) address named as a release is, `…/<name>/v<N>.ttl`,

@@ -133,6 +133,15 @@ describe("create", () => {
     expect(writes(pod)).toEqual([]);
   });
 
+  it("refuses a draft at an address no draft has, writing nothing", async () => {
+    const pod = await draftPod();
+    const url = `${INSTANCE}drafts/solid/v1e+21/release.ttl`;
+    await expect(pod.repository.create(INSTANCE, rebaseDraft(courseDraft(), url))).rejects.toThrow(
+      url,
+    );
+    expect(writes(pod)).toEqual([]);
+  });
+
   it("refuses an instance with no catalog, writing nothing", async () => {
     const pod = await draftPod();
     await pod.put(CATALOG, `<#other> a <http://www.w3.org/ns/dcat#Catalog> .`);
@@ -776,6 +785,19 @@ describe("readRelease and parseRelease", () => {
       `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "beta" .`,
     );
     await expect(read(at)).rejects.toMatchObject({ code: "releaseUnreadable" });
+    // A version too large to number a draft after, or the one after it.
+    for (const version of ["9007199254740991", "1000000000000000000000"]) {
+      await pod.put(
+        at,
+        `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "${version}" .`,
+      );
+      await expect(read(at)).rejects.toMatchObject({ code: "releaseUnreadable" });
+    }
+    await pod.put(
+      at,
+      `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "9007199254740990" .`,
+    );
+    expect((await read(at)).root.version).toBe("9007199254740990");
     await pod.put(
       at,
       `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <${SM}formatVersion> 7 .`,
@@ -918,6 +940,7 @@ describe("readRelease and parseRelease", () => {
       `<> a <${SM}Deck> .`,
       `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "1.0" .`,
       `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "0" .`,
+      `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "1000000000000000000000" .`,
     ]) {
       await expect(pod.repository.parseRelease(text, "turtle")).rejects.toMatchObject({
         code: "notAReleaseFile",
