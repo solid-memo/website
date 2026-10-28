@@ -25,9 +25,14 @@
     // find a bad or malicious version and pull it before it reaches main
     // unreviewed (GOVERNANCE.md#dependency-updates), where the release
     // job holds the deploy key (docs/releasing.md#the-deploy-key).
-    // 'strict' makes no branch, and so no pull request, before then. A
-    // security update does not wait: Renovate's vulnerabilityAlerts lift
-    // the age by default, and say so here too, should that default change.
+    // 'strict' makes no branch, and so no pull request, before then. This
+    // wait is on the version an update names: the .npmrc files'
+    // min-release-age and uv.toml's exclude-newer hold every package npm
+    // or uv newly locks to the same 3 days. A security update is proposed
+    // at once: Renovate's vulnerabilityAlerts lift the age by default, and
+    // say so here too, should that default change. npm and uv still lock
+    // no version younger than 3 days, so a maintainer locks such a fix by
+    // hand.
     minimumReleaseAge: '3 days',
     internalChecksFilter: 'strict',
     vulnerabilityAlerts: {
@@ -59,8 +64,9 @@
     // its hashes stale, so it is off; these are the only requirements
     // files. A bump moves only the pins: on the first of each month,
     // Renovate compiles both files again, so that the packages the tools
-    // need get their fixes too. That compiles in versions of any age, so
-    // a person merges it, after reading what moved.
+    // need get their fixes too. That moves every package at once, so a
+    // person merges it, after reading what moved. A compile, Renovate's or
+    // a person's, locks no version younger than 3 days (uv.toml).
     'pip-compile': {
         managerFilePatterns: ['/^scripts/requirements-[a-z]+\\.txt$/'],
         lockFileMaintenance: {

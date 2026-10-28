@@ -460,7 +460,10 @@ proposes their updates, CI checks them ([vendor-code.md](vendor-code.md)),
 and Renovate merges them on `main` with no person reviewing them once
 their version has been public for 3 days, so a bad version can be
 found and pulled first
-([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). Every action
+([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). The wait holds
+for every package an update newly locks, not only the one it names:
+the repository's `.npmrc` files set npm's `min-release-age` to 3 days,
+and its `uv.toml` sets uv's `exclude-newer` to 3 days. Every action
 the workflows use is pinned to a commit, since a tag can be moved
 (`npm run check:actions`,
 [testing.md](testing.md#the-repositorys-own-checks)). The archive isn't
