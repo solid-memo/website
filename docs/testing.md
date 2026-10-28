@@ -748,7 +748,9 @@ The Python tools CI installs are pinned twice. Each
 `uv pip compile` writes its `requirements-*.txt`: every package they
 need, at an exact version, with the hash of each of its files. pip
 installs the `.txt`, and with a hash in it, refuses any file whose hash
-differs or any package not listed. CI's jobs and the Taxonomy workflow
+differs or any package not listed. [uv.toml](../uv.toml) has uv
+compile only versions public for 3 days
+([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). CI's jobs and the Taxonomy workflow
 pass `--require-hashes` too. The hashes don't cover what pip installs
 to build a package that has no wheel, such as `actionlint-py`: those
 build tools come unpinned. Only CI's jobs that hold no secret install

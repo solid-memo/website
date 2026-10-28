@@ -447,8 +447,9 @@ They need checking again before anything relies on them.
 - SHOULD, not met — no unreviewed changes on `main`. The ruleset
   requires no approval, so the maintainer's and Renovate's pull
   requests reach `main` unreviewed. Renovate proposes a version only
-  once it has been public for 3 days, so a bad one can be pulled first;
-  that wait isn't a review.
+  once it has been public for 3 days, and npm and uv lock no package
+  an update pulls in to a younger version. A bad one can be pulled
+  first; that wait isn't a review.
 - SHOULD, not met — review within two business days: a stated target
   one volunteer can't assure, and nothing measures it.
 - OPTIONAL, not met — review by several reviewers.

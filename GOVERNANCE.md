@@ -137,7 +137,25 @@ reviewing it, so its updates are unreviewed changes too. A few updates
 wait for a person, as `renovate.json5` says why. Every update waits too:
 Renovate proposes a version only once it has been public for 3 days, so
 that a bad or malicious version can be found and pulled before it
-reaches `main`. A security update does not wait. The workflows' actions
+reaches `main`. The wait covers every package an update newly locks,
+not only the one it names. The repository's [.npmrc](.npmrc), and one
+beside each end-to-end test server's own `package-lock.json` in
+`e2e/pod/servers/`, set npm's `min-release-age` to 3 days, and
+[uv.toml](uv.toml) sets uv's `exclude-newer` to 3 days for the
+`scripts/requirements-*.txt` it compiles. So npm and uv, whether
+Renovate or a person runs them, resolve no package to a younger
+version. npm before 11.10 ignores the setting without a word: Node 24's
+npm is newer, and so is the npm the root `package.json`'s
+`packageManager` names, which Renovate runs. Versions already locked
+stay as they are, and `npm ci` and pip install them whatever their age.
+Renovate proposes a security update at once, without the wait. When
+its fixed version, or a package that version newly needs, is younger
+than 3 days, npm or uv cannot lock it and the update fails: a
+maintainer locks it by hand, after reading what it changes. npm's
+`--min-release-age-exclude=<package>` exempts that one package and not
+what it needs; so does uv's `--exclude-newer-package=<package>=false`,
+which the maintainer then takes out of the command the `.txt` records
+at its top. The workflows' actions
 are pinned to a commit, not a tag, which their owners could move, and
 Renovate updates them as it does every other dependency. Renovate
 cannot approve its own pull requests: once `main` requires an approving

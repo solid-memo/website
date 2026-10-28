@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# uv compiles scripts/requirements-*.txt only from versions that have been
+# public for 3 days, the wait renovate.json5's minimumReleaseAge sets on the
+# version an update names (GOVERNANCE.md#dependency-updates), as .npmrc's
+# min-release-age does for package-lock.json: this covers every package a
+# compile newly brings in, whoever runs it. pip installs what the .txt
+# already holds, whatever its age.
+exclude-newer = "3 days"
