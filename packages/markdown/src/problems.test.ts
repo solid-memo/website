@@ -98,6 +98,8 @@ describe("markdownProblems", () => {
       "[https://solidproject.org/TR](https://solidproject.org/TR/protocol)",
       "<https://solidproject.org/>",
       "[Bücher.example](https://xn--bcher-kva.example/)",
+      "[Bu\u0308cher.example](https://xn--bcher-kva.example/)",
+      "<https://my_site.example/>",
       "[https://[broken](https://x.example/)",
     ]) {
       expect(markdownProblems(link, PROSE)).toEqual([]);
@@ -133,6 +135,28 @@ describe("markdownProblems", () => {
       { code: "linkHost", text: "github.io", host: "evil.github.io" },
       { code: "linkHost", text: "example.org", host: "docs.example.org" },
       { code: "linkHost", text: "package.json", host: "docs.npmjs.com" },
+    ]);
+  });
+
+  it("names an address whose host as written is not the one it opens", () => {
+    expect(
+      markdownProblems(
+        "<https://login.bank.example%2E%65%76%69%6C%2E%63%6F%6D/> <https://bank.example\u3002evil.com/> [https://bank.example@evil.com/](https://evil.com/) [https://0x7f.1/](https://127.0.0.1/) [WWW.Example.org](https://example.org/)",
+        PROSE,
+      ),
+    ).toEqual([
+      {
+        code: "linkHost",
+        text: "https://login.bank.example%2E%65%76%69%6C%2E%63%6F%6D/",
+        host: "login.bank.example.evil.com",
+      },
+      {
+        code: "linkHost",
+        text: "https://bank.example\u3002evil.com/",
+        host: "bank.example.evil.com",
+      },
+      { code: "linkHost", text: "https://bank.example@evil.com/", host: "evil.com" },
+      { code: "linkHost", text: "https://0x7f.1/", host: "127.0.0.1" },
     ]);
   });
 

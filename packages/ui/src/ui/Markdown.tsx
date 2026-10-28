@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Fragment, type ComponentChildren } from "preact";
-import { liveLink } from "@solid-memo/markdown/links";
+import { liveLink, writtenHost } from "@solid-memo/markdown/links";
 import type { MdBlock, MdInline } from "@solid-memo/markdown/parse";
 import { breakable } from "./breakable";
 import { ExternalLink } from "./ExternalLink";
@@ -165,15 +165,40 @@ function inline(node: MdInline): ComponentChildren {
 }
 
 function MarkdownLink({ url, nodes }: { url: string; nodes: readonly MdInline[] }) {
-  const { t } = useI18n();
   const link = liveLink(url);
   const text = <MarkdownInlines nodes={nodes} />;
   if (link === null) return text;
-  const shown = nodes.map(inlineSource).join("");
+  return (
+    <WebLink link={link} written={url} shown={nodes.map(inlineSource).join("")}>
+      {text}
+    </WebLink>
+  );
+}
+
+/**
+ * A followed link (liveLink) from data, written as `written`, its text
+ * reading `shown`, with the host it leads to beside it unless the text is
+ * the address and names that host itself (writtenHost).
+ */
+export function WebLink({
+  link,
+  written,
+  shown,
+  children,
+}: {
+  link: { href: string; host: string };
+  written: string;
+  shown: string;
+  children: ComponentChildren;
+}) {
+  const { t } = useI18n();
   // Text that is the address as written needs no host beside it, unless
-  // its host is an international one: the punycode host then shows what
-  // look-alike letters hide.
-  const ownAddress = shown === link.href || (shown === url && !PUNYCODE.test(link.host));
+  // that address names its host other than as the parser reads it (an
+  // escape, a full-width dot) or the host is an international one: the
+  // punycode host then shows what look-alike letters hide.
+  const ownAddress =
+    shown === link.href ||
+    (shown === written && writtenHost(written) === link.host && !PUNYCODE.test(link.host));
   // Both isolated (dir), so a bidi override in the text before them cannot
   // reorder the address or the host they show. An address shown as itself
   // and the host run left to right; other link text in the direction of its
@@ -181,7 +206,7 @@ function MarkdownLink({ url, nodes }: { url: string; nodes: readonly MdInline[] 
   return (
     <>
       <ExternalLink url={link.href} dir={ownAddress ? "ltr" : "auto"}>
-        {text}
+        {children}
       </ExternalLink>
       {!ownAddress && (
         <span class="md-link-host" dir="ltr">
