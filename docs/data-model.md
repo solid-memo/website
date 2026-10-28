@@ -841,7 +841,10 @@ link to a group, a `dcat:catalog` link to a deck) is ignored. A node
 several parents list goes to the group with the lowest URL, except a
 group the catalog's `dcat:catalog` lists, which stays at the top level.
 A cycle is broken by moving its lowest-URL group to the top level. A
-negative position counts as none; on a tie of positions, decks come
+group nested deeper than 16 groups (`MAX_GROUP_DEPTH`) is read at the
+top level, with the groups it holds counting their depth from there.
+The editor doesn't stop a move that nests a group deeper, so the next
+read shows that group at the top level. A negative position counts as none; on a tie of positions, decks come
 before groups, each kind in document order. A group in a format newer
 than the app's makes the arrangement read-only. So does, under the
 "Set invalid data aside" policy (`sm:blockSubject`, the default), a
@@ -1295,6 +1298,17 @@ An import reads the file as the pod is read, with the same mappers:
   reading it would fetch that address. The parser reads the document as
   the check saw it, so a key named twice is the last one for both, and
   its document loader fetches nothing;
+- JSON nested deeper than 12 levels is refused (`deckFileUnreadable`),
+  before anything else reads it: the JSON-LD parser takes time far
+  beyond linear in the depth, and a file this app exports nests 5;
+- a file larger than `DECK_FILE_LIMITS` in `solidDeckArchive.ts` is
+  refused (`deckFileTooLarge`), and nothing is written. The limits are
+  64 MiB of text, a million triples, and 256 Mi characters in the terms
+  of those triples, which a prefix or a context can make far longer
+  than the text. They leave a wide margin over a deck of tens of
+  thousands of cards with progress, which the pod holds with no limit.
+  A release file the Studio opens is held to a release's limits
+  ([deck-library.md](deck-library.md#from-a-link));
 - a triple with a term Turtle can't write as it is is left out (below).
 
 The deck is then written as a new deck of the instance (`importedDeck`).

@@ -15,6 +15,7 @@ import {
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
+import { RELEASE_LIMITS } from "./client/readLimits";
 import {
   DECKS,
   draftPod,
@@ -785,6 +786,28 @@ describe("readRelease and parseRelease", () => {
       `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <${SM}formatVersion> 6 . <#c> a <${SM}Card> ; <${SM}formatVersion> 8 .`,
     );
     await expect(read(at)).rejects.toMatchObject({ code: "libraryCardTooNew" });
+  });
+
+  it("refuse a release larger than a release may be", async () => {
+    const pod = await draftPod();
+    const at = "https://other.example/releases/x/v1.ttl";
+    const many = Array.from({ length: RELEASE_LIMITS.quads }, (_, n) => n).join(",");
+    const releaseFetch: typeof globalThis.fetch = async (input) => {
+      const response = new Response(`<> a <${SM}Deck> ; <${SM}p> ${many} .`, {
+        headers: { "Content-Type": "text/turtle" },
+      });
+      Object.defineProperty(response, "url", { value: String(input) });
+      return response;
+    };
+    const repository = createSolidReleaseDraftRepository({ fetch: pod.fetch, releaseFetch });
+    await expect(repository.readRelease(at)).rejects.toMatchObject({
+      code: "releaseTooLarge",
+      vars: { url: at, bytes: RELEASE_LIMITS.bytes, quads: RELEASE_LIMITS.quads },
+    });
+    // So is a release file: one past them no one could read once published.
+    await expect(
+      repository.parseRelease(`<${at}> a <${SM}Deck> ; <${SM}p> ${many}, -1 .`, "turtle"),
+    ).rejects.toMatchObject({ code: "deckFileTooLarge", vars: RELEASE_LIMITS });
   });
 
   it("read the document a release names its series and publisher in, once, as no one, and none for a release that describes them", async () => {

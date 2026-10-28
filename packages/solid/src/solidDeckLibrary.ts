@@ -7,9 +7,9 @@ import type { Dataset } from "./client/rdf";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
-import { AppError } from "@solid-memo/domain/appError";
 import { catalogLinks } from "./catalogLinks";
 import { getSolidDatasetLinear } from "./client/resources";
+import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import {
   toCourseOutline,
   toLibraryDeckContent,
@@ -17,6 +17,7 @@ import {
   toLibraryIndexView,
   toStandaloneLibraryDeck,
 } from "./mappers/libraryMapper";
+import { releaseReadError, shownReadError } from "./releaseReadError";
 import { SM } from "./vocab";
 
 export interface SolidDeckLibraryDeps {
@@ -46,8 +47,15 @@ export interface SolidDeckLibraryDeps {
  * each time, with no index: its address may hold anything, now or later,
  * until it is copied. Its creator's catalog (publishedBeside) is read
  * as anyone reads it, as the fetch reads everything: no login is sent.
+ * Every release is read under RELEASE_LIMITS, as anyone's server may
+ * serve one as it likes (a copy from a link reads its newer releases
+ * here too), and so is that catalog; the library's releases are well
+ * within them (client/readLimits.test.ts); a release past them is
+ * releaseTooLarge, however it is read. The index, which grows with the
+ * library and comes with the site, is not.
  */
 export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps): DeckLibrary {
+  const limited = limitedFetch(fetch, RELEASE_LIMITS);
   const releases = new Map<string, Promise<Dataset>>();
   const contents = new Map<string, Promise<LibraryDeckContent>>();
   const outlines = new Map<string, Promise<CourseOutline>>();
@@ -62,7 +70,11 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
 
   /** The release's document, read once. */
   function release(url: string): Promise<Dataset> {
-    return kept(releases, url, () => getSolidDatasetLinear(url, { fetch }));
+    return kept(releases, url, () =>
+      getSolidDatasetLinear(url, { fetch: limited }).catch((error: unknown) => {
+        throw shownReadError(url, error);
+      }),
+    );
   }
 
   return {
@@ -91,9 +103,9 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
     async readRelease(url) {
       let dataset: Dataset;
       try {
-        dataset = await getSolidDatasetLinear(url, { fetch });
-      } catch {
-        throw new AppError("releaseUnreadable", { url });
+        dataset = await getSolidDatasetLinear(url, { fetch: limited });
+      } catch (error) {
+        throw releaseReadError(url, error);
       }
       return toStandaloneLibraryDeck(url, dataset);
     },
@@ -101,7 +113,7 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
     async publishedBeside(url) {
       for (const folder of foldersAbove(url)) {
         // An instance's catalog is `<instance>catalog.ttl`; one that cannot be read is no answer.
-        const links = await catalogLinks(folder, SM.publishedRelease, fetch).catch(
+        const links = await catalogLinks(folder, SM.publishedRelease, limited).catch(
           (): string[] => [],
         );
         if (links.includes(url)) return links;
@@ -111,13 +123,24 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
   };
 }
 
-/** The folders above a document, nearest first, up to its host's root. */
+/**
+ * How many folders above a release publishedBeside looks for its
+ * creator's catalog in: a release is published at
+ * `<instance>releases/<name>/v<N>.ttl` unless its creator chooses
+ * another folder, so the catalog is three folders up; whoever made the
+ * link chose the address, and each folder is one more read.
+ */
+const MAX_CATALOG_LEVELS = 8;
+
+/** The folders above a document, nearest first, up to its host's root or MAX_CATALOG_LEVELS. */
 function foldersAbove(url: string): string[] {
   const folders: string[] = [];
-  for (let folder = new URL(".", url); ; folder = new URL("..", folder)) {
+  for (let folder = new URL(".", url); folders.length < MAX_CATALOG_LEVELS; ) {
     folders.push(folder.href);
-    if (folder.pathname === "/") return folders;
+    if (folder.pathname === "/") break;
+    folder = new URL("..", folder);
   }
+  return folders;
 }
 
 /** What `make` makes for the URL, made once and kept; a failure is forgotten, so the next call tries again. */

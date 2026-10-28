@@ -9,6 +9,8 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
+import { ReadLimitError, type ReadLimits } from "./interface";
+import { limitsOf, quadTally, refusalOf } from "./readLimits";
 
 type Graphs = SolidDataset["graphs"];
 type Graph = Graphs["default"];
@@ -24,32 +26,68 @@ const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
  * deck of 3,000 cards, where fetching and parsing it take 50 ms. Here
  * solid-client fetches the document and describes it (ETag, ACL, access)
  * as ever, but its parser hands it no quads: they are collected and built
- * into the same frozen structure, once each.
+ * into the same frozen structure, once each. A response read under
+ * limits (readLimits.ts) is parsed under them too: past its triples, or
+ * the characters of their terms, the read fails with a ReadLimitError
+ * before any of it is built.
  */
 export async function getSolidDatasetLinear(
   url: string,
   options: { fetch: typeof globalThis.fetch },
 ): Promise<Dataset> {
-  const collected: { quads?: Quad[] } = {};
+  const collected: Collected = {};
   const described = await getSolidDataset(url, {
-    fetch: options.fetch,
-    parsers: { "text/turtle": collectingTurtleParser(collected) },
+    fetch: async (input, init) => {
+      const response = await options.fetch(input, init);
+      collected.response = response;
+      collected.limits = limitsOf(response);
+      return response;
+    },
+    parsers: { "text/turtle": collectingTurtleParser(collected, url) },
+  }).catch((error: unknown) => {
+    // The library reports a parser's error as a plain one of its own, and the browser a body's as its own.
+    throw collected.refused ?? refusalOf(collected.response) ?? error;
   });
   // solid-client parses what it returns with the parser for its type; ours is the only one it has.
   return Object.freeze({ ...described, graphs: graphsOf(collected.quads!) });
 }
 
-/** solid-client's Turtle parser, whose quads go to `collected` instead of to solid-client. */
-function collectingTurtleParser(collected: { quads?: Quad[] }): Parser {
+/** What a read's parser collected: its quads, and the read's response, its limits and why it refused it, if it did. */
+interface Collected {
+  response?: Response;
+  quads?: Quad[];
+  limits?: ReadLimits;
+  refused?: ReadLimitError;
+}
+
+/**
+ * solid-client's Turtle parser, whose quads go to `collected` instead of
+ * to solid-client; one past the limits of the read of `url` (quadTally)
+ * fails the parse instead, once, and drops what was kept. The parser
+ * goes on to the end of the text it was given, but keeps none of it.
+ */
+function collectingTurtleParser(collected: Collected, url: string): Parser {
   const parser = getTurtleParser();
+  const failed: ((error: Error) => void)[] = [];
   return {
     onQuad: () => undefined,
-    onError: (callback) => parser.onError(callback),
+    onError: (callback) => {
+      failed.push(callback);
+      parser.onError(callback);
+    },
     onComplete: (callback) => parser.onComplete(callback),
     parse: (source, resourceInfo) => {
       const quads: Quad[] = [];
+      const past = quadTally(collected.limits);
       collected.quads = quads;
-      parser.onQuad((quad) => quads.push(quad));
+      parser.onQuad((quad) => {
+        if (collected.refused !== undefined) return;
+        if (!past(quad)) return quads.push(quad);
+        // The tally is past limits only under some.
+        collected.refused = new ReadLimitError(url, collected.limits!);
+        quads.length = 0;
+        for (const callback of failed) callback(collected.refused);
+      });
       parser.parse(source, resourceInfo);
     },
   };

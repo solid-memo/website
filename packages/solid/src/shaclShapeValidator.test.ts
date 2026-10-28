@@ -16,6 +16,8 @@ import {
 } from "./client/rdf";
 import { datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
+import { ReadLimitError } from "./client/interface";
+import { RELEASE_LIMITS } from "./client/readLimits";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
 import { toFsrsStateThing, toReviewStateThing } from "./mappers/reviewStateMapper";
@@ -180,7 +182,27 @@ describe("createShaclShapeValidator", () => {
     );
     const { validator, validateNode, validate, publicFetch } = makeValidator();
     const report = await validator.validateDocument(release, "library");
-    expect(vi.mocked(getSolidDatasetOrNull).mock.calls[0]![1]).toBe(publicFetch);
+    // Through the public fetch, under the limits of a release.
+    vi.mocked(publicFetch).mockResolvedValueOnce(new Response(null, { status: 404 }));
+    await vi.mocked(getSolidDatasetOrNull).mock.calls[0]![1](release);
+    expect(publicFetch).toHaveBeenCalledWith(release, undefined);
+    vi.mocked(publicFetch).mockResolvedValueOnce(
+      new Response("x", { headers: { "Content-Length": String(RELEASE_LIMITS.bytes + 1) } }),
+    );
+    await expect(
+      vi.mocked(getSolidDatasetOrNull).mock.calls[0]![1](release),
+    ).rejects.toBeInstanceOf(ReadLimitError);
+    // A release past them is shown as one, and any other failure as it is.
+    vi.mocked(getSolidDatasetOrNull).mockRejectedValueOnce(
+      new ReadLimitError(release, RELEASE_LIMITS),
+    );
+    await expect(validator.validateDocument(release, "library")).rejects.toMatchObject({
+      code: "releaseTooLarge",
+      vars: { url: release },
+    });
+    const offline = new TypeError("Failed to fetch");
+    vi.mocked(getSolidDatasetOrNull).mockRejectedValueOnce(offline);
+    await expect(validator.validateDocument(release, "library")).rejects.toBe(offline);
     expect(report.subjects).toEqual([
       { url: release, status: "checked", shape: "libraryDeck", version: 6, violations: [] },
     ]);

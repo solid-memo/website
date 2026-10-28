@@ -80,9 +80,18 @@ function termValue(term: Term, compact: (iri: string) => string): Value {
 }
 
 /**
+ * How deep a deck file's JSON may nest: a file this app exports nests
+ * five levels, and the JSON-LD parser takes time far beyond linear in
+ * the depth of each value it reads (an array in an array, …), so a file
+ * nested some hundreds of levels holds the tab for minutes.
+ */
+const MAX_JSON_DEPTH = 12;
+
+/**
  * Refuse JSON-LD that names a context elsewhere (a URL, or `@import`):
  * reading it would fetch that address from the user's browser. A file
- * this app exports states its context in full. Throws
+ * this app exports states its context in full. Refuse JSON nested deeper
+ * than MAX_JSON_DEPTH too, before anything recurses into it. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
  *
  * Gives the document checked, written again: the parser is to read that
@@ -97,22 +106,26 @@ export function refuseRemoteContexts(text: string): string {
   } catch (error) {
     throw new AppError("deckFileUnreadable", { reason: String(error) });
   }
-  const visit = (value: unknown): void => {
-    if (Array.isArray(value)) {
-      value.forEach(visit);
-      return;
+  // A walk of its own, not a recursion, which a file nested deeper than the call stack would end.
+  const pending: [value: unknown, depth: number][] = [[json, 0]];
+  while (pending.length > 0) {
+    const [value, depth] = pending.pop()!;
+    if (typeof value !== "object" || value === null) continue;
+    if (depth === MAX_JSON_DEPTH) {
+      throw new AppError("deckFileUnreadable", {
+        reason: `The file nests deeper than ${MAX_JSON_DEPTH} levels.`,
+      });
     }
-    if (typeof value !== "object" || value === null) return;
     for (const [key, child] of Object.entries(value)) {
       if (key === "@context" && remote(child)) {
         throw new AppError("deckFileUnreadable", {
           reason: "The file names a JSON-LD context elsewhere.",
         });
       }
-      visit(child);
+      pending.push([child, depth + 1]);
     }
-  };
-  visit(json);
+  }
+  // Only now, the depth known to be within MAX_JSON_DEPTH: JSON.stringify recurses.
   return JSON.stringify(json);
 }
 

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { shown } from "@solid-memo/domain/langText";
+import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
 import {
   isCopyOf,
   libraryCopiesOf,
@@ -117,6 +118,46 @@ export interface LibraryUseCases {
     plan: LibraryUpgradePlan,
     onProgress?: (progress: DeckUpgradeProgress) => void,
   ): Promise<DeckUpgradeOutcome>;
+}
+
+/**
+ * How many of the releases a creator's catalog links are read for the
+ * series of a copy from a link (linkedSeries), and how many of them at
+ * once: the catalog is its creator's to write, now or later, and may
+ * link any number of releases, each as large as a release may be.
+ */
+const MAX_LINKED_RELEASES = 16;
+const LINKED_READS_AT_ONCE = 4;
+
+/**
+ * Which of a catalog's `links` to read for the series of the release
+ * at `copied`: a newer version of a release is named after its series
+ * (`…/<name>/v<N>.ttl`, docs/studio.md), so those named as it come
+ * first, the highest version first, then the others, in the catalog's
+ * order; MAX_LINKED_RELEASES of them at most.
+ */
+function likeliestNewer(copied: string, links: string[]): string[] {
+  const name = releasePlaceOf(copied)?.name;
+  const rank = (url: string): [number, number] => {
+    const place = releasePlaceOf(url);
+    return place !== null && place.name === name ? [0, -place.version] : [1, 0];
+  };
+  return links
+    .map((url) => ({ url, rank: rank(url) }))
+    .sort((a, b) => a.rank[0] - b.rank[0] || a.rank[1] - b.rank[1])
+    .slice(0, MAX_LINKED_RELEASES)
+    .map(({ url }) => url);
+}
+
+/** `read` of each of `urls`, in their order, LINKED_READS_AT_ONCE of them at most at once. */
+async function readEach<T>(urls: string[], read: (url: string) => Promise<T>): Promise<T[]> {
+  const results: T[] = [];
+  let next = 0;
+  const reader = async () => {
+    for (let at = next++; at < urls.length; at = next++) results[at] = await read(urls[at]!);
+  };
+  await Promise.all(Array.from({ length: LINKED_READS_AT_ONCE }, reader));
+  return results;
 }
 
 /**
@@ -242,8 +283,9 @@ export function createLibraryUseCases({
    * itself unless its creator's catalog can be read (`complete`), then
    * the newest of its series the catalog links. A release the
    * catalog links that cannot be read is passed over, and so is one the
-   * copied release lists, as no newer one. `reads` keeps each release
-   * read, for the copies looked up together: one read of each.
+   * copied release lists, as no newer one; of the rest, no more than
+   * MAX_LINKED_RELEASES are read (likeliestNewer). `reads` keeps each
+   * release read, for the copies looked up together: one read of each.
    */
   async function linkedSeries(
     url: string,
@@ -260,8 +302,12 @@ export function createLibraryUseCases({
     const [copied, published] = await Promise.all([read(url), deckLibrary.publishedBeside(url)]);
     if (published === null) return { copied, series: copied, complete: false };
     const listed = new Set(copied.releases.map((release) => release.url));
-    const others = await Promise.all(
-      published.filter((other) => !listed.has(other)).map((other) => read(other).catch(() => null)),
+    const others = await readEach(
+      likeliestNewer(
+        url,
+        published.filter((other) => !listed.has(other)),
+      ),
+      (other) => read(other).catch(() => null),
     );
     return { copied, series: newestRelease(copied, others), complete: true };
   }

@@ -404,16 +404,17 @@ export interface DeckLibrary {
    * (docs/deck-library.md, From a link): what its one document says of
    * it, its series and its earlier versions, with no index. Read afresh
    * each time, as an address may hold anything, now or later. Throws
-   * releaseUnreadable when nothing can be read there, notADeck when it
-   * holds no deck, libraryDeckTooNew when its deck is in a newer format.
+   * releaseUnreadable when nothing can be read there, releaseTooLarge
+   * when it is larger than a release may be, notADeck when it holds no
+   * deck, libraryDeckTooNew when its deck is in a newer format.
    */
   readRelease(url: string): Promise<LibraryDeck>;
   /**
    * The releases the catalog of the instance that published `url`
    * links (`sm:publishedRelease`), read as anyone reads it: looked for
-   * in the folders above the release, nearest first, the first that
-   * links it. Null when none can be read: an instance's catalog is
-   * private unless its owner shares it.
+   * in the folders above the release, nearest first and a few at most,
+   * the first that links it. Null when none can be read: an instance's
+   * catalog is private unless its owner shares it.
    */
   publishedBeside(url: string): Promise<string[] | null>;
 }
@@ -438,8 +439,9 @@ export interface DeckArchive {
    * IRIs are resolved against `baseUrl`. Throws deckFileUnreadable when
    * the text does not parse (or a JSON-LD context would be fetched from
    * elsewhere), notADeckFile when it holds no deck this app can read, or
-   * more than one, and deckFileTooNew when a deck, card or review state
-   * is in a newer format than this app reads.
+   * more than one, deckFileTooNew when a deck, card or review state
+   * is in a newer format than this app reads, and deckFileTooLarge when
+   * the file is larger than a deck file may be.
    */
   readDeckFile(text: string, format: DeckFileFormat, baseUrl: string): Promise<DeckFileContent>;
 }
@@ -504,7 +506,8 @@ export interface ReleaseDraftRepository {
   /**
    * A release document anywhere, as it states itself, at its own URL;
    * releaseUnreadable when there is none to read there, or its version
-   * is none of 1, 2, ….
+   * is none of 1, 2, …; releaseTooLarge when it is larger than a release
+   * may be.
    */
   readRelease(url: string): Promise<ReleaseDraft>;
   /**
@@ -520,7 +523,8 @@ export interface ReleaseDraftRepository {
    * A release from a file's text, at the address its root names (the
    * file's own when it names none); notAReleaseFile when it holds no
    * one release, or its version is none of 1, 2, …; deckFileUnreadable
-   * when it does not parse.
+   * when it does not parse, deckFileTooLarge when it is larger than a
+   * release may be.
    */
   parseRelease(text: string, format: DeckFileFormat): Promise<ReleaseDraft>;
   /**

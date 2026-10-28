@@ -111,6 +111,37 @@ export class HttpError extends Error {
 }
 
 /**
+ * How much of a document a read takes in: its body's bytes, the triples
+ * parsed from it, and the characters of their terms (readLimits.ts,
+ * quadTally).
+ */
+export interface ReadLimits {
+  readonly bytes: number;
+  readonly quads: number;
+  readonly characters: number;
+}
+
+/**
+ * What a read rejects with when the document is larger than its limits
+ * allow (readLimits.ts): its body, as sent or as said in advance
+ * (Content-Length), or the triples parsed from it, or their terms. What
+ * was read so far is dropped.
+ */
+export class ReadLimitError extends Error {
+  constructor(
+    /** The document's URL. */
+    readonly url: string,
+    /** The limits it went past. */
+    readonly limits: ReadLimits,
+  ) {
+    super(
+      `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms.`,
+    );
+    this.name = "ReadLimitError";
+  }
+}
+
+/**
  * What a read of a document gave: the dataset, with the version (ETag)
  * the pod gave it, or that the document is still at the version asked
  * about (304).

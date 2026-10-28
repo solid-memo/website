@@ -12,9 +12,12 @@ import {
   type DocumentWrite,
   type FetchedDataset,
   HttpError,
+  ReadLimitError,
+  type ReadLimits,
   type RequestOptions,
   type SourcedDataset,
 } from "@solid-memo/solid/client/interface";
+import { limitsOf, quadTally, refusalOf } from "@solid-memo/solid/client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid/client/sparqlUpdate";
 import { refuseUnwritable } from "@solid-memo/solid/writableTerms";
 import {
@@ -145,17 +148,47 @@ function resourceOf(response: Response): Resource {
   });
 }
 
-/** The quads of a Turtle text, its relative IRIs resolved against `baseIRI`. */
-function parseTurtle(text: string, baseIRI: string): Quad[] {
-  return new Parser({ format: TURTLE, baseIRI }).parse(text);
+/**
+ * A collector of a text's quads, parsed as the document at `url` under
+ * `limits`: `add` keeps each, until one past them (quadTally), which
+ * drops what was kept and rejects once, with a ReadLimitError; the
+ * parser may go on to the end of the text, but nothing more is kept.
+ */
+function collector(url: string, limits: ReadLimits | undefined, reject: (error: Error) => void) {
+  const quads: Quad[] = [];
+  const past = quadTally(limits);
+  let refused = false;
+  return {
+    quads,
+    add(quad: Quad): void {
+      if (refused) return;
+      if (!past(quad)) return void quads.push(quad);
+      refused = true;
+      quads.length = 0;
+      // The tally is past limits only under some.
+      reject(new ReadLimitError(url, limits!));
+    },
+  };
+}
+
+/** The quads of a Turtle text, its relative IRIs resolved against `baseIRI`, under `limits` (collector). */
+function parseTurtle(text: string, baseIRI: string, limits?: ReadLimits): Promise<Quad[]> {
+  return new Promise((resolve, reject) => {
+    const { quads, add } = collector(baseIRI, limits, reject);
+    new Parser({ format: TURTLE, baseIRI }).parse(text, (error, quad) => {
+      if (error) reject(error);
+      else if (quad) add(quad);
+      else resolve(quads);
+    });
+  });
 }
 
 /**
  * The quads of a JSON-LD text, its relative IRIs resolved against
- * `baseIRI`, in every graph it names. A context it names by URL is not
- * fetched: such a text fails to parse.
+ * `baseIRI`, in every graph it names, under `limits` (collector). A
+ * context it names by URL is not fetched: such a text fails to parse.
  */
-function parseJsonLd(text: string, baseIRI: string): Promise<Quad[]> {
+function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
     const parser = new JsonLdParser({
       baseIRI,
@@ -165,8 +198,8 @@ function parseJsonLd(text: string, baseIRI: string): Promise<Quad[]> {
         },
       },
     });
-    const quads: Quad[] = [];
-    parser.on("data", (quad: Quad) => quads.push(quad));
+    const { quads, add } = collector(baseIRI, limits, reject);
+    parser.on("data", add);
     parser.on("error", reject);
     parser.on("end", () => resolve(quads));
     parser.write(text);
@@ -176,8 +209,10 @@ function parseJsonLd(text: string, baseIRI: string): Promise<Quad[]> {
 
 /**
  * The quads of a document's response: a Turtle document's, parsed with
- * its URL as the base. Rejects (with no HttpError) on a response of
- * another type, or one whose text does not parse.
+ * its URL as the base, under the limits it is read under (readLimits.ts).
+ * Rejects (with no HttpError) on a response of another type, or one
+ * whose text does not parse, and with a ReadLimitError on one past its
+ * limits.
  */
 async function quadsOfResponse(response: Response, resource: Resource): Promise<Quad[]> {
   const { url, contentType } = resource;
@@ -190,10 +225,15 @@ async function quadsOfResponse(response: Response, resource: Resource): Promise<
       `The Resource at [${url}] has a MIME type of [${mediaType}], but the only parsers available are for the following MIME types: [${TURTLE}].`,
     );
   }
-  const text = await response.text();
+  const limits = limitsOf(response);
+  const text = await response.text().catch((error: unknown) => {
+    // A body past its limit fails as the browser fails a read; why is kept apart.
+    throw refusalOf(response) ?? error;
+  });
   try {
-    return parseTurtle(text, url);
+    return await parseTurtle(text, url, limits);
   } catch (error) {
+    if (error instanceof ReadLimitError) throw error;
     throw new Error(
       `Encountered an error parsing the Resource at [${url}] with content type [${contentType}]: ${error}`,
       { cause: error },
@@ -586,14 +626,18 @@ const MEDIA_TYPES = { turtle: TURTLE, jsonld: "application/ld+json" } as const;
 /**
  * The quads of a Turtle or JSON-LD text, its relative IRIs resolved
  * against `baseUrl`, parsed as a pod's documents are: in every graph the
- * text names. Rejects with the parser's error on a text that does not parse.
+ * text names. Rejects with the parser's error on a text that does not
+ * parse, and with a ReadLimitError at the first quad past `limits`.
  */
 export async function parseQuads(
   text: string,
   format: keyof typeof MEDIA_TYPES,
   baseUrl: string,
+  limits?: ReadLimits,
 ): Promise<Quad[]> {
-  return format === "turtle" ? parseTurtle(text, baseUrl) : parseJsonLd(text, baseUrl);
+  return format === "turtle"
+    ? parseTurtle(text, baseUrl, limits)
+    : parseJsonLd(text, baseUrl, limits);
 }
 
 /** The URL of the document a dataset was read from or saved to; null for one built here. */

@@ -143,6 +143,8 @@ export const ERROR_TEMPLATES = {
     "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
   deckFileTooNew:
     "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
+  deckFileTooLarge:
+    "That file is larger than any deck Solid Memo reads, so it was not read. Choose a smaller file.",
   noGuestPod: "There is no guest study on this device.",
   guestPodStartFailed:
     "The guest study on this device could not be opened. Reload the page and try again.",
@@ -154,6 +156,8 @@ export const ERROR_TEMPLATES = {
   draftGone: "That draft no longer exists. Perhaps it was deleted in another tab or app.",
   releaseUnreadable:
     "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
+  releaseTooLarge:
+    "The release at {url} is larger than any release Solid Memo reads, so it was not read. Check the address, or ask the release's creator about it.",
   notAReleaseFile:
     "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
   draftIdUnsupported:
