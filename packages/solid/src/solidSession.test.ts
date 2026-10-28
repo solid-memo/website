@@ -27,7 +27,7 @@ it("logs in and fetches through one sign-in client", async () => {
     redirectUrl: "https://memo.example/",
     clientName: "Test App",
   });
-  expect(client.fetch).toHaveBeenCalledWith("https://pod.example/resource", undefined);
+  expect(client.fetch).toHaveBeenCalledWith("https://pod.example/resource", { redirect: "error" });
   expect(expired).toHaveBeenCalledOnce();
   expect(webId()).toBe("https://alice.example/profile/card#me");
 });

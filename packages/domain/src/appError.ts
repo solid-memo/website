@@ -106,6 +106,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo stopped a change to your Pod for safety: it would have been saved at an address Solid Memo never saves to. Nothing was changed.",
   writeOutsidePod:
     "Solid Memo did not save this: it is kept on {host}, outside your Pod, and Solid Memo saves only to your Pod. Nothing was changed.",
+  redirectRefused:
+    "Solid Memo stopped a change to your Pod for safety: your Pod sent it on to another address, and Solid Memo saves only at the address it asked for.",
   deckChangedSinceOffer:
     "The deck changed since the update was offered, perhaps in another tab or app, so nothing was changed. Look at the offer again.",
   deckChangedDuringUpgrade:

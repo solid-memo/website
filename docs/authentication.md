@@ -181,6 +181,33 @@ gateway hands the profile lookup (`getProfileStorages`, in
 `client/resources.ts`) the profile it read, so the lookup doesn't fetch
 it with the browser's fetch.
 
+authFetch follows no redirect: it sends every request with
+`redirect: "error"`, whatever the caller asked. The
+[pod fence](boundaries.md#the-pod-fence) checks the address asked for,
+and Inrupt's sign-in client sends a redirected request that ends 401
+or 403 again to the new address, with fresh credentials. Both sign-in
+clients send the request with the redirect mode authFetch gives it
+([solid-memo-client.md](solid-memo-client.md#restore-refresh-and-logout)).
+So no request carries the user's credentials to an address the fences
+never saw.
+When a request fails and wasn't aborted, authFetch asks the same
+address with a HEAD as no one, the redirect not followed:
+
+- **No redirect:** the failure is passed on as it came.
+- **A read** (GET, HEAD, OPTIONS) that redirects is sent again as no
+  one (`anonymousFetch`), the redirect followed. A WebID whose public
+  profile is behind a redirect still reads. If that read follows no
+  redirect, the first failure is passed on instead.
+- **A write** that redirects is refused (`redirectRefused`), and the
+  app shows why. A write to the profile of such a WebID, a type index
+  link say, fails the same way.
+
+The HEAD asks as no one, so it can't tell a redirect the user would
+get from one only visitors with no login get. On a server that sends
+those to a login page, a write that failed for another reason, such
+as a dropped connection, shows as `redirectRefused`. Nothing is sent
+to the login page.
+
 ## Logout
 
 `logout()` clears the session through the authn library, and the UI

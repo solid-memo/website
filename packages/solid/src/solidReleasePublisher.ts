@@ -171,7 +171,8 @@ function statementsOf(quads: readonly Quad[], url: string): string {
  * and so is any but a read (GET, HEAD) of another resource than the
  * release's own access control, beside it (`<release>.acl`, its ACL; or
  * `<release>.acr`, its ACR), which every Solid server tested names. A
- * write is not followed to another address (`redirect: "error"`), and a
+ * write is not followed to another address (`redirect: "error"`, as
+ * the user's fetch already asks of every request, authFetch.ts), and a
  * read answered from another origin is refused. Each check is of the
  * request itself, so an answer that names one access control first and
  * another after leads to no other write.
@@ -195,7 +196,3 @@ function accessControlFetch(
     return response;
   };
 }
-
-/** A fetch as someone with no login: no cookie, no credentials of any kind. */
-export const anonymousFetch: typeof globalThis.fetch = (input, init) =>
-  globalThis.fetch(input, { ...init, credentials: "omit" });

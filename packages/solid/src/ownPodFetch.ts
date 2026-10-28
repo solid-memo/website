@@ -8,8 +8,9 @@ import { isDocumentIn } from "@solid-memo/domain/instanceLayout";
  * A fetch that is the user only in their own pod: a document in one of
  * the folders `ownFolders` gives for the logged-in WebID (their storages
  * and the instances they registered) is read with `fetch`, the user's,
- * and a redirect is then an error, so neither the browser nor the
- * login's fetch takes the credentials anywhere else; every other address
+ * and a redirect is then an error, as it is for every request that
+ * fetch sends (authFetch.ts), asked here too so that it holds of any
+ * fetch this is given; every other address
  * is read with `publicFetch`, as no one. Logged out, everything is.
  */
 export function createOwnPodFetch({

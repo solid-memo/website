@@ -74,14 +74,18 @@ vi.mock("@solid-memo/solid/solidSession", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/solid/solidSession")>();
   return {
     ...original,
-    createSolidSession: (...args: Parameters<typeof original.createSolidSession>) => ({
-      ...original.createSolidSession(...args),
-      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-        login.sent.push(String(input instanceof Request ? input.url : input));
-        return globalThis.fetch(input, init);
-      },
-      webId: () => login.webId,
-    }),
+    createSolidSession: (...args: Parameters<typeof original.createSolidSession>) => {
+      const session = original.createSolidSession(...args);
+      return {
+        ...session,
+        // The session's own fetch, so a test sees what it sends.
+        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+          login.sent.push(String(input instanceof Request ? input.url : input));
+          return session.fetch(input, init);
+        },
+        webId: () => login.webId,
+      };
+    },
   };
 });
 
@@ -641,6 +645,40 @@ describe("createAppUseCases", () => {
     }
     // No refused write left the page.
     expect(requests).toEqual([]);
+  });
+
+  it("follows no redirect with the user's credentials, whatever an adapter asks", async () => {
+    const alice = "https://alice.example/";
+    const pod = podAt(alice);
+    podsNetwork({ [alice]: pod });
+    login.webId = `${alice}profile/card#me`;
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    given.clear();
+    createAppUseCases({ ...options, indexedDB: undefined });
+    // The pod's fetch, the publisher's access fetch, and the data fetch, which sends a request into the user's own pod through the credential gate.
+    const fetches = {
+      podFetch: given.get("createSolidInstanceRepository")!.fetch!,
+      shareFetch: given.get("createSolidReleasePublisher")!.shareFetch!,
+      deckFetch: given.get("createSolidDeckRepository")!.fetch!,
+      reviewFetch: given.get("createSolidReviewStateRepository")!.fetch!,
+    };
+    const url = `${alice}solid-memo/main/decks/deck-1.ttl`;
+    for (const [name, fetch] of Object.entries(fetches)) {
+      for (const method of ["GET", "PUT"]) {
+        vi.mocked(globalThis.fetch).mockClear();
+        login.sent = [];
+        await fetch(url, { method, redirect: "follow" });
+        expect(vi.mocked(globalThis.fetch), `${name}: ${method}`).toHaveBeenCalledWith(
+          url,
+          expect.objectContaining({ method, redirect: "error" }),
+        );
+        expect(login.sent, `${name}: ${method}`).toContain(url);
+      }
+    }
   });
 
   it("reads the deck library the site publishes", { timeout: 30_000 }, async () => {
