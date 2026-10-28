@@ -94,6 +94,13 @@
         "noUselessFragments": "off",
         // The reduced-motion rule must win over every animation.
         "noImportantStyles": "off",
+        // The smallest and largest study days are ISO date strings, which Math.min cannot compare.
+        "useMathMinMax": "off",
+      },
+      "performance": {
+        // The journeys read a Playwright locator's innerText(), the text a reader sees, which
+        // textContent() is not.
+        "useDomNodeTextContent": "off",
       },
       "style": {
         // Allowed where the code just made sure of the value, and in tests (docs/style.md).
