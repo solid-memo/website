@@ -100,10 +100,14 @@ flowchart LR
 - **A date the app can't read** is checked beside its shape, wherever
   the subject is: an instance's, a release's or a draft's
   (`DateTimeRange`, `dateViolations` in `shaclShapeValidator.ts`). It's
-  a valid `xsd:dateTime` in one of the shape's date fields, past what a
+  an `xsd:dateTime` in one of the shape's date fields that the app reads
+  as no date (`readDatetime` in
+  [records.ts](../packages/solid/src/records.ts)). One is past what a
   JavaScript date holds (after 13 September 275760, or before 20 April
-  -271821). SHACL finds it valid, and the app reads it as no date
-  (`readDatetime` in [records.ts](../packages/solid/src/records.ts)).
+  -271821), which SHACL finds valid. Another is longer than 64
+  characters, or isn't a date-time from its first character to its
+  last: the app reads it as no date before the client's reader sees
+  it, since that reader takes much longer on a long literal.
   It's a violation of the subject, with the date as its value. A value
   that's no date-time at all is the shape's to name, and named once.
   The app reads an optional date as absent, and a [repair](#repair)

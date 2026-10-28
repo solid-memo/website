@@ -1499,7 +1499,7 @@
       "recomputeDue": "Recalculer la date de la prochaine révision",
       "nameAgent": "Nommer la personne ou l’organisation d’après son adresse",
       "dropDanglingMembers": "Supprimer les liens vers des paquets et des groupes qui n’existent plus",
-      "dropUnreadableDate": "Supprimer les dates trop lointaines dans le futur ou le passé pour être lues",
+      "dropUnreadableDate": "Supprimer les dates que Solid Memo ne peut pas lire",
       "removeSubject": "Supprimer"
     }
   },
@@ -1633,7 +1633,7 @@
       "MaxLength": "Le texte est trop long.",
       "Closed": "La propriété n’est pas autorisée ici.",
       "DeckPlace": "L’entrée du paquet n’est pas dans le catalogue de son instance, ou elle désigne un document à une adresse qu’aucun document de paquet ne peut avoir, comme le contrôle d’accès d’une autre ressource ou l’un des documents propres de l’instance. Solid Memo ne l’utilise pas.",
-      "DateTimeRange": "Cette date est trop loin dans le futur ou le passé pour que Solid Memo la lise : elle est lue comme une absence de date."
+      "DateTimeRange": "Solid Memo ne peut pas lire cette date : elle est trop loin dans le futur ou le passé, ou plus longue qu’une date-heure, elle est donc lue comme une absence de date."
     }
   },
   "webIdDocument": {

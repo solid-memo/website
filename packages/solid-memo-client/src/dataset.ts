@@ -314,7 +314,9 @@ export function changesOfLog(log: Step): Changes {
 /** A date-time literal's value: see rdf.ts getDatetime. */
 export function parseDatetime(text: string): Date | null {
   // Found anywhere in the text, as @inrupt/solid-client finds it; the text is then read from its start.
-  if (!/-?\d{4,}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(Z|(\+|-)\d\d:\d\d)?/.test(text)) return null;
+  // Its pattern, -?\d{4,}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(Z|(\+|-)\d\d:\d\d)?, finds a
+  // date-time where this one does, but takes time that grows with the square of a long run of digits.
+  if (!/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d/.test(text)) return null;
   const [signedDate = "", rest = ""] = text.split("T");
   const negative = signedDate.startsWith("-");
   const [year, month, day] = (negative ? signedDate.slice(1) : signedDate).split("-");

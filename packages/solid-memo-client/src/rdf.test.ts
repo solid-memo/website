@@ -76,6 +76,12 @@ describe("getDatetime, of the forms a date-time takes", () => {
   it("reads a year of two digits as that year, not as one of the 1900s", () => {
     expect(at("0050-06-01T00:00:00Z")!.getUTCFullYear()).toBe(50);
   });
+
+  it("finds no date-time in a long run of digits, in time that grows with its length", () => {
+    const started = performance.now();
+    expect(at("1".repeat(100_000))).toBeNull();
+    expect(performance.now() - started).toBeLessThan(1_000);
+  });
 });
 
 /** A subject made by name holding one literal of `datatype`. */
