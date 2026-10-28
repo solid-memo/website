@@ -38,10 +38,12 @@ export function exclusively<T>(work: () => Promise<T>): Promise<T> {
 /**
  * Refreshes the stored session's tokens with its refresh token, read
  * afresh in case another tab rotated it, and stores the one the
- * provider gives back. "gone" when no session of `webId`'s is stored
- * any more: a logout, or a login as someone else, in another tab.
- * Undefined when the session has no refresh token, or the provider
- * refuses it, which ends the stored session.
+ * provider gives back. "gone" when no session of `webId`'s at `as` is
+ * stored any more: a logout, or a login as someone else or at another
+ * provider, in another tab. A session from another provider is left as
+ * it is, and its tokens and client are never sent to `as`. Undefined
+ * when the session has no refresh token, or the provider refuses it,
+ * which ends the stored session.
  */
 export async function refreshStored(
   as: oauth.AuthorizationServer,
@@ -49,7 +51,9 @@ export async function refreshStored(
 ): Promise<{ stored: StoredSession; tokens: Tokens } | "gone" | undefined> {
   return exclusively(async () => {
     const stored = await loadSession();
-    if (stored === undefined || stored.webId !== webId) return "gone";
+    if (stored === undefined || stored.webId !== webId || stored.issuer !== as.issuer) {
+      return "gone";
+    }
     if (stored.refreshToken === undefined) return undefined;
     let tokens: Tokens;
     try {

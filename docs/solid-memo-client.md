@@ -144,8 +144,10 @@ The session's requests are in
   `restore()` asks the provider again with `prompt=none`, as Inrupt's
   client always does. It reports the page it left once the provider
   sends the learner back. When another tab logged out, or logged in as
-  someone else, after the reload read the stored session, `restore()`
-  finds no one and asks the provider nothing.
+  someone else or at another provider, after the reload read the
+  stored session, `restore()` finds no one and asks the provider
+  nothing. A provider that refuses the silent login ends the stored
+  session only when it's still this provider's.
 - **A request** carries `Authorization: DPoP` with the access token and
   a proof of its method and its URL. It's sent once more when the pod
   answers 401 asking for a DPoP nonce, if its body can be sent again.
@@ -161,6 +163,9 @@ The session's requests are in
 - **A refresh** reads the stored session again, and takes its refresh
   token and key pair, which a login in another tab may have replaced.
   A provider that refuses the refresh token ends the stored session.
+  When another tab has since logged in at another provider, the
+  refresh sends nothing to this tab's provider, and the tab logs out.
+  The other provider's session stays stored.
 - **`logout()`** forgets the session in this browser only, as Inrupt's
   client does: the provider's own session, and its
   `end_session_endpoint`, are left alone
