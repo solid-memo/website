@@ -19,12 +19,19 @@
 # main's run skips the jobs that would save it, warm-browsers does
 # (ci.yml), and caches keeps main's newest two entries per browser, a
 # new image being rolled out over days. Run it after npm ci.
+#
+# With `cache: false`, it always asks the mirror, whose signed lists apt
+# checks each file against, and saves nothing (actions/chromium says
+# which jobs do).
 name: Playwright's system libraries
 description: Restores or downloads, and installs, the system libraries a Playwright browser needs.
 inputs:
   browser:
     description: The browser whose libraries to install (chromium, firefox or webkit).
     required: true
+  cache:
+    description: Whether to restore the .deb files from GitHub's cache, and save them there (true or false).
+    default: "true"
 runs:
   using: composite
   steps:
@@ -36,6 +43,7 @@ runs:
         version=$(node -p "require('playwright-core/package.json').version")
         echo "key=playwright-deps-$BROWSER-${ImageOS:?}-${ImageVersion:?}-$RUNNER_ARCH-$version" >> "$GITHUB_OUTPUT"
     - id: cache
+      if: inputs.cache == 'true'
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/playwright-deps
@@ -87,7 +95,7 @@ runs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::SourceList=/dev/null -o Dir::Etc::SourceParts=/dev/null \
             install -y -q --no-install-recommends "${debs[@]}"
         fi
-    - if: steps.cache.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main'
+    - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main'
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/playwright-deps

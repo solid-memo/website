@@ -10,10 +10,22 @@
 # system libraries it needs come from playwright-deps, from GitHub's
 # cache too. Run it after npm ci, which installs that version.
 #
+# With `cache: false`, nothing comes from GitHub's cache: the shell is
+# downloaded by Playwright and the libraries from Ubuntu's signed
+# mirror, and nothing is saved. A job that holds a secret, or attests
+# what it makes, uses that (release.yml's release job; its docs job,
+# which checks out a tag, installs them with a step of its own): any
+# job on main can write main's cache entries, so what a job restores
+# from them is only as trustworthy as the least trusted of those jobs.
+#
 # The key is not the journeys job's (ci.yml): that job installs the full
 # Chromium, and neither may restore a cache that lacks its browser.
 name: Chromium
 description: Restores or installs the Chromium headless shell that draws the docs' diagrams.
+inputs:
+  cache:
+    description: Whether to restore the shell and its libraries from GitHub's cache, and save them there (true or false).
+    default: "true"
 runs:
   using: composite
   steps:
@@ -21,6 +33,7 @@ runs:
       shell: bash
       run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
     - id: cache
+      if: inputs.cache == 'true'
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/ms-playwright
@@ -31,3 +44,4 @@ runs:
     - uses: ./.github/actions/playwright-deps
       with:
         browser: chromium
+        cache: ${{ inputs.cache }}
