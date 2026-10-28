@@ -436,6 +436,16 @@ The job holds the key briefly:
   while the job installs the dependencies and Chromium.
 - `npm ci --ignore-scripts` runs no package's install script; Chromium
   comes from the job's own step (`npx playwright install`).
+- Nothing comes from GitHub's cache: not npm's cache, not Chromium,
+  and not its system libraries, which come from Ubuntu's signed mirror
+  (the Chromium action's `cache: false`). Any job on `main` can write
+  `main`'s cache entries, so a file restored from them could carry code
+  from the least trusted of those jobs into this one. The release
+  workflow's `docs` job restores nothing either, as it attests what it
+  renders. It installs Chromium and its libraries with its own step
+  (`npx playwright install --with-deps`), not the Chromium action:
+  that action comes from the tag's checkout, and an older tag's copy
+  restores them from the cache.
 - Only the step that runs semantic-release reads the secret. It writes
   the key to a file that git's `ssh` reads (`GIT_SSH_COMMAND`), with
   GitHub's host keys from its API, and removes the file when the step

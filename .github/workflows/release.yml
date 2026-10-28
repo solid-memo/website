@@ -67,7 +67,10 @@ jobs:
        github.event.workflow_run.head_repository.full_name == github.repository &&
        !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): '))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
+    # apt-get three minutes and one more try) before semantic-release
+    # starts, so a stall never cuts a release short.
+    timeout-minutes: 30
     permissions:
       contents: write
       actions: read
@@ -153,20 +156,27 @@ jobs:
             exit 1
           fi
           echo "release=true" >> "$GITHUB_OUTPUT"
+      # Nothing in this job comes from GitHub's cache
+      # (docs/releasing.md#the-deploy-key): any job on main can write
+      # main's entries, and this one holds the key. npm's cache neither,
+      # which setup-node would restore for packageManager in package.json.
       - if: steps.tip.outputs.release == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: npm
+          package-manager-cache: false
       # No package's install script runs here (docs/releasing.md#the-deploy-key):
       # the release needs none, and Chromium comes from the action below.
       - if: steps.tip.outputs.release == 'true'
         run: npm ci --ignore-scripts
       # Chromium, which the release's prepare step draws the docs' Mermaid
       # diagrams in, for the archive the GitHub release carries
-      # (npm run docs:archive).
+      # (npm run docs:archive): downloaded, with its system libraries
+      # from Ubuntu's signed mirror, not restored from the cache.
       - if: steps.tip.outputs.release == 'true'
         uses: ./.github/actions/chromium
+        with:
+          cache: false
       # Pushes the release commit and the tag over SSH, with the key, and
       # makes the GitHub release with the run's token. The key is written
       # to a file for this step alone, which git's ssh reads
@@ -217,7 +227,7 @@ jobs:
       github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
       inputs.tag != ''
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       # To upload the asset and publish the release.
       contents: write
@@ -291,16 +301,21 @@ jobs:
             echo "::error::$TAG came before the docs were archived, so it has none to attach."
             exit 1
           fi
+      # As in the release job, which this renders the docs as: nothing
+      # from GitHub's cache, as this job attests what it renders.
       - if: steps.release.outputs.attach == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      # As in the release job, which this renders the docs as.
+          package-manager-cache: false
       - if: steps.release.outputs.attach == 'true'
         run: npm ci --ignore-scripts
+      # Chromium and its system libraries from Playwright and Ubuntu's
+      # signed mirror, by this step on main, not by .github/actions: a
+      # local action is the checkout's, the tag's, whose copy may restore
+      # them from the cache.
       - if: steps.release.outputs.attach == 'true'
-        uses: ./.github/actions/chromium
+        run: npx playwright install --with-deps --only-shell chromium
       - if: steps.release.outputs.attach == 'true'
         name: npm run docs:archive
         env:

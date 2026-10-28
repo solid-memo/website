@@ -437,7 +437,9 @@ playwright-core's version. A job asks the mirror only when the cache
 has none, each `apt-get` given three minutes and one more try, and
 saves the download only on `main`. The `caches` job keeps
 `main`'s two newest entries per browser (GitHub rolls a new image out
-over days).
+over days). The release workflow's jobs restore nothing from the cache
+and always ask the mirror
+([releasing.md](releasing.md#the-deploy-key)).
 
 The journeys run the same way every time:
 
