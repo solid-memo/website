@@ -38,6 +38,7 @@ import {
   applyRecord,
   datetimeLiteral,
   isUnreadableDatetime,
+  readDatetime,
   readRecord,
   readVersioned,
   recordThing,
@@ -581,6 +582,36 @@ describe("unreadableDatetimes", () => {
     // The library's pattern lets this through, then throws on it.
     expect(isUnreadableDatetime(datetimeLiteral("T2026-01-01T00:00:00Z"))).toBe(true);
     expect(isUnreadableDatetime(FAR_DATE.datatype)).toBe(false);
+  });
+});
+
+describe("readDatetime", () => {
+  const at = (...values: string[]) => {
+    const builder = buildThing(createThing({ url: URL_ }));
+    for (const value of values) builder.addLiteral(`${EX}when`, datetimeLiteral(value));
+    return readDatetime(builder.build(), `${EX}when`);
+  };
+
+  it("reads the first date-time of the predicate, as getDatetime does", () => {
+    expect(at("2026-01-01T10:00:00Z", "2027-01-01T10:00:00Z")).toEqual(
+      new Date("2026-01-01T10:00:00Z"),
+    );
+    expect(at("2026-01-01T10:00:00.5+02:00")).toEqual(new Date("2026-01-01T12:00:00.005Z"));
+    expect(at("+010000-01-01T00:00:00.000Z")).toEqual(new Date("+010000-01-01T00:00:00.000Z"));
+    expect(at()).toBeNull();
+  });
+
+  it("reads a literal that is not wholly a date-time, or is too long, as none", () => {
+    expect(at("2026-01-01T10:00:00Z and more")).toBeNull();
+    expect(at(" 2026-01-01T10:00:00Z")).toBeNull();
+    expect(at(`2026-01-01T10:00:00.${"0".repeat(44)}Z`)).toBeNull();
+    expect(at(`2026-01-01T10:00:00.${"0".repeat(43)}Z`)).toEqual(new Date("2026-01-01T10:00:00Z"));
+  });
+
+  it("reads a long run of digits as none without first matching the library's pattern on it", () => {
+    const started = performance.now();
+    expect(at("1".repeat(100_000))).toBeNull();
+    expect(performance.now() - started).toBeLessThan(1_000);
   });
 });
 

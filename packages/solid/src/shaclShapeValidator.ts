@@ -181,8 +181,8 @@ const DECK_PLACE =
 /**
  * The dates of a subject the app cannot read: each value of one of its
  * shape's date fields that is an xsd:dateTime readDatetime reads as no
- * date (one past what a JavaScript date holds, or a lexical form the
- * library cannot read). SHACL finds such a value valid, and the app reads it as
+ * date (one past what a JavaScript date holds, or a lexical form it
+ * does not read). SHACL may find such a value valid, and the app reads it as
  * absent, so a subject that needs it does not fit its shape. A value
  * the shape's own check already names (one that is no xsd:dateTime at
  * all) is not named again. Wherever the subject is (an instance's, a
@@ -212,7 +212,7 @@ function dateViolations(
 }
 
 const DATE_TIME_RANGE =
-  "This date is too far in the future or the past for Solid Memo to read, so it reads as no date.";
+  "Solid Memo can't read this date: it is too far in the future or the past, or longer than a date-time is, so it reads as no date.";
 
 /**
  * What is wrong with another app's data is reported, never acted on: a

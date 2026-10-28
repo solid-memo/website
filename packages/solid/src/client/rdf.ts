@@ -66,7 +66,9 @@ import { graphsOf } from "./linearDataset";
  * - getDatetime reads any literal its unanchored pattern finds a date-time
  *   in, so it throws on some ("T2026-01-01T00:00:00Z") and gives an
  *   invalid date for one past what a JavaScript date holds; records.ts
- *   readDatetime makes both null.
+ *   readDatetime makes both null. That pattern takes time that grows
+ *   with the square of a long literal's length, so readDatetime passes
+ *   it only a short literal that is wholly a date-time.
  * - Language tags are lower case wherever a value is read with one
  *   (getStringByLocaleAll, getLiteralAll), however the document spells it.
  * - getDecimal reads a decimal as parseFloat does (`2.50` is 2.5, a value

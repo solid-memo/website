@@ -1365,7 +1365,7 @@
       "recomputeDue": "다음 복습일 다시 계산하기",
       "nameAgent": "사람이나 단체의 이름을 주소로 정하기",
       "dropDanglingMembers": "사라진 덱과 그룹으로 가는 링크 제거하기",
-      "dropUnreadableDate": "읽을 수 없을 만큼 먼 미래나 과거의 날짜 제거하기",
+      "dropUnreadableDate": "Solid Memo가 읽을 수 없는 날짜 제거하기",
       "removeSubject": "삭제하기"
     }
   },
@@ -1489,7 +1489,7 @@
       "MaxLength": "텍스트가 너무 길어요.",
       "Closed": "여기서 허용되지 않는 속성이에요.",
       "DeckPlace": "덱 항목이 인스턴스의 카탈로그에 없거나, 덱 문서가 가질 수 없는 주소의 문서를 가리켜요. 예를 들어 다른 리소스의 접근 제어나 인스턴스 자체 문서예요. Solid Memo는 이 덱을 사용하지 않아요.",
-      "DateTimeRange": "이 날짜는 Solid Memo가 읽기에는 너무 먼 미래나 과거라서, 날짜가 없는 것으로 읽어요."
+      "DateTimeRange": "Solid Memo가 이 날짜를 읽을 수 없어요. 너무 먼 미래나 과거이거나, 날짜와 시각보다 길어서 날짜가 없는 것으로 읽어요."
     }
   },
   "webIdDocument": {

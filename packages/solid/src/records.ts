@@ -96,25 +96,42 @@ function readScalar(
   }
 }
 
+const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+
+/**
+ * The longest date-time lexical form read, and the form itself, matched
+ * from start to end: an xsd:dateTime, or a year with a sign as
+ * toISOString writes one past 9999. The library's own pattern is
+ * unanchored and takes time that grows with the square of a long
+ * literal's length, so a literal goes to it only once it has this form.
+ */
+const DATETIME_LENGTH = 64;
+const DATETIME_FORM = /^[+-]?\d{4,}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(Z|[+-]\d\d:\d\d)?$/;
+
 /**
  * A date-time value; null when there is none, or when the library
  * cannot make a date of it: one past what a JavaScript date holds
  * (after 13 September 275760, or before 20 April -271821), which it
- * reads as an invalid date rather than none, or a lexical form its
- * unanchored pattern lets through and then throws on, such as
- * "T2026-01-01T00:00:00Z".
+ * reads as an invalid date rather than none, or a literal that is
+ * longer than DATETIME_LENGTH or not of DATETIME_FORM, such as
+ * "T2026-01-01T00:00:00Z", which the library would throw on.
  */
 export function readDatetime(thing: Subject, predicate: string): Date | null {
-  let date: Date | null;
-  try {
-    date = getDatetime(thing, predicate);
-  } catch {
+  // The literal getDatetime reads: the first of its datatype.
+  const literal = getLiteralAll(thing, predicate).find(
+    (one) => one.datatype.value === XSD_DATETIME,
+  );
+  if (
+    literal === undefined ||
+    literal.value.length > DATETIME_LENGTH ||
+    !DATETIME_FORM.test(literal.value)
+  ) {
     return null;
   }
-  return date === null || Number.isNaN(date.getTime()) ? null : date;
+  const date = getDatetime(thing, predicate)!;
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 const PROBE = "https://solid-memo.com/probe";
 
 /** An xsd:dateTime literal of this lexical form, as a subject holds it. */
