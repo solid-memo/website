@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.16.1](https://github.com/solid-memo/website/compare/v6.16.0...v6.16.1) (2026-10-28)
+
+### Bug Fixes
+
+* **application:** fill in release languages only for library copies ([06e80d8](https://github.com/solid-memo/website/commit/06e80d82050145f9cf3403297aab230d6b14535a))
+* **composition:** send credentials for an instance's data only into the user's own pod ([8b9b674](https://github.com/solid-memo/website/commit/8b9b67405ec20b1e983d4c0d4971072b3e6f28e6))
+* **studio:** ask before making a release public ([68dff77](https://github.com/solid-memo/website/commit/68dff7712fbdadb9794abcde91ea8cf9284b76b5))
+* **ui:** show no app inside another site's frame ([46d2378](https://github.com/solid-memo/website/commit/46d2378e5ddf727f39becb3245d52b93fef770e0))
+
 ## [6.16.0](https://github.com/solid-memo/website/compare/v6.15.0...v6.16.0) (2026-10-27)
 
 ### Features
