@@ -187,11 +187,18 @@ function parseTurtle(text: string, baseIRI: string, limits?: ReadLimits): Promis
  * The quads of a JSON-LD text, its relative IRIs resolved against
  * `baseIRI`, in every graph it names, under `limits` (collector). A
  * context it names by URL is not fetched: such a text fails to parse.
+ * The text is read as it streams, so a node's `@context` is to come
+ * before its other keys, or the text fails to parse: otherwise the
+ * parser holds every node to the end, then matches each against every
+ * typed one, time growing with their square.
  */
 function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
     const parser = new JsonLdParser({
       baseIRI,
+      streamingProfile: true,
+      // refuseRemoteContexts refuses a type's own context; a plain one may come after the id.
+      streamingProfileAllowOutOfOrderPlainType: true,
       documentLoader: {
         load: async (url: string) => {
           throw new Error(`The JSON-LD context at [${url}] is not fetched.`);

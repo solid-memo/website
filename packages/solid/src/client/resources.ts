@@ -321,7 +321,11 @@ export function parseQuads(
  * with, but given a document loader that loads nothing. The library's
  * loader fetches every context the text names by its address (or
  * `@import`s), from the user's browser; here such a text is refused
- * instead, as one that does not parse, whatever check came before.
+ * instead, as one that does not parse, whatever check came before. It
+ * reads the text as it streams, so a node's `@context` is to come before
+ * its other keys (refuseRemoteContexts writes it so), or the text does
+ * not parse: otherwise the parser holds every node to the end, then
+ * matches each against every typed one, time growing with their square.
  */
 function parseJsonLd(
   text: string,
@@ -334,6 +338,9 @@ function parseJsonLd(
 ): void {
   const parser = new JsonLdParser({
     baseIRI: baseUrl,
+    streamingProfile: true,
+    // refuseRemoteContexts refuses a type's own context; a plain one may come after the id.
+    streamingProfileAllowOutOfOrderPlainType: true,
     documentLoader: {
       load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
     },
