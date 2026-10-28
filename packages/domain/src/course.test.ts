@@ -21,6 +21,7 @@ import {
 import type { Answer } from "./answer";
 import type { CardContent } from "./deck";
 import type { ReviewState } from "./review";
+import { growth } from "./testing/growth";
 
 const RELEASE = "https://solid-memo.com/decks/solid/v1.ttl";
 const at = (id: string) => `${RELEASE}#${id}`;
@@ -205,6 +206,28 @@ describe("a course's outline", () => {
       ["ch-z", ["z-2"]],
     ]);
   });
+
+  it("is built in time that grows with the chapters and steps, not with their product", () => {
+    // Eight times the chapters and steps take about as long as an eighth of
+    // them eight times over (the sorts add a little); looking through every
+    // step for each chapter would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const chapters = Array.from({ length: count }, (_, i) => ({
+          url: at(`ch-${i}`),
+          data: chapter(i),
+        }));
+        const steps = Array.from({ length: count }, (_, i) => ({
+          url: at(`st-${i}`),
+          data: step(`ch-${count - 1 - i}`, 0, [`q-${i}`]),
+        }));
+        return () => courseOutlineFromRecords(RELEASE, chapters, steps);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("two releases' outlines", () => {
@@ -337,6 +360,28 @@ describe("a learner's progress", () => {
       chapters: [{ state: "done" }],
       done: true,
     });
+  });
+
+  it("is worked out in time that grows with a chapter's steps, not with their square", () => {
+    // Every step of one chapter done: eight times the steps take about as
+    // long as an eighth of them eight times over.
+    const ratio = growth(
+      (count) => {
+        const many = courseOutlineFromRecords(
+          RELEASE,
+          [{ url: at("ch-a"), data: chapter(0) }],
+          Array.from({ length: count }, (_, i) => ({
+            url: at(`a-${i}`),
+            data: step("ch-a", i, [`q-${i}`]),
+          })),
+        );
+        const answered = many.chapters[0]!.steps.flatMap((s) => s.questionIds);
+        return () => courseProgress(many, answered, []);
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

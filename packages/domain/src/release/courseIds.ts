@@ -2,9 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { DraftStepV1 } from "@solid-memo/vocab/types.generated";
 import { shown, type LangText } from "../langText.ts";
 import { slugOf } from "./draftLayout.ts";
-import { DRAFT_ID, idIn, idsInUse, type QuestionPlace, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  DRAFT_ID,
+  idIn,
+  idsInUse,
+  type DraftNode,
+  type QuestionPlace,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 
 /**
  * The id assistant (docs/studio.md, Ids): ids for a draft's
@@ -110,7 +118,12 @@ export function stepIdFor(draft: ReleaseDraft, chapter: string): string {
 /** The cards a step asks, by id, in the order it asks them: their ids' (course.ts). */
 export function questionsOfStep(draft: ReleaseDraft, step: string): string[] {
   const node = draft.steps.find((one) => one.id === step);
-  return (node?.data.checkedBy ?? [])
+  return node === undefined ? [] : stepQuestions(draft, node);
+}
+
+/** The cards a step's node asks, as questionsOfStep has them: for the outline, which has its steps' nodes. */
+export function stepQuestions(draft: ReleaseDraft, step: DraftNode<DraftStepV1>): string[] {
+  return step.data.checkedBy
     .map((iri) => idIn(draft, iri))
     .filter((id) => id !== null)
     .sort();

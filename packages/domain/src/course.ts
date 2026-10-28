@@ -89,6 +89,22 @@ export function courseOutlineFromRecords(
 ): CourseOutline {
   const inUse = <T extends { data: { deprecated?: boolean } }>(items: readonly T[]) =>
     items.filter((item) => item.data.deprecated !== true);
+  // Each step put under its chapter in one pass, not a pass over every
+  // step per chapter: a release may have thousands of each.
+  const stepsOf = new Map<string, CourseStep[]>();
+  for (const step of inUse(steps)) {
+    const entry: CourseStep = {
+      id: fragmentIdOf(step.url),
+      url: step.url,
+      position: step.data.position,
+      theory: step.data.theory,
+      ...(step.data.textFormat === undefined ? {} : { textFormat: step.data.textFormat }),
+      questionIds: idsOf(step.data.checkedBy),
+    };
+    const under = stepsOf.get(step.data.chapter);
+    if (under === undefined) stepsOf.set(step.data.chapter, [entry]);
+    else under.push(entry);
+  }
   return {
     releaseUrl,
     chapters: byPosition(
@@ -100,22 +116,7 @@ export function courseOutlineFromRecords(
           title: data.title,
           ...(data.description === undefined ? {} : { description: data.description }),
           ...(data.textFormat === undefined ? {} : { textFormat: data.textFormat }),
-          steps: byPosition(
-            inUse(steps)
-              .filter((step) => step.data.chapter === url)
-              .map(
-                (step): CourseStep => ({
-                  id: fragmentIdOf(step.url),
-                  url: step.url,
-                  position: step.data.position,
-                  theory: step.data.theory,
-                  ...(step.data.textFormat === undefined
-                    ? {}
-                    : { textFormat: step.data.textFormat }),
-                  questionIds: idsOf(step.data.checkedBy),
-                }),
-              ),
-          ),
+          steps: byPosition([...(stepsOf.get(url) ?? [])]),
           reviewQuestionIds: idsOf(data.reviewQuestion),
         }),
       ),
@@ -246,7 +247,8 @@ export function courseProgress(
     const doneStepIds = chapter.steps
       .filter((step) => step.questionIds.every((id) => answered.has(id)))
       .map((step) => step.id);
-    const resume = chapter.steps.find((step) => !doneStepIds.includes(step.id));
+    const doneSteps = new Set(doneStepIds);
+    const resume = chapter.steps.find((step) => !doneSteps.has(step.id));
     return {
       url: chapter.url,
       state,

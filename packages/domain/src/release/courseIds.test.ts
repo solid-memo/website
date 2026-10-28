@@ -13,6 +13,7 @@ import {
   questionIdFor,
   questionsOfStep,
   reviewQuestionsOf,
+  stepQuestions,
   stepIdFor,
   takenIds,
 } from "./courseIds.ts";
@@ -87,6 +88,10 @@ describe("questions and their ids", () => {
     };
     expect(questionsOfStep(asked, "ch-a-1")).toEqual(["q-a-1a", "q-a-1c"]);
     expect(questionsOfStep(asked, "nowhere")).toEqual([]);
+    expect(stepQuestions(asked, asked.steps.find((node) => node.id === "ch-a-1")!)).toEqual([
+      "q-a-1a",
+      "q-a-1c",
+    ]);
     expect(reviewQuestionsOf(draft, "ch-a")).toEqual(["q-a-r01"]);
     expect(reviewQuestionsOf(draft, "nowhere")).toEqual([]);
   });

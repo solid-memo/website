@@ -7,8 +7,12 @@ import { useRef, useState } from "preact/hooks";
 import type { Anchor } from "@solid-memo/domain/deckTree";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
-import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
-import { draftCardOf, draftOutline, outlineMove } from "@solid-memo/domain/release/draftOutline";
+import { isPublished, stepQuestions } from "@solid-memo/domain/release/courseIds";
+import {
+  draftCardFinder,
+  draftOutline,
+  outlineMove,
+} from "@solid-memo/domain/release/draftOutline";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type {
   DraftChange,
@@ -90,9 +94,14 @@ export function DraftOutline({
   const listRef = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  // A draft started from a release may have thousands of chapters, steps
+  // and cards: each row's node is looked up by its key, not looked for.
   const outline = draftOutline(draft);
-  const chapterTitle = (id: string): LangText =>
-    draft.chapters.find((node) => node.id === id)!.data.title ?? { "": id };
+  // The rows a drag froze may name one the draft has since retired.
+  const chapterNodes = new Map(draft.chapters.map((node) => [node.id, node]));
+  const chapterTitle = (id: string): LangText => chapterNodes.get(id)!.data.title ?? { "": id };
+  const stepNodes = new Map(draft.steps.map((node) => [node.id, node]));
+  const cardOf = draftCardFinder(draft);
   const stepLabel = (chapter: number, step: number) =>
     t("studio.outline.stepNumber", { chapter: chapter + 1, step: step + 1 });
   const nodes: OutlineNode[] = outline.map(({ chapter, steps }, at) => ({
@@ -258,7 +267,8 @@ export function DraftOutline({
                     <ul class="deck-list" style="--depth: 1">
                       {steps.map((step, index) => {
                         const label = stepLabel(at, index);
-                        const data = draft.steps.find((node) => node.id === step.key)!.data;
+                        const node = stepNodes.get(step.key)!;
+                        const { data } = node;
                         const theory = readerText(data.theory ?? {});
                         return (
                           <li
@@ -287,8 +297,8 @@ export function DraftOutline({
                                   : plainDataText(theory, isMarkdown(data.textFormat), 80)}
                               </span>
                               <ul class="outline-questions">
-                                {questionsOfStep(draft, step.key).map((card) => {
-                                  const found = draftCardOf(draft, card);
+                                {stepQuestions(draft, node).map((card) => {
+                                  const found = cardOf(card);
                                   const question =
                                     found === null
                                       ? card

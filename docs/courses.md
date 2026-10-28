@@ -109,7 +109,9 @@ domain's
   ([i18n.md](i18n.md#which-language)).
 - A retired chapter or step (`owl:deprecated true`) is left out of the
   outline (`courseOutlineFromRecords`), and so is every step of a
-  retired chapter.
+  retired chapter. The steps are put under their chapters in one pass,
+  so a release with thousands of chapters and steps takes no longer
+  per step than a small one.
 - A question that names no card of the release is left out of the
   outline (`outlineOfCards`), and so is a step left with no question.
   A chapter left with no step and no review question goes too, and the

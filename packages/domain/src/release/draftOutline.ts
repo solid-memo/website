@@ -2,7 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { CardV7, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
+import type {
+  CardV7,
+  DistractorV1,
+  DraftChapterV1,
+  DraftStepV1,
+} from "@solid-memo/vocab/types.generated";
 import type { CardContent, Distractor } from "../deck.ts";
 import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../deckRecord.ts";
 import { sameText, type LangText } from "../langText.ts";
@@ -11,7 +16,7 @@ import {
   idIn,
   iriIn,
   liveChapters,
-  liveSteps,
+  liveStepsByChapter,
   placeOf,
   type CardText,
   type DraftChange,
@@ -36,7 +41,12 @@ export interface OutlineChapter {
 
 /** The chapters in use and their steps in use, in their order. */
 export function draftOutline(draft: ReleaseDraft): OutlineChapter[] {
-  return liveChapters(draft).map((chapter) => ({ chapter, steps: liveSteps(draft, chapter.id) }));
+  // A draft started from a release may have thousands of chapters and steps.
+  const stepsOf = liveStepsByChapter(draft);
+  return liveChapters(draft).map((chapter) => ({
+    chapter,
+    steps: stepsOf.get(iriIn(draft, chapter.id)) ?? [],
+  }));
 }
 
 /** Subjects in the order of their ids (code units, as ids sort: course.ts). Ids are unique: two never compare equal. */
@@ -109,16 +119,45 @@ export interface DraftCard {
 /** The card of the draft by id, with its wrong options; null for one it has not, or one with an empty side. */
 export function draftCardOf(draft: ReleaseDraft, id: string): DraftCard | null {
   const node = draft.cards.find((one) => one.id === id);
-  if (node === undefined) return null;
+  return node === undefined
+    ? null
+    : draftCardFrom(node, (iri) => draft.distractors.find((one) => iriIn(draft, one.id) === iri));
+}
+
+/**
+ * Finds the draft's cards as draftCardOf does, for a page that shows
+ * many of them (the outline): the cards and wrong options are looked up
+ * by id, built once, not looked through for each.
+ */
+export function draftCardFinder(draft: ReleaseDraft): (id: string) => DraftCard | null {
+  // A draft started from a release may have thousands of cards and wrong options.
+  const cards = new Map(draft.cards.map((node) => [node.id, node]));
+  const distractors = new Map(draft.distractors.map((node) => [iriIn(draft, node.id), node]));
+  return (id) => {
+    const node = cards.get(id);
+    return node === undefined ? null : draftCardFrom(node, (iri) => distractors.get(iri));
+  };
+}
+
+/** A card's node as the card editors take it, its wrong options found by IRI. */
+function draftCardFrom(
+  node: DraftNode<CardV7>,
+  distractorAt: (iri: string) => DraftNode<DistractorV1> | undefined,
+): DraftCard | null {
   const distractors = node.data.distractor.flatMap((iri) => {
-    const found = draft.distractors.find((one) => iriIn(draft, one.id) === iri);
+    const found = distractorAt(iri);
     const distractor = found === undefined ? null : distractorFromRecord(iri, found.data);
     return distractor === null ? [] : [distractor];
   });
   const content = cardContentFromRecord(node.data, distractors);
   return content === null
     ? null
-    : { id, content, retired: node.data.deprecated === true, created: node.data.created ?? "" };
+    : {
+        id: node.id,
+        content,
+        retired: node.data.deprecated === true,
+        created: node.data.created ?? "",
+      };
 }
 
 /**
