@@ -42,6 +42,7 @@ describe("takenIds and idProblem", () => {
   it("knows what an earlier release published", () => {
     expect(isPublished(courseDraft(published), "q-a-1b")).toBe(true);
     expect(isPublished(courseDraft(published), "q-a-1a")).toBe(false);
+    expect(isPublished(courseDraft(published), "constructor")).toBe(false);
   });
 });
 

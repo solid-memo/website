@@ -167,9 +167,9 @@ export function upgradedText(
  * it is, where comparing English text (see english) once matched them.
  */
 function withLanguagesOf(mine: LangText, release: LangText): LangText | undefined {
-  const shared = Object.keys(mine).filter((tag) => tag in release);
+  const shared = Object.keys(mine).filter((tag) => Object.hasOwn(release, tag));
   if (shared.length === 0 || shared.some((tag) => mine[tag] !== release[tag])) return undefined;
-  const added = Object.keys(release).filter((tag) => !(tag in mine));
+  const added = Object.keys(release).filter((tag) => !Object.hasOwn(mine, tag));
   return added.length === 0 ? undefined : { ...release, ...mine };
 }
 

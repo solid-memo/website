@@ -6,6 +6,7 @@ import {
   buildThing,
   createSolidDataset,
   createThing,
+  datasetFromQuads,
   getDecimal,
   getInteger,
   getStringNoLocale,
@@ -14,9 +15,10 @@ import {
   getUrl,
   getUrlAll,
   setThing,
+  toRdfJsDataset,
 } from "./client/rdf";
 import { getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
-import type { Literal } from "@rdfjs/types";
+import type { Literal, Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { LATEST_VERSION, type CardV5 } from "@solid-memo/vocab/types.generated";
@@ -419,6 +421,42 @@ describe("several texts per language (a deck's keywords)", () => {
     expect(
       readRecord(recordThing(URL_, DECK_V6, { ...deck, keyword: {} }, null), DECK_V6)?.keyword,
     ).toEqual({});
+  });
+
+  it("reads a tag named like a member of Object.prototype as any other", () => {
+    // The library's builder throws on such a tag, and writes refuse it (writableTerms.ts): built from quads.
+    const keyword = (value: string, language: string) =>
+      ({
+        subject: { termType: "NamedNode", value: URL_ },
+        predicate: { termType: "NamedNode", value: KEYWORD },
+        object: {
+          termType: "Literal",
+          value,
+          language,
+          datatype: {
+            termType: "NamedNode",
+            value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+          },
+        },
+        graph: { termType: "DefaultGraph", value: "" },
+      }) as Quad;
+    const record = setThing(
+      createSolidDataset(),
+      recordThing(URL_, DECK_V6, { ...deck, keyword: {} }, null),
+    );
+    const thing = getThing(
+      datasetFromQuads([
+        ...toRdfJsDataset(record),
+        keyword("a", "constructor"),
+        keyword("b", "Constructor"),
+        keyword("c", "toString"),
+      ]),
+      URL_,
+    )!;
+    expect(readRecord(thing, DECK_V6)?.keyword).toEqual({
+      constructor: ["a", "b"],
+      tostring: ["c"],
+    });
   });
 
   it("reads only tagged keywords where the shape allows no untagged ones, and replaces them in place", () => {

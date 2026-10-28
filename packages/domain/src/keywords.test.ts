@@ -114,6 +114,14 @@ describe("tidiedKeywords", () => {
     });
   });
 
+  it("keeps a tag named like a member of Object.prototype as any other", () => {
+    expect(tidiedKeywords({ constructor: ["a"], CONSTRUCTOR: ["b"] }, undefined)).toEqual({
+      constructor: ["a", "b"],
+    });
+    const proto = tidiedKeywords(Object.fromEntries([["__proto__", [" a "]]]), undefined);
+    expect(Object.entries(proto)).toEqual([["__proto__", ["a"]]]);
+  });
+
   it("keeps untagged keywords only as saved, some of them removed", () => {
     const saved = { "": ["capitals", "huvudstäder"] };
     expect(tidiedKeywords({ "": ["capitals", "huvudstäder"], en: ["countries"] }, saved)).toEqual({

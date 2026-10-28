@@ -1290,6 +1290,19 @@ describe("withReleaseLanguages", () => {
     ).toBeNull();
     expect(withReleaseLanguages({ ...deck, title: { fi: "Pääkaupungit" } }, release2)).toBeNull();
   });
+
+  it("takes a language named like a member of Object.prototype as any other", () => {
+    expect(
+      withReleaseLanguages({ ...deck, title: { en: "Capitals", constructor: "Mine" } }, release2),
+    ).toMatchObject({ title: { en: "Capitals", sv: "Huvudstäder", constructor: "Mine" } });
+    expect(
+      withReleaseLanguages(deck, {
+        ...release2,
+        title: { en: "Capitals", toString: "Theirs" },
+        description: undefined,
+      }),
+    ).toMatchObject({ title: { en: "Capitals", toString: "Theirs" } });
+  });
 });
 
 describe("the app's default description in an upgrade", () => {

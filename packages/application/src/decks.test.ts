@@ -89,6 +89,26 @@ describe("decks", () => {
     ).rejects.toThrow("“fr-x-custom” is not a language code.");
     expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(1);
   });
+  it("renames and describes a deck whose texts have a tag named like a member of Object.prototype", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    const stored = { ...deck, title: { constructor: "x" }, keywords: { constructor: ["y"] } };
+    await useCases.renameDeck(stored, { constructor: "x", en: "Kanji" });
+    expect(deps.deckRepository.renameDeck).toHaveBeenCalledWith(stored, {
+      constructor: "x",
+      en: "Kanji",
+    });
+    await useCases.describeDeck(stored, {
+      description: { constructor: "z" },
+      topics: [],
+      keywords: { constructor: ["y"], en: ["kanji"] },
+    });
+    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
+      ...stored,
+      description: { constructor: "z" },
+      keywords: { constructor: ["y"], en: ["kanji"] },
+    });
+  });
   it("setDeckPace saves the deck's own daily limits, refusing one that is not a whole number", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);

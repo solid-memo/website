@@ -179,9 +179,9 @@ function readAnyText(thing: Subject, predicate: string): LangText | null {
  * tag. Empty ({}) when there are none.
  */
 function readTexts(thing: Subject, predicate: string, untagged: boolean): LangTexts {
-  const texts: Record<string, string[]> = {};
+  const texts = new Map<string, string[]>();
   const add = (tag: string, values: readonly string[]) => {
-    texts[tag] = [...new Set([...(texts[tag] ?? []), ...values])];
+    texts.set(tag, [...new Set([...(texts.get(tag) ?? []), ...values])]);
   };
   if (untagged) {
     const values = getStringNoLocaleAll(thing, predicate);
@@ -190,7 +190,7 @@ function readTexts(thing: Subject, predicate: string, untagged: boolean): LangTe
   for (const [language, values] of getStringByLocaleAll(thing, predicate)) {
     add(language.toLowerCase(), values);
   }
-  return texts;
+  return Object.fromEntries(texts);
 }
 
 /**

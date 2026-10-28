@@ -191,5 +191,5 @@ export function questionIdBefore(
 
 /** Whether a subject of the draft was published by a release before it: it is then retired, never deleted. */
 export function isPublished(draft: ReleaseDraft, id: string): boolean {
-  return id in draft.published.ids;
+  return Object.hasOwn(draft.published.ids, id);
 }

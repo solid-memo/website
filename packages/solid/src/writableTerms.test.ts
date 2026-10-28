@@ -29,6 +29,7 @@ describe("unwritableTermOf", () => {
       { termType: "BlankNode", value: "a.b-" } as Term,
     ],
     ["text with anything in it", literal('a> . <b> "c', "en-GB")],
+    ["a language tag with subtags of 8 characters", literal("a", "abcdefgh-12345678")],
     ["a literal without a direction", { ...literal("a"), direction: undefined } as Term],
   ])("finds none in %s", (_, term) => {
     expect(unwritableTermOf(quad(term))).toBeUndefined();
@@ -50,6 +51,8 @@ describe("unwritableTermOf", () => {
     ],
     ["a datatype with >", literal("1", "", "https://t.example/t> . <x")],
     ["a language tag with a space", literal("a", "en . <x")],
+    ["a language subtag longer than 8 characters", literal("a", "constructor")],
+    ["a later subtag longer than 8 characters", literal("a", "en-123456789")],
     [
       "a base direction",
       literal("a", "ar", "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString", "rtl"),

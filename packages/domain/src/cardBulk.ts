@@ -332,12 +332,17 @@ export interface TextChange {
   after?: string;
 }
 
+/** A text's value in one language; undefined when it has none, whatever the tag is named ("constructor"). */
+function textIn(text: LangText | undefined, tag: string): string | undefined {
+  return text !== undefined && Object.hasOwn(text, tag) ? text[tag] : undefined;
+}
+
 /** The texts that differ between a card and its edit, part by part, for a preview to show. */
 export function changedTexts(before: CardContent, after: CardContent): TextChange[] {
   const changes: TextChange[] = [];
   const compare = (part: ChangedPart, was: LangText | undefined, is: LangText | undefined) => {
     for (const tag of new Set([...Object.keys(was ?? {}), ...Object.keys(is ?? {})])) {
-      const [from, to] = [was?.[tag], is?.[tag]];
+      const [from, to] = [textIn(was, tag), textIn(is, tag)];
       if (from !== to) {
         changes.push({
           part,
