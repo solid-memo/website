@@ -169,13 +169,17 @@ needs no library of its own:
 - `solid` writes Turtle with `@inrupt/solid-client`'s
   `solidDatasetAsTurtle` and JSON-LD with
   [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
-  triples. It reads both with `parseQuads`, on the library's Turtle and
-  JSON-LD parsers. Both are in
-  [client/resources.ts](../packages/solid/src/client/resources.ts).
-  With `SOLID_CLIENT=solid-memo-client`, that package's `resources.ts`
-  writes and reads Turtle with `n3`, and reads JSON-LD with
-  `jsonld-streaming-parser`; `jsonLd.ts` writes JSON-LD on either
-  client.
+  triples. It reads both with `parseQuads`: Turtle with the library's
+  parser, JSON-LD with `jsonld-streaming-parser`, the parser the library
+  uses, given a document loader that loads nothing, so that reading a
+  file never fetches a context. Both are in
+  [client/resources.ts](../packages/solid/src/client/resources.ts), the
+  only file of `solid` that may import `jsonld-streaming-parser`
+  (`VENDOR_ONLY_IN`). With `SOLID_CLIENT=solid-memo-client`, that
+  package's `resources.ts` writes and reads Turtle with `n3`, and reads
+  JSON-LD with `jsonld-streaming-parser`, also with a document loader
+  that loads nothing, and is its only file that may import it;
+  `jsonLd.ts` writes JSON-LD on either client.
 - `browser`'s `FileExchange` port saves and opens files with what the
   browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):
   a `Blob` behind a link with `download`, and a hidden

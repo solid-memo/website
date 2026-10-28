@@ -193,8 +193,8 @@ export function parseDeckFile(
   format: DeckFileFormat,
   baseUrl: string,
 ): Promise<Quad[]> {
-  if (format === "jsonld") refuseRemoteContexts(text);
-  return parseQuads(text, format, baseUrl).then(
+  const checked = format === "jsonld" ? refuseRemoteContexts(text) : text;
+  return parseQuads(checked, format, baseUrl).then(
     (quads) => quads.filter((quad) => quad.graph.termType === "DefaultGraph"),
     (error: unknown) => {
       throw new AppError("deckFileUnreadable", { reason: String(error) });

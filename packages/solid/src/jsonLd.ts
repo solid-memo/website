@@ -84,8 +84,13 @@ function termValue(term: Term, compact: (iri: string) => string): Value {
  * reading it would fetch that address from the user's browser. A file
  * this app exports states its context in full. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
+ *
+ * Gives the document checked, written again: the parser is to read that
+ * text, not the file's, so that both see the same document. A key named
+ * twice in an object is one key to JSON.parse, which keeps the last; a
+ * streaming parser may act on the first.
  */
-export function refuseRemoteContexts(text: string): void {
+export function refuseRemoteContexts(text: string): string {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -108,6 +113,7 @@ export function refuseRemoteContexts(text: string): void {
     }
   };
   visit(json);
+  return JSON.stringify(json);
 }
 
 /** Whether a context is, or holds, one named by its address. */

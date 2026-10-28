@@ -1292,7 +1292,9 @@ An import reads the file as the pod is read, with the same mappers:
 - relative IRIs are resolved against `https://file.solid-memo.invalid/`
   and the file's name (`DECK_FILE_BASE`);
 - a JSON-LD context named by its address (or `@import`) is refused, as
-  reading it would fetch that address;
+  reading it would fetch that address. The parser reads the document as
+  the check saw it, so a key named twice is the last one for both, and
+  its document loader fetches nothing;
 - a triple with a term Turtle can't write as it is is left out (below).
 
 The deck is then written as a new deck of the instance (`importedDeck`).

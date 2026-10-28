@@ -91,12 +91,19 @@ export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
  * packages/solid/src/client/, so another library takes their place there
  * alone (docs/vendor-code.md), but for their interface (interface.ts),
  * which names no library; shacl, which may not import solid, reads
- * Turtle through one module of its own.
+ * Turtle through one module of its own. The JSON-LD parser, which must
+ * be given a document loader that fetches nothing, is one module's alone
+ * in each client: client/resources.ts in solid, resources.ts in
+ * solid-memo-client.
  */
 export const VENDOR_ONLY_IN: { specifier: RegExp; files: Record<string, RegExp> }[] = [
   {
     specifier: /^@inrupt\//,
     files: { solid: /^src\/client\/(?!interface\.ts$)/, shacl: /^src\/turtleDocument\.ts$/ },
+  },
+  {
+    specifier: /^jsonld-streaming-parser$/,
+    files: { solid: /^src\/client\/resources\.ts$/, "solid-memo-client": /^src\/resources\.ts$/ },
   },
 ];
 

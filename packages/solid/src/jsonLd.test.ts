@@ -86,4 +86,10 @@ describe("refuseRemoteContexts", () => {
       refuseRemoteContexts(JSON.stringify([{ "@context": { ex: EX } }, 5, null])),
     ).not.toThrow();
   });
+
+  it("gives the document it checked, a key named twice as JSON.parse keeps it", () => {
+    expect(refuseRemoteContexts('{"@context": "https://evil.example/c", "@context": {}}')).toBe(
+      '{"@context":{}}',
+    );
+  });
 });
