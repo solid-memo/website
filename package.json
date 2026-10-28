@@ -3,7 +3,7 @@
   "description": "Spaced-repetition flashcards that live in your own Solid pod.",
   "private": true,
   "license": "MIT",
-  "version": "6.17.8",
+  "version": "6.17.9",
   "homepage": "https://solid-memo.com/",
   "repository": {
     "type": "git",

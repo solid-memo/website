@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.9](https://github.com/solid-memo/website/compare/v6.17.8...v6.17.9) (2026-10-28)
+
+### Bug Fixes
+
+* **solid:** keep a release's back-link out of drafts and deck documents ([1796658](https://github.com/solid-memo/website/commit/17966587398b4a0b0c0f3ceba182e9ef2becff7e))
+* **ui:** follow a release's contact link as its other links are followed ([e5cdded](https://github.com/solid-memo/website/commit/e5cddedad00b514a76442f12526cace6ac87c047))
+
 ## [6.17.8](https://github.com/solid-memo/website/compare/v6.17.7...v6.17.8) (2026-10-28)
 
 ### Bug Fixes
