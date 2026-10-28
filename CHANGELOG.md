@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.3](https://github.com/solid-memo/website/compare/v6.17.2...v6.17.3) (2026-10-28)
+
+### Bug Fixes
+
+* **ci:** restore nothing from the Actions cache in the release workflow ([342267a](https://github.com/solid-memo/website/commit/342267a42fc8cb0a2cbe4bb1c767716e0cb80089))
+* **solid:** read a date-time only once it is wholly one ([f610e33](https://github.com/solid-memo/website/commit/f610e33fd210cc5a0905e6a92720e86b1f3ca007))
+
 ## [6.17.2](https://github.com/solid-memo/website/compare/v6.17.1...v6.17.2) (2026-10-28)
 
 ### Bug Fixes
