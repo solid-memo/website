@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.4](https://github.com/solid-memo/website/compare/v6.17.3...v6.17.4) (2026-10-28)
+
+### Bug Fixes
+
+* **solid-memo-client:** refresh only a stored session from the tab's own provider ([19e9b7d](https://github.com/solid-memo/website/commit/19e9b7d2e98c368cee278a008d629eecec05a450))
+
 ## [6.17.3](https://github.com/solid-memo/website/compare/v6.17.2...v6.17.3) (2026-10-28)
 
 ### Bug Fixes
