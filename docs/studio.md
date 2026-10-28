@@ -1471,13 +1471,16 @@ documents is `dcterms:isPartOf` anything, which to a deck would say the
 document is that deck's
 ([data-model.md](data-model.md#where-an-instances-documents-are)).
 
-A release is made a draft only if its version is 1, 2, … and every id
-in it has letters A to Z, digits, `.`, `_` and `-`, starting with a
-letter or digit (`unsupportedIdOf`). A chapter's document is named
+A release is made a draft only if its version is 1, 2, …, small
+enough that it and the next one are safe integers in JavaScript (a
+draft's address names its version). Every id in it must have letters
+A to Z, digits, `.`, `_` and `-`, starting with a letter or digit
+(`unsupportedIdOf`). A chapter's document is named
 after its id. Else it's refused (`releaseIdUnsupported`). A draft
 whose documents (perhaps written by another app) name a subject by
 another id isn't opened, and no change gives a draft one
-(`draftIdUnsupported`). Either is refused with nothing written.
+(`draftIdUnsupported`). Either is refused with nothing written, as is a
+draft at an address no draft has (`draftPlaceOf`).
 
 A draft is named after its title, or its release's name, unlike the
 instance's other drafts of that version. Only a draft's place taken

@@ -32,6 +32,12 @@ describe("where a draft is kept", () => {
     expect(draftPlaceOf(DRAFT)).toEqual({ instanceUrl: INSTANCE, name: "solid", version: 2 });
     expect(draftPlaceOf(`${INSTANCE}catalog.ttl`)).toBeNull();
     expect(draftPlaceOf(`${INSTANCE}drafts/solid/v0/release.ttl`)).toBeNull();
+    expect(draftPlaceOf(`${INSTANCE}drafts/solid/v9007199254740991/release.ttl`)).toMatchObject({
+      version: Number.MAX_SAFE_INTEGER,
+    });
+    // A version too large for a safe integer would name another draft (`v1e+23`).
+    for (const version of ["9007199254740993", "100000000000000000000000"])
+      expect(draftPlaceOf(`${INSTANCE}drafts/solid/v${version}/release.ttl`), version).toBeNull();
   });
 
   it("is no draft at an address a request would send elsewhere", () => {

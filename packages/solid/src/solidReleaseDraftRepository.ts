@@ -177,8 +177,13 @@ export function createSolidReleaseDraftRepository({
   /** Read a release document, as it states itself, its formats ones this app reads. */
   function readReleaseQuads(quads: readonly Quad[], url: string): ReleaseDraft {
     const release = draftFromQuads(quads, url);
-    // A version is 1, 2, …: a draft is numbered after it.
-    if (release === null || !/^[1-9][0-9]*$/.test(release.root.version ?? "1"))
+    // A version is 1, 2, …: a draft is numbered after it, in its address, as is the next version's.
+    const version = release?.root.version ?? "1";
+    if (
+      release === null ||
+      !/^[1-9][0-9]*$/.test(version) ||
+      !Number.isSafeInteger(Number(version) + 1)
+    )
       throw new AppError("releaseUnreadable", { url });
     const dataset = datasetFromQuads(quads);
     const root = getThing(dataset, url)!;
@@ -226,6 +231,9 @@ export function createSolidReleaseDraftRepository({
     },
 
     async create(instanceUrl, draft) {
+      // A draft at an address no draft has would be written where no list finds it, nor a delete.
+      const summary = draftSummaryOf(draft);
+      if (summary === null) throw new Error(`No draft can be at ${draft.url}`);
       const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
       if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null)
         throw new AppError("noCatalogToUpdate");
@@ -253,7 +261,7 @@ export function createSolidReleaseDraftRepository({
           );
         throw error;
       }
-      return draftSummaryOf(draft)!;
+      return summary;
     },
 
     read(draftUrl) {
