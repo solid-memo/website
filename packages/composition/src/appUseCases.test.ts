@@ -188,9 +188,7 @@ describe("createSiteFetch", () => {
 describe("createAppUseCases", () => {
   const options = { clientName: "Solid Memo", servedSite: SERVED, ruleset: "test" };
 
-  it("keeps a guest's study in memory, every write checked against the shapes the site publishes", {
-    timeout: 30_000,
-  }, async () => {
+  it("keeps a guest's study in memory, every write checked against the shapes the site publishes", async () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     expect(await useCases.startGuest("My study")).toEqual(GUEST_SESSION);
     const [instance] = await useCases.listInstances(GUEST_SESSION);
@@ -338,9 +336,7 @@ describe("createAppUseCases", () => {
     expect(login.sent).toContain(own);
   });
 
-  it("sends the user's credentials only into their own pod, reading a deck's documents elsewhere as no one and writing nothing there", {
-    timeout: 30_000,
-  }, async () => {
+  it("sends the user's credentials only into their own pod, reading a deck's documents elsewhere as no one and writing nothing there", async () => {
     const alice = "https://alice.example/";
     login.webId = `${alice}profile/card#me`;
     // A deck from a guest's study, its entry moved into Alice's instance.
@@ -533,9 +529,7 @@ describe("createAppUseCases", () => {
     ]);
   });
 
-  it("reads a guest's instance as a graph from this browser, fetching nothing it names", {
-    timeout: 30_000,
-  }, async () => {
+  it("reads a guest's instance as a graph from this browser, fetching nothing it names", async () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
@@ -552,9 +546,7 @@ describe("createAppUseCases", () => {
     expect(requests).toEqual([]);
   });
 
-  it("keeps a guest's study in IndexedDB, where the browser has it", {
-    timeout: 30_000,
-  }, async () => {
+  it("keeps a guest's study in IndexedDB, where the browser has it", async () => {
     const indexedDB = new IDBFactory();
     await createAppUseCases({ ...options, indexedDB }).startGuest("My study");
     // Another page finds the study the first one left.
@@ -564,9 +556,7 @@ describe("createAppUseCases", () => {
     expect(instance!.name).toBe("My study");
   });
 
-  it("refuses writes to a guest's study another tab is moving, and to its copy, while that move runs", {
-    timeout: 30_000,
-  }, async () => {
+  it("refuses writes to a guest's study another tab is moving, and to its copy, while that move runs", async () => {
     const locks = fakeLocks();
     Object.defineProperty(navigator, "locks", { value: locks, configurable: true });
     try {
@@ -681,7 +671,7 @@ describe("createAppUseCases", () => {
     }
   });
 
-  it("reads the deck library the site publishes", { timeout: 30_000 }, async () => {
+  it("reads the deck library the site publishes", async () => {
     const decks = await createAppUseCases({ ...options, indexedDB: undefined }).listLibraryDecks();
     expect(decks.length).toBeGreaterThan(0);
     expect(requests[0]!.url).toBe(`${SERVED}decks/index.ttl`);

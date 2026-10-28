@@ -274,7 +274,7 @@ describe("intakeVsLoadOf", () => {
 });
 
 describe("the figures of a large log", () => {
-  it("take each answer once", { timeout: 30_000 }, () => {
+  it("take each answer once", () => {
     // 100 answers a day over 2,000 cards, a year of them.
     const answers = Array.from({ length: 365 * 100 }, (_, i): Answer => {
       const dayIndex = Math.floor(i / 100);

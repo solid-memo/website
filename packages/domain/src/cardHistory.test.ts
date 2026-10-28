@@ -115,7 +115,7 @@ describe("lapseIndex", () => {
     expect(lapseIndex([])).toEqual({ lapses: new Map(), since: null });
   });
 
-  it("reads the answers in one pass, however many years they cover", { timeout: 30_000 }, () => {
+  it("reads the answers in one pass, however many years they cover", () => {
     // A year of 200 answers a day, over 2,000 cards.
     const answers = (count: number) =>
       Array.from({ length: count }, (_, n): Answer => {
@@ -199,7 +199,7 @@ describe("hardestCardsOf", () => {
     ).toEqual({ reviews: 0, cards: [] });
   });
 
-  it("reads the answers in one pass, however many there are", { timeout: 30_000 }, () => {
+  it("reads the answers in one pass, however many there are", () => {
     const cards = Array.from({ length: 2_000 }, (_, n) => card(`c-${n}`));
     const answers = (count: number) =>
       Array.from({ length: count }, (_, n): Answer => {

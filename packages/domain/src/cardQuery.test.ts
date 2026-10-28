@@ -383,9 +383,7 @@ describe("queryCards", () => {
     expect(sorted([iron, fresh])).toEqual(["c-iron", "c-fresh"]);
   });
 
-  it("searches, filters and sorts 5,000 cards in time that grows with the cards", {
-    timeout: 30_000,
-  }, () => {
+  it("searches, filters and sorts 5,000 cards in time that grows with the cards", () => {
     const many = Array.from({ length: 5_000 }, (_, i) =>
       card(`c-${i}`, {
         front: { sv: `Ord nummer ${i}`, en: `Word number ${i}` },

@@ -375,7 +375,7 @@ describe("statisticsOf", () => {
     expect(statistics.quiz).toEqual({ answers: 2, right: 1 });
   });
 
-  it("works through a large log in one pass", { timeout: 30_000 }, () => {
+  it("works through a large log in one pass", () => {
     // A year of 50 answers a day, over 2,000 cards in four decks.
     const answers = (count: number) =>
       Array.from({ length: count }, (_, i): Answer => {

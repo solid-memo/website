@@ -103,7 +103,7 @@ describe("isRepeat, isScoredReview and isLapse", () => {
     expect(isRepeat(otherWay, index)).toBe(false);
   });
 
-  it("builds the chains in one pass, however many answers there are", { timeout: 30_000 }, () => {
+  it("builds the chains in one pass, however many answers there are", () => {
     // A year of 200 answers a day over 2,000 prompts.
     const answers = (count: number) =>
       Array.from({ length: count }, (_, n): Answer => {

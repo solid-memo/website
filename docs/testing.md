@@ -952,10 +952,12 @@ removed with its tests, or put to use; a helper only tests need goes to
 a `testing/` folder. The check reads exports, not a port's members: a
 port method no use case calls is found by reading.
 
-A test may take 30 seconds, not vitest's 5 (`vitest.shared.ts`). CI,
-running every package's tests at once with coverage on, takes some
-tests fifty times as long as a laptop (the generator's check of `ns/`:
-0.1 s against over 5 s). A test that hangs still fails.
+A test may take 60 seconds, not vitest's 5 (`vitest.shared.ts`). CI
+runs every package's tests at once with coverage on, and takes some
+tests fifty times as long as a laptop does: the generator's check of
+`ns/` took over 5 s there, against 0.1 s. Tests that read a file at the
+size limits, about a second on a laptop, ran out of 30 s on a slow
+runner. A test that hangs still fails.
 
 ## Strategy per layer
 
