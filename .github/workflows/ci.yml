@@ -558,7 +558,9 @@ jobs:
   # its own, so that WebKit's and the phone's, the slowest, never land
   # together. Each job pays the setup again (about a minute), for a
   # shorter wall time. When one
-  # fails, the job's summary names the step it failed in, and its
+  # fails, the others are canceled (fail-fast), as their result no longer
+  # changes the run's and they take long; the job's summary names the
+  # step it failed in, and its
   # artifact holds the trace to replay it step
   # by step (`npx playwright show-trace`), the report, a video, and the
   # server's log. On main and in the merge queue the traces are kept
@@ -575,7 +577,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
-      fail-fast: false
+      fail-fast: true
       # name: the job's, and its blob's (journeys-report lists them);
       # projects: what it runs; browser: what it installs, and the key it
       # is kept under, the phone's being WebKit's.
@@ -668,8 +670,9 @@ jobs:
           overwrite: true
 
   # On main, the journeys jobs' runs merged into one report, every
-  # browser's journeys and their traces in it, even when a journey failed:
-  # the deploy publishes it at /journeys/ (docs/deployment.md). When this
+  # browser's journeys and their traces in it; when a journey failed,
+  # what the jobs ran before the others were canceled: the deploy
+  # publishes it at /journeys/ (docs/deployment.md). When this
   # run skipped the journeys, their blobs come from the run gate names,
   # which ran them on this tree: the merge queue's, or a release commit's
   # parent's. When the journeys passed, or ran there, every job's blob
