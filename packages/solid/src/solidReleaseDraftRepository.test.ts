@@ -1001,7 +1001,7 @@ describe("a library release made a draft and published again", () => {
     "sweden-counties-and-provinces/v1.ttl",
     "git-commands/v1.ttl",
   ]) {
-    it(`gives ${path} back, apart from what publishing sets`, { timeout: 30_000 }, async () => {
+    it(`gives ${path} back, apart from what publishing sets`, async () => {
       const { release, assembled } = await roundTrip(await draftPod(), path);
       expect(assembled).toEqual(release);
     });

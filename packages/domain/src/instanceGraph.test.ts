@@ -380,9 +380,7 @@ describe("instanceGraphOf", () => {
     expect(of.nodes.map((each) => each.id)).toEqual([INSTANCE, CATALOG]);
   });
 
-  it("builds the graph in one pass, however many cards and answers there are", {
-    timeout: 30_000,
-  }, () => {
+  it("builds the graph in one pass, however many cards and answers there are", () => {
     const documents = (count: number): GraphDocument[] => {
       const cards: DraftTriple[] = [];
       const answers: DraftTriple[] = [];

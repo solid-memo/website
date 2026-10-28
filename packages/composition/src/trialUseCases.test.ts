@@ -93,9 +93,7 @@ describe("createTrialUseCases", () => {
     await expect(useCases.reportPlace(draft.url)).resolves.toEqual({ library: false });
   });
 
-  it("throws on a trial's write to a real pod, which never sees it", {
-    timeout: 30_000,
-  }, async () => {
+  it("throws on a trial's write to a real pod, which never sees it", async () => {
     const podFetch = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("", { status: 404 }),
     );

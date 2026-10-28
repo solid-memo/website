@@ -141,9 +141,7 @@ async function app(site: typeof fetch = siteFetch, store = createMemoryResourceS
 }
 
 describe("a deck imported from the library", () => {
-  it("is written at deck format 6 and card format 7 from a format-4 release, its text and what its cards are about exactly the release's", {
-    timeout: 30_000,
-  }, async () => {
+  it("is written at deck format 6 and card format 7 from a format-4 release, its text and what its cards are about exactly the release's", async () => {
     // Releases are frozen: a format-4 release is read as it was published.
     expect(LATEST_VERSION.libraryDeck).toBe(6);
     const { useCases, store } = await app();
@@ -227,9 +225,7 @@ describe("a deck imported from the library", () => {
     expect(texts(card("dk"), `${SM_NS}frontNote`)).toBe(1);
   });
 
-  it("copies a format-5 release's keywords with their language tags", {
-    timeout: 30_000,
-  }, async () => {
+  it("copies a format-5 release's keywords with their language tags", async () => {
     const { useCases, store } = await app();
     const instance = await useCases.createInstance(ALICE, {
       containerUrl: `${POD}solid-memo/`,

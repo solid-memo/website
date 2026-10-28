@@ -151,9 +151,7 @@ describe("a guest's study", () => {
     vi.unstubAllGlobals();
   });
 
-  it("is kept on the device, with nothing sent anywhere, until the guest logs in", {
-    timeout: 30_000,
-  }, async () => {
+  it("is kept on the device, with nothing sent anywhere, until the guest logs in", async () => {
     const { useCases, guestStore, requests } = await app();
     expect(await useCases.restoreSession()).toBeNull();
     expect(await useCases.startGuest("My study")).toEqual(GUEST_SESSION);
@@ -173,9 +171,7 @@ describe("a guest's study", () => {
     expect((await guestStore.urls()).length).toBeGreaterThan(5);
   });
 
-  it("moves into the pod the guest logs in to, as theirs, and leaves the device", {
-    timeout: 30_000,
-  }, async () => {
+  it("moves into the pod the guest logs in to, as theirs, and leaves the device", async () => {
     const { useCases, guestStore, aliceStore } = await app();
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
@@ -214,9 +210,7 @@ describe("a guest's study", () => {
     expect(await useCases.findGuestStudy()).toBeNull();
   });
 
-  it("moves a study that mixes formats 4 and 5, each subject checked against its own format and kept at it", {
-    timeout: 30_000,
-  }, async () => {
+  it("moves a study that mixes formats 4 and 5, each subject checked against its own format and kept at it", async () => {
     const { useCases, guestStore, aliceStore } = await app();
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
@@ -285,9 +279,7 @@ describe("a guest's study", () => {
     expect(await useCases.planMigration(TARGET)).toMatchObject({ deckCount: 1, cardCount: 2 });
   });
 
-  it("is brought up to date in place, each document on its own, at its address, another app's triples kept", {
-    timeout: 30_000,
-  }, async () => {
+  it("is brought up to date in place, each document on its own, at its address, another app's triples kept", async () => {
     const { useCases, guestStore } = await app();
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
@@ -342,9 +334,7 @@ describe("a guest's study", () => {
     expect(added).toEqual([]);
   });
 
-  it("refuses a write over a subject a newer version of the app wrote", {
-    timeout: 30_000,
-  }, async () => {
+  it("refuses a write over a subject a newer version of the app wrote", async () => {
     const { useCases, guestStore } = await app();
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);

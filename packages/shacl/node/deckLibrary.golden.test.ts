@@ -130,4 +130,4 @@ it("says what it said of published releases with faults put in", async () => {
     courseProblems(stripped).slice(0, 40),
   );
   await expect(`${out.join("\n")}\n`).toMatchFileSnapshot("deckLibrary.golden.txt");
-}, 30_000);
+});

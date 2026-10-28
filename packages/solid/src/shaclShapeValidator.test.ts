@@ -607,7 +607,7 @@ describe("createShaclShapeValidator", () => {
         .sort(),
     ).toEqual([DCTERMS.description, "http://www.w3.org/ns/dcat#theme"]);
     await validator.validateDocument(DOC);
-  }, 30_000);
+  });
 
   it("finds nothing wrong with a deck's documents as the app writes them, another scheduler's state warned about only", async () => {
     const CARDS = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
@@ -704,7 +704,7 @@ describe("createShaclShapeValidator", () => {
     const own = reviewsReport.subjects.find((subject) => subject.url === `${REVIEWS}#card-1@fsrs6`);
     expect(own).toMatchObject({ status: "checked", shape: "fsrsReviewState", violations: [] });
     expect(own).not.toHaveProperty("foreign");
-  }, 30_000);
+  });
 
   it("checks a write with the engine it has: pathless results named by subject, warnings and results about other subjects passed over", async () => {
     const { validator, validateNode, validate } = makeValidator();
@@ -830,7 +830,7 @@ describe("createShaclShapeValidator", () => {
       await expect(
         validator.checkSubjects(listing(`${DOC}#deck-gone`), [`${DOC}#catalog`], "pod"),
       ).rejects.toThrow(`<${DOC}#catalog> (${DCAT.dataset}): DCAT-AP:`);
-    }, 30_000);
+    });
 
     it("holds a draft to the draft shapes and not yet to DCAT-AP, and an instance's deck to the pod's", async () => {
       const draft = setThing(
@@ -877,7 +877,7 @@ describe("createShaclShapeValidator", () => {
           violations: expect.arrayContaining([expect.anything()]),
         }),
       ]);
-    }, 30_000);
+    });
 
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(
