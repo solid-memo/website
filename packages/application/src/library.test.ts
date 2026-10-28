@@ -572,6 +572,61 @@ describe("the deck library", () => {
       ).rejects.toMatchObject({ code: "releaseNotConforming" });
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalledWith(`${RELEASES}v2.ttl`);
     });
+
+    it("planLibraryUpgrade reads no more than sixteen of the releases a linked copy's newer release lists in between, each once, four at once, the newest", async () => {
+      const deps = makeDeps();
+      const versions = Array.from({ length: 40 }, (_, at) => at + 2);
+      const listed = versions.map((version) => ({
+        url: `${RELEASES}v${version}.ttl`,
+        version: String(version),
+      }));
+      // Every one listed twice, and many more of one version on other hosts.
+      const crowded = Array.from({ length: 1000 }, (_, at) => ({
+        url: `https://host-${at}.example/v2.ttl`,
+        version: "2",
+      }));
+      const series = linked(42, {
+        releases: [{ url: `${RELEASES}v1.ttl`, version: "1" }, ...crowded, ...listed, ...listed],
+      });
+      let open = 0;
+      let most = 0;
+      const atMostFour = async <T>(made: T): Promise<T> => {
+        most = Math.max(most, ++open);
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        open--;
+        return made;
+      };
+      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation((url) =>
+        atMostFour({ url, status: "checked", subjects: [] }),
+      );
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation((url) =>
+        atMostFour({
+          ...libraryContent,
+          url,
+          version: url === series.url ? "42" : (/v(\d+)\.ttl$/.exec(url)?.[1] ?? ""),
+        }),
+      );
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      await createUseCases(deps).planLibraryUpgrade(copy, {
+        deck: copy,
+        series,
+        version: "1",
+        newer: true,
+        fromLink: true,
+      });
+      const newest = versions.slice(-16).map((version) => `${RELEASES}v${version}.ttl`);
+      expect(
+        vi.mocked(deps.shapeValidator.validateDocument).mock.calls.map(([url]) => url),
+      ).toEqual([series.url, ...newest]);
+      expect(
+        vi
+          .mocked(deps.deckLibrary.fetchLibraryDeck)
+          .mock.calls.map(([url]) => url)
+          .slice(2),
+      ).toEqual(newest);
+      expect(most).toBeLessThanOrEqual(4);
+    });
   });
   it("importLibraryDeck fetches the deck's content and imports it", async () => {
     const deps = makeDeps();

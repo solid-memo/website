@@ -982,7 +982,10 @@ flowchart LR
 - Before an upgrade from a link is planned, the newer release and each
   one in between are checked against the library's shapes
   (`checkLinkedRelease`); one that breaks them refuses the upgrade
-  (`releaseNotConforming`).
+  (`releaseNotConforming`). The newer release is its creator's to write,
+  so it may list any number of releases in between. The app reads the
+  newest 16 of them at most, four at once, each once. A card as one left
+  out has it counts as the user's, and the upgrade keeps it.
 - A copy from a link isn't given its release's new title or description
   languages when its page opens (`addReleaseLanguages`,
   [migrations.md](migrations.md)). Its release stays on the creator's

@@ -122,9 +122,11 @@ export interface LibraryUseCases {
 
 /**
  * How many of the releases a creator's catalog links are read for the
- * series of a copy from a link (linkedSeries), and how many of them at
- * once: the catalog is its creator's to write, now or later, and may
- * link any number of releases, each as large as a release may be.
+ * series of a copy from a link (linkedSeries), and of those its newest
+ * release lists between the copy's and its own (planUpgrade), and how
+ * many of them at once: the catalog and the release are their creator's
+ * to write, now or later, and may name any number of releases, each as
+ * large as a release may be.
  */
 const MAX_LINKED_RELEASES = 16;
 const LINKED_READS_AT_ONCE = 4;
@@ -207,15 +209,23 @@ export function createLibraryUseCases({
       deckLibrary.fetchLibraryDeck(series.url),
       cards(),
     ]);
-    const betweenUrls = series.releases
-      .filter(
-        (release) =>
-          Number(release.version) > Number(from.version) &&
-          Number(release.version) < Number(to.version),
-      )
-      .map((release) => release.url);
-    if (fromLink === true) await Promise.all([series.url, ...betweenUrls].map(checkLinkedRelease));
-    const between = await Promise.all(betweenUrls.map((url) => deckLibrary.fetchLibraryDeck(url)));
+    const inBetween = [
+      ...new Set(
+        series.releases
+          .filter(
+            (release) =>
+              Number(release.version) > Number(from.version) &&
+              Number(release.version) < Number(to.version),
+          )
+          .sort((a, b) => Number(a.version) - Number(b.version))
+          .map((release) => release.url),
+      ),
+    ];
+    // Oldest first. A release from a link lists what its creator wrote: MAX_LINKED_RELEASES of them at most, the
+    // newest; a card as one left out has it counts as the user's, and is kept.
+    const betweenUrls = fromLink === true ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
+    if (fromLink === true) await readEach([series.url, ...betweenUrls], checkLinkedRelease);
+    const between = await readEach(betweenUrls, (url) => deckLibrary.fetchLibraryDeck(url));
     // A course's outline stays in its release: a newer one may change only that.
     const outlines =
       from.isCourse === true && to.isCourse === true
