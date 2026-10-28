@@ -39,6 +39,12 @@ import { AppError } from "@solid-memo/domain/appError";
 
 export interface SolidInstanceRepositoryDeps {
   fetch: typeof globalThis.fetch;
+  /**
+   * What an instance's data is deleted through, `fetch` when unset: the
+   * catalog names its decks' documents, which may be anywhere, so the app
+   * passes its credential gate (docs/boundaries.md).
+   */
+  dataFetch?: typeof globalThis.fetch;
   now: () => Date;
   randomId: () => string;
   /** Checks what is about to be written; see writeCheck.ts. */
@@ -47,6 +53,7 @@ export interface SolidInstanceRepositoryDeps {
 
 export function createSolidInstanceRepository({
   fetch,
+  dataFetch = fetch,
   now,
   randomId,
   checkWrite = noWriteCheck,
@@ -199,7 +206,7 @@ export function createSolidInstanceRepository({
 
     async deleteInstance({ webId, instance }) {
       const url = ensureTrailingSlash(instance.url);
-      const deletion = await deleteInstanceData(url, fetch);
+      const deletion = await deleteInstanceData(url, dataFetch);
       const locations = await locateTypeIndexes(webId, fetch);
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;

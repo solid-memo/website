@@ -23,6 +23,7 @@ import {
   isCanonicalUrl,
   isDeckInPlace,
   isDocumentIn,
+  isInFolder,
   isPaletteOf,
   isInstanceAddress,
   isPlainHttpUrl,
@@ -234,6 +235,25 @@ describe("where an instance's documents are", () => {
       ["https://xn--bcher-kva.example/d/x.ttl", "https://bücher.example/d/"],
     ]) {
       expect(isDocumentIn(url!, container!), url).toBe(true);
+    }
+  });
+
+  it("is in a folder as the folder itself, a folder in it or a document in it", () => {
+    const instance = "https://pod.example/solid-memo/main/";
+    for (const url of [instance, `${instance}history/`, `${instance}decks/deck-1.ttl`]) {
+      expect(isInFolder(url, instance), url).toBe(true);
+    }
+    expect(isInFolder("https://Pod.example/solid-memo/main", instance)).toBe(false);
+    for (const url of [
+      "https://pod.example/solid-memo/",
+      "https://pod.example/solid-memo/main-2/x.ttl",
+      `${instance}a%2F..%2F..%2Fx.ttl`,
+      `${instance}.acl`,
+      `${instance}history//x.ttl`,
+      "https://pod.example.attacker.example/solid-memo/main/x.ttl",
+      "not a url",
+    ]) {
+      expect(isInFolder(url, instance), url).toBe(false);
     }
   });
 

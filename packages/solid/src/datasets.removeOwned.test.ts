@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { AppError } from "@solid-memo/domain/appError";
 import { PreconditionFailedError, removeOwned } from "./datasets";
 import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
 import { createLocalPod } from "./localPod";
@@ -119,6 +120,23 @@ _:shared <${SM}text> "named by both" .`,
     await p.put(foreign);
     await expect(removeOwned(DOC, cards, p.fetch)).resolves.toBe("kept");
     expect(p.sent).toEqual([]);
+  });
+
+  it("keeps a document outside the user's own pod, which the app's fetch never writes to", async () => {
+    const p = await pod();
+    await p.put(card("c1"));
+    const gated = (async (input, init) => {
+      const method = (init?.method ?? "GET").toUpperCase();
+      if (method !== "GET") throw new AppError("writeOutsidePod", { host: "pod.example" });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch;
+    await expect(removeOwned(DOC, cards, gated)).resolves.toBe("kept");
+    expect(await p.text()).toContain("c1");
+    // Any other refusal is the caller's.
+    const refused = (async () => {
+      throw new AppError("writeRefused", { method: "GET", url: DOC });
+    }) as typeof globalThis.fetch;
+    await expect(removeOwned(DOC, cards, refused)).rejects.toMatchObject({ code: "writeRefused" });
   });
 
   it("finds a document that is gone absent, sending nothing, and throws on a read that fails", async () => {

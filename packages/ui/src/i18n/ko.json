@@ -1572,6 +1572,7 @@
     "resourceChangedDuringCopy": "복사하는 동안 이 브라우저의 학습 기록 일부가 바뀌어서 여기에 그대로 두었어요. 다른 탭에서 바뀌었을 수 있어요. 다시 시도해 주세요.",
     "guestStudyBeingMoved": "Solid Memo가 이 브라우저의 학습 기록을 Pod로 옮기는 중이라, 끝날 때까지 이 학습 기록에는 아무것도 저장하지 않아요. 옮기기가 끝나면 다시 시도해 주세요.",
     "writeRefused": "Solid Memo가 안전을 위해 Pod의 변경을 멈췄어요. Solid Memo가 절대 저장하지 않는 주소에 저장될 뻔했어요. 아무것도 바뀌지 않았어요.",
+    "writeOutsidePod": "Solid Memo가 이것을 저장하지 않았어요. {host}에 있어서 Pod 밖에 있고, Solid Memo는 Pod에만 저장해요. 아무것도 바뀌지 않았어요.",
     "deckChangedSinceOffer": "업데이트를 제안한 뒤 덱이 바뀌어서 아무것도 바꾸지 않았어요. 다른 탭이나 앱에서 바뀌었을 수 있어요. 제안을 다시 확인해 주세요.",
     "deckChangedDuringUpgrade": "업데이트하는 동안 덱이 바뀌었어요. 다른 탭이나 앱에서 바뀌었을 수 있어요. 다시 시도해 주세요.",
     "changedElsewhere": "Solid Memo가 읽은 뒤에 다른 곳에서 내용이 바뀌어서 아무것도 저장하지 않았어요. 다른 탭이나 앱에서 바뀌었을 수 있어요. 페이지를 새로고침하고 다시 시도해 주세요.",

@@ -248,6 +248,46 @@ folder's. It's used only inside the publisher's check, which allows the
 release's two ([Access control](#access-control)). A Studio trial's
 fetch allows only GET and HEAD ([studio.md](studio.md#the-trial)).
 
+## The credential gate
+
+The login's fetch sends the user's access token to any address it's
+given. So the adapters that read and write an instance's data get
+another fetch
+([appUseCases.ts](../packages/composition/src/appUseCases.ts)). They're
+the decks, cards, review states, answers, preferences, palettes, the
+digest, the drafts, the instance check and its repairs, the graph, a
+deck's export, a Studio trial, and deleting an instance's data. Behind
+the [pod fence](#the-pod-fence) that fetch passes the credential gate
+([ownPodGate.ts](../packages/solid/src/ownPodGate.ts),
+`createOwnPodGate`):
+
+- **In the user's own pod** a request goes on as the user, a read or a
+  write. The user's own pod is the storages their profile names and
+  the instances they registered. On this page it's also a storage they
+  entered by hand and the folder they moved a guest's study into. Each
+  counts with what's in it (`isInFolder` in `instanceLayout.ts`). For
+  an instance in someone else's pod, only its own folder counts.
+- **Anywhere else** a read is sent as no one (`credentials: "omit"`),
+  and a write is refused before it's sent (`writeOutsidePod`). A
+  catalog may name a deck's documents on any server
+  ([data-model.md](data-model.md#where-an-instances-documents-are)), and
+  what such a document says of itself never makes it writable.
+- **The folders** are asked once a WebID and kept. The page asks for
+  them again when it adds or removes one: a storage entered, an instance
+  made, registered or deleted, a guest's study moved. An address outside
+  them has them asked again at most once a minute, for an instance
+  registered elsewhere. A failed ask fails the request.
+- **A guest's pod** is this browser's, routed before the gate. Logged
+  out, nothing is the user's.
+
+The profile, the storages, the type indexes and the instances'
+registrations are read and written through the pod fetch, without the
+gate. They're how the gate finds the user's own pod, and an instance
+added by its address isn't registered until it's read. So is copying
+an instance, and publishing a release. A release a draft follows is
+read through `createOwnPodFetch`, which asks the same folders
+([studio.md](studio.md#drafts)).
+
 ## Further rules
 
 - UI components never import ports or adapters; they get `UseCases`,

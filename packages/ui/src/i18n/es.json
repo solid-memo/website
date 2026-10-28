@@ -1720,6 +1720,7 @@
     "resourceChangedDuringCopy": "Parte de tus datos de estudio en este navegador cambió mientras se copiaba, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",
     "guestStudyBeingMoved": "Solid Memo está trasladando a tu Pod tus datos de estudio de este navegador y no guarda nada en ellos hasta que termine. Espera a que acabe e inténtalo de nuevo.",
     "writeRefused": "Solid Memo detuvo un cambio en tu Pod por seguridad: se habría guardado en una dirección en la que Solid Memo nunca guarda nada. No se cambió nada.",
+    "writeOutsidePod": "Solid Memo no guardó esto: está en {host}, fuera de tu Pod, y Solid Memo solo guarda en tu Pod. No se cambió nada.",
     "deckChangedSinceOffer": "El mazo cambió después de que se ofreciera la actualización, quizá en otra pestaña o aplicación, así que no se cambió nada. Vuelve a mirar la oferta.",
     "deckChangedDuringUpgrade": "El mazo cambió mientras se actualizaba, quizá en otra pestaña o aplicación. Inténtalo de nuevo.",
     "changedElsewhere": "Esto se cambió en otro lugar, quizá en otra pestaña o aplicación, después de que Solid Memo lo leyera, así que no se guardó nada. Vuelve a cargar la página e inténtalo de nuevo.",

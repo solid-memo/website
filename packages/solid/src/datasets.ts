@@ -328,7 +328,9 @@ export type Removal = "absent" | "deleted" | "kept";
  *    whatever changed meanwhile; then the document is kept as it is.
  *
  * A document changed meanwhile (412) is read again and the removal made
- * once more; a second 412 is a PreconditionFailedError.
+ * once more; a second 412 is a PreconditionFailedError. One outside the
+ * user's own pod, which the app's fetch never writes to (ownPodGate.ts,
+ * `writeOutsidePod`), is "kept" as it is.
  */
 export async function removeOwned(
   url: string,
@@ -338,6 +340,7 @@ export async function removeOwned(
   try {
     return await removeOwnedOnce(url, owns, fetch);
   } catch (error) {
+    if (error instanceof AppError && error.code === "writeOutsidePod") return "kept";
     if (!(error instanceof PreconditionFailedError)) throw error;
     return removeOwnedOnce(url, owns, fetch);
   }

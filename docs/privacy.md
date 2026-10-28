@@ -118,6 +118,10 @@ The browser contacts these, each when it's needed:
   is one in [`podProvider.ts`](../packages/domain/src/podProvider.ts);
   the project runs none of them.
 - **The pod's server**, for everything the learner studies.
+- **The server of a deck's document outside the learner's pod**, when
+  their study's catalog names one there. It's asked as no one, and the
+  app saves nothing to it
+  ([boundaries.md](boundaries.md#the-credential-gate)).
 - **The servers of pictures on cards**, each seeing a request from the
   browser: for the library's decks, image hosts such as `flagcdn.com`,
   `upload.wikimedia.org`, `thumb.wikimedia.org` and `iiif.micr.io`; for
