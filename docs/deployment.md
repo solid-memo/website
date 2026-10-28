@@ -137,6 +137,7 @@ data it reads:
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
 | `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
 | `/journeys/index.html` | `apps/web/public/journeys/` | The user journeys' report's old address: a page that sends `/journeys/#x` on to `https://journeys.solid-memo.com/#x`, where the report now lives ([below](#the-journeys-report)). |
+| `/journeys/trace/sw.bundle.js` | `apps/web/public/journeys/trace/` | A service worker at the address of the old report's trace viewer's, which unregisters itself. |
 
 Vite copies `ns/`, `decks/` and `vendor/` unchanged
 (`turtleDirectoryPlugin` in
@@ -210,7 +211,11 @@ registration outlives its script, so the worker still loads any trace
 a link names and serves its pages on the app's origin. The app, as it
 starts, unregisters every service worker under `journeys/`
 ([journeysWorkers.ts](../apps/web/src/journeysWorkers.ts)), and
-registers none of its own.
+registers none of its own. A browser that follows a link into
+`/journeys/trace/` and never opens the app is cleaned up too. The site
+serves a `sw.bundle.js` at the old worker's address, the same as the
+journeys' site's. The browser fetches it as that worker's update, and
+the update removes the registration.
 
 The job pushes with a deploy key: the public half, with write access,
 is the journeys repository's, and the private half is the secret
