@@ -10,6 +10,7 @@ import type { ResponseTimes } from "@solid-memo/domain/answer";
 import {
   courseAnswerEffect,
   courseProgress,
+  outlineOfCards,
   type CompletedChaptersEdit,
   type CourseAnswerEffect,
   type CourseOutline,
@@ -106,8 +107,11 @@ export interface Course {
   release: LibraryDeckContent;
   /** The release's chapters and steps. */
   outline: CourseOutline;
-  /** The release's cards (the questions, with their distractors) by id. */
-  cards: Readonly<Record<string, LibraryCard>>;
+  /**
+   * The release's cards (the questions, with their distractors) by id:
+   * every question the outline asks is one of them (outlineOfCards).
+   */
+  cards: ReadonlyMap<string, LibraryCard>;
   /** The cards the learner has answered: those with review state in the deck. */
   answeredCardIds: string[];
   progress: CourseProgress;
@@ -166,15 +170,19 @@ export function createCourseUseCases({
     async getCourse(offered) {
       const deck = await deckRepository.readDeck(offered.url);
       if (deck === null) throw new AppError("deckGone", { deck: offered.title });
-      const [release, { outline, answeredCardIds }] = await Promise.all([
+      const [release, summary] = await Promise.all([
         deckLibrary.fetchLibraryDeck(sourceOf(deck)),
         courseSummary(deck),
       ]);
+      const cards = new Map(release.cards.map((card) => [card.id, card]));
+      // Read apart, the outline and the cards could be of two states of a draft: it asks only these.
+      const outline = outlineOfCards(summary.outline, new Set(cards.keys()));
+      const { answeredCardIds } = summary;
       return {
         deck,
         release,
         outline,
-        cards: Object.fromEntries(release.cards.map((card) => [card.id, card])),
+        cards,
         answeredCardIds,
         progress: courseProgress(outline, answeredCardIds, deck.completedChapters ?? []),
       };

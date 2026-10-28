@@ -13,7 +13,8 @@ import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
 /**
  * Where a chapter of the course is taken up: its steps, from the first
  * not done, or its final review once they all are and it is not yet
- * completed. A completed chapter opens at its steps again, for practice.
+ * completed. A completed chapter opens at its steps again, for practice;
+ * one with no step (outlineOfCards) always opens at its final review.
  */
 export function chapterHref(
   links: CourseLinks,
@@ -22,7 +23,9 @@ export function chapterHref(
   chapter: CourseChapter,
 ): string {
   const progress = course.progress.chapters.find((entry) => entry.url === chapter.url)!;
-  const toReview = progress.state === "open" && progress.resumeStepId === undefined;
+  const toReview =
+    chapter.steps.length === 0 ||
+    (progress.state === "open" && progress.resumeStepId === undefined);
   return (toReview ? links.reviewHref : links.chapterHref)(
     instanceUrl,
     course.deck.url,

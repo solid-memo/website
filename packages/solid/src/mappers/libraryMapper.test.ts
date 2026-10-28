@@ -566,7 +566,9 @@ describe("toCourseOutline", () => {
    sm:theory "Second."@en ; sm:checkedBy <#q-3> .
 <#ch-1-1> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 0 ; sm:theory "First."@en ; sm:checkedBy <#q-1>, <#q-2> .
 <#ch-1-broken> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 2 ; sm:checkedBy <#q-1> .
-<#q-1> a sm:Card ; sm:front "Q"@en ; sm:back "A"@en .
+<#q-1> a sm:Card ; sm:formatVersion 7 ; sm:front "Q"@en ; sm:back "A"@en .
+<#q-2> a sm:Card ; sm:formatVersion 7 ; sm:front "Q2"@en ; sm:back "A2"@en .
+<#q-3> a sm:Card ; sm:formatVersion 7 ; sm:front "Q3"@en ; sm:back "A3"@en .
 `,
       DOC,
     );
@@ -613,6 +615,7 @@ describe("toCourseOutline", () => {
 
 - one
 - two"""@en ; sm:checkedBy <#q-1> .
+<#q-1> a sm:Card ; sm:formatVersion 7 ; sm:front "Q"@en ; sm:back "A"@en .
 `,
       DOC,
     );
@@ -625,5 +628,27 @@ describe("toCourseOutline", () => {
         ],
       },
     ]);
+  });
+  it("asks only the release's cards that fit their shape, leaving out a step left with none", async () => {
+    const dataset = await datasetOf(
+      `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+<#ch-1> a sm:Chapter ; schema:isPartOf <> ; schema:position 0 ; dcterms:title "Linked data"@en ;
+   sm:reviewQuestion <#constructor>, <#q-1>, <#q-broken> .
+<#ch-1-1> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 0 ; sm:theory "First."@en ;
+   sm:checkedBy <#q-1>, <#q-missing>, <#__proto__> .
+<#ch-1-2> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 1 ; sm:theory "Second."@en ;
+   sm:checkedBy <#constructor> .
+<#q-1> a sm:Card ; sm:formatVersion 7 ; sm:front "Q"@en ; sm:back "A"@en .
+<#q-broken> a sm:Card ; sm:formatVersion 7 ; sm:back "A"@en .
+`,
+      DOC,
+    );
+    expect(toCourseOutline(DOC, dataset).chapters).toMatchObject([
+      { id: "ch-1", steps: [{ id: "ch-1-1", questionIds: ["q-1"] }], reviewQuestionIds: ["q-1"] },
+    ]);
+    expect(toCourseOutline(DOC, dataset).chapters[0]!.steps).toHaveLength(1);
   });
 });

@@ -233,7 +233,8 @@ function TrialPlay({
       course={course!}
       justCompleted={justCompleted ?? undefined}
     />
-  ) : review ? (
+  ) : review || shown.steps.length === 0 ? (
+    // A chapter with no step (outlineOfCards) has only its final review.
     <ChapterReviewContainer
       key={`${shown.id} ${run}`}
       useCases={useCases}

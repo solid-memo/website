@@ -112,7 +112,7 @@ export function ChapterPlayerContainer({
   );
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
   const step = chapter.steps[at.step]!;
-  const card = course.cards[step.questionIds[at.question]!]!;
+  const card = course.cards.get(step.questionIds[at.question]!)!;
   const choices = useMemo(() => choicesOf(card, random), [at.step, at.question]);
   const answerMutation = useCourseAnswer(useCases, instance, course, setAnswer);
 

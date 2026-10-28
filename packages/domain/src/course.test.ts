@@ -8,6 +8,7 @@ import {
   choicesOf,
   courseAnswerEffect,
   courseOutlineFromRecords,
+  outlineOfCards,
   courseProgress,
   courseProgressOf,
   editCompletedChapters,
@@ -107,6 +108,58 @@ describe("a course's outline", () => {
           reviewQuestionIds: [],
         },
       ],
+    });
+  });
+
+  it("asks only the release's cards, leaving out a step left with none and keeping the progress to them", () => {
+    const asking = outlineOfCards(
+      courseOutlineFromRecords(
+        RELEASE,
+        [{ url: at("ch-a"), data: chapter(0, { reviewQuestion: [at("constructor"), at("q2")] }) }],
+        [
+          { url: at("a-1"), data: step("ch-a", 0, ["q1", "q-missing", "__proto__"]) },
+          { url: at("a-2"), data: step("ch-a", 1, ["constructor"]) },
+        ],
+      ),
+      new Set(["q1", "q2"]),
+    );
+    expect(asking.chapters[0]).toMatchObject({
+      steps: [{ id: "a-1", questionIds: ["q1"] }],
+      reviewQuestionIds: ["q2"],
+    });
+    expect(asking.chapters[0]!.steps).toHaveLength(1);
+    expect(courseProgress(asking, ["q1"], []).chapters[0]).toEqual({
+      url: at("ch-a"),
+      state: "open",
+      doneStepIds: ["a-1"],
+    });
+    expect(finalReviewQueue(asking.chapters[0]!, () => 0.999999)).toEqual(["q1", "q2"]);
+  });
+
+  it("leaves out a chapter that asks none of the release's cards, so the next one unlocks", () => {
+    const asking = outlineOfCards(
+      courseOutlineFromRecords(
+        RELEASE,
+        [
+          { url: at("ch-a"), data: chapter(0) },
+          { url: at("ch-b"), data: chapter(1, { reviewQuestion: [at("constructor")] }) },
+          { url: at("ch-c"), data: chapter(2, { reviewQuestion: [at("q2")] }) },
+        ],
+        [
+          { url: at("a-1"), data: step("ch-a", 0, ["q1"]) },
+          { url: at("b-1"), data: step("ch-b", 0, ["q-missing", "__proto__"]) },
+        ],
+      ),
+      new Set(["q1", "q2"]),
+    );
+    expect(asking.chapters.map((c) => [c.id, c.steps.length, c.reviewQuestionIds])).toEqual([
+      ["ch-a", 1, []],
+      ["ch-c", 0, ["q2"]],
+    ]);
+    expect(courseProgress(asking, ["q1"], [at("ch-a")]).chapters[1]).toEqual({
+      url: at("ch-c"),
+      state: "open",
+      doneStepIds: [],
     });
   });
 

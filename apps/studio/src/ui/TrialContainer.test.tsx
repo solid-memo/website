@@ -12,7 +12,13 @@ import { problem } from "@solid-memo/domain/release/problems";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { QUEUE_DEFAULTS } from "@solid-memo/ui/test/fakes/study";
-import { CH1, courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
+import {
+  CH1,
+  courseDeck,
+  courseInstance,
+  makeCourse,
+  makeSteplessCourse,
+} from "@solid-memo/ui/test/course";
 import { courseDraft, DRAFT_URL, instanceA } from "../test/fixtures";
 import { TrialContainer, type TrialLinks } from "./TrialContainer";
 import { queryKeys } from "./queryKeys";
@@ -138,6 +144,14 @@ describe("TrialContainer", () => {
     // A chapter the course has not: its page.
     show("ch-gone");
     expect(await screen.findByRole("link", { name: "Continue" })).toBeInTheDocument();
+  });
+
+  it("plays a chapter with no step at its final review", async () => {
+    const trial = makeUseCasesFake({ getCourse: vi.fn(async () => makeSteplessCourse()) });
+    renderTrial({ openTrial: async () => opened(trial), chapter: "ch-1" });
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Final review: Linked data" }),
+    ).toBeInTheDocument();
   });
 
   it("leads a final review passed back to the course's page, which cheers the chapter until another is shown", async () => {

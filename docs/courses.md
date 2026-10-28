@@ -110,6 +110,14 @@ domain's
 - A retired chapter or step (`owl:deprecated true`) is left out of the
   outline (`courseOutlineFromRecords`), and so is every step of a
   retired chapter.
+- A question that names no card of the release is left out of the
+  outline (`outlineOfCards`), and so is a step left with no question.
+  A chapter left with no step and no review question goes too, and the
+  next chapter unlocks as if it weren't there. A chapter left with only
+  review questions opens at its final review. The Studio refuses such
+  a question before it publishes, but a release from another server
+  may have one. The player, the progress and the statistics read the
+  same outline, so they count the same questions.
 - A retired distractor (`owl:deprecated true`) is never offered
   (`choicesOf` leaves it out), and an upgrade retires it in the copies
   that have it. It's kept, marked `retired`, wherever a card's

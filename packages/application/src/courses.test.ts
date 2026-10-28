@@ -13,7 +13,7 @@ import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import type { LibraryCard } from "@solid-memo/domain/library";
-import type { CourseOutline } from "@solid-memo/domain/course";
+import type { CourseChapter, CourseOutline } from "@solid-memo/domain/course";
 import {
   sm2s,
   promptOf,
@@ -229,7 +229,10 @@ describe("courses", () => {
       deck: completed,
       release,
       outline,
-      cards: { "q-iri": question, "q-rdf": release.cards[1] },
+      cards: new Map([
+        ["q-iri", question],
+        ["q-rdf", release.cards[1]],
+      ]),
       answeredCardIds: ["q-iri"],
       progress: {
         chapters: [
@@ -242,6 +245,44 @@ describe("courses", () => {
     });
     // A deck with no chapter completed has the first open.
     expect((await useCases.getCourse(courseDeck)).progress.chapters[0]!.state).toBe("open");
+  });
+
+  it("getCourse asks only the release's cards, whatever ids the outline names", async () => {
+    const { deps, useCases } = setup();
+    const [first, second] = outline.chapters as [CourseChapter, CourseChapter];
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockResolvedValueOnce({
+      ...outline,
+      chapters: [
+        {
+          ...first,
+          steps: [{ ...first.steps[0]!, questionIds: ["__proto__", "q-iri", "q-missing"] }],
+          reviewQuestionIds: ["constructor", "q-rdf"],
+        },
+        {
+          ...second,
+          steps: [{ ...second.steps[0]!, questionIds: ["constructor"] }],
+          reviewQuestionIds: ["q-rdf"],
+        },
+        {
+          ...second,
+          id: "ch-3",
+          url: at("ch-3"),
+          steps: [{ ...second.steps[0]!, questionIds: ["q-missing"] }],
+          reviewQuestionIds: ["__proto__"],
+        },
+      ],
+    });
+    const got = await useCases.getCourse(courseDeck);
+    expect(got.outline.chapters.map((chapter) => chapter.steps)).toEqual([
+      [{ ...first.steps[0]!, questionIds: ["q-iri"] }],
+      [],
+    ]);
+    expect(got.outline.chapters.map((chapter) => chapter.reviewQuestionIds)).toEqual([
+      ["q-rdf"],
+      ["q-rdf"],
+    ]);
+    expect(got.cards.get("constructor")).toBeUndefined();
+    expect(got.progress.chapters[1]).toEqual({ url: at("ch-2"), state: "locked", doneStepIds: [] });
   });
 
   it("getCourse keeps a chapter completed in an older release completed in the one the deck now follows", async () => {
