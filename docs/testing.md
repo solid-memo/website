@@ -737,6 +737,33 @@ installing. `check:actions`, in `npm run check`, checks that every
 action is pinned
 ([The repository's own checks](#the-repositorys-own-checks)).
 
+The Python tools CI installs are pinned twice. Each
+`scripts/requirements-*.in` names the tools at exact versions, and
+`uv pip compile` writes its `requirements-*.txt`: every package they
+need, at an exact version, with the hash of each of its files. pip
+installs the `.txt`, and with a hash in it, refuses any file whose hash
+differs or any package not listed. CI's jobs and the Taxonomy workflow
+pass `--require-hashes` too. The hashes don't cover what pip installs
+to build a package that has no wheel, such as `actionlint-py`: those
+build tools come unpinned. Only CI's jobs that hold no secret install
+`requirements-lint.txt`.
+
+Each `.txt` holds the packages for every Python its tools support:
+3.9 and later for `requirements-ci.txt`, which is pySHACL's floor, and
+3.11 and later for `requirements-lint.txt`, which is zizmor's.
+Renovate bumps a pin in a `.in` file and compiles its `.txt` again,
+and each month it compiles both again to bring the packages they need
+up to date, in a pull request a maintainer merges
+([renovate.json5](../renovate.json5)). Renovate reads the command at
+the top of a `.txt` and runs it again, so the command writes each
+option with an `=` and the output file in full. By hand, after
+changing a `.in` file:
+
+```sh
+uv pip compile --generate-hashes --universal --python-version=3.9 scripts/requirements-ci.in --output-file=scripts/requirements-ci.txt
+uv pip compile --generate-hashes --universal --python-version=3.11 scripts/requirements-lint.in --output-file=scripts/requirements-lint.txt
+```
+
 ### Code scanning
 
 GitHub's [CodeQL](https://codeql.github.com/) reads the code for

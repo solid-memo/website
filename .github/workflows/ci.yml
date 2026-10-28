@@ -348,7 +348,7 @@ jobs:
           python-version: "3.15"
           cache: pip
           cache-dependency-path: scripts/requirements-ci.txt
-      - run: pip install -r scripts/requirements-ci.txt
+      - run: pip install --require-hashes -r scripts/requirements-ci.txt
       # The script's own tests (scripts/test_shacl_crosscheck.py), on
       # small documents of their own, before it checks the real ones, and
       # the taxonomy deck generator's (scripts/test_taxonomy_deck.py) and the
@@ -1024,13 +1024,13 @@ jobs:
           python-version: "3.15"
           cache: pip
           cache-dependency-path: scripts/requirements-ci.txt
-      - run: pip install -r scripts/requirements-ci.txt
+      - run: pip install --require-hashes -r scripts/requirements-ci.txt
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.15"
           cache: pip
           cache-dependency-path: scripts/requirements-lint.txt
-      - run: pip install -r scripts/requirements-lint.txt
+      - run: pip install --require-hashes -r scripts/requirements-lint.txt
 
   # The docs (docs/testing.md#documentation): every link to a file or a
   # heading in the repository resolves (lychee, offline: the web's
@@ -1059,7 +1059,7 @@ jobs:
           cache-dependency-path: scripts/requirements-lint.txt
       # pip installs outside the checkout, so only the repository's own
       # files are there to check.
-      - run: pip install -r scripts/requirements-lint.txt
+      - run: pip install --require-hashes -r scripts/requirements-lint.txt
       - run: npm run lint:reuse
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
@@ -1090,7 +1090,7 @@ jobs:
           python-version: "3.15"
           cache: pip
           cache-dependency-path: scripts/requirements-lint.txt
-      - run: pip install -r scripts/requirements-lint.txt
+      - run: pip install --require-hashes -r scripts/requirements-lint.txt
       - run: npm run lint:workflows
 
   # A pull request's commits follow Conventional Commits
