@@ -25,6 +25,7 @@ import { makeUseCasesFake } from "../test/useCasesFake";
 import { deckProgressOf } from "../test/fakes/statistics";
 import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { routeToHash, statisticsHref } from "./router";
+import { queryKeys } from "./queryKeys";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
@@ -52,10 +53,10 @@ function makeUseCases(overrides: Partial<UseCases> = {}): UseCases {
   });
 }
 
-function renderWorkspace(useCases: UseCases) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+function renderWorkspace(
+  useCases: UseCases,
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+) {
   return render(
     <QueryClientProvider client={queryClient}>
       <Workspace useCases={useCases} session={session} />
@@ -2873,11 +2874,14 @@ describe("Workspace", () => {
         "",
         routeToHash({ screen: "home", instanceUrl: instanceA.url }),
       );
-      renderWorkspace(useCases);
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      renderWorkspace(useCases, queryClient);
       const start = await screen.findByRole("button", { name: "Start the course" });
-      // Effects run after the next frame: the list's (Workspace's deck lookup)
-      // has run before a learner's click, though the library's index is in first.
-      await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
+      // Effects run after the next frame: until Workspace has copied the (empty)
+      // tree into the decks, a click could let that copy undo the started course's.
+      await waitFor(() =>
+        expect(queryClient.getQueryData(queryKeys.decks(instanceA.url))).toEqual([]),
+      );
       fireEvent.click(start);
 
       expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
