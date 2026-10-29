@@ -1315,6 +1315,12 @@ An import reads the file as the pod is read, with the same mappers:
   of all the terms before it, so a small file of such contexts holds
   the tab for minutes. A file this app exports states its context once,
   at the top;
+- a JSON-LD context that defines a term by more than an IRI (an object,
+  such as one with a `@container`) is refused (`deckFileUnreadable`).
+  The parser reads the values of some such terms, a `@graph` container,
+  in time growing with their square. A context may give only strings,
+  for its terms and for keywords such as `@vocab`; a file this app
+  exports states prefixes alone;
 - the parser reads the document as it streams, each object written
   again with its context first. A parser that held every node to the
   end would match each against every typed one, in time growing with

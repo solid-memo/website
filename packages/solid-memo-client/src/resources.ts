@@ -17,7 +17,7 @@ import {
   type RequestOptions,
   type SourcedDataset,
 } from "@solid-memo/solid/client/interface";
-import { limitsOf, quadTally, refusalOf } from "@solid-memo/solid/client/readLimits";
+import { limitsOf, quadTally, refusalOf, textChunks } from "@solid-memo/solid/client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid/client/sparqlUpdate";
 import { refuseUnwritable } from "@solid-memo/solid/writableTerms";
 import {
@@ -190,7 +190,9 @@ function parseTurtle(text: string, baseIRI: string, limits?: ReadLimits): Promis
  * The text is read as it streams, so a node's `@context` is to come
  * before its other keys, or the text fails to parse: otherwise the
  * parser holds every node to the end, then matches each against every
- * typed one, time growing with their square.
+ * typed one, time growing with their square. The text is written in
+ * parts (textChunks), and the parser destroyed once past `limits`, so
+ * that it reads no further than the part it is in.
  */
 function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
@@ -205,11 +207,14 @@ function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promis
         },
       },
     });
-    const { quads, add } = collector(baseIRI, limits, reject);
+    const { quads, add } = collector(baseIRI, limits, (error) => {
+      parser.destroy();
+      reject(error);
+    });
     parser.on("data", add);
     parser.on("error", reject);
     parser.on("end", () => resolve(quads));
-    parser.write(text);
+    for (const chunk of textChunks(text)) parser.write(chunk);
     parser.end();
   });
 }
