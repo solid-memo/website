@@ -163,7 +163,7 @@ export function cardName(
   readerText: I18n["readerText"],
 ): string {
   if (!isMarkdown(card.textFormat)) return cardLabel(card, readerText);
-  return labelText(readerText(cardNameText(card, readerText))) || card.id;
+  return markdownName(card, readerText)?.label ?? card.id;
 }
 
 /**
@@ -173,8 +173,17 @@ export function cardName(
  */
 export function cardNameText(card: CardContent, readerText: I18n["readerText"]): LangText {
   if (!isMarkdown(card.textFormat)) return cardLabelText(card);
-  return (
-    [card.front, card.back].find((text) => labelText(readerText(text)) !== "") ??
-    cardLabelText(card)
-  );
+  return markdownName(card, readerText)?.side ?? cardLabelText(card);
+}
+
+/** A Markdown card's first side whose text shows any, with its label (labelText); null when neither does. */
+function markdownName(
+  card: CardContent,
+  readerText: I18n["readerText"],
+): { side: LangText; label: string } | null {
+  for (const side of [card.front, card.back]) {
+    const label = labelText(readerText(side));
+    if (label !== "") return { side, label };
+  }
+  return null;
 }
