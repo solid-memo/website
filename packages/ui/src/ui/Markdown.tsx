@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Fragment, type ComponentChildren } from "preact";
-import { liveLink, writtenHost } from "@solid-memo/markdown/links";
+import { liveLink, namesItsHost } from "@solid-memo/markdown/links";
 import type { MdBlock, MdInline } from "@solid-memo/markdown/parse";
 import { breakable } from "./breakable";
 import { ExternalLink } from "./ExternalLink";
@@ -178,7 +178,7 @@ function MarkdownLink({ url, nodes }: { url: string; nodes: readonly MdInline[] 
 /**
  * A followed link (liveLink) from data, written as `written`, its text
  * reading `shown`, with the host it leads to beside it unless the text is
- * the address and names that host itself (writtenHost).
+ * the address and names that host itself (namesItsHost).
  */
 export function WebLink({
   link,
@@ -196,9 +196,7 @@ export function WebLink({
   // that address names its host other than as the parser reads it (an
   // escape, a full-width dot) or the host is an international one: the
   // punycode host then shows what look-alike letters hide.
-  const ownAddress =
-    shown === link.href ||
-    (shown === written && writtenHost(written) === link.host && !PUNYCODE.test(link.host));
+  const ownAddress = shown === link.href || (shown === written && namesItsHost(written, link.host));
   // Both isolated (dir), so a bidi override in the text before them cannot
   // reorder the address or the host they show. An address shown as itself
   // and the host run left to right; other link text in the direction of its
@@ -217,9 +215,6 @@ export function WebLink({
     </>
   );
 }
-
-/** A host with an international (punycode) label. */
-const PUNYCODE = /(?:^|\.)xn--/i;
 
 /** A link's text as the reader sees it, for comparing with its address. */
 function inlineSource(node: MdInline): string {

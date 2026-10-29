@@ -81,12 +81,17 @@ describe("isLinkableUrl", () => {
     expect(isLinkableUrl(value)).toBe(true);
   });
 
-  it.each(["javascript:alert(1)", "data:text/html,<p>hi</p>", "not a url", ""])(
-    "rejects %j",
-    (value) => {
-      expect(isLinkableUrl(value)).toBe(false);
-    },
-  );
+  it.each([
+    "javascript:alert(1)",
+    "data:text/html,<p>hi</p>",
+    "not a url",
+    "",
+    "https://pod.example\u2215card@evil.example/x",
+    "https://user:secret@pod.example/",
+    "http://:secret@pod.example/",
+  ])("rejects %j", (value) => {
+    expect(isLinkableUrl(value)).toBe(false);
+  });
 });
 
 describe("validateWebId", () => {
