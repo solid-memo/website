@@ -64,6 +64,7 @@ function page(network: typeof globalThis.fetch = globalThis.fetch) {
     deckLibrary: createSolidDeckLibrary({
       fetch: routedFetch({ origin: SITE, local: shapesFetch, remote: globalThis.fetch }),
       indexUrl: `${SITE}decks/index.ttl`,
+      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
     }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch }),
     instanceRepository: createSolidInstanceRepository(deps),

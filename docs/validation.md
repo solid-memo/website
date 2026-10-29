@@ -349,9 +349,11 @@ A published release is never written.
 
 A release a learner adds [from a link](deck-library.md#from-a-link) is
 checked in the `"library"` context
-(`validateDocument(url, "library")`): each subject against its library
-shape, no DCAT-AP. It's fetched as the shapes are: no login goes to its
-host. A violation refuses the release; a warning doesn't.
+(`validateDataset(url, dataset, "library")`): each subject against its
+library shape, no DCAT-AP. The check is of the read the library made
+(`DeckLibrary.readRelease`), which no login goes with, and the read that
+passes is the one imported. A violation refuses the release; a warning
+doesn't.
 
 ## Repair
 

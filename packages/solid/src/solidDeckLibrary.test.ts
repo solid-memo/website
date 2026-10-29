@@ -19,7 +19,12 @@ const DOC = "https://solid-memo.com/decks/capitals/v1.ttl";
 const fetch = vi.fn() as unknown as typeof globalThis.fetch;
 
 function makeLibrary() {
-  return createSolidDeckLibrary({ fetch, indexUrl: INDEX });
+  // A release from a link, checked as it is read, is releaseFromLink.test.ts's.
+  return createSolidDeckLibrary({
+    fetch,
+    indexUrl: INDEX,
+    validate: () => Promise.reject(new Error("A library release is not checked as it is read")),
+  });
 }
 
 /** A release of one card. */

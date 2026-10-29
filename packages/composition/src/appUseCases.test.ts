@@ -707,6 +707,29 @@ describe("createAppUseCases", () => {
     }
   });
 
+  it("checks a release from a link against the library's shapes as it was read, reading it once and as no one", async () => {
+    const bob = "https://bob.example/";
+    const release = `${bob}releases/capitals/v1.ttl`;
+    const broken = `${bob}releases/broken/v1.ttl`;
+    const pod = podAt(bob);
+    // A release of the library's, published again in a pod, and one with a card that has no back.
+    const turtle = await (await shapesFetch(`${SITE}decks/capitals-of-the-world/v1.ttl`)).text();
+    await put(pod, release, turtle);
+    await put(pod, broken, turtle.replace(/solid-memo:back "Zagreb"@en ,\s+"Zagreb"@sv ;/, ""));
+    const sent = podsNetwork({ [bob]: pod });
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await expect(useCases.readReleaseFromLink(release)).resolves.toMatchObject({ url: release });
+    await expect(useCases.readReleaseFromLink(broken)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+      vars: { host: "bob.example", count: 1 },
+    });
+    expect(sent.filter(({ method }) => method === "GET").map(({ url }) => url)).toEqual([
+      release,
+      broken,
+    ]);
+    expect(login.sent).not.toContain(release);
+  });
+
   it("reads the deck library the site publishes", async () => {
     const decks = await createAppUseCases({ ...options, indexedDB: undefined }).listLibraryDecks();
     expect(decks.length).toBeGreaterThan(0);

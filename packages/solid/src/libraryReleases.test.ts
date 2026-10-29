@@ -41,7 +41,12 @@ const siteFetch: typeof globalThis.fetch = async (input) => {
   return turtleFetch(readFileSync(join(DECKS_ROOT, url.slice(DECKS.length)), "utf8"))(url);
 };
 
-const library = createSolidDeckLibrary({ fetch: siteFetch, indexUrl: `${DECKS}index.ttl` });
+// The library's own releases are not checked as one from a link is.
+const library = createSolidDeckLibrary({
+  fetch: siteFetch,
+  indexUrl: `${DECKS}index.ttl`,
+  validate: () => Promise.reject(new Error("A library release is not checked as it is read")),
+});
 
 const documents = new Map<string, Promise<Dataset>>();
 

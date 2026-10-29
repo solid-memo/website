@@ -156,7 +156,7 @@ export function createInstanceCheckUseCases({
     decks: readonly Deck[],
     drafts: readonly string[],
     unclaimed: readonly UnclaimedDeck[],
-  ): { url: string; context: DocumentContext }[] {
+  ): { url: string; context: Exclude<DocumentContext, "library"> }[] {
     return [
       ...instanceDocumentUrls(instanceUrl, decks)
         .filter((url) => !isUnclaimed(url, unclaimed))
@@ -167,7 +167,7 @@ export function createInstanceCheckUseCases({
   /** The check of these documents of the instance, each not checked again while still at the version the digest says conformed. */
   async function checkDocuments(
     instanceUrl: string,
-    urls: readonly { url: string; context: DocumentContext }[],
+    urls: readonly { url: string; context: Exclude<DocumentContext, "library"> }[],
     digest: InstanceDigest,
   ): Promise<ValidationReport> {
     const documents = await Promise.all(

@@ -907,14 +907,14 @@ link**, on the deck list and the library, opens `#/import-url`
 ```mermaid
 flowchart LR
     accTitle: Importing a release by URL
-    accDescr: The import screen reads a release from any host, validates it against the shapes, and imports it into the learner's instance.
+    accDescr: The import screen reads a release from any host once, validates that read against the shapes, and imports it into the learner's instance.
     ui["ImportUrlContainer / ImportUrlScreen<br/>#/import-url?instance=…&url=…"] --> read["readReleaseFromLink"]
     read --> lib["DeckLibrary.readRelease<br/>(solidDeckLibrary.ts)"]
-    read --> shapes["ShapeValidator.validateDocument<br/>(context library)"]
+    lib --> shapes["ShaclShapeValidator.validateDataset<br/>(context library)"]
     ui --> add["importReleaseFromUrl"]
     add --> imp["importLibraryDeck / startCourse"]
+    imp -->|the read checked| lib
     lib -->|plain fetch| rel["any host: …/name/vN.ttl"]
-    shapes -->|plain fetch| rel
     imp -->|authenticated| pod["the learner's instance"]
 ```
 
@@ -928,7 +928,7 @@ flowchart LR
   its deck, its cards counted, its creators and license, and its series
   with every version the document describes. Format 6 describes the
   series in the release, and a `decks/` release at an older format
-  lists only itself. It's read afresh each time, never kept.
+  lists only itself. It's read afresh each time.
 - Every release is read under `RELEASE_LIMITS`
   ([readLimits.ts](../packages/solid/src/client/readLimits.ts)): 32 MiB
   of body, 400,000 triples, and 64 Mi characters in the terms of those
@@ -947,9 +947,13 @@ flowchart LR
   user's own pod documents aren't limited. A deck file has limits of its
   own, in `data-model.md`.
 - The same read is checked against the library's shapes, with no login
-  sent (`validateDocument(url, "library")`). A subject that breaks its
-  shape refuses the release (`releaseNotConforming`); warnings don't. A
-  release in a newer format than the app reads is refused.
+  sent (`validateDataset(url, dataset, "library")`); the release isn't
+  read again for the check. A subject that breaks its shape refuses the
+  release (`releaseNotConforming`); warnings don't. A release in a newer
+  format than the app reads is refused. The read that passes is kept as
+  the release's, so the deck or course imported next is that read, the
+  one shown, not a later answer from the release's host. A read refused
+  isn't kept.
 - The screen shows the release like the library's page, without card
   list or preview, with its host, whether it's a deck or a course, and
   that it isn't the library's. Any link in its text goes
@@ -985,12 +989,15 @@ flowchart LR
   hasn't shared, the Studio says it's unknown whether a newer version is
   out.
 - Before an upgrade from a link is planned, the newer release and each
-  one in between are checked against the library's shapes
+  one in between are read and checked against the library's shapes
   (`checkLinkedRelease`); one that breaks them refuses the upgrade
-  (`releaseNotConforming`). The newer release is its creator's to write,
-  so it may list any number of releases in between. The app reads the
-  newest 16 of them at most, four at once, each once. A card as one left
-  out has it counts as the user's, and the upgrade keeps it.
+  (`releaseNotConforming`). The plan is made from those same reads: its
+  cards, its notes and the list of releases in between come from the
+  newer release as it was checked, not from the series read before. The
+  newer release is its creator's to write, so it may list any number of
+  releases in between. The app reads the newest 16 of them at most, four
+  at once, each once. A card as one left out has it counts as the
+  user's, and the upgrade keeps it.
 - A copy from a link isn't given its release's new title or description
   languages when its page opens (`addReleaseLanguages`,
   [migrations.md](migrations.md)). Its release stays on the creator's

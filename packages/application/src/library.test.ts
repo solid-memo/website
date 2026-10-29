@@ -8,6 +8,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "./useCases";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
@@ -102,7 +103,7 @@ describe("the deck library", () => {
     await expect(plan).resolves.toMatchObject({ toVersion: "2", add: [{ id: "norway" }] });
     expect(deps.deckLibrary.listLibraryDecks).not.toHaveBeenCalled();
     // A release from the library's index is not checked as one from a link is.
-    expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
+    expect(deps.deckLibrary.readRelease).not.toHaveBeenCalled();
     await expect(
       createUseCases(deps).planLibraryUpgrade(copy, {
         deck: copy,
@@ -284,23 +285,59 @@ describe("the deck library", () => {
       })),
       ...extra,
     });
-    const reading = (deps: ReturnType<typeof makeDeps>, releases: readonly LibraryDeck[]) =>
-      vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url) => {
+    /** What the library's shapes say of a release: nothing wrong. */
+    const conforming = (url: string): DocumentReport => ({ url, status: "checked", subjects: [] });
+    /** A report of a release a card of which breaks its shape. */
+    const breaking = (url: string): DocumentReport => ({
+      url,
+      status: "checked",
+      subjects: [
+        {
+          url: `${url}#a`,
+          status: "checked",
+          shape: "card",
+          version: 5,
+          violations: [
+            {
+              path: SM.front,
+              message: { en: "Less than 1 values" },
+              severity: "violation",
+              constraint: "MinCount",
+            },
+          ],
+        },
+      ],
+    });
+    /** The library reading these releases, each read handed with what the shapes say of it (`report`) when it is checked. */
+    const reading = (
+      deps: ReturnType<typeof makeDeps>,
+      releases: readonly LibraryDeck[],
+      report: (url: string) => DocumentReport = conforming,
+    ) =>
+      vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url, accept) => {
         const found = releases.find((release) => release.url === url);
         if (found === undefined) throw new AppError("releaseUnreadable", { url });
+        accept?.(report(url));
         return found;
       });
+    /** The URLs of the releases the library was asked to check as it read them. */
+    const checked = (deps: ReturnType<typeof makeDeps>) =>
+      vi
+        .mocked(deps.deckLibrary.readRelease)
+        .mock.calls.filter(([, accept]) => accept !== undefined)
+        .map(([url]) => url);
 
-    it("readReleaseFromLink reads the release and checks it against the library's shapes, as anyone, writing nothing", async () => {
+    it("readReleaseFromLink reads the release once and checks that read against the library's shapes, as anyone, writing nothing", async () => {
       const deps = makeDeps();
       reading(deps, [linked(1)]);
       await expect(createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`)).resolves.toEqual(
         linked(1),
       );
-      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledExactlyOnceWith(
         `${RELEASES}v1.ttl`,
-        "library",
+        expect.any(Function),
       );
+      expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
       expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
     });
 
@@ -312,7 +349,10 @@ describe("the deck library", () => {
           `https://Bob.example:443/memo/releases/rivers/v1.ttl`,
         ),
       ).resolves.toEqual(linked(1));
-      expect(deps.deckLibrary.readRelease).toHaveBeenCalledWith(`${RELEASES}v1.ttl`);
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledWith(
+        `${RELEASES}v1.ttl`,
+        expect.any(Function),
+      );
     });
 
     it("readReleaseFromLink refuses text that is no release's address, before reading anything", async () => {
@@ -325,14 +365,13 @@ describe("the deck library", () => {
 
     it("readReleaseFromLink refuses a release that breaks its shapes, counting its violations, not its warnings", async () => {
       const deps = makeDeps();
-      reading(deps, [linked(1)]);
       const violation = (severity: "violation" | "warning") => ({
         path: SM.front,
         message: { en: "Less than 1 values" },
         severity,
         constraint: "MinCount",
       });
-      vi.mocked(deps.shapeValidator.validateDocument).mockResolvedValue({
+      reading(deps, [linked(1)], () => ({
         url: `${RELEASES}v1.ttl`,
         status: "checked",
         subjects: [
@@ -352,7 +391,7 @@ describe("the deck library", () => {
           },
           { url: `${RELEASES}v1.ttl#c`, status: "untyped" },
         ],
-      });
+      }));
       const refused = createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`);
       await expect(refused).rejects.toMatchObject({
         code: "releaseNotConforming",
@@ -507,15 +546,19 @@ describe("the deck library", () => {
         toVersion: "2",
         add: [{ id: "norway" }],
       });
-      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
-        `${RELEASES}v2.ttl`,
-        "library",
+      // The newer release is checked as it is read, before it is planned with: that read is the one fetchLibraryDeck gives.
+      expect(checked(deps)).toEqual([`${RELEASES}v2.ttl`]);
+      const check = vi.mocked(deps.deckLibrary.readRelease).mock.calls.findIndex(([, a]) => a);
+      const fetched = vi
+        .mocked(deps.deckLibrary.fetchLibraryDeck)
+        .mock.calls.findIndex(([url]) => url === `${RELEASES}v2.ttl`);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.invocationCallOrder[check]!).toBeLessThan(
+        vi.mocked(deps.deckLibrary.fetchLibraryDeck).mock.invocationCallOrder[fetched]!,
       );
     });
 
     it("planLibraryUpgrade refuses a linked copy's newer release, or one in between, that breaks the library's shapes", async () => {
       const deps = makeDeps();
-      reading(deps, [linked(1), linked(2), linked(3)]);
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         `${RELEASES}v1.ttl`,
         `${RELEASES}v2.ttl`,
@@ -528,29 +571,9 @@ describe("the deck library", () => {
       }));
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
       const broken = (bad: string) =>
-        vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
-          url,
-          status: "checked",
-          subjects:
-            url === bad
-              ? [
-                  {
-                    url: `${url}#a`,
-                    status: "checked",
-                    shape: "card",
-                    version: 5,
-                    violations: [
-                      {
-                        path: SM.front,
-                        message: { en: "Less than 1 values" },
-                        severity: "violation",
-                        constraint: "MinCount",
-                      },
-                    ],
-                  },
-                ]
-              : [],
-        }));
+        reading(deps, [linked(1), linked(2), linked(3)], (url) =>
+          url === bad ? breaking(url) : conforming(url),
+        );
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
       const useCases = createUseCases(deps);
       for (const bad of [`${RELEASES}v3.ttl`, `${RELEASES}v2.ttl`]) {
@@ -596,9 +619,11 @@ describe("the deck library", () => {
         open--;
         return made;
       };
-      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation((url) =>
-        atMostFour({ url, status: "checked", subjects: [] }),
-      );
+      vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url, accept) => {
+        accept?.(await atMostFour(conforming(url)));
+        // The newer release's checked read is the one that lists those in between.
+        return url === series.url ? series : linked(1, { url });
+      });
       vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation((url) =>
         atMostFour({
           ...libraryContent,
@@ -616,9 +641,7 @@ describe("the deck library", () => {
         fromLink: true,
       });
       const newest = versions.slice(-16).map((version) => `${RELEASES}v${version}.ttl`);
-      expect(
-        vi.mocked(deps.shapeValidator.validateDocument).mock.calls.map(([url]) => url),
-      ).toEqual([series.url, ...newest]);
+      expect(checked(deps)).toEqual([series.url, ...newest]);
       expect(
         vi
           .mocked(deps.deckLibrary.fetchLibraryDeck)
@@ -839,7 +862,7 @@ describe("library deck upgrade", () => {
     // Nothing kept beside the deck: no copy, no backup, no note in the browser.
     expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
     expect(deps.updateJournal.begin).not.toHaveBeenCalled();
-    expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
+    expect(deps.deckLibrary.readRelease).not.toHaveBeenCalled();
     expect(progress.map((p) => `${p.step} ${p.done}/${p.total}`)).toEqual([
       "read 0/4",
       "cards 1/4",

@@ -1356,7 +1356,9 @@ and its row says "From \<host>".
   none that the copy's own release lists.
 - Before an upgrade is planned, the newer release and those in between
   are checked against the library's shapes; one that breaks them is
-  refused (`releaseNotConforming`).
+  refused (`releaseNotConforming`). The upgrade is planned from the
+  same reads that were checked, its notes and the releases in between
+  included.
 - When no public catalog of its creator lists the release (an
   instance's catalog is private unless its owner shares it), the row
   says "Not known: no public catalog of its creator lists it".
