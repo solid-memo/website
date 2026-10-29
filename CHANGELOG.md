@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.19](https://github.com/solid-memo/website/compare/v6.17.18...v6.17.19) (2026-10-29)
+
+### Bug Fixes
+
+* **solid:** refuse JSON-LD terms defined by more than an IRI ([e1b823a](https://github.com/solid-memo/website/commit/e1b823ae3f64e0bd901d1e483332c4b4c5212664))
+
 ## [6.17.18](https://github.com/solid-memo/website/compare/v6.17.17...v6.17.18) (2026-10-29)
 
 ### Bug Fixes
