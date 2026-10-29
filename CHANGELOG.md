@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.18](https://github.com/solid-memo/website/compare/v6.17.17...v6.17.18) (2026-10-29)
+
+### Bug Fixes
+
+* **domain:** lay out drafts in one pass however long their chains ([364c573](https://github.com/solid-memo/website/commit/364c5738bdd4550d065529f29f8c8e4f082bc89c))
+
 ## [6.17.17](https://github.com/solid-memo/website/compare/v6.17.16...v6.17.17) (2026-10-29)
 
 ### Bug Fixes
