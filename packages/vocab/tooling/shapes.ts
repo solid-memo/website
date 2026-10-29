@@ -381,7 +381,9 @@ function constName(model: ShapeModel): string {
 function byShape(models: readonly ShapeModel[]): Map<string, ShapeModel[]> {
   const groups = new Map<string, ShapeModel[]>();
   for (const model of models) {
-    groups.set(model.shape, [...(groups.get(model.shape) ?? []), model]);
+    const versions = groups.get(model.shape);
+    if (versions === undefined) groups.set(model.shape, [model]);
+    else versions.push(model);
   }
   for (const [shape, versions] of groups) {
     versions.forEach((model, index) => {

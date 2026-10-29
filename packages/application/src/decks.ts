@@ -129,7 +129,9 @@ function deckKeywords(keywords: LangTexts, deck: Deck): LangTexts {
   for (const [tag, list] of Object.entries(keywords)) {
     const stated = tag === "" || stored.has(tag.toLowerCase()) ? tag : canonicalTag(tag);
     if (stated === null) throw new AppError("textLanguageInvalid", { tag });
-    canonical.set(stated, [...(canonical.get(stated) ?? []), ...list]);
+    const held = canonical.get(stated);
+    if (held === undefined) canonical.set(stated, [...list]);
+    else for (const keyword of list) held.push(keyword);
   }
   return Object.fromEntries(canonical);
 }

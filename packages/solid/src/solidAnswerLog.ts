@@ -85,7 +85,9 @@ export function createSolidAnswerLog({
       const byMonth = new Map<string, Answer[]>();
       for (const answer of answers) {
         const url = historyUrlOf(instanceUrl, monthOfStudyDay(answer.studyDay));
-        byMonth.set(url, [...(byMonth.get(url) ?? []), answer]);
+        const month = byMonth.get(url);
+        if (month === undefined) byMonth.set(url, [answer]);
+        else month.push(answer);
       }
       for (const [url, month] of byMonth) {
         const things = month.map((answer) => toAnswerThing(url, answer));

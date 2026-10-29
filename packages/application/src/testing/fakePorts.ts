@@ -293,7 +293,9 @@ export function memoryLog() {
   const log = {
     append: vi.fn(async (_instanceUrl: string, answer: Answer) => {
       const month = answer.studyDay.slice(0, 7);
-      byMonth.set(month, [...(byMonth.get(month) ?? []), answer]);
+      const answers = byMonth.get(month);
+      if (answers === undefined) byMonth.set(month, [answer]);
+      else answers.push(answer);
       changed(month);
     }),
     appendAll: vi.fn(async () => undefined),

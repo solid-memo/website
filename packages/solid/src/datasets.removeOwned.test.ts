@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
-import { PreconditionFailedError, removeOwned } from "./datasets";
+import { growth } from "@solid-memo/domain/testing/growth";
+import { PreconditionFailedError, removeOwned, withOnlyTheirBlankNodes } from "./datasets";
 import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -217,5 +219,62 @@ _:shared <${SM}text> "named by both" .`,
       await expect(removeOwned(DOC, cards, p.fetch)).resolves.toBe("kept");
       expect(p.sent).toEqual([]);
     });
+  });
+});
+
+describe("withOnlyTheirBlankNodes", () => {
+  const named = (value: string) => ({ termType: "NamedNode", value }) as Term;
+  const blank = (value: string) => ({ termType: "BlankNode", value }) as Term;
+  const naming = (from: Term, to: Term) =>
+    ({ subject: from, predicate: named(SAYS), object: to }) as Quad;
+
+  it("takes the blank nodes only the subjects name, and those only they name, on", () => {
+    const quads = [
+      naming(named(`${DOC}#card`), blank("a")),
+      naming(blank("a"), blank("b")),
+      naming(named(`${DOC}#card`), blank("shared")),
+      naming(named(`${DOC}#recipe`), blank("shared")),
+    ];
+    expect(withOnlyTheirBlankNodes(quads, [`${DOC}#card`])).toEqual(
+      new Set([`${DOC}#card`, "_:a", "_:b"]),
+    );
+  });
+
+  it("indexes many blank nodes of one subject in time that grows with them, not their square", () => {
+    // Eight times the blank nodes must take less than four times as long
+    // as an eighth of them done eight times over (testing.md): copying
+    // the subject's list at each one would take about eight times as long.
+    const ratio = growth(
+      (count) => {
+        const quads = Array.from({ length: count }, (_, i) =>
+          naming(named(`${DOC}#card`), blank(`b${i}`)),
+        );
+        return () => withOnlyTheirBlankNodes(quads, []);
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("walks many subjects that name one blank node in time that grows with them, not their square", () => {
+    // Asking at each subject whether every namer of the blank node goes
+    // too would read all of them each time: about eight times as long.
+    const ratio = growth(
+      (count) => {
+        const subjects = Array.from({ length: count }, (_, i) => `${DOC}#card-${i}`);
+        const quads = [
+          ...subjects.map((subject) => naming(named(subject), blank("shared"))),
+          naming(named(`${DOC}#recipe`), blank("shared")),
+        ];
+        return () => {
+          const removed = withOnlyTheirBlankNodes(quads, subjects);
+          if (removed.has("_:shared")) throw new Error("the shared blank node went too");
+        };
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

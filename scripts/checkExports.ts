@@ -227,7 +227,8 @@ export function unusedExports(
     const before = used.get(file);
     if (before === "*") return;
     if (names === "*") used.set(file, "*");
-    else used.set(file, new Set([...(before ?? []), ...names]));
+    else if (before === undefined) used.set(file, new Set(names));
+    else for (const name of names) before.add(name);
   };
   const importers = [
     ...[...records]

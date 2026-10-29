@@ -1243,6 +1243,36 @@ describe("the notes of the making", () => {
       makingNotesOf(draft),
     );
   });
+
+  it("reads many notes in one language in time that grows with them, not their square", () => {
+    // Eight times the notes must take less than four times as long as an
+    // eighth of them done eight times over (testing.md): copying the
+    // language's notes at each one would take about eight times as long.
+    const noted = (count: number): ReleaseDraft => {
+      const draft = courseDraft();
+      const notes = Array.from({ length: count }, (_, i) => ({
+        subject: ownMakingOf(draft)!,
+        predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+        object: {
+          kind: "literal" as const,
+          value: `Note ${i}.`,
+          language: "en",
+          datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+        },
+      }));
+      return { ...draft, triples: [...draft.triples, ...notes] };
+    };
+    expect(makingNotesOf(noted(2)).en).toBe("Note 0.\n\nNote 1.");
+    const ratio = growth(
+      (count) => {
+        const draft = noted(count);
+        return () => makingNotesOf(draft);
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("readCheckActivity", () => {
@@ -1606,5 +1636,30 @@ describe("mergedDraft", () => {
   it("is null when theirs changed what mine did, otherwise", () => {
     const theirs = made(base, { kind: "setMeta", meta: { versionNotes: "Theirs." } });
     expect(mergedDraft(base, mine, theirs)).toBeNull();
+  });
+
+  it("compares many statements of one subject in time that grows with them, not their square", () => {
+    // Eight times the statements must take less than four times as long
+    // as an eighth of them done eight times over (testing.md): copying
+    // the subject's statements at each one would take about eight times
+    // as long.
+    const said = (count: number): ReleaseDraft => ({
+      ...base,
+      triples: [
+        ...base.triples,
+        ...Array.from({ length: count }, (_, i) =>
+          link("https://source.example/", "https://p.example/cites", `https://source.example/${i}`),
+        ),
+      ],
+    });
+    const ratio = growth(
+      (count) => {
+        const draft = said(count);
+        return () => mergedDraft(draft, draft, draft);
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

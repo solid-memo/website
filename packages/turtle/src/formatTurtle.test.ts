@@ -103,6 +103,24 @@ ${PREFIXES}<> a ex:Thing ; ex:name "A \\"quoted\\" name", "B"@en ; ex:count 2 ; 
 `);
   });
 
+  it("carries the comment blocks of a subject stated twice over to it, in order", () => {
+    const source = `${PREFIXES}
+# First.
+<#a> ex:name "a" .
+# Second.
+<#a> ex:count 1 .
+`;
+    expect(formatTurtle(source, BASE)).toBe(`@prefix ex:  <https://example.com/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# First.
+# Second.
+<#a>
+    ex:name "a" ;
+    ex:count 1 .
+`);
+  });
+
   it("refuses a document whose comments it cannot place", () => {
     expect(() =>
       formatTurtle(`${PREFIXES}<#a> ex:name "a" ;\n  # between predicates\n  ex:count 1 .`, BASE),

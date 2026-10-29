@@ -38,7 +38,10 @@ export function versionGapProblems(paths: Iterable<string>): ReleaseProblem[] {
   const versionsOf = new Map<string, number[]>();
   for (const path of paths) {
     const at = releasePathOf(path);
-    if (at !== undefined) versionsOf.set(at.deck, [...(versionsOf.get(at.deck) ?? []), at.version]);
+    if (at === undefined) continue;
+    const versions = versionsOf.get(at.deck);
+    if (versions === undefined) versionsOf.set(at.deck, [at.version]);
+    else versions.push(at.version);
   }
   return [...versionsOf]
     .map(([deck, versions]) => [deck, versions.sort((a, b) => a - b)] as const)

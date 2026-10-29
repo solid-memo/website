@@ -856,7 +856,9 @@ function byDocument<T extends Deck>(decks: readonly T[]): Map<string, T[]> {
   const result = new Map<string, T[]>();
   for (const deck of decks) {
     const url = documentUrlOf(deck.url);
-    result.set(url, [...(result.get(url) ?? []), deck]);
+    const held = result.get(url);
+    if (held === undefined) result.set(url, [deck]);
+    else held.push(deck);
   }
   return result;
 }
