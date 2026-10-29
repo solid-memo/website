@@ -12,9 +12,11 @@
 #
 # With `cache: false`, nothing comes from GitHub's cache: the shell is
 # downloaded by Playwright and the libraries from Ubuntu's signed
-# mirror, and nothing is saved. A job that holds a secret, or attests
-# what it makes, uses that (release.yml's release job; its docs job,
-# which checks out a tag, installs them with a step of its own): any
+# mirror, and nothing is saved. A job that holds a secret, attests
+# what it makes or builds the site that is deployed uses that
+# (release.yml's release job, ci.yml's site job, deploy.yml's build job;
+# release.yml's docs job, which checks out a tag, installs them with a
+# step of its own): any
 # job on main can write main's cache entries, so what a job restores
 # from them is only as trustworthy as the least trusted of those jobs.
 #

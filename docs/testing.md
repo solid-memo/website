@@ -442,7 +442,9 @@ saves the download only on `main`. The `caches` job keeps
 `main`'s two newest entries per browser (GitHub rolls a new image out
 over days). The release workflow's jobs restore nothing from the cache
 and always ask the mirror
-([releasing.md](releasing.md#the-deploy-key)).
+([releasing.md](releasing.md#the-deploy-key)), as do CI's `site` job
+and the deploy's build, which make the site that's deployed
+([deployment.md](deployment.md#the-build-ci-tested)).
 
 The journeys run the same way every time:
 
@@ -612,7 +614,7 @@ jobs run side by side, each
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
 | `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
-| `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships ([deployment.md](deployment.md#the-build-ci-tested)) |
+| `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships. Nothing in it comes from GitHub's cache, and in the merge queue and on `main` it attests the list of the site's files, which the deploy checks the artifact against ([deployment.md](deployment.md#the-build-ci-tested)) |
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over that run's site as this run's `site` artifact and, except on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
 | `library` | deterministic | the change against its base. The deck library: no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)). The public API: no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
