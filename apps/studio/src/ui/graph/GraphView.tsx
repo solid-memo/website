@@ -520,12 +520,13 @@ export function GraphView({
   };
   useLayoutEffect(measure, [box]);
   // A plot resized (the window, the aside) shows more or less of the drawing, at another scale.
-  useEffect(() => {
+  // Layout effects both, for their cleanups to run as the plot goes: a passive one's waits for the next frame, and a settling due before it would measure a plot gone.
+  useLayoutEffect(() => {
     const observer = new ResizeObserver(settleSoon);
     observer.observe(svg.current!);
     return () => observer.disconnect();
   }, [box]);
-  useEffect(() => () => clearTimeout(settling.current), []);
+  useLayoutEffect(() => () => clearTimeout(settling.current), []);
 
   /** Moves and zooms the drawing to `next`, its layers as they are but the edges' width, for them to stay a pixel wide. */
   const show = (next: View) => {

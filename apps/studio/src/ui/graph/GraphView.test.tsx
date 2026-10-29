@@ -393,6 +393,16 @@ describe("GraphView", () => {
     vi.unstubAllGlobals();
   });
 
+  it("measures nothing once it is gone, though it went just before a zoom settled", () => {
+    vi.useFakeTimers();
+    const { svg } = draw(100);
+    key(svg, "+");
+    vi.advanceTimersByTime(SETTLE_MS - 1);
+    // Gone outside act, as a page leaves: its passive effects' cleanups wait for the next frame.
+    cleanup();
+    expect(() => vi.advanceTimersByTime(SETTLE_MS)).not.toThrow();
+  });
+
   it("labels the nodes in sight while the part in sight is narrow enough, once a zoom settles, and the folders and documents alone past it", () => {
     vi.useFakeTimers();
     // A label is 12 units large unzoomed, "folder label" about 86 wide.
