@@ -175,7 +175,10 @@ function toLibrarySource(url: string, thing: Subject | null): LibrarySource {
  * (declared with @base) rather than the URL it was fetched from. A deck
  * or card in a newer format than this app writes is refused: importing
  * it would silently drop whatever the newer format added. Older formats
- * are brought up to the current one in memory.
+ * are brought up to the current one in memory. A release that gives two
+ * of its cards and distractors one id is refused (libraryIdsRepeat): a
+ * copy keeps them all as subjects of one cards document, by their ids
+ * (refuseRepeatedIds).
  */
 export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeckContentOf {
   const deck = releaseDeckOf(url, dataset);
@@ -191,7 +194,7 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
   if (read === null) {
     throw new AppError("notADeck", { url });
   }
-  const cards = toLibraryCards(url, dataset);
+  const cards = refuseRepeatedIds(url, toLibraryCards(url, dataset));
   const subject = asUrl(deck!);
   const names = agentNamesOf(dataset);
   if (read.record.version < 3) {
@@ -272,6 +275,24 @@ export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOut
   // A question asks one of the release's cards, as the player looks it up among them.
   const cardIds = new Set(toLibraryCards(releaseUrl, dataset).map((card) => card.id));
   return outlineOfCards(courseOutlineFromRecords(releaseUrl, chapters, steps), cardIds);
+}
+
+/**
+ * The cards, unless a card and a distractor have one id, or two cards
+ * name one distractor; else refused (libraryIdsRepeat). A copy
+ * of the release keeps cards and distractors in one cards document,
+ * each at its id, so a repeated id would make two of them one subject.
+ */
+export function refuseRepeatedIds(url: string, cards: LibraryCard[]): LibraryCard[] {
+  const seen = new Set<string>();
+  for (const id of cards.flatMap((card) => [
+    card.id,
+    ...(card.distractors ?? []).map((distractor) => distractor.id),
+  ])) {
+    if (seen.has(id)) throw new AppError("libraryIdsRepeat", { url, id });
+    seen.add(id);
+  }
+  return cards;
 }
 
 type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;

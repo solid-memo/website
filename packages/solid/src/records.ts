@@ -388,6 +388,19 @@ export function unlessNewer<T extends Subject>(thing: T): T {
   return thing;
 }
 
+/**
+ * The subject at `url`, unless it is typed `other` (refused,
+ * idTakenInDeck): a card and a distractor are subjects of one cards
+ * document, each at its id, so one is never written onto the other.
+ */
+export function unlessTyped(dataset: Dataset, url: string, other: string): NamedSubject | null {
+  const thing = getThing(dataset, url);
+  if (thing !== null && getUrlAll(thing, RDF.type).includes(other)) {
+    throw new AppError("idTakenInDeck", { url });
+  }
+  return thing;
+}
+
 /** The dataset without the subject, unless a newer version of the app wrote it (unlessNewer). */
 export function removeUnlessNewer<D extends Dataset>(dataset: D, url: string): D {
   const thing = getThing(dataset, url);

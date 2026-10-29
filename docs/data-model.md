@@ -932,10 +932,30 @@ Studio's card inspector edit them
   one write of the card, and only one the deck's release never
   published; one it did is retired instead.
 - Each change is a write of the card (`updateCard`): the card and its
-  distractors are written, those it names no more removed, and triples
+  distractors are written, those it names no more removed unless
+  another card names them (`withoutUnnamedDistractors`), and triples
   the app doesn't know kept (`withDistractors`).
 - A wrong option not in the back's languages is a warning in a pod's
   deck, never a refusal.
+- **A card and a distractor never share an id.** Both are subjects of
+  the cards document at their ids. A write of a card onto an
+  `sm:Distractor` subject, or of a distractor onto an `sm:Card`
+  subject, is refused before anything is sent (`idTakenInDeck`), and
+  the deck is left as it was.
+- **A distractor belongs to one card.** A write that leaves a
+  distractor it writes named (`sm:distractor`) by two cards is refused
+  the same way (`assertDistractorsOwnedOnce`), so an upgrade never
+  gives a distractor a card keeps to another card. Removing a card, or
+  a distractor it no longer names, never removes one another card still
+  names.
+- **A deck an earlier version left mixed up** may have a subject typed
+  both `sm:Card` and `sm:Distractor`, or a distractor two cards name.
+  A write of such a card is refused (`idTakenInDeck`) rather than made
+  onto the other's subject. While another card names the subject as
+  its distractor, removing the card that took it over, by hand or in an
+  upgrade, removes only the card statements: the `sm:Card` type and the
+  card properties (`withoutCardSubject`). The other card keeps its
+  distractor and is editable again.
 
 ## Courses
 

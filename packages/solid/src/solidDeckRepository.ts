@@ -63,6 +63,9 @@ import {
   withCatalog,
   withDeck,
   withDistractors,
+  withoutCardSubject,
+  withoutUnnamedDistractors,
+  assertDistractorsOwnedOnce,
   withoutDeck,
   withSuggestedAnswers,
 } from "./mappers/deckMapper";
@@ -70,7 +73,7 @@ import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
-import { readDatetime, recordThing, removeUnlessNewer, unlessNewer } from "./records";
+import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
@@ -121,6 +124,7 @@ export function createSolidDeckRepository({
     subjects: readonly string[],
     options?: { whole?: boolean },
   ): Promise<void> {
+    assertDistractorsOwnedOnce(dataset, subjects);
     const written = await guard.writable(deck, deck.cardsDocumentUrl, dataset);
     await save(deck.cardsDocumentUrl, written, subjects, options);
   }
@@ -706,11 +710,13 @@ export function createSolidDeckRepository({
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
     let updated = dataset;
     const subjects: string[] = [];
+    // Distractors no card names any longer go once all are written: one moved to another card stays.
+    const dropped: string[] = [];
     for (const card of saved) {
       const existing = getThing(updated, urlOf(card.id));
       const createdAt =
         existing === null ? undefined : readDatetime(existing, DCTERMS.created)?.toISOString();
-      const written = withCard(
+      const written = withCardWritten(
         updated,
         deck,
         { ...card, ...(createdAt === undefined ? {} : { createdAt }) },
@@ -718,16 +724,19 @@ export function createSolidDeckRepository({
       );
       updated = written.dataset;
       subjects.push(...written.subjects);
+      dropped.push(...written.dropped);
     }
-    for (const id of remove) updated = withoutCard(updated, urlOf(id));
-    return { dataset: updated, subjects };
+    for (const id of remove) {
+      dropped.push(...distractorsNamedBy(updated, urlOf(id)));
+      updated = withoutCardSubject(updated, urlOf(id));
+    }
+    return { dataset: withoutUnnamedDistractors(updated, dropped), subjects };
   }
 
   /**
-   * The cards document with the card written (cardThing) and its
-   * distractors beside it, those it named before and no longer does
-   * removed. Returns the subjects written: the card's, then its
-   * distractors'.
+   * The cards document with the card written and its distractors
+   * beside it (withCardWritten), those it named before and no longer
+   * does removed, unless another card names them.
    */
   function withCard(
     dataset: Dataset,
@@ -735,6 +744,27 @@ export function createSolidDeckRepository({
     card: CardContent & { id: string; createdAt?: string; retired?: true },
     existing: NamedSubject | null,
   ): { dataset: Dataset; subjects: string[] } {
+    const written = withCardWritten(dataset, deck, card, existing);
+    return {
+      dataset: withoutUnnamedDistractors(written.dataset, written.dropped),
+      subjects: written.subjects,
+    };
+  }
+
+  /**
+   * The cards document with the card written (cardThing) and its
+   * distractors beside it; a card is never written onto a distractor,
+   * nor a distractor onto a card (unlessTyped). Returns the subjects
+   * written, the card's, then its distractors', and the distractors it
+   * named before and no longer does (`dropped`), still in the document.
+   */
+  function withCardWritten(
+    dataset: Dataset,
+    deck: Deck,
+    card: CardContent & { id: string; createdAt?: string; retired?: true },
+    existing: NamedSubject | null,
+  ): { dataset: Dataset; subjects: string[]; dropped: string[] } {
+    unlessTyped(dataset, `${deck.cardsDocumentUrl}#${card.id}`, SM.Distractor);
     const before = existing === null ? [] : getUrlAll(existing, SM.distractor);
     const distractors = card.distractors ?? [];
     const thing = withSuggestedAnswers(
@@ -751,6 +781,7 @@ export function createSolidDeckRepository({
     return {
       dataset: written.dataset,
       subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects],
+      dropped: written.dropped,
     };
   }
 
@@ -805,14 +836,19 @@ export function createSolidDeckRepository({
   }
 }
 
-/** The cards document without the card and the distractors it names. */
+/**
+ * The cards document without the card (withoutCardSubject) and the
+ * distractors it names, but those another card names.
+ */
 function withoutCard(dataset: Dataset, cardUrl: string): Dataset {
+  const distractors = distractorsNamedBy(dataset, cardUrl);
+  return withoutUnnamedDistractors(withoutCardSubject(dataset, cardUrl), distractors);
+}
+
+/** The distractors the card at `cardUrl` names, none when there is no card. */
+function distractorsNamedBy(dataset: Dataset, cardUrl: string): string[] {
   const card = getThing(dataset, cardUrl);
-  const distractors = card === null ? [] : getUrlAll(card, SM.distractor);
-  return [cardUrl, ...distractors].reduce(
-    (current, url) => removeUnlessNewer(current, url),
-    dataset,
-  );
+  return card === null ? [] : getUrlAll(card, SM.distractor);
 }
 
 /** Decks by the catalog document their entries are in, in the order first met. */

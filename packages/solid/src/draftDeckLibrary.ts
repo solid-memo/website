@@ -8,7 +8,7 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { toCourseOutline, toLibraryCards } from "./mappers/libraryMapper";
+import { refuseRepeatedIds, toCourseOutline, toLibraryCards } from "./mappers/libraryMapper";
 import { datasetFromQuads } from "./client/rdf";
 import { draftQuads } from "./mappers/releaseDraftMapper";
 
@@ -53,7 +53,7 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
         ...about,
         url,
         formatVersion: LATEST_VERSION.libraryDeck,
-        cards: toLibraryCards(url, dataset),
+        cards: refuseRepeatedIds(url, toLibraryCards(url, dataset)),
       };
     },
 
