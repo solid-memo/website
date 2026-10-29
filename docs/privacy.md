@@ -75,6 +75,10 @@ before any pod is reached:
 During a login, `sessionStorage` holds the page the learner was on
 (`solid-memo:login-hash`), to bring them back to it
 ([`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts)).
+While a login or a session restore is under way, it also holds the
+sign-in client's mark that this tab may have sent the learner to the
+identity provider (`solid-memo:provider-redirect`). The mark stays
+until the next restore in that tab ends, or the tab closes.
 The authentication library under the sign-in client
 ([`client/session.ts`](../packages/solid/src/client/session.ts),
 `@inrupt/solid-client-authn-browser`) stores in the browser what it needs to restore the session, such as

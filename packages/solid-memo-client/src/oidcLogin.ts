@@ -184,17 +184,20 @@ export function pendingLogin(): PendingLogin | undefined {
 
 /**
  * The redirect back from the provider, if this page is one: a pending
- * request in this tab and a `state` on the URL. Both are removed here,
- * so a reload does not try the code again.
+ * request in this tab and its `state` on the URL. The provider's
+ * parameters are removed from the URL whenever it has them, so a reload
+ * does not try the code again; an answer to no request of this tab's is
+ * dropped, and a pending request kept for its own answer.
  */
 export function takeRedirect(): { pending: PendingLogin; parameters: URLSearchParams } | undefined {
-  const pending = pendingLogin();
   const url = new URL(window.location.href);
-  if (pending === undefined || !url.searchParams.has("state")) return undefined;
-  window.sessionStorage.removeItem(PENDING_LOGIN_KEY);
+  if (!RESPONSE_PARAMETERS.some((name) => url.searchParams.has(name))) return undefined;
   const parameters = new URLSearchParams(url.searchParams);
   for (const name of RESPONSE_PARAMETERS) url.searchParams.delete(name);
   window.history.replaceState(window.history.state, "", url.href);
+  const pending = pendingLogin();
+  if (pending === undefined || parameters.get("state") !== pending.state) return undefined;
+  window.sessionStorage.removeItem(PENDING_LOGIN_KEY);
   return { pending, parameters };
 }
 

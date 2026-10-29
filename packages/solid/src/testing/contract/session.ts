@@ -24,6 +24,12 @@ export interface SessionHarness {
   sessionAt(issuer: string): void;
   /** A login request to `issuer` is under way; gives its state. */
   requestSentTo(issuer: string): string;
+  /**
+   * The page's URL has a provider's answer, `search`, that no login or
+   * restore of this tab's asked for; with `awaiting`, the tab has left
+   * for the provider and awaits the answer to another request.
+   */
+  unaskedAnswer(search: string, awaiting: boolean): void;
   /** Restoring fails with `error`. */
   failToRestore(error: Error): void;
   /** The session now fetches with `fetch`, and is `webId`'s (none: logged out). */
@@ -70,6 +76,21 @@ export function sessionContract(harness: SessionHarness): void {
           webId: WEBID,
           restoredFrom: "https://memo.example/#/studio",
         });
+      });
+
+      it("restores the previous session past a provider's answer the tab did not ask for", async () => {
+        for (const awaiting of [false, true]) {
+          for (const search of ["?error=access_denied", "?code=a&state=b", "?error=e&state=b"]) {
+            harness.reset();
+            harness.sessionToRestore(WEBID);
+            harness.unaskedAnswer(search, awaiting);
+            await expect(harness.create().restore()).resolves.toEqual({
+              webId: WEBID,
+              fromLogin: false,
+              restoredFrom: null,
+            });
+          }
+        }
       });
 
       it("finds no one when there is no session", async () => {

@@ -58,11 +58,14 @@ client redeems any code:
   the issuer it goes to. A silent restore keeps the issuer of the
   session it restores, which the sign-in client names
   (`sessionIssuer()`), and forgets it if the page doesn't leave.
-- `restore()` refuses an answer, a code or an error, without `iss`
-  (`loginIssuerMissing`). It refuses an answer when this tab sent the
-  browser to no provider (`loginNotStarted`), and an answer whose
-  `iss` is another issuer than the one kept, a trailing slash aside
-  (`loginIssuerMismatch`).
+- `restore()` drops an answer, a code or an error, when this tab sent
+  the browser to no provider: it removes the answer from the address
+  and restores the previous session as on any load. Such an answer
+  comes from a link with a provider's parameters, say, and refusing it
+  would stop the session for that load.
+- It refuses an answer without `iss` (`loginIssuerMissing`), and one
+  whose `iss` is another issuer than the one kept, a trailing slash
+  aside (`loginIssuerMismatch`).
 - It refuses a code whose `state` names no request the sign-in client
   holds (`loginNotStarted`), and one whose request went to another
   issuer than the one kept (`loginIssuerMismatch`). The client names
@@ -189,6 +192,23 @@ previous session (`restorePreviousSession: true`), and returns a domain
 completed on this load), and `"restored"` otherwise. The UI shows the
 "Pod connected" onboarding step only for `"login"`, unless every instance's preferences say to skip it
 ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
+
+`restore()` completes only a redirect this tab set off. Before a
+login, and before a restore that may leave for the provider, the
+sign-in client marks the tab in `sessionStorage`
+(`solid-memo:provider-redirect`). The library would take any `code`,
+`state` or `error` on the page's address for a redirect to complete,
+and end the stored session when that failed. So unless the tab has the
+mark and the address carries a `state` the library sent, the client
+takes `code`, `state`, `iss`, `error`, `error_description` and
+`session_state` off the address before the library sees them. The
+gateway has dropped such an answer already when this tab sent the
+browser to no provider, and refused it when the tab awaits another
+answer
+([The issuer on the provider's answer](#the-issuer-on-the-providers-answer)).
+The client's check holds for a sign-in client on its own. A provider's
+answer has to come back to the tab that left for it, since
+`sessionStorage` is kept per tab; `solid-memo-client` needs the same.
 
 Solid Memo and the Studio are one page ([studio.md](studio.md)): a
 login in either is a login in both. A redirect URL can't carry a hash,

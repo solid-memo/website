@@ -126,16 +126,31 @@ describe("createSolidSessionGateway", () => {
       await expect(gateway.restore()).resolves.toMatchObject({ origin: "login" });
     });
 
-    it("refuses an answer that names a provider when this tab sent the browser to none", async () => {
-      // An answer to a request another tab made, say, which only that tab can check.
-      sendBack({ code: "c", state: "s", iss: ISSUER });
-      const gateway = createSolidSessionGateway(options);
-      await expect(gateway.restore()).rejects.toMatchObject({
-        code: "loginNotStarted",
-        detail: `iss: ${ISSUER}`,
-      });
-      expect(client.restore).not.toHaveBeenCalled();
-      expect(window.location.search).toBe("");
+    it("drops an answer when this tab sent the browser to no provider, and restores the session", async () => {
+      // A link with a provider's parameters, say, or an answer to a request another tab made.
+      const answers: Record<string, string>[] = [
+        { code: "c", state: "s", iss: ISSUER },
+        { code: "c", state: "s" },
+        { error: "login_required", state: "s" },
+      ];
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      restored(false);
+      for (const parameters of answers) {
+        window.history.replaceState(
+          null,
+          "",
+          `/?lang=sv&${new URLSearchParams(parameters)}#/study`,
+        );
+        await expect(createSolidSessionGateway(options).restore()).resolves.toEqual({
+          session: { webId: WEBID },
+          origin: "restored",
+        });
+        expect(window.location.search).toBe("?lang=sv");
+        expect(window.location.hash).toBe("#/study");
+      }
+      expect(client.requestIssuer).not.toHaveBeenCalled();
+      // A silent restore, as on any load, not the answer completed.
+      expect(client.sessionIssuer).toHaveBeenCalledTimes(answers.length);
     });
 
     it("keeps the session's provider before a silent restore leaves, and lets its answer through", async () => {
@@ -190,22 +205,6 @@ describe("createSolidSessionGateway", () => {
       // Taken off the address, so a reload does not try it again.
       expect(window.location.search).toBe("");
       expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
-    });
-
-    it("refuses an answer that names no provider without a login set off in this tab, and an error too", async () => {
-      const gateway = createSolidSessionGateway(options);
-      const answers: Record<string, string>[] = [
-        { code: "c", state: "s" },
-        { error: "login_required", state: "s" },
-      ];
-      for (const parameters of answers) {
-        sendBack(parameters);
-        await expect(gateway.restore()).rejects.toMatchObject({
-          code: "loginIssuerMissing",
-          detail: "",
-        });
-      }
-      expect(client.restore).not.toHaveBeenCalled();
     });
 
     it("refuses a login's answer that names another provider", async () => {

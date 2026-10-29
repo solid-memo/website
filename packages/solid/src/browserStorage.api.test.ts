@@ -3,18 +3,20 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
+import { PROVIDER_REDIRECT_KEY } from "./client/providerRedirect";
 import { LOGIN_HASH_KEY } from "./solidSessionGateway";
 
 /**
  * What this package keeps in the browser, part of the app's public API
- * (docs/releasing.md#the-public-api): the sessionStorage key a login
- * keeps the page's route under while the identity provider has the tab.
- * The keys the Inrupt client keeps are its own, not listed here. A line
+ * (docs/releasing.md#the-public-api): the sessionStorage keys a login
+ * keeps the page's route under while the identity provider has the tab,
+ * and the sign-in client marks the tab as sent there under. The keys the
+ * Inrupt library keeps are its own, not listed here. A line
  * that goes is a breaking change, which `npm run check:breaking` holds
  * to a commit that says so.
  */
 it("keeps api/browser-storage/solid.txt to what the browser keeps", async () => {
-  const lines = [`sessionStorage: ${LOGIN_HASH_KEY}`];
+  const lines = [`sessionStorage: ${LOGIN_HASH_KEY}`, `sessionStorage: ${PROVIDER_REDIRECT_KEY}`];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
     "../../../api/browser-storage/solid.txt",
   );
