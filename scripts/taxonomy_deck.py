@@ -148,7 +148,10 @@ REPRODUCIBILITY
   - every taxonomy version read: its number, publication time, the GraphQL
     query that fetched it, and a SHA-256 of the answer normalized as
     checksum() describes. A run checks the versions against the previous
-    version's checksums and stops if one has changed.
+    version's checksums and publication times and stops if one has
+    changed; --cache-dir is read only for the versions it has checksums
+    of. Every concept id must be as the taxonomy writes them, and every
+    publication time a time, or the run stops: both go into the deck.
   Nothing depends on the time or place of the run: the deck's
   dcterms:modified is the newest taxonomy version's publication time, its
   dcterms:issued the date --issued gives, each card's dcterms:created the time
@@ -236,25 +239,54 @@ def fetch_json(url: str) -> object:
         return json.load(resp)
 
 
+# A concept's id, as the taxonomy gives them ("Y8ck_cY2_8CE"): it goes into an
+# IRI in the deck, so anything else stops the run.
+CONCEPT_ID = re.compile(r"[0-9A-Za-z_]{1,32}")
+TIMESTAMP = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?Z")
+
+
+def api_timestamp(value: object) -> str:
+    """A time the API gives ("2026-08-12T12:30:58.521Z"), checked and written
+    as the deck records it: an xsd:dateTime in UTC, with milliseconds. Raises
+    ValueError for anything else."""
+    found = TIMESTAMP.fullmatch(value) if isinstance(value, str) else None
+    if not found:
+        raise ValueError(f"not a time: {json.dumps(value)[:100]}")
+    datetime.strptime(found.group(1), "%Y-%m-%dT%H:%M:%S")  # a real date and time, or ValueError
+    return f"{found.group(1)}.{(found.group(2) or '').ljust(3, '0')[:3]}Z"
+
+
 def load_versions() -> dict[int, str]:
-    """Taxonomy version -> the time it was published, as an xsd:dateTime."""
+    """Taxonomy version -> the time it was published, as an xsd:dateTime.
+    Every version is checked as it is read: a whole number, and a time."""
     url = f"{API}/main/versions"
     print(f"fetching {url}", file=sys.stderr)
-    return {
-        v["taxonomy/version"]: v["taxonomy/timestamp"]
-        for v in fetch_json(url)  # type: ignore[union-attr]
-    }
+    data = fetch_json(url)
+    versions: dict[int, str] = {}
+    for entry in data if isinstance(data, list) else [data]:
+        number = entry.get("taxonomy/version") if isinstance(entry, dict) else None
+        try:
+            if type(number) is not int or number < 0:
+                raise ValueError("not a version number")
+            versions[number] = api_timestamp(entry.get("taxonomy/timestamp"))
+        except ValueError:
+            sys.exit(f"{url}: unexpected version: {json.dumps(entry)[:500]}")
+    return versions
 
 
 def snapshot_url(version: int) -> str:
     return f"{API}/graphql?" + urllib.parse.urlencode({"query": QUERY % (CONCEPT_TYPE, version)})
 
 
-def load_snapshot(version: int, cache_dir: Path | None) -> tuple[dict[str, Concept], str]:
+def load_snapshot(version: int, cache_dir: Path | None, *,
+                  read_cache: bool = True) -> tuple[dict[str, Concept], str]:
     """Every occupation-name concept of a version, deprecated ones included, by
-    id in id order; and the SHA-256 of the snapshot normalized (see checksum)."""
+    id in id order; and the SHA-256 of the snapshot normalized (see checksum).
+    With read_cache false, the version is fetched even if the cache has it, and
+    kept there: a version the deck records no checksum for is not read from the
+    cache, since nothing could show that the copy there is the taxonomy's."""
     cached = cache_dir / f"{CONCEPT_TYPE}-{version}.json" if cache_dir else None
-    if cached and cached.exists():
+    if cached and read_cache and cached.exists():
         data = json.loads(cached.read_text(encoding="utf-8"))
     else:
         print(f"fetching {CONCEPT_TYPE} concepts of taxonomy version {version}", file=sys.stderr)
@@ -264,6 +296,12 @@ def load_snapshot(version: int, cache_dir: Path | None) -> tuple[dict[str, Conce
         if cached:
             cached.parent.mkdir(parents=True, exist_ok=True)
             cached.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    bad = sorted({json.dumps(i) for c in data["data"]["concepts"]
+                  for i in [c["id"], *(r["id"] for r in c["replaced_by"] or [])]
+                  if not isinstance(i, str) or not CONCEPT_ID.fullmatch(i)})
+    if bad:
+        sys.exit(f"taxonomy version {version}: concept ids that are not as the taxonomy writes them: "
+                 + ", ".join(bad)[:500])
     concepts = sorted(data["data"]["concepts"], key=lambda c: c["id"])
     snapshot = {
         c["id"]: Concept(c["id"], c["preferred_label"].strip(), c["deprecated"],
@@ -715,6 +753,12 @@ def recorded_checksums(text: str) -> dict[int, str]:
         text, re.M)}
 
 
+def recorded_issued(text: str) -> dict[int, str]:
+    """Taxonomy version -> the time it was published, as a version written by this script records them."""
+    return {int(v): t for v, t in re.findall(
+        r'^<#taxonomy-version-(\d+)>\n(?:    .*\n)*?    dcterms:issued "([^"]*)"\^\^xsd:dateTime', text, re.M)}
+
+
 # --------------------------------------------------------------------------- Turtle
 
 
@@ -1093,7 +1137,19 @@ CONTACT = "https://github.com/solid-memo/website/issues"
 
 
 def concept_iri(cid: str) -> str:
+    if not CONCEPT_ID.fullmatch(cid):
+        raise ValueError(f"not a taxonomy concept id: {cid!r}")
     return f"{CONCEPT}{cid}"
+
+
+IRI_FORBIDDEN = re.compile(r'[\x00-\x20<>"{}|^`\\]')  # what Turtle's IRIREF does not allow
+
+
+def iri_ref(iri: str) -> str:
+    """An IRI as Turtle writes it, <…>; one Turtle could not read as an IRI raises ValueError."""
+    if IRI_FORBIDDEN.search(iri):
+        raise ValueError(f"not an IRI Turtle can write: {iri!r}")
+    return f"<{iri}>"
 
 
 def card_lines(cards: list[Card], retired: dict[str, Released], versions: dict[int, str]) -> list[str]:
@@ -1112,7 +1168,7 @@ def card_lines(cards: list[Card], retired: dict[str, Released], versions: dict[i
             "    solid-memo:formatVersion 4 ;",  # format 4: the names tagged as Swedish
             *([f'    dcterms:created "{created}"^^xsd:dateTime ;'] if created else []),
             *(["    owl:deprecated true ;"] if is_retired else []),
-            *([f"    dcterms:subject {aligned('dcterms:subject', [f'<{s}>' for s in subjects])} ;"]
+            *([f"    dcterms:subject {aligned('dcterms:subject', [iri_ref(s) for s in subjects])} ;"]
               if subjects else []),
             f"    solid-memo:front {ttl_str(front)}@sv ;",
             *([f"    solid-memo:frontNote {tagged(back.front_note, 'solid-memo:frontNote')} ;"]
@@ -1124,8 +1180,8 @@ def card_lines(cards: list[Card], retired: dict[str, Released], versions: dict[i
         ]
     successors = {cid: ids for card in cards for cid, ids in card.successors.items()}
     for cid in sorted(successors):
-        objects = [f"<{concept_iri(r)}>" for r in sorted(successors[cid])]
-        out += ["", f"<{concept_iri(cid)}>", f"    dcterms:isReplacedBy {aligned('dcterms:isReplacedBy', objects)} ."]
+        objects = [iri_ref(concept_iri(r)) for r in sorted(successors[cid])]
+        out += ["", iri_ref(concept_iri(cid)), f"    dcterms:isReplacedBy {aligned('dcterms:isReplacedBy', objects)} ."]
     return out
 
 
@@ -1323,13 +1379,20 @@ def main() -> None:
         ap.error(f"taxonomy version {to} does not exist: the newest is {max(versions)}")
     if not args.verify and to < recorded[-1]:
         sys.exit(f"{previous.path.name} already covers taxonomy version {recorded[-1]}: there is nothing to add")
+    recorded_sums = recorded_checksums(previous.text)
     snaps, checksums = {}, {}
     for v in range(start, to + 1):
-        snaps[v], checksums[v] = load_snapshot(v, args.cache_dir)
-    changed = {v: h for v, h in recorded_checksums(previous.text).items() if checksums.get(v) != h}
+        snaps[v], checksums[v] = load_snapshot(v, args.cache_dir, read_cache=v in recorded_sums)
+    changed = {v: h for v, h in recorded_sums.items() if checksums.get(v) != h}
     if changed:
         sys.exit(f"{previous.path} was made from taxonomy versions whose content has changed since: "
                  + ", ".join(f"version {v} (was {h[:12]}…, now {checksums[v][:12]}…)" for v, h in sorted(changed.items()))
+                 + ". A published version should never change; find out why before making the next one.")
+    moved = {v: t for v, t in recorded_issued(previous.text).items() if versions.get(v) != t}
+    if moved:
+        sys.exit(f"{previous.path} records taxonomy versions as published at other times than the taxonomy "
+                 "now gives: " + ", ".join(f"version {v} (was {t}, now {versions.get(v, 'none')})"
+                                          for v, t in sorted(moved.items()))
                  + ". A published version should never change; find out why before making the next one.")
 
     since = start + 1  # the first version whose changes can be seen

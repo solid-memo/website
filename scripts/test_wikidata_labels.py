@@ -638,6 +638,15 @@ class Current(unittest.TestCase):
             with self.assertRaises(wl.Unreachable):
                 wl.current(["Q1"], None)
 
+    def test_refuses_a_revision_that_is_not_a_number(self) -> None:
+        for revision in ("9/../x", 9.5, True, None):
+            answer = {"entities": {"Q1": {"id": "Q1", "lastrevid": revision, "labels": {}}}}
+            with self.subTest(revision=revision), mock.patch.object(wl, "fetch_json", return_value=answer), \
+                    redirect_stderr(io.StringIO()):
+                with self.assertRaises(wl.Unreachable) as raised:
+                    wl.current(["Q1"], None)
+                self.assertTrue(str(raised.exception).startswith("unexpected revision of Q1: "))
+
     def test_says_so_when_an_old_revision_cannot_be_read(self) -> None:
         answers = [{"entities": {"Q1": {"id": "Q1", "lastrevid": 9, "labels": {}}}}, {"query": {"pages": []}}]
         with mock.patch.object(wl, "fetch_json", side_effect=answers), redirect_stderr(io.StringIO()):
