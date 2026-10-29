@@ -18,6 +18,7 @@ import {
   withDeckReport,
   type DeckTextCheck,
 } from "./deckHealth";
+import { growth } from "./testing/growth";
 import { summarize, withUnclaimed, type DocumentReport, type Violation } from "./validation";
 
 const CATALOG = "https://pod.example/a/catalog.ttl";
@@ -266,6 +267,23 @@ describe("duplicateCardsOf", () => {
         text.plain,
       ).map((group) => group.map((each) => each.id)),
     ).toEqual([["a", "b"]]);
+  });
+
+  it("groups many cards that say the same in time linear in the cards", () => {
+    // Eight times the cards, all alike, must take less than four times as
+    // long as an eighth of them done eight times over (testing.md): copying
+    // the group at every card would take about eight times as long.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) =>
+          card(`c${i}`, { front: { en: "Paris" }, back: { sv: "Frankrike" } }),
+        );
+        return () => duplicateCardsOf(cards, text.plain);
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

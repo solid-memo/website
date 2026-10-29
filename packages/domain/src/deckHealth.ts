@@ -232,7 +232,9 @@ export function duplicateCardsOf(
     const read = isMarkdown(card.textFormat) ? plain : (text: string) => text;
     const key =
       sideKey(card.front, card.frontImageUrl, read) + sideKey(card.back, card.backImageUrl, read);
-    groups.set(key, [...(groups.get(key) ?? []), card]);
+    const group = groups.get(key);
+    if (group === undefined) groups.set(key, [card]);
+    else group.push(card);
   }
   return [...groups.values()].filter((group) => group.length > 1);
 }

@@ -184,8 +184,11 @@ export function groupProblems(problems: readonly ReleaseProblem[]): ProblemGroup
   return (["error", "warning"] as const)
     .map((severity) => {
       const bySubject = new Map<string, ReleaseProblem[]>();
-      for (const one of problems.filter((p) => p.severity === severity))
-        bySubject.set(one.subject, [...(bySubject.get(one.subject) ?? []), one]);
+      for (const one of problems.filter((p) => p.severity === severity)) {
+        const found = bySubject.get(one.subject);
+        if (found === undefined) bySubject.set(one.subject, [one]);
+        else found.push(one);
+      }
       return {
         severity,
         subjects: [...bySubject].map(([subject, found]) => ({ subject, problems: found })),
@@ -212,7 +215,10 @@ export function outlineProblems(
   for (const one of problems) {
     const own = idIn(draft, one.subject);
     const id = own === null ? null : (cardOfDistractor(draft, one.subject)?.id ?? own);
-    if (id !== null) found.set(id, [...(found.get(id) ?? []), one]);
+    if (id === null) continue;
+    const under = found.get(id);
+    if (under === undefined) found.set(id, [one]);
+    else under.push(one);
   }
   return found;
 }
