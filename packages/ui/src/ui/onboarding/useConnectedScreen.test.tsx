@@ -50,7 +50,7 @@ function setup({
   const queryClient = new QueryClient();
   const useCases = { connectedScreenChoice: vi.fn(choice), skipConnectedScreen: vi.fn(skip) };
   const onEnter = vi.fn();
-  const wrapper = ({ children }: { children: ComponentChildren }) => (
+  const wrapper = ({ children }: { children?: ComponentChildren }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const hook = renderHook(
@@ -224,7 +224,7 @@ describe("useConnectedScreen", () => {
           onEnter: vi.fn(),
         }),
       {
-        wrapper: ({ children }: { children: ComponentChildren }) => (
+        wrapper: ({ children }: { children?: ComponentChildren }) => (
           <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         ),
       },

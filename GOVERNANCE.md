@@ -134,7 +134,14 @@ pull requests too ([Dependency updates](#dependency-updates)).
 Renovate adds it to the merge queue on its own, which merges it only
 when CI passes, with no person
 reviewing it, so its updates are unreviewed changes too. A few updates
-wait for a person, as `renovate.json5` says why. Every update waits too:
+wait for a person, as `renovate.json5` says why. A new version of an npm
+dependency raises the dependency's range to that version, even when the
+range already allows it, so each new version comes as a pull request of
+its own and no older version is locked again. Every Monday, Renovate
+also locks each `package-lock.json` again, to the newest versions the
+ranges allow, so that the packages the dependencies need get their
+fixes too. That moves many packages at once, so a person merges it,
+after reading what moved. Every update waits too:
 Renovate proposes a version only once it has been public for 3 days, so
 that a bad or malicious version can be found and pulled before it
 reaches `main`. The wait covers every package an update newly locks,
