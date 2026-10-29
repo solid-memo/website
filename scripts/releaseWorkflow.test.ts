@@ -10,7 +10,11 @@ import { describe, expect, it } from "vitest";
  * The release workflow's jobs restore nothing from GitHub's cache
  * (docs/releasing.md#the-deploy-key): the release job holds the deploy
  * key, the docs job attests what it renders, and any job on main can
- * write main's cache entries.
+ * write main's cache entries. Nor do the jobs that build the site that
+ * is deployed (docs/deployment.md#the-build-ci-tested): ci.yml's site
+ * job and deploy.yml's build job. And the deploy ships CI's site only
+ * once its files match the site job's attestation, which no other job
+ * of a run can make.
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -72,6 +76,100 @@ describe("release.yml", () => {
     expect(docs.filter((step) => step.includes("npx playwright install"))).toEqual([
       expect.stringContaining("run: npx playwright install --with-deps --only-shell chromium"),
     ]);
+  });
+});
+
+describe.each([
+  [".github/workflows/ci.yml", "site"],
+  [".github/workflows/deploy.yml", "build"],
+])("%s's %s job, which builds the site that is deployed", (path, name) => {
+  const job = steps(jobs(read(path)).get(name) ?? "", 6);
+
+  it("uses no cache action", () => {
+    expect(job).not.toEqual([]);
+    expect(job.filter((step) => /uses:\s*actions\/cache/.test(step))).toEqual([]);
+  });
+
+  it("sets up Node without npm's cache", () => {
+    const setups = job.filter((step) => step.includes("uses: actions/setup-node@"));
+    expect(setups).toHaveLength(1);
+    for (const step of setups) {
+      expect(step).not.toMatch(/^\s+cache:/m);
+      expect(step).toMatch(/^\s+package-manager-cache: false$/m);
+    }
+  });
+
+  it("installs Chromium and its system libraries without the cache", () => {
+    const local = job.filter((step) => /uses: \.\/\.github\/actions\//.test(step));
+    expect(local.map((step) => step.match(/uses: (\S+)/)?.[1])).toEqual([
+      "./.github/actions/chromium",
+    ]);
+    for (const step of local) expect(step).toMatch(/^\s+with:\n\s+cache: false$/m);
+  });
+});
+
+describe("the site the deploy ships", () => {
+  const ci = read(".github/workflows/ci.yml");
+  const ciJobs = jobs(ci);
+  const site = steps(ciJobs.get("site") ?? "", 6);
+  const deploy = jobs(read(".github/workflows/deploy.yml"));
+  const build = steps(deploy.get("build") ?? "", 6);
+  /** The list of the site's files and their SHA-256 that is attested. */
+  const manifest = "find . ! -type d -print0 | LC_ALL=C sort -z | xargs -0r sha256sum";
+  const at = (job: string[], text: string) => job.findIndex((step) => step.includes(text));
+
+  it("is uploaded as ci.yml's site artifact by the site and reuse jobs alone", () => {
+    const uploaders = [...ciJobs]
+      .filter(([, job]) =>
+        steps(job, 6).some(
+          (step) =>
+            step.includes("uses: actions/upload-artifact@") && /^\s+name: site$/m.test(step),
+        ),
+      )
+      .map(([name]) => name);
+    expect(uploaders).toEqual(["site", "reuse"]);
+  });
+
+  it("is taken over by a reuse job that restores no cache and runs no code", () => {
+    const reuse = steps(ciJobs.get("reuse") ?? "", 6);
+    expect(reuse).not.toEqual([]);
+    for (const step of reuse) {
+      expect(step).toMatch(/uses: actions\/(download-artifact|upload-artifact|cache\/save)@/);
+      expect(step).not.toMatch(/^\s+run:/m);
+    }
+  });
+
+  it("is attested by the site job, the only job of ci.yml that can attest", () => {
+    expect(ci.match(/^\s+id-token: write$/gm)).toHaveLength(1);
+    expect(ci.match(/^\s+attestations: write$/gm)).toHaveLength(1);
+    expect(ciJobs.get("site")).toMatch(/^ {6}id-token: write$/m);
+    const listed = at(site, manifest);
+    const attested = at(site, "uses: actions/attest@");
+    const uploaded = at(site, "uses: actions/upload-artifact@");
+    expect(site[listed]).toContain('> "$RUNNER_TEMP/site.sha256"');
+    expect(site[attested]).toMatch(/^\s+subject-path: \$\{\{ runner\.temp \}\}\/site\.sha256$/m);
+    expect(listed).toBeGreaterThan(-1);
+    expect(attested).toBeGreaterThan(listed);
+    expect(uploaded).toBeGreaterThan(attested);
+  });
+
+  it("is checked against that attestation before the deploy states its version", () => {
+    const downloaded = at(build, "uses: actions/download-artifact@");
+    const checked = at(build, "gh attestation verify");
+    const stated = at(build, 'npm run site:version -- "$SITE"');
+    expect(downloaded).toBeGreaterThan(-1);
+    expect(checked).toBeGreaterThan(downloaded);
+    expect(stated).toBeGreaterThan(checked);
+    expect(build[checked]).toContain(manifest);
+    expect(build[checked]).toContain(
+      "^https://github\\.com/$GH_REPO/\\.github/workflows/ci\\.yml@refs/heads/(main|gh-readonly-queue/main/.+)\\$",
+    );
+    expect(build[checked]).toContain('for digest in "$SHA" "$PARENT"; do');
+    expect(build[checked]).toContain('--source-digest "$digest" --deny-self-hosted-runners');
+    expect(deploy.get("build")).toMatch(/^ {6}attestations: read$/m);
+    expect(deploy.get("version")).toMatch(
+      /^ {6}parent: \$\{\{ steps\.release\.outputs\.parent \}\}$/m,
+    );
   });
 });
 

@@ -240,24 +240,56 @@ jobs:
   # first, is check's to cache. Chromium's headless shell draws the docs'
   # diagrams. The build is kept a week, as the journeys' blobs are, so
   # that a journeys job run again (Re-run failed jobs), which does not
-  # build it again, still finds it; a job run again replaces it.
-  # Deterministic.
+  # build it again, still finds it; a job run again replaces it. It is
+  # the site deploy.yml ships, so nothing in it comes from GitHub's cache
+  # (docs/deployment.md#the-build-ci-tested): any job on main can write
+  # main's cache entries. In the merge queue and on main it attests the
+  # site's manifest, and the deploy ships the artifact only if it matches
+  # that attestation, so no other job of the run can stand in a site of
+  # its own. Deterministic.
   site:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    permissions:
+      contents: read
+      # To attest the site's manifest (actions/attest), this job alone.
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
+    # apt-get three minutes and one more try), as the libraries come from
+    # it every time.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Without npm's cache, which setup-node would restore for
+      # packageManager in package.json.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: npm
+          package-manager-cache: false
       - run: npm ci --ignore-scripts
+      # Downloaded, with its system libraries from Ubuntu's signed mirror,
+      # not restored from the cache.
       - uses: ./.github/actions/chromium
+        with:
+          cache: false
       - run: npm run build
+      # Every file of the site and its SHA-256, in one list the deploy
+      # makes again from the artifact it downloads (deploy.yml's build
+      # job), attested as this workflow's on that commit. A pull request's
+      # site is never deployed, and a fork's run can't attest.
+      - name: The site's manifest
+        if: github.event_name == 'merge_group' || github.event_name == 'push'
+        working-directory: apps/web/dist
+        run: find . ! -type d -print0 | LC_ALL=C sort -z | xargs -0r sha256sum > "$RUNNER_TEMP/site.sha256"
+      - if: github.event_name == 'merge_group' || github.event_name == 'push'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/site.sha256
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: site
@@ -738,7 +770,8 @@ jobs:
   # On main, when this run reuses the one that tested its tree (gate's
   # jobs=reuse, tested-by), what that run made is taken over, not made
   # again: its site, kept as this run's site artifact, which the deploy
-  # ships (docs/deployment.md), and, but on a release commit, its Turbo
+  # ships once it matches the site job's attestation (docs/deployment.md),
+  # and, but on a release commit, its Turbo
   # cache, saved as main's, which every pull request and queue run
   # restores. That run tested this very tree: the queue's commit is the
   # one main moved to, and a release commit's code is its parent's. On a

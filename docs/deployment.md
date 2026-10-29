@@ -75,9 +75,10 @@ Only `main` deploys, and only from this repository:
   newest version, not the head of `main`, for example to put the site
   back on it after a failed deploy, and checks its release commit and
   GitHub release as above. It installs Chromium
-  ([.github/actions/chromium](../.github/actions/chromium/action.yml))
-  for the docs' diagrams ([markdown.md](markdown.md#diagrams)), runs
-  `npm run check` on that version, and builds it. Without a Turbo
+  ([.github/actions/chromium](../.github/actions/chromium/action.yml)),
+  not from GitHub's cache, for the docs' diagrams
+  ([markdown.md](markdown.md#diagrams)), runs `npm run check` on that
+  version, and builds it. Without a Turbo
   cache, it takes about as long as CI's `check` and `site` jobs in a
   row.
 
@@ -104,6 +105,31 @@ commit's run tested its tree, it's that run's own build
 ([releasing.md](releasing.md#what-each-stage-checks)). The site
 deployed is the one tested, and a deploy can't fail on what a build
 fetches, such as Chromium or its system libraries.
+
+**Build the deployed site from nothing GitHub's cache holds.** CI's
+`site` job sets up Node without npm's cache, and the Chromium action's
+`cache: false` downloads the headless shell with Playwright and its
+system libraries from Ubuntu's signed mirror. The deploy's own build,
+when run by hand, does the same. Any job on `main` can write `main`'s
+cache entries, so a file restored from them could carry code from the
+least trusted of those jobs into the site.
+
+**Ship only the site the `site` job built.** The other jobs keep their
+caches, and any job of a run can replace one of the run's artifacts.
+So in the merge queue and on `main`, the `site` job lists every file
+of the site with its SHA-256 and attests that list
+(`actions/attest`). It's the only job in CI that may attest. Before the
+deploy states the version, it makes the same list from the artifact it
+downloaded and checks it with `gh attestation verify`. CI's workflow
+in the merge queue or on `main` must have attested it, for the release
+commit or its parent. A site with a file changed, added or removed,
+or one from an older commit, isn't deployed. A version released before
+sites were attested fails this check; a deploy by hand builds it
+instead. A test
+([releaseWorkflow.test.ts](../scripts/releaseWorkflow.test.ts)) checks
+that the two builds restore no cache, that only the `site` and `reuse`
+jobs upload the `site` artifact, and that the deploy checks the
+attestation.
 
 That site states the version before the release, and only its pages
 state it; the scripts' files are named by a hash of their content

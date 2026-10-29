@@ -294,7 +294,10 @@ headless shell and the browsers' system libraries. `warm-images` and
 `warm-browsers` pull, build or download only what's missing and save
 it. `warm-pip` installs the Python tools, so pip's caches are saved
 where `main` lacks them
-([testing.md](testing.md#continuous-integration)).
+([testing.md](testing.md#continuous-integration)). The site that's
+deployed is built without them: CI's `site` job restores nothing from
+GitHub's cache and attests what it built, which the deploy checks, as
+`deployment.md` says.
 
 A `workflow_dispatch` run of the deploy runs `npm run check` itself and
 needs no CI run.

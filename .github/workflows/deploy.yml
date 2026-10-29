@@ -62,6 +62,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       sha: ${{ steps.release.outputs.sha }}
+      parent: ${{ steps.release.outputs.parent }}
       tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -139,6 +140,7 @@ jobs:
             exit 1
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "parent=$(git rev-parse "$sha^")" >> "$GITHUB_OUTPUT"
           echo "Deploying $TAG."
 
   build:
@@ -149,6 +151,8 @@ jobs:
       contents: read
       # To download the site from the CI run on the release commit.
       actions: read
+      # To check the site's attestation (gh attestation verify).
+      attestations: read
       # To set up GitHub Pages, before the artifact is uploaded.
       pages: write
     # A run by hand checks and builds first, with no Turbo cache: as long
@@ -159,10 +163,14 @@ jobs:
         with:
           ref: ${{ needs.version.outputs.sha }}
           persist-credentials: false
+      # Nothing in this job comes from GitHub's cache, as the site it
+      # deploys is made or stated here (docs/deployment.md#the-build-ci-tested):
+      # any job on main can write main's cache entries. npm's cache neither,
+      # which setup-node would restore for packageManager in package.json.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: npm
+          package-manager-cache: false
       # No package's install script runs (docs/vendor-code.md#installing),
       # though the release checked out may predate the root .npmrc.
       - run: npm ci --ignore-scripts
@@ -185,6 +193,35 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: ${{ runner.temp }}/site/
+      # The artifact is shipped only as CI's site job built it: its
+      # manifest, made again here as that job made it, must be attested
+      # by CI's workflow in the merge queue or on main, for the release
+      # commit or its parent (docs/deployment.md#the-build-ci-tested).
+      # Only the site job may attest, so a site any other job of a run
+      # uploaded in its place, or an older one, is refused. A version
+      # released before sites were attested fails here: deploy it by hand,
+      # which builds it.
+      - name: The site is the one CI's site job attested
+        if: github.event_name == 'workflow_run' && hashFiles('scripts/siteVersion.ts') != ''
+        env:
+          SITE: ${{ runner.temp }}/site
+          SHA: ${{ needs.version.outputs.sha }}
+          PARENT: ${{ needs.version.outputs.parent }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          manifest="$RUNNER_TEMP/site.sha256"
+          (cd "$SITE" && find . ! -type d -print0 | LC_ALL=C sort -z | xargs -0r sha256sum) > "$manifest"
+          for digest in "$SHA" "$PARENT"; do
+            if gh attestation verify "$manifest" --repo "$GH_REPO" \
+              --cert-identity-regex "^https://github\.com/$GH_REPO/\.github/workflows/ci\.yml@refs/heads/(main|gh-readonly-queue/main/.+)\$" \
+              --source-digest "$digest" --deny-self-hosted-runners > /dev/null; then
+              echo "The site is the one CI's site job attested on $digest."
+              exit 0
+            fi
+          done
+          echo "::error::The site artifact matches no attestation of CI's site job on $SHA or its parent, so it is not deployed (docs/deployment.md#the-build-ci-tested)."
+          exit 1
       - if: github.event_name == 'workflow_run' && hashFiles('scripts/siteVersion.ts') != ''
         env:
           SITE: ${{ runner.temp }}/site
@@ -193,13 +230,17 @@ jobs:
           mv "$SITE" apps/web/dist
       # A run by hand has no CI run behind it, so it checks the version and
       # builds it. Chromium, which npm run check and npm run build draw the
-      # docs' Mermaid diagrams in (docs/markdown.md); the action is the
-      # checked-out version's: one from before the drawings has none, and
-      # needs none.
+      # docs' Mermaid diagrams in (docs/markdown.md), downloaded, with its
+      # system libraries from Ubuntu's signed mirror, not restored from the
+      # cache. The action is the checked-out version's: one from before the
+      # drawings has none, and needs none; every version since 6.17.3 takes
+      # the cache input, and only the newest is deployed.
       - if: >-
           (github.event_name == 'workflow_dispatch' || hashFiles('scripts/siteVersion.ts') == '') &&
           hashFiles('.github/actions/chromium/action.yml') != ''
         uses: ./.github/actions/chromium
+        with:
+          cache: false
       - if: github.event_name == 'workflow_dispatch'
         run: npm run check
       - if: github.event_name == 'workflow_dispatch' || hashFiles('scripts/siteVersion.ts') == ''
