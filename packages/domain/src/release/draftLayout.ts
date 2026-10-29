@@ -188,16 +188,26 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
     if (triple.object.kind === "blank" && !namedBy.has(`_:${triple.object.value}`))
       namedBy.set(`_:${triple.object.value}`, triple.subject);
   }
-  const placeOf = (subject: string, seen: Set<string>): DraftDocument => {
-    const known = places.get(subject);
-    if (known !== undefined) return known;
-    const parent = namedBy.get(subject);
-    return parent === undefined || seen.has(parent) ? release : placeOf(parent, seen.add(parent));
+  // The chain of names is walked in a loop, not a call per link, and
+  // each node walked is placed, so that each is walked once however
+  // long the chain and in whatever order its statements come; a chain
+  // that comes back to a node walked is in the release document.
+  const place = (subject: string) => {
+    const chain = new Set<string>();
+    let node: string | undefined = subject;
+    let found: DraftDocument = release;
+    while (node !== undefined && !chain.has(node)) {
+      const known = places.get(node);
+      if (known !== undefined) {
+        found = known;
+        break;
+      }
+      chain.add(node);
+      node = namedBy.get(node);
+    }
+    for (const walked of chain) places.set(walked, found);
   };
-  for (const triple of draft.triples) {
-    if (!places.has(triple.subject))
-      places.set(triple.subject, placeOf(triple.subject, new Set([triple.subject])));
-  }
+  for (const triple of draft.triples) place(triple.subject);
   places.set(draft.url, release);
   return places;
 }
@@ -208,7 +218,9 @@ function documentContents(draft: ReleaseDraft): Map<string, string[]> {
   const contents = new Map<string, string[]>();
   const put = (place: DraftDocument, value: unknown) => {
     const url = draftDocumentUrl(draft.url, place);
-    contents.set(url, [...(contents.get(url) ?? []), canonical(value)]);
+    const held = contents.get(url);
+    if (held === undefined) contents.set(url, [canonical(value)]);
+    else held.push(canonical(value));
   };
   const release: DraftDocument = { kind: "release" };
   put(release, [draft.course, draft.root]);

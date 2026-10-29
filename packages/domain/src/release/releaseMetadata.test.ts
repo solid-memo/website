@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { growth } from "../testing/growth";
 import { courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/releaseDraft";
 import {
   applyDraftChanges,
@@ -237,6 +238,85 @@ describe("sources", () => {
     expect(sourceIri("javascript:alert(1)")).toBeNull();
     expect(sourceIri("not a url")).toBeNull();
   });
+
+  it("are gathered in time that grows with how many a release names", () => {
+    const draft = courseDraft();
+    const naming = (count: number) => {
+      const iris = Array.from({ length: count }, (_, n) => `https://many.example/${n}`);
+      return {
+        ...draft,
+        root: { ...draft.root, wasDerivedFrom: [...draft.root.wasDerivedFrom, ...iris] },
+        triples: [
+          ...draft.triples,
+          ...iris.map((iri, n) => ({
+            subject: iri,
+            predicate: `${DCTERMS}title`,
+            object: plain(`Source ${n}`),
+          })),
+        ],
+      };
+    };
+    const sources = sourcesOf(naming(100));
+    expect(sources).toHaveLength(101);
+    expect(sources.at(-1)).toMatchObject({
+      iri: "https://many.example/99",
+      title: "Source 99",
+      derivedFrom: true,
+    });
+    // Eight times the sources take about as long as an eighth of them
+    // eight times over; going over every statement for each source would
+    // take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = naming(count);
+        return () => sourcesOf(many);
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("change in time that grows with how many activities an earlier release carries", () => {
+    const draft = courseDraft();
+    const carrying = (count: number) => {
+      const ids = Array.from({ length: count }, (_, n) => `earlier-${n}`);
+      return {
+        ...draft,
+        triples: [
+          ...draft.triples,
+          ...ids.flatMap((id) => [
+            link(of(id), "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", `${PROV}Activity`),
+            { subject: of(id), predicate: COMMENT, object: plain(id) },
+          ]),
+        ],
+        published: { ids: {}, activities: ids },
+      };
+    };
+    const form = {
+      title: "New",
+      creator: "",
+      license: "",
+      evidence: "",
+      derivedFrom: true,
+      used: false,
+    };
+    const change = sourceChange("https://new.example/", form);
+    const carried = carrying(100);
+    expect(made(carried, [change]).triples).toHaveLength(carried.triples.length + 1);
+    // Eight times the activities take about as long as an eighth of them
+    // eight times over; going over every statement for each activity would
+    // take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = carrying(count);
+        return () => made(many, [change]);
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("checks", () => {
@@ -274,5 +354,42 @@ describe("checks", () => {
     expect(
       checkIdFor(made(deckDraft(), [{ kind: "addCheckActivity", id: "check-1", activity: check }])),
     ).toBe("check-2");
+  });
+
+  it("are read in time that grows with how many activities a release states", () => {
+    const draft = courseDraft();
+    const stating = (count: number) => {
+      const ids = Array.from({ length: count }, (_, n) => `activity-${n}`);
+      return {
+        ...draft,
+        triples: [
+          ...draft.triples,
+          ...ids.flatMap((id) => [
+            link(of(id), "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", `${PROV}Activity`),
+            { subject: of(id), predicate: COMMENT, object: plain(id) },
+          ]),
+        ],
+        // Every other one carried from an earlier release.
+        published: { ids: {}, activities: ids.filter((_, n) => n % 2 === 1) },
+      };
+    };
+    expect(checksOf(stating(4)).map((view) => [view.id, view.carried])).toEqual([
+      ["activity-0", false],
+      ["activity-2", false],
+      ["activity-1", true],
+      ["activity-3", true],
+    ]);
+    // Eight times the activities take about as long as an eighth of them
+    // eight times over; going over every statement for each activity would
+    // take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = stating(count);
+        return () => checksOf(many);
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { growth } from "../testing/growth.ts";
 import { card, courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/releaseDraft.ts";
 import {
   contactOf,
@@ -1412,6 +1413,38 @@ describe("blank nodes", () => {
       of("compilation"),
       "_:b2",
     ]);
+  });
+
+  it("go with a long chain, however its statements are ordered, in time that grows with it", () => {
+    const draft = courseDraft();
+    const chained = (depth: number) => {
+      const chain = Array.from({ length: depth }, (_, n) => ({
+        subject: `_:b${n}`,
+        predicate: "https://p.example/next",
+        object: { kind: "blank" as const, value: `b${n + 1}` },
+      })).reverse();
+      const naming = ["https://p.example/sum", "https://p.example/also"].map((predicate) => ({
+        subject: "https://source.example/",
+        predicate,
+        object: { kind: "blank" as const, value: "b0" },
+      }));
+      return { ...draft, triples: [...chain, ...draft.triples, ...naming] };
+    };
+    const remove: DraftChange = { kind: "setSource", iri: "https://source.example/", source: null };
+    const removed = made(chained(100), remove);
+    expect(removed.triples.map((triple) => triple.subject)).toEqual([DRAFT, of("compilation")]);
+    // A chain eight times as long takes about as long as an eighth of it
+    // eight times over; going over every statement again for each link
+    // would take eight times as long.
+    const ratio = growth(
+      (depth) => {
+        const long = chained(depth);
+        return () => made(long, remove);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

@@ -17,6 +17,7 @@ import {
   isRefusal,
   PROV,
   readCheckActivity,
+  triplesBySubject,
   type CheckActivity,
   type DraftChange,
   type DraftNode,
@@ -142,11 +143,12 @@ export type SourceForm = Pick<
 
 /** The IRIs the activities used (prov:used). */
 function usedBy(draft: ReleaseDraft, activities: readonly string[]): string[] {
+  const of = new Set(activities);
   return draft.triples
     .filter(
       (triple) =>
         triple.predicate === `${PROV}used` &&
-        activities.includes(triple.subject) &&
+        of.has(triple.subject) &&
         triple.object.kind === "iri",
     )
     .map((triple) => triple.object.value);
@@ -164,8 +166,13 @@ export function sourcesOf(draft: ReleaseDraft): SourceView[] {
     generatingActivities(draft).filter((iri) => !carried.has(iri)),
   );
   const earlier = usedBy(draft, [...carried]);
-  return [...new Set([...draft.root.wasDerivedFrom, ...own, ...earlier])].map((iri) => {
-    const said = draft.triples.filter((triple) => triple.subject === iri);
+  const derivedFrom = new Set(draft.root.wasDerivedFrom);
+  const used = new Set(own);
+  const usedEarlier = new Set(earlier);
+  const sources = new Set([...derivedFrom, ...used, ...usedEarlier]);
+  const saying = triplesBySubject(draft.triples, sources);
+  return [...sources].map((iri) => {
+    const said = saying.get(iri) ?? [];
     const first = (predicate: string, kind: ReleaseTerm["kind"]) =>
       said.find((triple) => triple.predicate === predicate && triple.object.kind === kind);
     const shown = [
@@ -181,9 +188,9 @@ export function sourcesOf(draft: ReleaseDraft): SourceView[] {
       creator: value(shown[1]),
       license: value(shown[2]),
       evidence: value(shown[3]),
-      derivedFrom: draft.root.wasDerivedFrom.includes(iri),
-      used: own.includes(iri),
-      usedEarlier: earlier.includes(iri),
+      derivedFrom: derivedFrom.has(iri),
+      used: used.has(iri),
+      usedEarlier: usedEarlier.has(iri),
       others: said
         .filter((triple) => !shown.includes(triple))
         .map(({ predicate, object }) => ({ predicate, object })),
@@ -268,11 +275,15 @@ export interface CheckView {
 /** The activities of the draft but its own making: its checks, then those carried from earlier versions, in order. */
 export function checksOf(draft: ReleaseDraft): CheckView[] {
   const making = new Set(generatingActivities(draft));
-  const views = activitiesOf(draft).flatMap((id): CheckView[] => {
-    const carried = draft.published.activities.includes(id);
+  const published = new Set(draft.published.activities);
+  const ids = activitiesOf(draft);
+  const statements = triplesBySubject(draft.triples, new Set(ids.map((id) => iriIn(draft, id))));
+  const views = ids.flatMap((id): CheckView[] => {
+    const carried = published.has(id);
     const iri = iriIn(draft, id);
     if (making.has(iri) && !carried) return [];
-    const said = draft.triples.filter((triple) => triple.subject === iri);
+    // Each activity was found by a statement of its own.
+    const said = statements.get(iri)!;
     const texts = (predicate: string) =>
       said
         .filter((triple) => triple.predicate === predicate && triple.object.kind === "literal")
@@ -284,7 +295,7 @@ export function checksOf(draft: ReleaseDraft): CheckView[] {
         label: texts("http://www.w3.org/2000/01/rdf-schema#label"),
         comments: texts(RDFS_COMMENT),
         endedAt: texts(`${PROV}endedAtTime`)[0]?.value ?? "",
-        activity: carried ? null : readCheckActivity(draft, id),
+        activity: carried ? null : readCheckActivity(draft, id, said),
       },
     ];
   });
