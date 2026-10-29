@@ -73,6 +73,23 @@ export function createOwnPodGate({
     return now() - kept.at >= ASK_AGAIN_AFTER_MS && inOne(await ask(user));
   }
 
+  return createFolderGate({ fetch, publicFetch, isOwn });
+}
+
+/**
+ * A fetch that is the user only where `isOwn` says: such a request goes
+ * to `fetch`, the user's; any other read goes to `publicFetch`, and any
+ * other write is refused before it is sent (`writeOutsidePod`).
+ */
+export function createFolderGate({
+  fetch,
+  publicFetch,
+  isOwn,
+}: {
+  fetch: typeof globalThis.fetch;
+  publicFetch: typeof globalThis.fetch;
+  isOwn: (url: string) => boolean | Promise<boolean>;
+}): typeof globalThis.fetch {
   return async (input, init) => {
     const request = input instanceof Request ? input : undefined;
     const url = request?.url ?? String(input);

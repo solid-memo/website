@@ -492,6 +492,42 @@ describe("createAppUseCases", () => {
     });
   });
 
+  it("reads no document the profile links on another server, as the user or at all", async () => {
+    const alice = "https://alice.example/";
+    const elsewhere = "https://elsewhere.example/";
+    const pod = podAt(alice);
+    const theirs = podAt(elsewhere);
+    const sent = podsNetwork({ [alice]: pod, [elsewhere]: theirs });
+    login.webId = `${alice}profile/card#me`;
+    const solid = "http://www.w3.org/ns/solid/terms#";
+    const pim = "http://www.w3.org/ns/pim/space#";
+    const seeAlso = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
+    // A profile with a private index and no public one, linking a document someone else keeps.
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${login.webId}> <${pim}storage> <${alice}>; <${solid}privateTypeIndex> <${alice}settings/private.ttl>; <${seeAlso}> <${elsewhere}doc>.`,
+    );
+    await put(pod, `${alice}settings/private.ttl`, `<> a <${solid}TypeIndex>.`);
+    await put(
+      theirs,
+      `${elsewhere}doc`,
+      `<${login.webId}> <${solid}publicTypeIndex> <${elsewhere}index.ttl>; <${pim}storage> <${elsewhere}>.`,
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+
+    expect(await useCases.listInstances(session)).toEqual([]);
+    expect(await useCases.getRegistrationOptions(session)).toEqual({
+      privateIndexExists: true,
+      publicIndexExists: false,
+    });
+    expect(await useCases.listStorages(session)).toEqual([expect.objectContaining({ url: alice })]);
+    expect(login.sent).toContain(`${alice}settings/private.ttl`);
+    expect(login.sent.filter((url) => url.startsWith(elsewhere))).toEqual([]);
+    expect(sent.filter(({ url }) => url.startsWith(elsewhere))).toEqual([]);
+  });
+
   it("moves a guest's study into a folder the user enters, though their profile names no storage", {
     timeout: 60_000,
   }, async () => {

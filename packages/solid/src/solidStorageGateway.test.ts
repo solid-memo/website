@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProfileStorages } from "./client/resources";
 import { readDataset } from "./datasets";
 import { createSolidStorageGateway, hasStorageLink } from "./solidStorageGateway";
+import { datasetFrom, datasetOfTurtle } from "./testing/datasets";
 
 vi.mock("./datasets", () => ({ readDataset: vi.fn() }));
 
@@ -43,7 +44,7 @@ describe("hasStorageLink", () => {
 describe("createSolidStorageGateway", () => {
   beforeEach(() => {
     profileStorages.mockReset();
-    vi.mocked(readDataset).mockResolvedValue("profile" as never);
+    vi.mocked(readDataset).mockResolvedValue(datasetFrom("https://alice.example/profile/card"));
   });
 
   describe("discoverStorages", () => {
@@ -59,7 +60,38 @@ describe("createSolidStorageGateway", () => {
       expect(fetch).not.toHaveBeenCalled();
       // The WebID document too is read through the fetch given, never the browser's own.
       expect(readDataset).toHaveBeenCalledWith(WEBID, fetch);
-      expect(profileStorages).toHaveBeenCalledWith(WEBID, { fetch, webIdProfile: "profile" });
+      expect(profileStorages).toHaveBeenCalledWith(WEBID, {
+        fetch: expect.any(Function),
+        webIdProfile: await vi.mocked(readDataset).mock.results[0]!.value,
+      });
+    });
+
+    it("reads more of the profile as the user in its own places alone, and nothing anywhere else", async () => {
+      vi.mocked(readDataset).mockResolvedValue(
+        await datasetOfTurtle(
+          "https://alice.example/profile/card",
+          "<#me> <http://www.w3.org/ns/pim/space#storage> <https://storage.example/alice/> .",
+        ),
+      );
+      profileStorages.mockResolvedValue(["https://alice.example/"]);
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(new Response(""));
+      await createSolidStorageGateway({ fetch, profileStorages }).discoverStorages(WEBID);
+      const profileFetch = profileStorages.mock.calls[0]![1].fetch!;
+
+      // The WebID's origin, and a storage its document names, are the user's.
+      await profileFetch("https://alice.example/profile/extended");
+      await profileFetch("https://storage.example/alice/profile");
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        "https://alice.example/profile/extended",
+        "https://storage.example/alice/profile",
+      ]);
+      // A document the profile links anywhere else is not read at all.
+      fetch.mockClear();
+      await expect(profileFetch("https://elsewhere.example/doc")).rejects.toThrow(
+        "outside the profile's own places",
+      );
+      await expect(profileFetch("https://storage.example/bob/profile")).rejects.toThrow();
+      expect(fetch).not.toHaveBeenCalled();
     });
 
     it("falls back to the Link-header walk-up when the profile has none", async () => {

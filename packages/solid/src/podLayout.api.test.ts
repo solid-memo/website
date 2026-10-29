@@ -241,7 +241,7 @@ async function typeIndexLinkLines(): Promise<string[]> {
       const filled = (turtle: string) => turtle.replace("LINK", link).replace("INDEX", index);
       await pod.put(PROFILE, filled(profile));
       if (other !== undefined) await pod.put(elsewhere, filled(other));
-      const found = await locateTypeIndexes(WEBID, pod.fetch);
+      const found = await locateTypeIndexes(WEBID, pod.fetch, pod.fetch);
       if ((kind === "private" ? found.privateIndexUrl : found.publicIndexUrl) === index)
         lines.push(`WebID: its ${kind} type index found by solid:${kind}TypeIndex in ${place}`);
     }

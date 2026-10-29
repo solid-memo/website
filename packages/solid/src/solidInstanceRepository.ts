@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { anonymousFetch } from "./authFetch";
 import { deleteContainer } from "./client/resources";
 import { createSolidDataset, getThing, setThing } from "./client/rdf";
 import type { InstanceRepository } from "@solid-memo/application/ports";
@@ -45,6 +46,11 @@ export interface SolidInstanceRepositoryDeps {
    * passes its credential gate (docs/boundaries.md).
    */
   dataFetch?: typeof globalThis.fetch;
+  /**
+   * What a type index outside the profile's own places is read through
+   * (locateTypeIndexes), as no one: `anonymousFetch` when unset.
+   */
+  publicFetch?: typeof globalThis.fetch;
   now: () => Date;
   randomId: () => string;
   /** Checks what is about to be written; see writeCheck.ts. */
@@ -54,17 +60,18 @@ export interface SolidInstanceRepositoryDeps {
 export function createSolidInstanceRepository({
   fetch,
   dataFetch = fetch,
+  publicFetch = anonymousFetch,
   now,
   randomId,
   checkWrite = noWriteCheck,
 }: SolidInstanceRepositoryDeps): InstanceRepository {
   return {
     async listInstances(webId): Promise<Instance[]> {
-      const locations = await locateTypeIndexes(webId, fetch);
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
       const byUrl = new Map<string, InstanceRegistration>();
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;
-        for (const registration of await readRegistrationsSafely(indexUrl, fetch)) {
+        for (const registration of await readRegistrationsSafely(indexUrl, locations.fetch)) {
           const url = ensureTrailingSlash(registration.containerUrl);
           if (!byUrl.has(url)) byUrl.set(url, registration);
         }
@@ -73,7 +80,7 @@ export function createSolidInstanceRepository({
     },
 
     async getRegistrationOptions(webId) {
-      const locations = await locateTypeIndexes(webId, fetch);
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
       return {
         privateIndexExists: locations.privateIndexUrl !== null,
         publicIndexExists: locations.publicIndexUrl !== null,
@@ -92,8 +99,10 @@ export function createSolidInstanceRepository({
       );
       // The private index, for the review states' and answers' registrations of an instance registered elsewhere.
       let privateIndexElsewhere: string | null;
+      let indexFetch: typeof globalThis.fetch;
       try {
-        const locations = await locateTypeIndexes(webId, fetch);
+        const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+        indexFetch = locations.fetch;
         const indexUrl =
           (registrationTarget === "private"
             ? locations.privateIndexUrl
@@ -105,7 +114,7 @@ export function createSolidInstanceRepository({
           indexUrl,
           { instanceUrl: url, title: name, classes: wantedIn(registrationTarget, true) },
           randomId,
-          fetch,
+          indexFetch,
         );
       } catch (error) {
         await bestEffortCleanup(metaUrl, url, fetch);
@@ -118,7 +127,7 @@ export function createSolidInstanceRepository({
             privateIndexElsewhere,
             { instanceUrl: url, title: name, classes: wantedIn("private", false) },
             randomId,
-            fetch,
+            indexFetch,
           );
         } catch {
           // Left for Preferences to add.
@@ -132,38 +141,43 @@ export function createSolidInstanceRepository({
       const url = instanceAddressOf(instanceUrl);
       if (!isPlainHttpUrl(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
       const name = await readInstanceName(url, fetch);
-      const indexUrl = await ensureTypeIndex(registrationTarget, webId, url, fetch);
+      const index = await ensureTypeIndex(registrationTarget, webId, url, fetch, publicFetch);
       await addRegistrations(
-        indexUrl,
+        index.url,
         { instanceUrl: url, title: name, classes: ["instance"] },
         randomId,
-        fetch,
+        index.fetch,
       );
       return { url, name };
     },
 
     async readDataClassRegistrations({ webId, instanceUrl }) {
-      return registrationsOf(await indexesOf(webId, instanceUrl, fetch));
+      return registrationsOf(await indexesOf(webId, instanceUrl, fetch, publicFetch));
     },
 
     async registerDataClasses({ webId, instanceUrl, title }) {
-      for (const index of (await indexesOf(webId, instanceUrl, fetch)).indexes) {
+      const { indexes, indexFetch } = await indexesOf(webId, instanceUrl, fetch, publicFetch);
+      for (const index of indexes) {
         const missing = index.wanted.filter((dataClass) => !index.registered.includes(dataClass));
         if (missing.length === 0) continue;
         await addRegistrations(
           index.url,
           { instanceUrl, title, classes: missing },
           randomId,
-          fetch,
+          indexFetch,
         );
       }
     },
 
     async renameRegistrations({ webId, instanceUrl, title }) {
-      const { privateIndexUrl, publicIndexUrl } = await locateTypeIndexes(webId, fetch);
-      for (const indexUrl of [privateIndexUrl, publicIndexUrl]) {
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;
-        await renameInstanceRegistrations(indexUrl, { containerUrl: instanceUrl, title }, fetch);
+        await renameInstanceRegistrations(
+          indexUrl,
+          { containerUrl: instanceUrl, title },
+          locations.fetch,
+        );
       }
     },
 
@@ -207,10 +221,10 @@ export function createSolidInstanceRepository({
     async deleteInstance({ webId, instance }) {
       const url = ensureTrailingSlash(instance.url);
       const deletion = await deleteInstanceData(url, dataFetch);
-      const locations = await locateTypeIndexes(webId, fetch);
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;
-        await removeInstanceRegistrations(indexUrl, url, fetch);
+        await removeInstanceRegistrations(indexUrl, url, locations.fetch);
       }
       return deletion;
     },
@@ -248,12 +262,19 @@ async function indexesOf(
   webId: string,
   instanceUrl: string,
   fetch: typeof globalThis.fetch,
+  publicFetch: typeof globalThis.fetch,
 ): Promise<{
   indexes: IndexRegistrations[];
+  /** What the indexes are read and written through (TypeIndexes). */
+  indexFetch: typeof globalThis.fetch;
   privateIndexMissing: boolean;
   unreadableIndexes: RegistrationTarget[];
 }> {
-  const { privateIndexUrl, publicIndexUrl } = await locateTypeIndexes(webId, fetch);
+  const {
+    privateIndexUrl,
+    publicIndexUrl,
+    fetch: indexFetch,
+  } = await locateTypeIndexes(webId, fetch, publicFetch);
   const indexes: IndexRegistrations[] = [];
   const unreadableIndexes: RegistrationTarget[] = [];
   for (const [kind, url] of [
@@ -263,7 +284,7 @@ async function indexesOf(
     if (url === null) continue;
     let registered: DataClass[];
     try {
-      registered = await readRegisteredClasses(url, instanceUrl, fetch);
+      registered = await readRegisteredClasses(url, instanceUrl, indexFetch);
     } catch {
       unreadableIndexes.push(kind);
       continue;
@@ -275,7 +296,12 @@ async function indexesOf(
       wanted: wantedIn(kind, registered.includes("instance")),
     });
   }
-  return { indexes, privateIndexMissing: privateIndexUrl === null, unreadableIndexes };
+  return {
+    indexes,
+    indexFetch,
+    privateIndexMissing: privateIndexUrl === null,
+    unreadableIndexes,
+  };
 }
 
 /** Every registration that belongs in an index, by class, the private index's first, and whether it is there. */

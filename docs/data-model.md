@@ -127,7 +127,10 @@ flowchart LR
 - **Type index links** are read from the WebID subject in the WebID
   document and in its extended profile documents (`rdfs:seeAlso` /
   `foaf:isPrimaryTopicOf`), plus `pim:preferencesFile` for the private
-  one.
+  one. Only the documents on the WebID's origin, on its document's
+  origin or in a storage the WebID document names are read; a link to
+  one anywhere else is left alone
+  ([boundaries.md](boundaries.md#the-credential-gate)).
 - **Missing indexes** are normal on Community Solid Server pods. The app
   warns the user, who chooses to create the private index (a document
   under `<storage>settings/` plus a profile link) or to register

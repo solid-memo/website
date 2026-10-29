@@ -4,8 +4,10 @@
 
 import type { StorageGateway } from "@solid-memo/application/ports";
 import type { Storage } from "@solid-memo/domain/storage";
-import type { ProfileStorages } from "./client/resources";
+import { getThing } from "./client/rdf";
+import { getSourceUrl, type ProfileStorages } from "./client/resources";
 import { readDataset } from "./datasets";
+import { createPlacesFetch, profilePlacesOf, readNothing } from "./profilePlaces";
 import { ensureTrailingSlash } from "./urls";
 import { AppError } from "@solid-memo/domain/appError";
 
@@ -26,10 +28,15 @@ export function createSolidStorageGateway({
       // The WebID document read through `fetch`, as every pod read is, and
       // handed to the lookup: left to itself, the Solid client library reads it
       // with the browser's own fetch, which cannot reach the guest's pod
-      // (docs/guest-mode.md).
+      // (docs/guest-mode.md). The documents it names as more of the profile
+      // are read as the user in the profile's own places alone, and any
+      // other is not read (profilePlacesOf).
+      const webIdProfile = await readDataset(webId, fetch);
+      const me = getThing(webIdProfile, webId);
+      const places = profilePlacesOf(webId, getSourceUrl(webIdProfile), me === null ? [] : [me]);
       const fromProfile = await profileStorages(webId, {
-        fetch,
-        webIdProfile: await readDataset(webId, fetch),
+        fetch: createPlacesFetch(places, fetch, readNothing),
+        webIdProfile,
       });
       if (fromProfile.length > 0) {
         return fromProfile.map((url) => ({ url, source: "profile" }));

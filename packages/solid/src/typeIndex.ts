@@ -26,6 +26,7 @@ import {
 } from "./datasets";
 import { ensureTrailingSlash } from "./urls";
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
+import { createPlacesFetch, isInPlaces, profilePlacesOf } from "./profilePlaces";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
 import { DATA_CLASSES, type DataClass } from "@solid-memo/domain/instance";
@@ -42,9 +43,16 @@ import { draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
 type Fetch = typeof globalThis.fetch;
 export type TypeIndexKind = "private" | "public";
 
-export interface TypeIndexLocations {
+export interface TypeIndexes {
   privateIndexUrl: string | null;
   publicIndexUrl: string | null;
+  /**
+   * What the indexes are read and written through: as the user in the
+   * profile's own places (profilePlacesOf: the WebID's origin, its
+   * document's, and the storages the profile names), any other read as
+   * no one and any other write refused (`writeOutsidePod`).
+   */
+  fetch: Fetch;
 }
 
 /**
@@ -53,49 +61,80 @@ export interface TypeIndexLocations {
  * (rdfs:seeAlso / foaf:isPrimaryTopicOf — e.g. Inrupt PodSpaces keeps a
  * read-only WebID document and a writable profile in the pod). The
  * private index is additionally looked up in the pim:preferencesFile
- * (per spec).
+ * (per spec). Only the documents in the profile's own places are read,
+ * as the user; a link to a document anywhere else, someone else's, is
+ * left alone. `publicFetch` reads an index outside those places.
  */
-export async function locateTypeIndexes(webId: string, fetch: Fetch): Promise<TypeIndexLocations> {
+export async function locateTypeIndexes(
+  webId: string,
+  fetch: Fetch,
+  publicFetch: Fetch,
+): Promise<TypeIndexes> {
   const profileDataset = await readDataset(webId, fetch);
+  const documentUrl = getSourceUrl(profileDataset);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
-    return { privateIndexUrl: null, publicIndexUrl: null };
+    const places = profilePlacesOf(webId, documentUrl, []);
+    return {
+      privateIndexUrl: null,
+      publicIndexUrl: null,
+      fetch: createPlacesFetch(places, fetch, publicFetch),
+    };
   }
 
   let publicIndexUrl = getUrl(profile, SOLID.publicTypeIndex);
   let privateIndexUrl = getUrl(profile, SOLID.privateTypeIndex);
+  const ownPlaces = profilePlacesOf(webId, documentUrl, [profile]);
+  const subjects = [profile];
+  // Done once both indexes are found and in the profile's places: an
+  // extended profile may name the storage an index is in.
+  const located = (): boolean => {
+    const places = profilePlacesOf(webId, documentUrl, subjects);
+    return [publicIndexUrl, privateIndexUrl].every(
+      (url) => url !== null && isInPlaces(url, places),
+    );
+  };
 
-  for (const extendedProfileUrl of extendedProfileUrls(profile, profileDataset)) {
-    if (publicIndexUrl !== null && privateIndexUrl !== null) break;
+  for (const extendedProfileUrl of extendedProfileUrls(webId, profile, profileDataset)) {
+    if (located()) break;
     const subject = await readSubjectSafely(extendedProfileUrl, webId, fetch);
     if (subject === null) continue;
+    subjects.push(subject);
     publicIndexUrl ??= getUrl(subject, SOLID.publicTypeIndex);
     privateIndexUrl ??= getUrl(subject, SOLID.privateTypeIndex);
   }
 
   if (privateIndexUrl === null) {
     const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
-    if (preferencesFileUrl !== null) {
+    if (preferencesFileUrl !== null && isInPlaces(preferencesFileUrl, ownPlaces)) {
       const subject = await readSubjectSafely(preferencesFileUrl, webId, fetch);
       privateIndexUrl = subject === null ? null : getUrl(subject, SOLID.privateTypeIndex);
     }
   }
 
-  return { privateIndexUrl, publicIndexUrl };
+  const places = profilePlacesOf(webId, documentUrl, subjects);
+  return { privateIndexUrl, publicIndexUrl, fetch: createPlacesFetch(places, fetch, publicFetch) };
 }
 
 /**
  * Extended profile documents linked from the WebID subject, deduplicated
  * and excluding the WebID document itself (which is commonly its own
- * foaf:isPrimaryTopicOf).
+ * foaf:isPrimaryTopicOf), in the profile's own places (profilePlacesOf)
+ * alone.
  */
-function extendedProfileUrls(profile: Subject, profileDataset: SourcedDataset): string[] {
-  const self = new Set([stripFragment(profile.url), stripFragment(getSourceUrl(profileDataset))]);
+function extendedProfileUrls(
+  webId: string,
+  profile: Subject,
+  profileDataset: SourcedDataset,
+): string[] {
+  const documentUrl = getSourceUrl(profileDataset);
+  const places = profilePlacesOf(webId, documentUrl, [profile]);
+  const self = new Set([stripFragment(profile.url), stripFragment(documentUrl)]);
   const urls = [
     ...getUrlAll(profile, RDFS.seeAlso),
     ...getUrlAll(profile, FOAF.isPrimaryTopicOf),
   ].map(stripFragment);
-  return [...new Set(urls)].filter((url) => !self.has(url));
+  return [...new Set(urls)].filter((url) => !self.has(url) && isInPlaces(url, places));
 }
 
 function stripFragment(url: string): string {
@@ -181,7 +220,7 @@ async function linkTypeIndexFromProfile(
     failures.push(describeFailure(getSourceUrl(profileDataset), error));
   }
 
-  for (const documentUrl of extendedProfileUrls(profile, profileDataset)) {
+  for (const documentUrl of extendedProfileUrls(webId, profile, profileDataset)) {
     try {
       const dataset = await readDataset(documentUrl, fetch);
       const subject = getThing(dataset, webId) ?? createThing({ url: webId });
@@ -207,16 +246,23 @@ function describeFailure(documentUrl: string, error: unknown): string {
   return `<${documentUrl}>: ${message}`;
 }
 
-/** Find the target index, creating it (and its profile link) if missing. */
+/**
+ * Find the target index, creating it (and its profile link) if missing;
+ * and what it is read and written through (TypeIndexes).
+ */
 export async function ensureTypeIndex(
   kind: TypeIndexKind,
   webId: string,
   nearUrl: string,
   fetch: Fetch,
-): Promise<string> {
-  const locations = await locateTypeIndexes(webId, fetch);
-  const existing = kind === "public" ? locations.publicIndexUrl : locations.privateIndexUrl;
-  return existing ?? createTypeIndex(kind, webId, nearUrl, fetch);
+  publicFetch: Fetch,
+): Promise<{ url: string; fetch: Fetch }> {
+  const indexes = await locateTypeIndexes(webId, fetch, publicFetch);
+  const existing = kind === "public" ? indexes.publicIndexUrl : indexes.privateIndexUrl;
+  return {
+    url: existing ?? (await createTypeIndex(kind, webId, nearUrl, fetch)),
+    fetch: indexes.fetch,
+  };
 }
 
 export interface InstanceRegistration {
