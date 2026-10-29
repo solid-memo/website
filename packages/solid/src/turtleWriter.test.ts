@@ -112,6 +112,9 @@ describe("turtleOf", () => {
       quadOf("_:loop1", `${SM}next`, blank("loop2")),
       quadOf("_:loop2", `${SM}next`, blank("loop1")),
       quadOf(BASE, `${SM}empty`, blank("nothing")),
+      quadOf("_:root", `${SM}next`, blank("leaf")),
+      quadOf("_:leaf", `${SM}value`, literal("jkl")),
+      quadOf("_:alone", `${SM}value`, literal("mno")),
     ];
     const turtle = turtleOf(quads, { base: BASE, prefixes: PREFIXES });
     expect(turtle).toContain(
@@ -121,6 +124,25 @@ describe("turtleOf", () => {
     expect(turtle).toContain("_:twice\n    solid-memo:value");
     expect(turtle).toContain("solid-memo:empty _:nothing");
     expect(turtle).toContain("_:loop1\n    solid-memo:next _:loop2 .");
+    expect(turtle).toContain("_:root\n    solid-memo:next _:leaf .");
+    expect(turtle).toContain('_:alone\n    solid-memo:value "mno" .');
+    const read = await quadsOfTurtle(turtle, BASE);
+    expect(read).toHaveLength(quads.length);
+  });
+
+  it("writes blank nodes in place 16 deep, any deeper by their labels, so a long chain is written whole", async () => {
+    const length = 50_000;
+    const quads = [
+      quadOf(BASE, `${SM}next`, blank("b0")),
+      ...Array.from({ length }, (_, i) => quadOf(`_:b${i}`, `${SM}next`, blank(`b${i + 1}`))),
+      quadOf(`_:b${length}`, `${SM}value`, literal("end")),
+    ];
+    const turtle = turtleOf(quads, { base: BASE, prefixes: PREFIXES });
+    expect(turtle).toContain(
+      `<>\n    solid-memo:next ${"[ solid-memo:next ".repeat(16)}_:b16${" ]".repeat(16)} .`,
+    );
+    expect(turtle).toContain("_:b16\n    solid-memo:next _:b17 .");
+    expect(turtle).toContain(`_:b${length}\n    solid-memo:value "end" .`);
     const read = await quadsOfTurtle(turtle, BASE);
     expect(read).toHaveLength(quads.length);
   });
