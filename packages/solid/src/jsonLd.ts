@@ -46,7 +46,9 @@ export function jsonLdOf(
     const isType = predicate.value === RDF_TYPE && object.termType === "NamedNode";
     const key = isType ? "@type" : compact(predicate.value);
     const value: Value = isType ? compact(object.value) : termValue(object, compact);
-    node.set(key, [...(node.get(key) ?? []), value]);
+    const values = node.get(key);
+    if (values === undefined) node.set(key, [value]);
+    else values.push(value);
   }
   const graph = [...nodes]
     .sort(([a], [b]) => (a < b ? -1 : 1))

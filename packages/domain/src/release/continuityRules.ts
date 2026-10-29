@@ -46,8 +46,11 @@ export function continuityProblems(before: ReleaseModel, after: ReleaseModel): R
 
   const kindsNow = new Map<string, ReleaseKind[]>();
   for (const kind of KINDS)
-    for (const id of publishedIds(after, kind))
-      kindsNow.set(id, [...(kindsNow.get(id) ?? []), kind]);
+    for (const id of publishedIds(after, kind)) {
+      const kinds = kindsNow.get(id);
+      if (kinds === undefined) kindsNow.set(id, [kind]);
+      else kinds.push(kind);
+    }
   for (const was of KINDS) {
     for (const id of publishedIds(before, was)) {
       const now = kindsNow.get(id) ?? [];

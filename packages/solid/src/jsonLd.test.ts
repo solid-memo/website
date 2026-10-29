@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { Quad, Term } from "@rdfjs/types";
+import { growth } from "@solid-memo/domain/testing/growth";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
 import { termOf } from "./ntriples";
 import { parseQuads } from "./client/resources";
@@ -77,6 +78,22 @@ describe("jsonLdOf", () => {
 
   it("writes the same triples the same, whatever their order", () => {
     expect(jsonLdOf([...quads].reverse(), { ex: EX })).toBe(jsonLdOf(quads, { ex: EX }));
+  });
+
+  it("writes many values of one subject's property in time that grows with them, not their square", () => {
+    // Eight times the values must take less than four times as long as an
+    // eighth of them done eight times over (testing.md).
+    const ratio = growth(
+      (count) => {
+        const quads = Array.from({ length: count }, (_, i) =>
+          quad(iri(`${EX}s`), `${EX}p`, literal(`v${i}`)),
+        );
+        return () => jsonLdOf(quads, { ex: EX });
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
