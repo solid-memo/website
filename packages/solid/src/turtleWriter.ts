@@ -12,13 +12,17 @@ const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 /** What a local name may be, for an IRI to be written as prefix:name: nothing Turtle would read otherwise. */
 const LOCAL_NAME = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
+/** How many blank nodes deep one is written in place inside another; one deeper is written by its label, in a block of its own. */
+const MAX_NESTING = 16;
+
 /**
  * Triples as a Turtle document of our own writing, as a release is
  * written (docs/deck-library.md): `@base` the document's own address,
  * so its subjects read `<>` and `<#id>`, then the prefixes it uses; a
  * block per subject, in the order given (`order`, the rest after in the
  * order met), its types first; a blank node named once written in place
- * (`[ … ]`). Text is written on one line, its quotes, backslashes and
+ * (`[ … ]`), at most MAX_NESTING deep, the rest by their labels, so a
+ * long chain of them costs no more than its length. Text is written on one line, its quotes, backslashes and
  * line breaks escaped; integers and booleans bare. A term written as it
  * is, an IRI or a blank node's label, that Turtle cannot write so is
  * refused (writableTerms.ts). No vendor library
@@ -46,18 +50,39 @@ export function turtleOf(
       namedBy.set(quad.object.value, key);
     }
   }
-  // A blank node another subject names once, reached from a named subject, is written in place; any other by its label.
-  const inlined = new Set<string>();
-  for (const [label, count] of named) {
-    if (count !== 1 || !bySubject.has(`_:${label}`)) continue;
-    const seen = new Set([label]);
-    let by = namedBy.get(label)!;
-    while (by.startsWith("_:") && named.get(by.slice(2)) === 1 && !seen.has(by.slice(2))) {
-      seen.add(by.slice(2));
-      by = namedBy.get(by.slice(2))!;
+  // A blank node another subject names once, reached from a named subject, is written in place, at most MAX_NESTING deep; any other by its label.
+  const level = new Map<string, number>();
+  for (const start of named.keys()) {
+    const path: string[] = [];
+    let label = start;
+    let above: number;
+    for (;;) {
+      const known = level.get(label);
+      if (known !== undefined) {
+        above = Math.max(known, 0);
+        break;
+      }
+      if (named.get(label) !== 1 || !bySubject.has(`_:${label}`)) {
+        level.set(label, 0);
+        above = 0;
+        break;
+      }
+      const by = namedBy.get(label)!;
+      if (!by.startsWith("_:")) {
+        level.set(label, 1);
+        above = 1;
+        break;
+      }
+      path.push(label);
+      level.set(label, -1);
+      label = by.slice(2);
     }
-    if (!by.startsWith("_:")) inlined.add(label);
+    for (const below of path.reverse()) {
+      above = above > 0 && above < MAX_NESTING ? above + 1 : 0;
+      level.set(below, above);
+    }
   }
+  const inlined = (label: string): boolean => (level.get(label) ?? 0) > 0;
   const used = new Set<string>();
   const iri = (value: string): string => {
     if (value === base) return "<>";
@@ -73,7 +98,7 @@ export function turtleOf(
   const object = (term: Term, depth: number): string => {
     if (term.termType === "NamedNode") return iri(term.value);
     if (term.termType === "BlankNode") {
-      return inlined.has(term.value)
+      return inlined(term.value)
         ? `[ ${predicates(bySubject.get(`_:${term.value}`)!, depth + 1).join(" ; ")} ]`
         : `_:${term.value}`;
     }
@@ -98,7 +123,7 @@ export function turtleOf(
   };
   const keys = [...new Set([...order.filter((key) => bySubject.has(key)), ...bySubject.keys()])];
   const blocks = keys
-    .filter((key) => !(key.startsWith("_:") && inlined.has(key.slice(2))))
+    .filter((key) => !(key.startsWith("_:") && inlined(key.slice(2))))
     .map(
       (key) =>
         `${key.startsWith("_:") ? key : iri(key)}\n    ${predicates(bySubject.get(key)!, 0).join(" ;\n    ")} .`,
