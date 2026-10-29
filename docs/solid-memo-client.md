@@ -99,7 +99,10 @@ Solid-OIDC's authorization-code flow on `oauth4webapi`
 ([oidcLogin.ts](../packages/solid-memo-client/src/oidcLogin.ts)):
 
 - **Discovery** reads the provider's
-  `/.well-known/openid-configuration`.
+  `/.well-known/openid-configuration`. A provider whose authorization,
+  token or registration endpoint is neither `https:` nor `http:` to
+  this machine is refused, as is one whose token endpoint is on another
+  origin than its issuer, before the browser is sent anywhere.
 - **The client** the app logs in as is its Client ID Document, when
   the page has one and the provider lists `webid` in
   `scopes_supported`. Otherwise the provider registers the app
