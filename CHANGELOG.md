@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.12](https://github.com/solid-memo/website/compare/v6.17.11...v6.17.12) (2026-10-29)
+
+### Bug Fixes
+
+* **shacl:** drop a document's rdfs:subClassOf statements before a check ([db7ea9a](https://github.com/solid-memo/website/commit/db7ea9a2871a70ab32a91746dd3b74ee489fc0dc))
+
 ## [6.17.11](https://github.com/solid-memo/website/compare/v6.17.10...v6.17.11) (2026-10-28)
 
 ### Bug Fixes
