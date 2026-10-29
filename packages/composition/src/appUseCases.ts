@@ -174,6 +174,7 @@ export function createAppUseCases({
   const podInstances = createSolidInstanceRepository({
     fetch: podFetch,
     dataFetch,
+    publicFetch: anonymousFetch,
     checkWrite,
     now,
     randomId,

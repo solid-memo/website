@@ -302,6 +302,17 @@ an instance, and publishing a release. A release a draft follows is
 read through `createOwnPodFetch`, which asks the same folders
 ([studio.md](studio.md#drafts)).
 
+For the profile and the type indexes, the profile's own places stand
+in for the gate
+([profilePlaces.ts](../packages/solid/src/profilePlaces.ts)): the
+WebID's origin, its document's, and the storages the profile names.
+A document the profile links (`rdfs:seeAlso`, `foaf:isPrimaryTopicOf`,
+`pim:preferencesFile`) is read as the user only in those places, and
+one anywhere else isn't read at all, nor taken as part of the profile.
+A type index outside them is read as no one, and nothing is written
+there: a profile whose index is on another server names that storage
+(`pim:storage`) for the app to use it.
+
 ## Further rules
 
 - UI components never import ports or adapters; they get `UseCases`,
