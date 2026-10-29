@@ -117,8 +117,8 @@ export function createSessionClient(): SessionClient {
 
     async logout() {
       setCurrentSession(null);
-      // After any refresh under way, so that it cannot store the session again.
-      await exclusively(clearSession);
+      // Without waiting for a refresh under way, which then cannot store the session again (refreshStored).
+      await clearSession();
     },
 
     // Looked up on every call: a fetch bound at wiring time would predate login.

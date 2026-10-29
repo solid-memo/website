@@ -57,8 +57,20 @@ export function isLoopbackHttp(url: URL): boolean {
   );
 }
 
+/** How long a request to the provider may take, in ms, before it is given up. */
+const REQUEST_TIMEOUT = 30_000;
+
+/**
+ * The options of a request to the provider: http: only to this machine,
+ * and a time limit, so that a provider that does not answer cannot keep
+ * a login, restore or refresh waiting, and the Web Lock a refresh holds
+ * (oidcSession.ts), forever.
+ */
 function requestOptions(url: string) {
-  return { [oauth.allowInsecureRequests]: isLoopbackHttp(new URL(url)) };
+  return {
+    [oauth.allowInsecureRequests]: isLoopbackHttp(new URL(url)),
+    signal: () => AbortSignal.timeout(REQUEST_TIMEOUT),
+  };
 }
 
 /**

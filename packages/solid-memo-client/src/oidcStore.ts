@@ -74,6 +74,33 @@ export async function saveSession(session: StoredSession): Promise<void> {
   await run(SESSIONS, "readwrite", (store) => store.put(session, CURRENT));
 }
 
+/**
+ * Stores `next` in place of `read`, the session as a refresh read it,
+ * only while that one is still stored: the same refresh token, WebID and
+ * issuer. One transaction, so nothing comes in between. False, and
+ * nothing written, once a logout cleared it or a login replaced it.
+ */
+export async function replaceSession(read: StoredSession, next: StoredSession): Promise<boolean> {
+  const database = await open();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(SESSIONS, "readwrite");
+    const store = transaction.objectStore(SESSIONS);
+    let replaced = false;
+    const current = store.get(CURRENT);
+    current.onsuccess = () => {
+      const stored = current.result as StoredSession | undefined;
+      replaced =
+        stored !== undefined &&
+        stored.refreshToken === read.refreshToken &&
+        stored.webId === read.webId &&
+        stored.issuer === read.issuer;
+      if (replaced) store.put(next, CURRENT);
+    };
+    transaction.oncomplete = () => resolve(replaced);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
 /** Forgets the session; the registrations stay, as they name the app, not the user. */
 export async function clearSession(): Promise<void> {
   await run(SESSIONS, "readwrite", (store) => store.delete(CURRENT));

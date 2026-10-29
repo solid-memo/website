@@ -9,6 +9,7 @@ import {
   clearSession,
   loadRegistration,
   loadSession,
+  replaceSession,
   saveRegistration,
   saveSession,
 } from "./oidcStore";
@@ -73,6 +74,54 @@ describe("the sign-in store", () => {
     await expect(loadSession()).resolves.not.toHaveProperty("refreshToken");
     await saveSession({ ...session, refreshToken: "r" });
     await expect(loadSession()).resolves.toHaveProperty("refreshToken", "r");
+  });
+
+  it("replaces the session a refresh read only while it is still stored", async () => {
+    const read = {
+      issuer: "https://idp.example/",
+      client: { client_id: "c" },
+      redirectUrl: "https://memo.example/",
+      keys: await generateKeyPair("ES256"),
+      webId: "https://alice.example/profile/card#me",
+      refreshToken: "r1",
+    };
+    const next = { ...read, refreshToken: "r2" };
+    await saveSession(read);
+    await expect(replaceSession(read, next)).resolves.toBe(true);
+    await expect(loadSession()).resolves.toHaveProperty("refreshToken", "r2");
+    // Another refresh token, WebID or issuer is another session now.
+    await expect(replaceSession(read, { ...read, refreshToken: "r3" })).resolves.toBe(false);
+    await saveSession({ ...next, webId: "https://bob.example/profile/card#me" });
+    await expect(replaceSession(next, next)).resolves.toBe(false);
+    await saveSession({ ...next, issuer: "https://other-idp.example/" });
+    await expect(replaceSession(next, next)).resolves.toBe(false);
+    // Logged out: nothing is stored again.
+    await clearSession();
+    await expect(replaceSession(next, next)).resolves.toBe(false);
+    await expect(loadSession()).resolves.toBeUndefined();
+  });
+
+  it("rejects a replacement the browser fails to write", async () => {
+    const read = {
+      issuer: "https://idp.example/",
+      client: { client_id: "c" },
+      redirectUrl: "https://memo.example/",
+      keys: await generateKeyPair("ES256"),
+      webId: "https://alice.example/profile/card#me",
+      refreshToken: "r1",
+    };
+    await saveSession(read);
+    vi.spyOn(IDBObjectStore.prototype, "put").mockImplementationOnce(function (
+      this: IDBObjectStore,
+      value,
+      key,
+    ) {
+      return this.add(value, key);
+    });
+    await expect(replaceSession(read, { ...read, refreshToken: "r2" })).rejects.toMatchObject({
+      name: "ConstraintError",
+    });
+    await expect(loadSession()).resolves.toHaveProperty("refreshToken", "r1");
   });
 
   it("rejects when the browser refuses to open the database, and tries again on the next call", async () => {
