@@ -32,6 +32,37 @@ export interface ShapeEngine {
 }
 
 const SH = "http://www.w3.org/ns/shacl#";
+const RDFS_SUB_CLASS_OF = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+
+/** Each document's checked copy, and the document's size when it was made. */
+const copies = new WeakMap<DatasetCore, { size: number; copy: DatasetCore }>();
+
+/**
+ * The data a check sees: `data` without its rdfs:subClassOf statements.
+ * The library follows them from a class to its subclasses, for sh:class
+ * and sh:targetClass, with no memory of the classes it has been to, so
+ * a cycle of them never ends and a few layers of them take exponential
+ * time. The data is the document checked, anyone's to write; the
+ * reference data checks run beside it states none (docs/validation.md).
+ * So a node is an instance of the classes its rdf:type names, and only
+ * those.
+ *
+ * A caller checks the subjects of one document one by one, so the copy is
+ * kept with the document it was made of, and made again only when the
+ * document's size changes: copying it once a subject would make a check
+ * as slow as the number of subjects times the number of statements.
+ */
+function checkedData(data: DatasetCore): DatasetCore {
+  const subClassOf = environment.namedNode(RDFS_SUB_CLASS_OF);
+  if (data.match(null, subClassOf).size === 0) return data;
+  const kept = copies.get(data);
+  if (kept !== undefined && kept.size === data.size) return kept.copy;
+  const copy = environment.dataset(
+    [...(data as Iterable<Quad>)].filter((q) => !q.predicate.equals(subClassOf)),
+  );
+  copies.set(data, { size: data.size, copy });
+  return copy;
+}
 
 /**
  * A dataset with every IRI (subjects, predicates, objects, graphs; not
@@ -136,7 +167,7 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
         // validateNode keeps adding to one report; start each check afresh.
         validator.validationEngine.initReport();
         const report = await validator.validateNode(
-          data,
+          checkedData(data),
           namedNode(focusNode),
           namedNode(shapeIri),
         );
@@ -145,7 +176,7 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
     validate: (data) =>
       oneAtATime(async () => {
         validator.validationEngine.initReport();
-        const report = await validator.validate(data);
+        const report = await validator.validate(checkedData(data));
         return report.results
           .map(
             (result): FocusedViolation => ({

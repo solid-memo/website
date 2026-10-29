@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { datasetFromTurtle } from "./testing/turtle";
 import type { Literal, Quad } from "@rdfjs/types";
 import { createEngine, mapIris, mergeDatasets } from "./engine";
+import { subclassCycle, subclassDiamond } from "./testing/subclassTangle";
 
 const SHAPES = `
 @prefix sh:  <http://www.w3.org/ns/shacl#> .
@@ -186,6 +187,88 @@ describe("createEngine", () => {
       DATA_URL,
     );
     expect(await e.validate(good)).toEqual([]);
+  });
+
+  describe.each([
+    ["a cycle of them", subclassCycle],
+    ["a diamond of them 30 layers deep", subclassDiamond],
+  ])("with a document's own rdfs:subClassOf statements, %s", (_, statements) => {
+    const EX = "https://example.com/ns#";
+    const tangle = statements(`${EX}Person`, (name) => `${EX}${name}`);
+    /** A subclass of ex:Person, by the document's statements. */
+    const sub = tangle[0][0];
+    /** The Turtle of a document: `turtle`, and the statements under ex:Person. */
+    const tangled = (turtle: string) =>
+      [turtle, ...tangle.map(([s, p, o]) => `<${s}> <${p}> <${o}> .`)].join("\n");
+
+    it("checks a node's class by its own types alone, without following them", async () => {
+      const e = createEngine(
+        await datasetFromTurtle(
+          `@prefix sh: <http://www.w3.org/ns/shacl#> .
+           <#person> a sh:NodeShape ; sh:class <${EX}Person> .`,
+          SHAPES_URL,
+        ),
+      );
+      const data = await datasetFromTurtle(
+        tangled(`<#a> a <${EX}Person> . <#b> a <${sub}> .`),
+        DATA_URL,
+      );
+      expect(await e.validateNode(data, `${DATA_URL}#a`, `${SHAPES_URL}#person`)).toEqual([]);
+      expect(await e.validateNode(data, `${DATA_URL}#b`, `${SHAPES_URL}#person`)).toEqual([
+        expect.objectContaining({ constraint: "Class", value: `${DATA_URL}#b` }),
+      ]);
+    }, 10_000);
+
+    it("targets a class's own instances alone, without following them, and leaves the document as it was", async () => {
+      const e = createEngine(
+        await datasetFromTurtle(
+          `@prefix sh: <http://www.w3.org/ns/shacl#> .
+           <#person> a sh:NodeShape ; sh:targetClass <${EX}Person> ;
+               sh:property [ sh:path <${EX}name> ; sh:minCount 1 ] .`,
+          SHAPES_URL,
+        ),
+      );
+      const data = await datasetFromTurtle(
+        tangled(`<#a> a <${EX}Person> . <#b> a <${sub}> .`),
+        DATA_URL,
+      );
+      expect((await e.validate(data)).map((v) => [v.focusNode, v.constraint])).toEqual([
+        [`${DATA_URL}#a`, "MinCount"],
+      ]);
+      expect(data.size).toBe(tangle.length + 2);
+    }, 10_000);
+  });
+
+  it("copies a document without its rdfs:subClassOf statements once for all its subjects, and again once it changes", async () => {
+    const EX = "https://example.com/ns#";
+    const e = createEngine(
+      await datasetFromTurtle(
+        `@prefix sh: <http://www.w3.org/ns/shacl#> .
+         <#person> a sh:NodeShape ; sh:class <${EX}Person> .`,
+        SHAPES_URL,
+      ),
+    );
+    const subjects = Array.from({ length: 200 }, (_, i) => `${DATA_URL}#p${i}`);
+    const data = await datasetFromTurtle(
+      [
+        `<${EX}Student> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <${EX}Person> .`,
+        ...subjects.map((s) => `<${s}> a <${EX}Person> .`),
+        `<#s> a <${EX}Student> .`,
+      ].join("\n"),
+      DATA_URL,
+    );
+    const copied = vi.spyOn(data as Iterable<Quad>, Symbol.iterator);
+    for (const subject of subjects) {
+      expect(await e.validateNode(data, subject, `${SHAPES_URL}#person`)).toEqual([]);
+    }
+    expect(copied).toHaveBeenCalledTimes(1);
+    const student = `${DATA_URL}#s`;
+    expect(await e.validateNode(data, student, `${SHAPES_URL}#person`)).toEqual([
+      expect.objectContaining({ constraint: "Class" }),
+    ]);
+    for (const q of await datasetFromTurtle(`<#s> a <${EX}Person> .`, DATA_URL)) data.add(q);
+    expect(await e.validateNode(data, student, `${SHAPES_URL}#person`)).toEqual([]);
+    expect(copied).toHaveBeenCalledTimes(2);
   });
 });
 

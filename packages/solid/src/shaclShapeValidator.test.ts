@@ -29,6 +29,7 @@ import type { ShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { DECKS, draftPod, INSTANCE, quadsOfTurtle } from "./testing/releaseDrafts";
+import { subclassCycle, subclassDiamond } from "@solid-memo/shacl/testing/subclassTangle";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -66,6 +67,34 @@ function withBlankMember(dataset: Dataset, catalog: string, label: string): Data
       object: term("NamedNode", DCAT.Dataset),
       graph,
     },
+  ];
+  return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+}
+
+/**
+ * rdfs:subClassOf statements a document may make under a deck's classes
+ * (sm:Deck, which Solid Memo's shapes ask of a deck, and dcat:Dataset,
+ * which DCAT-AP targets): a cycle and a diamond 30 layers deep under each.
+ */
+function subclassStatements(iri: (name: string) => string): [string, string, string][] {
+  return [SM.Deck, DCAT.Dataset].flatMap((cls, i) => [
+    ...subclassCycle(cls, (name) => iri(`c${i}-${name}`)),
+    ...subclassDiamond(cls, (name) => iri(`c${i}-${name}`)),
+  ]);
+}
+
+/** The dataset with these statements of IRIs added. */
+function withStatements(dataset: Dataset, statements: [string, string, string][]): Dataset {
+  const term = (termType: string, value: string) => ({ termType, value });
+  const graph = term("DefaultGraph", "");
+  const quads = [
+    ...toRdfJsDataset(dataset),
+    ...statements.map(([s, p, o]) => ({
+      subject: term("NamedNode", s),
+      predicate: term("NamedNode", p),
+      object: term("NamedNode", o),
+      graph,
+    })),
   ];
   return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
 }
@@ -879,6 +908,70 @@ describe("createShaclShapeValidator", () => {
       ]);
     });
 
+    it("stays bounded over a document's own rdfs:subClassOf statements, in a write and a document's check alike", async () => {
+      const draft = setThing(
+        datasetFrom(DOC),
+        buildThing(createThing({ url: DOC }))
+          .addIri(RDF.type, SM.Deck)
+          .addIri(RDF.type, DCAT.Dataset)
+          .addInteger(SM.formatVersion, 1)
+          .addIri(SM.studyDirection, SM.frontToBack)
+          .build(),
+      );
+      const tangled = withStatements(
+        draft,
+        subclassStatements((name) => `${DOC}#${name}`),
+      );
+      await expect(validator.checkSubjects(tangled, [DOC], "draft")).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(tangled, [DOC], "pod")).rejects.toThrow(
+        `<${DOC}> (${DCTERMS.title}):`,
+      );
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(tangled as never);
+      const checked = async (as?: "draft" | "library") =>
+        (await validator.validateDocument(DOC, as)).subjects.filter(
+          (subject) => subject.status === "checked",
+        );
+      expect(await checked("draft")).toEqual([
+        expect.objectContaining({ shape: "draftDeck", violations: [] }),
+      ]);
+      const asPod = await checked();
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(draft);
+      expect(asPod).toEqual(await checked());
+    }, 10_000);
+
+    it("checks a release from a link as it would without the release's own rdfs:subClassOf statements", async () => {
+      const release = "https://alice.example/releases/capitals/v1.ttl";
+      const plain = setThing(
+        datasetFrom(release),
+        buildThing(createThing({ url: release }))
+          .addIri(RDF.type, SM.Deck)
+          .addIri(RDF.type, DCAT.Dataset)
+          .addInteger(SM.formatVersion, 6)
+          .build(),
+      );
+      const checked = async (dataset: Dataset) => {
+        vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset as never);
+        return (await validator.validateDocument(release, "library")).subjects.filter(
+          (subject) => subject.status === "checked",
+        );
+      };
+      const expected = await checked(plain);
+      expect(expected).toEqual([
+        expect.objectContaining({
+          shape: "libraryDeck",
+          violations: expect.arrayContaining([expect.anything()]),
+        }),
+      ]);
+      expect(
+        await checked(
+          withStatements(
+            plain,
+            subclassStatements((name) => `${release}#${name}`),
+          ),
+        ),
+      ).toEqual(expected);
+    }, 10_000);
+
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(
         setThing(
@@ -979,6 +1072,27 @@ describe("validateRelease", () => {
       constraint: "Class",
       builtIn: true,
     });
+  }, 60_000);
+
+  it("checks a draft as it would without the draft's own rdfs:subClassOf statements", async () => {
+    const draft = courseDraft();
+    const tangle = subclassStatements(of);
+    const tangled = {
+      ...draft,
+      triples: [
+        ...draft.triples,
+        ...tangle.map(([subject, predicate, object]) => ({
+          subject,
+          predicate,
+          object: { kind: "iri" as const, value: object },
+        })),
+      ],
+    };
+    const classes = new Set(tangle.map(([subject]) => subject));
+    const found = await validator.validateRelease(tangled, draft.url);
+    expect(found.filter((p) => !classes.has(p.subject))).toEqual(
+      await validator.validateRelease(draft, draft.url),
+    );
   }, 60_000);
 
   it("names a date of the release its readers cannot read as an error, and a value no date-time at all once", async () => {

@@ -143,6 +143,13 @@ flowchart LR
   dynamically when a validation is asked for. It validates one focus
   node against one node shape (`validateNode`), so no `sh:targetClass`
   is needed.
+- The engine drops the data's `rdfs:subClassOf` statements before a
+  check. The library follows them from a class to its subclasses for
+  `sh:class` and `sh:targetClass` without bound, and the data is the
+  document checked, which anyone may write. So a node is an instance of
+  the classes its `rdf:type` names, and only those. No reference data
+  states `rdfs:subClassOf`, and the
+  [CI cross-check](#the-ci-cross-check) refuses a document that does.
 - One engine per shape document is shared by every document checked
   against it. It runs one check at a time: the library keeps a single
   report per validator, so two documents checked together would mix up
