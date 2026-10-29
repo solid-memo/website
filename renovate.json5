@@ -186,6 +186,18 @@
             matchUpdateTypes: ['digest'],
             automerge: false,
         },
+        // An action runs in the workflows' jobs, and some of those hold the
+        // deploy key and other secrets (docs/releasing.md#the-deploy-key):
+        // a person merges every update to one, after reading what it
+        // changes (GOVERNANCE.md#dependency-updates). A new digest under
+        // the same version means its tag was moved, the case pinning to a
+        // commit is for, and the 3-day wait cannot tell, since the date
+        // Renovate reads comes with the tag. scripts/renovateConfig.test.ts
+        // checks that no rule merges one on its own.
+        {
+            matchManagers: ['github-actions'],
+            automerge: false,
+        },
         // A tool a workflow downloads is checked against the hash its
         // update writes, and that hash is read from the same release as
         // the file: a person merges the update, after reading the release.

@@ -466,7 +466,8 @@ the repository's `.npmrc` files set npm's `min-release-age` to 3 days,
 and its `uv.toml` sets uv's `exclude-newer` to 3 days. Every action
 the workflows use is pinned to a commit, since a tag can be moved
 (`npm run check:actions`,
-[testing.md](testing.md#the-repositorys-own-checks)). The archive isn't
+[testing.md](testing.md#the-repositorys-own-checks)), and a person
+merges each update to one, which Renovate leaves waiting. The archive isn't
 built in a separate job without the key and attached with the run's
 token: semantic-release would then publish the release before its
 archive existed, and the deploy would serve the version without its

@@ -156,8 +156,12 @@ maintainer locks it by hand, after reading what it changes. npm's
 what it needs; so does uv's `--exclude-newer-package=<package>=false`,
 which the maintainer then takes out of the command the `.txt` records
 at its top. The workflows' actions
-are pinned to a commit, not a tag, which their owners could move, and
-Renovate updates them as it does every other dependency. Renovate
+are pinned to a commit, not a tag, which their owners could move.
+Renovate proposes their updates, but a person merges each one, after
+reading what it changes, because the workflows' jobs run them, and some
+of those jobs hold the deploy key and other secrets. A new commit under
+an unchanged version means the action's tag was moved, and is never
+merged unread. Renovate
 cannot approve its own pull requests: once `main` requires an approving
 review, a maintainer approves each update, and Renovate merges it after
 that. The weekly Taxonomy workflow likewise proposes each new version of
