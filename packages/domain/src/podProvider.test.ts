@@ -9,7 +9,6 @@ import { isSecureUrl } from "./webId";
 describe("POD_PROVIDERS", () => {
   it("offers every suggested provider for creating a Pod", () => {
     expect(POD_PROVIDERS.map(({ id, signUpUrl }) => ({ id, signUpUrl }))).toEqual([
-      { id: "igrant", signUpUrl: "https://igrant.io/datapod.html" },
       {
         id: "solidcommunity",
         signUpUrl: "https://solidcommunity.net/.account/login/password/register/",

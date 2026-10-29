@@ -24,14 +24,10 @@ export interface PodProvider {
  * Issuers are the exact values each provider advertises in its
  * /.well-known/openid-configuration, which `npm run check:providers`
  * checks weekly, with each sign-up page (docs/testing.md#pod-providers).
+ * Each sends the `iss` parameter on its answers, without which the app
+ * refuses a login (docs/authentication.md#the-issuer-on-the-providers-answer).
  */
 export const POD_PROVIDERS: readonly PodProvider[] = [
-  {
-    id: "igrant",
-    name: "iGrant.io Data Pod",
-    oidcIssuer: "https://datapod.igrant.io",
-    signUpUrl: "https://igrant.io/datapod.html",
-  },
   {
     id: "solidcommunity",
     name: "solidcommunity.net",

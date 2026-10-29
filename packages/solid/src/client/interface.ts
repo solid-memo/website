@@ -167,6 +167,17 @@ export interface SessionClient {
    * failing that, restores the previous session, silently.
    */
   restore(): Promise<RestoredSession>;
+  /**
+   * The identity provider of the session restore() would restore
+   * silently, by sending the browser there; none without one.
+   */
+  sessionIssuer(): Promise<string | null>;
+  /**
+   * The identity provider the login request with this `state` went to,
+   * where restore() would redeem the code answering it; none for a
+   * request this client did not send, or no longer holds.
+   */
+  requestIssuer(state: string): Promise<string | null>;
   /** Sends the browser to the identity provider; does not return. */
   login(options: LoginOptions): Promise<void>;
   /** Ends the session. */

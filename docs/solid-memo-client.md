@@ -70,12 +70,12 @@ server already on port 4173, which may serve another build
 ([testing.md](testing.md#user-journeys)).
 
 Under the switch, the tests of the four Inrupt modules this client
-replaces (`packages/solid/src/client/{access,rdf,resources,session}.test.ts`)
+replaces (`packages/solid/src/client/{access,rdf,resources,session,session.library}.test.ts`)
 test what is the library's alone, and some fail. The rest of `solid`
 runs without them, as CI runs it:
 
 ```sh
-SOLID_CLIENT=solid-memo-client npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session}.test.ts'
+SOLID_CLIENT=solid-memo-client npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session,session.library}.test.ts'
 ```
 
 Turbo hashes `SOLID_CLIENT` (`globalEnv`) and `scripts/solidClient.ts`
@@ -109,6 +109,9 @@ Solid-OIDC's authorization-code flow on `oauth4webapi`
   (S256), a `state` and a `nonce`. A login asks with `prompt=consent`,
   which the Community Solid Server needs before it grants
   `offline_access`.
+- **The answer** must name its provider in `iss`, even when the
+  provider's metadata doesn't say it sends one
+  ([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
 - **The token request** trades the code for DPoP-bound tokens, and is
   sent once more when the provider asks for a DPoP nonce. The ID
   token's issuer, audience and nonce are checked. Its `webid` claim is
@@ -148,6 +151,11 @@ The session's requests are in
   stored session, `restore()` finds no one and asks the provider
   nothing. A provider that refuses the silent login ends the stored
   session only when it's still this provider's.
+- **`sessionIssuer()`** names the stored session's issuer, which the
+  gateway keeps before a silent restore leaves the page
+  ([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
+- **`requestIssuer(state)`** names the issuer of the request under way
+  in this tab when `state` is its state, and none otherwise.
 - **A request** carries `Authorization: DPoP` with the access token and
   a proof of its method and its URL. It's sent once more when the pod
   answers 401 asking for a DPoP nonce, if its body can be sent again.

@@ -66,6 +66,12 @@ export const ERROR_TEMPLATES = {
     "Your WebID profile does not say where you log in. Pick your provider instead of entering your WebID.",
   webIdIssuerNotHttps:
     "Your WebID profile names a place to log in that is not a secure https:// address. Pick your provider instead of entering your WebID.",
+  loginIssuerMissing:
+    "Your provider did not say which provider it is, so Solid Memo stopped the login for safety. Log in again, or pick another provider.",
+  loginIssuerMismatch:
+    "You came back from another provider than the one you logged in at, so Solid Memo stopped the login for safety. Log in again.",
+  loginNotStarted:
+    "Solid Memo did not start this login in this tab, so it stopped the login for safety. Log in again in this tab.",
   profileNoSubject:
     "Your profile does not describe you, so Solid Memo cannot note in it where your data is. Check your profile with your Pod provider, then try again.",
   privateTypeIndexNotLinked:

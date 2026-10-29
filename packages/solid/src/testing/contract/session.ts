@@ -20,6 +20,10 @@ export interface SessionHarness {
   returnFromLogin(webId: string): void;
   /** A session from before is there to restore silently, as `webId`, leaving `from` if given. */
   sessionToRestore(webId: string, from?: string): void;
+  /** A session from before, at `issuer`, is kept for a silent restore. */
+  sessionAt(issuer: string): void;
+  /** A login request to `issuer` is under way; gives its state. */
+  requestSentTo(issuer: string): string;
   /** Restoring fails with `error`. */
   failToRestore(error: Error): void;
   /** The session now fetches with `fetch`, and is `webId`'s (none: logged out). */
@@ -79,6 +83,31 @@ export function sessionContract(harness: SessionHarness): void {
       it("rejects when restoring fails", async () => {
         harness.failToRestore(new Error("boom"));
         await expect(harness.create().restore()).rejects.toThrow("boom");
+      });
+    });
+
+    describe("sessionIssuer", () => {
+      it("names the issuer of the session a silent restore would go to", async () => {
+        harness.sessionAt("https://issuer.example/");
+        await expect(harness.create().sessionIssuer()).resolves.toBe("https://issuer.example/");
+      });
+
+      it("names none when there is no session", async () => {
+        await expect(harness.create().sessionIssuer()).resolves.toBeNull();
+      });
+    });
+
+    describe("requestIssuer", () => {
+      it("names the issuer a login request went to, by its state", async () => {
+        const state = harness.requestSentTo("https://issuer.example/");
+        await expect(harness.create().requestIssuer(state)).resolves.toBe(
+          "https://issuer.example/",
+        );
+      });
+
+      it("names none for a state it sent no request with", async () => {
+        harness.requestSentTo("https://issuer.example/");
+        await expect(harness.create().requestIssuer("unknown")).resolves.toBeNull();
       });
     });
 

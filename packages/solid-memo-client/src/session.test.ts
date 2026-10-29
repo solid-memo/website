@@ -353,6 +353,14 @@ const harness: SessionHarness = {
       pendingReturn({ silentFrom: from });
     }
   },
+  sessionAt(issuer) {
+    storedSession(WEBID);
+    memory.session = { ...memory.session!, issuer };
+  },
+  requestSentTo(issuer) {
+    pendingReturn({ issuer, state: "state-1" });
+    return "state-1";
+  },
   failToRestore(error) {
     storedSession(WEBID, "refresh-0");
     provider.failure = error;
@@ -484,6 +492,28 @@ describe("createSessionClient, over oauth4webapi", () => {
     sendBack();
     window.history.replaceState(null, "", window.location.href.replace(/state=[^&]+/, "state=x"));
     await expect(createSessionClient().restore()).rejects.toThrow(/state/);
+  });
+
+  it("refuses a redirect back that does not name its provider, even from one that does not say it would", async () => {
+    provider.metadata = { authorization_response_iss_parameter_supported: undefined };
+    await createSessionClient().login(LOGIN);
+    sendBack();
+    window.history.replaceState(null, "", window.location.href.replace(/&iss=[^&]+/, ""));
+    await expect(createSessionClient().restore()).rejects.toThrow(/"iss" \(issuer\) missing/);
+    expect(provider.tokenRequests).toEqual([]);
+  });
+
+  it("refuses a redirect back that names another provider", async () => {
+    await createSessionClient().login(LOGIN);
+    sendBack();
+    const other = encodeURIComponent("https://other.example/");
+    window.history.replaceState(
+      null,
+      "",
+      window.location.href.replace(/iss=[^&]+/, `iss=${other}`),
+    );
+    await expect(createSessionClient().restore()).rejects.toThrow(/"iss"/);
+    expect(provider.tokenRequests).toEqual([]);
   });
 
   it("finds no one when the user declined at the provider", async () => {
