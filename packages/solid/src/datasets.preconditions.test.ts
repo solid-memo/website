@@ -172,24 +172,76 @@ describe("saving with preconditions", () => {
     );
   });
 
-  it("sends no If-Match for a weak ETag or none, nor for a dataset saved since it was read", async () => {
+  it("sends no If-Match for a weak ETag or none, saved again too", async () => {
     for (const etag of ['W/"v1"', null]) {
       const server = pod({ etag });
-      await saveDataset(DOC, edited(await readDataset(DOC, server.fetch)), server.fetch);
-      expect(server.writes[0]!.ifMatch).toBeNull();
+      const dataset = edited(await readDataset(DOC, server.fetch));
+      await saveDataset(DOC, dataset, server.fetch);
+      await saveDataset(DOC, dataset, server.fetch);
+      expect(server.writes.map((w) => w.ifMatch)).toEqual([null, null]);
     }
+  });
+
+  it("refuses, sending nothing, a dataset saved again once its read was written over, though the pod gives no new ETag", async () => {
     const server = pod();
     const dataset = edited(await readDataset(DOC, server.fetch));
     await saveDataset(DOC, dataset, server.fetch);
     server.changeElsewhere('"v2"');
-    await saveDataset(DOC, dataset, server.fetch);
-    expect(server.writes.map((w) => w.ifMatch)).toEqual(['"v1"', null]);
+    await expect(saveDataset(DOC, dataset, server.fetch)).rejects.toMatchObject({
+      url: DOC,
+      expected: "unchanged",
+    });
+    expect(server.writes.map((w) => w.ifMatch)).toEqual(['"v1"']);
+    // Read again, it saves.
+    await saveDataset(DOC, edited(await readDataset(DOC, server.fetch)), server.fetch);
+    expect(server.writes.map((w) => w.ifMatch)).toEqual(['"v1"', '"v2"']);
+  });
+
+  it("refuses a second edit from the same read once the document changed, sending nothing", async () => {
+    const server = pod({ written: "strong" });
+    const read = await readDataset(DOC, server.fetch);
+    const a = edited(read);
+    const b = setThing(
+      read,
+      buildThing(createThing({ url: `${DOC}#other` }))
+        .addStringNoLocale("https://example.com/ns#n", "3")
+        .build(),
+    );
+    await saveDataset(DOC, a, server.fetch, { whole: true });
+    server.changeElsewhere('"v2"');
+    const error = await saveDataset(DOC, b, server.fetch, { whole: true }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(PreconditionFailedError);
+    expect(error).toMatchObject({ url: DOC, expected: "unchanged" });
+    expect(server.writes).toEqual([
+      { method: "PUT", url: DOC, ifMatch: '"v1"', ifNoneMatch: null },
+    ]);
+    // So is the edit saved, saved again: only what was written is kept at the new version.
+    await expect(saveDataset(DOC, a, server.fetch)).rejects.toBeInstanceOf(PreconditionFailedError);
   });
 
   it("saves a dataset read from elsewhere as a creation at the new address", async () => {
     const server = pod();
     await saveDataset(NEW, await readDataset(DOC, server.fetch), server.fetch);
     expect(server.writes[0]).toMatchObject({ url: NEW, ifMatch: null, ifNoneMatch: "*" });
+  });
+
+  it("still saves and deletes a read saved elsewhere only if its document is as it was read", async () => {
+    const server = pod();
+    const read = await readDataset(DOC, server.fetch);
+    await saveDataset(NEW, read, server.fetch);
+    server.changeElsewhere('"v2"');
+    await expect(
+      saveDataset(DOC, edited(read), server.fetch, { whole: true }),
+    ).rejects.toMatchObject({ url: DOC, expected: "unchanged" });
+    await expect(deleteDataset(DOC, read, server.fetch)).rejects.toMatchObject({
+      url: DOC,
+      expected: "unchanged",
+    });
+    expect(server.writes).toEqual([
+      { method: "PUT", url: NEW, ifMatch: null, ifNoneMatch: "*" },
+      { method: "PUT", url: DOC, ifMatch: '"v1"', ifNoneMatch: null },
+      { method: "DELETE", url: DOC, ifMatch: '"v1"', ifNoneMatch: null },
+    ]);
   });
 
   it("writes an edit too large for one PATCH as one PUT of the whole document, still only if it is as it was read", async () => {
@@ -324,5 +376,24 @@ describe("deleting with preconditions", () => {
     });
     await deleteDataset(DOC, createSolidDataset(), again.fetch);
     expect(again.writes.at(-1)!.ifMatch).toBeNull();
+  });
+
+  it("refuses, sending nothing, a delete on a read that a save has since written over", async () => {
+    const server = pod({ written: "strong" });
+    const read = await readDataset(DOC, server.fetch);
+    await saveDataset(DOC, edited(read), server.fetch);
+    server.changeElsewhere('"v2"');
+    const error = await deleteDataset(DOC, read, server.fetch).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(PreconditionFailedError);
+    expect(error).toMatchObject({ url: DOC, expected: "unchanged" });
+    expect(server.writes.map((w) => w.method)).toEqual(["PATCH"]);
+    // Read again, it deletes on the version there.
+    await deleteDataset(DOC, await readDataset(DOC, server.fetch), server.fetch);
+    expect(server.writes.at(-1)).toEqual({
+      method: "DELETE",
+      url: DOC,
+      ifMatch: '"v2"',
+      ifNoneMatch: null,
+    });
   });
 });

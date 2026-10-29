@@ -54,10 +54,21 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
  * keeps the written dataset at that version, as a read keeps what it
  * read: a later edit of it sends `If-Match: <that ETag>`, and the next
  * read asks `If-None-Match` with it. Pods need not give the new ETag;
- * without one, a dataset saved is written again without `If-Match`, and
- * the next read downloads the document.
+ * without one, nothing is kept, and the next read downloads the document.
+ * Either way the read that write was conditional on is written over: a
+ * later save of a dataset from it (the one saved, or another edit of the
+ * same read) is refused with a PreconditionFailedError before anything
+ * is sent, as the pod would refuse its If-Match, and so is a delete
+ * made on it. A read saved to another address is not written over: an
+ * edit or delete of it where it was read still sends its `If-Match`.
+ * A read without a strong ETag has no precondition to lose:
+ * an edit of it is still written, again and again, without `If-Match`,
+ * and it is still deleted without one.
  */
 const ETAGS = new WeakMap<object, string>();
+
+/** The source keys of reads that a save on their ETag has since written over (see above). */
+const WRITTEN_OVER = new WeakSet<object>();
 
 /** The pod refused a write because the document is not as Solid Memo last saw it. */
 export class PreconditionFailedError extends AppError {
@@ -248,6 +259,8 @@ export async function saveDataset<T extends Dataset>(
 ): Promise<void> {
   const source = sourceOf(dataset);
   const isEdit = source !== undefined && source.url === url;
+  // A dataset from a read since written over (the same, or another edit of it) is not what the document holds.
+  if (isEdit && WRITTEN_OVER.has(source.key)) throw new PreconditionFailedError(url, "unchanged");
   const etag = isEdit ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   let written: Awaited<ReturnType<typeof writeDocument>>;
@@ -258,7 +271,11 @@ export async function saveDataset<T extends Dataset>(
       throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
     throw error;
   }
-  if (source !== undefined) ETAGS.delete(source.key);
+  // A save elsewhere leaves the read as it was: the document it was read from still holds it.
+  if (isEdit) {
+    ETAGS.delete(source.key);
+    if (etag !== undefined) WRITTEN_OVER.add(source.key);
+  }
   // Only where a precondition held does the document hold just what was written.
   const version = strong(written.etag);
   if (version === undefined || (isEdit && etag === undefined)) return;
@@ -273,14 +290,21 @@ export function isReadFrom(dataset: object, url: string): boolean {
   return sourceOf(dataset)?.url === url;
 }
 
-/** Delete a document read before, only if it is unchanged since (If-Match). */
+/**
+ * Delete a document read before, only if it is unchanged since (If-Match).
+ * A read a save has since written over is refused, sending nothing, as a
+ * save of it is; one without a strong ETag is deleted without If-Match.
+ */
 export async function deleteDataset(
   url: string,
   dataset: Dataset,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   const source = sourceOf(dataset);
-  const etag = source?.url === url ? strong(ETAGS.get(source.key)) : undefined;
+  const isRead = source !== undefined && source.url === url;
+  // A read since written over is not what the document holds: deleting on it is refused as a save is.
+  if (isRead && WRITTEN_OVER.has(source.key)) throw new PreconditionFailedError(url, "unchanged");
+  const etag = isRead ? strong(ETAGS.get(source.key)) : undefined;
   forgetRead(url, fetch);
   try {
     await deleteSolidDataset(url, { fetch, ifMatch: etag });
