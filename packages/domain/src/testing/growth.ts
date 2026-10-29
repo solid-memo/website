@@ -45,6 +45,39 @@ export function growth(
   return slow / fast;
 }
 
+/**
+ * growth for work that awaits (an adapter's check over an engine that
+ * answers at once): the same two runs, each timed from its start until
+ * its promise settles. Nothing else may run meanwhile, as in a test.
+ */
+export async function growthAsync(
+  prepare: (size: number) => () => Promise<unknown>,
+  size: number,
+  times: number,
+): Promise<number> {
+  const small = prepare(size);
+  const large = prepare(size * times);
+  const smalls = async () => {
+    for (let time = 0; time < times; time++) await small();
+  };
+  await small();
+  let fast = Infinity;
+  let slow = Infinity;
+  for (let round = 0; round < 5; round++) {
+    fast = Math.min(fast, await cpuTimeAsync(smalls));
+    slow = Math.min(slow, await cpuTimeAsync(large));
+  }
+  return slow / fast;
+}
+
+/** The CPU time `work` takes until its promise settles, in microseconds. */
+async function cpuTimeAsync(work: () => Promise<unknown>): Promise<number> {
+  const started = process.cpuUsage();
+  await work();
+  const { user, system } = process.cpuUsage(started);
+  return user + system;
+}
+
 /** The CPU time `work` takes, in microseconds. */
 function cpuTime(work: () => unknown): number {
   const started = process.cpuUsage();
