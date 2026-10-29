@@ -128,9 +128,10 @@ CI's `commits` job lints a pull request's commits with commitlint
 `npm run lint:commits` lints your branch's before you push. Both check
 that every commit has a body and names its issue, and both refuse a
 merge commit, which commitlint does not lint: update your branch by
-rebasing it on `main`. `npm run lint:commits` lints the commits since
-`origin/main`, so from a fork, sync the fork's `main` with this
-repository's first, or run
+rebasing it on `main`. They refuse a `chore(release)` header too: it
+is semantic-release's, for the release commit it makes on `main`.
+`npm run lint:commits` lints the commits since `origin/main`, so from a
+fork, sync the fork's `main` with this repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the
 remote that names this repository.
 

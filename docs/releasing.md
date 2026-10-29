@@ -501,11 +501,22 @@ that passes CI tries again.
 - **The release commit is on `main`, but not its tag** (the tag's push
   failed): every run of the workflow stops with an error that names the
   commit until it's tagged. That stops semantic-release from releasing
-  the same version again on top of it. The maintainer tags it by hand,
-  then makes its GitHub release as below:
+  the same version again on top of it. Only a commit semantic-release
+  made counts (`npm run release:commit`,
+  [releaseCommit.ts](../scripts/releaseCommit.ts)): one on `main`'s
+  first-parent chain, by `github-actions[bot]` as author and committer,
+  that changes only the version's files. A commit that's only titled
+  `chore(release)`, such as one inside a merged pull request, is passed
+  over with a notice, and CI's `commits` job refuses that title in a
+  pull request. Before tagging, the maintainer checks that the commit
+  the error names is semantic-release's, then tags it by hand and makes
+  its GitHub release as below:
 
   ```sh
   git switch main && git pull
+  git log -1 --format='%an / %cn' <release-commit>  # github-actions[bot] / github-actions[bot]
+  git rev-list --first-parent main | grep -x "$(git rev-parse <release-commit>)"
+  git diff --name-only <release-commit>^ <release-commit>  # only the version's files
   git tag vX.Y.Z <release-commit>
   git push origin vX.Y.Z
   ```
@@ -514,8 +525,8 @@ that passes CI tries again.
   release is made, the maintainer runs the deploy by hand (Actions ›
   Deploy to GitHub Pages › Run workflow, from `main`), which deploys the
   new tag's version. It fails if the tag names any commit but
-  `chore(release): X.Y.Z` or the GitHub release is missing
-  ([deployment.md](deployment.md)).
+  semantic-release's `chore(release): X.Y.Z` on `main`, or the GitHub
+  release is missing ([deployment.md](deployment.md)).
 
 - **CI failed on the release commit**: the version is released but not
   deployed. When the run reused the parent's, one of these jobs failed

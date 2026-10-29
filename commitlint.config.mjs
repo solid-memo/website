@@ -34,6 +34,13 @@
  * issue may describe what it fixes, so it names its GitHub security
  * advisory instead (`Refs: GHSA-xxxx-xxxx-xxxx`), which is published
  * once the fix is deployed.
+ *
+ * A `chore(release)` header is semantic-release's alone, on the release
+ * commit it pushes onto main (docs/releasing.md#what-a-release-does), so
+ * a commit of a pull request or a branch may not have it. commitlint
+ * would skip a header such as `chore(release): 1.2.3` unlinted, as one of
+ * its default ignores takes a version for a release's, so its other
+ * defaults are kept but that one.
  */
 
 /** The start of the line commitBody in renovate.json5 ends each Renovate commit with. */
@@ -59,14 +66,61 @@ function referencesOrRenovate({ references, raw }) {
   ];
 }
 
+/**
+ * The header semantic-release titles its release commit with
+ * (release.config.mjs), in any case and with or without a `!`.
+ *
+ * @param {{ header: string | null }} commit
+ */
+function notARelease({ header }) {
+  return [
+    !/^chore\(release\)/i.test(header ?? ""),
+    "the header `chore(release)` is semantic-release's, for the release commit it makes on main: use another type or scope (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
+ * commitlint's default ignores (@commitlint/is-ignored), but a header
+ * that is a version: merges, which CI and `npm run lint:commits` refuse
+ * on their own, reverts, reapplies, and fixups. They are matched against
+ * the header alone, so a line of the body cannot make a commit skip
+ * every rule.
+ */
+const IGNORED = [
+  /^((Merge pull request)|(Merge (.*?) into (.*?)|(Merge branch (.*?)))$)/,
+  /^(Merge tag (.*?))$/,
+  /^(R|r)evert (.*)/,
+  /^(R|r)eapply (.*)/,
+  /^(amend|fixup|squash)!/,
+  /^(Merged (.*?)(in|into) (.*)|Merged PR (.*): (.*))/,
+  /^Merge remote-tracking branch(\s*)(.*)/,
+  /^Automatic merge(.*)/,
+  /^Auto-merged (.*?) into (.*)/,
+];
+
 export default {
+  defaultIgnores: false,
+  ignores: [
+    (/** @type {string} */ message) => {
+      const header = message.split(/\r?\n/, 1)[0];
+      return IGNORED.some((pattern) => pattern.test(header));
+    },
+  ],
   extends: ["@commitlint/config-conventional"],
-  plugins: [{ rules: { "references-or-renovate": referencesOrRenovate } }],
+  plugins: [
+    {
+      rules: {
+        "references-or-renovate": referencesOrRenovate,
+        "not-a-release": notARelease,
+      },
+    },
+  ],
   rules: {
     "body-max-line-length": [0],
     "footer-max-line-length": [0],
     "breaking-change-exclamation-mark": [2, "always"],
     "body-empty": [2, "never"],
     "references-or-renovate": [2, "always"],
+    "not-a-release": [2, "always"],
   },
 };

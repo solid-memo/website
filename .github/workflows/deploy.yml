@@ -99,12 +99,24 @@ jobs:
             exit 0
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      # Node, for the next step's script, which imports no package; not
+      # npm's cache, as nothing is installed.
+      - if: steps.tag.outputs.tag != ''
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
       # The tag alone does not make a release: it must be the newest
       # version on main, so a re-run of CI or of this workflow on an older
       # release commit cannot put that version back; its commit must be
-      # the release commit of that version, so a tag put on another commit
-      # by hand is not deployed; and its GitHub release must be made, so
-      # the site never runs a version the releases page does not list.
+      # the release commit of that version, one semantic-release made
+      # (npm run release:commit, scripts/releaseCommit.ts: on main's
+      # first-parent chain, its subject the version's, by
+      # github-actions[bot], changing only the files a release writes), so
+      # a tag put on another commit by hand, such as a pull request's
+      # commit titled as a release, is not deployed; and its GitHub
+      # release must be made, so the site never runs a version the
+      # releases page does not list.
       # semantic-release makes the release seconds after it pushes the
       # tag, so it is looked for a few times. A version that is not the
       # newest is a notice; anything else fails the run, as it should not
@@ -124,12 +136,8 @@ jobs:
             echo "::notice::$TAG is not the newest version on main (${newest:-none} is), so the site is not deployed (docs/deployment.md)."
             exit 0
           fi
+          RELEASE_MAIN=FETCH_HEAD npm run release:commit -- tag "$TAG"
           sha=$(git rev-list -n 1 "$TAG")
-          subject=$(git log -1 --format=%s "$sha")
-          if [ "$subject" != "chore(release): ${TAG#v}" ]; then
-            echo "::error::$TAG names $sha, which is not its release commit (chore(release): ${TAG#v}), so the site is not deployed (docs/releasing.md#when-a-release-fails)."
-            exit 1
-          fi
           for _ in 1 2 3 4 5 6; do
             draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || true)
             [ "$draft" = false ] && break

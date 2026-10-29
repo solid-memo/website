@@ -26,6 +26,8 @@ async function errors(message: string): Promise<string[]> {
   const result = await lint(message, config.rules, {
     parserOpts: config.parserPreset?.parserOpts as object,
     plugins: config.plugins,
+    defaultIgnores: config.defaultIgnores,
+    ignores: config.ignores,
   });
   return result.errors.map(({ name }) => name);
 }
@@ -81,6 +83,36 @@ describe("commitlint.config.mjs", () => {
     expect(await errors(`fix: keep the deck's title\n\n${why}\n\nRefs: none`)).toEqual([
       "references-or-renovate",
     ]);
+  });
+
+  // semantic-release's own commit is made on main, never in a pull
+  // request, and its title alone made a commit count as a release.
+  it("fails a commit titled as semantic-release's release commit", async () => {
+    for (const header of [
+      "chore(release): 6.17.21",
+      "chore(release)!: 7.0.0",
+      "CHORE(Release): 6.17.21",
+    ]) {
+      expect(await errors(`${header}\n\nBump the version.\n\nRefs: #1`)).toContain("not-a-release");
+    }
+    // The ignores read the header alone, so a body line like a merge's
+    // does not skip the commit.
+    for (const line of ["Merge branch x", "Merge tag x", "Merge x into y"]) {
+      expect(
+        await errors(`chore(release): 6.17.21\n\nBump the version.\n\n${line}\n\nRefs: #1`),
+      ).toContain("not-a-release");
+    }
+    expect(await errors("Merge branch x\n\nchore(release): 6.17.21")).toEqual([]);
+    expect(await errors(`chore(releases): tidy the notes\n\n${why}\n\nRefs: #1`)).toEqual([]);
+    expect(await errors(`fix(release): chore(release) is refused\n\n${why}\n\nRefs: #1`)).toEqual(
+      [],
+    );
+  });
+
+  it("still skips a revert and a fixup, as commitlint does by default", async () => {
+    expect(await errors('Revert "fix: keep the deck\'s title"')).toEqual([]);
+    expect(await errors("fixup! fix: keep the deck's title")).toEqual([]);
+    expect(await errors("chore: 1.2.3")).toContain("body-empty");
   });
 
   it("passes a Renovate update, which cannot name its pull request", async () => {

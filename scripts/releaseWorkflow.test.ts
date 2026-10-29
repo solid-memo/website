@@ -79,6 +79,43 @@ describe("release.yml", () => {
   });
 });
 
+// Any commit can be titled chore(release), and a pull request's commits
+// stay in main's history, so a release commit is told apart by
+// scripts/releaseCommit.ts, not by its subject (docs/releasing.md#when-a-release-fails).
+describe("the release commit's checks", () => {
+  const releaseJob = steps(workflow.get("release") ?? "", 6);
+  const version = steps(jobs(read(".github/workflows/deploy.yml")).get("version") ?? "", 6);
+  const at = (job: string[], text: string) => job.findIndex((step) => step.includes(text));
+
+  it("find the last release in release.yml with the script, after Node is set up", () => {
+    const tip = at(releaseJob, "name: CI passed on main's tip");
+    expect(releaseJob[tip]).toMatch(/^ {10}npm run release:commit -- last$/m);
+    expect(releaseJob[tip]).not.toContain("git log");
+    expect(at(releaseJob, "uses: actions/setup-node@")).toBeLessThan(tip);
+    expect(at(releaseJob, "uses: actions/setup-node@")).toBeGreaterThan(
+      at(releaseJob, "uses: actions/checkout@"),
+    );
+  });
+
+  it("check the tag's commit in deploy.yml with the script, against origin/main", () => {
+    const checked = at(version, "name: The tag is the newest release");
+    expect(version[checked]).toMatch(
+      /^ {10}RELEASE_MAIN=FETCH_HEAD npm run release:commit -- tag "\$TAG"$/m,
+    );
+    expect(version[checked]).not.toContain("git log");
+    expect(version[checked].indexOf("git fetch --force --quiet origin main")).toBeLessThan(
+      version[checked].indexOf("npm run release:commit"),
+    );
+    expect(version[checked].indexOf("npm run release:commit")).toBeLessThan(
+      version[checked].indexOf('echo "sha=$sha"'),
+    );
+    const setup = at(version, "uses: actions/setup-node@");
+    expect(setup).toBeGreaterThan(-1);
+    expect(setup).toBeLessThan(checked);
+    expect(version[setup]).toMatch(/^\s+package-manager-cache: false$/m);
+  });
+});
+
 describe.each([
   [".github/workflows/ci.yml", "site"],
   [".github/workflows/deploy.yml", "build"],
