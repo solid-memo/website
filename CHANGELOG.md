@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.20](https://github.com/solid-memo/website/compare/v6.17.19...v6.17.20) (2026-10-29)
+
+### Bug Fixes
+
+* **solid:** complete only a login redirect this tab set off ([2b12f64](https://github.com/solid-memo/website/commit/2b12f64c693cb0d1d42f65c20e037c9dc1473623))
+* **studio:** stop the graph's settling as the graph goes ([275a8f7](https://github.com/solid-memo/website/commit/275a8f708398296eed73eab4aa2c88ecad708112)), closes [#375](https://github.com/solid-memo/website/issues/375) [#375](https://github.com/solid-memo/website/issues/375)
+
 ## [6.17.19](https://github.com/solid-memo/website/compare/v6.17.18...v6.17.19) (2026-10-29)
 
 ### Bug Fixes
