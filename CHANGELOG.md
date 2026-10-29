@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.16](https://github.com/solid-memo/website/compare/v6.17.15...v6.17.16) (2026-10-29)
+
+### Bug Fixes
+
+* **domain:** group cards that say the same without copying the groups ([9c45c5e](https://github.com/solid-memo/website/commit/9c45c5e7be15b460be1c0e9bea62ef80dc930ebe))
+* **studio:** bound how deep the graph view hangs a node ([9ba838f](https://github.com/solid-memo/website/commit/9ba838f8e865f652dea2dc3f55796f473268ede1))
+* **ui:** show a pod address as the link reads it and refuse user@ ([fbeed07](https://github.com/solid-memo/website/commit/fbeed071ff3641ea11d943f045fffffc5369cc2e))
+
 ## [6.17.15](https://github.com/solid-memo/website/compare/v6.17.14...v6.17.15) (2026-10-29)
 
 ### Bug Fixes
