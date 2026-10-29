@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.13](https://github.com/solid-memo/website/compare/v6.17.12...v6.17.13) (2026-10-29)
+
+### Bug Fixes
+
+* **ci:** build the deployed site without the Actions cache ([ff4261b](https://github.com/solid-memo/website/commit/ff4261b1172bbfc041ce39243a073aead90e5eb6))
+* **decks:** check the taxonomy's ids and times before writing them ([dc24d64](https://github.com/solid-memo/website/commit/dc24d6481664be1bdda3de29ae0e5eda0e9f3366))
+
 ## [6.17.12](https://github.com/solid-memo/website/compare/v6.17.11...v6.17.12) (2026-10-29)
 
 ### Bug Fixes
