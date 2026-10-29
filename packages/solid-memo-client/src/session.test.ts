@@ -885,6 +885,46 @@ describe("createSessionClient, over oauth4webapi", () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["authorization endpoint", { authorization_endpoint: "javascript:alert(1)//" }],
+    ["authorization endpoint", { authorization_endpoint: "not a URL" }],
+    ["authorization endpoint", { authorization_endpoint: "http://idp.example/authorize" }],
+    ["token endpoint", { token_endpoint: "http://idp.example/token" }],
+    ["registration endpoint", { registration_endpoint: "data:text/plain,register" }],
+  ])(
+    "refuses a provider whose %s is neither https: nor on this machine",
+    async (name, metadata) => {
+      provider.metadata = metadata;
+      await expect(createSessionClient().login(LOGIN)).rejects.toThrow(
+        `${ISSUER}'s ${name} is neither https: nor on this machine`,
+      );
+      expect(navigate).not.toHaveBeenCalled();
+      expect(provider.registrations).toEqual([]);
+    },
+  );
+
+  it("refuses a provider whose token endpoint is on another origin", async () => {
+    provider.metadata = { token_endpoint: "https://elsewhere.example/token" };
+    await expect(createSessionClient().login(LOGIN)).rejects.toThrow(
+      `${ISSUER}'s token endpoint is on another origin`,
+    );
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("sends the browser to an authorization endpoint over http: on this machine", async () => {
+    provider.metadata = { authorization_endpoint: "http://localhost:3000/authorize" };
+    await createSessionClient().login(LOGIN);
+    const url = new URL(vi.mocked(navigate).mock.lastCall?.[0] ?? "");
+    expect(url.origin + url.pathname).toBe("http://localhost:3000/authorize");
+  });
+
+  it("restores no session from a provider that now names an endpoint a login refuses", async () => {
+    storedSession(WEBID, "refresh-0");
+    provider.metadata = { token_endpoint: "https://elsewhere.example/token" };
+    await expect(createSessionClient().restore()).rejects.toThrow(/another origin/);
+    expect(provider.tokenRequests).toEqual([]);
+  });
+
   it("refuses tokens that come without an ID token", async () => {
     provider.idToken = false;
     await expect(logIn()).rejects.toThrow(/id_token/);

@@ -61,14 +61,38 @@ function requestOptions(url: string) {
   return { [oauth.allowInsecureRequests]: isLoopbackHttp(new URL(url)) };
 }
 
-/** The provider's metadata, from its /.well-known/openid-configuration. */
+/**
+ * Refuses an endpoint the provider's metadata names that is not
+ * `https:`, or `http:` to this machine: the browser is sent to the
+ * authorization endpoint, and the app's requests go to the others.
+ */
+function checkEndpoint(issuer: string, name: string, endpoint: string | undefined): void {
+  if (endpoint === undefined) return;
+  const url = URL.parse(endpoint);
+  if (url === null || !(url.protocol === "https:" || isLoopbackHttp(url))) {
+    throw new Error(`${issuer}'s ${name} is neither https: nor on this machine`);
+  }
+}
+
+/**
+ * The provider's metadata, from its /.well-known/openid-configuration,
+ * once its authorization, token and registration endpoints are checked,
+ * and the token endpoint is on the issuer's origin.
+ */
 export async function discover(issuer: string): Promise<oauth.AuthorizationServer> {
   const url = new URL(issuer);
   const response = await oauth.discoveryRequest(url, {
     algorithm: "oidc",
     ...requestOptions(issuer),
   });
-  return oauth.processDiscoveryResponse(url, response);
+  const as = await oauth.processDiscoveryResponse(url, response);
+  checkEndpoint(as.issuer, "authorization endpoint", as.authorization_endpoint);
+  checkEndpoint(as.issuer, "token endpoint", as.token_endpoint);
+  checkEndpoint(as.issuer, "registration endpoint", as.registration_endpoint);
+  if (as.token_endpoint !== undefined && new URL(as.token_endpoint).origin !== url.origin) {
+    throw new Error(`${as.issuer}'s token endpoint is on another origin`);
+  }
+  return as;
 }
 
 /**
