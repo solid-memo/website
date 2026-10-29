@@ -78,6 +78,25 @@
     pip_requirements: {
         enabled: false,
     },
+    // Every Monday, Renovate locks the packages in each package-lock.json
+    // again, to the newest version each range allows, so that the packages
+    // the dependencies need get their fixes too: an update moves only the
+    // packages it names, and what they need stays as first locked. That
+    // moves every package at once, so a person merges it, after reading
+    // what moved. npm locks no version younger than 3 days (.npmrc). It
+    // moves what the app runs, so it is fix(deps):, and is released. Its
+    // branch is its own: on the default one, the monthly pip-compile run
+    // would join it every Monday.
+    npm: {
+        lockFileMaintenance: {
+            enabled: true,
+            branchTopic: 'npm-lock-file-maintenance',
+            commitMessageExtra: '(npm)',
+            schedule: ['* 0-3 * * 1'],
+            automerge: false,
+            semanticCommitType: 'fix',
+        },
+    },
     customManagers: [
         // A tool a workflow downloads, its version after a comment that
         // names it (`# renovate: datasource=github-release-attachments
@@ -104,6 +123,18 @@
         },
     ],
     packageRules: [
+        // A new version of a package.json dependency raises its range to
+        // that version (^11.0.0 to ^11.1.0), even where the range already
+        // allows it: each update is then a pull request of its own, and no
+        // older version can be locked again. Left to choose, Renovate
+        // proposed no update a range already allows for the workspace
+        // packages, so their lockfile stayed on the versions first locked.
+        // The pins below keep their own strategy.
+        {
+            matchManagers: ['npm'],
+            matchDepTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
+            rangeStrategy: 'bump',
+        },
         // The end-to-end tests run against two majors of each Solid server,
         // each pinned in e2e/pod/servers/ (docs/testing.md): each stays on
         // its major, the Community Solid Server's in its compose file,
