@@ -34,7 +34,7 @@ import {
 } from "./interface";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
 import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
-import { quadTally } from "./readLimits";
+import { quadTally, textChunks } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
 
@@ -295,13 +295,18 @@ export function parseQuads(
     const quads: Quad[] = [];
     const past = quadTally(limits);
     let refused = false;
-    const onQuad = (quad: Quad) => {
-      if (refused) return;
-      if (!past(quad)) return void quads.push(quad);
+    // Whether to go on: false once past limits, for the JSON-LD parser to stop (parseJsonLd).
+    const onQuad = (quad: Quad): boolean => {
+      if (refused) return false;
+      if (!past(quad)) {
+        quads.push(quad);
+        return true;
+      }
       refused = true;
       quads.length = 0;
       // The tally is past limits only under some.
       reject(new ReadLimitError(baseUrl, limits!));
+      return false;
     };
     const done = () => resolve(quads);
     if (format === "jsonld") {
@@ -326,6 +331,9 @@ export function parseQuads(
  * its other keys (refuseRemoteContexts writes it so), or the text does
  * not parse: otherwise the parser holds every node to the end, then
  * matches each against every typed one, time growing with their square.
+ * The text is written in parts (textChunks), and the parser destroyed
+ * once `onQuad` says not to go on, so that it reads no further than the
+ * part it is in.
  */
 function parseJsonLd(
   text: string,
@@ -334,7 +342,7 @@ function parseJsonLd(
     onQuad,
     onError,
     done,
-  }: { onQuad: (quad: Quad) => void; onError: (error: Error) => void; done: () => void },
+  }: { onQuad: (quad: Quad) => boolean; onError: (error: Error) => void; done: () => void },
 ): void {
   const parser = new JsonLdParser({
     baseIRI: baseUrl,
@@ -345,10 +353,12 @@ function parseJsonLd(
       load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
     },
   });
-  parser.on("data", onQuad);
+  parser.on("data", (quad: Quad) => {
+    if (!onQuad(quad)) parser.destroy();
+  });
   parser.on("error", onError);
   parser.on("end", done);
-  parser.write(text);
+  for (const chunk of textChunks(text)) parser.write(chunk);
   parser.end();
 }
 

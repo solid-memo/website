@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
 import { HttpError, ReadLimitError } from "../../client/interface";
 import { limitedFetch } from "../../client/readLimits";
@@ -10,6 +11,9 @@ import { type DataClient, turtleAt } from "./rdf";
 
 const URL_ = "https://pod.example/decks/deck.ttl";
 const EX = "https://example.com/ns#";
+
+/** The parser's job for each JSON value it reads, which a test counts. */
+type ValueJobs = { newOnValueJob: (...args: unknown[]) => Promise<void> };
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 
 /** How the pod answers a request; the body is the Turtle of one subject unless given. */
@@ -518,6 +522,28 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         );
         expect(error).toBeInstanceOf(ReadLimitError);
         expect(error).toMatchObject({ url: URL_, limits });
+      }
+    });
+
+    it("stops parsing JSON-LD once past its limits, reading no further than the part it is in", async () => {
+      // A @graph container gives each element's triple again for every element before it.
+      const elements = 2000;
+      const text = JSON.stringify({
+        "@context": { "@vocab": EX, g: { "@container": "@graph" } },
+        "@id": "#s",
+        g: Array.from({ length: elements }, (_, at) => ({ "@id": `#o${at}`, p: "v" })),
+      });
+      const values = vi.spyOn(JsonLdParser.prototype as unknown as ValueJobs, "newOnValueJob");
+      try {
+        const limits = { bytes: text.length, quads: 100, characters: 1_000_000 };
+        await expect(parseQuads(text, "jsonld", URL_, limits)).rejects.toBeInstanceOf(
+          ReadLimitError,
+        );
+        // Anything the parser had still to do would run before this.
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(values.mock.calls.length).toBeLessThan(elements);
+      } finally {
+        values.mockRestore();
       }
     });
 

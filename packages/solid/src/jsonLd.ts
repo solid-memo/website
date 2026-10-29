@@ -106,7 +106,12 @@ const MAX_CONTEXTS = 8;
  * inside a term definition (a scoped one) again at every use of the term,
  * and one on a node on top of all the terms it inherits, so a small file
  * of such contexts holds the tab for minutes. A file this app exports
- * states its context once, at the top. Refuse JSON nested deeper than
+ * states its context once, at the top. Refuse a context that is not
+ * terms and keywords each given as a string (an IRI, a prefix's, or a
+ * keyword's value such as `@vocab`): a term defined by an object may say
+ * how its values are read, and the parser reads some of those (a `@graph`
+ * container) in time growing with the square of the values. A file this
+ * app exports states prefixes alone. Refuse JSON nested deeper than
  * MAX_JSON_DEPTH too, before anything recurses into it. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
  *
@@ -158,7 +163,7 @@ function written(value: unknown): string {
   return `{${entries.map(([key, child]) => `${JSON.stringify(key)}:${written(child)}`).join(",")}}`;
 }
 
-/** Throws deckFileUnreadable unless a context is stated in full, on a top-level node, in at most MAX_CONTEXTS. */
+/** Throws deckFileUnreadable unless a context is stated in full, as strings alone, on a top-level node, in at most MAX_CONTEXTS. */
 function refuseContext(context: unknown, onTopLevelNode: boolean): void {
   const contexts = Array.isArray(context) ? context : [context];
   if (contexts.some(remote)) {
@@ -171,6 +176,20 @@ function refuseContext(context: unknown, onTopLevelNode: boolean): void {
       reason: `The file states a JSON-LD context below its top level, or lists more than ${MAX_CONTEXTS}.`,
     });
   }
+  if (!contexts.every(ofStrings)) {
+    throw new AppError("deckFileUnreadable", {
+      reason: "The file defines a JSON-LD term by more than an IRI.",
+    });
+  }
+}
+
+/** Whether a context gives each of its terms and keywords as a string, defining no term by an object. */
+function ofStrings(context: unknown): boolean {
+  return (
+    typeof context === "object" &&
+    context !== null &&
+    Object.values(context).every((value) => typeof value === "string")
+  );
 }
 
 /** Whether a context is one named by its address, or holds one. */

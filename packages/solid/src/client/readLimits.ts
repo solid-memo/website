@@ -100,3 +100,25 @@ function length(term: Term): number {
   if (term.termType !== "Literal") return term.value.length;
   return term.value.length + term.datatype.value.length + term.language.length;
 }
+
+/** How many characters of a text a parser is written at a time (textChunks). */
+const TEXT_CHUNK = 4096;
+
+/**
+ * A text in parts of TEXT_CHUNK characters, none ending inside a
+ * character (a surrogate pair), for a streaming parser to be written one
+ * part at a time. A parser written the whole text in one call goes on
+ * through all of it after the tally is past its limits; one written in
+ * parts can be stopped (destroyed) between them, with the rest unread.
+ */
+export function textChunks(text: string): string[] {
+  const chunks: string[] = [];
+  for (let start = 0; start < text.length; ) {
+    let end = start + TEXT_CHUNK;
+    const last = text.charCodeAt(end - 1);
+    if (last >= 0xd800 && last <= 0xdbff) end++;
+    chunks.push(text.slice(start, end));
+    start = end;
+  }
+  return chunks;
+}

@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { ReadLimitError } from "./interface";
-import { limitedFetch, limitsOf, refusalOf, RELEASE_LIMITS } from "./readLimits";
+import { limitedFetch, limitsOf, refusalOf, RELEASE_LIMITS, textChunks } from "./readLimits";
 import { parseQuads } from "./resources";
 
 const URL_ = "https://other.example/release.ttl";
@@ -97,5 +97,20 @@ describe("limitedFetch", () => {
     expect(response.status).toBe(304);
     expect(limitsOf(response)).toBeUndefined();
     expect(refusalOf(undefined)).toBeUndefined();
+  });
+});
+
+describe("textChunks", () => {
+  it("gives a text in parts that are the text again, each at most one character past a part's length", () => {
+    const text = "0123456789".repeat(1000);
+    const chunks = textChunks(text);
+    expect(chunks.join("")).toBe(text);
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(textChunks("")).toEqual([]);
+  });
+
+  it("never ends a part inside a surrogate pair", () => {
+    const text = `${"x".repeat(4095)}\u{1F600}y`;
+    expect(textChunks(text)).toEqual([`${"x".repeat(4095)}\u{1F600}`, "y"]);
   });
 });

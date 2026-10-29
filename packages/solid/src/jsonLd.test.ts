@@ -113,11 +113,7 @@ describe("refuseRemoteContexts", () => {
     const below = {
       reason: "The file states a JSON-LD context below its top level, or lists more than 8.",
     };
-    const scoped = { "@id": `${EX}p`, "@context": { t: `${EX}t` } };
     for (const document of [
-      // A term's scoped context, and a type's.
-      { "@context": { p: scoped }, "@id": `${EX}n`, p: { t: "x" } },
-      { "@context": [{ ex: EX }, { T: scoped }], "@id": `${EX}n`, "@type": "T" },
       // A node's own, below the top level.
       { "@context": { ex: EX }, "@graph": [{ "@context": { q: `${EX}q` }, q: "x" }] },
       [[{ "@context": { ex: EX } }]],
@@ -128,6 +124,33 @@ describe("refuseRemoteContexts", () => {
         expect.objectContaining({ code: "deckFileUnreadable", vars: below }),
       );
     }
+  });
+
+  it("refuses a term defined by more than an IRI, which may say how the parser reads its values", () => {
+    const byObject = { reason: "The file defines a JSON-LD term by more than an IRI." };
+    const scoped = { "@id": `${EX}p`, "@context": { t: `${EX}t` } };
+    for (const document of [
+      // A @graph container, whose values the parser reads in time growing with their square.
+      { "@context": { "@vocab": EX, g: { "@container": "@graph" } }, "@id": `${EX}n`, g: [] },
+      { "@context": [{ ex: EX }, { g: { "@container": ["@graph", "@set"] } }], "@id": `${EX}n` },
+      // A term's scoped context, and a type's.
+      { "@context": { p: scoped }, "@id": `${EX}n`, p: { t: "x" } },
+      { "@context": [{ ex: EX }, { T: scoped }], "@id": `${EX}n`, "@type": "T" },
+      // A context that is no object of terms, or a keyword's value that is no string.
+      { "@context": null, "@id": `${EX}n` },
+      { "@context": { "@version": 1.1 }, "@id": `${EX}n` },
+    ]) {
+      expect(() => refuseRemoteContexts(JSON.stringify(document))).toThrow(
+        expect.objectContaining({ code: "deckFileUnreadable", vars: byObject }),
+      );
+    }
+  });
+
+  it("lets a context of prefixes and keywords given as strings pass", () => {
+    const context = { "@vocab": EX, "@base": EX, "@language": "en", ex: EX, p: `${EX}p` };
+    expect(() =>
+      refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n", p: "x" })),
+    ).not.toThrow();
   });
 
   it("gives the document it checked, a key named twice as JSON.parse keeps it", () => {

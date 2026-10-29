@@ -938,7 +938,8 @@ flowchart LR
   the limit is canceled as soon as it's past it, or before it's read
   when its `Content-Length` says so. Parsing stops keeping triples at
   the first one past either of the other limits, before any are built
-  into a dataset. Each case refuses the release (`releaseTooLarge`),
+  into a dataset. A JSON-LD text stops being read there too: it's given
+  to the parser in parts, and the parser is stopped before the next. Each case refuses the release (`releaseTooLarge`),
   however the release is read. The same limits apply to a creator's
   catalog read for the release's series, to a release the Studio reads,
   opens as a file, or checks against the library's shapes. The library's

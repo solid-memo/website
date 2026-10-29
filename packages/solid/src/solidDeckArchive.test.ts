@@ -473,6 +473,18 @@ describe("readDeckFile", () => {
     }
   });
 
+  it("refuses JSON-LD that defines a term by more than an IRI, such as a @graph container, before the parser reads it", async () => {
+    const json = JSON.stringify({
+      "@context": { sm: SM_NS, g: { "@container": "@graph" } },
+      "@id": "#deck",
+      g: Array.from({ length: 4000 }, (_, at) => ({ "@id": `#o${at}`, "sm:p": "v" })),
+    });
+    await expect(archive.readDeckFile(json, "jsonld", base)).rejects.toMatchObject({
+      code: "deckFileUnreadable",
+      vars: { reason: "The file defines a JSON-LD term by more than an IRI." },
+    });
+  });
+
   it("reads JSON-LD whose key is named twice as JSON.parse does, fetching nothing", async () => {
     const fetch = vi.spyOn(globalThis, "fetch");
     try {
