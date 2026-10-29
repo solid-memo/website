@@ -16,6 +16,13 @@ describe("AuthorName", () => {
     );
   });
 
+  it("shows an address with header fields as plain text", () => {
+    const author = "Support <help@example.org?cc=someone%40example.net&subject=Hello>";
+    const { container } = render(<AuthorName author={author} />);
+    expect(container.textContent).toBe(author);
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+
   it("shows a name without an address as plain text", () => {
     const { container } = render(<AuthorName author="Anton Wiklund" />);
     expect(container.textContent).toBe("Anton Wiklund");

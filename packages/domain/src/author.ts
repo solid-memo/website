@@ -11,18 +11,21 @@ export interface Author {
 
 /**
  * An address in angle brackets: one "@" with text on both sides, and no
- * whitespace or brackets. Each run excludes "@", so it is matched in one
- * pass.
+ * whitespace or brackets. It is a bare address: a mailto link made from
+ * it names one recipient and nothing else, so "," and ";" (recipient
+ * separators), "?", "#", "&" (header fields) and "%" (escaped
+ * characters) are refused too. Each run excludes "@", so it is matched
+ * in one pass.
  */
-const ADDRESS = /^[^\s<>@]+@[^\s<>@]+$/;
+const ADDRESS = /^[^\s<>@?#%&,;]+@[^\s<>@?#%&,;]+$/;
 
 /** What a regular expression's "." doesn't match: a name stays on one line. */
 const LINE_TERMINATOR = /[\n\r\u2028\u2029]/;
 
 /**
  * Read an author literal. "Anton Wiklund <anton@example.com>" gives the
- * name and the address; anything else is a name alone. An address with
- * no name before it is its own name.
+ * name and the address; anything else, such as an address with a query,
+ * is a name alone. An address with no name before it is its own name.
  *
  * The literal comes from any release, so it is split by its last "<"
  * rather than by a pattern that backtracks, which took time cubic in a

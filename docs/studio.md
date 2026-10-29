@@ -1167,7 +1167,8 @@ Solid Memo. Each part has its own form and status line:
   The domain tidies and checks them
   ([deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
   authors that would share one agent node are refused, the form
-  staying. Nothing here
+  staying. An email with `,`, `;`, `?`, `#`, `%` or `&` in it isn't
+  read as one: that author stays a name alone. Nothing here
   says anyone reviewed the deck. `setDeckProvenance` writes again from
   a fresh read on a 412, three times in all.
 - **Study**: its direction and its pace, a limit left empty following

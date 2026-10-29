@@ -525,7 +525,10 @@ graph LR
     and `"Kortlek: <title>."@sv` (app-written text for any title).
   - It may name its authors (`dcterms:creator`), each a `foaf:Agent`
     node `#agent-<slug>` beside the deck, with `foaf:name` and a
-    `mailto:` `foaf:mbox`, shown as `Name <email>`. The slug is the
+    `mailto:` `foaf:mbox`, shown as `Name <email>`. Only a bare
+    address counts as the email: one with `,`, `;`, `?`, `#`, `%` or
+    `&` in it leaves the whole author a name, shown without a link.
+    The slug is the
     author folded to ASCII, `unnamed` when nothing is left of it. An
     author the folding loses letters or digits of, such as 김민수 or "Kim
     민수", or that has none to lose, such as "—", gets six hex digits of a
