@@ -70,6 +70,25 @@ function rememberedAll<T>(compute: (text: string) => T): (text: string) => T {
 }
 
 /**
+ * A markdownBlocks for a list of texts shown again on every render, such
+ * as a course's chapter descriptions, which may number more than
+ * CACHE_SIZE: each position in the list keeps the blocks of the last text
+ * it was given. A lookup compares the text with that one text only, never
+ * with the others, as a Map keyed by the texts would when many long texts
+ * share a length (a long string is hashed by its length alone).
+ */
+export function blocksByPosition(): (position: number, text: string) => MdBlock[] | null {
+  const cache: { text: string; blocks: MdBlock[] | null }[] = [];
+  return (position, text) => {
+    const hit = cache[position];
+    if (hit !== undefined && hit.text === text) return hit.blocks;
+    const blocks = parseMarkdown(text);
+    cache[position] = { text, blocks };
+    return blocks;
+  };
+}
+
+/**
  * A plainText that remembers every text it was given (rememberedAll): one
  * for each list of texts searched again and again, such as a deck's cards
  * in the Studio's workbench, which holds more texts than CACHE_SIZE.

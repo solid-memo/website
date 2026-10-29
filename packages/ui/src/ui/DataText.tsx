@@ -4,6 +4,7 @@
 
 import { cardLabel, cardLabelText, isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { MdBlock } from "@solid-memo/markdown/parse";
 import { labelText } from "@solid-memo/markdown/plainText";
 import { breakable } from "./breakable";
 import { useCardText, useCourseText } from "./cardLanguage";
@@ -26,23 +27,27 @@ import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache
  * Markdown that reads as a single paragraph renders as that same
  * paragraph, so a card with a word or two of code looks like any other;
  * anything more becomes a `div.md` of its blocks. Text past the
- * parser's limits is shown as plain text.
+ * parser's limits is shown as plain text. The blocks are read from
+ * `blocksOf`, markdownBlocks unless a list of texts longer than its cache
+ * passes its own (blocksByPosition).
  */
 export function DataText({
   text,
   markdown,
   breaks = false,
   class: className,
+  blocksOf = markdownBlocks,
 }: {
   text: LangText;
   markdown: boolean;
   breaks?: boolean;
   class?: string;
+  blocksOf?: (text: string) => MdBlock[] | null;
 }) {
   const { cardText, cardLang } = useCardText();
   const shown = cardText(text);
   const lang = cardLang(text);
-  const blocks = markdown ? markdownBlocks(shown) : null;
+  const blocks = markdown ? blocksOf(shown) : null;
   if (blocks === null) {
     return (
       <p class={className} lang={lang}>

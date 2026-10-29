@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { MAX_CHARS } from "@solid-memo/markdown/parse";
+import { MAX_CHARS, parseMarkdown } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
 import {
+  blocksByPosition,
   CACHE_SIZE,
   deckTextCheck,
   markdownBlocks,
@@ -14,6 +15,11 @@ import {
   plainTexts,
   releaseMarkdownCheck,
 } from "./markdownCache";
+
+vi.mock("@solid-memo/markdown/parse", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/markdown/parse")>();
+  return { ...original, parseMarkdown: vi.fn(original.parseMarkdown) };
+});
 
 vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/markdown/plainText")>();
@@ -47,6 +53,34 @@ describe("markdownBlocks and markdownPhrases", () => {
     markdownBlocks("one more");
     expect(markdownBlocks("first")).not.toBe(first);
     expect(markdownBlocks("first")).toEqual(first);
+  });
+});
+
+describe("blocksByPosition", () => {
+  it("remembers the text at every position, more than CACHE_SIZE, each its own", () => {
+    const blocksOf = blocksByPosition();
+    const texts = Array.from({ length: CACHE_SIZE + 1 }, (_, index) => `*text* ${index}`);
+    const first = texts.map((text, index) => blocksOf(index, text));
+    expect(first[0]).toEqual(markdownBlocks(texts[0]!));
+    expect(texts.every((text, index) => blocksOf(index, text) === first[index])).toBe(true);
+    expect(blocksByPosition()(0, texts[0]!)).not.toBe(first[0]);
+  });
+
+  it("reads long texts of one length again without parsing, and a changed one anew", () => {
+    const blocksOf = blocksByPosition();
+    const long = "a".repeat(17_000);
+    const texts = Array.from(
+      { length: 50 },
+      (_, index) => `${long}${String(index).padStart(3, "0")}`,
+    );
+    const first = texts.map((text, index) => blocksOf(index, text));
+    vi.mocked(parseMarkdown).mockClear();
+    const copies = texts.map((text) => `${text} `.slice(0, -1));
+    expect(copies.every((text, index) => blocksOf(index, text) === first[index])).toBe(true);
+    expect(parseMarkdown).not.toHaveBeenCalled();
+    expect(blocksOf(0, texts[1]!)).not.toBe(first[0]);
+    expect(blocksOf(0, texts[1]!)).toEqual(first[1]);
+    expect(parseMarkdown).toHaveBeenCalledTimes(1);
   });
 });
 
