@@ -341,7 +341,8 @@ function writeIndex(quads: readonly Quad[]): string {
   });
   writer.addQuads([...quads]);
   let output = "";
-  writer.end((_error, result) => {
+  // Writing to text, n3 ends at once and with no error.
+  writer.end((_error, result: string) => {
     output = result;
   });
   return formatTurtle(`@base <${INDEX_URL}> .\n\n${output}`, INDEX_URL);

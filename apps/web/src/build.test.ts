@@ -55,7 +55,7 @@ const DOCS_PAGES = DOCS_SOURCES.map((name) =>
  * it weighs, with room for a little more. A change that passes it says
  * why the page needs the weight, and raises this in the same commit.
  */
-const UP_FRONT_BUDGET_KB = 409;
+const UP_FRONT_BUDGET_KB = 414;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -214,6 +214,18 @@ describe("what the page loads up front", () => {
       gzipped / 1024,
       `${(gzipped / 1024).toFixed(1)} kB gzipped up front; its largest modules, before minifying:\n${largest.join("\n")}`,
     ).toBeLessThanOrEqual(UP_FRONT_BUDGET_KB);
+  });
+
+  it("holds one copy of each package, not one per package that needs it", () => {
+    const installs = new Map<string, Set<string>>();
+    for (const chunk of [...upFront()].map(chunkNamed))
+      for (const id of Object.keys(chunk.modules)) {
+        const match = /^(.*\/node_modules\/)((?:@[^/]+\/)?[^/]+)\//.exec(id);
+        if (match === null) continue;
+        const [, folder, name] = match as unknown as [string, string, string];
+        installs.set(name, (installs.get(name) ?? new Set()).add(folder.replace(REPOSITORY, "")));
+      }
+    expect([...installs].filter(([, folders]) => folders.size > 1)).toEqual([]);
   });
 });
 

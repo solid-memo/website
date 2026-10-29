@@ -22,7 +22,7 @@
     "@solid-memo/vocab": "*"
   },
   "devDependencies": {
-    "n3": "^2.0.0",
+    "n3": "^2.13.12",
     "yaml": "^2.9.1"
   }
 }

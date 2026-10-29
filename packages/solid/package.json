@@ -17,15 +17,15 @@
   },
   "dependencies": {
     "@inrupt/solid-client": "^4.0.0",
-    "@inrupt/solid-client-authn-browser": "^5.0.0",
+    "@inrupt/solid-client-authn-browser": "^5.0.2",
     "@solid-memo/application": "*",
     "@solid-memo/domain": "*",
     "@solid-memo/shacl": "*",
     "@solid-memo/vocab": "*",
-    "jsonld-streaming-parser": "^5.0.1"
+    "jsonld-streaming-parser": "^5.0.2"
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",
-    "happy-dom": "^21.0.0"
+    "happy-dom": "^21.0.4"
   }
 }

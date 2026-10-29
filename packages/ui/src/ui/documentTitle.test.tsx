@@ -33,7 +33,7 @@ describe("useDocumentTitle", () => {
   });
 
   it("follows the user's language", () => {
-    const wrapper = ({ children }: { children: ComponentChildren }) => (
+    const wrapper = ({ children }: { children?: ComponentChildren }) => (
       <I18nProvider locale="sv" onChoose={() => undefined}>
         {children}
       </I18nProvider>
@@ -43,7 +43,7 @@ describe("useDocumentTitle", () => {
   });
 
   it("ends in the name of the app the page is", () => {
-    const wrapper = ({ children }: { children: ComponentChildren }) => (
+    const wrapper = ({ children }: { children?: ComponentChildren }) => (
       <AppName.Provider value="studio.name">{children}</AppName.Provider>
     );
     renderHook(() => useDocumentTitle(["Decks"]), { wrapper });
