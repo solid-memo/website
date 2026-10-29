@@ -41,6 +41,56 @@ client leaves the protocol to a library too, `oauth4webapi`, and
 chooses the client the same way. The provider returns the learner to
 the page's address without `index.html` or a hash.
 
+### The issuer on the provider's answer
+
+Every provider gets the same redirect URL and, on the site's domain,
+the same client ID. So the `iss` parameter
+([RFC 9207](https://www.rfc-editor.org/rfc/rfc9207)) is what ties the
+provider's answer to the issuer it came from, and only the tab that
+sent the browser to a provider knows that issuer. A code is redeemed
+where the request it answers went, which the sign-in client looks up
+by the answer's `state`. The gateway checks both before a sign-in
+client redeems any code:
+
+- Before the browser leaves for a provider, the gateway keeps that
+  provider's issuer in `sessionStorage` (`solid-memo:login-issuer`),
+  which belongs to this tab, until the next page load. A login keeps
+  the issuer it goes to. A silent restore keeps the issuer of the
+  session it restores, which the sign-in client names
+  (`sessionIssuer()`), and forgets it if the page doesn't leave.
+- `restore()` refuses an answer, a code or an error, without `iss`
+  (`loginIssuerMissing`). It refuses an answer when this tab sent the
+  browser to no provider (`loginNotStarted`), and an answer whose
+  `iss` is another issuer than the one kept, a trailing slash aside
+  (`loginIssuerMismatch`).
+- It refuses a code whose `state` names no request the sign-in client
+  holds (`loginNotStarted`), and one whose request went to another
+  issuer than the one kept (`loginIssuerMismatch`). The client names
+  that issuer (`requestIssuer(state)`). Inrupt's library keeps its
+  requests in `localStorage`, which every tab shares, and keeps one
+  that was never answered. It fetches the provider's metadata again
+  from the request's issuer when the answer comes, and checks `iss`
+  only against that metadata. So a provider could otherwise pass on
+  the state of a request left for another provider, and that
+  provider's metadata could name the honest one and its own token
+  endpoint.
+- It removes a refused answer from the address before it shows the
+  error, so a reload doesn't try it again.
+- `solid-memo-client` requires `iss` itself too, whatever the
+  provider's metadata says, and checks it against the issuer of the
+  login it keeps in this tab. `oauth4webapi` checks that issuer
+  against the metadata it fetches.
+
+An answer comes through only from the provider this tab sent the
+browser to, and with a code, only for a request that went to that
+provider. A provider's error without `iss` is refused too: the learner
+sees the safety error, not the provider's. If that error answers a
+silent restore, the Inrupt library still holds the session to
+restore, so each reload shows the error again until the learner logs
+in.
+
+A provider that doesn't send `iss` can't be used to log in.
+
 ```mermaid
 sequenceDiagram
     accTitle: Logging in with Solid-OIDC
@@ -60,6 +110,7 @@ sequenceDiagram
     IdP->>UI: redirect back with code
     Note over UI,Gateway: page reloads
     UI->>Gateway: restore()
+    Note over Gateway: refuses an answer without the issuer's iss, or for another issuer's request
     Gateway->>IdP: handleIncomingRedirect (token exchange)
     IdP-->>Gateway: session (WebID)
     Gateway-->>UI: { session: { webId }, origin: "login" }
@@ -101,9 +152,7 @@ on a fork's address or in a subfolder.
 Of the suggested providers ([onboarding.md](onboarding.md)),
 solidcommunity.net and solidweb.me (Community Solid Server) and Inrupt
 PodSpaces (`login.inrupt.com`) list `webid` in their
-`/.well-known/openid-configuration`. iGrant.io's Data Pod (Node Solid
-Server) doesn't, so logins there register dynamically.
-`login.inrupt.com` lacks `none` in its
+`/.well-known/openid-configuration`. `login.inrupt.com` lacks `none` in its
 `token_endpoint_auth_methods_supported`, though Inrupt's guide
 describes Client ID Documents for apps with no secret; a login there
 with the document on the deployed site is untried. A session from

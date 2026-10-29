@@ -184,7 +184,8 @@ VITE_POD_PROVIDERS='[{"id":"school","name":"Example School Pods","oidcIssuer":"h
 
 The list needs at least one provider. Any other key, such as a
 misspelled `signupUrl`, fails the build. A WebID login works at any
-provider, listed or not.
+provider, listed or not, that names itself in its answer's `iss`
+parameter ([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
 
 ## VITE_LIBRARY_INDEX_URL
 

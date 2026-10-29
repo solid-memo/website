@@ -474,7 +474,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session}.test.ts'
+      - run: npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session,session.library}.test.ts'
       - if: success() || failure()
         run: npm run test:roundtrip -w @solid-memo/solid
       - if: success() || failure()

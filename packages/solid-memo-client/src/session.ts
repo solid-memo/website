@@ -8,6 +8,7 @@ import {
   completeLogin,
   discover,
   isRefusal,
+  pendingLogin,
   startLogin,
   startSilentLogin,
   takeRedirect,
@@ -99,6 +100,15 @@ export function createSessionClient(): SessionClient {
       await startSilentLogin(as, stored.client, stored.redirectUrl, window.location.href);
       // The page is leaving for the provider, which sends the user back.
       return new Promise<never>(() => {});
+    },
+
+    async sessionIssuer() {
+      return (await loadSession())?.issuer ?? null;
+    },
+
+    async requestIssuer(state) {
+      const pending = pendingLogin();
+      return pending?.state === state ? pending.issuer : null;
     },
 
     async login(options) {

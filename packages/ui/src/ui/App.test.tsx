@@ -737,9 +737,9 @@ describe("AppShell", () => {
     expect(
       await screen.findByRole("heading", { name: "Log in with your Pod" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /iGrant\.io Data Pod/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Inrupt PodSpaces/ })).toHaveAttribute(
       "href",
-      "https://igrant.io/datapod.html",
+      "https://start.inrupt.com/",
     );
     // The picture spells the product name, so it is the page's heading: the name is not shown twice.
     const heading = screen.getByRole("heading", { level: 1, name: "Solid Memo" });
@@ -791,7 +791,7 @@ describe("AppShell", () => {
       "href",
       "https://school.example/join",
     );
-    expect(screen.queryByRole("link", { name: /iGrant\.io Data Pod/ })).toBeNull();
+    expect(screen.queryByRole("link", { name: /Inrupt PodSpaces/ })).toBeNull();
   });
 
   it("shows a session-restore error (Error instance)", async () => {

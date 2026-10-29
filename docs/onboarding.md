@@ -113,7 +113,10 @@ takes the list as its `providers`:
   creating a Pod ([which ones](#offered-for-creating-a-pod)).
 
 Each issuer is exactly as its provider advertises it in
-`/.well-known/openid-configuration`.
+`/.well-known/openid-configuration`. A provider is listed only if it
+sends the `iss` parameter on its answers, without which the app
+refuses the login
+([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
 
 ### Offered for creating a Pod
 
@@ -122,7 +125,6 @@ invite and no waiting list (checked on 2026-10-24).
 
 | Provider | Sign-up page |
 | --- | --- |
-| iGrant.io Data Pod | <https://igrant.io/datapod.html> |
 | solidcommunity.net | <https://solidcommunity.net/.account/login/password/register/> |
 | Inrupt PodSpaces | <https://start.inrupt.com/> |
 | solidweb.me | <https://solidweb.me/.account/login/password/register/> |

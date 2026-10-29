@@ -176,20 +176,26 @@ export async function startSilentLogin(
   await authorize(as, client, redirectUrl, "none", from);
 }
 
+/** The authorization request under way in this tab, if any. */
+export function pendingLogin(): PendingLogin | undefined {
+  const saved = window.sessionStorage.getItem(PENDING_LOGIN_KEY);
+  return saved === null ? undefined : (JSON.parse(saved) as PendingLogin);
+}
+
 /**
  * The redirect back from the provider, if this page is one: a pending
  * request in this tab and a `state` on the URL. Both are removed here,
  * so a reload does not try the code again.
  */
 export function takeRedirect(): { pending: PendingLogin; parameters: URLSearchParams } | undefined {
-  const saved = window.sessionStorage.getItem(PENDING_LOGIN_KEY);
+  const pending = pendingLogin();
   const url = new URL(window.location.href);
-  if (saved === null || !url.searchParams.has("state")) return undefined;
+  if (pending === undefined || !url.searchParams.has("state")) return undefined;
   window.sessionStorage.removeItem(PENDING_LOGIN_KEY);
   const parameters = new URLSearchParams(url.searchParams);
   for (const name of RESPONSE_PARAMETERS) url.searchParams.delete(name);
   window.history.replaceState(window.history.state, "", url.href);
-  return { pending: JSON.parse(saved) as PendingLogin, parameters };
+  return { pending, parameters };
 }
 
 /** Whether `error` is the provider refusing the request (an OAuth error), not a failure to reach it. */
@@ -230,16 +236,25 @@ function webIdOf(claims: oauth.IDToken): string {
 
 /**
  * Completes the redirect back: checks it against the pending request
- * (state, issuer), trades the code for DPoP-bound tokens with `dpop`,
- * and checks the ID token (issuer, audience, nonce). Rejects with the
- * provider's error when it sent one (isRefusal).
+ * (state, and the issuer, which it must name), trades the code for
+ * DPoP-bound tokens with `dpop`, and checks the ID token (issuer,
+ * audience, nonce). Rejects with the provider's error when it sent one
+ * (isRefusal).
  */
 export async function completeLogin(
   { pending, parameters }: { pending: PendingLogin; parameters: URLSearchParams },
   as: oauth.AuthorizationServer,
   dpop: oauth.DPoPHandle,
 ): Promise<{ tokens: Tokens; webId: string }> {
-  const callback = oauth.validateAuthResponse(as, pending.client, parameters, pending.state);
+  // The iss parameter is required whatever the provider's metadata says:
+  // every provider is sent the same redirect URL, and only iss ties the
+  // answer to the provider the request went to (RFC 9207).
+  const callback = oauth.validateAuthResponse(
+    { ...as, authorization_response_iss_parameter_supported: true },
+    pending.client,
+    parameters,
+    pending.state,
+  );
   const response = await withDpopNonce(async () =>
     oauth.processAuthorizationCodeResponse(
       as,

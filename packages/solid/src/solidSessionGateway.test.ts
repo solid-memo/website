@@ -96,6 +96,189 @@ describe("createSolidSessionGateway", () => {
     });
   });
 
+  describe("restore, given the identity provider's answer", () => {
+    const ISSUER = "https://issuer.example/";
+
+    /** The identity provider sends the user back with these parameters. */
+    function sendBack(parameters: Record<string, string>) {
+      window.history.replaceState(null, "", `/?${new URLSearchParams(parameters)}`);
+    }
+
+    beforeEach(() => {
+      // The client holds the request the answers below answer, sent to the provider.
+      client.requestIssuer.mockImplementation(async (state) => (state === "s" ? ISSUER : null));
+    });
+
+    it("completes a login whose answer names the provider it set off for", async () => {
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer(ISSUER);
+      sendBack({ code: "c", state: "s", iss: ISSUER });
+      restored(true);
+      await expect(gateway.restore()).resolves.toMatchObject({ origin: "login" });
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+    });
+
+    it("takes the provider written with or without its trailing slash as the same", async () => {
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer("https://issuer.example");
+      sendBack({ code: "c", state: "s", iss: ISSUER });
+      restored(true);
+      await expect(gateway.restore()).resolves.toMatchObject({ origin: "login" });
+    });
+
+    it("refuses an answer that names a provider when this tab sent the browser to none", async () => {
+      // An answer to a request another tab made, say, which only that tab can check.
+      sendBack({ code: "c", state: "s", iss: ISSUER });
+      const gateway = createSolidSessionGateway(options);
+      await expect(gateway.restore()).rejects.toMatchObject({
+        code: "loginNotStarted",
+        detail: `iss: ${ISSUER}`,
+      });
+      expect(client.restore).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("");
+    });
+
+    it("keeps the session's provider before a silent restore leaves, and lets its answer through", async () => {
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      // The page leaves for the provider: restore never settles.
+      client.restore.mockReturnValue(new Promise(() => {}));
+      void createSolidSessionGateway(options).restore();
+      await vi.waitFor(() => expect(client.restore).toHaveBeenCalledOnce());
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBe(ISSUER);
+
+      // The provider sends the user back; the page loads afresh.
+      sendBack({ code: "c", state: "s", iss: ISSUER });
+      client.sessionIssuer.mockClear();
+      restored(false);
+      await expect(createSolidSessionGateway(options).restore()).resolves.toMatchObject({
+        origin: "restored",
+      });
+      // An answer is completed, not a new silent restore set off.
+      expect(client.sessionIssuer).not.toHaveBeenCalled();
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+    });
+
+    it("refuses a silent restore's answer that names another provider than the session's", async () => {
+      window.sessionStorage.setItem("solid-memo:login-issuer", ISSUER);
+      sendBack({ code: "c", state: "s", iss: "https://other.example/" });
+      await expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+        code: "loginIssuerMismatch",
+      });
+      expect(client.restore).not.toHaveBeenCalled();
+    });
+
+    it("forgets the session's provider when the page does not leave, or restoring fails", async () => {
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      restored(false);
+      await createSolidSessionGateway(options).restore();
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+
+      client.restore.mockRejectedValue(new Error("boom"));
+      await expect(createSolidSessionGateway(options).restore()).rejects.toThrow("boom");
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+    });
+
+    it("refuses a login's answer that names no provider, before the client sees it", async () => {
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer(ISSUER);
+      sendBack({ code: "c", state: "s" });
+      await expect(gateway.restore()).rejects.toMatchObject({
+        code: "loginIssuerMissing",
+        detail: `issuer: ${ISSUER}`,
+      });
+      expect(client.restore).not.toHaveBeenCalled();
+      // Taken off the address, so a reload does not try it again.
+      expect(window.location.search).toBe("");
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+    });
+
+    it("refuses an answer that names no provider without a login set off in this tab, and an error too", async () => {
+      const gateway = createSolidSessionGateway(options);
+      const answers: Record<string, string>[] = [
+        { code: "c", state: "s" },
+        { error: "login_required", state: "s" },
+      ];
+      for (const parameters of answers) {
+        sendBack(parameters);
+        await expect(gateway.restore()).rejects.toMatchObject({
+          code: "loginIssuerMissing",
+          detail: "",
+        });
+      }
+      expect(client.restore).not.toHaveBeenCalled();
+    });
+
+    it("refuses a login's answer that names another provider", async () => {
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer(ISSUER);
+      sendBack({ code: "c", state: "s", iss: "https://other.example/" });
+      await expect(gateway.restore()).rejects.toMatchObject({
+        code: "loginIssuerMismatch",
+        detail: `issuer: ${ISSUER}\niss: https://other.example/`,
+      });
+      expect(client.restore).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("");
+    });
+
+    it("asks the client which provider the answer's request went to, by its state", async () => {
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer(ISSUER);
+      sendBack({ code: "c", state: "s", iss: ISSUER });
+      restored(true);
+      await gateway.restore();
+      expect(client.requestIssuer).toHaveBeenCalledWith("s");
+    });
+
+    it("refuses a code answering a request, left from a login elsewhere, that went to another provider", async () => {
+      // A login to another provider, abandoned, that its provider sent on to this one with the
+      // request's state; this tab set off for this provider, which answers with its own iss.
+      client.requestIssuer.mockResolvedValue("https://other.example/");
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer(ISSUER);
+      sendBack({ code: "c", state: "left", iss: ISSUER });
+      await expect(gateway.restore()).rejects.toMatchObject({
+        code: "loginIssuerMismatch",
+        detail: `issuer: ${ISSUER}\nrequest: https://other.example/`,
+      });
+      expect(client.restore).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("");
+    });
+
+    it("refuses a code answering no request the client holds, or with no state", async () => {
+      const answers: Record<string, string>[] = [
+        { code: "c", state: "unknown", iss: ISSUER },
+        { code: "c", iss: ISSUER },
+      ];
+      for (const parameters of answers) {
+        const gateway = createSolidSessionGateway(options);
+        await gateway.loginWithIssuer(ISSUER);
+        sendBack(parameters);
+        await expect(gateway.restore()).rejects.toMatchObject({
+          code: "loginNotStarted",
+          detail: `iss: ${ISSUER}\nstate: ${parameters.state ?? ""}`,
+        });
+        expect(window.location.search).toBe("");
+      }
+      expect(client.restore).not.toHaveBeenCalled();
+    });
+
+    it("lets an error answer from the provider it set off for through, whatever its state", async () => {
+      const gateway = createSolidSessionGateway(options);
+      await gateway.loginWithIssuer(ISSUER);
+      sendBack({ error: "access_denied", iss: ISSUER });
+      await expect(gateway.restore()).resolves.toBeNull();
+      expect(client.requestIssuer).not.toHaveBeenCalled();
+      expect(client.restore).toHaveBeenCalledOnce();
+    });
+
+    it("leaves an address without an answer to the client", async () => {
+      sendBack({ state: "s" });
+      const gateway = createSolidSessionGateway(options);
+      await expect(gateway.restore()).resolves.toBeNull();
+      expect(client.restore).toHaveBeenCalledOnce();
+    });
+  });
+
   describe("login", () => {
     it("discovers the OIDC issuer from the WebID document and starts login", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
