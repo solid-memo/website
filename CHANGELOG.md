@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.14](https://github.com/solid-memo/website/compare/v6.17.13...v6.17.14) (2026-10-29)
+
+### Bug Fixes
+
+* **solid:** read extended profiles as the user only in the profile's places ([f025f1d](https://github.com/solid-memo/website/commit/f025f1d22f7e62b6a31e26b4c3f48c90aa87ca0a))
+* **solid:** require the issuer on every identity provider's answer ([eca1227](https://github.com/solid-memo/website/commit/eca1227151d669479573d8eedcc879b823739d52))
+
 ## [6.17.13](https://github.com/solid-memo/website/compare/v6.17.12...v6.17.13) (2026-10-29)
 
 ### Bug Fixes
