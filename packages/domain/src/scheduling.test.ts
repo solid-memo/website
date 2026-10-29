@@ -316,7 +316,32 @@ describe("snapshotBeforeReview", () => {
       lastReviewedAt: yesterday.toISOString(),
     };
     const reviewedToday = { ...review("a", "2026-09-22", now, yesterday), previous: morning };
-    expect(snapshotBeforeReview(reviewedToday, now, 4)).toBe(morning);
+    expect(snapshotBeforeReview(reviewedToday, now, 4)).toEqual(morning);
+  });
+
+  it("bounds the snapshot as applySm2 bounds a state", () => {
+    const earlier = {
+      ...review("a", "2026-09-21", yesterday),
+      easeFactor: 1e21,
+      intervalDays: 1e9,
+      repetitions: 1e21,
+    };
+    expect(snapshotBeforeReview(earlier, now, 4)).toEqual({
+      easeFactor: 5,
+      intervalDays: 36_500,
+      repetitions: 36_500,
+      due: "2026-09-21",
+      lastReviewedAt: yesterday.toISOString(),
+    });
+    const morning = { ...earlier, easeFactor: 0.5, intervalDays: -3, repetitions: -2 };
+    const reviewedToday = { ...review("a", "2026-09-22", now, yesterday), previous: morning };
+    expect(snapshotBeforeReview(reviewedToday, now, 4)).toEqual({
+      easeFactor: 1.3,
+      intervalDays: 0,
+      repetitions: 0,
+      due: "2026-09-21",
+      lastReviewedAt: yesterday.toISOString(),
+    });
   });
 
   it("carries no snapshot for a card introduced today and reviewed again", () => {
@@ -367,6 +392,14 @@ describe("resetStudyDay", () => {
       },
     ]);
     expect(restore[0]).not.toHaveProperty("previous");
+  });
+
+  it("restores a snapshot within the bounds applySm2 keeps", () => {
+    const reviewed = {
+      ...review("a", "2026-09-27", now, yesterday),
+      previous: { ...morning, easeFactor: 1e21 },
+    };
+    expect(resetStudyDay([reviewed], now, 4).restore[0]?.easeFactor).toBe(5);
   });
 
   it("makes a card without a snapshot due today, as the best it can do", () => {

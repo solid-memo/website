@@ -21,6 +21,7 @@ import {
   type FsrsRating,
 } from "./fsrs";
 import type { FsrsState, ReviewQuality, ReviewState } from "./review";
+import { INITIAL_SM2_STATE, MAX_EASE_FACTOR, MAX_INTERVAL_DAYS } from "./sm2";
 import type { StudyDirection } from "./deck";
 
 /** docs/srs.md, whose FSRS-6 worked examples these tests check. */
@@ -347,7 +348,16 @@ describe("memoryFromSm2", () => {
       stability: 0.001,
       difficulty: 10,
     });
-    expect(memoryFromSm2({ easeFactor: 30, intervalDays: 1 }).difficulty).toBe(1);
+    expect(memoryFromSm2({ easeFactor: 5, intervalDays: 10 }).difficulty).toBe(1);
+  });
+
+  it("estimates from the SM-2 state as applySm2 bounds it", () => {
+    expect(memoryFromSm2({ easeFactor: 1e20, intervalDays: 1e9 })).toEqual(
+      memoryFromSm2({ easeFactor: MAX_EASE_FACTOR, intervalDays: MAX_INTERVAL_DAYS }),
+    );
+    expect(memoryFromSm2({ easeFactor: Number.NaN, intervalDays: 10 })).toEqual(
+      memoryFromSm2(INITIAL_SM2_STATE),
+    );
   });
 });
 

@@ -25,6 +25,9 @@ import { withCatalog, withDeck } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
 import type { Deck } from "@solid-memo/domain/deck";
+import { gradePrompt } from "@solid-memo/domain/grading";
+import type { ReviewQuality, ReviewState } from "@solid-memo/domain/review";
+import { toReviewStateThing } from "./mappers/reviewStateMapper";
 import { createShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT, RDF, SM, SM_NS } from "./vocab";
@@ -830,5 +833,49 @@ describe("what the app writes, under DCAT-AP", () => {
     await expect(
       engine.validateNode(written, group.url, SHAPES.deckGroup[1].shapeIri),
     ).resolves.toEqual([]);
+  });
+});
+
+describe("a graded review state from out-of-bound values", () => {
+  const REVIEWS = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
+  const documents = {
+    id: "deck-1",
+    cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl",
+    reviewsDocumentUrl: REVIEWS,
+  };
+  const subject = `${REVIEWS}#card-1`;
+  const scheduling = { scheduler: "sm2", dayBoundaryHour: 4, desiredRetention: 0.9 } as const;
+
+  // A state another app wrote, each value a valid lexical form: graded, its
+  // state and the snapshot beside it are still written as the shape allows.
+  it.each([
+    [{ easeFactor: 1e20, intervalDays: 6, repetitions: 2 }, 5],
+    [{ easeFactor: 1e21, intervalDays: 6, repetitions: 2 }, 5],
+    [{ easeFactor: 1e300, intervalDays: 6, repetitions: 2 }, 1],
+    [{ easeFactor: 2.5, intervalDays: 1e21, repetitions: 3 }, 4],
+    [{ easeFactor: 2.5, intervalDays: 6, repetitions: 1e21 + 1 }, 3],
+  ] as const)("%o graded %i conforms to the review state shape", async (values, grade) => {
+    const before: ReviewState = {
+      cardId: "card-1",
+      direction: "front-to-back",
+      ...values,
+      due: "2026-10-28",
+      firstReviewedAt: "2026-10-20T10:00:00.000Z",
+      lastReviewedAt: "2026-10-22T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const { sm2 } = gradePrompt(
+      before,
+      { sm2: before, fsrs: null },
+      { grade: grade as ReviewQuality, mode: "recall" },
+      new Date(2026, 9, 29, 12),
+      scheduling,
+    );
+    expect(sm2.previous).toBeDefined();
+    const thing = toReviewStateThing(documents, sm2, null, subject);
+    const data = toRdfJsDataset(setThing(datasetFrom(REVIEWS), thing));
+    const descriptor = SHAPES.reviewState[2];
+    const engine = createEngine(await loader.load(descriptor));
+    await expect(engine.validateNode(data, subject, descriptor.shapeIri)).resolves.toEqual([]);
   });
 });
