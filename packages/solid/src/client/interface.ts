@@ -164,7 +164,10 @@ export interface DocumentWrite {
 export interface SessionClient {
   /**
    * Completes a login the identity provider sent the user back from or,
-   * failing that, restores the previous session, silently.
+   * failing that, restores the previous session, silently. Only a
+   * redirect this tab set off, by a login or a silent restore, is
+   * completed: a provider's answer on the page's URL that it did not ask
+   * for leaves the stored session as it is.
    */
   restore(): Promise<RestoredSession>;
   /**

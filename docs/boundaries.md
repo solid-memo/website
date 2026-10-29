@@ -132,6 +132,7 @@ library could take their place there alone
 | [sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests; it imports no library |
 | [inrupt.ts](../packages/solid/src/client/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |
 | [session.ts](../packages/solid/src/client/session.ts) | the sign-in client, on `@inrupt/solid-client-authn-browser` |
+| [providerRedirect.ts](../packages/solid/src/client/providerRedirect.ts) | the sessionStorage key `session.ts` marks the tab under while it waits on the identity provider, kept apart so it stays whichever client is in place; it imports no library |
 | [access.ts](../packages/solid/src/client/access.ts) | the public-read grant ([below](#access-control)) |
 
 `shacl` may not import `solid`, so it reads a shape's Turtle with a

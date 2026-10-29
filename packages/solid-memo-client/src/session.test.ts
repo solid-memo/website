@@ -361,6 +361,10 @@ const harness: SessionHarness = {
     pendingReturn({ issuer, state: "state-1" });
     return "state-1";
   },
+  unaskedAnswer(search, awaiting) {
+    if (awaiting) pendingReturn({ silentFrom: REDIRECT });
+    window.history.replaceState(null, "", `/${search}`);
+  },
   failToRestore(error) {
     storedSession(WEBID, "refresh-0");
     provider.failure = error;
@@ -487,11 +491,15 @@ describe("createSessionClient, over oauth4webapi", () => {
     await expect(logIn()).rejects.toThrow(/aud/);
   });
 
-  it("refuses a redirect back whose state is not the one it sent", async () => {
+  it("drops a redirect back whose state is not the one it sent, and still completes its own", async () => {
     await createSessionClient().login(LOGIN);
     sendBack();
-    window.history.replaceState(null, "", window.location.href.replace(/state=[^&]+/, "state=x"));
-    await expect(createSessionClient().restore()).rejects.toThrow(/state/);
+    const own = window.location.href;
+    window.history.replaceState(null, "", own.replace(/state=[^&]+/, "state=x"));
+    await expect(createSessionClient().restore()).resolves.toMatchObject({ webId: null });
+    expect(window.location.search).toBe("");
+    window.history.replaceState(null, "", own);
+    await expect(createSessionClient().restore()).resolves.toMatchObject({ webId: WEBID });
   });
 
   it("refuses a redirect back that does not name its provider, even from one that does not say it would", async () => {

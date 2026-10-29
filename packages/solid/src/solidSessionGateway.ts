@@ -63,24 +63,32 @@ function isAuthorizationResponse(searchParams: URLSearchParams): boolean {
   return searchParams.has("code") || searchParams.has("error");
 }
 
-/** Takes the provider's answer off the address, so a reload does not try it again, and refuses it. */
-function refuseAuthorizationResponse(url: URL, error: AppError): never {
+/** Takes the provider's answer off the address, keeping its route, so a reload does not try it again. */
+function takeOffAuthorizationResponse(url: URL): void {
   for (const name of RESPONSE_PARAMETERS) url.searchParams.delete(name);
   window.history.replaceState(window.history.state, "", url.href);
+}
+
+/** Takes the provider's answer off the address and refuses it. */
+function refuseAuthorizationResponse(url: URL, error: AppError): never {
+  takeOffAuthorizationResponse(url);
   throw error;
 }
 
 /**
- * Refuses an answer from an identity provider, before a sign-in client
- * redeems its code, unless this tab sent the browser to a provider and
- * the answer names that provider in its `iss` parameter (RFC 9207).
- * Every provider is sent the same redirect URL and client, so `iss` is
- * all that ties an answer to the provider it came from, and only this
- * tab knows which provider it sent the browser to. An answer with a
- * code must also answer a request, by its `state`, that went to that
- * same provider: the client redeems the code where the request went,
- * and may hold requests from other tabs, or ones left unanswered.
- * A refused answer is taken off the address.
+ * Drops an answer from an identity provider when this tab sent the
+ * browser to no provider: it answers nothing this tab asked for, so it
+ * is taken off the address and the previous session restored as on any
+ * load, where refusing it would stop the session for that load. Any
+ * other answer is refused, before a sign-in client redeems its code,
+ * unless it names the provider this tab sent the browser to in its
+ * `iss` parameter (RFC 9207). Every provider is sent the same redirect
+ * URL and client, so `iss` is all that ties an answer to the provider
+ * it came from, and only this tab knows which provider it sent the
+ * browser to. An answer with a code must also answer a request, by its
+ * `state`, that went to that same provider: the client redeems the code
+ * where the request went, and may hold requests from other tabs, or
+ * ones left unanswered. A refused answer is taken off the address too.
  */
 async function checkAuthorizationResponse(
   expectedIssuer: string | null,
@@ -89,15 +97,17 @@ async function checkAuthorizationResponse(
   const url = new URL(window.location.href);
   const { searchParams } = url;
   if (!isAuthorizationResponse(searchParams)) return;
+  if (expectedIssuer === null) {
+    takeOffAuthorizationResponse(url);
+    return;
+  }
   const iss = searchParams.get("iss");
   if (iss === null) {
     refuseAuthorizationResponse(
       url,
-      new AppError("loginIssuerMissing", expectedIssuer === null ? {} : { issuer: expectedIssuer }),
+      new AppError("loginIssuerMissing", { issuer: expectedIssuer }),
     );
   }
-  if (expectedIssuer === null)
-    refuseAuthorizationResponse(url, new AppError("loginNotStarted", { iss }));
   if (withoutTrailingSlash(iss) !== withoutTrailingSlash(expectedIssuer)) {
     refuseAuthorizationResponse(
       url,

@@ -11,6 +11,7 @@ import {
   logout,
 } from "@inrupt/solid-client-authn-browser";
 import type { SessionClient } from "./interface";
+import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
 
 /**
  * The sign-in client (SessionClient, interface.ts) over
@@ -58,10 +59,34 @@ function sessionOfState(state: string): string | null {
   return typeof sessionId === "string" ? sessionId : null;
 }
 
+/** The parameters a provider sends back on the redirect URL. */
+const RESPONSE_PARAMETERS = ["code", "state", "iss", "error", "error_description", "session_state"];
+
+/**
+ * Takes off the page's URL a provider's answer this tab did not ask for,
+ * keeping its route. An answer is this tab's when the tab is marked and
+ * the library stored the `state` it echoes (in localStorage, under its
+ * own key, on sending the request), an error's too.
+ */
+function dropUnaskedAnswer(): void {
+  const url = new URL(window.location.href);
+  const { searchParams } = url;
+  if (
+    !RESPONSE_PARAMETERS.some((name) => searchParams.has(name)) ||
+    (window.sessionStorage.getItem(PROVIDER_REDIRECT_KEY) &&
+      window.localStorage.getItem(`${USER_PREFIX}${searchParams.get("state")}`))
+  ) {
+    return;
+  }
+  for (const name of RESPONSE_PARAMETERS) searchParams.delete(name);
+  window.history.replaceState(window.history.state, "", url.href);
+}
+
 /** The sign-in client on @inrupt/solid-client-authn-browser's default session. */
 export function createSessionClient(): SessionClient {
   return {
     async restore() {
+      dropUnaskedAnswer();
       let fromLogin = false;
       const onLogin = () => {
         fromLogin = true;
@@ -73,11 +98,17 @@ export function createSessionClient(): SessionClient {
       // The library reports which happened only by these events.
       events().on(EVENTS.LOGIN, onLogin);
       events().on(EVENTS.SESSION_RESTORED, onRestored);
+      // Marked anew, and taken off once restored; a silent restore leaves
+      // the page with the library's promise never settling, so the
+      // finally below does not run and the mark stays for the provider's
+      // answer.
+      window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "restore");
       try {
         const info = await handleIncomingRedirect({ restorePreviousSession: true });
         const webId = info?.isLoggedIn && info.webId ? info.webId : null;
         return { webId, fromLogin, restoredFrom };
       } finally {
+        window.sessionStorage.removeItem(PROVIDER_REDIRECT_KEY);
         events().off(EVENTS.LOGIN, onLogin);
         events().off(EVENTS.SESSION_RESTORED, onRestored);
       }
@@ -93,7 +124,13 @@ export function createSessionClient(): SessionClient {
     },
 
     async login(options) {
-      await login(options);
+      window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "login");
+      try {
+        await login(options);
+      } catch (error) {
+        window.sessionStorage.removeItem(PROVIDER_REDIRECT_KEY);
+        throw error;
+      }
     },
 
     async logout() {
