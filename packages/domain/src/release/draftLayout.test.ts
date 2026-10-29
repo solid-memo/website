@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { growth } from "../testing/growth.ts";
 import { card, courseDraft, DRAFT, link, of } from "../testing/releaseDraft.ts";
 import { applyDraftChanges, type ReleaseDraft } from "./releaseDraft.ts";
 import {
@@ -152,6 +153,20 @@ describe("draftDocuments", () => {
     // A distractor two cards name stays with the first.
     expect(places.get(of("q-a-1a-d1"))).toEqual({ kind: "chapter", chapter: "ch-a" });
   });
+
+  it("places a long chain of blank nodes, its deepest statements first, with the subject that names it", () => {
+    const draft = courseDraft();
+    const depth = 20_000;
+    const chain = Array.from({ length: depth }, (_, n) => ({
+      subject: n === 0 ? of("q-a-1a") : `_:b${n - 1}`,
+      predicate: "https://other.example/next",
+      object: { kind: "blank" as const, value: `b${n}` },
+    })).reverse();
+    const places = draftDocuments({ ...draft, triples: [...chain, ...draft.triples] });
+    const a = { kind: "chapter", chapter: "ch-a" };
+    expect(places.get("_:b0")).toEqual(a);
+    expect(places.get(`_:b${depth - 2}`)).toEqual(a);
+  });
 });
 
 describe("draftNameFor", () => {
@@ -204,6 +219,46 @@ describe("changedDocuments", () => {
     expect(changedDocuments(draft, after({ kind: "addChapter", id: "ch-c" }))).toEqual([
       chapterDocumentOf(DRAFT, "ch-c"),
     ]);
+  });
+
+  it("names the one document a change writes among many statements, in time that grows with them", () => {
+    const many = (count: number) => {
+      const foreign = {
+        ...draft,
+        triples: [
+          ...draft.triples,
+          ...Array.from({ length: count }, (_, n) =>
+            link(
+              `https://other.example/s${n}`,
+              "https://other.example/p",
+              "https://other.example/o",
+            ),
+          ),
+        ],
+      };
+      const more = {
+        ...foreign,
+        triples: [
+          ...foreign.triples,
+          link(of("q-loose"), "https://other.example/p", "https://other.example/o"),
+        ],
+      };
+      return [foreign, more] as const;
+    };
+    const [foreign, more] = many(100);
+    expect(changedDocuments(foreign, more)).toEqual([cardsDocumentOf(DRAFT)]);
+    // Eight times the statements take about as long as an eighth of them
+    // eight times over; laying each out by copying its document's
+    // contents would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const [before, after] = many(count);
+        return () => changedDocuments(before, after);
+      },
+      3_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

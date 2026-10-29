@@ -380,18 +380,34 @@ export function applyDraftChange(
   return rewritten === null ? { ...next, triples } : { refused: "carriedActivity", id: rewritten };
 }
 
+/**
+ * The statements of each of `subjects` among `triples`, in their order,
+ * gathered in one pass; a subject none is of is left out.
+ */
+export function triplesBySubject(
+  triples: readonly DraftTriple[],
+  subjects: ReadonlySet<string>,
+): Map<string, DraftTriple[]> {
+  const of = new Map<string, DraftTriple[]>();
+  for (const triple of triples) {
+    if (!subjects.has(triple.subject)) continue;
+    const said = of.get(triple.subject);
+    if (said === undefined) of.set(triple.subject, [triple]);
+    else said.push(triple);
+  }
+  return of;
+}
+
 /** The first activity carried from an earlier release whose statements `triples` changes, by id; null when none. */
 function rewrittenActivity(draft: ReleaseDraft, triples: readonly DraftTriple[]): string | null {
-  const said = (list: readonly DraftTriple[], iri: string) =>
-    JSON.stringify(
-      list
-        .filter((triple) => triple.subject === iri)
-        .map(keyOfTriple)
-        .sort(),
-    );
+  const activities = new Set(draft.published.activities.map((id) => iriIn(draft, id)));
+  const was = triplesBySubject(draft.triples, activities);
+  const now = triplesBySubject(triples, activities);
+  const said = (of: Map<string, DraftTriple[]>, iri: string) =>
+    JSON.stringify((of.get(iri) ?? []).map(keyOfTriple).sort());
   return (
     draft.published.activities.find(
-      (id) => said(draft.triples, iriIn(draft, id)) !== said(triples, iriIn(draft, id)),
+      (id) => said(was, iriIn(draft, id)) !== said(now, iriIn(draft, id)),
     ) ?? null
   );
 }
@@ -406,23 +422,39 @@ function blankOf(term: ReleaseTerm): string | null {
   return term.kind === "blank" ? `_:${term.value}` : null;
 }
 
-/** `kept` without the statements of blank nodes that only statements of `before` it lacks named, however deep. */
+/**
+ * `kept` without the statements of blank nodes that only statements of
+ * `before` it lacks named, however deep. Each blank node is looked at
+ * once a statement naming it goes: it goes too when no statement kept
+ * names it any more, and the blank nodes its statements name are looked
+ * at in turn.
+ */
 function withoutOrphans(
   kept: readonly DraftTriple[],
   before: readonly DraftTriple[],
 ): DraftTriple[] {
   const keys = new Set(kept.map(keyOfTriple));
-  const named = (triples: readonly DraftTriple[]) =>
-    new Set(triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null));
-  let result = [...kept];
-  let gone = before.filter((triple) => !keys.has(keyOfTriple(triple)));
-  for (;;) {
-    const still = named(result);
-    const orphans = [...named(gone)].filter((blank) => !still.has(blank));
-    if (orphans.length === 0) return result;
-    gone = result.filter((triple) => orphans.includes(triple.subject));
-    result = result.filter((triple) => !orphans.includes(triple.subject));
+  const naming = new Map<string, number>();
+  const subjects = new Set<string>();
+  for (const triple of kept) {
+    const blank = blankOf(triple.object);
+    if (blank !== null) naming.set(blank, (naming.get(blank) ?? 0) + 1);
+    subjects.add(triple.subject);
   }
+  const of = triplesBySubject(kept, subjects);
+  const named = (triples: readonly DraftTriple[]) =>
+    triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null);
+  const looked = named(before.filter((triple) => !keys.has(keyOfTriple(triple))));
+  const orphans = new Set<string>();
+  for (let blank = looked.pop(); blank !== undefined; blank = looked.pop()) {
+    if (orphans.has(blank) || (naming.get(blank) ?? 0) > 0) continue;
+    orphans.add(blank);
+    for (const next of named(of.get(blank) ?? [])) {
+      naming.set(next, naming.get(next)! - 1);
+      looked.push(next);
+    }
+  }
+  return kept.filter((triple) => !orphans.has(triple.subject));
 }
 
 function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | DraftRefusal {
@@ -1005,7 +1037,7 @@ function setSource(
   iri: string,
   source: DraftSource | null,
 ): ReleaseDraft | DraftRefusal {
-  const generating = ownGeneratingActivities(draft);
+  const generating = new Set(ownGeneratingActivities(draft));
   const carried = new Set(draft.published.activities.map((id) => iriIn(draft, id)));
   const usedBy = (triple: DraftTriple) =>
     triple.predicate === `${PROV}used` &&
@@ -1017,8 +1049,7 @@ function setSource(
     draft.triples.some((triple) => usedBy(triple) && carried.has(triple.subject));
   const triples = draft.triples.filter(
     (triple) =>
-      (described || triple.subject !== iri) &&
-      !(usedBy(triple) && generating.includes(triple.subject)),
+      (described || triple.subject !== iri) && !(usedBy(triple) && generating.has(triple.subject)),
   );
   const derived = draft.root.wasDerivedFrom.filter((one) => one !== iri);
   if (source === null) {
@@ -1209,11 +1240,17 @@ export function checkActivityTriples(iri: string, activity: CheckActivity): Draf
 /**
  * The check an activity of the draft records, read back: null unless its
  * statements are exactly those checkActivityTriples writes for one, so
- * an activity written otherwise is never rewritten by an edit.
+ * an activity written otherwise is never rewritten by an edit. `said`
+ * is the activity's statements, when already gathered.
  */
-export function readCheckActivity(draft: ReleaseDraft, id: string): CheckActivity | null {
+export function readCheckActivity(
+  draft: ReleaseDraft,
+  id: string,
+  said: readonly DraftTriple[] = draft.triples.filter(
+    (triple) => triple.subject === iriIn(draft, id),
+  ),
+): CheckActivity | null {
   const iri = iriIn(draft, id);
-  const said = draft.triples.filter((triple) => triple.subject === iri);
   const literal = (predicate: string) =>
     said.find((triple) => triple.predicate === predicate && triple.object.kind === "literal")
       ?.object as ReleaseText | undefined;
@@ -1319,12 +1356,17 @@ function deleteActivity(draft: ReleaseDraft, id: string): ReleaseDraft | DraftRe
       .filter((triple) => triple.subject === iri && triple.predicate === `${PROV}used`)
       .map((triple) => triple.object.value),
   );
-  const named = (source: string) =>
-    draft.root.wasDerivedFrom.includes(source) ||
-    triples.some((triple) => triple.object.kind === "iri" && triple.object.value === source);
+  const pointedTo = new Set([
+    ...draft.root.wasDerivedFrom,
+    ...triples
+      .filter((triple) => triple.object.kind === "iri")
+      .map((triple) => triple.object.value),
+  ]);
   return {
     ...draft,
-    triples: triples.filter((triple) => !sources.has(triple.subject) || named(triple.subject)),
+    triples: triples.filter(
+      (triple) => !sources.has(triple.subject) || pointedTo.has(triple.subject),
+    ),
   };
 }
 
