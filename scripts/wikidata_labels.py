@@ -256,6 +256,8 @@ def current(qids: list[str], cache_dir: Path | None) -> dict[str, tuple[int, Lab
                 problems.append(f"  {qid}: no such item")
             elif "redirects" in entity or entity.get("id") != qid:
                 problems.append(f"  {qid}: now a redirect to {entity.get('redirects', {}).get('to', entity.get('id'))}")
+            elif type(entity["lastrevid"]) is not int:  # a revision is a number, and names a cache file
+                raise Unreachable(f"unexpected revision of {qid}: {json.dumps(entity['lastrevid'])[:100]}")
             else:
                 found[qid] = (entity["lastrevid"], labels_of(entity))
                 keep(cache_dir, qid, *found[qid])

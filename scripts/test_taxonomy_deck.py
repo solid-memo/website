@@ -10,8 +10,9 @@ the snapshots --cache-dir reads, and the deck's first version, v1.ttl,
 covering the taxonomy's versions 1 to 3, with a header written by hand and
 the cards the script's own functions make. The tests run the script on it
 (--check, --verify, making v2.ttl from version 4), with the taxonomy's list
-of versions, every download and git patched out, so they read nothing of
-the real repository and need no network.
+of versions, every download and git patched out (a download answers from the
+fake taxonomy), so they read nothing of the real repository and need no
+network.
 
 The fake taxonomy:
   - Aktiemäklare is replaced by a new concept, Finansmäklare, in version 3;
@@ -212,9 +213,18 @@ class Deck(unittest.TestCase):
             answer = json.dumps(api_answer(v), ensure_ascii=False)
             self.snapshot(v).write_text(answer, encoding="utf-8")
         self.versions = dict(VERSIONS)
+        self.answers = {td.snapshot_url(v): api_answer(v) for v in TAXONOMY}
+        self.fetched: list[str] = []
+
+        def fetch_json(url: str) -> object:
+            if url not in self.answers:
+                raise AssertionError(f"the tests fetch nothing else: {url}")
+            self.fetched.append(url)
+            return self.answers[url]
+
         for name, value in (
             ("load_versions", lambda: self.versions),
-            ("fetch_json", mock.Mock(side_effect=AssertionError("the tests fetch nothing"))),
+            ("fetch_json", fetch_json),
         ):
             patch = mock.patch.object(td, name, value)
             patch.start()
@@ -457,6 +467,42 @@ class Refusals(Deck):
         self.assertNotIn("version 1 (", message)
         self.assertFalse((self.deck / "v2.ttl").exists())
 
+    def test_stops_when_a_taxonomy_version_was_published_at_another_time_since(self) -> None:
+        self.versions[2] = "2022-01-10T08:00:01.000Z"
+        for args in (["--verify"], ["--to", "4", "--allow-uncommitted"]):
+            with self.subTest(args=args), self.assertRaises(SystemExit) as stop:
+                self.run_script(*args, "--cache-dir", str(self.cache))
+            message = str(stop.exception.code)
+            self.assertIn(f"{self.v1} records taxonomy versions as published at other times than the taxonomy "
+                          "now gives: version 2 (was 2022-01-10T08:00:00.000Z, now 2022-01-10T08:00:01.000Z)",
+                          message)
+        self.assertFalse((self.deck / "v2.ttl").exists())
+
+    def test_stops_on_a_concept_id_the_taxonomy_does_not_write(self) -> None:
+        for where in ("id", "replaced_by"):
+            answer = api_answer(4)
+            concept = next(c for c in answer["data"]["concepts"] if c["id"] == "aktie")
+            if where == "id":
+                concept["id"] = "aktie> . <#s> <#p> <#o"
+            else:
+                concept["replaced_by"][0]["id"] = "finans>"
+            self.answers[td.snapshot_url(4)] = answer
+            with self.subTest(where=where), self.assertRaises(SystemExit) as stop:
+                self.run_script("--to", "4", "--allow-uncommitted", "--cache-dir", str(self.cache))
+            self.assertTrue(str(stop.exception.code).startswith(
+                "taxonomy version 4: concept ids that are not as the taxonomy writes them: "), stop.exception.code)
+        self.assertFalse((self.deck / "v2.ttl").exists())
+
+    def test_reads_from_the_cache_only_the_versions_the_deck_has_checksums_of(self) -> None:
+        answer = api_answer(4)
+        answer["data"]["concepts"][1]["preferred_label"] = "Not the taxonomy's"
+        self.snapshot(4).write_text(json.dumps(answer, ensure_ascii=False), encoding="utf-8")
+        text = self.make_v2()
+        self.assertEqual(self.fetched, [td.snapshot_url(4)])  # versions 1 to 3 from the cache
+        self.assertNotIn("Not the taxonomy's", text)
+        self.assertIn("Dataskyddsombud", text)
+        self.assertEqual(json.loads(self.snapshot(4).read_text(encoding="utf-8")), api_answer(4))
+
     def test_the_checksum_ignores_order_and_formatting(self) -> None:
         concepts = api_answer(3)["data"]["concepts"]
         self.assertEqual(td.checksum(list(reversed(concepts))), td.checksum(concepts))
@@ -481,6 +527,48 @@ class PreviousVersion(unittest.TestCase):
     def test_finds_none_in_an_empty_folder(self) -> None:
         with tempfile.TemporaryDirectory() as folder:
             self.assertIsNone(td.previous_version(Path(folder)))
+
+
+class LoadVersions(unittest.TestCase):
+    def load(self, answer: object) -> dict[int, str]:
+        with mock.patch.object(td, "fetch_json", return_value=answer), redirect_stderr(io.StringIO()):
+            return td.load_versions()
+
+    def test_writes_every_time_as_the_deck_records_it(self) -> None:
+        answer = [{"taxonomy/version": 1, "taxonomy/timestamp": "2021-03-05T13:38:02.440Z"},
+                  {"taxonomy/version": 2, "taxonomy/timestamp": "2022-01-10T08:00:00Z"},
+                  {"taxonomy/version": 3, "taxonomy/timestamp": "2023-06-01T09:30:00.123456Z"}]
+        self.assertEqual(self.load(answer), {1: "2021-03-05T13:38:02.440Z", 2: "2022-01-10T08:00:00.000Z",
+                                             3: "2023-06-01T09:30:00.123Z"})
+
+    def test_stops_on_a_version_that_is_not_a_number_and_a_time(self) -> None:
+        for entry in ({"taxonomy/version": "1", "taxonomy/timestamp": "2021-03-05T13:38:02.440Z"},
+                      {"taxonomy/version": True, "taxonomy/timestamp": "2021-03-05T13:38:02.440Z"},
+                      {"taxonomy/version": -1, "taxonomy/timestamp": "2021-03-05T13:38:02.440Z"},
+                      {"taxonomy/version": 1, "taxonomy/timestamp": '2021-03-05T13:38:02Z" . <#s> <#p> <#o'},
+                      {"taxonomy/version": 1, "taxonomy/timestamp": "2021-13-05T13:38:02.440Z"},
+                      {"taxonomy/version": 1, "taxonomy/timestamp": 1614951482},
+                      {"taxonomy/version": 1},
+                      "1"):
+            with self.subTest(entry=entry), self.assertRaises(SystemExit) as stop:
+                self.load([entry])
+            self.assertIn("/main/versions: unexpected version: ", str(stop.exception.code))
+        with self.assertRaises(SystemExit):
+            self.load({"taxonomy/version": 1})
+
+
+class Iris(unittest.TestCase):
+    def test_a_concept_iri_takes_only_a_taxonomy_id(self) -> None:
+        self.assertEqual(td.concept_iri("Y8ck_cY2_8CE"), f"{td.CONCEPT}Y8ck_cY2_8CE")
+        for cid in ("", "a>b", "a b", "a/b", "x" * 33):
+            with self.subTest(cid=cid), self.assertRaises(ValueError):
+                td.concept_iri(cid)
+
+    def test_writes_only_an_iri_turtle_reads_as_one(self) -> None:
+        self.assertEqual(td.iri_ref(f"{td.CONCEPT}aktie"), f"<{td.CONCEPT}aktie>")
+        for iri in ("a>b", "a b", 'a"b', "a\\b", "a\nb", "a{b"):
+            with self.subTest(iri=iri), self.assertRaises(ValueError):
+                td.iri_ref(iri)
 
 
 class FetchJson(unittest.TestCase):

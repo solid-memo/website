@@ -329,7 +329,11 @@ that fetched it and a checksum of the answer. That command at that
 commit remakes it byte for byte. The script refuses to run unless it's
 committed and unmodified (`--allow-uncommitted` writes a draft), and
 stops when a taxonomy version the deck records no longer matches its
-checksum.
+checksum or its publication time. With `--cache-dir`, it reads from
+the cache only the versions the deck has checksums of, and fetches the
+others. It also stops on a concept id that isn't letters, digits and
+underscores, or a publication time that isn't a time: the deck writes
+both as they come.
 
 Two options write nothing:
 
