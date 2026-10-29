@@ -45,3 +45,16 @@ export function writtenHost(written: string): string | null {
     label === labels[i] || (label.startsWith("xn--") && !/^[\x20-\x7e]*$/.test(labels[i]!));
   return parsed.length === labels.length && parsed.every(same) ? host : null;
 }
+
+/**
+ * Whether `written`, a URL as written, shows the host it leads to
+ * (`host`, as liveLink gives it): it names that host as the parser reads
+ * it (writtenHost), and the host is not an international one, whose
+ * punycode is what shows the look-alike letters its text could hide.
+ */
+export function namesItsHost(written: string, host: string): boolean {
+  return writtenHost(written) === host && !PUNYCODE.test(host);
+}
+
+/** A host with an international (punycode) label. */
+const PUNYCODE = /(?:^|\.)xn--/i;

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { liveLink, writtenHost } from "./links";
+import { liveLink, namesItsHost, writtenHost } from "./links";
 
 describe("liveLink", () => {
   it("follows an absolute https URL, giving its host as the parser has it", () => {
@@ -67,5 +67,19 @@ describe("writtenHost", () => {
   it("gives a label that decodes to nothing only as the parser keeps it", () => {
     const url = "https://xn--a.example/";
     expect(writtenHost(url)).toBe(URL.canParse(url) ? new URL(url).host : null);
+  });
+});
+
+describe("namesItsHost", () => {
+  it("is true for an address that names, as written, the host it leads to", () => {
+    expect(namesItsHost("https://Pod.Example:8443/a", "pod.example:8443")).toBe(true);
+  });
+
+  it.each([
+    ["https://pod.example\u2215decks.evil.example/x", "pod.xn--exampledecks-ni5g.evil.example"],
+    ["https://b\u0430nk.example/", "xn--bnk-6cd.example"],
+    ["https://pod.example/", "evil.example"],
+  ])("is false for %j leading to %j", (written, host) => {
+    expect(namesItsHost(written, host)).toBe(false);
   });
 });
