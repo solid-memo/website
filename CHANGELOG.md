@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.15](https://github.com/solid-memo/website/compare/v6.17.14...v6.17.15) (2026-10-29)
+
+### Bug Fixes
+
+* **solid:** write long blank-node chains without deep recursion ([bce6774](https://github.com/solid-memo/website/commit/bce67747e7f57935c61f8caa21e29e67a9d0fd44))
+
 ## [6.17.14](https://github.com/solid-memo/website/compare/v6.17.13...v6.17.14) (2026-10-29)
 
 ### Bug Fixes
