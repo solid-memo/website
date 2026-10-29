@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { shiftStudyDay } from "@solid-memo/domain/answer";
+import { CHART_YEARS, shiftStudyDay } from "@solid-memo/domain/answer";
 import { introducedOverTime, type DayActivity } from "@solid-memo/domain/statistics";
+import { daysBetween } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
 import { LineChart } from "./LineChart";
 
@@ -13,19 +14,24 @@ import { LineChart } from "./LineChart";
  * days of nothing new. The days must not be empty. An answer's study day
  * is kept as it was when given, so a later day boundary or another time
  * zone can leave answers after today; the line then runs on to the last.
+ * Of more than CHART_YEARS' worth of days it shows the last.
  */
 export function IntroducedChart({ days, today }: { days: readonly DayActivity[]; today: string }) {
   const { t, locale, formatDate } = useI18n();
   const number = new Intl.NumberFormat(locale);
   const totals = introducedOverTime(days);
   const byDay = new Map(totals.map((total) => [total.studyDay, total.introduced]));
-  const keys: string[] = [];
-  const values: number[] = [];
   const lastDay = totals.at(-1)!.studyDay > today ? totals.at(-1)!.studyDay : today;
-  for (let day = totals[0]!.studyDay; day <= lastDay; day = shiftStudyDay(day, 1)) {
-    keys.push(day);
-    values.push(byDay.get(day) ?? values.at(-1)!);
-  }
+  // A known count of days, at most CHART_YEARS' worth, the total carried in from the days left out.
+  const count = Math.min(daysBetween(totals[0]!.studyDay, lastDay) + 1, CHART_YEARS * 366);
+  const keys = Array.from({ length: count }, (_, i) => shiftStudyDay(lastDay, i - count + 1));
+  let next = 0;
+  let total = 0;
+  const values = keys.map((day) => {
+    while (next < totals.length && totals[next]!.studyDay <= day)
+      total = totals[next++]!.introduced;
+    return total;
+  });
   return (
     <LineChart
       name="introduced-chart"

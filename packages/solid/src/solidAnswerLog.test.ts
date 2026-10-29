@@ -294,6 +294,48 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
   });
 
+  it("leaves out an answer of a day outside its document's month, but not one a day either side", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const given = answer("2026-09-21");
+    await log.append(INSTANCE, given);
+    /** An answer of `studyDay`, written into September's document. */
+    const inSeptember = async (studyDay: string) => {
+      const misplaced = answer(studyDay);
+      await log.append(INSTANCE, misplaced);
+      const url = `${HISTORY}${studyDay.slice(0, 7)}.ttl`;
+      for (const line of fake.documents.get(url)!)
+        fake.documents.get(SEPTEMBER)!.add(line.replaceAll(url, SEPTEMBER));
+      return misplaced;
+    };
+    const before = await inSeptember("2026-08-31");
+    const after = await inSeptember("2026-10-01");
+    await inSeptember("2026-10-02");
+    await inSeptember("9999-12-31");
+    await inSeptember("9000-01-01");
+    const read = await log.readMonth(INSTANCE, "2026-09");
+    expect(read).toEqual(expect.arrayContaining([given, before, after]));
+    expect(read).toHaveLength(3);
+    const since = await log.readMonthSince(INSTANCE, "2026-09", undefined);
+    expect(since).toEqual({ unchanged: false, value: read, version: '"v1"' });
+  });
+
+  it("leaves out an answer of a day before the earliest that shifting a day keeps in order", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const january = `${HISTORY}0100-01.ttl`;
+    const given = answer("0100-01-04");
+    await log.append(INSTANCE, given);
+    // A day a day before the month, which the earliest day would otherwise let through.
+    for (const studyDay of ["0099-12-31", "0100-01-03"]) {
+      await log.append(INSTANCE, answer(studyDay));
+      const url = `${HISTORY}${studyDay.slice(0, 7)}.ttl`;
+      for (const line of fake.documents.get(url)!)
+        fake.documents.get(january)!.add(line.replaceAll(url, january));
+    }
+    await expect(log.readMonth(INSTANCE, "0100-01")).resolves.toEqual([given]);
+  });
+
   it("reads a month again only when its document changed since the version known", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });

@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { isRecalled, MATURE_INTERVAL_DAYS, shiftStudyDay, type Answer } from "./answer";
+import {
+  CHART_YEARS,
+  isRecalled,
+  MATURE_INTERVAL_DAYS,
+  shiftStudyDay,
+  type Answer,
+} from "./answer";
 import { isRepeat, isScoredReview, promptKeyOf, segmentsOf, type ChainIndex } from "./answerChain";
 import { INTERVAL_BOUNDS } from "./scheduleInsight";
 import type { Recall, Retention } from "./statistics";
@@ -262,8 +268,9 @@ function stateOf(answer: Answer): "relearning" | "young" | "mature" {
 
 /**
  * Where the prompts answered stood at the end of each week (from Monday)
- * from the week of `since` (else of the first answer) to this one, as
- * their last answers by then left them, of the answers given, whose
+ * from the week of `since` (else of the first answer) to this one (of
+ * more than CHART_YEARS' worth, the last), as their last answers by then
+ * left them, of the answers given, whose
  * chains `index` holds; the answers before `since` set where the prompts
  * start. A card moved to another deck with its progress (its new chain
  * starting from the interval its old one ended on, once that ran out,
@@ -311,11 +318,11 @@ export function memoryOverTime(
   };
   const weeks: MemoryWeek[] = [];
   let next = 0;
-  for (
-    let week = mondayOf(since ?? ordered[0]!.studyDay);
-    week <= today;
-    week = shiftStudyDay(week, 7)
-  ) {
+  // A known count of weeks, at most CHART_YEARS' worth: the answers of the ones left out set where the first starts.
+  const first = mondayOf(since ?? ordered[0]!.studyDay);
+  const count = Math.floor(daysBetween(first, today) / 7) + 1;
+  for (let i = Math.max(0, count - CHART_YEARS * 53); i < count; i++) {
+    const week = shiftStudyDay(first, 7 * i);
     const end = shiftStudyDay(week, 6);
     while (next < ordered.length && ordered[next]!.studyDay <= end) apply(ordered[next++]!);
     weeks.push({ week, ...states, medianInterval: intervals.median() });

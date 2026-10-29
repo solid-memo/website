@@ -1178,9 +1178,14 @@ nothing could rebuild it.
   with the version they were read at; a month is read again only once
   it changed (`readMonthSince`, a conditional GET). A read adds to the
   cache and never replaces it; a month the log no longer lists is
-  dropped ([statistics.md](statistics.md#loading)). The Studio names a
-  deck's past answers by their card's id in its current cards document
-  (`deckAnswers`), which a library upgrade may have moved.
+  dropped ([statistics.md](statistics.md#loading)). An answer counts
+  only in its month's document. One whose study day is more than a day
+  outside that month is left out (`isOfStudyMonth`; the day allows for
+  the time zone), as is one whose study day isn't a real date. So is
+  one outside 0100-01-04 to 9999-12-31, the days `shiftStudyDay` keeps
+  in order. The Studio names a deck's past answers by their card's id in
+  its current cards document (`deckAnswers`), which a library upgrade
+  may have moved.
 - Checked in the full check only ([validation.md](validation.md)), since
   the current month changes every session.
 

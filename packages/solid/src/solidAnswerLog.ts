@@ -4,7 +4,7 @@
 
 import { type Dataset, createSolidDataset, getThingAll, removeThing, setThing } from "./client/rdf";
 import type { AnswerLog } from "@solid-memo/application/ports";
-import { monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
+import { isOfStudyMonth, monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
 import {
   historyContainerOf,
   historyUrlOf,
@@ -23,9 +23,18 @@ import { mapSince, readSince } from "./readSince";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { unlessNewer } from "./records";
 
-/** The answers of a month's document (none when there is none), each that fits its shape. */
-function answersIn(dataset: Dataset | null): Answer[] {
-  return dataset === null ? [] : getThingAll(dataset).flatMap((thing) => toAnswer(thing) ?? []);
+/**
+ * The answers of a month's document (none when there is none), each that
+ * fits its shape and is of the month (isOfStudyMonth): the statistics
+ * count every day from the first answer's to the last's.
+ */
+function answersIn(month: string, dataset: Dataset | null): Answer[] {
+  return dataset === null
+    ? []
+    : getThingAll(dataset).flatMap((thing) => {
+        const answer = toAnswer(thing);
+        return answer !== null && isOfStudyMonth(answer.studyDay, month) ? [answer] : [];
+      });
 }
 
 /** Tries at removing answers while other writes keep adding to the document. */
@@ -98,11 +107,14 @@ export function createSolidAnswerLog({
     },
 
     async readMonth(instanceUrl, month) {
-      return answersIn(await getSolidDatasetOrNull(historyUrlOf(instanceUrl, month), fetch));
+      return answersIn(month, await getSolidDatasetOrNull(historyUrlOf(instanceUrl, month), fetch));
     },
 
     async readMonthSince(instanceUrl, month, version) {
-      return mapSince(await readSince(historyUrlOf(instanceUrl, month), version, fetch), answersIn);
+      return mapSince(
+        await readSince(historyUrlOf(instanceUrl, month), version, fetch),
+        (dataset) => answersIn(month, dataset),
+      );
     },
 
     removeDay(instanceUrl, deckUrl, studyDay) {

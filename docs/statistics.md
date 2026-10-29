@@ -229,10 +229,14 @@ month, by server, for a learner who answers a hundred cards a day.
   log (`"all"`). When the range begins after the activity calendar's 52
   weeks (`calendarStartOf`), it reads those weeks too. `statisticsOf`
   counts the range's answers from its first day (`since`), and the
-  figures up to today, with `recentDays`, from every answer read. Its
-  result's `coverage` is the log's first month when the log begins
-  inside the range, and `logBegins` the log's first month, for the empty
-  range's message. The page's ranges are 30 days, 90 days (its
+  figures up to today, with `recentDays`, from every answer read. The
+  statistics read leaves out an answer after tomorrow: a later day
+  boundary or another time zone can put one on tomorrow, but none
+  later. The charts over time span at most ten years (`CHART_YEARS`),
+  the last, and walk a count of days, weeks or months known beforehand.
+  Its result's `coverage` is the log's first month when the log begins
+  inside the range, and `logBegins` the log's first month, for the
+  empty range's message. The page's ranges are 30 days, 90 days (its
   default), 12 months and `"all"` (`rangeRead` and `statisticsQuery` in
   `studyFigures.ts`), each read once and kept apart. The today strip
   has a key of its own (`todayFiguresQuery`). All time downloads the

@@ -75,10 +75,50 @@ export function monthOfStudyDay(studyDay: string): string {
   return studyDay.slice(0, 7);
 }
 
-/** The study day `days` after (or before, when negative) another, by the calendar. */
+/**
+ * The earliest study day shiftStudyDay gives: from 0100 a year has four
+ * digits as Date writes it, and this is its first Monday, so that the
+ * Monday of every week from it is a day of the range too.
+ */
+const FIRST_SHIFTED_DAY = Date.UTC(100, 0, 4);
+
+/** The last study day shiftStudyDay gives: after 9999 a year no longer has four digits. */
+const LAST_SHIFTED_DAY = Date.UTC(9999, 11, 31);
+
+/**
+ * The study day `days` after (or before, when negative) another, by the
+ * calendar, held to 0100-01-04 to 9999-12-31: as text the days given then
+ * always sort in the calendar's order. A walk over days must count its
+ * steps rather than compare with its last day, since past either end
+ * the same day comes back.
+ */
 export function shiftStudyDay(studyDay: string, days: number): string {
   const [year, month, day] = studyDay.split("-").map(Number);
-  return new Date(Date.UTC(year!, month! - 1, day! + days)).toISOString().slice(0, 10);
+  // setUTCFullYear, not Date.UTC, which reads the years 0 to 99 as 1900 to 1999.
+  const time = new Date(0).setUTCFullYear(year!, month! - 1, day! + days);
+  return new Date(Math.min(Math.max(time, FIRST_SHIFTED_DAY), LAST_SHIFTED_DAY))
+    .toISOString()
+    .slice(0, 10);
+}
+
+/**
+ * The most years a chart over time spans: of a longer answer log it
+ * shows the last ones. The log's months can be any, and a point a day
+ * (or a week, or a month) of them all would hang the page.
+ */
+export const CHART_YEARS = 10;
+
+/**
+ * Whether an answer's study day can be one of the answer log's month
+ * ("YYYY-MM"): in it, or a day either side, as a time zone may put an
+ * answer given near midnight on the other side of a month's end. A day
+ * outside the range shiftStudyDay keeps in order is of no month.
+ */
+export function isOfStudyMonth(studyDay: string, month: string): boolean {
+  return (
+    shiftStudyDay(studyDay, 0) === studyDay &&
+    [-1, 0, 1].some((days) => monthOfStudyDay(shiftStudyDay(studyDay, days)) === month)
+  );
 }
 
 /** A prompt reviewed at an interval of this many days or more is mature; below, young. */

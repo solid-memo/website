@@ -137,6 +137,27 @@ describe("the statistics of the answer log", () => {
       useCases.getStatistics(instance.url, noon, { range: "all" }),
     ).resolves.toMatchObject({ totals: { answers: 0 }, coverage: null, logBegins: null });
   });
+  it("leaves out answers of a day after tomorrow, which no answer given yet can have", async () => {
+    const { byMonth, useCases } = setup();
+    const answer = (studyDay: string): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl: deck.url,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+    });
+    // A later day boundary or another time zone can leave an answer on tomorrow.
+    byMonth.set("2026-09", [answer("2026-09-21"), answer("2026-09-22"), answer("2026-09-23")]);
+    byMonth.set("9000-01", [answer("9000-01-01")]);
+    byMonth.set("9999-12", [answer("9999-12-31")]);
+    for (const range of [undefined, "all"] as const) {
+      const statistics = await useCases.getStatistics(instance.url, noon, { range });
+      expect(statistics.days.map((day) => day.studyDay)).toEqual(["2026-09-21", "2026-09-22"]);
+    }
+  });
   it("saves the answers of the range asked for as a CSV file, of every deck or of one", async () => {
     const deps = makeDeps();
     const { log, byMonth } = memoryLog();

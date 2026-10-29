@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { Answer } from "./answer";
+import { CHART_YEARS, type Answer } from "./answer";
 import { chainIndexOf } from "./answerChain";
 import {
   latenessBucketOf,
@@ -182,6 +182,34 @@ describe("memoryOverTime", () => {
     expect(memoryOverTime(answers, chainIndexOf(answers), "2026-10-14", "2026-10-08")).toEqual([
       { week: "2026-10-05", relearning: 0, young: 1, mature: 1, medianInterval: 15.5 },
       { week: "2026-10-12", relearning: 0, young: 1, mature: 1, medianInterval: 15.5 },
+    ]);
+  });
+
+  it("spans at most CHART_YEARS of weeks, the last, the answers before setting where they start", () => {
+    const answers = [answer("1000-01-01", 4, undefined, 1), answer("2026-10-13", 4, 1, 25)];
+    const weeks = memoryOverTime(answers, chainIndexOf(answers), "2026-10-14");
+    expect(weeks).toHaveLength(CHART_YEARS * 53);
+    expect(weeks[0]).toEqual({
+      week: "2016-08-22",
+      relearning: 0,
+      young: 1,
+      mature: 0,
+      medianInterval: 1,
+    });
+    expect(weeks.at(-1)).toEqual({
+      week: "2026-10-12",
+      relearning: 0,
+      young: 0,
+      mature: 1,
+      medianInterval: 25,
+    });
+  });
+
+  it("starts its weeks on a Monday from the earliest study day an answer can have", () => {
+    const answers = [answer("0100-01-04", 4, undefined, 1)];
+    expect(memoryOverTime(answers, chainIndexOf(answers), "0100-01-12")).toEqual([
+      { week: "0100-01-04", relearning: 0, young: 1, mature: 0, medianInterval: 1 },
+      { week: "0100-01-11", relearning: 0, young: 1, mature: 0, medianInterval: 1 },
     ]);
   });
 

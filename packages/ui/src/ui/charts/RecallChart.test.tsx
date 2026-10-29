@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
+import { CHART_YEARS } from "@solid-memo/domain/answer";
 import type { MonthRetention } from "@solid-memo/domain/statistics";
 import { statusTexts } from "../../test/liveRegions";
 import { RecallChart } from "./RecallChart";
@@ -121,5 +122,29 @@ describe("RecallChart", () => {
       "September 21, 2026100% of 1 review100% of 2 reviews",
       "September 7, 202675% of 4 reviewsno reviews",
     ]);
+  });
+
+  it("spans at most CHART_YEARS of months, the last, up to the year 9999", () => {
+    const far = { ...months[2]!, month: "9999-12" };
+    const { container } = render(<RecallChart months={[months[0]!, far]} />);
+    const points = container.querySelectorAll("[data-point]");
+    expect(points).toHaveLength(CHART_YEARS * 12);
+    expect(points[0]).toHaveAttribute("data-point", "9990-01");
+    expect(points[points.length - 1]).toHaveAttribute("data-point", "9999-12");
+  });
+
+  it("spans at most CHART_YEARS of weeks, the last", () => {
+    const retention = { young: recall(1, 1), mature: recall(0, 0) };
+    const { container } = render(
+      <RecallChart
+        weeks={[
+          { week: "1000-01-06", retention },
+          { week: "2026-09-21", retention },
+        ]}
+      />,
+    );
+    const points = container.querySelectorAll("[data-point]");
+    expect(points).toHaveLength(CHART_YEARS * 53);
+    expect(points[points.length - 1]).toHaveAttribute("data-point", "2026-09-21");
   });
 });
