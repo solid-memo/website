@@ -58,6 +58,7 @@ export function emptyReleaseModel(url: string): ReleaseModel {
     distractors: [],
     distractorLinks: [],
     textFormats: [],
+    strays: [],
   };
 }
 

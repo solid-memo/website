@@ -1478,7 +1478,12 @@ enough that it and the next one are safe integers in JavaScript (a
 draft's address names its version). Every id in it must have letters
 A to Z, digits, `.`, `_` and `-`, starting with a letter or digit
 (`unsupportedIdOf`). A chapter's document is named
-after its id. Else it's refused (`releaseIdUnsupported`). A draft
+after its id. Else it's refused (`releaseIdUnsupported`). Every card,
+chapter, step and wrong option must be a fragment of the release
+(`<release>#id`), as the draft holds only those as its parts. One
+anywhere else is shown by no editor and checked by no rule, but would
+be published with the draft, so such a release is refused too
+(`releaseForeignPart`). A draft
 whose documents (perhaps written by another app) name a subject by
 another id isn't opened, and no change gives a draft one
 (`draftIdUnsupported`). Either is refused with nothing written, as is a
@@ -1740,7 +1745,11 @@ becomes: the rules `npm run library:check` runs on `decks/`
 
 - **Rules** (`ruleProblems` in
   [releaseCheck.ts](../packages/domain/src/release/releaseCheck.ts)):
-  - the course's (`courseProblems`);
+  - the course's (`courseProblems`), among them cards, chapters, steps
+    or wrong options the draft doesn't hold as its parts
+    (`strayParts`): ones outside the release, or whose records can't
+    be read. No editor shows them, but the release would publish them, so
+    a draft that holds one can't be published;
   - what a release needs that a draft may lack (`readinessProblems`): a
     title and a description with English text, a publisher, a version,
     a series, a distribution, the theme EDUC, and each chapter's and

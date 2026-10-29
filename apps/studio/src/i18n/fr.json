@@ -1277,6 +1277,7 @@
       "chapterPositions": "Les chapitres {chapters} occupent la même position, {position}.",
       "stepPositions": "Les étapes {steps} occupent la même position, {position}.",
       "chapterWithoutStep": "N’a aucune étape en usage.",
+      "strayParts": "Contient {parts}, typés carte, chapitre, étape ou mauvaise réponse, que le brouillon ne contient pas comme ses parties : hors de la publication, ou illisibles. Rien ici ne les affiche, mais la publication les publierait. Recommencez le brouillon à partir d’une publication qui ne les contient pas.",
       "textFormatMisplaced": "Indique un format de texte, ce que seuls une carte, une étape ou un chapitre peuvent faire.",
       "textFormatUnknown": "Indique un format de texte inconnu de cette application, {format} : son texte s’affiche en texte brut.",
       "markdown": "{field}, {language} : {finding}",

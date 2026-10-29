@@ -14,6 +14,7 @@ import {
 import {
   applyDraftChanges,
   blankDraft,
+  RDF_TYPE,
   type DraftChange,
   type DraftTriple,
   type ReleaseDraft,
@@ -269,6 +270,34 @@ describe("createReleaseDraft", () => {
       { code: "releaseIdUnsupported" },
     );
     expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it("refuses a release with a card outside it, writing nothing, but not one of its own its records do not hold", async () => {
+    const { useCases, repository } = setUp();
+    const typed = (subject: string, type: string): DraftTriple => ({
+      subject,
+      predicate: RDF_TYPE,
+      object: { kind: "iri", value: type },
+    });
+    const foreign = "https://elsewhere.example/x#q-1";
+    const hiding = { ...v1, triples: [...v1.triples, typed(foreign, SM.Card)] };
+    repository.readRelease.mockResolvedValueOnce(hiding);
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }),
+    ).rejects.toMatchObject({ code: "releaseForeignPart", vars: { part: foreign } });
+    repository.parseRelease.mockResolvedValueOnce(hiding);
+    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).rejects.toMatchObject(
+      { code: "releaseForeignPart" },
+    );
+    expect(repository.create).not.toHaveBeenCalled();
+    // One of its own its records do not read is the release check's to report (strayParts).
+    repository.parseRelease.mockResolvedValueOnce({
+      ...v1,
+      triples: [...v1.triples, typed(`${V1}#q-odd`, SM.Step)],
+    });
+    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).resolves.toEqual({
+      draft: expect.objectContaining({ name: "solid" }),
+    });
   });
 
   it("takes the next name when its place was taken elsewhere meanwhile, a few times", async () => {

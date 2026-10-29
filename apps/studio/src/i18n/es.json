@@ -1277,6 +1277,7 @@
       "chapterPositions": "Los capítulos {chapters} comparten la posición {position}.",
       "stepPositions": "Los pasos {steps} comparten la posición {position}.",
       "chapterWithoutStep": "No tiene ningún paso en uso.",
+      "strayParts": "Contiene {parts}, con tipo de tarjeta, capítulo, paso u opción incorrecta, que el borrador no tiene como partes suyas: fuera de la publicación o ilegibles. Nada de aquí los muestra, pero la publicación los publicaría. Empieza el borrador de nuevo a partir de una publicación sin ellos.",
       "textFormatMisplaced": "Indica un formato de texto, algo que solo hacen una tarjeta, un paso o un capítulo.",
       "textFormatUnknown": "Indica un formato de texto que esta aplicación no conoce, {format}: su texto se muestra como texto sin formato.",
       "markdown": "{field}, {language}: {finding}",

@@ -215,6 +215,11 @@ describe("problemMessage", () => {
       "Is of a Solid Memo class that no shape of this app describes.",
     );
     expect(
+      say({ code: "strayParts", params: { parts: [at("odd"), "https://elsewhere.example/x#q"] } }),
+    ).toBe(
+      "Holds #odd, <https://elsewhere.example/x#q>, typed a card, chapter, step or wrong option, which the draft does not hold as its parts: outside the release, or not readable. Nothing here shows them, but the release would publish them. Start the draft again from a release without them.",
+    );
+    expect(
       say({ code: "previousUnread", params: { previous: "https://pod.example/v1.ttl" } }),
     ).toBe(
       "The release it follows, <https://pod.example/v1.ttl>, could not be read, so nothing is checked against it. Check again later.",

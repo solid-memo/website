@@ -1054,6 +1054,24 @@ describe("courseProblems", () => {
     ]);
   });
 
+  it("names a card, chapter, step or distractor that is no fragment of the release", () => {
+    expect(
+      problemsOf(`${OUTLINE}
+<https://elsewhere.example/x#q-1> a solid-memo:Card .
+`),
+    ).toEqual([
+      `${L}: <https://elsewhere.example/x#q-1> is a solid-memo:Card, Chapter, Step or Distractor but no fragment of the release: every part of a release is a subject of its document, <#id>, which the Studio edits and checks.`,
+    ]);
+    expect(
+      problemsOf(`${OUTLINE}
+<https://elsewhere.example/x#q-1> a solid-memo:Card .
+<v0.ttl#d-1> a solid-memo:Distractor .
+`),
+    ).toEqual([
+      `${L}: <https://elsewhere.example/x#q-1>, <https://solid-memo.com/decks/solid/v0.ttl#d-1> are each a solid-memo:Card, Chapter, Step or Distractor but no fragment of the release: every part of a release is a subject of its document, <#id>, which the Studio edits and checks.`,
+    ]);
+  });
+
   it("names a chapter in use without a step in use, but not a retired one", () => {
     expect(
       problemsOf(

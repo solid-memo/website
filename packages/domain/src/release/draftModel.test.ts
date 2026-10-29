@@ -7,6 +7,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { courseDraft, deckDraft, DRAFT, link, of } from "../testing/releaseDraft";
 import { courseProblems } from "./courseRules";
 import { draftReleaseModel } from "./draftModel";
+import type { ReleaseDraft } from "./releaseDraft";
 import { publishedIds } from "./releaseModel";
 
 const PROV = "http://www.w3.org/ns/prov#";
@@ -250,6 +251,28 @@ describe("draftReleaseModel", () => {
       { subject: `${url}#ann`, object: { kind: "iri", value: "mailto:ann@example.com" } },
       { subject: `${url}#team`, object: { kind: "iri", value: "mailto:team@example.com" } },
     ]);
+  });
+
+  it("names as strays the subjects its statements type a card, chapter, step or distractor, outside it or in it, each once and moved", () => {
+    const deck = deckDraft();
+    const typed = (subject: string, type: string) => link(subject, RDF_TYPE, type);
+    const foreign = "https://elsewhere.example/x#q-1";
+    const draft: ReleaseDraft = {
+      ...deck,
+      triples: [
+        ...deck.triples,
+        typed(foreign, SM.Card),
+        typed(foreign, SM.Distractor),
+        typed(of("ch-odd"), SM.Chapter),
+        typed("_:b0", SM.Step),
+        typed(of("other"), "https://example.org/Thing"),
+        { subject: of("odd"), predicate: RDF_TYPE, object: { kind: "blank", value: SM.Card } },
+      ],
+    };
+    expect(draftReleaseModel(deck).strays).toEqual([]);
+    expect(draftReleaseModel(draft).strays).toEqual([foreign, of("ch-odd"), "_:b0"]);
+    const moved = "https://pod.example/releases/solid/v1.ttl";
+    expect(draftReleaseModel(draft, moved).strays).toEqual([foreign, `${moved}#ch-odd`, "_:b0"]);
   });
 
   it("names a distractor two cards share once", () => {

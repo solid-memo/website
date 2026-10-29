@@ -1757,6 +1757,7 @@
     "notAReleaseFile": "Ese archivo no contiene una única publicación de un mazo o un curso. Elige una publicación guardada como Turtle o JSON-LD.",
     "draftIdUnsupported": "Este borrador llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. Solid Memo no lo abre ni lo cambia.",
     "releaseIdUnsupported": "Esta publicación llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. No se puede convertir en borrador.",
+    "releaseForeignPart": "Esta publicación tiene una tarjeta, un capítulo, un paso o una opción incorrecta en {part}, fuera de la propia publicación. El Studio solo muestra y comprueba las partes propias de una publicación, así que no se puede convertir en borrador.",
     "releaseTaken": "Ya hay una publicación en {url}, y una publicación nunca se sobrescribe. Publica la siguiente versión o elige otra carpeta.",
     "releaseHasErrors": {
       "one": "La comprobación de la publicación encuentra {count} error. Corrígelo antes de publicarla.",

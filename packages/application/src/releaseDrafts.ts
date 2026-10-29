@@ -18,6 +18,7 @@ import {
 import {
   applyDraftChanges,
   blankDraft,
+  idIn,
   isRefusal,
   mergedDraft,
   publishedIdsOf,
@@ -34,7 +35,7 @@ import {
   type LearnerUpgrade,
   type ReleaseDiff,
 } from "@solid-memo/domain/release/releaseDiff";
-import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
+import { draftReleaseModel, strayPartsOf } from "@solid-memo/domain/release/draftModel";
 import { markdownProblems, type MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
@@ -189,10 +190,17 @@ function placeTaken(error: unknown, url: string): boolean {
   return error instanceof AppError && error.code === "createdElsewhere" && error.vars.url === url;
 }
 
-/** The release, unless it names a subject by an id a draft cannot keep (releaseIdUnsupported). */
+/**
+ * The release, unless it names a subject by an id a draft cannot keep
+ * (releaseIdUnsupported), or has a card, chapter, step or distractor
+ * outside it (releaseForeignPart): no editor or check of a draft would
+ * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp).
+ */
 function draftable(release: ReleaseDraft): ReleaseDraft {
   const id = unsupportedIdOf(release);
   if (id !== null) throw new AppError("releaseIdUnsupported", { id });
+  const foreign = strayPartsOf(release).find((stray) => idIn(release, stray) === null);
+  if (foreign !== undefined) throw new AppError("releaseForeignPart", { part: foreign });
   return release;
 }
 

@@ -1210,6 +1210,7 @@
       "chapterPositions": "Kapitlen {chapters} delar plats {position}.",
       "stepPositions": "Stegen {steps} delar plats {position}.",
       "chapterWithoutStep": "Har inget steg i bruk.",
+      "strayParts": "Innehåller {parts}, med typen kort, kapitel, steg eller felaktigt alternativ, som utkastet inte har som sina delar: utanför utgåvan eller inte läsbara. Inget här visar dem, men utgåvan skulle publicera dem. Börja om utkastet från en utgåva utan dem.",
       "textFormatMisplaced": "Anger ett textformat, vilket bara ett kort, ett steg eller ett kapitel gör.",
       "textFormatUnknown": "Anger ett textformat som appen inte känner till, {format}: dess text visas som vanlig text.",
       "markdown": "{field}, {language}: {finding}",

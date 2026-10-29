@@ -169,6 +169,8 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
       return `${at}chapters ${list(problem.params.chapters)} share schema:position ${problem.params.position}; a course's chapters each have their own.`;
     case "stepPositions":
       return `${at}steps ${list(problem.params.steps)} of ${shown(problem.params.chapter)} share schema:position ${problem.params.position}; a chapter's steps each have their own.`;
+    case "strayParts":
+      return `${at}${list(problem.params.parts)} ${problem.params.parts.length === 1 ? "is a" : "are each a"} solid-memo:Card, Chapter, Step or Distractor but no fragment of the release: every part of a release is a subject of its document, <#id>, which the Studio edits and checks.`;
     case "chapterWithoutStep":
       return `${at}chapter ${subject} has no step in use; a chapter in use has at least one step that is not retired.`;
     case "textFormatMisplaced": {
