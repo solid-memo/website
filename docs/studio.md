@@ -2317,7 +2317,11 @@ A leaf hangs by the first node that links to it. A choice that would
 make a cycle falls back, at the first node of the cycle (by address)
 that can, to what holds it, else to the first node that links to it.
 If none can, that first node goes under the middle. Where the cycle is
-broken doesn't depend on nodes unrelated to it.
+broken doesn't depend on nodes unrelated to it. No node hangs more than
+16 steps from the middle: one that a chain of links (each part of the
+next, say) would hang deeper hangs beside its parent instead. So no
+edge's path is longer for a long chain, and laying it out takes no
+longer than for as many nodes in a short one.
 
 The instance's folder is in the middle.
 

@@ -18,7 +18,10 @@
  *    the first node that links to it. A choice that would make a cycle
  *    falls back, at the first node of the cycle in order that can, to
  *    the folder or document that holds it, else to the first node that
- *    links to it; if none can, the first goes under the middle.
+ *    links to it; if none can, the first goes under the middle. No node
+ *    hangs deeper than MAX_DEPTH: one a chain of links (each part of the
+ *    next, say) would hang deeper hangs beside its parent, so a route,
+ *    up the tree and down, is never longer than that.
  * 2. Hubs and units. The folders, the documents and every subtree of more
  *    than UNIT_MAX nodes are hubs; any other subtree under a hub is a
  *    unit (a card with its review state, answers and wrong options),
@@ -113,6 +116,8 @@ const HANGS = new Map<string, { rank: number; up: boolean }>([
   ...DOWN.map((predicate, rank) => [predicate, { rank: UP.length + rank, up: false }] as const),
 ]);
 
+/** The deepest a node hangs in the tree: one a chain of links would hang deeper hangs beside its parent, so every route is as long as this, not as the chain (see boundDepth). */
+const MAX_DEPTH = 16;
 /** A slot's size, in the drawing's units: how far apart the nodes of the band are. */
 const SLOT = 12;
 /** The most nodes a subtree under a hub has to be a unit, a run of slots, not a hub. */
@@ -260,11 +265,35 @@ function treeOf(sorted: InstanceGraph): Tree {
   }
   parent[root] = -1;
   breakCycles(parent, root, fallback);
-  const children: Index[][] = Array.from({ length: parent.length }, () => []);
-  for (let at = 0; at < n; at++) {
-    if (at !== root && !term(at)) children[parent[at]!]!.push(at);
+  const childrenOf = () => {
+    const children: Index[][] = Array.from({ length: parent.length }, () => []);
+    for (let at = 0; at < n; at++) {
+      if (at !== root && !term(at)) children[parent[at]!]!.push(at);
+    }
+    return children;
+  };
+  const children = childrenOf();
+  const tree = { nodes, index, root, parent, children, terms, linkers };
+  return boundDepth(parent, preorder(children, root)) ? { ...tree, children: childrenOf() } : tree;
+}
+
+/**
+ * Hangs every node deeper than MAX_DEPTH beside its parent instead, in one
+ * pass down from the root (`pre`): the rest of a chain past it fans out
+ * under its node a step above the bound. Returns whether any moved.
+ */
+function boundDepth(parent: Int32Array, pre: readonly Index[]): boolean {
+  const depth = new Int32Array(parent.length);
+  let moved = false;
+  for (let p = 1; p < pre.length; p++) {
+    const at = pre[p]!;
+    if (depth[parent[at]!] === MAX_DEPTH) {
+      parent[at] = parent[parent[at]!]!;
+      moved = true;
+    }
+    depth[at] = depth[parent[at]!]! + 1;
   }
-  return { nodes, index, root, parent, children, terms, linkers };
+  return moved;
 }
 
 const UNSEEN = 0;

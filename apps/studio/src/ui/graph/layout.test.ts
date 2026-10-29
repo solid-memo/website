@@ -153,6 +153,28 @@ function decks(sizes: readonly [string, number, number][]): InstanceGraph {
   });
 }
 
+/** An instance of `cards` cards (largeGraph), and a document of `links` resources each part of the next, each a card and each linking to the first. */
+function chained(links: number, cards = 100): InstanceGraph {
+  const base = largeGraph(cards);
+  const doc = `${INSTANCE}chain.ttl`;
+  const at = (k: number) => `${doc}#r${k}`;
+  const triples = Array.from({ length: links }, (_, k) => [
+    triple(at(k), IS_PART_OF, at(k + 1)),
+    triple(at(k + 1), SEES, at(0)),
+    triple(at(k), TYPE, SM.Card),
+  ]).flat();
+  const chain = instanceGraphOf({
+    instanceUrl: INSTANCE,
+    storages: ["https://pod.example/"],
+    documents: [found(doc, triples)],
+  });
+  const ids = new Set(base.nodes.map((each) => each.id));
+  return {
+    nodes: [...base.nodes, ...chain.nodes.filter((each) => !ids.has(each.id))],
+    edges: [...base.edges, ...chain.edges],
+  };
+}
+
 describe("createLayout", () => {
   it.each([
     ["a small instance", smallGraph()],
@@ -492,6 +514,29 @@ describe("createLayout", () => {
         return () => createLayout(graph).step(Infinity);
       },
       300,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("lays out a long chain of parts, each linking to the far end, its routes no longer for it", () => {
+    const graph = chained(2000);
+    const { positions, routes } = laidOut(graph);
+    const longest = Math.max(...graph.edges.map((each) => routes.of(each).parts.join("").length));
+    // Along the tree, a route through every link between would be tens of thousands of characters.
+    expect(longest).toBeLessThan(1000);
+    expect(pointsOf(positions).size).toBe(graph.nodes.length);
+    expectRoutesJoinEnds(graph);
+  });
+
+  // A chain of 5,000 links eight times as long as one of 625, beside a few hundred other nodes.
+  it("lays out and routes a long chain of parts in time linear in it", () => {
+    const ratio = growth(
+      (links) => {
+        const graph = chained(links);
+        return () => createLayout(graph).step(Infinity);
+      },
+      625,
       8,
     );
     expect(ratio).toBeLessThan(4);
