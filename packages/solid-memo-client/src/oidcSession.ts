@@ -4,7 +4,7 @@
 
 import * as oauth from "oauth4webapi";
 import { isLoopbackHttp, isRefusal, refreshTokens, type Tokens } from "./oidcLogin";
-import { clearSession, loadSession, saveSession, type StoredSession } from "./oidcStore";
+import { clearSession, loadSession, replaceSession, type StoredSession } from "./oidcStore";
 
 /**
  * A logged-in session in this tab: its tokens, the access token in
@@ -20,12 +20,14 @@ const REFRESH_MARGIN = 30_000;
 let queue: Promise<unknown> = Promise.resolve();
 
 /**
- * Runs `work` as the only write of the stored session in this browser:
- * a refresh, a login's save or a logout's clear. So two tabs do not both
- * spend the same refresh token (providers rotate it, and one used twice
- * may end the session), and a refresh under way cannot write back a
- * session that a logout or a newer login has since replaced. Web Locks,
- * where the browser has them; this tab alone otherwise.
+ * Runs `work` as the only refresh or login's save of the stored session
+ * in this browser. So two tabs do not both spend the same refresh token
+ * (providers rotate it, and one used twice may end the session), and a
+ * refresh under way cannot write back a session that a newer login has
+ * since replaced. A logout does not wait for it: a refresh stores its
+ * tokens only while the session it read is still stored
+ * (replaceSession). Web Locks, where the browser has them; this tab
+ * alone otherwise.
  */
 export function exclusively<T>(work: () => Promise<T>): Promise<T> {
   const locks = globalThis.navigator?.locks;
@@ -38,12 +40,13 @@ export function exclusively<T>(work: () => Promise<T>): Promise<T> {
 /**
  * Refreshes the stored session's tokens with its refresh token, read
  * afresh in case another tab rotated it, and stores the one the
- * provider gives back. "gone" when no session of `webId`'s at `as` is
- * stored any more: a logout, or a login as someone else or at another
- * provider, in another tab. A session from another provider is left as
- * it is, and its tokens and client are never sent to `as`. Undefined
- * when the session has no refresh token, or the provider refuses it,
- * which ends the stored session.
+ * provider gives back, unless a logout cleared the session while the
+ * provider answered. "gone" when no session of `webId`'s at `as` is
+ * stored any more: a logout, here or in another tab, or a login as
+ * someone else or at another provider, in another tab. A session from
+ * another provider is left as it is, and its tokens and client are
+ * never sent to `as`. Undefined when the session has no refresh token,
+ * or the provider refuses it, which ends the stored session.
  */
 export async function refreshStored(
   as: oauth.AuthorizationServer,
@@ -69,7 +72,8 @@ export async function refreshStored(
       return undefined;
     }
     const refreshed = { ...stored, refreshToken: tokens.refreshToken ?? stored.refreshToken };
-    await saveSession(refreshed);
+    // Logged out while the provider answered: the tokens are not kept.
+    if (!(await replaceSession(stored, refreshed))) return "gone";
     return { stored: refreshed, tokens };
   });
 }

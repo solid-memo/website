@@ -166,11 +166,17 @@ The session's requests are in
   `redirect: "error"` holds
   ([authentication.md](authentication.md#authenticated-requests)).
   The access token is refreshed 30 seconds before it expires.
-- **Every write of the stored session**, a refresh, a login's save or a
-  logout's clear, holds the Web Lock `solid-memo:oidc-session`. A
-  browser without Web Locks queues the writes within its tab. So two
-  tabs never spend one refresh token, and a refresh under way can't
-  bring back a session a logout cleared.
+- **A refresh, a login's save and the clear after a refused silent
+  restore** hold the Web Lock `solid-memo:oidc-session`. A browser
+  without Web Locks queues them within its tab. So two tabs never
+  spend one refresh token, and a refresh under way can't store an
+  older session over a newer login.
+- **Every request to the provider**, discovery, registration and the
+  token requests, is given up after 30 seconds. So a provider that
+  doesn't answer can't hold the lock, or keep a login or restore
+  waiting, forever. A refresh can still hold the lock for about twice
+  that, since its token request is sent once more when the provider
+  asks for a DPoP nonce.
 - **A refresh** reads the stored session again, and takes its refresh
   token and key pair, which a login in another tab may have replaced.
   A provider that refuses the refresh token ends the stored session.
@@ -180,7 +186,10 @@ The session's requests are in
 - **`logout()`** forgets the session in this browser only, as Inrupt's
   client does: the provider's own session, and its
   `end_session_endpoint`, are left alone
-  ([authentication.md](authentication.md#logout)).
+  ([authentication.md](authentication.md#logout)). It doesn't wait for
+  the lock. A refresh under way stores its tokens only while the
+  session it read is still stored, in one IndexedDB transaction, so it
+  can't bring back a session a logout cleared.
 
 ## The public-read grant
 

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import * as oauth from "oauth4webapi";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { type SessionHarness, sessionContract } from "@solid-memo/solid/testing/contract/session";
 import type { LoginOptions } from "@solid-memo/solid/client/interface";
 import { navigate } from "./oidcBrowser";
@@ -25,6 +25,15 @@ vi.mock("./oidcStore", () => ({
   }),
   clearSession: vi.fn(async () => {
     memory.session = undefined;
+  }),
+  replaceSession: vi.fn(async (read: StoredSession, next: StoredSession) => {
+    const stored = memory.session;
+    const same =
+      stored?.refreshToken === read.refreshToken &&
+      stored?.webId === read.webId &&
+      stored?.issuer === read.issuer;
+    if (same) memory.session = next;
+    return same;
   }),
   loadRegistration: vi.fn(async (key: string) => memory.registrations.get(key)),
   saveRegistration: vi.fn(async (key: string, client: unknown) => {
@@ -822,6 +831,95 @@ describe("createSessionClient, over oauth4webapi", () => {
     await Promise.all([fetching, loggingOut]);
     expect(memory.session).toBeUndefined();
     await expect(createSessionClient().restore()).resolves.toMatchObject({ webId: null });
+  });
+
+  it("logs out at once while a refresh waits at the token endpoint, which cannot store the session again", async () => {
+    provider.accessTtl = 10;
+    const pod = vi.fn(async () => new Response("ok"));
+    const { client } = await logIn();
+    provider.pod = pod;
+    const release = holdRefresh();
+    const fetching = client.fetch("https://pod.example/a");
+    await vi.waitFor(() => expect(provider.tokenRequests).toHaveLength(2));
+    // The token endpoint has not answered: the logout does not wait for it.
+    await client.logout();
+    expect(client.webId()).toBeUndefined();
+    expect(memory.session).toBeUndefined();
+    release();
+    await fetching;
+    expect(memory.session).toBeUndefined();
+    expect(pod).toHaveBeenCalledWith("https://pod.example/a", undefined);
+    await expect(createSessionClient().restore()).resolves.toMatchObject({ webId: null });
+  });
+
+  it("stays logged out when another tab logs out while the reload's refresh waits at the token endpoint", async () => {
+    storedSession(WEBID, "refresh-0");
+    const release = holdRefresh();
+    const restoring = createSessionClient().restore();
+    await vi.waitFor(() => expect(provider.tokenRequests).toHaveLength(1));
+    await createSessionClient().logout();
+    release();
+    await expect(restoring).resolves.toEqual({ webId: null, fromLogin: false, restoredFrom: null });
+    expect(memory.session).toBeUndefined();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("gives up a request the provider does not answer in time, and keeps the session", async () => {
+    storedSession(WEBID, "refresh-0");
+    const timeouts: AbortController[] = [];
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockImplementation(() => {
+      const timeout = new AbortController();
+      timeouts.push(timeout);
+      return timeout.signal;
+    });
+    onTestFinished(() => timeoutSpy.mockRestore());
+    const signals: (AbortSignal | null | undefined)[] = [];
+    const answering = fakeFetch;
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      signals.push(init?.signal);
+      return answering(input, init);
+    });
+    // The token endpoint stalls until its request is given up.
+    provider.refreshGate = new Promise((_, reject) => {
+      void vi
+        .waitFor(() => expect(timeouts).toHaveLength(2))
+        .then(() => {
+          const timeout = timeouts[1]!;
+          timeout.signal.addEventListener("abort", () => reject(timeout.signal.reason));
+        });
+    });
+    const restoring = createSessionClient().restore();
+    await vi.waitFor(() => expect(provider.tokenRequests).toHaveLength(1));
+    expect(timeoutSpy).toHaveBeenCalledWith(30_000);
+    // Discovery and the token request, each with a time limit of its own.
+    expect(signals).toEqual([timeouts[0]?.signal, timeouts[1]?.signal]);
+    timeouts[1]?.abort(new DOMException("The operation timed out.", "TimeoutError"));
+    await expect(restoring).rejects.toMatchObject({ name: "TimeoutError" });
+    expect(memory.session?.refreshToken).toBe("refresh-0");
+  });
+
+  it("gives every request of a login, registration and the code's token request too, a time limit of its own", async () => {
+    const timeouts: AbortSignal[] = [];
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockImplementation(() => {
+      const { signal } = new AbortController();
+      timeouts.push(signal);
+      return signal;
+    });
+    onTestFinished(() => timeoutSpy.mockRestore());
+    const requests: { url: string; signal: AbortSignal | null | undefined }[] = [];
+    const answering = fakeFetch;
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      requests.push({ url: String(input), signal: init?.signal });
+      return answering(input, init);
+    });
+    await expect(logIn()).resolves.toMatchObject({ restored: { webId: WEBID } });
+    expect(requests.map(({ url }) => url)).toEqual(
+      expect.arrayContaining([`${ISSUER}register`, `${ISSUER}token`]),
+    );
+    expect(provider.tokenRequests[0]?.parameters.get("grant_type")).toBe("authorization_code");
+    expect(timeoutSpy).toHaveBeenCalledTimes(requests.length);
+    expect(timeoutSpy).toHaveBeenCalledWith(30_000);
+    expect(requests.every(({ signal }, index) => signal === timeouts[index])).toBe(true);
   });
 
   it("signs with the key pair the refreshed tokens are bound to, after a login in another tab", async () => {
