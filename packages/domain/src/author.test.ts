@@ -38,6 +38,19 @@ describe("parseAuthor", () => {
     expect(parseAuthor(literal)).toEqual({ name: literal });
   });
 
+  it.each([
+    "Support <help@example.org?cc=someone%40example.net>",
+    "Support <help@example.org?subject=Hello&body=Text>",
+    "Support <help@example.org&subject=Hello>",
+    "Support <help%40example.org@example.net>",
+    "Support <help@example.org#part>",
+    "Support <help@example.org,somebody>",
+    "Support <help@example.org;somebody@example.net>",
+    "Support <help,somebody@example.org>",
+  ])("takes %j, whose address isn't bare, as a name alone", (literal) => {
+    expect(parseAuthor(literal)).toEqual({ name: literal });
+  });
+
   it("keeps a name with a line break inside it whole", () => {
     expect(parseAuthor("Anton\nWiklund <anton@example.com>")).toEqual({
       name: "Anton\nWiklund <anton@example.com>",
