@@ -234,14 +234,17 @@ export function streaksOf(studyDays: readonly string[], today: string): Streaks 
   const studied = new Set(studyDays);
   let longest = 0;
   for (const day of studied) {
-    if (studied.has(shiftStudyDay(day, -1))) continue;
+    // A run starts on a day without the one before; before 0100-01-04 the same day comes back.
+    const before = shiftStudyDay(day, -1);
+    if (before < day && studied.has(before)) continue;
     let run = 1;
-    while (studied.has(shiftStudyDay(day, run))) run += 1;
+    // Counted up to the days there are: past the year 9999 the same day comes back too.
+    while (run < studied.size && studied.has(shiftStudyDay(day, run))) run += 1;
     longest = Math.max(longest, run);
   }
   let current = 0;
   let day = studied.has(today) ? today : shiftStudyDay(today, -1);
-  while (studied.has(day)) {
+  while (current < studied.size && studied.has(day)) {
     current += 1;
     day = shiftStudyDay(day, -1);
   }

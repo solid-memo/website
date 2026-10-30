@@ -108,6 +108,14 @@ describe("streaksOf", () => {
     expect(streaksOf(days, "2026-10-04")).toEqual({ current: 0, longest: 4 });
     expect(streaksOf([], "2026-10-04")).toEqual({ current: 0, longest: 0 });
   });
+
+  it("ends at the first and last days there are, where shifting a day gives the same day", () => {
+    expect(streaksOf(["9999-12-30", "9999-12-31"], "9999-12-31")).toEqual({
+      current: 2,
+      longest: 2,
+    });
+    expect(streaksOf(["0100-01-04"], "0100-01-04")).toEqual({ current: 1, longest: 1 });
+  });
 });
 
 describe("retentionOf", () => {

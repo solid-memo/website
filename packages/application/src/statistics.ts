@@ -320,9 +320,13 @@ export function createStatisticsUseCases({
       logged,
       (logMonth) => fromMonth === null || logMonth >= fromMonth,
     );
+    // Up to tomorrow: a later day boundary or another time zone can put
+    // an answer a day after today, but no answer is given later than that.
+    const last = shiftStudyDay(today, 1);
     const answers = read.filter(
       (answer) =>
         (from === null || answer.studyDay >= from) &&
+        answer.studyDay <= last &&
         (deckUrl === undefined || answer.deckUrl === deckUrl),
     );
     return {

@@ -2,18 +2,35 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { shiftStudyDay } from "@solid-memo/domain/answer";
+import { CHART_YEARS, shiftStudyDay } from "@solid-memo/domain/answer";
 import type { WeekRetention } from "@solid-memo/domain/memoryCurve";
 import type { MonthRetention, Recall, Retention } from "@solid-memo/domain/statistics";
-import type { FirstTry } from "@solid-memo/domain/studyPatterns";
+import { daysBetween, type FirstTry } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
 import { LineChart } from "./LineChart";
 
-/** The study month after `month` ("YYYY-MM"). */
-function nextMonth(month: string): string {
+/** A study month ("YYYY-MM") as a count of months from the year 0. */
+function monthIndexOf(month: string): number {
   const [year, number] = month.split("-").map(Number);
-  // Date.UTC counts months from 0, so the month's own number is the next one's index.
-  return new Date(Date.UTC(year!, number!, 1)).toISOString().slice(0, 7);
+  return year! * 12 + number! - 1;
+}
+
+/** The study month ("YYYY-MM") of a count of months from the year 0. */
+function monthOfIndex(index: number): string {
+  const year = String(Math.floor(index / 12)).padStart(4, "0");
+  return `${year}-${String((index % 12) + 1).padStart(2, "0")}`;
+}
+
+/** The keys of the months, or weeks, from the first given to the last: of more than CHART_YEARS' worth, the last. */
+function keysOf(first: string, last: string, monthly: boolean): string[] {
+  const count = monthly
+    ? Math.min(monthIndexOf(last) - monthIndexOf(first) + 1, CHART_YEARS * 12)
+    : Math.min(Math.floor(daysBetween(first, last) / 7) + 1, CHART_YEARS * 53);
+  return Array.from({ length: count }, (_, i) =>
+    monthly
+      ? monthOfIndex(monthIndexOf(last) + i - count + 1)
+      : shiftStudyDay(last, 7 * (i - count + 1)),
+  );
 }
 
 /**
@@ -22,7 +39,8 @@ function nextMonth(month: string): string {
  * scale of 0 to 100%: young cards dashed, mature cards solid. A month or
  * week without reviews of a kind, or without any, is a gap in that line,
  * not a 0. The months' table adds each month's first tries. The months
- * or weeks must not be empty.
+ * or weeks must not be empty; of more than CHART_YEARS' worth, the last
+ * are shown.
  */
 export function RecallChart(
   props: { months: readonly MonthRetention[] } | { weeks: readonly WeekRetention[] },
@@ -41,9 +59,7 @@ export function RecallChart(
     });
   const formatKey = monthly ? formatMonth : formatDate;
   const byKey = new Map(periods.map((period) => [period.key, period.retention]));
-  const keys = [periods[0]!.key];
-  while (keys.at(-1)! < periods.at(-1)!.key)
-    keys.push(monthly ? nextMonth(keys.at(-1)!) : shiftStudyDay(keys.at(-1)!, 7));
+  const keys = keysOf(periods[0]!.key, periods.at(-1)!.key, monthly);
   const none: Recall = { reviews: 0, recalled: 0 };
   const retentionAt = (key: string) => byKey.get(key) ?? { young: none, mature: none };
   const share = (recall: Recall) =>
