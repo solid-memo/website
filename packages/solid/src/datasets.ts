@@ -452,21 +452,29 @@ function isNewer(dataset: Dataset, subject: string): boolean {
  * The subjects, and the blank nodes only they name, and those only these
  * name, on: what goes with them. A blank node something else names stays.
  */
-function withOnlyTheirBlankNodes(quads: readonly Quad[], subjects: readonly string[]): Set<string> {
-  const namedBy = new Map<string, string[]>();
+export function withOnlyTheirBlankNodes(
+  quads: readonly Quad[],
+  subjects: readonly string[],
+): Set<string> {
+  // How many times each blank node is named by a subject not yet walked.
+  const namers = new Map<string, number>();
   const names = new Map<string, string[]>();
   for (const quad of quads) {
     if (quad.object.termType !== "BlankNode") continue;
     const from = termKey(quad.subject);
     const blank = termKey(quad.object);
-    namedBy.set(blank, [...(namedBy.get(blank) ?? []), from]);
-    names.set(from, [...(names.get(from) ?? []), blank]);
+    namers.set(blank, (namers.get(blank) ?? 0) + 1);
+    const named = names.get(from);
+    if (named === undefined) names.set(from, [blank]);
+    else named.push(blank);
   }
   const removed = new Set(subjects);
-  const pending = [...subjects];
+  const pending = [...removed];
   for (let key = pending.pop(); key !== undefined; key = pending.pop()) {
     for (const blank of names.get(key) ?? []) {
-      if (removed.has(blank) || !namedBy.get(blank)!.every((from) => removed.has(from))) continue;
+      const left = namers.get(blank)! - 1;
+      namers.set(blank, left);
+      if (left > 0 || removed.has(blank)) continue;
       removed.add(blank);
       pending.push(blank);
     }

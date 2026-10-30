@@ -245,7 +245,9 @@ function commentsBySubject(lines: string[]): Map<string, string[]> {
       if (block.length > 0) block.push("");
     } else if (block.length > 0) {
       const token = line.trim().split(/\s+/)[0];
-      comments.set(token, [...(comments.get(token) ?? []), ...block]);
+      const held = comments.get(token);
+      if (held === undefined) comments.set(token, block);
+      else for (const each of block) held.push(each);
       block = [];
     }
   }

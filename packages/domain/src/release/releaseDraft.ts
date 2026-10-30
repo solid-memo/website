@@ -1540,7 +1540,9 @@ export function makingNotesOf(draft: ReleaseDraft): LangText {
     )
       continue;
     const { language, value } = triple.object;
-    notes.set(language, [...(notes.get(language) ?? []), value]);
+    const paragraphs = notes.get(language);
+    if (paragraphs === undefined) notes.set(language, [value]);
+    else paragraphs.push(value);
   }
   return Object.fromEntries(
     [...notes].map(([language, paragraphs]) => [language, paragraphs.join("\n\n")]),
@@ -1681,8 +1683,10 @@ function partsOf(draft: ReleaseDraft): Map<string, string> {
       parts.set(`${list} ${node.id}`, canonical(node.data));
   const statements = new Map<string, string[]>();
   for (const triple of draft.triples) {
-    const said = statements.get(triple.subject) ?? [];
-    statements.set(triple.subject, [...said, canonical([triple.predicate, triple.object])]);
+    const statement = canonical([triple.predicate, triple.object]);
+    const said = statements.get(triple.subject);
+    if (said === undefined) statements.set(triple.subject, [statement]);
+    else said.push(statement);
   }
   for (const [subject, said] of statements)
     parts.set(`triples ${subject}`, JSON.stringify(said.sort()));

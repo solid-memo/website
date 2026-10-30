@@ -87,6 +87,11 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   retried. A network failure, a plain `Error`, or a 5xx, 408 or 429
   (alone or as an `AppError`'s `vars.status`) is tried three times more
   first ([retryable.ts](../packages/ui/src/ui/retryable.ts)).
+- **Lists grow in place.** A list gathered under a key takes each
+  value with `push`, or a `Set` with `add`. It is never copied with the
+  value added (`map.set(key, [...(map.get(key) ?? []), value])`): a
+  copy at each value makes the work grow with the square of the values,
+  and a pod or a release can hold many under one key.
 - **Avoid `any`**, and use a non-null assertion (`!`) only where the code
   has checked the value right before, or in a test.
 - **Tests** sit beside their module, as `name.test.ts`, and keep every

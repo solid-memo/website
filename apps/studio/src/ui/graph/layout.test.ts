@@ -79,9 +79,14 @@ function expectRoutesJoinEnds(graph: InstanceGraph) {
   const key = ({ x, y }: Point) => `${Math.round(x * 10)} ${Math.round(y * 10)}`;
   const joins = (parts: readonly string[], from: Point, to: Point) => {
     const next = new Map<string, string[]>();
+    const join = (from: string, to: string) => {
+      const ways = next.get(from);
+      if (ways === undefined) next.set(from, [to]);
+      else ways.push(to);
+    };
     for (const { start, end } of parts.map(endsOf)) {
-      next.set(key(start), [...(next.get(key(start)) ?? []), key(end)]);
-      next.set(key(end), [...(next.get(key(end)) ?? []), key(start)]);
+      join(key(start), key(end));
+      join(key(end), key(start));
     }
     const seen = new Set([key(from)]);
     const queue = [key(from)];

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { EU_LANGUAGES, TOPICS, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
 import { EDUCATION_THEME } from "@solid-memo/domain/dcat";
 import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
@@ -60,6 +60,8 @@ export function ReleaseMetadataScreen({
 }) {
   const { t } = useI18n();
   const held = readOnly !== null;
+  // Read from the draft's triples: once a draft, not at every render.
+  const makingNotes = useMemo(() => makingNotesOf(draft), [draft]);
   const heading = (id: string, part: ReleaseField, text: string) => (
     <h3 id={id} tabIndex={-1} data-arrival={field === part || undefined}>
       {text}
@@ -105,7 +107,7 @@ export function ReleaseMetadataScreen({
             label={t("studio.release.makingNotes")}
             role="description"
             field={t("studio.release.makingNotes")}
-            text={makingNotesOf(draft)}
+            text={makingNotes}
             multiline
             disabled={held}
             onSave={(notes) => onEdit([{ kind: "setMakingNotes", notes }], { debounce: true })}

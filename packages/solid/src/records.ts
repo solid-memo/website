@@ -196,16 +196,14 @@ function readAnyText(thing: Subject, predicate: string): LangText | null {
  * tag. Empty ({}) when there are none.
  */
 function readTexts(thing: Subject, predicate: string, untagged: boolean): LangTexts {
+  // The client reads each tag in lower case (client/rdf.ts), so a tag comes up once.
   const texts = new Map<string, string[]>();
-  const add = (tag: string, values: readonly string[]) => {
-    texts.set(tag, [...new Set([...(texts.get(tag) ?? []), ...values])]);
-  };
   if (untagged) {
     const values = getStringNoLocaleAll(thing, predicate);
-    if (values.length > 0) add("", values);
+    if (values.length > 0) texts.set("", [...new Set(values)]);
   }
   for (const [language, values] of getStringByLocaleAll(thing, predicate)) {
-    add(language.toLowerCase(), values);
+    texts.set(language, [...new Set(values)]);
   }
   return Object.fromEntries(texts);
 }

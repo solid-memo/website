@@ -89,18 +89,20 @@ export function sameKeywords(a: LangTexts | undefined, b: LangTexts | undefined)
  */
 export function tidiedKeywords(keywords: LangTexts, saved: LangTexts | undefined): LangTexts {
   // A Map, not an object: a tag may be named like one of Object.prototype's members ("constructor").
-  const tidied = new Map<string, string[]>();
+  const tidied = new Map<string, Set<string>>();
   for (const [tag, list] of Object.entries(keywords)) {
     const kept = list.map((keyword) => keyword.trim()).filter((keyword) => keyword !== "");
     if (kept.length === 0) continue;
     const lower = tag.toLowerCase();
-    tidied.set(lower, [...new Set([...(tidied.get(lower) ?? []), ...kept])]);
+    const held = tidied.get(lower);
+    if (held === undefined) tidied.set(lower, new Set(kept));
+    else for (const keyword of kept) held.add(keyword);
   }
   const savedUntagged = new Set(saved?.[""] ?? []);
-  if ((tidied.get("") ?? []).some((keyword) => !savedUntagged.has(keyword))) {
+  if ([...(tidied.get("") ?? [])].some((keyword) => !savedUntagged.has(keyword))) {
     throw new AppError("textNeedsLanguage", { field: "the keywords" });
   }
-  return Object.fromEntries(tidied);
+  return Object.fromEntries([...tidied].map(([tag, kept]) => [tag, [...kept]]));
 }
 
 /**

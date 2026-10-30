@@ -233,7 +233,9 @@ function summariesOf(given: readonly Answer[]): MonthSummary[] {
   const months = new Map<string, Answer[]>();
   for (const one of given) {
     const month = monthOfStudyDay(one.studyDay);
-    months.set(month, [...(months.get(month) ?? []), one]);
+    const answers = months.get(month);
+    if (answers === undefined) months.set(month, [one]);
+    else answers.push(one);
   }
   return [...months.values()].map(monthSummaryOf);
 }
