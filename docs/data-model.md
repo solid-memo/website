@@ -1492,8 +1492,16 @@ by one.
   the app keeps the written dataset at that version, as a read keeps
   what it read. The next edit sends `If-Match` with it, and the next
   read `If-None-Match`. Without it (Community Solid Server 7 answers a
-  PATCH with none), a dataset saved is written again without
-  `If-Match`, and the next read downloads the document.
+  PATCH with none), nothing is kept, and the next read downloads the
+  document. Either way the read that edit was made from is out of date.
+  A later save from it, of the dataset saved or another edit of the same
+  read, is refused with a `PreconditionFailedError` before anything is
+  sent, and so is a delete made on it. Sent without `If-Match`, either
+  could undo the first save and a change made elsewhere since. A read
+  saved to another document isn't out of date where it was read: an
+  edit or delete of it there still sends its `If-Match`. A read
+  without a strong ETag has no precondition to lose: an edit of it is
+  still written again without `If-Match`, and deleted without one.
   node-solid-server gives no ETag on a read and ignores `If-Match`;
   5.7.4 ignores `If-None-Match: *` too, which 5.8.8 and 6.0.0 enforce.
   There no edit is conditional: a PATCH still keeps a change made
