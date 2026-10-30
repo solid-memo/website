@@ -7,8 +7,16 @@ import { planCardTransfer, type TransferOptions } from "./cardTransfer";
 import type { Card } from "./deck";
 import type { FsrsState, ReviewState } from "./review";
 
-const SOURCE = "https://pod.example/a/decks/source.ttl#deck";
-const TARGET = "https://pod.example/a/decks/target.ttl#deck";
+const SOURCE = {
+  url: "https://pod.example/a/catalog.ttl#source",
+  cardsDocumentUrl: "https://pod.example/a/decks/source-cards.ttl",
+  reviewsDocumentUrl: "https://pod.example/a/reviews/source.ttl",
+};
+const TARGET = {
+  url: "https://pod.example/a/catalog.ttl#target",
+  cardsDocumentUrl: "https://pod.example/a/decks/target-cards.ttl",
+  reviewsDocumentUrl: "https://pod.example/a/reviews/target.ttl",
+};
 
 function card(id: string, extra: Partial<Card> = {}): Card {
   return {
@@ -65,8 +73,8 @@ const sourceStates = [state("a"), state("a", "back-to-front"), state("b", "back-
 describe("planCardTransfer", () => {
   it("moves cards under their ids, with their distractors, what they are about and review states, in the source's order", () => {
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [a, b, card("c")], states: sourceStates },
-      { url: TARGET, cards: [], states: [] },
+      { ...SOURCE, cards: [a, b, card("c")], states: sourceStates },
+      { ...TARGET, cards: [], states: [] },
       ["b", "a", "gone"],
       move,
     );
@@ -108,16 +116,16 @@ describe("planCardTransfer", () => {
       formatVersion: 1,
     };
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [a], states: sourceStates, fsrs: [fsrs] },
-      { url: TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
+      { ...SOURCE, cards: [a], states: sourceStates, fsrs: [fsrs] },
+      { ...TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
       ["a"],
       move,
     );
     expect(plan.target.fsrsSaves).toEqual([{ ...fsrs, cardId: "a-2" }]);
     expect(plan.target.fsrsRemovals).toEqual([{ cardId: "a-2", direction: "back-to-front" }]);
     const fresh = planCardTransfer(
-      { url: SOURCE, cards: [a], states: sourceStates, fsrs: [fsrs] },
-      { url: TARGET, cards: [], states: [] },
+      { ...SOURCE, cards: [a], states: sourceStates, fsrs: [fsrs] },
+      { ...TARGET, cards: [], states: [] },
       ["a"],
       { mode: "copy", keepProgress: false },
     );
@@ -136,8 +144,8 @@ describe("planCardTransfer", () => {
       formatVersion: 1,
     };
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [b], states: sourceStates, fsrs: [orphan] },
-      { url: TARGET, cards: [], states: [], fsrs: [orphan] },
+      { ...SOURCE, cards: [b], states: sourceStates, fsrs: [orphan] },
+      { ...TARGET, cards: [], states: [], fsrs: [orphan] },
       ["b"],
       move,
     );
@@ -156,8 +164,8 @@ describe("planCardTransfer", () => {
       card("z", { distractors: [{ id: "a-3-d1", text: { sv: "q" } }] }),
     ];
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [a], states: sourceStates },
-      { url: TARGET, cards: target, states: [] },
+      { ...SOURCE, cards: [a], states: sourceStates },
+      { ...TARGET, cards: target, states: [] },
       ["a"],
       move,
     );
@@ -180,9 +188,9 @@ describe("planCardTransfer", () => {
 
   it("keeps a card's id when only a distractor's is taken… unless its own distractor's is", () => {
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [a], states: [] },
+      { ...SOURCE, cards: [a], states: [] },
       {
-        url: TARGET,
+        ...TARGET,
         cards: [card("y", { distractors: [{ id: "a-d1", text: { sv: "q" } }] })],
         states: [],
       },
@@ -194,8 +202,8 @@ describe("planCardTransfer", () => {
 
   it("gives two cards of one transfer different ids", () => {
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [card("a"), card("a-2")], states: [] },
-      { url: TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
+      { ...SOURCE, cards: [card("a"), card("a-2")], states: [] },
+      { ...TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
       ["a", "a-2"],
       copy,
     );
@@ -204,13 +212,13 @@ describe("planCardTransfer", () => {
 
   it("finishes a move stopped after the target was written: the cards are present, the states written once", () => {
     const source = {
-      url: SOURCE,
+      ...SOURCE,
       cards: [card("a"), card("a-2")],
       states: [state("a"), state("a-2")],
     };
     const first = planCardTransfer(
       source,
-      { url: TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
+      { ...TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
       ["a", "a-2"],
       move,
     );
@@ -223,7 +231,7 @@ describe("planCardTransfer", () => {
     // The states did not make it: they are written now.
     const retry = planCardTransfer(
       source,
-      { url: TARGET, cards: after, states: [] },
+      { ...TARGET, cards: after, states: [] },
       ["a", "a-2"],
       move,
     );
@@ -237,12 +245,7 @@ describe("planCardTransfer", () => {
 
     // They did: a card present keeps the state it has there.
     const states = [state("a-2", "front-to-back", "2026-12-01"), state("a-2-2")];
-    const again = planCardTransfer(
-      source,
-      { url: TARGET, cards: after, states },
-      ["a", "a-2"],
-      move,
-    );
+    const again = planCardTransfer(source, { ...TARGET, cards: after, states }, ["a", "a-2"], move);
     expect(again.target).toEqual({
       save: [],
       reviewSaves: [],
@@ -255,13 +258,13 @@ describe("planCardTransfer", () => {
   it("never finds two cards saying the same present at one id", () => {
     const same = { front: { en: "same" }, back: { sv: "samma" } };
     const source = {
-      url: SOURCE,
+      ...SOURCE,
       cards: [card("a", same), card("a-2", same)],
       states: [state("a"), state("a-2", "back-to-front")],
     };
     const first = planCardTransfer(
       source,
-      { url: TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
+      { ...TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
       ["a", "a-2"],
       move,
     );
@@ -273,7 +276,7 @@ describe("planCardTransfer", () => {
 
     const retry = planCardTransfer(
       source,
-      { url: TARGET, cards: after, states: [] },
+      { ...TARGET, cards: after, states: [] },
       ["a", "a-2"],
       move,
     );
@@ -292,8 +295,8 @@ describe("planCardTransfer", () => {
 
   it("copies without progress: the source untouched, a state left at a new card's id removed", () => {
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [a, b], states: sourceStates },
-      { url: TARGET, cards: [], states: [state("a", "back-to-front")] },
+      { ...SOURCE, cards: [a, b], states: sourceStates },
+      { ...TARGET, cards: [], states: [state("a", "back-to-front")] },
       ["a", "b"],
       copy,
     );
@@ -304,8 +307,8 @@ describe("planCardTransfer", () => {
 
   it("leaves a card present in the target as it is there without progress", () => {
     const plan = planCardTransfer(
-      { url: SOURCE, cards: [b], states: sourceStates },
-      { url: TARGET, cards: [card("b")], states: [state("b")] },
+      { ...SOURCE, cards: [b], states: sourceStates },
+      { ...TARGET, cards: [card("b")], states: [state("b")] },
       ["b"],
       { mode: "move", keepProgress: false },
     );
@@ -326,11 +329,71 @@ describe("planCardTransfer", () => {
   it("refuses a transfer to the deck the cards are in", () => {
     expect(() =>
       planCardTransfer(
-        { url: SOURCE, cards: [a], states: [] },
-        { url: SOURCE, cards: [a], states: [] },
+        { ...SOURCE, cards: [a], states: [] },
+        { ...SOURCE, cards: [a], states: [] },
         ["a"],
         move,
       ),
     ).toThrow(expect.objectContaining({ code: "cardTransferSameDeck" }));
+  });
+
+  // Two entries over one document read the same cards on both sides: a move would find
+  // them all in the target, write nothing there, and remove them from the one document.
+  it.each([
+    ["move", { cardsDocumentUrl: SOURCE.cardsDocumentUrl }],
+    ["copy", { cardsDocumentUrl: "https://POD.example/a/decks/../decks/source-cards.ttl" }],
+    ["move", { reviewsDocumentUrl: "https://pod.example:443/a/reviews/source.ttl" }],
+    ["copy", { reviewsDocumentUrl: SOURCE.reviewsDocumentUrl }],
+    ["move", { cardsDocumentUrl: "https://pod.example/a/decks/%73ource-cards.ttl" }],
+    ["copy", { cardsDocumentUrl: "https://pod.example/a/de%63ks/source-cards.ttl" }],
+    ["copy", { cardsDocumentUrl: "https://pod.example./a/decks/source-cards.ttl" }],
+    ["move", { reviewsDocumentUrl: "https://pod.example/a/reviews/source%2Ettl" }],
+    ["move", { cardsDocumentUrl: "https://alice:secret@pod.example/a/decks/source-cards.ttl" }],
+    ["copy", { reviewsDocumentUrl: "https://alice@pod.example/a/reviews/source.ttl" }],
+    ["move", { cardsDocumentUrl: SOURCE.reviewsDocumentUrl }],
+    ["copy", { reviewsDocumentUrl: SOURCE.cardsDocumentUrl }],
+  ] as const)("refuses a %s to another entry over a document of the source's", (mode, shared) => {
+    const cards = [card("c1"), card("c2")];
+    const states = [state("c1"), state("c2")];
+    expect(() =>
+      planCardTransfer(
+        { ...SOURCE, cards, states },
+        { ...TARGET, ...shared, cards, states },
+        ["c1", "c2"],
+        { mode, keepProgress: true },
+      ),
+    ).toThrow(expect.objectContaining({ code: "cardTransferSameDeck" }));
+  });
+
+  it("reads an escape that needs one in any case as the same", () => {
+    const at = (cardsDocumentUrl: string) => ({
+      ...SOURCE,
+      cardsDocumentUrl,
+      cards: [a],
+      states: [],
+    });
+    expect(() =>
+      planCardTransfer(
+        at("https://pod.example/a/decks/%c3%a9.ttl"),
+        {
+          ...at("https://pod.example/a/decks/%C3%A9.ttl"),
+          url: TARGET.url,
+          reviewsDocumentUrl: TARGET.reviewsDocumentUrl,
+        },
+        ["a"],
+        copy,
+      ),
+    ).toThrow(expect.objectContaining({ code: "cardTransferSameDeck" }));
+  });
+
+  it("compares text that is no URL as it is written", () => {
+    expect(() =>
+      planCardTransfer(
+        { ...SOURCE, cardsDocumentUrl: "not a url", cards: [a], states: [] },
+        { ...TARGET, cardsDocumentUrl: "not a url either", cards: [], states: [] },
+        ["a"],
+        copy,
+      ),
+    ).not.toThrow();
   });
 });

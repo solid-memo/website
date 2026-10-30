@@ -394,10 +394,15 @@ describe("CardWorkbenchContainer", () => {
         };
       }),
     });
-    renderContainer(useCases);
+    // Another entry over this deck's cards document: its cards are these.
+    const archive = {
+      ...makeDeck("archive", { en: "Archive" }),
+      cardsDocumentUrl: deck.cardsDocumentUrl,
+    };
+    renderContainer(useCases, DEFAULT_CARD_QUERY, deck, [deck, nouns, archive]);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     pick("Move or copy the selected cards", "Move to deck…");
-    // The deck itself is no choice.
+    // The deck itself is no choice, nor a deck over its documents.
     expect(
       within(screen.getByRole("combobox", { name: "To the deck" }))
         .getAllByRole("option")

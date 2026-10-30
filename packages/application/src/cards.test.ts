@@ -825,6 +825,51 @@ describe("cards", () => {
       ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
       expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
     });
+
+    it.each([
+      [
+        "move",
+        "cards",
+        { cardsDocumentUrl: "https://ALICE.example/solid-memo/main/decks/./deck-1.ttl" },
+      ],
+      ["copy", "cards", { cardsDocumentUrl: deck.cardsDocumentUrl }],
+      ["move", "reviews", { reviewsDocumentUrl: deck.reviewsDocumentUrl }],
+      [
+        "copy",
+        "reviews",
+        { reviewsDocumentUrl: "https://alice.example:443/solid-memo/main/reviews/deck-1.ttl" },
+      ],
+      [
+        "move",
+        "cards",
+        { cardsDocumentUrl: "https://alice.example/solid-memo/main/%64ecks/deck-1.ttl" },
+      ],
+      ["copy", "reviews", { cardsDocumentUrl: deck.reviewsDocumentUrl }],
+      [
+        "move",
+        "cards",
+        { cardsDocumentUrl: "https://alice:secret@alice.example/solid-memo/main/decks/deck-1.ttl" },
+      ],
+      [
+        "copy",
+        "reviews",
+        { reviewsDocumentUrl: "https://bob@alice.example/solid-memo/main/reviews/deck-1.ttl" },
+      ],
+    ] as const)(
+      "refuses a %s to another entry over the deck's %s document, writing nothing",
+      async (mode, _document, shared) => {
+        const { deps, useCases } = setup();
+        await expect(
+          useCases.transferCards(instance.url, deck, { ...target, ...shared }, ["one"], {
+            mode,
+            keepProgress: true,
+          }),
+        ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
+        expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
+        expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+        expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      },
+    );
   });
   describe("deck files", () => {
     const fileDeck: Deck = {

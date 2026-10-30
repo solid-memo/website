@@ -1045,6 +1045,15 @@ that offers the instance's other decks and **Keep their progress**,
 checked to start with, and says what becomes of the cards' history. A
 moved card leaves the selection.
 
+A deck whose cards or reviews document is one of this deck's isn't
+offered, as another app may point two decks at one document. Its
+cards are this deck's, so a move would remove them from both. The use
+case refuses such a transfer before reading anything, and the domain
+plans none. Two addresses name one document when a server may read
+them as one: written another way a request or a server resolves, such
+as a character encoded that needs no encoding, or with a user name
+and password in it.
+
 The domain plans the transfer
 ([cardTransfer.ts](../packages/domain/src/cardTransfer.ts),
 `planCardTransfer`):
