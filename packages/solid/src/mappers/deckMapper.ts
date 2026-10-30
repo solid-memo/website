@@ -454,20 +454,29 @@ function distractorNamers(dataset: Dataset): Map<string, number> {
 /**
  * The document without each of `urls`, distractors a card no longer
  * names, unless a card still names it: a distractor belongs to the one
- * card that names it, so a card's never goes with another's.
+ * card that names it, so a card's never goes with another's. Only an
+ * sm:Distractor that is not an sm:Card is removed (isDistractorOnly):
+ * a card, or another app's subject, a card names is never removed.
  */
 export function withoutUnnamedDistractors(dataset: Dataset, urls: readonly string[]): Dataset {
   if (urls.length === 0) return dataset;
   const namers = distractorNamers(dataset);
   return removeAllUnlessNewer(
     dataset,
-    urls.filter((url) => isUnnamed(namers, url)),
+    urls.filter((url) => isUnnamed(namers, url) && isDistractorOnly(dataset, url)),
   );
 }
 
 /** Whether no subject of the document names the distractor at `url` (distractorNamers) any longer. */
 function isUnnamed(namers: ReadonlyMap<string, number>, url: string): boolean {
   return !namers.has(url);
+}
+
+/** Whether the subject at `url` is typed sm:Distractor and not sm:Card. */
+function isDistractorOnly(dataset: Dataset, url: string): boolean {
+  const thing = getThing(dataset, url);
+  const types = thing === null ? [] : getUrlAll(thing, RDF.type);
+  return types.includes(SM.Distractor) && !types.includes(SM.Card);
 }
 
 /**

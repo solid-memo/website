@@ -56,6 +56,7 @@ import { deckDocumentSubjects } from "./ownership";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import {
   deckSubjects,
+  toDistractor,
   toCard,
   toCards,
   toCatalog,
@@ -799,7 +800,9 @@ export function createSolidDeckRepository({
    * is never written onto a distractor, nor a distractor onto a card
    * (unlessTyped). Returns the subjects written, the card's, then its
    * distractors', and the distractors it named before and no longer
-   * does (`dropped`), still in the document.
+   * does (`dropped`), still in the document: only those it could read
+   * (toDistractor), so a link to any other subject leaves the card and
+   * never takes its target with it.
    */
   function withCardWritten(
     edit: DatasetEdit<Dataset>,
@@ -808,7 +811,11 @@ export function createSolidDeckRepository({
     existing: NamedSubject | null,
   ): { subjects: string[]; dropped: string[] } {
     unlessTyped(edit, `${deck.cardsDocumentUrl}#${card.id}`, SM.Distractor);
-    const before = existing === null ? [] : getUrlAll(existing, SM.distractor);
+    const named = existing === null ? [] : getUrlAll(existing, SM.distractor);
+    const before = named.filter((url) => {
+      const thing = edit.getThing(url);
+      return thing !== null && toDistractor(thing) !== null;
+    });
     const distractors = card.distractors ?? [];
     const thing = withSuggestedAnswers(
       cardThing(deck, card, existing),

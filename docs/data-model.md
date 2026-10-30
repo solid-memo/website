@@ -950,7 +950,10 @@ Studio's card inspector edit them
   the same way (`assertDistractorsOwnedOnce`), so an upgrade never
   gives a distractor a card keeps to another card. Removing a card, or
   a distractor it no longer names, never removes one another card still
-  names.
+  names, nor any subject that isn't a distractor. A card's
+  `sm:distractor` link to another card, or to a subject the app can't
+  read as a distractor, leaves the card in its next write, and the
+  subject it named stays.
 - **A deck an earlier version left mixed up** may have a subject typed
   both `sm:Card` and `sm:Distractor`, or a distractor two cards name.
   A write of such a card is refused (`idTakenInDeck`) rather than made
