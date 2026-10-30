@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.28](https://github.com/solid-memo/website/compare/v6.17.27...v6.17.28) (2026-10-30)
+
+### Bug Fixes
+
+* **domain:** gather lists under a key in place, not by copying them ([aa925bc](https://github.com/solid-memo/website/commit/aa925bc503aa0f4694bbe95bedbcf22cd61705e8))
+* **ui:** parse each course chapter description once ([6a6c4be](https://github.com/solid-memo/website/commit/6a6c4bed2b5db1517944b7db4da22dbc1d41cedb))
+
 ## [6.17.27](https://github.com/solid-memo/website/compare/v6.17.26...v6.17.27) (2026-10-30)
 
 ### Bug Fixes
