@@ -2,15 +2,53 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { courseProgress } from "@solid-memo/domain/course";
+import { parseMarkdown } from "@solid-memo/markdown/parse";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { CourseLanguage } from "./cardLanguage";
 import { CourseScreen } from "./CourseScreen";
+import { CACHE_SIZE } from "./markdownCache";
 import { CH1, courseOutline } from "../test/course";
 
+vi.mock("@solid-memo/markdown/parse", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/markdown/parse")>();
+  return { ...original, parseMarkdown: vi.fn(original.parseMarkdown) };
+});
+
 describe("CourseScreen", () => {
+  it("parses each chapter's description once, however many chapters the course has", () => {
+    const [first] = courseOutline.chapters;
+    const outline = {
+      ...courseOutline,
+      chapters: Array.from({ length: CACHE_SIZE + 1 }, (_, index) => ({
+        ...first!,
+        id: `many-${index}`,
+        url: `${first!.url}-many-${index}`,
+        position: index,
+        description: { en: `Chapter *${index}* of many.` },
+        textFormat: SM.markdown,
+      })),
+    };
+    const screen = (
+      <CourseScreen
+        title={{ en: "Solid" }}
+        outline={outline}
+        progress={courseProgress(outline, [], [])}
+        started={false}
+        chapterHref={(chapter) => `#/${chapter.id}`}
+        continueHref="#/go"
+      />
+    );
+    const { container, rerender } = render(screen);
+    expect(container.querySelectorAll(".course-chapter em")).toHaveLength(CACHE_SIZE + 1);
+    vi.mocked(parseMarkdown).mockClear();
+    rerender(<CourseScreen {...screen.props} started />);
+    expect(parseMarkdown).not.toHaveBeenCalled();
+    expect(container.querySelectorAll(".course-chapter em")).toHaveLength(CACHE_SIZE + 1);
+  });
+
   it("shows a chapter's description in Markdown as Markdown, and a plain one as written", () => {
     const [first, second] = courseOutline.chapters;
     const outline = {

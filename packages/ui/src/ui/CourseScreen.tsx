@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
+import { useState } from "preact/hooks";
 import type {
   ChapterState,
   CourseChapter,
@@ -18,6 +19,7 @@ import { CheckIcon, LibraryIcon } from "./icons";
 import { useCourseText } from "./cardLanguage";
 import { useI18n, type I18n } from "./i18n";
 import { linkify } from "./linkify";
+import { blocksByPosition } from "./markdownCache";
 import { CourseText } from "./ReaderText";
 
 function stateLabel(state: ChapterState, t: I18n["t"]): string {
@@ -41,15 +43,16 @@ const SPARKLES = 8;
  * done), and its chapters in order, each locked until the one before it
  * is completed, open, or done, with how many of its steps are done. An
  * open or done chapter's title links to it; a locked one's does not. A
- * chapter's description may be in Markdown (its `textFormat`); its title
- * is always plain. Once every chapter is done, the course says it is
- * finished, with a link back to the decks where there are any (none in
- * the Studio's trial). Beside the way on, or back, a secondary button
- * leads to the deck library where there is one, since a course runs
- * alongside other decks. A notice (a newer release of the course on
- * offer) goes under the blurb. Beside the title, a button leads to the
- * course's preferences where there are any (none in the trial), where
- * its course language is chosen.
+ * chapter's description may be in Markdown (its `textFormat`), each
+ * parsed once while the page is open, however many chapters there are
+ * (blocksByPosition); its title is always plain. Once every chapter is
+ * done, the course says it is finished, with a link back to the decks
+ * where there are any (none in the Studio's trial). Beside the way on,
+ * or back, a secondary button leads to the deck library where there is
+ * one, since a course runs alongside other decks. A notice (a newer
+ * release of the course on offer) goes under the blurb. Beside the
+ * title, a button leads to the course's preferences where there are any
+ * (none in the trial), where its course language is chosen.
  *
  * Coming back from a chapter just completed, the page cheers: a word
  * that the chapter is done, above the button on, which takes the focus
@@ -97,6 +100,7 @@ export function CourseScreen({
 }) {
   const { t, tx } = useI18n();
   const { cardText, cardLang } = useCourseText();
+  const [descriptionBlocks] = useState(blocksByPosition);
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
   const doneCount = progress.chapters.filter((chapter) => chapter.state === "done").length;
   const library =
@@ -197,7 +201,11 @@ export function CourseScreen({
                   )}
                 </span>
                 {chapter.description !== undefined && (
-                  <DataText text={chapter.description} markdown={isMarkdown(chapter.textFormat)} />
+                  <DataText
+                    text={chapter.description}
+                    markdown={isMarkdown(chapter.textFormat)}
+                    blocksOf={(text) => descriptionBlocks(index, text)}
+                  />
                 )}
                 <p class="hint">
                   {t("course.stepsDone", { done: doneStepIds.length, count: chapter.steps.length })}
