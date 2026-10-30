@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.26](https://github.com/solid-memo/website/compare/v6.17.25...v6.17.26) (2026-10-30)
+
+### Bug Fixes
+
+* **domain:** keep sm-2 ease factor and interval within bounds ([c0439df](https://github.com/solid-memo/website/commit/c0439df7e33c7aa09113d9aa8e84d521f1bca17f))
+* **domain:** link a deck author only to a bare address ([38dafcc](https://github.com/solid-memo/website/commit/38dafcca6f589a3375ce1b9258baf16f622a450f))
+* **solid-memo-client:** log out without waiting for a token refresh ([039916e](https://github.com/solid-memo/website/commit/039916ed79453bb4dd11bdcf6b1c8d54b3fbadc4))
+
 ## [6.17.25](https://github.com/solid-memo/website/compare/v6.17.24...v6.17.25) (2026-10-30)
 
 ### Bug Fixes
