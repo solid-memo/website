@@ -56,6 +56,7 @@
     "ci:gate": "node -e \"import('./scripts/ciGate.ts').then((m) => m.run(process))\"",
     "check:providers": "node -e \"import('./scripts/checkProviders.ts').then((m) => m.run(process))\"",
     "coverage:summary": "node -e \"import('./scripts/coverageSummary.ts').then((m) => m.run(process))\"",
+    "release:commit": "node -e \"import('./scripts/releaseCommit.ts').then((m) => m.run(process))\" --",
     "release:version": "node -e \"import('./scripts/releaseVersion.ts').then((m) => m.run(process))\" --",
     "docs:archive": "node -e \"import('./scripts/docsArchive.ts').then((m) => m.run(process))\" --",
     "site:version": "node -e \"import('./scripts/siteVersion.ts').then((m) => m.run(process))\" --",

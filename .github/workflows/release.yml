@@ -118,6 +118,16 @@ jobs:
           ref: main
           fetch-depth: 0
           persist-credentials: false
+      # Node, for the next step's script, which imports no package.
+      # Nothing in this job comes from GitHub's cache
+      # (docs/releasing.md#the-deploy-key): any job on main can write
+      # main's entries, and this one holds the key. npm's cache neither,
+      # which setup-node would restore for packageManager in package.json.
+      - if: steps.key.outputs.set == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
       # Only a tip that CI passed on is released. When main has moved on
       # since the commit CI checked, the tip is released if CI has passed
       # on it too: a newer run may have been replaced while it waited for
@@ -126,7 +136,11 @@ jobs:
       #
       # A release commit with no tag (its tag's push failed) stops every
       # run: semantic-release, finding no tag, would release the same
-      # version again on top of it.
+      # version again on top of it. Only a commit semantic-release made
+      # counts (npm run release:commit, scripts/releaseCommit.ts): on
+      # main's first-parent chain, by github-actions[bot], changing only
+      # the files a release writes; a pull request's commit titled as one
+      # does not.
       - name: CI passed on main's tip
         id: tip
         if: steps.key.outputs.set == 'true'
@@ -136,11 +150,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          last="$(git log --format='%H %s' | awk '$2 == "chore(release):" { print $1; exit }')"
-          if [ -n "$last" ] && [ -z "$(git tag --points-at "$last")" ]; then
-            echo "::error::The release commit $last has no tag: tag it by hand before anything else is released (docs/releasing.md#when-a-release-fails)."
-            exit 1
-          fi
+          npm run release:commit -- last
           tip="$(git rev-parse HEAD)"
           if [ "$EVENT" = workflow_run ] && [ "$tip" = "$CHECKED" ]; then
             echo "release=true" >> "$GITHUB_OUTPUT"
@@ -156,15 +166,6 @@ jobs:
             exit 1
           fi
           echo "release=true" >> "$GITHUB_OUTPUT"
-      # Nothing in this job comes from GitHub's cache
-      # (docs/releasing.md#the-deploy-key): any job on main can write
-      # main's entries, and this one holds the key. npm's cache neither,
-      # which setup-node would restore for packageManager in package.json.
-      - if: steps.tip.outputs.release == 'true'
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
       # No package's install script runs here (docs/releasing.md#the-deploy-key):
       # the release needs none, and Chromium comes from the action below.
       - if: steps.tip.outputs.release == 'true'

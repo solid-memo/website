@@ -42,8 +42,14 @@ Only `main` deploys, and only from this repository:
   deploy looks again for the tag for about two minutes.
 - **Only the newest release.** The deploy checks that the tag is the
   newest version on `main` (the highest `vX.Y.Z` tag), that it names
-  that version's release commit (`chore(release): X.Y.Z`), and that the
-  version has a GitHub release. semantic-release makes that release
+  that version's release commit, and that the version has a GitHub
+  release. A release commit is one semantic-release made
+  (`npm run release:commit`,
+  [releaseCommit.ts](../scripts/releaseCommit.ts)): on `main`'s
+  first-parent chain, titled `chore(release): X.Y.Z`, by
+  `github-actions[bot]` as author and committer, and changing only the
+  version's files, so a pull request's commit with that title, tagged by
+  hand, isn't deployed. semantic-release makes that release
   seconds after the tag, so the deploy looks again for about a minute.
   On an older release commit,
   a re-run of CI or of the deploy deploys nothing and says so in a
