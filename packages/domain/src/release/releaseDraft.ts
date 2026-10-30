@@ -1418,13 +1418,12 @@ function contactPointsOf(draft: ReleaseDraft): string[] {
 
 /** The web page the release's contact names (its first contact point's vcard:hasURL); null when it names none. */
 export function contactOf(draft: ReleaseDraft): string | null {
-  for (const point of contactPointsOf(draft)) {
-    const url = draft.triples.find(
-      (triple) =>
-        triple.subject === point &&
-        triple.predicate === `${VCARD}hasURL` &&
-        triple.object.kind === "iri",
-    );
+  const points = contactPointsOf(draft);
+  const of = triplesBySubject(draft.triples, new Set(points));
+  for (const point of points) {
+    const url = of
+      .get(point)
+      ?.find((triple) => triple.predicate === `${VCARD}hasURL` && triple.object.kind === "iri");
     if (url !== undefined) return url.object.value;
   }
   return null;

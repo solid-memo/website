@@ -61,10 +61,24 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     predicate,
     object: object.kind === "iri" ? iri(object.value) : object,
   }));
-  const statements = (predicate: string): ReleaseStatement[] =>
-    triples
-      .filter((triple) => triple.predicate === predicate)
-      .map(({ subject, object }) => ({ subject, object }));
+  // Each statement by its predicate, and by its subject and predicate:
+  // read once, so a lookup per source, activity or contact point costs
+  // what that subject states, not every statement of the draft.
+  const byPredicate = new Map<string, ReleaseStatement[]>();
+  const bySubject = new Map<string, Map<string, ReleaseTerm[]>>();
+  for (const { subject, predicate, object } of triples) {
+    const ofPredicate = byPredicate.get(predicate);
+    if (ofPredicate === undefined) byPredicate.set(predicate, [{ subject, object }]);
+    else ofPredicate.push({ subject, object });
+    let ofSubject = bySubject.get(subject);
+    if (ofSubject === undefined) bySubject.set(subject, (ofSubject = new Map()));
+    const objects = ofSubject.get(predicate);
+    if (objects === undefined) ofSubject.set(predicate, [object]);
+    else objects.push(object);
+  }
+  const statements = (predicate: string): ReleaseStatement[] => [
+    ...(byPredicate.get(predicate) ?? []),
+  ];
   const typed = (type: string) => [
     ...new Set(
       statements(RDF_TYPE)
@@ -82,10 +96,9 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
       .filter(({ subject }) => subject === url)
       .map(({ object }) => object.value),
   );
-  const said = (subject: string, predicate: string) =>
-    triples
-      .filter((triple) => triple.subject === subject && triple.predicate === predicate)
-      .map((triple) => triple.object);
+  const said = (subject: string, predicate: string): ReleaseTerm[] => [
+    ...(bySubject.get(subject)?.get(predicate) ?? []),
+  ];
   const sources = iris(root.wasDerivedFrom);
 
   const cards = draft.cards.map((node) => ({

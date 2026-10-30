@@ -113,6 +113,15 @@ function countsOf(model: ReleaseModel): Record<CountedThing, number> {
 export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
   const problems: ReleaseProblem[] = [];
   const derived = new Set(model.sources.map((term) => term.value));
+  // An earlier release's making is not rewritten: what it used is not held to this release's derivation.
+  const usersOf = new Map<string, string[]>();
+  for (const making of model.making.filter((one) => !one.carried)) {
+    for (const used of new Set(making.used)) {
+      const users = usersOf.get(used);
+      if (users === undefined) usersOf.set(used, [making.iri]);
+      else users.push(making.iri);
+    }
+  }
   for (const source of model.sourceDetails) {
     const missing: SourceDetail[] = [
       ...(source.title.length === 0 ? ["title" as const] : []),
@@ -127,11 +136,8 @@ export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
           { severity: "warning" },
         ),
       );
-    // An earlier release's making is not rewritten: what it used is not held to this release's derivation.
-    const users = model.making
-      .filter((one) => !one.carried && one.used.includes(source.iri))
-      .map((one) => one.iri);
-    if (users.length > 0 && !derived.has(source.iri)) {
+    const users = usersOf.get(source.iri);
+    if (users !== undefined && !derived.has(source.iri)) {
       problems.push(
         problem(
           source.iri,

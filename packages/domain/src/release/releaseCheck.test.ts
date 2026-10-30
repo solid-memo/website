@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { growth } from "../testing/growth";
 import { courseDraft, DRAFT, of } from "../testing/releaseDraft";
 import { draftReleaseModel } from "./draftModel";
 import { problem, type ReleaseProblem } from "./problems";
@@ -397,5 +398,74 @@ describe("problemTarget", () => {
     expect(isTargetField("question", "distractor:")).toBe(false);
     expect(isTargetField("release", "sources")).toBe(true);
     expect(isTargetField("release", "title")).toBe(false);
+  });
+});
+
+describe("placing many problems", () => {
+  it("places each in time that grows with the problems and the draft, not with their product", () => {
+    const ACTIVITY = "http://www.w3.org/ns/prov#Activity";
+    const many = (count: number) => {
+      const base = courseDraft();
+      const template = base.cards[0]!.data;
+      const ids = Array.from({ length: count }, (_, i) => i);
+      const draft = {
+        ...base,
+        cards: ids.map((i) => ({
+          id: `q-${i}`,
+          data: { ...template, distractor: [of(`d-${i}`), of("d-0")] },
+        })),
+        agents: ids.map((i) => ({ id: `ann-${i}`, data: { name: "Ann" } })),
+        triples: [
+          ...base.triples,
+          ...ids.map((i) => ({
+            subject: of(`check-${i}`),
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            object: { kind: "iri" as const, value: ACTIVITY },
+          })),
+        ],
+      };
+      const problems = ids.flatMap((i) => [
+        problem(of(`d-${i}`), { code: "required", params: {} }),
+        problem(of(`check-${i}`), { code: "required", params: {} }),
+        problem(of(`ann-${i}`), { code: "required", params: {} }),
+        problem(of("compilation"), { code: "required", params: {} }),
+      ]);
+      return { draft, problems };
+    };
+    const { draft, problems } = many(2);
+    expect(problems.map((one) => problemTarget(draft, one))).toEqual([
+      { screen: "question", card: "q-0", field: "distractor:d-0" },
+      { screen: "release", field: "checks" },
+      { screen: "release", field: "authors" },
+      { screen: "release", field: "making" },
+      { screen: "question", card: "q-1", field: "distractor:d-1" },
+      { screen: "release", field: "checks" },
+      { screen: "release", field: "authors" },
+      { screen: "release", field: "making" },
+    ]);
+    expect([...outlineProblems(draft, problems).keys()]).toEqual([
+      "q-0",
+      "check-0",
+      "ann-0",
+      "compilation",
+      "q-1",
+      "check-1",
+      "ann-1",
+    ]);
+    // Eight times the problems, in a draft eight times as large, take
+    // about as long as an eighth of them eight times over; reading the
+    // draft again for each problem would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const { draft, problems } = many(count);
+        return () => {
+          outlineProblems(draft, problems);
+          for (const one of problems) problemTarget(draft, one);
+        };
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

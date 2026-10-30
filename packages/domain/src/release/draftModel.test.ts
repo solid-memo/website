@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { growth } from "../testing/growth";
 import { courseDraft, deckDraft, DRAFT, link, of } from "../testing/releaseDraft";
 import { courseProblems } from "./courseRules";
 import { draftReleaseModel } from "./draftModel";
@@ -286,5 +287,58 @@ describe("draftReleaseModel", () => {
       ],
     });
     expect(model.distractors.map((d) => d.iri)).toEqual([of("x")]);
+  });
+
+  it("reads its sources, activities and contact points in time that grows with its statements, not with their product", () => {
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const CONTACT = "http://www.w3.org/ns/dcat#contactPoint";
+    const TITLE = "http://purl.org/dc/terms/title";
+    const many = (count: number): ReleaseDraft => {
+      const base = courseDraft();
+      const sources = Array.from({ length: count }, (_, i) => `https://source.example/${i}`);
+      const used = Array.from({ length: count }, (_, i) => `https://used.example/${i}`);
+      const points = Array.from({ length: count }, (_, i) => of(`contact-${i}`));
+      return {
+        ...base,
+        root: { ...base.root, wasDerivedFrom: sources },
+        triples: [
+          ...base.triples,
+          ...sources.map((source) => link(source, TITLE, "https://title.example/")),
+          ...used.map((source) => link(of("compilation"), `${PROV}used`, source)),
+          ...points.flatMap((point) => [
+            link(DRAFT, CONTACT, point),
+            link(point, RDF_TYPE, `${VCARD}Kind`),
+            link(point, `${VCARD}hasURL`, "https://tracker.example/"),
+          ]),
+        ],
+      };
+    };
+    const model = draftReleaseModel(many(2));
+    expect(model.sourceDetails.map((source) => [source.iri, source.title.length])).toEqual([
+      ["https://source.example/0", 1],
+      ["https://source.example/1", 1],
+      ["https://source.example/", 1],
+      ["https://used.example/0", 0],
+      ["https://used.example/1", 0],
+    ]);
+    expect(
+      model.contacts.map((point) => [point.point.value, point.types, point.urls.length]),
+    ).toEqual([
+      [of("contact-0"), [`${VCARD}Kind`], 1],
+      [of("contact-1"), [`${VCARD}Kind`], 1],
+    ]);
+    // Eight times the sources, activities' sources and contact points, each
+    // with its statements, take about as long as an eighth of them eight
+    // times over; looking through every statement for each would take eight
+    // times as long.
+    const ratio = growth(
+      (count) => {
+        const draft = many(count);
+        return () => draftReleaseModel(draft);
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

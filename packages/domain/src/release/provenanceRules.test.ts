@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { provenanceOf, provenanceProblems, RDFS_COMMENT } from "./provenanceRules";
+import { growth } from "../testing/growth";
 import { emptyReleaseModel } from "../testing/releaseModel";
 import type { ReleaseModel, ReleaseTerm, ReleaseText } from "./releaseModel";
 
@@ -260,5 +261,46 @@ describe("provenanceProblems", () => {
       ["sources", 2, 1],
       ["cards", 1, 0],
     ]);
+  });
+
+  it("holds each source a making used to the derivation in time that grows with the sources, not with their product", () => {
+    const described = {
+      title: [text("A")],
+      creator: [text("Ann")],
+      license: [iri("https://cc0.example/")],
+      comments: [],
+    };
+    const many = (count: number) => {
+      const used = Array.from({ length: count }, (_, i) => `https://used.example/${i}`);
+      return model({
+        sources: used.slice(1).map(iri),
+        making: [
+          making([], { used: [...used, used[0]!] }),
+          { ...making([], { used }), iri: `${URL}#review` },
+        ],
+        sourceDetails: used.map((one) => ({ iri: one, ...described })),
+      });
+    };
+    expect(provenanceProblems(many(3))).toEqual([
+      {
+        severity: "warning",
+        subject: "https://used.example/0",
+        related: [`${URL}#compilation`, `${URL}#review`],
+        code: "usedNotDerived",
+        params: {},
+      },
+    ]);
+    // Eight times the sources the making used take about as long as an
+    // eighth of them eight times over; looking through what it used for
+    // each source would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const release = many(count);
+        return () => provenanceProblems(release);
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

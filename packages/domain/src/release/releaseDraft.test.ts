@@ -1055,6 +1055,50 @@ describe("the contact", () => {
       ...contact("contact-2", "https://a.example/"),
     ]);
   });
+
+  it("is the page of the first contact point that names one", () => {
+    const draft = courseDraft();
+    const named = {
+      ...draft,
+      triples: [
+        ...draft.triples,
+        link(DRAFT, POINT, of("first")),
+        link(of("first"), `${VCARD}hasEmail`, "mailto:a@example.org"),
+        ...contact("second", "https://b.example/"),
+        ...contact("third", "https://c.example/"),
+      ],
+    };
+    expect(contactOf(named)).toBe("https://b.example/");
+  });
+
+  it("is found in time that grows with the contact points, not their square", () => {
+    // Eight times the contact points, none naming a page, must take less
+    // than four times as long as an eighth of them done eight times over
+    // (testing.md): looking through every statement for each point would
+    // take about eight times as long.
+    const points = (count: number): ReleaseDraft => {
+      const draft = courseDraft();
+      return {
+        ...draft,
+        triples: [
+          ...draft.triples,
+          ...Array.from({ length: count }, (_, i) => [
+            link(DRAFT, POINT, of(`contact-${i}`)),
+            link(of(`contact-${i}`), RDF_TYPE, `${VCARD}Kind`),
+          ]).flat(),
+        ],
+      };
+    };
+    const ratio = growth(
+      (count) => {
+        const draft = points(count);
+        return () => contactOf(draft);
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("the license", () => {
