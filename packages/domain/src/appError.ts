@@ -124,6 +124,8 @@ export const ERROR_TEMPLATES = {
     "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
   writtenByNewerApp:
     "A newer version of Solid Memo has updated this data, so this version does not save over it. Reload the page to get the latest version.",
+  idTakenInDeck:
+    "Solid Memo did not save this: it would have mixed up the cards and wrong options of this deck. Nothing was changed.",
   deckTreeTooNew:
     "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Reload the page to get the latest version.",
   createdElsewhere:
@@ -139,6 +141,8 @@ export const ERROR_TEMPLATES = {
   cardGone:
     "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
   notADeck: "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
+  libraryIdsRepeat:
+    "This deck gives two of its cards or wrong options the same id, so Solid Memo cannot read it. Ask its creator to check it.",
   libraryDeckTooNew:
     "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
   libraryCardTooNew:

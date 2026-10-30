@@ -41,6 +41,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import {
   AGENT_V1,
+  CARD_V7,
   CATALOG_V1,
   DECK_V6,
   DISTRACTOR_V1,
@@ -48,8 +49,15 @@ import {
 } from "@solid-memo/vocab/descriptors.generated";
 import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
-import { readVersioned, recordThing, removeUnlessNewer, unlessNewer } from "../records";
+import {
+  readVersioned,
+  recordThing,
+  removeUnlessNewer,
+  unlessNewer,
+  unlessTyped,
+} from "../records";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
+import { AppError } from "@solid-memo/domain/appError";
 
 /** Every agent of a document by URL, named "Name <email>". */
 export function agentNamesOf(dataset: Dataset): Map<string, string> {
@@ -378,19 +386,19 @@ export function distractorsOf(dataset: Dataset, urls: readonly string[]): Distra
 /**
  * The document with a card's distractors written beside it, as subjects
  * of `documentUrl` (an existing one keeps triples this app does not
- * know), and those it named before (`before`, their URLs) but names no
- * longer removed. Returns the URLs written, for the write check.
+ * know); a distractor is never written onto a card (unlessTyped).
+ * Returns the URLs written, for the write check, and those the card
+ * named before (`before`) but names no longer (`dropped`), for
+ * withoutUnnamedDistractors.
  */
 export function withDistractors(
   dataset: Dataset,
   documentUrl: string,
   distractors: readonly Distractor[],
   before: readonly string[],
-): { dataset: Dataset; subjects: string[] } {
+): { dataset: Dataset; subjects: string[]; dropped: string[] } {
   const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
-  let updated = before
-    .filter((url) => !subjects.includes(url))
-    .reduce((current, url) => removeUnlessNewer(current, url), dataset);
+  let updated = dataset;
   for (const [i, distractor] of distractors.entries()) {
     updated = setThing(
       updated,
@@ -398,11 +406,65 @@ export function withDistractors(
         subjects[i],
         DISTRACTOR_V1,
         distractorToRecord(distractor),
-        getThing(updated, subjects[i]),
+        unlessTyped(updated, subjects[i], SM.Card),
       ),
     );
   }
-  return { dataset: updated, subjects };
+  return { dataset: updated, subjects, dropped: before.filter((url) => !subjects.includes(url)) };
+}
+
+/** How many subjects of the document name each URL as their distractor (sm:distractor). */
+function distractorNamers(dataset: Dataset): Map<string, number> {
+  const namers = new Map<string, number>();
+  for (const thing of getThingAll(dataset))
+    for (const url of getUrlAll(thing, SM.distractor)) namers.set(url, (namers.get(url) ?? 0) + 1);
+  return namers;
+}
+
+/**
+ * The document without each of `urls`, distractors a card no longer
+ * names, unless a card still names it: a distractor belongs to the one
+ * card that names it, so a card's never goes with another's.
+ */
+export function withoutUnnamedDistractors(dataset: Dataset, urls: readonly string[]): Dataset {
+  if (urls.length === 0) return dataset;
+  const namers = distractorNamers(dataset);
+  return urls
+    .filter((url) => !namers.has(url))
+    .reduce((current, url) => removeUnlessNewer(current, url), dataset);
+}
+
+/**
+ * The document without the card at `url`. A subject an earlier version
+ * left typed both a card and a distractor, which another card names as
+ * its distractor, loses only its card statements (the sm:Card type and
+ * the card properties no distractor has), so the card that names it
+ * keeps its distractor.
+ */
+export function withoutCardSubject(dataset: Dataset, url: string): Dataset {
+  const thing = getThing(dataset, url);
+  const named =
+    thing !== null &&
+    getUrlAll(thing, RDF.type).includes(SM.Distractor) &&
+    distractorNamers(dataset).has(url);
+  if (!named) return removeUnlessNewer(dataset, url);
+  unlessNewer(thing);
+  const kept = new Set(DISTRACTOR_V1.fields.map((field) => field.predicate));
+  const builder = buildThing(thing).removeUrl(RDF.type, SM.Card).removeAll(SCHEMA.suggestedAnswer);
+  for (const field of CARD_V7.fields)
+    if (!kept.has(field.predicate)) builder.removeAll(field.predicate);
+  return setThing(dataset, builder.setInteger(SM.formatVersion, DISTRACTOR_V1.version).build());
+}
+
+/**
+ * Refused (idTakenInDeck) when one of the subjects written is named as
+ * a distractor by more than one card: a distractor belongs to the one
+ * card that names it, so a card is never given another's.
+ */
+export function assertDistractorsOwnedOnce(dataset: Dataset, subjects: readonly string[]): void {
+  const namers = distractorNamers(dataset);
+  const shared = subjects.find((url) => (namers.get(url) ?? 0) > 1);
+  if (shared !== undefined) throw new AppError("idTakenInDeck", { url: shared });
 }
 
 /**

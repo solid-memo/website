@@ -773,6 +773,16 @@ The library conforms to [shapes.md](shapes.md)'s
 `LibraryDeckV6`, each release to its own format's shape. The app
 migrates a format-5 release to format 6 in memory.
 
+A release's cards and distractors share one set of ids: a copy keeps
+them all in one cards document, each at its id. The app refuses a
+release in which a card and a distractor have the same id, or two
+cards name one distractor (`libraryIdsRepeat`), for an import, an
+upgrade and a draft's trial in the Studio alike. A copy also refuses
+an upgrade that gives a card the id of a distractor it keeps, or gives
+a distractor a card keeps to another card (`idTakenInDeck`). So a new
+version never reuses the id of a distractor an earlier version had,
+even one it drops: give the new card or distractor an id of its own.
+
 ## A release outside the library
 
 From library deck format 6, a release outside `decks/` (one Turtle

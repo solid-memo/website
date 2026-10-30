@@ -28,6 +28,7 @@ import {
   withCatalog,
   withDeck,
   withDistractors,
+  withoutUnnamedDistractors,
   withoutDeck,
 } from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -535,7 +536,7 @@ describe("toCard", () => {
 });
 
 describe("withDistractors", () => {
-  it("writes a card's distractors beside it and removes those it named before and no longer does", () => {
+  it("writes a card's distractors beside it and names those it named before and no longer does", () => {
     const before = [`${CARDS_DOC}#d1`, `${CARDS_DOC}#old`];
     const first = withDistractors(
       datasetFrom(CARDS_DOC),
@@ -560,7 +561,11 @@ describe("withDistractors", () => {
       before,
     );
     expect(second.subjects).toEqual([before[0]]);
-    expect(getThing(second.dataset, before[1])).toBeNull();
+    expect(second.dropped).toEqual([before[1]]);
+    expect(getThing(second.dataset, before[1])).not.toBeNull();
+    expect(
+      getThing(withoutUnnamedDistractors(second.dataset, second.dropped), before[1]),
+    ).toBeNull();
     const d1 = getThing(second.dataset, before[0])!;
     expect(toDistractor(d1)).toEqual({
       id: "d1",
@@ -570,6 +575,24 @@ describe("withDistractors", () => {
     expect(getInteger(d1, SM.formatVersion)).toBe(1);
     expect(getUrlAll(d1, RDF.type)).toEqual([SM.Distractor, "https://schema.org/Answer"]);
     expect(getStringNoLocale(d1, "https://example.org/other")).toBe("kept");
+  });
+
+  it("removes a dropped distractor only when no card names it", () => {
+    const url = `${CARDS_DOC}#d1`;
+    const written = withDistractors(
+      datasetFrom(CARDS_DOC),
+      CARDS_DOC,
+      [{ id: "d1", text: { en: "One" } }],
+      [],
+    );
+    const named = setThing(
+      written.dataset,
+      buildThing(createThing({ url: `${CARDS_DOC}#other` }))
+        .addUrl(SM.distractor, url)
+        .build(),
+    );
+    expect(withoutUnnamedDistractors(named, [])).toBe(named);
+    expect(getThing(withoutUnnamedDistractors(named, [url]), url)).not.toBeNull();
   });
 
   it("retires a distractor, and restores it, keeping it named", () => {

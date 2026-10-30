@@ -572,6 +572,36 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
       `That is not a Solid Memo deck, so it cannot be added. Choose another deck.\nurl: ${DOC}`,
     );
   });
+
+  it("refuses a release that gives two of its cards and distractors one id", async () => {
+    const release = (cards: string) =>
+      datasetOf(
+        `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+         @prefix dcterms: <http://purl.org/dc/terms/> .
+         <> a sm:Deck ; dcterms:title "Capitals" .
+         <#x> a sm:Card ; sm:formatVersion 7 ; sm:front "France"@en ; sm:back "Paris"@en ;
+           sm:distractor <#dx> .
+         <#dx> a sm:Distractor ; sm:formatVersion 1 ; sm:distractorText "Lyon"@en .
+         ${cards}`,
+        DOC,
+      );
+    const refused = (id: string) =>
+      `This deck gives two of its cards or wrong options the same id, so Solid Memo cannot read it. Ask its creator to check it.\nurl: ${DOC}\nid: ${id}`;
+    const card = (url: string, extra = "") =>
+      `<${url}> a sm:Card ; sm:formatVersion 7 ; sm:front "Spain"@en ; sm:back "Madrid"@en ${extra}.`;
+    // A card at a distractor's id, and one distractor named by two cards.
+    for (const [cards, id] of [
+      [card("#dx"), "dx"],
+      [card("#y", "; sm:distractor <#dx> "), "dx"],
+    ] as const) {
+      const dataset = await release(cards);
+      expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(refused(id));
+    }
+    expect(toLibraryDeckContent(DOC, await release(card("#y"))).cards.map((c) => c.id)).toEqual([
+      "x",
+      "y",
+    ]);
+  });
 });
 
 describe("toCourseOutline", () => {

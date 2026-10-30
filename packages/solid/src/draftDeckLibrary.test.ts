@@ -53,6 +53,22 @@ describe("createDraftDeckLibrary", () => {
     ).toEqual([[of("ch-a"), ["ch-a-1", "ch-a-2"], ["q-a-r01"]]]);
   });
 
+  it("refuses a draft whose cards share a distractor, as a release's", async () => {
+    const draft = playableCourseDraft();
+    const shared = {
+      ...draft,
+      cards: draft.cards.map((node) =>
+        node.id === "q-a-r01"
+          ? { ...node, data: { ...node.data, distractor: [of("q-a-2a-d1")] } }
+          : node,
+      ),
+    };
+    await expect(createDraftDeckLibrary(shared).fetchLibraryDeck(DRAFT)).rejects.toMatchObject({
+      code: "libraryIdsRepeat",
+      vars: { id: "q-a-2a-d1" },
+    });
+  });
+
   it("reads each time the draft as it is, and no other release", async () => {
     const library = createDraftDeckLibrary(deckDraft());
     expect((await library.fetchLibraryDeck(DRAFT)).cards.map((card) => card.id)).toEqual(["w1"]);
