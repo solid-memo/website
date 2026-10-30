@@ -30,6 +30,7 @@ import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { DECKS, draftPod, INSTANCE, quadsOfTurtle } from "./testing/releaseDrafts";
 import { subclassCycle, subclassDiamond } from "@solid-memo/shacl/testing/subclassTangle";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -38,6 +39,7 @@ vi.mock("./datasets", async (importOriginal) => ({
 
 const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
 const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 
 /** An xsd:dateTime literal of this lexical form, valid or not. */
 function dateTime(value: string): never {
@@ -69,6 +71,55 @@ function withBlankMember(dataset: Dataset, catalog: string, label: string): Data
     },
   ];
   return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+}
+
+/** The dataset with more values of a subject's property, each a literal of this datatype. */
+function withLiterals(
+  dataset: Dataset,
+  subject: string,
+  predicate: string,
+  datatype: string,
+  values: readonly string[],
+): Dataset {
+  const term = (termType: string, value: string) => ({ termType, value });
+  const graph = term("DefaultGraph", "");
+  const quads = [
+    ...toRdfJsDataset(dataset),
+    ...values.map((value) => ({
+      subject: term("NamedNode", subject),
+      predicate: term("NamedNode", predicate),
+      object: { ...term("Literal", value), language: "", datatype: term("NamedNode", datatype) },
+      graph,
+    })),
+  ];
+  return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+}
+
+/** The dataset with `count` more of a catalog's links, each to a literal, which is not a member. */
+function withMemberLiterals(dataset: Dataset, catalog: string, count: number): Dataset {
+  const values = Array.from({ length: count }, (_, i) => `v${i}`);
+  return withLiterals(dataset, catalog, DCAT.dataset, XSD_STRING, values);
+}
+
+/** A catalog another app rewrote without its stamp: still Solid Memo's, held to the catalog shape and DCAT-AP. */
+function unstampedCatalog(): Dataset {
+  return setThing(
+    datasetFrom(DOC),
+    buildThing(createThing({ url: `${DOC}#catalog` }))
+      .addIri(RDF.type, DCAT.Catalog)
+      .build(),
+  );
+}
+
+/** A result about a catalog's link to `value`, which is not a member of the document. */
+function memberResult(value: string) {
+  return {
+    path: DCAT.dataset,
+    message: { en: "Value does not have class dcat:Dataset" },
+    severity: "violation" as const,
+    constraint: "Class",
+    value,
+  };
 }
 
 /**
@@ -587,9 +638,11 @@ describe("createShaclShapeValidator", () => {
       result("NodeKind", DCAT.dataset, "elsewhere"),
       result("MinCount", DCAT.dataset),
     ];
-    validate.mockResolvedValue(
-      members.map((member) => ({ focusNode: `${DOC}#catalog`, ...member })),
-    );
+    validate.mockResolvedValue([
+      ...members.map((member) => ({ focusNode: `${DOC}#catalog`, ...member })),
+      // What DCAT-AP says of the blank node itself: it has no report.
+      { focusNode: "theirs", ...result("MinCount", DCTERMS.title) },
+    ]);
     const [recipes, theirs, ...own] = members.map((member) => ({ ...member, profile: "dcat-ap" }));
     expect((await validator.validateDocument(DOC)).subjects).toEqual([
       {
@@ -607,6 +660,59 @@ describe("createShaclShapeValidator", () => {
       { url: alice, status: "checked", shape: "agent", version: 1, violations: [untitled] },
       { url: `${DOC}#recipes`, status: "untyped" },
     ]);
+  });
+
+  it("reports many links of a catalog that are not members in time that grows with them, not their square", async () => {
+    // Eight times the links must take less than four times as long as an
+    // eighth of them done eight times over (testing.md).
+    const ratio = await growthAsync(
+      (count) => {
+        const dataset = withMemberLiterals(unstampedCatalog(), `${DOC}#catalog`, count);
+        const results = Array.from({ length: count }, (_, i) => memberResult(`v${i}`));
+        const { validator, validateNode, validate } = makeValidator();
+        validateNode.mockResolvedValue(results as never);
+        validate.mockResolvedValue(results.map((r) => ({ focusNode: `${DOC}#catalog`, ...r })));
+        return () => {
+          vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(dataset as never);
+          return validator.validateDocument(DOC);
+        };
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("reports many dates of a catalog the app cannot read, which the shape names too, in time that grows with them, not their square", async () => {
+    const ratio = await growthAsync(
+      (count) => {
+        const far = Array.from({ length: count }, (_, i) => `${300_000 + i}-01-01T00:00:00Z`);
+        const dataset = withLiterals(
+          unstampedCatalog(),
+          `${DOC}#catalog`,
+          DCTERMS.modified,
+          XSD_DATETIME,
+          far,
+        );
+        const { validator, validateNode } = makeValidator();
+        validateNode.mockResolvedValue(
+          far.map((value) => ({
+            path: DCTERMS.modified,
+            message: { en: "Value does not have datatype xsd:dateTime" },
+            severity: "violation" as const,
+            constraint: "Datatype",
+            value,
+          })) as never,
+        );
+        return () => {
+          vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(dataset as never);
+          return validator.validateDocument(DOC);
+        };
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("holds a DCAT deck to DCAT-AP with the site's own profile and reference data", async () => {
@@ -859,6 +965,23 @@ describe("createShaclShapeValidator", () => {
       await expect(
         validator.checkSubjects(listing(`${DOC}#deck-gone`), [`${DOC}#catalog`], "pod"),
       ).rejects.toThrow(`<${DOC}#catalog> (${DCAT.dataset}): DCAT-AP:`);
+    });
+
+    it("refuses a catalog with many links that are not members in time that grows with them, not their square", async () => {
+      const ratio = await growthAsync(
+        (count) => {
+          const dataset = withMemberLiterals(unstampedCatalog(), `${DOC}#catalog`, count);
+          const results = Array.from({ length: count }, (_, i) => memberResult(`v${i}`));
+          const { validator, validateNode, validate } = makeValidator();
+          validateNode.mockResolvedValue(results as never);
+          validate.mockResolvedValue(results.map((r) => ({ focusNode: `${DOC}#catalog`, ...r })));
+          return () =>
+            validator.checkSubjects(dataset, [`${DOC}#catalog`], "pod").catch(() => undefined);
+        },
+        4000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
     });
 
     it("holds a draft to the draft shapes and not yet to DCAT-AP, and an instance's deck to the pod's", async () => {

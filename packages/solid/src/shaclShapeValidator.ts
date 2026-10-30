@@ -118,29 +118,40 @@ function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
 }
 
 /**
+ * A document's links from a catalog or deck group to a blank node, each
+ * as the key memberKey makes of it: gathered once per check, so that
+ * isForeignMember looks a result's value up instead of going through
+ * the document for each result.
+ */
+function blankMembers(quads: Iterable<Quad>): Set<string> {
+  const links = new Set<string>();
+  for (const q of quads) {
+    if (q.object.termType === "BlankNode" && MEMBER_LINKS.includes(q.predicate.value)) {
+      links.add(memberKey(q.subject.value, q.predicate.value, q.object.value));
+    }
+  }
+  return links;
+}
+
+const memberKey = (subject: string, path: string | undefined, value: string) =>
+  JSON.stringify([subject, path, value]);
+
+/**
  * A result about a catalog's or deck group's link to a member another
  * app wrote: a subject of the document that is not Solid Memo's, or a
- * blank node, which Solid Memo never writes. The member is that app's
- * data, and what is wrong with the link is no fault of the catalog's.
+ * blank node (one of `blank`, blankMembers), which Solid Memo never
+ * writes. The member is that app's data, and what is wrong with the
+ * link is no fault of the catalog's.
  */
 function isForeignMember(
-  quads: readonly Quad[],
+  blank: ReadonlySet<string>,
   foreign: ReadonlySet<string>,
   focusNode: string,
   violation: Violation,
 ): boolean {
   const { path, value } = violation;
   if (!MEMBER_LINKS.includes(path) || value === undefined) return false;
-  return (
-    foreign.has(value) ||
-    quads.some(
-      (q) =>
-        q.subject.value === focusNode &&
-        q.predicate.value === path &&
-        q.object.termType === "BlankNode" &&
-        q.object.value === value,
-    )
-  );
+  return foreign.has(value) || blank.has(memberKey(focusNode, path, value));
 }
 
 /**
@@ -195,9 +206,10 @@ function dateViolations(
 ): Violation[] {
   return descriptor.fields
     .filter((field) => field.kind === "dateTime")
-    .flatMap(({ predicate }) =>
-      unreadable(predicate)
-        .filter((value) => !found.some((v) => v.path === predicate && v.value === value))
+    .flatMap(({ predicate }) => {
+      const reported = new Set(found.filter((v) => v.path === predicate).map((v) => v.value));
+      return unreadable(predicate)
+        .filter((value) => !reported.has(value))
         .map(
           (value): Violation => ({
             path: predicate,
@@ -207,8 +219,8 @@ function dateViolations(
             severity: "violation",
             constraint: "DateTimeRange",
           }),
-        ),
-    );
+        );
+    });
 }
 
 const DATE_TIME_RANGE =
@@ -220,6 +232,37 @@ const DATE_TIME_RANGE =
  */
 function asWarning(violation: Violation): Violation {
   return violation.severity === "violation" ? { ...violation, severity: "warning" } : violation;
+}
+
+/**
+ * A document's report with DCAT-AP's results on its subjects added, each
+ * found by its address: a checked subject's added to its own, an untyped
+ * subject's making it a profiled one. Newer data is left alone, and a
+ * blank node has no report of its own, nor do its results.
+ */
+function withProfiled(
+  subjects: SubjectReport[],
+  bySubject: ReadonlyMap<string, Violation[]>,
+  attributed: (subject: string, violations: Violation[]) => Violation[],
+  foreign: ReadonlySet<string>,
+): void {
+  const indexOf = new Map(subjects.map((s, index) => [s.url, index]));
+  for (const [subject, found] of bySubject) {
+    const index = indexOf.get(subject);
+    if (index === undefined) continue;
+    const report = subjects[index];
+    const violations = attributed(subject, found);
+    if (report?.status === "checked") {
+      for (const violation of violations) report.violations.push(violation);
+    } else if (report?.status === "untyped") {
+      subjects[index] = {
+        url: subject,
+        status: "profiled",
+        violations,
+        ...(foreign.has(subject) && { foreign: true }),
+      };
+    }
+  }
 }
 
 /**
@@ -292,10 +335,10 @@ export function createShaclShapeValidator({
         isMemberElsewhere(focusNode, violation)
       )
         continue;
-      bySubject.set(focusNode, [
-        ...(bySubject.get(focusNode) ?? []),
-        { ...violation, profile: "dcat-ap" },
-      ]);
+      const entry: Violation = { ...violation, profile: "dcat-ap" };
+      const held = bySubject.get(focusNode);
+      if (held === undefined) bySubject.set(focusNode, [entry]);
+      else held.push(entry);
     }
     return bySubject;
   }
@@ -312,10 +355,10 @@ export function createShaclShapeValidator({
     context: WriteContext,
   ): Promise<string[]> {
     const data = toRdfJsDataset(dataset);
-    const quads = [...(data as Iterable<Quad>)];
+    const blank = blankMembers(data as Iterable<Quad>);
     const foreign = foreignSubjects(dataset);
     const counts = (subject: string, v: Violation) =>
-      v.severity === "violation" && !isForeignMember(quads, foreign, subject, v);
+      v.severity === "violation" && !isForeignMember(blank, foreign, subject, v);
     const problems: string[] = [];
     const describe = (subject: string, v: Violation) =>
       `<${subject}>${v.path === undefined ? "" : ` (${v.path})`}: ${v.profile === "dcat-ap" ? "DCAT-AP: " : ""}${shown(v.message)}`;
@@ -344,11 +387,10 @@ export function createShaclShapeValidator({
         );
       });
     if (profiled) {
+      const asked = new Set(subjects);
       for (const [subject, violations] of await profileViolations(data)) {
-        if (!subjects.includes(subject)) continue;
-        problems.push(
-          ...violations.filter((v) => counts(subject, v)).map((v) => describe(subject, v)),
-        );
+        if (!asked.has(subject)) continue;
+        for (const v of violations) if (counts(subject, v)) problems.push(describe(subject, v));
       }
     }
     return problems;
@@ -366,13 +408,13 @@ export function createShaclShapeValidator({
   ): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };
     const data = toRdfJsDataset(dataset);
-    const quads = [...(data as Iterable<Quad>)];
+    const blank = blankMembers(data as Iterable<Quad>);
     const subjects: SubjectReport[] = [];
     const foreign = foreignSubjects(dataset);
     /** A subject's results: all warnings for another app's subject, and for its links to another app's members. */
     const attributed = (subject: string, violations: Violation[]) =>
       violations.map((v) =>
-        foreign.has(subject) || isForeignMember(quads, foreign, subject, v) ? asWarning(v) : v,
+        foreign.has(subject) || isForeignMember(blank, foreign, subject, v) ? asWarning(v) : v,
       );
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
@@ -422,24 +464,7 @@ export function createShaclShapeValidator({
       getThingAll(dataset).some((thing) =>
         getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)),
       );
-    if (profiled) {
-      for (const [subject, found] of await profileViolations(data)) {
-        const index = subjects.findIndex((s) => s.url === subject);
-        const report = subjects[index];
-        const violations = attributed(subject, found);
-        // Every subject already has a report: newer data is left alone,
-        // an untyped subject becomes a profiled one.
-        if (report?.status === "checked") report.violations.push(...violations);
-        else if (report?.status === "untyped") {
-          subjects[index] = {
-            url: subject,
-            status: "profiled",
-            violations,
-            ...(foreign.has(subject) && { foreign: true }),
-          };
-        }
-      }
-    }
+    if (profiled) withProfiled(subjects, await profileViolations(data), attributed, foreign);
     return { url, status: "checked", subjects };
   }
 
