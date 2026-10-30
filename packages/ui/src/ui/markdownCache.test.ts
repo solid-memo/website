@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MAX_CHARS, parseMarkdown } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
+import { growth } from "@solid-memo/domain/testing/growth";
 import {
   blocksByPosition,
   CACHE_SIZE,
@@ -15,6 +16,7 @@ import {
   plainTexts,
   releaseMarkdownCheck,
 } from "./markdownCache";
+import { textHash } from "./textHash";
 
 vi.mock("@solid-memo/markdown/parse", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/markdown/parse")>();
@@ -24,6 +26,11 @@ vi.mock("@solid-memo/markdown/parse", async (importOriginal) => {
 vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/markdown/plainText")>();
   return { plainText: vi.fn(original.plainText) };
+});
+
+vi.mock("./textHash", async (importOriginal) => {
+  const original = await importOriginal<typeof import("./textHash")>();
+  return { textHash: vi.fn(original.textHash) };
 });
 
 describe("markdownBlocks and markdownPhrases", () => {
@@ -158,6 +165,43 @@ describe("releaseMarkdownCheck", () => {
     for (let pass = 0; pass < 10; pass++) for (const text of texts) check.problems(text, "option");
     const again = performance.now() - started;
     expect(again, `${Math.round(again)} ms against ${Math.round(read)} ms`).toBeLessThan(read);
+  });
+
+  it("keeps one text under a hash two texts share, and gives each its own", () => {
+    vi.mocked(textHash).mockReturnValue(0);
+    try {
+      const check = releaseMarkdownCheck();
+      const link = check.problems("[a](https://example.org)", "side");
+      expect(check.problems("a\n\nb", "side")).toEqual([]);
+      const again = check.problems("[a](https://example.org)", "side");
+      expect(again).toEqual(link);
+      expect(again).not.toBe(link);
+      expect(check.problems("[a](https://example.org)", "side")).toBe(again);
+    } finally {
+      vi.mocked(textHash).mockRestore();
+    }
+    expect(textHash("a")).not.toBe(textHash("b"));
+  });
+
+  it("looks long texts of one length up in time linear in how many there are", () => {
+    // Over 16,383 characters, a string is hashed by its length alone: a
+    // Map keyed by such texts compares each lookup with all of them.
+    const ratio = growth(
+      (count) => {
+        const check = releaseMarkdownCheck();
+        const texts = Array.from(
+          { length: count },
+          (_, index) => `${"a".repeat(MAX_CHARS)}${String(index).padStart(6, "0")}`,
+        );
+        for (const text of texts) check.problems(text, "side");
+        return () => {
+          for (const text of texts) check.problems(text, "side");
+        };
+      },
+      50,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("chunks a step's theory, each text once", () => {

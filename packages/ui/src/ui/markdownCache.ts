@@ -14,6 +14,7 @@ import {
   type FieldRule,
   type MarkdownProblem,
 } from "@solid-memo/markdown/problems";
+import { textHash } from "./textHash";
 import type { DeckTextCheck } from "@solid-memo/domain/deckHealth";
 import type { FieldRuleName, MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 
@@ -21,17 +22,24 @@ import type { FieldRuleName, MarkdownCheck } from "@solid-memo/domain/release/ma
 export const CACHE_SIZE = 500;
 
 /**
- * A function of a text remembered for the last CACHE_SIZE texts it was
- * given, so a list re-rendered, a card turned or a language switched
- * does not parse the same text again.
+ * A function of a text remembered for the last `limit` texts it was
+ * given (the oldest goes first), so a list re-rendered, a card turned or
+ * a language switched does not parse the same text again. A text is kept
+ * under its hash (textHash), with the text: a lookup compares the text
+ * with the one text kept under its hash only, never with the others, as
+ * V8's Map keyed by the texts would when many long texts share a length
+ * (it hashes a long string by its length alone). A text whose hash
+ * another text has replaces that entry, not chained to it.
  */
-function remembered<T>(compute: (text: string) => T): (text: string) => T {
-  const cache = new Map<string, T>();
+function remembered<T>(compute: (text: string) => T, limit = CACHE_SIZE): (text: string) => T {
+  const cache = new Map<number, { text: string; value: T }>();
   return (text) => {
-    if (cache.has(text)) return cache.get(text)!;
+    const key = textHash(text);
+    const hit = cache.get(key);
+    if (hit?.text === text) return hit.value;
     const value = compute(text);
-    if (cache.size >= CACHE_SIZE) cache.delete(cache.keys().next().value!);
-    cache.set(text, value);
+    if (!cache.delete(key) && cache.size >= limit) cache.delete(cache.keys().next().value!);
+    cache.set(key, { text, value });
     return value;
   };
 }
@@ -55,18 +63,12 @@ export const markdownChunks: (text: string) => MdBlock[][] | null = remembered((
 
 /**
  * A function of a text remembered for every text it was given, however
- * many: for a list of texts read again and again in the same order,
- * which a cache of the last CACHE_SIZE would miss on every text once the
- * list is longer.
+ * many (remembered without a limit): for a list of texts read again and
+ * again in the same order, which a cache of the last CACHE_SIZE would
+ * miss on every text once the list is longer.
  */
 function rememberedAll<T>(compute: (text: string) => T): (text: string) => T {
-  const cache = new Map<string, T>();
-  return (text) => {
-    if (cache.has(text)) return cache.get(text)!;
-    const value = compute(text);
-    cache.set(text, value);
-    return value;
-  };
+  return remembered(compute, Infinity);
 }
 
 /**
