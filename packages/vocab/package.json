@@ -20,7 +20,7 @@
     "format:turtle:check": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- --check fixtures ../../ns ../../decks ../../docs"
   },
   "devDependencies": {
-    "@types/n3": "^1.26.5",
+    "@types/n3": "^1.26.6",
     "n3": "^2.13.12"
   },
   "dependencies": {
