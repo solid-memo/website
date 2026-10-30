@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.24](https://github.com/solid-memo/website/compare/v6.17.23...v6.17.24) (2026-10-30)
+
+### Bug Fixes
+
+* **solid:** check a pod document against its shapes in linear time ([ba6d631](https://github.com/solid-memo/website/commit/ba6d631377b6ee74c37ffbfff8b54756efa4261f))
+
 ## [6.17.23](https://github.com/solid-memo/website/compare/v6.17.22...v6.17.23) (2026-10-30)
 
 ### Bug Fixes
