@@ -4,8 +4,12 @@
 
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
-import { idIn, liveSteps, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  draftCardFinder,
+  stepPlaceOf,
+  type DraftCard,
+} from "@solid-memo/domain/release/draftOutline";
+import { idIn, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { cardName } from "@solid-memo/ui/DataText";
 import type { I18n, MessageKey } from "@solid-memo/ui/i18n";
@@ -75,6 +79,35 @@ function named(draft: ReleaseDraft, iri: string): string {
 }
 
 /**
+ * What naming and linking the draft's subjects looks up, built once per
+ * draft: a screen names every subject a draft adds or changes, and a
+ * draft may have tens of thousands, so each is found by id, not by
+ * looking through the draft.
+ */
+interface DraftLookups {
+  chapters: ReadonlyMap<string, ReleaseDraft["chapters"][number]>;
+  steps: ReadonlySet<string>;
+  cardOf: (id: string) => DraftCard | null;
+  distractors: ReadonlySet<string>;
+}
+
+/** A draft is not changed in place: an edit makes a new one, which gets its own lookups. */
+const lookups = new WeakMap<ReleaseDraft, DraftLookups>();
+
+function lookupsOf(draft: ReleaseDraft): DraftLookups {
+  const known = lookups.get(draft);
+  if (known !== undefined) return known;
+  const made: DraftLookups = {
+    chapters: new Map(draft.chapters.map((node) => [node.id, node])),
+    steps: new Set(draft.steps.map((node) => node.id)),
+    cardOf: draftCardFinder(draft),
+    distractors: new Set(draft.distractors.map((node) => node.id)),
+  };
+  lookups.set(draft, made);
+  return made;
+}
+
+/**
  * What the problem is about, by name: the release itself, a chapter by
  * its title, a step by its place, a question by its front, a wrong
  * option by its id; anything else by its id or IRI.
@@ -88,17 +121,17 @@ export function subjectName(
   if (subject === draft.url) return t("studio.check.release");
   const id = idIn(draft, subject);
   if (id === null) return subject;
-  const chapter = draft.chapters.find((node) => node.id === id);
+  const { chapters, steps, cardOf, distractors } = lookupsOf(draft);
+  const chapter = chapters.get(id);
   if (chapter !== undefined)
     return chapter.data.title === undefined ? id : readerText(chapter.data.title);
-  if (draft.steps.some((node) => node.id === id)) {
-    const of = chapterOfStep(draft, id);
-    const number = of === null ? -1 : liveSteps(draft, of).findIndex((node) => node.id === id);
-    return number === -1 ? id : t("studio.chapter.step", { number: number + 1 });
+  if (steps.has(id)) {
+    const place = stepPlaceOf(draft, id);
+    return place === null ? id : t("studio.chapter.step", { number: place.index + 1 });
   }
-  const card = draftCardOf(draft, id);
+  const card = cardOf(id);
   if (card !== null) return cardName({ ...card.content, id }, readerText);
-  if (draft.distractors.some((node) => node.id === id)) return t("studio.check.distractor", { id });
+  if (distractors.has(id)) return t("studio.check.distractor", { id });
   return `#${id}`;
 }
 

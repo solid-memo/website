@@ -696,6 +696,30 @@ export function liveChapters(draft: ReleaseDraft): DraftNode<DraftChapterV1>[] {
   return inOrder(draft.chapters.filter((node) => node.data.deprecated !== true));
 }
 
+/** Each wrong option's card by its IRI, built once per list of cards (an edit to a card makes a new list). */
+const distractorCards = new WeakMap<object, ReadonlyMap<string, string>>();
+
+/**
+ * The first card (by id) of the draft whose wrong options include one,
+ * by its IRI, which its editor shows; undefined when none does. Built
+ * once per draft's cards, not looked through for each wrong option.
+ */
+export function distractorCardOf(
+  draft: Pick<ReleaseDraft, "cards">,
+  iri: string,
+): string | undefined {
+  let cards = distractorCards.get(draft.cards);
+  if (cards === undefined) {
+    const made = new Map<string, string>();
+    // From the last card back, so that the first to name an option has the last word.
+    for (const node of [...draft.cards].reverse())
+      for (const option of node.data.distractor) made.set(option, node.id);
+    cards = made;
+    distractorCards.set(draft.cards, cards);
+  }
+  return cards.get(iri);
+}
+
 /** The steps in use of a chapter (by id), in their order. */
 export function liveSteps(draft: ReleaseDraft, chapter: string): DraftNode<DraftStepV1>[] {
   const iri = iriIn(draft, chapter);
