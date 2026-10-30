@@ -35,6 +35,7 @@ import {
   type CourseOutline,
 } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
 /**
@@ -177,8 +178,7 @@ function toLibrarySource(url: string, thing: Subject | null): LibrarySource {
  * are brought up to the current one in memory.
  */
 export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeckContentOf {
-  const things = getThingAll(dataset);
-  const deck = things.find((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck));
+  const deck = releaseDeckOf(url, dataset);
   const formatVersion = deck === undefined ? 1 : storedVersionOf(deck);
   if (formatVersion > LATEST_VERSION.libraryDeck) {
     throw new AppError("libraryDeckTooNew", {
@@ -226,7 +226,7 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
     contact: _contact,
     ...content
   } = toLibraryDeckContent(url, dataset);
-  const deck = getThingAll(dataset).find((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))!;
+  const deck = releaseDeckOf(url, dataset)!;
   const subject = asUrl(deck);
   const release = migrate("libraryDeck", readVersioned(deck, "libraryDeck")!.record, { subject });
   const seriesThing = getThing(dataset, release.inSeries);
@@ -252,15 +252,16 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
 
 /**
  * A fetched release's course outline (see domain/course.ts): its
- * chapter and step subjects, each read with its format's shape (one that
- * does not fit is left out) and brought up to the current format, asking
- * only cards of the release that fit their shape (outlineOfCards). A
- * release with none — no course — has an empty outline.
+ * chapter and step subjects (releaseSubjectsOf), each read with its
+ * format's shape (one that does not fit is left out) and brought up to
+ * the current format, asking only cards of the release that fit their
+ * shape (outlineOfCards). A release with none — no course — has an
+ * empty outline.
  */
 export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOutline {
   const chapters: { url: string; data: ChapterV1 }[] = [];
   const steps: { url: string; data: StepV1 }[] = [];
-  for (const thing of getThingAll(dataset)) {
+  for (const thing of releaseSubjectsOf(releaseUrl, dataset)) {
     const url = asUrl(thing);
     const chapter = readVersioned(thing, "chapter");
     if (chapter !== null)
@@ -275,14 +276,46 @@ export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOut
 
 type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
 
-/** The cards of the release at `url`, each with its distractors; a card that does not fit its shape is left out. */
+/**
+ * The deck a fetched release document states: the one at `url`, else
+ * the first it holds, at its canonical URL (declared with @base) rather
+ * than the URL it was fetched from; undefined when it holds none.
+ */
+function releaseDeckOf(url: string, dataset: Dataset): Subject | undefined {
+  const isDeck = (thing: Subject | null) =>
+    thing !== null && getUrlAll(thing, RDF.type).includes(SM.Deck);
+  const at = getThing(dataset, url);
+  return isDeck(at) ? at! : getThingAll(dataset).find(isDeck);
+}
+
+/**
+ * The subjects of a fetched release that may be its cards, chapters,
+ * steps and distractors: those of its own document, its deck's
+ * (releaseDeckOf; `url` when it has none), each a fragment of it with an
+ * id of its own, as the Studio reads a release. A subject anywhere else
+ * is none of its parts, whatever it is typed (GHSA-67w8-qjpm-jhwp).
+ */
+function releaseSubjectsOf(url: string, dataset: Dataset): Subject[] {
+  const deck = releaseDeckOf(url, dataset);
+  const document = deck === undefined ? url : documentUrlOf(asUrl(deck));
+  return getThingAll(dataset).filter((thing) => asUrl(thing).startsWith(`${document}#`));
+}
+
+/** The cards of the release at `url` (releaseSubjectsOf), each with its distractors of the release; a card that does not fit its shape is left out. */
 export function toLibraryCards(url: string, dataset: Dataset): LibraryCard[] {
-  return getThingAll(dataset)
-    .map((thing) => toLibraryCard(url, thing, dataset))
+  const subjects = releaseSubjectsOf(url, dataset);
+  const own = new Set(subjects.map(asUrl));
+  return subjects
+    .map((thing) => toLibraryCard(url, thing, dataset, own))
     .filter((card): card is LibraryCard => card !== null);
 }
 
-function toLibraryCard(url: string, thing: Subject, dataset: Dataset): LibraryCard | null {
+function toLibraryCard(
+  url: string,
+  thing: Subject,
+  dataset: Dataset,
+  own: ReadonlySet<string>,
+): LibraryCard | null {
   if (!getUrlAll(thing, RDF.type).includes(SM.Card)) return null;
   const formatVersion = storedVersionOf(thing);
   if (formatVersion > LATEST_VERSION.card) {
@@ -299,6 +332,9 @@ function toLibraryCard(url: string, thing: Subject, dataset: Dataset): LibraryCa
     asUrl(thing),
     formatVersion,
     read.data,
-    distractorsOf(dataset, read.data.distractor),
+    distractorsOf(
+      dataset,
+      read.data.distractor.filter((distractor) => own.has(distractor)),
+    ),
   );
 }

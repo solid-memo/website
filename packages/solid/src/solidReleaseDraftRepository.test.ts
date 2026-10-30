@@ -2,8 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { courseProblems } from "@solid-memo/domain/release/courseRules";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
+import { draftReleaseModel, strayPartsOf } from "@solid-memo/domain/release/draftModel";
 import {
   applyDraftChanges,
   blankDraft,
@@ -12,10 +16,14 @@ import {
   type DraftNode,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
-import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
+import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
+import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { RELEASE_LIMITS } from "./client/readLimits";
+import { datasetFromQuads } from "./client/rdf";
+import { toLibraryCards } from "./mappers/libraryMapper";
+import { draftQuads } from "./mappers/releaseDraftMapper";
 import {
   DECKS,
   draftPod,
@@ -28,6 +36,7 @@ import {
   createSolidReleaseDraftRepository,
   deleteDraftResources,
   draftDocumentsIn,
+  releaseQuadsOf,
 } from "./solidReleaseDraftRepository";
 
 const DRAFT = draftUrlOf(INSTANCE, "solid", 1);
@@ -1029,4 +1038,42 @@ describe("a library release made a draft and published again", () => {
       expect(assembled).toEqual(release);
     });
   }
+});
+
+describe("a release with a card outside it (GHSA-67w8-qjpm-jhwp)", () => {
+  // A library release with one more card, at another address, under the id of one of its own.
+  const FOREIGN = "https://elsewhere.example/x#200-ok";
+  const text = `${readFileSync(join(DECKS_ROOT, "http-status-codes/v1.ttl"), "utf8")}
+<${FOREIGN}> a solid-memo:Card ;
+  solid-memo:formatVersion 4 ;
+  dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+  solid-memo:front "200" ;
+  solid-memo:back "Not this release's answer"@en .
+`;
+
+  it("is held a stray of the release, which a draft made of it reports and the learner app leaves out", async () => {
+    const pod = await draftPod();
+    const release = await pod.repository.parseRelease(text, "turtle");
+    expect(strayPartsOf(release)).toEqual([FOREIGN]);
+    // A draft that holds it, written and read again, keeps it out of its parts and reports it.
+    const summary = await pod.repository.create(
+      INSTANCE,
+      releaseToDraft(release, draftUrlOf(INSTANCE, "http-status-codes", 1)),
+    );
+    const { draft } = await pod.repository.read(summary.url);
+    expect(draft.cards).toHaveLength(63);
+    expect(
+      courseProblems(draftReleaseModel(draft)).filter((one) => one.code === "strayParts"),
+    ).toMatchObject([{ subject: draft.url, severity: "error", params: { parts: [FOREIGN] } }]);
+    // What it would publish, as a learner reads it: the release's own cards alone.
+    const published = "https://creator.example/memo/releases/http/v1.ttl";
+    const cards = toLibraryCards(
+      published,
+      datasetFromQuads(releaseQuadsOf(draftQuads(draft), published, NOW)),
+    );
+    expect(cards).toHaveLength(63);
+    expect(cards.filter((card) => card.id === "200-ok").map((card) => card.back)).toEqual([
+      { en: "OK" },
+    ]);
+  });
 });

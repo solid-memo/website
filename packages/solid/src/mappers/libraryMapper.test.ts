@@ -429,6 +429,30 @@ describe("toLibraryDeckContent", () => {
     expect(content).not.toHaveProperty("contact");
   });
 
+  it("reads only the cards and distractors of the release's own document: where it was read, or its canonical URL", async () => {
+    const turtle = (base: string) => `
+@base <${base}> .
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms:title "Other"@en .'}
+<> a sm:Deck ; dcterms:title "Capitals" .
+<#se> a sm:Card ; sm:formatVersion 7 ; sm:front "Sweden"@en ; sm:back "Stockholm"@en ;
+   sm:distractor <#se-a>, <https://elsewhere.example/x#se-b> .
+<#se-a> a sm:Distractor ; sm:distractorText "Oslo"@en .
+<https://elsewhere.example/x#se-b> a sm:Distractor ; sm:distractorText "Not its own"@en .
+<https://elsewhere.example/x#se> a sm:Card ; sm:formatVersion 7 ; sm:front "Sweden"@en ; sm:back "Not its own"@en .
+<https://elsewhere.example/other.ttl#no> a sm:Card ; sm:formatVersion 7 ; sm:front "Norway"@en ; sm:back "Oslo"@en .
+`;
+    const fetched = "https://localhost.example/decks/capitals/v1.ttl";
+    for (const base of [DOC, fetched]) {
+      const content = toLibraryDeckContent(fetched, await datasetOf(turtle(base), fetched));
+      expect(content.title).toEqual({ en: "Capitals" });
+      expect(content.cards).toMatchObject([
+        { id: "se", back: { en: "Stockholm" }, distractors: [{ id: "se-a" }] },
+      ]);
+    }
+  });
+
   it("reads the web page a release's contact names, and none from a contact with only an email", async () => {
     const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
     const turtle = await readFile(
@@ -602,6 +626,30 @@ describe("toCourseOutline", () => {
       ],
     });
   });
+  it("reads only the chapters and steps of the release's own document", async () => {
+    const dataset = await datasetOf(
+      `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+<> a sm:Deck .
+<#ch-1> a sm:Chapter ; schema:isPartOf <> ; schema:position 0 ; dcterms:title "Own"@en .
+<#ch-1-1> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 0 ; sm:theory "Own."@en ; sm:checkedBy <#q-1> .
+<https://elsewhere.example/x#ch-1-2> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 1 ;
+   sm:theory "Not its own."@en ; sm:checkedBy <#q-1> .
+<https://elsewhere.example/x#ch-2> a sm:Chapter ; schema:isPartOf <> ; schema:position 1 ; dcterms:title "Not its own"@en .
+<https://elsewhere.example/x#ch-2-1> a sm:Step ; schema:isPartOf <https://elsewhere.example/x#ch-2> ;
+   schema:position 0 ; sm:theory "Not its own."@en ; sm:checkedBy <#q-1> .
+<#q-1> a sm:Card ; sm:formatVersion 7 ; sm:front "Q"@en ; sm:back "A"@en .
+`,
+      DOC,
+    );
+    expect(toCourseOutline(DOC, dataset).chapters).toMatchObject([
+      { id: "ch-1", steps: [{ id: "ch-1-1", theory: { en: "Own." } }] },
+    ]);
+    expect(toCourseOutline(DOC, dataset).chapters[0]!.steps).toHaveLength(1);
+  });
+
   it("reads how a chapter's description and a step's theory are written", async () => {
     const dataset = await datasetOf(
       `

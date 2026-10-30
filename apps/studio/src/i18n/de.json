@@ -1210,6 +1210,7 @@
       "chapterPositions": "Die Kapitel {chapters} teilen sich die Position {position}.",
       "stepPositions": "Die Schritte {steps} teilen sich die Position {position}.",
       "chapterWithoutStep": "Hat keinen Schritt in Verwendung.",
+      "strayParts": "Enthält {parts}, als Karte, Kapitel, Schritt oder falsche Antwortmöglichkeit typisiert, die der Entwurf nicht als seine Teile führt: außerhalb der Ausgabe oder nicht lesbar. Nichts hier zeigt sie, aber die Ausgabe würde sie veröffentlichen. Beginne den Entwurf neu aus einer Ausgabe ohne sie.",
       "textFormatMisplaced": "Gibt ein Textformat an, was nur eine Karte, ein Schritt oder ein Kapitel tut.",
       "textFormatUnknown": "Gibt ein Textformat an, das diese App nicht kennt, {format}: Der Text wird als reiner Text angezeigt.",
       "markdown": "{field}, {language}: {finding}",

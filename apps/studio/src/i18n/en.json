@@ -1210,6 +1210,7 @@
       "chapterPositions": "Chapters {chapters} share place {position}.",
       "stepPositions": "Steps {steps} share place {position}.",
       "chapterWithoutStep": "Has no step in use.",
+      "strayParts": "Holds {parts}, typed a card, chapter, step or wrong option, which the draft does not hold as its parts: outside the release, or not readable. Nothing here shows them, but the release would publish them. Start the draft again from a release without them.",
       "textFormatMisplaced": "States a text format, which only a card, a step or a chapter does.",
       "textFormatUnknown": "States a text format this app does not know, {format}: its text shows as plain text.",
       "markdown": "{field}, {language}: {finding}",

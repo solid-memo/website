@@ -52,6 +52,22 @@ describe("courseProblems", () => {
     );
   });
 
+  it("names every card, chapter, step or distractor that is no part of the release, in a course or not", () => {
+    const strays = ["https://elsewhere.example/x#q-1", at("q-odd")];
+    expect(courseProblems(model({ cards: [card("se")], strays }))).toEqual([
+      {
+        severity: "error",
+        subject: RELEASE,
+        related: strays,
+        code: "strayParts",
+        params: { parts: strays },
+      },
+    ]);
+    expect(brief(courseProblems({ ...course(outline()), strays: strays.slice(0, 1) }))).toEqual([
+      { code: "strayParts", subject: RELEASE, params: { parts: strays.slice(0, 1) } },
+    ]);
+  });
+
   it("names a course without a chapter", () => {
     expect(brief(courseProblems(course({})))).toEqual([
       { code: "courseWithoutChapter", subject: RELEASE, params: {} },

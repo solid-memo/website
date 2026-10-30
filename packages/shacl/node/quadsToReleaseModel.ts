@@ -180,5 +180,12 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     distractors,
     distractorLinks: statements(sm("distractor")),
     textFormats: statements(sm("textFormat")),
+    strays: [
+      ...new Set(
+        ["Card", "Chapter", "Step", "Distractor"]
+          .flatMap((name) => typed(sm(name)))
+          .filter((iri) => !iri.startsWith(`${url}#`)),
+      ),
+    ],
   };
 }

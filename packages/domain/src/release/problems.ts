@@ -95,7 +95,9 @@ export type CourseProblem =
   | { code: "distractorLanguages"; params: { card: string; missing: string[] } }
   | { code: "chapterPositions"; params: { chapters: string[]; position: string } }
   | { code: "stepPositions"; params: { steps: string[]; chapter: string; position: string } }
-  | { code: "chapterWithoutStep"; params: Record<string, never> };
+  | { code: "chapterWithoutStep"; params: Record<string, never> }
+  /** Subjects typed a card, chapter, step or distractor that are no parts of the release (ReleaseModel.strays). */
+  | { code: "strayParts"; params: { parts: string[] } };
 
 /** Text and how it is written (markdownFields). */
 export type TextProblem =

@@ -170,6 +170,8 @@ export const ERROR_TEMPLATES = {
     "This draft names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. Solid Memo does not open or change it.",
   releaseIdUnsupported:
     "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
+  releaseForeignPart:
+    "This release holds a card, chapter, step or wrong option at {part}, outside the release itself. The Studio shows and checks only a release's own parts, so it cannot be made a draft.",
   releaseTaken:
     "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
   releaseHasErrors: {

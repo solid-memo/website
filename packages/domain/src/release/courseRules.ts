@@ -35,11 +35,16 @@ const POSITION = `${SCHEMA_NS}position`;
  * (retired ones not counted); and a chapter in use has a step in use.
  * Every card's distractors, in a course or not, are distractors of the
  * release, each named by that card alone. Retired chapters and steps
- * keep what they named.
+ * keep what they named. Every card, chapter, step and distractor, in a
+ * course or not, is a part of the release (none is a stray).
  */
 export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
   const { url, chapters, steps } = model;
   const problems: ReleaseProblem[] = outlineProblems(model);
+  if (model.strays.length > 0) {
+    const parts = model.strays;
+    problems.unshift(problem(url, { code: "strayParts", params: { parts } }, { related: parts }));
+  }
   const cards = new Map(model.cards.map((card) => [card.iri, card]));
   const distractors = new Map(model.distractors.filter((d) => d.typed).map((d) => [d.iri, d]));
 

@@ -194,6 +194,27 @@ describe("quadsToReleaseModel", () => {
     const empty = quadsToReleaseModel([], URL);
     expect(empty.decks).toEqual([]);
     expect(empty.cards).toEqual([]);
+    expect(empty.strays).toEqual([]);
+  });
+
+  it("reads as strays its cards, chapters, steps and distractors outside its document, each once", () => {
+    expect(model.strays).toEqual([]);
+    const strays = quadsToReleaseModel(
+      parseTurtle(
+        `${TURTLE}
+<https://elsewhere.example/x#q-1> a solid-memo:Card , solid-memo:Distractor .
+<v1.ttl#ch-1> a solid-memo:Chapter .
+<#s-2> a solid-memo:Step .
+[] a solid-memo:Step .`,
+        URL,
+      ),
+      URL,
+    ).strays;
+    expect(strays.slice(0, 2)).toEqual([
+      "https://elsewhere.example/x#q-1",
+      "https://solid-memo.com/decks/solid/v1.ttl#ch-1",
+    ]);
+    expect(strays).toHaveLength(3);
   });
 });
 

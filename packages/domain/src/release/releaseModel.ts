@@ -172,6 +172,12 @@ export interface ReleaseModel {
   distractorLinks: ReleaseStatement[];
   /** Every solid-memo:textFormat statement, of any subject. */
   textFormats: ReleaseStatement[];
+  /**
+   * Every subject typed a card, chapter, step or distractor that is no
+   * part of the release, each once: one outside its document (not a
+   * fragment of it) and, in a draft, one its records do not hold.
+   */
+  strays: string[];
 }
 
 /** The kinds of subject a release publishes for good: a later version retires one, never removes it. */

@@ -127,6 +127,8 @@ export function problemMessage(
     case "textFormatMisplaced":
     case "unshaped":
       return t(key);
+    case "strayParts":
+      return t(key, { parts: list(problem.params.parts) });
     case "notARelease":
       return t(key, { path: problem.params.path });
     case "versionGap":

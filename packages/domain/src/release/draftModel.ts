@@ -198,7 +198,32 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
       ...statements(SM.distractor),
     ],
     textFormats: [...formatted, ...statements(SM.textFormat)],
+    strays: strayPartsOf(draft).map(at),
   };
+}
+
+/** The classes of the parts a release publishes for good, each of which a draft holds as a record of its kind. */
+const PART_CLASSES: ReadonlySet<string> = new Set([SM.Card, SM.Chapter, SM.Step, SM.Distractor]);
+
+/**
+ * The subjects the draft's statements beyond its records type a card,
+ * chapter, step or distractor, each once, in order: none of its parts,
+ * so no editor and no rule on its parts sees them, but its release
+ * would publish them. One outside the draft (not a fragment of it) is
+ * never a part of it; one in it has a record its kind's shape does not
+ * read.
+ */
+export function strayPartsOf(draft: Pick<ReleaseDraft, "triples">): string[] {
+  return [
+    ...new Set(
+      draft.triples
+        .filter(
+          ({ predicate, object }) =>
+            predicate === RDF_TYPE && object.kind === "iri" && PART_CLASSES.has(object.value),
+        )
+        .map(({ subject }) => subject),
+    ),
+  ];
 }
 
 /** The other types the statements give the release: those its record does not. */

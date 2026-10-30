@@ -660,6 +660,10 @@ about a course, on every version (a plain deck passes):
 - Every `sm:distractor` link, in any release, names a `sm:Distractor` of
   the release, and no two cards name the same one (a copy writes and
   removes a card's distractors with the card).
+- Every card, chapter, step and distractor, in any release, is a
+  fragment of the release's document (`<#id>`). The Studio edits and
+  checks only those, and the app reads only those as the release's
+  parts (`strayParts`).
 
 Retired steps and chapters don't count toward the rules on positions
 or on how a card is asked.
@@ -756,6 +760,13 @@ deck list, the upgrade offers, the Studio's update badges and a
 release's place share that read and its decks; the index changes only
 with a deploy. A failed read isn't kept, so the next one retries. Each
 release is kept the same way.
+
+A release's cards, chapters, steps and distractors are the subjects of
+its own document, the deck's: the one at the address it was read from,
+else the one at its canonical address (`@base`). A subject anywhere
+else is none of them, whatever its type, and a card's distractor
+anywhere else isn't offered
+([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)).
 
 The library conforms to [shapes.md](shapes.md)'s
 `CatalogV1`, `LibraryDeckSeriesV3`, and `LibraryDeckV5` or
