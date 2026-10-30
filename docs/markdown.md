@@ -127,7 +127,14 @@ plain, its source still readable, unless the limit says otherwise.
   going on only while what it has read shows no text (a rule, a
   definition), at most 2,000 characters in all. A label costs the same
   however long the text. A reference defined after a blank line isn't
-  resolved there, and reads as written.
+  resolved there, and reads as written. The label of each text's
+  first 2,000 characters is kept, so a long list such as a draft's
+  outline reads none of its labels again when it's shown again. It's
+  kept under a copy of those characters alone, so a lookup costs the
+  same however many texts there are. The labels kept are of at most 64 Mi
+  characters of those starts in all (`LABEL_CACHE_CHARS`, as many as
+  the app reads of a release's terms), and the one used longest ago
+  goes first.
 
 The package's tests include the cmark and commonmark.js pathological
 inputs, each at the length cap, within a time budget.
@@ -527,7 +534,7 @@ text is rendered, and none relies on a check of the data.
 | Link spoofing | A followed link opens in a new tab and says so. When its text isn't its own URL, or its host is an international one, the host follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". Text counts as its own URL only when each label of its host is the one the URL parser reads, give or take case, or an international one the parser writes in punycode, and its port is the same (`writtenHost`). A percent escape, an ideographic or full-width dot or letter, an IPv4 address in short form or a default port written out shows the host the link opens. An address in a plain-text description does the same, with its hidden characters as markers, as does a deck's source. Any other address the app shows from a pod or a profile reads with its hidden characters as markers, and as the URL parser has it, punycode kept, when it doesn't name its host as the parser reads it or that host is an international one (`ExternalLink`). For a deck's source, a title beside its link counts as text that isn't its URL. A license gets a short name such as "CC BY 4.0" only at its address on the Creative Commons or GNU site; any other shows its URL, with its host when it needs one. The link and its host are each isolated against a bidi override in the text before them. The host, and an address shown as itself, run left to right (`dir="ltr"`); other link text takes its first letter's direction (`dir="auto"`), so a link in Arabic reads right to left. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
 | Trojan Source | Hidden characters in code and link text shown as markers ([the package](#the-package)); links isolated from the text around them. |
-| Denial of service | The limits above, at every entry point for data, and each text parsed once. `markdownCache.ts` keeps the last 500 texts' blocks; a theory's chunks, split from its cached blocks; the plain text of every card of the deck the Studio's workbench searches; and the problems of the last 500 texts of each field rule the Studio's release check reads. |
+| Denial of service | The limits above, at every entry point for data, and each text parsed once. `markdownCache.ts` keeps the last 500 texts' blocks; a theory's chunks, split from its cached blocks; the plain text of every card of the deck the Studio's workbench searches; the problems of the last 500 texts of each field rule the Studio's release check reads; and `labelText` keeps the label of each text's start, so a draft's outline shown again reads none of them again. |
 
 [`parseDocument`](#repository-markdown) lifts `MAX_CHARS` and is never
 given data: it reads the repository's own files at build time, and no

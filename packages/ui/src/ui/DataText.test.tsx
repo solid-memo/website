@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/preact";
 import type { LangText } from "@solid-memo/domain/langText";
-import { MAX_CHARS } from "@solid-memo/markdown/parse";
+import { MAX_CHARS, parseMarkdown } from "@solid-memo/markdown/parse";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   cardName,
@@ -18,6 +18,11 @@ import {
 } from "./DataText";
 import { CardLanguage, CourseLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
+
+vi.mock("@solid-memo/markdown/parse", async (original) => {
+  const parse = await original<typeof import("@solid-memo/markdown/parse")>();
+  return { ...parse, parseMarkdown: vi.fn(parse.parseMarkdown) };
+});
 
 function html(children: preact.ComponentChildren): string {
   return render(
@@ -222,6 +227,31 @@ describe("cardName", () => {
         readerText,
       ),
     ).toBe("c");
+  });
+});
+
+describe("a list of names shown again", () => {
+  const readerText = (text: Record<string, string>) => text.en ?? "";
+  it("parses none of its Markdown again, as a draft's outline is shown again", () => {
+    const crafted = "_a* ".repeat(500);
+    const cards = Array.from({ length: 3 }, (_, at) => ({
+      id: `c${at}`,
+      front: { en: at === 0 ? "\n___\n" : `front ${at} ${crafted}` },
+      back: { en: `back ${at} ${crafted}` },
+      textFormat: SM.markdown,
+    }));
+    const names = () => [
+      ...cards.map((card) => cardName(card, readerText)),
+      ...cards.map((card) => plainDataText(readerText(card.back), true, 80)),
+    ];
+    const parsed = vi.mocked(parseMarkdown);
+    parsed.mockClear();
+    const first = names();
+    // The first card's front shows no text, so its back names it.
+    expect(parsed).toHaveBeenCalledTimes(cards.length * 2);
+    parsed.mockClear();
+    expect(names()).toEqual(first);
+    expect(parsed).not.toHaveBeenCalled();
   });
 });
 
