@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.27](https://github.com/solid-memo/website/compare/v6.17.26...v6.17.27) (2026-10-30)
+
+### Bug Fixes
+
+* **markdown:** remember each text's label ([c9cb8ee](https://github.com/solid-memo/website/commit/c9cb8ee1ec0daa950d83a220ba31539e5022285a))
+* **solid:** keep card and distractor ids of a deck apart ([be6f7de](https://github.com/solid-memo/website/commit/be6f7deb899ca9596cebc918f6fab5f3877baf8b))
+
 ## [6.17.26](https://github.com/solid-memo/website/compare/v6.17.25...v6.17.26) (2026-10-30)
 
 ### Bug Fixes
