@@ -92,6 +92,14 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   value added (`map.set(key, [...(map.get(key) ?? []), value])`): a
   copy at each value makes the work grow with the square of the values,
   and a pod or a release can hold many under one key.
+- **Many subjects are written at once.** A write of many subjects to a
+  dataset sets them with `setThings` or one edit (`editOf` in
+  [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)), and takes
+  them out with `removeThings`. A `setThing` or `removeThing` at each
+  copies the whole document every time. A subject's many values for one
+  property are set in one call of its builder (`setIriAll`,
+  `setStringAll`), not an add or a remove at each, which copies the
+  values so far.
 - **Avoid `any`**, and use a non-null assertion (`!`) only where the code
   has checked the value right before, or in a test.
 - **Tests** sit beside their module, as `name.test.ts`, and keep every

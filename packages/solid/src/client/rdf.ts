@@ -3,8 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  addBoolean as libraryAddBoolean,
+  addDatetime as libraryAddDatetime,
+  addDecimal as libraryAddDecimal,
+  addInteger as libraryAddInteger,
+  addLiteral as libraryAddLiteral,
+  addStringNoLocale as libraryAddStringNoLocale,
+  addStringWithLocale as libraryAddStringWithLocale,
+  addUrl as libraryAddUrl,
   asUrl as libraryAsUrl,
-  buildThing as libraryBuildThing,
   createSolidDataset as libraryCreateSolidDataset,
   createThing as libraryCreateThing,
   fromRdfJsDataset as libraryFromRdfJsDataset,
@@ -22,9 +29,12 @@ import {
   getThingAll as libraryGetThingAll,
   getUrl as libraryGetUrl,
   getUrlAll as libraryGetUrlAll,
-  removeThing as libraryRemoveThing,
+  removeAll as libraryRemoveAll,
+  removeLiteral as libraryRemoveLiteral,
   removeUrl as libraryRemoveUrl,
-  setThing as librarySetThing,
+  setInteger as librarySetInteger,
+  setStringNoLocale as librarySetStringNoLocale,
+  setUrl as librarySetUrl,
   type SolidDataset,
   type Thing,
   type ThingPersisted,
@@ -38,6 +48,7 @@ import type {
   Changes,
   Dataset,
   FetchedDataset,
+  LanguageString,
   NamedSubject,
   PropertyValue,
   Source,
@@ -79,6 +90,7 @@ import { graphsOf } from "./linearDataset";
 export type {
   Dataset,
   FetchedDataset,
+  LanguageString,
   NamedSubject,
   SourcedDataset,
   Subject,
@@ -197,20 +209,146 @@ export function getThingAll(dataset: Dataset): NamedSubject[] {
   return libraryGetThingAll(solidDataset(dataset));
 }
 
-/** The dataset with `subject` in place of what it said of the same subject, the change recorded (changesOf). */
+/**
+ * The dataset with `subject` in place of what it said of the same
+ * subject, the change recorded (changesOf): as the library's setThing,
+ * in time that grows with the subject's values, not their square
+ * (setThings).
+ */
 export function setThing<T extends Dataset>(dataset: T, subject: Subject): T {
-  return likeDataset(dataset, librarySetThing(solidDataset(dataset), thing(subject)));
+  return setThings(dataset, [subject]);
 }
 
-/** The dataset without what it said of `subject`, the change recorded (changesOf). */
+/** The dataset without what it said of `subject`, the change recorded (changesOf), as removeThings removes one. */
 export function removeThing<T extends Dataset>(dataset: T, subject: string | Subject): T {
-  return likeDataset(
-    dataset,
-    libraryRemoveThing(
-      solidDataset(dataset),
-      typeof subject === "string" ? subject : thing(subject),
-    ),
+  return removeThings(dataset, [subject]);
+}
+
+/**
+ * The dataset with each of `subjects` set in turn, as setThing sets one,
+ * each change recorded (changesOf). The library's setThing copies the
+ * whole dataset and searches its changes so far at each subject and at
+ * each of its triples, so a subject at a time takes time in the square
+ * of the subjects, and of one subject's values; here the dataset is
+ * copied once and the changes are kept by their quads' keys.
+ */
+export function setThings<T extends Dataset>(dataset: T, subjects: Iterable<Subject>): T {
+  const data = solidDataset(dataset);
+  const edit = editOf(data);
+  for (const subject of subjects) {
+    // At the IRI setThing gives it: one made by name in the document read.
+    const iri = resolvedIri(data, subject.url);
+    const stored: Thing = Object.freeze({ ...thing(subject), url: iri });
+    // In its place, where it was there already, as setThing keeps it.
+    edit.deleteQuadsOf(iri);
+    for (const quad of quadsOf(iri, stored)) edit.add(quad);
+    edit.graph[iri] = stored;
+  }
+  return likeDataset(dataset, edit.done() ?? data);
+}
+
+/**
+ * The dataset without what it said of each of `subjects`, as removeThing
+ * removes one, each change recorded (changesOf): in time that grows with
+ * the subjects and the dataset, not their product (setThings).
+ */
+export function removeThings<T extends Dataset>(
+  dataset: T,
+  subjects: Iterable<string | Subject>,
+): T {
+  const data = solidDataset(dataset);
+  const edit = editOf(data);
+  for (const subject of subjects) {
+    const iri = typeof subject === "string" ? resolvedIri(data, subject) : subject.url;
+    edit.deleteQuadsOf(iri);
+    delete edit.graph[iri];
+  }
+  return likeDataset(dataset, edit.done() ?? data);
+}
+
+/** Where the library puts a subject by its IRI: one made by name is resolved against a document read. */
+function resolvedIri(data: SolidDataset, iri: string): string {
+  const name = localNameOf(iri);
+  const info = (data as Partial<WithServerResourceInfo>).internal_resourceInfo;
+  if (name === undefined || typeof info?.linkedResources !== "object") return iri;
+  const url = new URL(info.sourceIri);
+  url.hash = name;
+  return url.href;
+}
+
+/**
+ * A subject's quads, as setThing records them among a dataset's changes:
+ * in the library's order, without those that name a blank node, which
+ * it leaves out. Made by the library's toRdfJsDataset, given back as
+ * the list it makes rather than a dataset of it.
+ */
+function quadsOf(iri: string, stored: Thing): Quad[] {
+  const alone = { graphs: { default: { [iri]: stored } } } as unknown as SolidDataset;
+  const quads = libraryToRdfJsDataset(alone, {
+    datasetFactory: { dataset: (made?: Quad[]) => made as unknown as DatasetCore },
+  }) as unknown as Quad[];
+  return quads.filter(
+    (quad) => quad.subject.termType !== "BlankNode" && quad.object.termType !== "BlankNode",
   );
+}
+
+/**
+ * Edits of a library dataset, made at once: its default graph copied
+ * once, and its changes kept by their quads' keys, a quad added and
+ * then deleted (or deleted and then added again) no change, as the
+ * library records them. done() gives the dataset edited; undefined
+ * when no edit was made, as a dataset no subject was set in or removed
+ * from is the same.
+ */
+function editOf(data: SolidDataset) {
+  const graph: Record<string, Thing> = Object.assign(Object.create(null), data.graphs.default);
+  const log = (data as Partial<WithChangeLog>).internal_changeLog;
+  const additions = new Map((log?.additions ?? []).map((quad) => [quadKey(quad), quad]));
+  const deletions = new Map((log?.deletions ?? []).map((quad) => [quadKey(quad), quad]));
+  let edited = false;
+  return {
+    graph,
+    add(quad: Quad) {
+      const key = quadKey(quad);
+      if (!deletions.delete(key)) additions.set(key, quad);
+    },
+    /** Records the quads of the subject at `iri` deleted; the graph is the caller's to change. */
+    deleteQuadsOf(iri: string) {
+      edited = true;
+      const previous = graph[iri];
+      if (previous === undefined) return;
+      // Its quads as setThing would have recorded them when it was set.
+      for (const quad of quadsOf(iri, previous)) {
+        const key = quadKey(quad);
+        if (!additions.delete(key)) deletions.set(key, quad);
+      }
+    },
+    done(): SolidDataset | undefined {
+      if (!edited) return undefined;
+      return Object.freeze({
+        ...data,
+        graphs: Object.freeze({ ...data.graphs, default: Object.freeze(graph) }),
+        internal_changeLog: {
+          additions: [...additions.values()],
+          deletions: [...deletions.values()],
+        },
+      });
+    },
+  };
+}
+
+/** A quad's key: two quads are the same (Quad.equals) when their keys are. */
+function quadKey(quad: Quad): string {
+  const { subject, predicate, object } = quad;
+  const literal = object.termType === "Literal" ? [object.datatype.value, object.language] : [];
+  return JSON.stringify([
+    subject.termType,
+    subject.value,
+    predicate.value,
+    object.termType,
+    object.value,
+    ...literal,
+  ]);
 }
 
 /**
@@ -223,11 +361,156 @@ export function createThing(options?: { url: string } | { name?: string }): Name
 
 /**
  * A builder of a subject's triples, starting from what `subject` says.
- * The library's builder takes its own subjects as values, which every
- * subject here is (inrupt.ts).
+ * Each call is the library's own (its buildThing makes the same calls),
+ * but setIriAll and setStringAll, which it has none of: there the
+ * property's values are made once, where the library's adds copy them
+ * at every value. The library takes its own subjects as values, which
+ * every subject here is (inrupt.ts).
  */
 export function buildThing(subject: Subject): SubjectBuilder {
-  return libraryBuildThing(thing(subject) as ThingPersisted) as unknown as SubjectBuilder;
+  return new Builder(thing(subject));
+}
+
+type Predicate = Thing["predicates"][string];
+
+/** A subject with nothing said of it, to see how the library writes one value (setIriAll, setStringAll). */
+const PROBE = libraryCreateThing();
+
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
+
+class Builder implements SubjectBuilder {
+  #thing: Thing;
+
+  constructor(subject: Thing) {
+    this.#thing = subject;
+  }
+
+  #with(change: (subject: Thing) => Thing): this {
+    this.#thing = change(this.#thing);
+    return this;
+  }
+
+  /** The subject with the property's values made by `change` from what they are. */
+  #predicate(property: string, change: (predicate: Predicate) => Predicate): this {
+    const { [property]: previous = {}, ...others } = this.#thing.predicates;
+    const next = Object.fromEntries(
+      Object.entries(change(previous)).filter(
+        ([, values]) => values !== undefined && Object.keys(values).length > 0,
+      ),
+    ) as Predicate;
+    const predicates = Object.keys(next).length === 0 ? others : { ...others, [property]: next };
+    return this.#with((subject) =>
+      Object.freeze({ ...subject, predicates: Object.freeze(predicates) }),
+    );
+  }
+
+  addIri(property: string, value: string | Subject): this {
+    return this.#with((subject) => libraryAddUrl(subject, property, iriOf(value)));
+  }
+
+  addUrl(property: string, value: string | Subject): this {
+    return this.addIri(property, value);
+  }
+
+  addBoolean(property: string, value: boolean): this {
+    return this.#with((subject) => libraryAddBoolean(subject, property, value));
+  }
+
+  addDatetime(property: string, value: Date): this {
+    return this.#with((subject) => libraryAddDatetime(subject, property, value));
+  }
+
+  addDecimal(property: string, value: number): this {
+    return this.#with((subject) => libraryAddDecimal(subject, property, value));
+  }
+
+  addInteger(property: string, value: number): this {
+    return this.#with((subject) => libraryAddInteger(subject, property, value));
+  }
+
+  addLiteral(property: string, value: Literal): this {
+    return this.#with((subject) => libraryAddLiteral(subject, property, value));
+  }
+
+  addStringNoLocale(property: string, value: string): this {
+    return this.#with((subject) => libraryAddStringNoLocale(subject, property, value));
+  }
+
+  addStringWithLocale(property: string, value: string, locale: string): this {
+    return this.#with((subject) => libraryAddStringWithLocale(subject, property, value, locale));
+  }
+
+  setIri(property: string, value: string | Subject): this {
+    return this.#with((subject) => librarySetUrl(subject, property, iriOf(value)));
+  }
+
+  setInteger(property: string, value: number): this {
+    return this.#with((subject) => librarySetInteger(subject, property, value));
+  }
+
+  setStringNoLocale(property: string, value: string): this {
+    return this.#with((subject) => librarySetStringNoLocale(subject, property, value));
+  }
+
+  removeAll(property: string): this {
+    return this.#with((subject) => libraryRemoveAll(subject, property));
+  }
+
+  removeLiteral(property: string, value: Literal): this {
+    return this.#with((subject) => libraryRemoveLiteral(subject, property, value));
+  }
+
+  removeUrl(property: string, value: string | Subject): this {
+    return this.#with((subject) => libraryRemoveUrl(subject, property, iriOf(value)));
+  }
+
+  setIriAll(property: string, values: readonly string[]): this {
+    // Each as the library's add writes it, which refuses one that is no URL.
+    const iris = new Set(
+      values.map(
+        (value) => libraryAddUrl(PROBE, property, value).predicates[property].namedNodes![0],
+      ),
+    );
+    return this.#predicate(property, (previous) => ({ ...previous, namedNodes: [...iris] }));
+  }
+
+  setStringAll(property: string, values: readonly LanguageString[]): this {
+    // Each as the library's adds write it: a language in lower case.
+    const strings = new Set<string>();
+    const byLanguage = new Map<string, Set<string>>();
+    for (const { value, language } of values) {
+      if (language === "") {
+        const written = libraryAddStringNoLocale(PROBE, property, value).predicates[property];
+        strings.add(written.literals![XSD_STRING][0]);
+        continue;
+      }
+      const written = libraryAddStringWithLocale(PROBE, property, value, language).predicates[
+        property
+      ];
+      const [[tag, [text]]] = Object.entries(written.langStrings!);
+      const texts = byLanguage.get(tag);
+      if (texts === undefined) byLanguage.set(tag, new Set([text]));
+      else texts.add(text);
+    }
+    return this.#predicate(property, (previous) => {
+      const literals = { ...previous.literals };
+      delete literals[XSD_STRING];
+      if (strings.size > 0) literals[XSD_STRING] = [...strings];
+      const langStrings = Object.fromEntries(
+        [...byLanguage].map(([tag, texts]) => [tag, [...texts]]),
+      );
+      return { ...previous, literals, langStrings };
+    });
+  }
+
+  build(): NamedSubject {
+    return this.#thing as ThingPersisted;
+  }
+}
+
+/** A value as the library takes it: an IRI, or one of its own subjects. */
+function iriOf(value: string | Subject): string | Thing {
+  return typeof value === "string" ? value : thing(value);
 }
 
 /** A subject's IRI; throws for one made by name and not saved yet, which has none. */

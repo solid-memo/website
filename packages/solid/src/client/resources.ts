@@ -17,6 +17,9 @@ import {
   overwriteFile as libraryOverwriteFile,
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
   solidDatasetAsTurtle as librarySolidDatasetAsTurtle,
+  type SolidDataset,
+  type Thing,
+  type WithServerResourceInfo,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
 import { JsonLdParser } from "jsonld-streaming-parser";
@@ -130,6 +133,13 @@ export async function readDocument(
  *
  * With `ifMatch`, the write is made only if the document is still at that
  * version: a 412 otherwise, as HttpError.
+ *
+ * The library's save gives what it saved with the subjects made by name
+ * resolved, copying the whole dataset at each subject, in time in the
+ * square of its subjects. So it makes its request of the dataset as it
+ * is (libraryRequestOf), but saves one with no subject in its default
+ * graph, and the subjects are given back to what it saved, resolved in
+ * one pass (withSubjectsOf).
  */
 export async function writeDocument(
   url: string,
@@ -146,14 +156,78 @@ export async function writeDocument(
     etag = response.headers.get("ETag") ?? undefined;
     return response;
   };
-  const saved = await answered(async () =>
-    fetchedDataset(
-      await librarySaveSolidDatasetAt(url, solidDataset(dataset), {
-        fetch: ownPatches(withIfMatch(noting, ifMatch), dataset, whole),
-      }),
-    ),
+  const data = solidDataset(dataset);
+  const request = await libraryRequestOf(url, data);
+  const written = ownPatches(withIfMatch(noting, ifMatch), dataset, whole);
+  const saved = await answered(() =>
+    librarySaveSolidDatasetAt(url, Object.freeze({ ...data, graphs: { default: {} } }), {
+      // The library's only PUT creates the document: of the whole dataset, as it would send it.
+      fetch: (input, init) =>
+        written(input, init?.method === "PUT" ? { ...init, body: request.body } : init),
+    }),
   );
-  return { dataset: saved, etag };
+  return { dataset: fetchedDataset(withSubjectsOf(saved, data)), etag };
+}
+
+/** What stops a save once the library has made its request (libraryRequestOf). */
+const MADE = new Error("The request is made.");
+
+/** The request the library's save of `data` to `url` makes, not sent. */
+async function libraryRequestOf(url: string, data: SolidDataset): Promise<RequestInit> {
+  let request: RequestInit | undefined;
+  await librarySaveSolidDatasetAt(url, data, {
+    fetch: async (_input, init) => {
+      request = init;
+      throw MADE;
+    },
+  }).catch((error: unknown) => {
+    if (error !== MADE) throw error;
+  });
+  // The library's request always has its method, headers and body.
+  return request!;
+}
+
+/**
+ * `saved`, as the library saved a dataset with no subject in its default
+ * graph, with the subjects of `data`'s default graph and its other
+ * graphs, as the library resolves them once saved: a subject made by
+ * name, and an IRI value of one, is `#name` in the document saved.
+ */
+function withSubjectsOf<T extends SolidDataset & WithServerResourceInfo>(
+  saved: T,
+  data: SolidDataset,
+): T {
+  const base = saved.internal_resourceInfo.sourceIri;
+  const resolve = (iri: string) => {
+    const name = localNameOf(iri);
+    return name === undefined ? iri : `${base}#${name}`;
+  };
+  const isLocal = (objects: Thing["predicates"][string]) =>
+    (objects.namedNodes ?? []).some((node) => localNameOf(node) !== undefined);
+  const graph: Record<string, Thing> = Object.create(null);
+  for (const [iri, thing] of Object.entries(data.graphs.default)) {
+    const entries = Object.entries(thing.predicates);
+    const predicates = !entries.some(([, objects]) => isLocal(objects))
+      ? thing.predicates
+      : Object.freeze(
+          Object.fromEntries(
+            entries.map(([predicate, objects]) => [
+              predicate,
+              isLocal(objects)
+                ? Object.freeze({
+                    ...objects,
+                    namedNodes: Object.freeze(objects.namedNodes!.map(resolve)),
+                  })
+                : objects,
+            ]),
+          ),
+        );
+    graph[resolve(iri)] = Object.freeze({ ...thing, url: resolve(thing.url), predicates });
+  }
+  return Object.freeze({
+    ...saved,
+    graphs: Object.freeze({ ...data.graphs, default: Object.freeze(graph) }),
+  });
 }
 
 /**

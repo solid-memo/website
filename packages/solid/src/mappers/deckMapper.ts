@@ -16,7 +16,9 @@ import {
   getUrlAll,
   removeThing,
   setThing,
+  setThings,
 } from "../client/rdf";
+import { editOf, type DatasetEdit } from "../datasetEdit";
 import { agentUrlOf, authorFromAgentRecord } from "@solid-memo/domain/agentRecord";
 import {
   catalogFromRecord,
@@ -52,7 +54,7 @@ import { foreignSubjects } from "../ownership";
 import {
   readVersioned,
   recordThing,
-  removeUnlessNewer,
+  removeAllUnlessNewer,
   unlessNewer,
   unlessTyped,
 } from "../records";
@@ -143,24 +145,39 @@ export function toDeck(
  * own fields.
  */
 export function withDeck(dataset: Dataset, deck: Deck): Dataset {
-  let updated = setThing(
-    dataset,
-    recordThing(deck.url, DECK_V6, deckToRecord(deck), getThing(dataset, deck.url)),
-  );
-  for (const { url, record } of deckAgents(deck)) {
-    updated = setThing(updated, recordThing(url, AGENT_V1, record, getThing(updated, url)));
+  return withDecks(dataset, [deck]);
+}
+
+/**
+ * The catalog document with each of the decks written, as withDeck
+ * writes one: every subject set at once (editOf), and stray agents and
+ * the catalog's links seen to once, so that many decks (a catalog
+ * brought to this app's format) take time that grows with them and the
+ * document, not their product.
+ */
+export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
+  const edit = editOf(dataset);
+  for (const deck of decks) {
+    edit.setThing(recordThing(deck.url, DECK_V6, deckToRecord(deck), edit.getThing(deck.url)));
+    for (const { url, record } of deckAgents(deck)) {
+      edit.setThing(recordThing(url, AGENT_V1, record, edit.getThing(url)));
+    }
+    const distribution = deckDistribution(deck);
+    edit.setThing(
+      recordThing(
+        distribution.url,
+        DISTRIBUTION_V1,
+        distribution.record,
+        edit.getThing(distribution.url),
+      ),
+    );
   }
-  const distribution = deckDistribution(deck);
-  updated = setThing(
-    updated,
-    recordThing(
-      distribution.url,
-      DISTRIBUTION_V1,
-      distribution.record,
-      getThing(updated, distribution.url),
-    ),
+  const documents = new Set(decks.map((deck) => documentUrlOf(deck.url)));
+  return withCatalogDatasets(
+    withoutStrayAgents(edit.done(), documents),
+    decks.map((deck) => deck.url),
+    "add",
   );
-  return withCatalogDataset(withoutStrayAgents(updated, documentUrlOf(deck.url)), deck.url, "add");
 }
 
 /** The subjects a deck is written as: its entry, its distribution and its agents. */
@@ -175,24 +192,20 @@ export function deckSubjects(deck: Deck): string[] {
  * (domain/deckTree.ts buildTree), and the next arrangement closes it.
  */
 export function withoutDeck(dataset: Dataset, deck: Deck): Dataset {
-  let updated = removeUnlessNewer(
-    removeUnlessNewer(dataset, deck.url),
-    distributionUrlOf(deck.url),
+  const removed = removeAllUnlessNewer(dataset, [deck.url, distributionUrlOf(deck.url)]);
+  const updated = setThings(
+    removed,
+    getThingAll(removed)
+      .filter(
+        (thing) =>
+          getUrlAll(thing, RDF.type).includes(SM.DeckGroup) &&
+          getUrlAll(thing, DCAT.dataset).includes(deck.url),
+      )
+      .map((thing) => buildThing(unlessNewer(thing)).removeUrl(DCAT.dataset, deck.url).build()),
   );
-  for (const thing of getThingAll(updated)) {
-    if (
-      getUrlAll(thing, RDF.type).includes(SM.DeckGroup) &&
-      getUrlAll(thing, DCAT.dataset).includes(deck.url)
-    ) {
-      updated = setThing(
-        updated,
-        buildThing(unlessNewer(thing)).removeUrl(DCAT.dataset, deck.url).build(),
-      );
-    }
-  }
-  return withCatalogDataset(
-    withoutStrayAgents(updated, documentUrlOf(deck.url)),
-    deck.url,
+  return withCatalogDatasets(
+    withoutStrayAgents(updated, new Set([documentUrlOf(deck.url)])),
+    [deck.url],
     "remove",
   );
 }
@@ -209,24 +222,37 @@ function deckUrlsOf(dataset: Dataset): string[] {
 }
 
 /**
- * The catalog node, when the document has one, with the one deck's
- * `dcat:dataset` link added or removed. Every other link stays as it is:
- * a dataset another app listed in the catalog is not this app's to
- * drop (docs/data-model.md "Write discipline").
+ * The catalog node of each deck's document, when it has one, with the
+ * deck's `dcat:dataset` link added or removed. Every other link stays as
+ * it is: a dataset another app listed in the catalog is not this app's
+ * to drop (docs/data-model.md "Write discipline").
  */
-function withCatalogDataset(dataset: Dataset, deckUrl: string, change: "add" | "remove"): Dataset {
-  const catalog = getThing(dataset, `${documentUrlOf(deckUrl)}#catalog`);
-  if (catalog === null) return dataset;
-  const listed = getUrlAll(catalog, DCAT.dataset).includes(deckUrl);
-  if (listed === (change === "add")) return dataset;
-  const builder = buildThing(unlessNewer(catalog));
-  return setThing(
-    dataset,
-    (change === "add"
-      ? builder.addIri(DCAT.dataset, deckUrl)
-      : builder.removeUrl(DCAT.dataset, deckUrl)
-    ).build(),
-  );
+function withCatalogDatasets(
+  dataset: Dataset,
+  deckUrls: readonly string[],
+  change: "add" | "remove",
+): Dataset {
+  const byCatalog = new Map<string, Set<string>>();
+  for (const url of deckUrls) {
+    const catalogUrl = `${documentUrlOf(url)}#catalog`;
+    const urls = byCatalog.get(catalogUrl);
+    if (urls === undefined) byCatalog.set(catalogUrl, new Set([url]));
+    else urls.add(url);
+  }
+  const changed: NamedSubject[] = [];
+  for (const [catalogUrl, urls] of byCatalog) {
+    const catalog = getThing(dataset, catalogUrl);
+    if (catalog === null) continue;
+    const listed = new Set(getUrlAll(catalog, DCAT.dataset));
+    const links = [...urls].filter((url) => listed.has(url) !== (change === "add"));
+    if (links.length === 0) continue;
+    // The new list set in one call (setIriAll), however many links change.
+    const changing = new Set(links);
+    const datasets =
+      change === "add" ? [...listed, ...links] : [...listed].filter((url) => !changing.has(url));
+    changed.push(buildThing(unlessNewer(catalog)).setIriAll(DCAT.dataset, datasets).build());
+  }
+  return setThings(dataset, changed);
 }
 
 /**
@@ -302,18 +328,24 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
   return updated;
 }
 
-/** Agent nodes this app wrote (`#agent-…`) that nothing in the document names. */
-function withoutStrayAgents(dataset: Dataset, documentUrl: string): Dataset {
+/** Agent nodes this app wrote (`#agent-…`) in one of `documents` that nothing in the dataset names. */
+function withoutStrayAgents(dataset: Dataset, documents: ReadonlySet<string>): Dataset {
   const named = new Set(
     getThingAll(dataset).flatMap((thing) => [
       ...getUrlAll(thing, DCTERMS.creator),
       ...getUrlAll(thing, DCTERMS.publisher),
     ]),
   );
-  return getThingAll(dataset)
-    .map(asUrl)
-    .filter((url) => url.startsWith(`${documentUrl}#agent-`) && !named.has(url))
-    .reduce((current, url) => removeUnlessNewer(current, url), dataset);
+  const isAgent = (url: string) => {
+    const hash = url.indexOf("#");
+    return hash >= 0 && url.startsWith("#agent-", hash) && documents.has(url.slice(0, hash));
+  };
+  return removeAllUnlessNewer(
+    dataset,
+    getThingAll(dataset)
+      .map(asUrl)
+      .filter((url) => isAgent(url) && !named.has(url)),
+  );
 }
 
 /**
@@ -384,33 +416,31 @@ export function distractorsOf(dataset: Dataset, urls: readonly string[]): Distra
 }
 
 /**
- * The document with a card's distractors written beside it, as subjects
- * of `documentUrl` (an existing one keeps triples this app does not
- * know); a distractor is never written onto a card (unlessTyped).
- * Returns the URLs written, for the write check, and those the card
- * named before (`before`) but names no longer (`dropped`), for
- * withoutUnnamedDistractors.
+ * Writes a card's distractors beside it, as subjects of `documentUrl`
+ * (an existing one keeps triples this app does not know); a distractor
+ * is never written onto a card (unlessTyped). Returns the URLs written,
+ * for the write check, and those the card named before (`before`) but
+ * names no longer (`dropped`), for withoutUnnamedDistractors.
  */
-export function withDistractors(
-  dataset: Dataset,
+export function writeDistractors(
+  edit: DatasetEdit<Dataset>,
   documentUrl: string,
   distractors: readonly Distractor[],
   before: readonly string[],
-): { dataset: Dataset; subjects: string[]; dropped: string[] } {
+): { subjects: string[]; dropped: string[] } {
   const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
-  let updated = dataset;
   for (const [i, distractor] of distractors.entries()) {
-    updated = setThing(
-      updated,
+    edit.setThing(
       recordThing(
         subjects[i],
         DISTRACTOR_V1,
         distractorToRecord(distractor),
-        unlessTyped(updated, subjects[i], SM.Card),
+        unlessTyped(edit, subjects[i], SM.Card),
       ),
     );
   }
-  return { dataset: updated, subjects, dropped: before.filter((url) => !subjects.includes(url)) };
+  const written = new Set(subjects);
+  return { subjects, dropped: before.filter((url) => !written.has(url)) };
 }
 
 /** How many subjects of the document name each URL as their distractor (sm:distractor). */
@@ -429,31 +459,47 @@ function distractorNamers(dataset: Dataset): Map<string, number> {
 export function withoutUnnamedDistractors(dataset: Dataset, urls: readonly string[]): Dataset {
   if (urls.length === 0) return dataset;
   const namers = distractorNamers(dataset);
-  return urls
-    .filter((url) => !namers.has(url))
-    .reduce((current, url) => removeUnlessNewer(current, url), dataset);
+  return removeAllUnlessNewer(
+    dataset,
+    urls.filter((url) => isUnnamed(namers, url)),
+  );
+}
+
+/** Whether no subject of the document names the distractor at `url` (distractorNamers) any longer. */
+function isUnnamed(namers: ReadonlyMap<string, number>, url: string): boolean {
+  return !namers.has(url);
 }
 
 /**
- * The document without the card at `url`. A subject an earlier version
- * left typed both a card and a distractor, which another card names as
- * its distractor, loses only its card statements (the sm:Card type and
- * the card properties no distractor has), so the card that names it
- * keeps its distractor.
+ * The document without the cards at `urls`, all at once. A subject an
+ * earlier version left typed both a card and a distractor, which
+ * another card names as its distractor, loses only its card statements
+ * (the sm:Card type and the card properties no distractor has), so the
+ * card that names it keeps its distractor.
  */
-export function withoutCardSubject(dataset: Dataset, url: string): Dataset {
-  const thing = getThing(dataset, url);
-  const named =
-    thing !== null &&
-    getUrlAll(thing, RDF.type).includes(SM.Distractor) &&
-    distractorNamers(dataset).has(url);
-  if (!named) return removeUnlessNewer(dataset, url);
-  unlessNewer(thing);
+export function withoutCardSubjects(dataset: Dataset, urls: readonly string[]): Dataset {
+  let namers: Map<string, number> | undefined;
+  const removed: string[] = [];
+  const kept: NamedSubject[] = [];
+  for (const url of urls) {
+    const thing = getThing(dataset, url);
+    const named =
+      thing !== null &&
+      getUrlAll(thing, RDF.type).includes(SM.Distractor) &&
+      (namers ??= distractorNamers(dataset)).has(url);
+    if (named) kept.push(distractorOnly(unlessNewer(thing)));
+    else removed.push(url);
+  }
+  return setThings(removeAllUnlessNewer(dataset, removed), kept);
+}
+
+/** A subject typed both a card and a distractor, without its card statements. */
+function distractorOnly(thing: NamedSubject): NamedSubject {
   const kept = new Set(DISTRACTOR_V1.fields.map((field) => field.predicate));
   const builder = buildThing(thing).removeUrl(RDF.type, SM.Card).removeAll(SCHEMA.suggestedAnswer);
   for (const field of CARD_V7.fields)
     if (!kept.has(field.predicate)) builder.removeAll(field.predicate);
-  return setThing(dataset, builder.setInteger(SM.formatVersion, DISTRACTOR_V1.version).build());
+  return builder.setInteger(SM.formatVersion, DISTRACTOR_V1.version).build();
 }
 
 /**
@@ -479,11 +525,11 @@ export function withSuggestedAnswers(
   before: readonly string[],
   distractors: readonly string[],
 ): NamedSubject {
-  const builder = buildThing(card);
-  for (const url of before)
-    if (!distractors.includes(url)) builder.removeUrl(SCHEMA.suggestedAnswer, url);
-  const suggested = getUrlAll(card, SCHEMA.suggestedAnswer);
-  for (const url of distractors)
-    if (!suggested.includes(url)) builder.addUrl(SCHEMA.suggestedAnswer, url);
-  return builder.build();
+  const named = new Set(distractors);
+  const dropped = new Set(before.filter((url) => !named.has(url)));
+  const kept = getUrlAll(card, SCHEMA.suggestedAnswer).filter((url) => !dropped.has(url));
+  // The new list set in one call (setIriAll), however many distractors the card has.
+  return buildThing(card)
+    .setIriAll(SCHEMA.suggestedAnswer, [...kept, ...distractors])
+    .build();
 }

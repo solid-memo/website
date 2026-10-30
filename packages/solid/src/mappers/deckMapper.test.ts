@@ -27,11 +27,13 @@ import {
   toDistractor,
   withCatalog,
   withDeck,
-  withDistractors,
+  withDecks,
+  writeDistractors,
   withoutUnnamedDistractors,
   withoutDeck,
 } from "./deckMapper";
-import type { Deck } from "@solid-memo/domain/deck";
+import type { Deck, Distractor } from "@solid-memo/domain/deck";
+import { editOf } from "../datasetEdit";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
@@ -535,7 +537,19 @@ describe("toCard", () => {
   });
 });
 
-describe("withDistractors", () => {
+/** The document with a card's distractors written (writeDistractors), with what that gives. */
+function withDistractors(
+  dataset: Dataset,
+  documentUrl: string,
+  distractors: readonly Distractor[],
+  before: readonly string[],
+) {
+  const edit = editOf(dataset);
+  const written = writeDistractors(edit, documentUrl, distractors, before);
+  return { ...written, dataset: edit.done() };
+}
+
+describe("writeDistractors", () => {
   it("writes a card's distractors beside it and names those it named before and no longer does", () => {
     const before = [`${CARDS_DOC}#d1`, `${CARDS_DOC}#old`];
     const first = withDistractors(
@@ -666,6 +680,19 @@ describe("the catalog node", () => {
     ]);
     dataset = withoutDeck(dataset, deck);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([other.url]);
+  });
+
+  it("writes many decks at once as one at a time, each listed once", () => {
+    const dataset = withCatalog(datasetFrom(CATALOG), CATALOG, catalog);
+    const other = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
+    const once = withDecks(dataset, [deck, other, deck]);
+    expect(getUrlAll(getThing(once, `${CATALOG}#catalog`)!, DATASET)).toEqual([
+      deck.url,
+      other.url,
+    ]);
+    expect(toDecks(once, CATALOG)).toEqual(
+      toDecks(withDeck(withDeck(dataset, deck), other), CATALOG),
+    );
   });
 
   it("keeps the datasets another app listed through every deck save, removal and catalog write", () => {

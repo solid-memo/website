@@ -1451,6 +1451,17 @@ by one.
   documents are saved from `createSolidDataset()`. The one exception is
   the [answer log](#the-answer-log): answers are added unread, with an
   insert-only PATCH.
+- An edit of many subjects is made to the dataset at once: a release's
+  cards written, cards removed, and cards, catalog entries and review
+  states brought to this app's format (`setThings` and `removeThings` in
+  [client/rdf.ts](../packages/solid/src/client/rdf.ts), `editOf` in
+  [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)). A subject at
+  a time would copy the whole document at each, in time growing with the
+  square of its subjects. A list of values of one subject, such as a
+  card's distractors or the catalog's links to its decks, is set in one
+  call too (`setIriAll` and `setStringAll` of a subject's builder). An
+  add at each value would copy the list so far. The edit and its
+  save then take time that grows with the document.
 - A card moved to another deck in the
   [Studio](studio.md#moving-and-copying-cards) is written afresh in the
   target with only what Solid Memo knows of it. Its subject and its

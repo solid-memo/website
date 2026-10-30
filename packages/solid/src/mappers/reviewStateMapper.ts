@@ -8,12 +8,11 @@ import {
   type Subject,
   asUrl,
   getTermAll,
-  getThing,
   getThingAll,
   getUrl,
   getUrlAll,
-  setThing,
 } from "../client/rdf";
+import { editOf, type DatasetEdit } from "../datasetEdit";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { GradedPrompt, PromptStates } from "@solid-memo/domain/grading";
 import {
@@ -40,7 +39,7 @@ import {
 } from "@solid-memo/domain/reviewRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
-import { readVersioned, recordThing, removeUnlessNewer } from "../records";
+import { readVersioned, recordThing, removeAllUnlessNewer } from "../records";
 import { RDF, SM } from "../vocab";
 
 /**
@@ -233,14 +232,14 @@ const FSRS_KIND: Kind<FsrsState> = {
  * subject), a new subject `#review-<id>`, which names its card.
  */
 function newSubjectFor<T>(
-  dataset: Dataset,
+  edit: DatasetEdit<Dataset>,
   documents: ReviewDocuments,
   kind: Kind<T>,
   key: ReviewKey,
   newId: () => string,
 ): string {
   const named = kind.named(documents.reviewsDocumentUrl, key);
-  const there = getThing(dataset, named);
+  const there = edit.getThing(named);
   if (there === null) return named;
   const thereKey = kind.keyOf(there, documents);
   return thereKey !== null && sameKey(thereKey, key)
@@ -303,31 +302,36 @@ function writeBoth(
   states: StatesToWrite,
   newId: () => string,
 ): { dataset: Dataset; subjects: string[] } {
-  const sm2 = writeStates(dataset, documents, SM2_KIND, read.sm2, states.sm2, newId);
-  const fsrs = writeStates(sm2.dataset, documents, FSRS_KIND, read.fsrs, states.fsrs ?? [], newId);
-  return { dataset: fsrs.dataset, subjects: [...sm2.subjects, ...fsrs.subjects] };
+  const edit = editOf(dataset);
+  const sm2 = writeStates(edit, documents, SM2_KIND, read.sm2, states.sm2, newId);
+  const fsrs = writeStates(edit, documents, FSRS_KIND, read.fsrs, states.fsrs ?? [], newId);
+  return { dataset: edit.done(), subjects: [...sm2, ...fsrs] };
 }
 
-/** The document with `states` of one kind written, each at the subject `read` has it at, else a new one. */
+/**
+ * Writes `states` of one kind, each at the subject `read` has it at,
+ * else a new one, through one edit of the document (editOf): many states
+ * take time that grows with them and the document, not their product.
+ * Returns the subjects written.
+ */
 function writeStates<T extends ReviewKey>(
-  dataset: Dataset,
+  edit: DatasetEdit<Dataset>,
   documents: ReviewDocuments,
   kind: Kind<T>,
   read: readonly { url: string; key: ReviewKey }[],
   states: readonly T[],
   newId: () => string,
-): { dataset: Dataset; subjects: string[] } {
+): string[] {
   const subjectOf = new Map(read.map(({ url, key }) => [reviewKeyOf(key), url]));
-  let updated = dataset;
   const subjects: string[] = [];
   for (const state of states) {
     const subject =
-      subjectOf.get(reviewKeyOf(state)) ?? newSubjectFor(updated, documents, kind, state, newId);
+      subjectOf.get(reviewKeyOf(state)) ?? newSubjectFor(edit, documents, kind, state, newId);
     subjectOf.set(reviewKeyOf(state), subject);
-    updated = setThing(updated, kind.thing(documents, state, getThing(updated, subject), subject));
+    edit.setThing(kind.thing(documents, state, edit.getThing(subject), subject));
     subjects.push(subject);
   }
-  return { dataset: updated, subjects };
+  return subjects;
 }
 
 /** The prompts whose states go: their SM-2 states, their FSRS-6 states. */
@@ -352,9 +356,9 @@ export function withoutReadReviewStates(
     const gone = new Set(keys.map(reviewKeyOf));
     return states.filter(({ key }) => gone.has(reviewKeyOf(key)));
   };
-  return [...removed(read.sm2, keys.sm2), ...removed(read.fsrs, keys.fsrs)].reduce(
-    (current, { url }) => removeUnlessNewer(current, url),
+  return removeAllUnlessNewer(
     dataset,
+    [...removed(read.sm2, keys.sm2), ...removed(read.fsrs, keys.fsrs)].map(({ url }) => url),
   );
 }
 
@@ -370,12 +374,16 @@ export function withoutReviewStates(
   documents: ReviewDocuments,
   keys: readonly ReviewKey[],
 ): Dataset {
-  return getThingAll(dataset)
-    .filter((thing) => {
-      const key = keyOfSubject(thing, documents) ?? fsrsKeyOfSubject(thing, documents);
-      return key !== null && keys.some((removed) => sameKey(removed, key));
-    })
-    .reduce((current, thing) => removeUnlessNewer(current, asUrl(thing)), dataset);
+  const removed = new Set(keys.map(reviewKeyOf));
+  return removeAllUnlessNewer(
+    dataset,
+    getThingAll(dataset)
+      .filter((thing) => {
+        const key = keyOfSubject(thing, documents) ?? fsrsKeyOfSubject(thing, documents);
+        return key !== null && removed.has(reviewKeyOf(key));
+      })
+      .map(asUrl),
+  );
 }
 
 /**

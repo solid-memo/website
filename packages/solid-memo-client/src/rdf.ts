@@ -8,6 +8,7 @@ import type {
   Changes,
   Dataset,
   FetchedDataset,
+  LanguageString,
   NamedSubject,
   PropertyValue,
   Source,
@@ -51,6 +52,7 @@ import {
 export type {
   Dataset,
   FetchedDataset,
+  LanguageString,
   NamedSubject,
   SourcedDataset,
   Subject,
@@ -175,34 +177,58 @@ export function getThingAll(dataset: Dataset): NamedSubject[] {
 
 /** The dataset with `subject` in place of what it said of the same subject, the change recorded (changesOf). */
 export function setThing<T extends Dataset>(dataset: T, subject: Subject): T {
+  return setThings(dataset, [subject]);
+}
+
+/**
+ * The dataset with each of `subjects` set in turn, as setThing sets one,
+ * each change recorded: the subjects are copied once, not once a subject.
+ */
+export function setThings<T extends Dataset>(dataset: T, subjects: Iterable<Subject>): T {
   const data = clientDataset(dataset);
-  const given = clientSubject(subject);
-  const iri = storedIri(given.url, data.resource);
-  const stored = iri === given.url ? given : subjectOf(iri, given.values);
-  const previous = data.subjects.get(iri);
-  const subjects = new Map(data.subjects).set(iri, stored);
-  return withEdit(
-    data,
-    subjects,
-    previous === undefined ? [] : quadsOf(previous, iri),
-    quadsOf(stored, iri),
-  ) as unknown as T;
+  const edited = new Map(data.subjects);
+  let updated = data;
+  for (const subject of subjects) {
+    const given = clientSubject(subject);
+    const iri = storedIri(given.url, data.resource);
+    const stored = iri === given.url ? given : subjectOf(iri, given.values);
+    const previous = edited.get(iri);
+    edited.set(iri, stored);
+    updated = withEdit(
+      updated,
+      edited,
+      previous === undefined ? [] : quadsOf(previous, iri),
+      quadsOf(stored, iri),
+    );
+  }
+  return updated as unknown as T;
 }
 
 /** The dataset without what it said of `subject`, the change recorded (changesOf). */
 export function removeThing<T extends Dataset>(dataset: T, subject: string | Subject): T {
+  return removeThings(dataset, [subject]);
+}
+
+/**
+ * The dataset without what it said of each of `subjects`, as removeThing
+ * removes one, each change recorded: the subjects are copied once, not
+ * once a subject.
+ */
+export function removeThings<T extends Dataset>(
+  dataset: T,
+  subjects: Iterable<string | Subject>,
+): T {
   const data = clientDataset(dataset);
-  // A subject made by name is looked for by its name's IRI only when given as text, as the library does.
-  const iri = typeof subject === "string" ? storedIri(subject, data.resource) : subject.url;
-  const previous = data.subjects.get(iri);
-  const subjects = new Map(data.subjects);
-  subjects.delete(iri);
-  return withEdit(
-    data,
-    subjects,
-    previous === undefined ? [] : quadsOf(previous, iri),
-    [],
-  ) as unknown as T;
+  const edited = new Map(data.subjects);
+  let updated = data;
+  for (const subject of subjects) {
+    // A subject made by name is looked for by its name's IRI only when given as text, as the library does.
+    const iri = typeof subject === "string" ? storedIri(subject, data.resource) : subject.url;
+    const previous = edited.get(iri);
+    edited.delete(iri);
+    updated = withEdit(updated, edited, previous === undefined ? [] : quadsOf(previous, iri), []);
+  }
+  return updated as unknown as T;
 }
 
 /** A random name for a subject made with no name or URL. */
@@ -346,6 +372,31 @@ class Builder implements SubjectBuilder {
       property,
       (one) => one.termType !== "NamedNode" || one.value.toLowerCase() !== iri,
     );
+  }
+
+  setIriAll(property: string, values: readonly string[]): this {
+    const iris = new Set(values.map(iriValue));
+    this.#keep(property, (one) => one.termType !== "NamedNode");
+    for (const iri of iris) this.#add(property, namedNode(iri));
+    return this;
+  }
+
+  setStringAll(property: string, values: readonly LanguageString[]): this {
+    const strings = new Map<string, Value>();
+    for (const { value, language } of values) {
+      const term =
+        language === ""
+          ? literal(value, namedNode(XSD_STRING))
+          : literal(value, language.toLowerCase());
+      strings.set(JSON.stringify([term.language, term.value]), term);
+    }
+    this.#keep(
+      property,
+      (one) =>
+        !(one.termType === "Literal" && (isLangString(one) || one.datatype.value === XSD_STRING)),
+    );
+    for (const term of strings.values()) this.#add(property, term);
+    return this;
   }
 
   build(): NamedSubject {
