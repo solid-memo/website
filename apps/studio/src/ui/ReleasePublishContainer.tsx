@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -22,7 +23,8 @@ import { queryKeys } from "./queryKeys";
  * catalog, so it waits its turn with the catalog's other writes, and
  * is held while the catalog may not be written (useDataCheck); then
  * the draft, the drafts and the releases are read afresh, the draft now
- * released. Whether its release is public, making it so again, its next
+ * released. Whether its release is public (asked only of an address a
+ * release may have: isPublishedReleaseUrl), making it so again, its next
  * version, and the release saved as a file.
  */
 export function ReleasePublishContainer({
@@ -51,7 +53,8 @@ export function ReleasePublishContainer({
   const publicQuery = useQuery({
     queryKey: queryKeys.releasePublic(released ?? ""),
     queryFn: () => useCases.isReleasePublic(released!),
-    enabled: released !== undefined,
+    // Asked of an address a release may have only: the draft is data anyone may have written.
+    enabled: released !== undefined && isPublishedReleaseUrl(released),
   });
   const publishMutation = useMutation({
     scope: { id: catalogScope(instanceUrl) },

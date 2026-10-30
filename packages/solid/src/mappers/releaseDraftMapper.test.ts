@@ -154,6 +154,42 @@ describe("draftFromQuads", () => {
     ]);
   });
 
+  it("keeps the release a draft was published as only at an address a release may have", async () => {
+    const releasedAs = async (iri: string) =>
+      draftFromQuads(
+        await quadsOfTurtle(
+          `${PREFIXES}<> a solid-memo:Deck ; solid-memo:formatVersion 1 ; dcterms:title "Solid"@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ; solid-memo:releasedAs <${iri}> .`,
+          DRAFT,
+        ),
+        DRAFT,
+      )!.root.releasedAs;
+    const release = "https://pod.example/solid-memo/a/releases/solid/v1.ttl";
+    expect(await releasedAs(release)).toBe(release);
+    expect(await releasedAs("javascript:alert(1)")).toBeUndefined();
+    expect(
+      await releasedAs("https://pod.example/solid-memo/a/releases/solid/v1.ttl?x"),
+    ).toBeUndefined();
+  });
+
+  it("keeps the release at a release's address of several, whatever their order", async () => {
+    const release = "https://pod.example/solid-memo/a/releases/solid/v1.ttl";
+    for (const objects of [
+      `<javascript:alert(1)>, <${release}>`,
+      `<${release}>, <javascript:alert(1)>`,
+    ]) {
+      const draft = draftFromQuads(
+        await quadsOfTurtle(
+          `${PREFIXES}<> a solid-memo:Deck ; solid-memo:formatVersion 1 ; dcterms:title "Solid"@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ; solid-memo:releasedAs ${objects} .`,
+          DRAFT,
+        ),
+        DRAFT,
+      );
+      expect(draft!.root.releasedAs).toBe(release);
+    }
+  });
+
   it("is null without a root this app can read", async () => {
     expect(
       draftFromQuads(await quadsOfTurtle(`${PREFIXES}<#x> a solid-memo:Card .`, DRAFT), DRAFT),

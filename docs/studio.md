@@ -2127,7 +2127,9 @@ releases it, two ways.
     write follows no redirect.
 - **Listed.** The catalog links it (`sm:publishedRelease`).
 - **Frozen.** The draft names its release (`sm:releasedAs`), and
-  changes no more.
+  changes no more. An `sm:releasedAs` that isn't a published release's
+  address is ignored, so such a draft reads as not released, as
+  `data-model.md` says.
 - **One version.** What is checked, written and marked released is the
   draft at the version read (If-Match). A draft changed elsewhere
   meanwhile is `changedElsewhere`: before the release is written,

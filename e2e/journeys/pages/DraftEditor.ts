@@ -119,7 +119,9 @@ export class DraftEditor extends Screen {
     await expect(publish).toBeDisabled();
     await part.getByRole("checkbox", { name: this.t("studio.publish.confirm") }).check();
     await publish.click();
-    await expect(part.getByRole("link", { name: url, exact: true })).toHaveAttribute("href", url, {
+    // A link to another document opens in a new tab, and says so.
+    const name = `${url} ${this.t("common.opensInNewTab")}`;
+    await expect(part.getByRole("link", { name, exact: true })).toHaveAttribute("href", url, {
       timeout: 60_000,
     });
     return url;

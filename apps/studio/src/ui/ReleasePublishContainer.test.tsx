@@ -52,6 +52,17 @@ describe("ReleasePublishContainer", () => {
     expect(useCases.isReleasePublic).toHaveBeenCalledWith(TARGET);
   });
 
+  it("asks nothing of a draft's release at an address no release has", async () => {
+    const useCases = makeUseCasesFake({ isReleasePublic: vi.fn(async () => false) });
+    renderContainer(useCases, {
+      ...courseDraft(),
+      root: { ...courseDraft().root, releasedAs: "javascript:alert(1)" },
+    });
+    expect(await screen.findByText("javascript:alert(1)")).toBeInTheDocument();
+    expect(document.querySelector('a[href^="javascript:"]')).toBeNull();
+    expect(useCases.isReleasePublic).not.toHaveBeenCalled();
+  });
+
   it("counts the errors of the release check's rules, not its warnings", async () => {
     const error = problem(DRAFT_URL, { code: "unshaped", params: {} });
     const warning = problem(DRAFT_URL, { code: "unshaped", params: {} }, { severity: "warning" });

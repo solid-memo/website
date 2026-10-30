@@ -2187,7 +2187,9 @@ describe("StudioWorkspace", () => {
       // Nothing is published until the instance's data check is done.
       await waitFor(() => expect(publish).toBeEnabled());
       fireEvent.click(publish);
-      expect(await screen.findByRole("link", { name: target })).toHaveAttribute("href", target);
+      expect(
+        await screen.findByRole("link", { name: `${target} (opens in a new tab)` }),
+      ).toHaveAttribute("href", target);
       expect(useCases.publishRelease).toHaveBeenCalledWith(DRAFT_URL, target, MARKDOWN_CHECK);
       // What the publishing said, not asked again: the pod would not make it public.
       expect(screen.getByText(/Only you can read it/)).toBeInTheDocument();
