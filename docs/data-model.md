@@ -1499,6 +1499,10 @@ by one.
     documents are](#where-an-instances-documents-are)). A deck another
     tab adds meanwhile is missed, and keeps the folder in place.
 
+  An edit or a delete is matched to its read by the document's address
+  as a request sends it (`isSameUrl`), so one spelled another way than
+  the pod answered with still carries the `If-Match` of that read.
+
   A 412 surfaces as a `PreconditionFailedError` naming the document
   ("changed elsewhere … Reload and try again"). Nothing retries on its
   own, except the writes that re-apply a change to the document as it is

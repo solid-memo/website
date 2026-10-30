@@ -14,6 +14,7 @@ import {
 import {
   deleteDataset,
   getSolidDatasetOrNull,
+  isReadFrom,
   keptDataset,
   PreconditionFailedError,
   readDataset,
@@ -55,7 +56,8 @@ function pod({
   let current = etag;
   let versions = 0;
   const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input);
+    // As a browser sends it: one address however it is spelled.
+    const url = new URL(String(input)).href;
     const method = init?.method ?? "GET";
     const headers = new Headers(init?.headers);
     if (method === "GET" || method === "HEAD") {
@@ -141,6 +143,24 @@ describe("saving with preconditions", () => {
       { method: "PATCH", url: DOC, ifMatch: '"v1"', ifNoneMatch: null },
     ]);
   });
+
+  it.each(["https://POD.example/doc.ttl", "https://pod.example:443/doc.ttl"])(
+    "takes a save to %s as an edit of the document read, as a request sends both",
+    async (spelled) => {
+      const server = pod();
+      const read = await readDataset(DOC, server.fetch);
+      expect(isReadFrom(read, spelled)).toBe(true);
+      await saveDataset(spelled, edited(read), server.fetch);
+      expect(server.writes).toEqual([
+        { method: "PATCH", url: DOC, ifMatch: '"v1"', ifNoneMatch: null },
+      ]);
+      // Written over, the read is refused under either spelling, sending nothing.
+      await expect(saveDataset(DOC, edited(read), server.fetch)).rejects.toBeInstanceOf(
+        PreconditionFailedError,
+      );
+      expect(server.writes).toHaveLength(1);
+    },
+  );
 
   it("refuses to save an edit of a document changed since it was read, naming it", async () => {
     const server = pod();
@@ -377,6 +397,17 @@ describe("deleting with preconditions", () => {
     await deleteDataset(DOC, createSolidDataset(), again.fetch);
     expect(again.writes.at(-1)!.ifMatch).toBeNull();
   });
+
+  it.each(["https://POD.example/doc.ttl", "https://pod.example:443/doc.ttl"])(
+    "deletes at %s only if the document read is as it was",
+    async (spelled) => {
+      const server = pod();
+      await deleteDataset(spelled, await readDataset(DOC, server.fetch), server.fetch);
+      expect(server.writes).toEqual([
+        { method: "DELETE", url: DOC, ifMatch: '"v1"', ifNoneMatch: null },
+      ]);
+    },
+  );
 
   it("refuses, sending nothing, a delete on a read that a save has since written over", async () => {
     const server = pod({ written: "strong" });

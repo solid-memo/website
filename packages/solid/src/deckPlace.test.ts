@@ -4,10 +4,12 @@
 
 import { describe, expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
+import type { ReviewState } from "@solid-memo/domain/review";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { deleteInstanceData } from "./instanceData";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
+import { createSolidDeckArchive } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 
@@ -625,6 +627,34 @@ describe("an instance at the pod's root, laid out flat", () => {
     expect(await p.urls()).toContain(cards);
   });
 
+  for (const spelled of ["https://POD.example/", "https://pod.example:443/"]) {
+    it(`never writes to an older document or the profile the catalog spells otherwise: ${spelled}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(ROOT, { en: "Spanish" });
+      const cards = `${ROOT}spanish.ttl`;
+      await p.put(cards, deckDocument(deck, cardTurtle("card-1", "uno"), false));
+      const other = (url: string) => url.replace(ROOT, spelled);
+      await plant(p, deck, other(cards), other(CARD), ROOT);
+      const [listed] = await p.decks.listDecks(ROOT);
+      await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([
+        other(cards),
+        other(CARD),
+      ]);
+
+      p.writes.length = 0;
+      await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+      await expect(
+        p.reviews.applyReviewChanges(listed!, {
+          save: [],
+          remove: [{ cardId: "card-1", direction: "front-to-back" }],
+        }),
+      ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+      expect(p.writes).toEqual([]);
+    });
+  }
+
   it("is not its own folder at a storage's root, and asks again a folder that did not answer", async () => {
     const p = await pod();
     const at = (instance: string) => ({
@@ -686,6 +716,12 @@ describe("an instance whose address is spelled otherwise than a request sends it
       await p.decks.addCard(second, UNO);
       const sent = (url: string) => new Request(url).url;
       expect(await p.urls()).toEqual(expect.arrayContaining([sent(deck.cardsDocumentUrl)]));
+      // An edit of a document read is made on the version read, however its address is spelled.
+      p.writes.length = 0;
+      p.conditions.length = 0;
+      await p.decks.addCard(deck, DOS);
+      expect(p.writes).toEqual([`PATCH ${sent(deck.cardsDocumentUrl)}`]);
+      expect(p.conditions).toEqual([expect.stringMatching(/^"e\d+"$/)]);
 
       p.writes.length = 0;
       await p.decks.removeDeck(deck);
@@ -699,6 +735,38 @@ describe("an instance whose address is spelled otherwise than a request sends it
       await deleteInstanceData(instance, p.fetch);
       expect(await p.urls()).not.toContain(sent(second.cardsDocumentUrl));
       expect(await p.urls()).toEqual(expect.arrayContaining([CARD, DIARY]));
+    });
+
+    it(`keeps a listed deck's cards and progress where they were written: ${instance}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(instance, { en: "Spanish" });
+      const card = await p.decks.addCard(deck, UNO);
+      await p.decks.addCard(deck, DOS);
+      const key = { cardId: card.id, direction: "front-to-back" } as const;
+      const grade = ({ sm2 }: { sm2: ReviewState | null }) => ({
+        sm2: {
+          ...key,
+          easeFactor: 2.5,
+          intervalDays: 1,
+          repetitions: (sm2?.repetitions ?? 0) + 1,
+          due: "2026-10-20",
+          firstReviewedAt: "2026-10-19T00:00:00.000Z",
+          lastReviewedAt: "2026-10-19T00:00:00.000Z",
+          formatVersion: 3,
+        },
+      });
+      await p.reviews.gradeReviewState(deck, key, grade);
+      const [listed] = await p.decks.listDecks(instance);
+      await p.reviews.gradeReviewState(listed!, key, grade);
+      const states = await p.reviews.listReviewStates(listed!);
+      expect(states.sm2.map((one) => one.repetitions)).toEqual([2]);
+
+      const archive = createSolidDeckArchive({ fetch: p.fetch });
+      const file = await archive.exportDeck(listed!, { format: "turtle", withProgress: true });
+      const read = await archive.readDeckFile(file, "turtle", "https://example.org/deck");
+      expect(read.cards).toHaveLength(2);
+      expect(read.reviews).toHaveLength(1);
+      expect(read.dropped).toEqual([]);
     });
   }
 });
