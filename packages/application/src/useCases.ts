@@ -295,7 +295,6 @@ export function createUseCases({
       deckLibrary,
       deckRepository,
       reviewStateRepository,
-      shapeValidator,
       courses,
     }),
     ...createMistakeReportUseCases({ deckLibrary }),

@@ -39,11 +39,9 @@ import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
-import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import { getSolidDatasetLinear } from "./client/resources";
 import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
-import { shownReadError } from "./releaseReadError";
 
 /** The IRIs a subject has as values of a predicate, among its own quads: what pickShape asks of a subject. */
 function iriValuesIn(own: readonly Quad[]): (predicate: string) => string[] {
@@ -56,7 +54,7 @@ function iriValuesIn(own: readonly Quad[]): (predicate: string) => string[] {
 export interface ShaclShapeValidatorDeps {
   /** Fetches pod documents (authenticated). */
   fetch: typeof globalThis.fetch;
-  /** Fetches the shape documents, the reference data, the profiles, a library's index and a release checked on its own, all public (plain). */
+  /** Fetches the shape documents, the reference data, the profiles and a library's index, all public (plain). */
   shapesFetch: typeof globalThis.fetch;
   /** Where the shapes are published (SHAPES_BASE). */
   shapesBaseUrl: string;
@@ -84,6 +82,8 @@ export interface ShaclShapeValidatorDeps {
  */
 export type ShaclShapeValidator = ShapeValidator & {
   checkSubjects: WriteCheck;
+  /** The report on a document already read, as validateDocument makes it of one it reads. */
+  validateDataset(url: string, dataset: Dataset, context: DocumentContext): Promise<DocumentReport>;
   over(fetch: typeof globalThis.fetch): ShaclShapeValidator;
 };
 
@@ -285,8 +285,6 @@ export function createShaclShapeValidator({
   loader = createShapeLoader({ fetch: shapesFetch, shapesBaseUrl, vocabBaseUrl, vendorBaseUrl }),
 }: ShaclShapeValidatorDeps): ShaclShapeValidator {
   const engines = new Map<string, Promise<ShapeEngine>>();
-  /** A release checked as the library's may be anyone's, on any server: read under RELEASE_LIMITS. */
-  const releaseFetch = limitedFetch(shapesFetch, RELEASE_LIMITS);
 
   function engineFor(descriptor: ShapeDescriptor): Promise<ShapeEngine> {
     let engine = engines.get(descriptor.shapeDocument);
@@ -480,15 +478,10 @@ export function createShaclShapeValidator({
     },
 
     async validateDocument(url, context = "pod"): Promise<DocumentReport> {
-      // A release is public: read as anyone reads it, as a library's index is, with no login sent to its host.
-      const dataset = await getSolidDatasetOrNull(
-        url,
-        context === "library" ? releaseFetch : podFetch,
-      ).catch((error: unknown) => {
-        throw shownReadError(url, error);
-      });
-      return reportOf(url, dataset, context);
+      return reportOf(url, await getSolidDatasetOrNull(url, podFetch), context);
     },
+
+    validateDataset: reportOf,
 
     async validateDocumentSince(url, version, context = "pod") {
       const since = await readSince(url, version, podFetch);

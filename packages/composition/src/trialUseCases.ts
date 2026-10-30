@@ -125,7 +125,6 @@ export function createTrialUseCases(
         deckLibrary,
         deckRepository,
         reviewStateRepository,
-        shapeValidator: validator,
         courses,
       }),
       ...createStudyUseCases({

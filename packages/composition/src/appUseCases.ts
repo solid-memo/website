@@ -241,6 +241,8 @@ export function createAppUseCases({
       fetch: siteFetch,
       // The library is published with the site, from decks/.
       indexUrl: libraryIndexUrl ?? `${SITE}decks/index.ttl`,
+      // A release from a link is checked against the library's shapes as it is read, that read alone.
+      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
     }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: dataFetch, checkWrite }),
     paletteRepository: createSolidPaletteRepository({ fetch: dataFetch, checkWrite }),

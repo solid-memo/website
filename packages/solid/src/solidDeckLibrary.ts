@@ -5,6 +5,7 @@
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { Dataset } from "./client/rdf";
 import type { CourseOutline } from "@solid-memo/domain/course";
+import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 import { catalogLinks } from "./catalogLinks";
@@ -29,6 +30,12 @@ export interface SolidDeckLibraryDeps {
   fetch: typeof globalThis.fetch;
   /** URL of the library's index document. */
   indexUrl: string;
+  /**
+   * What the library's shapes say of a release as read
+   * (ShaclShapeValidator.validateDataset, "library"): a release added
+   * from a link is checked as readRelease reads it, that read alone.
+   */
+  validate: (url: string, dataset: Dataset) => Promise<DocumentReport>;
 }
 
 /**
@@ -45,8 +52,11 @@ export interface SolidDeckLibraryDeps {
  *
  * A release added from a link (readRelease) is read on its own, afresh
  * each time, with no index: its address may hold anything, now or later,
- * until it is copied. Its creator's catalog (publishedBeside) is read
- * as anyone reads it, as the fetch reads everything: no login is sent.
+ * until it is copied. A read checked against the library's shapes and
+ * accepted is kept as the release's, in place of any before, so it is
+ * the one its cards are imported from. Its creator's catalog
+ * (publishedBeside) is read as anyone reads it, as the fetch reads
+ * everything: no login is sent.
  * Every release is read under RELEASE_LIMITS, as anyone's server may
  * serve one as it likes (a copy from a link reads its newer releases
  * here too), and so is that catalog; the library's releases are well
@@ -54,7 +64,11 @@ export interface SolidDeckLibraryDeps {
  * releaseTooLarge, however it is read. The index, which grows with the
  * library and comes with the site, is not.
  */
-export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps): DeckLibrary {
+export function createSolidDeckLibrary({
+  fetch,
+  indexUrl,
+  validate,
+}: SolidDeckLibraryDeps): DeckLibrary {
   const limited = limitedFetch(fetch, RELEASE_LIMITS);
   const releases = new Map<string, Promise<Dataset>>();
   const contents = new Map<string, Promise<LibraryDeckContent>>();
@@ -100,14 +114,22 @@ export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps
       );
     },
 
-    async readRelease(url) {
+    async readRelease(url, accept) {
       let dataset: Dataset;
       try {
         dataset = await getSolidDatasetLinear(url, { fetch: limited });
       } catch (error) {
         throw releaseReadError(url, error);
       }
-      return toStandaloneLibraryDeck(url, dataset);
+      const read = toStandaloneLibraryDeck(url, dataset);
+      if (accept !== undefined) {
+        accept(await validate(url, dataset));
+        // What was checked is what is read of the release from now on: its content and outline made of it anew.
+        releases.set(url, Promise.resolve(dataset));
+        contents.delete(url);
+        outlines.delete(url);
+      }
+      return read;
     },
 
     async publishedBeside(url) {
@@ -143,13 +165,20 @@ function foldersAbove(url: string): string[] {
   return folders;
 }
 
-/** What `make` makes for the URL, made once and kept; a failure is forgotten, so the next call tries again. */
+/**
+ * What `make` makes for the URL, made once and kept; a failure is
+ * forgotten, so the next call tries again, unless what is kept is
+ * another by then (a release's read checked, kept in its place).
+ */
 function kept<T>(cache: Map<string, Promise<T>>, url: string, make: () => Promise<T>): Promise<T> {
   let made = cache.get(url);
   if (made === undefined) {
-    made = make();
-    cache.set(url, made);
-    made.catch(() => cache.delete(url));
+    const making = make();
+    made = making;
+    cache.set(url, making);
+    making.catch(() => {
+      if (cache.get(url) === making) cache.delete(url);
+    });
   }
   return made;
 }

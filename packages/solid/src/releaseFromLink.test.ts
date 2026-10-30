@@ -4,9 +4,12 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import type { DocumentReport } from "@solid-memo/domain/validation";
 import { RELEASE_LIMITS } from "./client/readLimits";
+import type { Dataset } from "./client/rdf";
+import { toLibraryDeckContent } from "./mappers/libraryMapper";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 
 /**
@@ -43,8 +46,41 @@ function serving(
   return Object.assign(fetch, { asked });
 }
 
-const libraryOver = (fetch: typeof globalThis.fetch) =>
-  createSolidDeckLibrary({ fetch, indexUrl: "https://solid-memo.com/decks/index.ttl" });
+/** What the library's shapes say of a release: nothing wrong. */
+const conforming = async (url: string): Promise<DocumentReport> => ({
+  url,
+  status: "checked",
+  subjects: [],
+});
+
+const libraryOver = (
+  fetch: typeof globalThis.fetch,
+  validate: (url: string, dataset: Dataset) => Promise<DocumentReport> = conforming,
+) =>
+  createSolidDeckLibrary({ fetch, indexUrl: "https://solid-memo.com/decks/index.ttl", validate });
+
+/** A fetch that answers each read of a document with the next of its answers, the last once they run out. */
+function answering(documents: Record<string, string[]>): typeof globalThis.fetch & {
+  asked: string[];
+} {
+  const asked: string[] = [];
+  const fetch = async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    const answers = documents[url] ?? [];
+    const document = answers[asked.filter((other) => other === url).length] ?? answers.at(-1);
+    asked.push(url);
+    const response =
+      document === undefined
+        ? new Response("", { status: 404 })
+        : new Response(document, { status: 200, headers: { "Content-Type": "text/turtle" } });
+    Object.defineProperty(response, "url", { value: url });
+    return response;
+  };
+  return Object.assign(fetch, { asked });
+}
+
+/** The standalone release with Norway's capital another: a read that differs from the first. */
+const CHANGED = STANDALONE.replace('"Oslo"@en', '"Bergen"@en');
 
 /** An instance's catalog that links the releases it published. */
 const catalog = (instance: string, releases: string[]) =>
@@ -87,6 +123,85 @@ describe("readRelease", () => {
     await library.readRelease(V2);
     await library.readRelease(V2);
     expect(fetch.asked).toEqual([V2, V2]);
+  });
+
+  it("with `accept`, checks the very read it shows, and keeps it as the release's for the cards imported", async () => {
+    const fetch = answering({ [V2]: [STANDALONE, CHANGED] });
+    const validate = vi.fn((url: string, _dataset: Dataset) => conforming(url));
+    const library = libraryOver(fetch, validate);
+    const accept = vi.fn();
+    const release = await library.readRelease(V2, accept);
+    expect(release.cardCount).toBe(2);
+    expect(accept).toHaveBeenCalledExactlyOnceWith({ url: V2, status: "checked", subjects: [] });
+    const [url, dataset] = validate.mock.calls[0]!;
+    expect(url).toBe(V2);
+    // The cards and a course's outline are those of the read checked: the address is not read again.
+    const backs = async () =>
+      (await library.fetchLibraryDeck(V2)).cards.map((card) => card.back.en).sort();
+    expect(await backs()).toEqual(["Oslo", "Stockholm"]);
+    await expect(library.fetchCourseOutline(V2)).resolves.toEqual({
+      releaseUrl: V2,
+      chapters: [],
+    });
+    expect(fetch.asked).toEqual([V2]);
+    expect(toLibraryDeckContent(V2, dataset).cards).toEqual(
+      (await library.fetchLibraryDeck(V2)).cards,
+    );
+    // A later read accepted is the release's then, in place of the one before.
+    await library.readRelease(V2, accept);
+    expect(await backs()).toEqual(["Bergen", "Stockholm"]);
+    expect(fetch.asked).toEqual([V2, V2]);
+  });
+
+  it("with `accept`, keeps no read it refuses: the release is read again for its cards", async () => {
+    const fetch = answering({ [V2]: [CHANGED, STANDALONE] });
+    const library = libraryOver(fetch);
+    const refused = new Error("breaks its shapes");
+    await expect(
+      library.readRelease(V2, () => {
+        throw refused;
+      }),
+    ).rejects.toBe(refused);
+    expect((await library.fetchLibraryDeck(V2)).cards.map((card) => card.back.en)).toContain(
+      "Oslo",
+    );
+    expect(fetch.asked).toEqual([V2, V2]);
+  });
+
+  it("with `accept`, keeps its read though an earlier read of the release fails after it", async () => {
+    let failEarlier = () => {};
+    const earlier = new Promise<void>((resolve) => {
+      failEarlier = resolve;
+    });
+    const asked: string[] = [];
+    const fetch = async (input: RequestInfo | URL) => {
+      const url = String(input);
+      const first = asked.push(url) === 1;
+      if (first) await earlier;
+      const response = first
+        ? new Response("", { status: 500 })
+        : new Response(STANDALONE, { status: 200, headers: { "Content-Type": "text/turtle" } });
+      Object.defineProperty(response, "url", { value: url });
+      return response;
+    };
+    const library = libraryOver(fetch);
+    const failed = library.fetchLibraryDeck(V2);
+    await library.readRelease(V2, () => undefined);
+    failEarlier();
+    await expect(failed).rejects.toThrow();
+    await expect(library.fetchLibraryDeck(V2)).resolves.toMatchObject({ url: V2 });
+    expect(asked).toEqual([V2, V2]);
+  });
+
+  it("checks nothing, and keeps nothing, without `accept`", async () => {
+    const fetch = answering({ [V2]: [STANDALONE, CHANGED] });
+    const validate = vi.fn(conforming);
+    const library = libraryOver(fetch, validate);
+    await library.readRelease(V2);
+    expect(validate).not.toHaveBeenCalled();
+    expect((await library.fetchLibraryDeck(V2)).cards.map((card) => card.back.en)).toContain(
+      "Bergen",
+    );
   });
 
   it("refuses an address with nothing to read as a release, or no deck in it", async () => {

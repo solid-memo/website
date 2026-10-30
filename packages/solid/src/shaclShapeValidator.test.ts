@@ -16,8 +16,6 @@ import {
 } from "./client/rdf";
 import { datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
-import { ReadLimitError } from "./client/interface";
-import { RELEASE_LIMITS } from "./client/readLimits";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
 import { toFsrsStateThing, toReviewStateThing } from "./mappers/reviewStateMapper";
@@ -248,41 +246,20 @@ describe("createShaclShapeValidator", () => {
     expect(createEngine).toHaveBeenCalledOnce();
   });
 
-  it("reads a release checked on its own as anyone does, against the library's shapes, with no profile", async () => {
+  it("checks a release as it was read, against the library's shapes, with no profile, reading nothing itself", async () => {
     const release = "https://alice.example/releases/capitals/v1.ttl";
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(
-        datasetFrom(release),
-        buildThing(createThing({ url: release }))
-          .addIri(RDF.type, SM.Deck)
-          .addIri(RDF.type, DCAT.Dataset)
-          .addInteger(SM.formatVersion, 6)
-          .build(),
-      ),
+    const dataset = setThing(
+      datasetFrom(release),
+      buildThing(createThing({ url: release }))
+        .addIri(RDF.type, SM.Deck)
+        .addIri(RDF.type, DCAT.Dataset)
+        .addInteger(SM.formatVersion, 6)
+        .build(),
     );
     const { validator, validateNode, validate, publicFetch } = makeValidator();
-    const report = await validator.validateDocument(release, "library");
-    // Through the public fetch, under the limits of a release.
-    vi.mocked(publicFetch).mockResolvedValueOnce(new Response(null, { status: 404 }));
-    await vi.mocked(getSolidDatasetOrNull).mock.calls[0]![1](release);
-    expect(publicFetch).toHaveBeenCalledWith(release, undefined);
-    vi.mocked(publicFetch).mockResolvedValueOnce(
-      new Response("x", { headers: { "Content-Length": String(RELEASE_LIMITS.bytes + 1) } }),
-    );
-    await expect(
-      vi.mocked(getSolidDatasetOrNull).mock.calls[0]![1](release),
-    ).rejects.toBeInstanceOf(ReadLimitError);
-    // A release past them is shown as one, and any other failure as it is.
-    vi.mocked(getSolidDatasetOrNull).mockRejectedValueOnce(
-      new ReadLimitError(release, RELEASE_LIMITS),
-    );
-    await expect(validator.validateDocument(release, "library")).rejects.toMatchObject({
-      code: "releaseTooLarge",
-      vars: { url: release },
-    });
-    const offline = new TypeError("Failed to fetch");
-    vi.mocked(getSolidDatasetOrNull).mockRejectedValueOnce(offline);
-    await expect(validator.validateDocument(release, "library")).rejects.toBe(offline);
+    const report = await validator.validateDataset(release, dataset, "library");
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+    expect(publicFetch).not.toHaveBeenCalledWith(release, expect.anything());
     expect(report.subjects).toEqual([
       { url: release, status: "checked", shape: "libraryDeck", version: 6, violations: [] },
     ]);
@@ -415,7 +392,14 @@ describe("createShaclShapeValidator", () => {
     });
     const dates = async (context?: "library") =>
       Object.fromEntries(
-        (await validator.validateDocument(DOC, context)).subjects.map((subject) => [
+        (context === undefined
+          ? await validator.validateDocument(DOC)
+          : await validator.validateDataset(
+              DOC,
+              (await vi.mocked(getSolidDatasetOrNull).mock.results[0]!.value)!,
+              context,
+            )
+        ).subjects.map((subject) => [
           subject.url,
           subject.status === "checked"
             ? subject.violations
@@ -1050,7 +1034,7 @@ describe("createShaclShapeValidator", () => {
         `<${DOC}> (${DCTERMS.title}):`,
       );
       vi.mocked(getSolidDatasetOrNull).mockResolvedValue(tangled as never);
-      const checked = async (as?: "draft" | "library") =>
+      const checked = async (as?: "draft") =>
         (await validator.validateDocument(DOC, as)).subjects.filter(
           (subject) => subject.status === "checked",
         );
@@ -1073,8 +1057,7 @@ describe("createShaclShapeValidator", () => {
           .build(),
       );
       const checked = async (dataset: Dataset) => {
-        vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset as never);
-        return (await validator.validateDocument(release, "library")).subjects.filter(
+        return (await validator.validateDataset(release, dataset, "library")).subjects.filter(
           (subject) => subject.status === "checked",
         );
       };

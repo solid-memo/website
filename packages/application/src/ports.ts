@@ -407,8 +407,15 @@ export interface DeckLibrary {
    * releaseUnreadable when nothing can be read there, releaseTooLarge
    * when it is larger than a release may be, notADeck when it holds no
    * deck, libraryDeckTooNew when its deck is in a newer format.
+   *
+   * With `accept`, that same read is checked against the library's
+   * shapes too (DocumentContext "library"), once it reads as a release:
+   * `accept` is handed what they say of it, and throws to refuse it. A
+   * read it accepts is the release's from then on, as fetchLibraryDeck
+   * and fetchCourseOutline read it, in place of any kept before: what is
+   * checked and shown is what is imported. A read refused is not kept.
    */
-  readRelease(url: string): Promise<LibraryDeck>;
+  readRelease(url: string, accept?: (report: DocumentReport) => void): Promise<LibraryDeck>;
   /**
    * The releases the catalog of the instance that published `url`
    * links (`sm:publishedRelease`), read as anyone reads it: looked for
@@ -795,7 +802,15 @@ export interface InstanceGraphReader {
 export type DocumentContext = "pod" | "draft" | "library";
 
 export interface ShapeValidator {
-  validateDocument(url: string, context?: DocumentContext): Promise<DocumentReport>;
+  /**
+   * The report on a document of an instance's, read as the instance's
+   * documents are; a release is checked as DeckLibrary.readRelease reads
+   * it, never read again here.
+   */
+  validateDocument(
+    url: string,
+    context?: Exclude<DocumentContext, "library">,
+  ): Promise<DocumentReport>;
   /** The document's report unless it is still at `version` (undefined: check it). */
   validateDocumentSince(
     url: string,

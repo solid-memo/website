@@ -127,7 +127,11 @@ async function app(site: typeof fetch = siteFetch, store = createMemoryResourceS
     ...NO_PORTS,
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
-    deckLibrary: createSolidDeckLibrary({ fetch: site, indexUrl: `${SITE}decks/index.ttl` }),
+    deckLibrary: createSolidDeckLibrary({
+      fetch: site,
+      indexUrl: `${SITE}decks/index.ttl`,
+      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
+    }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, ...ids }),
     deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, ...ids }),
@@ -465,4 +469,234 @@ describe("a library deck's documents, through its import and an upgrade", () => 
     expect(await backLinks(store, upgraded!.cardsDocumentUrl, deck.url)).toBe(1);
     expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
   });
+});
+
+const LINKED = "https://bob.example/releases/capitals/v2.ttl";
+
+/** The standalone release of a pod, published at LINKED. */
+async function linkedRelease(): Promise<string> {
+  const turtle = await readFile(
+    `${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`,
+    "utf8",
+  );
+  return turtle.replaceAll(
+    "https://alice.example/solid-memo/main/releases/capitals/",
+    "https://bob.example/releases/capitals/",
+  );
+}
+
+/** That release with a card that breaks its shape: no front, and another back. */
+const breakingShapes = (turtle: string) =>
+  turtle.replace('solid-memo:front "Norway"@en ;', "").replace('"Oslo"@en', '"Bergen"@en');
+
+/** The site, and LINKED answered with each of `answers` in turn, the last once they run out; `asked` counts its reads. */
+function linkedSite(answers: string[]): typeof fetch & { asked: () => number } {
+  let reads = 0;
+  const site: typeof fetch = async (input, init) => {
+    if (String(input instanceof Request ? input.url : input) !== LINKED)
+      return siteFetch(input, init);
+    const body = answers[Math.min(reads++, answers.length - 1)]!;
+    const response = new Response(body, { headers: { "content-type": "text/turtle" } });
+    return Object.defineProperty(response, "url", { value: LINKED });
+  };
+  return Object.assign(site, { asked: () => reads });
+}
+
+describe("a release added from a link", () => {
+  it("is imported from the read that was checked against the library's shapes and shown, though its address answers otherwise later", async () => {
+    const good = await linkedRelease();
+    const site = linkedSite([good, breakingShapes(good)]);
+    const { useCases } = await app(site);
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+
+    const release = await useCases.readReleaseFromLink(LINKED);
+    expect(release).toMatchObject({ url: LINKED, cardCount: 2 });
+    const deck = await useCases.importReleaseFromUrl(instance.url, release);
+
+    expect(site.asked()).toBe(1);
+    const cards = await useCases.listCards(deck);
+    expect(cards.map((card) => [card.id, card.front.en, card.back.en]).sort()).toEqual([
+      ["no", "Norway", "Oslo"],
+      ["se", "Sweden", "Stockholm"],
+    ]);
+  });
+
+  it("is refused when the read breaks the library's shapes, and the next read is checked again", async () => {
+    const good = await linkedRelease();
+    const site = linkedSite([breakingShapes(good), good]);
+    const { useCases } = await app(site);
+
+    await expect(useCases.readReleaseFromLink(LINKED)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+      vars: { host: "bob.example" },
+    });
+    await expect(useCases.readReleaseFromLink(LINKED)).resolves.toMatchObject({ cardCount: 2 });
+    expect(site.asked()).toBe(2);
+  });
+});
+
+const BOB = "https://bob.example/releases/capitals/";
+const bobUrl = (version: number) => `${BOB}v${version}.ttl`;
+
+/** Version `version` of Bob's series, every one before it described in it, with a card for each of `cards`. */
+function bobRelease(
+  version: number,
+  cards: [string, string, string][],
+  notes = `Version ${version}.`,
+) {
+  const earlier = Array.from({ length: version - 1 }, (_, index) => index + 1);
+  const series = `${bobUrl(1)}#series`;
+  const previous =
+    version > 1
+      ? `dcat:prev <${bobUrl(version - 1)}> ; dcat:previousVersion <${bobUrl(version - 1)}> ;`
+      : "";
+  return `@base <${bobUrl(version)}> .
+@prefix solid-memo: <${SM_NS}> .
+@prefix dcterms: <${DCTERMS}> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+<> a solid-memo:Deck, dcat:Dataset ; solid-memo:formatVersion 6 ;
+  dcterms:title "Capitals"@en ; dcterms:description "Capitals of the world."@en ;
+  dcterms:creator <#bob> ; dcterms:publisher <#bob> ;
+  dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+  dcterms:issued "2026-10-1${version}T10:00:00Z"^^xsd:dateTime ;
+  solid-memo:studyDirection solid-memo:frontToBack ;
+  dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+  dcat:keyword "capitals"@en ;
+  dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+  dcat:version "${version}" ; adms:versionNotes "${notes}" ;
+  dcat:inSeries <${series}> ; dcat:isVersionOf <${series}> ; ${previous}
+  dcat:distribution <#turtle> .
+<${series}> a dcat:DatasetSeries, dcat:Dataset ; solid-memo:formatVersion 3 ;
+  dcterms:title "Capitals"@en ; dcterms:description "Capitals of the world."@en ;
+  dcterms:publisher <#bob> ;
+  dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+  dcat:keyword "capitals"@en ;
+  dcat:first <${bobUrl(1)}> ; dcat:last <> ;
+  dcat:hasVersion ${[...earlier.map((other) => `<${bobUrl(other)}>`), "<>"].join(", ")} ;
+  dcat:hasCurrentVersion <> .
+${earlier.map((other) => `<${bobUrl(other)}> a dcat:Dataset ; dcterms:title "Capitals"@en ; dcterms:description "Capitals of the world."@en ; dcat:version "${other}" .`).join("\n")}
+<#bob> a foaf:Agent ; foaf:name "Bob" .
+<#turtle> a dcat:Distribution ; dcat:accessURL <> ; dcat:downloadURL <> ;
+  dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+<https://creativecommons.org/publicdomain/zero/1.0/> a dcterms:LicenseDocument .
+${cards.map(([id, front, back]) => `<#${id}> a solid-memo:Card ; solid-memo:formatVersion 5 ; solid-memo:front "${front}"@en ; solid-memo:back "${back}"@en .`).join("\n")}
+`;
+}
+
+const SWEDEN: [string, string, string] = ["se", "Sweden", "Stockholm"];
+const NORWAY: [string, string, string] = ["no", "Norway", "Oslo"];
+const DENMARK: [string, string, string] = ["dk", "Denmark", "Copenhagen"];
+
+/** A release with notes of its own and a card that breaks its shape: no front. */
+const breaking = (turtle: string) =>
+  `${turtle.replace(/adms:versionNotes "[^"]*"/, 'adms:versionNotes "Another."')}<#fi> a solid-memo:Card ; solid-memo:formatVersion 5 ; solid-memo:back "Helsinki"@en .\n`;
+
+/** The site, and Bob's releases answered with each of their answers in turn, the last once they run out. */
+function bobSite(answers: Record<string, string[]>): typeof fetch & { asked: string[] } {
+  const asked: string[] = [];
+  const site: typeof fetch = async (input, init) => {
+    const url = String(input instanceof Request ? input.url : input);
+    const answered = answers[url];
+    if (answered === undefined) return siteFetch(input, init);
+    const body =
+      answered[Math.min(asked.filter((other) => other === url).length, answered.length - 1)]!;
+    asked.push(url);
+    const response = new Response(body, { headers: { "content-type": "text/turtle" } });
+    return Object.defineProperty(response, "url", { value: url });
+  };
+  return Object.assign(site, { asked });
+}
+
+/**
+ * A copy of Bob's v1 from its link, through the app over `site`, offered his v3 as read apart from the app,
+ * a read with notes of its own and no v2: the plan takes neither from it.
+ */
+async function bobCopy(site: typeof fetch & { asked: string[] }) {
+  const { useCases } = await app(site);
+  const instance = await useCases.createInstance(ALICE, {
+    containerUrl: `${POD}solid-memo/`,
+    name: "Main",
+    registrationTarget: "private",
+  });
+  const deck = await useCases.importReleaseFromUrl(
+    instance.url,
+    await useCases.readReleaseFromLink(bobUrl(1)),
+  );
+  const series = await createSolidDeckLibrary({
+    fetch: async (input) => {
+      const apart = bobRelease(3, [SWEDEN, NORWAY, DENMARK], "Read apart.").replace(
+        `<${bobUrl(2)}>, `,
+        "",
+      );
+      const response = new Response(apart, {
+        headers: { "content-type": "text/turtle" },
+      });
+      return Object.defineProperty(response, "url", { value: String(input) });
+    },
+    indexUrl: `${SITE}decks/index.ttl`,
+    validate: () => Promise.reject(new Error("not checked")),
+  }).readRelease(bobUrl(3));
+  site.asked.length = 0;
+  const copy = { deck, series, version: "1", newer: true, fromLink: true } as const;
+  return { useCases, deck, copy };
+}
+
+describe("an upgrade of a release added from a link", () => {
+  it("is planned with the reads of the newer release and the one in between that were checked against the library's shapes, though they answer otherwise later", {
+    timeout: 60_000,
+  }, async () => {
+    const v2 = bobRelease(2, [SWEDEN, NORWAY]);
+    const v3 = bobRelease(3, [SWEDEN, NORWAY, DENMARK]);
+    const site = bobSite({
+      [bobUrl(1)]: [bobRelease(1, [SWEDEN])],
+      [bobUrl(2)]: [v2, breaking(v2)],
+      [bobUrl(3)]: [v3, breaking(v3)],
+    });
+    const { useCases, deck, copy } = await bobCopy(site);
+
+    const plan = await useCases.planLibraryUpgrade(deck, copy);
+
+    // Each is read once: the read checked is the one planned with.
+    expect(site.asked.sort()).toEqual([bobUrl(2), bobUrl(3)]);
+    expect(plan).toMatchObject({
+      fromVersion: "1",
+      toVersion: "3",
+      releaseUrl: bobUrl(3),
+      notes: [{ version: "3", notes: "Version 3." }],
+    });
+    expect(plan!.add.map((card) => [card.id, card.front.en, card.back.en]).sort()).toEqual([
+      DENMARK,
+      NORWAY,
+    ]);
+  });
+
+  it.each([2, 3])(
+    "is refused when the read of v%i breaks the library's shapes, though a later read would not",
+    {
+      timeout: 60_000,
+    },
+    async (version) => {
+      const v2 = bobRelease(2, [SWEDEN, NORWAY]);
+      const v3 = bobRelease(3, [SWEDEN, NORWAY, DENMARK]);
+      const answers = { [bobUrl(2)]: [v2], [bobUrl(3)]: [v3] };
+      answers[bobUrl(version)] = [
+        breaking(answers[bobUrl(version)]![0]!),
+        answers[bobUrl(version)]![0]!,
+      ];
+      const site = bobSite({ [bobUrl(1)]: [bobRelease(1, [SWEDEN])], ...answers });
+      const { useCases, deck, copy } = await bobCopy(site);
+
+      await expect(useCases.planLibraryUpgrade(deck, copy)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+        vars: { host: "bob.example", count: 1 },
+      });
+    },
+  );
 });

@@ -30,7 +30,8 @@ import {
   type DeckUpgradeStep,
 } from "@solid-memo/domain/deckUpgrade";
 import type { ReviewKey } from "@solid-memo/domain/review";
-import type { DeckLibrary, DeckRepository, ReviewStateRepository, ShapeValidator } from "./ports";
+import type { DocumentReport } from "@solid-memo/domain/validation";
+import type { DeckLibrary, DeckRepository, ReviewStateRepository } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import type { CourseUseCases } from "./courses";
 import { readNow, unsent } from "./writes";
@@ -53,10 +54,10 @@ export interface LibraryUseCases {
    */
   readReleaseFromLink(url: string): Promise<LibraryDeck>;
   /**
-   * Add a release read from a link (readReleaseFromLink) to an instance
-   * as the library's are: a deck imported (importLibraryDeck), a course
-   * started (startCourse, the deck of it the instance has when it has
-   * one). The copy names the release it came from
+   * Add a release read from a link (readReleaseFromLink), as that read
+   * checked it, to an instance as the library's are: a deck imported
+   * (importLibraryDeck), a course started (startCourse, the deck of it
+   * the instance has when it has one). The copy names the release it came from
    * (`prov:wasDerivedFrom`); nothing is written where the release is.
    */
   importReleaseFromUrl(instanceUrl: string, release: LibraryDeck): Promise<Deck>;
@@ -172,13 +173,11 @@ export function createLibraryUseCases({
   deckLibrary,
   deckRepository,
   reviewStateRepository,
-  shapeValidator,
   courses,
 }: {
   deckLibrary: DeckLibrary;
   deckRepository: DeckRepository;
   reviewStateRepository: ReviewStateRepository;
-  shapeValidator: ShapeValidator;
   courses: Pick<CourseUseCases, "startCourse">;
 }): LibraryUseCases {
   /**
@@ -191,7 +190,8 @@ export function createLibraryUseCases({
    * The deck's series is looked up in the index, else as a release added
    * from a link, unless it is `known` (a LibraryCopy's). A copy from a
    * link is upgraded with releases no index lists: each is checked against
-   * the library's shapes first, as the first one was (checkLinkedRelease).
+   * the library's shapes first, as the first one was (checkLinkedRelease),
+   * and planned with as that check read it.
    */
   async function planUpgrade(
     deck: Deck,
@@ -204,6 +204,9 @@ export function createLibraryUseCases({
     // The index tells a copy of the current release, or of no older one,
     // without reading a release (thousands of cards) or the copy's cards.
     if (!offersNewerRelease(deck, series)) return null;
+    // A release from a link is checked as it is read, and that read is the one fetchLibraryDeck gives then; the
+    // releases in between and the notes come from it too, not from the series as read before.
+    const checked = fromLink === true ? await checkLinkedRelease(series.url) : series;
     const [from, to, copy] = await Promise.all([
       deckLibrary.fetchLibraryDeck(deck.sourceUrl),
       deckLibrary.fetchLibraryDeck(series.url),
@@ -211,7 +214,7 @@ export function createLibraryUseCases({
     ]);
     const inBetween = [
       ...new Set(
-        series.releases
+        checked.releases
           .filter(
             (release) =>
               Number(release.version) > Number(from.version) &&
@@ -224,7 +227,7 @@ export function createLibraryUseCases({
     // Oldest first. A release from a link lists what its creator wrote: MAX_LINKED_RELEASES of them at most, the
     // newest; a card as one left out has it counts as the user's, and is kept.
     const betweenUrls = fromLink === true ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
-    if (fromLink === true) await readEach([series.url, ...betweenUrls], checkLinkedRelease);
+    if (fromLink === true) await readEach(betweenUrls, checkLinkedRelease);
     const between = await readEach(betweenUrls, (url) => deckLibrary.fetchLibraryDeck(url));
     // A course's outline stays in its release: a newer one may change only that.
     const outlines =
@@ -240,9 +243,9 @@ export function createLibraryUseCases({
       from,
       between,
       to,
-      releases: series.releases,
+      releases: checked.releases,
       // A course's deck holds only the cards the learner reached: an upgrade adds none.
-      course: series.isCourse === true || from.isCourse === true,
+      course: checked.isCourse === true || from.isCourse === true,
       ...(outlines === null ? {} : { outlines: { from: outlines[0], to: outlines[1] } }),
     });
   }
@@ -266,12 +269,17 @@ export function createLibraryUseCases({
     );
   }
   /**
-   * Refuse a release read from a link (docs/deck-library.md, From a link)
-   * when a subject of it breaks its shape in the library's shapes, read as
-   * anyone reads it (releaseNotConforming); its warnings do not.
+   * A release read from a link (docs/deck-library.md, From a link), read
+   * once and refused when a subject of that read breaks its shape in the
+   * library's shapes (releaseNotConforming); its warnings do not. The read
+   * accepted is the one the library gives from then on, as the release's
+   * cards are imported or planned with (DeckLibrary.readRelease).
    */
-  async function checkLinkedRelease(url: string): Promise<void> {
-    const report = await shapeValidator.validateDocument(url, "library");
+  function checkLinkedRelease(url: string): Promise<LibraryDeck> {
+    return deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
+  }
+  /** Refuse a release whose report has a violation (releaseNotConforming). */
+  function refuseNonConforming(url: string, report: DocumentReport): void {
     const problems = report.subjects.flatMap((subject) =>
       subject.status === "checked"
         ? subject.violations.filter((violation) => violation.severity === "violation")
@@ -351,10 +359,8 @@ export function createLibraryUseCases({
     async readReleaseFromLink(text) {
       const url = releaseUrlOf(text);
       if (url === null) throw new AppError("releaseUrlInvalid", { url: text });
-      // Read first: what cannot be read as a release says so, before any shape is loaded.
-      const release = await deckLibrary.readRelease(url);
-      await checkLinkedRelease(url);
-      return release;
+      // One read: what cannot be read as a release says so before any shape is loaded, and what is checked is shown.
+      return checkLinkedRelease(url);
     },
     importReleaseFromUrl(instanceUrl, release) {
       return release.isCourse === true

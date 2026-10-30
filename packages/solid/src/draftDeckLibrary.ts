@@ -20,7 +20,10 @@ import { draftQuads } from "./mappers/releaseDraftMapper";
  * are read from the draft's statements as a release's are; what the
  * release says of itself is what the listing preview shows
  * (draftLibraryDeck), as a draft may not say all of it yet, read on its
- * own too. Any other release is none of it: releaseUnreadable.
+ * own too. Any other release is none of it: releaseUnreadable. A draft
+ * is no release from a link: readRelease checks nothing against the
+ * library's shapes (its `accept` is not asked), as the Studio's release
+ * check is the draft's.
  */
 export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
   /** The draft's statements, for the release at `url` (the draft's own only). */
