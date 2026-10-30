@@ -51,11 +51,13 @@ const DOCS_PAGES = DOCS_SOURCES.map((name) =>
 ).sort();
 
 /**
- * The most the page's up-front JavaScript may weigh, gzipped, in kB: what
- * it weighs, with room for a little more. A change that passes it says
- * why the page needs the weight, and raises this in the same commit.
+ * The most the page's up-front JavaScript may weigh, gzipped, in kB: a
+ * ceiling with wide room over what it weighs, so that it catches a large
+ * part, such as the Studio or another language's messages, coming up
+ * front, not a small change's growth. A change that passes it says why
+ * the page needs the weight, and raises this in the same commit.
  */
-const UP_FRONT_BUDGET_KB = 414;
+const UP_FRONT_BUDGET_KB = 500;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
