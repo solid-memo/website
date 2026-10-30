@@ -69,6 +69,11 @@ describe("studyDayOf", () => {
   it("rolls over at midnight with a boundary of 0", () => {
     expect(studyDayOf(new Date(2026, 8, 21, 0, 0), 0)).toBe("2026-09-21");
   });
+
+  it("gives the calendar day when a boundary far out of range would leave the calendar", () => {
+    expect(studyDayOf(now, 2_500_000_000)).toBe("2026-09-21");
+    expect(studyDayOf(now, -2_500_000_000)).toBe("2026-09-21");
+  });
 });
 
 describe("nextDueDate", () => {
@@ -82,6 +87,11 @@ describe("nextDueDate", () => {
 
   it("bases the due day on the study day, not the calendar day", () => {
     expect(nextDueDate(new Date(2026, 8, 21, 2, 0), 1, 4)).toBe("2026-09-21");
+  });
+
+  it("counts from the calendar day when a boundary far out of range would leave the calendar", () => {
+    expect(nextDueDate(now, 1, 2_500_000_000)).toBe("2026-09-22");
+    expect(nextDueDate(now, 1, -2_500_000_000)).toBe("2026-09-22");
   });
 });
 

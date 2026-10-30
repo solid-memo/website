@@ -119,6 +119,16 @@ describe("deck records", () => {
     });
   });
 
+  it.each([-1, 1e300, Number.POSITIVE_INFINITY, Number.NaN, 2.5])(
+    "read a deck's own daily limit of %s as absent, so the preferences apply",
+    (stored) => {
+      const record = { ...deckToRecord(deck), newCardsPerDay: stored, maxReviewsPerDay: stored };
+      const read = deckFromRecord(deck.url, 6, record, byAgent);
+      expect(read).not.toHaveProperty("newCardsPerDay");
+      expect(read).not.toHaveProperty("maxReviewsPerDay");
+    },
+  );
+
   it("name the agents beside a deck, one per author, and its cards document as its distribution", () => {
     const withTwo: Deck = {
       ...deck,

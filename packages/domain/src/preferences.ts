@@ -19,6 +19,15 @@ import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
  */
 export const PREFERENCES_FORMAT_VERSION: number = LATEST_VERSION.preferences;
 
+/**
+ * Whether a stored daily limit, the instance's or a deck's own, is a
+ * count the queue can use: a safe integer, 0 or more. The shapes say so,
+ * but a read is not checked against them.
+ */
+export function isDailyLimit(stored: number): boolean {
+  return Number.isSafeInteger(stored) && stored >= 0;
+}
+
 export interface StudyPreferences {
   /** Maximum unseen cards introduced per study day. */
   newCardsPerDay: number;
