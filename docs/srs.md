@@ -35,8 +35,8 @@ Each prompt (card + direction) carries one `ReviewState`:
 
 | Field | Meaning |
 |---|---|
-| `easeFactor` | SM-2 easiness (starts 2.5, never below 1.3) |
-| `intervalDays` | Days until the next review |
+| `easeFactor` | SM-2 easiness (starts 2.5, kept from 1.3 to 5) |
+| `intervalDays` | Days until the next review (at most 36,500) |
 | `repetitions` | Consecutive correct answers |
 | `due` | Study day ("YYYY-MM-DD") the card is next due |
 | `firstReviewedAt` | Introduction timestamp (counts against the new-card budget) |
@@ -62,11 +62,11 @@ flowchart TD
     accDescr: A grade below 3 resets the repetitions and sets a one-day interval, and a grade of 3 or more updates the ease factor and sets the interval by the repetition count.
     A[answer graded q] --> B{q at least 3?}
     B -- no (lapse) --> C[repetitions = 0<br/>interval = 1 day<br/>ease factor kept]
-    B -- yes --> D["update ease factor<br/>EF' = EF + 0.1 − (5−q)(0.08 + (5−q)·0.02)<br/>floor 1.3"]
+    B -- yes --> D["update ease factor<br/>EF' = EF + 0.1 − (5−q)(0.08 + (5−q)·0.02)<br/>kept from 1.3 to 5"]
     D --> E{repetition #}
     E -- 1st --> F[interval = 1 day]
     E -- 2nd --> G[interval = 6 days]
-    E -- 3rd+ --> H["interval = round(previous × EF')"]
+    E -- 3rd+ --> H["interval = round(previous × EF')<br/>kept from 1 to 36,500 days"]
 ```
 
 Decisions fixed in code (and tests):
@@ -83,6 +83,18 @@ Decisions fixed in code (and tests):
   a lapse graded 2 and a hard but correct answer (3) end the card's
   day.
 - Intervals are rounded to whole days.
+- The original puts a floor of 1.3 under the ease factor and no bound
+  on the interval. Solid Memo also keeps the ease factor at 5 at most,
+  and the interval at most 36,500 days (100 years, FSRS-6's longest
+  interval too). It bounds the state it reads, keeping the interval
+  and the repetitions from 0 to 36,500, and the one it gives, whose
+  interval is at least 1 day. The snapshot a review keeps of the
+  state before it, and the estimate FSRS-6 makes from an SM-2 state,
+  are bounded the same way. A state from elsewhere, such as a deck
+  file with progress, then still gives a due day that is a
+  `YYYY-MM-DD` date and numbers the write check accepts. A state whose
+  ease factor, interval or repetitions isn't a finite number counts as
+  a new card's.
 - Every grade below 3 resets the card. The statistics and the Studio
   count a **lapse** only for a *scored review* graded below 3 (`isLapse`
   in [answerChain.ts](../packages/domain/src/answerChain.ts),
@@ -107,6 +119,7 @@ the tests. Keep the header and the three number columns as they are.
 | 2.5, 6, 2 | 5 | 2.6, 16, 3 | 6 × 2.6 = 15.6, rounded. |
 | 2.0, 10, 3 | 3 | 1.86, 19, 4 | 10 × 1.86 = 18.6, rounded. |
 | 1.3, 10, 3 | 3 | 1.3, 13, 4 | The ease would be 1.16: the floor, 1.3. |
+| 5, 10, 3 | 5 | 5, 50, 4 | The ease would be 5.1: the ceiling, 5. |
 | 2.2, 30, 5 | 2 | 2.2, 1, 0 | A lapse: back to 1 day, the ease kept. |
 | 2.2, 30, 5 | 0 | 2.2, 1, 0 | Grades 0, 1 and 2 schedule alike. |
 

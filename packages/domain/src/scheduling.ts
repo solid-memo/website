@@ -13,6 +13,7 @@ import {
   type ReviewSnapshot,
   type ReviewState,
 } from "./review";
+import { boundedSm2State } from "./sm2";
 
 /**
  * The study day ("YYYY-MM-DD", device-local time) an instant belongs to.
@@ -148,7 +149,9 @@ export function requeueCard<T>(remaining: T[], card: T, random: () => number): T
 /**
  * The snapshot a review must carry forward: the state from before the
  * study day's FIRST review. A second review on the same day keeps the
- * snapshot it already has; a card without earlier state has none.
+ * snapshot it already has; a card without earlier state has none. The
+ * snapshot is bounded as the state applySm2 gives (boundedSm2State),
+ * so that it is written back as numbers the write check accepts.
  */
 export function snapshotBeforeReview(
   current: ReviewState | null,
@@ -159,14 +162,12 @@ export function snapshotBeforeReview(
   const reviewedToday =
     studyDayOf(new Date(current.lastReviewedAt), dayBoundaryHour) ===
     studyDayOf(now, dayBoundaryHour);
-  if (reviewedToday) return current.previous;
-  return {
-    easeFactor: current.easeFactor,
-    intervalDays: current.intervalDays,
-    repetitions: current.repetitions,
-    due: current.due,
-    lastReviewedAt: current.lastReviewedAt,
-  };
+  if (reviewedToday) return current.previous && boundedSnapshot(current.previous);
+  return boundedSnapshot(current);
+}
+
+function boundedSnapshot(state: ReviewSnapshot): ReviewSnapshot {
+  return { ...boundedSm2State(state), due: state.due, lastReviewedAt: state.lastReviewedAt };
 }
 
 /** The writes that undo one study day. */
@@ -200,7 +201,7 @@ export function resetStudyDay(
       reset.remove.push({ cardId: review.cardId, direction: review.direction });
     } else if (review.previous !== undefined) {
       const { previous, ...state } = review;
-      reset.restore.push({ ...state, ...previous });
+      reset.restore.push({ ...state, ...boundedSnapshot(previous) });
     } else {
       reset.restore.push({ ...review, due: today });
     }

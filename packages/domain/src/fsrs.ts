@@ -14,7 +14,7 @@ import {
   type ReviewState,
 } from "./review";
 import { nextDueDate, studyDayOf } from "./scheduling";
-import type { Sm2State } from "./sm2";
+import { boundedSm2State, MAX_INTERVAL_DAYS, type Sm2State } from "./sm2";
 import { daysBetween, gradeGroupOf } from "./studyPatterns";
 
 /**
@@ -61,9 +61,6 @@ const MIN_STABILITY = 0.001;
 const MAX_STABILITY = 36_500;
 const MIN_DIFFICULTY = 1;
 const MAX_DIFFICULTY = 10;
-
-/** The longest interval, in days: 100 years. */
-const MAX_INTERVAL_DAYS = 36_500;
 
 /** The chance of recall FSRS-6 aims at when a card falls due, unless the learner chooses another. */
 export const DEFAULT_DESIRED_RETENTION = 0.9;
@@ -193,9 +190,11 @@ export function nextMemory(
  * (fresh) FSRS-6 state (fsrs-rs `memory_state_from_sm2`, at a retention
  * of 90%): the stability is the SM-2 interval, and the difficulty the
  * one at which a Good review on the due day multiplies the stability by
- * the ease factor, kept to 1–10.
+ * the ease factor, kept to 1–10. The SM-2 state is bounded first
+ * (boundedSm2State), as applySm2 bounds it.
  */
-export function memoryFromSm2(sm2: Pick<Sm2State, "easeFactor" | "intervalDays">): FsrsMemory {
+export function memoryFromSm2(state: Pick<Sm2State, "easeFactor" | "intervalDays">): FsrsMemory {
+  const sm2 = boundedSm2State({ ...state, repetitions: 0 });
   const stability = Math.max(sm2.intervalDays, MIN_STABILITY);
   const growth = Math.exp(w(8)) * stability ** -w(9) * Math.expm1((1 - SM2_RETENTION) * w(10));
   const difficulty = 11 - (sm2.easeFactor - 1) / growth;

@@ -41,7 +41,7 @@ Solid Memo uses the ease factor and interval formulas as published:
 - A lapse (a grade under 3) restarts the repetitions, keeping the ease
   factor.
 
-Its two recorded departures from the description:
+Its three recorded departures from the description:
 
 - Intervals are whole study days, not calendar days
   ([srs.md](srs.md#study-days-and-the-queue)).
@@ -50,6 +50,9 @@ Its two recorded departures from the description:
   session's end until it scores 4 or more
   ([srs.md](srs.md#the-sm-2-transition)). A 2 (a lapse) or a 3 (correct
   but hard) ends the card's day.
+- The ease factor is kept at 5 at most, and the interval at most
+  36,500 days (100 years), so that a state from elsewhere still gives
+  a due day that can be written (the same section of `srs.md`).
 
 The answer scales and a course's multiple-choice answers map onto the
 same grades, without changing the algorithm ([srs.md](srs.md#answer-scales)).
