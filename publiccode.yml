@@ -12,7 +12,7 @@ publiccodeYmlVersion: "0"
 name: Solid Memo
 url: https://github.com/solid-memo/website
 landingURL: https://solid-memo.com/
-softwareVersion: 6.17.22
+softwareVersion: 6.17.23
 releaseDate: "2026-10-30"
 
 platforms:

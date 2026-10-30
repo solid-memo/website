@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.23](https://github.com/solid-memo/website/compare/v6.17.22...v6.17.23) (2026-10-30)
+
+### Bug Fixes
+
+* **solid:** refuse a write from a read that a save has written over ([2448697](https://github.com/solid-memo/website/commit/244869704ed5557df581aa8a4c46dc57e9a03087))
+* **statistics:** bound the study days the charts walk ([3d30b73](https://github.com/solid-memo/website/commit/3d30b739ea9c8ff20e1036b0b4da3fa949802f26))
+
 ## [6.17.22](https://github.com/solid-memo/website/compare/v6.17.21...v6.17.22) (2026-10-30)
 
 ### Bug Fixes
