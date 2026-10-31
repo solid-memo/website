@@ -98,7 +98,8 @@ package's own tree, folded to what the app shows:
 
 Every entry point for data is bounded, and a text past a limit is
 plain, its source still readable, unless the limit says otherwise.
-[Repository Markdown](#repository-markdown) lifts only `MAX_CHARS`.
+[Repository Markdown](#repository-markdown) lifts only `MAX_CHARS`
+and `MAX_LOOKAHEAD`.
 The limits count lines as the parser does: a line ends at a line
 feed, a carriage return, or both, and only spaces and tabs make it
 blank.
@@ -130,6 +131,34 @@ blank.
   uncounted. That is at most one for each quote it counts, so a text it
   lets through opens at most about twice `MAX_QUOTES`, still a bounded
   cost. The parser is quadratic in them too.
+- **`MAX_LISTS`, 200 lists a text opens.** A list's next item opens
+  none, and neither do the lines its items hold. A line indented less
+  than an item's content leaves the item. An item with another marker
+  (`-`, `+`, `*`, `.` or `)`) starts another list, and so do a
+  thematic break and a change in the quotes a line starts with. An
+  item can start with at most one blank line, so an item whose marker
+  line is empty ends at a blank line right after it; only an item with
+  the same marker goes on with its list then. An empty item, or an
+  ordered one that starts other than at 1, can't interrupt a
+  paragraph, so it opens no list while one is open. A paragraph counts
+  as open only from a line of plain words after a blank line or at the
+  start, under the same `>`s. A marker counts wherever it is, in
+  fenced code, indented code or an HTML block too, and a lazy line
+  leaves the list, so the count errs high: a fence holding a long diff
+  can pass the limit. The parser is quadratic in lists, such as `+ a`,
+  a blank line and `b`, repeated.
+- **`MAX_LOOKAHEAD`, 500,000 characters read ahead for the end of a
+  code span, inline HTML or a link's title.** An opener that never
+  closes is read to the end of its paragraph. Each opener counts the
+  characters from it to its closer, or to the next blank line when
+  none comes, and the counts add up over the text. A backtick run
+  closes at the next run of its length, `<!--` at `-->`, `<?` at `?>`,
+  `<![CDATA[` at `]]>`, and `<!` and a letter at `>`. A link's title
+  closes at its quote or `)`, and a link with no title counts to the
+  end of its destination. Each backtick run counts, a closer too, so
+  the count errs high, but closed spans count about once over. The
+  parser is quadratic in openers that never close. No text in `decks/`
+  comes near it.
 - **`MAX_UNDERLINES`, 200 lines that could underline a heading** (`===`,
   `---`, with up to three spaces before and white space after). The
   parser is quadratic in setext headings too (`a\n=\n…` at 20,000
@@ -277,15 +306,17 @@ input at build time only, never for data:
 - **Headings keep their level** (`{ type: "heading", depth, line }`)
   and their line, for a message about one. Other blocks are as
   `parseMarkdown` gives them.
-- **`MAX_CHARS` is lifted, and only it.** `studio.md` is about 130 KB,
-  `data-model.md` about 70 KB. The docs come nowhere near the other
+- **`MAX_CHARS` is lifted, and with it `MAX_LOOKAHEAD`, which grows
+  with a page's length.** `studio.md` is about 130 KB, `data-model.md`
+  about 70 KB. The docs come nowhere near the other
   [limits](#limits).
 - **What data would fold, it refuses.** Raw HTML, a picture, a link
   reference definition, what nests past `MAX_DEPTH`, a table past its
   caps, and a text past `MAX_LINE_NESTING`, `MAX_NESTED_LINES`,
-  `MAX_LAZY_LINES`, `MAX_QUOTES`, `MAX_DELIMITERS` or `MAX_UNDERLINES`
-  each throw a `DocumentError`, naming the problem's first line when
-  known. A page shows as written, or its build fails and says where.
+  `MAX_LAZY_LINES`, `MAX_QUOTES`, `MAX_LISTS`, `MAX_DELIMITERS` or
+  `MAX_UNDERLINES` each throw a `DocumentError`, naming the problem's
+  first line when known. A page shows as written, or its build fails
+  and says where.
 
 ## Diagrams
 
