@@ -4,7 +4,7 @@
 
 import type { DistractorV1, DraftDeckV1 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { agentToRecord, agentUrlOf } from "../agentRecord.ts";
+import { agentToRecord, agentUrlsOf } from "../agentRecord.ts";
 import { cardToRecord, distractorToRecord } from "../deckRecord.ts";
 import type { Card, Deck, DeckDirection } from "../deck.ts";
 import { blankDraft, licenseType, type DraftNode, type ReleaseDraft } from "./releaseDraft.ts";
@@ -44,9 +44,8 @@ export function deckToDraft(
   url: string,
   now: string,
 ): { draft: ReleaseDraft; basedOn?: string } {
-  const agents = new Map(
-    deck.authors.map((author) => [agentUrlOf(url, author), agentToRecord(author)]),
-  );
+  const urls = agentUrlsOf(url, deck.authors);
+  const agents = new Map(deck.authors.map((author, i) => [urls[i], agentToRecord(author)]));
   const creators = [...agents.keys()];
   const fragment = (iri: string) => iri.slice(url.length + 1);
   const taken = [

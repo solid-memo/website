@@ -533,7 +533,13 @@ graph LR
     author the folding loses letters or digits of, such as 김민수 or "Kim
     민수", or that has none to lose, such as "—", gets six hex digits of a
     hash of the whole author after it (`#agent-unnamed-5a5e6e`,
-    `#agent-kim-ad54ba`). Two such authors stay two agents. An agent
+    `#agent-kim-ad54ba`). Two such authors stay two agents. Every deck
+    of the catalog names its authors' nodes, so a node that already
+    holds another name or email is never written over. An author whose
+    slug another author holds, such as `Jane Doe (jane example org)`
+    beside `Jane Doe <jane@example.org>`, gets the hash after the slug
+    instead (`#agent-jane-doe-jane-example-org-<hash>`). When that node
+    is taken too, a count follows the hash. An agent
     is read by the IRI the deck names (one written under an older rule
     is replaced on the deck's next save).
   - It may name a license (`dcterms:license`, a URL), topics

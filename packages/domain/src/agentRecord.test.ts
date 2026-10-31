@@ -3,7 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { agentToRecord, agentUrlOf, authorFromAgentRecord } from "./agentRecord";
+import {
+  agentToRecord,
+  agentUrlOf,
+  agentUrlsOf,
+  authorFromAgentRecord,
+  sameAgent,
+} from "./agentRecord";
 
 const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
 
@@ -41,7 +47,61 @@ describe("agentUrlOf", () => {
   });
 });
 
+describe("agentUrlsOf", () => {
+  const SLUG = `${CATALOG}#agent-jane-doe-jane-example-org`;
+  const LOOK_ALIKES = [
+    "Jane Doe <jane@example.org>",
+    "Jane Doe <jane@exämple.org>",
+    "Jane Doe <jane.example@org>",
+    "Jane Doe (jane example org)",
+  ];
+
+  it("gives authors that fold to one node a node each, the first the bare one", () => {
+    expect(new Set(LOOK_ALIKES.map((author) => agentUrlOf(CATALOG, author)))).toEqual(
+      new Set([SLUG]),
+    );
+    const urls = agentUrlsOf(`${CATALOG}#deck-1`, LOOK_ALIKES);
+    expect(urls[0]).toBe(SLUG);
+    expect(new Set(urls).size).toBe(4);
+    for (const url of urls.slice(1)) expect(url).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
+  });
+
+  it("names the same author twice by one node", () => {
+    expect(agentUrlsOf(CATALOG, ["Anton", "Anton"])).toEqual([
+      `${CATALOG}#agent-anton`,
+      `${CATALOG}#agent-anton`,
+    ]);
+  });
+
+  it("leaves a node that holds another author, and keeps the one that holds this author", () => {
+    const held = new Map([[SLUG, agentToRecord("Jane Doe <jane@example.org>")]]);
+    const fits = (url: string, record: ReturnType<typeof agentToRecord>) => {
+      const holder = held.get(url);
+      return holder === undefined || sameAgent(holder, record);
+    };
+    expect(agentUrlsOf(CATALOG, ["Jane Doe <jane@example.org>"], fits)).toEqual([SLUG]);
+    const [moved] = agentUrlsOf(CATALOG, ["Jane Doe <jane@exämple.org>"], fits);
+    expect(moved).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
+    held.set(moved!, agentToRecord("Someone else"));
+    expect(agentUrlsOf(CATALOG, ["Jane Doe <jane@exämple.org>"], fits)).toEqual([`${moved}-2`]);
+  });
+
+  it("counts after the hash an author's node already has", () => {
+    const kim = agentUrlOf(CATALOG, "김민수");
+    const fits = (url: string) => url !== kim && url !== `${kim}-2`;
+    expect(agentUrlsOf(CATALOG, ["김민수"], fits)).toEqual([`${kim}-3`]);
+  });
+});
+
 describe("agent records", () => {
+  it("are the same author by name and mailbox", () => {
+    expect(
+      sameAgent(agentToRecord("A <a@example.org>"), { name: "A", mbox: "mailto:a@example.org" }),
+    ).toBe(true);
+    expect(sameAgent(agentToRecord("A <a@example.org>"), { name: "A" })).toBe(false);
+    expect(sameAgent({ name: "A" }, { name: "B" })).toBe(false);
+  });
+
   it("round-trip a name and an address", () => {
     expect(agentToRecord("Anton <anton@example.com>")).toEqual({
       name: "Anton",

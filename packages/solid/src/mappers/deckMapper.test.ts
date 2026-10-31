@@ -19,6 +19,7 @@ import {
 } from "../client/rdf";
 import { datasetFrom } from "../testing/datasets";
 import {
+  deckSubjects,
   toCard,
   toCards,
   toCatalog,
@@ -894,5 +895,99 @@ describe("the arrangement's triples (deck groups)", () => {
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DCAT.catalog)).toEqual([GROUP]);
     // A group that did not list it is not touched.
     expect(withoutDeck(dataset, deck)).toEqual(dataset);
+  });
+});
+
+describe("the agents of a catalog's decks", () => {
+  const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+  const FOAF_MBOX = "http://xmlns.com/foaf/0.1/mbox";
+  const SLUG = `${CATALOG}#agent-jane-doe-jane-example-org`;
+  const deckOf = (id: string, authors: string[]): Deck => ({
+    id,
+    url: `${CATALOG}#${id}`,
+    title: { en: id },
+    cardsDocumentUrl: `https://pod.example/solid-memo/a/decks/${id}.ttl`,
+    reviewsDocumentUrl: `https://pod.example/solid-memo/a/reviews/${id}.ttl`,
+    createdAt: "",
+    formatVersion: 6,
+    direction: "front-to-back",
+    authors,
+  });
+  const authorsOf = (dataset: Dataset) =>
+    Object.fromEntries(toDecks(dataset, CATALOG).map((deck) => [deck.id, deck.authors]));
+  // Four authors the slug of agentUrlOf folds to the same node.
+  const LOOK_ALIKES = [
+    "Jane Doe <jane@exämple.org>",
+    "Jane Doe <jane.example@org>",
+    "Jane Doe (jane example org)",
+  ];
+
+  it.each(LOOK_ALIKES)(
+    "keep another deck's author when a deck by %s is added, and when it is removed",
+    (other) => {
+      const a = deckOf("deck-1", ["Jane Doe <jane@example.org>"]);
+      const b = deckOf("deck-2", [other]);
+      const withA = withDeck(datasetFrom(CATALOG), a);
+      const withBoth = withDeck(withA, b);
+      expect(authorsOf(withBoth)).toEqual({ "deck-1": a.authors, "deck-2": b.authors });
+      expect(getStringNoLocale(getThing(withBoth, SLUG)!, FOAF_NAME)).toBe("Jane Doe");
+      expect(getUrlAll(getThing(withBoth, SLUG)!, FOAF_MBOX)).toEqual(["mailto:jane@example.org"]);
+      const [creator] = getUrlAll(getThing(withBoth, b.url)!, DCTERMS.creator);
+      expect(creator).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
+      expect(deckSubjects(withBoth, b)).toEqual([b.url, `${b.url}-cards`, creator]);
+      expect(deckSubjects(withBoth, a)).toEqual([a.url, `${a.url}-cards`, SLUG]);
+      // Written again, each deck keeps its node.
+      const again = withDeck(withDeck(withBoth, a), b);
+      expect(getUrlAll(getThing(again, b.url)!, DCTERMS.creator)).toEqual([creator]);
+      expect(getUrlAll(getThing(again, a.url)!, DCTERMS.creator)).toEqual([SLUG]);
+      const removed = withoutDeck(withBoth, b);
+      expect(authorsOf(removed)).toEqual({ "deck-1": a.authors });
+      expect(getThing(removed, creator!)).toBeNull();
+    },
+  );
+
+  it("keep the four authors that fold alike four agents, in one deck or in several", () => {
+    const authors = ["Jane Doe <jane@example.org>", ...LOOK_ALIKES];
+    const one = withDeck(datasetFrom(CATALOG), deckOf("deck-1", authors));
+    expect(authorsOf(one)).toEqual({ "deck-1": authors });
+    expect(new Set(getUrlAll(getThing(one, `${CATALOG}#deck-1`)!, DCTERMS.creator)).size).toBe(4);
+    const several = withDecks(
+      datasetFrom(CATALOG),
+      authors.map((author, i) => deckOf(`deck-${i + 1}`, [author])),
+    );
+    expect(Object.values(authorsOf(several))).toEqual(authors.map((author) => [author]));
+  });
+
+  it("take the next node when the hashed one holds another author too", () => {
+    const b = deckOf("deck-2", ["Jane Doe <jane@exämple.org>"]);
+    const squatter = (url: string, name: string) =>
+      buildThing(createThing({ url }))
+        .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
+        .addStringNoLocale(FOAF_NAME, name)
+        .build();
+    const onSlug = setThing(datasetFrom(CATALOG), squatter(SLUG, "Someone"));
+    const hashed = getUrlAll(getThing(withDeck(onSlug, b), b.url)!, DCTERMS.creator)[0]!;
+    expect(hashed).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
+    const taken = setThing(onSlug, squatter(hashed, "Someone else"));
+    const written = withDeck(taken, b);
+    expect(getUrlAll(getThing(written, b.url)!, DCTERMS.creator)).toEqual([`${hashed}-2`]);
+    expect(authorsOf(written)).toEqual({ "deck-2": b.authors });
+  });
+
+  it("write onto a node that says nothing an agent says, and not onto one that names someone outside the agent shape", () => {
+    const deck = deckOf("deck-1", ["Jane Doe <jane@example.org>"]);
+    const note = buildThing(createThing({ url: SLUG }))
+      .addStringNoLocale("https://other.example/note", "kept")
+      .build();
+    const onNote = withDeck(setThing(datasetFrom(CATALOG), note), deck);
+    expect(getUrlAll(getThing(onNote, deck.url)!, DCTERMS.creator)).toEqual([SLUG]);
+    expect(getStringNoLocale(getThing(onNote, SLUG)!, "https://other.example/note")).toBe("kept");
+    const untyped = buildThing(createThing({ url: SLUG }))
+      .addStringNoLocale(FOAF_NAME, "Jane Doe")
+      .build();
+    const onUntyped = withDeck(setThing(datasetFrom(CATALOG), untyped), deck);
+    const [creator] = getUrlAll(getThing(onUntyped, deck.url)!, DCTERMS.creator);
+    expect(creator).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
+    expect(authorsOf(onUntyped)).toEqual({ "deck-1": deck.authors });
   });
 });
