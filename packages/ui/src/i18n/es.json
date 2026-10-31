@@ -963,6 +963,11 @@
       "many": "Fuentes",
       "other": "Fuentes"
     },
+    "sourceCount": {
+      "one": "{count} fuente",
+      "many": "{count} de fuentes",
+      "other": "{count} fuentes"
+    },
     "import": "Importar este mazo",
     "importing": "Importando…",
     "preview": "Vista previa",

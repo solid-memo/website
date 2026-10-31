@@ -882,9 +882,11 @@ flowchart LR
   same way.
 - A row opens the deck's page: description, topics, keywords in the
   reader's language, the release (version, date, notes), authors,
-  license, dates and sources. It has an import button, "Browse cards" (a
-  read-only, paged list fetched from the release document) and "Copy
-  link", which copies a link that names no instance
+  license, dates and sources. More than five sources are folded into a
+  disclosure, closed, that says how many there are, so a long list
+  doesn't push the buttons below it far down. It has an import button,
+  "Browse cards" (a read-only, paged list fetched from the release
+  document) and "Copy link", which copies a link that names no instance
   ([routing.md](routing.md#a-link-to-a-library-deck)).
 - A deck's page is addressed by its **series** (`&deck=…/index.ttl#name`),
   which outlives releases; a release's address still finds it, and a

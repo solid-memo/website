@@ -915,6 +915,10 @@
       "one": "Source",
       "other": "Sources"
     },
+    "sourceCount": {
+      "one": "{count} source",
+      "other": "{count} sources"
+    },
     "import": "Import this deck",
     "importing": "Importing…",
     "preview": "Preview",

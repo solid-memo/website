@@ -1255,6 +1255,10 @@ dl.facts .sources {
   padding: 0;
 }
 
+dl.facts dd > details {
+  margin: 0;
+}
+
 .instance-bar {
   display: flex;
   flex-wrap: wrap;

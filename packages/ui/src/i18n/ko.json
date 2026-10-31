@@ -867,6 +867,9 @@
     "sources": {
       "other": "출처"
     },
+    "sourceCount": {
+      "other": "출처 {count}개"
+    },
     "import": "이 덱 가져오기",
     "importing": "가져오는 중…",
     "preview": "미리보기",

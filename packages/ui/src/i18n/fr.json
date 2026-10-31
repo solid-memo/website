@@ -963,6 +963,11 @@
       "many": "Sources",
       "other": "Sources"
     },
+    "sourceCount": {
+      "one": "{count} source",
+      "many": "{count} de sources",
+      "other": "{count} sources"
+    },
     "import": "Importer ce paquet",
     "importing": "Importation…",
     "preview": "Aperçu",
