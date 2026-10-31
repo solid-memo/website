@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "./appError";
-import type { Card, CardContent, StudyDirection } from "./deck";
+import type { Card, CardContent, Deck, StudyDirection } from "./deck";
+import { canonicalUrlOf } from "./instanceLayout";
 import { sameContent } from "./libraryUpgrade";
 import { reviewKeyOf, type FsrsState, type ReviewKey, type ReviewState } from "./review";
 
@@ -12,6 +13,48 @@ import { reviewKeyOf, type FsrsState, type ReviewKey, type ReviewState } from ".
  * same instance (docs/studio.md): planned here, written by the
  * application, the target first.
  */
+
+/** Where a deck's cards and review states are: its entry and its two documents. */
+type DeckPlace = Pick<Deck, "url" | "cardsDocumentUrl" | "reviewsDocumentUrl">;
+
+/**
+ * A document's address as a server may read it, to tell whether two
+ * addresses name one document: as a request sends it (canonicalUrlOf),
+ * its host without a trailing dot, which names the same host, without
+ * a user name or password, which a request does not send in the address
+ * and which name no other document, with a percent-encoded character that needs no encoding (a letter, a digit,
+ * `-`, `.`, `_`, `~`) decoded, as a server may decode it, and every
+ * other escape in upper case. Text that is no URL is taken as it is
+ * written.
+ */
+function documentKeyOf(url: string): string {
+  const canonical = canonicalUrlOf(url);
+  if (canonical === null) return url;
+  const parsed = new URL(canonical);
+  parsed.hostname = parsed.hostname.replace(/\.$/, "");
+  parsed.username = "";
+  parsed.password = "";
+  return parsed.href.replace(/%[0-9a-f]{2}/gi, (encoded) => {
+    const char = String.fromCharCode(Number.parseInt(encoded.slice(1), 16));
+    return /[\w.~-]/.test(char) ? char : encoded.toUpperCase();
+  });
+}
+
+/**
+ * Whether a transfer from `source` to `target` would be one onto itself:
+ * the same entry, or two entries with a document in common, a cards or
+ * reviews document of one being either of the other's, compared as a
+ * server may read them (documentKeyOf). Another app may point two decks
+ * at one document; the cards are in the target already then, and a move
+ * would remove them from both.
+ */
+export function sharesDocuments(source: DeckPlace, target: DeckPlace): boolean {
+  const own = new Set([source.cardsDocumentUrl, source.reviewsDocumentUrl].map(documentKeyOf));
+  return (
+    source.url === target.url ||
+    [target.cardsDocumentUrl, target.reviewsDocumentUrl].some((url) => own.has(documentKeyOf(url)))
+  );
+}
 
 /** Copy the cards (the source keeps them), or move them (the source loses them once the target has them). */
 export type TransferMode = "copy" | "move";
@@ -94,17 +137,17 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * among them, and stay where they are. The answer log is not the plan's: past answers keep naming the
  * cards in the source (docs/data-model.md).
  *
- * Refuses a transfer to the source itself (cardTransferSameDeck).
+ * Refuses a transfer to the source itself, or to a deck that shares a
+ * cards or reviews document with it (sharesDocuments,
+ * cardTransferSameDeck).
  */
 export function planCardTransfer(
-  source: {
-    url: string;
+  source: DeckPlace & {
     cards: readonly Card[];
     states: readonly ReviewState[];
     fsrs?: readonly FsrsState[];
   },
-  target: {
-    url: string;
+  target: DeckPlace & {
     cards: readonly Card[];
     states: readonly ReviewState[];
     fsrs?: readonly FsrsState[];
@@ -112,7 +155,7 @@ export function planCardTransfer(
   ids: readonly string[],
   { mode, keepProgress }: TransferOptions,
 ): CardTransferPlan {
-  if (source.url === target.url) throw new AppError("cardTransferSameDeck");
+  if (sharesDocuments(source, target)) throw new AppError("cardTransferSameDeck");
   const chosen = new Set(ids);
   const byId = new Map(target.cards.map((card) => [card.id, card]));
   const used = new Set(

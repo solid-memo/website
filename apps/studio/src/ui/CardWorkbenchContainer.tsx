@@ -8,6 +8,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import { planCardEdit, type CardEdit, type CardEditPlan } from "@solid-memo/domain/cardBulk";
 import { deckAnswers, lapseIndex } from "@solid-memo/domain/cardHistory";
 import { cardLanguages, queryCards, type CardQuery } from "@solid-memo/domain/cardQuery";
+import { sharesDocuments } from "@solid-memo/domain/cardTransfer";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { effectiveStates } from "@solid-memo/domain/fsrs";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -115,8 +116,10 @@ export function CardWorkbenchContainer({
     queryFn: () => useCases.getPreferences(instance.url),
   });
   const check = useDataCheck(useCases, instance.url);
-  // Only a deck that may be changed takes cards.
-  const others = decks.filter((other) => other.url !== deck.url && check.readOnly(other) === null);
+  // Only a deck that may be changed takes cards, and not one over this deck's documents.
+  const others = decks.filter(
+    (other) => !sharesDocuments(deck, other) && check.readOnly(other) === null,
+  );
   const answersQuery = useQuery({
     queryKey: queryKeys.answerLog(instance.url),
     queryFn: () => useCases.loadAnswerLog(instance.url),

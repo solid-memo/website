@@ -28,6 +28,7 @@ import type { FsrsState, ReviewKey, ReviewState, ReviewStates } from "@solid-mem
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
 import {
   planCardTransfer,
+  sharesDocuments,
   type CardTransferPlan,
   type TransferOptions,
 } from "@solid-memo/domain/cardTransfer";
@@ -152,7 +153,8 @@ export interface CardUseCases {
    * twice, and keep the states they have there. Then the
    * target's schedule in the digest is brought up to date, and for a
    * move the source's. The answer log is untouched. Refuses a transfer
-   * to `from` itself (cardTransferSameDeck) before any read. Resolves to
+   * to `from` itself, or to a deck that shares a cards or reviews
+   * document with it (cardTransferSameDeck), before any read. Resolves to
    * the plan as written.
    */
   transferCards(
@@ -345,11 +347,20 @@ export function createCardUseCases({
     const plan = planCardTransfer(
       {
         url: from.url,
+        cardsDocumentUrl: from.cardsDocumentUrl,
+        reviewsDocumentUrl: from.reviewsDocumentUrl,
         cards: sourceCards.value,
         states: sourceStates.sm2,
         fsrs: sourceStates.fsrs,
       },
-      { url: to.url, cards: targetCards.value, states: targetStates.sm2, fsrs: targetStates.fsrs },
+      {
+        url: to.url,
+        cardsDocumentUrl: to.cardsDocumentUrl,
+        reviewsDocumentUrl: to.reviewsDocumentUrl,
+        cards: targetCards.value,
+        states: targetStates.sm2,
+        fsrs: targetStates.fsrs,
+      },
       ids,
       options,
     );
@@ -456,7 +467,7 @@ export function createCardUseCases({
       });
     },
     async transferCards(instanceUrl, from, to, ids, options) {
-      if (from.url === to.url) throw new AppError("cardTransferSameDeck");
+      if (sharesDocuments(from, to)) throw new AppError("cardTransferSameDeck");
       for (let attempt = 1; ; attempt++) {
         try {
           const plan = await transferOnce(from, to, ids, options);
