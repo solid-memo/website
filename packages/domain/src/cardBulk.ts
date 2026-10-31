@@ -112,6 +112,13 @@ export function planCardEdit(
 ): CardEditPlan {
   const byId = new Map(cards.map((card) => [card.id, card]));
   const change = edit.kind === "remove" ? null : editOf(edit);
+  // Each card's states, found once: a scan of them all for each card would grow with both.
+  const statesOf = new Map<string, ReviewState[]>();
+  for (const state of reviews) {
+    const held = statesOf.get(state.cardId);
+    if (held === undefined) statesOf.set(state.cardId, [state]);
+    else held.push(state);
+  }
   const plan: CardEditPlan = { ...noChanges(), skipped: [], inverse: noChanges() };
   for (const id of new Set(ids)) {
     const card = byId.get(id);
@@ -124,7 +131,7 @@ export function planCardEdit(
         { cardId: id, direction: "back-to-front" },
       );
       plan.inverse.save.push(card);
-      plan.inverse.reviewSaves.push(...reviews.filter((state) => state.cardId === id));
+      for (const state of statesOf.get(id) ?? []) plan.inverse.reviewSaves.push(state);
     } else {
       const edited = change!(card);
       if (typeof edited === "string") {

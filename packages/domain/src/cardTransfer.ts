@@ -112,10 +112,11 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * free id of `<id>-2`, `<id>-3`…, its distractors renumbered after it
  * (`<new id>-d1`, `-d2`… in their order), as nextDistractorId names a
  * card's. The ids are tried in that order, and the source's cards in
- * theirs, so a plan made again names the same ids: a card the target
- * holds already under the id it would get, saying the same
- * (sameContent), is `present`, and is not written again. So a transfer
- * stopped half way is finished by making it again.
+ * theirs, each id once (the first card of it), so a plan made again
+ * names the same ids: a card the target holds already under the id it
+ * would get, saying the same (sameContent), is `present`, and is not
+ * written again. So a transfer stopped half way is finished by making
+ * it again.
  *
  * The target's cards document keeps its own links: the cards written
  * there are its deck's, and hold only what this app knows of a card
@@ -158,7 +159,7 @@ export function planCardTransfer(
   if (sharesDocuments(source, target)) throw new AppError("cardTransferSameDeck");
   const chosen = new Set(ids);
   const byId = new Map(target.cards.map((card) => [card.id, card]));
-  const used = new Set(
+  const used = new UsedIds(
     target.cards.flatMap((card) => [
       card.id,
       ...(card.distractors ?? []).map((distractor) => distractor.id),
@@ -169,14 +170,20 @@ export function planCardTransfer(
   const sourceFsrs = new Map((source.fsrs ?? []).map((state) => [reviewKeyOf(state), state]));
   const targetStates = new Set(target.states.map(reviewKeyOf));
   const targetFsrs = new Set((target.fsrs ?? []).map(reviewKeyOf));
+  const inSource = new Set(source.cards.map((card) => card.id));
   const plan: CardTransferPlan = {
     cards: [],
-    missing: [...chosen].filter((id) => !source.cards.some((card) => card.id === id)),
+    missing: [...chosen].filter((id) => !inSource.has(id)),
     target: { save: [], reviewSaves: [], reviewRemovals: [], fsrsSaves: [], fsrsRemovals: [] },
     source: { remove: [], reviewRemovals: [] },
   };
+  // Each id chosen is taken once, from the first card of the source of
+  // that id: a card's id is its subject's fragment, so a document may
+  // hold several of one id, and placing each would try the ids the
+  // others took.
+  const pending = new Set(chosen);
   for (const card of source.cards) {
-    if (!chosen.has(card.id)) continue;
+    if (!pending.delete(card.id)) continue;
     const { to, written, present } = placeIn(card, byId, used, claimed);
     plan.cards.push({ from: card.id, to, present });
     if (!present) plan.target.save.push(written);
@@ -202,30 +209,79 @@ export function planCardTransfer(
 }
 
 /**
+ * The ids the target's cards document holds, and those a plan has
+ * given: for each id, also the lowest `n` of an `<id>-d<n>` among them,
+ * so whether a card given that id has its renumbered distractors free
+ * is told in one step, not by trying each of them.
+ */
+class UsedIds {
+  private readonly ids = new Set<string>();
+  private readonly lowestDistractor = new Map<string, number>();
+
+  constructor(ids: Iterable<string>) {
+    this.add(ids);
+  }
+
+  has(id: string): boolean {
+    return this.ids.has(id);
+  }
+
+  add(ids: Iterable<string>): void {
+    for (const id of ids) {
+      this.ids.add(id);
+      const at = id.lastIndexOf("-d");
+      const n = id.slice(at + 2);
+      if (at < 0 || !/^[1-9]\d*$/.test(n)) continue;
+      const owner = id.slice(0, at);
+      const lowest = this.lowestDistractor.get(owner) ?? Infinity;
+      if (Number(n) < lowest) this.lowestDistractor.set(owner, Number(n));
+    }
+  }
+
+  /** Whether none of `<id>-d1` to `<id>-d<count>` is held. */
+  distractorsFree(id: string, count: number): boolean {
+    return (this.lowestDistractor.get(id) ?? Infinity) > count;
+  }
+}
+
+/**
  * Where the card goes in the target: the first id of `<id>`, `<id>-2`…
  * free there (its distractors' too), or holding the card already and
  * not claimed by another card of the plan. The ids it takes are added
  * to `used`, a card it is present as to `claimed`, so the next card
  * goes elsewhere: two cards saying the same are never both present at
  * one id.
+ *
+ * An id is told taken in one step, and the card is built and compared
+ * only at an id the target holds a card of as many distractors: so the
+ * ids tried cost no more than the cards there, whatever the card's
+ * distractors.
  */
 function placeIn(
   card: Card,
   byId: ReadonlyMap<string, Card>,
-  used: Set<string>,
+  used: UsedIds,
   claimed: Set<string>,
 ): { to: string; written: TransferredCard; present: boolean } {
+  const own = (card.distractors ?? []).map((distractor) => distractor.id);
+  const ownCount = new Set(own).size;
   for (let n = 1; ; n++) {
     const to = n === 1 ? card.id : `${card.id}-${n}`;
-    const written = asWritten(card, to);
     const there = byId.get(to);
-    if (there !== undefined && !claimed.has(to) && sameContent(there, written)) {
-      claimed.add(to);
-      return { to, written, present: true };
+    // As many as sameDistractors asks for: the card's own ids, or as many renumbered.
+    const count = n === 1 ? ownCount : own.length;
+    if (there !== undefined && !claimed.has(to) && (there.distractors?.length ?? 0) === count) {
+      const written = asWritten(card, to);
+      if (sameContent(there, written)) {
+        claimed.add(to);
+        return { to, written, present: true };
+      }
     }
-    const taken = [to, ...(written.distractors ?? []).map((distractor) => distractor.id)];
-    if (taken.every((id) => !used.has(id))) {
-      for (const id of taken) used.add(id);
+    if (used.has(to)) continue;
+    const free = n === 1 ? own.every((id) => !used.has(id)) : used.distractorsFree(to, own.length);
+    if (free) {
+      const written = asWritten(card, to);
+      used.add([to, ...(written.distractors ?? []).map((distractor) => distractor.id)]);
       return { to, written, present: false };
     }
   }

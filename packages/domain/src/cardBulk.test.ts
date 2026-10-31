@@ -8,6 +8,7 @@ import { changedTexts, planCardEdit, planUndo, sameCardEditPlan, type CardEdit }
 import { UNSTATED } from "./cardQuery";
 import type { Card } from "./deck";
 import type { ReviewState } from "./review";
+import { growth } from "./testing/growth";
 
 function card(id: string, extra: Partial<Card> = {}): Card {
   return {
@@ -108,6 +109,23 @@ describe("planCardEdit", () => {
       reviewRemovals: [],
       reviewSaves: states.slice(0, 2),
     });
+  });
+
+  it("removes a large selection in time that grows with the cards, not with their square", () => {
+    // Eight times the cards and their states take about as long as an
+    // eighth of them eight times over; finding each card's states among
+    // all of them would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) => card(`c${i}`));
+        const ids = cards.map(({ id }) => id);
+        const states = ids.flatMap((id) => [state(id), state(id, "back-to-front")]);
+        return () => planCardEdit(cards, ids, { kind: "remove" }, states);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("removes cards without review states, none to write back", () => {
