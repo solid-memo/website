@@ -1663,6 +1663,7 @@
     "createdElsewhere": "Dies wurde anderswo erstellt, vielleicht in einem anderen Tab oder einer anderen App, gerade als Solid Memo es erstellen wollte, daher wurde nichts gespeichert. Lade die Seite neu und versuche es erneut.",
     "alreadyExists": "An dieser Stelle in deinem Pod liegt bereits etwas. Wähle eine andere Stelle.",
     "cannotCheck": "Solid Memo konnte deinen Pod nicht prüfen. Prüfe deine Verbindung und versuche es erneut.",
+    "podNoAnswer": "Der Server hat nicht rechtzeitig geantwortet. Prüfe deine Verbindung und versuche es erneut.",
     "dataNotConforming": "Solid Memo hat dies nicht gespeichert: Es hat nicht das Format, das Solid Memo erwartet. Es wurde nichts geändert. Lade die Seite neu und versuche es erneut.",
     "deckGone": "Den Stapel „{deck}“ gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App entfernt.",
     "cardsDocumentGone": "Die Karten von „{deck}“ lassen sich nicht mehr finden. Lade die Seite neu und versuche es erneut.",

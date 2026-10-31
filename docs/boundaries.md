@@ -254,6 +254,17 @@ the pod fence didn't check. A write that redirects is refused
 (`redirectRefused`), and a read that redirects is sent again as no one
 ([authentication.md](authentication.md#authenticated-requests)).
 
+A read of another server, as the user or as no one, has a deadline
+([readDeadline.ts](../packages/solid/src/readDeadline.ts),
+`withReadDeadline`). If the server hasn't started to answer within 10
+seconds, the read is aborted and fails with `podNoAnswer`, which the
+app tries again ([style.md](style.md#typescript)). Without it, a
+request the server never answers keeps a screen loading for good. The
+deadline ends when the answer's headers arrive, so a large document
+takes as long as it needs. A write has no deadline: one cut off might
+still be saved, and only its answer says whether it was. The guest's
+pod, in this browser, has none either.
+
 The release publisher alone gets a second fetch for its access
 control, through the same fences, whose pod fence lets a document's own
 ACL or ACR (`<document>.acl`, `<document>.acr`) through, never a

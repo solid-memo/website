@@ -22,6 +22,12 @@ describe("retryable", () => {
     ).toBe(true);
   });
 
+  it("tries again a read the server did not answer in time", () => {
+    expect(
+      retryable(new AppError("podNoAnswer", { url: "https://pod.example/a.ttl", seconds: 10 })),
+    ).toBe(true);
+  });
+
   it("gives up on a lasting 4xx from the pod, but not on a 429 or a 5xx", () => {
     expect(retryable(inruptError(401))).toBe(false);
     expect(retryable(inruptError(403))).toBe(false);

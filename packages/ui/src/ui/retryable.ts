@@ -18,12 +18,13 @@ function statusOf(error: unknown): number | undefined {
 /**
  * Whether a failed read is worth another try. An AppError is a checked
  * outcome the same read gives again, unless the server's status it
- * carries (vars.status) may pass; so is a lasting 4xx from the pod, a
- * 401 or 403. A network failure, a 5xx, a 408 or 429, or a plain Error
- * may still pass.
+ * carries (vars.status) may pass, or the server did not answer in time
+ * (podNoAnswer); so is a lasting 4xx from the pod, a 401 or 403. A
+ * network failure, a 5xx, a 408 or 429, or a plain Error may still pass.
  */
 export function retryable(error: unknown): boolean {
   if (error instanceof AppError) {
+    if (error.code === "podNoAnswer") return true;
     const status = error.vars.status;
     return typeof status === "number" && passing(status);
   }

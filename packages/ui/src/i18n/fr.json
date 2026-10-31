@@ -1737,6 +1737,7 @@
     "createdElsewhere": "Cet élément a été créé ailleurs, peut-être dans un autre onglet ou une autre application, au moment où Solid Memo allait le créer, rien n’a donc été enregistré. Rechargez la page et réessayez.",
     "alreadyExists": "Il y a déjà quelque chose à cet emplacement de votre Pod. Choisissez un autre emplacement.",
     "cannotCheck": "Solid Memo n’a pas pu vérifier votre Pod. Vérifiez votre connexion et réessayez.",
+    "podNoAnswer": "Le serveur n’a pas répondu à temps. Vérifiez votre connexion et réessayez.",
     "dataNotConforming": "Solid Memo n’a pas enregistré ceci : ce n’est pas au format attendu par Solid Memo. Rien n’a été modifié. Rechargez la page et réessayez.",
     "deckGone": "Le paquet « {deck} » n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "cardsDocumentGone": "Les cartes de « {deck} » sont désormais introuvables. Rechargez la page et réessayez.",

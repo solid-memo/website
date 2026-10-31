@@ -1663,6 +1663,7 @@
     "createdElsewhere": "Det här skapades någon annanstans, kanske i en annan flik eller app, just när Solid Memo skulle skapa det, så inget sparades. Läs in sidan igen och försök på nytt.",
     "alreadyExists": "Något finns redan på den platsen i din Pod. Välj en annan plats.",
     "cannotCheck": "Solid Memo kunde inte kontrollera din Pod. Kontrollera anslutningen och försök igen.",
+    "podNoAnswer": "Servern svarade inte i tid. Kontrollera anslutningen och försök igen.",
     "dataNotConforming": "Solid Memo sparade inte det här: det har inte det format Solid Memo förväntar sig. Inget ändrades. Läs in sidan igen och försök på nytt.",
     "deckGone": "Kortleken ”{deck}” finns inte längre. Kanske togs den bort i en annan flik eller app.",
     "cardsDocumentGone": "Korten i ”{deck}” går inte längre att hitta. Läs in sidan igen och försök på nytt.",

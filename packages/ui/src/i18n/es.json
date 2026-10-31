@@ -1737,6 +1737,7 @@
     "createdElsewhere": "Esto se creó en otro lugar, quizá en otra pestaña o aplicación, justo cuando Solid Memo iba a crearlo, así que no se guardó nada. Vuelve a cargar la página e inténtalo de nuevo.",
     "alreadyExists": "Ya hay algo guardado en ese lugar de tu Pod. Elige otro lugar.",
     "cannotCheck": "Solid Memo no pudo comprobar tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
+    "podNoAnswer": "El servidor no respondió a tiempo. Comprueba tu conexión e inténtalo de nuevo.",
     "dataNotConforming": "Solid Memo no guardó esto: no está en el formato que espera Solid Memo. No se cambió nada. Vuelve a cargar la página e inténtalo de nuevo.",
     "deckGone": "El mazo «{deck}» ya no existe. Quizá se eliminó en otra pestaña o aplicación.",
     "cardsDocumentGone": "Ya no se encuentran las tarjetas de «{deck}». Vuelve a cargar la página e inténtalo de nuevo.",

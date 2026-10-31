@@ -6,6 +6,7 @@ import { createUseCases, type UseCases } from "@solid-memo/application/useCases"
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { anonymousFetch } from "@solid-memo/solid/authFetch";
+import { withReadDeadline } from "@solid-memo/solid/readDeadline";
 import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
@@ -104,11 +105,18 @@ export function createAppUseCases({
    * write fence, so a guest's study being moved cannot be written
    * (docs/guest-mode.md); then to the guest's pod or, as the logged-in
    * user, to any other, following no redirect to an address the fences
-   * never checked (authFetch.ts).
+   * never checked (authFetch.ts). A read of another server that gets no
+   * answer in time is given up, to be tried again (readDeadline.ts).
    */
   const writeFence = createWriteFence(
-    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: session.fetch }),
+    routedFetch({
+      origin: GUEST_ORIGIN,
+      local: guestFetch,
+      remote: withReadDeadline(session.fetch),
+    }),
   );
+  /** A fetch as no one (authFetch.ts), whose reads have a deadline as the user's do. */
+  const noOneFetch = withReadDeadline(anonymousFetch);
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
   const shareFetch = createPodFence(writeFence.fetch, { accessControl: true });
@@ -126,7 +134,7 @@ export function createAppUseCases({
       local: writeFence.fetch,
       remote: createOwnPodGate({
         fetch: writeFence.fetch,
-        publicFetch: anonymousFetch,
+        publicFetch: noOneFetch,
         webId: session.webId,
         ownFolders,
         revision: () => folderRevision,
@@ -174,7 +182,7 @@ export function createAppUseCases({
   const podInstances = createSolidInstanceRepository({
     fetch: podFetch,
     dataFetch,
-    publicFetch: anonymousFetch,
+    publicFetch: noOneFetch,
     checkWrite,
     now,
     randomId,
@@ -223,7 +231,7 @@ export function createAppUseCases({
       local: podFetch,
       remote: createOwnPodFetch({
         fetch: podFetch,
-        publicFetch: anonymousFetch,
+        publicFetch: noOneFetch,
         webId: session.webId,
         // A release in a folder that cannot be found is read as no one.
         ownFolders: (webId) => ownFolders(webId, true),
@@ -269,14 +277,14 @@ export function createAppUseCases({
       fetch: dataFetch,
       releaseFetch,
       // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
-      publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: anonymousFetch }),
+      publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: noOneFetch }),
       checkWrite,
     }),
     // A release is written as the user, its access control too; whether it is public, asked as no one.
     releasePublisher: createSolidReleasePublisher({
       fetch: podFetch,
       shareFetch,
-      publicFetch: anonymousFetch,
+      publicFetch: noOneFetch,
       grantPublicRead,
     }),
     // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.

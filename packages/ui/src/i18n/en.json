@@ -1663,6 +1663,7 @@
     "createdElsewhere": "This was created elsewhere, perhaps in another tab or app, just as Solid Memo was about to create it, so nothing was saved. Reload the page and try again.",
     "alreadyExists": "Something is already kept at that place in your Pod. Choose another place.",
     "cannotCheck": "Solid Memo could not check your Pod. Check your connection and try again.",
+    "podNoAnswer": "The server did not answer in time. Check your connection and try again.",
     "dataNotConforming": "Solid Memo did not save this: it is not in the format Solid Memo expects. Nothing was changed. Reload the page and try again.",
     "deckGone": "The deck “{deck}” no longer exists. Perhaps it was removed in another tab or app.",
     "cardsDocumentGone": "The cards of “{deck}” can no longer be found. Reload the page and try again.",
