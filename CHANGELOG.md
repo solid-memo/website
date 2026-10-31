@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.33](https://github.com/solid-memo/website/compare/v6.17.32...v6.17.33) (2026-10-31)
+
+### Bug Fixes
+
+* **domain:** refuse a card transfer between decks over one document ([d0d0027](https://github.com/solid-memo/website/commit/d0d0027240a5a1c97c7c5b2030e056a03d24876a))
+* **studio:** look up a draft's subjects once per draft ([069704d](https://github.com/solid-memo/website/commit/069704d04aa9972604d2ef18accf7e24e147045a))
+
 ## [6.17.32](https://github.com/solid-memo/website/compare/v6.17.31...v6.17.32) (2026-10-31)
 
 ### Bug Fixes
