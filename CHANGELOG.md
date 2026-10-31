@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.20.1](https://github.com/solid-memo/website/compare/v6.20.0...v6.20.1) (2026-10-31)
+
+### Bug Fixes
+
+* **domain:** read a month summary only when its days are of its month ([58e1ccd](https://github.com/solid-memo/website/commit/58e1ccd28a51e4480c5a25cc8a32222425191a1b))
+* **shacl:** check decimal and floating-point literals in linear time ([345030c](https://github.com/solid-memo/website/commit/345030cd2be4ab3ed7b73c8d9ae640d76cf94d40))
+* **studio:** keep only a release's own statements in a draft of it ([05aa7f3](https://github.com/solid-memo/website/commit/05aa7f35df85a024a7f80719a3664c71dab54049))
+
 ## [6.20.0](https://github.com/solid-memo/website/compare/v6.19.0...v6.20.0) (2026-10-31)
 
 ### Features
