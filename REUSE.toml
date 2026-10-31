@@ -116,6 +116,7 @@ path = [
     "decks/nordic-world-heritage-sites/*.ttl",
     "decks/norse-mythology/*.ttl",
     "decks/olympic-games/*.ttl",
+    "decks/open-licenses/*.ttl",
     "decks/periodic-table/*.ttl",
     "decks/physics-equations/*.ttl",
     "decks/portuguese-basics/*.ttl",
