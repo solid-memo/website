@@ -1360,8 +1360,10 @@ and its row says "From \<host>".
 
 - Its creator's catalog, found in the folders above the release and
   read as anyone reads it, lists the releases its instance published
-  (`sm:publishedRelease`). The newest of the copy's series is its
-  upgrade, planned and applied as a library copy's.
+  (`sm:publishedRelease`); only links at an address a release may have
+  are read. The newest of the copy's series is its upgrade, planned and
+  applied as a library copy's. The newer release's own list of releases
+  in between is kept to such addresses the same way.
 - Each release a catalog links is read once for all the copies, and
   none that the copy's own release lists.
 - Before an upgrade is planned, the newer release and those in between

@@ -8,6 +8,7 @@ import type { CourseOutline } from "@solid-memo/domain/course";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { catalogLinks } from "./catalogLinks";
 import { getSolidDatasetLinear } from "./client/resources";
 import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
@@ -138,7 +139,9 @@ export function createSolidDeckLibrary({
         const links = await catalogLinks(folder, SM.publishedRelease, limited).catch(
           (): string[] => [],
         );
-        if (links.includes(url)) return links;
+        // The catalog is data its creator wrote: of its links, only those at an address a release may have are
+        // read, and may become a copy's source (isPublishedReleaseUrl), as the user's own catalog's are.
+        if (links.includes(url)) return links.filter(isPublishedReleaseUrl);
       }
       return null;
     },

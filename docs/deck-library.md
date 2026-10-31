@@ -998,8 +998,10 @@ flowchart LR
   (`sm:publishedRelease`, [data-model.md](data-model.md)).
   `DeckLibrary.publishedBeside` takes the first catalog that links the
   release in the folders above it, nearest first and eight folders at
-  most, read as anyone reads them. The app then reads the releases it
-  links but those the copy's release lists: 16 at most, four at once,
+  most, read as anyone reads them. Of its links, it keeps only those at
+  an address a release may have (`isPublishedReleaseUrl`), as the
+  user's own catalog does. The app then reads those releases but the
+  ones the copy's release lists: 16 at most, four at once,
   those named as the copy's release first (`…/<name>/vN.ttl`), the
   highest version first. A catalog is its creator's to write, so it may
   link any number of releases. The newest of the same series is the
@@ -1016,7 +1018,9 @@ flowchart LR
   cards, its notes and the list of releases in between come from the
   newer release as it was checked, not from the series read before. The
   newer release is its creator's to write, so it may list any number of
-  releases in between. The app reads the newest 16 of them at most, four
+  releases in between. The app keeps only those at an address a release
+  may have (`isPublishedReleaseUrl`, in `toStandaloneLibraryDeck`), as
+  with a catalog's links, and reads the newest 16 of them at most, four
   at once, each once. A card as one left out has it counts as the
   user's, and the upgrade keeps it.
 - A copy from a link isn't given its release's new title or description

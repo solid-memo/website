@@ -36,6 +36,7 @@ import {
 } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
 /**
@@ -218,8 +219,9 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
  * added from a link, docs/deck-library.md): its content as an import
  * reads it (toLibraryDeckContent), its sources and creation time, its
  * live cards counted, and every version of its series the document
- * describes (library deck format 6 describes its series in it), else the
- * release alone, as the release says of itself.
+ * describes (library deck format 6 describes its series in it) at an
+ * address a release may have (isPublishedReleaseUrl), else the release
+ * alone, as the release says of itself.
  */
 export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryDeck {
   // Where a mistake in it is reported is read with its content when asked (UseCases.reportPlace).
@@ -234,10 +236,14 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
   const release = migrate("libraryDeck", readVersioned(deck, "libraryDeck")!.record, { subject });
   const seriesThing = getThing(dataset, release.inSeries);
   const series = seriesThing === null ? null : readVersioned(seriesThing, "libraryDeckSeries");
+  // The series is data the release's creator wrote: of the other versions it lists, only those at an address a
+  // release may have are read, and may become a copy's source (isPublishedReleaseUrl), as a catalog's are.
   const versions =
     series === null
       ? [subject]
-      : migrate("libraryDeckSeries", series.record, { subject: release.inSeries }).hasVersion;
+      : migrate("libraryDeckSeries", series.record, {
+          subject: release.inSeries,
+        }).hasVersion.filter((version) => version === subject || isPublishedReleaseUrl(version));
   return {
     ...content,
     releases: versions
