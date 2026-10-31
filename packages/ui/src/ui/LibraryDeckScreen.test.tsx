@@ -197,6 +197,28 @@ describe("LibraryDeckScreen", () => {
     expect(sources[1].textContent).not.toContain("—");
   });
 
+  it("shows up to five sources as they are, with nothing to open", () => {
+    const sources = Array.from({ length: 5 }, (_, i) => ({
+      url: `https://example.org/source-${i}`,
+      authors: [],
+    }));
+    renderScreen({ deck: { ...capitals, sources } });
+    expect(fact("Sources").querySelector("details")).toBeNull();
+    expect(within(fact("Sources")).getAllByRole("listitem")).toHaveLength(5);
+  });
+
+  it("folds more than five sources into a closed disclosure that names how many", () => {
+    const sources = Array.from({ length: 6 }, (_, i) => ({
+      url: `https://example.org/source-${i}`,
+      authors: [],
+    }));
+    renderScreen({ deck: { ...capitals, sources } });
+    const disclosure = fact("Sources").querySelector("details")!;
+    expect(disclosure.open).toBe(false);
+    expect(within(disclosure).getByText("6 sources").tagName).toBe("SUMMARY");
+    expect(within(disclosure).getAllByRole("listitem")).toHaveLength(6);
+  });
+
   it("shows the host beside a source whose title reads as another address", () => {
     renderScreen({
       deck: {

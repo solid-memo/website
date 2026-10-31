@@ -915,6 +915,10 @@
       "one": "Källa",
       "other": "Källor"
     },
+    "sourceCount": {
+      "one": "{count} källa",
+      "other": "{count} källor"
+    },
     "import": "Importera kortleken",
     "importing": "Importerar…",
     "preview": "Förhandsvisa",

@@ -915,6 +915,10 @@
       "one": "Quelle",
       "other": "Quellen"
     },
+    "sourceCount": {
+      "one": "{count} Quelle",
+      "other": "{count} Quellen"
+    },
     "import": "Stapel importieren",
     "importing": "Wird importiert…",
     "preview": "Vorschau",

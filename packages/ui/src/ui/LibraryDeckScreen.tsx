@@ -180,13 +180,7 @@ export function LibraryDeckScreen({
           <>
             <dt>{t("libraryDeck.sources", { count: deck.sources.length })}</dt>
             <dd>
-              <ul class="sources">
-                {deck.sources.map((source) => (
-                  <li key={source.url}>
-                    <SourceLine source={source} />
-                  </li>
-                ))}
-              </ul>
+              <SourceList sources={deck.sources} />
             </dd>
           </>
         )}
@@ -260,6 +254,30 @@ function ShareLink({ url }: { url: string }) {
         </span>
       )}
     </>
+  );
+}
+
+/** More sources than this are folded away, so they don't push the buttons below them far down. */
+const SOURCES_SHOWN = 5;
+
+/** A release's sources, each on its own line; a long list behind a disclosure, closed. */
+function SourceList({ sources }: { sources: LibrarySource[] }) {
+  const { t } = useI18n();
+  const list = (
+    <ul class="sources">
+      {sources.map((source) => (
+        <li key={source.url}>
+          <SourceLine source={source} />
+        </li>
+      ))}
+    </ul>
+  );
+  if (sources.length <= SOURCES_SHOWN) return list;
+  return (
+    <details>
+      <summary>{t("libraryDeck.sourceCount", { count: sources.length })}</summary>
+      {list}
+    </details>
   );
 }
 
