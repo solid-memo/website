@@ -1488,6 +1488,38 @@ describe("upgradeCards", () => {
     expect(getUrlAll(upgraded, DCTERMS.subject)).toEqual([subject]);
   });
 
+  it("drops an outdated card's link to a subject that is no distractor it can read, another card, another app's or one typed sm:Distractor without its shape, and keeps that subject", async () => {
+    const foreign = `${deck.cardsDocumentUrl}#note`;
+    const unread = `${deck.cardsDocumentUrl}#unread`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      [
+        stored(other, 7),
+        buildThing(createThing({ url: foreign }))
+          .addStringNoLocale("https://other.example/vocab#note", "kept")
+          .build(),
+        buildThing(createThing({ url: unread }))
+          .addIri(RDF.type, SM.Distractor)
+          .addStringNoLocale("https://other.example/vocab#note", "kept")
+          .build(),
+        buildThing(stored(card, 6))
+          .addUrl(SM.distractor, other.url)
+          .addUrl(SM.distractor, foreign)
+          .addUrl(SM.distractor, unread)
+          .build(),
+      ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(deck.cardsDocumentUrl)),
+    );
+
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(getStringNoLocale(getThing(saved as Dataset, other.url)!, SM.front)).toBe("火");
+    expect(getThing(saved as Dataset, foreign)).not.toBeNull();
+    expect(getThing(saved as Dataset, unread)).not.toBeNull();
+    const upgraded = getThing(saved as Dataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getUrlAll(upgraded, SM.distractor)).toEqual([]);
+  });
+
   it("writes nothing when no card is outdated, or there is no cards document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(datasetFrom(deck.cardsDocumentUrl), stored(other, 7)),

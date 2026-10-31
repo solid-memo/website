@@ -609,6 +609,25 @@ describe("writeDistractors", () => {
     expect(getThing(withoutUnnamedDistractors(named, [url]), url)).not.toBeNull();
   });
 
+  it("removes only a distractor, never a card or another app's subject, that no card names", () => {
+    const typed = (id: string, ...types: string[]) =>
+      types
+        .reduce(
+          (thing, type) => thing.addUrl(RDF.type, type),
+          buildThing(createThing({ url: `${CARDS_DOC}#${id}` })),
+        )
+        .addStringNoLocale(SM.front, id)
+        .build();
+    const urls = ["card", "mixed", "other"].map((id) => `${CARDS_DOC}#${id}`);
+    const dataset = [
+      typed("card", SM.Card),
+      typed("mixed", SM.Card, SM.Distractor),
+      typed("other", "https://example.org/Thing"),
+    ].reduce((current, thing) => setThing(current, thing), datasetFrom(CARDS_DOC));
+    const after = withoutUnnamedDistractors(dataset, [...urls, `${CARDS_DOC}#missing`]);
+    for (const url of urls) expect(getThing(after, url)).not.toBeNull();
+  });
+
   it("retires a distractor, and restores it, keeping it named", () => {
     const url = `${CARDS_DOC}#d1`;
     const retired = withDistractors(
