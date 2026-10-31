@@ -170,8 +170,8 @@ export function createSolidDeckRepository({
       let dataset = read ?? createSolidDataset();
       // Each entry stored in an older format, as read and brought up to date in memory, written in this app's.
       const written = toDecks(dataset, catalogUrl).filter(isDeckOutdated).map(upgradeDeck);
-      const subjects = written.flatMap(deckSubjects);
       dataset = withDecks(dataset, written);
+      const subjects = written.flatMap((deck) => deckSubjects(dataset, deck));
       if (catalog !== null && toCatalog(dataset, catalogUrl) === null) {
         dataset = withCatalog(dataset, catalogUrl, catalog);
         subjects.push(`${catalogUrl}#catalog`, catalog.publisher.webId);
@@ -208,7 +208,7 @@ export function createSolidDeckRepository({
         const updated = withOwnTerms(withDeck(dataset, written), deck);
         try {
           // If-Match the read above: the catalog changed elsewhere meanwhile is read and the entry added again.
-          await save(catalogUrl, updated, deckSubjects(written));
+          await save(catalogUrl, updated, deckSubjects(updated, written));
           return written;
         } catch (error) {
           if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
@@ -399,7 +399,8 @@ export function createSolidDeckRepository({
         formatVersion: DECK_FORMAT_VERSION,
       };
       // The write carries If-Match of the read above: the entry changes as it was checked, or not at all.
-      await save(catalogUrl, withDeck(dataset, written), deckSubjects(written));
+      const updated = withDeck(dataset, written);
+      await save(catalogUrl, updated, deckSubjects(updated, written));
       return written;
     },
 
@@ -577,10 +578,11 @@ export function createSolidDeckRepository({
         (deck) => dataset === null || getThing(dataset, deck.url) === null,
       );
       if (gone !== undefined) throw new AppError("deckGone", { deck: gone.title });
+      const updated = inDocument.reduce(withDeck, dataset!);
       await save(
         catalogUrl,
-        inDocument.reduce(withDeck, dataset!),
-        inDocument.flatMap(deckSubjects),
+        updated,
+        inDocument.flatMap((deck) => deckSubjects(updated, deck)),
       );
     }
     return written;
@@ -839,7 +841,8 @@ export function createSolidDeckRepository({
     const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
     if (getThing(dataset, deck.url) !== null)
       throw new AppError("alreadyExists", { url: deck.url });
-    await save(catalogUrl, withOwnTerms(withDeck(dataset, deck), deck), deckSubjects(deck));
+    const updated = withOwnTerms(withDeck(dataset, deck), deck);
+    await save(catalogUrl, updated, deckSubjects(updated, deck));
     return deck;
   }
 

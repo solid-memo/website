@@ -21,19 +21,65 @@ const MAILTO = "mailto:";
  * digits of (김민수, Kim 민수, Groß), or all of them (—), gets a hash of
  * the whole name after its slug ("unnamed" for an empty one), so that
  * two such names stay two agents; a name that folds without loss keeps
- * its bare slug, as it always had.
+ * its bare slug, as it always had. Other authors can fold to the same
+ * node (punctuation and accents go): agentUrlsOf names the node an
+ * author is written to.
  */
 export function agentUrlOf(subjectUrl: string, author: string): string {
+  return `${documentUrlOf(subjectUrl)}#agent-${agentFragmentOf(author).fragment}`;
+}
+
+/** The fragment of agentUrlOf, and whether it already ends in the author's hash. */
+function agentFragmentOf(author: string): { fragment: string; hashed: boolean } {
   const folded = author
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
   const slug = folded.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const lossy = slug === "" || /[\p{L}\p{N}]/u.test(folded.replace(/[a-z0-9]/g, ""));
-  const fragment = lossy
-    ? `${slug === "" ? "unnamed" : slug}-${hashOf(author.trim().normalize("NFC"))}`
-    : slug;
-  return `${documentUrlOf(subjectUrl)}#agent-${fragment}`;
+  return lossy
+    ? { fragment: `${slug === "" ? "unnamed" : slug}-${authorHashOf(author)}`, hashed: true }
+    : { fragment: slug, hashed: false };
+}
+
+function authorHashOf(author: string): string {
+  return hashOf(author.trim().normalize("NFC"));
+}
+
+/**
+ * The agent node each of `authors` is written to, in the document of
+ * `subjectUrl`: agentUrlOf's, unless that node holds another author,
+ * then the first after it that does not. `fits` says whether a node of
+ * the document may hold the author's record (nothing of an agent is said
+ * there, or the same author is). The nodes after it are agentUrlOf's
+ * with a hash of the whole author added (unless it has one), then with
+ * a count too. An author is never written over another one, whatever
+ * deck named it first; the same author named twice is one node.
+ */
+export function agentUrlsOf(
+  subjectUrl: string,
+  authors: readonly string[],
+  fits: (url: string, record: AgentV1) => boolean = () => true,
+): string[] {
+  const taken = new Map<string, AgentV1>();
+  return authors.map((author) => {
+    const record = agentToRecord(author);
+    const free = (url: string) => {
+      const held = taken.get(url);
+      return held === undefined ? fits(url, record) : sameAgent(held, record);
+    };
+    const first = agentUrlOf(subjectUrl, author);
+    const hashed = agentFragmentOf(author).hashed ? first : `${first}-${authorHashOf(author)}`;
+    let url = free(first) ? first : hashed;
+    for (let count = 2; !free(url); count++) url = `${hashed}-${count}`;
+    taken.set(url, record);
+    return url;
+  });
+}
+
+/** Whether two agent records name the same author: the same name and the same mailbox, or none. */
+export function sameAgent(a: AgentV1, b: AgentV1): boolean {
+  return a.name === b.name && a.mbox === b.mbox;
 }
 
 /** Six hex digits of the 32-bit FNV-1a hash of `text`'s UTF-16 code units: stable, not secret. */

@@ -19,7 +19,12 @@ import {
   setThings,
 } from "../client/rdf";
 import { editOf, type DatasetEdit } from "../datasetEdit";
-import { agentUrlOf, authorFromAgentRecord } from "@solid-memo/domain/agentRecord";
+import {
+  agentUrlOf,
+  agentUrlsOf,
+  authorFromAgentRecord,
+  sameAgent,
+} from "@solid-memo/domain/agentRecord";
 import {
   catalogFromRecord,
   catalogToRecord,
@@ -49,7 +54,7 @@ import {
   DISTRACTOR_V1,
   DISTRIBUTION_V1,
 } from "@solid-memo/vocab/descriptors.generated";
-import type { CardV7 } from "@solid-memo/vocab/types.generated";
+import type { AgentV1, CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
   readVersioned,
@@ -158,8 +163,11 @@ export function withDeck(dataset: Dataset, deck: Deck): Dataset {
 export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const edit = editOf(dataset);
   for (const deck of decks) {
-    edit.setThing(recordThing(deck.url, DECK_V6, deckToRecord(deck), edit.getThing(deck.url)));
-    for (const { url, record } of deckAgents(deck)) {
+    const creator = deckAgentUrls(deck, edit.getThing);
+    edit.setThing(
+      recordThing(deck.url, DECK_V6, deckToRecord(deck, creator), edit.getThing(deck.url)),
+    );
+    for (const { url, record } of deckAgents(deck, creator)) {
       edit.setThing(recordThing(url, AGENT_V1, record, edit.getThing(url)));
     }
     const distribution = deckDistribution(deck);
@@ -180,9 +188,31 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   );
 }
 
-/** The subjects a deck is written as: its entry, its distribution and its agents. */
-export function deckSubjects(deck: Deck): string[] {
-  return [deck.url, distributionUrlOf(deck.url), ...deckAgents(deck).map((agent) => agent.url)];
+/** The subjects a deck is written as in `dataset` (withDeck's): its entry, its distribution and its agents. */
+export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
+  const agents = new Set(deckAgentUrls(deck, (url) => getThing(dataset, url)));
+  return [deck.url, distributionUrlOf(deck.url), ...agents];
+}
+
+/**
+ * The agent node of each of a deck's authors in its catalog document,
+ * whose subjects `thingAt` finds (agentUrlsOf): a node that holds
+ * another author's name or mailbox is never written over, as every deck
+ * of the document names its authors' nodes, and the next one is taken.
+ */
+function deckAgentUrls(deck: Deck, thingAt: (url: string) => NamedSubject | null): string[] {
+  return agentUrlsOf(deck.url, deck.authors, (url, record) => agentFits(thingAt(url), record));
+}
+
+/** Whether an author's record may be written onto `thing`: there is none, it says nothing an agent says, or it is that author's. */
+function agentFits(thing: NamedSubject | null, record: AgentV1): boolean {
+  if (thing === null) return true;
+  const said = getPropertyAll(thing);
+  if (!AGENT_V1.fields.some((field) => said.includes(field.predicate))) return true;
+  const read = readVersioned(thing, "agent");
+  return (
+    read !== null && sameAgent(migrate("agent", read.record, { subject: asUrl(thing) }), record)
+  );
 }
 
 /**

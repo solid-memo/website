@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { agentToRecord, agentUrlOf } from "./agentRecord";
+import { agentToRecord, agentUrlsOf } from "./agentRecord";
 import { directionOfConcept, conceptOfDirection } from "./concepts";
 import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from "./dcat";
 import { isEmptyText, type Card, type CardContent, type Deck, type Distractor } from "./deck";
@@ -65,14 +65,21 @@ function usableCap(stored: number | undefined): stored is number {
   return stored !== undefined && isDailyLimit(stored);
 }
 
-/** The deck as its latest record; a deck that states no description gets the default one. */
-export function deckToRecord(deck: Deck): DeckV6 {
+/**
+ * The deck as its latest record, naming as its creators the agent nodes
+ * of `creator` (one per author, as agentUrlsOf names them); a deck that
+ * states no description gets the default one.
+ */
+export function deckToRecord(
+  deck: Deck,
+  creator: readonly string[] = agentUrlsOf(deck.url, deck.authors),
+): DeckV6 {
   return {
     title: deck.title,
     description: deck.description ?? defaultDeckDescriptionText(deck.title),
     ...(deck.createdAt === "" ? {} : { created: deck.createdAt }),
     ...(deck.modifiedAt === undefined ? {} : { modified: deck.modifiedAt }),
-    creator: deck.authors.map((author) => agentUrlOf(deck.url, author)),
+    creator: [...creator],
     ...(deck.license === undefined ? {} : { license: deck.license }),
     studyDirection: conceptOfDirection(deck.direction),
     theme: deck.themes ?? [],
@@ -86,11 +93,17 @@ export function deckToRecord(deck: Deck): DeckV6 {
   };
 }
 
-/** The agent nodes a deck's record names as its creators, one per author. */
-export function deckAgents(deck: Deck): { url: string; record: AgentV1 }[] {
+/**
+ * The agent nodes a deck's record names as its creators, one per
+ * author, at the nodes of `creator` (as deckToRecord takes them).
+ */
+export function deckAgents(
+  deck: Deck,
+  creator: readonly string[] = agentUrlsOf(deck.url, deck.authors),
+): { url: string; record: AgentV1 }[] {
   const agents = new Map<string, AgentV1>();
-  for (const author of deck.authors) {
-    agents.set(agentUrlOf(deck.url, author), agentToRecord(author));
+  for (const [i, author] of deck.authors.entries()) {
+    agents.set(creator[i], agentToRecord(author));
   }
   return [...agents].map(([url, record]) => ({ url, record }));
 }

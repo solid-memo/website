@@ -86,6 +86,16 @@ describe("deckToDraft", () => {
     ]);
   });
 
+  it("keeps two authors whose names fold alike two agents", () => {
+    const authors = ["Jane Doe <jane@example.org>", "Jane Doe <jane@exämple.org>"];
+    const { draft } = deckToDraft({ ...deck, authors }, [], DRAFT, NOW);
+    expect(draft.root.creator).toHaveLength(2);
+    expect(draft.agents.map((agent) => agent.data)).toEqual([
+      { name: "Jane Doe", mbox: "mailto:jane@example.org" },
+      { name: "Jane Doe", mbox: "mailto:jane@exämple.org" },
+    ]);
+  });
+
   it("keeps every card under its id, retired ones too, with its wrong options and what it is about", () => {
     const { draft } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(draft.cards).toEqual([
