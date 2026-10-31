@@ -14,6 +14,7 @@ import {
   type ReviewState,
 } from "./review";
 import { nextDueDate, studyDayOf } from "./scheduling";
+import { fnv1a } from "./fnv1a";
 import { boundedSm2State, MAX_INTERVAL_DAYS, type Sm2State } from "./sm2";
 import { daysBetween, gradeGroupOf } from "./studyPatterns";
 
@@ -23,7 +24,12 @@ import { daysBetween, gradeGroupOf } from "./studyPatterns";
  * description of FSRS-6, as fsrs-rs v6.6.2 (BSD-3-Clause) gives it:
  * https://github.com/open-spaced-repetition/fsrs-rs/blob/v6.6.2/src/model.rs
  * (docs/srs.md, FSRS-6, which also says what Solid Memo fixes). In
- * 64-bit floating point throughout, in whole study days, without fuzz.
+ * 64-bit floating point throughout, in whole study days. The interval
+ * is fuzzed by the ranges py-fsrs v6.3.2 (MIT) and Anki 26.09.3
+ * (AGPL-3.0-or-later) give, reimplemented, by a factor drawn from the prompt and
+ * its last review rather than at random (fuzzedInterval, fuzzFactor):
+ * https://github.com/open-spaced-repetition/py-fsrs/blob/v6.3.2/fsrs/scheduler.py
+ * https://github.com/ankitects/anki/blob/26.09.3/rslib/src/scheduler/states/fuzz.rs
  */
 
 /** The scheduler that sets the due days: the notations of the Schedulers scheme's concepts. */
@@ -106,6 +112,74 @@ export function retrievability(elapsedDays: number, stability: number): number {
 export function fsrsInterval(stability: number, desiredRetention: number): number {
   const days = (stability / FACTOR) * (desiredRetention ** (-1 / DECAY) - 1);
   return clamp(Math.round(days), 1, MAX_INTERVAL_DAYS);
+}
+
+/**
+ * How far fuzz may move an interval each way, in days: 1, plus 0.15 for
+ * each day from 2.5 to 7, 0.10 for each from 7 to 20 and 0.05 for each
+ * past 20 (py-fsrs's `FUZZ_RANGES`, Anki's `fuzz_delta`).
+ */
+const FUZZ_RANGES = [
+  { start: 2.5, end: 7, factor: 0.15 },
+  { start: 7, end: 20, factor: 0.1 },
+  { start: 20, end: Number.POSITIVE_INFINITY, factor: 0.05 },
+] as const;
+
+/** Intervals shorter than this many days are not fuzzed. */
+const MIN_FUZZED_DAYS = 2.5;
+
+/**
+ * The fewest and most days fuzz may make an interval of `days` (of
+ * 2.5 days or more): `days` less and plus its delta, rounded, from 2
+ * days to 36,500.
+ */
+function fuzzRange(days: number): { min: number; max: number } {
+  let delta = 1;
+  for (const range of FUZZ_RANGES) {
+    delta += range.factor * Math.max(Math.min(days, range.end) - range.start, 0);
+  }
+  const max = Math.min(Math.round(days + delta), MAX_INTERVAL_DAYS);
+  return { min: Math.min(Math.max(2, Math.round(days - delta)), max), max };
+}
+
+/**
+ * An interval of `days` fuzzed by `factor`, from 0 up to 1: a day of
+ * its fuzz range, the fewest at 0, each day as likely for a factor
+ * spread evenly. An interval shorter than 2.5 days stays as it is. For
+ * one factor a longer interval never gives a shorter fuzzed one.
+ */
+export function fuzzedInterval(days: number, factor: number): number {
+  if (days < MIN_FUZZED_DAYS) return days;
+  const { min, max } = fuzzRange(days);
+  return Math.floor(factor * (max - min + 1) + min);
+}
+
+/**
+ * A 32-bit hash with its bits mixed by MurmurHash3's finalizer
+ * (fmix32), so that texts a character apart, such as two instants a
+ * second apart, give factors spread across 0 to 1, as FNV-1a alone
+ * spreads them less evenly.
+ */
+function mixed(hash: number): number {
+  let h = hash ^ (hash >>> 16);
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
+/**
+ * The fuzz factor of a review of a prompt, from 0 up to 1: a hash
+ * (fnv1a, mixed) of the prompt and the instant of its last review
+ * before this one (`lastReviewedAt`; null for a new prompt), not of the
+ * time or the rating. So a grade gives the due day its preview showed, every rating
+ * of a review shares one factor and keeps the intervals in the ratings'
+ * order, and the same review graded again (after an undo) falls due the
+ * same day; the next review draws another.
+ */
+export function fuzzFactor(key: ReviewKey, lastReviewedAt: string | null): number {
+  const last = lastReviewedAt === null ? "" : String(Date.parse(lastReviewedAt));
+  return mixed(fnv1a(`${key.cardId}\n${key.direction}\n${last}`)) / 2 ** 32;
 }
 
 /** The difficulty a first rating gives, before it is kept to 1–10. */
@@ -280,10 +354,11 @@ function snapshotOf(state: FsrsState): FsrsSnapshot {
  * on the fresh FSRS-6 state, else on an estimate from the SM-2 state,
  * else it starts from the rating (a new prompt); the elapsed days are
  * the study days since the last review, 0 the same study day. The due
- * day is the interval at `desiredRetention` after today. The first
- * review of a study day snapshots a fresh state, and later ones that
- * day keep its snapshot; an estimate or a new prompt has none, as
- * nothing FSRS-6 wrote is there to restore.
+ * day is the interval at `desiredRetention`, fuzzed by the factor of
+ * the prompt and its last review (fuzzedInterval, fuzzFactor), after
+ * today. The first review of a study day snapshots a fresh state, and
+ * later ones that day keep its snapshot; an estimate or a new prompt
+ * has none, as nothing FSRS-6 wrote is there to restore.
  */
 export function fsrsReview(
   key: ReviewKey,
@@ -314,7 +389,14 @@ export function fsrsReview(
     direction: key.direction,
     stability: memory.stability,
     difficulty: memory.difficulty,
-    due: nextDueDate(now, fsrsInterval(memory.stability, desiredRetention), dayBoundaryHour),
+    due: nextDueDate(
+      now,
+      fuzzedInterval(
+        fsrsInterval(memory.stability, desiredRetention),
+        fuzzFactor(key, sm2?.lastReviewedAt ?? null),
+      ),
+      dayBoundaryHour,
+    ),
     firstReviewedAt: sm2?.firstReviewedAt ?? now.toISOString(),
     lastReviewedAt: now.toISOString(),
     formatVersion: FSRS_REVIEW_STATE_FORMAT_VERSION,

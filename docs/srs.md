@@ -145,7 +145,12 @@ project, described in
 Solid Memo reimplements FSRS-6's formulas and default parameters as
 the reference implementation
 [fsrs-rs v6.6.2](https://github.com/open-spaced-repetition/fsrs-rs/blob/v6.6.2/src/model.rs)
-(BSD-3-Clause) gives them, and copies no code from it.
+(BSD-3-Clause) gives them, and copies no code from it. The fuzz ranges
+are py-fsrs's
+([v6.3.2](https://github.com/open-spaced-repetition/py-fsrs/blob/v6.3.2/fsrs/scheduler.py),
+MIT) and Anki's
+([26.09.3](https://github.com/ankitects/anki/blob/26.09.3/rslib/src/scheduler/states/fuzz.rs)),
+reimplemented too.
 [Decisions fixed in code](#decisions-fixed-in-code-fsrs-6) says where
 Solid Memo fixes what FSRS leaves to the app.
 
@@ -198,7 +203,7 @@ a later one:   S, D kept to 0.001–36,500 and 1–10 first; R = R(t, S)
   S' is kept from 0.001 to 36,500.
 
 interval = clamp(round(I(S', desired retention)), 1, 36500)
-due = today + interval
+due = today + fuzzed(interval, f)          f: the fuzz factor, from 0 up to 1 (Fuzz)
 ```
 
 | Parameters | Default | Used for |
@@ -222,6 +227,50 @@ S = max(interval, 0.001)
 D = clamp(11 − (ease − 1) / (e^w8 · S^(−w9) · (e^(0.1·w10) − 1)), 1, 10)
 ```
 
+#### Fuzz
+
+Fuzz spreads out the due days of cards answered alike, so that cards
+learned together don't keep falling due together. An interval `I` of
+2.5 days or more becomes a day from `min` to `max`, each as likely
+(`fuzzedInterval`); a shorter one stays as it is:
+
+```text
+delta = 1 + 0.15 · max(min(I, 7) − 2.5, 0)
+          + 0.10 · max(min(I, 20) − 7, 0)
+          + 0.05 · max(I − 20, 0)
+max   = min(round(I + delta), 36500)
+min   = min(max(2, round(I − delta)), max)
+fuzzed(I, f) = floor(f · (max − min + 1) + min)
+```
+
+The factor `f` isn't random: it's a hash of the prompt (card and
+direction) and the instant of its last review before this one, or of
+the prompt alone for a new one (`fuzzFactor`). The hash is 32-bit
+FNV-1a, its bits mixed by MurmurHash3's finalizer, divided by 2^32.
+Neither the time of the grade nor the rating goes in. So:
+
+- A grade sets the due day its button showed (`previewIntervals`).
+- The four ratings of a review share a factor, and a longer interval
+  never fuzzes to a shorter one, so Hard, Good and Easy stay in order.
+- A review undone and graded again falls due the same day; the next
+  review draws another factor.
+- The domain stays pure, and the tests reproducible.
+
+For example, Good gives a card an interval of 34 days. Its delta is
+1 + 0.15 · 4.5 + 0.10 · 13 + 0.05 · 14 = 3.675, so the due day is 30
+to 38 days away, nine days. Card `c`, front to back, last reviewed at
+2026-09-11T10:00:00Z, has a factor of about 0.3992: floor(0.3992 · 9 +
+30) = 33 days.
+
+| Interval | Fewest | Most |
+|---|---|---|
+| 2 | 2 | 2 |
+| 3 | 2 | 4 |
+| 7 | 5 | 9 |
+| 20 | 17 | 23 |
+| 100 | 93 | 107 |
+| 36,500 | 34,673 | 36,500 |
+
 #### Decisions fixed in code (FSRS-6)
 
 - **Default parameters**, not trained on the learner's answers, in
@@ -229,8 +278,11 @@ D = clamp(11 − (ease − 1) / (e^w8 · S^(−w9) · (e^(0.1·w10) − 1)), 1, 
 - **Whole study days.** `t` counts study days by the instance's day
   boundary, as SM-2's due days do. A second review the same study day
   has `t = 0` and takes the same-day formula, Again included.
-- **No fuzz.** The interval is rounded to whole days, from 1 to
-  36,500; the same answers give the same due days.
+- **Fuzz, always, from the prompt.** The interval is rounded to whole
+  days, from 1 to 36,500, then fuzzed ([Fuzz](#fuzz)) by a factor the
+  prompt and its last review give. There's no preference to turn it
+  off. SM-2's intervals aren't fuzzed, and the switch to FSRS-6 keeps
+  SM-2's due days.
 - **Ratings.** A grade maps to a rating by its button (`ratingOfGrade`,
   `gradeGroupOf`): 0 to 2 Again, 3 Hard, 4 Good, 5 Easy. A course's
   multiple-choice answer is Good when right and Again when wrong
@@ -350,7 +402,8 @@ before is a new prompt, a stability and difficulty, or an SM-2 ease
 and interval to estimate from.
 [fsrs.test.ts](../packages/domain/src/fsrs.test.ts) parses the header
 and the five number columns and checks the code against every row, to
-within 0.0001 (the table rounds to 4 decimals). A change to the
+within 0.0001 (the table rounds to 4 decimals). The interval is before
+fuzz ([Fuzz](#fuzz)). A change to the
 formulas or a row that leaves the two apart fails the tests. Keep the
 header and the five number columns as they are.
 
@@ -513,7 +566,8 @@ Under each grade button, as its description, is the interval
 "1 day", "6 days", "15 days"
 (`previewIntervals` in [grading.ts](../packages/domain/src/grading.ts)).
 It's SM-2's under SM-2, and under FSRS-6 the FSRS-6 interval at the
-desired retention, which depends on the days since the last review.
+desired retention, fuzzed: the study days to the due day the grade
+sets. It depends on the days since the last review.
 The states and the preferences (scheduler and buttons) come with the
 queue as `getStudyQueue` read them. The session keeps each answer's new
 states: a card put back shows the intervals its first answer left.
