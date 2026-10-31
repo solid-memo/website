@@ -21,7 +21,7 @@
     "@solid-memo/ui": "*",
     "@solid-memo/vocab": "*",
     "@tanstack/react-query": "^5.105.0",
-    "preact": "^11.0.2"
+    "preact": "^11.1.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
