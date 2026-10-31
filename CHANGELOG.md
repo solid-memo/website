@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.21.0](https://github.com/solid-memo/website/compare/v6.20.4...v6.21.0) (2026-10-31)
+
+### Features
+
+* **decks:** add a course on open source and open content licenses ([9339c86](https://github.com/solid-memo/website/commit/9339c86a279528f0bc27025705941ee9ee9bd956)), closes [#425](https://github.com/solid-memo/website/issues/425)
+* **decks:** add a course on reading Hangul ([9dbf268](https://github.com/solid-memo/website/commit/9dbf268c6168b4e12002d9270c3f493826d73312)), closes [#423](https://github.com/solid-memo/website/issues/423)
+
+### Bug Fixes
+
+* **solid:** read only release addresses from a creator's links ([368f9fe](https://github.com/solid-memo/website/commit/368f9fef3e0a98cfc0e476326167c28403b3f3bf))
+
 ## [6.20.4](https://github.com/solid-memo/website/compare/v6.20.3...v6.20.4) (2026-10-31)
 
 ### Bug Fixes
