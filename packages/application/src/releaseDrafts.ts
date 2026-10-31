@@ -24,6 +24,7 @@ import {
   publishedIdsOf,
   type DraftChange,
   type DraftRefusal,
+  type DraftTriple,
   type PublishedIds,
   type ReleaseDraft,
   unsupportedIdOf,
@@ -76,7 +77,7 @@ export type NewDraft =
   | { kind: "fromDeck"; deck: Deck }
   /** A release, by its URL: the next version of it (nextVersionDraft), describing the series and publisher it names elsewhere. */
   | { kind: "nextVersionOf"; url: string }
-  /** A release in a Turtle or JSON-LD file the user picks, as it is (releaseToDraft). */
+  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements (ownStatements, releaseToDraft). */
   | { kind: "fromFile" };
 
 /** A draft made, and for one made from a copy of a release, that release: to start the next version of instead. */
@@ -194,14 +195,54 @@ function placeTaken(error: unknown, url: string): boolean {
  * The release, unless it names a subject by an id a draft cannot keep
  * (releaseIdUnsupported), or has a card, chapter, step or distractor
  * outside it (releaseForeignPart): no editor or check of a draft would
- * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp).
+ * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp). Of
+ * its other statements, it keeps only its own (ownStatements).
  */
 function draftable(release: ReleaseDraft): ReleaseDraft {
   const id = unsupportedIdOf(release);
   if (id !== null) throw new AppError("releaseIdUnsupported", { id });
   const foreign = strayPartsOf(release).find((stray) => idIn(release, stray) === null);
   if (foreign !== undefined) throw new AppError("releaseForeignPart", { part: foreign });
-  return release;
+  return ownStatements(release);
+}
+
+/**
+ * The release with only the statements a draft of it keeps: those of
+ * the release and its own subjects (`<release>#id`), and of what they
+ * name, at any depth (a source, a license, a blank node). A statement of
+ * anything else is dropped: no editor shows it and no check sees it, and
+ * published, at an address it names, it would say more of that release
+ * than its draft does (GHSA-p2pr-x6fw-hrfx).
+ */
+function ownStatements(release: ReleaseDraft): ReleaseDraft {
+  const bySubject = new Map<string, DraftTriple[]>();
+  for (const triple of release.triples) {
+    const of = bySubject.get(triple.subject);
+    if (of === undefined) bySubject.set(triple.subject, [triple]);
+    else of.push(triple);
+  }
+  const kept = new Set<string>();
+  const queue: string[] = [];
+  const keep = (subject: string) => {
+    if (kept.has(subject)) return;
+    kept.add(subject);
+    queue.push(subject);
+  };
+  keep(release.url);
+  for (const subject of bySubject.keys()) if (idIn(release, subject) !== null) keep(subject);
+  // What the records name: each IRI of theirs, as a move of them sees it.
+  rebaseDraft({ ...release, triples: [] }, release.url, (iri) => {
+    keep(iri);
+    return iri;
+  });
+  for (let subject = queue.pop(); subject !== undefined; subject = queue.pop()) {
+    for (const { object } of bySubject.get(subject) ?? []) {
+      if (object.kind === "iri") keep(object.value);
+      else if (object.kind === "blank") keep(`_:${object.value}`);
+    }
+  }
+  const triples = release.triples.filter((triple) => kept.has(triple.subject));
+  return triples.length === release.triples.length ? release : { ...release, triples };
 }
 
 /** The name a release's URL gives its series (`…/capitals/v2.ttl` → `capitals`); null when it is named otherwise. */

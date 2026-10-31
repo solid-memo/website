@@ -1781,6 +1781,7 @@
     "draftIdUnsupported": "Este borrador llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. Solid Memo no lo abre ni lo cambia.",
     "releaseIdUnsupported": "Esta publicación llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. No se puede convertir en borrador.",
     "releaseForeignPart": "Esta publicación tiene una tarjeta, un capítulo, un paso o una opción incorrecta en {part}, fuera de la propia publicación. El Studio solo muestra y comprueba las partes propias de una publicación, así que no se puede convertir en borrador.",
+    "releaseForeignStatement": "Este borrador afirma algo de {subject}, la dirección de la publicación que crearía o una parte de ella, que el Studio no muestra ni comprueba, así que la publicación no se creó. Publícalo en otra carpeta de tu Pod o crea un borrador nuevo que no lo afirme.",
     "releaseTaken": "Ya hay una publicación en {url}, y una publicación nunca se sobrescribe. Publica la siguiente versión o elige otra carpeta.",
     "releaseHasErrors": {
       "one": "La comprobación de la publicación encuentra {count} error. Corrígelo antes de publicarla.",

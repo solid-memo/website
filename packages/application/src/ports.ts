@@ -507,7 +507,10 @@ export interface ReleaseDraftRepository {
    * released `issued` (also its time of change), written at library
    * deck format 6, with the series it starts described in it. With
    * `version`, the draft as it was at that version (read), or
-   * changedElsewhere when its documents changed since.
+   * changedElsewhere when its documents changed since. A draft that
+   * states anything of `targetUrl` or a subject of it (`<targetUrl>#id`)
+   * itself, which would say more of the release than its parts do, is
+   * releaseForeignStatement.
    */
   assemble(draftUrl: string, targetUrl: string, issued: string, version?: string): Promise<string>;
   /**

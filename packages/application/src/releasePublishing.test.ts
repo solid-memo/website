@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
-import { problem } from "@solid-memo/domain/release/problems";
+import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type { ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { courseDraft, DRAFT, NOW } from "@solid-memo/domain/testing/releaseDraft";
@@ -20,18 +20,20 @@ const INDEX = "https://site.example/decks/index.ttl";
 const TURTLE = "@base <x> .";
 const markdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
 
-const clean: ReleaseCheck = { rules: [], library: [], drops: [], markdown: [], shapes: [] };
+const clean: ReleaseCheck = { rules: [], library: [], drops: [], markdown: [], shapes: null };
 
 const WEBID = "https://pod.example/profile/card#me";
 
 function setUp({
   stored = courseDraft() as ReleaseDraft,
   check = clean,
+  shapes = [],
   shared = true,
   storages = [{ url: "https://pod.example/" }],
 }: {
   stored?: ReleaseDraft;
   check?: ReleaseCheck;
+  shapes?: ReleaseProblem[];
   shared?: boolean;
   storages?: { url: string }[] | Error;
 } = {}) {
@@ -56,10 +58,12 @@ function setUp({
     readLibraryIndex: vi.fn(async () => ({ url: INDEX, publisher: null, releases: [] })),
   } as unknown as DeckLibrary;
   const fileExchange = { save: vi.fn<FileExchange["save"]>(), open: vi.fn<FileExchange["open"]>() };
+  const shapeValidator = { validateRelease: vi.fn(async () => shapes) };
   const useCases = createReleasePublishingUseCases({
     drafts,
     releaseDraftRepository: repository,
     releasePublisher: publisher,
+    shapeValidator,
     deckLibrary,
     fileExchange,
     storageGateway: {
@@ -70,19 +74,18 @@ function setUp({
     },
     now: () => new Date(NOW),
   });
-  return { drafts, repository, publisher, fileExchange, useCases };
+  return { drafts, repository, publisher, fileExchange, shapeValidator, useCases };
 }
 
 describe("publishRelease", () => {
-  it("checks the draft as a pod's release, publishes it at the target, and marks the draft released", async () => {
-    const { drafts, repository, publisher, useCases } = setUp();
+  it("checks the draft as a pod's release, its shapes at the target, publishes it there, and marks the draft released", async () => {
+    const { drafts, repository, publisher, shapeValidator, useCases } = setUp();
     await expect(useCases.publishRelease(DRAFT, TARGET, markdownCheck)).resolves.toEqual({
       url: TARGET,
       public: true,
     });
-    expect(drafts.checkReleaseDraft).toHaveBeenCalledWith(courseDraft(), markdownCheck, "pod", {
-      shapes: true,
-    });
+    expect(drafts.checkReleaseDraft).toHaveBeenCalledWith(courseDraft(), markdownCheck, "pod");
+    expect(shapeValidator.validateRelease).toHaveBeenCalledWith(courseDraft(), TARGET);
     expect(repository.assemble).toHaveBeenCalledWith(DRAFT, TARGET, NOW, "v1");
     expect(publisher.publish).toHaveBeenCalledWith(INSTANCE, TURTLE, TARGET);
     const [before, after, version] = repository.applyChanges.mock.calls[0]!;
@@ -102,7 +105,7 @@ describe("publishRelease", () => {
   it("publishes nothing while the check finds an error; a warning does not stop it", async () => {
     const error = problem(DRAFT, { code: "unshaped", params: {} });
     const warning = problem(DRAFT, { code: "unshaped", params: {} }, { severity: "warning" });
-    const stopped = setUp({ check: { ...clean, rules: [error], shapes: [error, warning] } });
+    const stopped = setUp({ check: { ...clean, rules: [error] }, shapes: [error, warning] });
     await expect(
       stopped.useCases.publishRelease(DRAFT, TARGET, markdownCheck),
     ).rejects.toMatchObject({ code: "releaseHasErrors", vars: { count: 2 } });

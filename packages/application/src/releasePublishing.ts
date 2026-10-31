@@ -14,6 +14,7 @@ import type {
   FileExchange,
   ReleaseDraftRepository,
   ReleasePublisher,
+  ShapeValidator,
   StorageGateway,
 } from "./ports";
 import type { ReleaseDraftUseCases } from "./releaseDrafts";
@@ -41,8 +42,9 @@ export interface SavedRelease {
 export interface ReleasePublishingUseCases {
   /**
    * Publish the draft at `targetUrl` in the pod: checked first, as a
-   * release in a pod is (its rules, Markdown and shapes; an error stops
-   * it, releaseHasErrors), made one Turtle document there (assemble),
+   * release in a pod is (its rules, Markdown and shapes, the shapes as
+   * the release it is at `targetUrl`; an error stops it,
+   * releaseHasErrors), made one Turtle document there (assemble),
    * written only where nothing is (releaseTaken), made readable by
    * everyone and linked from the catalog; then the draft is marked
    * released (`sm:releasedAs`), and no longer changed. The draft is
@@ -88,6 +90,7 @@ export function createReleasePublishingUseCases({
   drafts,
   releaseDraftRepository,
   releasePublisher,
+  shapeValidator,
   deckLibrary,
   fileExchange,
   storageGateway,
@@ -96,6 +99,7 @@ export function createReleasePublishingUseCases({
   drafts: Pick<ReleaseDraftUseCases, "readReleaseDraft" | "checkReleaseDraft">;
   releaseDraftRepository: ReleaseDraftRepository;
   releasePublisher: ReleasePublisher;
+  shapeValidator: Pick<ShapeValidator, "validateRelease">;
   deckLibrary: DeckLibrary;
   fileExchange: FileExchange;
   storageGateway: Pick<StorageGateway, "discoverStorages">;
@@ -123,8 +127,14 @@ export function createReleasePublishingUseCases({
       const { draft, version } = await drafts.readReleaseDraft(draftUrl);
       if (draft.root.releasedAs !== undefined)
         throw new AppError("draftReleased", { url: draft.root.releasedAs });
-      const check = await drafts.checkReleaseDraft(draft, markdownCheck, "pod", { shapes: true });
-      const errors = checkProblems(check).filter((one) => one.severity === "error").length;
+      // The shapes of the release where it is published: what it states there is what is checked (GHSA-p2pr-x6fw-hrfx).
+      const [check, shapes] = await Promise.all([
+        drafts.checkReleaseDraft(draft, markdownCheck, "pod"),
+        shapeValidator.validateRelease(draft, targetUrl),
+      ]);
+      const errors = [...checkProblems(check), ...shapes].filter(
+        (one) => one.severity === "error",
+      ).length;
       if (errors > 0) throw new AppError("releaseHasErrors", { count: errors });
       // A draft names the instance it is in.
       const { instanceUrl } = draftPlaceOf(draftUrl)!;
