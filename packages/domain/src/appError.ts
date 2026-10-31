@@ -182,6 +182,8 @@ export const ERROR_TEMPLATES = {
     "This release holds a card, chapter, step or wrong option at {part}, outside the release itself. The Studio shows and checks only a release's own parts, so it cannot be made a draft.",
   releaseForeignStatement:
     "This draft states something of {subject}, the address of the release it would make or a part of it, which the Studio neither shows nor checks, so the release was not made. Publish it in another folder of your pod, or make a new draft that does not state it.",
+  draftAliasedSubject:
+    "A document of this draft states something of {subject}, one of the draft's own addresses, which the Studio neither shows nor checks, so the release was not made. Make the draft again from its release, or copy it: the copy leaves that out.",
   releaseTaken:
     "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
   releaseHasErrors: {

@@ -58,6 +58,7 @@ import {
   draftFromQuads,
   draftIriOf,
   entryQuads,
+  inPlaceIn,
   keyOf,
   quadOf,
   quadsOf,
@@ -145,8 +146,12 @@ export function createSolidReleaseDraftRepository({
     if (!urls.includes(draftUrl)) throw new AppError("draftGone");
     const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
     const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
+    const inPlace = inPlaceIn(draftContainerOf(draftUrl), draftUrl);
     const quads = datasets.flatMap((dataset, at) =>
-      quadsOf(dataset).map((quad) => {
+      quadsOf(dataset).flatMap((quad) => {
+        // A subject named otherwise than the draft writes it there is not the draft's (inPlaceIn); publishing refuses it.
+        if (quad.subject.termType !== "BlankNode" && !inPlace(urls[at]!, quad.subject.value))
+          return [];
         // Blank nodes are named afresh in each document: here, they are each document's own.
         const blank = (key: string) =>
           key.startsWith("_:") ? `_:d${at}-${key.slice(2)}` : iriOf(key);
@@ -302,6 +307,7 @@ export function createSolidReleaseDraftRepository({
       const urls = await documentsOf(draftUrl);
       if (!urls.includes(draftUrl)) throw new AppError("draftGone");
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
+      const inPlace = inPlaceIn(draftContainerOf(draftUrl), draftUrl);
       const to = (iri: string) => moved(iriOf(iri), draftUrl, targetUrl);
       const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
       if (version !== undefined && versionOfDocuments(urls, datasets) !== version)
@@ -314,6 +320,9 @@ export function createSolidReleaseDraftRepository({
           const label = (value: string) => `d${at}-${value}`;
           if (quad.subject.termType !== "BlankNode" && atTargetAlready(iriOf(quad.subject.value)))
             throw new AppError("releaseForeignStatement", { subject: iriOf(quad.subject.value) });
+          // So would one of the draft's own subjects named otherwise than the draft writes it, which no read of the draft has (GHSA-8w75-jg23-rxq5).
+          if (quad.subject.termType !== "BlankNode" && !inPlace(urls[at]!, quad.subject.value))
+            throw new AppError("draftAliasedSubject", { subject: quad.subject.value });
           return quadOf(
             quad.subject.termType === "BlankNode"
               ? `_:${label(quad.subject.value)}`

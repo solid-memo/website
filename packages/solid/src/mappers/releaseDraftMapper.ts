@@ -158,6 +158,29 @@ export function draftIriOf(container: string, draftUrl: string): (iri: string) =
 }
 
 /**
+ * Whether a subject of the draft's document `document` is named there
+ * as the draft writes it (draftEntries): by an IRI draftIriOf leaves as
+ * it is, as the release document itself in it, or as a fragment of the
+ * document it is in. Any other name of the draft's documents (another
+ * document's fragment, or a document other than the release document
+ * itself) would be read as one of the draft's own subjects, what it
+ * states hidden behind the record read of that subject, and published
+ * with it (GHSA-8w75-jg23-rxq5).
+ */
+export function inPlaceIn(
+  container: string,
+  draftUrl: string,
+): (document: string, iri: string) => boolean {
+  const iriOf = draftIriOf(container, draftUrl);
+  return (document, iri) => {
+    const hash = iri.indexOf("#");
+    const named = hash === -1 ? iri : iri.slice(0, hash);
+    if (iriOf(iri) === iri && named !== draftUrl) return true;
+    return named === document && (hash !== -1 || iri === draftUrl);
+  };
+}
+
+/**
  * The draft (or release) at `url` its triples state, every IRI as the
  * draft names it; null when it has no root this app can read (an
  * sm:Deck at `url` with its shape's required fields). The release a

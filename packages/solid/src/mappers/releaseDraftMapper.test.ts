@@ -11,6 +11,7 @@ import {
   draftIriOf,
   draftQuads,
   entryQuads,
+  inPlaceIn,
   keyOf,
   quadOf,
   sameEntry,
@@ -40,6 +41,30 @@ describe("draftIriOf", () => {
   it("leaves any other IRI as it is", () => {
     expect(iriOf(`${CONTAINER}notes.ttl#x`)).toBe(`${CONTAINER}notes.ttl#x`);
     expect(iriOf("https://elsewhere.example/#x")).toBe("https://elsewhere.example/#x");
+  });
+});
+
+describe("inPlaceIn", () => {
+  const inPlace = inPlaceIn(CONTAINER, DRAFT);
+  const CARDS = `${CONTAINER}cards.ttl`;
+  const CHAPTER = `${CONTAINER}chapter-ch-a.ttl`;
+
+  it("takes a subject named as the draft writes it in the document it is in", () => {
+    expect(inPlace(DRAFT, DRAFT)).toBe(true);
+    expect(inPlace(DRAFT, of("q1"))).toBe(true);
+    expect(inPlace(CARDS, `${CARDS}#q2`)).toBe(true);
+    expect(inPlace(CHAPTER, `${CHAPTER}#q1`)).toBe(true);
+    expect(inPlace(CARDS, `${CONTAINER}notes.ttl#x`)).toBe(true);
+    expect(inPlace(CARDS, "https://elsewhere.example/#x")).toBe(true);
+  });
+
+  it("does not take one of the draft's documents, or another document's fragment, as one of its subjects (GHSA-8w75-jg23-rxq5)", () => {
+    expect(inPlace(DRAFT, CARDS)).toBe(false);
+    expect(inPlace(CARDS, CARDS)).toBe(false);
+    expect(inPlace(CARDS, DRAFT)).toBe(false);
+    expect(inPlace(DRAFT, `${CARDS}#q2`)).toBe(false);
+    expect(inPlace(CARDS, `${CHAPTER}#q1`)).toBe(false);
+    expect(inPlace(CARDS, of("q2"))).toBe(false);
   });
 });
 

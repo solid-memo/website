@@ -374,6 +374,75 @@ describe("createReleaseDraft", () => {
     expect(next.triples).toEqual(expect.arrayContaining(named));
   });
 
+  it("drops what a release states of, or names by, another address in the new draft's container (GHSA-8w75-jg23-rxq5)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const SOURCE = "https://source.example/";
+    const planted = (version: number): DraftTriple[] => {
+      const container = `${INSTANCE}drafts/solid/v${version}/`;
+      return [
+        {
+          subject: SOURCE,
+          predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+          object: { kind: "iri", value: `${container}cards.ttl` },
+        },
+        {
+          subject: `${container}cards.ttl`,
+          predicate: "http://purl.org/dc/terms/license",
+          object: { kind: "iri", value: "https://elsewhere.example/all-rights-reserved" },
+        },
+        {
+          subject: `${container}cards.ttl`,
+          predicate: SM.releasedAs,
+          object: { kind: "iri", value: "https://elsewhere.example/x/v9.ttl" },
+        },
+        {
+          subject: SOURCE,
+          predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+          object: { kind: "iri", value: `${container}chapter-ch-a.ttl#q-a-1a` },
+        },
+        {
+          subject: `${container}chapter-ch-a.ttl#q-a-1a`,
+          predicate: SM.frontImage,
+          object: { kind: "blank", value: "b9" },
+        },
+        {
+          subject: "_:b9",
+          predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+          object: { kind: "iri", value: `${container}notes.ttl` },
+        },
+        // The new draft's own address, as the release names it before it is moved there.
+        {
+          subject: SOURCE,
+          predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+          object: { kind: "iri", value: `${container}release.ttl` },
+        },
+        {
+          subject: `${container}release.ttl`,
+          predicate: SM.releasedAs,
+          object: { kind: "iri", value: "https://elsewhere.example/x/v9.ttl" },
+        },
+      ];
+    };
+    // What the release, made the next version's draft, would state as that draft's own.
+    repository.readRelease.mockResolvedValueOnce({
+      ...release,
+      triples: [...release.triples, ...planted(2)],
+    });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere });
+    expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 2));
+    expect(created().triples).toEqual(nextVersionDraft(release, created().url, []).triples);
+    // And the release itself, made a draft.
+    repository.parseRelease.mockResolvedValueOnce({
+      ...release,
+      triples: [...release.triples, ...planted(1)],
+    });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
+    expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 1));
+    expect(created().triples).toEqual(rebaseDraft(release, created().url).triples);
+  });
+
   it("takes the next name when its place was taken elsewhere meanwhile, a few times", async () => {
     const { useCases, repository } = setUp();
     repository.create.mockRejectedValueOnce(
@@ -435,6 +504,31 @@ describe("copyReleaseDraft", () => {
     expect(repository.read).toHaveBeenCalledWith(guest);
     expect(created()).toEqual(rebaseDraft(stored, draftUrlOf(INSTANCE, "solid-2", 2)));
     expect(JSON.stringify(created())).not.toContain("guest.example");
+  });
+
+  it("drops what the draft states of, or names by, another address in the copy's container (GHSA-8w75-jg23-rxq5)", async () => {
+    const DRAFT = draftUrlOf(INSTANCE, "solid", 1);
+    const draft = rebaseDraft(courseDraft(), DRAFT);
+    const container = `${INSTANCE}drafts/solid-2/v1/`;
+    const planted: DraftTriple[] = [
+      {
+        subject: "https://source.example/",
+        predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+        object: { kind: "iri", value: `${container}cards.ttl` },
+      },
+      {
+        subject: `${container}cards.ttl`,
+        predicate: "http://purl.org/dc/terms/license",
+        object: { kind: "iri", value: "https://elsewhere.example/all-rights-reserved" },
+      },
+    ];
+    const { useCases, created } = setUp({
+      stored: { ...draft, triples: [...draft.triples, ...planted] },
+      drafts: [summary("solid", 1)],
+    });
+    await useCases.copyReleaseDraft(DRAFT, INSTANCE);
+    expect(created().url).toBe(draftUrlOf(INSTANCE, "solid-2", 1));
+    expect(created().triples).toEqual(rebaseDraft(draft, created().url).triples);
   });
 
   it("writes nothing of a guest's draft whose copy would still name the guest's pod", async () => {

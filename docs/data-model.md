@@ -1041,9 +1041,19 @@ own pod, as a draft, before publishing it
 
   A subject keeps its fragment id in whichever document it's in, and
   moves with its place (a question moved to another chapter goes to that
-  chapter's document); what names it names it where it is. A chapter's
-  document left with nothing in it is deleted. Anything else in the
-  container (`isDraftDocumentName` in
+  chapter's document); what names it names it where it is. A subject a
+  document names otherwise isn't read as the draft's, and publishing the
+  draft refuses it (`inPlaceIn` in
+  [releaseDraftMapper.ts](../packages/solid/src/mappers/releaseDraftMapper.ts)).
+  The names that count are those of the draft's documents:
+  `release.ttl`, `cards.ttl` and `chapter-<id>.ttl`. Named otherwise is
+  a fragment of another of them, one of them other than the release
+  document, or the release document as a subject in the cards document
+  or a chapter's. A fragment of a document's own address counts as named
+  where it is, whichever document the draft gives that subject: what
+  two documents state of one subject is read as one.
+  A chapter's document left with nothing in it is deleted. Anything else
+  in the container (`isDraftDocumentName` in
   [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) is
   another app's, and left alone. Every id of a draft is letters, digits,
   `.`, `_` and `-`, starting with a letter or digit (`DRAFT_ID`), so a
