@@ -127,7 +127,11 @@ async function deckWithStates(count: number) {
   return { fetch, deck, reviews, states };
 }
 
-describe("card writes", () => {
+// Each test does its work many times over, at up to thousands of cards: a
+// few seconds on a laptop, and many times that in CI, coverage on and
+// every package's tests run at once. What is held to is the ratio, of
+// CPU time; the clock only stops a test that never ends.
+describe("card writes", { timeout: 180_000 }, () => {
   it("add a release in time that grows with its cards, not their square", async () => {
     const ratio = await growthAsync(
       (count) => {
