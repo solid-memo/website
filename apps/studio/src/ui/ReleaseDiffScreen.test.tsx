@@ -13,7 +13,9 @@ import { releaseDiff, simulateLearnerUpgrade } from "@solid-memo/domain/release/
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
+import { growth } from "@solid-memo/domain/testing/growth";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
+import { subjectName } from "./problemText";
 import { ReleaseDiffScreen, subjectTarget } from "./ReleaseDiffScreen";
 
 const V1 = "https://pod.example/solid-memo/a/releases/solid/v1.ttl";
@@ -217,5 +219,54 @@ describe("subjectTarget", () => {
       card: "q-pods-1a",
     });
     expect(subjectTarget(draft, { kind: "distractor", id: "loose" })).toEqual({ screen: "draft" });
+  });
+});
+
+describe("naming and linking each changed subject", () => {
+  const i18n = { t: (key: string) => key, readerText: () => "" } as never;
+
+  /** A draft with `size` steps in one chapter and as many cards, three wrong options each. */
+  function largeDraft(size: number): ReleaseDraft {
+    const base = courseDraft();
+    const at = (id: string) => `${DRAFT_URL}#${id}`;
+    const ids = Array.from({ length: size }, (_, index) => index);
+    const options = (index: number) => [0, 1, 2].map((option) => `d-${index}-${option}`);
+    return {
+      ...base,
+      steps: ids.map((index) => ({
+        id: `s-${index}`,
+        data: { chapter: at("ch-pods"), position: index, checkedBy: [] },
+      })),
+      cards: ids.map((index) => ({
+        id: `q-${index}`,
+        data: { front: { en: `${index}` }, distractor: options(index).map(at), subject: [] },
+      })),
+      distractors: ids.flatMap(options).map((id) => ({ id, data: { text: { en: id } } })),
+    };
+  }
+
+  it("grows with the draft, not with its square, lookups built included, as the diff lists them all", () => {
+    const ratio = growth(
+      (size) => {
+        const draft = largeDraft(size);
+        const subjects = [
+          ...draft.steps.map(({ id }) => ({ kind: "step" as const, id })),
+          ...draft.cards.map(({ id }) => ({ kind: "card" as const, id })),
+          ...draft.distractors.map(({ id }) => ({ kind: "distractor" as const, id })),
+        ];
+        // A new draft object each call, as each edit makes one: its lookups
+        // are built again, so building them is timed too.
+        return () => {
+          const fresh = { ...draft };
+          return subjects.map((change) => [
+            subjectTarget(fresh, change),
+            subjectName(fresh, `${DRAFT_URL}#${change.id}`, i18n),
+          ]);
+        };
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

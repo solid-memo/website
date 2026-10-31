@@ -312,4 +312,18 @@ describe("subjectName", () => {
     expect(subjectName(loose, at("ch-pods"), en)).toBe("ch-pods");
     expect(subjectName(loose, at("loose"), en)).toBe("loose");
   });
+
+  it("names a step of a chapter the draft does not have, and a retired step, by their ids", () => {
+    const stray = {
+      ...draft,
+      steps: [
+        ...draft.steps,
+        { id: "stray", data: { chapter: at("nowhere"), checkedBy: [] } },
+        { id: "retired", data: { chapter: at("ch-pods"), deprecated: true, checkedBy: [] } },
+      ],
+    };
+    expect(subjectName(stray, at("stray"), en)).toBe("stray");
+    expect(subjectName(stray, at("retired"), en)).toBe("retired");
+    expect(subjectName(stray, at("ch-pods-2"), en)).toBe("Step 2");
+  });
 });

@@ -5,18 +5,14 @@
 import { useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import {
-  chapterOfStep,
   DRAFT_CARD_FILTERS,
   draftCardLanguages,
   draftCardRows,
   type DraftCardFilter,
   type DraftCardRow,
+  stepPlaceOf,
 } from "@solid-memo/domain/release/draftOutline";
-import {
-  liveSteps,
-  type QuestionPlace,
-  type ReleaseDraft,
-} from "@solid-memo/domain/release/releaseDraft";
+import type { QuestionPlace, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { DataLine } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Pager, paginate } from "@solid-memo/ui/Pager";
@@ -116,12 +112,10 @@ export function DraftCardsScreen({
     if (place === null) return t("studio.question.nowhere");
     if (place.kind === "review")
       return t("studio.question.atReview", { chapter: chapterName(place.chapter) });
-    const chapter = chapterOfStep(draft, place.step);
-    const number =
-      chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === place.step);
-    return number === -1
+    const at = stepPlaceOf(draft, place.step);
+    return at === null
       ? place.step
-      : t("studio.question.atStep", { chapter: chapterName(chapter!), step: number + 1 });
+      : t("studio.question.atStep", { chapter: chapterName(at.chapter), step: at.index + 1 });
   };
   const languageName = (tag: string) =>
     tag === "unstated" ? t("studio.draftCards.unstated") : tag;

@@ -5,7 +5,11 @@
 import type { DraftDiff } from "@solid-memo/application/releaseDrafts";
 import type { ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import type { SubjectChange } from "@solid-memo/domain/release/releaseDiff";
-import { iriIn, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  distractorCardOf,
+  iriIn,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseKind } from "@solid-memo/domain/release/releaseModel";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type MessageKey } from "@solid-memo/ui/i18n";
@@ -34,10 +38,10 @@ export function subjectTarget(
     case "card":
       return { screen: "question", card: id };
     case "distractor": {
-      const card = draft.cards.find((node) => node.data.distractor.includes(iriIn(draft, id)));
+      const card = distractorCardOf(draft, iriIn(draft, id));
       return card === undefined
         ? { screen: "draft" }
-        : { screen: "question", card: card.id, field: `distractor:${id}` };
+        : { screen: "question", card, field: `distractor:${id}` };
     }
   }
 }

@@ -16,6 +16,7 @@ import type { ReleaseProblem, ReleaseSeverity } from "./problems.ts";
 import { provenanceProblems } from "./provenanceRules.ts";
 import {
   activitiesOf,
+  distractorCardOf,
   generatingActivities,
   idIn,
   PROV,
@@ -197,25 +198,6 @@ export function groupProblems(problems: readonly ReleaseProblem[]): ProblemGroup
     .filter((group) => group.subjects.length > 0);
 }
 
-/**
- * The first card that names each wrong option, by the option, of each draft's cards.
- * Keyed by the cards array, it assumes the array is never changed in place: drafts are rebuilt immutably.
- */
-const distractorCards = new WeakMap<ReleaseDraft["cards"], ReadonlyMap<string, string>>();
-
-/** The id of the card whose wrong options include the subject, which its editor shows: undefined when none does. */
-function cardOfDistractor(draft: Pick<ReleaseDraft, "cards">, subject: string) {
-  let cards = distractorCards.get(draft.cards);
-  if (cards === undefined) {
-    const found = new Map<string, string>();
-    for (const node of draft.cards) {
-      for (const option of node.data.distractor) if (!found.has(option)) found.set(option, node.id);
-    }
-    distractorCards.set(draft.cards, (cards = found));
-  }
-  return cards.get(subject);
-}
-
 /** The ids of a draft's subjects that have an editor or a part of the release screen, read once a draft. */
 interface DraftSubjects {
   chapters: ReadonlySet<string>;
@@ -263,7 +245,7 @@ export function outlineProblems(
   const found = new Map<string, ReleaseProblem[]>();
   for (const one of problems) {
     const own = idIn(draft, one.subject);
-    const id = own === null ? null : (cardOfDistractor(draft, one.subject) ?? own);
+    const id = own === null ? null : (distractorCardOf(draft, one.subject) ?? own);
     if (id === null) continue;
     const under = found.get(id);
     if (under === undefined) found.set(id, [one]);
@@ -377,7 +359,7 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
       ...(cardField === undefined ? {} : { field: cardField }),
     };
   }
-  const card = id === null ? undefined : cardOfDistractor(draft, problem.subject);
+  const card = id === null ? undefined : distractorCardOf(draft, problem.subject);
   if (card !== undefined) return { screen: "question", card, field: `distractor:${id}` };
   if (SOURCE_CODES.has(code)) return { screen: "release", field: "sources" };
   if (has(subjects.agents)) return { screen: "release", field: "authors" };

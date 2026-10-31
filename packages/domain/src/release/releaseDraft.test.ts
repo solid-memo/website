@@ -16,6 +16,7 @@ import {
   authorNames,
   blankDraft,
   checkActivityTriples,
+  distractorCardOf,
   generatingActivities,
   idIn,
   idsInUse,
@@ -1702,6 +1703,37 @@ describe("mergedDraft", () => {
         return () => mergedDraft(draft, draft, draft);
       },
       2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+});
+
+describe("the card of a wrong option", () => {
+  it("is named by the first card that has a wrong option, and by none for one no card has", () => {
+    const course = courseDraft();
+    const [first] = course.cards;
+    const shared = { ...course, cards: [...course.cards, { ...first!, id: "q-copy" }] };
+    expect(distractorCardOf(shared, of("q-a-1a-d1"))).toBe("q-a-1a");
+    expect(distractorCardOf(shared, of("loose"))).toBeUndefined();
+  });
+
+  it("finds each wrong option's card in time that grows with the cards, not with their square", () => {
+    // Looking through every card's wrong options for each would take
+    // eight times as long for eight times the cards.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) => ({
+          id: `q-${i}`,
+          data: card(`${i}`, { distractor: [of(`d-${i}`)] }),
+        }));
+        return () => {
+          // A new list each time, as each edit to a card makes one.
+          const fresh = { cards: [...cards] };
+          for (let i = 0; i < count; i++) distractorCardOf(fresh, of(`d-${i}`));
+        };
+      },
+      500,
       8,
     );
     expect(ratio).toBeLessThan(4);

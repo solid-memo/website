@@ -17,6 +17,7 @@ import {
   outlineMove,
   retiredChapters,
   retiredSteps,
+  stepPlaceOf,
 } from "./draftOutline.ts";
 import { growth } from "../testing/growth.ts";
 import { applyDraftChanges, type ReleaseDraft } from "./releaseDraft.ts";
@@ -96,6 +97,43 @@ describe("the outline", () => {
     };
     expect(chapterOfStep(orphan, "lost")).toBeNull();
     expect(chapterOfStep(orphan, "free")).toBeNull();
+  });
+
+  it("knows a step's place in its chapter, and none for a retired step or one of a chapter the draft has not", () => {
+    expect(stepPlaceOf(course, "ch-a-2")).toEqual({ chapter: "ch-a", index: 1 });
+    const placed = changed(course, { kind: "retire", of: "step", id: "ch-a-1" });
+    expect(stepPlaceOf(placed, "ch-a-2")).toEqual({ chapter: "ch-a", index: 0 });
+    expect(stepPlaceOf(placed, "ch-a-1")).toBeNull();
+    const orphan = {
+      ...course,
+      steps: [...course.steps, { id: "lost", data: { chapter: of("ch-gone"), checkedBy: [] } }],
+    };
+    expect(stepPlaceOf(orphan, "lost")).toBeNull();
+    expect(stepPlaceOf(orphan, "nowhere")).toBeNull();
+  });
+
+  it("places every step of a chapter in time that grows with the steps, not with their square", () => {
+    // Sorting the chapter's steps again for each step would take eight
+    // times as long for eight times the steps.
+    const ratio = growth(
+      (count) => {
+        const many: ReleaseDraft = {
+          ...course,
+          steps: Array.from({ length: count }, (_, i) => ({
+            id: `st-${i}`,
+            data: { chapter: of("ch-a"), position: count - i, checkedBy: [] },
+          })),
+        };
+        // A new draft each time, as each edit makes one: its places are built again.
+        return () => {
+          const fresh = { ...many };
+          for (const node of many.steps) stepPlaceOf(fresh, node.id);
+        };
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

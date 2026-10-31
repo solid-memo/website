@@ -308,6 +308,37 @@ export function draftCardLanguages(draft: ReleaseDraft): string[] {
   return tags.has("") ? [...stated, "unstated"] : stated;
 }
 
+/** Where a step in use is in its chapter: the chapter's id, and the step's place among its steps from 0. */
+export interface StepPlace {
+  chapter: string;
+  index: number;
+}
+
+/** A draft is not changed in place: an edit makes a new one, which gets its own places. */
+const stepPlaces = new WeakMap<ReleaseDraft, ReadonlyMap<string, StepPlace>>();
+
+/**
+ * Where a step (by id) is in its chapter; null for a retired one, or one
+ * of a chapter the draft has not. A page that places many steps (the
+ * table of cards, the problem lists) asks this for each: the places are
+ * built once per draft, not by sorting the chapter's steps for each.
+ */
+export function stepPlaceOf(draft: ReleaseDraft, step: string): StepPlace | null {
+  let places = stepPlaces.get(draft);
+  if (places === undefined) {
+    const chapters = new Set(draft.chapters.map((node) => node.id));
+    const made = new Map<string, StepPlace>();
+    for (const [iri, steps] of liveStepsByChapter(draft)) {
+      const chapter = idIn(draft, iri);
+      if (chapter === null || !chapters.has(chapter)) continue;
+      steps.forEach((node, index) => made.set(node.id, { chapter, index }));
+    }
+    places = made;
+    stepPlaces.set(draft, places);
+  }
+  return places.get(step) ?? null;
+}
+
 /** The chapter a step is part of, by id; null when it names none the draft has. */
 export function chapterOfStep(draft: ReleaseDraft, step: string): string | null {
   const iri = draft.steps.find((node) => node.id === step)?.data.chapter;
