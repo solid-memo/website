@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.32](https://github.com/solid-memo/website/compare/v6.17.31...v6.17.32) (2026-10-31)
+
+### Bug Fixes
+
+* **solid:** remove only distractors a card no longer names ([652f6f8](https://github.com/solid-memo/website/commit/652f6f8b2fe2db99424b3d0886e4be1c69ef6b98))
+
 ## [6.17.31](https://github.com/solid-memo/website/compare/v6.17.30...v6.17.31) (2026-10-31)
 
 ### Bug Fixes
