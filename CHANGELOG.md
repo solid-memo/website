@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.30](https://github.com/solid-memo/website/compare/v6.17.29...v6.17.30) (2026-10-31)
+
+### Bug Fixes
+
+* **ui:** key the Markdown caches by a hash, not by the whole text ([86ae5fc](https://github.com/solid-memo/website/commit/86ae5fc70125ce33fd9a0971184dce516beddc96))
+
 ## [6.17.29](https://github.com/solid-memo/website/compare/v6.17.28...v6.17.29) (2026-10-31)
 
 ### Bug Fixes
