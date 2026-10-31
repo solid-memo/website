@@ -1707,6 +1707,51 @@ describe("mergedDraft", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+
+  it("merges many nodes of a list in time that grows with them, not their square", () => {
+    // Eight times the agents must take less than four times as long as
+    // an eighth of them done eight times over (testing.md): looking
+    // through the list for each id would take about eight times as long.
+    // Each run has lists of its own, indexed afresh.
+    const agents = (count: number): ReleaseDraft => ({
+      ...base,
+      agents: [
+        ...base.agents,
+        ...Array.from({ length: count }, (_, n) => ({ id: `agent-${n}`, data: { name: `${n}` } })),
+      ],
+    });
+    const many = agents(10);
+    const renamed = {
+      ...many,
+      agents: many.agents.map((node) =>
+        node.id === "agent-3" ? { ...node, data: { name: "Three" } } : node,
+      ),
+    };
+    const merged = mergedDraft(many, renamed, many)!;
+    expect(merged.agents.map((node) => node.id)).toEqual(many.agents.map((node) => node.id));
+    expect(merged.agents.find((node) => node.id === "agent-3")!.data.name).toBe("Three");
+    // Two nodes of one id are both kept, where the first stood.
+    const twice = { ...many, agents: [...many.agents, { id: "agent-3", data: { name: "Again" } }] };
+    expect(
+      mergedDraft(twice, twice, twice)!
+        .agents.filter((node) => node.id === "agent-3")
+        .map((node) => node.data.name),
+    ).toEqual(["3", "Again"]);
+    const ratio = growth(
+      (count) => {
+        const draft = agents(count);
+        return () =>
+          mergedDraft(
+            draft,
+            { ...draft, agents: [...draft.agents] },
+            { ...draft, agents: [...draft.agents] },
+          );
+      },
+      2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("the card of a wrong option", () => {

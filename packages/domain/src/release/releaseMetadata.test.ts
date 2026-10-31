@@ -8,6 +8,7 @@ import { courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/release
 import {
   applyDraftChanges,
   attributionOf,
+  authorNames,
   isRefusal,
   type CheckActivity,
   type DraftChange,
@@ -109,6 +110,50 @@ describe("authors", () => {
       kind: "setAttribution",
       attribution: { ai: true },
     });
+  });
+
+  it("are found in time that grows with how many a release names", () => {
+    const draft = made(courseDraft(), addAuthorChanges(courseDraft(), "first", { name: "First" }));
+    const naming = (count: number): ReleaseDraft => {
+      const ids = Array.from({ length: count }, (_, n) => `author-${n}`);
+      return made(
+        {
+          ...draft,
+          root: { ...draft.root, creator: [...draft.root.creator, ...ids.map(of)] },
+          agents: [...draft.agents, ...ids.map((id) => ({ id, data: { name: id } }))],
+        },
+        [{ kind: "setAttribution", attribution: { ai: true } }],
+      );
+    };
+    const many = naming(100);
+    expect(authorsOf(many)).toHaveLength(101);
+    expect(authorsOf(many).at(-1)).toEqual({ id: "author-99", data: { name: "author-99" } });
+    expect(otherAuthorsOf(many)).toEqual([]);
+    expect(authorNames(many).at(-1)).toBe("author-99");
+    expect(editAuthorChanges(many, "first", { name: "One" }).at(-1)).toEqual({
+      kind: "setAttribution",
+      attribution: { ai: true },
+    });
+    // Eight times the authors take about as long as an eighth of them
+    // eight times over; going over every agent for each author would
+    // take eight times as long. Each run indexes its agents afresh.
+    const ratio = growth(
+      (count) => {
+        const named = naming(count);
+        return () => {
+          const fresh = { ...named, agents: [...named.agents] };
+          return [
+            authorsOf(fresh),
+            otherAuthorsOf(fresh),
+            attributionOf(fresh),
+            editAuthorChanges(fresh, "first", { name: "One" }),
+          ];
+        };
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
