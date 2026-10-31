@@ -171,36 +171,86 @@ export function withDeckReport(
 }
 
 /**
+ * The deck of an instance a subject is about (`deckOfSubjectsIn`): the
+ * deck whose entry or distribution it is, or whose cards or reviews
+ * document holds it; undefined for any other subject.
+ */
+export type DeckOfSubject = (subjectUrl: string) => Deck | undefined;
+
+/**
+ * Which of the instance's decks each subject is about, for the
+ * instance's health screen. The decks' entries, distributions and
+ * documents are indexed once, so each lookup takes constant time however
+ * many decks and subjects there are; where a subject matches more than
+ * one deck, the first in the decks' order wins.
+ */
+export function deckOfSubjectsIn(decks: readonly Deck[]): DeckOfSubject {
+  const bySubject = new Map<string, number>();
+  const byDocument = new Map<string, number>();
+  const first = (map: Map<string, number>, key: string, index: number) => {
+    if (!map.has(key)) map.set(key, index);
+  };
+  decks.forEach((deck, index) => {
+    first(bySubject, deck.url, index);
+    first(bySubject, distributionUrlOf(deck.url), index);
+    first(byDocument, deck.cardsDocumentUrl, index);
+    first(byDocument, deck.reviewsDocumentUrl, index);
+  });
+  return (subjectUrl) => {
+    const index = Math.min(
+      bySubject.get(subjectUrl) ?? Number.POSITIVE_INFINITY,
+      byDocument.get(documentUrlOf(subjectUrl)) ?? Number.POSITIVE_INFINITY,
+    );
+    return decks[index];
+  };
+}
+
+/**
+ * Where a subject of the deck's documents points (`cardSpotsOf`): the
+ * card it is about, and where in it the predicate `path` points; null
+ * for any other subject.
+ */
+export type CardSpotOf = (subjectUrl: string, path?: string) => CardSpot | null;
+
+/**
  * The card a subject of the deck's documents is about, and where in it
  * the predicate `path` points: a card's text, a wrong option of it, or
  * its review state; null for any other subject (the deck's entry, one
- * the deck has no card for).
+ * the deck has no card for). The cards and their wrong options are
+ * indexed once, so each lookup takes constant time however many cards,
+ * wrong options and subjects there are; where two share an id, the
+ * first card in the deck's order wins.
  */
-export function cardSpotOf(
-  deck: Deck,
-  cards: readonly Card[],
-  subjectUrl: string,
-  path?: string,
-): CardSpot | null {
-  const document = documentUrlOf(subjectUrl);
-  const id = fragmentIdOf(subjectUrl);
-  if (document === deck.reviewsDocumentUrl) {
-    const card = cards.find((each) => each.id === reviewKeyOf(id).cardId);
-    return card === undefined ? null : { card, place: { tab: "schedule" } };
+export function cardSpotsOf(deck: Deck, cards: readonly Card[]): CardSpotOf {
+  const byId = new Map<string, Card>();
+  const ownerOf = new Map<string, Card>();
+  for (const card of cards) {
+    if (!byId.has(card.id)) byId.set(card.id, card);
+    for (const distractor of card.distractors ?? []) {
+      if (!ownerOf.has(distractor.id)) ownerOf.set(distractor.id, card);
+    }
   }
-  if (document !== deck.cardsDocumentUrl) return null;
-  const card = cards.find((each) => each.id === id);
-  if (card !== undefined) {
-    const part = path === undefined ? undefined : PARTS.get(path);
-    return { card, place: part === undefined ? { tab: "content" } : { tab: "content", part } };
-  }
-  const owner = cards.find((each) => each.distractors?.some((distractor) => distractor.id === id));
-  if (owner === undefined) return null;
-  const part =
-    path === SM.distractorText ? "text" : path === SM.distractorNote ? "note" : undefined;
-  return {
-    card: owner,
-    place: { tab: "distractors", distractor: id, ...(part === undefined ? {} : { part }) },
+  return (subjectUrl, path) => {
+    const document = documentUrlOf(subjectUrl);
+    const id = fragmentIdOf(subjectUrl);
+    if (document === deck.reviewsDocumentUrl) {
+      const card = byId.get(reviewKeyOf(id).cardId);
+      return card === undefined ? null : { card, place: { tab: "schedule" } };
+    }
+    if (document !== deck.cardsDocumentUrl) return null;
+    const card = byId.get(id);
+    if (card !== undefined) {
+      const part = path === undefined ? undefined : PARTS.get(path);
+      return { card, place: part === undefined ? { tab: "content" } : { tab: "content", part } };
+    }
+    const owner = ownerOf.get(id);
+    if (owner === undefined) return null;
+    const part =
+      path === SM.distractorText ? "text" : path === SM.distractorNote ? "note" : undefined;
+    return {
+      card: owner,
+      place: { tab: "distractors", distractor: id, ...(part === undefined ? {} : { part }) },
+    };
   };
 }
 

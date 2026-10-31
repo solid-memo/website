@@ -1240,9 +1240,11 @@ the problems, then come four parts:
     still at the version the [digest](data-model.md#the-digest) says
     conformed isn't checked again.
   - Each result says what is wrong, in the shape's own words. It links
-    to a card's field (`cardSpotOf`, by the result's predicate), a
+    to a card's field (`cardSpotsOf`, by the result's predicate), a
     wrong option, a review state, or the deck's about screen (for its
-    entry and its distribution).
+    entry and its distribution). The cards and their wrong options are
+    indexed once for the deck's cards, so each link is a lookup, not a
+    search through them.
   - Solid Memo's own [repairs](validation.md#repair) of these are
     offered, and a subject no repair covers can be removed once the
     user confirms.
@@ -1291,7 +1293,9 @@ check of the whole instance. A check overtaken by another
 The instance's health is the check run when it's opened
 (`checkInstance`, the same query as Home's), with its repairs, then
 every deck with its badge, a link to its own health, as is a result
-about a deck. A badge checks its deck once, and what it finds holds its
+about a deck. The decks are indexed once for those links
+(`deckOfSubjectsIn`), so each is a lookup, not a search through them.
+A badge checks its deck once, and what it finds holds its
 deck too. A repair or a removal here reads every check of the instance
 afresh (their queries are under its key); on a deck's health, only the
 deck's, which is read afresh each time its screen opens. The end-to-end

@@ -3,17 +3,18 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
+import { useMemo } from "preact/hooks";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import {
-  cardSpotOf,
+  cardSpotsOf,
+  deckOfSubjectsIn,
   healthProblemCount,
   type CardSpot,
   type DeckHealth,
 } from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { RepairPlan, Unrepairable } from "@solid-memo/domain/repair";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { ValidationReport, Violation } from "@solid-memo/domain/validation";
 import { cardName } from "@solid-memo/ui/DataText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -243,11 +244,12 @@ export function DeckHealthScreen({
   const count = healthProblemCount(health);
   const about = (text: string) => (held ? text : <a href={aboutHref}>{text}</a>);
   const toSpot = held ? null : spotHref;
+  const spotOf = useMemo(() => cardSpotsOf(deck, cards), [deck, cards]);
   const link: SubjectLink = (subjectUrl, path) => {
     if (subjectUrl === deck.url) return about(t("studio.health.deckEntry"));
     if (subjectUrl === distributionUrlOf(deck.url))
       return about(t("studio.health.deckDistribution"));
-    const spot = cardSpotOf(deck, cards, subjectUrl, path);
+    const spot = spotOf(subjectUrl, path);
     return spot === null ? (
       <ExternalLink url={subjectUrl} />
     ) : (
@@ -367,15 +369,9 @@ export function InstanceHealthScreen({
 }) {
   const { t, readerText } = useI18n();
   useCheckAgain(checking, onCheck);
+  const deckOf = useMemo(() => deckOfSubjectsIn(decks), [decks]);
   const link: SubjectLink = (subjectUrl) => {
-    const document = documentUrlOf(subjectUrl);
-    const deck = decks.find(
-      (each) =>
-        each.url === subjectUrl ||
-        distributionUrlOf(each.url) === subjectUrl ||
-        each.cardsDocumentUrl === document ||
-        each.reviewsDocumentUrl === document,
-    );
+    const deck = deckOf(subjectUrl);
     return deck === undefined ? (
       <ExternalLink url={subjectUrl} />
     ) : (
