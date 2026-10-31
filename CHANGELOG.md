@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.20.4](https://github.com/solid-memo/website/compare/v6.20.3...v6.20.4) (2026-10-31)
+
+### Bug Fixes
+
+* **domain:** leave an error's details out of the report link ([eda612e](https://github.com/solid-memo/website/commit/eda612e7d0979541d743b6e9ef5fa13588153b98))
+* **domain:** renumber a draft's outline in one pass ([bc4ab04](https://github.com/solid-memo/website/commit/bc4ab048550c7b2bb60a2d8d53021fc077d2e7c9))
+* **studio:** walk each node once when breaking graph layout cycles ([e127676](https://github.com/solid-memo/website/commit/e12767615f5d043dd1d6bee71e4fba8a9a8e1e15))
+
 ## [6.20.3](https://github.com/solid-memo/website/compare/v6.20.2...v6.20.3) (2026-10-31)
 
 ### Bug Fixes
