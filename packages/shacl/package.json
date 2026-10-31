@@ -23,6 +23,7 @@
     "@solid-memo/turtle": "*",
     "@solid-memo/vocab": "*",
     "n3": "^2.13.12",
+    "rdf-validate-datatype": "^0.2.2",
     "rdf-validate-shacl": "^0.6.5"
   },
   "devDependencies": {

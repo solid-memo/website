@@ -7,6 +7,7 @@ import { datasetFromTurtle } from "./testing/turtle";
 import type { Literal, Quad } from "@rdfjs/types";
 import { createEngine, mapIris, mergeDatasets } from "./engine";
 import { subclassCycle, subclassDiamond } from "./testing/subclassTangle";
+import { readSiteTurtle, SHAPES_BASE } from "@solid-memo/vocab/tooling/sources";
 
 const SHAPES = `
 @prefix sh:  <http://www.w3.org/ns/shacl#> .
@@ -269,6 +270,98 @@ describe("createEngine", () => {
     for (const q of await datasetFromTurtle(`<#s> a <${EX}Person> .`, DATA_URL)) data.add(q);
     expect(await e.validateNode(data, student, `${SHAPES_URL}#person`)).toEqual([]);
     expect(copied).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("numeric datatypes", () => {
+  const XSD = "http://www.w3.org/2001/XMLSchema#";
+  const EX = "https://example.com/ns#";
+  const NUMBERS = `
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <${XSD}> .
+@prefix ex:  <${EX}> .
+<#shape> a sh:NodeShape ;
+    sh:property [ sh:path ex:decimal ; sh:datatype xsd:decimal ] ,
+                [ sh:path ex:float ; sh:datatype xsd:float ] ,
+                [ sh:path ex:double ; sh:datatype xsd:double ] .
+`;
+  /**
+   * Which of `values`, each typed `datatype`, the engine finds not to be of
+   * it, and how long the check alone took, without building the engine or
+   * parsing the data.
+   */
+  async function check(
+    datatype: string,
+    values: string[],
+  ): Promise<{ refused: string[]; ms: number }> {
+    const e = createEngine(await datasetFromTurtle(NUMBERS, SHAPES_URL));
+    const data = await datasetFromTurtle(
+      `<#a> ${values.map((v) => `<${EX}${datatype}> ${JSON.stringify(v)}^^<${XSD}${datatype}>`).join(" ; ")} .`,
+      DATA_URL,
+    );
+    const started = performance.now();
+    const violations = await e.validateNode(data, `${DATA_URL}#a`, `${SHAPES_URL}#shape`);
+    const ms = performance.now() - started;
+    return { refused: violations.map((v) => v.value!).sort(), ms };
+  }
+
+  /** Which of `values`, each typed `datatype`, the engine finds not to be of it. */
+  async function refused(datatype: string, values: string[]): Promise<string[]> {
+    return (await check(datatype, values)).refused;
+  }
+
+  const DECIMALS = ["0", "-1", "+1", "1.5", "-0.25", "1.", ".5", "007.700"];
+  const NOT_DECIMALS = ["", ".", "1x", "x1", "1.2.3", "1e5", "+-1", "1 ", "INF"];
+
+  it("takes a decimal with or without a dot or a sign, and nothing else", async () => {
+    expect(await refused("decimal", [...DECIMALS, ...NOT_DECIMALS])).toEqual(
+      [...NOT_DECIMALS].sort(),
+    );
+  });
+
+  it.each(["float", "double"])(
+    "takes a %s as a decimal with an exponent or none, or INF or NaN, and nothing else",
+    async (property) => {
+      const valid = [...DECIMALS, "1e5", "1.5E-3", ".5e+2", "-2E0", "INF", "-INF", "+INF", "NaN"];
+      const invalid = [...NOT_DECIMALS.filter((v) => v !== "1e5" && v !== "INF"), "1e", "e5"];
+      invalid.push("1e5.5", "inf", "nan", "-NaN");
+      expect(await refused(property, [...valid, ...invalid])).toEqual(invalid.sort());
+    },
+  );
+
+  it.each(["decimal", "float", "double"])(
+    "checks a long %s that is not one in time linear in its length",
+    async (property) => {
+      // The library's patterns took time quadratic in a run of digits that
+      // then fails to match, far past this budget on this one; a pattern
+      // that splits the run one way only takes a tiny part of it.
+      const value = `${"1".repeat(100_000)}x`;
+      const result = await check(property, [value]);
+      expect(result.refused).toEqual([value]);
+      expect(result.ms).toBeLessThan(1500);
+    },
+  );
+
+  it("checks a review state's long ease factor in time linear in its length", async () => {
+    const shapeUrl = `${SHAPES_BASE}review-state/v2.ttl`;
+    const e = createEngine(await datasetFromTurtle(await readSiteTurtle(shapeUrl), shapeUrl));
+    const value = `${"1".repeat(100_000)}x`;
+    const data = await datasetFromTurtle(
+      `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+       <#card1> a sm:ReviewState ; sm:formatVersion 2 ; sm:intervalDays 1 ; sm:repetitions 1 ;
+         sm:easeFactor "${value}"^^<${XSD}decimal> ; sm:due "2026-01-01" .`,
+      DATA_URL,
+    );
+    const started = performance.now();
+    const violations = await e.validateNode(data, `${DATA_URL}#card1`, `${shapeUrl}#shape`);
+    expect(performance.now() - started).toBeLessThan(1500);
+    expect(violations).toContainEqual(
+      expect.objectContaining({
+        path: "https://solid-memo.com/ns/vocab/v1.ttl#easeFactor",
+        constraint: "Datatype",
+        value,
+      }),
+    );
   });
 });
 
