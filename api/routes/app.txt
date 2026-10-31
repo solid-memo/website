@@ -26,6 +26,7 @@
 #/library-card?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Flibrary.example%2Fdecks%2Fcapitals%2Fv1.ttl&card=card-1
 #/library-deck?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Flibrary.example%2Fdecks%2Fcapitals%2Fv1.ttl
 #/library-preview?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Flibrary.example%2Fdecks%2Fcapitals%2Fv1.ttl
+#/library-preview?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Flibrary.example%2Fdecks%2Fcapitals%2Fv1.ttl&chapter=chapter-1
 #/library?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
 #/new-card?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1
 #/new-deck?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F

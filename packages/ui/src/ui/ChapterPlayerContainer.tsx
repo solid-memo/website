@@ -66,6 +66,27 @@ export function useCourseAnswer(
   });
 }
 
+/** Where a chapter is at: the step, its phase, the chunk of its theory and the question. */
+export interface ChapterPlace {
+  step: number;
+  phase: StepPhase;
+  chunk: number;
+  question: number;
+}
+
+/**
+ * The place after the question `at` shows: the step's next question, the
+ * next step's theory at its first chunk, or null after the chapter's
+ * last question.
+ */
+export function nextPlace(chapter: CourseChapter, at: ChapterPlace): ChapterPlace | null {
+  if (at.question + 1 < chapter.steps[at.step]!.questionIds.length)
+    return { ...at, question: at.question + 1 };
+  if (at.step + 1 < chapter.steps.length)
+    return { step: at.step + 1, phase: "read", chunk: 0, question: 0 };
+  return null;
+}
+
 /**
  * Owns one chapter of a course, taken a step at a time. It opens at the
  * step the learner's progress says to resume at (the first not done; the
@@ -93,23 +114,21 @@ export function ChapterPlayerContainer({
   /** Uniform [0, 1) source the options are shuffled by. */
   random?: () => number;
 }) {
-  const { errorText } = useI18n();
-  const [at, setAt] = useState<{ step: number; phase: StepPhase; chunk: number; question: number }>(
-    () => {
-      const resume = course.progress.chapters.find(
-        (entry) => entry.url === chapter.url,
-      )!.resumeStepId;
-      return {
-        step: Math.max(
-          chapter.steps.findIndex((step) => step.id === resume),
-          0,
-        ),
-        phase: "read",
-        chunk: 0,
-        question: 0,
-      };
-    },
-  );
+  const { t, errorText } = useI18n();
+  const [at, setAt] = useState<ChapterPlace>(() => {
+    const resume = course.progress.chapters.find(
+      (entry) => entry.url === chapter.url,
+    )!.resumeStepId;
+    return {
+      step: Math.max(
+        chapter.steps.findIndex((step) => step.id === resume),
+        0,
+      ),
+      phase: "read",
+      chunk: 0,
+      question: 0,
+    };
+  });
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
   const step = chapter.steps[at.step]!;
   const card = course.cards.get(step.questionIds[at.question]!)!;
@@ -119,13 +138,9 @@ export function ChapterPlayerContainer({
   function next() {
     answerMutation.reset();
     setAnswer(null);
-    if (at.question + 1 < step.questionIds.length) {
-      setAt({ ...at, question: at.question + 1 });
-    } else if (at.step + 1 < chapter.steps.length) {
-      setAt({ step: at.step + 1, phase: "read", chunk: 0, question: 0 });
-    } else {
-      onReview();
-    }
+    const place = nextPlace(chapter, at);
+    if (place === null) onReview();
+    else setAt(place);
   }
 
   return (
@@ -143,6 +158,7 @@ export function ChapterPlayerContainer({
       onAnswerPhase={() => setAt({ ...at, phase: "answer" })}
       onChunk={(chunk) => setAt({ ...at, chunk })}
       onCheck={(choice, recallMillis) => answerMutation.mutate({ card, choice, recallMillis })}
+      lastLabel={t("chapterPlayer.toReview")}
       onNext={next}
     />
   );

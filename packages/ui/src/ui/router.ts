@@ -40,8 +40,15 @@ export type RouteRef =
       cardId: string;
     }
   /** A library deck's cards shown at random, for a try before import;
-      nothing is recorded. */
-  | { screen: "libraryPreview"; instanceUrl: string; libraryDeckUrl: string }
+      nothing is recorded. A course's preview lists its chapters instead,
+      and plays the one `chapterId` names (its fragment id in the
+      release, the same from release to release). */
+  | {
+      screen: "libraryPreview";
+      instanceUrl: string;
+      libraryDeckUrl: string;
+      chapterId?: string;
+    }
   /** A deck or course added from a link to its release, anywhere
       (docs/deck-library.md, From a link): `url` the address pasted, read
       and shown before it is added; absent until one is. */
@@ -206,6 +213,7 @@ export function routeToHash(ref: RouteRef): string {
       return `#/library-preview${params({
         instance: ref.instanceUrl,
         deck: ref.libraryDeckUrl,
+        ...(ref.chapterId === undefined ? {} : { chapter: ref.chapterId }),
       })}`;
     case "importUrl":
       return `#/import-url${params({ instance: ref.instanceUrl, ...(ref.url === undefined ? {} : { url: ref.url }) })}`;
@@ -485,8 +493,11 @@ function parseDeckRoute(
         ? null
         : { screen: "libraryCard", instanceUrl, libraryDeckUrl: deckUrl, cardId };
     }
-    case "/library-preview":
-      return { screen: "libraryPreview", instanceUrl, libraryDeckUrl: deckUrl };
+    case "/library-preview": {
+      const chapterId = query.get("chapter");
+      const ref = { screen: "libraryPreview", instanceUrl, libraryDeckUrl: deckUrl } as const;
+      return chapterId === null ? ref : { ...ref, chapterId };
+    }
     case "/deck":
       return { screen: "deckDetail", instanceUrl, deckUrl };
     case "/deck-preferences":

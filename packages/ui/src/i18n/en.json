@@ -941,6 +941,18 @@
     "reveal": "Reveal",
     "loading": "Loading cards…"
   },
+  "coursePreview": {
+    "hint": "Each step's theory, then its questions, as the course shows them. Nothing is recorded: start the course to take it.",
+    "steps": {
+      "one": "{count} step",
+      "other": "{count} steps"
+    },
+    "allChapters": "All chapters",
+    "nextChapter": "On to the next chapter",
+    "toChapters": "Back to the chapters",
+    "empty": "This course has no chapters.",
+    "loading": "Loading the course…"
+  },
   "libraryUpgrade": {
     "updated": "Updated to release {version} from the library."
   },

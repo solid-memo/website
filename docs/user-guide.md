@@ -239,7 +239,9 @@ adjectives.
 
 - Click a deck to read what it covers, who made it, its license and
   sources, and **Browse cards** to list its cards.
-- **Preview** shows its cards at random, recording nothing.
+- **Preview** shows its cards at random, recording nothing. A course's
+  preview lists its chapters: open one to read each step's theory and
+  answer its questions, as the course asks them.
 - **Report a mistake**, on a deck's page and on each of its cards,
   reports a wrong card with its deck filled in.
 - **Copy link**, on a deck's page, copies a link anyone can open: someone
@@ -481,6 +483,7 @@ ones in the [online report](https://journeys.solid-memo.com/).
 | Checking the instance (developer mode) | full-learner | 21 |
 | A card in Markdown | [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts) | 04–07 |
 | The newcomer course from an empty deck list, and the library beside it | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–07 |
+| Previewing a course from the library: a chapter's theory, then a question | course-chapter | 02b |
 | A course's first chapter and its final review | [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts) | 03–08 |
 | A course's title, chapters and theory in another language, and back | course-chapter | 03b–03d |
 | A course's answers and chapters in the statistics, and its most-confused options | course-chapter | 09–10 |

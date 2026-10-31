@@ -34,6 +34,7 @@ function screenOf(
       onAnswerPhase={onAnswerPhase}
       onChunk={onChunk}
       onCheck={vi.fn()}
+      lastLabel="On to the final review"
       onNext={vi.fn()}
     />
   );

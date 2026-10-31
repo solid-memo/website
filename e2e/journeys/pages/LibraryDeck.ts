@@ -17,12 +17,14 @@ export class LibraryDeck extends Screen {
     return this.page.getByRole("heading", { name: title, exact: true, level: 2 });
   }
 
+  /** The deck's page, with its Import button, or Start course for a course. */
   async expectOpen(title: string): Promise<void> {
     await expect(this.heading(title)).toBeVisible();
+    const main = this.page.getByRole("main");
     await expect(
-      this.page
-        .getByRole("main")
-        .getByRole("button", { name: this.t("libraryDeck.import"), exact: true }),
+      main
+        .getByRole("button", { name: this.t("libraryDeck.import"), exact: true })
+        .or(main.getByRole("button", { name: this.t("libraryDeck.startCourse"), exact: true })),
     ).toBeVisible();
   }
 

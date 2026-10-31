@@ -989,6 +989,19 @@
     "reveal": "Mostrar respuesta",
     "loading": "Cargando tarjetas…"
   },
+  "coursePreview": {
+    "hint": "La teoría de cada paso y luego sus preguntas, como las muestra el curso. No se registra nada: empieza el curso para hacerlo.",
+    "steps": {
+      "one": "{count} paso",
+      "many": "{count} de pasos",
+      "other": "{count} pasos"
+    },
+    "allChapters": "Todos los capítulos",
+    "nextChapter": "Ir al siguiente capítulo",
+    "toChapters": "Volver a los capítulos",
+    "empty": "Este curso no tiene capítulos.",
+    "loading": "Cargando el curso…"
+  },
   "libraryUpgrade": {
     "updated": "Actualizado a la versión {version} de la biblioteca."
   },

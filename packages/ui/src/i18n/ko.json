@@ -893,6 +893,17 @@
     "reveal": "정답 보기",
     "loading": "카드를 불러오는 중…"
   },
+  "coursePreview": {
+    "hint": "각 단계의 이론과 그 질문을 코스에서처럼 보여 줘요. 아무것도 기록되지 않아요. 코스를 들으려면 코스를 시작해 주세요.",
+    "steps": {
+      "other": "단계 {count}개"
+    },
+    "allChapters": "모든 챕터",
+    "nextChapter": "다음 챕터로 넘어가기",
+    "toChapters": "챕터 목록으로 돌아가기",
+    "empty": "이 코스에는 챕터가 없어요.",
+    "loading": "코스를 불러오는 중…"
+  },
   "libraryUpgrade": {
     "updated": "덱 라이브러리의 릴리스 {version}(으)로 업데이트했어요."
   },

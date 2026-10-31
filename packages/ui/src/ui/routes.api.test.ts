@@ -38,6 +38,12 @@ const ROUTES: RouteRef[] = [
   { screen: "libraryBrowser", instanceUrl: INSTANCE, libraryDeckUrl: LIBRARY_DECK, page: 2 },
   { screen: "libraryCard", instanceUrl: INSTANCE, libraryDeckUrl: LIBRARY_DECK, cardId: "card-1" },
   { screen: "libraryPreview", instanceUrl: INSTANCE, libraryDeckUrl: LIBRARY_DECK },
+  {
+    screen: "libraryPreview",
+    instanceUrl: INSTANCE,
+    libraryDeckUrl: LIBRARY_DECK,
+    chapterId: "chapter-1",
+  },
   { screen: "importUrl", instanceUrl: INSTANCE },
   { screen: "importUrl", instanceUrl: INSTANCE, url: LIBRARY_DECK },
   { screen: "deckDetail", instanceUrl: INSTANCE, deckUrl: DECK },

@@ -1466,6 +1466,45 @@ describe("Workspace", () => {
     );
   });
 
+  it("previews a library course by its chapters, each opened at its own address", async () => {
+    renderWorkspace(
+      makeUseCases({
+        listInstances: vi.fn(async () => [instanceA]),
+        listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+        getLibraryCourse: vi.fn(async () => makeCourse()),
+      }),
+    );
+
+    fireEvent.click(await screen.findByRole("link", { name: "Deck library" }));
+    fireEvent.click(await screen.findByRole("link", { name: "Preview Solid fundamentals" }));
+    expect(
+      await screen.findByRole("heading", { name: "Preview: Solid fundamentals" }),
+    ).toBeInTheDocument();
+    const preview = {
+      screen: "libraryPreview",
+      instanceUrl: instanceA.url,
+      libraryDeckUrl: courseLibraryDeck.seriesUrl,
+    } as const;
+
+    fireEvent.click(await screen.findByRole("link", { name: "Pods" }));
+    expect(await screen.findByText("A pod stores data.")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 2, name: "Pods" })).toHaveFocus(),
+    );
+    expect(window.location.hash).toBe(routeToHash({ ...preview, chapterId: "ch-2" }));
+    expect(screen.getByRole("link", { name: "All chapters" })).toHaveAttribute(
+      "href",
+      routeToHash(preview),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "On to the question" }));
+    fireEvent.click(screen.getByRole("radio", { name: "A store" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Back to the chapters" }));
+    expect(await screen.findByRole("link", { name: "Linked data" })).toBeInTheDocument();
+    expect(window.location.hash).toBe(routeToHash(preview));
+  });
+
   it("opens a library card from the deck's card list and goes back to the list", async () => {
     const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     renderWorkspace(

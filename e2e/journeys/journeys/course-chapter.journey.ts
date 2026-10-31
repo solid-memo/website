@@ -8,7 +8,9 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
 import type { Answers } from "../pages/CourseQuestion.ts";
 
 /**
- * A learner reads a course in a language of its own first (docs/i18n.md,
+ * A learner previews the course from the deck library first: a chapter
+ * opened from its list, its first step's theory, then a question,
+ * nothing recorded. Then the learner reads the course in a language of its own (docs/i18n.md,
  * "Which language"), chosen on its preferences: its title, chapters and
  * theory in Swedish, the app's own words in English; then, back in the
  * app's language, works through its first chapter (docs/courses.md, "The
@@ -36,6 +38,23 @@ test("work through a course's first chapter and its final review @course", async
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
   await app.step("02 · Log in with a WebID", () =>
     logInAndCreateInstance(app, account, `Learner ${runId}`),
+  );
+
+  let previewed = "";
+  await app.step(
+    "02b · Preview the course for newcomers: its first chapter's first step, theory then a question",
+    async () => {
+      course = await app.decks.newcomerCourseTitle();
+      await app.library.open();
+      await app.library.openDeck(course);
+      await app.libraryDeck.openPreview(course);
+      previewed = await app.libraryPreview.openChapter(1);
+      await app.chapter.readTheory();
+      await app.question.answer(new Map(), { recorded: false });
+      await app.libraryPreview.allChapters();
+      await app.libraryPreview.backToLibrary();
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
   );
 
   await app.step("03 · Start the course for newcomers", async () => {
@@ -72,6 +91,8 @@ test("work through a course's first chapter and its final review @course", async
     async () => {
       await app.course.start();
       chapter = await app.chapter.expectOpen();
+      // The preview recorded nothing: the course opens at the chapter previewed.
+      expect(chapter).toBe(previewed);
     },
   );
 

@@ -22,7 +22,8 @@ export type StepPhase = "read" | "answer";
  * with the theory not rendered at all: answering checks what was
  * understood, not what can be read off the screen. Next after the step's
  * last question goes to the next step's theory, or, after the chapter's
- * last step, to its final review.
+ * last step, on as `lastLabel` says: to the chapter's final review, in a
+ * course; to the next chapter, in a course's preview.
  *
  * As a new step comes up, its heading takes the focus, so its theory is
  * read first; as each of its questions comes up, the "Check your
@@ -42,7 +43,9 @@ export type StepPhase = "read" | "answer";
  * or the course's language leaves fewer, shows the last. The chapter's
  * title and its theory are in the course's language first under its
  * CourseLanguage (CourseText, DataProse). Theory in one chunk shows as it
- * always has.
+ * always has. With `arrival`, the chapter's title is where a screen
+ * opened at the chapter arrives (useScreenFocus), as in a course's
+ * preview, where the preview's own heading comes first.
  */
 export function ChapterPlayerScreen({
   chapter,
@@ -58,6 +61,8 @@ export function ChapterPlayerScreen({
   onAnswerPhase,
   onChunk,
   onCheck,
+  lastLabel,
+  arrival = false,
   onNext,
 }: {
   chapter: CourseChapter;
@@ -80,6 +85,10 @@ export function ChapterPlayerScreen({
   onChunk: (index: number) => void;
   /** An option checked, and the milliseconds it took to choose it (CourseQuestion). */
   onCheck: (choice: Choice, recallMillis: number) => void;
+  /** What Next says after the chapter's last question. */
+  lastLabel: string;
+  /** Whether the chapter's title takes the focus as the screen opens (useScreenFocus's `data-arrival`). */
+  arrival?: boolean;
   onNext: () => void;
 }) {
   const { t } = useI18n();
@@ -115,7 +124,7 @@ export function ChapterPlayerScreen({
   return (
     <section class="course-player">
       <header>
-        <h2>
+        <h2 data-arrival={arrival || undefined}>
           <CourseText text={chapter.title} />
         </h2>
       </header>
@@ -179,7 +188,7 @@ export function ChapterPlayerScreen({
             focusQuestion={false}
             busy={busy}
             error={error}
-            nextLabel={last ? t("chapterPlayer.toReview") : t("chapterPlayer.next")}
+            nextLabel={last ? lastLabel : t("chapterPlayer.next")}
             onCheck={onCheck}
             onNext={onNext}
           />

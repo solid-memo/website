@@ -33,6 +33,36 @@ describe("the deck library", () => {
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
     expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
   });
+  it("getLibraryCourse reads a course's outline and cards, asking only the cards it has, and writes nothing", async () => {
+    const deps = makeDeps();
+    const course: LibraryDeck = { ...libraryDeck, isCourse: true };
+    const step = (id: string, questionIds: string[]) => ({
+      id,
+      url: `${course.url}#${id}`,
+      position: 0,
+      theory: { en: id },
+      questionIds,
+    });
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockResolvedValue({
+      releaseUrl: course.url,
+      chapters: [
+        {
+          id: "ch-1",
+          url: `${course.url}#ch-1`,
+          position: 0,
+          title: { en: "Capitals" },
+          steps: [step("s-1", ["sweden", "gone"]), step("s-2", ["gone"])],
+          reviewQuestionIds: [],
+        },
+      ],
+    });
+    const { outline, cards } = await createUseCases(deps).getLibraryCourse(course);
+    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(course.url);
+    expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(course.url);
+    expect(outline.chapters[0]!.steps).toEqual([step("s-1", ["sweden"])]);
+    expect([...cards.keys()]).toEqual(libraryContent.cards.map((card) => card.id));
+    expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
+  });
   it("planLibraryUpgrade compares the release a copy came from with the deck's current one, and writes nothing", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };

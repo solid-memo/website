@@ -33,7 +33,8 @@ import type { ReviewKey } from "@solid-memo/domain/review";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { DeckLibrary, DeckRepository, ReviewStateRepository } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
-import type { CourseUseCases } from "./courses";
+import { outlineOfCards } from "@solid-memo/domain/course";
+import type { Course, CourseUseCases } from "./courses";
 import { readNow, unsent } from "./writes";
 import { stepReporter } from "./progress";
 
@@ -44,6 +45,12 @@ export interface LibraryUseCases {
   importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck>;
   /** A library deck's cards, to look through before importing it. */
   listLibraryCards(deck: LibraryDeck): Promise<LibraryCard[]>;
+  /**
+   * A library course's outline and its cards by id, to try before
+   * adding it: the outline asks only the release's cards
+   * (outlineOfCards), as getCourse's does. Writes nothing.
+   */
+  getLibraryCourse(deck: LibraryDeck): Promise<LibraryCourse>;
   /**
    * A release a learner adds from a link (docs/deck-library.md, From a
    * link), read on its own and checked against the library's shapes, to
@@ -162,6 +169,9 @@ async function readEach<T>(urls: string[], read: (url: string) => Promise<T>): P
   await Promise.all(Array.from({ length: LINKED_READS_AT_ONCE }, reader));
   return results;
 }
+
+/** A library course as its preview shows it (LibraryUseCases.getLibraryCourse). */
+export type LibraryCourse = Pick<Course, "outline" | "cards">;
 
 /**
  * The deck library (docs/deck-library.md): its decks looked through and
@@ -355,6 +365,14 @@ export function createLibraryUseCases({
     importLibraryDeck,
     async listLibraryCards(deck) {
       return (await deckLibrary.fetchLibraryDeck(deck.url)).cards;
+    },
+    async getLibraryCourse(deck) {
+      const [release, outline] = await Promise.all([
+        deckLibrary.fetchLibraryDeck(deck.url),
+        deckLibrary.fetchCourseOutline(deck.url),
+      ]);
+      const cards = new Map(release.cards.map((card) => [card.id, card]));
+      return { outline: outlineOfCards(outline, new Set(cards.keys())), cards };
     },
     async readReleaseFromLink(text) {
       const url = releaseUrlOf(text);

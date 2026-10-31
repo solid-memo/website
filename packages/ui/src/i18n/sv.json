@@ -941,6 +941,18 @@
     "reveal": "Visa svar",
     "loading": "Läser in kort…"
   },
+  "coursePreview": {
+    "hint": "Varje stegs teori och sedan dess frågor, så som kursen visar dem. Inget sparas: börja kursen för att gå den.",
+    "steps": {
+      "one": "{count} steg",
+      "other": "{count} steg"
+    },
+    "allChapters": "Alla kapitel",
+    "nextChapter": "Vidare till nästa kapitel",
+    "toChapters": "Tillbaka till kapitlen",
+    "empty": "Kursen har inga kapitel.",
+    "loading": "Läser in kursen…"
+  },
   "libraryUpgrade": {
     "updated": "Uppdaterad till utgåva {version} från biblioteket."
   },
