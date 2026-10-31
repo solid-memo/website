@@ -14,8 +14,9 @@ name: CI
 # nothing, so a pull request's commits are not checked twice for one
 # push. The jobs read the repository and nothing else: the token can
 # only read, and no secret is used, so a fork's pull request runs them as
-# safely as ours. The one exception, caches, runs on main alone and runs
-# no code of the repository's. Only runs on main save Turbo's cache and
+# safely as ours. The exceptions, caches, which runs on main alone, and the
+# fail-fast jobs, which never run for a fork, run no code of the
+# repository's. Only runs on main save Turbo's cache and
 # the end-to-end images, Turbo's being the queue's when main's run reuses
 # it; a pull request and the merge queue read main's.
 #
@@ -391,7 +392,7 @@ jobs:
   # The app's use cases and Solid adapters against real Solid servers,
   # one job per server (e2e/pod/servers.ts): each pulls or builds only its
   # server's image, or loads it from GitHub's cache (e2e-images), starts it
-  # in Docker on this runner and runs the whole suite (docs/testing.md). One server failing does not stop the others;
+  # in Docker on this runner and runs the whole suite (docs/testing.md). Off main, one server failing cancels the others;
   # what the server printed is kept when its job fails. Only a run on main
   # saves the images; elsewhere, new images are pulled through the mirror.
   # Timing-dependent: real servers, started on a shared runner. Where it is
@@ -403,7 +404,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
-      fail-fast: false
+      # Off main, one server failing cancels the others, and fail-fast-pod
+      # the run; on main, each runs to its end, saving its images.
+      fail-fast: ${{ github.ref != 'refs/heads/main' }}
       matrix:
         server: [css-7, css-6, nss-6, nss-5, css-acp]
     steps:
@@ -541,7 +544,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
-      fail-fast: false
+      # Off main, one server failing cancels the others, and fail-fast-contract
+      # the run; on main, each runs to its end, saving its images.
+      fail-fast: ${{ github.ref != 'refs/heads/main' }}
       matrix:
         server: [css-8, pivot, nextcloud, jss]
     steps:
@@ -1204,13 +1209,217 @@ jobs:
           gh api "repos/$REPO/pulls/$NUMBER" --jq '.body // ""' > "$body"
           npm run check:closes -- --base "$BASE" --head "$HEAD" --body-file "$body"
 
+  # When a job that tests the tree fails, the run's result is settled, so
+  # the jobs still going are canceled rather than left to finish: the
+  # journeys, the end-to-end tests and check take many minutes. Not
+  # commits: it fails within a minute when a pull request's body lacks
+  # its closing keyword, and once the body is fixed, only it runs again,
+  # not every job it would have canceled. One small
+  # job per testing job, needing it alone, so it starts the moment that
+  # job fails, not when all have ended; a job that passes, or is skipped
+  # for an earlier job's failure, skips its own.
+  # Each cancels the run through GitHub's API, which takes a token that
+  # can write (actions: write), so that token is in jobs that check out
+  # and run none of the repository's code, as caches does. ci-ok still
+  # runs (always()) and fails, the canceled jobs being neither passed nor
+  # skipped. Only where a newer run would cancel this one too, never on
+  # main (concurrency, above), and not for a fork's pull request, whose
+  # token can only read. Deterministic.
+  fail-fast-check:
+    name: fail fast (check)
+    needs: check
+    if: >-
+      failure() && needs.check.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for site. Deterministic.
+  fail-fast-site:
+    name: fail fast (site)
+    needs: site
+    if: >-
+      failure() && needs.site.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for library. Deterministic.
+  fail-fast-library:
+    name: fail fast (library)
+    needs: library
+    if: >-
+      failure() && needs.library.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for crosscheck. Deterministic.
+  fail-fast-crosscheck:
+    name: fail fast (crosscheck)
+    needs: crosscheck
+    if: >-
+      failure() && needs.crosscheck.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for pod. Deterministic.
+  fail-fast-pod:
+    name: fail fast (pod)
+    needs: pod
+    if: >-
+      failure() && needs.pod.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for contract. Deterministic.
+  fail-fast-contract:
+    name: fail fast (contract)
+    needs: contract
+    if: >-
+      failure() && needs.contract.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for journeys. Deterministic.
+  fail-fast-journeys:
+    name: fail fast (journeys)
+    needs: journeys
+    if: >-
+      failure() && needs.journeys.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for docs. Deterministic.
+  fail-fast-docs:
+    name: fail fast (docs)
+    needs: docs
+    if: >-
+      failure() && needs.docs.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
+  # As fail-fast-check, for workflows. Deterministic.
+  fail-fast-workflows:
+    name: fail fast (workflows)
+    needs: workflows
+    if: >-
+      failure() && needs.workflows.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
   # The one check a merge to main waits for (the ruleset on main is to
   # require it). The gate must pass; then, when the run tests its tree
   # (jobs=all), every job that tests it must pass, and when it reuses the
   # run that did (jobs=reuse), reuse must pass, and release-files too on
   # a release commit, the jobs that test being skipped. journeys-report,
-  # caches, the warm jobs and the advisory solid-memo-client jobs are not
-  # among them. Every job it needs is
+  # caches, the warm jobs, the fail-fast jobs and the advisory
+  # solid-memo-client jobs are not among them. Every job it needs is
   # the gate or in one of its two lists, or it fails. A matrix job's
   # checks are named per server, and jobs come and go; this name stays.
   ci-ok:
