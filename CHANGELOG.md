@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.18.0](https://github.com/solid-memo/website/compare/v6.17.34...v6.18.0) (2026-10-31)
+
+### Features
+
+* **ui:** link a login stopped for safety to its security advisory ([4237875](https://github.com/solid-memo/website/commit/4237875f0732895acfd5180724a641e4b5cc12da))
+
 ## [6.17.34](https://github.com/solid-memo/website/compare/v6.17.33...v6.17.34) (2026-10-31)
 
 ### Bug Fixes
