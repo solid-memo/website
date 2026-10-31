@@ -1111,6 +1111,29 @@
     "buttonInstanceRecord": "instansposten",
     "buttonCatalogue": "katalogen"
   },
+  "makerNote": {
+    "flagship": {
+      "title": "En app av hög kvalitet för Solid:",
+      "text": "jag vill att den ska visa vad Solid kan göra."
+    },
+    "learn": {
+      "title": "För en bred publik:",
+      "text": "flashcards passar alla som vill lära sig."
+    },
+    "privacy": {
+      "title": "Privat och säker:",
+      "text": "dina data stannar hos dig, inte hos mig, och jag arbetar för att hålla appen säker."
+    },
+    "free": {
+      "title": "Gratis:",
+      "text": "driften är nästan gratis, utan servrar att sköta. Appen kostar mig tid och arbete."
+    },
+    "openSource": {
+      "title": "Öppen källkod:",
+      "text": "vem som helst kan läsa, ändra och köra koden."
+    },
+    "readMore": "Läs varför jag gjorde den (på engelska)"
+  },
   "onboardingFlow": {
     "tryHeading": "Prova direkt",
     "tryAsGuest": "Prova utan att logga in",

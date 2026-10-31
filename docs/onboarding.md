@@ -33,14 +33,18 @@ stateDiagram-v2
 
 | Step | Component |
 |---|---|
-| Landing | `OnboardingFlow` + `WebIdForm` |
+| Landing | `MakerNote` + `OnboardingFlow` + `WebIdForm` |
 | Discovering, Connected, NoPod, Failed | `PodConnectionScreen` |
 | Orchestration (session, account query, Connected screen choice: `useConnectedScreen`) | `AppShell` (in `App.tsx`), the site's one shell, around Solid Memo and the [Studio](studio.md) |
 
-The landing is one page: the guest's offer, then logging in (a button
-per suggested provider, and the WebID form under them), then creating a
-Pod. Someone who has a Pod logs in in one click. After a logout or an
-expired session, and for a guest logging in, logging in comes first. A
+The landing is one page: the guest's offer, a short note from Solid
+Memo's maker on why they made it, then logging in (a button per
+suggested provider, and the WebID form under them), then creating a Pod.
+The note (`MakerNote`) links to the whole note on the About page.
+Someone who has a Pod logs in in one click. After a logout or an expired
+session, and for a guest logging in, logging in comes first, and the
+note is left out. A site with a name of its own, and the Studio, leave
+the note out too: it is the maker's own statement about Solid Memo. A
 guest studies in a pod kept in the browser until logging in moves the
 study into their Pod, in an instance they have or a new one
 ([guest-mode.md](guest-mode.md)). A silently restored session skips

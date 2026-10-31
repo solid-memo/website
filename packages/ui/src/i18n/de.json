@@ -1111,6 +1111,29 @@
     "buttonInstanceRecord": "Instanzeintrag",
     "buttonCatalogue": "Katalog"
   },
+  "makerNote": {
+    "flagship": {
+      "title": "Eine hochwertige App für Solid:",
+      "text": "Ich möchte, dass sie zeigt, was Solid kann."
+    },
+    "learn": {
+      "title": "Für ein breites Publikum:",
+      "text": "Karteikarten eignen sich für alle, die etwas lernen möchten."
+    },
+    "privacy": {
+      "title": "Privat und sicher:",
+      "text": "Deine Daten bleiben bei dir, nicht bei mir, und ich arbeite daran, die App sicher zu halten."
+    },
+    "free": {
+      "title": "Kostenlos:",
+      "text": "Das Hosting ist fast kostenlos, ohne eigene Server. Die App kostet mich Zeit und Mühe."
+    },
+    "openSource": {
+      "title": "Open Source:",
+      "text": "Alle können den Code lesen, ändern und ausführen."
+    },
+    "readMore": "Lies, warum ich sie gemacht habe (auf Englisch)"
+  },
   "onboardingFlow": {
     "tryHeading": "Gleich ausprobieren",
     "tryAsGuest": "Ohne Anmeldung ausprobieren",

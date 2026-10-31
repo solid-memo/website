@@ -591,6 +591,8 @@ describe("AppShell", () => {
         await screen.findByRole("heading", { level: 1, name: "Solid Memo Studio" }),
       ).toBeInTheDocument();
       expect(screen.getByText("Manage the decks in your Solid Pod.")).toBeInTheDocument();
+      // The maker's note is Solid Memo's own, not the Studio's.
+      expect(screen.queryByText("— Anton Wiklund")).toBeNull();
       expect(
         within(screen.getByRole("banner")).getByRole("link", { name: "Back to Solid Memo" }),
       ).toHaveAttribute("href", "#/");
@@ -792,6 +794,8 @@ describe("AppShell", () => {
       "https://school.example/join",
     );
     expect(screen.queryByRole("link", { name: /Inrupt PodSpaces/ })).toBeNull();
+    // The maker's note is Solid Memo's own, not the site's.
+    expect(screen.queryByText("— Anton Wiklund")).toBeNull();
   });
 
   it("shows a session-restore error (Error instance)", async () => {
@@ -1173,10 +1177,15 @@ describe("AppShell", () => {
     expect(alert).toHaveFocus();
     expect(alert.previousElementSibling).toHaveClass("tagline");
     expect(landingSections()).toEqual(["Log in with your Pod", "Try it right away", "No Pod yet?"]);
+    // Someone coming back knows why Solid Memo was made.
+    expect(screen.queryByText("— Anton Wiklund")).toBeNull();
 
     // Home is the landing as on a first visit, without the reason the user came back.
     fireEvent.click(screen.getByRole("link", { name: "Solid Memo" }));
     expect(landingSections()).toEqual(["Try it right away", "Log in with your Pod", "No Pod yet?"]);
+    // The maker's note comes right after the guest's offer, which stays in view first.
+    const note = screen.getByText("— Anton Wiklund").closest("figure")!;
+    expect(note.previousElementSibling).toHaveClass("guest-start");
     expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
   });
 

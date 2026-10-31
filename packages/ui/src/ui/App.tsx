@@ -27,6 +27,7 @@ import { AppVersion } from "./WhatsNew";
 import { I18nProvider, loadLocale, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
+import { MakerNote } from "./onboarding/MakerNote";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { useConnectedScreen } from "./onboarding/useConnectedScreen";
@@ -478,6 +479,8 @@ function AppContent({
               void startLogin(() => useCases.loginWithProvider(provider.oidcIssuer))
             }
             onTryAsGuest={guest ? undefined : () => void handleTryAsGuest()}
+            // The maker's own words: Solid Memo's, not a renamed site's.
+            note={t(identity.name) === PICTURE_NAME ? <MakerNote /> : undefined}
           />
           {guest && (
             <div class="onboarding-actions">
