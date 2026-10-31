@@ -63,8 +63,27 @@ export interface SubjectBuilder {
   removeAll(property: string): SubjectBuilder;
   removeLiteral(property: string, value: Literal): SubjectBuilder;
   removeUrl(property: string, value: string | Subject): SubjectBuilder;
+  /**
+   * The property's IRIs become `values`, each once, in the order given;
+   * its other values stay. One call for a list of any length, where an
+   * add or a remove at each value takes time in the square of the list.
+   */
+  setIriAll(property: string, values: readonly string[]): SubjectBuilder;
+  /**
+   * The property's strings, with a language or without one (`""`),
+   * become `values`, each once (a language as addStringWithLocale reads
+   * it); its other values stay. One call for a list of any length
+   * (setIriAll).
+   */
+  setStringAll(property: string, values: readonly LanguageString[]): SubjectBuilder;
   /** The subject with every triple added. */
   build(): NamedSubject;
+}
+
+/** A string, with its language; `""` for one without a language. */
+export interface LanguageString {
+  readonly value: string;
+  readonly language: string;
 }
 
 /** What has changed in a dataset since it was read or built, to be written as a patch. */

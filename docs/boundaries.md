@@ -125,7 +125,7 @@ library could take their place there alone
 | Module | What it has |
 |---|---|
 | [interface.ts](../packages/solid/src/client/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type; it imports no library |
-| [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built |
+| [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built, many subjects set or removed in one pass |
 | [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, for `resources.ts` and `rdf.ts` alone |
 | [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release takes in, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
 | [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, conditional reads and writes among them, and the Turtle and JSON-LD parsers |

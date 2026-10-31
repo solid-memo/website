@@ -2,7 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, createSolidDataset, getThingAll, removeThing, setThing } from "./client/rdf";
+import {
+  type Dataset,
+  createSolidDataset,
+  getThingAll,
+  removeThings,
+  setThing,
+  setThings,
+} from "./client/rdf";
 import type { AnswerLog } from "@solid-memo/application/ports";
 import { isOfStudyMonth, monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
 import {
@@ -65,7 +72,7 @@ export function createSolidAnswerLog({
       });
       if (picked.length === 0) return;
       try {
-        await saveDataset(url, picked.map(unlessNewer).reduce(removeThing, dataset), fetch);
+        await saveDataset(url, removeThings(dataset, picked.map(unlessNewer)), fetch);
         return;
       } catch (error) {
         if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
@@ -92,7 +99,7 @@ export function createSolidAnswerLog({
       for (const [url, month] of byMonth) {
         const things = month.map((answer) => toAnswerThing(url, answer));
         await checkWrite(
-          things.reduce(setThing, createSolidDataset()),
+          setThings(createSolidDataset(), things),
           month.map((answer) => `${url}#${answer.id}`),
           "pod",
         );

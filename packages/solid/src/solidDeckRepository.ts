@@ -62,8 +62,9 @@ import {
   toDecks,
   withCatalog,
   withDeck,
-  withDistractors,
-  withoutCardSubject,
+  withDecks,
+  writeDistractors,
+  withoutCardSubjects,
   withoutUnnamedDistractors,
   assertDistractorsOwnedOnce,
   withoutDeck,
@@ -71,12 +72,22 @@ import {
 } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
 import { createDeckDocumentGuard } from "./deckPlace";
+import { editOf, type DatasetEdit } from "./datasetEdit";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
+
+/** A card to write, by its id: a new card is stamped with the time of writing. */
+type CardToWrite = CardContent & { id: string; createdAt?: string; retired?: true };
+
+/** A card to write, onto the subject it has in the document now, if any. */
+interface CardWrite {
+  card: CardToWrite;
+  existing: NamedSubject | null;
+}
 
 export interface SolidDeckRepositoryDeps {
   fetch: typeof globalThis.fetch;
@@ -156,13 +167,10 @@ export function createSolidDeckRepository({
       const catalogUrl = catalogUrlOf(instanceUrl);
       const read = await getSolidDatasetOrNull(catalogUrl, fetch);
       let dataset = read ?? createSolidDataset();
-      const subjects: string[] = [];
       // Each entry stored in an older format, as read and brought up to date in memory, written in this app's.
-      for (const deck of toDecks(dataset, catalogUrl).filter(isDeckOutdated)) {
-        const written = upgradeDeck(deck);
-        dataset = withDeck(dataset, written);
-        subjects.push(...deckSubjects(written));
-      }
+      const written = toDecks(dataset, catalogUrl).filter(isDeckOutdated).map(upgradeDeck);
+      const subjects = written.flatMap(deckSubjects);
+      dataset = withDecks(dataset, written);
       if (catalog !== null && toCatalog(dataset, catalogUrl) === null) {
         dataset = withCatalog(dataset, catalogUrl, catalog);
         subjects.push(`${catalogUrl}#catalog`, catalog.publisher.webId);
@@ -181,14 +189,11 @@ export function createSolidDeckRepository({
 
     async importDeck(instanceUrl, content): Promise<Deck> {
       const deck = newDeck(instanceUrl, content.title, content);
-      let cards = createSolidDataset();
-      const subjects: string[] = [];
-      for (const card of content.cards) {
-        const written = withCard(cards, deck, card, null);
-        cards = written.dataset;
-        subjects.push(...written.subjects);
-      }
-      await saveCardsDocument(deck, cards, subjects);
+      const written = withCards(createSolidDataset(), deck, content.cards, (_, card) => ({
+        card,
+        existing: null,
+      }));
+      await saveCardsDocument(deck, written.dataset, written.subjects);
       return registerDeck(deck);
     },
 
@@ -319,36 +324,38 @@ export function createSolidDeckRepository({
     async upgradeCards(deck): Promise<boolean> {
       const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) return false;
-      let updated: Dataset = dataset;
-      const subjects: string[] = [];
       // Each card stored in an older format, as read and brought up to date in memory, written in this app's.
-      for (const card of toCards(dataset).filter(isOutdated)) {
-        const written = withCard(updated, deck, upgradeCard(card), getThing(updated, card.url));
-        updated = written.dataset;
-        subjects.push(...written.subjects);
-      }
-      if (subjects.length === 0) return false;
+      const written = withCards(
+        dataset,
+        deck,
+        toCards(dataset).filter(isOutdated),
+        (edit, card) => ({
+          card: upgradeCard(card),
+          existing: edit.getThing(card.url),
+        }),
+      );
+      if (written.subjects.length === 0) return false;
       // If-Match the read above; an edit too large for one PATCH is one PUT of the whole document (datasets.ts).
-      await saveCardsDocument(deck, updated, subjects);
+      await saveCardsDocument(deck, written.dataset, written.subjects);
       return true;
     },
 
     async stateCardLanguages(deck, cardIds, languages): Promise<number> {
       const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) return 0;
-      let updated: Dataset = dataset;
       const stated: string[] = [];
-      for (const id of cardIds) {
-        const thing = getThing(updated, `${deck.cardsDocumentUrl}#${id}`);
-        const card = thing === null ? null : toCard(thing, updated);
+      const written = withCards(dataset, deck, cardIds, (edit, id) => {
+        const thing = edit.getThing(`${deck.cardsDocumentUrl}#${id}`);
+        const card = thing === null ? null : toCard(thing, dataset);
         const restated = card === null ? null : withStatedLanguages(card, languages);
-        if (restated === null) continue;
-        updated = withCard(updated, deck, restated, thing).dataset;
+        if (restated === null) return null;
         stated.push(restated.url);
-      }
+        return { card: restated, existing: thing };
+      });
       // One PUT of the whole document, If-Match the read above: a cards document changed
       // meanwhile is not overwritten, and no PATCH of text is cut short (saveDataset's `whole`).
-      if (stated.length > 0) await saveCardsDocument(deck, updated, stated, { whole: true });
+      if (stated.length > 0)
+        await saveCardsDocument(deck, written.dataset, stated, { whole: true });
       return stated.length;
     },
 
@@ -708,29 +715,24 @@ export function createSolidDeckRepository({
     },
   ): { dataset: Dataset; subjects: string[] } {
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
-    let updated = dataset;
-    const subjects: string[] = [];
+    const edit = editOf(dataset);
     // Distractors no card names any longer go once all are written: one moved to another card stays.
-    const dropped: string[] = [];
-    for (const card of saved) {
-      const existing = getThing(updated, urlOf(card.id));
+    const written = writeCards(edit, deck, saved, (_, card) => {
+      const existing = edit.getThing(urlOf(card.id));
       const createdAt =
         existing === null ? undefined : readDatetime(existing, DCTERMS.created)?.toISOString();
-      const written = withCardWritten(
-        updated,
-        deck,
-        { ...card, ...(createdAt === undefined ? {} : { createdAt }) },
-        existing,
-      );
-      updated = written.dataset;
-      subjects.push(...written.subjects);
-      dropped.push(...written.dropped);
-    }
-    for (const id of remove) {
-      dropped.push(...distractorsNamedBy(updated, urlOf(id)));
-      updated = withoutCardSubject(updated, urlOf(id));
-    }
-    return { dataset: withoutUnnamedDistractors(updated, dropped), subjects };
+      return { card: { ...card, ...(createdAt === undefined ? {} : { createdAt }) }, existing };
+    });
+    const updated = edit.done();
+    const removed = remove.map(urlOf);
+    const dropped = [
+      ...written.dropped,
+      ...removed.flatMap((url) => distractorsNamedBy(updated, url)),
+    ];
+    return {
+      dataset: withoutUnnamedDistractors(withoutCardSubjects(updated, removed), dropped),
+      subjects: written.subjects,
+    };
   }
 
   /**
@@ -741,30 +743,71 @@ export function createSolidDeckRepository({
   function withCard(
     dataset: Dataset,
     deck: Deck,
-    card: CardContent & { id: string; createdAt?: string; retired?: true },
+    card: CardToWrite,
     existing: NamedSubject | null,
   ): { dataset: Dataset; subjects: string[] } {
-    const written = withCardWritten(dataset, deck, card, existing);
+    return withCards(dataset, deck, [card], () => ({ card, existing }));
+  }
+
+  /**
+   * The cards document with a card written for each of `items` that
+   * `toWrite` gives one for (reading the document as written so far),
+   * all at once (writeCards); then the distractors the cards named
+   * before and no longer do are removed, unless another card names them.
+   */
+  function withCards<T>(
+    dataset: Dataset,
+    deck: Deck,
+    items: Iterable<T>,
+    toWrite: (edit: DatasetEdit<Dataset>, item: T) => CardWrite | null,
+  ): { dataset: Dataset; subjects: string[] } {
+    const edit = editOf(dataset);
+    const written = writeCards(edit, deck, items, toWrite);
     return {
-      dataset: withoutUnnamedDistractors(written.dataset, written.dropped),
+      dataset: withoutUnnamedDistractors(edit.done(), written.dropped),
       subjects: written.subjects,
     };
   }
 
   /**
-   * The cards document with the card written (cardThing) and its
-   * distractors beside it; a card is never written onto a distractor,
-   * nor a distractor onto a card (unlessTyped). Returns the subjects
-   * written, the card's, then its distractors', and the distractors it
-   * named before and no longer does (`dropped`), still in the document.
+   * Writes a card for each of `items` that `toWrite` gives one for
+   * (withCardWritten), each read and written through one edit of the
+   * document, which is made once (editOf): many cards take time that
+   * grows with them and the document, not their product. Returns the
+   * subjects written and the distractors the cards dropped.
+   */
+  function writeCards<T>(
+    edit: DatasetEdit<Dataset>,
+    deck: Deck,
+    items: Iterable<T>,
+    toWrite: (edit: DatasetEdit<Dataset>, item: T) => CardWrite | null,
+  ): { subjects: string[]; dropped: string[] } {
+    const subjects: string[] = [];
+    const dropped: string[] = [];
+    for (const item of items) {
+      const write = toWrite(edit, item);
+      if (write === null) continue;
+      const written = withCardWritten(edit, deck, write.card, write.existing);
+      subjects.push(...written.subjects);
+      dropped.push(...written.dropped);
+    }
+    return { subjects, dropped };
+  }
+
+  /**
+   * Writes the card (cardThing) and its distractors beside it; a card
+   * is never written onto a distractor, nor a distractor onto a card
+   * (unlessTyped). Returns the subjects written, the card's, then its
+   * distractors', and the distractors it named before and no longer
+   * does (`dropped`), still in the document.
    */
   function withCardWritten(
-    dataset: Dataset,
+    edit: DatasetEdit<Dataset>,
     deck: Deck,
-    card: CardContent & { id: string; createdAt?: string; retired?: true },
+    card: CardToWrite,
     existing: NamedSubject | null,
-  ): { dataset: Dataset; subjects: string[]; dropped: string[] } {
-    unlessTyped(dataset, `${deck.cardsDocumentUrl}#${card.id}`, SM.Distractor);
+  ): { subjects: string[]; dropped: string[] } {
+    unlessTyped(edit, `${deck.cardsDocumentUrl}#${card.id}`, SM.Distractor);
     const before = existing === null ? [] : getUrlAll(existing, SM.distractor);
     const distractors = card.distractors ?? [];
     const thing = withSuggestedAnswers(
@@ -772,14 +815,9 @@ export function createSolidDeckRepository({
       before,
       distractors.map((distractor) => `${deck.cardsDocumentUrl}#${distractor.id}`),
     );
-    const written = withDistractors(
-      setThing(dataset, thing),
-      deck.cardsDocumentUrl,
-      distractors,
-      before,
-    );
+    edit.setThing(thing);
+    const written = writeDistractors(edit, deck.cardsDocumentUrl, distractors, before);
     return {
-      dataset: written.dataset,
       subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects],
       dropped: written.dropped,
     };
@@ -806,10 +844,13 @@ export function createSolidDeckRepository({
    * (sm:deckCardLanguage, as setCardLanguage sets it).
    */
   function withOwnTerms(dataset: Dataset, deck: Deck): Dataset {
-    let builder = buildThing(getThing(dataset, deck.url)!);
+    const entry = getThing(dataset, deck.url)!;
+    let builder = buildThing(entry);
     if (deck.course === true) builder = builder.addIri(RDF.type, SCHEMA.Course);
-    for (const url of deck.completedChapters ?? [])
-      builder = builder.addIri(SM.completedChapter, url);
+    if (deck.completedChapters !== undefined) {
+      const completed = [...getUrlAll(entry, SM.completedChapter), ...deck.completedChapters];
+      builder = builder.setIriAll(SM.completedChapter, completed);
+    }
     if (deck.cardLanguage !== undefined)
       builder = builder.addStringNoLocale(SM.deckCardLanguage, deck.cardLanguage);
     return setThing(dataset, builder.build());
@@ -842,7 +883,7 @@ export function createSolidDeckRepository({
  */
 function withoutCard(dataset: Dataset, cardUrl: string): Dataset {
   const distractors = distractorsNamedBy(dataset, cardUrl);
-  return withoutUnnamedDistractors(withoutCardSubject(dataset, cardUrl), distractors);
+  return withoutUnnamedDistractors(withoutCardSubjects(dataset, [cardUrl]), distractors);
 }
 
 /** The distractors the card at `cardUrl` names, none when there is no card. */

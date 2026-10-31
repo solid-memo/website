@@ -6,6 +6,7 @@ import {
   type Dataset,
   type NamedSubject,
   type Subject,
+  type LanguageString,
   type SubjectBuilder,
   buildThing,
   createThing,
@@ -20,8 +21,9 @@ import {
   getThing,
   getUrl,
   getUrlAll,
-  removeThing,
+  removeThings,
 } from "./client/rdf";
+import type { DatasetEdit } from "./datasetEdit";
 import type { Literal, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,
@@ -271,29 +273,32 @@ export function applyRecord<T>(
     builder.removeAll(field.predicate);
     const value = (record as Record<string, FieldValue | undefined>)[field.name];
     if (value === undefined) continue;
-    if ((field.kind === "text" || field.kind === "anyText") && field.cardinality === "many") {
-      const texts = value as LangTexts;
-      for (const language of Object.keys(texts).sort()) {
-        for (const one of texts[language]) {
-          if (language === "") builder.addStringNoLocale(field.predicate, one);
-          else builder.addStringWithLocale(field.predicate, one, language);
-        }
-      }
-      continue;
-    }
+    // A list, or a text in many languages, is written in one call (setIriAll, setStringAll).
     if (field.kind === "text" || field.kind === "anyText") {
-      const text = value as LangText;
-      for (const language of Object.keys(text).sort()) {
-        if (language === "") builder.addStringNoLocale(field.predicate, text[language]);
-        else builder.addStringWithLocale(field.predicate, text[language], language);
-      }
-      continue;
-    }
-    for (const one of Array.isArray(value) ? value : [value]) {
-      addValue(builder, field, one as string | number | boolean);
+      builder.setStringAll(field.predicate, languageStrings(value as LangText | LangTexts));
+    } else if (field.cardinality !== "many") {
+      addValue(builder, field, value as string | number | boolean);
+    } else if (field.kind === "iri" || field.kind === "iriEnum") {
+      builder.setIriAll(field.predicate, value as readonly string[]);
+    } else {
+      const strings = (value as readonly string[]).map((one) => ({ value: one, language: "" }));
+      builder.setStringAll(field.predicate, strings);
     }
   }
   return builder;
+}
+
+/** A text's strings, one or many in each language (`""` for none), by language. */
+function languageStrings(text: LangText | LangTexts): LanguageString[] {
+  return Object.keys(text)
+    .sort()
+    .flatMap((language) => {
+      const strings: string | readonly string[] = text[language];
+      return (typeof strings === "string" ? [strings] : strings).map((value) => ({
+        value,
+        language,
+      }));
+    });
 }
 
 function addValue(
@@ -391,8 +396,12 @@ export function unlessNewer<T extends Subject>(thing: T): T {
  * idTakenInDeck): a card and a distractor are subjects of one cards
  * document, each at its id, so one is never written onto the other.
  */
-export function unlessTyped(dataset: Dataset, url: string, other: string): NamedSubject | null {
-  const thing = getThing(dataset, url);
+export function unlessTyped(
+  edit: DatasetEdit<Dataset>,
+  url: string,
+  other: string,
+): NamedSubject | null {
+  const thing = edit.getThing(url);
   if (thing !== null && getUrlAll(thing, RDF.type).includes(other)) {
     throw new AppError("idTakenInDeck", { url });
   }
@@ -401,7 +410,18 @@ export function unlessTyped(dataset: Dataset, url: string, other: string): Named
 
 /** The dataset without the subject, unless a newer version of the app wrote it (unlessNewer). */
 export function removeUnlessNewer<D extends Dataset>(dataset: D, url: string): D {
-  const thing = getThing(dataset, url);
-  if (thing !== null) unlessNewer(thing);
-  return removeThing(dataset, url);
+  return removeAllUnlessNewer(dataset, [url]);
+}
+
+/**
+ * The dataset without each of the subjects, unless a newer version of
+ * the app wrote one (unlessNewer): all taken out at once (removeThings),
+ * in time that grows with them and the document, not their product.
+ */
+export function removeAllUnlessNewer<D extends Dataset>(dataset: D, urls: readonly string[]): D {
+  for (const url of urls) {
+    const thing = getThing(dataset, url);
+    if (thing !== null) unlessNewer(thing);
+  }
+  return removeThings(dataset, urls);
 }

@@ -279,6 +279,24 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       ).toEqual([["PUT", URL_, "*", "text/turtle"]]);
     });
 
+    it("gives a subject made by name, and a link to one, as the document saved names them", async () => {
+      const { fetch, sent } = pod({ status: 201, body: "", headers: { ETag: '"w1"' } });
+      const b = createThing({ name: "b" });
+      const linked = setThing(
+        created(),
+        buildThing(b)
+          .addUrl(`${EX}link`, createThing({ name: "a" }))
+          .addUrl(`${EX}other`, `${EX}x`)
+          .build(),
+      );
+      const written = await writeDocument(URL_, linked, { fetch });
+      const saved = getThing(written.dataset, `${URL_}#b`)!;
+      expect(rdf.getUrlAll(saved, `${EX}link`)).toEqual([`${URL_}#a`]);
+      expect(rdf.getUrlAll(saved, `${EX}other`)).toEqual([`${EX}x`]);
+      expect(getThing(written.dataset, `${URL_}#a`)).not.toBeNull();
+      expect(sent[0]!.body).toContain("<#b>");
+    });
+
     it("writes an edit of the document read as one PATCH of the app's own body, If-Match the version given", async () => {
       const edited = setThing(
         await read(),

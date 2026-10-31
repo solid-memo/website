@@ -18,6 +18,7 @@ import {
   withQuads,
 } from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
+import { editOf } from "./datasetEdit";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import {
@@ -66,7 +67,7 @@ import {
   type DraftEntry,
 } from "./mappers/releaseDraftMapper";
 import { draftSubjects } from "./ownership";
-import { recordThing, removeUnlessNewer, storedVersionOf } from "./records";
+import { recordThing, removeAllUnlessNewer, storedVersionOf } from "./records";
 import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
@@ -570,12 +571,18 @@ function changedDocument(
     ...gone,
     ...made.flatMap(({ entry, was }) => [entry, ...(was === undefined ? [] : [was])]),
   ].some(involvesBlank);
-  for (const entry of gone)
-    if (!entry.subject.startsWith("_:")) dataset = removeUnlessNewer(dataset, entry.subject);
+  // Every subject taken out, and every one written, at once (removeThings, editOf).
+  const named = (entry: DraftEntry) => !entry.subject.startsWith("_:");
+  const edit = editOf(
+    removeAllUnlessNewer(
+      dataset,
+      gone.filter(named).map((entry) => entry.subject),
+    ),
+  );
   for (const { entry, was } of made) {
-    if (!entry.subject.startsWith("_:"))
-      dataset = setThing(dataset, rewritten(getThing(dataset, entry.subject), entry, was));
+    if (named(entry)) edit.setThing(rewritten(edit.getThing(entry.subject), entry, was));
   }
+  dataset = edit.done();
   if (blank) dataset = withBlankNodes(dataset, gone, made);
   return { dataset, made };
 }

@@ -136,11 +136,15 @@ function withoutDanglingMembers(dataset: Dataset, documentUrl: string, thing: Su
       (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)))
     );
   };
+  // Each link's members kept set in one call (setIriAll), however many it has.
   return MEMBERSHIP.reduce(
     (builder, { link, types }) =>
-      getUrlAll(thing, link)
-        .filter((url) => url.startsWith(`${documentUrl}#`) && !describes(url, types))
-        .reduce((b, url) => b.removeUrl(link, url), builder),
+      builder.setIriAll(
+        link,
+        getUrlAll(thing, link).filter(
+          (url) => !url.startsWith(`${documentUrl}#`) || describes(url, types),
+        ),
+      ),
     buildThing(thing),
   ).build();
 }

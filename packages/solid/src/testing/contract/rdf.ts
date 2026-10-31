@@ -4,6 +4,7 @@
 
 import type { Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
+import { growth } from "@solid-memo/domain/testing/growth";
 import type * as Rdf from "../../client/rdf";
 import type * as Resources from "../../client/resources";
 
@@ -76,13 +77,18 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     getDecimal,
     getLiteralAll,
     getStringByLocaleAll,
+    getInteger,
     getStringNoLocale,
     getThing,
     getThingAll,
+    getUrlAll,
     isEmptyDataset,
     localNameOf,
     propertiesOf,
+    removeThing,
+    removeThings,
     setThing,
+    setThings,
     sourceOf,
     toRdfJsDataset,
     withQuads,
@@ -166,6 +172,121 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       const changes = changesOf(setThing(await read(), thing))!;
       expect(changes.deletions).toEqual([]);
       expect(changes.additions.map((one) => one.object.value)).toEqual(["Finland"]);
+    });
+  });
+
+  describe("setThings and removeThings", () => {
+    const lines = (quads: Iterable<Quad>) =>
+      [...quads]
+        .map(
+          ({ subject, predicate, object }) => `${subject.value} ${predicate.value} ${object.value}`,
+        )
+        .sort();
+    /** What a dataset holds, in the order getThingAll gives its subjects, and its changes. */
+    const stateOf = (dataset: Rdf.Dataset) => {
+      const changes = changesOf(dataset);
+      return {
+        subjects: getThingAll(dataset).map((subject) => subject.url),
+        quads: lines(toRdfJsDataset(dataset)),
+        additions: changes === undefined ? undefined : lines(changes.additions),
+        deletions: changes === undefined ? undefined : lines(changes.deletions),
+      };
+    };
+    const front = (subject: Rdf.Subject, value: string) =>
+      buildThing(subject).addStringNoLocale(`${EX}front`, value).build();
+
+    it("set and remove subjects as setThing and removeThing do, one at a time", async () => {
+      const base = await read();
+      const a = getThing(base, `${URL_}#a`)!;
+      const c = front(createThing({ url: `${URL_}#c` }), "Finland");
+      const named = front(createThing({ name: "d" }), "Denmark");
+      const set = [front(a, "Sverige"), c, named, front(a, "Suède")];
+      const removed = [c, `${URL_}#b`, `${URL_}#absent`, named.url];
+      const once = removeThings(setThings(base, set), removed);
+      const fold = removed.reduce<Rdf.Dataset>(
+        (dataset, subject) => removeThing(dataset, subject),
+        set.reduce<Rdf.Dataset>((dataset, subject) => setThing(dataset, subject), base),
+      );
+      expect(stateOf(once)).toEqual(stateOf(fold));
+      expect(getThing(once, `${URL_}#d`)).toBeNull();
+      // Edited again: what was removed and is set again, and what was set and is removed, is no change.
+      const b = front(createThing({ url: `${URL_}#b` }), "Norway");
+      const again = removeThings(setThings(once, [b]), [`${URL_}#a`]);
+      expect(stateOf(again)).toEqual(stateOf(removeThing(setThing(fold, b), `${URL_}#a`)));
+    });
+
+    it("give the dataset itself for no subject", async () => {
+      const base = await read();
+      expect(setThings(base, [])).toBe(base);
+      expect(removeThings(base, [])).toBe(base);
+    });
+
+    it("look for a subject given by its name's IRI as text only in a dataset of a document", () => {
+      const named = front(createThing({ name: "d" }), "Denmark");
+      const built = setThing(createSolidDataset(), named);
+      expect(stateOf(removeThings(built, [named.url]))).toEqual(
+        stateOf(removeThing(built, named.url)),
+      );
+      expect(getThingAll(removeThings(built, [named.url]))).toEqual([]);
+    });
+  });
+
+  describe("setIriAll and setStringAll", () => {
+    const P = `${EX}p`;
+    /** A subject with two IRIs, a string, a language string and an integer for P. */
+    const mixed = () =>
+      buildThing(createThing({ url: `${URL_}#a` }))
+        .addIri(P, `${EX}x`)
+        .addIri(P, `${EX}y`)
+        .addStringNoLocale(P, "plain")
+        .addStringWithLocale(P, "tagged", "en")
+        .addInteger(P, 7)
+        .build();
+
+    it("set the property's IRIs, each once, and keep its other values", () => {
+      const set = buildThing(mixed())
+        .setIriAll(P, [`${EX}y`, `${EX}z`, `${EX}z`])
+        .build();
+      expect(getUrlAll(set, P)).toEqual([`${EX}y`, `${EX}z`]);
+      expect(getStringNoLocale(set, P)).toBe("plain");
+      expect(getStringByLocaleAll(set, P)).toEqual(new Map([["en", ["tagged"]]]));
+      expect(getInteger(set, P)).toBe(7);
+      expect(getUrlAll(buildThing(mixed()).setIriAll(P, []).build(), P)).toEqual([]);
+      const only = buildThing(createThing({ url: `${URL_}#b` })).setIriAll(P, [`${EX}x`]);
+      expect(getUrlAll(only.setIriAll(P, []).build(), P)).toEqual([]);
+      expect(() => buildThing(mixed()).setIriAll(P, ["not a URL"])).toThrow();
+    });
+
+    it("set the property's strings, each once, a language as an add reads it, and keep its other values", () => {
+      const set = buildThing(mixed())
+        .setStringAll(P, [
+          { value: "one", language: "" },
+          { value: "one", language: "" },
+          { value: "två", language: "SV" },
+          { value: "två", language: "sv" },
+        ])
+        .build();
+      expect(getStringNoLocale(set, P)).toBe("one");
+      expect(getStringByLocaleAll(set, P)).toEqual(new Map([["sv", ["två"]]]));
+      expect(getUrlAll(set, P)).toEqual([`${EX}x`, `${EX}y`]);
+      expect(getInteger(set, P)).toBe(7);
+      const none = buildThing(mixed()).setStringAll(P, []).build();
+      expect(getStringNoLocale(none, P)).toBeNull();
+      expect(getStringByLocaleAll(none, P)).toEqual(new Map());
+    });
+
+    it("take time that grows with the values, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const iris = Array.from({ length: count }, (_, i) => `${EX}v${i}`);
+          const strings = iris.map((value, i) => ({ value, language: i % 2 === 0 ? "" : "en" }));
+          const subject = createThing({ url: `${URL_}#a` });
+          return () => buildThing(subject).setIriAll(P, iris).setStringAll(P, strings).build();
+        },
+        2000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
     });
   });
 

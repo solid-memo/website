@@ -10,7 +10,7 @@ import {
   createSolidDataset,
   getThing,
   localNameOf,
-  removeThing,
+  removeThings,
   removeUrl,
   setThing,
   sourceOf,
@@ -19,6 +19,7 @@ import {
 } from "./client/rdf";
 
 import type { Quad } from "@rdfjs/types";
+import { editOf } from "./datasetEdit";
 import { deleteSolidDataset, readDocument, writeDocument } from "./client/resources";
 import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
 import { unlessNewer } from "./records";
@@ -402,13 +403,11 @@ async function removeOwnedOnce(
     "subjects" in found ? found : { subjects: found, statements: [] };
   const owned = [...subjects].filter((subject) => !isNewer(dataset, subject));
   const removed = withOnlyTheirBlankNodes(quads, owned);
+  const removedStatements = new Set(statements.map((statement) => JSON.stringify(statement)));
   const isGone = (quad: Quad) =>
     removed.has(termKey(quad.subject)) ||
-    statements.some(
-      ([subject, predicate, object]) =>
-        quad.subject.value === subject &&
-        quad.predicate.value === predicate &&
-        quad.object.value === object,
+    removedStatements.has(
+      JSON.stringify([quad.subject.value, quad.predicate.value, quad.object.value]),
     );
   const left = quads.filter((quad) => !isGone(quad));
   if (left.length === 0) {
@@ -432,11 +431,12 @@ async function removeOwnedOnce(
     await saveDataset(url, withQuads(dataset, left), fetch, { whole: true });
     return "kept";
   }
-  const edited = statements.reduce(
-    (current, [subject, predicate, object]) =>
-      setThing(current, removeUrl(getThing(current, subject)!, predicate, object)),
-    owned.reduce((current, subject) => removeThing(current, subject), dataset),
-  );
+  // Every subject taken out, and every statement, at once (removeThings, editOf).
+  const edit = editOf(removeThings(dataset, owned));
+  for (const [subject, predicate, object] of statements) {
+    edit.setThing(removeUrl(edit.getThing(subject)!, predicate, object));
+  }
+  const edited = edit.done();
   const body = patchBody(changesOf(edited), localNameOf)!;
   if (etag === undefined && new TextEncoder().encode(body).length > MAX_PATCH_BYTES) return "kept";
   await saveDataset(url, edited, fetch);

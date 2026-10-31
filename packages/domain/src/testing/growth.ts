@@ -70,6 +70,35 @@ export async function growthAsync(
   return slow / fast;
 }
 
+/**
+ * growthAsync for work that changes what it works on (a removal, a
+ * format's upgrade, against a pod in memory): `prepare` gives, for a
+ * size, the setup of one run, which resolves to the work to time. Each
+ * run is set up afresh, and only its work is timed: an import that
+ * puts the input in place would hide the work's growth in its own.
+ */
+export async function growthAfterSetup(
+  prepare: (size: number) => () => Promise<() => Promise<unknown>>,
+  size: number,
+  times: number,
+): Promise<number> {
+  const small = prepare(size);
+  const large = prepare(size * times);
+  const smalls = async () => {
+    let total = 0;
+    for (let time = 0; time < times; time++) total += await cpuTimeAsync(await small());
+    return total;
+  };
+  await (await small())();
+  let fast = Infinity;
+  let slow = Infinity;
+  for (let round = 0; round < 5; round++) {
+    fast = Math.min(fast, await smalls());
+    slow = Math.min(slow, await cpuTimeAsync(await large()));
+  }
+  return slow / fast;
+}
+
 /** The CPU time `work` takes until its promise settles, in microseconds. */
 async function cpuTimeAsync(work: () => Promise<unknown>): Promise<number> {
   const started = process.cpuUsage();
