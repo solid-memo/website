@@ -150,7 +150,10 @@ The page links to it too, as `vite.config.ts` fills in
 [index.html](../apps/web/index.html): the JSON-LD's `sameAs` and
 `codeRepository`, and the "source code" link shown to a browser that
 runs no script. The about page's repository links don't follow
-it ([reuse.md](reuse.md#6-what-you-edit-by-hand)).
+it ([reuse.md](reuse.md#6-what-you-edit-by-hand)), and neither does
+the security advisory a login error links to, which only upstream's
+repository publishes
+([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
 
 In the docs at `/docs/`
 ([deployment.md](deployment.md#what-the-artifact-contains)), a link to

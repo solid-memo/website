@@ -10,6 +10,7 @@ import { AppError, type ErrorVars } from "@solid-memo/domain/appError";
 import { isolated, shown, shownTag, type LangText } from "@solid-memo/domain/langText";
 import { NO_LANGUAGE } from "@solid-memo/domain/languageTag";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@solid-memo/domain/locale";
+import { ExternalIcon } from "./icons";
 import en from "../i18n/en.json";
 
 /**
@@ -224,11 +225,12 @@ export interface I18n {
   /**
    * What went wrong, for the user: an AppError in this language
    * (`errors.<code>`, its values filled in), its technical detail folded
-   * away behind "Technical details" unless `detail` is false (where only
-   * a sentence fits, as a status line); a request that never got through
-   * as a network failure; any other error as its own message (marked
-   * English, and said to be, in another language); null when there is no
-   * error.
+   * away behind "Technical details", after a link to the security
+   * advisory that explains it when one does (a login stopped for safety),
+   * unless `detail` is false (where only a sentence fits, as a status
+   * line); a request that never got through as a network failure; any
+   * other error as its own message (marked English, and said to be, in
+   * another language); null when there is no error.
    */
   errorText(error: unknown, options?: { detail?: boolean }): ErrorText | null;
   /**
@@ -436,15 +438,33 @@ export function createI18n(locale: Locale, appName?: string): I18n {
       if (error === null || error === undefined) return null;
       if (error instanceof AppError) {
         const text = errorSentence(`errors.${error.code}`, error.vars);
-        if (!detail || error.detail === "") return text;
+        if (!detail || (error.detail === "" && error.advisory === null)) return text;
+        const { advisory } = error;
         // Addresses and statuses are for whoever looks into it: folded away, so the sentence reads plainly.
         return (
           <>
             {text}
-            <details class="error-detail">
-              <summary>{t("common.technicalDetails")}</summary>
-              <code lang={partLang("en")}>{error.detail}</code>
-            </details>
+            {advisory !== null && (
+              <>
+                {" "}
+                {tx("common.advisory", {
+                  // ExternalLink's markup, written out: ExternalLink imports useI18n from here.
+                  link: (
+                    <a href={advisory.url} hreflang="en" target="_blank" rel="noopener noreferrer">
+                      {t("common.advisoryLink", { id: advisory.id })}
+                      <ExternalIcon />
+                      <span class="visually-hidden"> {t("common.opensInNewTab")}</span>
+                    </a>
+                  ),
+                })}
+              </>
+            )}
+            {error.detail !== "" && (
+              <details class="error-detail">
+                <summary>{t("common.technicalDetails")}</summary>
+                <code lang={partLang("en")}>{error.detail}</code>
+              </details>
+            )}
           </>
         );
       }

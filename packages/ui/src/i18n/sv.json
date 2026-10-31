@@ -98,6 +98,8 @@
     "networkError": "Kunde inte nå din Pod. Kontrollera anslutningen och försök igen.",
     "unexpectedError": "Något gick fel. Försök igen, eller läs in sidan på nytt. Detaljer (på engelska): {detail}",
     "technicalDetails": "Tekniska detaljer",
+    "advisory": "Läs mer i {link}.",
+    "advisoryLink": "säkerhetsmeddelandet {id} (på engelska)",
     "opensInNewTab": "(öppnas i en ny flik)",
     "reportMistake": "Rapportera ett fel"
   },
