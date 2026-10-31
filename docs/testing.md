@@ -121,8 +121,10 @@ server that answers a pod request with a redirect fails the tests.
 must let anyone read and write, as `npm run pod`'s does.
 `SOLID_SERVER_NAME` names it in the tests; `NODE_EXTRA_CA_CERTS`
 trusts a certificate the contributor's own CA signed.
-CI runs one job per blocking server, side by side, none stopping the
-others ([migrations.md](migrations.md#proof-on-a-real-server)).
+CI runs one job per blocking server, side by side
+([migrations.md](migrations.md#proof-on-a-real-server)); outside
+`main`, one that fails cancels the others, and the run
+([Canceled runs](#canceled-runs)).
 `SOLID_CLIENT=solid-memo-client` runs the suite, or a package's unit
 tests (`test:unit`, without coverage), on the Solid client with no
 Inrupt library in place of Inrupt's, the default
@@ -397,8 +399,9 @@ setup. Chromium's run in two shards (`npx playwright test --shard`),
 project, WebKit's and the phone's the slowest, in a job of its own,
 `journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`.
 When one of them fails, CI cancels the others (`fail-fast`), as their
-result no longer changes the run's; "Re-run failed jobs" runs the
-canceled ones again too.
+result no longer changes the run's, and the rest of the run with them
+([below](#canceled-runs)); "Re-run failed jobs" runs the canceled ones
+again too.
 Chromium's journeys run fully parallel (`fullyParallel: true`), so a
 file of several, such as `pod-safety`, spreads over both shards; a file
 whose journeys depend on each other runs them in turn
@@ -628,9 +631,10 @@ jobs run side by side, each
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |
-| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes all but the newest of `main`'s Turbo caches, of the CodeQL databases per language, and of each end-to-end server's images, and all but the two newest of the browsers' system libraries per browser. It's the one job whose token can write (`actions: write`). It runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes all but the newest of `main`'s Turbo caches, of the CodeQL databases per language, and of each end-to-end server's images, and all but the two newest of the browsers' system libraries per browser. Its token can write (`actions: write`), as only the `fail-fast` jobs' can besides. It runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `fail-fast (<job>)` | deterministic | nothing: one per job that tests the tree, `commits` aside, needing that job alone. When it fails, outside `main` and not for a fork's pull request, it cancels the run ([Canceled runs](#canceled-runs)); when it passes, it is skipped. Its token can write (`actions: write`), and it runs none of the repository's code |
 | `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another, they save only the caches the skipped jobs would have saved and `main` lacks (`releasing.md`), failing neither the run nor `ci-ok` |
-| `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches`, the `warm` jobs and the `solid-memo-client` jobs aside |
+| `ci-ok` | deterministic | that the gate passed, and then every job above that tests the tree, or, when the run reuses another, `reuse`, and `release-files` on a release commit; `journeys-report`, `caches`, the `warm` jobs, the `fail-fast` jobs and the `solid-memo-client` jobs aside |
 
 **`ci-ok` is the one check a merge to `main` waits for.** The ruleset
 on `main` (Settings › Rules) requires it alone, so it stays fixed as
@@ -701,10 +705,43 @@ replaced by a newer one, which the next release includes. A release
 commit's run, the only one that can deploy its version, has a group of
 its own, which no newer push replaces.
 
+### Canceled runs
+
+When a job that tests the tree fails, the run's result is settled, and
+CI cancels the jobs still going instead of letting them finish. The
+journeys, the end-to-end tests and `check` take many minutes, and a pull
+request in the merge queue leaves it sooner. Each testing job has a
+`fail-fast` job of its own that needs it alone, so it starts the moment
+that job fails, not once every job has ended, and cancels the run
+through GitHub's API. It runs only for its own job's failure, not for a
+job skipped because one before it failed. Canceling the run takes a
+token that can write (`actions: write`), so it's in a job that checks
+out and runs none of the repository's code, as `caches` is, not in the
+job that failed. `commits` has none: it fails within a minute when a
+pull request's body lacks its closing keyword, and once the body is
+fixed, only it runs again. A matrix's job ends at once too: in `journeys`, and in
+`pod` and `contract` outside `main`, one server or project that fails
+cancels the others (`fail-fast`).
+
+`ci-ok` still runs, and fails, as the canceled jobs neither passed nor
+were skipped. The run's checks show the job that failed as failed and
+the others as canceled, and the run as a whole as canceled, not
+failed. "Re-run failed jobs" runs both again, the canceled ones from
+their start.
+
+Runs on `main` are never canceled, for the release and the deploy
+([above](#the-merge-queue)). There a failed job leaves the others to
+finish, as `journeys-report` and `caches` need, and every server of
+`pod` and `contract` runs to its end, saving its images. A fork's pull
+request isn't canceled as a whole either, as its token can only read:
+its jobs run to their end, a matrix's other servers or projects aside,
+and its result is the same.
+
 A fork's pull request runs the same jobs, with public results: every
 job's token can only read the repository, no job uses a secret, no
 checkout keeps the token (`persist-credentials: false`), and `caches`
-runs on `main` alone. A fork's run may restore the
+runs on `main` alone. The `fail-fast` jobs, whose token can write too,
+never run for a fork. A fork's run may restore the
 caches `main`'s runs saved, and what it saves (npm's, pip's and
 Playwright's browsers, not Turbo's, the images' or the browsers' system
 libraries) is kept for its own pull request only. No pull request run's
