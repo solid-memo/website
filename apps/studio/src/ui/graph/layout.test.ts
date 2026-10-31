@@ -180,6 +180,36 @@ function chained(links: number, cards = 100): InstanceGraph {
   };
 }
 
+/**
+ * An instance of `size` leaves elsewhere: a cycle of half of them, each
+ * part of the next, and a chain of the rest into it, its first linking to
+ * every node of the cycle, so that each falls back to it. With `cycle`
+ * false, the last of the cycle is part of the instance's document instead.
+ */
+function tailIntoCycle(size: number, cycle: boolean): InstanceGraph {
+  const doc = `${INSTANCE}catalog.ttl`;
+  // The first of the cycle sorts first, so the walk comes into it there; the rest after the chain, so that its first links to them first.
+  const ring = Array.from({ length: size / 2 }, (_, k) =>
+    k === 0 ? "https://a.example/0" : `https://z.example/${k}`,
+  );
+  const tail = Array.from({ length: size / 2 }, (_, k) => `https://m.example/${k}`);
+  return {
+    nodes: [
+      node(INSTANCE, "container"),
+      node(doc, "document", { document: doc, found: true }),
+      ...[...ring, ...tail].map((id) => node(id, "outsideLeaf")),
+    ],
+    edges: [
+      edge(INSTANCE, doc, LDP_CONTAINS, "containment"),
+      ...ring.map((id, k) =>
+        edge(id, k + 1 < ring.length ? ring[k + 1]! : cycle ? ring[0]! : doc, IS_PART_OF),
+      ),
+      ...tail.map((id, k) => edge(id, k + 1 < tail.length ? tail[k + 1]! : ring[0]!, IS_PART_OF)),
+      ...ring.map((id) => edge(tail[0]!, id, SEES)),
+    ],
+  };
+}
+
 describe("createLayout", () => {
   it.each([
     ["a small instance", smallGraph()],
@@ -545,6 +575,39 @@ describe("createLayout", () => {
       8,
     );
     expect(ratio).toBeLessThan(4);
+  });
+
+  it("places every node of a long chain into a cycle, or into a document, and routes every edge", () => {
+    for (const cycle of [false, true]) {
+      const graph = tailIntoCycle(400, cycle);
+      expect(pointsOf(laidOut(graph).positions).size).toBe(graph.nodes.length);
+      expectRoutesJoinEnds(graph);
+    }
+  });
+
+  // Hanging a chain into a cycle once walked the chain again for each node
+  // of the cycle. Timed against the same chain into the instance's
+  // document: the fewest of a few runs each, in CPU time, taken in turns,
+  // so that a machine busy for a while slows both alike (testing.md).
+  it("hangs a long chain into a cycle as fast as one into a document", () => {
+    const cpuTime = (graph: InstanceGraph) => {
+      const started = process.cpuUsage();
+      createLayout(graph).step(2);
+      const { user, system } = process.cpuUsage(started);
+      return user + system;
+    };
+    const into = (cycle: boolean) => tailIntoCycle(12_000, cycle);
+    const [control, cyclic] = [into(false), into(true)];
+    cpuTime(control);
+    cpuTime(cyclic);
+    let fast = Infinity;
+    let slow = Infinity;
+    for (let round = 0; round < 5; round++) {
+      fast = Math.min(fast, cpuTime(control));
+      slow = Math.min(slow, cpuTime(cyclic));
+    }
+    // About 1 in linear time; walking the chain for each node of the cycle makes it grow with the input.
+    expect(slow / fast).toBeLessThan(3);
   });
 });
 
