@@ -130,7 +130,7 @@
     "copied": "Les détails sont copiés.",
     "copyFailed": "Impossible de copier les détails. Sélectionnez-les sous Détails techniques et copiez-les à la main.",
     "report": "Le signaler",
-    "private": "Les détails ne mentionnent ni Pod, ni WebID, ni carte, et rien n’est envoyé à moins que vous n’envoyiez le signalement vous-même.",
+    "private": "Le signaler ouvre le formulaire de bug du projet avec la version déjà remplie : collez-y les détails copiés. Les adresses sont d’abord retirées des détails, et ils ne sont envoyés que si vous les collez dans le signalement et l’envoyez vous-même.",
     "notice": "Une erreur s’est produite. La page peut ne pas fonctionner comme prévu ; si elle ne répond plus, rechargez-la.",
     "noticeRegion": "Erreur",
     "close": "Fermer"

@@ -64,4 +64,4 @@ body:
     id: more
     attributes:
       label: Anything else
-      description: Screenshots, or messages from the browser's console. Leave out tokens and anything private from your pod.
+      description: Screenshots, messages from the browser's console, or the details that Copy details copies when the app says "Something went wrong". Leave out tokens and anything private from your pod.

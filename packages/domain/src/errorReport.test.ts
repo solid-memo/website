@@ -10,6 +10,7 @@ import {
   routeOf,
   withoutAddresses,
 } from "./errorReport";
+import { growth } from "./testing/growth";
 
 const REPO = "https://github.com/solid-memo/website";
 const SITE = "https://solid-memo.com/";
@@ -53,6 +54,59 @@ describe("withoutAddresses", () => {
         SITE,
       ),
     ).toBe("<address> <address> <address>");
+  });
+
+  it("takes out an email address and a mailto, tel or urn value", () => {
+    expect(
+      withoutAddresses(
+        "[alice@example.org, mailto:bob@x.se tel:+46701234567 urn:uuid:1f2e alice%40pod.example.net/x]",
+        SITE,
+      ),
+    ).toBe("[<address>, <address> <address> <address> <address>/x]");
+  });
+
+  it("takes out an email address in any script, a long one, one at localhost and a tel number with spaces", () => {
+    expect(
+      withoutAddresses(
+        `ålice@example.org alice@exämple.se ${"a".repeat(70)}@example.org alice@localhost alice%2540pod.example tel:+46 70 123 45`,
+        SITE,
+      ),
+    ).toBe("<address> <address> <address> <address> <address> <address>");
+  });
+
+  it("passes over a long run of encoded at signs with no host in time linear in its length", () => {
+    const ratio = growth(
+      (length) => {
+        const word = "a%40".repeat(length / 4);
+        return () => withoutAddresses(word, SITE);
+      },
+      20_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("takes out an email address in an error's message quoting pod text", () => {
+    const error = new Error("[due 2026-13-40 alice@example.org] does not start with a date-time.");
+    error.stack = "";
+    expect(errorDetails(error, PLACE)).toContain(
+      "Error: Error: [due 2026-13-40 <address>] does not start with a date-time.",
+    );
+  });
+
+  it("passes over a long word with no address in time linear in its length", () => {
+    // Eight times the word must take less than four times as long as an
+    // eighth of it done eight times over (testing.md): trying an email's
+    // user at every letter to the word's end would take about eight times.
+    const ratio = growth(
+      (length) => {
+        const word = `${"a".repeat(length)}@`;
+        return () => withoutAddresses(word, SITE);
+      },
+      20_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("keeps the path of the site's own scripts, without a query or a hash", () => {
@@ -136,15 +190,13 @@ describe("errorDetails", () => {
 });
 
 describe("errorReportUrl", () => {
-  it("opens the bug form with Where, Version and Anything else filled in, and nothing private", () => {
-    const details = errorDetails(chromiumError(`Cannot read ${DECK}`), PLACE);
-    const url = errorReportUrl(REPO, PLACE, details);
+  it("opens the bug form with only Where and Version filled in, and nothing private", () => {
+    const url = errorReportUrl(REPO, PLACE);
     expect(url.startsWith(`${REPO}/issues/new?`)).toBe(true);
     expect(Object.fromEntries(new URL(url).searchParams)).toEqual({
       template: "bug.yml",
       where: "#/study?instance=&deck=",
       version: `2.3.0 (${SHA})`,
-      more: `\`\`\`text\n${details}\n\`\`\``,
     });
     expect(decodeURIComponent(url)).not.toContain("alice");
   });

@@ -173,14 +173,16 @@ describe("ErrorReport", () => {
     expect(screen.getByText(/^Version: 2\.3\.0/)).toHaveTextContent("Error: TypeError");
   });
 
-  it("links to the bug form, filled in with the same details", () => {
+  it("links to the bug form next to Copy details, the details left out of the link", () => {
     render(<ErrorReport error={error} source={source} />);
     const place = errorPlace(source);
-    expect(screen.getByRole("link", { name: /Report it/ })).toHaveAttribute(
-      "href",
-      errorReportUrl(source.repoUrl, place, errorDetails(error, place)),
+    const link = screen.getByRole("link", { name: /Report it/ });
+    expect(link).toHaveAttribute("href", errorReportUrl(source.repoUrl, place));
+    expect(link.getAttribute("href")).not.toContain("Cannot");
+    expect(link.parentElement).toContainElement(
+      screen.getByRole("button", { name: "Copy details" }),
     );
-    expect(screen.getByText(/nothing is sent unless you send the report/)).toBeInTheDocument();
+    expect(screen.getByText(/paste the copied details into it/)).toBeInTheDocument();
   });
 
   it("keeps the details as the error came up, whatever route follows", () => {

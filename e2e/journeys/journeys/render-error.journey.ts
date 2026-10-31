@@ -9,12 +9,13 @@ import { expect, test } from "../fixtures.ts";
  * wrong): a guest opens the Studio, whose code throws, as a bug in it
  * would. "Something went wrong" takes the screen's place under the
  * masthead; its details copy without the address in the error, its
- * report link fills in the bug form with them, Try again meets the same
- * error, and Go to the start leads back to the deck list.
+ * report link fills in the bug form's Where and Version but leaves the
+ * details out of the link, Try again meets the same error, and Go to the
+ * start leads back to the deck list.
  *
  * What it catches: a render error that leaves the page blank (no
- * boundary, or one around the wrong part), details that keep an address,
- * and a way out that does not get out.
+ * boundary, or one around the wrong part), details that keep an address
+ * or leave in the report link, and a way out that does not get out.
  */
 test("a screen that fails while it renders gives a way out and a way to report it @error", async ({
   app,
@@ -42,13 +43,14 @@ test("a screen that fails while it renders gives a way out and a way to report i
     expect(details).not.toContain("pod.example");
   });
 
-  await app.step("04 · Report it: the bug form, filled in with the same details", async () => {
+  await app.step("04 · Report it: the bug form, the details left out of the link", async () => {
     const report = await app.crash.reportLink();
     expect(report.pathname).toBe("/solid-memo/website/issues/new");
     expect(report.searchParams.get("template")).toBe("bug.yml");
     expect(report.searchParams.get("where")).toBe("#/studio?instance=");
     expect(report.searchParams.get("version")).toMatch(/\S/);
-    expect(report.searchParams.get("more")).toBe(`\`\`\`text\n${details}\n\`\`\``);
+    expect([...report.searchParams.keys()]).toEqual(["template", "where", "version"]);
+    expect(report.href).not.toContain("Cannot");
   });
 
   await app.step("05 · Try again: the Studio fails again", async () => {
