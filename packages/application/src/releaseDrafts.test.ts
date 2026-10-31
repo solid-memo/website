@@ -300,6 +300,80 @@ describe("createReleaseDraft", () => {
     });
   });
 
+  it("keeps of a release's other statements only those of it, its subjects and what they name", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const text = (value: string) => ({
+      kind: "literal" as const,
+      value,
+      language: "en",
+      datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+    });
+    const SOURCE = "https://source.example/";
+    const LICENSE = "https://license.example/";
+    const named: DraftTriple[] = [
+      {
+        subject: SOURCE,
+        predicate: "http://purl.org/dc/terms/license",
+        object: { kind: "iri", value: LICENSE },
+      },
+      {
+        subject: LICENSE,
+        predicate: RDF_TYPE,
+        object: { kind: "iri", value: "http://purl.org/dc/terms/LicenseDocument" },
+      },
+      {
+        subject: LICENSE,
+        predicate: "http://www.w3.org/ns/prov#wasAttributedTo",
+        object: { kind: "blank", value: "b0" },
+      },
+      { subject: "_:b0", predicate: "http://xmlns.com/foaf/0.1/name", object: text("Licensor") },
+    ];
+    // What the release states of the address a draft of it would be published at, which nothing names.
+    const planted: DraftTriple[] = [
+      {
+        subject: `${V1}#q-a-1a`,
+        predicate: SM.frontImage,
+        object: { kind: "iri", value: "https://elsewhere.example/pixel.png" },
+      },
+      {
+        subject: `${V1}#q-a-1a`,
+        predicate: "http://www.w3.org/2002/07/owl#deprecated",
+        object: {
+          kind: "literal",
+          value: "true",
+          language: "",
+          datatype: "http://www.w3.org/2001/XMLSchema#boolean",
+        },
+      },
+      {
+        subject: V1,
+        predicate: "http://purl.org/dc/terms/description",
+        object: { kind: "blank", value: "b1" },
+      },
+      {
+        subject: "_:b1",
+        predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+        object: text("More"),
+      },
+    ];
+    const crafted = { ...release, triples: [...release.triples, ...named, ...planted] };
+    repository.parseRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
+    const imported = created();
+    expect(imported.triples).toEqual(
+      rebaseDraft({ ...release, triples: [...release.triples, ...named] }, imported.url).triples,
+    );
+    repository.readRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere });
+    const next = created();
+    expect(
+      next.triples.some((triple) => triple.subject.startsWith(V1) || triple.subject === "_:b1"),
+    ).toBe(false);
+    expect(next.triples).toEqual(expect.arrayContaining(named));
+  });
+
   it("takes the next name when its place was taken elsewhere meanwhile, a few times", async () => {
     const { useCases, repository } = setUp();
     repository.create.mockRejectedValueOnce(

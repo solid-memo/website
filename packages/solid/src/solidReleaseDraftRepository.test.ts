@@ -740,6 +740,39 @@ describe("assemble", () => {
     });
   });
 
+  it("refuses a draft that states anything of the release at its address already, for a pod or the library (GHSA-p2pr-x6fw-hrfx)", async () => {
+    const pod = await draftPod();
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    const draft = course();
+    const of = (subject: string) => ({
+      ...draft,
+      triples: [
+        ...draft.triples,
+        {
+          subject,
+          predicate: `${SM}frontImage`,
+          object: { kind: "iri" as const, value: "https://elsewhere.example/pixel.png" },
+        },
+      ],
+    });
+    await pod.repository.create(INSTANCE, of(`${target}#q-a-1a`));
+    await expect(pod.repository.assemble(DRAFT, target, NOW)).rejects.toMatchObject({
+      code: "releaseForeignStatement",
+      vars: { subject: `${target}#q-a-1a` },
+    });
+    const library = `${DECKS}solid/v1.ttl`;
+    const other = draftUrlOf(INSTANCE, "other", 1);
+    await pod.repository.create(INSTANCE, rebaseDraft(of(library), other));
+    await expect(pod.repository.assemble(other, library, NOW)).rejects.toMatchObject({
+      code: "releaseForeignStatement",
+      vars: { subject: library },
+    });
+    // At another address, it is as the draft states it.
+    await expect(pod.repository.assemble(other, `${DECKS}solid/v2.ttl`, NOW)).resolves.toContain(
+      `<${library}>`,
+    );
+  });
+
   it("leaves a series described elsewhere to where it is, and a release with none as it is", async () => {
     const pod = await draftPod();
     const elsewhere = {

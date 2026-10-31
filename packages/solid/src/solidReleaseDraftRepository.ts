@@ -306,10 +306,14 @@ export function createSolidReleaseDraftRepository({
       const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
       if (version !== undefined && versionOfDocuments(urls, datasets) !== version)
         throw new AppError("changedElsewhere", { url: draftUrl });
+      // A statement of the release at its address already would say more of it than the draft does, which no editor shows (GHSA-p2pr-x6fw-hrfx).
+      const atTargetAlready = (iri: string) => iri === targetUrl || iri.startsWith(`${targetUrl}#`);
       const atTarget = datasets.flatMap((dataset, at) =>
         quadsOf(dataset).map((quad) => {
           const object = termOf(quad.object);
           const label = (value: string) => `d${at}-${value}`;
+          if (quad.subject.termType !== "BlankNode" && atTargetAlready(iriOf(quad.subject.value)))
+            throw new AppError("releaseForeignStatement", { subject: iriOf(quad.subject.value) });
           return quadOf(
             quad.subject.termType === "BlankNode"
               ? `_:${label(quad.subject.value)}`

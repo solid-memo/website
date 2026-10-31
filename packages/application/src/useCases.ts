@@ -324,6 +324,7 @@ export function createUseCases({
       drafts,
       releaseDraftRepository,
       releasePublisher,
+      shapeValidator,
       deckLibrary,
       fileExchange,
       storageGateway,

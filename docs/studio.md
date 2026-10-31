@@ -1495,7 +1495,19 @@ chapter, step and wrong option must be a fragment of the release
 (`<release>#id`), as the draft holds only those as its parts. One
 anywhere else is shown by no editor and checked by no rule, but would
 be published with the draft, so such a release is refused too
-(`releaseForeignPart`). A draft
+(`releaseForeignPart`).
+
+Of a release's other statements, the draft keeps those of the release,
+of its own subjects, and of what they name, at any depth: a source, a
+license, a blank node. Only a statement of what none of these leads to
+is dropped, with nothing said. One that is kept can still be of the
+address the draft is later published at, or of a fragment of it. No
+editor shows it, so publishing there refuses the draft
+(`releaseForeignStatement`, [Publishing a release](#publishing-a-release)).
+In the pod, another folder is the way out; for the library, whose
+address is fixed, a new draft that doesn't state it.
+
+A draft
 whose documents (perhaps written by another app) name a subject by
 another id isn't opened, and no change gives a draft one
 (`draftIdUnsupported`). Either is refused with nothing written, as is a
@@ -2118,13 +2130,18 @@ releases it, two ways.
 - **Checked.** The screen counts the errors the release check finds
   for a pod, with a link to it (`publishErrors` in
   [releaseCheck.ts](../apps/studio/src/ui/releaseCheck.ts)).
-  Publishing checks the draft again, the shapes too. An error stops it
+  Publishing checks the draft again, the shapes too, as the release
+  at the address it's published at. An error stops it
   (`releaseHasErrors`), with nothing written; a warning doesn't.
 - **Written once.** The draft is made one Turtle document at the
   address (`assemble`, at library deck format 6,
   [data-model.md](data-model.md#drafts-and-releases)), written only
   where nothing is (`If-None-Match: *`). An address taken is refused
-  (`releaseTaken`).
+  (`releaseTaken`). So is a draft that states anything of the release
+  at that address, or a subject of it, itself
+  (`releaseForeignStatement`): no editor shows it, and it would add to
+  the release's own parts. Download .ttl refuses it the same way, at
+  the library's address.
 - **Public.** Then only that document is made readable by everyone, as
   its server's access control says it: its own ACL on a server with Web
   Access Control, its ACR on one with Access Control Policies

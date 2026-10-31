@@ -131,6 +131,7 @@ describe.each(SERVERS)("making a release public on $name", ({ url: server }) => 
           drafts: {} as never,
           releaseDraftRepository: {} as never,
           releasePublisher,
+          shapeValidator: {} as never,
           deckLibrary: {} as never,
           fileExchange: {} as never,
           storageGateway: { discoverStorages: async () => [] },
