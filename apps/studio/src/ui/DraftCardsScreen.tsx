@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import {
   DRAFT_CARD_FILTERS,
@@ -99,13 +99,24 @@ export function DraftCardsScreen({
 }) {
   const { t, locale, readerText } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
-  const found = draftCardRows(draft, {
-    ...(view.filter === undefined ? {} : { filter: view.filter }),
-    ...(view.language === undefined ? {} : { language: view.language }),
-  });
-  const languages = draftCardLanguages(draft);
+  // A draft may have thousands of cards: its rows, languages and chapter
+  // titles are worked out when it or the view changes, not on every
+  // render (a tick of a checkbox, a page).
+  const found = useMemo(
+    () =>
+      draftCardRows(draft, {
+        ...(view.filter === undefined ? {} : { filter: view.filter }),
+        ...(view.language === undefined ? {} : { language: view.language }),
+      }),
+    [draft, view.filter, view.language],
+  );
+  const languages = useMemo(() => draftCardLanguages(draft), [draft]);
+  const chapterTitles = useMemo(
+    () => new Map(draft.chapters.map((node) => [node.id, node.data.title])),
+    [draft],
+  );
   const chapterName = (id: string) => {
-    const title = draft.chapters.find((node) => node.id === id)?.data.title;
+    const title = chapterTitles.get(id);
     return title === undefined ? id : readerText(title);
   };
   const placeName = (place: QuestionPlace | null) => {

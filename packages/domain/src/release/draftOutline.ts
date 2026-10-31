@@ -17,7 +17,6 @@ import {
   iriIn,
   liveChapters,
   liveStepsByChapter,
-  placeOf,
   type CardText,
   type DraftChange,
   type DraftNode,
@@ -258,27 +257,39 @@ export function draftCardRows(
   draft: ReleaseDraft,
   { filter, language }: { filter?: DraftCardFilter; language?: string } = {},
 ): DraftCardRow[] {
+  // One pass over the steps and chapters counts where each card is asked
+  // and keeps the first place, as placeOf finds it: the first step that
+  // checks it, else the first chapter that reviews it. A draft started
+  // from a release may have thousands of cards and steps, and the table
+  // lists them all: a search of every step for each card would take
+  // their product.
   const asking = new Map<string, number>();
-  const count = (iris: readonly string[]) => {
-    for (const iri of iris) asking.set(iri, (asking.get(iri) ?? 0) + 1);
+  const places = new Map<string, QuestionPlace>();
+  const count = (iris: readonly string[], place: QuestionPlace) => {
+    for (const iri of iris) {
+      asking.set(iri, (asking.get(iri) ?? 0) + 1);
+      if (!places.has(iri)) places.set(iri, place);
+    }
   };
-  for (const node of draft.steps) count(node.data.checkedBy);
-  for (const node of draft.chapters) count(node.data.reviewQuestion);
+  for (const node of draft.steps) count(node.data.checkedBy, { kind: "step", step: node.id });
+  for (const node of draft.chapters)
+    count(node.data.reviewQuestion, { kind: "review", chapter: node.id });
   const live = new Set(
     draft.distractors
       .filter((node) => node.data.deprecated !== true)
       .map((node) => iriIn(draft, node.id)),
   );
-  const rows = draft.cards.map(
-    (node): DraftCardRow => ({
+  const rows = draft.cards.map((node): DraftCardRow => {
+    const iri = iriIn(draft, node.id);
+    return {
       id: node.id,
       card: node.data,
-      place: placeOf(draft, node.id),
-      asked: asking.get(iriIn(draft, node.id)) ?? 0,
-      distractors: node.data.distractor.filter((iri) => live.has(iri)).length,
+      place: places.get(iri) ?? null,
+      asked: asking.get(iri) ?? 0,
+      distractors: node.data.distractor.filter((one) => live.has(one)).length,
       retired: node.data.deprecated === true,
-    }),
-  );
+    };
+  });
   const keeps: Record<DraftCardFilter, (row: DraftCardRow) => boolean> = {
     unasked: (row) => draft.course && !row.retired && row.asked === 0,
     askedTwice: (row) => row.asked > 1,
