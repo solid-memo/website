@@ -430,6 +430,34 @@ describe("the deck library", () => {
       await expect(refused).rejects.toThrow("Less than 1 values");
     });
 
+    it("readReleaseFromLink refuses a release with a subject in a newer format than the app reads, as too new", async () => {
+      const deps = makeDeps();
+      const newer = (url: string, shape: "card" | "distractor") =>
+        ({ url, status: "newer", shape, version: 99, latest: 7 }) as const;
+      reading(deps, [linked(1)], () => ({
+        url: `${RELEASES}v1.ttl`,
+        status: "checked",
+        subjects: [newer(`${RELEASES}v1.ttl#d1`, "distractor")],
+      }));
+      await expect(
+        createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`),
+      ).rejects.toMatchObject({
+        code: "libraryDeckTooNew",
+        vars: { url: `${RELEASES}v1.ttl`, version: 99, latest: 7 },
+      });
+      reading(deps, [linked(1)], () => ({
+        url: `${RELEASES}v1.ttl`,
+        status: "checked",
+        subjects: [newer(`${RELEASES}v1.ttl#c1`, "card")],
+      }));
+      await expect(
+        createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`),
+      ).rejects.toMatchObject({
+        code: "libraryCardTooNew",
+        vars: { card: `${RELEASES}v1.ttl#c1`, url: `${RELEASES}v1.ttl`, version: 99, latest: 7 },
+      });
+    });
+
     it("importReleaseFromUrl imports a deck as the library's are, and starts a course once", async () => {
       const deps = makeDeps();
       const useCases = createUseCases(deps);

@@ -1603,7 +1603,8 @@
       "MaxLength": "Texten är för lång.",
       "Closed": "Egenskapen är inte tillåten här.",
       "DeckPlace": "Kortlekens post finns inte i instansens katalog, eller så anger den ett dokument på en adress som ingen kortleks dokument får ha, till exempel en annan resurs åtkomstkontroll eller ett av instansens egna dokument. Solid Memo använder den inte.",
-      "DateTimeRange": "Solid Memo kan inte läsa det här datumet: det ligger för långt fram eller tillbaka i tiden, eller är längre än en tidpunkt är, så det läses som inget datum."
+      "DateTimeRange": "Solid Memo kan inte läsa det här datumet: det ligger för långt fram eller tillbaka i tiden, eller är längre än en tidpunkt är, så det läses som inget datum.",
+      "FormatVersionRange": "Inget format i Solid Memo har den här versionen: den är lägre än 1, så Solid Memo kan inte läsa subjektet."
     }
   },
   "webIdDocument": {

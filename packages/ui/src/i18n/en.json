@@ -1603,7 +1603,8 @@
       "MaxLength": "The text is too long.",
       "Closed": "The property is not allowed here.",
       "DeckPlace": "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it.",
-      "DateTimeRange": "Solid Memo can't read this date: it is too far in the future or the past, or longer than a date-time is, so it reads as no date."
+      "DateTimeRange": "Solid Memo can't read this date: it is too far in the future or the past, or longer than a date-time is, so it reads as no date.",
+      "FormatVersionRange": "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject."
     }
   },
   "webIdDocument": {

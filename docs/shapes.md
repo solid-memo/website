@@ -225,7 +225,8 @@ Every mapper takes three steps
    version (absent = 1), and reads the subject with that version's
    descriptor into a `{ version, data }` record. A version newer
    than this app knows is read with the latest shape it has, its stored
-   version passed through unchanged.
+   version passed through unchanged. A version below 1, which no shape
+   has, isn't read: the subject is read as one that doesn't fit.
 2. `migrate("card", record)` walks the record up the
    [migration chain](migrations.md) to the latest version, in memory.
 3. `cardFromRecord(url, storedVersion, data)` builds the domain model,

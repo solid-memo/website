@@ -645,7 +645,11 @@ describe("readVersioned", () => {
         data: { front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [], subject: [] },
       },
     });
-    expect(readVersioned(card(0), "card")?.record.version).toBe(1);
+  });
+
+  it("is null for a version below 1, which no shape has, so no shape checks it", () => {
+    expect(readVersioned(card(0), "card")).toBeNull();
+    expect(readVersioned(card(-3), "card")).toBeNull();
   });
 
   it("is null for the wrong class or a subject that does not fit", () => {

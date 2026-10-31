@@ -56,7 +56,9 @@ export interface LibraryUseCases {
    * link), read on its own and checked against the library's shapes, to
    * show before it is added. Refused when the text is no address of a
    * release (releaseUrlInvalid), when a subject of it breaks its shape
-   * (releaseNotConforming), and as DeckLibrary.readRelease refuses. Read
+   * (releaseNotConforming), when one is in a newer format than the app
+   * reads (libraryDeckTooNew, libraryCardTooNew), and as
+   * DeckLibrary.readRelease refuses. Read
    * as anyone reads it; writes nothing.
    */
   readReleaseFromLink(url: string): Promise<LibraryDeck>;
@@ -281,15 +283,29 @@ export function createLibraryUseCases({
   /**
    * A release read from a link (docs/deck-library.md, From a link), read
    * once and refused when a subject of that read breaks its shape in the
-   * library's shapes (releaseNotConforming); its warnings do not. The read
+   * library's shapes (releaseNotConforming), or is in a format newer than
+   * they have (refuseNonConforming); its warnings do not. The read
    * accepted is the one the library gives from then on, as the release's
    * cards are imported or planned with (DeckLibrary.readRelease).
    */
   function checkLinkedRelease(url: string): Promise<LibraryDeck> {
     return deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
   }
-  /** Refuse a release whose report has a violation (releaseNotConforming). */
+  /**
+   * Refuse a release with a subject in a format newer than the library's
+   * shapes have, which no shape checks (libraryCardTooNew for a card,
+   * libraryDeckTooNew for any other), or with a violation of its shape
+   * (releaseNotConforming): the check reports a subject stamped with a
+   * version below 1 as breaking its shape.
+   */
   function refuseNonConforming(url: string, report: DocumentReport): void {
+    const newer = report.subjects.find((subject) => subject.status === "newer");
+    if (newer !== undefined) {
+      const { version, latest } = newer;
+      throw newer.shape === "card"
+        ? new AppError("libraryCardTooNew", { card: newer.url, url, version, latest })
+        : new AppError("libraryDeckTooNew", { url, version, latest });
+    }
     const problems = report.subjects.flatMap((subject) =>
       subject.status === "checked"
         ? subject.violations.filter((violation) => violation.severity === "violation")
