@@ -197,9 +197,58 @@ export function groupProblems(problems: readonly ReleaseProblem[]): ProblemGroup
     .filter((group) => group.subjects.length > 0);
 }
 
-/** The card whose wrong options include the subject, which its editor shows: undefined when none does. */
+/**
+ * The first card that names each wrong option, by the option, of each draft's cards.
+ * Keyed by the cards array, it assumes the array is never changed in place: drafts are rebuilt immutably.
+ */
+const distractorCards = new WeakMap<ReleaseDraft["cards"], ReadonlyMap<string, string>>();
+
+/** The id of the card whose wrong options include the subject, which its editor shows: undefined when none does. */
 function cardOfDistractor(draft: Pick<ReleaseDraft, "cards">, subject: string) {
-  return draft.cards.find((node) => node.data.distractor.includes(subject));
+  let cards = distractorCards.get(draft.cards);
+  if (cards === undefined) {
+    const found = new Map<string, string>();
+    for (const node of draft.cards) {
+      for (const option of node.data.distractor) if (!found.has(option)) found.set(option, node.id);
+    }
+    distractorCards.set(draft.cards, (cards = found));
+  }
+  return cards.get(subject);
+}
+
+/** The ids of a draft's subjects that have an editor or a part of the release screen, read once a draft. */
+interface DraftSubjects {
+  chapters: ReadonlySet<string>;
+  steps: ReadonlySet<string>;
+  cards: ReadonlySet<string>;
+  agents: ReadonlySet<string>;
+  activities: ReadonlySet<string>;
+  /** The activities that generated the release, by IRI. */
+  generating: ReadonlySet<string>;
+  /** The activities that made an earlier release. */
+  carried: ReadonlySet<string>;
+}
+
+/** Each draft's subjects; assumes a draft and its arrays are never changed in place, since drafts are rebuilt immutably. */
+const draftSubjects = new WeakMap<ReleaseDraft, DraftSubjects>();
+
+/** The draft's subjects, so that placing each of many problems does not read the whole draft again. */
+function subjectsOf(draft: ReleaseDraft): DraftSubjects {
+  let subjects = draftSubjects.get(draft);
+  if (subjects === undefined) {
+    const ids = (nodes: readonly { id: string }[]) => new Set(nodes.map((node) => node.id));
+    subjects = {
+      chapters: ids(draft.chapters),
+      steps: ids(draft.steps),
+      cards: ids(draft.cards),
+      agents: ids(draft.agents),
+      activities: new Set(activitiesOf(draft)),
+      generating: new Set(generatingActivities(draft)),
+      carried: new Set(draft.published.activities),
+    };
+    draftSubjects.set(draft, subjects);
+  }
+  return subjects;
 }
 
 /**
@@ -214,7 +263,7 @@ export function outlineProblems(
   const found = new Map<string, ReleaseProblem[]>();
   for (const one of problems) {
     const own = idIn(draft, one.subject);
-    const id = own === null ? null : (cardOfDistractor(draft, one.subject)?.id ?? own);
+    const id = own === null ? null : (cardOfDistractor(draft, one.subject) ?? own);
     if (id === null) continue;
     const under = found.get(id);
     if (under === undefined) found.set(id, [one]);
@@ -304,10 +353,10 @@ const OUTLINE_CODES: ReadonlySet<string> = new Set([
  */
 export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): ProblemTarget {
   const id = idIn(draft, problem.subject);
-  const has = (nodes: readonly { id: string }[]) =>
-    id !== null && nodes.some((node) => node.id === id);
+  const subjects = subjectsOf(draft);
+  const has = (ids: ReadonlySet<string>) => id !== null && ids.has(id);
   const { field, code } = problem;
-  if (has(draft.chapters)) {
+  if (has(subjects.chapters)) {
     const chapterField = chapterFieldOf(field, code);
     return {
       screen: "chapter",
@@ -315,12 +364,12 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
       ...(chapterField === undefined ? {} : { field: chapterField }),
     };
   }
-  if (has(draft.steps)) {
+  if (has(subjects.steps)) {
     const stepField: StepField | undefined =
       field === SM.theory ? "theory" : field === SM.checkedBy ? "questions" : undefined;
     return { screen: "step", step: id!, ...(stepField === undefined ? {} : { field: stepField }) };
   }
-  if (has(draft.cards)) {
+  if (has(subjects.cards)) {
     const cardField = questionFieldOf(field);
     return {
       screen: "question",
@@ -329,13 +378,11 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
     };
   }
   const card = id === null ? undefined : cardOfDistractor(draft, problem.subject);
-  if (card !== undefined) return { screen: "question", card: card.id, field: `distractor:${id}` };
+  if (card !== undefined) return { screen: "question", card, field: `distractor:${id}` };
   if (SOURCE_CODES.has(code)) return { screen: "release", field: "sources" };
-  if (has(draft.agents)) return { screen: "release", field: "authors" };
-  if (id !== null && activitiesOf(draft).includes(id)) {
-    const making =
-      generatingActivities(draft).includes(problem.subject) &&
-      !draft.published.activities.includes(id);
+  if (has(subjects.agents)) return { screen: "release", field: "authors" };
+  if (has(subjects.activities)) {
+    const making = subjects.generating.has(problem.subject) && !subjects.carried.has(id!);
     return { screen: "release", field: making ? "making" : "checks" };
   }
   if (problem.subject !== draft.url) return { screen: "draft" };
