@@ -25,7 +25,7 @@ import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/sh
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Instance } from "@solid-memo/domain/instance";
-import { arrangementSetAside, setAsideDecks } from "@solid-memo/domain/validation";
+import { arrangementSetAside, deckSetAside } from "@solid-memo/domain/validation";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
@@ -317,7 +317,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
         expect.objectContaining({ path: DCAT_DATASET, severity: "warning" }),
       ]),
     });
-    expect(setAsideDecks(report, decks)).toEqual(new Set());
+    expect(decks.filter((deck) => deckSetAside(report, deck))).toEqual([]);
     expect(arrangementSetAside(report)).toBe(false);
     // Opening the instance checks it the same way.
     expect((await useCases.checkInstance(instance.url)).conforms).toBe(true);

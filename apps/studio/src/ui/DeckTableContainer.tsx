@@ -16,7 +16,7 @@ import {
 } from "@solid-memo/domain/deckTable";
 import { decksOf, type DeckGroup } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
-import { setAsideDecks } from "@solid-memo/domain/validation";
+import { deckSetAside } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
 import { catalogScope, useCopies } from "@solid-memo/ui/deckTreeEditor";
@@ -173,9 +173,10 @@ export function DeckTableContainer({
   const preferences = preferencesQuery.data;
   const groups = groupsOfDecks(treeQuery.data);
   const report = check.report;
+  const at = new Map(decks.map((deck, index) => [deck, index]));
   const queries = (deck: Deck) => {
-    const at = decks.indexOf(deck);
-    return { cards: cardQueries[at]!, counts: countQueries[at]! };
+    const index = at.get(deck)!;
+    return { cards: cardQueries[index]!, counts: countQueries[index]! };
   };
   const rows = decks.map((deck): DeckTableRow => {
     const { cards, counts } = queries(deck);
@@ -197,15 +198,25 @@ export function DeckTableContainer({
     const { cards, counts } = queries(deck);
     return (figure === "cards" ? cards : counts).isError ? "unreadable" : "loading";
   };
-  const badges = (deck: Deck): DeckBadge[] => [
-    ...(deck.sourceUrl === undefined
-      ? []
-      : linkedHost(deck) === null
-        ? [isCourse(deck) ? ("course" as const) : ("library" as const)]
-        : [...(isCourse(deck) ? ["course" as const] : []), { from: linkedHost(deck)! }]),
-    ...(report !== null && setAsideDecks(report, [deck]).size > 0 ? ["invalid" as const] : []),
-    ...(queries(deck).cards.isError ? ["unreadable" as const] : []),
-  ];
+  // The screen asks for a row's badges several times a render: they are made once.
+  const badgesOf = new Map<Deck, DeckBadge[]>();
+  const badges = (deck: Deck): DeckBadge[] => {
+    let made = badgesOf.get(deck);
+    if (made === undefined) {
+      const host = linkedHost(deck);
+      made = [
+        ...(deck.sourceUrl === undefined
+          ? []
+          : host === null
+            ? [isCourse(deck) ? ("course" as const) : ("library" as const)]
+            : [...(isCourse(deck) ? ["course" as const] : []), { from: host }]),
+        ...(report !== null && deckSetAside(report, deck) ? ["invalid" as const] : []),
+        ...(queries(deck).cards.isError ? ["unreadable" as const] : []),
+      ];
+      badgesOf.set(deck, made);
+    }
+    return made;
+  };
 
   return (
     <DeckTableScreen

@@ -117,37 +117,49 @@ function failing(subject: SubjectReport): boolean {
   );
 }
 
-/** The subjects with a violation, by URL. */
-export function failingSubjectUrls(report: ValidationReport): Set<string> {
-  return new Set(
-    report.documents.flatMap((document) => document.subjects.filter(failing).map((s) => s.url)),
-  );
+/** The subjects and documents with a violation, by URL, and whether one of them is the arrangement of the deck list. */
+interface Failing {
+  subjects: ReadonlySet<string>;
+  documents: ReadonlySet<string>;
+  arrangement: boolean;
 }
 
-/** The documents with a violation, by URL. */
-export function failingDocumentUrls(report: ValidationReport): Set<string> {
-  return new Set(
-    report.documents.filter((document) => document.subjects.some(failing)).map((d) => d.url),
-  );
+/** Each report's failing subjects and documents; assumes a report is never changed in place, since reports are rebuilt immutably. */
+const failingOfReport = new WeakMap<ValidationReport, Failing>();
+
+/** What fails in the report, so that asking about each of many decks, on each render, does not walk the whole report again. */
+function failingOf(report: ValidationReport): Failing {
+  let found = failingOfReport.get(report);
+  if (found === undefined) {
+    const subjects = report.documents.flatMap((document) =>
+      document.subjects.filter(failing).map((subject) => ({ document: document.url, subject })),
+    );
+    found = {
+      subjects: new Set(subjects.map(({ subject }) => subject.url)),
+      documents: new Set(subjects.map(({ document }) => document)),
+      arrangement: subjects.some(
+        ({ subject }) =>
+          subject.status === "checked" &&
+          (subject.shape === "catalog" || subject.shape === "deckGroup"),
+      ),
+    };
+    failingOfReport.set(report, found);
+  }
+  return found;
 }
 
 /**
- * The decks with invalid data — their catalog entry, or anything in
- * their cards or reviews document — which the "set invalid data aside"
- * policy leaves out until they are repaired. By deck URL.
+ * Whether the deck has invalid data — its catalog entry, or anything in
+ * its cards or reviews document — which the "set invalid data aside"
+ * policy leaves out until it is repaired. The report is walked once,
+ * however many decks are asked about.
  */
-export function setAsideDecks(report: ValidationReport, decks: readonly Deck[]): Set<string> {
-  const subjects = failingSubjectUrls(report);
-  const documents = failingDocumentUrls(report);
-  return new Set(
-    decks
-      .filter(
-        (deck) =>
-          subjects.has(deck.url) ||
-          documents.has(deck.cardsDocumentUrl) ||
-          documents.has(deck.reviewsDocumentUrl),
-      )
-      .map((deck) => deck.url),
+export function deckSetAside(report: ValidationReport, deck: Deck): boolean {
+  const { subjects, documents } = failingOf(report);
+  return (
+    subjects.has(deck.url) ||
+    documents.has(deck.cardsDocumentUrl) ||
+    documents.has(deck.reviewsDocumentUrl)
   );
 }
 
@@ -157,12 +169,5 @@ export function setAsideDecks(report: ValidationReport, decks: readonly Deck[]):
  * aside" policy leaves read-only until it is repaired.
  */
 export function arrangementSetAside(report: ValidationReport): boolean {
-  return report.documents.some((document) =>
-    document.subjects.some(
-      (subject) =>
-        failing(subject) &&
-        subject.status === "checked" &&
-        (subject.shape === "catalog" || subject.shape === "deckGroup"),
-    ),
-  );
+  return failingOf(report).arrangement;
 }

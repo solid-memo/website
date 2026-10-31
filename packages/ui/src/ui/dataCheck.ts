@@ -11,7 +11,7 @@ import {
 } from "@solid-memo/domain/invalidDataPolicy";
 import {
   arrangementSetAside,
-  setAsideDecks,
+  deckSetAside,
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
@@ -70,7 +70,7 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
   const report =
     checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
   const setsAside = report !== null && policy === "block-subject";
-  const isSetAside = (deck: Deck) => setsAside && setAsideDecks(report, [deck]).size > 0;
+  const isSetAside = (deck: Deck) => setsAside && deckSetAside(report, deck);
   return {
     policy,
     pending: checkQuery.isPending,

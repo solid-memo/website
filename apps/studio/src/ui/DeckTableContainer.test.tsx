@@ -219,6 +219,36 @@ describe("DeckTableContainer", () => {
     expect(screen.getByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
   });
 
+  it("reads the check's report once for all the decks, however many there are and however often they render", async () => {
+    const decks = Array.from({ length: 30 }, (_, i) => makeDeck(`deck-${i}`, { en: `Deck ${i}` }));
+    const report = invalidReport([decks[0]!]);
+    const [failing, ...rest] = report.documents;
+    let walks = 0;
+    const counted: ValidationReport = {
+      ...report,
+      documents: [
+        {
+          ...failing!,
+          get subjects() {
+            walks += 1;
+            return failing!.subjects;
+          },
+        } as ValidationReport["documents"][number],
+        ...rest,
+      ],
+    };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => decks),
+      checkInstance: vi.fn(async () => counted),
+    });
+    renderContainer(useCases);
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: "Select Deck 1" })).toBeEnabled(),
+    );
+    expect(screen.getByRole("checkbox", { name: "Select Deck 0" })).toBeDisabled();
+    expect(walks).toBe(1);
+  });
+
   it("moves no deck into a group that a newer version arranged", async () => {
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, verbs]) });
     vi.mocked(useCases.listDeckTree).mockImplementation(async () => ({

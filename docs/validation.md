@@ -241,9 +241,14 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
 | Policy | What the app does |
 |---|---|
 | Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice with the repair in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
-| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`setAsideDecks`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's repaired, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
+| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's repaired, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
 
+- **What fails is gathered once per report**: the screens ask about
+  each deck on every render, so the failing subjects and documents,
+  and whether the arrangement fails, are read from a report once and
+  kept with it. Each deck's answer is then a lookup, however large the
+  report.
 - **The default applies only where no policy is stated**: an instance
   whose preferences were never saved, and preferences format 2, which
   the [step to format 3](migrations.md) gives the default. Format 3 and
