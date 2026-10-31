@@ -21,6 +21,9 @@ function slowClock() {
   return () => (now += 20);
 }
 
+/** A clock that never moves: every step fits in a batch, however slow the machine. */
+const stoppedClock = () => 0;
+
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
 });
@@ -56,7 +59,7 @@ describe("useLayout", () => {
   });
 
   it("runs as many steps a batch as fit in its time, and hands the layout over in one more", async () => {
-    const { result } = renderHook(() => useLayout("a", smallGraph(), true));
+    const { result } = renderHook(() => useLayout("a", smallGraph(), true, stoppedClock));
     await later(1);
     expect(result.current).toEqual({ laid: null, progress: 1 });
     await later(1);
