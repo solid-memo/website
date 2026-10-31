@@ -752,13 +752,26 @@ function inOrder<T extends { position?: number }>(nodes: DraftNode<T>[]): DraftN
 function renumbered<T extends { position?: number }>(
   nodes: readonly DraftNode<T>[],
   order: readonly string[],
-): DraftNode<T>[] {
-  return nodes.map((node) => {
-    const at = order.indexOf(node.id);
-    return at === -1 || node.data.position === at
-      ? node
-      : { id: node.id, data: { ...node.data, position: at } };
+): readonly DraftNode<T>[] {
+  return renumberedAt(nodes, new Map(order.map((id, at) => [id, at])));
+}
+
+/**
+ * Each node whose id `positions` holds given that position, looked up
+ * once per node rather than searched for; the same list when none moves.
+ */
+function renumberedAt<T extends { position?: number }>(
+  nodes: readonly DraftNode<T>[],
+  positions: ReadonlyMap<string, number>,
+): readonly DraftNode<T>[] {
+  let moved = false;
+  const next = nodes.map((node) => {
+    const at = positions.get(node.id);
+    if (at === undefined || node.data.position === at) return node;
+    moved = true;
+    return { id: node.id, data: { ...node.data, position: at } };
   });
+  return moved ? next : nodes;
 }
 
 /** The ids in order with `id` put at `at` (the end when absent or past it). */
@@ -1037,20 +1050,37 @@ function deleteSubject(
   );
 }
 
-/** The chapters in use numbered 0, 1, …, and the steps in use of each chapter. */
+/**
+ * The outlines renumberedOutline gave, by their chapters: their steps and
+ * the draft's URL. An edit that leaves both lists as they were (a card's
+ * retiring, say) finds its outline numbered already, so a run of such
+ * edits does not go through the whole outline each time.
+ */
+const numberedOutlines = new WeakMap<
+  readonly DraftNode<DraftChapterV1>[],
+  { readonly steps: readonly DraftNode<DraftStepV1>[]; readonly url: string }
+>();
+
+/**
+ * The chapters in use numbered 0, 1, …, and the steps in use of each
+ * chapter: the steps grouped by chapter in one pass, and each node's
+ * position looked up, so that the work grows with the outline, not with
+ * its chapters times its steps.
+ */
 function renumberedOutline(draft: ReleaseDraft): ReleaseDraft {
+  const numbered = numberedOutlines.get(draft.chapters);
+  if (numbered?.steps === draft.steps && numbered.url === draft.url) return draft;
   const chapters = renumbered(
     draft.chapters,
     liveChapters(draft).map((node) => node.id),
   );
-  const steps = draft.chapters.reduce(
-    (current, chapter) =>
-      renumbered(
-        current,
-        liveSteps({ ...draft, steps: current }, chapter.id).map((node) => node.id),
-      ),
-    draft.steps,
-  );
+  const byChapter = liveStepsByChapter(draft);
+  const positions = new Map<string, number>();
+  for (const chapter of draft.chapters)
+    for (const [at, step] of (byChapter.get(iriIn(draft, chapter.id)) ?? []).entries())
+      positions.set(step.id, at);
+  const steps = renumberedAt(draft.steps, positions);
+  numberedOutlines.set(chapters, { steps, url: draft.url });
   return { ...draft, chapters, steps };
 }
 
