@@ -89,6 +89,7 @@
                  <#nordic-world-heritage-sites> ,
                  <#norse-mythology> ,
                  <#olympic-games> ,
+                 <#open-licenses> ,
                  <#periodic-table> ,
                  <#physical-constants> ,
                  <#physics-equations> ,
@@ -6654,7 +6655,9 @@
     vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-    a dcterms:LicenseDocument .
+    a dcterms:LicenseDocument ;
+    dcterms:title "GNU General Public License, version 2" ;
+    dcterms:creator "Free Software Foundation" .
 
 <https://solid-memo.com/decks/git-commands/v3.ttl#compilation>
     a prov:Activity .
@@ -12667,6 +12670,393 @@
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
+<#open-licenses>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Open licenses"@en ,
+                  "Öppna licenser"@sv ,
+                  "오픈 라이선스"@ko ,
+                  "Offene Lizenzen"@de ,
+                  "Licencias abiertas"@es ,
+                  "Licences ouvertes"@fr ;
+    dcterms:description "Learn how open licenses work and how to apply one: for developers, researchers and anyone who publishes code, data or content, with no legal background assumed; the course is not legal advice. It starts with why a work needs a license before others may reuse it, the public domain and CC0, and three definitions of open: the Open Source Definition, the Free Software Definition and the Open Definition. It then covers the permissive licenses MIT, BSD and Apache-2.0; copyleft in GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 and EUPL-1.2, and \"only\" against \"or later\"; the Creative Commons licenses, their four elements, and why the Open Definition does not count the NonCommercial and NoDerivatives licenses as open; SPDX 3.0.1 identifiers and license expressions, and REUSE 3.3 for marking every file of a project; and what happens when works under different licenses are combined, in the cases the license authors have settled themselves. 6 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English, Swedish, Korean, German, Spanish and French. The facts come from WIPO's summary of the Berne Convention, the TRIPS Agreement, the license texts and their authors' own statements, the Open Source Definition, the Free Software Definition, Open Definition 2.1, the SPDX License List, SPDX 3.0.1 and REUSE 3.3, checked in October 2026."@en ,
+                        "Lär dig hur öppna licenser fungerar och hur du tillämpar en: för utvecklare, forskare och alla som publicerar kod, data eller innehåll, och du behöver inga juridiska förkunskaper; kursen är inte juridisk rådgivning. Den börjar med varför ett verk behöver en licens innan andra får återanvända det, allmän egendom (public domain) och CC0, och tre definitioner av öppenhet: Open Source Definition, definitionen av fri programvara och Open Definition. Därefter tar den upp de tillåtande licenserna MIT, BSD och Apache-2.0; copyleft i GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 och EUPL-1.2, och ”endast” mot ”eller senare”; Creative Commons-licenserna, deras fyra licenselement och varför Open Definition inte räknar licenserna med IckeKommersiell och IngaBearbetningar som öppna; SPDX 3.0.1-identifierare och licensuttryck, och REUSE 3.3 för att märka varje fil i ett projekt; och vad som händer när verk under olika licenser kombineras, i de fall som licensförfattarna själva har avgjort. 6 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns på engelska, svenska, koreanska, tyska, spanska och franska. Fakta kommer från WIPO:s sammanfattning av Bernkonventionen, TRIPS-avtalet, licenstexterna och licensförfattarnas egna uttalanden, Open Source Definition, definitionen av fri programvara, Open Definition 2.1, SPDX License List, SPDX 3.0.1 och REUSE 3.3, kontrollerade i oktober 2026."@sv ,
+                        "오픈 라이선스가 어떻게 작동하는지, 그리고 라이선스를 어떻게 적용하는지 배웁니다. 개발자, 연구자, 그리고 코드나 데이터, 콘텐츠를 공개하는 모든 사람을 위한 코스이며, 법률 지식은 없어도 됩니다. 이 코스는 법률 자문이 아닙니다. 먼저 다른 사람이 저작물을 재사용하려면 왜 라이선스가 필요한지, 퍼블릭 도메인과 CC0, 그리고 ‘오픈’에 대한 세 가지 정의인 오픈 소스 정의(OSD), 자유 소프트웨어 정의, 열린 정의(Open Definition)를 다룹니다. 이어서 퍼미시브 라이선스인 MIT, BSD, Apache-2.0을 살펴보고, GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0, EUPL-1.2의 카피레프트와 “해당 버전만”과 “이후 버전”의 차이를 다룹니다. 크리에이티브 커먼즈 라이선스의 네 가지 구성요소, 열린 정의가 비영리와 변경금지 라이선스를 오픈 라이선스로 인정하지 않는 이유, SPDX 3.0.1 식별자와 라이선스 표현식, 프로젝트의 모든 파일에 라이선스 정보를 표시하는 REUSE 3.3도 배웁니다. 마지막으로 서로 다른 라이선스의 저작물을 결합하면 어떻게 되는지를 라이선스 작성자들이 직접 밝힌 사례로 알아봅니다. 짧은 단계로 이루어진 챕터 6개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제입니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 코스는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 제공됩니다. 내용은 WIPO의 베른 협약 요약, TRIPS 협정, 라이선스 원문과 작성자들의 공식 설명, 오픈 소스 정의, 자유 소프트웨어 정의, 열린 정의 2.1, SPDX 라이선스 목록, SPDX 3.0.1, REUSE 3.3에서 가져왔으며 2026년 10월에 확인했습니다."@ko ,
+                        "Lerne, wie offene Lizenzen funktionieren und wie du eine anwendest: für Entwickler, Forschende und alle, die Code, Daten oder Inhalte veröffentlichen; juristisches Vorwissen brauchst du nicht, und der Kurs ist keine Rechtsberatung. Er beginnt damit, warum ein Werk eine Lizenz braucht, bevor andere es weiterverwenden dürfen, mit der Gemeinfreiheit und CC0 und mit drei Definitionen von offen: der Open Source Definition, der Definition Freier Software und der Open Definition. Danach geht es um die permissiven Lizenzen MIT, BSD und Apache-2.0; um das Copyleft von GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 und EUPL-1.2 und um „nur“ gegenüber „oder später“; um die Creative-Commons-Lizenzen, ihre vier Elemente und darum, warum die Open Definition die Lizenzen mit „Nicht kommerziell“ und „Keine Bearbeitungen“ nicht als offen gelten lässt; um SPDX-Lizenzbezeichner und Lizenzausdrücke nach SPDX 3.0.1 und um REUSE 3.3, mit dem du jede Datei eines Projekts kennzeichnest; und darum, was passiert, wenn Werke unter verschiedenen Lizenzen kombiniert werden, in den Fällen, die die Lizenzautoren selbst geklärt haben. 6 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch verfügbar. Die Fakten stammen aus der Zusammenfassung der Berner Übereinkunft durch die WIPO, dem TRIPS-Abkommen, den Lizenztexten und den eigenen Aussagen ihrer Autoren, der Open Source Definition, der Definition Freier Software, der Open Definition 2.1, der SPDX License List, SPDX 3.0.1 und REUSE 3.3, geprüft im Oktober 2026."@de ,
+                        "Aprende cómo funcionan las licencias abiertas y cómo aplicar una: para desarrolladores, investigadores y cualquiera que publique código, datos o contenidos, sin necesidad de conocimientos jurídicos; el curso no es asesoramiento legal. Empieza explicando por qué una obra necesita una licencia antes de que otros puedan reutilizarla, qué son el dominio público y CC0, y tres definiciones de lo abierto: la Definición de Código Abierto (Open Source Definition), la definición de software libre y la Definición de Conocimiento Abierto (Open Definition). Después trata las licencias permisivas MIT, BSD y Apache-2.0; el copyleft de GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 y EUPL-1.2, y «solo» frente a «o posterior»; las licencias Creative Commons, sus cuatro elementos y por qué la Definición de Conocimiento Abierto no considera abiertas las licencias NoComercial y SinDerivadas; los identificadores de licencia y las expresiones de licencia de SPDX 3.0.1, y REUSE 3.3 para marcar cada archivo de un proyecto; y qué ocurre al combinar obras con licencias distintas, en los casos que los propios autores de las licencias han resuelto. 6 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso está en inglés, sueco, coreano, alemán, español y francés. La información procede del resumen del Convenio de Berna de la OMPI, del Acuerdo sobre los ADPIC, de los textos de las licencias y de las declaraciones de sus autores, de la Definición de Código Abierto, de la definición de software libre, de la Definición de Conocimiento Abierto 2.1, de la SPDX License List, SPDX 3.0.1 y REUSE 3.3, y se comprobó en octubre de 2026."@es ,
+                        "Découvrez comment fonctionnent les licences ouvertes et comment en appliquer une : pour les développeurs, les chercheurs et toute personne qui publie du code, des données ou des contenus, sans connaissances juridiques préalables ; le cours ne constitue pas un conseil juridique. Il commence par expliquer pourquoi une œuvre a besoin d’une licence avant que d’autres puissent la réutiliser, ce que sont le domaine public et CC0, et trois définitions de l’ouverture : l’Open Source Definition, la définition du logiciel libre et l’Open Definition. Il aborde ensuite les licences permissives MIT, BSD et Apache-2.0 ; le copyleft des licences GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 et EUPL-1.2, et le choix entre « une seule version » et « les suivantes » ; les licences Creative Commons, leurs quatre éléments et la raison pour laquelle l’Open Definition ne tient pas pour ouvertes les licences Pas d’utilisation commerciale et Pas de modification ; les identifiants et les expressions de licence SPDX 3.0.1, et REUSE 3.3 pour marquer chaque fichier d’un projet ; enfin, ce qui se passe quand on combine des œuvres sous des licences différentes, dans les cas que les auteurs des licences ont eux-mêmes tranchés. 6 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours existe en anglais, en suédois, en coréen, en allemand, en espagnol et en français. Les informations proviennent du résumé de la Convention de Berne par l’OMPI, de l’Accord sur les ADPIC, des textes des licences et des déclarations de leurs auteurs, de l’Open Source Definition, de la définition du logiciel libre, de l’Open Definition 2.1, de la SPDX License List, de SPDX 3.0.1 et de REUSE 3.3, vérifiées en octobre 2026."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "open licenses"@en ,
+                 "open source"@en ,
+                 "free software"@en ,
+                 "copyright"@en ,
+                 "Creative Commons"@en ,
+                 "copyleft"@en ,
+                 "SPDX"@en ,
+                 "REUSE"@en ,
+                 "license compatibility"@en ,
+                 "öppna licenser"@sv ,
+                 "öppen källkod"@sv ,
+                 "fri programvara"@sv ,
+                 "upphovsrätt"@sv ,
+                 "Creative Commons"@sv ,
+                 "copyleft"@sv ,
+                 "SPDX"@sv ,
+                 "REUSE"@sv ,
+                 "licenskompatibilitet"@sv ,
+                 "오픈 라이선스"@ko ,
+                 "오픈 소스"@ko ,
+                 "자유 소프트웨어"@ko ,
+                 "저작권"@ko ,
+                 "크리에이티브 커먼즈"@ko ,
+                 "카피레프트"@ko ,
+                 "SPDX"@ko ,
+                 "REUSE"@ko ,
+                 "라이선스 호환성"@ko ,
+                 "offene Lizenzen"@de ,
+                 "Open Source"@de ,
+                 "Freie Software"@de ,
+                 "Urheberrecht"@de ,
+                 "Creative Commons"@de ,
+                 "Copyleft"@de ,
+                 "SPDX"@de ,
+                 "REUSE"@de ,
+                 "Lizenzkompatibilität"@de ,
+                 "licencias abiertas"@es ,
+                 "código abierto"@es ,
+                 "software libre"@es ,
+                 "derechos de autor"@es ,
+                 "Creative Commons"@es ,
+                 "copyleft"@es ,
+                 "SPDX"@es ,
+                 "REUSE"@es ,
+                 "compatibilidad de licencias"@es ,
+                 "licences ouvertes"@fr ,
+                 "open source"@fr ,
+                 "logiciel libre"@fr ,
+                 "droit d’auteur"@fr ,
+                 "Creative Commons"@fr ,
+                 "copyleft"@fr ,
+                 "SPDX"@fr ,
+                 "REUSE"@fr ,
+                 "compatibilité des licences"@fr ;
+    dcat:first <https://solid-memo.com/decks/open-licenses/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/open-licenses/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/open-licenses/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/open-licenses/v1.ttl> .
+
+<https://solid-memo.com/decks/open-licenses/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "Open licenses"@en ,
+                  "Öppna licenser"@sv ,
+                  "오픈 라이선스"@ko ,
+                  "Offene Lizenzen"@de ,
+                  "Licencias abiertas"@es ,
+                  "Licences ouvertes"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/open-licenses/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Learn how open licenses work and how to apply one: for developers, researchers and anyone who publishes code, data or content, with no legal background assumed; the course is not legal advice. It starts with why a work needs a license before others may reuse it, the public domain and CC0, and three definitions of open: the Open Source Definition, the Free Software Definition and the Open Definition. It then covers the permissive licenses MIT, BSD and Apache-2.0; copyleft in GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 and EUPL-1.2, and \"only\" against \"or later\"; the Creative Commons licenses, their four elements, and why the Open Definition does not count the NonCommercial and NoDerivatives licenses as open; SPDX 3.0.1 identifiers and license expressions, and REUSE 3.3 for marking every file of a project; and what happens when works under different licenses are combined, in the cases the license authors have settled themselves. 6 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English, Swedish, Korean, German, Spanish and French. The facts come from WIPO's summary of the Berne Convention, the TRIPS Agreement, the license texts and their authors' own statements, the Open Source Definition, the Free Software Definition, Open Definition 2.1, the SPDX License List, SPDX 3.0.1 and REUSE 3.3, checked in October 2026."@en ,
+                        "Lär dig hur öppna licenser fungerar och hur du tillämpar en: för utvecklare, forskare och alla som publicerar kod, data eller innehåll, och du behöver inga juridiska förkunskaper; kursen är inte juridisk rådgivning. Den börjar med varför ett verk behöver en licens innan andra får återanvända det, allmän egendom (public domain) och CC0, och tre definitioner av öppenhet: Open Source Definition, definitionen av fri programvara och Open Definition. Därefter tar den upp de tillåtande licenserna MIT, BSD och Apache-2.0; copyleft i GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 och EUPL-1.2, och ”endast” mot ”eller senare”; Creative Commons-licenserna, deras fyra licenselement och varför Open Definition inte räknar licenserna med IckeKommersiell och IngaBearbetningar som öppna; SPDX 3.0.1-identifierare och licensuttryck, och REUSE 3.3 för att märka varje fil i ett projekt; och vad som händer när verk under olika licenser kombineras, i de fall som licensförfattarna själva har avgjort. 6 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns på engelska, svenska, koreanska, tyska, spanska och franska. Fakta kommer från WIPO:s sammanfattning av Bernkonventionen, TRIPS-avtalet, licenstexterna och licensförfattarnas egna uttalanden, Open Source Definition, definitionen av fri programvara, Open Definition 2.1, SPDX License List, SPDX 3.0.1 och REUSE 3.3, kontrollerade i oktober 2026."@sv ,
+                        "오픈 라이선스가 어떻게 작동하는지, 그리고 라이선스를 어떻게 적용하는지 배웁니다. 개발자, 연구자, 그리고 코드나 데이터, 콘텐츠를 공개하는 모든 사람을 위한 코스이며, 법률 지식은 없어도 됩니다. 이 코스는 법률 자문이 아닙니다. 먼저 다른 사람이 저작물을 재사용하려면 왜 라이선스가 필요한지, 퍼블릭 도메인과 CC0, 그리고 ‘오픈’에 대한 세 가지 정의인 오픈 소스 정의(OSD), 자유 소프트웨어 정의, 열린 정의(Open Definition)를 다룹니다. 이어서 퍼미시브 라이선스인 MIT, BSD, Apache-2.0을 살펴보고, GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0, EUPL-1.2의 카피레프트와 “해당 버전만”과 “이후 버전”의 차이를 다룹니다. 크리에이티브 커먼즈 라이선스의 네 가지 구성요소, 열린 정의가 비영리와 변경금지 라이선스를 오픈 라이선스로 인정하지 않는 이유, SPDX 3.0.1 식별자와 라이선스 표현식, 프로젝트의 모든 파일에 라이선스 정보를 표시하는 REUSE 3.3도 배웁니다. 마지막으로 서로 다른 라이선스의 저작물을 결합하면 어떻게 되는지를 라이선스 작성자들이 직접 밝힌 사례로 알아봅니다. 짧은 단계로 이루어진 챕터 6개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제입니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 코스는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 제공됩니다. 내용은 WIPO의 베른 협약 요약, TRIPS 협정, 라이선스 원문과 작성자들의 공식 설명, 오픈 소스 정의, 자유 소프트웨어 정의, 열린 정의 2.1, SPDX 라이선스 목록, SPDX 3.0.1, REUSE 3.3에서 가져왔으며 2026년 10월에 확인했습니다."@ko ,
+                        "Lerne, wie offene Lizenzen funktionieren und wie du eine anwendest: für Entwickler, Forschende und alle, die Code, Daten oder Inhalte veröffentlichen; juristisches Vorwissen brauchst du nicht, und der Kurs ist keine Rechtsberatung. Er beginnt damit, warum ein Werk eine Lizenz braucht, bevor andere es weiterverwenden dürfen, mit der Gemeinfreiheit und CC0 und mit drei Definitionen von offen: der Open Source Definition, der Definition Freier Software und der Open Definition. Danach geht es um die permissiven Lizenzen MIT, BSD und Apache-2.0; um das Copyleft von GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 und EUPL-1.2 und um „nur“ gegenüber „oder später“; um die Creative-Commons-Lizenzen, ihre vier Elemente und darum, warum die Open Definition die Lizenzen mit „Nicht kommerziell“ und „Keine Bearbeitungen“ nicht als offen gelten lässt; um SPDX-Lizenzbezeichner und Lizenzausdrücke nach SPDX 3.0.1 und um REUSE 3.3, mit dem du jede Datei eines Projekts kennzeichnest; und darum, was passiert, wenn Werke unter verschiedenen Lizenzen kombiniert werden, in den Fällen, die die Lizenzautoren selbst geklärt haben. 6 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch verfügbar. Die Fakten stammen aus der Zusammenfassung der Berner Übereinkunft durch die WIPO, dem TRIPS-Abkommen, den Lizenztexten und den eigenen Aussagen ihrer Autoren, der Open Source Definition, der Definition Freier Software, der Open Definition 2.1, der SPDX License List, SPDX 3.0.1 und REUSE 3.3, geprüft im Oktober 2026."@de ,
+                        "Aprende cómo funcionan las licencias abiertas y cómo aplicar una: para desarrolladores, investigadores y cualquiera que publique código, datos o contenidos, sin necesidad de conocimientos jurídicos; el curso no es asesoramiento legal. Empieza explicando por qué una obra necesita una licencia antes de que otros puedan reutilizarla, qué son el dominio público y CC0, y tres definiciones de lo abierto: la Definición de Código Abierto (Open Source Definition), la definición de software libre y la Definición de Conocimiento Abierto (Open Definition). Después trata las licencias permisivas MIT, BSD y Apache-2.0; el copyleft de GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 y EUPL-1.2, y «solo» frente a «o posterior»; las licencias Creative Commons, sus cuatro elementos y por qué la Definición de Conocimiento Abierto no considera abiertas las licencias NoComercial y SinDerivadas; los identificadores de licencia y las expresiones de licencia de SPDX 3.0.1, y REUSE 3.3 para marcar cada archivo de un proyecto; y qué ocurre al combinar obras con licencias distintas, en los casos que los propios autores de las licencias han resuelto. 6 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso está en inglés, sueco, coreano, alemán, español y francés. La información procede del resumen del Convenio de Berna de la OMPI, del Acuerdo sobre los ADPIC, de los textos de las licencias y de las declaraciones de sus autores, de la Definición de Código Abierto, de la definición de software libre, de la Definición de Conocimiento Abierto 2.1, de la SPDX License List, SPDX 3.0.1 y REUSE 3.3, y se comprobó en octubre de 2026."@es ,
+                        "Découvrez comment fonctionnent les licences ouvertes et comment en appliquer une : pour les développeurs, les chercheurs et toute personne qui publie du code, des données ou des contenus, sans connaissances juridiques préalables ; le cours ne constitue pas un conseil juridique. Il commence par expliquer pourquoi une œuvre a besoin d’une licence avant que d’autres puissent la réutiliser, ce que sont le domaine public et CC0, et trois définitions de l’ouverture : l’Open Source Definition, la définition du logiciel libre et l’Open Definition. Il aborde ensuite les licences permissives MIT, BSD et Apache-2.0 ; le copyleft des licences GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0, MPL-2.0 et EUPL-1.2, et le choix entre « une seule version » et « les suivantes » ; les licences Creative Commons, leurs quatre éléments et la raison pour laquelle l’Open Definition ne tient pas pour ouvertes les licences Pas d’utilisation commerciale et Pas de modification ; les identifiants et les expressions de licence SPDX 3.0.1, et REUSE 3.3 pour marquer chaque fichier d’un projet ; enfin, ce qui se passe quand on combine des œuvres sous des licences différentes, dans les cas que les auteurs des licences ont eux-mêmes tranchés. 6 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours existe en anglais, en suédois, en coréen, en allemand, en espagnol et en français. Les informations proviennent du résumé de la Convention de Berne par l’OMPI, de l’Accord sur les ADPIC, des textes des licences et des déclarations de leurs auteurs, de l’Open Source Definition, de la définition du logiciel libre, de l’Open Definition 2.1, de la SPDX License List, de SPDX 3.0.1 et de REUSE 3.3, vérifiées en octobre 2026."@fr ;
+    prov:wasDerivedFrom <https://www.wipo.int/treaties/en/ip/berne/summary_berne.html> ,
+                        <https://www.wto.org/english/docs_e/legal_e/27-trips_04_e.htm> ,
+                        <https://creativecommons.org/publicdomain/zero/1.0/legalcode.en> ,
+                        <https://creativecommons.org/public-domain/cc0/> ,
+                        <https://opensource.org/osd> ,
+                        <https://www.gnu.org/philosophy/free-sw.html> ,
+                        <https://opendefinition.org/od/2.1/en/> ,
+                        <https://opendefinition.org/licenses/> ,
+                        <https://opendefinition.org/licenses/nonconformant/> ,
+                        <https://opensource.org/license/mit> ,
+                        <https://opensource.org/license/bsd-2-clause> ,
+                        <https://opensource.org/license/bsd-3-clause> ,
+                        <https://www.apache.org/licenses/LICENSE-2.0> ,
+                        <https://www.mozilla.org/en-US/MPL/2.0/> ,
+                        <https://www.mozilla.org/en-US/MPL/2.0/FAQ/> ,
+                        <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> ,
+                        <https://www.gnu.org/licenses/gpl-3.0.html> ,
+                        <https://www.gnu.org/licenses/agpl-3.0.html> ,
+                        <https://www.gnu.org/licenses/lgpl-3.0.html> ,
+                        <https://www.gnu.org/licenses/gpl-faq.html> ,
+                        <https://www.gnu.org/licenses/license-list.html> ,
+                        <https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12> ,
+                        <https://www.apache.org/licenses/GPL-compatibility.html> ,
+                        <https://www.apache.org/legal/resolved.html> ,
+                        <https://creativecommons.org/licenses/by-sa/4.0/legalcode.en> ,
+                        <https://creativecommons.org/licenses/by-nd/4.0/legalcode.en> ,
+                        <https://creativecommons.org/share-your-work/cclicenses/> ,
+                        <https://creativecommons.org/faq/> ,
+                        <https://wiki.creativecommons.org/wiki/Best_practices_for_attribution> ,
+                        <https://creativecommons.org/share-your-work/licensing-considerations/compatible-licenses/> ,
+                        <https://spdx.org/licenses/> ,
+                        <https://spdx.github.io/spdx-spec/v3.0.1/annexes/spdx-license-expressions/> ,
+                        <https://reuse.software/spec-3.3/> ,
+                        <https://www.wikidata.org/wiki/Property:P2479> ,
+                        <https://github.com/standard-for-public-code/standard-for-public-code/tree/0.8.1> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/open-licenses/v1.ttl#compilation> ;
+    dcterms:created "2026-10-31T00:00:00Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "open licenses"@en ,
+                 "open source"@en ,
+                 "free software"@en ,
+                 "copyright"@en ,
+                 "Creative Commons"@en ,
+                 "copyleft"@en ,
+                 "SPDX"@en ,
+                 "REUSE"@en ,
+                 "license compatibility"@en ,
+                 "öppna licenser"@sv ,
+                 "öppen källkod"@sv ,
+                 "fri programvara"@sv ,
+                 "upphovsrätt"@sv ,
+                 "Creative Commons"@sv ,
+                 "copyleft"@sv ,
+                 "SPDX"@sv ,
+                 "REUSE"@sv ,
+                 "licenskompatibilitet"@sv ,
+                 "오픈 라이선스"@ko ,
+                 "오픈 소스"@ko ,
+                 "자유 소프트웨어"@ko ,
+                 "저작권"@ko ,
+                 "크리에이티브 커먼즈"@ko ,
+                 "카피레프트"@ko ,
+                 "SPDX"@ko ,
+                 "REUSE"@ko ,
+                 "라이선스 호환성"@ko ,
+                 "offene Lizenzen"@de ,
+                 "Open Source"@de ,
+                 "Freie Software"@de ,
+                 "Urheberrecht"@de ,
+                 "Creative Commons"@de ,
+                 "Copyleft"@de ,
+                 "SPDX"@de ,
+                 "REUSE"@de ,
+                 "Lizenzkompatibilität"@de ,
+                 "licencias abiertas"@es ,
+                 "código abierto"@es ,
+                 "software libre"@es ,
+                 "derechos de autor"@es ,
+                 "Creative Commons"@es ,
+                 "copyleft"@es ,
+                 "SPDX"@es ,
+                 "REUSE"@es ,
+                 "compatibilidad de licencias"@es ,
+                 "licences ouvertes"@fr ,
+                 "open source"@fr ,
+                 "logiciel libre"@fr ,
+                 "droit d’auteur"@fr ,
+                 "Creative Commons"@fr ,
+                 "copyleft"@fr ,
+                 "SPDX"@fr ,
+                 "REUSE"@fr ,
+                 "compatibilité des licences"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-31T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#open-licenses> ;
+    dcat:isVersionOf <#open-licenses> ;
+    dcat:contactPoint <https://solid-memo.com/decks/open-licenses/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/open-licenses/v1.ttl#turtle> ;
+    solid-memo:cardCount 75 .
+
+<https://solid-memo.com/decks/open-licenses/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/open-licenses/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-nd/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://www.apache.org/licenses/LICENSE-2.0>
+    a dcterms:LicenseDocument ;
+    dcterms:title "Apache License, Version 2.0" ;
+    dcterms:creator "The Apache Software Foundation" .
+
+<https://solid-memo.com/decks/open-licenses/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/open-licenses/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/open-licenses/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<https://solid-memo.com/decks/open-licenses/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://www.wipo.int/treaties/en/ip/berne/summary_berne.html>
+    dcterms:title "Summary of the Berne Convention for the Protection of Literary and Artistic Works (1886)" ;
+    dcterms:creator "World Intellectual Property Organization (WIPO)" .
+
+<https://www.wto.org/english/docs_e/legal_e/27-trips_04_e.htm>
+    dcterms:title "Agreement on Trade-Related Aspects of Intellectual Property Rights (TRIPS), Part II" ;
+    dcterms:creator "World Trade Organization (WTO)" .
+
+<https://creativecommons.org/publicdomain/zero/1.0/legalcode.en>
+    dcterms:title "CC0 1.0 Universal (legal code)" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://creativecommons.org/public-domain/cc0/>
+    dcterms:title "CC0 (\"No Rights Reserved\")" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://opensource.org/osd>
+    dcterms:title "The Open Source Definition" ;
+    dcterms:creator "Open Source Initiative (OSI)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://www.gnu.org/philosophy/free-sw.html>
+    dcterms:title "What is Free Software?" ;
+    dcterms:creator "Free Software Foundation (GNU Project)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-nd/4.0/> .
+
+<https://opendefinition.org/od/2.1/en/>
+    dcterms:title "Open Definition 2.1" ;
+    dcterms:creator "Open Knowledge Foundation" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://opendefinition.org/licenses/>
+    dcterms:title "Conformant Licenses" ;
+    dcterms:creator "Open Knowledge Foundation" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://opendefinition.org/licenses/nonconformant/>
+    dcterms:title "Non-Conformant Licenses" ;
+    dcterms:creator "Open Knowledge Foundation" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://opensource.org/license/mit>
+    dcterms:title "The MIT License" ;
+    dcterms:creator "Open Source Initiative (page); the license text is not OSI's" .
+
+<https://opensource.org/license/bsd-2-clause>
+    dcterms:title "The 2-Clause BSD License" ;
+    dcterms:creator "Open Source Initiative (page); the license text is not OSI's" .
+
+<https://opensource.org/license/bsd-3-clause>
+    dcterms:title "The 3-Clause BSD License" ;
+    dcterms:creator "Open Source Initiative (page); the license text is not OSI's" .
+
+<https://www.mozilla.org/en-US/MPL/2.0/>
+    dcterms:title "Mozilla Public License Version 2.0" ;
+    dcterms:creator "Mozilla Foundation" .
+
+<https://www.mozilla.org/en-US/MPL/2.0/FAQ/>
+    dcterms:title "MPL 2.0 FAQ" ;
+    dcterms:creator "Mozilla Foundation" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/3.0/> .
+
+<https://www.gnu.org/licenses/gpl-3.0.html>
+    dcterms:title "GNU General Public License, version 3" ;
+    dcterms:creator "Free Software Foundation" .
+
+<https://www.gnu.org/licenses/agpl-3.0.html>
+    dcterms:title "GNU Affero General Public License, version 3" ;
+    dcterms:creator "Free Software Foundation" .
+
+<https://www.gnu.org/licenses/lgpl-3.0.html>
+    dcterms:title "GNU Lesser General Public License, version 3" ;
+    dcterms:creator "Free Software Foundation" .
+
+<https://www.gnu.org/licenses/gpl-faq.html>
+    dcterms:title "Frequently Asked Questions about the GNU Licenses" ;
+    dcterms:creator "Free Software Foundation" ;
+    dcterms:license <https://creativecommons.org/licenses/by-nd/4.0/> .
+
+<https://www.gnu.org/licenses/license-list.html>
+    dcterms:title "Various Licenses and Comments about Them" ;
+    dcterms:creator "Free Software Foundation" ;
+    dcterms:license <https://creativecommons.org/licenses/by-nd/4.0/> .
+
+<https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12>
+    dcterms:title "European Union Public Licence v. 1.2" ;
+    dcterms:creator "European Commission (Interoperable Europe)" .
+
+<https://www.apache.org/licenses/GPL-compatibility.html>
+    dcterms:title "Apache License v2.0 and GPL Compatibility" ;
+    dcterms:creator "The Apache Software Foundation" ;
+    dcterms:license <https://www.apache.org/licenses/LICENSE-2.0> .
+
+<https://www.apache.org/legal/resolved.html>
+    dcterms:title "ASF 3rd Party License Policy" ;
+    dcterms:creator "The Apache Software Foundation" ;
+    dcterms:license <https://www.apache.org/licenses/LICENSE-2.0> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/legalcode.en>
+    dcterms:title "Attribution-ShareAlike 4.0 International (legal code)" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://creativecommons.org/licenses/by-nd/4.0/legalcode.en>
+    dcterms:title "Attribution-NoDerivatives 4.0 International (legal code)" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://creativecommons.org/share-your-work/cclicenses/>
+    dcterms:title "About CC Licenses" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://creativecommons.org/faq/>
+    dcterms:title "Frequently Asked Questions" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://wiki.creativecommons.org/wiki/Best_practices_for_attribution>
+    dcterms:title "Best practices for attribution" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://creativecommons.org/share-your-work/licensing-considerations/compatible-licenses/>
+    dcterms:title "Compatible Licenses" ;
+    dcterms:creator "Creative Commons" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://spdx.org/licenses/>
+    dcterms:title "SPDX License List" ;
+    dcterms:creator "SPDX Workgroup, a Linux Foundation project" .
+
+<https://spdx.github.io/spdx-spec/v3.0.1/annexes/spdx-license-expressions/>
+    dcterms:title "SPDX license expressions (annex of the SPDX Specification 3.0.1)" ;
+    dcterms:creator "The Linux Foundation and its Contributors" .
+
+<https://reuse.software/spec-3.3/>
+    dcterms:title "REUSE Specification – Version 3.3" ;
+    dcterms:creator "Free Software Foundation Europe (FSFE)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://www.wikidata.org/wiki/Property:P2479>
+    dcterms:title "SPDX license ID (Wikidata property P2479)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://github.com/standard-for-public-code/standard-for-public-code/tree/0.8.1>
+    dcterms:title "Standard for Public Code, release 0.8.1: source repository" ;
+    dcterms:creator "Standard for Public Code Authors and the Foundation for Public Code" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:creator "Standard for Public Code Authors and the Foundation for Public Code, 2025" .
+
 <#periodic-table>
     a dcat:DatasetSeries ,
       dcat:Dataset ;
@@ -17006,10 +17396,6 @@
 
 <https://solid-memo.com/decks/standard-for-public-code/v4.ttl#compilation>
     a prov:Activity .
-
-<https://github.com/standard-for-public-code/standard-for-public-code/tree/0.8.1>
-    dcterms:title "Standard for Public Code, release 0.8.1: source repository" ;
-    dcterms:creator "Standard for Public Code Authors and the Foundation for Public Code, 2025" .
 
 <https://www.standardforpubliccode.org/>
     dcterms:title "Standard for Public Code" ;
