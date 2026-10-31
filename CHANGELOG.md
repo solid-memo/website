@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.23.1](https://github.com/solid-memo/website/compare/v6.23.0...v6.23.1) (2026-10-31)
+
+### Bug Fixes
+
+* **ui:** give the maker's note on the landing the cards' background ([c26d89f](https://github.com/solid-memo/website/commit/c26d89fbf4b2812523695d3f1650fc8f57438e8c)), closes [#446](https://github.com/solid-memo/website/issues/446)
+
 ## [6.23.0](https://github.com/solid-memo/website/compare/v6.22.0...v6.23.0) (2026-10-31)
 
 ### Features
