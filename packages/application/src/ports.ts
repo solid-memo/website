@@ -420,8 +420,9 @@ export interface DeckLibrary {
    * The releases the catalog of the instance that published `url`
    * links (`sm:publishedRelease`), read as anyone reads it: looked for
    * in the folders above the release, nearest first and a few at most,
-   * the first that links it. Null when none can be read: an instance's
-   * catalog is private unless its owner shares it.
+   * the first that links it: those at an address a release may have
+   * (isPublishedReleaseUrl), as listPublished lists. Null when none can
+   * be read: an instance's catalog is private unless its owner shares it.
    */
   publishedBeside(url: string): Promise<string[] | null>;
 }

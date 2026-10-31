@@ -117,6 +117,24 @@ describe("readRelease", () => {
     });
   });
 
+  it("lists only the versions of its series at an address a release may have, as a catalog's links", async () => {
+    const odd = [
+      "data:text/turtle,%3C%3E%20a%20%3Chttps%3A%2F%2Fsolid-memo.com%2Fns%2Fvocab%2Fv1.ttl%23Deck%3E.",
+      `${RELEASES}v3.ttl#frag`,
+      "https://ALICE.example:443/solid-memo/main/releases/capitals/v9.ttl",
+    ];
+    const listing = STANDALONE.replace(
+      `dcat:hasVersion <${V1}> ,`,
+      `dcat:hasVersion <${V1}> , ${odd.map((url) => `<${url}>`).join(" , ")} ,`,
+    ).replace(
+      "<#alice>\n    a foaf:Agent",
+      `${odd.map((url) => `<${url}> a dcat:Dataset ; dcat:version "3" .`).join("\n")}\n\n<#alice>\n    a foaf:Agent`,
+    );
+    expect(listing).toContain(odd[2]);
+    const release = await libraryOver(serving({ [V2]: listing })).readRelease(V2);
+    expect(release.releases.map((one) => one.url)).toEqual([V1, V2]);
+  });
+
   it("reads afresh each time: an address may hold another document later", async () => {
     const fetch = serving({ [V2]: STANDALONE });
     const library = libraryOver(fetch);
@@ -262,6 +280,20 @@ describe("publishedBeside", () => {
       `${instance}releases/catalog.ttl`,
       `${instance}catalog.ttl`,
     ]);
+  });
+
+  it("gives only the links at an address a release may have, as the user's own catalog's", async () => {
+    const instance = "https://alice.example/solid-memo/main/";
+    const fetch = serving({
+      [`${instance}catalog.ttl`]: catalog(instance, [
+        V1,
+        "data:text/turtle,%3C%3E%20a%20%3Chttps%3A%2F%2Fsolid-memo.com%2Fns%2Fvocab%2Fv1.ttl%23Deck%3E.",
+        `${RELEASES}v3.ttl#frag`,
+        "https://ALICE.example:443/solid-memo/main/releases/capitals/v9.ttl",
+        V2,
+      ]),
+    });
+    await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toEqual([V1, V2]);
   });
 
   it("looks no more than eight folders up, however deep the release's address", async () => {
