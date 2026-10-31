@@ -84,9 +84,11 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   An error only a programming mistake can cause stays a plain `Error`.
   A read that fails with an `AppError` or a lasting 4xx from the pod
   (any but 408 and 429) is shown at once, not
-  retried. A network failure, a plain `Error`, or a 5xx, 408 or 429
-  (alone or as an `AppError`'s `vars.status`) is tried three times more
-  first ([retryable.ts](../packages/ui/src/ui/retryable.ts)).
+  retried. A network failure, a plain `Error`, a 5xx, 408 or 429
+  (alone or as an `AppError`'s `vars.status`), or a read the server
+  didn't answer in time (`podNoAnswer`,
+  [boundaries.md](boundaries.md#the-pod-fence)) is tried three times
+  more first ([retryable.ts](../packages/ui/src/ui/retryable.ts)).
 - **Lists grow in place.** A list gathered under a key takes each
   value with `push`, or a `Set` with `add`. It is never copied with the
   value added (`map.set(key, [...(map.get(key) ?? []), value])`): a
