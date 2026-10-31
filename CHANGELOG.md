@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.22.0](https://github.com/solid-memo/website/compare/v6.21.0...v6.22.0) (2026-10-31)
+
+### Features
+
+* **decks:** add a course on web accessibility with WCAG 2.2 ([c0312ff](https://github.com/solid-memo/website/commit/c0312ff6ec46ed620ce20cd15e9a990c8c3127d0)), closes [#424](https://github.com/solid-memo/website/issues/424)
+
 ## [6.21.0](https://github.com/solid-memo/website/compare/v6.20.4...v6.21.0) (2026-10-31)
 
 ### Features
