@@ -12,6 +12,7 @@ import {
   treeChanges,
   type DeckTreeEdit,
 } from "@solid-memo/domain/deckTree";
+import { growth } from "@solid-memo/domain/testing/growth";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { toStoredLayout, withTreeChanges } from "./deckTreeMapper";
 import { DCAT, DCTERMS, SM } from "../vocab";
@@ -276,5 +277,45 @@ describe("withTreeChanges", () => {
     const moved = edited(decks, { kind: "move", node: at("b"), to: { parent: null, after: null } });
     expect(moved.subjects).toEqual([]);
     expect(getInteger(getThing(moved.dataset, at("b"))!, SM.position)).toBe(0);
+  });
+
+  it("writes a rearrangement of many groups and decks in time that grows with them, not with their square", async () => {
+    // A catalog of `count` groups and as many decks, none with a position:
+    // moving the first group to the end numbers every one of them. Setting
+    // each by itself would copy the whole document at each.
+    const catalog = (count: number) => {
+      const groups = Array.from({ length: count }, (_, i) => `g${i}`);
+      const decks = Array.from({ length: count }, (_, i) => `d${i}`);
+      return document(
+        `<#catalog> a dcat:Catalog ; dcterms:title "Main" ; dcterms:description "My decks." ;
+  dcterms:publisher <${ME}> ; dcat:dataset ${decks.map((id) => `<#${id}>`).join(", ")} ;
+  dcat:catalog ${groups.map((id) => `<#${id}>`).join(", ")} .\n` +
+          decks.map((id) => deckTtl(id)).join("") +
+          groups.map((id) => groupTtl(id, id, "")).join(""),
+      );
+    };
+    const size = 150;
+    const times = 8;
+    const datasets = new Map([
+      [size, await catalog(size)],
+      [size * times, await catalog(size * times)],
+    ]);
+    const ratio = growth(
+      (count) => {
+        const dataset = datasets.get(count)!;
+        const stored = toStoredLayout(dataset, CATALOG);
+        const after = applyDeckTreeEdit(buildTree(stored), {
+          kind: "move",
+          node: at("g0"),
+          to: { parent: null, after: at(`g${count - 1}`) },
+        });
+        const changes = treeChanges(stored, after);
+        expect(changes.positions.size).toBe(2 * count);
+        return () => withTreeChanges(dataset, CATALOG, changes);
+      },
+      size,
+      times,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

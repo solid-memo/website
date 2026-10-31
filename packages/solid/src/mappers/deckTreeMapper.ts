@@ -11,8 +11,8 @@ import {
   getThingAll,
   getUrl,
   getUrlAll,
-  setThing,
 } from "../client/rdf";
+import { editOf } from "../datasetEdit";
 import { deckGroupFromRecord, deckGroupToRecord } from "@solid-memo/domain/deckGroupRecord";
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
@@ -21,7 +21,7 @@ import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import {
   readVersioned,
   recordThing,
-  removeUnlessNewer,
+  removeAllUnlessNewer,
   storedVersionOf,
   unlessNewer,
 } from "../records";
@@ -80,7 +80,10 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
  * shape owns, written as they are. A member link to a node the layout
  * does not have is kept only when it names a dataset (or catalog) the
  * document says is one, or a node in another document; a link to what
- * is gone is dropped as its list is written.
+ * is gone is dropped as its list is written. The removals are made at
+ * once, and so are the subjects written (setThings): a subject at a
+ * time would copy the whole document at each, in the square of the
+ * groups and decks a rearrangement renumbers.
  */
 export function withTreeChanges(
   dataset: Dataset,
@@ -113,8 +116,7 @@ export function withTreeChanges(
     return url;
   };
 
-  let updated = dataset;
-  for (const url of changes.groupsRemoved) updated = removeUnlessNewer(updated, url);
+  const edit = editOf(removeAllUnlessNewer(dataset, changes.groupsRemoved));
 
   const stored = new Map(layout.groups.map((entry) => [entry.group.url, entry]));
   const titles = new Map(
@@ -127,7 +129,7 @@ export function withTreeChanges(
   ]);
   for (const url of written) {
     const before = stored.get(url);
-    const existing = getThing(updated, url);
+    const existing = edit.getThing(url);
     // A new group's URL is minted by the client: one the document already has is not this app's to write.
     if (before === undefined && existing !== null)
       throw new Error(`${url} is already in the catalog document`);
@@ -145,14 +147,13 @@ export function withTreeChanges(
       ...(position === undefined ? {} : { position }),
     };
     const record = deckGroupToRecord(group, previous?.publisher ?? publisher(), previous);
-    updated = setThing(updated, recordThing(url, DECK_GROUP_V1, record, existing));
+    edit.setThing(recordThing(url, DECK_GROUP_V1, record, existing));
   }
 
   for (const [url, position] of changes.positions) {
     if (written.has(url)) continue;
-    updated = setThing(
-      updated,
-      buildThing(unlessNewer(getThing(updated, url)!))
+    edit.setThing(
+      buildThing(unlessNewer(edit.getThing(url)!))
         .setInteger(SM.position, position)
         .build(),
     );
@@ -160,15 +161,15 @@ export function withTreeChanges(
 
   if (changes.rootGroups !== undefined) {
     if (root === null) throw noCatalog();
-    let builder = buildThing(unlessNewer(getThing(updated, rootUrl)!)).removeAll(DCAT.catalog);
+    let builder = buildThing(unlessNewer(edit.getThing(rootUrl)!)).removeAll(DCAT.catalog);
     for (const url of [
       ...changes.rootGroups,
       ...foreign(getUrlAll(root!, DCAT.catalog), catalogs),
     ]) {
       builder = builder.addIri(DCAT.catalog, url);
     }
-    updated = setThing(updated, builder.build());
+    edit.setThing(builder.build());
   }
 
-  return { dataset: updated, subjects: [...written, ...(root === null ? [] : [rootUrl])] };
+  return { dataset: edit.done(), subjects: [...written, ...(root === null ? [] : [rootUrl])] };
 }

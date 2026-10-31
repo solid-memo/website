@@ -1471,10 +1471,11 @@ by one.
   documents are saved from `createSolidDataset()`. The one exception is
   the [answer log](#the-answer-log): answers are added unread, with an
   insert-only PATCH.
-- An edit of many subjects is made to the dataset at once: a release's
-  cards written, cards removed, and cards, catalog entries and review
-  states brought to this app's format (`setThings` and `removeThings` in
-  [client/rdf.ts](../packages/solid/src/client/rdf.ts), `editOf` in
+- An edit of many subjects is made to the dataset at once. Such edits
+  are a release's cards written, cards removed, the deck groups and
+  positions of a rearranged deck list, and cards, catalog entries and
+  review states brought to this app's format (`setThings` and
+  `removeThings` in [client/rdf.ts](../packages/solid/src/client/rdf.ts), `editOf` in
   [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)). A subject at
   a time would copy the whole document at each, in time growing with the
   square of its subjects. A list of values of one subject, such as a
