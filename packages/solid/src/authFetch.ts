@@ -3,10 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "@solid-memo/domain/appError";
+import { isInFolder } from "@solid-memo/domain/instanceLayout";
 import type { SessionClient } from "./client/session";
 
-/** Window event dispatched when the pod answers 401 (expired session). */
+/** Window event dispatched once the user's session expired (createAuthFetch says when). */
 export const SESSION_EXPIRED_EVENT = "solid-memo:session-expired";
+
+/** A challenge (WWW-Authenticate) that says the access token sent is no longer good. */
+const INVALID_TOKEN = /\berror\s*=\s*"?invalid_token\b/i;
 
 /** Methods that only read; every other one writes. */
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -20,8 +24,17 @@ export const anonymousFetch: typeof globalThis.fetch = (input, init) =>
 
 /**
  * The client's fetch, which always uses the CURRENT session (a bound
- * reference captured at wiring time would predate login). Announces
- * expired sessions via a window event.
+ * reference captured at wiring time would predate login), and `forget`,
+ * which a logout calls.
+ *
+ * It announces an expired session (SESSION_EXPIRED_EVENT) on a 401 in
+ * two cases alone: the sign-in client, which had a user, has none now
+ * (its token expired, or the provider refused to refresh it), or a 401
+ * that names the token invalid (`invalid_token`) comes from one of the
+ * user's own storages (`ownStorages`) or their identity provider. A 401
+ * from any other server, such as an attached instance elsewhere that
+ * does not take the user's login, is the caller's to read as refused
+ * access: it says nothing of the session.
  *
  * It follows no redirect (`redirect: "error"`), whatever the caller
  * asks: the fences in front of it (docs/boundaries.md) check the address
@@ -36,14 +49,42 @@ export const anonymousFetch: typeof globalThis.fetch = (input, init) =>
  * sends only visitors with no login elsewhere (to a login page, say)
  * shows a failed write there as a refused redirect.
  */
-export function createAuthFetch(client: SessionClient): typeof globalThis.fetch {
-  return async (input, init) => {
+export function createAuthFetch(
+  client: SessionClient,
+  {
+    ownStorages = async () => [],
+  }: {
+    /** The user's own storages, by their WebID: where a token refused as invalid means the session expired. */
+    ownStorages?: (webId: string) => Promise<readonly string[]>;
+  } = {},
+): { fetch: typeof globalThis.fetch; forget: () => void } {
+  /** The user the client last had, until the session ends or is logged out of. */
+  let user: string | undefined;
+
+  /** Whether a 401 from `url` says the session expired. */
+  async function expired(url: string, response: Response): Promise<boolean> {
+    if (user === undefined) return false;
+    const current = client.webId();
+    if (current === undefined) {
+      user = undefined;
+      return true;
+    }
+    if (!INVALID_TOKEN.test(response.headers.get("WWW-Authenticate") ?? "")) return false;
+    const issuer = await client.sessionIssuer().catch(() => null);
+    const provider = issuer === null ? undefined : URL.parse(issuer)?.origin;
+    if (provider !== undefined && URL.parse(url)?.origin === provider) return true;
+    const storages = await ownStorages(current).catch(() => []);
+    return storages.some((storage) => isInFolder(url, storage));
+  }
+
+  const fetch: typeof globalThis.fetch = async (input, init) => {
+    user = client.webId() ?? user;
+    const request = input instanceof Request ? input : undefined;
+    const url = request?.url ?? String(input);
     let response: Response;
     try {
       response = await client.fetch(input, { ...init, redirect: "error" });
     } catch (error) {
-      const request = input instanceof Request ? input : undefined;
-      const url = request?.url ?? String(input);
       if ((init?.signal ?? request?.signal)?.aborted || !(await redirects(url))) throw error;
       const method = (init?.method ?? request?.method ?? "GET").toUpperCase();
       if (!READS.has(method)) throw new AppError("redirectRefused", { method, url });
@@ -51,10 +92,16 @@ export function createAuthFetch(client: SessionClient): typeof globalThis.fetch 
       if (!answer.redirected) throw error;
       return answer;
     }
-    if (response.status === 401) {
+    if (response.status === 401 && (await expired(url, response))) {
       window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
     }
     return response;
+  };
+  return {
+    fetch,
+    forget() {
+      user = undefined;
+    },
   };
 }
 

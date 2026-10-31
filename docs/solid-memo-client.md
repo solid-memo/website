@@ -165,7 +165,10 @@ The session's requests are in
   Both tries keep the caller's redirect mode, so authFetch's
   `redirect: "error"` holds
   ([authentication.md](authentication.md#authenticated-requests)).
-  The access token is refreshed 30 seconds before it expires.
+  The access token is refreshed 30 seconds before it expires. Without
+  a refresh token, the session ends once the access token expired, and
+  the next request goes without one
+  ([authentication.md](authentication.md#an-expired-session)).
 - **A refresh, a login's save and the clear after a refused silent
   restore** hold the Web Lock `solid-memo:oidc-session`. A browser
   without Web Locks queues them within its tab. So two tabs never
