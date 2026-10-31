@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import { fsrsInterval } from "@solid-memo/domain/fsrs";
+import { fsrsInterval, fuzzedInterval, fuzzFactor } from "@solid-memo/domain/fsrs";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
 
@@ -226,7 +226,11 @@ describe("the answer log", () => {
         },
       });
       expect(recorded.fsrs!.stability).toBeGreaterThan(10);
-      const nextInterval = fsrsInterval(recorded.fsrs!.stability, fsrsPrefs.desiredRetention);
+      // FSRS-6's interval, fuzzed by the prompt and its last review.
+      const nextInterval = fuzzedInterval(
+        fsrsInterval(recorded.fsrs!.stability, fsrsPrefs.desiredRetention),
+        fuzzFactor(morning, morning.lastReviewedAt),
+      );
       await useCases.getStatistics(instance.url, noon);
       expect(byMonth.get("2026-09")).toEqual([
         expect.objectContaining({

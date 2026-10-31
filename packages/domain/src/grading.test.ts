@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { fsrsInterval, fsrsReview } from "./fsrs";
+import { fsrsInterval, fsrsReview, fuzzedInterval, fuzzFactor } from "./fsrs";
 import { gradePrompt, previewIntervals, ratingOfAnswer, type Scheduling } from "./grading";
 import type { FsrsState, ReviewState } from "./review";
+import { studyDayOf } from "./scheduling";
+import { daysBetween } from "./studyPatterns";
 
 const key = { cardId: "c", direction: "front-to-back" } as const;
 const yesterday = new Date(2026, 8, 20, 12, 0);
@@ -121,12 +123,14 @@ describe("previewIntervals", () => {
     expect(previewIntervals(key, { sm2: null, fsrs: null }, now, sm2)[4]).toBe(1);
   });
 
-  it("gives FSRS-6's interval of each grade under FSRS-6, at the desired retention", () => {
+  it("gives FSRS-6's fuzzed interval of each grade under FSRS-6, at the desired retention", () => {
     const current = { sm2: before, fsrs: fresh };
     const intervals = previewIntervals(key, current, now, fsrs6);
+    const factor = fuzzFactor(key, before.lastReviewedAt);
     for (const grade of [0, 1, 2, 3, 4, 5] as const) {
       const graded = gradePrompt(key, current, { grade }, now, fsrs6).fsrs!;
-      expect(intervals[grade]).toBe(fsrsInterval(graded.stability, 0.9));
+      const interval = fsrsInterval(graded.stability, 0.9);
+      expect(intervals[grade]).toBe(fuzzedInterval(interval, factor));
     }
     expect(intervals[1]).toBeLessThan(intervals[3]);
     expect(intervals[3]).toBeLessThan(intervals[4]);
@@ -134,5 +138,26 @@ describe("previewIntervals", () => {
     // A lower retention waits longer.
     const lower = previewIntervals(key, current, now, { ...fsrs6, desiredRetention: 0.8 });
     expect(lower[4]).toBeGreaterThan(intervals[4]);
+  });
+
+  it("shows under FSRS-6 the study days to the due day each grade sets", () => {
+    const today = studyDayOf(now, fsrs6.dayBoundaryHour);
+    for (let i = 0; i < 100; i++) {
+      const prompt = { cardId: `card-${i}`, direction: "front-to-back" } as const;
+      const at = new Date(2026, 8, 1 + (i % 20), 12, i);
+      const sm2State = {
+        ...before,
+        ...prompt,
+        intervalDays: 1 + (i % 30),
+        lastReviewedAt: at.toISOString(),
+      };
+      const current = { sm2: sm2State, fsrs: null };
+      const intervals = previewIntervals(prompt, current, now, fsrs6);
+      for (const grade of [0, 1, 2, 3, 4, 5] as const) {
+        const graded = gradePrompt(prompt, current, { grade }, now, fsrs6).fsrs!;
+        expect(intervals[grade]).toBe(daysBetween(today, graded.due));
+      }
+      expect(intervals[3] <= intervals[4] && intervals[4] <= intervals[5]).toBe(true);
+    }
   });
 });
