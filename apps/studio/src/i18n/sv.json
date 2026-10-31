@@ -1590,6 +1590,14 @@
         "showAll": {
           "one": "Visa {count} länk",
           "other": "Visa alla {count} länkar"
+        },
+        "showAllTypes": {
+          "one": "Visa {count} klass",
+          "other": "Visa alla {count} klasser"
+        },
+        "showAllValues": {
+          "one": "Visa {count} värde",
+          "other": "Visa alla {count} värden"
         }
       }
     },

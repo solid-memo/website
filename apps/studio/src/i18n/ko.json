@@ -1509,6 +1509,12 @@
         "noLinks": "없음.",
         "showAll": {
           "other": "링크 {count}개 모두 보기"
+        },
+        "showAllTypes": {
+          "other": "클래스 {count}개 모두 보기"
+        },
+        "showAllValues": {
+          "other": "값 {count}개 모두 보기"
         }
       }
     },

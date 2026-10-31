@@ -278,15 +278,26 @@ export function nearestInDirection(
   return best;
 }
 
-/** The edges of a node, those from it and those to it. */
-export function edgesOf(
-  edges: readonly GraphEdge[],
-  id: string,
-): { outgoing: GraphEdge[]; incoming: GraphEdge[] } {
-  return {
-    outgoing: edges.filter((edge) => edge.from === id),
-    incoming: edges.filter((edge) => edge.to === id),
-  };
+/** A node of a graph with its edges, those from it and those to it. */
+export interface IndexedNode {
+  node: GraphNode;
+  outgoing: GraphEdge[];
+  incoming: GraphEdge[];
+}
+
+/**
+ * Every node of `graph` by its id, with its edges: built once for a
+ * graph, so a node and its links are found without a scan of all.
+ */
+export function nodeIndexOf(graph: InstanceGraph): ReadonlyMap<string, IndexedNode> {
+  const index = new Map<string, IndexedNode>(
+    graph.nodes.map((node) => [node.id, { node, outgoing: [], incoming: [] }]),
+  );
+  for (const edge of graph.edges) {
+    index.get(edge.from)!.outgoing.push(edge);
+    index.get(edge.to)!.incoming.push(edge);
+  }
+  return index;
 }
 
 /** How soon a node is labelled, lowest first: folders and documents, then decks, then every other. */

@@ -1671,6 +1671,16 @@
           "one": "Afficher le {count} lien",
           "many": "Afficher les {count} de liens",
           "other": "Afficher les {count} liens"
+        },
+        "showAllTypes": {
+          "one": "Afficher la {count} classe",
+          "many": "Afficher les {count} de classes",
+          "other": "Afficher les {count} classes"
+        },
+        "showAllValues": {
+          "one": "Afficher la {count} valeur",
+          "many": "Afficher les {count} de valeurs",
+          "other": "Afficher les {count} valeurs"
         }
       }
     },
