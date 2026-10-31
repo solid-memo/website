@@ -150,6 +150,16 @@ flowchart LR
   the classes its `rdf:type` names, and only those. No reference data
   states `rdfs:subClassOf`, and the
   [CI cross-check](#the-ci-cross-check) refuses a document that does.
+- The engine checks `xsd:decimal`, `xsd:float` and `xsd:double`
+  literals with patterns of its own, which it registers in the
+  library's datatype checks (`rdf-validate-datatype`). The library's
+  patterns can split a run of digits more than one way, so a literal
+  that doesn't match takes time quadratic in its length, and the data
+  checked may come from another app or a release's publisher. The
+  engine's split a run one way only, so a check takes time linear in a
+  literal's length. They take every value of the XSD lexical space
+  (`+INF` too) and nothing else, so a value with two signs (`+-1`),
+  which the library takes, is refused.
 - One engine per shape document is shared by every document checked
   against it. It runs one check at a time: the library keeps a single
   report per validator, so two documents checked together would mix up

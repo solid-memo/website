@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { DatasetCore, Quad } from "@rdfjs/types";
+import { validators } from "rdf-validate-datatype";
 import SHACLValidator from "rdf-validate-shacl";
 import environment from "rdf-validate-shacl/src/defaultEnv.js";
 import { shown } from "@solid-memo/domain/langText";
@@ -32,6 +33,24 @@ export interface ShapeEngine {
 }
 
 const SH = "http://www.w3.org/ns/shacl#";
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+
+/** An xsd:decimal: digits with a dot anywhere, or none, and a sign. */
+const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
+/** An xsd:float or xsd:double: a decimal with an exponent, or none; or INF or NaN. */
+const FLOATING = /^(?:[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|[+-]?INF|NaN)$/;
+
+// The library checks sh:datatype xsd:decimal, xsd:float and xsd:double
+// with patterns in which a run of digits can be split two ways (`\d+\.?\d*`),
+// so a literal that does not match takes time quadratic in its length,
+// and the data checked may be data another app wrote to the pod or a
+// release its publisher wrote. These patterns split a run of digits only
+// one way, so a check takes time linear in a literal's length, and
+// accept every value the library's do that XSD does (docs/validation.md).
+validators.register(environment.namedNode(`${XSD}decimal`), (value) => DECIMAL.test(value));
+for (const datatype of ["float", "double"]) {
+  validators.register(environment.namedNode(`${XSD}${datatype}`), (value) => FLOATING.test(value));
+}
 const RDFS_SUB_CLASS_OF = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
 
 /** Each document's checked copy, and the document's size when it was made. */

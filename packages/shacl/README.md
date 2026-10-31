@@ -20,8 +20,9 @@ and checks (`npm run library`).
 ## Boundaries
 
 It may import `domain` and `vocab`, and, from `node/` only, `turtle`
-and `markdown`. Only `solid` may import it. `rdf-validate-shacl` is
-used in `src/engine.ts` alone, loaded lazily
+and `markdown`. Only `solid` may import it. `rdf-validate-shacl` (and
+`rdf-validate-datatype`, its datatype checks) is used in
+`src/engine.ts` alone, loaded lazily
 ([boundaries.md](../../docs/boundaries.md)).
 
 ## Tests
