@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import {
@@ -45,8 +45,10 @@ export function ReleaseAuthors({
   onEdit: DraftEditor["edit"];
 }) {
   const { t } = useI18n();
-  const authors = authorsOf(draft);
-  const others = otherAuthorsOf(draft);
+  const { authors, others } = useMemo(
+    () => ({ authors: authorsOf(draft), others: otherAuthorsOf(draft) }),
+    [draft],
+  );
   return (
     <>
       <p class="hint">{t("studio.release.authorsHint")}</p>

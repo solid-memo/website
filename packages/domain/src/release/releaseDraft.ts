@@ -580,12 +580,49 @@ function defined<T extends object>(value: T): T {
   return Object.fromEntries(Object.entries(value).filter(([, one]) => one !== undefined)) as T;
 }
 
+/**
+ * Each list's nodes grouped by id, in the list's order, built once per
+ * list. It relies on a draft's lists never being changed in place: an
+ * edit to a node makes a new list, which gets its own index.
+ */
+const nodesById = new WeakMap<object, ReadonlyMap<string, readonly DraftNode<unknown>[]>>();
+
+/** The list's nodes grouped by id, in the list's order, from the index (made the first time). */
+function byIdOf(
+  nodes: readonly DraftNode<unknown>[],
+): ReadonlyMap<string, readonly DraftNode<unknown>[]> {
+  let byId = nodesById.get(nodes);
+  if (byId === undefined) {
+    const made = new Map<string, DraftNode<unknown>[]>();
+    for (const node of nodes) {
+      const same = made.get(node.id);
+      if (same === undefined) made.set(node.id, [node]);
+      else same.push(node);
+    }
+    byId = made;
+    nodesById.set(nodes, byId);
+  }
+  return byId;
+}
+
+/**
+ * The draft's first node of the list with the id; undefined when it has
+ * none. Found in the list's nodes by id, built once per list, not
+ * looked through for each id: a release names many agents as its
+ * authors, and each is looked up.
+ */
 function nodeOf<K extends keyof NodeLists>(
   draft: ReleaseDraft,
   list: K,
   id: string,
 ): DraftNode<NodeLists[K]> | undefined {
-  return (draft[list] as readonly DraftNode<NodeLists[K]>[]).find((node) => node.id === id);
+  return byIdOf(draft[list]).get(id)?.[0] as DraftNode<NodeLists[K]> | undefined;
+}
+
+/** The agent of the draft a creator (or any IRI) names; undefined when it names none of them. */
+export function agentNamed(draft: ReleaseDraft, iri: string): DraftNode<AgentV1> | undefined {
+  const id = idIn(draft, iri);
+  return id === null ? undefined : nodeOf(draft, "agents", id);
 }
 
 function withNodes<K extends keyof NodeLists>(
@@ -1634,8 +1671,7 @@ function commentIn(value: string, language: string): ReleaseText {
 /** The names of the release's authors (dcterms:creator), as its agents name them, in order. */
 export function authorNames(draft: ReleaseDraft): string[] {
   return draft.root.creator.flatMap((iri) => {
-    const id = idIn(draft, iri);
-    const agent = id === null ? undefined : nodeOf(draft, "agents", id);
+    const agent = agentNamed(draft, iri);
     return agent === undefined ? [] : [agent.data.name];
   });
 }
@@ -1742,10 +1778,8 @@ export function mergedDraft(
   const from = (key: string) => (ours.has(key) ? mine : theirs);
   const nodes = <K extends (typeof LISTS)[number]>(list: K): ReleaseDraft[K] => {
     const ids = [...new Set([...theirs[list], ...mine[list]].map((node) => node.id))];
-    return ids.flatMap((id) =>
-      (from(`${list} ${id}`)[list] as readonly DraftNode<unknown>[]).filter(
-        (node) => node.id === id,
-      ),
+    return ids.flatMap(
+      (id) => byIdOf(from(`${list} ${id}`)[list]).get(id) ?? [],
     ) as ReleaseDraft[K];
   };
   const root = from("root");

@@ -416,8 +416,10 @@ function Publisher({
  */
 function Attribution({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEditor["edit"] }) {
   const { t, locale } = useI18n();
-  const names = authorNames(draft);
-  const stated = attributionOf(draft);
+  const { names, stated } = useMemo(
+    () => ({ names: authorNames(draft), stated: attributionOf(draft) }),
+    [draft],
+  );
   const chosen = stated === null ? "none" : stated.ai ? "ai" : "compiled";
   const none = names.length === 0;
   const options = [

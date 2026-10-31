@@ -2043,6 +2043,10 @@ the library's releases are
   none. Removing an author removes its
   agent too, unless it publishes the release or a statement names it.
   Authors another document describes are kept as they are.
+  Each author is found among the agents by its id, which the draft's
+  agents are indexed by once, not looked through for each author. A
+  test keeps the time this takes growing in step with the number of
+  authors, not with its square.
 - **How it was made**: the attribution, and notes.
   - The attribution is "Compiled by <the authors' names>", with or
     without "with the help of AI", in English and Swedish ("Sammanställd

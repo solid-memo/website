@@ -8,11 +8,11 @@ import { slugOf } from "./draftLayout.ts";
 import { RDFS_COMMENT } from "./provenanceRules.ts";
 import {
   activitiesOf,
+  agentNamed,
   applyDraftChanges,
   attributionOf,
   authorNames,
   generatingActivities,
-  idIn,
   iriIn,
   isRefusal,
   PROV,
@@ -44,8 +44,8 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 /** The release's authors that are agents of the draft (dcterms:creator), in order. */
 export function authorsOf(draft: ReleaseDraft): DraftNode<AgentV1>[] {
   return draft.root.creator.flatMap((iri) => {
-    const id = idIn(draft, iri);
-    return draft.agents.filter((node) => node.id === id);
+    const agent = agentNamed(draft, iri);
+    return agent === undefined ? [] : [agent];
   });
 }
 
