@@ -1111,6 +1111,29 @@
     "buttonInstanceRecord": "the instance record",
     "buttonCatalogue": "the catalog"
   },
+  "makerNote": {
+    "flagship": {
+      "title": "A high-quality app for Solid:",
+      "text": "I want it to show what Solid can do."
+    },
+    "learn": {
+      "title": "For a broad audience:",
+      "text": "flashcards suit anyone who wants to learn."
+    },
+    "privacy": {
+      "title": "Private and secure:",
+      "text": "your data stays with you, not with me, and I work to keep the app secure."
+    },
+    "free": {
+      "title": "Free:",
+      "text": "hosting is mostly free, with no servers to run. It takes my time and effort."
+    },
+    "openSource": {
+      "title": "Open source:",
+      "text": "anyone can read, change and run the code."
+    },
+    "readMore": "Read why I made it"
+  },
   "onboardingFlow": {
     "tryHeading": "Try it right away",
     "tryAsGuest": "Try it without logging in",

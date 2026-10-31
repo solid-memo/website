@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { PodProvider } from "@solid-memo/domain/podProvider";
+import type { ComponentChildren } from "preact";
 import { useI18n } from "../i18n";
 import { WebIdForm } from "./WebIdForm";
 
@@ -12,7 +13,8 @@ import { WebIdForm } from "./WebIdForm";
  * by typing a WebID — or create a Pod at a provider first. Login itself
  * happens on the identity provider's page; this flow only finds out which
  * provider that is. Logging in comes before creating a Pod, and before the
- * guest's offer too for someone who logged out here.
+ * guest's offer too for someone who logged out here, who is not shown the
+ * note on why the app was made either.
  */
 export function OnboardingFlow({
   providers,
@@ -21,6 +23,7 @@ export function OnboardingFlow({
   onLogin,
   onLoginWithProvider,
   onTryAsGuest,
+  note,
 }: {
   providers: readonly PodProvider[];
   busy: boolean;
@@ -30,6 +33,8 @@ export function OnboardingFlow({
   onLoginWithProvider: (provider: PodProvider) => void;
   /** Offered when given: study as a guest, without logging in. */
   onTryAsGuest?: () => void;
+  /** Why the app was made, for a new visitor: after the guest's offer, not for someone coming back. */
+  note?: ComponentChildren;
 }) {
   const { t } = useI18n();
   const signUpProviders = providers.filter((provider) => provider.signUpUrl !== undefined);
@@ -96,6 +101,7 @@ export function OnboardingFlow({
   ) : (
     <>
       {guest}
+      {note}
       {logIn}
       {createPod}
     </>

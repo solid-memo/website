@@ -1174,6 +1174,29 @@
     "buttonInstanceRecord": "el registro de la instancia",
     "buttonCatalogue": "el catálogo"
   },
+  "makerNote": {
+    "flagship": {
+      "title": "Una app de calidad para Solid:",
+      "text": "quiero que muestre lo que Solid puede hacer."
+    },
+    "learn": {
+      "title": "Para un público amplio:",
+      "text": "las tarjetas de memoria sirven para cualquiera que quiera aprender."
+    },
+    "privacy": {
+      "title": "Privada y segura:",
+      "text": "tus datos se quedan contigo, no conmigo, y trabajo para mantener la app segura."
+    },
+    "free": {
+      "title": "Gratis:",
+      "text": "el alojamiento es casi gratis, sin servidores que mantener. Me cuesta tiempo y esfuerzo."
+    },
+    "openSource": {
+      "title": "Código abierto:",
+      "text": "cualquiera puede leer, cambiar y ejecutar el código."
+    },
+    "readMore": "Lee por qué la hice (en inglés)"
+  },
   "onboardingFlow": {
     "tryHeading": "Pruébalo ahora mismo",
     "tryAsGuest": "Probar sin iniciar sesión",

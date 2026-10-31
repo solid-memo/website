@@ -18,6 +18,25 @@ decks ([`decks/`](decks/)) are published together at
 <https://solid-memo.com/>, one released version at a time
 ([docs/deployment.md](docs/deployment.md)).
 
+## Why I made Solid Memo
+
+> **I want to show what Solid can do.** I want Solid Memo to be a
+> high-quality flagship app for Solid.
+>
+> **I like flashcards.** They're a simple way to learn, and they suit
+> a broad audience: anyone who wants to learn something.
+>
+> **I value privacy.** Your cards and progress stay in your own Pod,
+> and I keep no copy. The app reads and writes your Pod, so I check it
+> for security problems and fix them openly.
+>
+> **I want it to be free.** It has no back end, so hosting is mostly
+> free. It costs me time and effort instead.
+>
+> **I like open source.** Anyone can read, change and run the code.
+>
+> — Anton Wiklund
+
 ## About
 
 Solid Memo helps you remember what you learn. You study flashcards, and

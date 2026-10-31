@@ -191,6 +191,14 @@
       border-radius: 0.5rem;
     }
 
+    .note {
+      margin: 0 0 1rem;
+    }
+
+    .note blockquote {
+      margin: 0;
+    }
+
     figcaption {
       margin-top: 0.35rem;
       color: var(--text-muted);
@@ -235,6 +243,7 @@
       </ul>
       <nav aria-label="On this page">
         <ul>
+          <li><a href="#why">Why I made it</a></li>
           <li><a href="#screenshots">Screenshots</a></li>
           <li><a href="#learners">For learners</a></li>
           <li><a href="#authors">For deck authors</a></li>
@@ -243,6 +252,37 @@
         </ul>
       </nav>
     </header>
+
+    <section id="why" aria-labelledby="why-title">
+      <h2 id="why-title">Why I made Solid Memo</h2>
+      <figure class="note">
+        <blockquote>
+          <p>
+            <strong>I want to show what Solid can do.</strong> I want Solid Memo to be a high-quality flagship app for Solid.
+          </p>
+          <p>
+            <strong>I like flashcards.</strong> They're a simple way to
+            learn, and they suit a broad audience: anyone who wants to learn something.
+          </p>
+          <p>
+            <strong>I value privacy.</strong> Your cards and progress
+            stay in your own Pod, and I keep no copy. The app reads and
+            writes your Pod, so I check it for security problems and fix
+            them openly.
+          </p>
+          <p>
+            <strong>I want it to be free.</strong> It has no back end,
+            so hosting is mostly free. It costs me time and
+            effort instead.
+          </p>
+          <p>
+            <strong>I like open source.</strong> Anyone can read, change
+            and run the code.
+          </p>
+        </blockquote>
+        <figcaption>— Anton Wiklund</figcaption>
+      </figure>
+    </section>
 
     <section id="screenshots" aria-labelledby="screenshots-title">
       <h2 id="screenshots-title">Screenshots</h2>
@@ -321,8 +361,7 @@
         </li>
         <li>
           Your data is yours: it lives in your Pod, in open formats, and you can
-          take it with you. Solid Memo keeps no account of yours and costs
-          nothing.
+          take it with you.
         </li>
         <li>The app speaks English, Swedish, Korean, German, Spanish and French.</li>
       </ul>

@@ -1048,6 +1048,29 @@
     "buttonInstanceRecord": "인스턴스 레코드",
     "buttonCatalogue": "카탈로그"
   },
+  "makerNote": {
+    "flagship": {
+      "title": "Solid를 위한 고품질 앱:",
+      "text": "Solid로 무엇을 할 수 있는지 보여 주고 싶어요."
+    },
+    "learn": {
+      "title": "폭넓은 사용자를 위해:",
+      "text": "플래시카드는 배우고 싶은 누구에게나 잘 맞아요."
+    },
+    "privacy": {
+      "title": "개인 정보와 보안:",
+      "text": "데이터는 제가 아니라 여러분 곁에 머물고, 저는 앱을 안전하게 지키려고 노력해요."
+    },
+    "free": {
+      "title": "무료:",
+      "text": "운영할 서버가 없어 호스팅 비용이 거의 들지 않아요. 대신 제 시간과 노력이 들어가요."
+    },
+    "openSource": {
+      "title": "오픈 소스:",
+      "text": "누구나 코드를 읽고, 고치고, 실행할 수 있어요."
+    },
+    "readMore": "만든 이유 읽기 (영어)"
+  },
   "onboardingFlow": {
     "tryHeading": "바로 사용해 보기",
     "tryAsGuest": "로그인 없이 사용해 보기",
