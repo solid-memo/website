@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.20.2](https://github.com/solid-memo/website/compare/v6.20.1...v6.20.2) (2026-10-31)
+
+### Bug Fixes
+
+* **markdown:** show a text with too many block quotes as plain text ([b9dc67c](https://github.com/solid-memo/website/commit/b9dc67c99c482dcba19c3df3ff2022a6e3f42c63))
+* **solid:** never write one deck's author over another's agent node ([d0e2459](https://github.com/solid-memo/website/commit/d0e2459c659c2f9ba35613ea8ed60c7bc410d620))
+* **statistics:** write formula-like text in the answers csv as text ([28e14e8](https://github.com/solid-memo/website/commit/28e14e8a3c3bbc650c926bce627e6cbeeb9dfe44))
+
 ## [6.20.1](https://github.com/solid-memo/website/compare/v6.20.0...v6.20.1) (2026-10-31)
 
 ### Bug Fixes
