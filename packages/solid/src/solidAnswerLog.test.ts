@@ -294,6 +294,25 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
   });
 
+  it("leaves out a prior due day that is not a real date or is out of range, and keeps the answer", async () => {
+    const given = answer("2026-09-21");
+    // The reader does not apply the shape's pattern to the prior due day.
+    for (const priorDue of ['=HYPERLINK("https://other.example/")', "2026-09-31", "0100-01-03"]) {
+      const log = createSolidAnswerLog({ fetch: pod().fetch });
+      await log.append(INSTANCE, { ...given, priorDue });
+      await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
+    }
+  });
+
+  it("keeps a prior due day at either end of the range study days are held to", async () => {
+    for (const priorDue of ["0100-01-04", "9999-12-31"]) {
+      const given = { ...answer("2026-09-21"), priorDue };
+      const log = createSolidAnswerLog({ fetch: pod().fetch });
+      await log.append(INSTANCE, given);
+      await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
+    }
+  });
+
   it("leaves out an answer of a day outside its document's month, but not one a day either side", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });

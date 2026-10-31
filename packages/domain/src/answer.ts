@@ -104,6 +104,16 @@ export function shiftStudyDay(studyDay: string, days: number): string {
 }
 
 /**
+ * Whether a study day is one of the range shiftStudyDay keeps in order,
+ * 0100-01-04 to 9999-12-31, and a day of the calendar (2026-09-31 is
+ * not). Text that cannot be read as a date at all passes, so the caller
+ * checks that it is one.
+ */
+export function isOfStudyDayRange(studyDay: string): boolean {
+  return shiftStudyDay(studyDay, 0) === studyDay;
+}
+
+/**
  * The most years a chart over time spans: of a longer answer log it
  * shows the last ones. The log's months can be any, and a point a day
  * (or a week, or a month) of them all would hang the page.
@@ -118,7 +128,7 @@ export const CHART_YEARS = 10;
  */
 export function isOfStudyMonth(studyDay: string, month: string): boolean {
   return (
-    shiftStudyDay(studyDay, 0) === studyDay &&
+    isOfStudyDayRange(studyDay) &&
     [-1, 0, 1].some((days) => monthOfStudyDay(shiftStudyDay(studyDay, days)) === month)
   );
 }

