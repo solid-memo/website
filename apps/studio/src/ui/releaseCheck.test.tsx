@@ -10,7 +10,7 @@ import { problem } from "@solid-memo/domain/release/problems";
 import type { CheckPolicy, ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { publishErrors, useReleaseCheck } from "./releaseCheck";
+import { markdownCheckOf, publishErrors, useReleaseCheck } from "./releaseCheck";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 
 const draft = courseDraft();
@@ -123,5 +123,15 @@ describe("publishErrors", () => {
     expect(publishErrors({ rules: [error, warning], drops: [error], markdown: [error] })).toBe(3);
     const elsewhere: ReleaseCheck = { ...check([warning]), library: [error], shapes: [error] };
     expect(publishErrors(elsewhere)).toBe(0);
+  });
+});
+
+describe("markdownCheckOf", () => {
+  it("keeps the last draft's Markdown check only, a new one for another draft", () => {
+    const first = markdownCheckOf(DRAFT_URL);
+    expect(markdownCheckOf(DRAFT_URL)).toBe(first);
+    const other = markdownCheckOf("https://pod.example/drafts/other/");
+    expect(other).not.toBe(first);
+    expect(markdownCheckOf(DRAFT_URL)).not.toBe(first);
   });
 });

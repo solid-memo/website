@@ -11,6 +11,7 @@ import {
   type ReleaseCheck,
 } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { releaseMarkdownCheck } from "@solid-memo/ui/markdownCache";
 import { queryKeys } from "./queryKeys";
 
@@ -25,8 +26,19 @@ import { queryKeys } from "./queryKeys";
  * version it is in.
  */
 
-/** The Markdown check every check of this page shares, a release's publishing among them, every text remembered (releaseMarkdownCheck). */
-export const markdownCheck = releaseMarkdownCheck();
+/** The draft whose Markdown check is kept, and that check. */
+let kept: { url: string; check: MarkdownCheck } | undefined;
+
+/**
+ * The Markdown check every check of the draft shares, its publishing
+ * among them, every text remembered (releaseMarkdownCheck). Only the last
+ * draft's is kept: another draft's starts anew, so one draft's texts
+ * neither stay in memory nor slow the next one's check.
+ */
+export function markdownCheckOf(url: string): MarkdownCheck {
+  if (kept?.url !== url) kept = { url, check: releaseMarkdownCheck() };
+  return kept.check;
+}
 
 const revisions = new WeakMap<ReleaseDraft, number>();
 let latest = 0;
@@ -55,7 +67,7 @@ export function useReleaseCheck(
 ) {
   return useQuery<ReleaseCheck>({
     queryKey: queryKeys.releaseCheck(draft?.url, policy, draft === null ? 0 : revisionOf(draft)),
-    queryFn: () => useCases.checkReleaseDraft(draft!, markdownCheck, policy),
+    queryFn: () => useCases.checkReleaseDraft(draft!, markdownCheckOf(draft!.url), policy),
     enabled: draft !== null,
     placeholderData: (previous, previousQuery) =>
       previousQuery?.queryKey[1] === draft?.url && previousQuery?.queryKey[2] === policy
@@ -82,7 +94,11 @@ export function useShapeCheck(useCases: UseCases, asked: ReleaseDraft | null, po
   return useQuery<ReleaseProblem[]>({
     queryKey: queryKeys.releaseShapes(asked?.url, policy, asked === null ? 0 : revisionOf(asked)),
     queryFn: async () =>
-      (await useCases.checkReleaseDraft(asked!, markdownCheck, policy, { shapes: true })).shapes!,
+      (
+        await useCases.checkReleaseDraft(asked!, markdownCheckOf(asked!.url), policy, {
+          shapes: true,
+        })
+      ).shapes!,
     enabled: asked !== null,
     staleTime: Infinity,
   });

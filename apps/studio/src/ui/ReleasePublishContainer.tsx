@@ -10,7 +10,7 @@ import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
-import { markdownCheck, publishErrors, useReleaseCheck } from "./releaseCheck";
+import { markdownCheckOf, publishErrors, useReleaseCheck } from "./releaseCheck";
 import { useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublishScreen";
 import { queryKeys } from "./queryKeys";
@@ -55,7 +55,8 @@ export function ReleasePublishContainer({
   });
   const publishMutation = useMutation({
     scope: { id: catalogScope(instanceUrl) },
-    mutationFn: (url: string) => useCases.publishRelease(draft.url, url, markdownCheck),
+    mutationFn: (url: string) =>
+      useCases.publishRelease(draft.url, url, markdownCheckOf(draft.url)),
     onSuccess: (published) =>
       queryClient.setQueryData(queryKeys.releasePublic(published.url), published.public),
     onSettled: () =>
