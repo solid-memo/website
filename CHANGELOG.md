@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.19.0](https://github.com/solid-memo/website/compare/v6.18.2...v6.19.0) (2026-10-31)
+
+### Features
+
+* **ui:** fold a long list of sources on a library deck's page ([e09fe41](https://github.com/solid-memo/website/commit/e09fe415120e76f59aa254eb0b2fe755d388f088)), closes [#426](https://github.com/solid-memo/website/issues/426)
+
 ## [6.18.2](https://github.com/solid-memo/website/compare/v6.18.1...v6.18.2) (2026-10-31)
 
 ### Bug Fixes
