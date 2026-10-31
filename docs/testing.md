@@ -355,7 +355,8 @@ Further journeys go through:
   removed;
 - a screen that fails while it renders (the Studio's code swapped for
   code that throws): "Something went wrong" under the working header,
-  its details copied, its report link filled in, and the way back;
+  its details copied, its report link with only Where and Version
+  filled in, and the way back;
 - what Solid Memo leaves alone in a pod
   ([pod-safety.journey.ts](../e2e/journeys/journeys/pod-safety.journey.ts)),
   each journey reading the pod with plain requests after an everyday

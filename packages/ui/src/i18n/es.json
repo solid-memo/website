@@ -130,7 +130,7 @@
     "copied": "Los detalles se han copiado.",
     "copyFailed": "No se pudieron copiar los detalles. Selecciónalos en Detalles técnicos y cópialos a mano.",
     "report": "Informar de ello",
-    "private": "Los detalles no mencionan ningún Pod, WebID ni tarjeta, y no se envía nada a menos que envíes el informe tú.",
+    "private": "Informar de ello abre el formulario de errores del proyecto con la versión ya rellenada: pega allí los detalles copiados. Antes se quitan las direcciones de los detalles, y solo se envían si los pegas en el informe y lo envías tú.",
     "notice": "Algo salió mal. Puede que la página no funcione como debe; si deja de responder, vuelve a cargarla.",
     "noticeRegion": "Error",
     "close": "Cerrar"

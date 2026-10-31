@@ -162,16 +162,22 @@ only if the learner takes it out:
 - **Copy details** copies the app's version and commit, the route the
   learner was at without its values (`#/study?instance=&deck=`), and
   the error's message and stack.
-- **Report it** opens the project's bug form on GitHub, filled in with
-  the same details and sent only when the learner submits it.
+- **Report it** opens the project's bug form on GitHub with only the
+  app's version and that route filled in. The details stay out of the
+  link, since a link's query reaches GitHub as soon as it opens: the
+  learner pastes them from Copy details into the form, and they are
+  sent only when the learner submits it.
 
 The app first strips every address from the details, except the
-paths of the site's own scripts (which show where the code broke), so
-they name no pod, WebID, deck or card, and carry no token
-([`errorReport.ts`](../packages/domain/src/errorReport.ts)). An
-error's message can still quote other text, such as a card's. The
-details appear under "Technical details" for the learner to read
-before sending.
+paths of the site's own scripts, which show where the code broke
+([`errorReport.ts`](../packages/domain/src/errorReport.ts)). It strips
+web addresses, such as a pod's, a WebID's, a deck's or a card's, with
+any token in their query. It strips email addresses, including ones
+in other scripts, and `blob:`, `data:`, `mailto:`, `tel:` and `urn:`
+values. An error's message can still quote other text, such as a
+card's or a host name written without its `https://`. The details
+appear under "Technical details" for the learner to read before
+sending.
 
 ## What the project has published
 

@@ -93,8 +93,9 @@ decks. "Log out", at the top, ends the session.
 - **"Skip to content"** is the first thing the Tab key reaches.
 - **"Something went wrong"** takes a screen's place if it breaks, and
   the top and the footer stay. **Try again**, or **Go to the start**.
-  **Copy details** and **Report it** help you tell the project, and
-  nothing is sent unless you send the report
+  **Copy details** and **Report it** help you tell the project: paste
+  the copied details into the report, and nothing of them is sent
+  unless you send it
   ([privacy.md](privacy.md#when-something-goes-wrong)).
 
 ## Your decks

@@ -128,7 +128,7 @@
     "copied": "Detaljerna är kopierade.",
     "copyFailed": "Detaljerna gick inte att kopiera. Markera dem under Tekniska detaljer och kopiera dem för hand.",
     "report": "Rapportera det",
-    "private": "Detaljerna nämner ingen Pod, inget WebID och inget kort, och inget skickas om du inte skickar rapporten själv.",
+    "private": "Rapportera det öppnar projektets formulär för fel med versionen ifylld: klistra in de kopierade detaljerna i det. Adresser tas först bort ur detaljerna, och de skickas bara om du klistrar in dem i rapporten och skickar den.",
     "notice": "Något gick fel. Sidan kanske inte fungerar som den ska; om den slutar svara, ladda om den.",
     "noticeRegion": "Fel",
     "close": "Stäng"

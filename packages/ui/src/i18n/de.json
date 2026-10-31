@@ -128,7 +128,7 @@
     "copied": "Die Details sind kopiert.",
     "copyFailed": "Die Details konnten nicht kopiert werden. Markiere sie unter Technische Details und kopiere sie von Hand.",
     "report": "Melden",
-    "private": "Die Details nennen keinen Pod, keine WebID und keine Karte, und nichts wird gesendet, außer du sendest die Meldung selbst.",
+    "private": "Melden öffnet das Fehlerformular des Projekts mit eingetragener Version: Füge die kopierten Details dort ein. Adressen werden zuvor aus den Details entfernt, und die Details werden nur gesendet, wenn du sie in die Meldung einfügst und sie sendest.",
     "notice": "Etwas ist schiefgelaufen. Die Seite funktioniert vielleicht nicht wie gewohnt; reagiert sie nicht mehr, lade sie neu.",
     "noticeRegion": "Fehler",
     "close": "Schließen"

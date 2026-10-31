@@ -128,7 +128,7 @@
     "copied": "The details are copied.",
     "copyFailed": "The details could not be copied. Select them under Technical details and copy them by hand.",
     "report": "Report it",
-    "private": "The details name no Pod, WebID or card, and nothing is sent unless you send the report yourself.",
+    "private": "Report it opens the project's bug form with the version filled in: paste the copied details into it. Addresses are taken out of the details first, and they are sent only if you paste them into the report and send it.",
     "notice": "Something went wrong. The page may not work as it should; if it stops responding, reload it.",
     "noticeRegion": "Error",
     "close": "Close"

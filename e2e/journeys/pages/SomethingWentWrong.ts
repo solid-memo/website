@@ -71,7 +71,7 @@ export class SomethingWentWrong extends Screen {
     });
   }
 
-  /** Where Report it leads, without following it there: the bug form, filled in. */
+  /** Where Report it leads, without following it there: the bug form, partly filled in. */
   async reportLink(): Promise<URL> {
     return this.intent("Read where Report it leads", async () => {
       const href = await this.page

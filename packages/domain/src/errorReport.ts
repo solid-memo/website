@@ -24,24 +24,28 @@ const BUG_FORM = "bug.yml";
 /** Longest an error's message is kept; a message can quote a whole document. */
 const MAX_MESSAGE = 500;
 
-/** The stack's first frames, which say where it broke; the rest only make the link long. */
+/** The stack's first frames, which say where it broke; more only lengthen the copied details. */
 const MAX_FRAMES = 12;
 
 /**
  * An address, written out or URL-encoded (`https%3A%2F%2F…`, as in a
- * route's query), or a blob or data URL; a stop, comma or colon after it
- * is the sentence's. The scheme's length is bounded, so a long word that
- * is no address is passed over in linear time.
+ * route's query), a tel number (spaces and all), a blob, data, mailto,
+ * tel or urn value, or an email address in any script, at localhost or
+ * a dotted host (its `@` written out, encoded or encoded twice); a stop,
+ * comma or colon after it is the sentence's. A scheme's length is
+ * bounded, and an email's user starts where its letters do, so a long
+ * word that is no address is passed over in time linear in its length.
  */
 const ADDRESS =
-  /\b[a-z][a-z0-9+.-]{0,31}(?::\/\/|%3A%2F%2F)(?:[^\s"'<>()[\]{}]*[^\s"'<>()[\]{}.,:;!?])?|\b(?:blob|data):[^\s"'<>()[\]{}]*[^\s"'<>()[\]{}.,:;!?]/gi;
+  /\b[a-z][a-z0-9+.-]{0,31}(?::\/\/|%3A%2F%2F)(?:[^\s"'<>()[\]{}]*[^\s"'<>()[\]{}.,:;!?])?|\btel:\+?[\d ().-]*\d|\b(?:blob|data|mailto|tel|urn):[^\s"'<>()[\]{}]*[^\s"'<>()[\]{}.,:;!?]|(?<![\p{L}\p{M}\p{N}_.%+-])[\p{L}\p{M}\p{N}_.%+-]+(?:@|%40|%2540)(?:localhost\b|[\p{L}\p{M}\p{N}-]+(?:\.[\p{L}\p{M}\p{N}-]+)+)/giu;
 
 /**
- * `text` with every address in it taken out, so it names no pod, WebID,
- * deck or card, and carries no token in a query. An address in the
- * site's own folder (its scripts, in a stack) keeps its path there,
- * without a query or a hash, since that says where the code broke and
- * nothing about the learner.
+ * `text` with every address in it taken out: a pod's, a WebID's, a
+ * deck's or a card's, an email address, and with them any token in a
+ * query. A host written without its scheme is not an address here. An
+ * address in the site's own folder (its scripts, in a stack) keeps its
+ * path there, without a query or a hash, since that says where the code
+ * broke and nothing about the learner.
  */
 export function withoutAddresses(text: string, site: string): string {
   return text.replace(ADDRESS, (address) =>
@@ -101,17 +105,17 @@ function versionOf({ version, commitSha }: ErrorPlace): string {
 
 /**
  * The link that reports an error: the bug form of the repository at
- * `repoUrl`, its Where, Version and Anything else filled in, the last
- * with `details` (errorDetails). What happened and the steps are left to
- * the learner. Opening it sends nothing: the learner reads the form, and
- * submits it or not.
+ * `repoUrl`, its Where and Version filled in. The error's details
+ * (errorDetails) stay out of it, since a link's query reaches the server
+ * as soon as it opens: the learner pastes them from Copy details into
+ * the form, and submits it or not. What happened and the steps are left
+ * to the learner too.
  */
-export function errorReportUrl(repoUrl: string, place: ErrorPlace, details: string): string {
+export function errorReportUrl(repoUrl: string, place: ErrorPlace): string {
   const query = new URLSearchParams({
     template: BUG_FORM,
     where: routeOf(place.hash, place.site),
     version: versionOf(place),
-    more: ["```text", details, "```"].join("\n"),
   });
   return `${repoUrl}/issues/new?${query}`;
 }
