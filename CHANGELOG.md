@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.24.0](https://github.com/solid-memo/website/compare/v6.23.1...v6.24.0) (2026-10-31)
+
+### Features
+
+* **domain:** fuzz FSRS-6 intervals ([8d390c7](https://github.com/solid-memo/website/commit/8d390c74a415f4d150f6ab28c490872ff834f22a)), closes [#450](https://github.com/solid-memo/website/issues/450)
+* **ui:** celebrate a day's study finished on the deck list ([d876422](https://github.com/solid-memo/website/commit/d8764225d638c10ff53203389e645ffaa27d2ff9)), closes [#451](https://github.com/solid-memo/website/issues/451)
+
 ## [6.23.1](https://github.com/solid-memo/website/compare/v6.23.0...v6.23.1) (2026-10-31)
 
 ### Bug Fixes
