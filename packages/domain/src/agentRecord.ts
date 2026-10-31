@@ -4,6 +4,7 @@
 
 import { parseAuthor } from "./author";
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
+import { fnv1a } from "./fnv1a";
 import { documentUrlOf } from "./subjectUrl";
 
 /**
@@ -82,13 +83,9 @@ export function sameAgent(a: AgentV1, b: AgentV1): boolean {
   return a.name === b.name && a.mbox === b.mbox;
 }
 
-/** Six hex digits of the 32-bit FNV-1a hash of `text`'s UTF-16 code units: stable, not secret. */
+/** Six hex digits of the 32-bit FNV-1a hash of `text` (fnv1a). */
 function hashOf(text: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    hash = Math.imul(hash ^ text.charCodeAt(i), 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0").slice(0, 6);
+  return fnv1a(text).toString(16).padStart(8, "0").slice(0, 6);
 }
 
 export function agentToRecord(author: string): AgentV1 {

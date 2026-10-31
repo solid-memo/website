@@ -10,6 +10,8 @@ import {
   effectiveStates,
   fsrsInterval,
   fsrsReview,
+  fuzzedInterval,
+  fuzzFactor,
   isFresh,
   memoryFromSm2,
   nextMemory,
@@ -21,6 +23,7 @@ import {
   type FsrsRating,
 } from "./fsrs";
 import type { FsrsState, ReviewQuality, ReviewState } from "./review";
+import { nextDueDate } from "./scheduling";
 import { INITIAL_SM2_STATE, MAX_EASE_FACTOR, MAX_INTERVAL_DAYS } from "./sm2";
 import type { StudyDirection } from "./deck";
 
@@ -467,6 +470,94 @@ describe("effectiveStates", () => {
   });
 });
 
+describe("fuzzedInterval", () => {
+  /** The fewest and most days `days` fuzzes to, and the middle one. */
+  const bounds = (days: number) => [0, 0.5, 1 - 2 ** -32].map((f) => fuzzedInterval(days, f));
+
+  it("leaves an interval shorter than 2.5 days as it is", () => {
+    expect(bounds(1)).toEqual([1, 1, 1]);
+    expect(bounds(2)).toEqual([2, 2, 2]);
+    expect(bounds(2.49)).toEqual([2.49, 2.49, 2.49]);
+  });
+
+  it("moves an interval by 1 day, plus 0.15, 0.10 and 0.05 a day past 2.5, 7 and 20", () => {
+    expect(bounds(2.5)).toEqual([2, 3, 4]);
+    expect(bounds(3)).toEqual([2, 3, 4]);
+    expect(bounds(7)).toEqual([5, 7, 9]);
+    expect(bounds(17)).toEqual([14, 17, 20]);
+    expect(bounds(20)).toEqual([17, 20, 23]);
+    expect(bounds(37)).toEqual([33, 37, 41]);
+    expect(bounds(100)).toEqual([93, 100, 107]);
+  });
+
+  it("keeps a fuzzed interval to 36,500 days", () => {
+    expect(bounds(MAX_INTERVAL_DAYS)).toEqual([34_673, 35_587, MAX_INTERVAL_DAYS]);
+    expect(bounds(40_000)).toEqual([MAX_INTERVAL_DAYS, MAX_INTERVAL_DAYS, MAX_INTERVAL_DAYS]);
+  });
+
+  it("makes each day of the range as likely, for factors spread evenly", () => {
+    const counts = new Map<number, number>();
+    for (let i = 0; i < 1000; i++) {
+      const days = fuzzedInterval(7, i / 1000);
+      counts.set(days, (counts.get(days) ?? 0) + 1);
+    }
+    expect([...counts]).toEqual([
+      [5, 200],
+      [6, 200],
+      [7, 200],
+      [8, 200],
+      [9, 200],
+    ]);
+  });
+
+  it("never gives a longer interval a shorter fuzzed one, for one factor", () => {
+    for (const factor of [0, 0.1, 0.33, 0.5, 0.77, 0.999]) {
+      for (let days = 1; days < 400; days++) {
+        expect(fuzzedInterval(days + 1, factor)).toBeGreaterThanOrEqual(
+          fuzzedInterval(days, factor),
+        );
+      }
+    }
+  });
+});
+
+describe("fuzzFactor", () => {
+  const key = { cardId: "c", direction: "front-to-back" } as const;
+  const last = "2026-09-11T10:00:00.000Z";
+
+  it("draws a factor from the prompt and its last review, the same each time", () => {
+    expect(fuzzFactor(key, last)).toBeCloseTo(0.399214, 6);
+    expect(fuzzFactor(key, last)).toBe(fuzzFactor({ ...key }, last));
+    expect(fuzzFactor({ ...key, direction: "back-to-front" }, last)).toBeCloseTo(0.668236, 6);
+    expect(fuzzFactor({ ...key, cardId: "d" }, last)).toBeCloseTo(0.426294, 6);
+    expect(fuzzFactor(key, "2026-09-12T10:00:00.000Z")).toBeCloseTo(0.034596, 6);
+    expect(fuzzFactor(key, null)).toBeCloseTo(0.96975, 5);
+  });
+
+  it("fuzzes docs/srs.md's example, 34 days, to 33", () => {
+    expect(fuzzedInterval(34, fuzzFactor(key, last))).toBe(33);
+  });
+
+  it("reads the last review as an instant, however it is written", () => {
+    expect(fuzzFactor(key, "2026-09-11T12:00:00+02:00")).toBe(fuzzFactor(key, last));
+  });
+
+  it("spreads factors from 0 up to 1 evenly over prompts and reviews", () => {
+    const tenths = Array.from({ length: 10 }, () => 0);
+    for (let i = 0; i < 10_000; i++) {
+      const at = new Date(Date.parse(last) + i * 1000).toISOString();
+      const factor = fuzzFactor({ cardId: `card-${i % 100}`, direction: "front-to-back" }, at);
+      expect(factor).toBeGreaterThanOrEqual(0);
+      expect(factor).toBeLessThan(1);
+      tenths[Math.floor(factor * 10)]!++;
+    }
+    for (const count of tenths) {
+      expect(count).toBeGreaterThan(900);
+      expect(count).toBeLessThan(1100);
+    }
+  });
+});
+
 describe("fsrsReview", () => {
   const key = { cardId: "c", direction: "front-to-back" } as const;
 
@@ -501,11 +592,13 @@ describe("fsrsReview", () => {
       BOUNDARY,
     );
     const memory = nextMemory(fresh, 3, 10);
+    expect(fsrsInterval(memory.stability, 0.9)).toBe(34);
+    const fuzzed = fuzzedInterval(34, fuzzFactor(key, tenDaysAgo.toISOString()));
     expect(state).toEqual({
       ...key,
       stability: memory.stability,
       difficulty: memory.difficulty,
-      due: "2026-10-25",
+      due: nextDueDate(now, fuzzed, BOUNDARY),
       firstReviewedAt: sm2State("c", tenDaysAgo).firstReviewedAt,
       lastReviewedAt: now.toISOString(),
       formatVersion: 1,
@@ -516,13 +609,16 @@ describe("fsrsReview", () => {
         lastReviewedAt: tenDaysAgo.toISOString(),
       },
     });
-    expect(fsrsInterval(memory.stability, 0.9)).toBe(34);
+    // 34 days fuzzes to 30 to 38.
+    expect(fuzzed).toBeGreaterThanOrEqual(30);
+    expect(fuzzed).toBeLessThanOrEqual(38);
   });
 
   it("aims the due day at the desired retention", () => {
     const current = { sm2: sm2State("c", tenDaysAgo), fsrs: fsrsState("c", tenDaysAgo) };
     const dues = [0.8, 0.9, 0.95].map((r) => fsrsReview(key, current, 3, now, r, BOUNDARY).due);
-    expect(dues[1]).toBe("2026-10-25");
+    const factor = fuzzFactor(key, tenDaysAgo.toISOString());
+    expect(dues[1]).toBe(nextDueDate(now, fuzzedInterval(34, factor), BOUNDARY));
     expect(dues[0]! > dues[1]! && dues[1]! > dues[2]!).toBe(true);
   });
 
@@ -570,8 +666,45 @@ describe("fsrsReview", () => {
       expect(state.stability).toBe(expected.stability);
       expect(state.stability).toBeCloseTo(25, 9);
       expect(state.difficulty).toBe(expected.difficulty);
-      expect(state.due).toBe("2026-10-16");
+      expect(state.due).toBe(
+        nextDueDate(now, fuzzedInterval(25, fuzzFactor(key, sm2.lastReviewedAt)), BOUNDARY),
+      );
       expect(state).not.toHaveProperty("previous");
+    }
+  });
+
+  it("fuzzes the interval by the prompt and its last review, not the time of day or the rating", () => {
+    const sm2 = sm2State("c", tenDaysAgo);
+    const current = { sm2, fsrs: fsrsState("c", tenDaysAgo) };
+    const evening = new Date(2026, 8, 21, 22, 0);
+    expect(fsrsReview(key, current, 3, evening, 0.9, BOUNDARY)).toMatchObject({
+      due: fsrsReview(key, current, 3, now, 0.9, BOUNDARY).due,
+    });
+    const factor = fuzzFactor(key, sm2.lastReviewedAt);
+    for (const rating of [2, 3, 4] as const) {
+      const state = fsrsReview(key, current, rating, now, 0.9, BOUNDARY);
+      const interval = fsrsInterval(state.stability, 0.9);
+      expect(state.due).toBe(nextDueDate(now, fuzzedInterval(interval, factor), BOUNDARY));
+    }
+  });
+
+  it("fuzzes a new prompt's interval by the prompt alone", () => {
+    const state = fsrsReview(key, { sm2: null, fsrs: null }, 4, now, 0.9, BOUNDARY);
+    expect(state.due).toBe(nextDueDate(now, fuzzedInterval(8, fuzzFactor(key, null)), BOUNDARY));
+  });
+
+  it("keeps Hard, Good and Easy in order after fuzz, for every prompt", () => {
+    for (let i = 0; i < 200; i++) {
+      const prompt = { cardId: `card-${i}`, direction: "front-to-back" } as const;
+      const at = new Date(tenDaysAgo.getTime() + i * 60_000);
+      const current = {
+        sm2: sm2State(prompt.cardId, at, { intervalDays: 1 + (i % 40) }),
+        fsrs: null,
+      };
+      const [hard, good, easy] = ([2, 3, 4] as const).map(
+        (rating) => fsrsReview(prompt, current, rating, now, 0.9, BOUNDARY).due,
+      );
+      expect(hard! <= good! && good! <= easy!).toBe(true);
     }
   });
 

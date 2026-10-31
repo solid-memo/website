@@ -72,7 +72,9 @@ app is fixed
 - Default parameters, not trained on the learner's answers.
 - Whole study days; a second review the same study day takes the
   same-day formula.
-- Intervals rounded, from 1 to 36,500 days, without fuzz.
+- Intervals rounded, from 1 to 36,500 days, then fuzzed by the ranges
+  of py-fsrs and Anki, with a factor drawn from the prompt and its last
+  review rather than at random.
 - A prompt without a current FSRS-6 state gets one estimated from its
   SM-2 state, like fsrs-rs's `memory_state_from_sm2` at 90% retention.
 

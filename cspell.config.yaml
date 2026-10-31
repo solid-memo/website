@@ -137,6 +137,7 @@ words:
   - WHOIS
   - xone
   # Products, projects, organizations and people
+  - Anki
   - antwika
   - Arbetsförmedlingen
   - clownface
@@ -202,6 +203,7 @@ words:
   - beforeunload
   - bookmarkable
   - crawlable
+  - finalizer
   - nojekyll
   # Mermaid's accDescr, a diagram's description for screen readers
   - Descr
