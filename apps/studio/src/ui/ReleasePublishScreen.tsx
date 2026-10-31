@@ -14,6 +14,7 @@ import {
 } from "@solid-memo/domain/release/releasePlace";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
+import { ExternalLink } from "@solid-memo/ui/ExternalLink";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
@@ -266,7 +267,7 @@ function Released({
   const { ask, dialog } = useConfirm();
   return (
     <>
-      <p>{tx("studio.publish.releasedAt", { url: <a href={url}>{url}</a> })}</p>
+      <p>{tx("studio.publish.releasedAt", { url: <ExternalLink url={url} /> })}</p>
       <p>
         <CopyLink url={url} label={t("studio.releases.copyLink", { url })} />
       </p>

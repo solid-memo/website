@@ -32,6 +32,7 @@ import {
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
@@ -159,7 +160,12 @@ export function draftIriOf(container: string, draftUrl: string): (iri: string) =
 /**
  * The draft (or release) at `url` its triples state, every IRI as the
  * draft names it; null when it has no root this app can read (an
- * sm:Deck at `url` with its shape's required fields).
+ * sm:Deck at `url` with its shape's required fields). The release a
+ * draft was published as (`sm:releasedAs`) is kept only at an address
+ * a release may have (isPublishedReleaseUrl): the draft is data anyone
+ * with write access to its container may have written, and the Studio
+ * links that address and asks it whether the release is public. Of
+ * several, one at such an address is kept, whichever comes first.
  */
 export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraft | null {
   const dataset = datasetFromQuads(quads);
@@ -183,11 +189,15 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
 
   const rootThing = getThing(dataset, url);
   const rootTypes = rootThing === null ? [] : getUrlAll(rootThing, RDF_TYPE);
-  const root =
+  const read =
     rootThing === null || !rootTypes.includes(SM.Deck)
       ? null
       : readRecord(rootThing, DRAFT_DECK_V1);
-  if (root === null) return null;
+  if (read === null) return null;
+  // Of every sm:releasedAs the draft states, one at a release's address, whatever their order.
+  const { releasedAs: _first, ...rest } = read;
+  const releasedAs = getUrlAll(rootThing!, SM.releasedAs).find(isPublishedReleaseUrl);
+  const root = releasedAs === undefined ? rest : { ...rest, releasedAs };
   own(url, DRAFT_DECK_V1, [SCHEMA_COURSE]);
 
   const nodes: Record<string, DraftNode<unknown>[]> = Object.fromEntries(

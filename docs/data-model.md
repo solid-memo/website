@@ -1058,7 +1058,10 @@ own pod, as a draft, before publishing it
   ([deck-library.md](deck-library.md#provenance),
   [studio.md](studio.md#the-releases-metadata-and-provenance)). A
   draft names the release it was published as with `sm:releasedAs`, and
-  is then no longer edited.
+  is then no longer edited. An `sm:releasedAs` at an address no release
+  can have (`isPublishedReleaseUrl`, as for the catalog's releases) is
+  read as absent: the Studio neither links it nor asks it whether the
+  release is public. Of several, one at a release's address is read.
 - **Writes** follow the [write discipline](#write-discipline). Making a
   draft puts each document only where none is (`If-None-Match: *`), the
   release document first, then links it from the catalog (`If-Match`,

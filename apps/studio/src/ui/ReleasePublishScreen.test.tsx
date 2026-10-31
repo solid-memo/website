@@ -140,11 +140,21 @@ describe("ReleasePublishScreen", () => {
 
   it("shows a draft released where its release is, public, and starts its next version", () => {
     const { startNext } = renderScreen({ draft: released(), isPublic: true });
-    expect(screen.getByRole("link", { name: TARGET })).toHaveAttribute("href", TARGET);
+    expect(screen.getByRole("link", { name: `${TARGET} (opens in a new tab)` })).toHaveAttribute(
+      "href",
+      TARGET,
+    );
     expect(screen.getByText("Anyone with its address can read it.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: `Copy the link ${TARGET}` })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Start the next version" }));
     expect(startNext.run).toHaveBeenCalledWith(TARGET);
+  });
+
+  it("links a release only at a web address: any other is text", () => {
+    const url = "javascript:alert(1)";
+    renderScreen({ draft: { ...courseDraft(), root: { ...courseDraft().root, releasedAs: url } } });
+    expect(screen.getByText(url).closest("a")).toBeNull();
+    expect(document.querySelector('a[href^="javascript:"]')).toBeNull();
   });
 
   it("holds starting the next version while the catalog may not be written, and says why", () => {
