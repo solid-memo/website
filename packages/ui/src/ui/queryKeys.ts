@@ -107,6 +107,8 @@ export const queryKeys = {
   library: () => ["library"],
   /** A library deck's cards. */
   libraryCards: (deckUrl: string | undefined) => ["libraryCards", deckUrl],
+  /** A library course's outline and cards, for its preview (UseCases.getLibraryCourse). */
+  libraryCourse: (deckUrl: string) => ["libraryCourse", deckUrl],
   /** A copy's upgrades to a newer release, and the mutation that makes one. */
   libraryUpgrade: (deckUrl: string) => ["libraryUpgrade", deckUrl],
   /** A copy's upgrade plan from the release it came from: under libraryUpgrade. */

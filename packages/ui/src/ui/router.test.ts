@@ -62,6 +62,12 @@ const roundTrips: RouteRef[] = [
     instanceUrl: "https://pod.example/solid-memo/a/",
     libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
   },
+  {
+    screen: "libraryPreview",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    libraryDeckUrl: "https://solid-memo.com/decks/solid/v1.ttl",
+    chapterId: "ch-linked-data",
+  },
   { screen: "importUrl", instanceUrl: "https://pod.example/solid-memo/a/" },
   {
     screen: "importUrl",

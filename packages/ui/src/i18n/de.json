@@ -945,6 +945,18 @@
     "reveal": "Antwort anzeigen",
     "loading": "Karten werden geladen…"
   },
+  "coursePreview": {
+    "hint": "Die Theorie jedes Schritts, dann seine Fragen, wie der Kurs sie zeigt. Nichts wird gespeichert: Starte den Kurs, um ihn zu machen.",
+    "steps": {
+      "one": "{count} Schritt",
+      "other": "{count} Schritte"
+    },
+    "allChapters": "Alle Kapitel",
+    "nextChapter": "Weiter zum nächsten Kapitel",
+    "toChapters": "Zurück zu den Kapiteln",
+    "empty": "Dieser Kurs hat keine Kapitel.",
+    "loading": "Kurs wird geladen…"
+  },
   "libraryUpgrade": {
     "updated": "Auf Ausgabe {version} aus der Bibliothek aktualisiert."
   },

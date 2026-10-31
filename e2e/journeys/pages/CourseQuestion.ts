@@ -42,16 +42,16 @@ export class CourseQuestion extends Screen {
    * first; or, `wrongly`, another than the right one `known` has. Learns the right one from its mark, and says which question
    * it was and whether the answer was right; the verdict says so too, and, for a question met
    * for the first time (none of a fresh learner's), that its card joined
-   * the deck.
+   * the deck — unless the answer is not `recorded`, as in a preview.
    */
   async answer(
     known: Answers,
-    { wrongly = false }: { wrongly?: boolean } = {},
+    { wrongly = false, recorded = true }: { wrongly?: boolean; recorded?: boolean } = {},
   ): Promise<{ question: string; correct: boolean }> {
     return this.intent("Answer the question", async () => {
       const { question, options } = await this.read();
       const remembered = known.get(question);
-      const added = !known.has(question);
+      const added = recorded && !known.has(question);
       const chosen = wrongly
         ? options.find((option) => option !== remembered)!
         : remembered !== undefined && options.includes(remembered)

@@ -994,6 +994,19 @@
     "reveal": "Afficher la réponse",
     "loading": "Chargement des cartes…"
   },
+  "coursePreview": {
+    "hint": "La théorie de chaque étape, puis ses questions, comme le cours les présente. Rien n’est enregistré : commencez le cours pour le suivre.",
+    "steps": {
+      "one": "{count} étape",
+      "many": "{count} d’étapes",
+      "other": "{count} étapes"
+    },
+    "allChapters": "Tous les chapitres",
+    "nextChapter": "Passer au chapitre suivant",
+    "toChapters": "Retour aux chapitres",
+    "empty": "Ce cours ne contient aucun chapitre.",
+    "loading": "Chargement du cours…"
+  },
   "libraryUpgrade": {
     "updated": "Mis à jour vers la version {version} de la bibliothèque."
   },

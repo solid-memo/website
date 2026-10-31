@@ -44,6 +44,7 @@ import { LibraryCardScreen } from "./LibraryCardScreen";
 import { LibraryContainer } from "./LibraryContainer";
 import { ImportUrlContainer } from "./ImportUrlContainer";
 import { LibraryDeckContainer } from "./LibraryDeckContainer";
+import { CoursePreviewContainer } from "./CoursePreviewContainer";
 import { LibraryPreviewContainer } from "./LibraryPreviewContainer";
 import { Loading } from "./Loading";
 import { MigrationContainer } from "./MigrationContainer";
@@ -180,6 +181,53 @@ function checkedScreen(
     return reported ? null : <Loading label={t("workspace.checkingData")} />;
   }
   return deckSetAside ? <p class="hint">{t("workspace.deckSetAside")}</p> : screen();
+}
+
+/**
+ * A library deck's preview (#/library-preview): a course's chapters, each
+ * played at its own address, or a deck's cards at random.
+ */
+function LibraryPreview({
+  useCases,
+  deck,
+  route,
+  navigate,
+}: {
+  useCases: UseCases;
+  deck: LibraryDeck;
+  route: Extract<RouteRef, { screen: "libraryPreview" }>;
+  navigate: (to: RouteRef) => void;
+}) {
+  const { instanceUrl, libraryDeckUrl } = route;
+  const deckHref = libraryDeckHref(instanceUrl, libraryDeckUrl);
+  const onExit = () => navigate({ screen: "library", instanceUrl });
+  if (deck.isCourse !== true) {
+    return (
+      <LibraryPreviewContainer
+        useCases={useCases}
+        deck={deck}
+        deckHref={deckHref}
+        onExit={onExit}
+      />
+    );
+  }
+  const at = (chapterId?: string): RouteRef => ({
+    screen: "libraryPreview",
+    instanceUrl,
+    libraryDeckUrl,
+    ...(chapterId === undefined ? {} : { chapterId }),
+  });
+  return (
+    <CoursePreviewContainer
+      useCases={useCases}
+      deck={deck}
+      deckHref={deckHref}
+      chapterId={route.chapterId}
+      chapterHref={(chapterId) => routeToHash(at(chapterId))}
+      onChapter={(chapterId) => navigate(at(chapterId))}
+      onExit={onExit}
+    />
+  );
 }
 
 /** Whether a route needs the storages the storage picker offers: it, and the instance creator. */
@@ -775,11 +823,11 @@ export function Workspace({
         );
       case "libraryPreview":
         return (
-          <LibraryPreviewContainer
+          <LibraryPreview
             useCases={useCases}
             deck={activeLibraryDeck!}
-            deckHref={libraryDeckHref(instanceUrl!, libraryDeckUrl!)}
-            onExit={() => navigate({ screen: "library", instanceUrl: instanceUrl! })}
+            route={route}
+            navigate={navigate}
           />
         );
       case "deckDetail":

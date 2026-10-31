@@ -24,6 +24,10 @@ export function makeLibraryUseCasesFake(
         throw new Error("importLibraryDeck fake not configured");
       }),
       listLibraryCards: vi.fn(async () => []),
+      getLibraryCourse: vi.fn(async (deck) => ({
+        outline: { releaseUrl: deck.url, chapters: [] },
+        cards: new Map(),
+      })),
       readReleaseFromLink: vi.fn(async () => {
         throw new Error("readReleaseFromLink fake not configured");
       }),

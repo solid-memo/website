@@ -300,6 +300,7 @@ its current release is a course; anything else offers nothing.
 | `startCourse(instanceUrl, course)` | The instance's deck of the course: the copy it has (`isCopyOf`), else a new, empty copy of the current release. |
 | `importReleaseFromUrl(instanceUrl, release)` | Starts a course added from a link the same way (`readReleaseFromLink` reads and checks it first, [deck-library.md](deck-library.md#from-a-link)). |
 | `getCourse(deck)` | The course as the learner has it: the deck as its entry is now, the release, its outline, its cards by id, the cards answered and the progress. Writes nothing. A deck that's gone throws `deckGone`. |
+| `getLibraryCourse(deck)` | For a library course's preview, before it's added: the release's outline, asking only its cards (`outlineOfCards`), and its cards by id. Writes nothing. |
 | `getCourseSummary(deck)` | For the deck list's strip: the outline of the release the deck names and the cards answered. The deck is taken as given, not read again, and the release's cards aren't mapped. Writes nothing. |
 | `answerCourseQuestion(instanceUrl, deck, card, choice, now, times?)` | Grades one answer as `courseAnswerEffect` says, logging how long choosing took (`times.recallMillis`). A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
 | `completeChapter(deck, chapterUrl)` | Adds `sm:completedChapter` to the deck's entry. |

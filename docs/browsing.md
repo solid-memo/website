@@ -119,9 +119,19 @@ learner can look at it three read-only ways:
   "Next card" goes on. Nothing is graded or recorded
   ([LibraryPreviewScreen.tsx](../packages/ui/src/ui/LibraryPreviewScreen.tsx),
   [LibraryPreviewContainer.tsx](../packages/ui/src/ui/LibraryPreviewContainer.tsx)).
+  A course's preview lists its chapters instead, each title a link to
+  `&chapter=<id>`, which plays that chapter from its first step as the
+  course does: each step's theory, then its questions, multiple choice,
+  each explained. Nothing is graded or recorded, and the final review is
+  left out. After a chapter's last question comes the next chapter, or the
+  list after the last
+  ([CoursePreviewScreen.tsx](../packages/ui/src/ui/CoursePreviewScreen.tsx),
+  [CoursePreviewContainer.tsx](../packages/ui/src/ui/CoursePreviewContainer.tsx),
+  `UseCases.getLibraryCourse`).
 
 All three share one query that reads the release's cards once from
-the library (`UseCases.listLibraryCards`). A deck
+the library (`UseCases.listLibraryCards`); a course's preview reads its
+outline with them, in a query of its own. A deck
 added from a link has none of them: the app reads it only to add it
 ([deck-library.md](deck-library.md#from-a-link)).
 
@@ -130,7 +140,8 @@ added from a link has none of them: the app reads it only to add it
 - **Unit tests** at 100% coverage: each screen and container above has
   a `*.test.tsx` file beside it in `packages/ui/src/ui/`. A part
   without one, such as `AddCardForm.tsx`, `DeckAboutSection.tsx`,
-  `RetiredCards.tsx` or `LibraryPreviewScreen.tsx`, is tested through
+  `RetiredCards.tsx`, `LibraryPreviewScreen.tsx` or
+  `CoursePreviewScreen.tsx`, is tested through
   the screen or container that shows it. The use cases they call are
   tested in `useCases.test.ts` ([testing.md](testing.md)).
 - **User journeys** ([testing.md](testing.md#user-journeys)):
@@ -138,6 +149,9 @@ added from a link has none of them: the app reads it only to add it
     creates decks and adds cards with the card creator (steps 04, 05,
     07 and 08), previews a library deck (16), and describes an
     imported deck in English and Swedish in its Browser (18);
+  - [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts)
+    previews a course: a chapter opened from its list, its first
+    step's theory, then a question (02b);
   - [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts)
     adds a card in Markdown, opens its page, edits it, and reloads to
     check that the pod kept it.
