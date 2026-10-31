@@ -1251,7 +1251,13 @@ version (ETag) of the document it was learned from
   (`sm:recallSecondsCount "4 7"`, a minute or more counted at 60). The
   strip shows these and estimates the time left today from them
   ([statistics.md](statistics.md#the-today-strip)). A summary needs no
-  day boundary, and a month no longer looked back over is dropped.
+  day boundary, and a month no longer looked back over is dropped. A
+  summary is read only when its `sm:summaryOf` is a month's document,
+  a path ending in `history/<YYYY-MM>.ttl` with no query or fragment.
+  Each of its days must be a real date of that month, or a day either
+  side, given once, and its counts have at most 15 digits. Any other is
+  left out, made again from the month's answers and written over the
+  one in the digest.
 
 ```mermaid
 sequenceDiagram

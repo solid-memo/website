@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { growth } from "./testing/growth";
-import type { Answer } from "./answer";
+import { type Answer, shiftStudyDay } from "./answer";
 import { chainIndexOf } from "./answerChain";
 import {
   dailyActivity,
@@ -115,6 +115,30 @@ describe("streaksOf", () => {
       longest: 2,
     });
     expect(streaksOf(["0100-01-04"], "0100-01-04")).toEqual({ current: 1, longest: 1 });
+  });
+
+  it("counts only days the calendar writes so, in time linear in the days", () => {
+    // "2026-09-31" is no day; as 2026-10-01 it would start a run of its own.
+    expect(
+      streaksOf(["2026-09-31", "2026-10-01", "2026-10-02", "0050-01-01"], "2026-10-02"),
+    ).toEqual({ current: 2, longest: 2 });
+    // Days numbered past their month, each landing in a run of real ones.
+    const ratio = growth(
+      (count) => {
+        const days: string[] = [];
+        for (let day = "2027-01-01"; days.length < count; day = shiftStudyDay(day, 1))
+          days.push(day);
+        for (let fake = 0; fake < count; fake++) {
+          const month = Math.floor(fake / 40);
+          const year = 2027 + Math.floor(month / 12);
+          days.push(`${year}-${String((month % 12) + 1).padStart(2, "0")}-${60 + (fake % 40)}`);
+        }
+        return () => streaksOf(days, "2026-10-31");
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

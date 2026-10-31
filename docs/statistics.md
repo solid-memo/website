@@ -65,9 +65,10 @@ Each past month is summarized once, in the instance's
 month's document. A summary holds each study day's answers, new cards,
 reviews and lapses, the month's young-card recall, and how many
 recalled answers took each whole second up to a minute. A visit checks
-each past month's version, and a `304` means its summary holds. Only
-this month and a changed month are read in full; new summaries are
-written back in the background.
+each past month's version, and a `304` means its summary holds, if
+each of its days is a real date of that month or a day either side;
+one that isn't is made again. Only this month and a changed month are
+read in full; new summaries are written back in the background.
 
 Each answer keeps its study day, so a change of the day boundary leaves
 the summaries as they are. The counts are exact unless the day boundary
