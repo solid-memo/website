@@ -92,7 +92,8 @@ Decisions fixed in code (and tests):
   state before it, and the estimate FSRS-6 makes from an SM-2 state,
   are bounded the same way. A state from elsewhere, such as a deck
   file with progress, then still gives a due day that is a
-  `YYYY-MM-DD` date and numbers the write check accepts. A state whose
+  `YYYY-MM-DD` date and numbers the write check accepts. A snapshot
+  whose due day isn't a real `YYYY-MM-DD` date is dropped. A state whose
   ease factor, interval or repetitions isn't a finite number counts as
   a new card's.
 - Every grade below 3 resets the card. The statistics and the Studio
@@ -293,7 +294,11 @@ to 38 days away, nine days. Card `c`, front to back, last reviewed at
   else, for a new prompt, on the rating alone.
 - **The snapshot.** The first review of a study day snapshots a fresh
   FSRS-6 state, and later ones that day keep that snapshot. A state
-  estimated from SM-2, or a new one, has none.
+  estimated from SM-2, or a new one, has none. The snapshot is bounded
+  as the write check expects: the stability above 0 and at most 36,500
+  days, the difficulty from 1 to 10. One with a number that isn't
+  finite, or a due day that isn't a real `YYYY-MM-DD` date, is
+  dropped.
 - **The same first review.** An FSRS-6 state's `firstReviewedAt` is its
   SM-2 state's: both count the prompt introduced the same day.
 
@@ -727,12 +732,13 @@ decides, per card reviewed today:
 |---|---|
 | introduced today (`firstReviewedAt` is today) | removes its state — it is a new card again |
 | reviewed today, has a snapshot | restores the snapshot (ease, interval, repetitions, due, last review) |
-| reviewed today, no snapshot (state written before snapshots existed, or given a due day in the Studio) | can't be restored: made due today |
+| reviewed today, no snapshot (state written before snapshots existed, or given a due day in the Studio), or one whose due day isn't a real date | can't be restored: made due today |
 | not reviewed today | untouched |
 
 The FSRS-6 states go back in the same save (`resetFsrsStudyDay`): one
 reviewed today gets its snapshot back. One introduced today is removed,
-as is one first written today from an estimate; the next review
+as is one first written today from an estimate, or with a snapshot
+that can't be written back; the next review
 estimates it again from the restored SM-2 state.
 
 ```mermaid

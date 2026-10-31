@@ -657,6 +657,29 @@ describe("fsrsReview", () => {
     expect(state).not.toHaveProperty("previous");
   });
 
+  it("bounds the snapshot of a state from elsewhere, or drops it when it cannot be written back", () => {
+    const sm2 = sm2State("c", tenDaysAgo);
+    const review = (fsrs: FsrsState) => fsrsReview(key, { sm2, fsrs }, 3, now, 0.9, BOUNDARY);
+    expect(review(fsrsState("c", tenDaysAgo, { stability: 0, difficulty: 50 })).previous).toEqual({
+      stability: 0.001,
+      difficulty: 10,
+      due: "2026-10-03",
+      lastReviewedAt: tenDaysAgo.toISOString(),
+    });
+    expect(review({ ...fsrsState("c", tenDaysAgo), due: "soon" })).not.toHaveProperty("previous");
+    const morning = new Date(2026, 8, 21, 9, 0);
+    const snapshot = { stability: -5, difficulty: 0, due: "2026-09-21", lastReviewedAt: "" };
+    const sameDay = fsrsReview(
+      key,
+      { sm2: sm2State("c", morning), fsrs: fsrsState("c", morning, { previous: snapshot }) },
+      3,
+      now,
+      0.9,
+      BOUNDARY,
+    );
+    expect(sameDay.previous).toEqual({ ...snapshot, stability: 0.001, difficulty: 1 });
+  });
+
   it("estimates from the SM-2 state when the FSRS-6 state is stale or missing, with no snapshot", () => {
     const sm2 = sm2State("c", tenDaysAgo, { easeFactor: 2.5, intervalDays: 10 });
     const stale = fsrsState("c", new Date(2026, 8, 1, 12, 0));

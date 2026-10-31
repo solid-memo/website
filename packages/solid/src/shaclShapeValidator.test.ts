@@ -29,6 +29,8 @@ import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { DECKS, draftPod, INSTANCE, quadsOfTurtle } from "./testing/releaseDrafts";
 import { subclassCycle, subclassDiamond } from "@solid-memo/shacl/testing/subclassTangle";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
+import { gradePrompt } from "@solid-memo/domain/grading";
+import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -1077,6 +1079,64 @@ describe("createShaclShapeValidator", () => {
         ),
       ).toEqual(expected);
     }, 10_000);
+
+    describe("a grade of review states another app wrote out of range", () => {
+      const REVIEWS = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
+      const documents = {
+        id: "deck-1",
+        cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl",
+        reviewsDocumentUrl: REVIEWS,
+      };
+      const key = { cardId: "card-1", direction: "front-to-back" } as const;
+      const lastReviewedAt = new Date(2026, 9, 2, 12).toISOString();
+      const sm2: ReviewState = {
+        ...key,
+        easeFactor: 2.5,
+        intervalDays: 6,
+        repetitions: 2,
+        due: "0",
+        firstReviewedAt: new Date(2026, 8, 20, 12).toISOString(),
+        lastReviewedAt,
+        formatVersion: 2,
+      };
+      const fsrs: FsrsState = {
+        ...key,
+        stability: 0,
+        difficulty: 50,
+        due: "soon",
+        firstReviewedAt: sm2.firstReviewedAt,
+        lastReviewedAt,
+        formatVersion: 1,
+      };
+      const scheduling = { scheduler: "fsrs6", dayBoundaryHour: 4, desiredRetention: 0.9 } as const;
+
+      // Each value a valid lexical form the reader takes: graded, the states
+      // and their snapshots are still written as the shapes allow.
+      it.each([
+        ["an earlier day", sm2, fsrs, new Date(2026, 9, 5, 12)],
+        [
+          "the same day, their snapshots out of range too",
+          { ...sm2, previous: { ...sm2, due: "0" } },
+          { ...fsrs, previous: { ...fsrs, stability: -5 } },
+          new Date(2026, 9, 2, 18),
+        ],
+      ] as const)("passes the write check, graded on %s", async (_, before, beforeFsrs, now) => {
+        const graded = gradePrompt(
+          key,
+          { sm2: before, fsrs: beforeFsrs },
+          { grade: 4, mode: "recall" },
+          now,
+          scheduling,
+        );
+        const dataset = [
+          toReviewStateThing(documents, graded.sm2, null, `${REVIEWS}#card-1`),
+          toFsrsStateThing(documents, graded.fsrs!, null, `${REVIEWS}#card-1@fsrs6`),
+        ].reduce<Dataset>((data, thing) => setThing(data, thing), datasetFrom(REVIEWS));
+        await expect(
+          validator.checkSubjects(dataset, [`${REVIEWS}#card-1`, `${REVIEWS}#card-1@fsrs6`], "pod"),
+        ).resolves.toBeUndefined();
+      });
+    });
 
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(

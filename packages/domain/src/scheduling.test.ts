@@ -354,6 +354,13 @@ describe("snapshotBeforeReview", () => {
     });
   });
 
+  it("drops a snapshot whose due day is not a real date", () => {
+    expect(snapshotBeforeReview(review("a", "0", yesterday), now, 4)).toBeUndefined();
+    const morning = review("a", "soon", yesterday);
+    const reviewedToday = { ...review("a", "2026-09-22", now, yesterday), previous: morning };
+    expect(snapshotBeforeReview(reviewedToday, now, 4)).toBeUndefined();
+  });
+
   it("carries no snapshot for a card introduced today and reviewed again", () => {
     expect(snapshotBeforeReview(review("a", "2026-09-22", now), now, 4)).toBeUndefined();
   });
@@ -410,6 +417,15 @@ describe("resetStudyDay", () => {
       previous: { ...morning, easeFactor: 1e21 },
     };
     expect(resetStudyDay([reviewed], now, 4).restore[0]?.easeFactor).toBe(5);
+  });
+
+  it("makes a card whose snapshot's due day is not a real date due today", () => {
+    const reviewed = {
+      ...review("a", "2026-09-27", now, yesterday),
+      previous: { ...morning, due: "soon" },
+    };
+    const { previous: _, ...state } = reviewed;
+    expect(resetStudyDay([reviewed], now, 4).restore).toEqual([{ ...state, due: "2026-09-21" }]);
   });
 
   it("makes a card without a snapshot due today, as the best it can do", () => {
@@ -539,6 +555,21 @@ describe("resetFsrsStudyDay", () => {
         formatVersion: 1,
       },
     ]);
+  });
+
+  it("restores a snapshot within the bounds the write check keeps", () => {
+    const state = fsrs(now, yesterday, true);
+    const outOfRange = { ...state, previous: { ...state.previous!, stability: 0, difficulty: 50 } };
+    expect(resetFsrsStudyDay([outOfRange], now, 4).restore[0]).toMatchObject({
+      stability: 0.001,
+      difficulty: 10,
+    });
+  });
+
+  it("removes a state whose snapshot cannot be written back", () => {
+    const state = fsrs(now, yesterday, true);
+    const unwritable = { ...state, previous: { ...state.previous!, due: "soon" } };
+    expect(resetFsrsStudyDay([unwritable], now, 4)).toEqual({ restore: [], remove: [key] });
   });
 
   it("removes a state introduced today, or one without a snapshot to restore", () => {
