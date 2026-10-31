@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.18.2](https://github.com/solid-memo/website/compare/v6.18.1...v6.18.2) (2026-10-31)
+
+### Bug Fixes
+
+* **solid:** give up on a pod read the server never answers ([4c03fc7](https://github.com/solid-memo/website/commit/4c03fc75798776ce5afb555e49f9b02330d31f97)), closes [#419](https://github.com/solid-memo/website/issues/419)
+
 ## [6.18.1](https://github.com/solid-memo/website/compare/v6.18.0...v6.18.1) (2026-10-31)
 
 ### Bug Fixes
