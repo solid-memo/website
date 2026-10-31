@@ -345,7 +345,7 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown(">\n```\n```\n".repeat(MAX_QUOTES + 1))).toBeNull();
   });
 
-  it("reads nothing past MAX_LAZY_LINES lines in a row that continue a quote's or item's paragraph without its markers", () => {
+  it("reads nothing past MAX_LAZY_LINES lines that continue a quote's or item's paragraph without its markers", () => {
     expect(parseMarkdown(`- a\r${"b\r".repeat(MAX_LAZY_LINES + 1)}`)).toBeNull();
     const run = (lines: number) => "b\n".repeat(lines);
     expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES)}`)).not.toBeNull();
@@ -519,7 +519,7 @@ describe("parseDocument", () => {
       line: 3 + MAX_QUOTES * 2,
     });
     expect(refusal(`- a\n${"b\n".repeat(MAX_LAZY_LINES + 1)}`)).toMatchObject({
-      what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a row`,
+      what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a paragraph`,
       line: MAX_LAZY_LINES + 2,
     });
   });
@@ -771,5 +771,136 @@ describe("pathological input", () => {
     expect(took, `${Math.round(took)} ms against ${Math.round(base)} ms`).toBeLessThan(
       base * slowest,
     );
+  });
+});
+
+describe("lazy lines across a paragraph's `>` lines, list markers and indentation", () => {
+  const run = (lines: number, unit = "b\n") => unit.repeat(lines);
+
+  it("counts a paragraph's lazy lines past the quote's `>` lines that go on with it", () => {
+    expect(
+      parseMarkdown(`> a\n${run(MAX_LAZY_LINES / 2)}> c\n${run(MAX_LAZY_LINES / 2)}`),
+    ).not.toBeNull();
+    expect(
+      parseMarkdown(`> a\n${run(MAX_LAZY_LINES / 2)}> c\n${run(MAX_LAZY_LINES / 2 + 1)}`),
+    ).toBeNull();
+    expect(parseMarkdown(`> a\n${"> c\n".repeat(MAX_LAZY_LINES * 2)}`)).not.toBeNull();
+    // A quote's blank line, a list item that interrupts, a thematic break or a fence starts a new paragraph.
+    for (const between of [">\n", "> \t>\n", "> - c\n", "> 1. c\n", "- c\n", "***\n", "```\n```\n"])
+      expect(
+        parseMarkdown(`> a\n${run(MAX_LAZY_LINES)}${between}> a\n${run(MAX_LAZY_LINES)}`),
+      ).not.toBeNull();
+  });
+
+  it("goes on counting past a run of backticks that is no fence", () => {
+    for (const between of ["```x`\n", "``` `\n", "````a``\n"]) {
+      const half = `> a\n${run(MAX_LAZY_LINES / 2)}${between}`;
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2 - 1)}`)).not.toBeNull();
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2 + 1)}`)).toBeNull();
+    }
+    for (const between of ["```x\n```\n", "~~~x`\n~~~\n"])
+      expect(
+        parseMarkdown(`> a\n${run(MAX_LAZY_LINES)}${between}> a\n${run(MAX_LAZY_LINES)}`),
+      ).not.toBeNull();
+  });
+
+  it("goes on counting past a list marker that cannot interrupt the paragraph", () => {
+    for (const between of ["> 2. c\n", "> 01. c\n", "> +\n", "> * \n", "2. c\n", "+\n"]) {
+      const half = `> a\n${run(MAX_LAZY_LINES / 2)}${between}`;
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2)}`)).not.toBeNull();
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2 + 1)}`)).toBeNull();
+    }
+    expect(
+      parseMarkdown(`- a\n${run(MAX_LAZY_LINES / 2)}2. c\n${run(MAX_LAZY_LINES / 2 + 1)}`),
+    ).toBeNull();
+  });
+
+  it("goes on counting past markers indented four columns past the paragraph's container", () => {
+    for (const between of ["    - c\n", "\t- c\n", "    1. c\n", "    >\n", "\t>\n", ">     >\n"]) {
+      const half = `> a\n${run(MAX_LAZY_LINES / 2)}${between}`;
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2 - 1)}`)).not.toBeNull();
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2 + 1)}`)).toBeNull();
+    }
+    for (const between of ["      - c\n", "      >\n"]) {
+      const half = `- a\n${run(MAX_LAZY_LINES / 2)}${between}`;
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2)}`)).not.toBeNull();
+      expect(parseMarkdown(`${half}${run(MAX_LAZY_LINES / 2 + 1)}`)).toBeNull();
+    }
+    // Less indented, the marker opens a list item or quote in the item, which ends the paragraph.
+    for (const between of ["    - c\n", "  >\n"])
+      expect(
+        parseMarkdown(`- a\n${run(MAX_LAZY_LINES)}${between}- a\n${run(MAX_LAZY_LINES)}`),
+      ).not.toBeNull();
+    expect(parseMarkdown(`a\n    - c\n- a\n${run(MAX_LAZY_LINES)}`)).not.toBeNull();
+  });
+
+  it("counts indented lines in a quote as lazy, and an item's own indented lines as not", () => {
+    expect(parseMarkdown(`> a\n${run(MAX_LAZY_LINES, " b\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`> a\n${run(MAX_LAZY_LINES + 1, " b\n")}`)).toBeNull();
+    expect(parseMarkdown(`- > a\n${run(MAX_LAZY_LINES + 1, "  b\n")}`)).toBeNull();
+    expect(parseMarkdown(`> - a\n${run(MAX_LAZY_LINES + 1, "\tb\n")}`)).toBeNull();
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES + 1, "  b\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`> a\n\n- c\n${run(MAX_LAZY_LINES + 1, "  b\n")}`)).not.toBeNull();
+  });
+
+  it("counts a list item's lines indented less than its content as lazy", () => {
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES, " b\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES + 1, " b\n")}`)).toBeNull();
+    expect(parseMarkdown(`10. a\n${run(MAX_LAZY_LINES + 1, "  b\n")}`)).toBeNull();
+    expect(parseMarkdown(`10. a\n${run(MAX_LAZY_LINES + 1, "    b\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`-   a\n${run(MAX_LAZY_LINES + 1, "  b\n")}`)).toBeNull();
+    expect(parseMarkdown(`-\ta\n${run(MAX_LAZY_LINES + 1, "    b\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`-      a\n${run(MAX_LAZY_LINES + 1, "  b\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`- a\n  - b\n${run(MAX_LAZY_LINES + 1, "  c\n")}`)).toBeNull();
+    expect(parseMarkdown(`- a\n  - b\n${run(MAX_LAZY_LINES + 1, "    c\n")}`)).not.toBeNull();
+    // A paragraph the item holds after a blank line, and one after the list.
+    expect(parseMarkdown(`- a\n\n  b\n${run(MAX_LAZY_LINES + 1, "c\n")}`)).toBeNull();
+    expect(parseMarkdown(`- a\n\nb\n${run(MAX_LAZY_LINES + 1, " c\n")}`)).not.toBeNull();
+    expect(parseMarkdown(`a\n${run(MAX_LAZY_LINES + 1, "2. c\nb\n")}`)).not.toBeNull();
+  });
+
+  it.each([
+    ["a quote's paragraph re-armed by `>` lines", `> a\n${run(MAX_LAZY_LINES - 1)}`.repeat(49)],
+    ["indented lazy lines in a quote", `> a\n${run(6600, " b\n")}`],
+    ["indented lazy lines in a quote in a list item", `- > a\n${run(4900, "  b\n")}`],
+    ...["> 2. c", "> +", "> *"].map((marker): [string, string] => [
+      `a quote's paragraph re-armed by \`${marker}\``,
+      `> a\n${`${run(MAX_LAZY_LINES - 1)}${marker}\n`.repeat(48)}`,
+    ]),
+    ...["    - c", "      - c", "\t- c", "    1. c", "    >", "\t>", ">     >"].map(
+      (marker): [string, string] => [
+        `a quote's paragraph re-armed by \`${marker}\``,
+        `> a\n${`${run(MAX_LAZY_LINES - 1)}${marker}\n`.repeat(48)}`,
+      ],
+    ),
+    ...["```x`", "``` `"].map((marker): [string, string] => [
+      `a quote's paragraph re-armed by "${marker}", which is no fence`,
+      `${`> a\n${run(MAX_LAZY_LINES - 1)}${marker}\n`.repeat(48)}`,
+    ]),
+    [
+      "a list item's paragraph re-armed by an indented `- c`",
+      `- a\n${`${run(MAX_LAZY_LINES - 1)}      - c\n`.repeat(48)}`,
+    ],
+    [
+      "indented lines re-armed by `> +`",
+      `> a\n${`${run(MAX_LAZY_LINES - 1, " b\n")}> +\n`.repeat(32)}`,
+    ],
+    ["a list item's lines indented less than its content", `- a\n${run(6600, " b\n")}`],
+    ["an ordered item's lines indented less than its content", `10. a\n${run(4900, "  b\n")}`],
+    ["lazy lines of an item's paragraph after a blank line", `- a\n\n  b\n${run(9900, "c\n")}`],
+  ])("refuses %s at once", { timeout: 60_000 }, (_, input) => {
+    expect(input.length).toBeLessThanOrEqual(MAX_CHARS);
+    const baseline = "Plain words in a paragraph.\n".repeat(Math.floor(input.length / 28));
+    let base = Infinity;
+    let took = Infinity;
+    for (let round = 0; round < 2; round++) {
+      let started = performance.now();
+      parseMarkdown(baseline);
+      base = Math.min(base, performance.now() - started);
+      started = performance.now();
+      expect(parseMarkdown(input)).toBeNull();
+      took = Math.min(took, performance.now() - started);
+    }
+    expect(took, `${Math.round(took)} ms against ${Math.round(base)} ms`).toBeLessThan(base);
   });
 });
