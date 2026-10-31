@@ -29,9 +29,17 @@ export const ANSWER_CSV_COLUMNS = [
   "utc_offset_minutes",
 ] as const;
 
-/** A field as CSV writes it: quoted when it holds a comma, a quote or a line break. */
+/**
+ * A field as CSV writes it: quoted when it holds a comma, a quote or a
+ * line break. Text that starts with "=", "+", "-", "@", a tab or a
+ * carriage return gets a "'" in front, so that a spreadsheet shows it
+ * as text and never reads it as a formula. A number is written as it
+ * is: it comes from a numeric field of the answer, never from text, so
+ * a negative one (an offset west of UTC) stays a number.
+ */
 function field(value: string | number | undefined): string {
-  const text = value === undefined ? "" : String(value);
+  if (value === undefined) return "";
+  const text = typeof value === "number" ? String(value) : value.replace(/^[=+@\t\r-]/, "'$&");
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 

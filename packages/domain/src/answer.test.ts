@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   answerIdOf,
+  isOfStudyDayRange,
   isOfStudyMonth,
   isRecalled,
   MAX_RESPONSE_MILLIS,
@@ -62,6 +63,13 @@ describe("answers", () => {
     expect(isOfStudyMonth("0100-01-03", "0100-01")).toBe(false);
     expect(isOfStudyMonth("0100-01-04", "0100-01")).toBe(true);
     expect(isOfStudyMonth("9999-12-31", "9999-12")).toBe(true);
+  });
+
+  it("are of the range shifting a day keeps in order from 0100-01-04 to 9999-12-31", () => {
+    expect(isOfStudyDayRange("0100-01-04")).toBe(true);
+    expect(isOfStudyDayRange("9999-12-31")).toBe(true);
+    expect(isOfStudyDayRange("0100-01-03")).toBe(false);
+    expect(isOfStudyDayRange("2026-09-31")).toBe(false);
   });
 
   it("remember the card from grade 3 up", () => {

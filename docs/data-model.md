@@ -1212,9 +1212,11 @@ nothing could rebuild it.
   outside that month is left out (`isOfStudyMonth`; the day allows for
   the time zone), as is one whose study day isn't a real date. So is
   one outside 0100-01-04 to 9999-12-31, the days `shiftStudyDay` keeps
-  in order. The Studio names a deck's past answers by their card's id in
-  its current cards document (`deckAnswers`), which a library upgrade
-  may have moved.
+  in order (`isOfStudyDayRange`). A prior due day (`sm:priorDue`) that
+  isn't a real date, or is outside that range, is dropped, and the
+  answer kept. The Studio names a deck's past answers by their card's
+  id in its current cards document (`deckAnswers`), which a library
+  upgrade may have moved.
 - Checked in the full check only ([validation.md](validation.md)), since
   the current month changes every session.
 
