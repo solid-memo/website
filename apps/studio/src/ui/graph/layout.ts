@@ -299,29 +299,39 @@ function boundDepth(parent: Int32Array, pre: readonly Index[]): boolean {
 const UNSEEN = 0;
 const ON_PATH = 1;
 const REACHES = 2;
+/** Of a node no walk from a fallback went through yet. */
+const NO_END = -1;
+/** Of a node the walk from a fallback goes through now. */
+const WALKING = -2;
 
 /**
  * Makes every chain of parents end at `root`, in one pass: of the nodes
  * of a chain that comes back to itself, the first in order whose
  * `fallback` reaches the root hangs under it instead, else the first
  * under the root. Where the walk came into the cycle changes nothing.
+ * Each node is walked from a fallback at most once: the walk keeps,
+ * for every node it went through, the node it stopped at, whose state
+ * then says whether the chain reaches the root.
  */
 function breakCycles(parent: Int32Array, root: Index, fallback: (at: Index) => Index): void {
   const state = new Uint8Array(parent.length);
-  const seen = new Int32Array(parent.length).fill(-1);
+  const end = new Int32Array(parent.length).fill(NO_END);
   state[root] = REACHES;
   const path: Index[] = [];
-  let marks = 0;
+  const walked: Index[] = [];
   /** Whether the chain from `from` reaches the root, past neither the path walked now nor a cycle of its own. */
   const reaches = (from: Index) => {
-    const mark = marks++;
+    walked.length = 0;
     let at = from;
-    while (state[at] !== REACHES) {
-      if (state[at] === ON_PATH || seen[at] === mark) return false;
-      seen[at] = mark;
+    while (state[at] === UNSEEN && end[at] === NO_END) {
+      end[at] = WALKING;
+      walked.push(at);
       at = parent[at]!;
     }
-    return true;
+    // A node on the path or past it, one of this walk's own cycle, or one an earlier walk went through.
+    const stop = state[at] !== UNSEEN || end[at] === WALKING ? at : end[at]!;
+    for (const each of walked) end[each] = stop;
+    return state[stop] === REACHES;
   };
   for (let start = 0; start < parent.length; start++) {
     path.length = 0;
