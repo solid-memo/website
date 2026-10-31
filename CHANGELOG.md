@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.20.0](https://github.com/solid-memo/website/compare/v6.19.0...v6.20.0) (2026-10-31)
+
+### Features
+
+* **ui:** preview a course by its chapters, theory before questions ([816d9df](https://github.com/solid-memo/website/commit/816d9dfac06f274c1f746818465288efb7b633fa)), closes [#428](https://github.com/solid-memo/website/issues/428)
+
 ## [6.19.0](https://github.com/solid-memo/website/compare/v6.18.2...v6.19.0) (2026-10-31)
 
 ### Features
