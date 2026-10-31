@@ -1098,29 +1098,29 @@ describe("Markdown from data", () => {
   });
 });
 
+/** The rules, at the top level or in the media query `condition`, whose selector is `selector` (spaced as one line). */
+function rules(selector: string, condition?: string): CSSStyleRule[] {
+  return [...document.styleSheets]
+    .flatMap((sheet) => [...sheet.cssRules])
+    .flatMap((rule) =>
+      condition === undefined
+        ? [rule]
+        : rule instanceof CSSMediaRule && rule.conditionText === condition
+          ? [...rule.cssRules]
+          : [],
+    )
+    .filter(
+      (rule): rule is CSSStyleRule =>
+        rule instanceof CSSStyleRule && rule.selectorText.replace(/\s+/g, " ") === selector,
+    );
+}
+
 /*
  * The course for newcomers moves only as it comes in (WCAG 2.2.2), and
  * not at all with motion reduced: each part's own style is where its
  * animation ends, so taking the animations away leaves it at rest.
  */
 describe("the course for newcomers", () => {
-  /** The rules, at the top level or in the media query `condition`, whose selector is `selector` (spaced as one line). */
-  function rules(selector: string, condition?: string): CSSStyleRule[] {
-    return [...document.styleSheets]
-      .flatMap((sheet) => [...sheet.cssRules])
-      .flatMap((rule) =>
-        condition === undefined
-          ? [rule]
-          : rule instanceof CSSMediaRule && rule.conditionText === condition
-            ? [...rule.cssRules]
-            : [],
-      )
-      .filter(
-        (rule): rule is CSSStyleRule =>
-          rule instanceof CSSStyleRule && rule.selectorText.replace(/\s+/g, " ") === selector,
-      );
-  }
-
   it("sweeps its glint across twice and no more, off the card when it rests", () => {
     const [glint] = rules(".newcomer-course::after");
     expect(glint!.style.getPropertyValue("animation")).toMatch(/^newcomer-shine .* 2$/);
@@ -1264,6 +1264,26 @@ describe("a course's celebrations", () => {
     expect(sparkles.position).toBe("absolute");
     expect(sparkles.pointerEvents).toBe("none");
     expect(getComputedStyle(document.querySelector(".course-sparkles>span")!).opacity).toBe("0");
+  });
+});
+
+describe("the day's study done", () => {
+  it("sweeps a shimmer once across the strip, clipped to it, resting off it", () => {
+    const [shimmer] = rules(".today-strip.just-done::after");
+    expect(shimmer!.style.getPropertyValue("animation")).toMatch(/^today-shimmer /);
+    expect(shimmer!.style.getPropertyValue("opacity")).toBe("0");
+    expect(shimmer!.style.getPropertyValue("pointer-events")).toBe("none");
+    document.body.innerHTML = `<aside class="today-strip just-done"></aside>`;
+    expect(getComputedStyle(document.querySelector(".today-strip")!).overflow).toBe("hidden");
+  });
+
+  it("raises stars along the strip, out of the pointer's way, gone when they rest", () => {
+    document.body.innerHTML = `<aside class="today-strip just-done">
+      <span class="today-stars" aria-hidden="true"><span></span></span></aside>`;
+    const stars = getComputedStyle(document.querySelector(".today-stars")!);
+    expect(stars.position).toBe("absolute");
+    expect(stars.pointerEvents).toBe("none");
+    expect(getComputedStyle(document.querySelector(".today-stars>span")!).opacity).toBe("0");
   });
 });
 

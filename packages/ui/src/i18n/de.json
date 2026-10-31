@@ -560,6 +560,7 @@
       "some": "Starke Lerneinheit!",
       "many": "Beeindruckend!"
     },
+    "allDone": "Für heute alles geschafft!",
     "streakCount": {
       "one": "{count} Tag in Folge",
       "other": "{count} Tage in Folge"

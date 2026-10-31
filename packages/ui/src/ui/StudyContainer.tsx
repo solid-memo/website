@@ -56,7 +56,9 @@ interface Session {
  * dropped when the session ends, however it is left. Its deck links to
  * the deck's page, or to `deckLink` when given. A deck copied from a
  * release says where a mistake in the cards it has of the release is
- * reported (UseCases.reportPlace).
+ * reported (UseCases.reportPlace). It is left with whether an answer of
+ * the session still stands (`onExit`), so the deck list can celebrate a
+ * day's study finished.
  *
  * The last answer can be undone while the session lasts, one step back:
  * its prompt's state and its answer in the log go (useCases.undoReview),
@@ -79,7 +81,8 @@ export function StudyContainer({
   useCases: StudyUseCases & LibraryUseCases & MistakeReportUseCases;
   instance: Instance;
   deck: Deck;
-  onExit: () => void;
+  /** Called as the session is left, with whether an answer of it still stands (none undone). */
+  onExit: (studied: boolean) => void;
   deckLink?: string;
   /** Uniform [0, 1) source deciding where a failed card comes back. */
   random?: () => number;
@@ -202,11 +205,12 @@ export function StudyContainer({
   );
 
   async function handleExit() {
+    const studied = session!.states.size > 0;
     keepSchedule();
     await queryClient.invalidateQueries({
       queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
     });
-    onExit();
+    onExit(studied);
   }
 
   if (queueQuery.error) {

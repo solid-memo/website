@@ -560,6 +560,7 @@
       "some": "Great session!",
       "many": "Impressive effort!"
     },
+    "allDone": "All done for today!",
     "streakCount": {
       "one": "{count}-day streak",
       "other": "{count}-day streak"

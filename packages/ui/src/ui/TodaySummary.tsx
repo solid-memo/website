@@ -6,6 +6,9 @@ import type { TodaySummary as Today } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
 import { FlameIcon } from "./icons";
 
+/** How many stars rise along the strip when the day's study is done. */
+const STARS = 6;
+
 /** A word of praise that grows with the day's work. */
 function useCheer() {
   const { t } = useI18n();
@@ -38,11 +41,16 @@ function useStreakNote() {
  * deck's count is known (`left`), and about how many minutes they will
  * take, once that is known too (`minutesLeft`); then the week's answers so far, and
  * how they compare with the same days of last week, when it had any.
+ * Once nothing is left, the praise says the day is done; and when a
+ * session has just been left with an answer (`celebrate`), the flame
+ * pops, a shimmer sweeps across the strip from left to right and small
+ * stars rise and fade as it passes them (style.css), decoration only.
  */
 export function TodaySummary({
   today,
   left,
   minutesLeft,
+  celebrate = false,
   statisticsHref,
 }: {
   today: Today;
@@ -50,6 +58,8 @@ export function TodaySummary({
   left?: number;
   /** About how many minutes the cards left will take (expectedTimeToday); none while unknown. */
   minutesLeft?: number;
+  /** A study session was just left with an answer: a shimmer and stars, once nothing is left. */
+  celebrate?: boolean;
   statisticsHref: string;
 }) {
   const { t, formatPercent, formatChange } = useI18n();
@@ -57,16 +67,28 @@ export function TodaySummary({
   const streakNote = useStreakNote();
   const { reviews, recalled } = today.recall;
   const { answers: thisWeek, previous } = today.week;
+  const allDone = left === 0;
+  const justDone = allDone && celebrate;
   return (
-    <aside class="today-strip" aria-label={t("today.heading")}>
+    <aside
+      class={justDone ? "today-strip just-done" : "today-strip"}
+      aria-label={t("today.heading")}
+    >
       <FlameIcon />
+      {justDone && (
+        <span class="today-stars" aria-hidden="true">
+          {Array.from({ length: STARS }, (_, star) => (
+            <span key={star} style={{ "--x": (0.08 + (star * 0.84) / (STARS - 1)).toFixed(3) }} />
+          ))}
+        </span>
+      )}
       <div>
         <p>
           <strong class="streak-count">{t("today.streakCount", { count: today.streak })}</strong>{" "}
           <span class="streak-note">{streakNote(today)}</span>
         </p>
         <p class="today-numbers">
-          {cheer(today.answers)}{" "}
+          {allDone ? t("today.allDone") : cheer(today.answers)}{" "}
           {[
             t("today.answers", { count: today.answers }),
             t("today.introduced", { count: today.introduced }),
@@ -78,8 +100,8 @@ export function TodaySummary({
                     count: reviews,
                   }),
                 ]),
-            ...(left === undefined || left === 0 ? [] : [t("today.stillDue", { count: left })]),
-            ...(left === undefined || left === 0 || minutesLeft === undefined
+            ...(left === undefined || allDone ? [] : [t("today.stillDue", { count: left })]),
+            ...(left === undefined || allDone || minutesLeft === undefined
               ? []
               : [t("today.timeLeft", { count: minutesLeft })]),
             previous === 0
