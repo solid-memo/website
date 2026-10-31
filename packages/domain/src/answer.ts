@@ -90,12 +90,14 @@ const LAST_SHIFTED_DAY = Date.UTC(9999, 11, 31);
  * calendar, held to 0100-01-04 to 9999-12-31: as text the days given then
  * always sort in the calendar's order. A walk over days must count its
  * steps rather than compare with its last day, since past either end
- * the same day comes back.
+ * the same day comes back. A study day that is no date comes back as
+ * it is.
  */
 export function shiftStudyDay(studyDay: string, days: number): string {
   const [year, month, day] = studyDay.split("-").map(Number);
   // setUTCFullYear, not Date.UTC, which reads the years 0 to 99 as 1900 to 1999.
   const time = new Date(0).setUTCFullYear(year!, month! - 1, day! + days);
+  if (Number.isNaN(time)) return studyDay;
   return new Date(Math.min(Math.max(time, FIRST_SHIFTED_DAY), LAST_SHIFTED_DAY))
     .toISOString()
     .slice(0, 10);

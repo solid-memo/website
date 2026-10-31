@@ -437,15 +437,17 @@ the due day the scheduler in use set (`courseAnswerEffect`):
 
 Scheduling works in *study days*, not calendar days. `studyDayOf`
 shifts an instant back by `dayBoundaryHour` (default 4) before taking
-the local date: a review at 03:00 counts as yesterday. Study days are
-device-local, and traveling shifts due times by a few hours (accepted
-for v1).
+the local date: a review at 03:00 counts as yesterday. A boundary that
+would move the instant off the calendar falls back to the calendar day.
+Study days are device-local, and traveling shifts due times by a few
+hours (accepted for v1).
 
 `buildStudyQueue` builds the day's session from the cards, the deck's
 direction, the review states and the preferences: the instance's, with
 the deck's own daily limits in their place where the deck sets them
-(`deckPreferences` in `domain/deckPace.ts`). `now` is always passed in,
-never read from a clock. Retired cards (`owl:deprecated true`) make no
+(`deckPreferences` in `domain/deckPace.ts`). A deck's limit that isn't
+a count, 0 or more, reads as absent. `now` is always passed in, never
+read from a clock. Retired cards (`owl:deprecated true`) make no
 prompts: their review states are kept, but never due and never new.
 
 - **due**: prompts whose `due <= today`, oldest due first, capped at

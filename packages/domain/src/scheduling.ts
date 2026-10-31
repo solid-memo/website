@@ -23,8 +23,17 @@ import { boundedSm2State } from "./sm2";
  * Accepted for v1.
  */
 export function studyDayOf(instant: Date, dayBoundaryHour: number): string {
+  return formatLocalDate(shiftedByBoundary(instant, dayBoundaryHour));
+}
+
+/**
+ * The instant moved back by the day boundary; the instant itself when
+ * that is no date, which only a boundary far out of an hour's range
+ * gives: a study day is then still a day of the calendar.
+ */
+function shiftedByBoundary(instant: Date, dayBoundaryHour: number): Date {
   const shifted = new Date(instant.getTime() - dayBoundaryHour * 3_600_000);
-  return formatLocalDate(shifted);
+  return Number.isNaN(shifted.getTime()) ? new Date(instant.getTime()) : shifted;
 }
 
 /** The study day a card reviewed now with the given interval is next due. */
@@ -33,7 +42,7 @@ export function nextDueDate(
   intervalDays: number,
   dayBoundaryHour: number,
 ): string {
-  const shifted = new Date(reviewedAt.getTime() - dayBoundaryHour * 3_600_000);
+  const shifted = shiftedByBoundary(reviewedAt, dayBoundaryHour);
   shifted.setDate(shifted.getDate() + intervalDays);
   return formatLocalDate(shifted);
 }

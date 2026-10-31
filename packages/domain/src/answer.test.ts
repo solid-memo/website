@@ -41,6 +41,11 @@ describe("answers", () => {
     expect(shiftStudyDay("0099-12-31", 1)).toBe("0100-01-04");
   });
 
+  it("give a study day that is no date back as it is, without throwing", () => {
+    expect(shiftStudyDay("NaN-NaN-NaN", -1)).toBe("NaN-NaN-NaN");
+    expect(shiftStudyDay("2026-10-30", Number.NaN)).toBe("2026-10-30");
+  });
+
   it("are of the answer log's month of their study day, or a month a day away", () => {
     expect(isOfStudyMonth("2026-10-15", "2026-10")).toBe(true);
     expect(isOfStudyMonth("2026-09-30", "2026-10")).toBe(true);

@@ -16,6 +16,7 @@ import type {
   DistributionV1,
   LibraryDeckV6,
 } from "@solid-memo/vocab/types.generated";
+import { isDailyLimit } from "./preferences";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -50,9 +51,18 @@ export function deckFromRecord(
     ...(data.source === undefined ? {} : { sourceUrl: data.source }),
     ...(data.theme.length === 0 ? {} : { themes: [...data.theme] }),
     ...(noKeywords(data.keyword) ? {} : { keywords: copyKeywords(data.keyword) }),
-    ...(data.newCardsPerDay === undefined ? {} : { newCardsPerDay: data.newCardsPerDay }),
-    ...(data.maxReviewsPerDay === undefined ? {} : { maxReviewsPerDay: data.maxReviewsPerDay }),
+    ...(usableCap(data.newCardsPerDay) ? { newCardsPerDay: data.newCardsPerDay } : {}),
+    ...(usableCap(data.maxReviewsPerDay) ? { maxReviewsPerDay: data.maxReviewsPerDay } : {}),
   };
+}
+
+/**
+ * Whether a deck's own daily limit is there and usable. One that is not
+ * a count, 0 or more, reads as absent, so the instance's preferences
+ * apply, as an unusable limit there reads as the default.
+ */
+function usableCap(stored: number | undefined): stored is number {
+  return stored !== undefined && isDailyLimit(stored);
 }
 
 /** The deck as its latest record; a deck that states no description gets the default one. */
