@@ -421,6 +421,30 @@ describe("the table of a draft's cards", () => {
     expect(draftCardRows(deckDraft(), { filter: "unasked" })).toEqual([]);
   });
 
+  it("are built in time that grows with the cards and steps, not with their product", () => {
+    // Eight times the cards, each checked by a step of its own, take about
+    // as long as an eighth of them eight times over (the sort adds a
+    // little); looking through every step for each card's place would take
+    // eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many: ReleaseDraft = {
+          ...course,
+          cards: Array.from({ length: count }, (_, i) => ({ id: `q-${i}`, data: card(`${i}`) })),
+          steps: Array.from({ length: count }, (_, i) => ({
+            id: `st-${i}`,
+            data: { chapter: of("ch-a"), position: i, checkedBy: [of(`q-${i}`)] },
+          })),
+          chapters: [],
+        };
+        return () => draftCardRows(many);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
   it("offers the languages of the fronts and backs, unstated last", () => {
     expect(draftCardLanguages(draft)).toEqual(["en", "sv-fi", "unstated"]);
     expect(draftCardLanguages(deckDraft())).toEqual(["en"]);
