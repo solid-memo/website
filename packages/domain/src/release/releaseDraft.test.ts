@@ -646,6 +646,75 @@ describe("applyDraftChange", () => {
         id: "q-z",
       });
     });
+
+    it("leaves an outline numbered already as it is when a card is retired", () => {
+      const once = made(courseDraft(), { kind: "retire", of: "card", id: "q-loose" });
+      const twice = made(once, { kind: "restore", of: "card", id: "q-loose" });
+      expect(twice.chapters).toBe(once.chapters);
+      expect(twice.steps).toBe(once.steps);
+    });
+
+    it("numbers the steps again when the same outline is in a draft at another URL", () => {
+      const elsewhere = "https://pod.example/solid-memo/main/drafts/other/v1/release.ttl";
+      const draft = courseDraft();
+      // The steps are of a chapter at the other URL, out of their numbering.
+      const numbered = made(
+        {
+          ...draft,
+          steps: draft.steps.map((node, at) => ({
+            id: node.id,
+            data: { ...node.data, chapter: `${elsewhere}#ch-a`, position: 5 + at },
+          })),
+        },
+        { kind: "retire", of: "card", id: "q-loose" },
+      );
+      expect(positions(numbered, "steps")).toEqual({ "ch-a-1": 5, "ch-a-2": 6 });
+      const moved = made(
+        { ...numbered, url: elsewhere },
+        { kind: "restore", of: "card", id: "q-loose" },
+      );
+      expect(positions(moved, "steps")).toEqual({ "ch-a-1": 0, "ch-a-2": 1 });
+    });
+
+    it("numbers the outline again in time that grows with it, not with its chapters times its steps", () => {
+      // Eight times the chapters, a step each, must take less than four
+      // times as long as an eighth of them done eight times over
+      // (testing.md): going through every step for each chapter, or
+      // searching the order for each node's place, takes about eight
+      // times as long.
+      const outline = (count: number): ReleaseDraft => {
+        const draft = courseDraft();
+        return {
+          ...draft,
+          chapters: Array.from({ length: count }, (_, i) => ({
+            id: `ch-${i}`,
+            data: { title: { en: `${i}` }, course: DRAFT, position: i, reviewQuestion: [] },
+          })),
+          steps: Array.from({ length: count }, (_, i) => ({
+            id: `st-${i}`,
+            data: { chapter: of(`ch-${i}`), position: 0, checkedBy: [] },
+          })),
+        };
+      };
+      const ratio = growth(
+        (count) => {
+          const draft = outline(count);
+          const last = `ch-${count - 1}`;
+          return () => {
+            made(draft, { kind: "retire", of: "step", id: "st-0" });
+            made(draft, { kind: "retire", of: "chapter", id: "ch-0" });
+            made(draft, { kind: "delete", of: "step", id: "st-0" });
+            made(draft, { kind: "addChapter", id: "ch-new", at: 0 });
+            made(draft, { kind: "moveChapter", id: last, to: 0 });
+            made(draft, { kind: "addStep", id: "st-new", chapter: "ch-0", at: 0 });
+            made(draft, { kind: "moveStep", id: "st-0", chapter: last, to: 0 });
+          };
+        },
+        1000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
   });
 
   describe("delete", () => {
