@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.29](https://github.com/solid-memo/website/compare/v6.17.28...v6.17.29) (2026-10-31)
+
+### Bug Fixes
+
+* **domain:** read a draft's statements once for the release check ([83666e6](https://github.com/solid-memo/website/commit/83666e6c322556bec6c06bdd54450e41f4011d07))
+* **domain:** read out-of-range day boundaries and limits as defaults ([eebe03b](https://github.com/solid-memo/website/commit/eebe03b3ec37342900066d2f45ff1e8a758e54f2))
+* **solid:** match a deck document's write to its read in any spelling ([8865787](https://github.com/solid-memo/website/commit/8865787aadb70051a34a877147cfe13f54b4f835))
+* **solid:** write and remove many cards in one pass ([433d112](https://github.com/solid-memo/website/commit/433d112c9d4b7f9a2c471ab18c2eeccd6e20fe7f))
+
 ## [6.17.28](https://github.com/solid-memo/website/compare/v6.17.27...v6.17.28) (2026-10-30)
 
 ### Bug Fixes
