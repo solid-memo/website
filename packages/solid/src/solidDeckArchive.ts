@@ -106,10 +106,11 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       for (const thing of things) refuseNewer(thing);
       const typed = (type: string) =>
         things.filter((thing) => getUrlAll(thing, RDF.type).includes(type));
-      const names = agentNamesOf(dataset);
-      const decks = typed(SM.Deck).map((thing) => toDeck(thing, names));
-      if (decks.length !== 1 || decks[0] === null) throw new AppError("notADeckFile");
-      const deck = decks[0]!;
+      // A file of more than one deck is refused before any is read (GHSA-hcrw-cr33-jg78).
+      const deckThings = typed(SM.Deck);
+      if (deckThings.length !== 1) throw new AppError("notADeckFile");
+      const deck = toDeck(deckThings[0]!, agentNamesOf(dataset));
+      if (deck === null) throw new AppError("notADeckFile");
 
       const upgraded: FormatUpgrade[] = [];
       const dropped: string[] = [];

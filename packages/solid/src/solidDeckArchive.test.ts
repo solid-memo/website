@@ -6,13 +6,21 @@ import { describe, expect, it, vi } from "vitest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { RELEASE_LIMITS } from "./client/readLimits";
+import { agentNamesOf, toDeck } from "./mappers/deckMapper";
 import { createSolidDeckArchive, parseDeckFile } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { fakePod } from "./testing/fakePod";
 import { SCHEMA, SM, SM_NS } from "./vocab";
+
+// The real mappers, watched: a test checks that a file of several decks maps none of them.
+vi.mock("./mappers/deckMapper", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./mappers/deckMapper")>();
+  return { ...actual, agentNamesOf: vi.fn(actual.agentNamesOf), toDeck: vi.fn(actual.toDeck) };
+});
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const FOREIGN = "https://other.example/ns#rating";
@@ -301,6 +309,36 @@ describe("readDeckFile", () => {
     await expect(archive.readDeckFile(two, "turtle", base)).rejects.toMatchObject({
       code: "notADeckFile",
     });
+  });
+
+  it("refuses a file of more than one deck before it maps any (GHSA-hcrw-cr33-jg78)", async () => {
+    vi.mocked(toDeck).mockClear();
+    vi.mocked(agentNamesOf).mockClear();
+    const two = `${OLD_DECK}<#other> a sm:Deck ; dcterms:title "B" ; sm:cardsDocument <b> ; sm:reviewsDocument <c> .`;
+    await expect(archive.readDeckFile(two, "turtle", base)).rejects.toMatchObject({
+      code: "notADeckFile",
+    });
+    expect(toDeck).not.toHaveBeenCalled();
+    expect(agentNamesOf).not.toHaveBeenCalled();
+  });
+
+  it("refuses a file of many decks and agents in time that grows with them, not their product (GHSA-hcrw-cr33-jg78)", async () => {
+    const ratio = await growthAsync(
+      (count) => {
+        let text = PREFIXES;
+        for (let i = 0; i < count; i++) {
+          text += `<#d${i}> a sm:Deck ; dcterms:title "t" ; sm:cardsDocument <c> ; sm:reviewsDocument <r> .\n`;
+          text += `<#a${i}> a <http://xmlns.com/foaf/0.1/Agent> ; <http://xmlns.com/foaf/0.1/name> "n${i}" .\n`;
+        }
+        return () =>
+          expect(archive.readDeckFile(text, "turtle", base)).rejects.toMatchObject({
+            code: "notADeckFile",
+          });
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("refuses text that does not parse", async () => {

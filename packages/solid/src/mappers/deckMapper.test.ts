@@ -15,9 +15,11 @@ import {
   type NamedSubject,
   removeThing,
   setThing,
+  setThings,
   type SubjectBuilder,
 } from "../client/rdf";
 import { datasetFrom } from "../testing/datasets";
+import { growth } from "@solid-memo/domain/testing/growth";
 import {
   deckSubjects,
   toCard,
@@ -370,6 +372,32 @@ describe("toDeck", () => {
         ),
       ),
     ).toBeNull();
+  });
+});
+
+describe("toDecks over many decks and agents", () => {
+  it("takes time that grows with them, not their product (GHSA-hcrw-cr33-jg78)", () => {
+    const ratio = growth(
+      (count) => {
+        const subjects = Array.from({ length: count }, (_, i) => [
+          buildThing(createThing({ url: `${CATALOG}#deck-${i}` }))
+            .addIri(RDF.type, SM.Deck)
+            .addStringNoLocale(DCTERMS.title, "t")
+            .addIri(SM.cardsDocument, CARDS_DOC)
+            .addIri(SM.reviewsDocument, REVIEWS_DOC)
+            .build(),
+          buildThing(createThing({ url: `${CATALOG}#agent-${i}` }))
+            .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
+            .addStringNoLocale("http://xmlns.com/foaf/0.1/name", `n${i}`)
+            .build(),
+        ]).flat();
+        const catalog = setThings(datasetFrom(CATALOG), subjects);
+        return () => toDecks(catalog, CATALOG);
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
