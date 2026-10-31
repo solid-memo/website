@@ -99,6 +99,9 @@ package's own tree, folded to what the app shows:
 Every entry point for data is bounded, and a text past a limit is
 plain, its source still readable, unless the limit says otherwise.
 [Repository Markdown](#repository-markdown) lifts only `MAX_CHARS`.
+The limits count lines as the parser does: a line ends at a line
+feed, a carriage return, or both, and only spaces and tabs make it
+blank.
 
 - **`MAX_CHARS`, 20,000 characters.** The longest course text is about
   2,600.
@@ -112,6 +115,21 @@ plain, its source still readable, unless the limit says otherwise.
   item's paragraph without its `>` or indentation.** The parser is
   quadratic in both (`- a` followed by 10,000 such lines takes over a
   second).
+- **`MAX_QUOTES`, 200 block quotes a text opens**, side by side or
+  apart, in a list item or in another quote. A quote's next line that
+  starts with the same `>`s opens none, so one long quote at a line's
+  start counts once; a `>` after four columns of white space is code,
+  and opens none either. The count doesn't follow fenced code, HTML
+  or list items, so it can be off either way. Mostly it errs high. A
+  `>` on a line indented less than the one above counts as a quote of
+  its own, as that line may have left a list item. A code block of
+  many `>` lines that each follow one without, or a long quote in a list
+  item, may count past the limit and show as plain text. It errs low
+  only after a line it takes for a quote's that the parser doesn't,
+  such as an HTML block's last line: the quote the next line opens goes
+  uncounted. That is at most one for each quote it counts, so a text it
+  lets through opens at most about twice `MAX_QUOTES`, still a bounded
+  cost. The parser is quadratic in them too.
 - **`MAX_UNDERLINES`, 200 lines that could underline a heading** (`===`,
   `---`, with up to three spaces before and white space after). The
   parser is quadratic in setext headings too (`a\n=\n…` at 20,000
@@ -265,9 +283,9 @@ input at build time only, never for data:
 - **What data would fold, it refuses.** Raw HTML, a picture, a link
   reference definition, what nests past `MAX_DEPTH`, a table past its
   caps, and a text past `MAX_LINE_NESTING`, `MAX_NESTED_LINES`,
-  `MAX_LAZY_LINES`, `MAX_DELIMITERS` or `MAX_UNDERLINES` each throw a
-  `DocumentError`, naming the problem's first line when known. A page
-  shows as written, or its build fails and says where.
+  `MAX_LAZY_LINES`, `MAX_QUOTES`, `MAX_DELIMITERS` or `MAX_UNDERLINES`
+  each throw a `DocumentError`, naming the problem's first line when
+  known. A page shows as written, or its build fails and says where.
 
 ## Diagrams
 
@@ -534,7 +552,7 @@ text is rendered, and none relies on a check of the data.
 | Link spoofing | A followed link opens in a new tab and says so. When its text isn't its own URL, or its host is an international one, the host follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". Text counts as its own URL only when each label of its host is the one the URL parser reads, give or take case, or an international one the parser writes in punycode, and its port is the same (`writtenHost`). A percent escape, an ideographic or full-width dot or letter, an IPv4 address in short form or a default port written out shows the host the link opens. An address in a plain-text description does the same, with its hidden characters as markers, as does a deck's source. Any other address the app shows from a pod or a profile reads with its hidden characters as markers, and as the URL parser has it, punycode kept, when it doesn't name its host as the parser reads it or that host is an international one (`ExternalLink`). For a deck's source, a title beside its link counts as text that isn't its URL. A license gets a short name such as "CC BY 4.0" only at its address on the Creative Commons or GNU site; any other shows its URL, with its host when it needs one. The link and its host are each isolated against a bidi override in the text before them. The host, and an address shown as itself, run left to right (`dir="ltr"`); other link text takes its first letter's direction (`dir="auto"`), so a link in Arabic reads right to left. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
 | Trojan Source | Hidden characters in code and link text shown as markers ([the package](#the-package)); links isolated from the text around them. |
-| Denial of service | The limits above, at every entry point for data, and each text parsed once. `markdownCache.ts` keeps the last 500 texts' blocks; the blocks of every chapter description of the course page that is open; a theory's chunks, split from its cached blocks; the plain text of every card of the deck the Studio's workbench searches; the problems of every text of each field rule the Studio's release check reads, for the last draft it checked; and `labelText` keeps the label of each text's start, so a draft's outline shown again reads none of them again. No cache is keyed by a whole text: V8's `Map` hashes a long string by its length alone, and would compare a lookup with every long text of that length. The chapter descriptions' are kept by position, the labels by a text's start, and the others under a hash of all of a text's characters (`textHash`, from a seed drawn once a page), each lookup compared with the one text kept there. |
+| Denial of service | The limits above, at every entry point for data, and each text parsed once. `markdownCache.ts` keeps the last 500 texts' blocks; the blocks of every chapter description of the last 8 courses whose page was opened, by release (`COURSES_KEPT`), so opening a course again parses none of them again, for as long as the app is open, which can be much of 8 releases' size; a theory's chunks, split from its cached blocks; the plain text of every card of the deck the Studio's workbench searches; the problems of every text of each field rule the Studio's release check reads, for the last draft it checked; and `labelText` keeps the label of each text's start, so a draft's outline shown again reads none of them again. No cache is keyed by a whole text: V8's `Map` hashes a long string by its length alone, and would compare a lookup with every long text of that length. The chapter descriptions' are kept by position, the labels by a text's start, and the others under a hash of all of a text's characters (`textHash`, from a seed drawn once a page), each lookup compared with the one text kept there. |
 
 [`parseDocument`](#repository-markdown) lifts `MAX_CHARS` and is never
 given data: it reads the repository's own files at build time, and no

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useState } from "preact/hooks";
+import { useMemo } from "preact/hooks";
 import type {
   ChapterState,
   CourseChapter,
@@ -19,7 +19,7 @@ import { CheckIcon, LibraryIcon } from "./icons";
 import { useCourseText } from "./cardLanguage";
 import { useI18n, type I18n } from "./i18n";
 import { linkify } from "./linkify";
-import { blocksByPosition } from "./markdownCache";
+import { courseDescriptionBlocks } from "./markdownCache";
 import { CourseText } from "./ReaderText";
 
 function stateLabel(state: ChapterState, t: I18n["t"]): string {
@@ -44,8 +44,9 @@ const SPARKLES = 8;
  * is completed, open, or done, with how many of its steps are done. An
  * open or done chapter's title links to it; a locked one's does not. A
  * chapter's description may be in Markdown (its `textFormat`), each
- * parsed once while the page is open, however many chapters there are
- * (blocksByPosition); its title is always plain. Once every chapter is
+ * parsed once for the release, however many chapters there are and
+ * however often the page is opened (courseDescriptionBlocks); its title
+ * is always plain. Once every chapter is
  * done, the course says it is finished, with a link back to the decks
  * where there are any (none in the Studio's trial). Beside the way on,
  * or back, a secondary button leads to the deck library where there is
@@ -100,7 +101,10 @@ export function CourseScreen({
 }) {
   const { t, tx } = useI18n();
   const { cardText, cardLang } = useCourseText();
-  const [descriptionBlocks] = useState(blocksByPosition);
+  const descriptionBlocks = useMemo(
+    () => courseDescriptionBlocks(outline.releaseUrl),
+    [outline.releaseUrl],
+  );
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
   const doneCount = progress.chapters.filter((chapter) => chapter.state === "done").length;
   const library =

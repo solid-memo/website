@@ -10,6 +10,7 @@ import {
   MAX_LAZY_LINES,
   MAX_LINE_NESTING,
   MAX_NESTED_LINES,
+  MAX_QUOTES,
   MAX_TABLE_CELLS,
   MAX_TABLE_COLUMNS,
   MAX_UNDERLINES,
@@ -291,10 +292,61 @@ describe("parseMarkdown", () => {
         `${"- a\n".repeat(MAX_NESTED_LINES)}${"   1. b\n".repeat(MAX_NESTED_LINES + 1)}`,
       ),
     ).toBeNull();
-    expect(parseMarkdown("> - a\n> > b\n".repeat(MAX_NESTED_LINES))).not.toBeNull();
+    expect(parseMarkdown("> - a\n> > b\n".repeat(MAX_QUOTES - 1))).not.toBeNull();
+  });
+
+  it("reads nothing past MAX_QUOTES block quotes, a quote's next lines aside", () => {
+    expect(parseMarkdown(">\n\n".repeat(MAX_QUOTES))).not.toBeNull();
+    expect(parseMarkdown(">\n\n".repeat(MAX_QUOTES + 1))).toBeNull();
+    expect(parseMarkdown(">\n\n".repeat(6666))).toBeNull();
+    expect(parseMarkdown(`${"a\n".repeat(MAX_QUOTES)}${"> a\n".repeat(MAX_QUOTES * 10)}`)).toEqual([
+      expect.objectContaining({ type: "paragraph" }),
+      expect.objectContaining({ type: "quote" }),
+    ]);
+    expect(parseMarkdown("> > a\n>> b\n".repeat(MAX_QUOTES * 2))).not.toBeNull();
+    expect(
+      parseMarkdown(`${"> a\n".repeat(MAX_QUOTES)}\n${"> a\n".repeat(MAX_QUOTES)}`),
+    ).not.toBeNull();
+    for (const unit of [
+      ">\n\n",
+      "> \n\n",
+      " >a\n\n",
+      ">\na\n",
+      "a\n>\n",
+      "- >\n",
+      "> a\n>\n> > b\n",
+      ">\r\r",
+      ">\r\n\r\n",
+      "a\r>\r",
+      "> >\n>     >\n",
+      ">     >\n> >\n",
+      "> > >\n> >     >\n",
+      "> >\n>\t  >\n",
+      ">\n    >\n",
+      "- a\n  > b\n> c\n",
+      "1. a\n   > b\n> c\n",
+    ]) {
+      expect(parseMarkdown(unit.repeat(MAX_QUOTES + 1)), JSON.stringify(unit)).toBeNull();
+      expect(
+        parseMarkdown(unit.repeat(Math.floor(MAX_CHARS / unit.length))),
+        JSON.stringify(unit),
+      ).toBeNull();
+    }
+    // A `>` on a line indented less than the one above opens a quote of its own.
+    expect(parseMarkdown("- a\n  > b\n> c\n".repeat(MAX_QUOTES / 2))).not.toBeNull();
+    expect(parseMarkdown("- a\n  > b\n> c\n".repeat(MAX_QUOTES / 2 + 1))).toBeNull();
+    expect(parseMarkdown("  > a\n> b\n".repeat(MAX_QUOTES))).toBeNull();
+    expect(parseMarkdown("> a\n  > b\n".repeat(MAX_QUOTES))).not.toBeNull();
+    // A `>` after four columns of white space is code, and counts as no quote.
+    expect(parseMarkdown(">     > a\n".repeat(MAX_QUOTES * 2))).toEqual([
+      expect.objectContaining({ type: "quote" }),
+    ]);
+    expect(parseMarkdown(">\n***\n".repeat(MAX_QUOTES + 1))).toBeNull();
+    expect(parseMarkdown(">\n```\n```\n".repeat(MAX_QUOTES + 1))).toBeNull();
   });
 
   it("reads nothing past MAX_LAZY_LINES lines in a row that continue a quote's or item's paragraph without its markers", () => {
+    expect(parseMarkdown(`- a\r${"b\r".repeat(MAX_LAZY_LINES + 1)}`)).toBeNull();
     const run = (lines: number) => "b\n".repeat(lines);
     expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES)}`)).not.toBeNull();
     expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES + 1)}`)).toBeNull();
@@ -304,6 +356,13 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown(`- a\n${"  b\n".repeat(MAX_LAZY_LINES + 1)}`)).not.toBeNull();
     expect(parseMarkdown(`- a\n\`\`\`\n${run(MAX_LAZY_LINES + 1)}\`\`\``)).not.toBeNull();
     expect(parseMarkdown(run(MAX_LAZY_LINES + 1))).not.toBeNull();
+    for (const space of ["\u00a0", "\f", "\v", "\ufeff", "\u3000"])
+      expect(
+        parseMarkdown(`- a\n${run(MAX_LAZY_LINES / 2)}${space}\n${run(MAX_LAZY_LINES / 2)}`),
+      ).toBeNull();
+    expect(
+      parseMarkdown(`- a\n${run(MAX_LAZY_LINES / 2)} \t\n${run(MAX_LAZY_LINES / 2)}`),
+    ).not.toBeNull();
   });
 
   it("reads nothing past MAX_DELIMITERS asterisks and underscores", () => {
@@ -454,6 +513,10 @@ describe("parseDocument", () => {
     expect(refusal("- - a\n".repeat(MAX_NESTED_LINES + 1))).toMatchObject({
       what: `more than MAX_NESTED_LINES (${MAX_NESTED_LINES}) quotes and list items opened inside a list item`,
       line: MAX_NESTED_LINES + 1,
+    });
+    expect(refusal(`ok\n\n${">\n\n".repeat(MAX_QUOTES + 1)}`)).toMatchObject({
+      what: `more than MAX_QUOTES (${MAX_QUOTES}) block quotes`,
+      line: 3 + MAX_QUOTES * 2,
     });
     expect(refusal(`- a\n${"b\n".repeat(MAX_LAZY_LINES + 1)}`)).toMatchObject({
       what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a row`,
@@ -642,10 +705,29 @@ describe("pathological input", () => {
     ],
     ["lazy lines past the cap", fill("b\n", "- a\n")],
     [
+      "lazy lines with lines of non-breaking spaces among them",
+      fill(`\u00a0\n${"b\n".repeat(150)}`, "- a\n"),
+    ],
+    [
       "lists nested by indentation",
       Array.from({ length: 139 }, (_, level) => `${"  ".repeat(level)}- a`).join("\n"),
     ],
     ["sibling list items", fill("- a\n")],
+    ["loose sibling list items", fill("- a\n\n")],
+    ["sibling block quotes", fill(">\n\n")],
+    ["sibling block quotes, lines ended by carriage returns", fill(">\r\r")],
+    ["block quotes among paragraphs, lines ended by carriage returns", fill("a\r>\r")],
+    ["lazy lines ended by carriage returns", fill("b\r", "- a\r")],
+    ["block quotes among paragraphs", fill("a\n>\n")],
+    ["block quotes in sibling list items", fill("- >\n")],
+    ["block quotes nested in one quote", fill("> a\n>\n> > b\n")],
+    ["block quotes nested anew after code in a quote", fill("> >\n>     >\n")],
+    ["block quotes nested anew before code in a quote", fill(">     >\n> >\n")],
+    ["block quotes nested anew after code three quotes deep", fill("> > >\n> >     >\n")],
+    ["block quotes after indented code", fill(">\n    >\n")],
+    ["block quotes in and after list items", fill("- a\n  > b\n> c\n")],
+    ["block quotes at the cap after paragraphs", fill("a\n\n", "", ">\n\n".repeat(MAX_QUOTES))],
+    ["one block quote of many lines", fill("> a\n")],
     ["emphasis delimiters at the cap", fill("a", "*_".repeat(MAX_DELIMITERS / 2))],
     ["unclosed links", fill("[")],
     ["unclosed images", fill("![")],
