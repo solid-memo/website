@@ -573,6 +573,7 @@
       "some": "¡Gran sesión!",
       "many": "¡Qué esfuerzo!"
     },
+    "allDone": "¡Todo hecho por hoy!",
     "streakCount": {
       "one": "Racha de {count} día",
       "many": "Racha de {count} días",

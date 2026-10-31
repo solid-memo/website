@@ -573,6 +573,7 @@
       "some": "Belle séance !",
       "many": "Effort impressionnant !"
     },
+    "allDone": "Tout est fait pour aujourd’hui !",
     "streakCount": {
       "one": "{count} jour d’affilée",
       "many": "{count} de jours d’affilée",

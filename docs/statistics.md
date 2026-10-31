@@ -19,7 +19,14 @@ study session usually ends, sums up the day:
   it's "Day one! Come back tomorrow for two."; on the longest streak
   yet, "Your longest yet!"; else the record to beat, "Record: 12 days".
 - **Praise** grows with the day's answers: "Nice work!" under 10,
-  "Great session!" from 10, "Impressive effort!" from 50.
+  "Great session!" from 10, "Impressive effort!" from 50. Once every
+  deck has nothing left today, it's "All done for today!". When a study
+  session with an answer brings the learner back to that, the flame
+  pops, a shimmer sweeps across the strip from left to right, and small
+  stars rise and fade where it passes. That's lighter than a finished
+  course's confetti ([courses.md](courses.md)), since it can come every
+  day. Coming back to the list later shows none of it, and neither does
+  reduced motion.
 - **The day's numbers**: answers, new cards, and the share of today's
   reviews remembered, with their count ("80% remembered of 5 reviews",
   [below](#what-the-figures-count)); a day without a review (only new
