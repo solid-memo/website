@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { planCardTransfer, type TransferOptions } from "./cardTransfer";
 import type { Card } from "./deck";
 import type { FsrsState, ReviewState } from "./review";
+import { growth } from "./testing/growth";
 
 const SOURCE = {
   url: "https://pod.example/a/catalog.ttl#source",
@@ -198,6 +199,75 @@ describe("planCardTransfer", () => {
       copy,
     );
     expect(plan.cards).toEqual([{ from: "a", to: "a-2", present: false }]);
+  });
+
+  it("passes an id only for a renumbered distractor within the card's", () => {
+    // `a` has two distractors: `a-2-d2` blocks `a-2`, `a-3-d3` not `a-3`.
+    const plan = planCardTransfer(
+      { ...SOURCE, cards: [a], states: [] },
+      {
+        ...TARGET,
+        cards: [
+          card("a", { front: { en: "other" } }),
+          card("z", {
+            distractors: [
+              { id: "a-2-d2", text: { sv: "q" } },
+              { id: "a-3-d3", text: { sv: "q" } },
+              { id: "a-3-d0", text: { sv: "q" } },
+              { id: "a-3-dx", text: { sv: "q" } },
+              { id: "a-2-d4", text: { sv: "q" } },
+            ],
+          }),
+        ],
+        states: [],
+      },
+      ["a"],
+      copy,
+    );
+    expect(plan.cards).toEqual([{ from: "a", to: "a-3", present: false }]);
+  });
+
+  it("finds a card present at a renumbered id among others of as many distractors", () => {
+    const other = card("a-2", {
+      distractors: [
+        { id: "a-2-d1", text: { sv: "x" } },
+        { id: "a-2-d2", text: { sv: "other" } },
+      ],
+    });
+    const plan = planCardTransfer(
+      { ...SOURCE, cards: [a], states: [] },
+      {
+        ...TARGET,
+        cards: [
+          card("a", { front: { en: "other" } }),
+          other,
+          card("a-3", {
+            ...written(a),
+            id: "a-3",
+            distractors: [
+              { id: "a-3-d1", text: { sv: "x" } },
+              { id: "a-3-d2", text: { sv: "y" }, retired: true },
+            ],
+          }),
+        ],
+        states: [],
+      },
+      ["a"],
+      copy,
+    );
+    expect(plan.cards).toEqual([{ from: "a", to: "a-3", present: true }]);
+  });
+
+  it("takes a chosen id once, from the first card of it in the source", () => {
+    const plan = planCardTransfer(
+      { ...SOURCE, cards: [card("a"), card("a", { front: { en: "other" } })], states: [] },
+      { ...TARGET, cards: [], states: [] },
+      ["a"],
+      move,
+    );
+    expect(plan.cards).toEqual([{ from: "a", to: "a", present: false }]);
+    expect(plan.target.save).toEqual([written(card("a"))]);
+    expect(plan.source.remove).toEqual(["a"]);
   });
 
   it("gives two cards of one transfer different ids", () => {
@@ -395,5 +465,75 @@ describe("planCardTransfer", () => {
         copy,
       ),
     ).not.toThrow();
+  });
+
+  it("plans a large selection in time that grows with the cards, not with their square", () => {
+    // Eight times the cards take about as long as an eighth of them eight
+    // times over; looking each id up among all the source's cards would
+    // take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) => card(`c${i}`));
+        const ids = [...cards.map(({ id }) => id), "gone"];
+        return () =>
+          planCardTransfer(
+            { ...SOURCE, cards, states: [] },
+            { ...TARGET, cards: [], states: [] },
+            ids,
+            copy,
+          );
+      },
+      1500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("plans a source of many cards of one id in time that grows with them, not with their square", () => {
+    // Placing each of them would try the ids all those before it took.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) =>
+          card("x", { front: { en: `s${i}` } }),
+        );
+        return () =>
+          planCardTransfer(
+            { ...SOURCE, cards, states: [] },
+            { ...TARGET, cards: [], states: [] },
+            ["x"],
+            copy,
+          );
+      },
+      1500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("places a card of many distractors past a long run of taken ids in time that grows with them, not with their square", () => {
+    // The target holds `x`, `x-2`… of other content, and the card has as
+    // many distractors as there are ids taken: building the card at each
+    // id tried would take eight times as long for eight times both.
+    const ratio = growth(
+      (count) => {
+        const distractors = Array.from({ length: count }, (_, i) => ({
+          id: `x-d${i + 1}`,
+          text: { sv: `w${i}` },
+        }));
+        const taken = Array.from({ length: count }, (_, i) =>
+          card(i === 0 ? "x" : `x-${i + 1}`, { front: { en: "other" } }),
+        );
+        return () =>
+          planCardTransfer(
+            { ...SOURCE, cards: [card("x", { distractors })], states: [] },
+            { ...TARGET, cards: taken, states: [] },
+            ["x"],
+            copy,
+          );
+      },
+      400,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
