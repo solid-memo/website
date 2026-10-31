@@ -29,7 +29,7 @@ import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache
  * anything more becomes a `div.md` of its blocks. Text past the
  * parser's limits is shown as plain text. The blocks are read from
  * `blocksOf`, markdownBlocks unless a list of texts longer than its cache
- * passes its own (blocksByPosition).
+ * passes its own (courseDescriptionBlocks).
  */
 export function DataText({
   text,

@@ -108,6 +108,14 @@ export const MAX_UNDERLINES = 200;
 export const MAX_NESTED_LINES = 300;
 export const MAX_LAZY_LINES = 200;
 
+/**
+ * The most block quotes a text may open, wherever they are: side by
+ * side, one after another, inside a list item or inside another quote.
+ * A quote's next line, under the same `>`, opens none. The parser takes
+ * time quadratic in them, so a text past it is shown as plain text.
+ */
+export const MAX_QUOTES = 200;
+
 /** A table wider than this, or with more cells than MAX_TABLE_CELLS, is shown as its source. */
 export const MAX_TABLE_COLUMNS = 20;
 export const MAX_TABLE_CELLS = 2_000;
@@ -143,8 +151,9 @@ function marker(control: string): string {
 
 /**
  * The text read as Markdown, as blocks; null when it is longer than
- * MAX_CHARS, or past MAX_LINE_NESTING, MAX_DELIMITERS or MAX_UNDERLINES, to be shown as
- * plain text instead.
+ * MAX_CHARS, or past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
+ * MAX_QUOTES, MAX_DELIMITERS or MAX_UNDERLINES, to be shown as plain text
+ * instead.
  */
 export function parseMarkdown(text: string): MdBlock[] | null {
   const tree = read(text);
@@ -163,7 +172,7 @@ export function parseMarkdown(text: string): MdBlock[] | null {
  * throws a DocumentError instead: raw HTML, a picture, a link reference
  * definition, what nests past MAX_DEPTH, a table past its caps, and a
  * text past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
- * MAX_DELIMITERS or MAX_UNDERLINES. So a page shows as it is written, or
+ * MAX_QUOTES, MAX_DELIMITERS or MAX_UNDERLINES. So a page shows as it is written, or
  * its build fails and says where.
  */
 export function parseDocument(text: string): DocBlock[] {
@@ -252,9 +261,66 @@ const FENCE = /^ {0,3}(?:`{3,}|~{3,})/;
 const UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/gm;
 
 /**
+ * The containers a line opens, as CONTAINER_OPENER finds them, up to one
+ * past MAX_LINE_NESTING: whether each is a quote, and whether it is one
+ * of the `>`s the line starts with, which may go on with the line
+ * above's quotes. Four columns of white space before an opener make it
+ * code, or a paragraph's text, to the parser: after another opener, it
+ * opens nothing, and nothing after it does, so the list ends before it.
+ * At the line's start the white space may be a list item's indentation,
+ * so the opener counts, but as one of its own, never going on from above.
+ */
+function openers(line: string): { quote: boolean; leading: boolean }[] {
+  const found: { quote: boolean; leading: boolean }[] = [];
+  let leading = true; // no list marker or indentation has come yet
+  let column = 0; // the column the line is read to, tabs expanded
+  let content = 0; // the column after the last opener and the one space it may take
+  CONTAINER_OPENER.lastIndex = 0;
+  for (
+    let opener = CONTAINER_OPENER.exec(line);
+    opener !== null && found.length <= MAX_LINE_NESTING;
+    opener = CONTAINER_OPENER.exec(line)
+  ) {
+    const marker = opener[0].trim();
+    const at = opener.index + opener[0].indexOf(marker);
+    const markerColumn = columnAfter(line, opener.index, at, column);
+    const indented = markerColumn - content >= 4;
+    if (indented && found.length > 0) break;
+    leading &&= marker === ">" && !indented;
+    found.push({ quote: marker === ">", leading });
+    content = columnAfter(line, at, at + marker.length, markerColumn) + 1;
+    column = columnAfter(line, at, CONTAINER_OPENER.lastIndex, markerColumn);
+  }
+  return found;
+}
+
+/** The column after `text`'s characters from `start` to `end`, read from `column`: a tab goes on to the next multiple of 4. */
+function columnAfter(text: string, start: number, end: number, column: number): number {
+  let after = column;
+  for (let index = start; index < end; index++)
+    after = text[index] === "\t" ? after + 4 - (after % 4) : after + 1;
+  return after;
+}
+
+/** The columns of white space a line starts with, tabs expanded. */
+function indentOf(line: string): number {
+  return columnAfter(line, 0, /^[ \t]*/.exec(line)![0].length, 0);
+}
+
+/**
+ * How many of the line above's `>`s, `above`, a line may go on with. A
+ * line indented less than the one above may have left a list item that
+ * held those quotes, so its `>`s go on with none and each opens one.
+ */
+function quotesGoingOn(above: number, aboveIndent: number, indent: number): number {
+  return indent < aboveIndent ? 0 : above;
+}
+
+/**
  * Why the parser would take too long on the text, and on which line (from
  * 1) when one says it; null when it would not: see MAX_LINE_NESTING,
- * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_DELIMITERS and MAX_UNDERLINES.
+ * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_DELIMITERS and
+ * MAX_UNDERLINES.
  */
 function tooCostly(text: string): { what: string; line: number | null } | null {
   if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS)
@@ -265,23 +331,33 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
       line: null,
     };
   let nested = 0;
+  let quotes = 0;
   let lazy = -1; // lines continuing the paragraph of a container opened above; -1: none open
-  const lines = text.split("\n");
+  let above = 0; // the `>`s the line above starts with, before any list marker: the quotes a line may go on
+  let aboveIndent = 0; // the columns of white space the line above starts with
+  // A line ends at a line feed, a carriage return, or both, as CommonMark has it.
+  const lines = text.split(/\r\n?|\n/);
   for (const [index, line] of lines.entries()) {
-    if (line.trim() === "" || FENCE.test(line)) {
+    // Only spaces and tabs make a line blank, as CommonMark has it: a line
+    // of other white space, such as U+00A0, is a paragraph's text.
+    if (/^[ \t]*$/.test(line) || FENCE.test(line)) {
       lazy = -1;
+      above = 0;
       continue;
     }
-    if (THEMATIC_BREAK.test(line)) continue;
-    CONTAINER_OPENER.lastIndex = 0;
+    if (THEMATIC_BREAK.test(line)) {
+      above = 0;
+      continue;
+    }
+    const indent = indentOf(line);
+    above = quotesGoingOn(above, aboveIndent, indent);
+    aboveIndent = indent;
     let opened = 0;
+    // The `>`s the line starts with, while no list marker comes before them.
+    let leading = 0;
     // An opener is nested after a list marker on its line, or on an indented line.
     let inItem = /^[ \t]/.test(line);
-    for (
-      let opener = CONTAINER_OPENER.exec(line);
-      opener !== null;
-      opener = CONTAINER_OPENER.exec(line)
-    ) {
+    for (const opener of openers(line)) {
       if (++opened > MAX_LINE_NESTING)
         return {
           what: `more than MAX_LINE_NESTING (${MAX_LINE_NESTING}) quotes and list items opened on one line`,
@@ -292,8 +368,16 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
           what: `more than MAX_NESTED_LINES (${MAX_NESTED_LINES}) quotes and list items opened inside a list item`,
           line: index + 1,
         };
-      if (!opener[0].includes(">")) inItem = true;
+      if (!opener.quote) {
+        inItem = true;
+        continue;
+      }
+      // A `>` under one of the line above's goes on with its quote; any other opens one.
+      if (!(opener.leading && leading < above) && ++quotes > MAX_QUOTES)
+        return { what: `more than MAX_QUOTES (${MAX_QUOTES}) block quotes`, line: index + 1 };
+      if (opener.leading) leading++;
     }
+    above = leading;
     if (opened > 0) lazy = 0;
     else if (lazy >= 0 && !/^[ \t]/.test(line) && ++lazy > MAX_LAZY_LINES)
       return {

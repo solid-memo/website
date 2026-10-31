@@ -79,7 +79,7 @@ function rememberedAll<T>(compute: (text: string) => T): (text: string) => T {
  * with the others, as a Map keyed by the texts would when many long texts
  * share a length (a long string is hashed by its length alone).
  */
-export function blocksByPosition(): (position: number, text: string) => MdBlock[] | null {
+function blocksByPosition(): (position: number, text: string) => MdBlock[] | null {
   const cache: { text: string; blocks: MdBlock[] | null }[] = [];
   return (position, text) => {
     const hit = cache[position];
@@ -88,6 +88,33 @@ export function blocksByPosition(): (position: number, text: string) => MdBlock[
     cache[position] = { text, blocks };
     return blocks;
   };
+}
+
+/** How many courses courseDescriptionBlocks keeps the descriptions of; the one used longest ago goes first. */
+export const COURSES_KEPT = 8;
+
+const descriptionsByRelease = new Map<
+  string,
+  (position: number, text: string) => MdBlock[] | null
+>();
+
+/**
+ * The blocks of a course's chapter descriptions, by position
+ * (blocksByPosition), kept for the release (its URL) while the app is
+ * open, for the last COURSES_KEPT courses: coming back to a course's page
+ * does not parse its descriptions again.
+ */
+export function courseDescriptionBlocks(
+  releaseUrl: string,
+): (position: number, text: string) => MdBlock[] | null {
+  let blocksOf = descriptionsByRelease.get(releaseUrl);
+  if (blocksOf === undefined) {
+    blocksOf = blocksByPosition();
+    if (descriptionsByRelease.size >= COURSES_KEPT)
+      descriptionsByRelease.delete(descriptionsByRelease.keys().next().value!);
+  } else descriptionsByRelease.delete(releaseUrl);
+  descriptionsByRelease.set(releaseUrl, blocksOf);
+  return blocksOf;
 }
 
 /**

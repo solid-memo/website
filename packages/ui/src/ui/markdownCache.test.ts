@@ -7,8 +7,9 @@ import { MAX_CHARS, parseMarkdown } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
 import { growth } from "@solid-memo/domain/testing/growth";
 import {
-  blocksByPosition,
   CACHE_SIZE,
+  COURSES_KEPT,
+  courseDescriptionBlocks,
   deckTextCheck,
   markdownBlocks,
   markdownChunks,
@@ -63,18 +64,18 @@ describe("markdownBlocks and markdownPhrases", () => {
   });
 });
 
-describe("blocksByPosition", () => {
+describe("courseDescriptionBlocks", () => {
   it("remembers the text at every position, more than CACHE_SIZE, each its own", () => {
-    const blocksOf = blocksByPosition();
+    const blocksOf = courseDescriptionBlocks("https://r.example/positions");
     const texts = Array.from({ length: CACHE_SIZE + 1 }, (_, index) => `*text* ${index}`);
     const first = texts.map((text, index) => blocksOf(index, text));
     expect(first[0]).toEqual(markdownBlocks(texts[0]!));
     expect(texts.every((text, index) => blocksOf(index, text) === first[index])).toBe(true);
-    expect(blocksByPosition()(0, texts[0]!)).not.toBe(first[0]);
+    expect(courseDescriptionBlocks("https://r.example/other")(0, texts[0]!)).not.toBe(first[0]);
   });
 
   it("reads long texts of one length again without parsing, and a changed one anew", () => {
-    const blocksOf = blocksByPosition();
+    const blocksOf = courseDescriptionBlocks("https://r.example/long");
     const long = "a".repeat(17_000);
     const texts = Array.from(
       { length: 50 },
@@ -88,6 +89,18 @@ describe("blocksByPosition", () => {
     expect(blocksOf(0, texts[1]!)).not.toBe(first[0]);
     expect(blocksOf(0, texts[1]!)).toEqual(first[1]);
     expect(parseMarkdown).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a release's descriptions for the last COURSES_KEPT courses, the one used longest ago going first", () => {
+    const url = (index: number) => `https://r.example/kept/${index}`;
+    const kept = Array.from({ length: COURSES_KEPT }, (_, index) =>
+      courseDescriptionBlocks(url(index)),
+    );
+    expect(courseDescriptionBlocks(url(0))).toBe(kept[0]);
+    courseDescriptionBlocks(url(COURSES_KEPT));
+    expect(courseDescriptionBlocks(url(0))).toBe(kept[0]);
+    expect(courseDescriptionBlocks(url(2))).toBe(kept[2]);
+    expect(courseDescriptionBlocks(url(1))).not.toBe(kept[1]);
   });
 });
 
