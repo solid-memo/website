@@ -24,6 +24,7 @@ import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
 import { unlessNewer } from "./records";
 import { refuseUnwritable } from "./writableTerms";
 import { AppError } from "@solid-memo/domain/appError";
+import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 
 /**
@@ -32,9 +33,10 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
  *
  * - every read remembers the document's ETag, with the dataset it returned
  *   (keyed by its source's key, which edits of the dataset keep);
- * - saving an edit of a dataset read from the same URL sends
- *   `If-Match: <that ETag>`: had the document changed since, the pod
- *   answers 412 and nothing is written;
+ * - saving an edit of a dataset read from the same URL (compared as a
+ *   request sends both, isSameUrl) sends `If-Match: <that ETag>`: had
+ *   the document changed since, the pod answers 412 and nothing is
+ *   written;
  * - saving a new dataset is a creation, sent with `If-None-Match: *`
  *   (client/resources.ts writeDocument): had the document appeared
  *   meanwhile, 412;
@@ -258,7 +260,7 @@ export async function saveDataset<T extends Dataset>(
   { whole = false }: { whole?: boolean } = {},
 ): Promise<void> {
   const source = sourceOf(dataset);
-  const isEdit = source !== undefined && source.url === url;
+  const isEdit = source !== undefined && isSameUrl(source.url, url);
   // A dataset from a read since written over (the same, or another edit of it) is not what the document holds.
   if (isEdit && WRITTEN_OVER.has(source.key)) throw new PreconditionFailedError(url, "unchanged");
   const etag = isEdit ? strong(ETAGS.get(source.key)) : undefined;
@@ -279,15 +281,19 @@ export async function saveDataset<T extends Dataset>(
   // Only where a precondition held does the document hold just what was written.
   const version = strong(written.etag);
   if (version === undefined || (isEdit && etag === undefined)) return;
-  const savedSource = sourceOf(written.dataset);
-  if (savedSource?.url !== url) return;
-  ETAGS.set(savedSource.key, version);
+  if (!isReadFrom(written.dataset, url)) return;
+  ETAGS.set(sourceOf(written.dataset)!.key, version);
   readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: written.dataset });
 }
 
-/** Whether `dataset` was read from (or last saved to) `url`: a save of it is an edit there, If-Match its version. */
+/**
+ * Whether `dataset` was read from (or last saved to) `url`, compared as a
+ * request sends both (isSameUrl): a save of it is an edit there, If-Match
+ * its version.
+ */
 export function isReadFrom(dataset: object, url: string): boolean {
-  return sourceOf(dataset)?.url === url;
+  const source = sourceOf(dataset);
+  return source !== undefined && isSameUrl(source.url, url);
 }
 
 /**
@@ -301,7 +307,7 @@ export async function deleteDataset(
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   const source = sourceOf(dataset);
-  const isRead = source !== undefined && source.url === url;
+  const isRead = source !== undefined && isSameUrl(source.url, url);
   // A read since written over is not what the document holds: deleting on it is refused as a save is.
   if (isRead && WRITTEN_OVER.has(source.key)) throw new PreconditionFailedError(url, "unchanged");
   const etag = isRead ? strong(ETAGS.get(source.key)) : undefined;
