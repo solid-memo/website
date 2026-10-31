@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.17.31](https://github.com/solid-memo/website/compare/v6.17.30...v6.17.31) (2026-10-31)
+
+### Bug Fixes
+
+* **studio:** link a draft's release only at a release's address ([8bd995d](https://github.com/solid-memo/website/commit/8bd995dd294f10310ed462ebdbdc0dfa01c87c91))
+
 ## [6.17.30](https://github.com/solid-memo/website/compare/v6.17.29...v6.17.30) (2026-10-31)
 
 ### Bug Fixes
