@@ -7,7 +7,7 @@
 # Pivot's components, from the lockfile beside this file, run with
 # pivot-e2e.json. Pivot's own views name their templates relative to the
 # working directory, hence the link. Nothing it needs is an install script.
-FROM node:22.23.4-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d
+FROM node:22.23.4-bookworm-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da
 WORKDIR /srv/pivot
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts --omit=dev --no-audit --no-fund && ln -s node_modules/@solid/pivot/templates templates
