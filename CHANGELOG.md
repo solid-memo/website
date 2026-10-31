@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.20.3](https://github.com/solid-memo/website/compare/v6.20.2...v6.20.3) (2026-10-31)
+
+### Bug Fixes
+
+* **domain:** find a bulk edit's cards, states and free ids in one pass ([8bd630e](https://github.com/solid-memo/website/commit/8bd630e9f9b08a7b5f20901c331ab1f159dfd9d3))
+* **domain:** find a release's authors among its agents by id ([c78b238](https://github.com/solid-memo/website/commit/c78b238690727819a4f930738ed7c8c474b72723))
+* **studio:** find the draft cards table's places in one pass ([8391522](https://github.com/solid-memo/website/commit/839152203c405e1f3c81d412d5267268e7e7f476))
+
 ## [6.20.2](https://github.com/solid-memo/website/compare/v6.20.1...v6.20.2) (2026-10-31)
 
 ### Bug Fixes
