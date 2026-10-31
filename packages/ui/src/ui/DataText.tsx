@@ -4,7 +4,7 @@
 
 import { cardLabel, cardLabelText, isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
-import type { MdBlock } from "@solid-memo/markdown/parse";
+import type { MdBlock, MdPhrase } from "@solid-memo/markdown/parse";
 import { labelText } from "@solid-memo/markdown/plainText";
 import { breakable } from "./breakable";
 import { useCardText, useCourseText } from "./cardLanguage";
@@ -126,25 +126,45 @@ export function useProseChunks(text: LangText, markdown: boolean): number {
   return (markdown ? markdownChunks(cardText(text))?.length : undefined) ?? 1;
 }
 
+/** How a list of lines reads each line's Markdown: markdownPhrases, or a list's own (optionPhrases). */
+type PhrasesOf = (text: string) => MdPhrase[] | null;
+
 /**
  * Text from data that must stay one line of phrasing, such as an option
  * in a `<label>` or a card's label: as DataText, but Markdown keeps only
  * emphasis and code (the inline profile, parseInlineMarkdown). The bare
  * content, for the caller's own element; DataLine wraps it with its
- * language.
+ * language. The phrasing is read from `phrasesOf`, markdownPhrases unless
+ * a list of texts longer than its cache passes its own (optionPhrases).
  */
-export function DataLineContent({ text, markdown }: { text: LangText; markdown: boolean }) {
+export function DataLineContent({
+  text,
+  markdown,
+  phrasesOf = markdownPhrases,
+}: {
+  text: LangText;
+  markdown: boolean;
+  phrasesOf?: PhrasesOf;
+}) {
   const { cardText } = useCardText();
   const shown = cardText(text);
-  const phrases = markdown ? markdownPhrases(shown) : null;
+  const phrases = markdown ? phrasesOf(shown) : null;
   return phrases === null ? <>{breakable(shown)}</> : <MarkdownInlines nodes={phrases} />;
 }
 
 /** DataLineContent in a span marked with its language, when that is not the page's. */
-export function DataLine({ text, markdown }: { text: LangText; markdown: boolean }) {
+export function DataLine({
+  text,
+  markdown,
+  phrasesOf,
+}: {
+  text: LangText;
+  markdown: boolean;
+  phrasesOf?: PhrasesOf;
+}) {
   const { cardLang } = useCardText();
   const lang = cardLang(text);
-  const content = <DataLineContent text={text} markdown={markdown} />;
+  const content = <DataLineContent text={text} markdown={markdown} phrasesOf={phrasesOf} />;
   return lang === undefined ? content : <span lang={lang}>{content}</span>;
 }
 

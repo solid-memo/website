@@ -4,7 +4,22 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
+import { DataLine } from "./DataText";
+import { CACHE_SIZE } from "./markdownCache";
 import { MultipleChoice, type ChoiceOption } from "./MultipleChoice";
+
+// Counts the options' parses, parsing as ever.
+vi.mock("@solid-memo/markdown/inline", async (actual) => {
+  const inline = await actual<typeof import("@solid-memo/markdown/inline")>();
+  return { ...inline, parseInlineMarkdown: vi.fn(inline.parseInlineMarkdown) };
+});
+
+// Counts the options drawn, drawing them as ever.
+vi.mock("./DataText", async (actual) => {
+  const dataText = await actual<typeof import("./DataText")>();
+  return { ...dataText, DataLine: vi.fn(dataText.DataLine) };
+});
 
 const choices: ChoiceOption[] = [
   { key: "back", text: { en: "An IRI" } },
@@ -103,5 +118,47 @@ describe("MultipleChoice", () => {
     renderChoice({ answered: { chosen: "back", correct: "back" } });
     expect(screen.getByText("Right answer").closest("label")).toHaveClass("choice-right");
     expect(screen.queryByText("Your answer")).toBeNull();
+  });
+
+  it("parses each Markdown option once for the question, however many it offers", () => {
+    // More options than the shared cache keeps, each read again in the same order.
+    const many = (): ChoiceOption[] =>
+      Array.from({ length: CACHE_SIZE + 100 }, (_, index) => ({
+        key: `distractor:d${index}`,
+        text: { en: `option ${index} *em*` },
+      }));
+    const parse = vi.mocked(parseInlineMarkdown);
+    const drawn = vi.mocked(DataLine);
+    parse.mockClear();
+    const { rerender } = renderChoice({ choices: many(), markdown: true });
+    const count = CACHE_SIZE + 100;
+    expect(parse).toHaveBeenCalledTimes(count);
+    expect(screen.getAllByText("em")[0]!.tagName).toBe("EM");
+    // A pick draws only the options whose state changes.
+    const radios = screen.getAllByRole("radio");
+    drawn.mockClear();
+    fireEvent.click(radios[1]!);
+    expect(drawn).toHaveBeenCalledTimes(1);
+    drawn.mockClear();
+    fireEvent.keyDown(radios[1]!, { key: "3" });
+    expect(radios[2]).toBeChecked();
+    expect(drawn).toHaveBeenCalledTimes(2);
+    // Drawn again with the same options in a new list, once checked, every
+    // option reads its parse of before.
+    rerender(
+      <>
+        <p id="q">What names a thing?</p>
+        <MultipleChoice
+          labelledBy="q"
+          choices={many()}
+          markdown
+          busy={false}
+          answered={{ chosen: "distractor:d2", correct: "distractor:d0" }}
+          onCheck={vi.fn()}
+        />
+      </>,
+    );
+    expect(radios.every((radio) => (radio as HTMLInputElement).disabled)).toBe(true);
+    expect(parse).toHaveBeenCalledTimes(count);
   });
 });
