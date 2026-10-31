@@ -37,7 +37,7 @@ import {
 } from "./interface";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
 import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
-import { quadTally, textChunks } from "./readLimits";
+import { quadTally, type TextStream, textChunks, writeTurtle } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
 
@@ -356,8 +356,9 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * text names. Rejects with the parser's error on a text that does not
  * parse, and with a ReadLimitError at the first quad past `limits`
  * (quadTally; the text's own size is its caller's to check: it holds the
- * text already). JSON-LD is read with no fetch at all: a context named
- * by its address is refused (parseJsonLd).
+ * text already), or on a Turtle text at its first base past them
+ * (writeTurtle); the parser reads no further. JSON-LD is read with no
+ * fetch at all: a context named by its address is refused (parseJsonLd).
  */
 export function parseQuads(
   text: string,
@@ -369,17 +370,20 @@ export function parseQuads(
     const quads: Quad[] = [];
     const past = quadTally(limits);
     let refused = false;
-    // Whether to go on: false once past limits, for the JSON-LD parser to stop (parseJsonLd).
+    const refuse = () => {
+      refused = true;
+      quads.length = 0;
+      // The tally, and the bases, are past limits only under some.
+      reject(new ReadLimitError(baseUrl, limits!));
+    };
+    // Whether to go on: false once past limits, for the parser to stop (parseJsonLd, writeTurtle).
     const onQuad = (quad: Quad): boolean => {
       if (refused) return false;
       if (!past(quad)) {
         quads.push(quad);
         return true;
       }
-      refused = true;
-      quads.length = 0;
-      // The tally is past limits only under some.
-      reject(new ReadLimitError(baseUrl, limits!));
+      refuse();
       return false;
     };
     const done = () => resolve(quads);
@@ -391,7 +395,10 @@ export function parseQuads(
     parser.onQuad(onQuad);
     parser.onError(reject);
     parser.onComplete(done);
-    parser.parse(text, serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format])));
+    const resourceInfo = serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format]));
+    // solid-client hands the text to n3's parser as it is, which reads a stream as well.
+    const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);
+    if (!writeTurtle(text, baseUrl, limits, parse, () => !refused)) refuse();
   });
 }
 

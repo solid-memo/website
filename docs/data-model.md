@@ -1396,7 +1396,12 @@ An import reads the file as the pod is read, with the same mappers:
   of those triples, which a prefix or a context can make far longer
   than the text. They leave a wide margin over a deck of tens of
   thousands of cards with progress, which the pod holds with no limit.
-  A release file the Studio opens is held to a release's limits
+  A Turtle file is refused the same way when it declares its base more
+  than 16 times or more than 4,096 prefixes. So is one whose base can
+  grow past 512 characters or has a `.`, `..` or empty segment in its
+  path. Its parse stops there, as it stops at the first triple past the
+  limits. A declaration quoted in a card's text doesn't count. A
+  release file the Studio opens is held to a release's limits
   ([deck-library.md](deck-library.md#from-a-link));
 - a triple with a term Turtle can't write as it is is left out (below).
 

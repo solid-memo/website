@@ -316,9 +316,13 @@ describe("readDeckFile", () => {
   });
 
   it("refuses as unreadable a text the parser throws on at once, not only one it reports", async () => {
-    // Not a string: the Turtle parser takes it for a stream and throws before it reads.
-    const text = {} as unknown as string;
-    await expect(parseDeckFile(text, "turtle", base)).rejects.toMatchObject({
+    // Not a string: reading it throws before the parser reads any of it.
+    const text = {
+      get length(): number {
+        throw new TypeError("Not a text");
+      },
+    } as unknown as string;
+    await expect(parseDeckFile(text, "turtle", base, null)).rejects.toMatchObject({
       code: "deckFileUnreadable",
     });
   });
