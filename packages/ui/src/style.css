@@ -757,11 +757,16 @@ main.landing > a.hero-brand > h1:not(.hero-heading) {
   color: var(--text-muted);
 }
 
-/* The maker's note, after the guest's offer: a quote, not another card. */
+/* The maker's note, after the guest's offer: a quote on the cards'
+   surface, so the paper's circles behind it do not show through. */
 .maker-note {
   margin: 0 0 1.5rem;
-  padding: 0.1rem 0 0.1rem 0.9rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .maker-note blockquote {
