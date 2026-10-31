@@ -78,4 +78,60 @@ describe("the digest's records", () => {
     expect(monthSummaryFromRecord({ ...record, days: ["2026-09-02 3 1 2"] })).toBeNull();
     expect(monthSummaryFromRecord({ ...record, recallSeconds: ["61 1"] })).toBeNull();
   });
+
+  it("leaves out a month summary whose days are not days of its month, each once", () => {
+    const record = monthSummaryToRecord({
+      document: "https://pod.example/history/2026-09.ttl",
+      version: '"m"',
+      summary: {
+        days: [{ studyDay: "2026-09-02", answers: 3, introduced: 1, reviews: 2, lapses: 0 }],
+        young: { reviews: 0, recalled: 0 },
+        recallSeconds: {},
+      },
+    });
+    const read = (change: Partial<typeof record>) =>
+      monthSummaryFromRecord({ ...record, ...change });
+    // A day either side of the month is one of its answers given near midnight.
+    const days = ["2026-08-31 1 0 0 0", "2026-09-30 1 0 0 0", "2026-10-01 1 0 0 0"];
+    expect(read({ days })?.summary.days.map((day) => day.studyDay)).toEqual([
+      "2026-08-31",
+      "2026-09-30",
+      "2026-10-01",
+    ]);
+    for (const day of ["2026-10-02", "2026-08-30", "2026-09-31", "2026-09-60", "2027-09-02"])
+      expect(read({ days: [`${day} 1 0 0 0`] })).toBeNull();
+    expect(read({ days: ["2026-09-02 1 0 0 0", "2026-09-02 2 0 0 0"] })).toBeNull();
+    // Only the answer log's month documents are summarized.
+    expect(read({ document: "https://pod.example/history/notes.ttl" })).toBeNull();
+    for (const document of [
+      "https://pod.example/evil/2026-09.ttl",
+      "https://pod.example/2026-09.ttl",
+      "https://pod.example/notes?at=/history/2026-09.ttl",
+      "https://pod.example/history/2026-09.ttl?at=1",
+      "https://pod.example/notes#/history/2026-09.ttl",
+      "https://pod.example/history/2026-09.ttl#it",
+    ])
+      expect(read({ document })).toBeNull();
+    // More days than a month has, each of them sound, are not read one by one.
+    const many = Array.from({ length: 34 }, () => "2026-09-02 1 0 0 0");
+    expect(read({ days: many })).toBeNull();
+  });
+
+  it("leaves out a month summary with a count past what a number holds exactly", () => {
+    const record = monthSummaryToRecord({
+      document: "https://pod.example/history/2026-09.ttl",
+      version: '"m"',
+      summary: { days: [], young: { reviews: 1, recalled: 1 }, recallSeconds: {} },
+    });
+    const read = (change: Partial<typeof record>) =>
+      monthSummaryFromRecord({ ...record, ...change });
+    const digits = (count: number) => "9".repeat(count);
+    expect(read({ days: [`2026-09-02 ${digits(15)} ${digits(15)} 0 0`] })).not.toBeNull();
+    expect(read({ days: [`2026-09-02 ${digits(16)} 0 0 0`] })).toBeNull();
+    expect(read({ days: ["2026-09-02 1 0 0 ".concat(digits(400))] })).toBeNull();
+    expect(read({ recallSeconds: [`3 ${digits(16)}`] })).toBeNull();
+    for (const count of [Number.POSITIVE_INFINITY, -1, 2 ** 53, 0.5])
+      expect(read({ youngReviews: count })).toBeNull();
+    expect(read({ youngRecalled: -1 })).toBeNull();
+  });
 });

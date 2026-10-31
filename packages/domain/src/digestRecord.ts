@@ -7,6 +7,7 @@ import type {
   DocumentReceiptV1,
   MonthSummaryV1,
 } from "@solid-memo/vocab/types.generated";
+import { isOfStudyMonth } from "./answer";
 import {
   conceptOfDirection,
   conceptOfScheduler,
@@ -84,15 +85,41 @@ export function scheduleToRecord(stored: StoredSchedule): DeckScheduleV2 {
   };
 }
 
-/** A month summary's values as its shape has them (month-summary/v1.ttl). */
-const DAY_COUNTS = /^\d{4}-\d{2}-\d{2} [1-9]\d* \d+ \d+ \d+$/;
-const RECALL_SECONDS = /^([0-9]|[1-5][0-9]|60) [1-9][0-9]*$/;
+/**
+ * A month summary's values as its shape has them (month-summary/v1.ttl),
+ * each count of at most 15 digits, so a safe integer.
+ */
+const DAY_COUNTS = /^\d{4}-\d{2}-\d{2} [1-9]\d{0,14}( \d{1,15}){3}$/;
+const RECALL_SECONDS = /^([0-9]|[1-5][0-9]|60) [1-9][0-9]{0,14}$/;
+/**
+ * The month a summary is of, by its answer-log document, a path ending
+ * in history/<YYYY-MM>.ttl with no query or fragment (historyUrlOf).
+ */
+const SUMMARIZED_MONTH = /^[^?#]*\/history\/(\d{4}-\d{2})\.ttl$/;
+/** The most study days a month's answers can have: its own and a day either side (isOfStudyMonth). */
+const MONTH_DAYS = 33;
 
-/** null when a value is not as the shape has it: the summary is derived, so it is made again. */
+/**
+ * null when a value is not as the shape has it, or its days are not
+ * days of its month, each once: the summary is derived, so it is made
+ * again from the month's answers.
+ */
 export function monthSummaryFromRecord(data: MonthSummaryV1): StoredMonthSummary | null {
+  const month = SUMMARIZED_MONTH.exec(data.document)?.[1];
   if (
+    month === undefined ||
+    data.days.length > MONTH_DAYS ||
     !data.days.every((value) => DAY_COUNTS.test(value)) ||
-    !data.recallSeconds.every((value) => RECALL_SECONDS.test(value))
+    !data.recallSeconds.every((value) => RECALL_SECONDS.test(value)) ||
+    ![data.youngReviews, data.youngRecalled].every(
+      (count) => Number.isSafeInteger(count) && count >= 0,
+    )
+  )
+    return null;
+  const studyDays = data.days.map((value) => value.split(" ")[0]!);
+  if (
+    new Set(studyDays).size !== studyDays.length ||
+    !studyDays.every((day) => isOfStudyMonth(day, month))
   )
     return null;
   const recallSeconds: Record<number, number> = {};

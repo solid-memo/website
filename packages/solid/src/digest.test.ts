@@ -406,4 +406,31 @@ describe("the instance's digest in the pod", () => {
       emptyDigest(),
     );
   });
+
+  it("leaves out a month summary with days not of its month, and writes the one made again over it", async () => {
+    const pod = fakePod();
+    const subject = `${DIGEST}#month-history-2026-09.ttl`;
+    await pod.put(
+      DIGEST,
+      `${PREFIXES}<#month-history-2026-09.ttl> a sm:MonthSummary ; sm:formatVersion 1 ;
+         sm:summaryOf <history/2026-09.ttl> ; sm:summarizedVersion "\\"m1\\"" ;
+         sm:youngReviewCount 0 ; sm:youngRecalledCount 0 ;
+         sm:studyDayCounts "2026-09-29 1 0 0 0", "2027-01-60 1 0 0 0" .`,
+    );
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    expect(await digests.readDigest(INSTANCE)).toEqual(emptyDigest());
+    await digests.updateDigest(INSTANCE, (stored) =>
+      withMonthSummaries(stored!, { [month.document]: month }),
+    );
+    expect(await digests.readDigest(INSTANCE)).toEqual(
+      withMonthSummaries(emptyDigest(), { [month.document]: month }),
+    );
+    const days = pod
+      .triples(DIGEST)!
+      .filter((t) => t.startsWith(`<${subject}> <${SM}studyDayCounts>`));
+    expect(days).toEqual([
+      `<${subject}> <${SM}studyDayCounts> "2026-09-29 12 3 8 1" .`,
+      `<${subject}> <${SM}studyDayCounts> "2026-09-30 1 0 0 0" .`,
+    ]);
+  });
 });

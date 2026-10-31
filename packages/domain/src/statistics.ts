@@ -229,12 +229,16 @@ export function dailyActivity(answers: readonly Answer[], index: ChainIndex): Da
   return [...byDay.values()].sort((a, b) => a.studyDay.localeCompare(b.studyDay));
 }
 
-/** Runs of consecutive study days: the one alive today, and the longest. */
+/**
+ * Runs of consecutive study days: the one alive today, and the longest.
+ * Only days written as the calendar writes them count: "2027-01-99" is
+ * no day, and as a later date it would start a run inside another.
+ */
 export function streaksOf(studyDays: readonly string[], today: string): Streaks {
-  const studied = new Set(studyDays);
+  const studied = new Set(studyDays.filter((day) => shiftStudyDay(day, 0) === day));
   let longest = 0;
   for (const day of studied) {
-    // A run starts on a day without the one before; before 0100-01-04 the same day comes back.
+    // A run starts on a day without the one before; on 0100-01-04 the same day comes back.
     const before = shiftStudyDay(day, -1);
     if (before < day && studied.has(before)) continue;
     let run = 1;
