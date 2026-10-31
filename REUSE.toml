@@ -120,6 +120,7 @@ path = [
     "decks/physics-equations/*.ttl",
     "decks/portuguese-basics/*.ttl",
     "decks/python-built-ins/*.ttl",
+    "decks/reading-hangul/*.ttl",
     "decks/rijksmuseum-collection/*.ttl",
     "decks/roman-numerals/*.ttl",
     "decks/shakespeare-plays/*.ttl",
