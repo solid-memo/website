@@ -109,7 +109,8 @@ The deck list is home. From the top:
   brings none.
 - **Today**: once you've studied today, your streak (days in a row), a
   word of praise and the day's numbers, with a link to all your
-  statistics ([statistics.md](statistics.md#the-today-strip)). Before
+  statistics ([statistics.md](statistics.md#the-today-strip)). Finish
+  every deck's cards for the day and the strip's flame sparkles. Before
   you study, a welcome back: the streak that studying today keeps, a
   note on it that changes daily, and the cards left for today. After a
   streak has lapsed, a gentle note to start a new one.

@@ -547,6 +547,7 @@
       "some": "멋진 학습이었어요!",
       "many": "정말 대단해요!"
     },
+    "allDone": "오늘 공부를 모두 마쳤어요!",
     "streakCount": {
       "other": "{count}일 연속 학습"
     },

@@ -43,7 +43,9 @@ import {
  * on SM-2 is invited to switch to FSRS-6 above the list
  * (SchedulerInvitationContainer), until they switch or answer "Not now".
  * The highlights of a version this browser has not shown are at the top
- * (WhatsNewContainer), until closed.
+ * (WhatsNewContainer), until closed. A study session just left with an
+ * answer (`celebrate`) is celebrated in today's strip once nothing is
+ * left to study today (TodaySummary).
  */
 export function DeckListContainer({
   useCases,
@@ -51,6 +53,7 @@ export function DeckListContainer({
   isSetAside = () => false,
   arrangementSetAside = false,
   checking = false,
+  celebrate = false,
   onStudyDeck,
   onCourseStarted,
 }: {
@@ -61,6 +64,8 @@ export function DeckListContainer({
   arrangementSetAside?: boolean;
   /** The instance's data is still being checked, under a policy that may set some of it aside: the list cannot be rearranged yet. */
   checking?: boolean;
+  /** A study session was just left with an answer: finishing the day's study is celebrated. */
+  celebrate?: boolean;
   onStudyDeck: (deck: Deck) => void;
   /** Called with the instance's deck of the course for newcomers once it is started. */
   onCourseStarted: (deck: Deck) => void;
@@ -84,6 +89,7 @@ export function DeckListContainer({
         useCases={useCases}
         instance={instance}
         decks={decks.filter((deck) => !isSetAside(deck))}
+        celebrate={celebrate}
       />
       <CourseStripContainer
         useCases={useCases}

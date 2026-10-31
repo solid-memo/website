@@ -560,6 +560,7 @@
       "some": "Ett riktigt bra pass!",
       "many": "Imponerande insats!"
     },
+    "allDone": "Allt klart för idag!",
     "streakCount": {
       "one": "{count} dag i rad",
       "other": "{count} dagar i rad"

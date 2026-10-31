@@ -659,8 +659,34 @@ describe("StudyContainer", () => {
     const { onExit } = renderContainer(makeUseCasesFake());
     fireEvent.click(await screen.findByRole("button", { name: "End session" }));
     await waitFor(() => {
-      expect(onExit).toHaveBeenCalledOnce();
+      expect(onExit).toHaveBeenCalledExactlyOnceWith(false);
     });
+  });
+
+  it("exits saying whether an answer of the session still stands", async () => {
+    const twoCards = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+    });
+    const { onExit } = renderContainer(twoCards);
+    await answer("4 — Good");
+    fireEvent.click(await undoButton());
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    const end = screen.getByRole("button", { name: "End session" });
+    await waitFor(() => expect(end).toBeEnabled());
+    fireEvent.click(end);
+    await waitFor(() => expect(onExit).toHaveBeenCalledExactlyOnceWith(false));
+
+    onExit.mockClear();
+    await answer("4 — Good");
+    await screen.findByText("front-b");
+    await waitFor(() => expect(end).toBeEnabled());
+    fireEvent.click(end);
+    await waitFor(() => expect(onExit).toHaveBeenCalledExactlyOnceWith(true));
   });
 
   it("drops the deck's cached queue when the session is left", async () => {

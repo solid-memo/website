@@ -22,7 +22,7 @@ import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "../test/useCasesFake";
-import { deckProgressOf } from "../test/fakes/statistics";
+import { deckProgressOf, todayFiguresFrom } from "../test/fakes/statistics";
 import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { routeToHash, statisticsHref } from "./router";
 import { queryKeys } from "./queryKeys";
@@ -2391,6 +2391,64 @@ describe("Workspace", () => {
     formatVersion: 1,
     authors: [],
   };
+
+  it("celebrates a session that leaves nothing to study today, on its return to the deck list only", async () => {
+    let answered = false;
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [deck]),
+      getStudyQueue: vi.fn(async () => ({
+        due: answered ? [] : [{ card: dueCard, direction: "front-to-back" as const }],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+      // An answer earlier today: the strip shows from the start.
+      getTodayFigures: vi.fn(async () =>
+        todayFiguresFrom(
+          [
+            {
+              id: "answer-1",
+              deckUrl: deck.url,
+              cardUrl: dueCard.url,
+              direction: "front-to-back",
+              grade: 1,
+              answeredAt: "2026-09-21T09:00:00.000Z",
+              studyDay: "2026-09-21",
+              nextIntervalDays: 0,
+            },
+          ],
+          "2026-09-21",
+        ),
+      ),
+    });
+    const recordReview = useCases.recordReview;
+    useCases.recordReview = vi.fn(async (...args: Parameters<UseCases["recordReview"]>) => {
+      answered = true;
+      return recordReview(...args);
+    });
+    renderWorkspace(useCases);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Study Kanji N5" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
+    fireEvent.click(await screen.findByRole("button", { name: "4 — Good" }));
+    await screen.findByText("Session finished — all cards reviewed.");
+    const end = screen.getByRole("button", { name: "End session" });
+    await waitFor(() => expect(end).toBeEnabled());
+    fireEvent.click(end);
+    expect(await screen.findByText(/^All done for today!/)).toBeInTheDocument();
+    expect(document.querySelector(".today-stars")).not.toBeNull();
+
+    act(() => {
+      window.location.hash = statisticsHref(instanceA.url);
+    });
+    await screen.findByRole("heading", { name: "Statistics" });
+    act(() => {
+      window.location.hash = routeToHash({ screen: "home", instanceUrl: instanceA.url });
+    });
+    expect(await screen.findByText(/^All done for today!/)).toBeInTheDocument();
+    expect(document.querySelector(".today-stars")).toBeNull();
+  });
 
   it("keeps the URL in sync while navigating", async () => {
     renderWorkspace(

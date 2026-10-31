@@ -434,6 +434,14 @@ export function Workspace({
     if (route?.screen !== "course") setJustCompleted(null);
   }, [route]);
 
+  // A study session just left with an answer, for the deck list to
+  // celebrate once nothing is left to study today. Kept in memory, as
+  // justCompleted is, and dropped as the learner leaves the deck list.
+  const [justStudied, setJustStudied] = useState(false);
+  useEffect(() => {
+    if (route?.screen !== "home") setJustStudied(false);
+  }, [route]);
+
   const preferencesQuery = useQuery({
     queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl!),
@@ -733,6 +741,7 @@ export function Workspace({
             isSetAside={isSetAside}
             arrangementSetAside={arrangementIsSetAside}
             checking={checkUnsettled}
+            celebrate={justStudied}
             onStudyDeck={(deck) =>
               navigate({
                 screen: "study",
@@ -939,7 +948,10 @@ export function Workspace({
               useCases={useCases}
               instance={activeInstance!}
               deck={activeDeck!}
-              onExit={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
+              onExit={(studied) => {
+                setJustStudied(studied);
+                navigate({ screen: "home", instanceUrl: instanceUrl! });
+              }}
             />
           </CardLanguage>
         );

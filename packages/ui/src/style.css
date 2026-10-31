@@ -4229,6 +4229,88 @@ p[role="status"]:not(.loading) {
   fill: color-mix(in srgb, var(--accent-yellow) 35%, transparent);
 }
 
+/* The day's study just done: the flame pops, a shimmer sweeps once
+   across the strip from left to right, and small stars along it pop up
+   as the shimmer passes them, float up a little and fade. Both stay
+   within the strip (it clips them) and out of the pointer's way; a star
+   at rest is transparent and the shimmer rests off the strip, so with
+   motion reduced (every animation stopped) there is nothing to see, and
+   all of it is over in under two seconds. */
+.today-strip.just-done {
+  position: relative;
+  overflow: hidden;
+}
+
+.today-strip.just-done svg.icon {
+  animation: badge-pop 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0.2s backwards;
+}
+
+.today-strip.just-done::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, var(--shine) 50%, transparent 60%);
+  transform: translateX(-60%);
+  opacity: 0;
+  pointer-events: none;
+  animation: today-shimmer 1s linear 0.2s;
+}
+
+@keyframes today-shimmer {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(60%);
+  }
+}
+
+.today-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* A four-pointed star at its place along the strip (--x, a share of its
+   width), timed to pop as the shimmer's light reaches it. */
+.today-stars > span {
+  position: absolute;
+  top: 35%;
+  left: calc(var(--x) * 100%);
+  width: 0.6rem;
+  height: 0.6rem;
+  margin: -0.3rem;
+  background: var(--accent-yellow);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  opacity: 0;
+  animation: star-rise 0.8s ease-out calc(0.1s + (var(--x) + 0.1) * 0.8s) backwards;
+}
+
+.today-stars > span:nth-child(even) {
+  top: 65%;
+  background: var(--primary);
+}
+
+@keyframes star-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0) scale(0.2);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translateY(-0.2rem) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-0.8rem) scale(0.7);
+  }
+}
+
 .streak-count {
   font-size: 1.1rem;
 }

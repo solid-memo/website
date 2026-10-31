@@ -26,7 +26,8 @@ import { WelcomeBack } from "./WelcomeBack";
  * read (studyCountsQuery, one cache), once every deck's is known, and
  * about how many minutes they will take, from how long an answer has
  * taken and how often young cards were forgotten over those months
- * (expectedTimeToday), a minute at least.
+ * (expectedTimeToday), a minute at least. Finishing the day's study is
+ * celebrated when `celebrate` asks for it (TodaySummary).
  * Before the day's first answer, a word of welcome back in its place,
  * with the streak that studying today keeps (WelcomeBack), for a learner
  * who has studied before. Nothing when the answers cannot be read: the
@@ -36,10 +37,13 @@ export function TodaySummaryContainer({
   useCases,
   instance,
   decks,
+  celebrate = false,
 }: {
   useCases: UseCases;
   instance: Instance;
   decks: readonly Deck[];
+  /** A study session was just left with an answer. */
+  celebrate?: boolean;
 }) {
   const figures = useQuery(todayFiguresQuery(useCases, instance.url));
   const counts = useQueries({
@@ -69,6 +73,7 @@ export function TodaySummaryContainer({
       today={today}
       left={left}
       minutesLeft={minutesLeft}
+      celebrate={celebrate}
       statisticsHref={statisticsHref(instance.url)}
     />
   );

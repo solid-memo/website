@@ -115,6 +115,21 @@ describe("TodaySummary", () => {
     expect(screen.queryByText(/to go/)).toBeNull();
   });
 
+  it("says the day is done once nothing is left, with a shimmer and stars just after a session", () => {
+    const { container, rerender } = render(
+      <TodaySummary today={today()} left={0} statisticsHref="#/statistics" />,
+    );
+    expect(screen.getByText(/^All done for today! 4 cards/)).toBeInTheDocument();
+    expect(container.querySelector(".today-stars")).toBeNull();
+    rerender(<TodaySummary today={today()} left={0} celebrate statisticsHref="#/statistics" />);
+    expect(container.querySelector(".today-stars")).toHaveAttribute("aria-hidden", "true");
+    rerender(<TodaySummary today={today()} left={2} celebrate statisticsHref="#/statistics" />);
+    expect(screen.getByText(/^Nice work! 4 cards/)).toBeInTheDocument();
+    expect(container.querySelector(".today-stars")).toBeNull();
+    rerender(<TodaySummary today={today()} celebrate statisticsHref="#/statistics" />);
+    expect(container.querySelector(".today-stars")).toBeNull();
+  });
+
   it("cheers louder the more was studied", () => {
     const { rerender } = render(
       <TodaySummary today={today({ answers: 10 })} statisticsHref="#/statistics" />,
@@ -133,7 +148,12 @@ describe("TodaySummaryContainer", () => {
     {
       decks = [],
       getStudyCounts,
-    }: { decks?: Deck[]; getStudyCounts?: UseCases["getStudyCounts"] } = {},
+      celebrate,
+    }: {
+      decks?: Deck[];
+      getStudyCounts?: UseCases["getStudyCounts"];
+      celebrate?: boolean;
+    } = {},
   ) {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrap = (node: ComponentChildren) => (
@@ -148,6 +168,7 @@ describe("TodaySummaryContainer", () => {
           })}
           instance={INSTANCE}
           decks={decks}
+          celebrate={celebrate}
         />,
       ),
     );
@@ -207,6 +228,20 @@ describe("TodaySummaryContainer", () => {
     finish({ dueCount: 1, newCount: 0 });
     expect(await screen.findByText(/· 6 left to study today ·/)).toBeInTheDocument();
     expect(getStudyCounts).toHaveBeenCalledTimes(2);
+  });
+
+  it("celebrates a session that left nothing to study today in any deck", async () => {
+    const getTodayFigures = vi.fn(async () =>
+      todayFiguresFrom([answer("2026-10-03")], "2026-10-03"),
+    );
+    const getStudyCounts = vi.fn(async () => ({ dueCount: 0, newCount: 0 }));
+    const { container } = renderContainer(getTodayFigures, {
+      decks: [deckOf("deck-1"), deckOf("deck-2")],
+      getStudyCounts,
+      celebrate: true,
+    });
+    expect(await screen.findByText(/^All done for today!/)).toBeInTheDocument();
+    expect(container.querySelector(".today-stars")).not.toBeNull();
   });
 
   it("says about how long the cards left will take, from how long an answer has taken", async () => {
