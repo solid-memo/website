@@ -125,6 +125,7 @@
                  <#us-states-and-capitals> ,
                  <#vim-commands> ,
                  <#vitamins> ,
+                 <#web-accessibility> ,
                  <#world-currencies> ,
                  <#world-flags> ,
                  <#world-history-dates> ,
@@ -20833,6 +20834,350 @@
     dcat:downloadURL <https://solid-memo.com/decks/vitamins/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#web-accessibility>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Web accessibility with WCAG 2.2"@en ,
+                  "Webbtillgänglighet med WCAG 2.2"@sv ,
+                  "WCAG 2.2로 배우는 웹 접근성"@ko ,
+                  "Barrierefreiheit im Web mit WCAG 2.2"@de ,
+                  "Accesibilidad web con las WCAG 2.2"@es ,
+                  "Accessibilité du web avec les WCAG 2.2"@fr ;
+    dcterms:description "Learn to make web content usable by everyone, following the Web Content Accessibility Guidelines (WCAG) 2.2, the W3C standard for accessible web content. The course is for web developers, designers, content writers and public-sector staff, and assumes only that you know roughly what a web page is made of. It starts with how people with disabilities use the web: screen readers, magnification, keyboards and switches, voice control and captions. It then shows how WCAG is built (principles, guidelines, success criteria, the levels A, AA and AAA, and what changed in 2.2) and works through its four principles: text alternatives, captions and structure; contrast, color and reflow; keyboard, focus and pointer input; time, motion and navigation; language, forms and help; and name, role, value and the first rule of ARIA. A closing chapter covers what automated tools can and can't find, the Web Accessibility Directive, EN 301 549, the European Accessibility Act, accessibility statements and Swedish law. 9 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English, Swedish, Korean, German, Spanish and French. The facts come from WCAG 2.2 (W3C Recommendation, as updated in December 2024), W3C's guidance on it, and EU and Swedish law, checked in October 2026."@en ,
+                        "Lär dig att göra webbinnehåll användbart för alla, enligt Riktlinjer för tillgängligt webbinnehåll (WCAG) 2.2, W3C:s standard för tillgängligt webbinnehåll. Kursen riktar sig till webbutvecklare, designer, skribenter och anställda i offentlig sektor, och förutsätter bara att du ungefär vet vad en webbsida består av. Den börjar med hur personer med funktionsnedsättning använder webben: skärmläsare, förstoring, tangentbord och kontakter, röststyrning och textning. Därefter visar den hur WCAG är uppbyggt (principer, riktlinjer, framgångskriterier, nivåerna A, AA och AAA och vad som är nytt i 2.2) och går igenom de fyra principerna: textalternativ, textning och struktur; kontrast, färg och omflöde; tangentbord, fokus och pekare; tid, rörelse och navigering; språk, formulär och hjälp; samt namn, roll, värde och ARIA:s första regel. Ett avslutande kapitel tar upp vad automatiska verktyg kan och inte kan hitta, webbtillgänglighetsdirektivet, EN 301 549, tillgänglighetsdirektivet för produkter och tjänster, tillgänglighetsredogörelser och svensk lag. 9 kapitel med korta steg, vart och ett en bit teori följd av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns på engelska, svenska, koreanska, tyska, spanska och franska. Fakta kommer från WCAG 2.2 (W3C-rekommendation, uppdaterad i december 2024), W3C:s vägledning om WCAG samt EU-rätt och svensk lag, kontrollerade i oktober 2026."@sv ,
+                        "웹 콘텐츠 접근성 지침(WCAG) 2.2에 따라 누구나 쓸 수 있는 웹 콘텐츠를 만드는 방법을 배워요. WCAG는 접근성 있는 웹 콘텐츠에 관한 W3C 표준이에요. 웹 개발자, 디자이너, 콘텐츠 작성자, 공공 부문 직원을 위한 코스이며, 웹 페이지가 대략 무엇으로 이루어지는지만 알면 수강할 수 있어요. 먼저 장애가 있는 사람들이 웹을 쓰는 방식, 곧 스크린 리더, 화면 확대, 키보드와 스위치, 음성 제어, 자막을 살펴봐요. 이어서 WCAG의 구조(원칙, 지침, 성공 기준, A·AA·AAA 수준, 2.2에서 바뀐 점)를 보고, 네 가지 원칙에 따라 대체 텍스트·자막·구조, 명도 대비·색·재배치, 키보드·포커스·포인터 입력, 시간·움직임·내비게이션, 언어·양식·도움말, 그리고 이름·역할·값과 ARIA의 첫 번째 규칙을 차례로 다뤄요. 마지막 챕터는 자동 도구가 찾을 수 있는 것과 없는 것, EU 웹 접근성 지침(지침 (EU) 2016/2102), EN 301 549, 유럽 접근성법(EAA), 접근성 성명서, 스웨덴 법을 다뤄요. 짧은 단계로 이루어진 챕터 9개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제예요. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 돼요. 코스는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 제공돼요. 내용은 WCAG 2.2(W3C 권고안, 2024년 12월 개정판), 이에 관한 W3C 안내 자료, EU와 스웨덴의 법에서 가져왔으며 2026년 10월에 확인했어요."@ko ,
+                        "Lerne, Webinhalte für alle nutzbar zu machen, nach den Richtlinien für barrierefreie Webinhalte (WCAG) 2.2, dem W3C-Standard für barrierefreie Webinhalte. Der Kurs richtet sich an alle, die Websites entwickeln, gestalten oder Texte dafür schreiben, und an Beschäftigte im öffentlichen Dienst, und setzt nur voraus, dass du ungefähr weißt, woraus eine Webseite besteht. Er beginnt damit, wie Menschen mit Behinderungen das Web nutzen: Screenreader, Bildschirmvergrößerung, Tastatur und Taster, Sprachsteuerung und Untertitel. Dann zeigt er, wie WCAG aufgebaut ist (Prinzipien, Richtlinien, Erfolgskriterien, die Stufen A, AA und AAA und was sich in 2.2 geändert hat), und geht die vier Prinzipien durch: Textalternativen, Untertitel und Struktur; Kontrast, Farbe und Umfluss; Tastatur, Fokus und Zeigereingabe; Zeit, Bewegung und Navigation; Sprache, Formulare und Hilfe; sowie Name, Rolle, Wert und die erste Regel von ARIA. Ein abschließendes Kapitel behandelt, was automatische Werkzeuge finden können und was nicht, die EU-Webseitenrichtlinie (Richtlinie (EU) 2016/2102), die Norm EN 301 549, den European Accessibility Act, Erklärungen zur Barrierefreiheit und schwedisches Recht. 9 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch verfügbar. Die Fakten stammen aus WCAG 2.2 (W3C-Empfehlung, aktualisiert im Dezember 2024), den Erläuterungen des W3C dazu sowie aus EU-Recht und schwedischem Recht, geprüft im Oktober 2026."@de ,
+                        "Aprende a hacer que todo el mundo pueda usar el contenido web, siguiendo las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, el estándar del W3C para un contenido web accesible. El curso está pensado para desarrolladores web, diseñadores, redactores de contenidos y personal del sector público, y solo da por sentado que sabes, más o menos, de qué está hecha una página web. Empieza por cómo usan la web las personas con discapacidad: lectores de pantalla, magnificadores, teclado y pulsadores, control por voz y subtítulos. Después muestra cómo están construidas las WCAG (principios, pautas, criterios de conformidad, los niveles A, AA y AAA, y qué cambió en la versión 2.2) y recorre sus cuatro principios: alternativas textuales, subtítulos y estructura; contraste, color y reajuste; teclado, foco y puntero; tiempo, movimiento y navegación; idioma, formularios y ayuda; y nombre, función, valor y la primera regla de ARIA. Un capítulo final trata lo que las herramientas automáticas pueden y no pueden encontrar, la Directiva de accesibilidad web, la norma EN 301 549, la Ley Europea de Accesibilidad, las declaraciones de accesibilidad y la legislación sueca. 9 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso está en inglés, sueco, coreano, alemán, español y francés. La información procede de las WCAG 2.2 (Recomendación del W3C, en su versión actualizada de diciembre de 2024), de las guías del W3C sobre ellas y de la legislación de la UE y de Suecia, comprobada en octubre de 2026."@es ,
+                        "Apprenez à rendre les contenus web utilisables par tous, en suivant les Règles pour l’accessibilité des contenus web (WCAG) 2.2, le standard du W3C pour des contenus web accessibles. Le cours s’adresse aux développeurs, aux designers, aux rédacteurs web et aux agents du secteur public, et suppose seulement que vous sachiez à peu près de quoi est faite une page web. Il commence par la façon dont les personnes handicapées utilisent le web : lecteurs d’écran, agrandissement d’écran, clavier et contacteurs, contrôle vocal et sous-titres. Il montre ensuite comment les WCAG sont construites (principes, règles, critères de succès, niveaux A, AA et AAA, et ce qui a changé dans la version 2.2), puis parcourt leurs quatre principes : équivalents textuels, sous-titres et structure ; contraste, couleur et redistribution ; clavier, focus et pointeur ; temps, mouvement et navigation ; langue, formulaires et aide ; et enfin nom, rôle, valeur et la première règle d’ARIA. Un dernier chapitre présente ce que les outils automatiques peuvent trouver ou non, la directive sur l’accessibilité du web, la norme EN 301 549, l’acte législatif européen sur l’accessibilité, les déclarations sur l’accessibilité et le droit suédois. 9 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours existe en anglais, en suédois, en coréen, en allemand, en espagnol et en français. Les informations proviennent des WCAG 2.2 (Recommandation du W3C, mise à jour en décembre 2024), des documents d’accompagnement du W3C et du droit de l’UE et de la Suède, vérifiées en octobre 2026."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "web accessibility"@en ,
+                 "WCAG"@en ,
+                 "WCAG 2.2"@en ,
+                 "accessibility"@en ,
+                 "assistive technology"@en ,
+                 "screen reader"@en ,
+                 "ARIA"@en ,
+                 "EN 301 549"@en ,
+                 "Web Accessibility Directive"@en ,
+                 "European Accessibility Act"@en ,
+                 "webbtillgänglighet"@sv ,
+                 "WCAG"@sv ,
+                 "WCAG 2.2"@sv ,
+                 "digital tillgänglighet"@sv ,
+                 "hjälpmedel"@sv ,
+                 "skärmläsare"@sv ,
+                 "ARIA"@sv ,
+                 "EN 301 549"@sv ,
+                 "webbtillgänglighetsdirektivet"@sv ,
+                 "tillgänglighetsdirektivet"@sv ,
+                 "웹 접근성"@ko ,
+                 "WCAG"@ko ,
+                 "WCAG 2.2"@ko ,
+                 "접근성"@ko ,
+                 "보조 기술"@ko ,
+                 "스크린 리더"@ko ,
+                 "ARIA"@ko ,
+                 "EN 301 549"@ko ,
+                 "EU 웹 접근성 지침"@ko ,
+                 "유럽 접근성법"@ko ,
+                 "Barrierefreiheit"@de ,
+                 "digitale Barrierefreiheit"@de ,
+                 "WCAG"@de ,
+                 "WCAG 2.2"@de ,
+                 "assistive Technologien"@de ,
+                 "Screenreader"@de ,
+                 "ARIA"@de ,
+                 "EN 301 549"@de ,
+                 "EU-Webseitenrichtlinie"@de ,
+                 "European Accessibility Act"@de ,
+                 "accesibilidad web"@es ,
+                 "WCAG"@es ,
+                 "WCAG 2.2"@es ,
+                 "accesibilidad"@es ,
+                 "productos de apoyo"@es ,
+                 "lector de pantalla"@es ,
+                 "ARIA"@es ,
+                 "EN 301 549"@es ,
+                 "Directiva de accesibilidad web"@es ,
+                 "Ley Europea de Accesibilidad"@es ,
+                 "accessibilité du web"@fr ,
+                 "WCAG"@fr ,
+                 "WCAG 2.2"@fr ,
+                 "accessibilité numérique"@fr ,
+                 "technologies d’assistance"@fr ,
+                 "lecteur d’écran"@fr ,
+                 "ARIA"@fr ,
+                 "EN 301 549"@fr ,
+                 "directive sur l’accessibilité du web"@fr ,
+                 "acte législatif européen sur l’accessibilité"@fr ;
+    dcat:first <https://solid-memo.com/decks/web-accessibility/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/web-accessibility/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/web-accessibility/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/web-accessibility/v1.ttl> .
+
+<https://solid-memo.com/decks/web-accessibility/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "Web accessibility with WCAG 2.2"@en ,
+                  "Webbtillgänglighet med WCAG 2.2"@sv ,
+                  "WCAG 2.2로 배우는 웹 접근성"@ko ,
+                  "Barrierefreiheit im Web mit WCAG 2.2"@de ,
+                  "Accesibilidad web con las WCAG 2.2"@es ,
+                  "Accessibilité du web avec les WCAG 2.2"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/web-accessibility/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Learn to make web content usable by everyone, following the Web Content Accessibility Guidelines (WCAG) 2.2, the W3C standard for accessible web content. The course is for web developers, designers, content writers and public-sector staff, and assumes only that you know roughly what a web page is made of. It starts with how people with disabilities use the web: screen readers, magnification, keyboards and switches, voice control and captions. It then shows how WCAG is built (principles, guidelines, success criteria, the levels A, AA and AAA, and what changed in 2.2) and works through its four principles: text alternatives, captions and structure; contrast, color and reflow; keyboard, focus and pointer input; time, motion and navigation; language, forms and help; and name, role, value and the first rule of ARIA. A closing chapter covers what automated tools can and can't find, the Web Accessibility Directive, EN 301 549, the European Accessibility Act, accessibility statements and Swedish law. 9 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The course is in English, Swedish, Korean, German, Spanish and French. The facts come from WCAG 2.2 (W3C Recommendation, as updated in December 2024), W3C's guidance on it, and EU and Swedish law, checked in October 2026."@en ,
+                        "Lär dig att göra webbinnehåll användbart för alla, enligt Riktlinjer för tillgängligt webbinnehåll (WCAG) 2.2, W3C:s standard för tillgängligt webbinnehåll. Kursen riktar sig till webbutvecklare, designer, skribenter och anställda i offentlig sektor, och förutsätter bara att du ungefär vet vad en webbsida består av. Den börjar med hur personer med funktionsnedsättning använder webben: skärmläsare, förstoring, tangentbord och kontakter, röststyrning och textning. Därefter visar den hur WCAG är uppbyggt (principer, riktlinjer, framgångskriterier, nivåerna A, AA och AAA och vad som är nytt i 2.2) och går igenom de fyra principerna: textalternativ, textning och struktur; kontrast, färg och omflöde; tangentbord, fokus och pekare; tid, rörelse och navigering; språk, formulär och hjälp; samt namn, roll, värde och ARIA:s första regel. Ett avslutande kapitel tar upp vad automatiska verktyg kan och inte kan hitta, webbtillgänglighetsdirektivet, EN 301 549, tillgänglighetsdirektivet för produkter och tjänster, tillgänglighetsredogörelser och svensk lag. 9 kapitel med korta steg, vart och ett en bit teori följd av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Kursen finns på engelska, svenska, koreanska, tyska, spanska och franska. Fakta kommer från WCAG 2.2 (W3C-rekommendation, uppdaterad i december 2024), W3C:s vägledning om WCAG samt EU-rätt och svensk lag, kontrollerade i oktober 2026."@sv ,
+                        "웹 콘텐츠 접근성 지침(WCAG) 2.2에 따라 누구나 쓸 수 있는 웹 콘텐츠를 만드는 방법을 배워요. WCAG는 접근성 있는 웹 콘텐츠에 관한 W3C 표준이에요. 웹 개발자, 디자이너, 콘텐츠 작성자, 공공 부문 직원을 위한 코스이며, 웹 페이지가 대략 무엇으로 이루어지는지만 알면 수강할 수 있어요. 먼저 장애가 있는 사람들이 웹을 쓰는 방식, 곧 스크린 리더, 화면 확대, 키보드와 스위치, 음성 제어, 자막을 살펴봐요. 이어서 WCAG의 구조(원칙, 지침, 성공 기준, A·AA·AAA 수준, 2.2에서 바뀐 점)를 보고, 네 가지 원칙에 따라 대체 텍스트·자막·구조, 명도 대비·색·재배치, 키보드·포커스·포인터 입력, 시간·움직임·내비게이션, 언어·양식·도움말, 그리고 이름·역할·값과 ARIA의 첫 번째 규칙을 차례로 다뤄요. 마지막 챕터는 자동 도구가 찾을 수 있는 것과 없는 것, EU 웹 접근성 지침(지침 (EU) 2016/2102), EN 301 549, 유럽 접근성법(EAA), 접근성 성명서, 스웨덴 법을 다뤄요. 짧은 단계로 이루어진 챕터 9개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제예요. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 돼요. 코스는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 제공돼요. 내용은 WCAG 2.2(W3C 권고안, 2024년 12월 개정판), 이에 관한 W3C 안내 자료, EU와 스웨덴의 법에서 가져왔으며 2026년 10월에 확인했어요."@ko ,
+                        "Lerne, Webinhalte für alle nutzbar zu machen, nach den Richtlinien für barrierefreie Webinhalte (WCAG) 2.2, dem W3C-Standard für barrierefreie Webinhalte. Der Kurs richtet sich an alle, die Websites entwickeln, gestalten oder Texte dafür schreiben, und an Beschäftigte im öffentlichen Dienst, und setzt nur voraus, dass du ungefähr weißt, woraus eine Webseite besteht. Er beginnt damit, wie Menschen mit Behinderungen das Web nutzen: Screenreader, Bildschirmvergrößerung, Tastatur und Taster, Sprachsteuerung und Untertitel. Dann zeigt er, wie WCAG aufgebaut ist (Prinzipien, Richtlinien, Erfolgskriterien, die Stufen A, AA und AAA und was sich in 2.2 geändert hat), und geht die vier Prinzipien durch: Textalternativen, Untertitel und Struktur; Kontrast, Farbe und Umfluss; Tastatur, Fokus und Zeigereingabe; Zeit, Bewegung und Navigation; Sprache, Formulare und Hilfe; sowie Name, Rolle, Wert und die erste Regel von ARIA. Ein abschließendes Kapitel behandelt, was automatische Werkzeuge finden können und was nicht, die EU-Webseitenrichtlinie (Richtlinie (EU) 2016/2102), die Norm EN 301 549, den European Accessibility Act, Erklärungen zur Barrierefreiheit und schwedisches Recht. 9 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Der Kurs ist auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch verfügbar. Die Fakten stammen aus WCAG 2.2 (W3C-Empfehlung, aktualisiert im Dezember 2024), den Erläuterungen des W3C dazu sowie aus EU-Recht und schwedischem Recht, geprüft im Oktober 2026."@de ,
+                        "Aprende a hacer que todo el mundo pueda usar el contenido web, siguiendo las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, el estándar del W3C para un contenido web accesible. El curso está pensado para desarrolladores web, diseñadores, redactores de contenidos y personal del sector público, y solo da por sentado que sabes, más o menos, de qué está hecha una página web. Empieza por cómo usan la web las personas con discapacidad: lectores de pantalla, magnificadores, teclado y pulsadores, control por voz y subtítulos. Después muestra cómo están construidas las WCAG (principios, pautas, criterios de conformidad, los niveles A, AA y AAA, y qué cambió en la versión 2.2) y recorre sus cuatro principios: alternativas textuales, subtítulos y estructura; contraste, color y reajuste; teclado, foco y puntero; tiempo, movimiento y navegación; idioma, formularios y ayuda; y nombre, función, valor y la primera regla de ARIA. Un capítulo final trata lo que las herramientas automáticas pueden y no pueden encontrar, la Directiva de accesibilidad web, la norma EN 301 549, la Ley Europea de Accesibilidad, las declaraciones de accesibilidad y la legislación sueca. 9 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. El curso está en inglés, sueco, coreano, alemán, español y francés. La información procede de las WCAG 2.2 (Recomendación del W3C, en su versión actualizada de diciembre de 2024), de las guías del W3C sobre ellas y de la legislación de la UE y de Suecia, comprobada en octubre de 2026."@es ,
+                        "Apprenez à rendre les contenus web utilisables par tous, en suivant les Règles pour l’accessibilité des contenus web (WCAG) 2.2, le standard du W3C pour des contenus web accessibles. Le cours s’adresse aux développeurs, aux designers, aux rédacteurs web et aux agents du secteur public, et suppose seulement que vous sachiez à peu près de quoi est faite une page web. Il commence par la façon dont les personnes handicapées utilisent le web : lecteurs d’écran, agrandissement d’écran, clavier et contacteurs, contrôle vocal et sous-titres. Il montre ensuite comment les WCAG sont construites (principes, règles, critères de succès, niveaux A, AA et AAA, et ce qui a changé dans la version 2.2), puis parcourt leurs quatre principes : équivalents textuels, sous-titres et structure ; contraste, couleur et redistribution ; clavier, focus et pointeur ; temps, mouvement et navigation ; langue, formulaires et aide ; et enfin nom, rôle, valeur et la première règle d’ARIA. Un dernier chapitre présente ce que les outils automatiques peuvent trouver ou non, la directive sur l’accessibilité du web, la norme EN 301 549, l’acte législatif européen sur l’accessibilité, les déclarations sur l’accessibilité et le droit suédois. 9 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Le cours existe en anglais, en suédois, en coréen, en allemand, en espagnol et en français. Les informations proviennent des WCAG 2.2 (Recommandation du W3C, mise à jour en décembre 2024), des documents d’accompagnement du W3C et du droit de l’UE et de la Suède, vérifiées en octobre 2026."@fr ;
+    prov:wasDerivedFrom <https://www.w3.org/TR/WCAG22/> ,
+                        <https://www.w3.org/standards/history/WCAG22/> ,
+                        <https://www.w3.org/WAI/WCAG22/Understanding/> ,
+                        <https://www.w3.org/WAI/standards-guidelines/wcag/> ,
+                        <https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/> ,
+                        <https://www.w3.org/WAI/standards-guidelines/wcag/faq/> ,
+                        <https://www.w3.org/WAI/people-use-web/> ,
+                        <https://www.w3.org/TR/using-aria/> ,
+                        <https://www.w3.org/WAI/ARIA/apg/practices/read-me-first/> ,
+                        <https://www.w3.org/WAI/test-evaluate/tools/selecting/> ,
+                        <https://www.w3.org/WAI/test-evaluate/> ,
+                        <https://www.w3.org/WAI/test-evaluate/conformance/wcag-em/> ,
+                        <https://eur-lex.europa.eu/eli/dir/2016/2102/oj> ,
+                        <https://eur-lex.europa.eu/eli/dec_impl/2018/1523/oj> ,
+                        <https://eur-lex.europa.eu/eli/dec_impl/2018/1524/oj> ,
+                        <https://eur-lex.europa.eu/eli/dec_impl/2018/2048/oj> ,
+                        <https://eur-lex.europa.eu/eli/dec_impl/2021/1339/oj> ,
+                        <https://digital-strategy.ec.europa.eu/en/policies/web-accessibility-directive-standards-and-harmonisation> ,
+                        <https://accessible-eu-centre.ec.europa.eu/content-corner/news/european-accessibility-standard-en-301-549-has-been-updated-2026-09-07_en> ,
+                        <https://www.etsi.org/deliver/etsi_en/301500_301599/301549/> ,
+                        <https://eur-lex.europa.eu/eli/dir/2019/882/oj> ,
+                        <https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-20181937-om-tillganglighet-till-digital_sfs-2018-1937/> ,
+                        <https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/forordning-20181938-om-tillganglighet-till_sfs-2018-1938/> ,
+                        <https://www.digg.se/kunskap-och-stod/digital-tillganglighet> ,
+                        <https://pts.se/digital-inkludering/lagen-om-vissa-produkters-och-tjansters-tillganglighet/> ,
+                        <https://www.w3.org/Translations/WCAG22-fr/> ,
+                        <https://www.w3.org/Translations/WCAG20-de/> ,
+                        <https://www.w3.org/Translations/WCAG20-sv/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/web-accessibility/v1.ttl#compilation> ;
+    dcterms:created "2026-10-31T00:00:00Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "web accessibility"@en ,
+                 "WCAG"@en ,
+                 "WCAG 2.2"@en ,
+                 "accessibility"@en ,
+                 "assistive technology"@en ,
+                 "screen reader"@en ,
+                 "ARIA"@en ,
+                 "EN 301 549"@en ,
+                 "Web Accessibility Directive"@en ,
+                 "European Accessibility Act"@en ,
+                 "webbtillgänglighet"@sv ,
+                 "WCAG"@sv ,
+                 "WCAG 2.2"@sv ,
+                 "digital tillgänglighet"@sv ,
+                 "hjälpmedel"@sv ,
+                 "skärmläsare"@sv ,
+                 "ARIA"@sv ,
+                 "EN 301 549"@sv ,
+                 "webbtillgänglighetsdirektivet"@sv ,
+                 "tillgänglighetsdirektivet"@sv ,
+                 "웹 접근성"@ko ,
+                 "WCAG"@ko ,
+                 "WCAG 2.2"@ko ,
+                 "접근성"@ko ,
+                 "보조 기술"@ko ,
+                 "스크린 리더"@ko ,
+                 "ARIA"@ko ,
+                 "EN 301 549"@ko ,
+                 "EU 웹 접근성 지침"@ko ,
+                 "유럽 접근성법"@ko ,
+                 "Barrierefreiheit"@de ,
+                 "digitale Barrierefreiheit"@de ,
+                 "WCAG"@de ,
+                 "WCAG 2.2"@de ,
+                 "assistive Technologien"@de ,
+                 "Screenreader"@de ,
+                 "ARIA"@de ,
+                 "EN 301 549"@de ,
+                 "EU-Webseitenrichtlinie"@de ,
+                 "European Accessibility Act"@de ,
+                 "accesibilidad web"@es ,
+                 "WCAG"@es ,
+                 "WCAG 2.2"@es ,
+                 "accesibilidad"@es ,
+                 "productos de apoyo"@es ,
+                 "lector de pantalla"@es ,
+                 "ARIA"@es ,
+                 "EN 301 549"@es ,
+                 "Directiva de accesibilidad web"@es ,
+                 "Ley Europea de Accesibilidad"@es ,
+                 "accessibilité du web"@fr ,
+                 "WCAG"@fr ,
+                 "WCAG 2.2"@fr ,
+                 "accessibilité numérique"@fr ,
+                 "technologies d’assistance"@fr ,
+                 "lecteur d’écran"@fr ,
+                 "ARIA"@fr ,
+                 "EN 301 549"@fr ,
+                 "directive sur l’accessibilité du web"@fr ,
+                 "acte législatif européen sur l’accessibilité"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-31T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#web-accessibility> ;
+    dcat:isVersionOf <#web-accessibility> ;
+    dcat:contactPoint <https://solid-memo.com/decks/web-accessibility/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/web-accessibility/v1.ttl#turtle> ;
+    solid-memo:cardCount 109 .
+
+<https://solid-memo.com/decks/web-accessibility/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/web-accessibility/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/web-accessibility/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/web-accessibility/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/web-accessibility/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<https://solid-memo.com/decks/web-accessibility/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://www.w3.org/TR/WCAG22/>
+    dcterms:title "Web Content Accessibility Guidelines (WCAG) 2.2" ;
+    dcterms:creator "W3C (Accessibility Guidelines Working Group)" .
+
+<https://www.w3.org/standards/history/WCAG22/>
+    dcterms:title "WCAG 2.2: publication history" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/WAI/WCAG22/Understanding/>
+    dcterms:title "Understanding WCAG 2.2" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI), Accessibility Guidelines Working Group" .
+
+<https://www.w3.org/WAI/standards-guidelines/wcag/>
+    dcterms:title "WCAG 2 Overview" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/>
+    dcterms:title "What's New in WCAG 2.2" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://www.w3.org/WAI/standards-guidelines/wcag/faq/>
+    dcterms:title "WCAG 2 FAQ" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://www.w3.org/WAI/people-use-web/>
+    dcterms:title "How People with Disabilities Use the Web" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI), Education and Outreach Working Group" .
+
+<https://www.w3.org/TR/using-aria/>
+    dcterms:title "Using ARIA" ;
+    dcterms:creator "W3C (Accessible Rich Internet Applications Working Group)" ;
+    dcterms:license <https://www.w3.org/copyright/software-license-2023/> .
+
+<https://www.w3.org/WAI/ARIA/apg/practices/read-me-first/>
+    dcterms:title "ARIA Authoring Practices Guide (APG): Read Me First" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://www.w3.org/WAI/test-evaluate/tools/selecting/>
+    dcterms:title "Selecting Web Accessibility Evaluation Tools" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://www.w3.org/WAI/test-evaluate/>
+    dcterms:title "Evaluating Web Accessibility Overview" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://www.w3.org/WAI/test-evaluate/conformance/wcag-em/>
+    dcterms:title "WCAG-EM Overview: Website Accessibility Conformance Evaluation Methodology" ;
+    dcterms:creator "W3C Web Accessibility Initiative (WAI)" .
+
+<https://eur-lex.europa.eu/eli/dir/2016/2102/oj>
+    dcterms:title "Directive (EU) 2016/2102 on the accessibility of the websites and mobile applications of public sector bodies" ;
+    dcterms:creator "European Parliament and Council of the European Union" .
+
+<https://eur-lex.europa.eu/eli/dec_impl/2018/1523/oj>
+    dcterms:title "Commission Implementing Decision (EU) 2018/1523 establishing a model accessibility statement" ;
+    dcterms:creator "European Commission" .
+
+<https://eur-lex.europa.eu/eli/dec_impl/2018/1524/oj>
+    dcterms:title "Commission Implementing Decision (EU) 2018/1524 establishing a monitoring methodology" ;
+    dcterms:creator "European Commission" .
+
+<https://eur-lex.europa.eu/eli/dec_impl/2018/2048/oj>
+    dcterms:title "Commission Implementing Decision (EU) 2018/2048 on the harmonised standard for websites and mobile applications" ;
+    dcterms:creator "European Commission" .
+
+<https://eur-lex.europa.eu/eli/dec_impl/2021/1339/oj>
+    dcterms:title "Commission Implementing Decision (EU) 2021/1339 amending Implementing Decision (EU) 2018/2048" ;
+    dcterms:creator "European Commission" .
+
+<https://digital-strategy.ec.europa.eu/en/policies/web-accessibility-directive-standards-and-harmonisation>
+    dcterms:title "Web Accessibility Directive: standards and harmonisation" ;
+    dcterms:creator "European Commission" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+<https://accessible-eu-centre.ec.europa.eu/content-corner/news/european-accessibility-standard-en-301-549-has-been-updated-2026-09-07_en>
+    dcterms:title "The European accessibility standard EN 301 549 has been updated" ;
+    dcterms:creator "AccessibleEU (European Commission)" .
+
+<https://www.etsi.org/deliver/etsi_en/301500_301599/301549/>
+    dcterms:title "ETSI EN 301 549: published versions" ;
+    dcterms:creator "ETSI" .
+
+<https://eur-lex.europa.eu/eli/dir/2019/882/oj>
+    dcterms:title "Directive (EU) 2019/882 on the accessibility requirements for products and services (European Accessibility Act)" ;
+    dcterms:creator "European Parliament and Council of the European Union" .
+
+<https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-20181937-om-tillganglighet-till-digital_sfs-2018-1937/>
+    dcterms:title "Lag (2018:1937) om tillgänglighet till digital offentlig service" ;
+    dcterms:creator "Sveriges riksdag" .
+
+<https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/forordning-20181938-om-tillganglighet-till_sfs-2018-1938/>
+    dcterms:title "Förordning (2018:1938) om tillgänglighet till digital offentlig service" ;
+    dcterms:creator "Sveriges regering" .
+
+<https://www.digg.se/kunskap-och-stod/digital-tillganglighet>
+    dcterms:title "Digital tillgänglighet" ;
+    dcterms:creator "Myndigheten för digital förvaltning (DIGG)" .
+
+<https://pts.se/digital-inkludering/lagen-om-vissa-produkters-och-tjansters-tillganglighet/>
+    dcterms:title "Lagen om vissa produkters och tjänsters tillgänglighet" ;
+    dcterms:creator "Post- och telestyrelsen (PTS)" .
+
+<https://www.w3.org/Translations/WCAG22-fr/>
+    dcterms:title "Règles pour l’accessibilité des contenus web (WCAG) 2.2" ;
+    dcterms:creator "W3C; authorized French translation by Access42" .
+
+<https://www.w3.org/Translations/WCAG20-de/>
+    dcterms:title "Richtlinien für barrierefreie Webinhalte (WCAG) 2.0" ;
+    dcterms:creator "W3C; authorized German translation by Aktion Mensch e.V." .
+
+<https://www.w3.org/Translations/WCAG20-sv/>
+    dcterms:title "Riktlinjer för tillgängligt webbinnehåll (WCAG) 2.0" ;
+    dcterms:creator "W3C; authorized Swedish translation by Funka Nu AB" .
 
 <#world-currencies>
     a dcat:DatasetSeries ,
