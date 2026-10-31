@@ -16,6 +16,7 @@ describe("AppError", () => {
       "The deck “Capitals” no longer exists. Perhaps it was removed in another tab or app.",
     );
     expect(error.detail).toBe("");
+    expect(error.advisory).toBeNull();
     expect(new AppError("webIdEmpty").vars).toEqual({});
   });
 
@@ -41,6 +42,20 @@ describe("AppError", () => {
     expect(
       technicalDetail({ one: "{count} {a}", other: "{count} {b}" }, { count: 2, a: 1, b: 2, c: 3 }),
     ).toBe("c: 3");
+  });
+
+  it("names the security advisory behind a login it stops for safety, its address last in its message", () => {
+    const url = "https://github.com/solid-memo/website/security/advisories/GHSA-vrcx-39mp-3746";
+    for (const code of ["loginIssuerMissing", "loginIssuerMismatch", "loginNotStarted"] as const)
+      expect(new AppError(code).advisory).toEqual({ id: "GHSA-vrcx-39mp-3746", url });
+    const error = new AppError("loginIssuerMissing", { issuer: "https://idp.example/" });
+    expect(error.detail).toBe("issuer: https://idp.example/");
+    expect(error.message).toBe(
+      `Your provider did not say which provider it is, so Solid Memo stopped the login for safety. Log in again, or pick another provider.\nissuer: https://idp.example/\nadvisory: ${url}`,
+    );
+    expect(new AppError("loginNotStarted").message).toBe(
+      `Solid Memo did not start this login in this tab, so it stopped the login for safety. Log in again in this tab.\nadvisory: ${url}`,
+    );
   });
 
   it("leaves a placeholder without a value as it is", () => {

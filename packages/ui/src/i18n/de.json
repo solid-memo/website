@@ -98,6 +98,8 @@
     "networkError": "Dein Pod ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
     "unexpectedError": "Etwas ist schiefgelaufen. Versuche es erneut oder lade die Seite neu. Details (auf Englisch): {detail}",
     "technicalDetails": "Technische Details",
+    "advisory": "Mehr dazu in der {link}.",
+    "advisoryLink": "Sicherheitsmeldung {id} (auf Englisch)",
     "opensInNewTab": "(öffnet sich in einem neuen Tab)",
     "reportMistake": "Fehler melden"
   },

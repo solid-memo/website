@@ -94,6 +94,16 @@ in.
 
 A provider that doesn't send `iss` can't be used to log in.
 
+The fix that brought in these three errors has a
+[security advisory](https://github.com/solid-memo/website/security/advisories/GHSA-vrcx-39mp-3746),
+and each error names it as its `advisory`
+([appError.ts](../packages/domain/src/appError.ts)).
+The app links to the advisory after the error's text, in the
+learner's language, and the error's `message` ends with its address.
+That address is upstream's repository, never `VITE_REPO_URL`
+([configuration.md](configuration.md#vite_repo_url)): the advisory
+belongs to Solid Memo, and a fork's repository doesn't have it.
+
 ```mermaid
 sequenceDiagram
     accTitle: Logging in with Solid-OIDC

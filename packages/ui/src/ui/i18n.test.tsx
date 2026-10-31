@@ -319,6 +319,34 @@ describe("errorText", () => {
     );
   });
 
+  it("links a login stopped for safety to the security advisory that explains it", () => {
+    const url = "https://github.com/solid-memo/website/security/advisories/GHSA-vrcx-39mp-3746";
+    const missing = new AppError("loginIssuerMissing", { issuer: "https://idp.example/" });
+    render(<div data-testid="sv">{createI18n("sv").errorText(missing)}</div>);
+    const link = screen.getByRole("link", {
+      name: "säkerhetsmeddelandet GHSA-vrcx-39mp-3746 (på engelska) (öppnas i en ny flik)",
+    });
+    expect(link).toHaveAttribute("href", url);
+    expect(link).toHaveAttribute("hreflang", "en");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByTestId("sv")).toHaveTextContent(
+      "för säkerhets skull. Logga in igen, eller välj en annan leverantör. Läs mer i säkerhetsmeddelandet GHSA-vrcx-39mp-3746 (på engelska)",
+    );
+    expect(screen.getByText("Tekniska detaljer").closest("details")).not.toHaveAttribute("open");
+
+    // With no technical detail, the link alone follows the sentence; a status line has the sentence alone.
+    const { errorText } = createI18n("en");
+    render(<div data-testid="en">{errorText(new AppError("loginNotStarted"))}</div>);
+    expect(screen.getByTestId("en")).toHaveTextContent(
+      "Log in again in this tab. Read more in the security advisory GHSA-vrcx-39mp-3746",
+    );
+    expect(screen.getByTestId("en").querySelector("details")).toBeNull();
+    expect(errorText(missing, { detail: false })).toBe(
+      "Your provider did not say which provider it is, so Solid Memo stopped the login for safety. Log in again, or pick another provider.",
+    );
+  });
+
   it("says a request that never got through is a network failure", () => {
     const { errorText } = createI18n("sv");
     expect(errorText(new TypeError("Failed to fetch"))).toBe(

@@ -9,9 +9,12 @@
  * a test holds them to. A text says what went wrong in plain words and
  * what to do about it; the values it leaves out — addresses, statuses, a
  * check's findings — are the error's technical `detail`, for whoever looks
- * into it. An error's `message` is the English text with its values filled
- * in, then its detail, for logs and tests. Errors only a programming
- * mistake can cause stay plain Errors.
+ * into it. An error Solid Memo raises to keep the user safe may name the
+ * security advisory that explains it (`advisory`), which the app links
+ * to after its text. An error's `message` is the English text with its
+ * values filled in, then its detail, then its advisory's address, for
+ * logs and tests. Errors only a programming mistake can cause stay plain
+ * Errors.
  */
 
 import { shown, type LangText } from "./langText";
@@ -199,6 +202,33 @@ export const ERROR_TEMPLATES = {
 
 export type ErrorCode = keyof typeof ERROR_TEMPLATES;
 
+/** A security advisory: its id ("GHSA-…"), and the page that publishes it. */
+export interface Advisory {
+  id: string;
+  url: string;
+}
+
+/**
+ * Where upstream's security advisories are published. Not the site's
+ * repository (VITE_REPO_URL): an advisory belongs to Solid Memo's own
+ * repository, and a fork's has none of them.
+ */
+const ADVISORIES_URL = "https://github.com/solid-memo/website/security/advisories";
+
+/** The security advisory that explains an error, by its code: the fix that made Solid Memo raise it. */
+const ERROR_ADVISORIES: Partial<Record<ErrorCode, string>> = {
+  // A provider's answer must name its issuer (RFC 9207), against an OIDC mix-up.
+  loginIssuerMissing: "GHSA-vrcx-39mp-3746",
+  loginIssuerMismatch: "GHSA-vrcx-39mp-3746",
+  loginNotStarted: "GHSA-vrcx-39mp-3746",
+};
+
+/** The security advisory that explains an error; null when none does. */
+function advisoryOf(code: ErrorCode): Advisory | null {
+  const id = ERROR_ADVISORIES[code];
+  return id === undefined ? null : { id, url: `${ADVISORIES_URL}/${id}` };
+}
+
 const PLACEHOLDER = /\{(\w+)\}/g;
 
 /** A value as an English text shows it: text in several languages as its English, else its first. */
@@ -237,14 +267,19 @@ export class AppError extends Error {
   readonly vars: ErrorVars;
   /** The values the text leaves out, for whoever looks into the error; "" when there are none. */
   readonly detail: string;
+  /** The security advisory that explains the error, for the user to read more; null when none does. */
+  readonly advisory: Advisory | null;
 
   constructor(code: ErrorCode, vars: ErrorVars = {}) {
     const text = fillTemplate(ERROR_TEMPLATES[code], vars);
     const detail = technicalDetail(ERROR_TEMPLATES[code], vars);
-    super(detail === "" ? text : `${text}\n${detail}`);
+    const advisory = advisoryOf(code);
+    const lines = [text, detail, advisory === null ? "" : `advisory: ${advisory.url}`];
+    super(lines.filter((line) => line !== "").join("\n"));
     this.name = "AppError";
     this.code = code;
     this.vars = vars;
     this.detail = detail;
+    this.advisory = advisory;
   }
 }
