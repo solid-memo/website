@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.18.1](https://github.com/solid-memo/website/compare/v6.18.0...v6.18.1) (2026-10-31)
+
+### Bug Fixes
+
+* **decks:** show The Night Café again in Famous paintings ([b4b6487](https://github.com/solid-memo/website/commit/b4b648747ca9659c7828386de594fd24b14d8d23)), closes [#397](https://github.com/solid-memo/website/issues/397)
+
 ## [6.18.0](https://github.com/solid-memo/website/compare/v6.17.34...v6.18.0) (2026-10-31)
 
 ### Features
