@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, createSolidDataset, getThing, removeThing, setThing } from "./client/rdf";
+import { type Dataset, type NamedSubject, createSolidDataset, removeThings } from "./client/rdf";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
 import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
+import { editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import {
+  type DigestSubjects,
   toDigest,
   toMonthSummaryThing,
   toReceiptThing,
@@ -64,7 +66,7 @@ export function createSolidDigestRepository({
       const stored = dataset === null ? null : toDigest(dataset);
       const next = changes.reduce<InstanceDigest | null>(
         (digest, change) => change(digest),
-        stored,
+        stored?.digest ?? null,
       )!;
       const { updated, subjects } = withDigest(
         instanceUrl,
@@ -103,7 +105,7 @@ export function createSolidDigestRepository({
   return {
     async readDigest(instanceUrl) {
       const dataset = await getSolidDatasetOrNull(digestUrlOf(instanceUrl), fetch);
-      return dataset === null ? null : toDigest(dataset);
+      return dataset === null ? null : toDigest(dataset).digest;
     },
 
     updateDigest(instanceUrl, change) {
@@ -124,49 +126,54 @@ export function createSolidDigestRepository({
   };
 }
 
-/** The digest document holding `next`: only the subjects that differ from `stored` are written or removed. */
+/**
+ * The digest document holding `next`: only the subjects that differ
+ * from `stored` are written or removed, all in one edit of the dataset
+ * (datasetEdit.ts), so a write takes time that grows with the document
+ * and its subjects, not their product. What is dropped is removed at
+ * each subject it was read from, as is any other subject a rewritten
+ * one was read from, so none is left to be read again.
+ */
 function withDigest(
   instanceUrl: string,
   dataset: Dataset,
-  stored: InstanceDigest | null,
+  stored: { digest: InstanceDigest; subjects: DigestSubjects } | null,
   next: InstanceDigest,
 ): { updated: Dataset; subjects: string[] } {
-  let updated = dataset;
-  const subjects: string[] = [];
+  const before = stored?.digest ?? emptyDigest();
+  const readAt = stored?.subjects ?? {
+    receipts: new Map(),
+    schedules: new Map(),
+    months: new Map(),
+  };
   const differs = (a: unknown, b: unknown) => JSON.stringify(a) !== JSON.stringify(b);
-  const before = stored ?? emptyDigest();
-  for (const [document, receipt] of Object.entries(next.receipts)) {
-    if (!differs(before.receipts[document], receipt)) continue;
-    const url = digestSubjectOf(instanceUrl, "receipt", document);
-    updated = setThing(updated, toReceiptThing(url, receipt, getThing(updated, url)));
-    subjects.push(url);
+  const sets: { url: string; make: (existing: NamedSubject | null) => NamedSubject }[] = [];
+  const gone: string[] = [];
+  function plan<T>(
+    kind: "receipt" | "schedule" | "month",
+    was: Record<string, T>,
+    now: Record<string, T>,
+    at: Map<string, string[]>,
+    toThing: (url: string, value: T, existing: NamedSubject | null) => NamedSubject,
+  ): void {
+    for (const [key, value] of Object.entries(now)) {
+      if (!differs(was[key], value)) continue;
+      const url = digestSubjectOf(instanceUrl, kind, key);
+      for (const other of at.get(key) ?? []) if (other !== url) gone.push(other);
+      sets.push({ url, make: (existing) => toThing(url, value, existing) });
+    }
+    for (const key of Object.keys(was)) {
+      if (Object.hasOwn(now, key)) continue;
+      for (const subject of at.get(key)!) gone.push(subject);
+    }
   }
-  for (const [deck, schedule] of Object.entries(next.schedules)) {
-    if (!differs(before.schedules[deck], schedule)) continue;
-    const url = digestSubjectOf(instanceUrl, "schedule", deck);
-    updated = setThing(updated, toScheduleThing(url, schedule, getThing(updated, url)));
-    subjects.push(url);
-  }
-  for (const [document, summary] of Object.entries(next.months)) {
-    if (!differs(before.months[document], summary)) continue;
-    const url = digestSubjectOf(instanceUrl, "month", document);
-    updated = setThing(updated, toMonthSummaryThing(url, summary, getThing(updated, url)));
-    subjects.push(url);
-  }
-  const gone = [
-    ...Object.keys(before.receipts)
-      .filter((document) => !(document in next.receipts))
-      .map((d) => digestSubjectOf(instanceUrl, "receipt", d)),
-    ...Object.keys(before.schedules)
-      .filter((deck) => !(deck in next.schedules))
-      .map((d) => digestSubjectOf(instanceUrl, "schedule", d)),
-    ...Object.keys(before.months)
-      .filter((document) => !(document in next.months))
-      .map((d) => digestSubjectOf(instanceUrl, "month", d)),
-  ];
-  for (const url of gone) {
-    updated = removeThing(updated, url);
-    subjects.push(url);
-  }
-  return { updated, subjects };
+  plan("receipt", before.receipts, next.receipts, readAt.receipts, toReceiptThing);
+  plan("schedule", before.schedules, next.schedules, readAt.schedules, toScheduleThing);
+  plan("month", before.months, next.months, readAt.months, toMonthSummaryThing);
+  const edit = editOf(removeThings(dataset, gone));
+  for (const { url, make } of sets) edit.setThing(make(edit.getThing(url)));
+  return {
+    updated: edit.done(),
+    subjects: [...new Set([...sets.map(({ url }) => url), ...gone])],
+  };
 }

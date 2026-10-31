@@ -26,19 +26,36 @@ import {
 } from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 
+/** The subjects of a digest document each receipt, schedule and month summary was read from, by its key. */
+export interface DigestSubjects {
+  receipts: Map<string, string[]>;
+  schedules: Map<string, string[]>;
+  months: Map<string, string[]>;
+}
+
 /**
- * The digest a digest document holds. Read leniently, being derived
- * data: a subject that does not fit its shape is left out, and so
- * learned again. A schedule of an older format is brought up to the
- * latest (one of format 1 counted SM-2's due days).
+ * The digest a digest document holds, and the subjects it was read
+ * from (more than one for a key said twice; whichever the app would
+ * name it or not), so that what is dropped or written over is removed
+ * where it is. Read leniently, being derived data: a subject that does
+ * not fit its shape is left out, and so learned again. A schedule of an
+ * older format is brought up to the latest (one of format 1 counted
+ * SM-2's due days).
  */
-export function toDigest(dataset: Dataset): InstanceDigest {
+export function toDigest(dataset: Dataset): { digest: InstanceDigest; subjects: DigestSubjects } {
   const digest = emptyDigest();
+  const subjects: DigestSubjects = { receipts: new Map(), schedules: new Map(), months: new Map() };
+  const readAt = (of: Map<string, string[]>, key: string, thing: NamedSubject) => {
+    const at = of.get(key);
+    if (at === undefined) of.set(key, [asUrl(thing)]);
+    else at.push(asUrl(thing));
+  };
   for (const thing of getThingAll(dataset)) {
     const receipt = readVersioned(thing, "documentReceipt");
     if (receipt !== null) {
       const read = receiptFromRecord(receipt.record.data);
       digest.receipts[read.document] = read;
+      readAt(subjects.receipts, read.document, thing);
       continue;
     }
     const schedule = readVersioned(thing, "deckSchedule");
@@ -47,15 +64,19 @@ export function toDigest(dataset: Dataset): InstanceDigest {
         migrate("deckSchedule", schedule.record, { subject: asUrl(thing) }),
       );
       digest.schedules[read.deck] = read;
+      readAt(subjects.schedules, read.deck, thing);
       continue;
     }
     const summary = readVersioned(thing, "monthSummary");
     if (summary !== null) {
       const read = monthSummaryFromRecord(summary.record.data);
-      if (read !== null) digest.months[read.document] = read;
+      if (read !== null) {
+        digest.months[read.document] = read;
+        readAt(subjects.months, read.document, thing);
+      }
     }
   }
-  return digest;
+  return { digest, subjects };
 }
 
 export function toReceiptThing(
