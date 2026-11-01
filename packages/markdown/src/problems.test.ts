@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { MAX_CHARS, MAX_DELIMITERS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "./parse";
+import { MAX_CHARS, MAX_DELIMITERS, MAX_DEPTH, MAX_TABLE_COLUMNS, MAX_UNDERLINES } from "./parse";
 import { markdownProblems, OPTION, PROSE, SIDE } from "./problems";
 
 describe("markdownProblems", () => {
@@ -36,6 +36,16 @@ describe("markdownProblems", () => {
     expect(markdownProblems(`<b>${"*_".repeat(MAX_DELIMITERS)}`, PROSE)).toEqual([
       { code: "tooComplex" },
     ]);
+    for (const heading of [
+      ">a\n>=\n",
+      ">>a\n>>=\n",
+      "> a\n>  =\n",
+      ">a\n>--\n",
+      "-   a\n    =\n    a\n",
+    ])
+      expect(markdownProblems(heading.repeat(MAX_UNDERLINES + 1), PROSE)).toEqual([
+        { code: "tooComplex" },
+      ]);
   });
 
   it("names raw HTML and pictures, which are not shown", () => {

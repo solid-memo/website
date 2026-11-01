@@ -586,6 +586,30 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown("a\n- b\n- c\n".repeat(MAX_UNDERLINES / 2 + 1))).not.toBeNull();
   });
 
+  it.each([
+    ["in a block quote", ">a\n>=\n"],
+    ["in a nested block quote", ">>a\n>>=\n"],
+    ["in a block quote after spaces", "> a\n>  =\n"],
+    ["of dashes in a block quote", ">a\n>--\n"],
+    ["indented in a list item", "-   a\n    =\n    a\n"],
+  ])("counts lines that could underline a heading %s against MAX_UNDERLINES", (_, heading) => {
+    expect(parseMarkdown(heading.repeat(MAX_UNDERLINES))).not.toBeNull();
+    expect(parseMarkdown(heading.repeat(MAX_UNDERLINES + 1))).toBeNull();
+  });
+
+  // CommonMark indents with spaces and tabs only: after a no-break space or
+  // a form feed, `=` is paragraph text, not an underline, so these must stay
+  // uncounted rather than be swept in by a wider white space class.
+  it.each([
+    ["a no-break space", "a\n\u00a0=\n"],
+    ["a form feed", "a\n\f=\n"],
+    ["a no-break space in a block quote", ">a\n>\u00a0=\n"],
+  ])("does not count a line of `=` after %s against MAX_UNDERLINES", (_, line) => {
+    const text = line.repeat(MAX_UNDERLINES + 1);
+    expect(parseMarkdown(text)).not.toBeNull();
+    expect(JSON.stringify(parseMarkdown(text))).not.toContain(`"type":"heading"`);
+  });
+
   it("reads nothing above MAX_CHARS", () => {
     expect(parseMarkdown("a".repeat(MAX_CHARS))).toHaveLength(1);
     expect(parseMarkdown("a".repeat(MAX_CHARS + 1))).toBeNull();
@@ -984,6 +1008,14 @@ describe("pathological input", () => {
     ["table cells", fill("|", "| a | b |\n|-|-|\n")],
     ["reference definitions", fill("[a]: b\n")],
     ["setext headings at the cap", fill("a\n", "a\n=\n".repeat(MAX_UNDERLINES))],
+    ["setext headings in a quote", fill(">a\n>=\n")],
+    ["setext headings in a nested quote", fill(">>a\n>>=\n")],
+    ["setext headings in a quote after spaces", fill("> a\n>  =\n")],
+    ["setext headings of dashes in a quote", fill(">a\n>--\n")],
+    ["setext headings indented in a list item", fill("    =\n    a\n", "-   a\n")],
+    ["setext headings in a quote at the cap", fill(">a\n", ">a\n>=\n".repeat(MAX_UNDERLINES))],
+    ["lines of `=` after a no-break space", fill("a\n\u00a0=\n")],
+    ["lines of `=` after a form feed", fill("a\n\f=\n")],
     ["setext underlines", fill("=\n")],
     ["setext headings", fill("a\n-\n")],
     ["long setext underlines", fill("a\n==\n")],
