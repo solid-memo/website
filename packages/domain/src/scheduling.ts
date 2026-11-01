@@ -13,6 +13,8 @@ import {
   type ReviewSnapshot,
   type ReviewState,
 } from "./review";
+import { boundedFsrsSnapshot } from "./fsrsSnapshot";
+import { isStudyDay } from "./reviewStateEdits";
 import { boundedSm2State } from "./sm2";
 
 /**
@@ -160,7 +162,8 @@ export function requeueCard<T>(remaining: T[], card: T, random: () => number): T
  * study day's FIRST review. A second review on the same day keeps the
  * snapshot it already has; a card without earlier state has none. The
  * snapshot is bounded as the state applySm2 gives (boundedSm2State),
- * so that it is written back as numbers the write check accepts.
+ * so that it is written back as numbers the write check accepts; one
+ * whose due day is not a real "YYYY-MM-DD" date is dropped.
  */
 export function snapshotBeforeReview(
   current: ReviewState | null,
@@ -175,7 +178,8 @@ export function snapshotBeforeReview(
   return boundedSnapshot(current);
 }
 
-function boundedSnapshot(state: ReviewSnapshot): ReviewSnapshot {
+function boundedSnapshot(state: ReviewSnapshot): ReviewSnapshot | undefined {
+  if (!isStudyDay(state.due)) return undefined;
   return { ...boundedSm2State(state), due: state.due, lastReviewedAt: state.lastReviewedAt };
 }
 
@@ -191,8 +195,9 @@ export interface StudyDayReset {
  * Undo the current study day: every prompt reviewed today goes back to
  * how it was before. Untouched prompts are not mentioned in the result.
  *
- * A prompt reviewed today that has no snapshot (state written before
- * snapshots existed) cannot be restored; it is made due today instead, so
+ * A prompt reviewed today that has no usable snapshot (state written
+ * before snapshots existed, or one whose due day is not a real date)
+ * cannot be restored; it is made due today instead, so
  * it can at least be studied again.
  */
 export function resetStudyDay(
@@ -208,11 +213,12 @@ export function resetStudyDay(
     if (!isToday(review.lastReviewedAt)) continue;
     if (isToday(review.firstReviewedAt)) {
       reset.remove.push({ cardId: review.cardId, direction: review.direction });
-    } else if (review.previous !== undefined) {
-      const { previous, ...state } = review;
-      reset.restore.push({ ...state, ...boundedSnapshot(previous) });
     } else {
-      reset.restore.push({ ...review, due: today });
+      const { previous, ...state } = review;
+      const snapshot = previous && boundedSnapshot(previous);
+      reset.restore.push(
+        snapshot === undefined ? { ...state, due: today } : { ...state, ...snapshot },
+      );
     }
   }
   return reset;
@@ -230,7 +236,8 @@ export interface FsrsStudyDayReset {
  * Undo the current study day of the FSRS-6 states, beside resetStudyDay
  * of the SM-2 ones: every state reviewed today goes back to its
  * snapshot. One introduced today goes, as its SM-2 state does; so does
- * one without a snapshot (first written today from an estimate), which
+ * one without a snapshot (first written today from an estimate), or
+ * with one that cannot be written back (boundedFsrsSnapshot), which
  * the next review estimates again from the SM-2 state restored.
  */
 export function resetFsrsStudyDay(
@@ -243,11 +250,12 @@ export function resetFsrsStudyDay(
   const reset: FsrsStudyDayReset = { restore: [], remove: [] };
   for (const state of states) {
     if (!isToday(state.lastReviewedAt)) continue;
-    if (isToday(state.firstReviewedAt) || state.previous === undefined) {
+    const { previous, ...rest } = state;
+    const snapshot = previous && boundedFsrsSnapshot(previous);
+    if (isToday(state.firstReviewedAt) || snapshot === undefined) {
       reset.remove.push({ cardId: state.cardId, direction: state.direction });
     } else {
-      const { previous, ...rest } = state;
-      reset.restore.push({ ...rest, ...previous });
+      reset.restore.push({ ...rest, ...snapshot });
     }
   }
   return reset;

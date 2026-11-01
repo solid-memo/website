@@ -7,7 +7,6 @@ import {
   FSRS_REVIEW_STATE_FORMAT_VERSION,
   reviewKeyOf,
   type DueState,
-  type FsrsSnapshot,
   type FsrsState,
   type ReviewKey,
   type ReviewQuality,
@@ -15,6 +14,13 @@ import {
 } from "./review";
 import { nextDueDate, studyDayOf } from "./scheduling";
 import { fnv1a } from "./fnv1a";
+import {
+  boundedFsrsSnapshot,
+  MAX_DIFFICULTY,
+  MAX_STABILITY,
+  MIN_DIFFICULTY,
+  MIN_STABILITY,
+} from "./fsrsSnapshot";
 import { boundedSm2State, MAX_INTERVAL_DAYS, type Sm2State } from "./sm2";
 import { daysBetween, gradeGroupOf } from "./studyPatterns";
 
@@ -62,11 +68,6 @@ const DECAY = w(20);
 
 /** Chosen so that the chance of recall after `stability` days is 90%. */
 const FACTOR = 0.9 ** (-1 / DECAY) - 1;
-
-const MIN_STABILITY = 0.001;
-const MAX_STABILITY = 36_500;
-const MIN_DIFFICULTY = 1;
-const MAX_DIFFICULTY = 10;
 
 /** The chance of recall FSRS-6 aims at when a card falls due, unless the learner chooses another. */
 export const DEFAULT_DESIRED_RETENTION = 0.9;
@@ -338,16 +339,6 @@ export function recallNow(
   return retrievability(elapsed, state.stability);
 }
 
-/** The fields a review of a state overwrites. */
-function snapshotOf(state: FsrsState): FsrsSnapshot {
-  return {
-    stability: state.stability,
-    difficulty: state.difficulty,
-    due: state.due,
-    lastReviewedAt: state.lastReviewedAt,
-  };
-}
-
 /**
  * The FSRS-6 state after a rating `now`, given the prompt's states
  * before it (`sm2`, `fsrs`; null when there is none). The memory builds
@@ -382,8 +373,8 @@ export function fsrsReview(
     fresh === null
       ? undefined
       : studyDayOf(new Date(fresh.lastReviewedAt), dayBoundaryHour) === today
-        ? fresh.previous
-        : snapshotOf(fresh);
+        ? fresh.previous && boundedFsrsSnapshot(fresh.previous)
+        : boundedFsrsSnapshot(fresh);
   return {
     cardId: key.cardId,
     direction: key.direction,
