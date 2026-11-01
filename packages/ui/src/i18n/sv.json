@@ -1730,6 +1730,7 @@
     "releaseIdUnsupported": "Utgåvan kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Den kan inte göras till ett utkast.",
     "releaseForeignPart": "Utgåvan har ett kort, kapitel, steg eller felaktigt alternativ på {part}, utanför själva utgåvan. Studio visar och kontrollerar bara utgåvans egna delar, så den kan inte göras till ett utkast.",
     "releaseForeignStatement": "Utkastet säger något om {subject}, adressen till utgåvan det skulle skapa eller en del av den, som Studio varken visar eller kontrollerar, så utgåvan skapades inte. Publicera det i en annan mapp i din pod, eller gör ett nytt utkast som inte säger det.",
+    "draftAliasedSubject": "Ett dokument i utkastet säger något om {subject}, en av utkastets egna adresser, som Studio varken visar eller kontrollerar, så utgåvan skapades inte. Gör utkastet igen från dess utgåva, eller kopiera det: kopian tar inte med det.",
     "releaseTaken": "En utgåva är redan publicerad på {url}, och en utgåva skrivs aldrig över. Publicera nästa version, eller välj en annan mapp.",
     "releaseHasErrors": {
       "one": "Utgåvekontrollen hittar {count} fel. Rätta det innan du publicerar utgåvan.",

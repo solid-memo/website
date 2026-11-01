@@ -1806,6 +1806,7 @@
     "releaseIdUnsupported": "Cette publication nomme l’une de ses parties « #{id} », ce qu’un brouillon ne peut pas conserver : l’identifiant d’un brouillon se compose de lettres de A à Z, de chiffres, de « . », « _ » et « - », et commence par une lettre ou un chiffre. Elle ne peut pas devenir un brouillon.",
     "releaseForeignPart": "Cette publication contient une carte, un chapitre, une étape ou une mauvaise réponse à {part}, hors de la publication elle-même. Le Studio n’affiche et ne vérifie que les parties propres d’une publication : elle ne peut donc pas devenir un brouillon.",
     "releaseForeignStatement": "Ce brouillon affirme quelque chose de {subject}, l’adresse de la publication qu’il créerait ou une partie de celle-ci, que le Studio n’affiche ni ne vérifie : la publication n’a donc pas été créée. Publiez-le dans un autre dossier de votre Pod, ou créez un nouveau brouillon qui ne l’affirme pas.",
+    "draftAliasedSubject": "Un document de ce brouillon affirme quelque chose de {subject}, l’une des adresses propres du brouillon, que le Studio n’affiche ni ne vérifie : la publication n’a donc pas été créée. Recréez le brouillon à partir de sa publication, ou copiez-le : la copie laisse cela de côté.",
     "releaseTaken": "Une publication existe déjà à l’adresse {url}, et une publication n’est jamais écrasée. Publiez la version suivante ou choisissez un autre dossier.",
     "releaseHasErrors": {
       "one": "La vérification de la publication trouve {count} erreur. Corrigez-la avant de publier.",

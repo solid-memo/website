@@ -10,6 +10,7 @@ import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile"
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
 import {
+  draftContainerOf,
   draftNameFor,
   draftPlaceOf,
   draftUrlOf,
@@ -245,6 +246,39 @@ function ownStatements(release: ReleaseDraft): ReleaseDraft {
   return triples.length === release.triples.length ? release : { ...release, triples };
 }
 
+/**
+ * Whether an IRI is in the container of the draft at `url` and not one
+ * of the source's own (`<source>`, `<source>#id`), which move to the
+ * draft's: one of the draft's documents, `release.ttl`, `cards.ttl` or
+ * `chapter-<id>.ttl`, with or without a fragment, or anything else
+ * there. Read back from the pod, it would be one of the draft's own
+ * subjects, what is stated of it hidden behind the record read of it,
+ * and published with the draft (GHSA-8w75-jg23-rxq5).
+ */
+function takenBy(source: Pick<ReleaseDraft, "url">, url: string): (iri: string) => boolean {
+  const container = draftContainerOf(url);
+  return (iri) => iri.startsWith(container) && iri !== source.url && idIn(source, iri) === null;
+}
+
+/** The statements, but those of or naming an IRI `taken` says is the new draft's. */
+function untaken(triples: readonly DraftTriple[], taken: (iri: string) => boolean): DraftTriple[] {
+  return triples.filter(
+    ({ subject, object }) => !taken(subject) && !(object.kind === "iri" && taken(object.value)),
+  );
+}
+
+/**
+ * The release, or draft, to be made the draft at `url`, before it is
+ * moved there: without a statement of or naming an address in the new
+ * draft's container (takenBy), and what only such a statement led to
+ * (ownStatements). Before the move, the draft's own address is one of
+ * these too: a statement of it is not one of the source's.
+ */
+function inItsPlace(source: ReleaseDraft, url: string): ReleaseDraft {
+  const triples = untaken(source.triples, takenBy(source, url));
+  return triples.length === source.triples.length ? source : ownStatements({ ...source, triples });
+}
+
 /** The name a release's URL gives its series (`…/capitals/v2.ttl` → `capitals`); null when it is named otherwise. */
 function nameInUrl(url: string): string | null {
   return releasePlaceOf(url)?.name ?? null;
@@ -468,7 +502,12 @@ export function createReleaseDraftUseCases({
             draft: await create(
               instanceUrl,
               { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
-              (url) => nextVersionDraft(release, url, linked),
+              (url) =>
+                nextVersionDraft(
+                  inItsPlace(release, url),
+                  url,
+                  untaken(linked, takenBy(release, url)),
+                ),
             ),
           };
         }
@@ -487,7 +526,7 @@ export function createReleaseDraftUseCases({
             draft: await create(
               instanceUrl,
               { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
-              (url) => releaseToDraft(release, url),
+              (url) => releaseToDraft(inItsPlace(release, url), url),
             ),
           };
         }
@@ -499,7 +538,8 @@ export function createReleaseDraftUseCases({
       // A draft is read only at a draft's place; its copy is named as it is, not after its title.
       const { name, version } = draftPlaceOf(draftUrl)!;
       return create(instanceUrl, { title: {}, name, version }, (url) => {
-        const copy = rebaseDraft(draft, url);
+        // What the draft states of an address in the copy's container, as a release made a draft could (GHSA-8w75-jg23-rxq5), is not copied.
+        const copy = rebaseDraft(inItsPlace(draft, url), url);
         // A guest's pod goes once the guest's study is kept: a copy names nothing in it.
         if (isGuestUrl(draftUrl) && mentionsGuest(copy))
           throw new AppError("guestUrlsLeft", { url });

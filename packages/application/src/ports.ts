@@ -511,7 +511,9 @@ export interface ReleaseDraftRepository {
    * changedElsewhere when its documents changed since. A draft that
    * states anything of `targetUrl` or a subject of it (`<targetUrl>#id`)
    * itself, which would say more of the release than its parts do, is
-   * releaseForeignStatement.
+   * releaseForeignStatement. One whose documents name a subject of the
+   * draft otherwise than the draft writes it, which no read of the draft
+   * has, is draftAliasedSubject.
    */
   assemble(draftUrl: string, targetUrl: string, issued: string, version?: string): Promise<string>;
   /**

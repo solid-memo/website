@@ -1501,10 +1501,14 @@ be published with the draft, so such a release is refused too
 
 Of a release's other statements, the draft keeps those of the release,
 of its own subjects, and of what they name, at any depth: a source, a
-license, a blank node. Only a statement of what none of these leads to
-is dropped, with nothing said. One that is kept can still be of the
-address the draft is later published at, or of a fragment of it. No
-editor shows it, so publishing there refuses the draft
+license, a blank node. A statement of what none of these leads to is
+dropped, with nothing said. So is one of, or naming, an address in the
+new draft's folder, its own release document's too, before the
+release's subjects are moved there. Read back from the pod, that
+address would be one of the draft's subjects, with statements no editor
+shows. Copying a draft drops them the same way. One that is kept can
+still be of the address the draft is later published at, or of a
+fragment of it. No editor shows it, so publishing there refuses the draft
 (`releaseForeignStatement`, [Publishing a release](#publishing-a-release)).
 In the pod, another folder is the way out; for the library, whose
 address is fixed, a new draft that doesn't state it.
@@ -2146,8 +2150,13 @@ releases it, two ways.
   (`releaseTaken`). So is a draft that states anything of the release
   at that address, or a subject of it, itself
   (`releaseForeignStatement`): no editor shows it, and it would add to
-  the release's own parts. Download .ttl refuses it the same way, at
-  the library's address.
+  the release's own parts. So is a draft whose documents name one of
+  its own subjects otherwise than the draft writes it (the address of
+  `cards.ttl`, or another of its documents' fragment)
+  (`draftAliasedSubject`). Another app can write that, and a draft made
+  from a release before such statements were dropped can hold it. Download .ttl refuses
+  these the same way, at the library's address. A copy of the draft
+  leaves out the statements of such a subject.
 - **Public.** Then only that document is made readable by everyone, as
   its server's access control says it: its own ACL on a server with Web
   Access Control, its ACR on one with Access Control Policies

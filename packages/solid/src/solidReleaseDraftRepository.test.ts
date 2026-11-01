@@ -5,6 +5,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
 import { courseProblems } from "@solid-memo/domain/release/courseRules";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { draftReleaseModel, strayPartsOf } from "@solid-memo/domain/release/draftModel";
@@ -771,6 +772,85 @@ describe("assemble", () => {
     await expect(pod.repository.assemble(other, `${DECKS}solid/v2.ttl`, NOW)).resolves.toContain(
       `<${library}>`,
     );
+  });
+
+  it("neither reads nor publishes a subject a draft's document names by another of its documents' address (GHSA-8w75-jg23-rxq5)", async () => {
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    /** The course draft, with what another app added to one of its documents: read as it was, and refused when published. */
+    const planted = async (document: string, subject: string) => {
+      const pod = await draftPod();
+      await pod.repository.create(INSTANCE, course());
+      const { draft } = await pod.repository.read(DRAFT);
+      await pod.put(
+        document,
+        `${await pod.text(document)}\n<${subject}> <${SM}frontImage> <https://elsewhere.example/x.png> .\n`,
+      );
+      expect(sorted((await pod.repository.read(DRAFT)).draft)).toEqual(sorted(draft));
+      await expect(pod.repository.assemble(DRAFT, target, NOW)).rejects.toMatchObject({
+        code: "draftAliasedSubject",
+        vars: { subject },
+      });
+    };
+    await planted(DRAFT, CARDS);
+    await planted(CARDS, CARDS);
+    await planted(CARDS, DRAFT);
+    await planted(DRAFT, `${CHAPTER_A}#q-a-1a`);
+    await planted(CARDS, `${DRAFT}#q-a-1a`);
+  });
+
+  it("publishes nothing of a draft made from a release that the draft does not show, whatever the release names in the new draft's container (GHSA-8w75-jg23-rxq5)", async () => {
+    const release = "https://elsewhere.example/decks/capitals-of-the-world/v1.ttl";
+    const container = `${INSTANCE}drafts/capitals-of-the-world/v1/`;
+    const text = readFileSync(join(DECKS_ROOT, "capitals-of-the-world/v1.ttl"), "utf8").replace(
+      /@base <[^>]*>/,
+      `@base <${release}>`,
+    );
+    /** The release with `planted` stated of `document` of the new draft, made a draft, and that draft. */
+    const imported = async (document: string, planted: string) => {
+      const pod = await draftPod({ checked: true });
+      const useCases = createReleaseDraftUseCases({
+        releaseDraftRepository: pod.repository,
+        deckRepository: {} as never,
+        deckLibrary: {} as never,
+        shapeValidator: pod.validator,
+        fileExchange: {
+          open: async () => ({
+            name: "capitals.ttl",
+            text: `${text}
+<https://en.wikipedia.org/wiki/List_of_national_capitals> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <${container}${document}> .
+<${container}${document}> ${planted} .
+`,
+          }),
+          save: () => undefined,
+        },
+        now: () => new Date(NOW),
+      });
+      const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
+      const draft = await useCases.getReleaseDraft(created!.draft.url);
+      expect(draft.url).toBe(`${container}release.ttl`);
+      const target = `${INSTANCE}releases/capitals-of-the-world/v1.ttl`;
+      const turtle = await pod.repository.assemble(draft.url, target, NOW);
+      expect(turtle).not.toContain("elsewhere.example");
+      expect(await pod.text(draft.url)).not.toContain("elsewhere.example");
+      expect((await pod.repository.list(INSTANCE)).map((listed) => listed.releasedAs)).toEqual([
+        undefined,
+      ]);
+      return draft;
+    };
+    // A license the Studio would not show, published with the one it does.
+    const licensed = await imported(
+      "cards.ttl",
+      "<http://purl.org/dc/terms/license> <https://elsewhere.example/all-rights-reserved>",
+    );
+    expect(licensed.root.license).toBe("https://creativecommons.org/publicdomain/zero/1.0/");
+    // A release the draft would seem to be published as.
+    for (const document of ["cards.ttl", "release.ttl"]) {
+      const released = await imported(
+        document,
+        `<${SM}releasedAs> <https://elsewhere.example/x/v9.ttl>`,
+      );
+      expect(released.root.releasedAs).toBeUndefined();
+    }
   });
 
   it("leaves a series described elsewhere to where it is, and a release with none as it is", async () => {
