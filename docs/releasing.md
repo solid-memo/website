@@ -321,9 +321,10 @@ semantic-release:
    `releaseDate`) and [`CITATION.cff`](../CITATION.cff) (`version`,
    `date-released`), with `npm run release:version`
    ([releaseVersion.ts](../scripts/releaseVersion.ts));
-4. renders the version's docs as pages, every diagram drawn in
-   Chromium, into `release-assets/docs-X.Y.Z.tar.gz`, with
-   `npm run docs:archive`
+4. renders the version's docs as pages, with every diagram the job
+   drew in Chromium before semantic-release started
+   (`npm run docs:archive -- --draw`), into
+   `release-assets/docs-X.Y.Z.tar.gz`, with `npm run docs:archive`
    ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). git
    ignores the archive, so the release commit leaves it out;
 5. commits the five files of steps 2 and 3 to `main` as
@@ -438,7 +439,11 @@ The job holds the key briefly:
 - The checkout keeps no credentials, so the key isn't in the git config
   while the job installs the dependencies and Chromium.
 - `npm ci --ignore-scripts` runs no package's install script; Chromium
-  comes from the job's own step (`npx playwright install`).
+  comes from the Chromium action, which downloads its headless shell
+  and checks the file against the SHA-256 committed in
+  [.github/actions/headless-shell](../.github/actions/headless-shell/action.yml).
+  Playwright's own download checks no hash, so it isn't used, and
+  `npm run check:shell` holds the pin to Playwright's version.
 - `npm audit signatures` runs next, before Chromium is downloaded and
   semantic-release runs with the key. It fails unless every installed
   version from a registry has the registry's valid signature, and any
@@ -454,23 +459,37 @@ The job holds the key briefly:
   `main`'s cache entries, so a file restored from them could carry code
   from the least trusted of those jobs into this one. The release
   workflow's `docs` job restores nothing either, as it attests what it
-  renders. It installs Chromium and its libraries with its own step
-  (`npx playwright install --with-deps`), not the Chromium action:
-  that action comes from the tag's checkout, and an older tag's copy
-  restores them from the cache.
+  renders. It installs Chromium and its libraries with its own step,
+  not the Chromium action: that action comes from the tag's checkout,
+  and an older tag's copy restores them from the cache or downloads
+  the shell unchecked. The step checks the shell against the same
+  SHA-256, so it fails for a tag whose Playwright wants another build,
+  and takes the libraries from Ubuntu's signed mirror
+  (`npx playwright install-deps`). A release whose archive is missing
+  is attached again before the next update to Playwright that moves
+  the shell is merged; after it, main pins a build that tag's
+  Playwright doesn't want, and the job can't attach that tag's docs.
+  The download is the same step as the headless-shell action's, which
+  `npm run check:shell` checks too.
+- No browser runs while the key is on disk. Before the secret is read,
+  `npm run docs:archive -- --draw` draws the docs' diagrams into the
+  drawings' cache, and the next step removes the browser. The archive
+  semantic-release renders draws from that cache. A diagram that isn't
+  there would need Chromium, which is gone, so the release fails
+  before anything is pushed.
 - Only the step that runs semantic-release reads the secret. It writes
   the key to a file that git's `ssh` reads (`GIT_SSH_COMMAND`), with
   GitHub's host keys from its API, and removes the file when the step
   ends. semantic-release checks that it can push before anything else
   and pushes in its prepare step, so the key stays for the whole run.
 
-That step runs Chromium, through Playwright, and Mermaid on the
-repository's docs while the key is there, to draw the archive's
-diagrams, and it loads Vite. These are development dependencies that
-read only what is committed on `main`, and Playwright and Mermaid are
-pinned. Renovate proposes their updates, and those of semantic-release,
-its plugins and the preset they load, once their version has been public for 3 days,
-so a bad version can be found and pulled first. CI checks them
+That step renders the repository's docs while the key is there, with
+the drawings kept, to pack the archive, and it loads Vite. These are
+development dependencies that read only what is committed on `main`,
+and Playwright and Mermaid are pinned. Renovate proposes their
+updates, and those of semantic-release, its plugins and the preset
+they load, once their version has been public for 3 days, so a bad
+version can be found and pulled first. CI checks them
 ([vendor-code.md](vendor-code.md)), and Renovate leaves each one
 waiting for a person, who merges it after reading what it changes
 ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). The wait holds

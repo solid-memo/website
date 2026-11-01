@@ -114,9 +114,15 @@ fetches, such as Chromium or its system libraries.
 
 **Build the deployed site from nothing GitHub's cache holds.** CI's
 `site` job sets up Node without npm's cache, and the Chromium action's
-`cache: false` downloads the headless shell with Playwright and its
-system libraries from Ubuntu's signed mirror. The deploy's own build,
-when run by hand, does the same. Any job on `main` can write `main`'s
+`cache: false` downloads the headless shell, checked against the
+SHA-256 committed in
+[.github/actions/headless-shell](../.github/actions/headless-shell/action.yml),
+and its system libraries from Ubuntu's signed mirror. Playwright
+doesn't install the shell, as its download checks no hash
+([testing.md](testing.md#the-repositorys-own-checks)). The deploy's
+own build, when run by hand, does the same, with the Chromium action
+of the tag it builds: a tag from before the shell was pinned still
+installs it with Playwright. Any job on `main` can write `main`'s
 cache entries, so a file restored from them could carry code from the
 least trusted of those jobs into the site.
 
@@ -363,8 +369,12 @@ address is the site build's (`VITE_REPO_URL`,
 
 An archive is rendered once, by that release's own code. It draws
 every diagram in Chromium, ignoring `DOCS_DIAGRAMS`, and fails without
-Chromium. It checks each drawing as the build does (`checkSvg`, and
-the font's notice in it), then packs them with the system's `tar`. The
+Chromium unless every drawing is in the drawings' cache already.
+`npm run docs:archive -- --draw` draws and checks them so, and writes
+no archive: the release job runs it before it writes the deploy key
+([releasing.md](releasing.md#the-deploy-key)). It checks each drawing
+as the build does (`checkSvg`, and the font's notice in it), then
+packs them with the system's `tar`. The
 archive's address and contents aren't part of the public API
 ([releasing.md](releasing.md#the-public-api)).
 

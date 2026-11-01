@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# Chromium's headless shell, the build of it the installed playwright-core
+# names in its browsers.json, downloaded and checked against the SHA-256
+# committed here, then unpacked where Playwright looks for it
+# (~/.cache/ms-playwright/chromium_headless_shell-<revision>/), with the
+# marker Playwright leaves on an installed browser. Playwright's own
+# install checks no hash, so it is not used; nor is FFmpeg, which only
+# records video, downloaded. The zip is Chrome for Testing's.
+#
+# Playwright publishes no hashes, so a person records the new one with
+# each update to playwright, which Renovate leaves waiting
+# (renovate.json5), after checking that the zip is the same file as
+# Chrome for Testing's own download. `npm run check:shell` fails until
+# the version, the revision and the hash here are the installed
+# playwright-core's, and release.yml's docs job, which downloads the
+# shell with a step of its own, is this step, but for its if. The
+# check with sha256sum fails the step, under set -e, before the zip is
+# unpacked, which check:shell holds both copies to. The hash is Linux
+# x64's zip, so on another runner it fails. Run it after npm ci.
+name: Chromium headless shell
+description: Downloads Chromium's headless shell for the installed Playwright, checked against a committed SHA-256.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        CHROMIUM_HEADLESS_SHELL_VERSION: 156.0.8078.4
+        CHROMIUM_HEADLESS_SHELL_REVISION: "1248"
+        CHROMIUM_HEADLESS_SHELL_SHA256: c3e50596aef52c58f8fda3c6b3411c33d34c88b177b3ed1c2243359fd3b8ba20
+      run: |
+        set -eo pipefail
+        if [ "$RUNNER_OS" != Linux ] || [ "$RUNNER_ARCH" != X64 ]; then
+          echo "::error::The headless shell's hash is Linux x64's, not $RUNNER_OS $RUNNER_ARCH's."
+          exit 1
+        fi
+        expected=$(node -p "const b = require(require('path').join(require.resolve('playwright-core/package.json'), '../browsers.json')).browsers.find((b) => b.name === 'chromium-headless-shell'); b.browserVersion + ' ' + b.revision")
+        if [ "$expected" != "$CHROMIUM_HEADLESS_SHELL_VERSION $CHROMIUM_HEADLESS_SHELL_REVISION" ]; then
+          echo "::error::playwright-core wants the headless shell $expected, and $CHROMIUM_HEADLESS_SHELL_VERSION $CHROMIUM_HEADLESS_SHELL_REVISION is pinned (npm run check:shell)."
+          exit 1
+        fi
+        zip="$RUNNER_TEMP/chrome-headless-shell-linux64.zip"
+        curl -fsSL -o "$zip" "https://cdn.playwright.dev/builds/cft/$CHROMIUM_HEADLESS_SHELL_VERSION/linux64/chrome-headless-shell-linux64.zip"
+        echo "$CHROMIUM_HEADLESS_SHELL_SHA256  $zip" | sha256sum -c -
+        dir="$HOME/.cache/ms-playwright/chromium_headless_shell-$CHROMIUM_HEADLESS_SHELL_REVISION"
+        rm -rf "$dir"
+        mkdir -p "$dir"
+        unzip -q "$zip" -d "$dir"
+        rm "$zip"
+        touch "$dir/INSTALLATION_COMPLETE"
