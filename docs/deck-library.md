@@ -966,8 +966,9 @@ flowchart LR
   Turtle text is also refused at the part where it declares its base
   (`@base`, `BASE`) for the 17th time, or where its base can grow past
   512 characters (`writeTurtle`). It's refused there too when a base
-  it declares has a `.`, `..` or empty segment in its path, or when it
-  declares a prefix (`@prefix`, `PREFIX`) for the 4,097th time. The
+  it declares has an empty segment in its path, or a `.` or `..` one
+  but in a relative path with no colon. So it is when it declares a
+  prefix (`@prefix`, `PREFIX`) for the 4,097th time. The
   length bound is the longest of the release's address and the
   absolute bases it declares, with each relative one added on. The
   parser walks the whole base for each relative IRI, base and prefix it

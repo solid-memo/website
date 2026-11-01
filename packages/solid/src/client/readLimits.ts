@@ -191,10 +191,16 @@ const DIRECTIVE = /(base|prefix)(?=[\s#<"'])/iy;
 const IN_NAME = /[\w:-]/;
 
 /**
- * Whether a declared base, the IRI as written, has a plain path: no `.`
- * or `..` segment and no empty one, and no escape that could stand for
- * one. The parser walks such segments of the base again for every IRI
- * it resolves against it, and no release the app writes has one.
+ * Whether a declared base, the IRI as written, has a plain path: no
+ * empty segment, no escape that could stand for a segment, and no `.`
+ * or `..` segment but in a relative path with no colon. The parser
+ * keeps an absolute base as it is written, and walks such segments of
+ * it again for every IRI it resolves against it; no release the app
+ * writes has one. A relative path it resolves against the base before,
+ * which removes its dot segments, as a document written by hand may
+ * have them (`@base <./>`). One that starts at the root it resolves on
+ * its own, and there it takes a colon for the end of a scheme and
+ * keeps the segment after it.
  */
 function plainBase(iri: string): boolean {
   if (iri.includes("\\")) return false;
@@ -206,7 +212,8 @@ function plainBase(iri: string): boolean {
   }
   const query = path.search(/[?#]/);
   if (query >= 0) path = path.slice(0, query);
-  return !path.includes("//") && !DOT_SEGMENT.test(path);
+  const resolved = scheme === 0 && !path.startsWith("/") && !path.includes(":");
+  return !path.includes("//") && (resolved || !DOT_SEGMENT.test(path));
 }
 
 /** Where the IRI that starts at `at` (its `<`) of a Turtle text ends, as the parser reads it: -1 when none does. */

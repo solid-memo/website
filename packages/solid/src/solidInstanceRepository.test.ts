@@ -769,6 +769,45 @@ describe("readMeta and upgradeMeta", () => {
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
     expect(writeDocument).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["upgradeMeta", { formatVersion: 2 }],
+    ["saveMeta", { name: "Renamed" }],
+    ["createInstance", { name: "Made" }],
+  ] as const)(
+    "reads the meta document again after %s writes it, not as it was before, however the server versions it",
+    async (write, written) => {
+      // A server that gives a document rewritten within the same second the same version, as the Community Solid Server 6 does.
+      let served: Dataset = metaDataset();
+      vi.mocked(readDocument).mockImplementation(async (_url, { ifNoneMatch }) =>
+        ifNoneMatch === '"v1"' ? { notModified: true } : { dataset: served as never, etag: '"v1"' },
+      );
+      vi.mocked(writeDocument).mockImplementation(async (_url, dataset) => {
+        served = dataset as Dataset;
+        return { dataset: dataset as never, etag: undefined };
+      });
+      vi.mocked(locateTypeIndexes).mockResolvedValue({
+        fetch: indexFetch,
+        privateIndexUrl: PRIVATE_INDEX,
+        publicIndexUrl: PUBLIC_INDEX,
+      });
+      const repository = makeRepository();
+      await expect(repository.readMeta(CONTAINER)).resolves.toMatchObject({ formatVersion: 1 });
+      if (write === "upgradeMeta") await repository.upgradeMeta(CONTAINER);
+      else if (write === "saveMeta")
+        await repository.saveMeta(CONTAINER, { ...meta, name: "Renamed" });
+      else
+        await repository.createInstance({
+          webId: WEBID,
+          containerUrl: CONTAINER,
+          name: "Made",
+          registrationTarget: "private",
+        });
+      expect(writeDocument).toHaveBeenCalledOnce();
+      await expect(repository.readMeta(CONTAINER)).resolves.toMatchObject(written);
+      expect(vi.mocked(readDocument).mock.lastCall?.[1].ifNoneMatch).toBeUndefined();
+    },
+  );
 });
 
 describe("renameRegistrations", () => {

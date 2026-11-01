@@ -69,7 +69,11 @@ export function createSolidInstanceRepository({
   /**
    * An instance's meta document is read under limits: a folder anyone
    * may make can be added by its address, and is read as soon as it is,
-   * then again each time the app reads its description.
+   * then again each time the app reads its description. It is written
+   * through the same fetch, so that a write forgets the read it kept
+   * (datasets.ts) and the next read is not answered from it: a server
+   * may give a document rewritten within the same second the same
+   * version.
    */
   const metaFetch = limitedFetch(fetch, FOREIGN_LIMITS);
   return {
@@ -101,7 +105,7 @@ export function createSolidInstanceRepository({
       await saveMetaDocument(
         metaUrl,
         { name, createdAt: now().toISOString(), formatVersion: INSTANCE_FORMAT_VERSION },
-        fetch,
+        metaFetch,
         checkWrite,
       );
       // The private index, for the review states' and answers' registrations of an instance registered elsewhere.
@@ -207,7 +211,7 @@ export function createSolidInstanceRepository({
       const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
       await checkWrite(updated, [url], "pod");
       // If-Match the read above.
-      await saveDataset(metaUrl, updated, fetch);
+      await saveDataset(metaUrl, updated, metaFetch);
     },
 
     async upgradeMeta(instanceUrl): Promise<boolean> {
@@ -221,7 +225,7 @@ export function createSolidInstanceRepository({
       const updated = setThing(dataset!, toInstanceMetaThing(url, meta, existing));
       await checkWrite(updated, [url], "pod");
       // If-Match the read above.
-      await saveDataset(metaUrl, updated, fetch);
+      await saveDataset(metaUrl, updated, metaFetch);
       return true;
     },
 

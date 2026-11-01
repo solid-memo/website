@@ -144,11 +144,15 @@ describe("publish", () => {
     expect(await pod.text(CATALOG)).toContain(`<${PUBLISHED}> <${RELEASE}>`);
   });
 
-  it("lists the catalog's releases as the instance's data is read, under its limits", async () => {
-    const { publisher } = await publisherPod({
+  it("lists and links the catalog's releases as the instance's data is read and written, under its limits", async () => {
+    const { pod, publisher } = await publisherPod({
       dataLimits: { bytes: 64, quads: 1_000, characters: 64 * 1024 },
     });
-    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+      name: "ReadLimitError",
+      url: CATALOG,
+    });
+    await addCatalogLink(INSTANCE, PUBLISHED, RELEASE, pod.fetch);
     await expect(publisher.listPublished(INSTANCE)).rejects.toMatchObject({
       name: "ReadLimitError",
       url: CATALOG,

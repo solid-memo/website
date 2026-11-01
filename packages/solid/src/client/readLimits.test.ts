@@ -254,17 +254,19 @@ describe("writeTurtle", () => {
     expect(refuses(`<s> <p> "base #base" . @base ${long} .`)).toBe(true);
   });
 
-  it("refuses a base whose path has a dot segment, an empty segment or an escape, and lets its authority, query and fragment be", () => {
+  it("refuses a base whose path has an empty segment or an escape, or a dot segment but in a relative path with no colon, and lets its authority, query and fragment be", () => {
     for (const iri of [
       "https://other.example/a/./b/",
       "https://other.example/a/../",
       "https://other.example/a/..",
       "https://other.example/.",
       "https://other.example/a//b/",
-      "./a/",
-      "../",
-      "a/.",
       "a//b/",
+      ".//",
+      // From the root, or with a colon, the parser keeps a segment after the colon.
+      "/a/../",
+      "/x:/../",
+      "a/x:/../",
       "//other.example/a/",
       "https://other.example/a\\u002E\\u002E/",
     ]) {
@@ -278,6 +280,12 @@ describe("writeTurtle", () => {
       "a.b/c..",
       "a/b?./..",
       "#./",
+      // A relative base's dot segments the parser removes as it resolves it, as a document written by hand may have.
+      "./",
+      "./a/",
+      "../",
+      "a/.",
+      "../../a/./b/",
     ]) {
       expect(refuses(`@base <${iri}> .`), iri).toBe(false);
     }

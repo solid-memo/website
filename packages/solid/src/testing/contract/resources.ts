@@ -346,6 +346,22 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(quad?.subject.value).toBe("https://pod.example/decks/a");
     });
 
+    it("reads a document whose relative base has dot segments, as one written by hand may, with limits or with none", async () => {
+      // The parser resolves a relative base against the one before, which removes them.
+      const text = `@base <./> .\n@base <../a/./> .\n<b#it> <${EX}p> "x" .`;
+      const subject = "https://pod.example/a/b#it";
+      for (const fetch of [turtleAt(text), limitedFetch(turtleAt(text), RELEASE_LIMITS)]) {
+        for (const reading of [getSolidDataset, getSolidDatasetLinear]) {
+          expect(getThing(await reading(URL_, { fetch }), subject)).not.toBeNull();
+        }
+        expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+      }
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const [quad] = await parseQuads(text, "turtle", URL_, limits);
+        expect(quad?.subject.value).toBe(subject);
+      }
+    });
+
     it("refuses a text of prefixes, or of IRIs that go up from a base, in time that does not grow with the rest", async () => {
       const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 10, characters: 100_000_000 };
       const dotted = `@base <https://pod.example/${"../".repeat(160)}> .\n`;

@@ -42,10 +42,10 @@ import { RDF, SM } from "./vocab";
  * (podFence.ts), which `fetch` never does; it is used for nothing else.
  * Whether a release is public is asked as someone with no login would
  * ask: with `publicFetch`, which sends no credentials. The releases an
- * instance's catalog links are listed with `dataFetch`, as the
- * instance's data is read: the Studio lists them for any instance it
- * shows, one outside the user's storages too, which is read under
- * limits and as no one (docs/boundaries.md).
+ * instance's catalog links are listed, and linked, with `dataFetch`, as
+ * the instance's data is read and written: the Studio lists them for
+ * any instance it shows, one outside the user's storages too, which is
+ * read under limits and as no one (docs/boundaries.md).
  */
 export function createSolidReleasePublisher({
   fetch,
@@ -123,7 +123,8 @@ export function createSolidReleasePublisher({
       } else if (!response.ok)
         throw new AppError("addFailed", { url: targetUrl, status: response.status });
       const shared = await share(targetUrl);
-      await addCatalogLink(instanceUrl, SM.publishedRelease, targetUrl, fetch);
+      // Through the fetch listPublished reads the catalog with, so that the write forgets the read it kept (datasets.ts).
+      await addCatalogLink(instanceUrl, SM.publishedRelease, targetUrl, dataFetch);
       return { public: shared };
     },
 

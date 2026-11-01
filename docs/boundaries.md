@@ -310,8 +310,10 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   prefixes, with limits or with none. That holds for a deck's
   documents, a folder's listing and a profile alike. The document's own
   address counts toward a base's length, so a document of the user's
-  at an address longer than 512 characters, or one another app wrote
-  with a base like `<./>`, can't be read. The library's own reads of
+  at an address longer than 512 characters can't be read. Nor can one
+  another app wrote with a base that has a `.` or `..` segment, unless
+  it's a relative path with no colon, such as `<./>`: the parser
+  removes those as it resolves it. The library's own reads of
   a profile's further documents and of access controls aren't bounded
   so; they're the user's own.
 - **The folders** are asked once a WebID and kept. The page asks for
