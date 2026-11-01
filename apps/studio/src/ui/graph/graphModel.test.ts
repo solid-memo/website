@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { growth } from "@solid-memo/domain/testing/growth";
 import type { GraphNode } from "@solid-memo/domain/instanceGraph";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { instanceA } from "../../test/fixtures";
@@ -115,10 +116,17 @@ describe("tooLarge", () => {
 describe("labelOf and shortName", () => {
   const label = (id: string) => labelOf(nodeOf(id), instanceA.url, instanceA.name);
 
-  it("names the instance's folder by its name, and folders and documents by their path", () => {
+  it("names the instance's folder by its name, a folder by its own and a document by its path", () => {
     expect(label(instanceA.url)).toBe(instanceA.name);
     expect(label(CARDS)).toBe("decks/capitals.ttl");
     expect(label(`${instanceA.url}decks/`)).toBe("decks/");
+    const folder: GraphNode = {
+      id: `${instanceA.url}releases/capitals/v1/`,
+      kind: "container",
+      types: [],
+      literals: [],
+    };
+    expect(labelOf(folder, instanceA.url, instanceA.name)).toBe("v1/");
   });
 
   it("names a resource by its fragment, a blank node by its label, a term in short", () => {
@@ -211,11 +219,35 @@ describe("distinctLabels", () => {
       "reviews/verbs#card-7",
       "nouns#card-9",
       "decks/nouns#card-9",
-      "decks",
-      "decks",
+      "decks/",
+      "reviews/",
       "x",
       "x",
       "only",
+    ]);
+  });
+
+  it("names a folder named as another after its parent folder, else its path in the instance", () => {
+    const nodes = [
+      of(root, "container"),
+      of(`${root}releases/`, "container"),
+      of(`${root}releases/capitals/v1/`, "container"),
+      of(`${root}releases/verbs/v1/`, "container"),
+      of(`${root}releases/verbs/v2/`, "container"),
+      of(`${root}drafts/a/v1/`, "container"),
+      of(`${root}releases/a/v1/`, "container"),
+      of(`${root}v1/`, "container"),
+    ];
+    const labels = new Map(nodes.map((node) => [node.id, labelOf(node, root, instanceA.name)]));
+    expect([...distinctLabels(nodes, labels, root).values()]).toEqual([
+      instanceA.name,
+      "releases/",
+      "capitals/v1/",
+      "verbs/v1/",
+      "v2/",
+      "drafts/a/v1/",
+      "releases/a/v1/",
+      "v1/",
     ]);
   });
 });
@@ -227,6 +259,31 @@ describe("drawnLabel", () => {
     expect([...drawnLabel(long)]).toHaveLength(LABEL_LENGTH);
     expect(drawnLabel("reviews/korean-verbs#card-7")).toBe("reviews/kor…verbs#card-7");
     expect(drawnLabel("x".repeat(LABEL_LENGTH))).toBe("x".repeat(LABEL_LENGTH));
+    expect(drawnLabel(`${"a".repeat(LABEL_LENGTH)}😀`)).toBe(
+      `${"a".repeat(11)}…${"a".repeat(11)}😀`,
+    );
+    expect(drawnLabel("😀".repeat(LABEL_LENGTH + 1))).toBe(`${"😀".repeat(11)}…${"😀".repeat(12)}`);
+    expect(drawnLabel(`${"a/".repeat(19_990)}cards.ttl`)).toBe("a/a/a/a/a/a…/a/cards.ttl");
+  });
+
+  // Reading all of a label to cut it would take sixteen times as long for
+  // one sixteen times as long: a ratio of about one, not under a quarter.
+  // A cut takes so little time that one is done thousands of times over in
+  // each timed run, which then lasts long enough that a pause of the
+  // garbage collector or the scheduler cannot tip the ratio.
+  it("cuts a label of millions of characters short without reading all of it", () => {
+    const ratio = growth(
+      (length) => {
+        const label = `${"a/".repeat(length / 2)}cards.ttl`;
+        drawnLabel(label);
+        return () => {
+          for (let time = 0; time < 4_000; time++) drawnLabel(label);
+        };
+      },
+      200_000,
+      16,
+    );
+    expect(ratio).toBeLessThan(0.25);
   });
 });
 

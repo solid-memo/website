@@ -47,7 +47,11 @@ import { useLayout } from "./useLayout";
 /** How many nodes a search lists at most. */
 const FOUND_AT_MOST = 10;
 
-/** The names of a graph's nodes, by id, no two the same that can be told apart. */
+/**
+ * The names of a graph's nodes, by id, no two the same that can be told
+ * apart: a folder by its own name, with its parent's or its path in the
+ * instance only when another is named as it is (distinctLabels).
+ */
 export function useLabels(graph: InstanceGraph, instance: Instance): ReadonlyMap<string, string> {
   return useMemo(() => {
     const root = ensureTrailingSlash(instance.url);

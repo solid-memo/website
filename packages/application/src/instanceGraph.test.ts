@@ -153,6 +153,19 @@ describe("readInstanceGraph", () => {
     expect(urls.filter((url) => url === REVIEWS)).toHaveLength(1);
   });
 
+  it("reads no document whose path in the instance is too long or deep to draw", async () => {
+    const deep = `${INSTANCE}${"a/".repeat(19_990)}cards.ttl`;
+    const long = `${INSTANCE}decks/${"a".repeat(3_000)}.ttl`;
+    const { reader, useCases } = setUp({
+      decks: [{ cardsDocumentUrl: deep, reviewsDocumentUrl: long }] as Deck[],
+    });
+    const graph = await useCases.readInstanceGraph(INSTANCE, WEBID);
+    const urls = reader.readDocument.mock.calls.map(([url]) => url);
+    expect(urls).not.toContain(deep);
+    expect(urls).not.toContain(long);
+    expect(graph.nodes.some((node) => node.id.startsWith(`${INSTANCE}a/`))).toBe(false);
+  });
+
   it("draws the graph with no storages when they cannot be found", async () => {
     const { storageGateway, useCases } = setUp();
     vi.mocked(storageGateway.discoverStorages).mockRejectedValueOnce(new Error("404"));

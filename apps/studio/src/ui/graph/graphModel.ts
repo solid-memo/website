@@ -162,13 +162,17 @@ export function shortName(iri: string): string {
 
 /**
  * What a node is called in the graph: the instance's folder by the
- * instance's name; a folder or a document by its path in the instance; a
- * blank node by its label; a vocabulary term in short; any other by its
+ * instance's name; a folder in it by its own name ("decks/"), not its
+ * whole path, which would make the names of a deep chain of folders grow
+ * with the square of its depth; a document by its path in the instance;
+ * a blank node by its label; a vocabulary term in short; any other by its
  * fragment, else the last part of its path, else its IRI.
  */
 export function labelOf(node: GraphNode, instanceUrl: string, instanceName: string): string {
   if (node.id === instanceUrl) return instanceName;
-  if ((node.kind === "container" || node.kind === "document") && node.id.startsWith(instanceUrl))
+  if (node.kind === "container" && node.id.startsWith(instanceUrl))
+    return node.id.slice(node.id.lastIndexOf("/", node.id.length - 2) + 1);
+  if (node.kind === "document" && node.id.startsWith(instanceUrl))
     return node.id.slice(instanceUrl.length);
   // A blank node's label holds no "@", its document's address may.
   if (node.blank === true) return node.id.slice(0, node.id.indexOf("@"));
@@ -192,7 +196,12 @@ function documentName(document: string, instanceUrl: string): string {
  * document named as another node is is named after its document's file
  * too ("korean-verbs#card-7"), and when that is still another's, after the
  * document's path in the instance ("reviews/korean-verbs#card-7"). A
- * folder, a document, and a node of no document keep their names.
+ * folder in the instance named as another node is is named after its
+ * parent folder too ("capitals/v1/"), and when that is still another's,
+ * by its path in the instance ("releases/capitals/v1/"). A document and
+ * a node of no document keep their names. Each name is worked out once,
+ * from the end of its address: no folder's whole path is read unless it
+ * is the one told apart only by it.
  */
 export function distinctLabels(
   nodes: readonly GraphNode[],
@@ -201,13 +210,22 @@ export function distinctLabels(
 ): Map<string, string> {
   const named = (each: GraphNode) =>
     each.document !== undefined && each.kind !== "container" && each.kind !== "document";
+  const folder = (each: GraphNode) =>
+    each.kind === "container" && each.id !== instanceUrl && each.id.startsWith(instanceUrl);
   const counted = (texts: Iterable<string>) => {
     const counts = new Map<string, number>();
     for (const text of texts) counts.set(text, (counts.get(text) ?? 0) + 1);
     return counts;
   };
   const counts = counted(labels.values());
-  const shared = nodes.filter((each) => named(each) && counts.get(labels.get(each.id)!)! > 1);
+  const collides = (each: GraphNode) => counts.get(labels.get(each.id)!)! > 1;
+  const shared = nodes.filter((each) => named(each) && collides(each));
+  const sharedFolders = nodes.filter((each) => folder(each) && collides(each));
+  const parentOf = (each: GraphNode) => {
+    const parent = each.id.lastIndexOf("/", each.id.lastIndexOf("/", each.id.length - 2) - 1);
+    return each.id.slice(Math.max(parent + 1, instanceUrl.length));
+  };
+  const parentCounts = counted(sharedFolders.map(parentOf));
   const shortOf = (each: GraphNode) =>
     `${documentName(each.document!, instanceUrl).split("/").at(-1)}#${labels.get(each.id)}`;
   const shortCounts = counted(shared.map(shortOf));
@@ -221,6 +239,13 @@ export function distinctLabels(
         : short,
     );
   }
+  for (const each of sharedFolders) {
+    const parent = parentOf(each);
+    distinct.set(
+      each.id,
+      parentCounts.get(parent)! > 1 ? each.id.slice(instanceUrl.length) : parent,
+    );
+  }
   return distinct;
 }
 
@@ -230,13 +255,21 @@ export const LABEL_LENGTH = 24;
 /**
  * A label as drawn: cut short past LABEL_LENGTH characters, in the
  * middle, with an ellipsis, for its end (a fragment, often) to tell it
- * from another as long.
+ * from another as long. Only the characters drawn are read, however long
+ * the label: its start up to one past LABEL_LENGTH, and its end.
  */
 export function drawnLabel(label: string): string {
-  const characters = [...label];
-  if (characters.length <= LABEL_LENGTH) return label;
+  const start: string[] = [];
+  for (const character of label) {
+    start.push(character);
+    if (start.length > LABEL_LENGTH) break;
+  }
+  if (start.length <= LABEL_LENGTH) return label;
   const head = Math.floor((LABEL_LENGTH - 1) / 2);
-  return `${characters.slice(0, head).join("")}…${characters.slice(head - LABEL_LENGTH + 1).join("")}`;
+  const tail = LABEL_LENGTH - 1 - head;
+  // A character is at most two code units: its last `tail` are within twice as many.
+  const end = [...label.slice(-2 * tail)].slice(-tail);
+  return `${start.slice(0, head).join("")}…${end.join("")}`;
 }
 
 /** An arrow key's direction, as a step across the drawing (y down). */

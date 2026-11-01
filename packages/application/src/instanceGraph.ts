@@ -4,6 +4,7 @@
 
 import {
   instanceGraphOf,
+  isDrawnDocument,
   type GraphDocument,
   type InstanceGraph,
 } from "@solid-memo/domain/instanceGraph";
@@ -12,7 +13,6 @@ import {
   ensureTrailingSlash,
   historyUrlOf,
   instanceDocumentUrls,
-  isDocumentIn,
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type {
@@ -32,6 +32,7 @@ import type {
  * drafts' documents and the releases published in it), and nothing
  * else. The catalog is data anyone may have written: a document it names
  * outside the instance (or that climbs out of it, by `..`) is not read,
+ * nor one whose path in it is too long or deep to draw (isDrawnDocument),
  * and no IRI a document names is. A document that cannot be read is
  * drawn as such, the rest still drawn: a broken instance is where the
  * graph helps most. The user's storages, which tell the leaves in their
@@ -86,8 +87,9 @@ export function createInstanceGraphUseCases({
       ...drafts,
       ...releases,
     ];
-    // As deleting an instance's data does: a deck's document by its address, never a folder.
-    return [...new Set(urls.map(documentUrlOf))].filter((url) => isDocumentIn(url, root));
+    // As deleting an instance's data does: a deck's document by its address, never a folder;
+    // and none the graph would not draw, too long or deep a path in the instance.
+    return [...new Set(urls.map(documentUrlOf))].filter((url) => isDrawnDocument(url, root));
   }
 
   return {

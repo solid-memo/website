@@ -217,6 +217,30 @@ function literalOf(predicate: string, object: ReleaseText, document: string): Gr
   };
 }
 
+/**
+ * How long and how deep a document's path in the instance may be for it
+ * to be drawn: far past any address Solid Memo makes. Each folder on the
+ * way is a node named by its whole address, so a longer or deeper one,
+ * which only a catalog someone else wrote can name, would cost the graph
+ * and every step over it time and memory growing with the square of its
+ * length.
+ */
+const DRAWN_PATH = { length: 2_048, parts: 32 };
+
+/**
+ * Whether the graph draws the document `url` of the instance at `root`:
+ * a document in it (isDocumentIn), its path in it no longer or deeper
+ * than DRAWN_PATH allows.
+ */
+export function isDrawnDocument(url: string, root: string): boolean {
+  const path = url.slice(ensureTrailingSlash(root).length);
+  return (
+    path.length <= DRAWN_PATH.length &&
+    path.split("/").length <= DRAWN_PATH.parts &&
+    isDocumentIn(url, root)
+  );
+}
+
 /** The graph of an instance's documents as read: see InstanceGraph. */
 export function instanceGraphOf({
   instanceUrl,
@@ -227,7 +251,7 @@ export function instanceGraphOf({
   // A storage named without its trailing slash holds no address that merely starts as it does.
   const pods = storages.map(ensureTrailingSlash);
   // A document elsewhere is not the instance's data, whatever the catalog says.
-  const documents = read.filter(({ url }) => isDocumentIn(url, root));
+  const documents = read.filter(({ url }) => isDrawnDocument(url, root));
   const nodes = new Map<string, GraphNode>();
   const edges = new Map<string, GraphEdge>();
   const edge = (from: string, to: string, predicate: string, kind: GraphEdgeKind): boolean => {
