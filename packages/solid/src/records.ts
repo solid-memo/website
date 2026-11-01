@@ -410,11 +410,6 @@ export function unlessTyped(
   return thing;
 }
 
-/** The dataset without the subject, unless a newer version of the app wrote it (unlessNewer). */
-export function removeUnlessNewer<D extends Dataset>(dataset: D, url: string): D {
-  return removeAllUnlessNewer(dataset, [url]);
-}
-
 /**
  * The dataset without each of the subjects, unless a newer version of
  * the app wrote one (unlessNewer): all taken out at once (removeThings),

@@ -42,7 +42,7 @@ import {
   readRecord,
   readVersioned,
   recordThing,
-  removeUnlessNewer,
+  removeAllUnlessNewer,
   storedVersionOf,
   unlessNewer,
   unreadableDatetimes,
@@ -217,7 +217,7 @@ describe("a change or removal that records no subject", () => {
         ),
       }),
     );
-    expect(() => removeUnlessNewer(setThing(createSolidDataset(), card(newer)), CARD)).toThrow(
+    expect(() => removeAllUnlessNewer(setThing(createSolidDataset(), card(newer)), [CARD])).toThrow(
       expect.objectContaining({ code: "writtenByNewerApp" }),
     );
   });
@@ -227,8 +227,8 @@ describe("a change or removal that records no subject", () => {
     expect(unlessNewer(card())).toEqual(card());
     expect(unlessNewer(card(99, `${EX}Other`))).toEqual(card(99, `${EX}Other`));
     const dataset = setThing(createSolidDataset(), card(LATEST_VERSION.card));
-    expect(getThing(removeUnlessNewer(dataset, CARD), CARD)).toBeNull();
-    expect(getThing(removeUnlessNewer(createSolidDataset(), CARD), CARD)).toBeNull();
+    expect(getThing(removeAllUnlessNewer(dataset, [CARD]), CARD)).toBeNull();
+    expect(getThing(removeAllUnlessNewer(createSolidDataset(), [CARD]), CARD)).toBeNull();
   });
 });
 
