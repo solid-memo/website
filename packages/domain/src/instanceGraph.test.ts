@@ -371,6 +371,23 @@ describe("instanceGraphOf", () => {
     expect(of.edges.every((each) => each.from !== each.to)).toBe(true);
   });
 
+  it("leaves out a document whose path in the instance is too long or too deep", () => {
+    const folders = (count: number) => "a/".repeat(count);
+    const deepest = `${INSTANCE}${folders(31)}cards.ttl`;
+    const longest = `${INSTANCE}decks/${"b".repeat(2_048 - "decks/.ttl".length)}.ttl`;
+    const of = graph([
+      found(`${INSTANCE}${folders(32)}cards.ttl`, []),
+      found(`${INSTANCE}decks/${"c".repeat(2_049 - "decks/.ttl".length)}.ttl`, []),
+      found(`${INSTANCE}${folders(19_990)}reviews.ttl`, []),
+      found(deepest, []),
+      found(longest, []),
+    ]);
+    const documents = of.nodes.filter((each) => each.kind === "document").map((each) => each.id);
+    expect(documents).toEqual([deepest, longest]);
+    // The folders on the way to the deepest drawn: one for each of its 31.
+    expect(of.nodes.filter((each) => each.kind === "container")).toHaveLength(1 + 31 + 1);
+  });
+
   it("takes the instance's address without its trailing slash", () => {
     const of = instanceGraphOf({
       instanceUrl: INSTANCE.slice(0, -1),
@@ -410,6 +427,21 @@ describe("instanceGraphOf", () => {
         return () => graph(some);
       },
       500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("builds the graph of a document too deep to draw in a pass over its address", () => {
+    // Each folder of a document drawn is a node named by its whole address:
+    // were one thousands of folders deep drawn, eight times the folders would
+    // take sixty-four times as long.
+    const ratio = growth(
+      (depth) => {
+        const some = [found(`${INSTANCE}${"a/".repeat(depth)}cards.ttl`, [])];
+        return () => graph(some);
+      },
+      2_500,
       8,
     );
     expect(ratio).toBeLessThan(4);

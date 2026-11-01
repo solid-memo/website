@@ -2296,6 +2296,10 @@ edge.
   `%2e%2e`), or a folder
   ([data-model.md](data-model.md#where-an-instances-documents-are)),
   nor a deck the instance doesn't keep where it keeps decks.
+- It doesn't read or draw a document whose path in the instance is
+  longer than 2,048 characters or more than 32 parts deep. That's far
+  past any address Solid Memo makes, and each folder on the way would be
+  a node of its own.
 - A document that can't be read (refused, say, or not Turtle) is drawn
   as such, and the rest as read.
 
@@ -2355,14 +2359,17 @@ edges go to terms while they're shown. The filters are kept for the
 page's life, for each instance.
 
 **Names.** A node is named by its address, never by its text. The
-instance's folder is named by the instance's name, and a folder or
-document by its path in the instance. A vocabulary term is named in
-short (`sm:Card`), a blank node by its label, and any other by its
-fragment, else the last part of its path. Two nodes of documents named
-the same are told apart by the file (`korean-verbs#card-7`), else by its
-path in the instance (`decks/capitals#sweden`,
-`reviews/capitals#sweden`), with no extension. Each is drawn cut at 24
-characters, in the middle, for its end to show.
+instance's folder is named by the instance's name, a folder by its own
+name (`decks/`), and a document by its path in the instance. A
+vocabulary term is named in short (`sm:Card`), a blank node by its
+label, and any other by its fragment, else the last part of its path.
+Two folders named the same are told apart by their parent folders
+(`capitals/v1/`, `verbs/v1/`), else by their paths in the instance. Two
+nodes of documents named the same are told apart by the file
+(`korean-verbs#card-7`), else by its path in the instance
+(`decks/capitals#sweden`, `reviews/capitals#sweden`), with no
+extension. Each is drawn cut at 24 characters, in the middle, for its
+end to show.
 
 - The nodes in sight are named once a move or a zoom settles with the
   part in sight 800 units wide or less, holding 400 nodes at most;
