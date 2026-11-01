@@ -84,8 +84,10 @@ doesn't list.
 [compare.ts](../e2e/pod/compare.ts) names these in the job's summary,
 with what passes though listed, to take off the list. CI still checks
 that every advisory server starts and meets the contract (`contract`),
-so a change that breaks one isn't merged unnoticed. Renovate merges its
-updates once that passes, as it does a blocking one's.
+so a change that breaks one isn't merged unnoticed. Renovate merges
+their minor and patch image updates once that passes; their npm
+updates wait for a person
+([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)).
 Solid-Nextcloud's SQLite refuses concurrent writes, so with it in a run
 the test files run one at a time (`serialFiles` in `servers.ts`). What
 it fails, and why, is in its `expected-failures.json`. css-8 becomes blocking at 8.0.0,
