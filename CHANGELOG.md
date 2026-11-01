@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.5](https://github.com/solid-memo/website/compare/v6.25.4...v6.25.5) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** bound a JSON-LD base and terms as a Turtle base is bounded ([53b0a83](https://github.com/solid-memo/website/commit/53b0a833b2d116f855af4bdbf6a3d5c27823fc42))
+
 ## [6.25.4](https://github.com/solid-memo/website/compare/v6.25.3...v6.25.4) (2026-11-01)
 
 ### Bug Fixes
