@@ -40,7 +40,8 @@ stateDiagram-v2
 The landing is one page: the guest's offer, a short note from Solid
 Memo's maker on why they made it, then logging in (a button per
 suggested provider, and the WebID form under them), then creating a Pod.
-The note (`MakerNote`) links to the whole note on the About page.
+The note (`MakerNote`) is the same paragraph as on the About page, in
+the reader's language.
 Someone who has a Pod logs in in one click. After a logout or an expired
 session, and for a guest logging in, logging in comes first, and the
 note is left out. A site with a name of its own, and the Studio, leave

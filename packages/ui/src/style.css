@@ -773,20 +773,11 @@ main.landing > a.hero-brand > h1:not(.hero-heading) {
   margin: 0;
 }
 
-.maker-note ul {
+.maker-note p {
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.maker-note li + li {
-  margin-top: 0.2rem;
 }
 
 .maker-note figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
   margin-top: 0.35rem;
   color: var(--text-muted);
   font-size: 0.9375rem;

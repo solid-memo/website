@@ -1176,27 +1176,7 @@
     "buttonCatalogue": "le catalogue"
   },
   "makerNote": {
-    "flagship": {
-      "title": "Une app de qualité pour Solid :",
-      "text": "je veux qu’elle montre ce que Solid sait faire."
-    },
-    "learn": {
-      "title": "Pour un large public :",
-      "text": "les cartes mémoire conviennent à toute personne qui veut apprendre."
-    },
-    "privacy": {
-      "title": "Privée et sécurisée :",
-      "text": "vos données restent chez vous, pas chez moi, et je veille à la sécurité de l’app."
-    },
-    "free": {
-      "title": "Gratuite :",
-      "text": "l’hébergement est presque gratuit, sans serveur à gérer. Elle me coûte du temps et des efforts."
-    },
-    "openSource": {
-      "title": "Open source :",
-      "text": "chacun peut lire, modifier et exécuter le code."
-    },
-    "readMore": "Lisez pourquoi je l’ai créée (en anglais)"
+    "text": "Mon objectif est que Solid Memo soit une application de qualité dans l’écosystème Solid. Étudier avec des cartes mémoire est un moyen simple d’apprendre de nombreux sujets, et cela convient à un large public. Comme l’application repose sur Solid, le projet n’a pas besoin d’héberger de serveurs ni de stockage, ce qui maintient les coûts de fonctionnement proches de zéro. L’application peut donc rester gratuite pour tout le monde. À long terme, je veux que le projet soit entièrement autonome financièrement, avec une structure de gouvernance ouverte."
   },
   "onboardingFlow": {
     "tryHeading": "Essayer tout de suite",
