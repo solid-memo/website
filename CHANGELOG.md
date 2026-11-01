@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.24.3](https://github.com/solid-memo/website/compare/v6.24.2...v6.24.3) (2026-11-01)
+
+### Bug Fixes
+
+* **markdown:** count lazy lines per paragraph, by item indentation ([101b705](https://github.com/solid-memo/website/commit/101b7056ebfcb879476a47606d01224ce8ea7726))
+* **solid:** write a rearranged deck tree to its document at once ([7a8efd3](https://github.com/solid-memo/website/commit/7a8efd3d648da959636311fe10ce2a45df9e2f02))
+* **ui:** parse a course question's options once ([761b088](https://github.com/solid-memo/website/commit/761b0888f224682267720603ca0c2cd0af684542))
+
 ## [6.24.2](https://github.com/solid-memo/website/compare/v6.24.1...v6.24.2) (2026-11-01)
 
 ### Bug Fixes
