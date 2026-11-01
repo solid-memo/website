@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.3](https://github.com/solid-memo/website/compare/v6.25.2...v6.25.3) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** read a document's agent names once for all its decks ([4ecfb5f](https://github.com/solid-memo/website/commit/4ecfb5f9171480293d67c7377c56d62054781a7b))
+
 ## [6.25.2](https://github.com/solid-memo/website/compare/v6.25.1...v6.25.2) (2026-11-01)
 
 ### Bug Fixes
