@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.8](https://github.com/solid-memo/website/compare/v6.25.7...v6.25.8) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** read a hand-written relative base and a meta just written ([af768d1](https://github.com/solid-memo/website/commit/af768d14735dcbe28a8e09b035fa31782c20e0e2))
+* **solid:** read instance documents outside the storages under limits ([4c9849f](https://github.com/solid-memo/website/commit/4c9849fdc739bded80bba25ce53ec27acb88267e))
+
 ## [6.25.7](https://github.com/solid-memo/website/compare/v6.25.6...v6.25.7) (2026-11-01)
 
 ### Bug Fixes
