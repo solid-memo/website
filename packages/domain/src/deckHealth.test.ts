@@ -9,8 +9,9 @@ import { distributionUrlOf } from "./dcat";
 import type { Card, Deck } from "./deck";
 import {
   cardMarkdownProblems,
-  cardSpotOf,
+  cardSpotsOf,
   deckHealth,
+  deckOfSubjectsIn,
   deckReport,
   duplicateCardsOf,
   healthProblemCount,
@@ -182,19 +183,21 @@ describe("a deck whose documents are unclaimed", () => {
   });
 });
 
-describe("cardSpotOf", () => {
+describe("cardSpotsOf", () => {
   const cards = [card("c1", { distractors: [{ id: "c1-d1", text: { sv: "x" } }] }), card("c1-2")];
+  const cardSpotOf = (subjectUrl: string, path?: string) =>
+    cardSpotsOf(deck, cards)(subjectUrl, path);
 
   it("finds a card's text by its predicate, or the card alone", () => {
-    expect(cardSpotOf(deck, cards, `${CARDS}#c1`, SM.backNote)).toEqual({
+    expect(cardSpotOf(`${CARDS}#c1`, SM.backNote)).toEqual({
       card: cards[0],
       place: { tab: "content", part: "backNote" },
     });
-    expect(cardSpotOf(deck, cards, `${CARDS}#c1`, SM.textFormat)).toEqual({
+    expect(cardSpotOf(`${CARDS}#c1`, SM.textFormat)).toEqual({
       card: cards[0],
       place: { tab: "content" },
     });
-    expect(cardSpotOf(deck, cards, `${CARDS}#c1`)).toEqual({
+    expect(cardSpotOf(`${CARDS}#c1`)).toEqual({
       card: cards[0],
       place: { tab: "content" },
     });
@@ -202,35 +205,129 @@ describe("cardSpotOf", () => {
 
   it("finds a wrong option's card, and its text or note", () => {
     const at = `${CARDS}#c1-d1`;
-    expect(cardSpotOf(deck, cards, at, SM.distractorText)).toEqual({
+    expect(cardSpotOf(at, SM.distractorText)).toEqual({
       card: cards[0],
       place: { tab: "distractors", distractor: "c1-d1", part: "text" },
     });
-    expect(cardSpotOf(deck, cards, at, SM.distractorNote)).toEqual({
+    expect(cardSpotOf(at, SM.distractorNote)).toEqual({
       card: cards[0],
       place: { tab: "distractors", distractor: "c1-d1", part: "note" },
     });
-    expect(cardSpotOf(deck, cards, at, SM.distractor)).toEqual({
+    expect(cardSpotOf(at, SM.distractor)).toEqual({
       card: cards[0],
       place: { tab: "distractors", distractor: "c1-d1" },
     });
   });
 
   it("finds a review state's card, either way", () => {
-    expect(cardSpotOf(deck, cards, `${REVIEWS}#c1`)).toEqual({
+    expect(cardSpotOf(`${REVIEWS}#c1`)).toEqual({
       card: cards[0],
       place: { tab: "schedule" },
     });
-    expect(cardSpotOf(deck, cards, `${REVIEWS}#c1-2@back-to-front`)).toEqual({
+    expect(cardSpotOf(`${REVIEWS}#c1-2@back-to-front`)).toEqual({
       card: cards[1],
       place: { tab: "schedule" },
     });
   });
 
   it("finds nothing for another subject", () => {
-    expect(cardSpotOf(deck, cards, deck.url)).toBeNull();
-    expect(cardSpotOf(deck, cards, `${CARDS}#gone`)).toBeNull();
-    expect(cardSpotOf(deck, cards, `${REVIEWS}#gone`)).toBeNull();
+    expect(cardSpotOf(deck.url)).toBeNull();
+    expect(cardSpotOf(`${CARDS}#gone`)).toBeNull();
+    expect(cardSpotOf(`${REVIEWS}#gone`)).toBeNull();
+  });
+
+  it("takes the first card in the deck's order when two share an id", () => {
+    const twins = [
+      card("a", { distractors: [{ id: "x", text: { sv: "x" } }] }),
+      card("a", { distractors: [{ id: "x", text: { sv: "y" } }] }),
+    ];
+    const spotOf = cardSpotsOf(deck, twins);
+    expect(spotOf(`${CARDS}#a`)?.card).toBe(twins[0]);
+    expect(spotOf(`${CARDS}#x`)?.card).toBe(twins[0]);
+  });
+
+  it("finds the cards of many subjects in time linear in the cards and subjects", () => {
+    // Eight times the cards, with as many subjects that no card names (the
+    // worst case: each passes the cards and their wrong options), must
+    // take less than four times as long as an eighth of them done eight
+    // times over (testing.md): a search through the cards for each
+    // subject would take about eight times as long.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) =>
+          card(`c${i}`, {
+            distractors: [1, 2, 3].map((k) => ({ id: `c${i}-d${k}`, text: { sv: "x" } })),
+          }),
+        );
+        const subjects = Array.from({ length: count }, (_, i) => `${CARDS}#orphan-${i}`);
+        return () => {
+          const spotOf = cardSpotsOf(deck, cards);
+          for (const subject of subjects) spotOf(subject, SM.distractorText);
+        };
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+});
+
+describe("deckOfSubjectsIn", () => {
+  const other: Deck = {
+    ...deck,
+    id: "deck-2",
+    url: `${CATALOG}#deck-2`,
+    cardsDocumentUrl: "https://pod.example/a/decks/e.ttl",
+    reviewsDocumentUrl: "https://pod.example/a/reviews/e.ttl",
+  };
+
+  it("finds the deck whose entry, distribution or documents a subject is of", () => {
+    const deckOf = deckOfSubjectsIn([deck, other]);
+    expect(deckOf(other.url)).toBe(other);
+    expect(deckOf(distributionUrlOf(other.url))).toBe(other);
+    expect(deckOf(`${other.cardsDocumentUrl}#c1`)).toBe(other);
+    expect(deckOf(`${other.reviewsDocumentUrl}#c1-review`)).toBe(other);
+    expect(deckOf(`${CARDS}#c1`)).toBe(deck);
+    expect(deckOf(`${CATALOG}#catalog`)).toBeUndefined();
+    expect(deckOf("https://pod.example/elsewhere.ttl")).toBeUndefined();
+  });
+
+  it("takes the first deck in the decks' order when a subject matches more than one", () => {
+    // The second deck's entry lies in the first deck's cards document.
+    const twin: Deck = { ...other, url: `${CARDS}#entry` };
+    expect(deckOfSubjectsIn([deck, twin])(twin.url)).toBe(deck);
+    expect(deckOfSubjectsIn([twin, deck])(twin.url)).toBe(twin);
+    expect(deckOfSubjectsIn([deck, { ...deck }])(`${CARDS}#c1`)).toBe(deck);
+  });
+
+  it("finds the decks of many subjects in time linear in the decks and subjects", () => {
+    // Eight times the decks, with as many subjects that no deck holds (the
+    // worst case for a search through the decks), must take less than four
+    // times as long as an eighth of them done eight times over
+    // (testing.md): a search through the decks for each subject would
+    // take about eight times as long.
+    const ratio = growth(
+      (count) => {
+        const decks = Array.from({ length: count }, (_, i) => ({
+          ...deck,
+          id: `deck-${i}`,
+          url: `${CATALOG}#deck-${i}`,
+          cardsDocumentUrl: `https://pod.example/a/decks/${i}.ttl`,
+          reviewsDocumentUrl: `https://pod.example/a/reviews/${i}.ttl`,
+        }));
+        const subjects = Array.from(
+          { length: count },
+          (_, i) => `https://pod.example/a/other/${i}.ttl#x`,
+        );
+        return () => {
+          const deckOf = deckOfSubjectsIn(decks);
+          for (const subject of subjects) deckOf(subject);
+        };
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
