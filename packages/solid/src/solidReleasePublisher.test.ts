@@ -7,7 +7,7 @@ import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink } from "./catalogLinks";
 import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
 import type { ReadLimits } from "./client/interface";
-import { limitedFetch } from "./client/readLimits";
+import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import { createPodFence } from "./podFence";
 import { createSolidReleasePublisher } from "./solidReleasePublisher";
 
@@ -413,6 +413,194 @@ describe("makePublic", () => {
     });
     expect(writes().slice(before)).toEqual([]);
   });
+});
+
+describe("a release already at an address, on a server that may be anyone's", () => {
+  /**
+   * The publisher over the test pod, but for `endless`: a read of it
+   * answers a Turtle body with no end, its headers at once, and when it
+   * is the release, a write there is refused (412). The release names
+   * its own ACL (`rel="acl"`), as a server with Web Access Control does.
+   * `pulls` is the most parts of one such body read so far, one MiB
+   * each; past twice the most a limit lets through, the body fails, so
+   * a read with no limit ends too.
+   */
+  async function endlessAt(endless: string, grant: GrantPublicRead = vi.fn(async () => true)) {
+    const pod = await draftPod();
+    const chunk = new TextEncoder().encode(`<#s> <#p> <#o> .\n`.repeat(64 * 1024));
+    let pulls = 0;
+    const fetch = (async (input, init) => {
+      const url = String(input);
+      const method = (init?.method ?? "GET").toUpperCase();
+      if (url === endless && url === RELEASE && method === "PUT")
+        return new Response(null, { status: 412 });
+      const headers = new Headers({ "Content-Type": "text/turtle" });
+      if (url === RELEASE) {
+        headers.append("Link", `<${RELEASE}.acl>; rel="acl"`);
+        headers.set("WAC-Allow", 'user="read write control"');
+      }
+      if (url !== endless || method === "PUT" || method === "PATCH") {
+        const response = await pod.fetch(input, init);
+        if (url !== RELEASE || (method !== "GET" && method !== "HEAD")) return response;
+        response.headers.forEach((value, name) => {
+          if (name !== "content-type") headers.append(name, value);
+        });
+        return answered(new Response(response.body, { status: response.status, headers }), url);
+      }
+      if (method === "HEAD") return answered(new Response(null, { headers }), url);
+      let read = 0;
+      const body = new ReadableStream<Uint8Array>({
+        pull(controller) {
+          read += 1;
+          pulls = Math.max(pulls, read);
+          if (read > 2 * BOUND) return controller.error(new Error("No limit on this read"));
+          controller.enqueue(chunk);
+        },
+      });
+      return answered(new Response(body, { headers }), url);
+    }) as typeof globalThis.fetch;
+    const publisher = createSolidReleasePublisher({
+      fetch: createPodFence(fetch),
+      dataFetch: createPodFence(pod.fetch),
+      shareFetch: createPodFence(fetch, { accessControl: true }),
+      publicFetch: fetch,
+      grantPublicRead: grant,
+    });
+    return { pod, publisher, grant, pulls: () => pulls };
+  }
+  /** `response`, answered from `url`, as a server's answers are. */
+  function answered(response: Response, url: string): Response {
+    Object.defineProperty(response, "url", { value: url });
+    return response;
+  }
+  const endlessRelease = () => endlessAt(RELEASE);
+  /** The most parts of a body read before RELEASE_LIMITS end it, with room for the stream's own read-ahead. */
+  const BOUND = RELEASE_LIMITS.bytes / (1024 * 1024) + 4;
+
+  it("reads it under release limits after a refused write: past them, it is not this release", async () => {
+    const { pod, publisher, grant, pulls } = await endlessRelease();
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+      code: "releaseTaken",
+      vars: { url: RELEASE },
+    });
+    expect(pulls()).toBeLessThanOrEqual(BOUND);
+    expect(grant).not.toHaveBeenCalled();
+    expect(
+      pod.requests.some((request) => request.url === CATALOG && request.method !== "GET"),
+    ).toBe(false);
+  });
+
+  it("reads it under release limits before making it public: past them, it is not made public", async () => {
+    const { pod, publisher, grant, pulls } = await endlessRelease();
+    await addCatalogLink(INSTANCE, PUBLISHED, RELEASE, pod.fetch);
+    await expect(publisher.makePublic(INSTANCE, RELEASE)).rejects.toMatchObject({
+      code: "publicAccessRefused",
+      vars: { url: RELEASE },
+    });
+    expect(pulls()).toBeLessThanOrEqual(BOUND);
+    expect(grant).not.toHaveBeenCalled();
+  });
+
+  it("reads its access control under limits as it makes it public: past them, it is not public, and it is linked", async () => {
+    const { pod, publisher, pulls } = await endlessAt(`${RELEASE}.acl`, libraryGrant);
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: false });
+    expect(pulls()).toBeLessThanOrEqual(BOUND);
+    expect(await pod.text(CATALOG)).toContain(RELEASE);
+  });
+
+  it("reads its access control under limits when asked to make it public: past them, it is refused", async () => {
+    const { pod, publisher, pulls } = await endlessAt(`${RELEASE}.acl`, libraryGrant);
+    await pod.put(RELEASE, TURTLE);
+    await addCatalogLink(INSTANCE, PUBLISHED, RELEASE, pod.fetch);
+    await expect(publisher.makePublic(INSTANCE, RELEASE)).rejects.toMatchObject({
+      code: "publicAccessRefused",
+      vars: { url: RELEASE },
+    });
+    expect(pulls()).toBeLessThanOrEqual(BOUND);
+  });
+
+  /** Access controls within ACCESS_CONTROL_LIMITS' bytes, past their characters (a long prefix each triple names) or their triples. */
+  const longPrefix = `@prefix p: <https://example.org/${"a".repeat(64 * 1024)}/> .\n${Array.from(
+    { length: 32 },
+    (_, i) => `p:s${i} p:p p:o .`,
+  ).join("\n")}`;
+  const manyTriples = Array.from(
+    { length: ACCESS_CONTROL_LIMITS.quads + 1 },
+    (_, i) => `<#s${i}> <#p> <#o> .`,
+  ).join("\n");
+
+  it.each([
+    ["a long prefix", longPrefix],
+    ["many triples", manyTriples],
+  ])(
+    "refuses an access control of %s under the byte limit: the release is not made public, and it is linked",
+    async (_, acl) => {
+      expect(new TextEncoder().encode(acl).byteLength).toBeLessThan(ACCESS_CONTROL_LIMITS.bytes);
+      const { pod, publisher, writes } = await publisherPod({ grant: libraryGrant });
+      await pod.put(`${RELEASE}.acl`, acl);
+
+      const before = writes().length;
+      await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({
+        public: false,
+      });
+      expect(writes().slice(before)).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${CATALOG}`]);
+    },
+  );
+
+  /** A release with more triples than ACCESS_CONTROL_LIMITS let through, well within RELEASE_LIMITS. */
+  const largeRelease = `${TURTLE}\n${Array.from(
+    { length: ACCESS_CONTROL_LIMITS.quads + 1 },
+    (_, i) => `<#s${i}> <#p> <#o> .`,
+  ).join("\n")}`;
+
+  it("lets a grant read the release itself under release limits, not its access control's", async () => {
+    const { pod, publisher, writes } = await publisherPod();
+    await expect(publisher.publish(INSTANCE, largeRelease, RELEASE)).resolves.toEqual({
+      public: true,
+    });
+    expect(writes()).toEqual([
+      `PUT ${RELEASE} If-None-Match`,
+      `PATCH ${RELEASE}.acl`,
+      `PATCH ${CATALOG}`,
+    ]);
+    expect(await pod.text(`${RELEASE}.acl`)).toContain(RELEASE);
+  });
+
+  it("lets a grant read the folders above the release", async () => {
+    const folders = [`${INSTANCE}releases/solid/`, `${INSTANCE}releases/`, INSTANCE, POD];
+    const read: number[] = [];
+    const grant = vi.fn<GrantPublicRead>(async (url, { fetch }) => {
+      for (const folder of folders) read.push((await fetch(folder, { method: "GET" })).status);
+      return (await fetch(url)).ok;
+    });
+    const { publisher } = await publisherPod({ grant });
+    await expect(publisher.publish(INSTANCE, largeRelease, RELEASE)).resolves.toEqual({
+      public: true,
+    });
+    expect(read).toHaveLength(folders.length);
+  });
+
+  it("makes a release past an access control's limits public with the library's grant", async () => {
+    const { pod, publisher } = await publisherPod({ grant: libraryGrant });
+    await expect(publisher.publish(INSTANCE, largeRelease, RELEASE)).resolves.toEqual({
+      public: true,
+    });
+    expect(await pod.text(`${RELEASE}.acl`)).toContain(RELEASE);
+  });
+
+  it("refuses one whose triples are past release limits, however few its bytes, as this release or any", async () => {
+    const { pod, publisher, writes } = await publisherPod();
+    const many = Array.from(
+      { length: RELEASE_LIMITS.quads + 1 },
+      (_, i) => `<#s${i}> <#p> <#o> .`,
+    ).join("\n");
+    await pod.put(RELEASE, many);
+    const before = writes().length;
+    await expect(publisher.publish(INSTANCE, many, RELEASE)).rejects.toMatchObject({
+      code: "releaseTaken",
+    });
+    expect(writes().slice(before)).toEqual([`PUT ${RELEASE} If-None-Match`]);
+  }, 120_000);
 });
 
 describe("isPublic and listPublished", () => {

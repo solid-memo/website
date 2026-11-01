@@ -332,9 +332,18 @@ gate. They're how the gate finds the user's own pod, and an instance
 added by its address isn't registered until it's read. So is copying
 an instance, and publishing a release; the releases a catalog links,
 which the Studio lists for any instance it shows, are read through the
-gate as the instance's data is. An instance's `meta.ttl` is
-read through the pod fetch too, under `FOREIGN_LIMITS`, since a folder
-added by its address is read as soon as it's added. A release a draft follows is
+gate as the instance's data is. A release already at the address
+being published to, or one being made public, is read under
+`RELEASE_LIMITS`, since the instance may be on another server. Its
+access control, read as it's made public, is read under
+`ACCESS_CONTROL_LIMITS` on its bytes, its triples, their characters and
+its declarations before the grant parses it. A read the grant makes of
+the release, or of a folder above it, is held to `RELEASE_LIMITS`.
+Once a request gets no answer or goes past its limits, the grant
+fails. An
+instance's `meta.ttl` is read through the pod fetch too, under
+`FOREIGN_LIMITS`, since a folder added by its address is read as soon
+as it's added. A release a draft follows is
 read through `createOwnPodFetch`, which asks the same folders
 ([studio.md](studio.md#drafts)).
 
