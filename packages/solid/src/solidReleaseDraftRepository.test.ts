@@ -1032,6 +1032,24 @@ describe("readRelease and parseRelease", () => {
     expect(jsonld.url).toBe(`${DECKS}capitals/v1.ttl`);
   });
 
+  it("refuse a JSON-LD file whose base or prefix is longer than a Turtle base may be (GHSA-3jqf-v8x6-qcc3)", async () => {
+    const pod = await draftPod();
+    for (const context of [
+      { "@base": `${DECKS}${"a".repeat(512)}` },
+      { p: `${"a".repeat(512)}/` },
+    ]) {
+      const text = JSON.stringify({
+        "@context": context,
+        "@id": "capitals/v1.ttl",
+        "@type": `${SM}Deck`,
+        [`${SM}studyDirection`]: { "@id": `${SM}frontToBack` },
+      });
+      await expect(pod.repository.parseRelease(text, "jsonld")).rejects.toMatchObject({
+        code: "deckFileUnreadable",
+      });
+    }
+  });
+
   it("refuse a file with a term Turtle cannot write as it is, which a draft would keep (GHSA-x937-hx25-qfp4)", async () => {
     const pod = await draftPod();
     for (const extra of [

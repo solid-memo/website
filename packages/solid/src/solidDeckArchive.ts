@@ -214,7 +214,7 @@ export function parseDeckFile(
   const tooLarge = () => new AppError("deckFileTooLarge", { ...limits });
   if (limits !== null && text.length > limits.bytes) throw tooLarge();
   // The depth is checked, in refuseRemoteContexts, before anything recurses into the document.
-  const checked = format === "jsonld" ? refuseRemoteContexts(text) : text;
+  const checked = format === "jsonld" ? refuseRemoteContexts(text, baseUrl) : text;
   return parseQuads(checked, format, baseUrl, limits ?? undefined).then(
     (parsed) => parsed.filter((quad) => quad.graph.termType === "DefaultGraph"),
     (error: unknown) => {

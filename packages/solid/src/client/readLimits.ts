@@ -122,7 +122,7 @@ const MAX_PREFIX_DECLARATIONS = 4096;
  * the time only with the base bounded too. A release names itself as
  * its base, so this is about the longest address it can have.
  */
-const MAX_BASE_CHARACTERS = 512;
+export const MAX_BASE_CHARACTERS = 512;
 
 const SPACE = 0x20;
 const TAB = 0x09;
@@ -168,7 +168,7 @@ const IN_NAME = /[\w:-]/;
  * one. The parser walks such segments of the base again for every IRI
  * it resolves against it, and no release the app writes has one.
  */
-function plainBase(iri: string): boolean {
+export function plainBase(iri: string): boolean {
   if (iri.includes("\\")) return false;
   const scheme = ABSOLUTE_IRI.exec(iri)?.[0].length ?? 0;
   let path = iri.slice(scheme);

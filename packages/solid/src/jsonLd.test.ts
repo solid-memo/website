@@ -5,13 +5,16 @@
 import { describe, expect, it } from "vitest";
 import type { Quad, Term } from "@rdfjs/types";
 import { growth } from "@solid-memo/domain/testing/growth";
-import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
+import { jsonLdOf, refuseRemoteContexts as refuseIn } from "./jsonLd";
 import { termOf } from "./ntriples";
 import { parseQuads } from "./client/resources";
 
 const EX = "https://example.org/ns#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+
+/** The check of a document read with no base of its own. */
+const refuseRemoteContexts = (text: string) => refuseIn(text, "");
 
 const iri = (value: string) => ({ termType: "NamedNode", value }) as Term;
 const blank = (value: string) => ({ termType: "BlankNode", value }) as Term;
@@ -153,6 +156,104 @@ describe("refuseRemoteContexts", () => {
     ).not.toThrow();
   });
 
+  it("lets plain bases and vocabularies of at most 512 characters together pass (GHSA-3jqf-v8x6-qcc3)", () => {
+    const long = `https://pod.example/${"a".repeat(512 - 20)}`;
+    for (const context of [
+      { "@base": long, "@vocab": long },
+      [{ "@base": "https://pod.example/a/" }, { "@base": "b/" }],
+      { "@base": "", "@vocab": "#" },
+    ]) {
+      expect(() =>
+        refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
+      ).not.toThrow();
+    }
+  });
+
+  it("refuses a base or a vocabulary that is long or not plain, which the parser walks for every IRI (GHSA-3jqf-v8x6-qcc3)", () => {
+    const long = `https://pod.example/${"a".repeat(512 - 19)}`;
+    for (const keyword of ["@base", "@vocab"]) {
+      const reason = `The file declares a JSON-LD ${keyword} that is not plain, or longer than 512 characters.`;
+      for (const context of [
+        { [keyword]: long },
+        { [keyword]: `https://pod.example/${"../".repeat(10)}` },
+        { [keyword]: "https://pod.example/a//b/" },
+        // Each resolves against the one before: together, past the bound.
+        Array.from({ length: 8 }, () => ({ [keyword]: `${"a".repeat(64)}/` })),
+      ]) {
+        expect(() =>
+          refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
+        ).toThrow(expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }));
+      }
+    }
+  });
+
+  it("lets terms defined as keywords, or as plain IRIs with a scheme, of at most 4096 characters in all pass (GHSA-3jqf-v8x6-qcc3)", () => {
+    const long = `https://pod.example/${"a".repeat(512 - 20)}`;
+    for (const context of [
+      { id: "@id", ex: EX, p: `${EX}p`, q: "urn:q", "@language": "en" },
+      // A compact IRI through a prefix no context of the node defines.
+      { p: "ex:p", "@vocab": "ex:" },
+      // Each term and its IRI, 512 characters: 4096 in all.
+      Array.from({ length: 8 }, (_, at) => ({ [`t${at}`]: long.slice(0, -2) })),
+    ]) {
+      expect(() =>
+        refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
+      ).not.toThrow();
+    }
+  });
+
+  it("refuses a term defined as a relative, long or not plain IRI, or contexts past 4096 characters, which the parser gives again at every use (GHSA-3jqf-v8x6-qcc3)", () => {
+    const reason =
+      "The file defines a JSON-LD term by an IRI that is relative, not plain, or longer than 512 characters, or states contexts of more than 4096 characters.";
+    const long = `https://pod.example/${"a".repeat(512 - 19)}`;
+    for (const context of [
+      { p: "a/" },
+      { p: "../" },
+      { p: "_:b" },
+      { p: long },
+      { "@language": "a".repeat(513) },
+      { p: `${EX.slice(0, -1)}/../` },
+      { p: "https://pod.example/a//b/" },
+      // Each within the bound, together past it.
+      Array.from({ length: 8 }, (_, at) => ({ [`t${at}`]: long.slice(0, -2) })),
+      { [`t${"a".repeat(4096)}`]: EX },
+    ]) {
+      expect(() =>
+        refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
+      ).toThrow(expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }));
+    }
+  });
+
+  it("counts the document's own base toward the bound, as for Turtle (GHSA-3jqf-v8x6-qcc3)", () => {
+    const url = `https://pod.example/${"a".repeat(400 - 20)}`;
+    const reason =
+      "The file declares a JSON-LD @base that is not plain, or longer than 512 characters.";
+    const text = (base: string) => JSON.stringify({ "@context": { "@base": base }, "@id": "n" });
+    // An absolute base replaces the document's; a relative one adds to it.
+    expect(() => refuseIn(text(`https://pod.example/${"b".repeat(490)}`), url)).not.toThrow();
+    expect(() => refuseIn(text(`${"b".repeat(200)}/`), url)).toThrow(
+      expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }),
+    );
+    expect(() => refuseIn(text("b/"), `https://pod.example/${"a".repeat(512)}`)).toThrow(
+      expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }),
+    );
+  });
+
+  it("refuses a term, base or vocabulary defined through a term of the node's contexts, which the parser expands with no bound (GHSA-3jqf-v8x6-qcc3)", () => {
+    const reason = "The file defines a JSON-LD term, base or vocabulary through another term.";
+    for (const context of [
+      { a: "b:x/", b: "a:y/" },
+      { a: "a:x/" },
+      { ex: EX, p: "ex:p" },
+      [{ ex: EX }, { "@vocab": "ex:" }],
+      { ex: EX, "@base": "ex:a/" },
+    ]) {
+      expect(() =>
+        refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
+      ).toThrow(expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }));
+    }
+  });
+
   it("gives the document it checked, a key named twice as JSON.parse keeps it", () => {
     expect(refuseRemoteContexts('{"@context": "https://evil.example/c", "@context": {}}')).toBe(
       '{"@context":{}}',
@@ -160,8 +261,10 @@ describe("refuseRemoteContexts", () => {
   });
 
   it("writes each object's context first, before a key that reads as an integer too", () => {
-    const text = '[{"5": "x", "@id": "n", "@context": {"b": "y", "1": "z"}}]';
-    expect(refuseRemoteContexts(text)).toBe('[{"@context":{"1":"z","b":"y"},"5":"x","@id":"n"}]');
+    const text = '[{"5": "x", "@id": "n", "@context": {"b": "ex:y", "1": "ex:z"}}]';
+    expect(refuseRemoteContexts(text)).toBe(
+      '[{"@context":{"1":"ex:z","b":"ex:y"},"5":"x","@id":"n"}]',
+    );
   });
 
   it("refuses a document nested deeper than a deck file's before writing it again, which could overflow the stack", () => {
