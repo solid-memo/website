@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.24.2](https://github.com/solid-memo/website/compare/v6.24.1...v6.24.2) (2026-11-01)
+
+### Bug Fixes
+
+* **library:** refuse a linked release in a format no shape checks ([49551c4](https://github.com/solid-memo/website/commit/49551c40da0d1637b87b03716ea3976fb10783b1))
+* **studio:** index the cards once to link the health screen's results ([07cc74e](https://github.com/solid-memo/website/commit/07cc74e2c78155904e99b496b820d8a938c4fb24))
+* **studio:** show a graph node's first classes and values in the aside ([0f82d84](https://github.com/solid-memo/website/commit/0f82d84d297ebd3ef13239ea2dbd420501cd2dda))
+
 ## [6.24.1](https://github.com/solid-memo/website/compare/v6.24.0...v6.24.1) (2026-11-01)
 
 ### Bug Fixes
