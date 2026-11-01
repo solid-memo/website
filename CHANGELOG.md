@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.4](https://github.com/solid-memo/website/compare/v6.25.3...v6.25.4) (2026-11-01)
+
+### Bug Fixes
+
+* **deps:** update dependency @inrupt/solid-client-authn-browser to ^5.0.3 ([1070735](https://github.com/solid-memo/website/commit/1070735990efa16ff038907853224ad1fe71693c))
+
 ## [6.25.3](https://github.com/solid-memo/website/compare/v6.25.2...v6.25.3) (2026-11-01)
 
 ### Bug Fixes
