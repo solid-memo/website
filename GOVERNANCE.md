@@ -175,7 +175,9 @@ its own and no older version is locked again. Every Monday, Renovate
 also locks each `package-lock.json` again, to the newest versions the
 ranges allow, so that the packages the dependencies need get their
 fixes too. That moves many packages at once, so a person merges it,
-after reading what moved. Every update waits too:
+after reading what moved, which CI's `dependency-review` job lists in
+its run's summary
+([docs/testing.md](docs/testing.md#dependency-review)). Every update waits too:
 Renovate proposes a version only once it has been public for 3 days, so
 that a bad or malicious version can be found and pulled before it
 reaches `main`. The wait covers every package an update newly locks,
