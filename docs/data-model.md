@@ -1059,7 +1059,13 @@ own pod, as a draft, before publishing it
   `.`, `_` and `-`, starting with a letter or digit (`DRAFT_ID`), so a
   chapter's document is always in the draft's container. A draft whose
   documents name a subject otherwise is neither opened nor written
-  (`draftIdUnsupported`).
+  (`draftIdUnsupported`). Nor is one whose documents state a subject
+  the draft reads by its shape otherwise than its record writes it
+  (`draftHiddenValue`), such as a second text in a language, or an
+  integer or date-time not written as one. No editor shows the
+  difference and no check sees it, but publishing would write it. A
+  subject in a newer format than the app reads is refused as a newer
+  app's (`writtenByNewerApp`), whose message asks for a reload.
 - **Links on the catalog.** `sm:releaseDraft` names a draft's release
   document, and `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's catalog, they

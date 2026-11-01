@@ -66,6 +66,7 @@ import {
   termOf,
   tripleKey,
   type DraftEntry,
+  UNPUBLISHED_ROOT_PREDICATES,
 } from "./mappers/releaseDraftMapper";
 import { draftSubjects } from "./ownership";
 import { recordThing, removeAllUnlessNewer, storedVersionOf } from "./records";
@@ -145,29 +146,9 @@ export function createSolidReleaseDraftRepository({
     const urls = await documentsOf(draftUrl);
     if (!urls.includes(draftUrl)) throw new AppError("draftGone");
     const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
-    const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
-    const inPlace = inPlaceIn(draftContainerOf(draftUrl), draftUrl);
-    const quads = datasets.flatMap((dataset, at) =>
-      quadsOf(dataset).flatMap((quad) => {
-        // A subject named otherwise than the draft writes it there is not the draft's (inPlaceIn); publishing refuses it.
-        if (quad.subject.termType !== "BlankNode" && !inPlace(urls[at]!, quad.subject.value))
-          return [];
-        // Blank nodes are named afresh in each document: here, they are each document's own.
-        const blank = (key: string) =>
-          key.startsWith("_:") ? `_:d${at}-${key.slice(2)}` : iriOf(key);
-        const object = termOf(quad.object);
-        return quadOf(
-          blank(keyOf(quad.subject)),
-          quad.predicate.value,
-          object.kind === "iri"
-            ? { kind: "iri", value: iriOf(object.value) }
-            : object.kind === "blank"
-              ? { kind: "blank", value: `d${at}-${object.value}` }
-              : object,
-        );
-      }),
-    );
-    const draft = draftFromQuads(quads, draftUrl);
+    const quads = draftNamedQuads(draftUrl, urls, datasets);
+    // What its documents state otherwise than its records write it would be published, unseen and unchecked (GHSA-32jq-jh7h-r7v4).
+    const draft = draftFromQuads(quads, draftUrl, { refuseHidden: true });
     if (draft === null) throw new AppError("draftGone");
     // Its documents are anyone's to write: an id no draft has could name a chapter's document outside its container.
     const unsupported = unsupportedIdOf(draft);
@@ -336,6 +317,8 @@ export function createSolidReleaseDraftRepository({
           );
         }),
       );
+      // So would a value of one of its subjects stated otherwise than its record writes it, which no read of the draft shows (GHSA-32jq-jh7h-r7v4).
+      draftFromQuads(draftNamedQuads(draftUrl, urls, datasets), draftUrl, { refuseHidden: true });
       const quads = releaseQuadsOf(atTarget, targetUrl, issued);
       const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
       return turtleOf(quads, {
@@ -429,6 +412,40 @@ function versionOfDocuments(urls: readonly string[], datasets: readonly Dataset[
 }
 
 /**
+ * The statements of a draft's documents (`urls`, read as `datasets`),
+ * every IRI as the draft names it, as a read of the draft takes them: a
+ * subject a document names otherwise than the draft writes it there is
+ * not the draft's (inPlaceIn), and is left out; publishing refuses it.
+ */
+function draftNamedQuads(
+  draftUrl: string,
+  urls: readonly string[],
+  datasets: readonly Dataset[],
+): Quad[] {
+  const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
+  const inPlace = inPlaceIn(draftContainerOf(draftUrl), draftUrl);
+  return datasets.flatMap((dataset, at) =>
+    quadsOf(dataset).flatMap((quad) => {
+      if (quad.subject.termType !== "BlankNode" && !inPlace(urls[at]!, quad.subject.value))
+        return [];
+      // Blank nodes are named afresh in each document: here, they are each document's own.
+      const blank = (key: string) =>
+        key.startsWith("_:") ? `_:d${at}-${key.slice(2)}` : iriOf(key);
+      const object = termOf(quad.object);
+      return quadOf(
+        blank(keyOf(quad.subject)),
+        quad.predicate.value,
+        object.kind === "iri"
+          ? { kind: "iri", value: iriOf(object.value) }
+          : object.kind === "blank"
+            ? { kind: "blank", value: `d${at}-${object.value}` }
+            : object,
+      );
+    }),
+  );
+}
+
+/**
  * A draft's statements, every subject moved to `targetUrl`, as the
  * release they make, released `issued` (also its time of change):
  * written at library deck format 6, with the series it starts described
@@ -437,16 +454,14 @@ function versionOfDocuments(urls: readonly string[], datasets: readonly Dataset[
  */
 export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued: string): Quad[] {
   const time = { kind: "literal" as const, value: issued, language: "", datatype: XSD_DATE_TIME };
-  const dropped = new Set([
-    SM.formatVersion,
-    SM.releasedAs,
-    DCTERMS("issued"),
-    DCTERMS("modified"),
-  ]);
   return withSeries(
     [
       ...quads.filter(
-        (quad) => !(quad.subject.value === targetUrl && dropped.has(quad.predicate.value)),
+        (quad) =>
+          !(
+            quad.subject.value === targetUrl &&
+            UNPUBLISHED_ROOT_PREDICATES.has(quad.predicate.value)
+          ),
       ),
       quadOf(targetUrl, SM.formatVersion, {
         kind: "literal",

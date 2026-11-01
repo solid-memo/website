@@ -228,6 +228,144 @@ describe("draftFromQuads", () => {
   });
 });
 
+describe("draftFromQuads refusing hidden values (GHSA-32jq-jh7h-r7v4)", () => {
+  const ROOT = `<> a solid-memo:Deck , dcat:Dataset ; solid-memo:formatVersion 1 ;
+    dcterms:title "Solid"@en ; solid-memo:studyDirection solid-memo:frontToBack`;
+  const CARD = `<#q1> a solid-memo:Card ; solid-memo:formatVersion 7 ;
+    solid-memo:front "Q"@en ; solid-memo:back "A"@en`;
+  const STEP = "<#ch-a-1> a solid-memo:Step , schema:LearningResource ; solid-memo:formatVersion 1";
+  /** The draft the Turtle states, read as a draft in the pod is. */
+  const read = async (turtle: string) =>
+    draftFromQuads(
+      await quadsOfTurtle(
+        `${PREFIXES}@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+${turtle}`,
+        DRAFT,
+      ),
+      DRAFT,
+      { refuseHidden: true },
+    );
+  const hidden = (subject: string, predicate: string) =>
+    expect.objectContaining({ code: "draftHiddenValue", vars: { subject, predicate } });
+  const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+
+  it("reads a draft whose records keep every value their shapes own, whatever it says beyond them", async () => {
+    const draft =
+      await read(`${ROOT} ; solid-memo:releasedAs <https://pod.example/a/releases/solid/v1.ttl> , <https://pod.example/a/releases/solid/v2.ttl> ;
+    dcterms:issued "2026-01-01T00:00:00Z"^^xsd:dateTime , "2026-01-02T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-01-01T00:00:00Z"^^xsd:dateTime , "later" ;
+    solid-memo:formatVersion "one" ; dcat:keyword "a"@en , "b"@en , "a"@sv .
+${CARD} ; solid-memo:front "F" ; solid-memo:distractor <#q1-d1> , <#q1-d2> ; <https://other.example/says> "more" , "again" .
+<#old> a solid-memo:Card ; solid-memo:formatVersion 4 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;
+    dcterms:subject <https://data.example/a> , <https://data.example/b> .
+${STEP} ; schema:position 1 ; owl:deprecated false .
+<#ch-a-2> a solid-memo:Step , schema:LearningResource .
+`);
+    expect(draft?.cards.map((card) => card.id).sort()).toEqual(["old", "q1"]);
+    expect(draft?.steps).toHaveLength(2);
+    // Without it, as a release or a draft's listing is read, a value the record drops is not refused.
+    expect(
+      draftFromQuads(await quadsOfTurtle(`${PREFIXES}${ROOT} .\n${CARD} , "Q2"@en .`, DRAFT), DRAFT)
+        ?.cards,
+    ).toHaveLength(1);
+  });
+
+  it("refuses a second text in a language, of a card the draft sees in one", async () => {
+    await expect(read(`${ROOT} .\n${CARD} ; solid-memo:front "HIDDEN"@en .`)).rejects.toEqual(
+      hidden(of("q1"), `${SM}front`),
+    );
+  });
+
+  it("refuses a second value of a field of one, and a value of the wrong kind", async () => {
+    await expect(read(`${ROOT} .\n${STEP} ; owl:deprecated true , false .`)).rejects.toEqual(
+      hidden(of("ch-a-1"), "http://www.w3.org/2002/07/owl#deprecated"),
+    );
+    await expect(read(`${ROOT} .\n${STEP} ; schema:position "first" .`)).rejects.toEqual(
+      hidden(of("ch-a-1"), "https://schema.org/position"),
+    );
+    await expect(read(`${ROOT} .\n${CARD} ; solid-memo:frontImage "not an IRI" .`)).rejects.toEqual(
+      hidden(of("q1"), `${SM}frontImage`),
+    );
+    await expect(read(`${ROOT} .\n${CARD} ; solid-memo:formatVersion 8 .`)).rejects.toEqual(
+      hidden(of("q1"), `${SM}formatVersion`),
+    );
+  });
+
+  it("refuses a subject a newer app wrote with the reload message, not as a value to remove", async () => {
+    await expect(
+      read(`${ROOT} .\n${CARD.replace("formatVersion 7", 'formatVersion "99"^^xsd:integer')} .`),
+    ).rejects.toEqual(
+      expect.objectContaining({
+        code: "writtenByNewerApp",
+        vars: { url: of("q1"), version: 99, writes: 7 },
+      }),
+    );
+  });
+
+  it("refuses a value its record reads otherwise than it is stated: an ill-formed number", async () => {
+    await expect(
+      read(`${ROOT} .\n${CARD.replace("formatVersion 7", 'formatVersion "7junk"^^xsd:integer')} .`),
+    ).rejects.toEqual(hidden(of("q1"), `${SM}formatVersion`));
+    await expect(
+      read(`${ROOT} .\n${STEP} ; schema:position "0junk"^^xsd:integer .`),
+    ).rejects.toEqual(hidden(of("ch-a-1"), "https://schema.org/position"));
+    await expect(read(`${ROOT} .\n${STEP} ; schema:position "0.9"^^xsd:integer .`)).rejects.toEqual(
+      hidden(of("ch-a-1"), "https://schema.org/position"),
+    );
+    // Two spellings of one value are two statements where its record keeps one.
+    await expect(
+      read(`${ROOT} .\n${STEP} ; schema:position 1 , "01"^^xsd:integer .`),
+    ).rejects.toEqual(hidden(of("ch-a-1"), "https://schema.org/position"));
+  });
+
+  it("reads a value stated in another spelling of what its record writes", async () => {
+    const draft = await read(`${ROOT} .
+${CARD.replace("formatVersion 7", 'formatVersion "+07"^^xsd:integer')} ;
+    dcterms:created "2026-01-01T00:00:00Z"^^xsd:dateTime .
+${STEP} ; schema:position "-01"^^xsd:integer ; owl:deprecated "1"^^xsd:boolean .
+<#ch-a-2> a solid-memo:Step , schema:LearningResource ; schema:position "-0"^^xsd:integer .`);
+    expect(draft?.cards[0]?.data).toMatchObject({ created: "2026-01-01T00:00:00.000Z" });
+    expect(draft?.steps.map((step) => step.data)).toEqual([
+      expect.objectContaining({ position: -1, deprecated: true }),
+      expect.objectContaining({ position: -0 }),
+    ]);
+    // A value its record cannot read is not one it writes.
+    for (const created of [
+      "yesterday",
+      "2026-01-01T01:00:00+01:00",
+      "2026-13-01T00:00:00Z",
+      "2026-02-30T00:00:00Z",
+      "2026-01-01T99:00:00Z",
+      "2026-01-01T00:00:60Z",
+    ]) {
+      await expect(
+        read(`${ROOT} .\n${CARD} ; dcterms:created "${created}"^^xsd:dateTime .`),
+      ).rejects.toEqual(hidden(of("q1"), "http://purl.org/dc/terms/created"));
+    }
+    await expect(read(`${ROOT} .\n${STEP} ; owl:deprecated "yes"^^xsd:boolean .`)).rejects.toEqual(
+      hidden(of("ch-a-1"), "http://www.w3.org/2002/07/owl#deprecated"),
+    );
+  });
+
+  it("refuses an IRI outside a field's list, and a predicate the shape forbids", async () => {
+    await expect(read(`${ROOT} , solid-memo:sideways .`)).rejects.toEqual(
+      hidden(DRAFT, `${SM}studyDirection`),
+    );
+    await expect(read(`${ROOT} ; dcterms:source <https://data.example/> .`)).rejects.toEqual(
+      hidden(DRAFT, "http://purl.org/dc/terms/source"),
+    );
+  });
+
+  it("refuses what a card stamped below format 7 says it is about that its record drops", async () => {
+    await expect(
+      read(`${ROOT} .
+<#old> a solid-memo:Card ; solid-memo:formatVersion 4 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;
+    dcterms:subject <https://data.example/a> , "a literal" .`),
+    ).rejects.toEqual(hidden(of("old"), "http://purl.org/dc/terms/subject"));
+  });
+});
+
 describe("draftEntries", () => {
   it("keeps each subject in its document, at that document's IRI, naming the others where they are", () => {
     const entries = draftEntries(courseDraft());

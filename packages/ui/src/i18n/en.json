@@ -1712,6 +1712,7 @@
     "releaseForeignPart": "This release holds a card, chapter, step or wrong option at {part}, outside the release itself. The Studio shows and checks only a release's own parts, so it cannot be made a draft.",
     "releaseForeignStatement": "This draft states something of {subject}, the address of the release it would make or a part of it, which the Studio neither shows nor checks, so the release was not made. Publish it in another folder of your pod, or make a new draft that does not state it.",
     "draftAliasedSubject": "A document of this draft states something of {subject}, one of the draft's own addresses, which the Studio neither shows nor checks, so the release was not made. Make the draft again from its release, or copy it: the copy leaves that out.",
+    "draftHiddenValue": "This draft states {predicate} of {subject} otherwise than the Studio reads it: a value it does not keep, such as a second one where it keeps one or a second text in one language, or a value of the wrong kind or not well formed. Nothing shows or checks that value, so Solid Memo neither opens nor publishes the draft. Correct the value with another app, or delete the draft.",
     "releaseTaken": "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
     "releaseHasErrors": {
       "one": "The release check finds {count} error. Fix it before you publish the release.",

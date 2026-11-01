@@ -2158,9 +2158,20 @@ releases it, two ways.
   its own subjects otherwise than the draft writes it (the address of
   `cards.ttl`, or another of its documents' fragment)
   (`draftAliasedSubject`). Another app can write that, and a draft made
-  from a release before such statements were dropped can hold it. Download .ttl refuses
-  these the same way, at the library's address. A copy of the draft
-  leaves out the statements of such a subject.
+  from a release before such statements were dropped can hold it. So
+  is a draft whose documents state one of its subjects otherwise than
+  the Studio reads it (`draftHiddenValue`). That's a second value where
+  a field holds one, or a second text in one language. It's also a
+  value of the wrong kind or not written as one of its kind, or one
+  outside a field's list. No editor or check would see the
+  difference, so the Studio doesn't open that draft either. A subject
+  in a format newer than the Studio's is refused too, with the
+  message to reload the page (`writtenByNewerApp`). Each value a shape owns is published as the value
+  the check saw.
+  Download .ttl refuses these the same way, at the library's address.
+  A copy of the draft leaves out the statements of a subject named
+  otherwise, and is refused, like the draft, for a value stated
+  otherwise.
 - **Public.** Then only that document is made readable by everyone, as
   its server's access control says it: its own ACL on a server with Web
   Access Control, its ACR on one with Access Control Policies
