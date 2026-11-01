@@ -561,6 +561,32 @@ describe("attachInstance", () => {
     expect(readDocument).not.toHaveBeenCalled();
   });
 
+  it("reads meta.ttl under limits, as it does to read an instance's description", async () => {
+    // The fetch the read is given, asked as readDocument would.
+    vi.mocked(readDocument).mockImplementation(async (url, { fetch }) => {
+      await fetch(url);
+      throw new Error("Read past the fetch");
+    });
+    const fetch = vi.fn(
+      async () => new Response("<#it> a <x> .", { headers: { "Content-Length": "33554433" } }),
+    );
+    const repository = createSolidInstanceRepository({
+      fetch: fetch as unknown as typeof globalThis.fetch,
+      now: () => new Date(),
+      randomId: () => "fixed-id",
+    });
+    await expect(
+      repository.attachInstance({
+        webId: WEBID,
+        instanceUrl: CONTAINER,
+        registrationTarget: "private",
+      }),
+    ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
+    await expect(repository.readMeta(CONTAINER)).rejects.toMatchObject({ name: "ReadLimitError" });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(ensureTypeIndex).not.toHaveBeenCalled();
+  });
+
   it("rejects a meta.ttl without the #it subject", async () => {
     vi.mocked(readDocument).mockResolvedValue(readOf(datasetFrom(`${CONTAINER}meta.ttl`)));
 

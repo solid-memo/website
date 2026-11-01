@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad, Term } from "@rdfjs/types";
-import { DataFactory, Parser, Writer } from "n3";
+import { DataFactory, Writer } from "n3";
 import type { GrantPublicRead } from "@solid-memo/solid/client/interface";
+import { parseQuads } from "./resources";
 
 export type { GrantPublicRead } from "@solid-memo/solid/client/interface";
 
@@ -73,7 +74,7 @@ async function readControl(
   const typed = linked(response, url, "type").includes(ACCESS_CONTROL_RESOURCE);
   if (response.status === 404) return { acp: typed, exists: false, quads: [] };
   if (!response.ok) return undefined;
-  const quads = parse(await response.text(), base(response, url));
+  const quads = await parseQuads(await response.text(), "turtle", base(response, url));
   const speaksAcp = quads.some((one) =>
     [one.predicate, one.object].some((term) => term.value.startsWith(ACP)),
   );
@@ -255,10 +256,6 @@ function linked(response: Response, url: string, rel: string): string[] {
 
 function base(response: Response, url: string): string {
   return response.url === "" ? url : response.url;
-}
-
-function parse(text: string, baseIRI: string): Quad[] {
-  return new Parser({ baseIRI }).parse(text) as Quad[];
 }
 
 function subjectsWith(quads: Quad[], predicate: string, object: string): Term[] {

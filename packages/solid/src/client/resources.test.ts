@@ -8,8 +8,9 @@ import {
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
   type SolidDataset,
 } from "@inrupt/solid-client";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { resourcesContract } from "../testing/contract/resources";
+import { turtleAt } from "../testing/contract/rdf";
 import { HttpError } from "./interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
@@ -38,6 +39,19 @@ describe("HttpError, over the library", () => {
     expect((error as HttpError).message).toBe(expected);
     expect((error as HttpError).cause).toBeInstanceOf(FetchError);
     expect((error as HttpError).cause).toHaveProperty("message", expected);
+  });
+});
+
+describe("getSolidDataset, over the library", () => {
+  it("reads with the global fetch when given none", async () => {
+    vi.stubGlobal("fetch", vi.fn(turtleAt(`<${URL_}> <https://example.com/ns#p> "x" .`)));
+    try {
+      const dataset = await resources.getSolidDataset(URL_);
+      expect(rdf.getThing(dataset, URL_)).not.toBeNull();
+      expect(globalThis.fetch).toHaveBeenCalledOnce();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

@@ -981,8 +981,15 @@ flowchart LR
   series, to a release the Studio reads,
   opens as a file, or checks against the library's shapes. The library's
   index, which comes with the site and grows with the library, and the
-  user's own pod documents aren't limited. A deck file has limits of its
-  own, in `data-model.md`.
+  documents in the user's storages aren't limited in size. Their bases
+  and prefixes are, as those of every document the app reads into a
+  dataset, a folder's listing too; the document's
+  own address counts toward a base's length. An
+  instance's documents outside the user's storages, in an instance
+  they registered on another server too, are read under the same
+  limits as a release
+  ([boundaries.md](boundaries.md#the-credential-gate)). A deck file has
+  limits of its own, in `data-model.md`.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

@@ -365,6 +365,13 @@ describe("readDeckFile", () => {
     });
   });
 
+  it("refuses as unreadable, not too large, a text read with no limits whose declarations are past what a read takes in", async () => {
+    const text = `${"@base <a/> .\n".repeat(17)}<b> <c> <d> .\n`;
+    await expect(parseDeckFile(text, "turtle", base, null)).rejects.toMatchObject({
+      code: "deckFileUnreadable",
+    });
+  });
+
   it("reads JSON-LD written by hand, its context inline", async () => {
     const json = JSON.stringify({
       "@context": [{ sm: SM_NS }, { dcterms: "http://purl.org/dc/terms/" }],

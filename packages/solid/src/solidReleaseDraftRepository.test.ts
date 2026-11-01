@@ -23,6 +23,7 @@ import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { RELEASE_LIMITS } from "./client/readLimits";
 import { datasetFromQuads } from "./client/rdf";
+import { turtleAt } from "./testing/contract/rdf";
 import { toLibraryCards } from "./mappers/libraryMapper";
 import { draftQuads } from "./mappers/releaseDraftMapper";
 import {
@@ -293,6 +294,14 @@ describe("list and documents", () => {
     await pod.repository.create(INSTANCE, course());
     pod.failNext("GET", CONTAINER, 500);
     await expect(pod.repository.documents(INSTANCE)).rejects.toThrow();
+  });
+
+  it("refuse a draft's folder whose listing declares more bases than a read takes in", async () => {
+    const listing = `${"@base <a/> .\n".repeat(1_000)}<> <http://www.w3.org/ns/ldp#contains> <cards.ttl> .`;
+    await expect(draftDocumentsIn(DRAFT, turtleAt(listing))).rejects.toMatchObject({
+      name: "ReadLimitError",
+      url: CONTAINER,
+    });
   });
 
   it("are none without a catalog", async () => {

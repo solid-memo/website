@@ -6,7 +6,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
-import { ReadLimitError, type ReadLimits } from "./interface";
+import { ReadLimitError } from "./interface";
 import { growth } from "@solid-memo/domain/testing/growth";
 import {
   limitedFetch,
@@ -106,6 +106,15 @@ describe("limitedFetch", () => {
     expect(limitsOf(response)).toBeUndefined();
     expect(refusalOf(undefined)).toBeUndefined();
   });
+
+  it("gives an answer of a status with no body as it is, though the browser gives it an empty one", async () => {
+    // A browser can answer a conditional read with a 304 whose body is an empty stream; no Response with a body can have its status.
+    const answer = new Response("");
+    Object.defineProperty(answer, "status", { value: 304 });
+    const response = await limitedFetch(async () => answer, LIMITS)(URL_);
+    expect(response).toBe(answer);
+    expect(limitsOf(response)).toBeUndefined();
+  });
 });
 
 describe("textChunks", () => {
@@ -124,12 +133,11 @@ describe("textChunks", () => {
 });
 
 describe("writeTurtle", () => {
-  /** Whether writeTurtle refuses `text`, read as `url` under `limits` (none: null), written to a parser that reads nothing. */
-  const refuses = (text: string, url = URL_, limits: ReadLimits | null = LIMITS) =>
+  /** Whether writeTurtle refuses `text`, read as `url`, written to a parser that reads nothing. */
+  const refuses = (text: string, url = URL_) =>
     !writeTurtle(
       text,
       url,
-      limits ?? undefined,
       () => undefined,
       () => true,
     );
@@ -151,7 +159,6 @@ describe("writeTurtle", () => {
     const wrote = writeTurtle(
       text,
       URL_,
-      LIMITS,
       (stream) => {
         stream.on("data", (part) => written.push(part!));
         stream.on("end", () => {
@@ -192,7 +199,7 @@ describe("writeTurtle", () => {
     expect(ended).toBe(false);
   });
 
-  it("lets a text under limits declare its base 16 times, in any form, and no more", () => {
+  it("lets a text declare its base 16 times, in any form, and no more", () => {
     expect(refuses(declaring(16))).toBe(false);
     expect(refuses(declaring(17))).toBe(true);
     // Each of these is a declaration to the parser too.
@@ -276,7 +283,7 @@ describe("writeTurtle", () => {
     }
   });
 
-  it("lets a text under limits declare 4,096 prefixes, in any form, and no more", () => {
+  it("lets a text declare 4,096 prefixes, in any form, and no more", () => {
     const prefixForms = [
       "@prefix ex: <x> .",
       "PREFIX : <x>",
@@ -292,7 +299,6 @@ describe("writeTurtle", () => {
     expect(refuses(`<a> <b> "prefix ex: <x>" .\n${prefixes(4096)}`)).toBe(false);
     expect(refuses('<a> <b> "a prefix, the prefixes" .\n'.repeat(5000))).toBe(false);
     expect(refuses(`${"ex:prefixed ".repeat(5000)}`)).toBe(false);
-    expect(refuses(prefixes(5000), URL_, null)).toBe(false);
   });
 
   it("counts a base with no IRI of 512 characters at most as past the limits, and a `base` with no IRI next as no declaration", () => {
@@ -304,11 +310,6 @@ describe("writeTurtle", () => {
     expect(refuses(`<a> <b> <c${"d".repeat(1000)} .\nBASE "x"`)).toBe(false);
     expect(refuses(`@base # a comment\n${"a".repeat(2048)}`)).toBe(false);
     expect(refuses("# a base camp, a database: <x>\n".repeat(100))).toBe(false);
-  });
-
-  it("limits no text read with no limits", () => {
-    expect(refuses(declaring(100), URL_, null)).toBe(false);
-    expect(refuses(`@base <${"a".repeat(10_000)}> .`, URL_, null)).toBe(false);
   });
 
   it("looks through a text in time that grows with it, not its square", () => {

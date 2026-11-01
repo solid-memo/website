@@ -425,6 +425,97 @@ describe("createAppUseCases", () => {
     expect(login.sent).toContain(entered);
   });
 
+  it("lists the releases of an instance outside the user's storages as no one, under limits", async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    const catalog = "https://elsewhere.example/memo/catalog.ttl";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input instanceof Request ? input.url : input);
+        if (url.startsWith(`${alice}profile/card`))
+          return Promise.resolve(
+            new Response(`<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`, {
+              headers: { "Content-Type": "text/turtle" },
+            }),
+          );
+        if (url !== catalog) return servedSiteNetwork(input, init);
+        // A catalog that says it is larger than any read outside the user's storages takes in.
+        const response = new Response(
+          `<${catalog}#catalog> a <http://www.w3.org/ns/dcat#Catalog>.`,
+          {
+            headers: { "Content-Type": "text/turtle", "Content-Length": "33554433" },
+          },
+        );
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+
+    await expect(
+      useCases.listPublishedReleases("https://elsewhere.example/memo/"),
+    ).rejects.toMatchObject({ name: "ReadLimitError", url: catalog });
+    expect(login.sent).not.toContain(catalog);
+  });
+
+  it("reads a deck's documents outside the user's storages under limits, in an instance they registered too, and theirs with none", async () => {
+    const alice = "https://alice.example/";
+    const shared = "https://shared.example/study/";
+    login.webId = `${alice}profile/card#me`;
+    const guest = createAppUseCases({ ...options, indexedDB: undefined });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+    const made = await guest.createDeck(instance!.url, { en: "Capitals" });
+    const entry = `${alice}memo/catalog.ttl#deck-1`;
+    const deckAt = (url: string) => ({
+      ...made,
+      url: entry,
+      cardsDocumentUrl: url,
+      reviewsDocumentUrl: url,
+    });
+    const documents: Record<string, string> = {
+      [`${alice}profile/card`]: `<${login.webId}>
+        <http://www.w3.org/ns/pim/space#storage> <${alice}>;
+        <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${alice}settings/private.ttl>.`,
+      // An instance on another server, registered as the user's.
+      [`${alice}settings/private.ttl`]: `<#memo>
+        a <http://www.w3.org/ns/solid/terms#TypeRegistration>;
+        <http://www.w3.org/ns/solid/terms#forClass> <https://solid-memo.com/ns/vocab/v1.ttl#Instance>;
+        <http://www.w3.org/ns/solid/terms#instanceContainer> <${shared}>.`,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input instanceof Request ? input.url : input).replace(/#.*/, "");
+        const elsewhere = ["https://elsewhere.example/", shared].some((at) => url.startsWith(at));
+        if (!url.startsWith(alice) && !elsewhere) return servedSiteNetwork(input, init);
+        const listed = documents[url];
+        const body = listed ?? `<${url}> <http://purl.org/dc/terms/isPartOf> <${entry}>.`;
+        // A deck's document that says it is larger than any read outside the user's storages takes in.
+        const length: Record<string, string> =
+          listed === undefined ? { "Content-Length": "33554433" } : {};
+        const response = new Response(body, {
+          headers: { "Content-Type": "text/turtle", ...length },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+
+    await expect(
+      useCases.listCards(deckAt("https://elsewhere.example/cards.ttl")),
+    ).rejects.toMatchObject({ name: "ReadLimitError", url: "https://elsewhere.example/cards.ttl" });
+    const registered = `${shared}decks/deck-1.ttl`;
+    await expect(useCases.listCards(deckAt(registered))).rejects.toMatchObject({
+      name: "ReadLimitError",
+      url: registered,
+    });
+    expect(login.sent).toContain(registered);
+    expect(await useCases.listCards(deckAt(`${alice}memo/decks/deck-1.ttl`))).toEqual([]);
+  });
+
   it("studies a deck whose catalog names its documents on another server without the user's credentials there, writing nothing there", {
     timeout: 60_000,
   }, async () => {

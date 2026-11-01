@@ -19,6 +19,33 @@ export const RELEASE_LIMITS: ReadLimits = {
   characters: 64 * 1024 * 1024,
 };
 
+/**
+ * The most the app reads of an instance's document outside the user's
+ * storages (ownPodGate.ts), read as no one or, in an instance they
+ * registered on another server, as them, and of an instance's meta
+ * document anywhere: as much as of a release (RELEASE_LIMITS), which
+ * holds a deck's cards as an instance's largest documents do. An
+ * instance anyone may make can be added by its address or registered by
+ * another app, a catalog may name a deck's documents on any server, and
+ * the app keeps every triple of what it reads. The user's storages are
+ * read with no limits but on their declarations (writeTurtle).
+ */
+export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
+
+/**
+ * What a read with no limits is refused under, by the one bound every
+ * read keeps: a Turtle text's base and prefix declarations
+ * (writeTurtle). Its body, its triples and their terms are not bounded.
+ */
+export const NO_SIZE_LIMITS: ReadLimits = {
+  bytes: Number.POSITIVE_INFINITY,
+  quads: Number.POSITIVE_INFINITY,
+  characters: Number.POSITIVE_INFINITY,
+};
+
+/** The statuses whose responses have no body (Fetch Standard, "null body status"). */
+const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
+
 /** Each response limitedFetch gave: the limits it is read under, and how it went past them, once it did. */
 const READS = new WeakMap<Response, { limits: ReadLimits; refused?: ReadLimitError }>();
 
@@ -36,7 +63,8 @@ export function limitedFetch(
 ): typeof globalThis.fetch {
   return async (input, init) => {
     const response = await fetch(input, init);
-    if (response.body === null) return response;
+    // A status with no body (a 304 to a conditional read) has nothing to limit, and no response with a body can be made of it.
+    if (response.body === null || NULL_BODY_STATUSES.has(response.status)) return response;
     const { url } = response;
     if (Number(response.headers.get("Content-Length")) > limits.bytes) {
       await response.body.cancel();
@@ -97,8 +125,8 @@ export function quadTally(limits: ReadLimits | undefined): (quad: Quad) => boole
 }
 
 /**
- * The most base declarations (`@base`, `BASE`) a Turtle text read under
- * limits may make. The parser resolves each against the one before it,
+ * The most base declarations (`@base`, `BASE`) a Turtle text may make,
+ * read under limits or with none. The parser resolves each against the one before it,
  * walking the whole base each time, and a declaration makes no triple
  * for quadTally to count. A document needs one at most; each release in
  * the library has one.
@@ -106,8 +134,8 @@ export function quadTally(limits: ReadLimits | undefined): (quad: Quad) => boole
 const MAX_BASE_DECLARATIONS = 16;
 
 /**
- * The most prefix declarations (`@prefix`, `PREFIX`) a Turtle text read
- * under limits may make. The parser resolves the IRI of each against
+ * The most prefix declarations (`@prefix`, `PREFIX`) a Turtle text may
+ * make, read under limits or with none. The parser resolves the IRI of each against
  * the base, walking the whole base, and a declaration makes no triple
  * for quadTally to count. A document needs a few; the bound leaves a
  * wide margin over that.
@@ -115,8 +143,8 @@ const MAX_BASE_DECLARATIONS = 16;
 const MAX_PREFIX_DECLARATIONS = 4096;
 
 /**
- * The most characters the base of a Turtle text read under limits may
- * reach. The parser walks the whole base for each relative IRI it
+ * The most characters the base of a Turtle text may reach, read under
+ * limits or with none. The parser walks the whole base for each relative IRI it
  * resolves, and a triple's terms can be far shorter than the base (an
  * IRI that goes up a level), so the read limits on the triples bound
  * the time only with the base bounded too. A release names itself as
@@ -211,13 +239,15 @@ function stringEnd(text: string, at: number): number {
 
 /**
  * Whether the base and prefix declarations of a Turtle text read as
- * `url` under `limits`, those that start before an offset of the text,
- * are past what such a read takes in: more than MAX_BASE_DECLARATIONS
- * bases, more than MAX_PREFIX_DECLARATIONS prefixes, a base whose path
- * is not plain (plainBase), or a base of more than MAX_BASE_CHARACTERS
- * (never, with no limits). Each call looks on from where the last
- * stopped, so a text is looked through once, as far as it is written
- * (writeTurtle), in time linear in it.
+ * `url`, those that start before an offset of the text, are past what
+ * any read takes in, under limits or with none: more than
+ * MAX_BASE_DECLARATIONS bases, more than MAX_PREFIX_DECLARATIONS
+ * prefixes, a base whose path is not plain (plainBase), or a base of
+ * more than MAX_BASE_CHARACTERS. A document needs one base and a few
+ * prefixes, and the parser takes time in the square of a chain of
+ * relative bases, wherever the text is read from. Each call looks on
+ * from where the last stopped, so a text is looked through once, as far
+ * as it is written (writeTurtle), in time linear in it.
  *
  * The search reads the text as the parser does: past strings (with
  * their escapes), IRIs and comments, where a declaration is only text,
@@ -230,12 +260,7 @@ function stringEnd(text: string, at: number): number {
  * longest of the URL and the absolute IRIs, with every relative IRI
  * added on.
  */
-function declarationsPast(
-  text: string,
-  url: string,
-  limits: ReadLimits | undefined,
-): (end: number) => boolean {
-  if (limits === undefined) return () => false;
+function declarationsPast(text: string, url: string): (end: number) => boolean {
   const lineEnd = /[\n\r]/g;
   let bases = 0;
   let prefixes = 0;
@@ -272,6 +297,7 @@ function declarationsPast(
     return longest + added > MAX_BASE_CHARACTERS;
   };
 
+  // The document's own address is its first base: a Turtle text at a longer one is refused, with limits or with none.
   let refused = url.length > MAX_BASE_CHARACTERS;
 
   /** Where the search goes on after what starts at `at`, having checked a directive there. */
@@ -315,26 +341,26 @@ export interface TextStream {
 }
 
 /**
- * Parse a Turtle text read as `url` under `limits`, by a parser that
+ * Parse a Turtle text read as `url`, by a parser that
  * reads streams: `parse` hands it the text as one (n3's parser reads
  * such an object, as its own stream parser hands it one), and the text
  * is written to it in parts (textChunks), then ended, while `goOn` says
  * to. A parser given the whole text goes on through all of it after the
  * tally is past its limits; here it reads no further than the part it
  * is in. Before each part, the base and prefix declarations that start
- * in it, or before, are checked (declarationsPast): false when they are past
- * the limits, and the rest is not written; true otherwise.
+ * in it, or before, are checked (declarationsPast), with limits or with
+ * none: false when they are past what a read takes in, and the rest is
+ * not written; true otherwise.
  */
 export function writeTurtle(
   text: string,
   url: string,
-  limits: ReadLimits | undefined,
   parse: (stream: TextStream) => void,
   goOn: () => boolean,
 ): boolean {
   const listeners = new Map<string, (part?: string) => void>();
   parse({ on: (event, listener) => void listeners.set(event, listener) });
-  const past = declarationsPast(text, url, limits);
+  const past = declarationsPast(text, url);
   let end = 0;
   for (const part of textChunks(text)) {
     end += part.length;
