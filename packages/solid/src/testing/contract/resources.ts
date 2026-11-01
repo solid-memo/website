@@ -738,6 +738,23 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       }
     });
 
+    it("reads no RDF-star in JSON-LD: an annotation gives no triple, and a triple term does not parse", async () => {
+      const annotated = JSON.stringify({
+        "@context": { ex: EX },
+        "@graph": [{ "@id": "#a", "ex:p": { "@value": "x", "@annotation": { "ex:q": "y" } } }],
+      });
+      const quads = await parseQuads(annotated, "jsonld", URL_);
+      expect(quads.map((one) => [one.subject.value, one.object.value])).toEqual([
+        [`${URL_}#a`, "x"],
+      ]);
+      const triple = JSON.stringify({
+        "@context": { ex: EX },
+        "@id": { "@id": "#a", "ex:p": "x" },
+        "ex:q": "y",
+      });
+      await expect(parseQuads(triple, "jsonld", URL_)).rejects.toBeDefined();
+    });
+
     it("reads JSON-LD as it streams: a context after a node's other keys does not parse", async () => {
       const node = { "@id": "#a", "@type": "ex:T", "ex:p": "x" };
       const after = JSON.stringify({ ...node, "@context": { ex: EX } });

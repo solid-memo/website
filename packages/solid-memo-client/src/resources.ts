@@ -239,6 +239,8 @@ function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promis
       streamingProfile: true,
       // refuseRemoteContexts refuses a type's own context; a plain one may come after the id.
       streamingProfileAllowOutOfOrderPlainType: true,
+      // No RDF-star: the parser holds a top-level node's annotations to the end, copying them at each.
+      rdfstar: false,
       documentLoader: {
         load: async (url: string) => {
           throw new Error(`The JSON-LD context at [${url}] is not fetched.`);

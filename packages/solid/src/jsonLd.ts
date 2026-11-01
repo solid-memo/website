@@ -142,7 +142,8 @@ const WITH_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
  * one costs its length at every use for an IRI that may be short. A file
  * this app exports states short namespaces with a scheme. Refuse JSON
  * nested deeper than MAX_JSON_DEPTH too, before anything recurses into
- * it. Throws
+ * it, and an RDF-star annotation or triple term (refuseTripleTerms),
+ * which the parser is also told not to read. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
  *
  * Gives the document checked, written again: the parser is to read that
@@ -160,6 +161,10 @@ export function refuseRemoteContexts(text: string, baseUrl: string): string {
     throw new AppError("deckFileUnreadable", { reason: String(error) });
   }
   const topLevel = new Set(Array.isArray(json) ? json : [json]);
+  // The terms the contexts alias to `@id`, and the keys given an object (alone or in an array), in the whole
+  // document: an `@id` that is an object is a triple.
+  const ids = new Set(["@id"]);
+  const givenObjects = new Set<string>();
   // A walk of its own, not a recursion, which a file nested deeper than the call stack would end.
   const pending: [value: unknown, depth: number][] = [[json, 0]];
   while (pending.length > 0) {
@@ -171,12 +176,36 @@ export function refuseRemoteContexts(text: string, baseUrl: string): string {
       });
     }
     for (const [key, child] of Object.entries(value)) {
-      if (key === "@context") refuseContext(child, topLevel.has(value), baseUrl);
+      if (key === "@context") {
+        for (const alias of refuseContext(child, topLevel.has(value), baseUrl)) ids.add(alias);
+      }
+      if (key === "@annotation") refuseTripleTerms();
+      if (holdsObject(child)) givenObjects.add(key);
       pending.push([child, depth + 1]);
     }
   }
+  if ([...ids].some((id) => givenObjects.has(id))) refuseTripleTerms();
   // Only now, the depth known to be within MAX_JSON_DEPTH: written recurses.
   return written(json);
+}
+
+/** Whether a value is an object, or an array that holds one. */
+function holdsObject(value: unknown): boolean {
+  const values = Array.isArray(value) ? value : [value];
+  return values.some((one) => typeof one === "object" && one !== null && !Array.isArray(one));
+}
+
+/**
+ * Throws deckFileUnreadable for an RDF-star annotation or triple term
+ * (an `@id` that is an object, or an array holding one): the parser holds each annotation of the
+ * top-level nodes to the end, copying all those before it at each, in
+ * time growing with their square. A file this app exports holds neither,
+ * and the app writes no triple term.
+ */
+function refuseTripleTerms(): never {
+  throw new AppError("deckFileUnreadable", {
+    reason: "The file states an RDF-star annotation or triple term.",
+  });
 }
 
 /**
@@ -198,9 +227,11 @@ function written(value: unknown): string {
  * strings alone, on a top-level node, in at most MAX_CONTEXTS, with
  * plain bases and vocabularies within MAX_BASE_CHARACTERS (baseLength),
  * plain terms (plainTerm) that name no term of the node's contexts
- * (chained), and at most MAX_CONTEXT_CHARACTERS in all.
+ * (chained), and at most MAX_CONTEXT_CHARACTERS in all, and none an
+ * alias of `@annotation` (refuseTripleTerms). Gives the terms it aliases
+ * to `@id`.
  */
-function refuseContext(context: unknown, onTopLevelNode: boolean, baseUrl: string): void {
+function refuseContext(context: unknown, onTopLevelNode: boolean, baseUrl: string): string[] {
   const contexts = Array.isArray(context) ? context : [context];
   if (contexts.some(remote)) {
     throw new AppError("deckFileUnreadable", {
@@ -238,6 +269,8 @@ function refuseContext(context: unknown, onTopLevelNode: boolean, baseUrl: strin
       reason: "The file defines a JSON-LD term, base or vocabulary through another term.",
     });
   }
+  if (entries.some(([, value]) => value === "@annotation")) refuseTripleTerms();
+  return entries.flatMap(([key, value]) => (value === "@id" ? [key] : []));
 }
 
 /**

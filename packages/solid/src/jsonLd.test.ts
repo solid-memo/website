@@ -267,6 +267,49 @@ describe("refuseRemoteContexts", () => {
     );
   });
 
+  it("refuses an RDF-star annotation or triple term, however its keyword is named", () => {
+    const refused = expect.objectContaining({
+      code: "deckFileUnreadable",
+      vars: { reason: "The file states an RDF-star annotation or triple term." },
+    });
+    const context = { ex: EX };
+    for (const document of [
+      {
+        "@context": context,
+        "@graph": [{ "@id": "ex:a", "ex:p": { "@value": "x", "@annotation": { "ex:q": "y" } } }],
+      },
+      { "@context": { ...context, note: "@annotation" }, "@id": "ex:a", "ex:p": "x" },
+      { "@context": context, "@id": { "@id": "ex:a", "ex:p": "x" }, "ex:q": "y" },
+      { "@context": context, "@id": ["ex:b", { "@id": "ex:a", "ex:p": "x" }], "ex:q": "y" },
+      { "@context": { ...context, id: "@id" }, "@graph": [{ id: [{ "@id": "ex:a" }] }] },
+      // The check is the whole document's: an alias given an object elsewhere, or a key in a JSON literal.
+      [
+        { "@context": { ...context, id: "@id" }, "@id": "ex:a" },
+        { "@context": context, "ex:p": { id: {} } },
+      ],
+      {
+        "@context": context,
+        "@id": "ex:a",
+        "ex:p": { "@type": "@json", "@value": { "@annotation": 1 } },
+      },
+      [
+        {
+          "@context": { ...context, id: "@id" },
+          "@graph": [{ id: { "@id": "ex:a", "ex:p": "x" } }],
+        },
+      ],
+    ]) {
+      expect(() => refuseRemoteContexts(JSON.stringify(document))).toThrow(refused);
+    }
+    // A node given as an object under a property, or an alias of @id given a string, is no triple term.
+    const plain = {
+      "@context": { ...context, id: "@id" },
+      id: "ex:a",
+      "ex:p": { "@id": "ex:b", "ex:q": [{ "@value": "y" }] },
+    };
+    expect(() => refuseRemoteContexts(JSON.stringify(plain))).not.toThrow();
+  });
+
   it("refuses a document nested deeper than a deck file's before writing it again, which could overflow the stack", () => {
     const depth = 100_000;
     const nested = `{"@context": {}, "a": ${"[".repeat(depth)}1${"]".repeat(depth)}}`;

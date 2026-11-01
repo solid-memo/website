@@ -1425,6 +1425,16 @@ An import reads the file as the pod is read, with the same mappers:
 - JSON nested deeper than 12 levels is refused (`deckFileUnreadable`),
   before anything else reads it: the JSON-LD parser takes time far
   beyond linear in the depth, and a file this app exports nests 5;
+- a JSON-LD RDF-star annotation (`@annotation`, or a term defined as
+  it) or triple term (an `@id`, or a term defined as it, given an
+  object or an array that holds one) is refused (`deckFileUnreadable`).
+  The parser is also told to read no RDF-star: it holds the
+  annotations of the top-level nodes to the end, copying all those
+  before it at each, in time growing with their square. The check
+  covers the whole document: a term one node's context defines as
+  `@id` is refused given an object anywhere, even as a plain key of
+  another node, and so are these keys inside a `@json` literal. A file
+  this app exports holds neither;
 - a file larger than `DECK_FILE_LIMITS` in `solidDeckArchive.ts` is
   refused (`deckFileTooLarge`), and nothing is written. The limits are
   64 MiB of text, a million triples, and 256 Mi characters in the terms
