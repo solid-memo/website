@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.1](https://github.com/solid-memo/website/compare/v6.25.0...v6.25.1) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** bound Turtle declarations and stop the parse at a limit ([93369ed](https://github.com/solid-memo/website/commit/93369ede7a07e513159bb0c21b16a2485ff6981b))
+* **solid:** end the session only on a 401 that says it expired ([402f109](https://github.com/solid-memo/website/commit/402f109d37545fde7f75386e410e435c9c97c15e))
+
 ## [6.25.0](https://github.com/solid-memo/website/compare/v6.24.3...v6.25.0) (2026-11-01)
 
 ### Features
