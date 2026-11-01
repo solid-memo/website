@@ -51,7 +51,7 @@ describe("propertiesOf, of the library's subjects", () => {
   });
 });
 
-describe("setThing and removeThing, beside the library's own", () => {
+describe("setThing and removeThings, beside the library's own", () => {
   /** A dataset's quads and its changes, each as sorted lines. */
   const stateOf = (dataset: rdf.Dataset) => {
     const lines = (quads: Iterable<Quad>) =>
@@ -85,7 +85,7 @@ describe("setThing and removeThing, beside the library's own", () => {
       .buildThing(rdf.createThing({ name: "n" }))
       .addIri(`${EX}p`, a)
       .build();
-    const ours = rdf.removeThing(rdf.setThing(rdf.setThing(read, changed), named), `${URL_}#a`);
+    const ours = rdf.removeThings(rdf.setThing(rdf.setThing(read, changed), named), [`${URL_}#a`]);
     const data = read as unknown as SolidDataset;
     const theirs = libraryRemoveThing(
       librarySetThing(librarySetThing(data, changed as never), named as never),

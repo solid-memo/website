@@ -132,7 +132,7 @@ describe("getThing and createThing", () => {
   });
 });
 
-describe("removeThing", () => {
+describe("removeThings, of one subject", () => {
   const thing = rdf
     .buildThing(rdf.createThing({ url: `${URL_}#a` }))
     .addStringNoLocale(P, "x")
@@ -141,7 +141,7 @@ describe("removeThing", () => {
   it("removes a subject given as text or as itself, its quads deleted", () => {
     const dataset = rdf.withQuads(rdf.datasetAt(URL_), [quadOf(`${URL_}#a`, term("x"))]);
     for (const subject of [`${URL_}#a`, thing]) {
-      const removed = rdf.removeThing(dataset, subject);
+      const removed = rdf.removeThings(dataset, [subject]);
       expect(rdf.isEmptyDataset(removed)).toBe(true);
       expect(rdf.changesOf(removed)!.deletions.map((one) => one.object.value)).toEqual(["x"]);
     }
@@ -153,15 +153,15 @@ describe("removeThing", () => {
       .addStringNoLocale(P, "x")
       .build();
     const dataset = rdf.withQuads(rdf.datasetAt(URL_), [quadOf(`${URL_}#a`, term("x"))]);
-    expect(rdf.isEmptyDataset(rdf.removeThing(dataset, named.url))).toBe(true);
-    expect(rdf.isEmptyDataset(rdf.removeThing(dataset, named))).toBe(false);
+    expect(rdf.isEmptyDataset(rdf.removeThings(dataset, [named.url]))).toBe(true);
+    expect(rdf.isEmptyDataset(rdf.removeThings(dataset, [named]))).toBe(false);
     const local = rdf.setThing(rdf.createSolidDataset(), named);
-    expect(rdf.isEmptyDataset(rdf.removeThing(local, named))).toBe(true);
+    expect(rdf.isEmptyDataset(rdf.removeThings(local, [named]))).toBe(true);
   });
 
   it("changes nothing for a subject the dataset says nothing of", () => {
     const dataset = rdf.datasetAt(URL_);
-    expect(rdf.changesOf(rdf.removeThing(dataset, thing))).toEqual({
+    expect(rdf.changesOf(rdf.removeThings(dataset, [thing]))).toEqual({
       additions: [],
       deletions: [],
     });
@@ -169,9 +169,12 @@ describe("removeThing", () => {
 
   it("makes no change of a subject set and then removed, nor of one removed and then set again", () => {
     const added = rdf.setThing(rdf.datasetAt(URL_), thing);
-    expect(rdf.changesOf(rdf.removeThing(added, thing))).toEqual({ additions: [], deletions: [] });
+    expect(rdf.changesOf(rdf.removeThings(added, [thing]))).toEqual({
+      additions: [],
+      deletions: [],
+    });
     const read = rdf.withQuads(rdf.datasetAt(URL_), [quadOf(`${URL_}#a`, term("x"))]);
-    const back = rdf.setThing(rdf.removeThing(read, thing), thing);
+    const back = rdf.setThing(rdf.removeThings(read, [thing]), thing);
     expect(rdf.changesOf(back)).toEqual({ additions: [], deletions: [] });
   });
 });
