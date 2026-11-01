@@ -88,6 +88,7 @@ function page(network: typeof globalThis.fetch = globalThis.fetch) {
 function publisherOver(network: typeof globalThis.fetch) {
   return createSolidReleasePublisher({
     fetch: createPodFence(network),
+    dataFetch: createPodFence(network),
     shareFetch: createPodFence(network, { accessControl: true }),
     publicFetch: network,
     grantPublicRead,

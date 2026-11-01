@@ -12,7 +12,6 @@ import {
   getFile as libraryGetFile,
   getPodUrlAllFrom as libraryGetPodUrlAllFrom,
   getProfileAll as libraryGetProfileAll,
-  getSolidDataset as libraryGetSolidDataset,
   getTurtleParser as libraryGetTurtleParser,
   overwriteFile as libraryOverwriteFile,
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
@@ -37,7 +36,7 @@ import {
 } from "./interface";
 import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
 import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
-import { quadTally, type TextStream, textChunks, writeTurtle } from "./readLimits";
+import { NO_SIZE_LIMITS, quadTally, type TextStream, textChunks, writeTurtle } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
 
@@ -69,9 +68,17 @@ async function answered<T>(request: () => Promise<T>): Promise<T> {
   }
 }
 
-/** The document at `url`, as a dataset. */
+/**
+ * The document at `url`, as a dataset, read as getSolidDatasetLinear
+ * reads it: under the limits of a response limitedFetch gave, and always
+ * under the bound on a Turtle text's declarations (writeTurtle), so that
+ * a container's listing, a profile or any other document is parsed as
+ * the documents of a deck are. With no fetch, the global one.
+ */
 export function getSolidDataset(url: string, options?: RequestOptions): Promise<FetchedDataset> {
-  return answered(async () => fetchedDataset(await libraryGetSolidDataset(url, options)));
+  return getSolidDatasetLinear(url, {
+    fetch: options?.fetch ?? ((input, init) => globalThis.fetch(input, init)),
+  });
 }
 
 /** The document at `url`, as getSolidDataset reads it, but built in time linear in its size (linearDataset.ts). */
@@ -356,8 +363,9 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * text names. Rejects with the parser's error on a text that does not
  * parse, and with a ReadLimitError at the first quad past `limits`
  * (quadTally; the text's own size is its caller's to check: it holds the
- * text already), or on a Turtle text at its first base past them
- * (writeTurtle); the parser reads no further. JSON-LD is read with no
+ * text already), or on a Turtle text at its first base or prefix past
+ * what a read takes in, with limits or with none (writeTurtle); the
+ * parser reads no further. JSON-LD is read with no
  * fetch at all: a context named by its address is refused (parseJsonLd).
  */
 export function parseQuads(
@@ -373,8 +381,8 @@ export function parseQuads(
     const refuse = () => {
       refused = true;
       quads.length = 0;
-      // The tally, and the bases, are past limits only under some.
-      reject(new ReadLimitError(baseUrl, limits!));
+      // The tally is past limits only under some; the declarations, under none too.
+      reject(new ReadLimitError(baseUrl, limits ?? NO_SIZE_LIMITS));
     };
     // Whether to go on: false once past limits, for the parser to stop (parseJsonLd, writeTurtle).
     const onQuad = (quad: Quad): boolean => {
@@ -398,7 +406,7 @@ export function parseQuads(
     const resourceInfo = serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format]));
     // solid-client hands the text to n3's parser as it is, which reads a stream as well.
     const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);
-    if (!writeTurtle(text, baseUrl, limits, parse, () => !refused)) refuse();
+    if (!writeTurtle(text, baseUrl, parse, () => !refused)) refuse();
   });
 }
 

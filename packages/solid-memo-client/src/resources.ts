@@ -19,6 +19,7 @@ import {
 } from "@solid-memo/solid/client/interface";
 import {
   limitsOf,
+  NO_SIZE_LIMITS,
   quadTally,
   refusalOf,
   type TextStream,
@@ -159,7 +160,8 @@ function resourceOf(response: Response): Resource {
  * A collector of a text's quads, parsed as the document at `url` under
  * `limits`: `add` keeps each, until one past them (quadTally), which
  * drops what was kept and rejects once, with a ReadLimitError, as
- * `refuse` does for a text past them otherwise (writeTurtle); nothing
+ * `refuse` does for a text whose declarations are past what a read
+ * takes in, with limits or with none (writeTurtle); nothing
  * more is kept, and `refused` says to stop the parser.
  */
 function collector(url: string, limits: ReadLimits | undefined, reject: (error: Error) => void) {
@@ -169,8 +171,8 @@ function collector(url: string, limits: ReadLimits | undefined, reject: (error: 
   const refuse = (): void => {
     refused = true;
     quads.length = 0;
-    // The tally, and the bases, are past limits only under some.
-    reject(new ReadLimitError(url, limits!));
+    // The tally is past limits only under some; the declarations, under none too.
+    reject(new ReadLimitError(url, limits ?? NO_SIZE_LIMITS));
   };
   return {
     quads,
@@ -186,9 +188,9 @@ function collector(url: string, limits: ReadLimits | undefined, reject: (error: 
 
 /**
  * The quads of a Turtle text, its relative IRIs resolved against
- * `baseIRI`, under `limits` (collector), as is a base past them
- * (writeTurtle). The text is written to the parser in parts, so that it
- * reads no further than the part it is in.
+ * `baseIRI`, under `limits` (collector), refused at a base or prefix
+ * past what any read takes in (writeTurtle). The text is written to the
+ * parser in parts, so that it reads no further than the part it is in.
  */
 function parseTurtle(text: string, baseIRI: string, limits?: ReadLimits): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
@@ -201,7 +203,7 @@ function parseTurtle(text: string, baseIRI: string, limits?: ReadLimits): Promis
         else if (quad) add(quad);
         else resolve(quads);
       });
-    if (!writeTurtle(text, baseIRI, limits, parse, () => !refused())) refuse();
+    if (!writeTurtle(text, baseIRI, parse, () => !refused())) refuse();
   });
 }
 
@@ -662,7 +664,8 @@ const MEDIA_TYPES = { turtle: TURTLE, jsonld: "application/ld+json" } as const;
  * against `baseUrl`, parsed as a pod's documents are: in every graph the
  * text names. Rejects with the parser's error on a text that does not
  * parse, and with a ReadLimitError at the first quad past `limits`, or
- * on a Turtle text at its first base past them (writeTurtle).
+ * on a Turtle text at its first base or prefix past what a read takes
+ * in, with limits or with none (writeTurtle).
  */
 export async function parseQuads(
   text: string,

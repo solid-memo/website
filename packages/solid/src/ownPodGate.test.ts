@@ -3,29 +3,41 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { createOwnPodGate } from "./ownPodGate";
+import { createOwnPodGate, type OwnFolders } from "./ownPodGate";
 
 const WEB_ID = "https://alice.example/profile/card#me";
 
-/** A gate whose user owns `folders`, logged in as `user.webId`, and the fetches it chooses between. */
+/**
+ * A gate whose user owns `folders`, their storages, and `instances`,
+ * registered elsewhere, logged in as `user.webId`, and the fetches it
+ * chooses between.
+ */
 function setup(
   user: { webId: string | undefined },
   folders = ["https://alice.example/", "https://shared.example/study/"],
+  instances: string[] = [],
 ) {
   const fetch = vi.fn(async () => new Response("user"));
+  const instanceFetch = vi.fn(async () => new Response("user, limited"));
   const publicFetch = vi.fn(async () => new Response("no one"));
-  const ownFolders = vi.fn(async (_webId: string) => [...folders]);
+  const ownFolders = vi.fn(
+    async (_webId: string): Promise<OwnFolders> => ({
+      storages: [...folders],
+      instances: [...instances],
+    }),
+  );
   /** The page's changes to the folders, and the clock. */
   const page = { revision: 0, now: 0 };
   const gate = createOwnPodGate({
     fetch,
+    instanceFetch,
     publicFetch,
     webId: () => user.webId,
     ownFolders,
     revision: () => page.revision,
     now: () => page.now,
   });
-  return { gate, fetch, publicFetch, ownFolders, page };
+  return { gate, fetch, instanceFetch, publicFetch, ownFolders, page };
 }
 
 describe("createOwnPodGate", () => {
@@ -43,6 +55,23 @@ describe("createOwnPodGate", () => {
     // Asked once, then kept.
     expect(ownFolders).toHaveBeenCalledOnce();
     expect(ownFolders).toHaveBeenCalledWith(WEB_ID);
+  });
+
+  it("sends a request in an instance the user registered outside their storages with its own fetch", async () => {
+    const { gate, fetch, instanceFetch, publicFetch } = setup(
+      { webId: WEB_ID },
+      ["https://alice.example/"],
+      ["https://shared.example/study/", "https://alice.example/memo/"],
+    );
+    const cards = "https://shared.example/study/decks/deck-1.ttl";
+    expect(await (await gate(cards)).text()).toBe("user, limited");
+    await gate(cards, { method: "PUT" });
+    expect(instanceFetch).toHaveBeenLastCalledWith(cards, { method: "PUT" });
+    // An instance in one of their storages is read as the rest of it is.
+    expect(await (await gate("https://alice.example/memo/catalog.ttl")).text()).toBe("user");
+    expect(instanceFetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(publicFetch).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -66,6 +95,17 @@ describe("createOwnPodGate", () => {
     }
     expect(fetch).not.toHaveBeenCalled();
     expect(publicFetch).toHaveBeenCalledOnce();
+  });
+
+  it("refuses a write made as a request outside the user's own folders", async () => {
+    const { gate, fetch, publicFetch } = setup({ webId: WEB_ID });
+    const url = "https://attacker.example/cards.ttl";
+    await expect(gate(new Request(url, { method: "PUT" }))).rejects.toMatchObject({
+      code: "writeOutsidePod",
+      vars: { method: "PUT", url },
+    });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(publicFetch).not.toHaveBeenCalled();
   });
 
   it("keeps the folders until the page changes them", async () => {
@@ -137,7 +177,7 @@ describe("createOwnPodGate", () => {
     ownFolders.mockReturnValueOnce(new Promise((_resolve, reject) => (fail = reject)));
     const first = gate("https://alice.example/memo/catalog.ttl");
     user.webId = "https://bob.example/profile/card#me";
-    ownFolders.mockResolvedValueOnce(["https://bob.example/"]);
+    ownFolders.mockResolvedValueOnce({ storages: ["https://bob.example/"], instances: [] });
     await gate("https://bob.example/memo/catalog.ttl");
     fail(new Error("offline"));
     await expect(first).rejects.toThrow("offline");
@@ -151,7 +191,7 @@ describe("createOwnPodGate", () => {
     const { gate, fetch, publicFetch, ownFolders } = setup(user);
     await gate("https://alice.example/memo/catalog.ttl");
     user.webId = "https://bob.example/profile/card#me";
-    ownFolders.mockResolvedValueOnce(["https://bob.example/"]);
+    ownFolders.mockResolvedValueOnce({ storages: ["https://bob.example/"], instances: [] });
     await gate("https://alice.example/memo/catalog.ttl");
     expect(ownFolders).toHaveBeenLastCalledWith(user.webId);
     expect(fetch).toHaveBeenCalledOnce();

@@ -6,6 +6,8 @@ import { describe, expect, it, vi } from "vitest";
 import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink } from "./catalogLinks";
 import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
+import type { ReadLimits } from "./client/interface";
+import { limitedFetch } from "./client/readLimits";
 import { createPodFence } from "./podFence";
 import { createSolidReleasePublisher } from "./solidReleasePublisher";
 
@@ -48,7 +50,8 @@ const fakeGrant = vi.fn<GrantPublicRead>(async (url, { fetch }) => {
  * answer for which has a Link saying what it is, a 404 too while it is
  * not written yet, as the Community Solid Server does. `grant` is the public-read grant the
  * publisher is given, a fake one unless told. `sent` is every request
- * made, with its redirect mode and a PATCH's body.
+ * made, with its redirect mode and a PATCH's body. With `dataLimits`,
+ * the publisher's reads of an instance's data are made under them.
  */
 async function publisherPod({
   wac = true,
@@ -56,12 +59,14 @@ async function publisherPod({
   acl = (url: string) => `${url}.${acp ? "acr" : "acl"}`,
   answeredFrom,
   grant = fakeGrant,
+  dataLimits,
 }: {
   wac?: boolean;
   acp?: boolean;
   acl?: (url: string, reads: number) => string;
   answeredFrom?: string;
   grant?: GrantPublicRead;
+  dataLimits?: ReadLimits;
 } = {}) {
   const pod = await draftPod();
   const sent: string[] = [];
@@ -99,6 +104,7 @@ async function publisherPod({
   // Behind the pod fences, as the app wires it (appUseCases.ts).
   const publisher = createSolidReleasePublisher({
     fetch: createPodFence(fetch),
+    dataFetch: createPodFence(dataLimits === undefined ? fetch : limitedFetch(fetch, dataLimits)),
     shareFetch: createPodFence(fetch, { accessControl: true }),
     publicFetch,
     grantPublicRead: grant,
@@ -136,6 +142,21 @@ describe("publish", () => {
     expect(new Set(named)).toEqual(new Set([RELEASE]));
     await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([RELEASE]);
     expect(await pod.text(CATALOG)).toContain(`<${PUBLISHED}> <${RELEASE}>`);
+  });
+
+  it("lists and links the catalog's releases as the instance's data is read and written, under its limits", async () => {
+    const { pod, publisher } = await publisherPod({
+      dataLimits: { bytes: 64, quads: 1_000, characters: 64 * 1024 },
+    });
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+      name: "ReadLimitError",
+      url: CATALOG,
+    });
+    await addCatalogLink(INSTANCE, PUBLISHED, RELEASE, pod.fetch);
+    await expect(publisher.listPublished(INSTANCE)).rejects.toMatchObject({
+      name: "ReadLimitError",
+      url: CATALOG,
+    });
   });
 
   it("never writes over a release: one there already is releaseTaken, with nothing written", async () => {

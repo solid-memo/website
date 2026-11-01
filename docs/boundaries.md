@@ -127,7 +127,7 @@ library could take their place there alone
 | [interface.ts](../packages/solid/src/client/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type; it imports no library |
 | [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built, many subjects set or removed in one pass |
 | [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, for `resources.ts` and `rdf.ts` alone |
-| [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release takes in, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
+| [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bound every read keeps on a Turtle text's base and prefix declarations, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
 | [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, conditional reads and writes among them, and the Turtle and JSON-LD parsers |
 | [sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests; it imports no library |
 | [inrupt.ts](../packages/solid/src/client/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |
@@ -292,12 +292,30 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   counts with what's in it (`isInFolder` in `instanceLayout.ts`). For
   an instance in someone else's pod, only its own folder counts. It
   goes through the same fences and login fetch as any pod request, so
-  it follows no redirect either.
+  it follows no redirect either. A registered instance outside the
+  user's storages is anyone's to make, and another app may register
+  it, so what's read there is held to `FOREIGN_LIMITS`, which match a
+  release's ([deck-library.md](deck-library.md)). The storages and the
+  folders entered on this page, a storage entered by hand trusted like
+  one the profile names, are read as the user with no limits on size.
 - **Anywhere else** a read is sent as no one (`credentials: "omit"`),
   and a write is refused before it's sent (`writeOutsidePod`). A
   catalog may name a deck's documents on any server
   ([data-model.md](data-model.md#where-an-instances-documents-are)), and
-  what such a document says of itself never makes it writable.
+  what such a document says of itself never makes it writable. Such a
+  read is held to `FOREIGN_LIMITS` too.
+- **A read past its limits** fails with a `ReadLimitError`. So does
+  a document the app reads into a dataset whose Turtle text has too
+  many bases, a base that's too long or not plain, or too many
+  prefixes, with limits or with none. That holds for a deck's
+  documents, a folder's listing and a profile alike. The document's own
+  address counts toward a base's length, so a document of the user's
+  at an address longer than 512 characters can't be read. Nor can one
+  another app wrote with a base that has a `.` or `..` segment, unless
+  it's a relative path with no colon, such as `<./>`: the parser
+  removes those as it resolves it. The library's own reads of
+  a profile's further documents and of access controls aren't bounded
+  so; they're the user's own.
 - **The folders** are asked once a WebID and kept. The page asks for
   them again when it adds or removes one: a storage entered, an instance
   made, registered or deleted, a guest's study moved. An address outside
@@ -310,7 +328,11 @@ The profile, the storages, the type indexes and the instances'
 registrations are read and written through the pod fetch, without the
 gate. They're how the gate finds the user's own pod, and an instance
 added by its address isn't registered until it's read. So is copying
-an instance, and publishing a release. A release a draft follows is
+an instance, and publishing a release; the releases a catalog links,
+which the Studio lists for any instance it shows, are read through the
+gate as the instance's data is. An instance's `meta.ttl` is
+read through the pod fetch too, under `FOREIGN_LIMITS`, since a folder
+added by its address is read as soon as it's added. A release a draft follows is
 read through `createOwnPodFetch`, which asks the same folders
 ([studio.md](studio.md#drafts)).
 

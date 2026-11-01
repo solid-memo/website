@@ -36,12 +36,13 @@ import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { createOwnPodFetch } from "@solid-memo/solid/ownPodFetch";
-import { createOwnPodGate } from "@solid-memo/solid/ownPodGate";
+import { createOwnPodGate, type OwnFolders } from "@solid-memo/solid/ownPodGate";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { FOREIGN_LIMITS, limitedFetch } from "@solid-memo/solid/client/readLimits";
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSessionClient } from "@solid-memo/solid/client/session";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
@@ -127,7 +128,9 @@ export function createAppUseCases({
    * pod fence, the credential gate (docs/boundaries.md) sends a request
    * as the user only into the user's own pod (ownFolders) and reads
    * anywhere else as no one, writing nothing there; a guest's pod is
-   * this browser's.
+   * this browser's. What it reads outside the user's storages, in an
+   * instance they registered elsewhere too, is read under
+   * FOREIGN_LIMITS.
    */
   const dataFetch = createPodFence(
     routedFetch({
@@ -135,7 +138,8 @@ export function createAppUseCases({
       local: writeFence.fetch,
       remote: createOwnPodGate({
         fetch: writeFence.fetch,
-        publicFetch: noOneFetch,
+        instanceFetch: limitedFetch(writeFence.fetch, FOREIGN_LIMITS),
+        publicFetch: limitedFetch(noOneFetch, FOREIGN_LIMITS),
         webId: session.webId,
         ownFolders,
         revision: () => folderRevision,
@@ -221,18 +225,22 @@ export function createAppUseCases({
     return [...storages.map(({ url }) => url), ...entered];
   }
   /**
-   * The folders of the user's own pod: their storages, the instances they
-   * registered and the folders they entered or made on this page. With
+   * The folders of the user's own pod: their storages with the folders
+   * they entered or made on this page, and the instances they
+   * registered, kept apart for the credential gate. With
    * `orNone`, a list that cannot be read names none, the others still
    * counting.
    */
-  async function ownFolders(webId: string, orNone = false): Promise<string[]> {
+  async function ownFolders(webId: string, orNone = false): Promise<OwnFolders> {
     const settled = <T>(listed: Promise<T[]>) => (orNone ? listed.catch(() => []) : listed);
     const [storages, instances] = await Promise.all([
       settled(storageGateway.discoverStorages(webId)),
       settled(instanceRepository.listInstances(webId)),
     ]);
-    return [...[...storages, ...instances].map(({ url }) => url), ...entered];
+    return {
+      storages: [...storages.map(({ url }) => url), ...entered],
+      instances: instances.map(({ url }) => url),
+    };
   }
   /**
    * A release is read where it is published: the site's where the site
@@ -252,7 +260,10 @@ export function createAppUseCases({
         publicFetch: noOneFetch,
         webId: session.webId,
         // A release in a folder that cannot be found is read as no one.
-        ownFolders: (webId) => ownFolders(webId, true),
+        ownFolders: async (webId) => {
+          const { storages, instances } = await ownFolders(webId, true);
+          return [...storages, ...instances];
+        },
       }),
     }),
   });
@@ -298,9 +309,11 @@ export function createAppUseCases({
       publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: noOneFetch }),
       checkWrite,
     }),
-    // A release is written as the user, its access control too; whether it is public, asked as no one.
+    // A release is written as the user, its access control too; whether it is public, asked as no one;
+    // the releases a catalog links, read as the instance's data is.
     releasePublisher: createSolidReleasePublisher({
       fetch: podFetch,
+      dataFetch,
       shareFetch,
       publicFetch: noOneFetch,
       grantPublicRead,

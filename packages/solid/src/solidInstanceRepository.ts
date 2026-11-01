@@ -4,6 +4,7 @@
 
 import { anonymousFetch } from "./authFetch";
 import { deleteContainer } from "./client/resources";
+import { FOREIGN_LIMITS, limitedFetch } from "./client/readLimits";
 import { createSolidDataset, getThing, setThing } from "./client/rdf";
 import type { InstanceRepository } from "@solid-memo/application/ports";
 import {
@@ -65,6 +66,16 @@ export function createSolidInstanceRepository({
   randomId,
   checkWrite = noWriteCheck,
 }: SolidInstanceRepositoryDeps): InstanceRepository {
+  /**
+   * An instance's meta document is read under limits: a folder anyone
+   * may make can be added by its address, and is read as soon as it is,
+   * then again each time the app reads its description. It is written
+   * through the same fetch, so that a write forgets the read it kept
+   * (datasets.ts) and the next read is not answered from it: a server
+   * may give a document rewritten within the same second the same
+   * version.
+   */
+  const metaFetch = limitedFetch(fetch, FOREIGN_LIMITS);
   return {
     async listInstances(webId): Promise<Instance[]> {
       const locations = await locateTypeIndexes(webId, fetch, publicFetch);
@@ -94,7 +105,7 @@ export function createSolidInstanceRepository({
       await saveMetaDocument(
         metaUrl,
         { name, createdAt: now().toISOString(), formatVersion: INSTANCE_FORMAT_VERSION },
-        fetch,
+        metaFetch,
         checkWrite,
       );
       // The private index, for the review states' and answers' registrations of an instance registered elsewhere.
@@ -140,7 +151,7 @@ export function createSolidInstanceRepository({
       // As a request would send it, so every address made from it is compared as sent; an http(s) folder only.
       const url = instanceAddressOf(instanceUrl);
       if (!isPlainHttpUrl(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
-      const name = await readInstanceName(url, fetch);
+      const name = await readInstanceName(url, metaFetch);
       const index = await ensureTypeIndex(registrationTarget, webId, url, fetch, publicFetch);
       await addRegistrations(
         index.url,
@@ -183,7 +194,7 @@ export function createSolidInstanceRepository({
 
     async readMeta(instanceUrl): Promise<InstanceMeta | null> {
       const metaUrl = metaUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
+      const dataset = await getSolidDatasetOrNull(metaUrl, metaFetch);
       if (dataset === null) return null;
       const subject = getThing(dataset, `${metaUrl}#it`);
       return subject === null ? null : toInstanceMeta(subject);
@@ -191,7 +202,7 @@ export function createSolidInstanceRepository({
 
     async saveMeta(instanceUrl, meta): Promise<void> {
       const metaUrl = metaUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
+      const dataset = await getSolidDatasetOrNull(metaUrl, metaFetch);
       const url = `${metaUrl}#it`;
       const existing = dataset === null ? null : getThing(dataset, url);
       if (dataset === null || existing === null) {
@@ -200,12 +211,12 @@ export function createSolidInstanceRepository({
       const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
       await checkWrite(updated, [url], "pod");
       // If-Match the read above.
-      await saveDataset(metaUrl, updated, fetch);
+      await saveDataset(metaUrl, updated, metaFetch);
     },
 
     async upgradeMeta(instanceUrl): Promise<boolean> {
       const metaUrl = metaUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
+      const dataset = await getSolidDatasetOrNull(metaUrl, metaFetch);
       const url = `${metaUrl}#it`;
       const existing = dataset === null ? null : getThing(dataset, url);
       // The record as read, brought up to date in memory, written in this app's format.
@@ -214,7 +225,7 @@ export function createSolidInstanceRepository({
       const updated = setThing(dataset!, toInstanceMetaThing(url, meta, existing));
       await checkWrite(updated, [url], "pod");
       // If-Match the read above.
-      await saveDataset(metaUrl, updated, fetch);
+      await saveDataset(metaUrl, updated, metaFetch);
       return true;
     },
 

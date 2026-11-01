@@ -41,15 +41,21 @@ import { RDF, SM } from "./vocab";
  * that the pod fence lets write a document's own access control
  * (podFence.ts), which `fetch` never does; it is used for nothing else.
  * Whether a release is public is asked as someone with no login would
- * ask: with `publicFetch`, which sends no credentials.
+ * ask: with `publicFetch`, which sends no credentials. The releases an
+ * instance's catalog links are listed, and linked, with `dataFetch`, as
+ * the instance's data is read and written: the Studio lists them for
+ * any instance it shows, one outside the user's storages too, which is
+ * read under limits and as no one (docs/boundaries.md).
  */
 export function createSolidReleasePublisher({
   fetch,
+  dataFetch,
   shareFetch,
   publicFetch,
   grantPublicRead,
 }: {
   fetch: typeof globalThis.fetch;
+  dataFetch: typeof globalThis.fetch;
   shareFetch: typeof globalThis.fetch;
   publicFetch: typeof globalThis.fetch;
   grantPublicRead: GrantPublicRead;
@@ -83,7 +89,7 @@ export function createSolidReleasePublisher({
 
   /** The releases the catalog links (`sm:publishedRelease`) at an address a release may have (isPublishedReleaseUrl). */
   async function listPublished(instanceUrl: string): Promise<string[]> {
-    return (await catalogLinks(instanceUrl, SM.publishedRelease, fetch)).filter(
+    return (await catalogLinks(instanceUrl, SM.publishedRelease, dataFetch)).filter(
       isPublishedReleaseUrl,
     );
   }
@@ -117,7 +123,8 @@ export function createSolidReleasePublisher({
       } else if (!response.ok)
         throw new AppError("addFailed", { url: targetUrl, status: response.status });
       const shared = await share(targetUrl);
-      await addCatalogLink(instanceUrl, SM.publishedRelease, targetUrl, fetch);
+      // Through the fetch listPublished reads the catalog with, so that the write forgets the read it kept (datasets.ts).
+      await addCatalogLink(instanceUrl, SM.publishedRelease, targetUrl, dataFetch);
       return { public: shared };
     },
 

@@ -966,8 +966,9 @@ flowchart LR
   Turtle text is also refused at the part where it declares its base
   (`@base`, `BASE`) for the 17th time, or where its base can grow past
   512 characters (`writeTurtle`). It's refused there too when a base
-  it declares has a `.`, `..` or empty segment in its path, or when it
-  declares a prefix (`@prefix`, `PREFIX`) for the 4,097th time. The
+  it declares has an empty segment in its path, or a `.` or `..` one
+  but in a relative path with no colon. So it is when it declares a
+  prefix (`@prefix`, `PREFIX`) for the 4,097th time. The
   length bound is the longest of the release's address and the
   absolute bases it declares, with each relative one added on. The
   parser walks the whole base for each relative IRI, base and prefix it
@@ -986,8 +987,15 @@ flowchart LR
   their bound or when defined through another term, as a deck file's
   are ([data-model.md](data-model.md#decks-as-files)). The library's
   index, which comes with the site and grows with the library, and the
-  user's own pod documents aren't limited. A deck file has limits of its
-  own, in `data-model.md`.
+  documents in the user's storages aren't limited in size. Their bases
+  and prefixes are, as those of every document the app reads into a
+  dataset, a folder's listing too; the document's
+  own address counts toward a base's length. An
+  instance's documents outside the user's storages, in an instance
+  they registered on another server too, are read under the same
+  limits as a release
+  ([boundaries.md](boundaries.md#the-credential-gate)). A deck file has
+  limits of its own, in `data-model.md`.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

@@ -574,11 +574,13 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
   });
 
   it("refuses a release that gives two of its cards and distractors one id", async () => {
-    const release = (cards: string) =>
+    // `before` comes first in the text, so that a subject both a card and a distractor reads as a card.
+    const release = (cards: string, before = "") =>
       datasetOf(
         `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
          @prefix dcterms: <http://purl.org/dc/terms/> .
          <> a sm:Deck ; dcterms:title "Capitals" .
+         ${before}
          <#x> a sm:Card ; sm:formatVersion 7 ; sm:front "France"@en ; sm:back "Paris"@en ;
            sm:distractor <#dx> .
          <#dx> a sm:Distractor ; sm:formatVersion 1 ; sm:distractorText "Lyon"@en .
@@ -590,11 +592,11 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
     const card = (url: string, extra = "") =>
       `<${url}> a sm:Card ; sm:formatVersion 7 ; sm:front "Spain"@en ; sm:back "Madrid"@en ${extra}.`;
     // A card at a distractor's id, and one distractor named by two cards.
-    for (const [cards, id] of [
-      [card("#dx"), "dx"],
-      [card("#y", "; sm:distractor <#dx> "), "dx"],
+    for (const [cards, id, before] of [
+      ["", "dx", card("#dx")],
+      [card("#y", "; sm:distractor <#dx> "), "dx", ""],
     ] as const) {
-      const dataset = await release(cards);
+      const dataset = await release(cards, before);
       expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(refused(id));
     }
     expect(toLibraryDeckContent(DOC, await release(card("#y"))).cards.map((c) => c.id)).toEqual([

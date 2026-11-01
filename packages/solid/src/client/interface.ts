@@ -143,8 +143,10 @@ export interface ReadLimits {
 /**
  * What a read rejects with when the document is larger than its limits
  * allow (readLimits.ts): its body, as sent or as said in advance
- * (Content-Length), or the triples parsed from it, or their terms. What
- * was read so far is dropped.
+ * (Content-Length), or the triples parsed from it, or their terms; or
+ * when a Turtle text's base or prefix declarations are past what any
+ * read takes in, its limits then NO_SIZE_LIMITS for a read with none.
+ * What was read so far is dropped.
  */
 export class ReadLimitError extends Error {
   constructor(
@@ -154,7 +156,9 @@ export class ReadLimitError extends Error {
     readonly limits: ReadLimits,
   ) {
     super(
-      `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms.`,
+      limits.bytes === Number.POSITIVE_INFINITY
+        ? `The document at [${url}] has more or longer base or prefix declarations than a read takes in.`
+        : `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms, a few base and prefix declarations.`,
     );
     this.name = "ReadLimitError";
   }

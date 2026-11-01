@@ -118,6 +118,7 @@ describe.each(SERVERS)("making a release public on $name", ({ url: server }) => 
       // Behind the pod fences, as createAppUseCases wires it.
       const releasePublisher = createSolidReleasePublisher({
         fetch: createPodFence(userFetch),
+        dataFetch: createPodFence(userFetch),
         shareFetch: createPodFence(userFetch, { accessControl: true }),
         publicFetch: fetch,
         grantPublicRead,

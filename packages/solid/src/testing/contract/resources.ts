@@ -6,7 +6,7 @@ import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
 import { HttpError, ReadLimitError } from "../../client/interface";
-import { limitedFetch, RELEASE_LIMITS } from "../../client/readLimits";
+import { limitedFetch, NO_SIZE_LIMITS, RELEASE_LIMITS } from "../../client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
 import { type DataClient, turtleAt } from "./rdf";
 
@@ -243,8 +243,19 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(getThing(dataset, subject)).not.toBeNull();
       const [quad] = await parseQuads(few, "turtle", URL_, limits);
       expect(quad?.subject.value).toBe(subject);
-      // A text from the user's own pod is read with no limits, its bases as many as it says.
-      expect(await parseQuads(`${bases(17)}<a> <${EX}p> "x" .`, "turtle", URL_)).toHaveLength(1);
+      // A text from the user's own pod, read with no limits, is held to as few.
+      await expect(parseQuads(past, "turtle", URL_)).rejects.toMatchObject({
+        name: "ReadLimitError",
+        url: URL_,
+        limits: NO_SIZE_LIMITS,
+        message: expect.stringContaining("declarations than a read takes in"),
+      });
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
+        () => readDocument(URL_, { fetch: turtleAt(past) }),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+      }
     });
 
     it("refuses a document at its base when the base is too long, and reads one whose base is not", async () => {
@@ -269,8 +280,12 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       });
       expect(getThing(dataset, subject)).not.toBeNull();
       expect(await parseQuads(within, "turtle", URL_, limits)).toHaveLength(1_000);
-      // A text from the user's own pod is read with no limits, its base as long as it says.
-      expect(await parseQuads(past, "turtle", URL_)).toHaveLength(1_000);
+      // A text from the user's own pod, read with no limits, is held to as short a base.
+      await expect(parseQuads(past, "turtle", URL_)).rejects.toMatchObject({
+        name: "ReadLimitError",
+        limits: NO_SIZE_LIMITS,
+      });
+      expect(await parseQuads(within, "turtle", URL_)).toHaveLength(1_000);
     });
 
     it("refuses a document whose base is too long past a comment that names a short one", async () => {
@@ -331,6 +346,22 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(quad?.subject.value).toBe("https://pod.example/decks/a");
     });
 
+    it("reads a document whose relative base has dot segments, as one written by hand may, with limits or with none", async () => {
+      // The parser resolves a relative base against the one before, which removes them.
+      const text = `@base <./> .\n@base <../a/./> .\n<b#it> <${EX}p> "x" .`;
+      const subject = "https://pod.example/a/b#it";
+      for (const fetch of [turtleAt(text), limitedFetch(turtleAt(text), RELEASE_LIMITS)]) {
+        for (const reading of [getSolidDataset, getSolidDatasetLinear]) {
+          expect(getThing(await reading(URL_, { fetch }), subject)).not.toBeNull();
+        }
+        expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+      }
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const [quad] = await parseQuads(text, "turtle", URL_, limits);
+        expect(quad?.subject.value).toBe(subject);
+      }
+    });
+
     it("refuses a text of prefixes, or of IRIs that go up from a base, in time that does not grow with the rest", async () => {
       const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 10, characters: 100_000_000 };
       const dotted = `@base <https://pod.example/${"../".repeat(160)}> .\n`;
@@ -350,6 +381,36 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
           8,
         );
         expect(ratio).toBeLessThan(0.5);
+      }
+    });
+
+    it("refuses a chain of relative bases read with no limits, as from the user's own pod, in time that does not grow with it", async () => {
+      // Each relative base the parser resolves against the one before, walking all of it.
+      const chain = (count: number) =>
+        `${`@base <${"a".repeat(40)}/> .\n`.repeat(count)}<s> <p> <o> .`;
+      for (const read of [
+        (text: string) => parseQuads(text, "turtle", URL_),
+        (text: string) => getSolidDatasetLinear(URL_, { fetch: turtleAt(text) }),
+        (text: string) => readDocument(URL_, { fetch: turtleAt(text) }),
+        // As a container's listing, a draft's folder or a profile is read.
+        (text: string) => getSolidDataset(URL_, { fetch: turtleAt(text) }),
+        (text: string) =>
+          getSolidDataset(URL_, { fetch: limitedFetch(turtleAt(text), RELEASE_LIMITS) }),
+      ]) {
+        await expect(read(chain(5_000))).rejects.toMatchObject({
+          name: "ReadLimitError",
+          url: URL_,
+        });
+        // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
+        const ratio = await growthAsync(
+          (count) => {
+            const text = chain(count);
+            return () => read(text).catch(() => undefined);
+          },
+          2_000,
+          8,
+        );
+        expect(ratio).toBeLessThan(4);
       }
     });
 
