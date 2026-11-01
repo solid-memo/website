@@ -354,6 +354,42 @@ describe("GraphView", () => {
     expect(labelled(svg)).toEqual(["res"]);
   });
 
+  it("leaves out a node it has no position for, and its edges, rather than failing", () => {
+    const placed = new Map([["res", { x: 5, y: 5 }]]);
+    const onSelect = vi.fn();
+    render(
+      <GraphView
+        nodes={[node("res", "resource"), node("new", "resource")]}
+        edges={[
+          { from: "res", to: "new", predicate: "link", kind: "link" },
+          { from: "res", to: "res", predicate: "sameAs", kind: "link" },
+        ]}
+        positions={placed}
+        routes={straight(placed)}
+        labels={
+          new Map([
+            ["res", "res"],
+            ["new", "new"],
+          ])
+        }
+        selected="new"
+        onSelect={onSelect}
+        label="Graph of A"
+        describe={(each) => each.id}
+      />,
+    );
+    const svg = screen.getByRole("img", { name: "Graph of A" });
+    const drawn = [...svg.querySelectorAll("[data-node]")].map((each) =>
+      each.getAttribute("data-node"),
+    );
+    expect(drawn).toEqual(["res"]);
+    const paths = [...svg.querySelectorAll(".edges-link")].map((each) => each.getAttribute("d"));
+    expect(paths).toEqual(["M5 5L5 5"]);
+    key(svg, "End");
+    key(svg, "Enter");
+    expect(onSelect).toHaveBeenLastCalledWith("res");
+  });
+
   it("measures its pixels again as the plot is resized, once it is still", () => {
     vi.useFakeTimers();
     let resized = () => undefined as void;
