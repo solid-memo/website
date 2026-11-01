@@ -617,7 +617,7 @@ jobs run side by side, each
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s |
+| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm audit signatures` checks the registry's signatures of the installed packages (The workflows, below) |
 | `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships. Nothing in it comes from GitHub's cache, and in the merge queue and on `main` it attests the list of the site's files, which the deploy checks the artifact against ([deployment.md](deployment.md#the-build-ci-tested)) |
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over that run's site as this run's `site` artifact and, except on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
@@ -815,6 +815,33 @@ changing a `.in` file:
 uv pip compile --generate-hashes --universal --python-version=3.9 scripts/requirements-ci.in --output-file=scripts/requirements-ci.txt
 uv pip compile --generate-hashes --universal --python-version=3.11 scripts/requirements-lint.in --output-file=scripts/requirements-lint.txt
 ```
+
+CI's `check` job and the release job run `npm audit signatures` right
+after `npm ci --ignore-scripts`. For each installed version from a
+registry, it fetches the registry's record of that version. It checks
+the registry's signature over its name, version and integrity hash,
+with the public keys [Sigstore](https://www.sigstore.dev/) publishes
+for the registry, or the registry's own when Sigstore has none. A
+version that has attestations, such as provenance naming the repository
+commit and the workflow that built it, has them checked with Sigstore
+and against that hash. The command fails on:
+
+- an invalid signature or attestation;
+- a signature or attestation whose key isn't among the registry's keys,
+  or had expired when it signed;
+- an attestation whose package, version or hash differs from the
+  record's;
+- a version with no signature, from a registry that has signing keys;
+- a record, key or attestation it can't fetch.
+
+A version without attestations passes, and so does one whose earlier
+versions had provenance when this one has none. The command checks the
+registry's record, not what was installed: it doesn't compare that hash
+with the lockfile's or with the installed files, so a lockfile whose
+hash was changed passes it. `npm ci` compares each download with the
+lockfile's hash, and `check:dependencies` that each package comes from
+the npm registry. Nor does a signature make a package safe: a hijacked
+maintainer account still publishes a validly signed version.
 
 ### Code scanning
 

@@ -439,6 +439,15 @@ The job holds the key briefly:
   while the job installs the dependencies and Chromium.
 - `npm ci --ignore-scripts` runs no package's install script; Chromium
   comes from the job's own step (`npx playwright install`).
+- `npm audit signatures` runs next, before Chromium is downloaded and
+  semantic-release runs with the key. It fails unless every installed
+  version from a registry has the registry's valid signature, and any
+  attestation it has, such as its provenance, verifies
+  ([testing.md](testing.md#the-workflows)). It checks the registry's
+  record of each version, not the lockfile's hashes or the files
+  installed. A valid signature proves a version is one the registry
+  published, not that it's safe: a hijacked maintainer account still
+  publishes a validly signed version.
 - Nothing comes from GitHub's cache: not npm's cache, not Chromium,
   and not its system libraries, which come from Ubuntu's signed mirror
   (the Chromium action's `cache: false`). Any job on `main` can write

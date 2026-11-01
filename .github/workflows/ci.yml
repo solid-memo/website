@@ -126,6 +126,15 @@ jobs:
           key: turbo-check-${{ github.sha }}
           restore-keys: turbo-check-
       - run: npm ci --ignore-scripts
+      # The registry's record of every installed version is signed with
+      # its keys, and any attestation of where the version was built
+      # (provenance) verifies. It fails on an invalid signature or
+      # attestation, and on a version with no signature from a registry
+      # that has keys, so a pull request that changes package-lock.json,
+      # Renovate's included, fails on one. It checks the registry's
+      # record, not the lockfile's hashes or the files installed
+      # (docs/testing.md#the-workflows).
+      - run: npm audit signatures
       # Chromium, which site's tests draw the docs' Mermaid diagrams in
       # (docs/markdown.md).
       - uses: ./.github/actions/chromium
