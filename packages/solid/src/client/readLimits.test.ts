@@ -230,9 +230,10 @@ describe("writeTurtle", () => {
     expect(refuses("<a> <b> <c> .", `${url}${"u".repeat(2 * 16)}`)).toBe(false);
     expect(refuses("<a> <b> <c> .", `${url}${"u".repeat(2 * 16 + 1)}`)).toBe(true);
     // An absolute base is the base on its own, whatever came before it.
-    const absolute = `@base <https://other.example/${"a".repeat(512 - 22)}> .\n`;
+    const iri = `https://other.example/${"a".repeat(512 - 22)}`;
+    const absolute = `@base <${iri}> .\n`;
     expect(refuses(absolute.repeat(16))).toBe(false);
-    expect(refuses(absolute.replace("<", "<a"))).toBe(true);
+    expect(refuses(`@base <${iri}a> .\n`)).toBe(true);
     expect(refuses(`${absolute}@base <x> .`)).toBe(true);
   });
 
