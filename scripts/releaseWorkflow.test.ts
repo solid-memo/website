@@ -14,7 +14,9 @@ import { describe, expect, it } from "vitest";
  * is deployed (docs/deployment.md#the-build-ci-tested): ci.yml's site
  * job and deploy.yml's build job. And the deploy ships CI's site only
  * once its files match the site job's attestation, which no other job
- * of a run can make.
+ * of a run can make. ci.yml's check job and the release job check the
+ * registry's signatures of what they install, the release job before
+ * Chromium and the key (docs/testing.md#the-workflows).
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -207,6 +209,31 @@ describe("the site the deploy ships", () => {
     expect(deploy.get("version")).toMatch(
       /^ {6}parent: \$\{\{ steps\.release\.outputs\.parent \}\}$/m,
     );
+  });
+});
+
+describe("npm audit signatures", () => {
+  const at = (job: string[], text: string) => job.findIndex((step) => step.includes(text));
+  const install = "npm ci --ignore-scripts";
+  const audit = /^\s*run: npm audit signatures$/m;
+
+  it("runs right after the install in ci.yml's check job", () => {
+    const check = steps(jobs(read(".github/workflows/ci.yml")).get("check") ?? "", 6);
+    const installed = at(check, install);
+    expect(installed).toBeGreaterThan(-1);
+    expect(check[installed + 1]).toMatch(audit);
+  });
+
+  it("runs right after the install in the release job, before Chromium and semantic-release", () => {
+    const job = steps(workflow.get("release") ?? "", 6);
+    const installed = at(job, install);
+    expect(installed).toBeGreaterThan(-1);
+    const audited = job[installed + 1];
+    expect(audited).toMatch(audit);
+    expect(audited).toMatch(/^if: steps\.tip\.outputs\.release == 'true'$/m);
+    expect(audited).not.toContain("secrets.");
+    expect(at(job, "uses: ./.github/actions/chromium")).toBe(installed + 2);
+    expect(at(job, "name: npx semantic-release")).toBeGreaterThan(installed + 2);
   });
 });
 

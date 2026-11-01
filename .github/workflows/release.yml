@@ -170,6 +170,12 @@ jobs:
       # the release needs none, and Chromium comes from the action below.
       - if: steps.tip.outputs.release == 'true'
         run: npm ci --ignore-scripts
+      # Every installed version is signed by the registry, and its
+      # attestations verify, as in CI's check job, before Chromium is
+      # downloaded and semantic-release runs with the key
+      # (docs/releasing.md#the-deploy-key).
+      - if: steps.tip.outputs.release == 'true'
+        run: npm audit signatures
       # Chromium, which the release's prepare step draws the docs' Mermaid
       # diagrams in, for the archive the GitHub release carries
       # (npm run docs:archive): downloaded, with its system libraries
