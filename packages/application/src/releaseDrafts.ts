@@ -31,6 +31,7 @@ import {
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
+import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import {
   releaseDiff,
   simulateLearnerUpgrade,
@@ -599,11 +600,12 @@ export function createReleaseDraftUseCases({
       const { prev } = draft.root;
       if (prev === undefined) return null;
       const [previous, before] = await Promise.all([release(prev), releaseModel(prev)]);
+      const listed = draftLibraryDeck(draft);
       return {
         previous,
-        diff: releaseDiff(previous, draft),
+        diff: releaseDiff(previous, draft, listed),
         problems: continuityProblems(before, draftReleaseModel(draft)),
-        upgrade: simulateLearnerUpgrade(previous, draft),
+        upgrade: simulateLearnerUpgrade(previous, draft, listed),
       };
     },
   };

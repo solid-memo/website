@@ -4,8 +4,10 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { growth } from "../testing/growth.ts";
 import { card, courseDraft, deckDraft, DRAFT } from "../testing/releaseDraft.ts";
 import type { DraftNode, ReleaseDraft } from "./releaseDraft.ts";
+import { draftLibraryDeck } from "./draftListing.ts";
 import { releaseDiff, simulateLearnerUpgrade } from "./releaseDiff.ts";
 import { rebaseDraft } from "./releaseToDraft.ts";
 import { nextVersionDraft } from "./releaseVersion.ts";
@@ -14,6 +16,24 @@ const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 
 /** The course fixture as release 1, at V1. */
 const v1 = (draft: ReleaseDraft = courseDraft()): ReleaseDraft => rebaseDraft(draft, V1);
+
+/** The course fixture as release 1, drawn from `count` more sources, each with a title. */
+function withSources(count: number): ReleaseDraft {
+  const draft = courseDraft();
+  const urls = Array.from({ length: count }, (_, n) => `https://many.example/${n}`);
+  return v1({
+    ...draft,
+    root: { ...draft.root, wasDerivedFrom: [...draft.root.wasDerivedFrom, ...urls] },
+    triples: [
+      ...draft.triples,
+      ...urls.map((url, n) => ({
+        subject: url,
+        predicate: "http://purl.org/dc/terms/title",
+        object: { kind: "literal" as const, value: `Source ${n}`, language: "", datatype: "" },
+      })),
+    ],
+  });
+}
 
 /** The node of a list with its record changed by `change`; the others as they are. */
 function edit<T>(
@@ -280,5 +300,35 @@ describe("simulateLearnerUpgrade", () => {
       plan: null,
       lost: { cards: ["q-loose"], chapters: [] },
     });
+  });
+
+  it("compares with the draft's listing when it is already made", () => {
+    const release = withSources(3);
+    const next = nextVersionDraft(release, DRAFT);
+    const listed = draftLibraryDeck(next);
+    expect(releaseDiff(release, next, listed)).toEqual(releaseDiff(release, next));
+    expect(simulateLearnerUpgrade(release, next, listed)).toEqual(
+      simulateLearnerUpgrade(release, next),
+    );
+  });
+
+  it("compares in time that grows with how many sources the release has", () => {
+    const release = withSources(100);
+    const next = nextVersionDraft(release, DRAFT);
+    expect(releaseDiff(release, next).about).toEqual([]);
+    expect(simulateLearnerUpgrade(release, next).plan).toBeNull();
+    // Eight times the sources take about as long as an eighth of them
+    // eight times over; going over every statement for each source would
+    // take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = withSources(count);
+        const draft = nextVersionDraft(many, DRAFT);
+        return () => [releaseDiff(many, draft), simulateLearnerUpgrade(many, draft)];
+      },
+      1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
