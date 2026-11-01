@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.10](https://github.com/solid-memo/website/compare/v6.25.9...v6.25.10) (2026-11-01)
+
+### Bug Fixes
+
+* **domain:** look a draft's cards and wrong options up by id ([1a1f45d](https://github.com/solid-memo/website/commit/1a1f45d15cdd0c49f4356de5e677743e0f67b7d7))
+
 ## [6.25.9](https://github.com/solid-memo/website/compare/v6.25.8...v6.25.9) (2026-11-01)
 
 ### Bug Fixes
