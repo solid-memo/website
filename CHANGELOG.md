@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.9](https://github.com/solid-memo/website/compare/v6.25.8...v6.25.9) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** use no type index outside the profile's places ([58af60e](https://github.com/solid-memo/website/commit/58af60e9c1008c11400b8fe0c3134ac6a609d817))
+
 ## [6.25.8](https://github.com/solid-memo/website/compare/v6.25.7...v6.25.8) (2026-11-01)
 
 ### Bug Fixes
