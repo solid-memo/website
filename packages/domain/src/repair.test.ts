@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { planRepair } from "./repair";
+import { growth } from "./testing/growth";
 import { summarize, type SubjectReport, type Violation } from "./validation";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
@@ -216,5 +217,32 @@ describe("planRepair", () => {
       ["pub", [unreadable(`${DC}created`)]],
       ["a", [unreadable(`${SM}lastReviewedAt`)]],
     ]);
+  });
+
+  it("plans repairs of many subjects in time that grows with them, not their square", () => {
+    // Every review state with half a snapshot and a malformed due day, each
+    // found twice: eight times as many must take less than four times as
+    // long as an eighth of them planned eight times over (testing.md).
+    const ratio = growth(
+      (count) => {
+        const report = summarize(INSTANCE, [
+          {
+            url: REVIEWS,
+            status: "checked",
+            subjects: Array.from({ length: count }, (_, i) =>
+              checked(`${REVIEWS}#r${i}`, "reviewState", [
+                v("Xone"),
+                v("Xone"),
+                v("Pattern", `${SM}due`),
+              ]),
+            ),
+          },
+        ]);
+        return () => planRepair(report);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

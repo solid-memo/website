@@ -98,7 +98,8 @@ function readScalar(
   }
 }
 
-const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+/** The datatype of an xsd:dateTime literal. */
+export const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 
 /**
  * The longest date-time lexical form read, and the form itself, matched

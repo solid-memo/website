@@ -396,8 +396,10 @@ the catalog's and the deck groups' membership links to it
 (`dcat:dataset`, `dcat:catalog`), not a deck naming it as creator or
 the catalog as publisher. `applyRepairs`
 ([solidRepairRepository.ts](../packages/solid/src/solidRepairRepository.ts))
-reads each document once, applies its repairs and writes it once,
-then the instance is checked again.
+reads each document once, applies its repairs in one edit, each to
+the subject as the repairs before it left it, and writes it once,
+then the instance is checked again. Many repairs take time that grows
+with them and the document, not their square.
 
 ## The CI cross-check
 
