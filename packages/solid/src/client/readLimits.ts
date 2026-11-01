@@ -33,6 +33,18 @@ export const RELEASE_LIMITS: ReadLimits = {
 export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
 
 /**
+ * The most the app reads of a release's access control as it makes the
+ * release public (solidReleasePublisher.ts), on a server that may be
+ * anyone's: an ACL or ACR holds a few rules, so a wide margin over that
+ * is far less than a release may be.
+ */
+export const ACCESS_CONTROL_LIMITS: ReadLimits = {
+  bytes: 1024 * 1024,
+  quads: 10_000,
+  characters: 4 * 1024 * 1024,
+};
+
+/**
  * What a read with no limits is refused under, by the one bound every
  * read keeps: a Turtle text's base and prefix declarations
  * (writeTurtle). Its body, its triples and their terms are not bounded.

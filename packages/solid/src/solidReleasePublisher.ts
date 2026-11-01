@@ -9,6 +9,7 @@ import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { addCatalogLink, catalogLinks } from "./catalogLinks";
 import type { GrantPublicRead } from "./client/access";
+import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
 import { RDF, SM } from "./vocab";
 
@@ -46,6 +47,16 @@ import { RDF, SM } from "./vocab";
  * the instance's data is read and written: the Studio lists them for
  * any instance it shows, one outside the user's storages too, which is
  * read under limits and as no one (docs/boundaries.md).
+ *
+ * A release already at an address is read, after a write refused there
+ * and before one is made public, under RELEASE_LIMITS, as any release
+ * is: an instance the user registered may be on anyone's server, and
+ * the release being published was made under those limits already.
+ * Its access control, which the grant reads before writing it, is read
+ * under ACCESS_CONTROL_LIMITS for the same reason, and the release
+ * itself, should the grant read it, under RELEASE_LIMITS: their bytes,
+ * their triples, their characters and their base and prefix
+ * declarations (accessControlFetch).
  */
 export function createSolidReleasePublisher({
   fetch,
@@ -60,6 +71,15 @@ export function createSolidReleasePublisher({
   publicFetch: typeof globalThis.fetch;
   grantPublicRead: GrantPublicRead;
 }): ReleasePublisher {
+  /** The release at `url`, as `fetch` reads it, under RELEASE_LIMITS: its triples; throws when it cannot be read. */
+  async function readRelease(url: string): Promise<Quad[]> {
+    const response = await limitedFetch(fetch, RELEASE_LIMITS)(url, {
+      headers: { Accept: "text/turtle" },
+    });
+    if (!response.ok) throw new AppError("releaseUnreadable", { url });
+    return parseDeckFile(await response.text(), "turtle", url, RELEASE_LIMITS);
+  }
+
   /**
    * Make the release readable by everyone: whether the pod says it now
    * is. Only its own access control is written (accessControlFetch).
@@ -72,14 +92,12 @@ export function createSolidReleasePublisher({
     }
   }
 
-  /** Whether the document at `url` states what `turtle` does, its time of issue aside; not when it cannot be read. Both are the user's own, read with no limits. */
+  /** Whether the document at `url` states what `turtle` does, its time of issue aside; not when it cannot be read, or is larger than a release may be (readRelease). */
   async function isThisRelease(url: string, turtle: string): Promise<boolean> {
     try {
-      const response = await fetch(url, { headers: { Accept: "text/turtle" } });
-      if (!response.ok) return false;
       const [there, here] = await Promise.all([
-        parseDeckFile(await response.text(), "turtle", url, null),
-        parseDeckFile(turtle, "turtle", url, null),
+        readRelease(url),
+        parseDeckFile(turtle, "turtle", url, RELEASE_LIMITS),
       ]);
       return statementsOf(there, url) === statementsOf(here, url);
     } catch {
@@ -94,12 +112,10 @@ export function createSolidReleasePublisher({
     );
   }
 
-  /** Whether the document at `url` is a release: its own subject a deck (`<> a sm:Deck`); not when it cannot be read. It is the user's own, read with no limits. */
+  /** Whether the document at `url` is a release: its own subject a deck (`<> a sm:Deck`); not when it cannot be read, or is larger than a release may be (readRelease). */
   async function isRelease(url: string): Promise<boolean> {
     try {
-      const response = await fetch(url, { headers: { Accept: "text/turtle" } });
-      if (!response.ok) return false;
-      return (await parseDeckFile(await response.text(), "turtle", url, null)).some(
+      return (await readRelease(url)).some(
         (quad) =>
           quad.subject.value === url &&
           quad.predicate.value === RDF.type &&
@@ -182,7 +198,20 @@ function statementsOf(quads: readonly Quad[], url: string): string {
  * the user's fetch already asks of every request, authFetch.ts), and a
  * read answered from another origin is refused. Each check is of the
  * request itself, so an answer that names one access control first and
- * another after leads to no other write.
+ * another after leads to no other write. The release's server may be
+ * anyone's, and the grant's library parses what it reads with no
+ * limits, so every answer is read under limits: its body on its bytes,
+ * and the body of a read that succeeds is parsed first under them, on
+ * its triples, their characters and its base and prefix declarations,
+ * then handed on as it was. A read of the release itself, or of a
+ * folder above it, which a grant may make when its server answers no
+ * HEAD, is held to RELEASE_LIMITS, as any release is; every other read,
+ * of an access control, to ACCESS_CONTROL_LIMITS, far smaller. The
+ * library takes a failed read of the release's access control for one
+ * not written yet, and writes another from its folder's, so once a
+ * request throws (refused here, past a limit, or not answered), every
+ * one after is refused, and the grant fails. An answer that is not ok,
+ * such as a 404, is handed on, and locks nothing.
  */
 function accessControlFetch(
   fetch: typeof globalThis.fetch,
@@ -190,16 +219,40 @@ function accessControlFetch(
 ): typeof globalThis.fetch {
   const { origin } = new URL(release);
   const own = new Set([`${release}.acl`, `${release}.acr`]);
+  const accessControl = limitedFetch(fetch, ACCESS_CONTROL_LIMITS);
+  const document = limitedFetch(fetch, RELEASE_LIMITS);
+  /** Whether `href` is the release or a folder above it, not an access control. */
+  const isDocument = (href: string) =>
+    href === release || (href.endsWith("/") && release.startsWith(href));
+  let failed = false;
   return async (input, init) => {
     // The grant asks by URL (client/access.ts): a Request, whose text is no URL, is refused.
     const url = new URL(String(input));
     const method = (init?.method ?? "GET").toUpperCase();
     const read = method === "GET" || method === "HEAD";
-    if (url.origin !== origin || (!read && !own.has(url.href)))
+    if (failed || url.origin !== origin || (!read && !own.has(url.href)))
       throw new TypeError(`Not the release's to change: ${method} ${url.href}`);
-    const response = await fetch(input, read ? init : { ...init, redirect: "error" });
-    if (response.url !== "" && new URL(response.url).origin !== origin)
-      throw new TypeError(`Answered from another origin: ${response.url}`);
-    return response;
+    try {
+      const [limited, limits] =
+        read && isDocument(url.href)
+          ? [document, RELEASE_LIMITS]
+          : [accessControl, ACCESS_CONTROL_LIMITS];
+      const response = await limited(input, read ? init : { ...init, redirect: "error" });
+      if (response.url !== "" && new URL(response.url).origin !== origin)
+        throw new TypeError(`Answered from another origin: ${response.url}`);
+      if (method !== "GET" || !response.ok) return response;
+      const text = await response.text();
+      await parseDeckFile(text, "turtle", response.url || url.href, limits);
+      const checked = new Response(text, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      });
+      Object.defineProperty(checked, "url", { value: response.url });
+      return checked;
+    } catch (error) {
+      failed = true;
+      throw error;
+    }
   };
 }
