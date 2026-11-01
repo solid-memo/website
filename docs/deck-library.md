@@ -985,7 +985,8 @@ flowchart LR
   and `@vocab` are refused (`deckFileUnreadable`) past it, counted with
   the release's own address. Its terms and prefixes are refused past
   their bound or when defined through another term, as a deck file's
-  are ([data-model.md](data-model.md#decks-as-files)). The library's
+  are, and so is an RDF-star annotation or triple term
+  ([data-model.md](data-model.md#decks-as-files)). The library's
   index, which comes with the site and grows with the library, and the
   documents in the user's storages aren't limited in size. Their bases
   and prefixes are, as those of every document the app reads into a

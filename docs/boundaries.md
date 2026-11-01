@@ -180,7 +180,8 @@ needs no library of its own:
   (`VENDOR_ONLY_IN`). With `SOLID_CLIENT=solid-memo-client`, that
   package's `resources.ts` writes and reads Turtle with `n3`, and reads
   JSON-LD with `jsonld-streaming-parser`, also with a document loader
-  that loads nothing, and is its only file that may import it;
+  that loads nothing, and is its only file that may import it.
+  Either client tells the parser to read no RDF-star, and
   `jsonLd.ts` writes JSON-LD on either client.
 - `browser`'s `FileExchange` port saves and opens files with what the
   browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):

@@ -438,6 +438,8 @@ function parseJsonLd(
     streamingProfile: true,
     // refuseRemoteContexts refuses a type's own context; a plain one may come after the id.
     streamingProfileAllowOutOfOrderPlainType: true,
+    // No RDF-star: the parser holds a top-level node's annotations to the end, copying them at each.
+    rdfstar: false,
     documentLoader: {
       load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
     },
