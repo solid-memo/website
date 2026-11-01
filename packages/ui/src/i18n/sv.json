@@ -1113,27 +1113,7 @@
     "buttonCatalogue": "katalogen"
   },
   "makerNote": {
-    "flagship": {
-      "title": "En app av hög kvalitet för Solid:",
-      "text": "jag vill att den ska visa vad Solid kan göra."
-    },
-    "learn": {
-      "title": "För en bred publik:",
-      "text": "flashcards passar alla som vill lära sig."
-    },
-    "privacy": {
-      "title": "Privat och säker:",
-      "text": "dina data stannar hos dig, inte hos mig, och jag arbetar för att hålla appen säker."
-    },
-    "free": {
-      "title": "Gratis:",
-      "text": "driften är nästan gratis, utan servrar att sköta. Appen kostar mig tid och arbete."
-    },
-    "openSource": {
-      "title": "Öppen källkod:",
-      "text": "vem som helst kan läsa, ändra och köra koden."
-    },
-    "readMore": "Läs varför jag gjorde den (på engelska)"
+    "text": "Mitt mål är att Solid Memo ska vara en app av hög kvalitet i Solid-ekosystemet. Att studera med flashcards är ett enkelt sätt att lära sig många ämnen, och det passar en bred publik. Eftersom appen bygger på Solid behöver projektet inte ha egna servrar eller egen lagring, vilket håller driftkostnaderna nära noll. Därför kan appen förbli gratis för alla. På sikt vill jag att projektet ska bära sig helt självt, med en öppen styrningsmodell."
   },
   "onboardingFlow": {
     "tryHeading": "Prova direkt",

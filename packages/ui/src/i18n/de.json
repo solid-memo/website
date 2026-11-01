@@ -1113,27 +1113,7 @@
     "buttonCatalogue": "Katalog"
   },
   "makerNote": {
-    "flagship": {
-      "title": "Eine hochwertige App für Solid:",
-      "text": "Ich möchte, dass sie zeigt, was Solid kann."
-    },
-    "learn": {
-      "title": "Für ein breites Publikum:",
-      "text": "Karteikarten eignen sich für alle, die etwas lernen möchten."
-    },
-    "privacy": {
-      "title": "Privat und sicher:",
-      "text": "Deine Daten bleiben bei dir, nicht bei mir, und ich arbeite daran, die App sicher zu halten."
-    },
-    "free": {
-      "title": "Kostenlos:",
-      "text": "Das Hosting ist fast kostenlos, ohne eigene Server. Die App kostet mich Zeit und Mühe."
-    },
-    "openSource": {
-      "title": "Open Source:",
-      "text": "Alle können den Code lesen, ändern und ausführen."
-    },
-    "readMore": "Lies, warum ich sie gemacht habe (auf Englisch)"
+    "text": "Mein Ziel ist, dass Solid Memo eine hochwertige App im Solid-Ökosystem ist. Mit Karteikarten zu lernen ist ein einfacher Weg, sich viele Themen anzueignen, und eignet sich für ein breites Publikum. Weil die App auf Solid aufbaut, muss das Projekt keine eigenen Server oder Speicher betreiben, sodass die laufenden Kosten nahezu null bleiben. Deshalb kann die App für alle kostenlos bleiben. Langfristig soll sich das Projekt vollständig selbst tragen, mit einer offenen Governance-Struktur."
   },
   "onboardingFlow": {
     "tryHeading": "Gleich ausprobieren",

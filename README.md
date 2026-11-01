@@ -20,20 +20,13 @@ decks ([`decks/`](decks/)) are published together at
 
 ## Why I made Solid Memo
 
-> **I want to show what Solid can do.** I want Solid Memo to be a
-> high-quality flagship app for Solid.
->
-> **I like flashcards.** They're a simple way to learn, and they suit
-> a broad audience: anyone who wants to learn something.
->
-> **I value privacy.** Your cards and progress stay in your own Pod,
-> and I keep no copy. The app reads and writes your Pod, so I check it
-> for security problems and fix them openly.
->
-> **I want it to be free.** It has no back end, so hosting is mostly
-> free. It costs me time and effort instead.
->
-> **I like open source.** Anyone can read, change and run the code.
+> My goal is for Solid Memo to be a high-quality app in the Solid
+> ecosystem. Studying with flashcards is a simple way to learn many
+> subjects, and it suits a wide audience. Building on Solid means the
+> project doesn't have to host servers or storage, which keeps running
+> costs near zero. As a result, the app can stay free for everyone. In
+> the long run, I want the project to be fully self-sustaining, with
+> an open governance structure.
 >
 > — Anton Wiklund
 

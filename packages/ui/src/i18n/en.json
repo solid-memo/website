@@ -1113,27 +1113,7 @@
     "buttonCatalogue": "the catalog"
   },
   "makerNote": {
-    "flagship": {
-      "title": "A high-quality app for Solid:",
-      "text": "I want it to show what Solid can do."
-    },
-    "learn": {
-      "title": "For a broad audience:",
-      "text": "flashcards suit anyone who wants to learn."
-    },
-    "privacy": {
-      "title": "Private and secure:",
-      "text": "your data stays with you, not with me, and I work to keep the app secure."
-    },
-    "free": {
-      "title": "Free:",
-      "text": "hosting is mostly free, with no servers to run. It takes my time and effort."
-    },
-    "openSource": {
-      "title": "Open source:",
-      "text": "anyone can read, change and run the code."
-    },
-    "readMore": "Read why I made it"
+    "text": "My goal is for Solid Memo to be a high-quality app in the Solid ecosystem. Studying with flashcards is a simple way to learn many subjects, and it suits a wide audience. Building on Solid means the project doesn't have to host servers or storage, which keeps running costs near zero. As a result, the app can stay free for everyone. In the long run, I want the project to be fully self-sustaining, with an open governance structure."
   },
   "onboardingFlow": {
     "tryHeading": "Try it right away",
