@@ -15,10 +15,14 @@ import {
   getUrl,
   getUrlAll,
   type NamedSubject,
+  changesOf,
   setThing,
+  toRdfJsDataset,
+  withQuads,
 } from "./client/rdf";
+import type { Quad } from "@rdfjs/types";
 import { writeDocument } from "./client/resources";
-import { datasetFrom, getStringWithLocale } from "./testing/datasets";
+import { datasetFrom, datasetOfTurtle, getStringWithLocale } from "./testing/datasets";
 import type { Repair } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createSolidRepairRepository } from "./solidRepairRepository";
@@ -59,6 +63,23 @@ function repair(
   documentUrl = CATALOG,
 ): Repair {
   return { kind, documentUrl, subjectUrl, version };
+}
+
+/** Quads as sorted lines, to compare as sets. */
+function lines(quads: Iterable<Quad>): string[] {
+  return [...quads]
+    .map((quad) =>
+      JSON.stringify([
+        quad.subject.value,
+        quad.predicate.value,
+        quad.object.termType,
+        quad.object.value,
+        quad.object.termType === "Literal"
+          ? [quad.object.language, quad.object.datatype.value]
+          : [],
+      ]),
+    )
+    .sort();
 }
 
 function saved(index = 0): Dataset {
@@ -389,6 +410,26 @@ describe("applyRepairs", () => {
     expect(getUrlAll(getThing(saved(), `${CATALOG}#other`)!, DCAT.dataset)).toEqual([deck]);
   });
 
+  it("removes a subject from a catalog that lists a member the library takes for no URL, keeping that link", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      (await datasetOfTurtle(
+        CATALOG,
+        `@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#catalog> a dcat:Catalog ; dcat:dataset <#deck-1>, <http://%zz/x>, <urn:x> ; dcat:catalog <#group> .
+<#group> a sm:DeckGroup ; dcat:dataset <#deck-1> .
+<#deck-1> a sm:Deck .
+`,
+      )) as never,
+    );
+    await repository().applyRepairs([repair("remove-subject", `${CATALOG}#deck-1`)]);
+    expect(getThing(saved(), `${CATALOG}#deck-1`)).toBeNull();
+    const catalog = getThing(saved(), `${CATALOG}#catalog`)!;
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual(["http://%zz/x", "urn:x"]);
+    expect(getUrlAll(catalog, DCAT.catalog)).toEqual([`${CATALOG}#group`]);
+    expect(getUrlAll(getThing(saved(), `${CATALOG}#group`)!, DCAT.dataset)).toEqual([]);
+  });
+
   // Another app's dataset, described in its own document.
   const FOREIGN_DATASET = "https://pod.example/recipes/index.ttl#cookbook";
 
@@ -453,6 +494,81 @@ describe("applyRepairs", () => {
     const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
     expect(getUrlAll(group1, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`]);
     expect(getUrlAll(group1, DCAT.catalog)).toEqual([`${CATALOG}#group-2`]);
+  });
+
+  it("applies a document's repairs as one at a time would, each to what the ones before it left", async () => {
+    const turtle = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+<#catalog> a dcat:Catalog ; dcterms:publisher <#pub> ;
+  dcat:dataset <#deck-1>, <#deck-2>, <#deck-3> ; dcat:catalog <#group-1>, <#group-2>, <#group-3> .
+<#group-1> a sm:DeckGroup, dcat:Catalog ; dcat:dataset <#deck-1>, <#agent>, <#deck-gone> .
+<#group-2> a sm:DeckGroup, dcat:Catalog ; dcat:dataset <#deck-2>, <#agent> ; dcat:catalog <#group-3> .
+<#group-3> a sm:DeckGroup ; dcat:dataset <#deck-3> .
+<#deck-1> a sm:Deck, dcat:Dataset ; dcterms:title "One" .
+<#deck-2> a sm:Deck ; dcterms:title "Two" ; dcterms:creator <#agent> .
+<#deck-3> a sm:Deck ; dcterms:title "Three" .
+<#agent> dcterms:title "Named by deck 2 alone" .
+<#pub> dcterms:title "The publisher" .
+`;
+    const reviews = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#a> a sm:ReviewState ; sm:due "2026-09-27" ; sm:previousDue "2026-09-20" .
+<#b> a sm:ReviewState ; sm:due "2026-09-27" ; sm:previousDue "2026-09-20" .
+`;
+    const reads: Record<string, string> = { [CATALOG]: turtle, [REVIEWS]: reviews };
+    const at = (subject: string, documentUrl = CATALOG) => `${documentUrl}#${subject}`;
+    const repairs: Repair[] = [
+      // Before deck 2 is removed, the agent it names is Solid Memo's, and no deck: unlinked.
+      repair("drop-dangling-members", at("group-1"), 1),
+      repair("describe-deck", at("deck-2")),
+      repair("drop-snapshot", at("a", REVIEWS), 2, REVIEWS),
+      repair("remove-subject", at("deck-2"), 1),
+      // After, the agent is another app's: kept.
+      repair("drop-dangling-members", at("group-2"), 1),
+      repair("describe-deck", at("deck-2")),
+      repair("direct-deck", at("deck-1")),
+      repair("remove-subject", at("group-3"), 1),
+      repair("name-agent", at("pub")),
+      repair("drop-snapshot", at("b", REVIEWS), 2, REVIEWS),
+      repair("remove-subject", at("deck-1"), 1),
+    ];
+    const read = async (url: string) => datasetOfTurtle(url, reads[url]);
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(read as never);
+    await repository().applyRepairs(repairs);
+    const together = [saved(0), saved(1)];
+
+    // One repair at a time, each from what the one before wrote, read afresh.
+    const one: Record<string, Dataset> = {
+      [CATALOG]: await read(CATALOG),
+      [REVIEWS]: await read(REVIEWS),
+    };
+    for (const each of repairs) {
+      vi.mocked(writeDocument).mockClear();
+      const before = one[each.documentUrl];
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+        withQuads(datasetFrom(each.documentUrl), toRdfJsDataset(before)) as never,
+      );
+      await repository().applyRepairs([each]);
+      one[each.documentUrl] = saved();
+    }
+
+    for (const [index, url] of [CATALOG, REVIEWS].entries()) {
+      const original = new Set(lines(toRdfJsDataset(await read(url))));
+      const repaired = lines(toRdfJsDataset(together[index]));
+      expect(repaired).toEqual(lines(toRdfJsDataset(one[url])));
+      // What is written is what changed, as one repair at a time records it.
+      const changes = changesOf(together[index])!;
+      expect(lines(changes.additions)).toEqual(repaired.filter((line) => !original.has(line)));
+      expect(lines(changes.deletions)).toEqual(
+        [...original].filter((line) => !repaired.includes(line)).sort(),
+      );
+    }
+    const catalog = getThing(together[0], at("catalog"))!;
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([at("deck-3")]);
+    expect(getUrlAll(catalog, DCAT.catalog)).toEqual([at("group-1"), at("group-2")]);
+    expect(getUrlAll(getThing(together[0], at("group-1"))!, DCAT.dataset)).toEqual([]);
+    expect(getUrlAll(getThing(together[0], at("group-2"))!, DCAT.dataset)).toEqual([at("agent")]);
+    expect(getThing(together[0], at("deck-2"))).toBeNull();
   });
 
   it("skips a document that is gone", async () => {

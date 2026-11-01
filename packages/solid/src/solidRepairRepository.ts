@@ -4,29 +4,22 @@
 
 import {
   type Dataset,
-  type Subject,
+  type NamedSubject,
   buildThing,
   getInteger,
   getStringNoLocale,
-  getThing,
   getThingAll,
   getUrlAll,
-  removeThing,
-  setThing,
+  removeThings,
 } from "./client/rdf";
 import type { RepairRepository } from "@solid-memo/application/ports";
 import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/domain/dcat";
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
+import { type DatasetEdit, editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { foreignSubjects } from "./ownership";
-import {
-  datetimeLiteral,
-  readDatetime,
-  readText,
-  unlessNewer,
-  unreadableDatetimes,
-} from "./records";
+import { readDatetime, readText, unlessNewer, unreadableDatetimes, XSD_DATETIME } from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
@@ -48,9 +41,10 @@ const FSRS_SNAPSHOT = [
 
 /**
  * Repairs written to the pod (see docs/validation.md): each document is
- * read once, every repair of its subjects applied, and written once. A
- * repair only fills in or removes what its problem is about, so what
- * else a subject says survives; a subject that is gone is skipped.
+ * read once, every repair of its subjects applied in one edit, and
+ * written once. A repair only fills in or removes what its problem is
+ * about, so what else a subject says survives; a subject that is gone
+ * is skipped.
  */
 export function createSolidRepairRepository({
   fetch,
@@ -59,16 +53,24 @@ export function createSolidRepairRepository({
 }): RepairRepository {
   return {
     async applyRepairs(repairs) {
-      for (const documentUrl of [...new Set(repairs.map((r) => r.documentUrl))]) {
+      for (const [documentUrl, ofDocument] of byDocument(repairs)) {
         const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
         if (dataset === null) continue;
-        const repaired = repairs
-          .filter((r) => r.documentUrl === documentUrl)
-          .reduce<Dataset>((current, repair) => applyRepair(current, repair), dataset);
-        await saveDataset(documentUrl, repaired, fetch);
+        await saveDataset(documentUrl, repaired(dataset, documentUrl, ofDocument), fetch);
       }
     },
   };
+}
+
+/** The repairs of each document, in the order their documents first come. */
+function byDocument(repairs: readonly Repair[]): Map<string, Repair[]> {
+  const documents = new Map<string, Repair[]>();
+  for (const repair of repairs) {
+    const ofDocument = documents.get(repair.documentUrl);
+    if (ofDocument === undefined) documents.set(repair.documentUrl, [repair]);
+    else ofDocument.push(repair);
+  }
+  return documents;
 }
 
 /**
@@ -82,42 +84,114 @@ const MEMBERSHIP = [
   { link: DCAT.catalog, types: [DCAT.Catalog, SM.DeckGroup] },
 ];
 
-function applyRepair(dataset: Dataset, repair: Repair): Dataset {
-  const thing = getThing(dataset, repair.subjectUrl);
-  if (thing === null) return dataset;
-  // A repair is of what this version found: never of a subject a newer one has written since.
-  unlessNewer(thing);
-  if (repair.kind === "remove-subject") {
-    return withoutMembershipsOf(removeThing(dataset, thing), repair.documentUrl, repair.subjectUrl);
+/**
+ * The document with its repairs applied in turn, each to the subject as
+ * the repairs before it left it, in one edit of the document (editOf)
+ * and one removal of the subjects removed (removeThings): many repairs
+ * take time that grows with them and the document, where a setThing or
+ * removeThing at each would copy the whole document every time, in the
+ * square of its subjects. A removal makes the other apps' subjects be
+ * found again at the next drop-dangling-members repair, so the two
+ * kinds alternating in one call take longer; the instance check never
+ * plans a removal, and each removal the user confirms comes alone.
+ */
+function repaired(dataset: Dataset, documentUrl: string, repairs: readonly Repair[]): Dataset {
+  const edit = editOf(dataset);
+  // The subjects removed, by their URLs, and the URLs their repairs named them by.
+  const removed = new Map<string, NamedSubject>();
+  const unlinked = new Set<string>();
+  const current = (url: string) => {
+    const thing = edit.getThing(url);
+    return thing === null || removed.has(thing.url) ? null : thing;
+  };
+  // Another app's subjects change only with a removal (a deck's creator is
+  // Solid Memo's while the deck names it), so they are found again after one.
+  let foreign: Set<string> | null = null;
+  const foreignNow = () => (foreign ??= foreignSubjects(removeThings(dataset, removed.values())));
+  for (const repair of repairs) {
+    const thing = current(repair.subjectUrl);
+    if (thing === null) continue;
+    // A repair is of what this version found: never of a subject a newer one has written since.
+    unlessNewer(thing);
+    if (repair.kind === "remove-subject") {
+      removed.set(thing.url, thing);
+      unlinked.add(repair.subjectUrl);
+      foreign = null;
+    } else if (repair.kind === "drop-dangling-members") {
+      edit.setThing(withoutDanglingMembers(current, foreignNow(), documentUrl, thing));
+    } else {
+      edit.setThing(repairedThing(thing, { ...repair, kind: repair.kind }));
+    }
   }
-  if (repair.kind === "drop-dangling-members") {
-    return setThing(dataset, withoutDanglingMembers(dataset, repair.documentUrl, thing));
+  if (unlinked.size > 0) {
+    for (const { url } of getThingAll(dataset)) {
+      const parent = current(url);
+      if (parent !== null) withoutMembershipsOf(edit, documentUrl, parent, unlinked);
+    }
   }
-  return setThing(dataset, repairedThing(thing, { ...repair, kind: repair.kind }));
+  return removeThings(edit.done(), removed.values());
 }
 
 /**
  * A removed subject is no member of the catalog (`#catalog`) or of a
  * deck group any more. Only those links go: who else names it — a deck
- * its creator, the catalog its publisher — is left as it is.
+ * its creator, the catalog its publisher — is left as it is. Every
+ * removed subject's links go at once, a parent set once however many
+ * of its members are removed.
  */
-function withoutMembershipsOf(dataset: Dataset, documentUrl: string, url: string): Dataset {
-  return getThingAll(dataset)
-    .filter(
-      (thing) =>
-        thing.url === `${documentUrl}#catalog` || getUrlAll(thing, RDF.type).includes(SM.DeckGroup),
-    )
-    .reduce(
-      (current, parent) =>
-        setThing(
-          current,
-          MEMBERSHIP.reduce(
-            (builder, { link }) => builder.removeUrl(link, url),
-            buildThing(parent),
-          ).build(),
-        ),
-      dataset,
-    );
+function withoutMembershipsOf(
+  edit: DatasetEdit<Dataset>,
+  documentUrl: string,
+  parent: NamedSubject,
+  unlinked: ReadonlySet<string>,
+): void {
+  if (
+    parent.url !== `${documentUrl}#catalog` &&
+    !getUrlAll(parent, RDF.type).includes(SM.DeckGroup)
+  )
+    return;
+  const links = MEMBERSHIP.filter(({ link }) =>
+    getUrlAll(parent, link).some((url) => unlinked.has(url)),
+  );
+  if (links.length === 0) return;
+  edit.setThing(withoutLinks(parent, links, unlinked));
+}
+
+/**
+ * The parent without its `links` to the subjects in `unlinked`: each
+ * link's other values set at once, in time that grows with them.
+ * setIriAll writes each again and refuses one the library takes for no
+ * URL, which another app may have written; then only the removed
+ * subjects' links are taken out, one at a time, and every other value
+ * stays as it is.
+ */
+function withoutLinks(
+  parent: NamedSubject,
+  links: readonly { link: string }[],
+  unlinked: ReadonlySet<string>,
+): NamedSubject {
+  try {
+    return links
+      .reduce(
+        (builder, { link }) =>
+          builder.setIriAll(
+            link,
+            getUrlAll(parent, link).filter((url) => !unlinked.has(url)),
+          ),
+        buildThing(parent),
+      )
+      .build();
+  } catch {
+    return links
+      .reduce(
+        (builder, { link }) =>
+          getUrlAll(parent, link)
+            .filter((url) => unlinked.has(url))
+            .reduce((next, url) => next.removeUrl(link, url), builder),
+        buildThing(parent),
+      )
+      .build();
+  }
 }
 
 /**
@@ -127,10 +201,14 @@ function withoutMembershipsOf(dataset: Dataset, documentUrl: string, url: string
  * there, and its link stays, as does one another app described in this
  * document, whatever its class.
  */
-function withoutDanglingMembers(dataset: Dataset, documentUrl: string, thing: Subject): Subject {
-  const foreign = foreignSubjects(dataset);
+function withoutDanglingMembers(
+  current: (url: string) => NamedSubject | null,
+  foreign: ReadonlySet<string>,
+  documentUrl: string,
+  thing: NamedSubject,
+): NamedSubject {
   const describes = (url: string, types: string[]) => {
-    const member = getThing(dataset, url);
+    const member = current(url);
     return (
       member !== null &&
       (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)))
@@ -150,9 +228,9 @@ function withoutDanglingMembers(dataset: Dataset, documentUrl: string, thing: Su
 }
 
 function repairedThing(
-  thing: Subject,
+  thing: NamedSubject,
   repair: Repair & { kind: Exclude<RepairKind, "remove-subject" | "drop-dangling-members"> },
-): Subject {
+): NamedSubject {
   const builder = buildThing(thing);
   switch (repair.kind) {
     case "describe-deck": {
@@ -192,13 +270,11 @@ function repairedThing(
     }
     case "drop-unreadable-date":
       // Only the dates the app reads as none: a readable value of the same field stays.
+      // Each field's in one pass, however many there are.
       return (repair.predicates ?? [])
         .reduce(
           (b, predicate) =>
-            unreadableDatetimes(thing, predicate).reduce(
-              (next, value) => next.removeLiteral(predicate, datetimeLiteral(value)),
-              b,
-            ),
+            b.removeLiteralAll(predicate, XSD_DATETIME, unreadableDatetimes(thing, predicate)),
           builder,
         )
         .build();

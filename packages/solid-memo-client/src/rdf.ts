@@ -399,6 +399,16 @@ class Builder implements SubjectBuilder {
     return this;
   }
 
+  removeLiteralAll(property: string, datatype: string, values: readonly string[]): this {
+    if (this.#values[property] === undefined) return this;
+    const removed = new Set(values);
+    return this.#keep(
+      property,
+      (one) =>
+        !(one.termType === "Literal" && one.datatype.value === datatype && removed.has(one.value)),
+    );
+  }
+
   build(): NamedSubject {
     const values = record<readonly Value[]>();
     for (const [predicate, list] of Object.entries(this.#values)) {

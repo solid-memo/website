@@ -290,6 +290,69 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     });
   });
 
+  describe("removeLiteralAll", () => {
+    const P = `${EX}p`;
+    const DATETIME = `${XSD}dateTime`;
+    const literal = (value: string, datatype = DATETIME) =>
+      ({
+        termType: "Literal",
+        value,
+        language: "",
+        datatype: { termType: "NamedNode", value: datatype },
+      }) as never;
+    const subject = () =>
+      buildThing(createThing({ url: `${URL_}#a` }))
+        .addLiteral(P, literal("a"))
+        .addLiteral(P, literal("b"))
+        .addLiteral(P, literal("c"))
+        .addLiteral(P, literal("a", `${XSD}date`))
+        .addStringNoLocale(P, "a")
+        .addIri(P, `${EX}x`)
+        .build();
+
+    it("removes the literals of the datatype named, as removeLiteral does, and keeps the rest", () => {
+      const removed = buildThing(subject()).removeLiteralAll(P, DATETIME, ["a", "c", "z"]).build();
+      const oneByOne = buildThing(subject())
+        .removeLiteral(P, literal("a"))
+        .removeLiteral(P, literal("c"))
+        .removeLiteral(P, literal("z"))
+        .build();
+      const terms = (subject: Rdf.Subject) =>
+        getLiteralAll(subject, P).map((one) => [one.value, one.datatype.value]);
+      expect(terms(removed)).toEqual(terms(oneByOne));
+      expect(terms(removed)).toEqual([
+        ["b", DATETIME],
+        ["a", `${XSD}date`],
+        ["a", `${XSD}string`],
+      ]);
+      expect(getUrlAll(removed, P)).toEqual([`${EX}x`]);
+      const all = buildThing(subject()).removeLiteralAll(P, DATETIME, ["a", "b", "c"]).build();
+      expect(terms(all)).toEqual([
+        ["a", `${XSD}date`],
+        ["a", `${XSD}string`],
+      ]);
+      const none = buildThing(createThing({ url: `${URL_}#b` }))
+        .removeLiteralAll(P, DATETIME, ["a"])
+        .build();
+      expect(propertiesOf(none)).toEqual([]);
+    });
+
+    it("takes time that grows with the values, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const values = Array.from({ length: count }, (_, i) => `v${i}`);
+          const builder = buildThing(createThing({ url: `${URL_}#a` }));
+          for (const value of values) builder.addLiteral(P, literal(value));
+          const full = builder.build();
+          return () => buildThing(full).removeLiteralAll(P, DATETIME, values).build();
+        },
+        2000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
   describe("sourceOf", () => {
     it("names the document read, with a key every edit of it keeps and no other read has", async () => {
       const dataset = await read();

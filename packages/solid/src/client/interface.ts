@@ -76,6 +76,12 @@ export interface SubjectBuilder {
    * (setIriAll).
    */
   setStringAll(property: string, values: readonly LanguageString[]): SubjectBuilder;
+  /**
+   * The property's literals of `datatype` whose lexical form is one of
+   * `values` removed, as removeLiteral removes one; its other values
+   * stay. One call for a list of any length (setIriAll).
+   */
+  removeLiteralAll(property: string, datatype: string, values: readonly string[]): SubjectBuilder;
   /** The subject with every triple added. */
   build(): NamedSubject;
 }

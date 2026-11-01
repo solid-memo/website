@@ -362,7 +362,7 @@ export function createThing(options?: { url: string } | { name?: string }): Name
 /**
  * A builder of a subject's triples, starting from what `subject` says.
  * Each call is the library's own (its buildThing makes the same calls),
- * but setIriAll and setStringAll, which it has none of: there the
+ * but setIriAll, setStringAll and removeLiteralAll, which it has none of: there the
  * property's values are made once, where the library's adds copy them
  * at every value. The library takes its own subjects as values, which
  * every subject here is (inrupt.ts).
@@ -501,6 +501,22 @@ class Builder implements SubjectBuilder {
       );
       return { ...previous, literals, langStrings };
     });
+  }
+
+  removeLiteralAll(property: string, datatype: string, values: readonly string[]): this {
+    const removed = new Set(values);
+    // Each datatype where it was, as removeLiteral keeps it.
+    return this.#predicate(property, (previous) => ({
+      ...previous,
+      literals: Object.fromEntries(
+        Object.entries(previous.literals ?? {})
+          .map(([type, kept]) => [
+            type,
+            type === datatype ? kept.filter((value) => !removed.has(value)) : kept,
+          ])
+          .filter(([, kept]) => kept.length > 0),
+      ),
+    }));
   }
 
   build(): NamedSubject {

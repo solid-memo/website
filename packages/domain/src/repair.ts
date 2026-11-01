@@ -130,6 +130,12 @@ function problemsOf(
  */
 export function planRepair(report: ValidationReport): RepairPlan {
   const repairs: Repair[] = [];
+  // Each repair by its kind and subject, found at once however many came before.
+  const planned = new Map<string, Repair>();
+  const plan = (key: string, repair: Repair) => {
+    planned.set(key, repair);
+    repairs.push(repair);
+  };
   const unrepairable: Unrepairable[] = [];
   for (const document of report.documents) {
     for (const subject of document.subjects) {
@@ -143,13 +149,14 @@ export function planRepair(report: ValidationReport): RepairPlan {
           if (!left.has(key)) left.set(key, violation);
           continue;
         }
-        const same = repairs.find((r) => r.kind === kind && r.subjectUrl === subject.url);
+        const key = JSON.stringify([kind, subject.url]);
+        const same = planned.get(key);
         if (kind === "drop-unreadable-date") {
           // One repair of the subject drops every unreadable optional date it has.
           const predicates = [...(same?.predicates ?? []), violation.path!];
           if (same !== undefined) same.predicates = [...new Set(predicates)];
           else
-            repairs.push({
+            plan(key, {
               kind,
               documentUrl: document.url,
               subjectUrl: subject.url,
@@ -157,7 +164,7 @@ export function planRepair(report: ValidationReport): RepairPlan {
               predicates,
             });
         } else if (same === undefined) {
-          repairs.push({
+          plan(key, {
             kind,
             documentUrl: document.url,
             subjectUrl: subject.url,
