@@ -238,6 +238,92 @@
             matchDatasources: ['github-release-attachments'],
             automerge: false,
         },
+        // CI cannot tell a malicious version from a good one, since such a
+        // version is made to pass the tests, and the 3-day wait only gives
+        // others time to find it. So a person merges each update of the
+        // three kinds below, which reach the most, after reading it
+        // (GOVERNANCE.md#dependency-updates), and no rule after them merges
+        // one on its own again (scripts/renovateConfig.test.ts). A branch
+        // with several updates merges on its own only when each of them
+        // would, so one held update holds its group. A security update of
+        // one is held too: vulnerabilityAlerts proposes it at once but
+        // sets no automerge, so these rules still apply to it. Every other
+        // update, of a development tool that runs only in CI jobs with no
+        // secret and on contributors' machines, still merges on its own
+        // after the wait.
+        //
+        // What the app ships: the run-time dependencies of each workspace
+        // package that scripts/checkDependencies.ts walks from its SHIPPED,
+        // the app the site serves and the Solid client a build may put in
+        // place of Inrupt's, among them the Solid client that handles
+        // login and pod access. A bad version would reach every user in
+        // the next release. The test checks that these are the package
+        // files the walk reaches. The end-to-end tests' package files are
+        // not among them: what they list as dependencies runs a test
+        // server, shipped to no one.
+        {
+            matchManagers: ['npm'],
+            matchFileNames: [
+                'apps/studio/package.json',
+                'apps/web/package.json',
+                'packages/application/package.json',
+                'packages/browser/package.json',
+                'packages/composition/package.json',
+                'packages/domain/package.json',
+                'packages/markdown/package.json',
+                'packages/shacl/package.json',
+                'packages/solid/package.json',
+                'packages/solid-memo-client/package.json',
+                'packages/turtle/package.json',
+                'packages/ui/package.json',
+                'packages/vocab/package.json',
+            ],
+            matchDepTypes: ['dependencies', 'optionalDependencies', 'peerDependencies'],
+            automerge: false,
+        },
+        // The root package.json lists readable-stream 4 as a development
+        // dependency, but the app ships it: n3, jsonld-streaming-parser and
+        // rdf-dataset-ext need it, and listing it at the root puts that one
+        // copy at the top of node_modules, which the page bundles
+        // (docs/testing.md). The test checks that these are the root's
+        // dependencies that package-lock.json does not mark as only for
+        // development.
+        {
+            matchManagers: ['npm'],
+            matchFileNames: ['package.json'],
+            matchDepNames: ['readable-stream'],
+            automerge: false,
+        },
+        // A new major version, of any package, image or tool, may change
+        // what the tests do not cover.
+        {
+            matchUpdateTypes: ['major'],
+            automerge: false,
+        },
+        // What the release job runs while it holds the deploy key, which
+        // can push to main and tag a release (docs/releasing.md#the-deploy-key):
+        // semantic-release and its @semantic-release/ plugins, and
+        // conventional-changelog-conventionalcommits, the preset their
+        // commit analyzer and release notes generator load
+        // (release.config.mjs). Its prepare step runs `npm run docs:archive`
+        // (scripts/docsArchive.ts), which imports vite for its loadEnv,
+        // starts Chromium through playwright, and runs mermaid in it to
+        // draw the docs' diagrams (packages/site/src/drawDiagrams.ts);
+        // playwright's group holds @playwright/test with it. The parsers
+        // the archive's pages are rendered with are the shipped packages'
+        // dependencies, held above, and Fredoka's font is read into the
+        // drawings, not run.
+        {
+            matchDepNames: [
+                'semantic-release',
+                '/^@semantic-release\\//',
+                'conventional-changelog-conventionalcommits',
+                'vite',
+                'playwright',
+                'mermaid',
+            ],
+            automerge: false,
+        },
         // Playwright and the browser it downloads move together: one pinned
         // version, @playwright/test's in e2e/journeys/package.json and
         // playwright's in packages/site/package.json (one group, as a

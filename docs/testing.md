@@ -639,9 +639,10 @@ jobs run side by side, each
 
 **`ci-ok` is the one check a merge to `main` waits for.** The ruleset
 on `main` (Settings › Rules) requires it alone, so it stays fixed as
-jobs and matrix servers come and go, and Renovate merges its updates
-through a pull request once it passes (`automergeType: 'pr'` in
-`renovate.json5`). It runs even when a job before it failed, and fails
+jobs and matrix servers come and go. Renovate merges the updates it
+may merge on its own through a pull request once it passes
+(`automergeType: 'pr'` in `renovate.json5`,
+[GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). It runs even when a job before it failed, and fails
 unless every job passed or was skipped by the gate's choice: the
 testing jobs when the run reuses another, the two reusing ones when it
 tests. Every check of `ns/` and `decks/`, the comparison with the base
