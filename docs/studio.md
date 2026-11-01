@@ -1368,16 +1368,21 @@ and its row says "From \<host>".
   are read. The newest of the copy's series is its upgrade, planned and
   applied as a library copy's. The newer release's own list of releases
   in between is kept to such addresses the same way.
-- Each release a catalog links is read once for all the copies, and
-  none that the copy's own release lists.
+- Each release a catalog links is read once for each copy, and none
+  that the copy's own release lists. A copy's lookup reads them for
+  itself, its own release among them, under one release's limits
+  together; past them, the row says it's not known, as below.
 - Before an upgrade is planned, the newer release and those in between
   are checked against the library's shapes; one that breaks them is
   refused (`releaseNotConforming`). The upgrade is planned from the
   same reads that were checked, its notes and the releases in between
-  included.
-- When no public catalog of its creator lists the release (an
-  instance's catalog is private unless its owner shares it), the row
-  says "Not known: no public catalog of its creator lists it".
+  included. Those reads share one release's limits, and none of them
+  is kept after the plan.
+- No public catalog of its creator may list the release: an
+  instance's catalog is private unless its owner shares it. Then, or
+  when the releases it links are larger together than that, the row
+  says "Not known: no public catalog of its creator lists it, or its
+  releases are larger than Solid Memo reads".
 - A copy whose release can't be read either shows as no longer in the
   library.
 

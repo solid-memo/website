@@ -138,6 +138,9 @@ const library: DeckLibrary = {
     throw new Error(`No release is read from a link: ${url}`);
   },
   publishedBeside: async () => null,
+  linkedReads: () => {
+    throw new Error("No release is read from a link here");
+  },
 };
 
 /** The app as createAppUseCases wires it, every write checked against the shapes read from this repository. */

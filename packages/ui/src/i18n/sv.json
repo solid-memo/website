@@ -1706,6 +1706,7 @@
     "draftGone": "Det utkastet finns inte längre. Det kanske togs bort i en annan flik eller app.",
     "releaseUnreadable": "Solid Memo kan inte läsa någon utgåva på {url}. Kontrollera adressen och att utgåvan är publicerad där.",
     "releaseTooLarge": "Utgåvan på {url} är större än någon utgåva Solid Memo läser, så den lästes inte. Kontrollera adressen, eller fråga utgåvans skapare om den.",
+    "linkedReleasesTooLarge": "Utgåvorna på {host} som den här uppdateringen läser är tillsammans större än vad Solid Memo läser för en uppdatering, så den erbjuds inte. Fråga deras skapare om dem.",
     "notAReleaseFile": "Den filen innehåller inte en utgåva av en kortlek eller kurs. Välj en utgåva sparad som Turtle eller JSON-LD.",
     "draftIdUnsupported": "Utkastet kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Solid Memo varken öppnar eller ändrar det.",
     "releaseIdUnsupported": "Utgåvan kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Den kan inte göras till ett utkast.",

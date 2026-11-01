@@ -1706,6 +1706,7 @@
     "draftGone": "Diesen Entwurf gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App gelöscht.",
     "releaseUnreadable": "Solid Memo kann unter {url} keine Ausgabe lesen. Prüfe die Adresse und ob die Ausgabe dort veröffentlicht ist.",
     "releaseTooLarge": "Die Ausgabe unter {url} ist größer als jede Ausgabe, die Solid Memo liest, deshalb wurde sie nicht gelesen. Prüfe die Adresse oder frag die Person, die die Ausgabe erstellt hat.",
+    "linkedReleasesTooLarge": "Die Ausgaben auf {host}, die diese Aktualisierung liest, sind zusammen größer als das, was Solid Memo für eine Aktualisierung liest, deshalb wird sie nicht angeboten. Frag die Person, die sie erstellt hat.",
     "notAReleaseFile": "Diese Datei enthält nicht genau eine Ausgabe eines Stapels oder Kurses. Wähle eine Ausgabe, die als Turtle oder JSON-LD gespeichert ist.",
     "draftIdUnsupported": "Dieser Entwurf nennt einen seiner Teile „#{id}“, und das kann ein Entwurf nicht übernehmen: Eine ID in einem Entwurf besteht aus den Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“ und beginnt mit einem Buchstaben oder einer Ziffer. Solid Memo öffnet und ändert ihn nicht.",
     "releaseIdUnsupported": "Diese Ausgabe nennt einen ihrer Teile „#{id}“, und das kann ein Entwurf nicht übernehmen: Eine ID in einem Entwurf besteht aus den Buchstaben A bis Z, Ziffern, „.“, „_“ und „-“ und beginnt mit einem Buchstaben oder einer Ziffer. Diese Ausgabe lässt sich nicht zu einem Entwurf machen.",

@@ -31,7 +31,12 @@ import {
 } from "@solid-memo/domain/deckUpgrade";
 import type { ReviewKey } from "@solid-memo/domain/review";
 import type { DocumentReport } from "@solid-memo/domain/validation";
-import type { DeckLibrary, DeckRepository, ReviewStateRepository } from "./ports";
+import type {
+  DeckLibrary,
+  DeckRepository,
+  LinkedReleaseReads,
+  ReviewStateRepository,
+} from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
 import type { Course, CourseUseCases } from "./courses";
@@ -79,7 +84,8 @@ export interface LibraryUseCases {
    * lists it (its LibraryCopy, its series found), it does not look for its
    * series again. The releases a copy from a link would be upgraded with
    * are checked against the library's shapes first, as readReleaseFromLink
-   * checks one (releaseNotConforming).
+   * checks one (releaseNotConforming), and read under one release's
+   * limits together (DeckLibrary.linkedReads, linkedReleasesTooLarge).
    */
   planLibraryUpgrade(deck: Deck, copy?: LibraryCopy): Promise<LibraryUpgradePlan | null>;
   /**
@@ -132,43 +138,50 @@ export interface LibraryUseCases {
 
 /**
  * How many of the releases a creator's catalog links are read for the
- * series of a copy from a link (linkedSeries), and of those its newest
- * release lists between the copy's and its own (planUpgrade), and how
- * many of them at once: the catalog and the release are their creator's
- * to write, now or later, and may name any number of releases, each as
- * large as a release may be.
+ * series of a copy from a link (linkedSeries), of those named as the
+ * copy's release, and of those its newest release lists between the
+ * copy's and its own (planUpgrade), and how many of them at once: the
+ * catalog and the release are their creator's to write, now or later,
+ * and may name any number of releases, each as large as a release may
+ * be. Of the catalog's links named otherwise, its other decks most of
+ * all, MAX_OTHER_LINKS at most are read.
  */
 const MAX_LINKED_RELEASES = 16;
+const MAX_OTHER_LINKS = 4;
 const LINKED_READS_AT_ONCE = 4;
 
 /**
  * Which of a catalog's `links` to read for the series of the release
  * at `copied`: a newer version of a release is named after its series
- * (`…/<name>/v<N>.ttl`, docs/studio.md), so those named as it come
- * first, the highest version first, then the others, in the catalog's
- * order; MAX_LINKED_RELEASES of them at most.
+ * (`…/<name>/v<N>.ttl`, docs/studio.md), so those named as it
+ * (`named`), the highest version first, MAX_LINKED_RELEASES of them at
+ * most; then the others, in the catalog's order, MAX_OTHER_LINKS of
+ * them at most.
  */
-function likeliestNewer(copied: string, links: string[]): string[] {
+function likeliestNewer(copied: string, links: string[]): { named: string[]; others: string[] } {
   const name = releasePlaceOf(copied)?.name;
-  const rank = (url: string): [number, number] => {
-    const place = releasePlaceOf(url);
-    return place !== null && place.name === name ? [0, -place.version] : [1, 0];
-  };
-  return links
-    .map((url) => ({ url, rank: rank(url) }))
-    .sort((a, b) => a.rank[0] - b.rank[0] || a.rank[1] - b.rank[1])
+  const named = links
+    .map((url) => ({ url, place: releasePlaceOf(url) }))
+    .filter(({ place }) => place !== null && place.name === name)
+    .sort((a, b) => b.place!.version - a.place!.version)
     .slice(0, MAX_LINKED_RELEASES)
     .map(({ url }) => url);
+  const others = links.filter((url) => !named.includes(url) && releasePlaceOf(url)?.name !== name);
+  return { named, others: others.slice(0, MAX_OTHER_LINKS) };
 }
 
-/** `read` of each of `urls`, in their order, LINKED_READS_AT_ONCE of them at most at once. */
-async function readEach<T>(urls: string[], read: (url: string) => Promise<T>): Promise<T[]> {
+/** `read` of each of `urls`, in their order, `atOnce` of them at most at once. */
+async function readEach<T>(
+  urls: string[],
+  read: (url: string) => Promise<T>,
+  atOnce = LINKED_READS_AT_ONCE,
+): Promise<T[]> {
   const results: T[] = [];
   let next = 0;
   const reader = async () => {
     for (let at = next++; at < urls.length; at = next++) results[at] = await read(urls[at]!);
   };
-  await Promise.all(Array.from({ length: LINKED_READS_AT_ONCE }, reader));
+  await Promise.all(Array.from({ length: atOnce }, reader));
   return results;
 }
 
@@ -203,7 +216,9 @@ export function createLibraryUseCases({
    * from a link, unless it is `known` (a LibraryCopy's). A copy from a
    * link is upgraded with releases no index lists: each is checked against
    * the library's shapes first, as the first one was (checkLinkedRelease),
-   * and planned with as that check read it.
+   * and planned with as that check read it. Those releases are read for
+   * the plan alone (DeckLibrary.linkedReads): under one release's limits
+   * together, however many it reads, and none kept once it is made.
    */
   async function planUpgrade(
     deck: Deck,
@@ -216,12 +231,15 @@ export function createLibraryUseCases({
     // The index tells a copy of the current release, or of no older one,
     // without reading a release (thousands of cards) or the copy's cards.
     if (!offersNewerRelease(deck, series)) return null;
+    // The newer release and those in between, from a link, are read for this plan alone: kept with it, and under one
+    // release's limits together. The copy's own release is the library's to keep, as deckRelease reads it.
+    const reads = fromLink === true ? deckLibrary.linkedReads() : deckLibrary;
     // A release from a link is checked as it is read, and that read is the one fetchLibraryDeck gives then; the
     // releases in between and the notes come from it too, not from the series as read before.
-    const checked = fromLink === true ? await checkLinkedRelease(series.url) : series;
+    const checked = fromLink === true ? await checkLinkedRelease(series.url, reads) : series;
     const [from, to, copy] = await Promise.all([
       deckLibrary.fetchLibraryDeck(deck.sourceUrl),
-      deckLibrary.fetchLibraryDeck(series.url),
+      reads.fetchLibraryDeck(series.url),
       cards(),
     ]);
     const inBetween = [
@@ -239,14 +257,14 @@ export function createLibraryUseCases({
     // Oldest first. A release from a link lists what its creator wrote: MAX_LINKED_RELEASES of them at most, the
     // newest; a card as one left out has it counts as the user's, and is kept.
     const betweenUrls = fromLink === true ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
-    if (fromLink === true) await readEach(betweenUrls, checkLinkedRelease);
-    const between = await readEach(betweenUrls, (url) => deckLibrary.fetchLibraryDeck(url));
+    if (fromLink === true) await readEach(betweenUrls, (url) => checkLinkedRelease(url, reads));
+    const between = await readEach(betweenUrls, (url) => reads.fetchLibraryDeck(url));
     // A course's outline stays in its release: a newer one may change only that.
     const outlines =
       from.isCourse === true && to.isCourse === true
         ? await Promise.all([
             deckLibrary.fetchCourseOutline(from.url),
-            deckLibrary.fetchCourseOutline(to.url),
+            reads.fetchCourseOutline(to.url),
           ])
         : null;
     return planLibraryUpgrade({
@@ -275,7 +293,7 @@ export function createLibraryUseCases({
       isCopyOf(deck, libraryDeck),
     );
     if (indexed !== undefined) return { series: indexed };
-    return linkedSeries(deck.sourceUrl!, new Map()).then(
+    return linkedSeries(deck.sourceUrl!).then(
       (found) => (found.complete ? { series: found.series, fromLink: true } : { series: null }),
       () => ({ series: null }),
     );
@@ -286,10 +304,14 @@ export function createLibraryUseCases({
    * library's shapes (releaseNotConforming), or is in a format newer than
    * they have (refuseNonConforming); its warnings do not. The read
    * accepted is the one the library gives from then on, as the release's
-   * cards are imported or planned with (DeckLibrary.readRelease).
+   * cards are imported or planned with (DeckLibrary.readRelease), by
+   * `reads` (an upgrade plan's own, DeckLibrary.linkedReads).
    */
-  function checkLinkedRelease(url: string): Promise<LibraryDeck> {
-    return deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
+  function checkLinkedRelease(
+    url: string,
+    reads: LinkedReleaseReads = deckLibrary,
+  ): Promise<LibraryDeck> {
+    return reads.readRelease(url, (report) => refuseNonConforming(url, report));
   }
   /**
    * Refuse a release with a subject in a format newer than the library's
@@ -327,41 +349,49 @@ export function createLibraryUseCases({
    * itself unless its creator's catalog can be read (`complete`), then
    * the newest of its series the catalog links. A release the
    * catalog links that cannot be read is passed over, and so is one the
-   * copied release lists, as no newer one; of the rest, no more than
-   * MAX_LINKED_RELEASES are read (likeliestNewer). `reads` keeps each
-   * release read, for the copies looked up together: one read of each.
+   * copied release lists, as no newer one. Of the rest, those named as
+   * the copied release are read one at a time, the highest version first,
+   * until one is a newer release of its series: the newest. Only when
+   * none is are the others read (likeliestNewer). The copied release,
+   * the catalog and those are read for this lookup alone
+   * (DeckLibrary.linkedReads), under one release's limits together: past
+   * them (linkedReleasesTooLarge) before a newer release is found, the
+   * newest is not known (not `complete`).
    */
   async function linkedSeries(
     url: string,
-    reads: Map<string, Promise<LibraryDeck>>,
   ): Promise<{ copied: LibraryDeck; series: LibraryDeck; complete: boolean }> {
-    const read = (release: string) => {
-      let made = reads.get(release);
-      if (made === undefined) {
-        made = deckLibrary.readRelease(release);
-        reads.set(release, made);
-      }
-      return made;
-    };
-    const [copied, published] = await Promise.all([read(url), deckLibrary.publishedBeside(url)]);
+    const linked = deckLibrary.linkedReads();
+    const [copied, published] = await Promise.all([
+      linked.readRelease(url),
+      linked.publishedBeside(url),
+    ]);
     if (published === null) return { copied, series: copied, complete: false };
     const listed = new Set(copied.releases.map((release) => release.url));
-    const others = await readEach(
-      likeliestNewer(
-        url,
-        published.filter((other) => !listed.has(other)),
-      ),
-      (other) => read(other).catch(() => null),
+    const { named, others } = likeliestNewer(
+      url,
+      [...new Set(published)].filter((other) => other !== url && !listed.has(other)),
     );
-    return { copied, series: newestRelease(copied, others), complete: true };
+    let newest = copied;
+    let pastLimits = false;
+    // Once a newer release is found, or past the limits, the rest are not read.
+    const read = async (other: string): Promise<void> => {
+      if (pastLimits || newest !== copied) return;
+      const release = await linked.readRelease(other).catch((error: unknown) => {
+        if (error instanceof AppError && error.code === "linkedReleasesTooLarge") pastLimits = true;
+        return null;
+      });
+      newest = newestRelease(newest, [release]);
+    };
+    await readEach(named, read, 1);
+    await readEach(others, read);
+    if (newest === copied && pastLimits) return { copied, series: copied, complete: false };
+    return { copied, series: newest, complete: true };
   }
   /** A copy whose series the library's index does not list, as a release added from a link; as it was when its release cannot be read. */
-  async function linkedCopy(
-    copy: LibraryCopy,
-    reads: Map<string, Promise<LibraryDeck>>,
-  ): Promise<LibraryCopy> {
+  async function linkedCopy(copy: LibraryCopy): Promise<LibraryCopy> {
     try {
-      const { copied, series, complete } = await linkedSeries(copy.deck.sourceUrl!, reads);
+      const { copied, series, complete } = await linkedSeries(copy.deck.sourceUrl!);
       return {
         deck: copy.deck,
         series,
@@ -408,11 +438,8 @@ export function createLibraryUseCases({
       const decks = await deckRepository.listDecks(instanceUrl);
       if (decks.every((deck) => deck.sourceUrl === undefined)) return [];
       const copies = libraryCopiesOf(decks, await deckLibrary.listLibraryDecks());
-      // A creator's catalog links many releases, maybe of several copies: each is read once.
-      const reads = new Map<string, Promise<LibraryDeck>>();
-      return Promise.all(
-        copies.map((copy) => (copy.series === null ? linkedCopy(copy, reads) : copy)),
-      );
+      // Each copy's series is looked up on its own, under limits of its own, as its deck's page looks it up.
+      return Promise.all(copies.map((copy) => (copy.series === null ? linkedCopy(copy) : copy)));
     },
     async addReleaseLanguages(deck) {
       if (deck.sourceUrl === undefined) return null;

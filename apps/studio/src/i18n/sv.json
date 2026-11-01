@@ -808,7 +808,7 @@
       "failed": "{deck}: uppdateringen misslyckades i steget ”{step}”:",
       "badge": "Utgåva {version} finns",
       "badgeOf": "för {deck}",
-      "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den",
+      "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den, eller så är dess utgåvor större än vad Solid Memo läser",
       "peek": "Gå till en kopias rad ({j}, {k}) för att se vad en uppgradering skulle ändra.",
       "plan": "Uppgradering",
       "bulk": "Valda kopior",

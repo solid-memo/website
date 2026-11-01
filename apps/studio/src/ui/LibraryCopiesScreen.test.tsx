@@ -147,7 +147,7 @@ describe("LibraryCopiesScreen", () => {
     expect(cells("Pods From bob.example").slice(1)).toEqual([
       "Release 1",
       "Release 1",
-      "Not known: no public catalog of its creator lists it",
+      "Not known: no public catalog of its creator lists it, or its releases are larger than Solid Memo reads",
     ]);
     expect(cells("Lakes From bob.example")[3]).toBe("Up to date");
   });

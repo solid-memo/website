@@ -203,6 +203,8 @@ export function makeDeps() {
       throw new AppError("releaseUnreadable", { url });
     }),
     publishedBeside: vi.fn(async (): Promise<string[] | null> => null),
+    // A plan's reads are the library's own here: what each read gives is the test's to say.
+    linkedReads: vi.fn(() => deckLibrary),
   };
   const preferencesRepository: PreferencesRepository = {
     getPreferences: vi.fn(async () => null),

@@ -857,7 +857,7 @@
       "failed": "{deck} : la mise à jour a échoué à l’étape « {step} » :",
       "badge": "Version {version} parue",
       "badgeOf": "pour {deck}",
-      "newerUnknown": "Inconnue : aucun catalogue public de son créateur ne la répertorie",
+      "newerUnknown": "Inconnue : aucun catalogue public de son créateur ne la répertorie, ou ses publications sont plus volumineuses que ce que Solid Memo lit",
       "peek": "Placez-vous sur la ligne d’une copie ({j}, {k}) pour voir ce que sa mise à jour changerait.",
       "plan": "Mise à jour",
       "bulk": "Copies sélectionnées",

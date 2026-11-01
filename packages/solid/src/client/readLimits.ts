@@ -46,8 +46,27 @@ export const NO_SIZE_LIMITS: ReadLimits = {
 /** The statuses whose responses have no body (Fetch Standard, "null body status"). */
 const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
 
-/** Each response limitedFetch gave: the limits it is read under, and how it went past them, once it did. */
-const READS = new WeakMap<Response, { limits: ReadLimits; refused?: ReadLimitError }>();
+/**
+ * How much reads have taken in so far of the limits they share
+ * (limitedFetch with `spent`): every read counts in the same tally, and
+ * each is past the limits once the tally of all of them is.
+ */
+export interface ReadsSpent {
+  bytes: number;
+  quads: number;
+  characters: number;
+}
+
+/** Nothing taken in yet. */
+export function noneSpent(): ReadsSpent {
+  return { bytes: 0, quads: 0, characters: 0 };
+}
+
+/** Each response limitedFetch gave: the limits it is read under, what is spent of them, and how it went past them, once it did. */
+const READS = new WeakMap<
+  Response,
+  { limits: ReadLimits; spent: ReadsSpent; refused?: ReadLimitError }
+>();
 
 /**
  * The fetch, its answers read under `limits`: a body larger than they
@@ -55,28 +74,35 @@ const READS = new WeakMap<Response, { limits: ReadLimits; refused?: ReadLimitErr
  * ReadLimitError when its Content-Length says so, and the request is
  * canceled. A body read fails as the browser fails it, so the reason is
  * kept apart (refusalOf). The triples are counted where the body is
- * parsed (getSolidDatasetLinear), which asks limitsOf for the response's.
+ * parsed (getSolidDatasetLinear), which asks limitsOf for the response's,
+ * and spentOf for what is spent of them. Each answer has the limits to
+ * itself, unless `spent` is given: then all of them share the limits,
+ * each counting what it takes in into `spent`, a read refused too.
  */
 export function limitedFetch(
   fetch: typeof globalThis.fetch,
   limits: ReadLimits,
+  spent?: ReadsSpent,
 ): typeof globalThis.fetch {
   return async (input, init) => {
     const response = await fetch(input, init);
     // A status with no body (a 304 to a conditional read) has nothing to limit, and no response with a body can be made of it.
     if (response.body === null || NULL_BODY_STATUSES.has(response.status)) return response;
     const { url } = response;
-    if (Number(response.headers.get("Content-Length")) > limits.bytes) {
+    const tally = spent ?? noneSpent();
+    if (tally.bytes + Number(response.headers.get("Content-Length")) > limits.bytes) {
       await response.body.cancel();
       throw new ReadLimitError(url, limits);
     }
-    const read: { limits: ReadLimits; refused?: ReadLimitError } = { limits };
-    let bytes = 0;
+    const read: { limits: ReadLimits; spent: ReadsSpent; refused?: ReadLimitError } = {
+      limits,
+      spent: tally,
+    };
     const body = response.body.pipeThrough(
       new TransformStream<Uint8Array, Uint8Array>({
         transform(chunk, controller) {
-          bytes += chunk.byteLength;
-          if (bytes <= limits.bytes) return controller.enqueue(chunk);
+          tally.bytes += chunk.byteLength;
+          if (tally.bytes <= limits.bytes) return controller.enqueue(chunk);
           read.refused = new ReadLimitError(url, limits);
           controller.error(read.refused);
         },
@@ -99,6 +125,11 @@ export function limitsOf(response: Response): ReadLimits | undefined {
   return READS.get(response)?.limits;
 }
 
+/** What is spent of the limits a response is read under (limitedFetch), its read's own or shared with others; none with no limits. */
+export function spentOf(response: Response): ReadsSpent | undefined {
+  return READS.get(response)?.spent;
+}
+
 /** Why the body of a response limitedFetch gave failed to be read: past its limit; undefined when it was not, or there was no response. */
 export function refusalOf(response: Response | undefined): ReadLimitError | undefined {
   return response === undefined ? undefined : READS.get(response)?.refused;
@@ -110,17 +141,18 @@ export function refusalOf(response: Response | undefined): ReadLimitError | unde
  * language, graph): a prefix lets a short line of Turtle, or a context
  * a short line of JSON-LD, stand for terms as long as it is, so a
  * document's bytes do not bound what its triples hold. Each call counts
- * one triple, and says whether the count is now past either limit; never
- * with no limits.
+ * one triple, into `spent` (by default the parse's own), and says
+ * whether the count is now past either limit; never with no limits.
  */
-export function quadTally(limits: ReadLimits | undefined): (quad: Quad) => boolean {
+export function quadTally(
+  limits: ReadLimits | undefined,
+  spent: ReadsSpent = noneSpent(),
+): (quad: Quad) => boolean {
   if (limits === undefined) return () => false;
-  let quads = 0;
-  let characters = 0;
   return ({ subject, predicate, object, graph }) => {
-    quads++;
-    characters += length(subject) + length(predicate) + length(object) + length(graph);
-    return quads > limits.quads || characters > limits.characters;
+    spent.quads++;
+    spent.characters += length(subject) + length(predicate) + length(object) + length(graph);
+    return spent.quads > limits.quads || spent.characters > limits.characters;
   };
 }
 

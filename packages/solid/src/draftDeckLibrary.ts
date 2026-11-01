@@ -33,7 +33,7 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
   }
   const listed = () => draftLibraryDeck(draft);
 
-  return {
+  const library: DeckLibrary = {
     async listLibraryDecks() {
       return [listed()];
     },
@@ -73,5 +73,11 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
     async publishedBeside() {
       return null;
     },
+
+    // Nothing of a draft is kept, so a plan's reads are the library's own.
+    linkedReads() {
+      return library;
+    },
   };
+  return library;
 }

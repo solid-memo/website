@@ -100,6 +100,8 @@ describe("the deck library", () => {
     });
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(copy.sourceUrl);
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(current.url);
+    // A library copy's releases are the library's to read and keep, under a release's limits each.
+    expect(deps.deckLibrary.linkedReads).not.toHaveBeenCalled();
     expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
   });
   it("planLibraryUpgrade does not read the index again for a copy whose series is found", async () => {
@@ -504,14 +506,14 @@ describe("the deck library", () => {
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
         { deck: gone, series: null, version: null, newer: false },
       ]);
-      // Each release is read once, however many copies the catalog serves; none the copied one lists, which is no newer; those named as it first, the newest first.
+      // None the copied one lists, which is no newer; those named as it, the newest first, until one of its series is
+      // read; none named otherwise then.
       const reads = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
       expect(reads).toEqual([
         `${RELEASES}v1.ttl`,
         "https://carol.example/v1.ttl",
         `${RELEASES}v9.ttl`,
         `${RELEASES}v2.ttl`,
-        elsewhere.url,
       ]);
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue(null);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
@@ -532,15 +534,17 @@ describe("the deck library", () => {
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
         { deck: lakes, series: elsewhere, version: "3", newer: false, fromLink: true },
       ]);
+      // Each copy's lookup reads them on its own, under limits of its own: none read for the other is shared.
       expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
         `${RELEASES}v1.ttl`,
         elsewhere.url,
         `${RELEASES}v9.ttl`,
         `${RELEASES}v2.ttl`,
+        `${RELEASES}v9.ttl`,
       ]);
     });
 
-    it("reads no more than sixteen of the releases a creator's catalog links, four at once, those named as the copy's release first, the newest first", async () => {
+    it("reads the releases named as the copy's release one at a time, the newest first, and no more once it finds a newer one of its series", async () => {
       const deps = makeDeps();
       const versions = Array.from({ length: 40 }, (_, at) => at + 2);
       reading(deps, [linked(1), ...versions.map((version) => linked(version))]);
@@ -549,30 +553,162 @@ describe("the deck library", () => {
         ...others,
         ...versions.map((version) => `${RELEASES}v${version}.ttl`),
       ]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
+      await expect(createUseCases(deps).listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(41), version: "1", newer: true, fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v41.ttl`,
+      ]);
+    });
+
+    it("reads no more than sixteen of the releases named as the copy's, one at a time, then four of the others at once", async () => {
+      const deps = makeDeps();
+      const versions = Array.from({ length: 40 }, (_, at) => at + 2);
+      // Named as the copy's release, but of another series.
+      const unrelated = (version: number) =>
+        linked(version, { seriesUrl: "https://bob.example/memo/other#series" });
+      const others = Array.from({ length: 20 }, (_, at) => `https://bob.example/other-${at}.ttl`);
+      reading(deps, [
+        linked(1),
+        ...versions.map(unrelated),
+        ...others.map((url) => linked(9, { url, seriesUrl: `${url}#series` })),
+      ]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        ...others,
+        ...versions.map((version) => `${RELEASES}v${version}.ttl`),
+      ]);
       let open = 0;
-      let most = 0;
+      const most: number[] = [];
       const read = vi.mocked(deps.deckLibrary.readRelease).getMockImplementation()!;
       vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url) => {
-        most = Math.max(most, ++open);
+        most.push(++open);
         await new Promise((resolve) => setTimeout(resolve, 1));
         open--;
         return read(url);
       });
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
-      const useCases = createUseCases(deps);
-      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
-        { deck: copy, series: linked(41), version: "1", newer: true, fromLink: true },
+      await expect(createUseCases(deps).listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(1), version: "1", newer: false, fromLink: true },
       ]);
-      const reads = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
-      expect(reads).toEqual([
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
         `${RELEASES}v1.ttl`,
         ...versions
           .slice(-16)
           .reverse()
           .map((version) => `${RELEASES}v${version}.ttl`),
+        ...others.slice(0, 4),
       ]);
-      expect(most).toBe(4);
+      expect(Math.max(...most.slice(0, 17))).toBe(1);
+      expect(Math.max(...most.slice(17))).toBe(4);
+    });
+
+    it("finds a series in a catalog of its creator's other decks, and reads few of them: a newer release named as the copy's, else four of the others", async () => {
+      const deps = makeDeps();
+      const decks = Array.from(
+        { length: 12 },
+        (_, at) => `https://bob.example/memo/releases/deck-${at}/v1.ttl`,
+      );
+      // A newer version its creator had to give another name, as a place taken.
+      const renamed = linked(3, { url: "https://bob.example/memo/releases/rivers-2/v3.ttl" });
+      reading(deps, [
+        linked(1),
+        linked(2),
+        renamed,
+        ...decks.map((url) => linked(1, { url, seriesUrl: `${url}#series` })),
+      ]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        ...decks,
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+      ]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+      ]);
+      // The newest copied: none of the others is newer, four of them read.
+      vi.mocked(deps.deckLibrary.readRelease).mockClear();
+      const newest: Deck = { ...copy, sourceUrl: `${RELEASES}v2.ttl` };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([newest]);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: newest, series: linked(2), version: "2", newer: false, fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
+        `${RELEASES}v2.ttl`,
+        ...decks.slice(0, 4),
+      ]);
+      // A newer one named otherwise is found among them.
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        renamed.url,
+        ...decks,
+        `${RELEASES}v2.ttl`,
+      ]);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: newest, series: renamed, version: "2", newer: true, fromLink: true },
+      ]);
+    });
+
+    it("looks up each linked copy's series by reads of its own, under one release's limits together: past them, a newer version is not known, and the deck's page offers none", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1), linked(2), linked(3), linked(4)]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+        `${RELEASES}v3.ttl`,
+        `${RELEASES}v4.ttl`,
+      ]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      const other: Deck = { ...deck, url: `${deck.url}-other`, sourceUrl: `${RELEASES}v1.ttl` };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, other]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(4), version: "1", newer: true, fromLink: true },
+        { deck: other, series: linked(4), version: "1", newer: true, fromLink: true },
+      ]);
+      // One lookup's reads for each copy, none shared with another's.
+      expect(deps.deckLibrary.linkedReads).toHaveBeenCalledTimes(2);
+      // The newest is the one past the limits: the rest are not read, and no newer one is known.
+      const read = vi.mocked(deps.deckLibrary.readRelease).getMockImplementation()!;
+      vi.mocked(deps.deckLibrary.readRelease).mockReset();
+      vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url, accept) => {
+        if (url === `${RELEASES}v4.ttl`)
+          throw new AppError("linkedReleasesTooLarge", { host: "bob.example" });
+        return read(url, accept);
+      });
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v4.ttl`,
+      ]);
+      // Those after the one past the limits are not read, named otherwise either.
+      vi.mocked(deps.deckLibrary.readRelease).mockClear();
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v4.ttl`,
+        ...Array.from({ length: 8 }, (_, at) => `https://bob.example/other-${at}.ttl`),
+      ]);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v4.ttl`,
+      ]);
+      // The deck's page offers no upgrade either.
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
+      expect(checked(deps)).toEqual([]);
     });
 
     it("planLibraryUpgrade plans a linked copy against the newest version its creator's catalog lists, and offers nothing when it cannot be read", async () => {
@@ -707,6 +843,86 @@ describe("the deck library", () => {
           .slice(2),
       ).toEqual(newest);
       expect(most).toBeLessThanOrEqual(4);
+    });
+
+    it("planLibraryUpgrade reads a linked copy's newer release and those in between through reads of the plan's own, its own release through the library", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v3.ttl`,
+      ]);
+      reading(deps, [linked(1), linked(3)]);
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      // v3 adds a card.
+      const content = async (url: string): Promise<LibraryDeckContent> => ({
+        ...libraryContent,
+        url,
+        version: url.slice(-5, -4),
+        cards: url.endsWith("v3.ttl")
+          ? [
+              ...libraryContent.cards,
+              { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 },
+            ]
+          : libraryContent.cards,
+      });
+      const planReads = () => ({
+        readRelease: vi.fn(async (url: string, accept?: (report: DocumentReport) => void) => {
+          accept?.(conforming(url));
+          return linked(Number(url.slice(-5, -4)));
+        }),
+        fetchLibraryDeck: vi.fn(content),
+        fetchCourseOutline: vi.fn(async (releaseUrl: string) => ({ releaseUrl, chapters: [] })),
+        publishedBeside: deps.deckLibrary.publishedBeside,
+      });
+      const made: ReturnType<typeof planReads>[] = [];
+      vi.mocked(deps.deckLibrary.linkedReads).mockImplementation(() => {
+        made.push(planReads());
+        return made.at(-1)!;
+      });
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(content);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      const useCases = createUseCases(deps);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({ toVersion: "3" });
+      await useCases.planLibraryUpgrade(copy);
+      // A lookup of the series' reads, then a plan's, each time, none shared with those before.
+      expect(made).toHaveLength(4);
+      const [lookups, plans] = [
+        made.filter((_, at) => at % 2 === 0),
+        made.filter((_, at) => at % 2 === 1),
+      ];
+      for (const reads of lookups) {
+        expect(reads.readRelease.mock.calls.map(([url]) => url)).toEqual([
+          `${RELEASES}v1.ttl`,
+          `${RELEASES}v3.ttl`,
+        ]);
+        expect(reads.fetchLibraryDeck).not.toHaveBeenCalled();
+      }
+      for (const reads of plans) {
+        expect(reads.readRelease.mock.calls.map(([url]) => url)).toEqual([
+          `${RELEASES}v3.ttl`,
+          `${RELEASES}v2.ttl`,
+        ]);
+        expect(reads.fetchLibraryDeck.mock.calls.map(([url]) => url)).toEqual([
+          `${RELEASES}v3.ttl`,
+          `${RELEASES}v2.ttl`,
+        ]);
+      }
+      expect(vi.mocked(deps.deckLibrary.fetchLibraryDeck).mock.calls).toEqual([
+        [`${RELEASES}v1.ttl`],
+        [`${RELEASES}v1.ttl`],
+      ]);
+      // Past what the plan's reads may read together, nothing is offered.
+      vi.mocked(deps.deckLibrary.linkedReads)
+        .mockImplementationOnce(planReads)
+        .mockImplementationOnce(() => ({
+          ...planReads(),
+          readRelease: async () => {
+            throw new AppError("linkedReleasesTooLarge", { host: "bob.example" });
+          },
+        }));
+      await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({
+        code: "linkedReleasesTooLarge",
+      });
     });
   });
   it("importLibraryDeck fetches the deck's content and imports it", async () => {

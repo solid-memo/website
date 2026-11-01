@@ -21,7 +21,9 @@ import {
   limitsOf,
   NO_SIZE_LIMITS,
   quadTally,
+  type ReadsSpent,
   refusalOf,
+  spentOf,
   type TextStream,
   textChunks,
   writeTurtle,
@@ -159,14 +161,21 @@ function resourceOf(response: Response): Resource {
 /**
  * A collector of a text's quads, parsed as the document at `url` under
  * `limits`: `add` keeps each, until one past them (quadTally), which
- * drops what was kept and rejects once, with a ReadLimitError, as
+ * drops what was kept and rejects once, with a ReadLimitError (the
+ * triples counted into `spent` too, when the read shares its limits
+ * with others: limitedFetch), as
  * `refuse` does for a text whose declarations are past what a read
  * takes in, with limits or with none (writeTurtle); nothing
  * more is kept, and `refused` says to stop the parser.
  */
-function collector(url: string, limits: ReadLimits | undefined, reject: (error: Error) => void) {
+function collector(
+  url: string,
+  limits: ReadLimits | undefined,
+  reject: (error: Error) => void,
+  spent?: ReadsSpent,
+) {
   const quads: Quad[] = [];
-  const past = quadTally(limits);
+  const past = quadTally(limits, spent);
   let refused = false;
   const refuse = (): void => {
     refused = true;
@@ -192,9 +201,14 @@ function collector(url: string, limits: ReadLimits | undefined, reject: (error: 
  * past what any read takes in (writeTurtle). The text is written to the
  * parser in parts, so that it reads no further than the part it is in.
  */
-function parseTurtle(text: string, baseIRI: string, limits?: ReadLimits): Promise<Quad[]> {
+function parseTurtle(
+  text: string,
+  baseIRI: string,
+  limits?: ReadLimits,
+  spent?: ReadsSpent,
+): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
-    const { quads, add, refuse, refused } = collector(baseIRI, limits, reject);
+    const { quads, add, refuse, refused } = collector(baseIRI, limits, reject, spent);
     const parser = new Parser({ format: TURTLE, baseIRI });
     // n3's parser reads a stream as such an object, as its own stream parser hands it one.
     const parse = (stream: TextStream) =>
@@ -267,7 +281,7 @@ async function quadsOfResponse(response: Response, resource: Resource): Promise<
     throw refusalOf(response) ?? error;
   });
   try {
-    return await parseTurtle(text, url, limits);
+    return await parseTurtle(text, url, limits, spentOf(response));
   } catch (error) {
     if (error instanceof ReadLimitError) throw error;
     throw new Error(

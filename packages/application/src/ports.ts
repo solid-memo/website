@@ -425,7 +425,27 @@ export interface DeckLibrary {
    * be read: an instance's catalog is private unless its owner shares it.
    */
   publishedBeside(url: string): Promise<string[] | null>;
+  /**
+   * Reads of releases from a link for one upgrade plan (planLibraryUpgrade
+   * of a copy from a link), or for one lookup of such a copy's series
+   * (its release and those its creator's catalog links): read and kept
+   * as the library's are, but kept only by what is returned, never by the
+   * library, and all of them read under one release's limits together,
+   * not each under its own: the releases are their creator's to make, as
+   * many as a release or a catalog may list and each as large as a
+   * release may be. Past those limits, the read that goes past them fails
+   * with linkedReleasesTooLarge, of them all, not releaseTooLarge, as it
+   * may be within a release's limits on its own. A lookup reads its
+   * creator's catalog (publishedBeside) under them too.
+   */
+  linkedReads(): LinkedReleaseReads;
 }
+
+/** The reads of releases from a link one upgrade plan, or one lookup of a series, makes (DeckLibrary.linkedReads), as the library's are made. */
+export type LinkedReleaseReads = Pick<
+  DeckLibrary,
+  "readRelease" | "fetchLibraryDeck" | "fetchCourseOutline" | "publishedBeside"
+>;
 
 /**
  * Driven port: a deck as a file, in Turtle or JSON-LD

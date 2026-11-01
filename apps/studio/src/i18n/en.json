@@ -808,7 +808,7 @@
       "failed": "{deck}: the update failed while {step}:",
       "badge": "Release {version} out",
       "badgeOf": "for {deck}",
-      "newerUnknown": "Not known: no public catalog of its creator lists it",
+      "newerUnknown": "Not known: no public catalog of its creator lists it, or its releases are larger than Solid Memo reads",
       "peek": "Move to a copy's row ({j}, {k}) to see what upgrading it would change.",
       "plan": "Upgrade",
       "bulk": "Selected copies",

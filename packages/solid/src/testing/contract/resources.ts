@@ -6,7 +6,7 @@ import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
 import { HttpError, ReadLimitError } from "../../client/interface";
-import { limitedFetch, NO_SIZE_LIMITS, RELEASE_LIMITS } from "../../client/readLimits";
+import { limitedFetch, NO_SIZE_LIMITS, noneSpent, RELEASE_LIMITS } from "../../client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
 import { type DataClient, turtleAt } from "./rdf";
 
@@ -200,6 +200,21 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
           expect(error).toBeInstanceOf(ReadLimitError);
           expect(error).toMatchObject({ name: "ReadLimitError", url: URL_, limits: limit });
         }
+      }
+    });
+
+    it("reads documents that share their limits under them together, the triples of each counted", async () => {
+      // Each within the limits alone, the second past them after the first.
+      const limits = { bytes: turtle.length * 4, quads: 5, characters: 1000 };
+      for (const read of [
+        (fetch: typeof globalThis.fetch) => getSolidDatasetLinear(URL_, { fetch }),
+        (fetch: typeof globalThis.fetch) => readDocument(URL_, { fetch }),
+      ]) {
+        const spent = noneSpent();
+        const fetch = limitedFetch(turtleAt(turtle), limits, spent);
+        await read(fetch);
+        expect(spent.quads).toBe(3);
+        await expect(read(fetch)).rejects.toMatchObject({ name: "ReadLimitError", limits });
       }
     });
 
