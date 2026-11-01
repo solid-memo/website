@@ -117,9 +117,10 @@ export function toDeck(
   const read = readVersioned(thing, "deck");
   if (read === null) return null;
   const url = asUrl(thing);
-  const names = new Map(agentNames);
+  // Only a deck before format 3 names agents of its own: the document's are not copied for each deck, which made many decks and agents take quadratic time (GHSA-hcrw-cr33-jg78).
+  const own = new Map<string, string>();
   if (read.record.version < 3) {
-    for (const author of read.record.data.creator) names.set(agentUrlOf(url, author), author);
+    for (const author of read.record.data.creator) own.set(agentUrlOf(url, author), author);
   }
   const completedChapters = getUrlAll(thing, SM.completedChapter);
   const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);
@@ -129,7 +130,7 @@ export function toDeck(
       url,
       read.storedVersion,
       migrate("deck", read.record, { subject: url }),
-      (agent) => names.get(agent) ?? agent,
+      (agent) => own.get(agent) ?? agentNames.get(agent) ?? agent,
     ),
     // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
     ...(getUrlAll(thing, RDF.type).includes(SCHEMA.Course) ? { course: true as const } : {}),
