@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.11](https://github.com/solid-memo/website/compare/v6.25.10...v6.25.11) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** apply a document's instance-check repairs in one edit ([cacf01f](https://github.com/solid-memo/website/commit/cacf01fbf4a106aa706954cdc9e9296ae8f78866))
+
 ## [6.25.10](https://github.com/solid-memo/website/compare/v6.25.9...v6.25.10) (2026-11-01)
 
 ### Bug Fixes
