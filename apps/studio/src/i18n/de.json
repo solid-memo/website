@@ -808,7 +808,7 @@
       "failed": "„{deck}“: Die Aktualisierung ist beim Schritt „{step}“ fehlgeschlagen:",
       "badge": "Ausgabe {version} ist erschienen",
       "badgeOf": "für „{deck}“",
-      "newerUnknown": "Unbekannt: Der Stapel steht in keinem öffentlichen Katalog der Person, die ihn erstellt hat",
+      "newerUnknown": "Unbekannt: Der Stapel steht in keinem öffentlichen Katalog der Person, die ihn erstellt hat, oder seine Ausgaben sind größer, als Solid Memo liest",
       "peek": "Gehe zur Zeile einer Kopie ({j}, {k}), um zu sehen, was eine Aktualisierung ändern würde.",
       "plan": "Aktualisierung",
       "bulk": "Ausgewählte Kopien",

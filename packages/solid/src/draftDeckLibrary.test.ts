@@ -85,5 +85,7 @@ describe("createDraftDeckLibrary", () => {
       code: "releaseUnreadable",
     });
     expect(await library.publishedBeside(DRAFT)).toBeNull();
+    // Nothing of it is kept: a plan's reads are its own.
+    expect(library.linkedReads()).toBe(library);
   });
 });

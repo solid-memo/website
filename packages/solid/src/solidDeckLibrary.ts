@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeckLibrary } from "@solid-memo/application/ports";
+import type { DeckLibrary, LinkedReleaseReads } from "@solid-memo/application/ports";
 import type { Dataset } from "./client/rdf";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { DocumentReport } from "@solid-memo/domain/validation";
@@ -11,7 +11,7 @@ import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { catalogLinks } from "./catalogLinks";
 import { getSolidDatasetLinear } from "./client/resources";
-import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
+import { limitedFetch, noneSpent, RELEASE_LIMITS } from "./client/readLimits";
 import {
   toCourseOutline,
   toLibraryDeckContent,
@@ -19,7 +19,12 @@ import {
   toLibraryIndexView,
   toStandaloneLibraryDeck,
 } from "./mappers/libraryMapper";
-import { releaseReadError, shownReadError } from "./releaseReadError";
+import {
+  linkedReleasesTooLarge,
+  releaseReadError,
+  shownReadError,
+  type TooLarge,
+} from "./releaseReadError";
 import { SM } from "./vocab";
 
 export interface SolidDeckLibraryDeps {
@@ -59,10 +64,14 @@ export interface SolidDeckLibraryDeps {
  * (publishedBeside) is read as anyone reads it, as the fetch reads
  * everything: no login is sent.
  * Every release is read under RELEASE_LIMITS, as anyone's server may
- * serve one as it likes (a copy from a link reads its newer releases
- * here too), and so is that catalog; the library's releases are well
- * within them (client/readLimits.test.ts); a release past them is
- * releaseTooLarge, however it is read. The index, which grows with the
+ * serve one as it likes, and so is that catalog; the library's releases
+ * are well within them (client/readLimits.test.ts); a release past them
+ * is releaseTooLarge, however it is read. The releases one upgrade plan
+ * of a copy from a link reads (linkedReads) are read under them
+ * together, not each, and kept only with the plan: a release may list
+ * releases in between of its creator's choosing, each as large as a
+ * release may be. So are those one lookup of such a copy's series
+ * reads, its creator's catalogs too. The index, which grows with the
  * library and comes with the site, is not.
  */
 export function createSolidDeckLibrary({
@@ -71,9 +80,7 @@ export function createSolidDeckLibrary({
   validate,
 }: SolidDeckLibraryDeps): DeckLibrary {
   const limited = limitedFetch(fetch, RELEASE_LIMITS);
-  const releases = new Map<string, Promise<Dataset>>();
-  const contents = new Map<string, Promise<LibraryDeckContent>>();
-  const outlines = new Map<string, Promise<CourseOutline>>();
+  const reads = releaseReads(limited, validate);
   const indexes = new Map<string, Promise<Dataset>>();
   const decks = new Map<string, Promise<LibraryDeck[]>>();
   const views = new Map<string, Promise<LibraryIndexView>>();
@@ -81,15 +88,6 @@ export function createSolidDeckLibrary({
   /** The index's document, read once. */
   function index(): Promise<Dataset> {
     return kept(indexes, indexUrl, () => getSolidDatasetLinear(indexUrl, { fetch }));
-  }
-
-  /** The release's document, read once. */
-  function release(url: string): Promise<Dataset> {
-    return kept(releases, url, () =>
-      getSolidDatasetLinear(url, { fetch: limited }).catch((error: unknown) => {
-        throw shownReadError(url, error);
-      }),
-    );
   }
 
   return {
@@ -103,6 +101,44 @@ export function createSolidDeckLibrary({
       );
     },
 
+    ...reads,
+
+    // One plan's or lookup's reads, catalogs too: their own, kept with them alone, under one release's limits.
+    linkedReads() {
+      return releaseReads(
+        limitedFetch(fetch, RELEASE_LIMITS, noneSpent()),
+        validate,
+        linkedReleasesTooLarge,
+      );
+    },
+  };
+}
+
+/**
+ * Releases read with `limited`, each once, and what is made of it kept
+ * (createSolidDeckLibrary), in maps of their own: dropped with what is
+ * returned; a release's catalogs (publishedBeside) are read with it too.
+ * A read past the limits is shown as `tooLarge` says.
+ */
+function releaseReads(
+  limited: typeof globalThis.fetch,
+  validate: SolidDeckLibraryDeps["validate"],
+  tooLarge?: TooLarge,
+): LinkedReleaseReads {
+  const releases = new Map<string, Promise<Dataset>>();
+  const contents = new Map<string, Promise<LibraryDeckContent>>();
+  const outlines = new Map<string, Promise<CourseOutline>>();
+
+  /** The release's document, read once. */
+  function release(url: string): Promise<Dataset> {
+    return kept(releases, url, () =>
+      getSolidDatasetLinear(url, { fetch: limited }).catch((error: unknown) => {
+        throw shownReadError(url, error, tooLarge);
+      }),
+    );
+  }
+
+  return {
     fetchLibraryDeck(url) {
       return kept(contents, url, () =>
         release(url).then((dataset) => toLibraryDeckContent(url, dataset)),
@@ -120,7 +156,7 @@ export function createSolidDeckLibrary({
       try {
         dataset = await getSolidDatasetLinear(url, { fetch: limited });
       } catch (error) {
-        throw releaseReadError(url, error);
+        throw releaseReadError(url, error, tooLarge);
       }
       const read = toStandaloneLibraryDeck(url, dataset);
       if (accept !== undefined) {

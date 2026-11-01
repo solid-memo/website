@@ -1782,6 +1782,7 @@
     "draftGone": "Ce brouillon n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "releaseUnreadable": "Solid Memo ne peut pas lire de publication à l’adresse {url}. Vérifiez l’adresse et assurez-vous que la publication y est bien publiée.",
     "releaseTooLarge": "La publication à l’adresse {url} est plus volumineuse que toute publication que Solid Memo lit : elle n’a donc pas été lue. Vérifiez l’adresse, ou interrogez la personne qui l’a créée.",
+    "linkedReleasesTooLarge": "Les publications sur {host} que lit cette mise à jour sont, ensemble, plus volumineuses que ce que Solid Memo lit pour une mise à jour : elle n’est donc pas proposée. Interrogez la personne qui les a créées.",
     "notAReleaseFile": "Ce fichier ne contient pas exactement une publication de paquet ou de cours. Choisissez une publication enregistrée en Turtle ou en JSON-LD.",
     "draftIdUnsupported": "Ce brouillon nomme l’une de ses parties « #{id} », ce qu’un brouillon ne peut pas conserver : l’identifiant d’un brouillon se compose de lettres de A à Z, de chiffres, de « . », « _ » et « - », et commence par une lettre ou un chiffre. Solid Memo ne l’ouvre pas et ne le modifie pas.",
     "releaseIdUnsupported": "Cette publication nomme l’une de ses parties « #{id} », ce qu’un brouillon ne peut pas conserver : l’identifiant d’un brouillon se compose de lettres de A à Z, de chiffres, de « . », « _ » et « - », et commence par une lettre ou un chiffre. Elle ne peut pas devenir un brouillon.",

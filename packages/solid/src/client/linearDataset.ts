@@ -13,8 +13,10 @@ import type { Quad } from "@rdfjs/types";
 import { ReadLimitError, type ReadLimits } from "./interface";
 import {
   limitsOf,
+  spentOf,
   NO_SIZE_LIMITS,
   quadTally,
+  type ReadsSpent,
   refusalOf,
   type TextStream,
   writeTurtle,
@@ -51,6 +53,7 @@ export async function getSolidDatasetLinear(
       const response = await options.fetch(input, init);
       collected.response = response;
       collected.limits = limitsOf(response);
+      collected.spent = spentOf(response);
       return response;
     },
     parsers: { "text/turtle": collectingTurtleParser(collected, url) },
@@ -62,11 +65,12 @@ export async function getSolidDatasetLinear(
   return Object.freeze({ ...described, graphs: graphsOf(collected.quads!) });
 }
 
-/** What a read's parser collected: its quads, and the read's response, its limits and why it refused it, if it did. */
+/** What a read's parser collected: its quads, and the read's response, its limits, what is spent of them and why it refused it, if it did. */
 interface Collected {
   response?: Response;
   quads?: Quad[];
   limits?: ReadLimits;
+  spent?: ReadsSpent;
   refused?: ReadLimitError;
 }
 
@@ -90,7 +94,7 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
     onComplete: (callback) => parser.onComplete(callback),
     parse: (source, resourceInfo) => {
       const quads: Quad[] = [];
-      const past = quadTally(collected.limits);
+      const past = quadTally(collected.limits, collected.spent);
       collected.quads = quads;
       const refuse = () => {
         // The tally is past limits only under some; the declarations, under none too.

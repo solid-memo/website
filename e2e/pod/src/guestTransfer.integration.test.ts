@@ -100,6 +100,9 @@ const library: DeckLibrary = {
     throw new Error(`No release is read from a link: ${url}`);
   },
   publishedBeside: async () => null,
+  linkedReads: () => {
+    throw new Error("No release is read from a link here");
+  },
 };
 
 /**

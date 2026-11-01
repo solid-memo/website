@@ -857,7 +857,7 @@
       "failed": "{deck}: la actualización falló en el paso «{step}»:",
       "badge": "Versión {version} disponible",
       "badgeOf": "para {deck}",
-      "newerUnknown": "Se desconoce: ningún catálogo público de quien la creó la incluye",
+      "newerUnknown": "Se desconoce: ningún catálogo público de quien la creó la incluye, o sus publicaciones son más grandes de lo que Solid Memo lee",
       "peek": "Ve a la fila de una copia ({j}, {k}) para ver qué cambiaría al actualizarla.",
       "plan": "Actualización",
       "bulk": "Copias seleccionadas",

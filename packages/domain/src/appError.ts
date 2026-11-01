@@ -172,6 +172,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
   releaseTooLarge:
     "The release at {url} is larger than any release Solid Memo reads, so it was not read. Check the address, or ask the release's creator about it.",
+  linkedReleasesTooLarge:
+    "The releases on {host} that this update reads are larger together than Solid Memo reads for one update, so it is not offered. Ask their creator about them.",
   notAReleaseFile:
     "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
   draftIdUnsupported:

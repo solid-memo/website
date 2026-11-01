@@ -11,8 +11,11 @@ import { growth } from "@solid-memo/domain/testing/growth";
 import {
   limitedFetch,
   limitsOf,
+  noneSpent,
+  quadTally,
   refusalOf,
   RELEASE_LIMITS,
+  spentOf,
   textChunks,
   writeTurtle,
 } from "./readLimits";
@@ -96,6 +99,33 @@ describe("limitedFetch", () => {
       headers: { "Content-Length": "1000" },
     });
     await expect(limitedFetch(fetch, LIMITS)(URL_)).rejects.toBeInstanceOf(ReadLimitError);
+    expect(sent.canceled).toBe(true);
+  });
+
+  it("with what is spent, reads every answer under the limits together, each counting its bytes into it", async () => {
+    const spent = noneSpent();
+    const fetch = limitedFetch(serving("0123456").fetch, LIMITS, spent);
+    const first = await fetch(URL_);
+    expect(await first.text()).toBe("0123456");
+    expect(spent).toEqual({ bytes: 7, quads: 0, characters: 0 });
+    expect(spentOf(first)).toBe(spent);
+    // Within the limits alone, past them with the answer before.
+    const second = await fetch(URL_);
+    await expect(second.text()).rejects.toBeDefined();
+    expect(refusalOf(second)).toMatchObject({ url: URL_, limits: LIMITS });
+    // Each answer has the limits to itself without it.
+    const own = await limitedFetch(serving("0123456").fetch, LIMITS)(URL_);
+    expect(spentOf(own)).toEqual(noneSpent());
+    expect(await own.text()).toBe("0123456");
+    expect(spentOf(own)).toEqual({ bytes: 7, quads: 0, characters: 0 });
+  });
+
+  it("with what is spent, fails at once where the Content-Length says the body is past what is left", async () => {
+    const spent = { ...noneSpent(), bytes: 4 };
+    const { fetch, sent } = serving("0123456", { headers: { "Content-Length": "7" } });
+    await expect(limitedFetch(fetch, LIMITS, spent)(URL_)).rejects.toMatchObject({
+      limits: LIMITS,
+    });
     expect(sent.canceled).toBe(true);
   });
 
@@ -349,5 +379,22 @@ describe("writeTurtle", () => {
       );
       expect(ratio).toBeLessThan(4);
     }
+  });
+});
+
+describe("quadTally", () => {
+  it("counts the triples and their characters into what is spent, shared by tallies given the same", async () => {
+    const quads = await parseQuads("<#a> <#p> 1, 2, 3 .", "turtle", URL_, RELEASE_LIMITS);
+    const limits = { ...RELEASE_LIMITS, quads: 5 };
+    const spent = noneSpent();
+    const first = quadTally(limits, spent);
+    const second = quadTally(limits, spent);
+    expect(quads.map(first)).toEqual([false, false, false]);
+    expect(spent.quads).toBe(3);
+    expect(spent.characters).toBeGreaterThan(0);
+    // Five triples at most, together.
+    expect(quads.map(second)).toEqual([false, false, true]);
+    // A tally of its own counts from none.
+    expect(quads.map(quadTally(limits))).toEqual([false, false, false]);
   });
 });

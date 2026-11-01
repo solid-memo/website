@@ -1032,17 +1032,25 @@ flowchart LR
   release in the folders above it, nearest first and eight folders at
   most, read as anyone reads them. Of its links, it keeps only those at
   an address a release may have (`isPublishedReleaseUrl`), as the
-  user's own catalog does. The app then reads those releases but the
-  ones the copy's release lists: 16 at most, four at once,
-  those named as the copy's release first (`…/<name>/vN.ttl`), the
-  highest version first. A catalog is its creator's to write, so it may
-  link any number of releases. The newest of the same series is the
-  copy's upgrade
-  (`listLibraryUpdates`, `planLibraryUpgrade`, the Studio's
-  [library copies](studio.md#library-copies)). `listLibraryUpdates`
-  reads each release once for all the copies. For a catalog its owner
-  hasn't shared, the Studio says it's unknown whether a newer version is
-  out.
+  user's own catalog does. Of those links, the app reads only some, and
+  never one the copy's release lists. First come those named as the
+  copy's release (`…/<name>/vN.ttl`): 16 at most, one at a time, the
+  highest version first, until one is a newer release of the same
+  series. That one is the copy's upgrade. When none is, it reads four
+  of the catalog's other links at most, at once, as a newer version may
+  have had to take another name (a draft's place taken). A catalog is
+  its creator's to write, so it may link any number of releases, other
+  decks of theirs most of all (`listLibraryUpdates`,
+  `planLibraryUpgrade`, the Studio's
+  [library copies](studio.md#library-copies)). Each copy's lookup reads
+  those releases, the copy's own and the catalogs for that copy alone
+  (`DeckLibrary.linkedReads`), under one release's limits
+  (`RELEASE_LIMITS`) together, the Studio's and the deck page's alike.
+  When they're larger than that together before a newer release is
+  found, the app stops reading them, and whether a newer version is out
+  isn't known: the deck's page doesn't offer an upgrade, and says
+  nothing of it. For that, or for a catalog its owner hasn't shared,
+  the Studio says it's unknown whether a newer version is out.
 - Before an upgrade from a link is planned, the newer release and each
   one in between are read and checked against the library's shapes
   (`checkLinkedRelease`); one that breaks them refuses the upgrade
@@ -1055,6 +1063,17 @@ flowchart LR
   with a catalog's links, and reads the newest 16 of them at most, four
   at once, each once. A card as one left out has it counts as the
   user's, and the upgrade keeps it.
+- The newer release and the ones in between are read for that plan
+  alone (`DeckLibrary.linkedReads`). Together they're read under one
+  release's limits (`RELEASE_LIMITS`), not each under its own, and not
+  with those the copy's lookup read. When they're larger than that
+  together, the upgrade isn't offered (`linkedReleasesTooLarge`). That
+  error names the creator's host, not a release, as each of them may be
+  within a release's limits. The deck's page says nothing of it, and
+  the Studio says what the release would change couldn't be read. The
+  library doesn't keep them once the plan is made, so each plan reads
+  them again, the one an upgrade makes as it's applied too. The copy's
+  own release is read and kept as any other.
 - A copy from a link isn't given its release's new title or description
   languages when its page opens (`addReleaseLanguages`,
   [migrations.md](migrations.md)). Its release stays on the creator's
