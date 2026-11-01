@@ -2,20 +2,20 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { globSync, readFileSync } from "node:fs";
+import { join, matchesGlob } from "node:path";
 import JSON5 from "json5";
 import { describe, expect, it } from "vitest";
-import { type LockEntry, type Lockfile, SHIPPED } from "./checkDependencies.ts";
 
 /**
- * renovate.json5: Renovate merges most updates on its own once CI passes,
- * but a person merges every update to a workflow's action, since some of
- * the jobs that run one hold the deploy key and other secrets, and every
- * update of what the app ships, of what the release job runs while it
- * holds the key, and to a new major version. Every new
- * version of an npm dependency raises its range, and every week the npm
- * lockfiles are locked again, which a person merges
+ * renovate.json5: Renovate merges an update on its own once CI passes only
+ * where no rule holds it. A person merges every npm update, development
+ * tools' included, since the build that makes the deployed site and the
+ * release job run them, and an update of one can move a shipped package in
+ * the lockfile; every update to a workflow's action, since some of the
+ * jobs that run one hold the deploy key and other secrets; and every new
+ * major version. Every new version of an npm dependency raises its range,
+ * and every week the npm lockfiles are locked again, which a person merges
  * (GOVERNANCE.md#dependency-updates).
  */
 
@@ -44,62 +44,105 @@ const held = config.packageRules.findIndex(
     rule.automerge === false,
 );
 
-/** The index of the rule that holds the shipped packages' run-time dependencies. */
-const heldShipped = config.packageRules.findIndex(
-  (rule) =>
-    JSON.stringify(rule.matchManagers) === JSON.stringify(["npm"]) &&
-    rule.matchFileNames !== undefined &&
-    rule.automerge === false,
-);
-
-/** The index of the rule that holds what the root package.json lists and the app ships. */
-const heldRoot = config.packageRules.findIndex(
-  (rule) =>
-    JSON.stringify(rule.matchFileNames) === JSON.stringify(["package.json"]) &&
-    rule.automerge === false,
-);
-
 /** The index of the rule that holds every major update. */
 const heldMajor = config.packageRules.findIndex(
   (rule) =>
     JSON.stringify(rule.matchUpdateTypes) === JSON.stringify(["major"]) && rule.automerge === false,
 );
 
-/** The index of the rule that holds the tools the release job runs. */
-const heldRelease = config.packageRules.findIndex(
-  (rule) =>
-    Array.isArray(rule.matchDepNames) &&
-    rule.matchDepNames.includes("semantic-release") &&
-    rule.automerge === false,
-);
+/** One update Renovate may propose, as its package rules match it. */
+type Update = {
+  manager: string;
+  datasource: string;
+  packageFile: string;
+  depName: string;
+  depType?: string;
+  updateType: string;
+};
 
-const releaseConfig = (await import(new URL("../release.config.mjs", import.meta.url).href)) as {
-  default: { plugins: [string, unknown][] };
+/** Whether a rule's list matches a value: a `/regex/`, or a glob. */
+function listed(patterns: unknown, value: string | undefined): boolean {
+  if (value === undefined) return false;
+  return (patterns as string[]).some((pattern) =>
+    pattern.startsWith("/")
+      ? new RegExp(pattern.slice(1, pattern.lastIndexOf("/"))).test(value)
+      : matchesGlob(value, pattern),
+  );
+}
+
+/** What each `match*` field of a rule compares with. */
+const MATCHERS: Record<string, (update: Update) => string | undefined> = {
+  matchManagers: (update) => update.manager,
+  matchDatasources: (update) => update.datasource,
+  matchFileNames: (update) => update.packageFile,
+  matchDepNames: (update) => update.depName,
+  matchDepTypes: (update) => update.depType,
+  matchUpdateTypes: (update) => update.updateType,
 };
 
 /**
- * The package.json of every workspace package scripts/checkDependencies.ts
- * walks from SHIPPED: each root's, and each workspace package's that one
- * of them needs at run time, as package-lock.json links them.
+ * Whether Renovate would merge an update on its own: the top level's
+ * automerge, then the lock file maintenance's, then every package rule
+ * that matches it in order, the last one that sets automerge winning.
  */
-function shippedPackageFiles(lock: Lockfile): string[] {
-  const seen = new Set<string>();
-  const queue = [...SHIPPED];
-  for (let next = queue.shift(); next !== undefined; next = queue.shift()) {
-    if (seen.has(next)) continue;
-    seen.add(next);
-    const entry = lock.packages[next] ?? {};
-    const names = [
-      ...Object.keys(entry.dependencies ?? {}),
-      ...Object.keys(entry.optionalDependencies ?? {}),
-      ...Object.keys(entry.peerDependencies ?? {}),
-    ];
-    for (const name of names) {
-      const linked = lock.packages[`node_modules/${name}`];
-      if (linked?.link === true && linked.resolved !== undefined) queue.push(linked.resolved);
-    }
+function automerges(update: Update): boolean {
+  let automerge = config.automerge ?? false;
+  if (update.manager === "npm" && update.updateType === "lockFileMaintenance") {
+    automerge = (config.npm?.lockFileMaintenance?.automerge as boolean | undefined) ?? automerge;
   }
-  return [...seen].map((location) => `${location}/package.json`).sort();
+  for (const rule of config.packageRules) {
+    const fields = Object.keys(rule).filter((key) => key.startsWith("match"));
+    const matches = fields.every((field) => {
+      const value = MATCHERS[field];
+      if (value === undefined) throw new Error(`no matcher for ${field}`);
+      return listed(rule[field], value(update));
+    });
+    if (matches && rule.automerge !== undefined) automerge = rule.automerge;
+  }
+  return automerge;
+}
+
+/** Every update type Renovate proposes. */
+const UPDATE_TYPES = [
+  "major",
+  "minor",
+  "patch",
+  "pin",
+  "digest",
+  "pinDigest",
+  "bump",
+  "rollback",
+  "replacement",
+  "lockFileMaintenance",
+];
+
+/** The fields of a package.json that Renovate's npm manager reads dependencies from. */
+const DEP_TYPES = [
+  "dependencies",
+  "devDependencies",
+  "optionalDependencies",
+  "peerDependencies",
+  "overrides",
+  "engines",
+  "packageManager",
+];
+
+/** Every dependency each package.json in the repository lists, by its field. */
+function npmDependencies(): { packageFile: string; depName: string; depType: string }[] {
+  const files = globSync("**/package.json", { cwd: ROOT, exclude: ["**/node_modules/**"] });
+  return files.flatMap((packageFile) => {
+    const manifest = JSON.parse(readFileSync(join(ROOT, packageFile), "utf8")) as Record<
+      string,
+      unknown
+    >;
+    return DEP_TYPES.flatMap((depType) => {
+      const field = manifest[depType];
+      if (field === undefined) return [];
+      const names =
+        typeof field === "string" ? [field.split("@")[0] ?? field] : Object.keys(field as object);
+      return names.map((depName) => ({ packageFile, depName, depType }));
+    });
+  });
 }
 
 describe("renovate.json5", () => {
@@ -122,56 +165,131 @@ describe("renovate.json5", () => {
     expect(later.filter((rule) => rule.automerge === true)).toEqual([]);
   });
 
-  it("holds every update of what the app ships for a person", () => {
-    expect(heldShipped).toBeGreaterThanOrEqual(0);
-    const rule = config.packageRules[heldShipped] ?? {};
-    expect(Object.keys(rule).sort()).toEqual([
-      "automerge",
-      "matchDepTypes",
-      "matchFileNames",
-      "matchManagers",
-    ]);
-    // What scripts/checkDependencies.ts walks as needed at run time.
-    expect(rule.matchDepTypes).toEqual([
-      "dependencies",
-      "optionalDependencies",
-      "peerDependencies",
-    ]);
-    const lock = JSON.parse(readFileSync(join(ROOT, "package-lock.json"), "utf8")) as Lockfile;
-    expect([...(rule.matchFileNames as string[])].sort()).toEqual(shippedPackageFiles(lock));
+  it("holds every npm update for a person, development tools' included", () => {
+    const dependencies = npmDependencies();
+    // The root's, the shipped workspaces' and the end-to-end tests'.
+    const files = new Set(dependencies.map((dependency) => dependency.packageFile));
+    expect(files).toContain("package.json");
+    expect(files).toContain("apps/web/package.json");
+    expect(files).toContain("e2e/journeys/package.json");
+    // A development tool that the deployed site's build runs, one that
+    // the release job runs, and one that shares shipped packages with the
+    // app in the lockfile.
+    const names = new Set(dependencies.map((dependency) => dependency.depName));
+    for (const name of ["@preact/preset-vite", "turbo", "semantic-release", "markdownlint-cli2"]) {
+      expect(names).toContain(name);
+    }
+    const merged = dependencies.flatMap((dependency) =>
+      UPDATE_TYPES.flatMap((updateType) => {
+        const update = { manager: "npm", datasource: "npm", updateType, ...dependency };
+        return automerges(update) ? [update] : [];
+      }),
+    );
+    expect(merged).toEqual([]);
   });
 
-  it("holds every update of what the root lists and the app ships for a person", () => {
-    expect(heldRoot).toBeGreaterThanOrEqual(0);
-    const rule = config.packageRules[heldRoot] ?? {};
-    expect(Object.keys(rule).sort()).toEqual([
-      "automerge",
-      "matchDepNames",
-      "matchFileNames",
-      "matchManagers",
+  it("holds an npm update whatever it names, in whatever package file", () => {
+    for (const depType of [undefined, "devDependencies"]) {
+      for (const updateType of UPDATE_TYPES) {
+        const update = {
+          manager: "npm",
+          datasource: "npm",
+          packageFile: "tools/new/package.json",
+          depName: "a-new-tool",
+          depType,
+          updateType,
+        };
+        expect(automerges(update)).toBe(false);
+      }
+    }
+  });
+
+  it("holds an npm package's update in a workflow's comment too", () => {
+    // The workflows' regex manager takes whatever datasource a comment names.
+    for (const updateType of UPDATE_TYPES) {
+      const update = {
+        manager: "regex",
+        datasource: "npm",
+        packageFile: ".github/workflows/ci.yml",
+        depName: "a-new-tool",
+        updateType,
+      };
+      expect(automerges(update)).toBe(false);
+    }
+  });
+
+  it("holds every npm registry package with one rule that matches by its datasource alone", () => {
+    const rules = config.packageRules.filter(
+      (rule) =>
+        JSON.stringify(rule.matchDatasources) === JSON.stringify(["npm"]) &&
+        rule.automerge === false,
+    );
+    expect(rules.map((rule) => Object.keys(rule).sort())).toEqual([
+      ["automerge", "matchDatasources"],
     ]);
-    expect(rule.matchManagers).toEqual(["npm"]);
-    // npm marks each package that only development needs: the root's
-    // others are installed for the shipped packages, which the page bundles.
-    const root = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as LockEntry;
-    const lock = JSON.parse(readFileSync(join(ROOT, "package-lock.json"), "utf8")) as {
-      packages: Record<string, { dev?: boolean; devOptional?: boolean }>;
+  });
+
+  it("holds every update to a workflow's action, of every type", () => {
+    for (const updateType of UPDATE_TYPES) {
+      const update = {
+        manager: "github-actions",
+        datasource: "github-tags",
+        packageFile: ".github/workflows/ci.yml",
+        depName: "actions/checkout",
+        updateType,
+      };
+      expect(automerges(update)).toBe(false);
+    }
+  });
+
+  it("still merges a minor update of another manager's image on its own", () => {
+    const update = {
+      manager: "docker-compose",
+      datasource: "docker",
+      packageFile: "e2e/journeys/css/compose.yml",
+      depName: "solidproject/community-server",
+      updateType: "minor",
     };
-    const listed = [
-      ...Object.keys(root.dependencies ?? {}),
-      ...Object.keys(root.devDependencies ?? {}),
-      ...Object.keys(root.optionalDependencies ?? {}),
-    ];
-    const shipped = listed.filter((name) => {
-      const entry = lock.packages[`node_modules/${name}`];
-      return entry?.dev !== true && entry?.devOptional !== true;
-    });
-    expect([...(rule.matchDepNames as string[])].sort()).toEqual(shipped.sort());
+    expect(automerges(update)).toBe(true);
+    expect(automerges({ ...update, updateType: "major" })).toBe(false);
+    expect(automerges({ ...update, updateType: "digest" })).toBe(false);
   });
 
-  it("holds the end-to-end tests' dependencies out of the shipped ones", () => {
-    const files = config.packageRules[heldShipped]?.matchFileNames as string[];
-    expect(files.filter((file) => file.startsWith("e2e/"))).toEqual([]);
+  it("holds every update of a tool a workflow downloads for a person", () => {
+    const update = {
+      manager: "regex",
+      datasource: "github-release-attachments",
+      packageFile: ".github/workflows/ci.yml",
+      depName: "owner/tool",
+      updateType: "patch",
+    };
+    expect(automerges(update)).toBe(false);
+  });
+
+  it("holds every npm update with one rule that matches by its manager alone", () => {
+    const rules = config.packageRules.filter(
+      (rule) =>
+        JSON.stringify(rule.matchManagers) === JSON.stringify(["npm"]) && rule.automerge === false,
+    );
+    expect(rules.map((rule) => Object.keys(rule).sort())).toEqual([["automerge", "matchManagers"]]);
+  });
+
+  it("refuses a rule field the check does not know", () => {
+    // A matcher the check skipped could hold or merge an update unseen.
+    expect(() => {
+      config.packageRules.push({ matchCategories: ["js"], automerge: true });
+      try {
+        automerges({
+          manager: "npm",
+          datasource: "npm",
+          packageFile: "package.json",
+          depName: "turbo",
+          updateType: "patch",
+        });
+      } finally {
+        config.packageRules.pop();
+      }
+    }).toThrow("no matcher for matchCategories");
   });
 
   it("holds every major update for a person", () => {
@@ -180,30 +298,6 @@ describe("renovate.json5", () => {
       "automerge",
       "matchUpdateTypes",
     ]);
-  });
-
-  it("holds every update of what the release job runs with the deploy key", () => {
-    expect(heldRelease).toBeGreaterThanOrEqual(0);
-    const rule = config.packageRules[heldRelease] ?? {};
-    expect(Object.keys(rule).sort()).toEqual(["automerge", "matchDepNames"]);
-    expect(rule.matchDepNames).toEqual([
-      "semantic-release",
-      "/^@semantic-release\\//",
-      "conventional-changelog-conventionalcommits",
-      "vite",
-      "playwright",
-      "mermaid",
-    ]);
-    // Every plugin release.config.mjs runs is one of semantic-release's.
-    const plugins = releaseConfig.default.plugins.map(([name]) => name);
-    expect(plugins.filter((name) => !name.startsWith("@semantic-release/"))).toEqual([]);
-  });
-
-  it("lets no rule after the held ones merge an update on its own again", () => {
-    for (const index of [heldShipped, heldRoot, heldMajor, heldRelease]) {
-      const later = config.packageRules.slice(index + 1);
-      expect(later.filter((rule) => rule.automerge === true)).toEqual([]);
-    }
   });
 
   it("holds a security update of a held package too", () => {
