@@ -1677,7 +1677,8 @@
       "MaxLength": "Le texte est trop long.",
       "Closed": "La propriété n’est pas autorisée ici.",
       "DeckPlace": "L’entrée du paquet n’est pas dans le catalogue de son instance, ou elle désigne un document à une adresse qu’aucun document de paquet ne peut avoir, comme le contrôle d’accès d’une autre ressource ou l’un des documents propres de l’instance. Solid Memo ne l’utilise pas.",
-      "DateTimeRange": "Solid Memo ne peut pas lire cette date : elle est trop loin dans le futur ou le passé, ou plus longue qu’une date-heure, elle est donc lue comme une absence de date."
+      "DateTimeRange": "Solid Memo ne peut pas lire cette date : elle est trop loin dans le futur ou le passé, ou plus longue qu’une date-heure, elle est donc lue comme une absence de date.",
+      "FormatVersionRange": "Aucun format de Solid Memo n’a cette version : elle est inférieure à 1, Solid Memo ne peut donc pas lire le sujet."
     }
   },
   "webIdDocument": {

@@ -1603,7 +1603,8 @@
       "MaxLength": "Der Text ist zu lang.",
       "Closed": "Die Eigenschaft ist hier nicht erlaubt.",
       "DeckPlace": "Der Eintrag des Stapels steht nicht im Katalog seiner Instanz, oder er nennt ein Dokument unter einer Adresse, die kein Dokument eines Stapels haben darf, etwa die Zugriffskontrolle einer anderen Ressource oder eines der eigenen Dokumente der Instanz. Solid Memo verwendet ihn nicht.",
-      "DateTimeRange": "Solid Memo kann dieses Datum nicht lesen: Es liegt zu weit in der Zukunft oder Vergangenheit oder ist länger als ein Zeitpunkt, daher gilt es als kein Datum."
+      "DateTimeRange": "Solid Memo kann dieses Datum nicht lesen: Es liegt zu weit in der Zukunft oder Vergangenheit oder ist länger als ein Zeitpunkt, daher gilt es als kein Datum.",
+      "FormatVersionRange": "Kein Format von Solid Memo hat diese Version: Sie ist kleiner als 1, daher kann Solid Memo das Subjekt nicht lesen."
     }
   },
   "webIdDocument": {

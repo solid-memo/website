@@ -475,6 +475,42 @@ describe("createShaclShapeValidator", () => {
     expect(createEngine).toHaveBeenCalledOnce();
   });
 
+  it("reports a subject stamped with a version below 1 as not fitting its shape, as the app reads it, not as newer", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(DOC),
+        buildThing(createThing({ url: `${DOC}#deck-0` }))
+          .addIri(RDF.type, SM.Deck)
+          .addInteger(SM.formatVersion, 0)
+          .build(),
+      ),
+    );
+    const { validator, validateNode } = makeValidator();
+    await expect(validator.validateDocument(DOC)).resolves.toEqual({
+      url: DOC,
+      status: "checked",
+      subjects: [
+        {
+          url: `${DOC}#deck-0`,
+          status: "checked",
+          shape: "deck",
+          version: 0,
+          violations: [
+            {
+              path: SM.formatVersion,
+              message: { en: expect.stringContaining("below 1") },
+              builtIn: true,
+              value: "0",
+              severity: "violation",
+              constraint: "FormatVersionRange",
+            },
+          ],
+        },
+      ],
+    });
+    expect(validateNode).not.toHaveBeenCalled();
+  });
+
   it("checks a document with DCAT or FOAF subjects against DCAT-AP too, merging what it finds by subject", async () => {
     const DCAT_DATASET = "http://www.w3.org/ns/dcat#Dataset";
     let dataset = catalog();

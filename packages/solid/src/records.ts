@@ -239,16 +239,18 @@ function hasFixedValues(thing: Subject, descriptor: ShapeDescriptor): boolean {
 /**
  * A subject of the given kind, read with the shape of its stored version
  * — or, for a version newer than this app knows, with the latest shape
- * it has, the stored version passing through. Null when the subject is
- * not of the kind's class, lacks a value the kind's shape fixes, or does
- * not fit its shape.
+ * it has, the stored version passing through. Null when the subject's
+ * version is below 1, which no shape has, as no shape checks it; when
+ * it is not of the kind's class, lacks a value the kind's shape fixes,
+ * or does not fit its shape.
  */
 export function readVersioned<S extends ShapeName>(
   thing: Subject,
   shape: S,
 ): { storedVersion: number; record: VersionedRecord[S] } | null {
   const storedVersion = storedVersionOf(thing);
-  const version = Math.min(Math.max(storedVersion, 1), LATEST_VERSION[shape]);
+  if (storedVersion < 1) return null;
+  const version = Math.min(storedVersion, LATEST_VERSION[shape]);
   const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[version];
   if (!getUrlAll(thing, RDF.type).includes(descriptor.targetClass)) return null;
   if (!hasFixedValues(thing, descriptor)) return null;

@@ -223,6 +223,25 @@ function dateViolations(
     });
 }
 
+/**
+ * A subject stamped with a format version below 1, which no shape has:
+ * the app reads it as one that does not fit (records.ts readVersioned),
+ * so the check names it as such, not as a newer format left alone.
+ */
+function formatVersionViolation(version: number): Violation {
+  return {
+    path: SM.formatVersion,
+    message: { en: FORMAT_VERSION_RANGE },
+    builtIn: true,
+    value: String(version),
+    severity: "violation",
+    constraint: "FormatVersionRange",
+  };
+}
+
+const FORMAT_VERSION_RANGE =
+  "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject.";
+
 const DATE_TIME_RANGE =
   "Solid Memo can't read this date: it is too far in the future or the past, or longer than a date-time is, so it reads as no date.";
 
@@ -414,6 +433,17 @@ export function createShaclShapeValidator({
       violations.map((v) =>
         foreign.has(subject) || isForeignMember(blank, foreign, subject, v) ? asWarning(v) : v,
       );
+    /** A subject's results against its shape, with the dates the app can't read and, for a deck in a pod, where it is. */
+    const shapeViolations = async (thing: Subject, descriptor: ShapeDescriptor) => {
+      const subject = asUrl(thing);
+      const engine = await engineFor(descriptor);
+      const found = await engine.validateNode(data, subject, descriptor.shapeIri);
+      return [
+        ...found,
+        ...dateViolations(descriptor, (predicate) => unreadableDatetimes(thing, predicate), found),
+        ...(context === "pod" && descriptor.shape === "deck" ? placeViolations(thing, url) : []),
+      ];
+    };
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
@@ -425,7 +455,7 @@ export function createShaclShapeValidator({
         if (!isDeckBackLink(dataset, thing)) subjects.push({ url: subject, status: "untyped" });
         continue;
       }
-      if (pick.kind === "unknown-version") {
+      if (pick.kind === "unknown-version" && pick.version >= 1) {
         subjects.push({
           url: subject,
           status: "newer",
@@ -435,25 +465,24 @@ export function createShaclShapeValidator({
         });
         continue;
       }
-      const engine = await engineFor(pick.descriptor);
-      const found = await engine.validateNode(data, subject, pick.descriptor.shapeIri);
-      const violations = [
-        ...found,
-        ...dateViolations(
-          pick.descriptor,
-          (predicate) => unreadableDatetimes(thing, predicate),
-          found,
-        ),
-        ...(context === "pod" && pick.descriptor.shape === "deck"
-          ? placeViolations(thing, url)
-          : []),
-      ];
+      // A version below 1, which no shape has, is read as a subject that does not fit (records.ts readVersioned).
+      const checked =
+        pick.kind === "shape"
+          ? {
+              shape: pick.descriptor.shape,
+              version: pick.descriptor.version,
+              violations: await shapeViolations(thing, pick.descriptor),
+            }
+          : {
+              shape: pick.shape,
+              version: pick.version,
+              violations: [formatVersionViolation(pick.version)],
+            };
       subjects.push({
         url: subject,
         status: "checked",
-        shape: pick.descriptor.shape,
-        version: pick.descriptor.version,
-        violations: attributed(subject, violations),
+        ...checked,
+        violations: attributed(subject, checked.violations),
         ...(foreign.has(subject) && { foreign: true }),
       });
     }

@@ -537,6 +537,36 @@ describe("a release added from a link", () => {
     await expect(useCases.readReleaseFromLink(LINKED)).resolves.toMatchObject({ cardCount: 2 });
     expect(site.asked()).toBe(2);
   });
+
+  it("is refused when a subject is stamped with a format version no shape has, which no shape would check", async () => {
+    const good = await linkedRelease();
+    const unchecked = good.replace(
+      'solid-memo:formatVersion 5 ;\n    solid-memo:front "Norway"@en ;',
+      'solid-memo:formatVersion 0 ;\n    solid-memo:front "Norway"@en, "Noreg"@en ;',
+    );
+    expect(unchecked).not.toBe(good);
+    const { useCases } = await app(linkedSite([unchecked]));
+
+    await expect(useCases.readReleaseFromLink(LINKED)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+      vars: { host: "bob.example", count: 1 },
+    });
+  });
+
+  it("is refused as too new when a card is in a newer format than the app reads", async () => {
+    const good = await linkedRelease();
+    const newer = good.replace(
+      'solid-memo:formatVersion 5 ;\n    solid-memo:front "Norway"@en ;',
+      'solid-memo:formatVersion 99 ;\n    solid-memo:front "Norway"@en ;',
+    );
+    expect(newer).not.toBe(good);
+    const { useCases } = await app(linkedSite([newer]));
+
+    await expect(useCases.readReleaseFromLink(LINKED)).rejects.toMatchObject({
+      code: "libraryCardTooNew",
+      vars: { url: LINKED, version: 99 },
+    });
+  });
 });
 
 const BOB = "https://bob.example/releases/capitals/";

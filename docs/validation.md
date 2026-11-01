@@ -75,8 +75,11 @@ flowchart LR
   [shapes.md](shapes.md#conventions)). A subject with a Solid Memo class
   is checked against that class's shapes only (a deck group, though a
   `dcat:Catalog`, isn't checked as the catalog). A subject is then:
-  - `checked`, with its violations;
-  - `newer`, a format this app doesn't know: skipped, reported;
+  - `checked`, with its violations. A subject stamped with a format
+    version below 1, which no shape has, is checked too: it's in
+    violation (`FormatVersionRange`), as the app reads it as one that
+    doesn't fit;
+  - `newer`, a format newer than this app knows: skipped, reported;
   - `untyped`, no Solid Memo class: listed, to show strays.
 
   A subject another app wrote is also marked `foreign`, and its results

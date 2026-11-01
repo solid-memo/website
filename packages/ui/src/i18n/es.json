@@ -1677,7 +1677,8 @@
       "MaxLength": "El texto es demasiado largo.",
       "Closed": "La propiedad no está permitida aquí.",
       "DeckPlace": "La entrada del mazo no está en el catálogo de su instancia, o indica un documento en una dirección que ningún documento de un mazo puede tener, como el control de acceso de otro recurso o uno de los documentos propios de la instancia. Solid Memo no lo usa.",
-      "DateTimeRange": "Solid Memo no puede leer esta fecha: está demasiado lejos en el futuro o en el pasado, o es más larga que una fecha y hora, así que se lee como si no hubiera fecha."
+      "DateTimeRange": "Solid Memo no puede leer esta fecha: está demasiado lejos en el futuro o en el pasado, o es más larga que una fecha y hora, así que se lee como si no hubiera fecha.",
+      "FormatVersionRange": "Ningún formato de Solid Memo tiene esta versión: es menor que 1, así que Solid Memo no puede leer el sujeto."
     }
   },
   "webIdDocument": {
