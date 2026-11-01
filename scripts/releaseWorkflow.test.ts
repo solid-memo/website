@@ -75,9 +75,38 @@ describe("release.yml", () => {
     const docs = steps(workflow.get("docs") ?? "", 6);
     expect(docs.some((step) => step.includes("ref: ${{ inputs.tag }}"))).toBe(true);
     expect(docs.filter((step) => /uses:\s*\.\//.test(step))).toEqual([]);
-    expect(docs.filter((step) => step.includes("npx playwright install"))).toEqual([
-      expect.stringContaining("run: npx playwright install --with-deps --only-shell chromium"),
+    // The shell from its own download, checked against the pinned
+    // SHA-256 (npm run check:shell), and only the libraries from
+    // Playwright, which takes them from Ubuntu's signed mirror.
+    const installs = docs.filter((step) => step.includes("npx playwright install"));
+    expect(installs).toHaveLength(1);
+    expect(installs[0]).toMatch(/^ {8}run: npx playwright install-deps chromium$/m);
+    expect(installs[0]).not.toMatch(/playwright install(?!-deps)/);
+    const shell = docs.findIndex((step) => step.includes("sha256sum -c -"));
+    expect(docs[shell]).toMatch(/^ {10}CHROMIUM_HEADLESS_SHELL_SHA256: [0-9a-f]{64}$/m);
+    expect(docs[shell + 1]).toBe(installs[0]);
+  });
+
+  // The diagrams are drawn, and the browser removed, before the key is
+  // written: the archive semantic-release makes draws from their cache.
+  it("runs no browser while the deploy key is on disk", () => {
+    const job = steps(workflow.get("release") ?? "", 6);
+    const at = (text: string) => job.findIndex((step) => step.includes(text));
+    const installed = at("uses: ./.github/actions/chromium");
+    const drawn = at("run: npm run docs:archive -- --draw");
+    const removed = at("name: No browser beside the key");
+    const released = at("name: npx semantic-release");
+    expect(installed).toBeGreaterThan(-1);
+    expect(drawn).toBe(installed + 1);
+    expect(removed).toBe(drawn + 1);
+    expect(released).toBe(removed + 1);
+    expect(job[removed]).toMatch(/^ {8}run: rm -rf "\$HOME\/\.cache\/ms-playwright"$/m);
+    const keyed = job.filter((step) => step.includes("secrets.SEMANTIC_RELEASE_KEY"));
+    expect(keyed.map((step) => job.indexOf(step))).toEqual([
+      at("name: The deploy key is set"),
+      released,
     ]);
+    expect(job[released]).not.toMatch(/playwright|docs:archive/);
   });
 });
 
@@ -245,6 +274,13 @@ describe("the Chromium action's cache input", () => {
     for (const step of [...chromium, ...deps].filter((s) => s.includes("uses: actions/cache"))) {
       expect(step).toMatch(/inputs\.cache == 'true'/);
     }
+  });
+
+  it("downloads a shell the cache lacks through the checked download, not Playwright's", () => {
+    const missed = chromium.filter((step) => step.includes("cache-hit != 'true'"));
+    expect(missed).toHaveLength(1);
+    expect(missed[0]).toMatch(/^\s+uses: \.\/\.github\/actions\/headless-shell$/m);
+    expect(chromium.filter((step) => step.includes("playwright install"))).toEqual([]);
   });
 
   it("is passed on to playwright-deps", () => {

@@ -434,8 +434,12 @@ and `JOURNEY_SERVER_URL` pointing at a server that
 `npm run css -w @solid-memo/e2e-journeys` keeps up.
 
 **In CI the browsers and their system libraries come from GitHub's
-cache**, the browsers under Playwright's version. The system libraries
-the runner image lacks are kept as the `.deb` files
+cache**, the browsers under Playwright's version. A headless shell the
+cache lacks is downloaded and checked against its pinned SHA-256
+([headless-shell](../.github/actions/headless-shell/action.yml),
+`check:shell` in
+[The repository's own checks](#the-repositorys-own-checks)). The
+system libraries the runner image lacks are kept as the `.deb` files
 `npx playwright install-deps` would fetch from Ubuntu's mirror, and
 installed from them
 ([playwright-deps](../.github/actions/playwright-deps/action.yml)). The
@@ -954,6 +958,28 @@ checks of the repository as a whole, plain Node scripts in
   download comment has its version on the next line and the SHA-256 of
   its file on the line after (`<NAME>_SHA256:`), which the workflow
   checks the download against.
+- `check:shell` ([checkHeadlessShell.ts](../scripts/checkHeadlessShell.ts)):
+  the workflows download Chromium's headless shell themselves and check
+  it against a SHA-256, as Playwright's own download checks none. The
+  version and revision pinned beside that hash, in
+  [.github/actions/headless-shell](../.github/actions/headless-shell/action.yml)
+  and in release.yml's `docs` job, which can't use a local action, are
+  the ones the installed playwright-core's `browsers.json` names, and
+  the two hashes are the same. An update to Playwright that moves the
+  shell fails here until a person records the new zip's SHA-256.
+  Playwright publishes no hashes, so the maintainer checks first that
+  the zip from Playwright's CDN is the same file as Chrome for
+  Testing's own download. The two pinned steps are the same step, but
+  for its `if:`. Its script starts with `set -e`, never turns it off,
+  ignores no failure with `|| true`, and checks the zip with
+  `sha256sum -c` on the line after the download, before it unpacks
+  it. No workflow or action installs the shell with
+  Playwright (`--only-shell` or `chromium-headless-shell`), whether a
+  step runs `playwright`, `playwright@<version>`, `@playwright/test` or
+  the CLI's `cli.js`, and however its `run:` script is split over
+  lines. No job that restores nothing from GitHub's cache installs any
+  browser with Playwright, as Chromium brings the headless shell and
+  FFmpeg too.
 - `check:keys` ([checkQueryKeys.ts](../scripts/checkQueryKeys.ts)): no
   screen of Solid Memo or the Studio writes a query key out as an
   array; each is made by a function of the keys modules

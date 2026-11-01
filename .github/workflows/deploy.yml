@@ -238,11 +238,12 @@ jobs:
           mv "$SITE" apps/web/dist
       # A run by hand has no CI run behind it, so it checks the version and
       # builds it. Chromium, which npm run check and npm run build draw the
-      # docs' Mermaid diagrams in (docs/markdown.md), downloaded, with its
-      # system libraries from Ubuntu's signed mirror, not restored from the
-      # cache. The action is the checked-out version's: one from before the
-      # drawings has none, and needs none; every version since 6.17.3 takes
-      # the cache input, and only the newest is deployed.
+      # docs' Mermaid diagrams in (docs/markdown.md), downloaded and
+      # checked against a committed SHA-256, with its system libraries
+      # from Ubuntu's signed mirror, not restored from the cache. The
+      # action is the checked-out version's: one from before the drawings
+      # has none, and needs none; every version since 6.17.3 takes the
+      # cache input, and only the newest is deployed.
       - if: >-
           (github.event_name == 'workflow_dispatch' || hashFiles('scripts/siteVersion.ts') == '') &&
           hashFiles('.github/actions/chromium/action.yml') != ''
