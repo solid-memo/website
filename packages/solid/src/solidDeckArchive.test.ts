@@ -527,6 +527,50 @@ describe("readDeckFile", () => {
     });
   });
 
+  it("refuses JSON-LD with a long base and many IRIs relative to it in time that grows with the file, not its square (GHSA-3jqf-v8x6-qcc3)", async () => {
+    // Eight times the file must take less than four times as long as an eighth of it done eight times over.
+    const ratio = await growthAsync(
+      (count) => {
+        const json = JSON.stringify({
+          "@context": { "@base": `https://a.example/b/${"c".repeat(100 * count)}` },
+          "@graph": Array.from({ length: count }, (_, at) => ({
+            "@id": `x${at}`,
+            [`${SM_NS}p`]: { "@id": "y" },
+          })),
+        });
+        return () =>
+          expect(archive.readDeckFile(json, "jsonld", base)).rejects.toMatchObject({
+            code: "deckFileUnreadable",
+          });
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("refuses JSON-LD with a long prefix and many IRIs through it in time that grows with the file, not its square (GHSA-3jqf-v8x6-qcc3)", async () => {
+    // Eight times the file must take less than four times as long as an eighth of it done eight times over.
+    const ratio = await growthAsync(
+      (count) => {
+        const json = JSON.stringify({
+          "@context": { p: `${"a".repeat(100 * count)}/` },
+          "@graph": Array.from({ length: count }, (_, at) => ({
+            "@id": `p:../x${at}`,
+            [`${SM_NS}p`]: { "@id": "p:../y" },
+          })),
+        });
+        return () =>
+          expect(archive.readDeckFile(json, "jsonld", base)).rejects.toMatchObject({
+            code: "deckFileUnreadable",
+          });
+      },
+      1000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
   it("reads JSON-LD whose key is named twice as JSON.parse does, fetching nothing", async () => {
     const fetch = vi.spyOn(globalThis, "fetch");
     try {

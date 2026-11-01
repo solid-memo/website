@@ -979,7 +979,12 @@ flowchart LR
   the release (`releaseTooLarge`), however the release is read. The
   same limits apply to a creator's catalog read for the release's
   series, to a release the Studio reads,
-  opens as a file, or checks against the library's shapes. The library's
+  opens as a file, or checks against the library's shapes. A release
+  file in JSON-LD is held to the same bound on its base: its `@base`
+  and `@vocab` are refused (`deckFileUnreadable`) past it, counted with
+  the release's own address. Its terms and prefixes are refused past
+  their bound or when defined through another term, as a deck file's
+  are ([data-model.md](data-model.md#decks-as-files)). The library's
   index, which comes with the site and grows with the library, and the
   user's own pod documents aren't limited. A deck file has limits of its
   own, in `data-model.md`.

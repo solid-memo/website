@@ -1383,6 +1383,31 @@ An import reads the file as the pod is read, with the same mappers:
   in time growing with their square. A context may give only strings,
   for its terms and for keywords such as `@vocab`; a file this app
   exports states prefixes alone;
+- a JSON-LD `@base` or `@vocab` is refused (`deckFileUnreadable`) under
+  the rule for a Turtle base. One whose path has a `.`, `..` or empty
+  segment is refused. So are those a node's contexts declare when,
+  with the file's own address and each resolved against the one
+  before, they come to more than 512 characters.
+  The parser walks the whole base for each relative IRI it resolves, and
+  the IRIs it gives can be far shorter than the base, so the limits
+  below wouldn't bound the time. A file this app exports declares
+  neither;
+- a JSON-LD term or prefix is refused (`deckFileUnreadable`) unless
+  it's defined as a keyword or as an IRI with a scheme, a plain path
+  and at most 512 characters. So are a node's contexts when their terms
+  and values come to more than 4,096 characters together. The parser
+  gives a term's IRI again at every use, resolving a relative one
+  against the base, so a long one costs its length at every use, for
+  an IRI that may be short. A file this app exports states short
+  namespaces with a scheme;
+- a JSON-LD term, `@base` or `@vocab` is refused (`deckFileUnreadable`)
+  when it's a compact IRI whose prefix, the part before its first `:`,
+  is a term of the node's contexts. The parser expands such a term
+  through the other with no bound on how deep, so two terms defined
+  through each other, or one through itself, never end. A file this
+  app exports states each namespace in full. With the base bounded and
+  each term defined in full, at most 512 characters, the limits below
+  bound the time;
 - the parser reads the document as it streams, each object written
   again with its context first. A parser that held every node to the
   end would match each against every typed one, in time growing with

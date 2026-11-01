@@ -4,6 +4,7 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
+import { MAX_BASE_CHARACTERS, plainBase } from "./client/readLimits";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
@@ -98,6 +99,19 @@ const MAX_JSON_DEPTH = 12;
 const MAX_CONTEXTS = 8;
 
 /**
+ * How many characters the terms and values of a top-level node's
+ * contexts may come to together: the prefixes a file this app exports states come to some
+ * hundreds. The parser builds a term's IRI from the terms it names, and
+ * gives it again at every use of the term, in time growing with its
+ * length, so the read limits on the triples bound the time only with the
+ * terms bounded too.
+ */
+const MAX_CONTEXT_CHARACTERS = 8 * MAX_BASE_CHARACTERS;
+
+/** An IRI with a scheme, or a compact IRI: one the parser need not resolve against the base. */
+const WITH_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
+
+/**
  * Refuse JSON-LD that names a context elsewhere (a URL, or `@import`):
  * reading it would fetch that address from the user's browser. A file
  * this app exports states its context in full. Refuse a context anywhere
@@ -111,8 +125,24 @@ const MAX_CONTEXTS = 8;
  * keyword's value such as `@vocab`): a term defined by an object may say
  * how its values are read, and the parser reads some of those (a `@graph`
  * container) in time growing with the square of the values. A file this
- * app exports states prefixes alone. Refuse JSON nested deeper than
- * MAX_JSON_DEPTH too, before anything recurses into it. Throws
+ * app exports states prefixes alone. Refuse a base or a vocabulary
+ * (`@base`, `@vocab`) past what a Turtle text read under limits may
+ * declare (readLimits.ts): one whose path is not plain (plainBase), or
+ * those of a node's contexts, which each resolve against the one before,
+ * of more than MAX_BASE_CHARACTERS together. The parser walks the whole
+ * base for each relative IRI it resolves, and the IRIs it gives can be
+ * far shorter than the base, so the read limits on the triples bound the
+ * time only with the base bounded too. A file this app exports declares
+ * neither. The document's own base (`baseUrl`) counts toward the bound
+ * as in Turtle. Refuse a term or prefix defined as an IRI that is
+ * relative, not plain or longer than MAX_BASE_CHARACTERS (plainTerm), or
+ * through a term of the node's contexts (chained), and contexts of
+ * more than MAX_CONTEXT_CHARACTERS: the parser gives a term's IRI again
+ * at every use, and resolves a relative one against the base, so a long
+ * one costs its length at every use for an IRI that may be short. A file
+ * this app exports states short namespaces with a scheme. Refuse JSON
+ * nested deeper than MAX_JSON_DEPTH too, before anything recurses into
+ * it. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
  *
  * Gives the document checked, written again: the parser is to read that
@@ -122,7 +152,7 @@ const MAX_CONTEXTS = 8;
  * first in it (written): the parser reads the text as it streams, which
  * it can only with the context before the rest.
  */
-export function refuseRemoteContexts(text: string): string {
+export function refuseRemoteContexts(text: string, baseUrl: string): string {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -141,7 +171,7 @@ export function refuseRemoteContexts(text: string): string {
       });
     }
     for (const [key, child] of Object.entries(value)) {
-      if (key === "@context") refuseContext(child, topLevel.has(value));
+      if (key === "@context") refuseContext(child, topLevel.has(value), baseUrl);
       pending.push([child, depth + 1]);
     }
   }
@@ -163,8 +193,14 @@ function written(value: unknown): string {
   return `{${entries.map(([key, child]) => `${JSON.stringify(key)}:${written(child)}`).join(",")}}`;
 }
 
-/** Throws deckFileUnreadable unless a context is stated in full, as strings alone, on a top-level node, in at most MAX_CONTEXTS. */
-function refuseContext(context: unknown, onTopLevelNode: boolean): void {
+/**
+ * Throws deckFileUnreadable unless a context is stated in full, as
+ * strings alone, on a top-level node, in at most MAX_CONTEXTS, with
+ * plain bases and vocabularies within MAX_BASE_CHARACTERS (baseLength),
+ * plain terms (plainTerm) that name no term of the node's contexts
+ * (chained), and at most MAX_CONTEXT_CHARACTERS in all.
+ */
+function refuseContext(context: unknown, onTopLevelNode: boolean, baseUrl: string): void {
   const contexts = Array.isArray(context) ? context : [context];
   if (contexts.some(remote)) {
     throw new AppError("deckFileUnreadable", {
@@ -181,6 +217,69 @@ function refuseContext(context: unknown, onTopLevelNode: boolean): void {
       reason: "The file defines a JSON-LD term by more than an IRI.",
     });
   }
+  const entries = (contexts as Record<string, string>[]).flatMap(Object.entries);
+  for (const keyword of ["@base", "@vocab"]) {
+    const declared = entries.flatMap(([key, iri]) => (key === keyword ? [iri] : []));
+    if (baseLength(baseUrl, declared) > MAX_BASE_CHARACTERS || !declared.every(plainBase)) {
+      throw new AppError("deckFileUnreadable", {
+        reason: `The file declares a JSON-LD ${keyword} that is not plain, or longer than ${MAX_BASE_CHARACTERS} characters.`,
+      });
+    }
+  }
+  const length = entries.reduce((sum, [key, value]) => sum + key.length + value.length, 0);
+  if (length > MAX_CONTEXT_CHARACTERS || !entries.every(plainTerm)) {
+    throw new AppError("deckFileUnreadable", {
+      reason: `The file defines a JSON-LD term by an IRI that is relative, not plain, or longer than ${MAX_BASE_CHARACTERS} characters, or states contexts of more than ${MAX_CONTEXT_CHARACTERS} characters.`,
+    });
+  }
+  const terms = new Set(entries.flatMap(([key]) => (key.startsWith("@") ? [] : [key])));
+  if (entries.some(([, value]) => chained(value, terms))) {
+    throw new AppError("deckFileUnreadable", {
+      reason: "The file defines a JSON-LD term, base or vocabulary through another term.",
+    });
+  }
+}
+
+/**
+ * The longest base (or vocabulary) a node's declarations can come to, as
+ * for a Turtle text read under limits (readLimits.ts): the document's
+ * own base, or the longest absolute one declared, and each relative one
+ * added, as each resolves against the one before.
+ */
+function baseLength(baseUrl: string, declared: string[]): number {
+  let longest = baseUrl.length;
+  let added = 0;
+  for (const iri of declared) {
+    if (WITH_SCHEME.test(iri)) longest = Math.max(longest, iri.length);
+    else added += iri.length;
+  }
+  return longest + added;
+}
+
+/**
+ * Whether a context's value is a compact IRI whose prefix (the part
+ * before the first `:`) is a term of the node's contexts. The parser
+ * expands such a value through that term, and that term's through the
+ * next, with no bound on how deep, so two terms through each other (or
+ * one through itself) build an IRI without end. A file this app exports
+ * states its namespaces in full.
+ */
+function chained(value: string, terms: Set<string>): boolean {
+  const colon = value.indexOf(":");
+  return colon >= 0 && terms.has(value.slice(0, colon));
+}
+
+/**
+ * Whether a context's term (or prefix) is defined as a keyword, or as a
+ * plain IRI with a scheme (or a compact one) of at most
+ * MAX_BASE_CHARACTERS: a relative one, which the parser resolves against
+ * the base at every use, is not. A keyword's own value (`@language`, …)
+ * is held to the length alone.
+ */
+function plainTerm([key, value]: [string, string]): boolean {
+  if (value.length > MAX_BASE_CHARACTERS) return false;
+  if (key.startsWith("@") || value.startsWith("@")) return true;
+  return WITH_SCHEME.test(value) && plainBase(value);
 }
 
 /** Whether a context gives each of its terms and keywords as a string, defining no term by an object. */
