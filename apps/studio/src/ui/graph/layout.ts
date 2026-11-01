@@ -904,20 +904,23 @@ export function createLayout(graph: InstanceGraph): Layout {
   };
 }
 
+const identities = new WeakMap<InstanceGraph, string>();
+
 /**
- * A short mark of a graph, the same for the same nodes and edges: so a
- * layout kept from before is used only for the graph it was made of
- * (FNV-1a over every id and edge).
+ * What a graph is, in full: every node's id and kind and every edge's
+ * ends, predicate and kind, in order, as text that two graphs share only
+ * when they are the same. So a layout kept from before is used only for
+ * the graph it was made of; a short hash of these could be made to match
+ * for another graph. Made once for each graph object.
  */
-export function graphFingerprint(graph: InstanceGraph): string {
-  let hash = 0x811c9dc5;
-  const mix = (text: string) => {
-    for (let i = 0; i < text.length; i++) {
-      hash ^= text.charCodeAt(i);
-      hash = Math.imul(hash, 0x01000193);
-    }
-  };
-  for (const node of graph.nodes) mix(`${node.id}\u0000${node.kind}\u0000`);
-  for (const edge of graph.edges) mix(`${edge.from}\u0000${edge.predicate}\u0000${edge.to}\u0000`);
-  return `${graph.nodes.length}.${graph.edges.length}.${(hash >>> 0).toString(16)}`;
+export function graphIdentity(graph: InstanceGraph): string {
+  let identity = identities.get(graph);
+  if (identity === undefined) {
+    identity = JSON.stringify([
+      graph.nodes.map((node) => [node.id, node.kind]),
+      graph.edges.map((edge) => [edge.from, edge.predicate, edge.to, edge.kind]),
+    ]);
+    identities.set(graph, identity);
+  }
+  return identity;
 }

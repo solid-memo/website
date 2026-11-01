@@ -2431,9 +2431,13 @@ point of its own. The layout runs in steps, 4,000 edges' paths a step,
 in batches of up to 12 ms, the page drawing between them, under a bar
 that says how far it is (**Placing the nodes**). A layout done is kept
 for the page's life, so coming back to the same graph draws it at
-once. An instance of the library's ten largest decks with a hundred
-answers each (about 14,500 nodes and 50,000 edges) is laid out and
-routed in about a tenth of a second.
+once. It's kept with the whole graph it was made of, every node's id
+and kind and every edge. It's used only for a graph the same in all of
+these; any other graph, however like it, is laid out afresh. A node the drawing has no position for is left out,
+with its edges, rather than drawn nowhere. An instance of the
+library's ten largest decks with a hundred answers each (about 14,500
+nodes and 50,000 edges) is laid out and routed in about a tenth of a
+second.
 
 It's drawn in SVG: dragging moves it, the wheel zooms about the
 pointer, as **Zoom in**, **Zoom out** and **Whole graph** do. Either
