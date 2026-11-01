@@ -624,6 +624,45 @@ describe("createAppUseCases", () => {
     expect(sent.filter(({ url }) => url.startsWith(elsewhere))).toEqual([]);
   });
 
+  it("takes no instance from a type index outside the profile's own places as the user's, sending no credentials and writing nothing there", async () => {
+    const alice = "https://alice.example/";
+    const lapsed = "https://lapsed.example/";
+    const attacker = "https://attacker.example/";
+    const pod = podAt(alice);
+    const theirs = podAt(lapsed);
+    const sent = podsNetwork({ [alice]: pod, [lapsed]: theirs, [attacker]: podAt(attacker) });
+    login.webId = `${alice}profile/card#me`;
+    const solid = "http://www.w3.org/ns/solid/terms#";
+    const registering = (container: string) =>
+      `<#memo> a <${solid}TypeRegistration>; <${solid}forClass> <https://solid-memo.com/ns/vocab/v1.ttl#Instance>; <${solid}instanceContainer> <${container}>.`;
+    // The private index in the user's own pod, the public one on a server outside the profile's places.
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${login.webId}> <${solid}privateTypeIndex> <${alice}settings/private.ttl>; <${solid}publicTypeIndex> <${lapsed}index.ttl>.`,
+    );
+    await put(pod, `${alice}settings/private.ttl`, registering(`${alice}memo/`));
+    await put(theirs, `${lapsed}index.ttl`, registering(`${attacker}i/`));
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+
+    expect(await useCases.listInstances(session)).toEqual([
+      expect.objectContaining({ url: `${alice}memo/` }),
+    ]);
+    expect((await useCases.connectedScreenChoice(session)).instances).toEqual([
+      expect.objectContaining({ url: `${alice}memo/` }),
+    ]);
+    await useCases.getPreferences(`${attacker}i/`);
+    await expect(
+      useCases.savePreferences(`${attacker}i/`, await useCases.getPreferences(`${attacker}i/`)),
+    ).rejects.toMatchObject({ code: "writeOutsidePod" });
+    expect(login.sent).toContain(`${alice}memo/preferences.ttl`);
+    expect(login.sent.filter((url) => !url.startsWith(alice))).toEqual([]);
+    expect(sent.filter(({ url, method }) => url.startsWith(attacker) && method !== "GET")).toEqual(
+      [],
+    );
+  });
+
   it("counts as the user's own storages, where a refused token means the session expired, those their profile names and those entered here, not an instance elsewhere", async () => {
     const alice = "https://alice.example/";
     const entered = "https://other.example/alice/";
