@@ -237,11 +237,11 @@ reused run made.
 | Stage | What runs, and blocks |
 |---|---|
 | A pull request | every job |
-| The merge queue (`merge_group`) | every job, at full strength; a flaky check is fixed here, not retried |
+| The merge queue (`merge_group`) | every job but `dependency-review`, a pull request's alone, at full strength; a flaky check is fixed here, not retried |
 | A push to `main` the merge queue passed | the queue's run is reused: its site and Turbo's cache are taken over |
 | A push to `main` that skipped the queue | every job, as in the queue |
 | A release commit | when CI passed its parent on `main`, the run that tested the parent is reused and the commit's own files are linted; otherwise every job |
-| A run by hand | every job |
+| A run by hand | every job but `dependency-review`, as in the queue |
 
 So a tree is tested once per push to its pull request and once more in
 the merge queue, on top of `main` and the pull requests ahead of it.

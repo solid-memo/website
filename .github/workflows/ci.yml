@@ -1218,6 +1218,95 @@ jobs:
           gh api "repos/$REPO/pulls/$NUMBER" --jq '.body // ""' > "$body"
           npm run check:closes -- --base "$BASE" --head "$HEAD" --body-file "$body"
 
+  # What a pull request does to the packages
+  # (docs/testing.md#dependency-review): GitHub's dependency graph of its
+  # base and of its head compared, over every manifest the graph reads,
+  # the lockfiles of the root and of the end-to-end servers and the
+  # pinned Python tools among them. It fails on a package the pull
+  # request adds, or moves to another version, with a known
+  # vulnerability of moderate severity or worse, or under a license not
+  # on the list below, and lists what moved in the run's summary, which
+  # a person reads before merging Renovate's lock file maintenance
+  # (GOVERNANCE.md#dependency-updates). On a pull request only, as ci-ok
+  # expects: what the merge queue's tree and a push to main bring in came
+  # through pull requests, each reviewed. The token only reads: the
+  # action asks GitHub's API, and posts no comment on the pull request,
+  # which would need pull-requests: write. It needs the repository's
+  # dependency graph turned on (Settings > Advanced Security), or it
+  # fails on every pull request. Deterministic, against GitHub's
+  # advisory database as it stands when it runs.
+  dependency-review:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          # Every scope, not only the packages the app runs: the
+          # development tools run in CI and on contributors' machines,
+          # and build the site that is deployed.
+          fail-on-scopes: runtime, development, unknown
+          # The licenses the project can ship a package under, beside
+          # its own MIT (docs/style.md#licenses): permissive ones, the
+          # content licenses REUSE.toml gives the decks, MPL-2.0
+          # (axe-core, among others), whose copyleft stays in the
+          # package's own files, and the fonts' OFL-1.1
+          # (docs/vendor-code.md). An expression passes when the list
+          # satisfies it, `BSD-3-Clause OR GPL-2.0` by BSD-3-Clause. A
+          # package whose license GitHub doesn't know is reported, not
+          # failed.
+          allow-licenses: >-
+            0BSD, Apache-2.0, BlueOak-1.0.0, BSD-2-Clause, BSD-3-Clause,
+            CC-BY-3.0, CC-BY-4.0, CC-BY-SA-4.0, CC0-1.0, ISC, MIT, MIT-0,
+            MPL-2.0, OFL-1.1, PSF-2.0, Python-2.0, Unlicense, W3C-20150513
+          # The packages already accepted under a license that can't be
+          # on the list, at any version. None ships in the site:
+          # javascript-solid-server (AGPL-3.0-only) is an end-to-end test
+          # server, run in its own container (e2e/pod/servers/jss/);
+          # elkjs (EPL-2.0) lays out the docs' diagrams at build time
+          # (docs/markdown.md); npm (Artistic-2.0) is semantic-release's,
+          # for the release; @cspell/dict-django (WTFPL) is one of
+          # cspell's dictionaries; jsonify ("Public Domain", no SPDX
+          # license) comes with the Pivot test server; reuse
+          # (GPL-3.0-or-later by its classifiers) and its python-debian
+          # (GPL-2.0-or-later) lint the files' licenses in the docs job.
+          allow-dependencies-licenses: >-
+            pkg:npm/javascript-solid-server, pkg:npm/elkjs, pkg:npm/npm,
+            pkg:npm/%40cspell/dict-django, pkg:npm/jsonify,
+            pkg:pypi/reuse, pkg:pypi/python-debian
+          # Scorecard's scores come from another service, and the summary
+          # below names every package that moved already.
+          show-openssf-scorecard: false
+      # The action's summary names the problems it found. This lists
+      # every package added, changed or removed, per manifest, from the
+      # same comparison, whether the review passed or not. gh fetches it
+      # again rather than a step reading the action's output, which a
+      # lock file maintenance can make too large to pass to a step.
+      - if: success() || failure()
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: success() || failure()
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The script imports no package, so nothing is installed.
+      - if: success() || failure()
+        name: npm run dependencies:summary -- <changes.json>
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          changes="$RUNNER_TEMP/changes.json"
+          gh api --paginate --slurp "repos/$REPO/dependency-graph/compare/$BASE...$HEAD?per_page=100" > "$changes"
+          npm run dependencies:summary -- "$changes"
+
   # When a job that tests the tree fails, the run's result is settled, so
   # the jobs still going are canceled rather than left to finish: the
   # journeys, the end-to-end tests and check take many minutes. Not
@@ -1426,16 +1515,18 @@ jobs:
   # require it). The gate must pass; then, when the run tests its tree
   # (jobs=all), every job that tests it must pass, and when it reuses the
   # run that did (jobs=reuse), reuse must pass, and release-files too on
-  # a release commit, the jobs that test being skipped. journeys-report,
-  # caches, the warm jobs, the fail-fast jobs and the advisory
-  # solid-memo-client jobs are not among them. Every job it needs is
-  # the gate or in one of its two lists, or it fails. A matrix job's
-  # checks are named per server, and jobs come and go; this name stays.
+  # a release commit, the jobs that test being skipped. dependency-review
+  # must pass on a pull request, and be skipped on any other run.
+  # journeys-report, caches, the warm jobs, the fail-fast jobs and the
+  # advisory solid-memo-client jobs are not among them. Every job it
+  # needs is the gate, dependency-review or in one of its two lists, or
+  # it fails. A matrix job's checks are named per server, and jobs come
+  # and go; this name stays.
   ci-ok:
     if: always()
     needs:
       [gate, check, site, library, crosscheck, pod, contract, journeys, docs, workflows, commits,
-       reuse, release-files]
+       reuse, release-files, dependency-review]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -1450,6 +1541,8 @@ jobs:
             ${{ needs.workflows.result }} ${{ needs.commits.result }}
           REUSE: ${{ needs.reuse.result }}
           RELEASE_FILES: ${{ needs.release-files.result }}
+          REVIEW: ${{ needs.dependency-review.result }}
+          EVENT: ${{ github.event_name }}
           RELEASE: >-
             ${{ startsWith(github.event.head_commit.message, 'chore(release): ') }}
           JOBS: ${{ needs.gate.outputs.jobs }}
@@ -1457,7 +1550,7 @@ jobs:
           echo "The jobs' results: $RESULTS (gate: ${JOBS:-none})"
           read -ra all <<< "$RESULTS"
           read -ra tests <<< "$TESTS"
-          [ "${#all[@]}" -eq $(( 3 + ${#tests[@]} )) ] || {
+          [ "${#all[@]}" -eq $(( 4 + ${#tests[@]} )) ] || {
             echo "::error::ci-ok needs a job neither of its lists names: add it to one."
             exit 1
           }
@@ -1467,11 +1560,17 @@ jobs:
               for result in "${tests[@]}"; do
                 [ "$result" = success ] || exit 1
               done
+              if [ "$EVENT" = pull_request ]; then
+                [ "$REVIEW" = success ] || exit 1
+              else
+                [ "$REVIEW" = skipped ] || exit 1
+              fi
               ;;
             reuse)
               for result in "${tests[@]}"; do
                 [ "$result" = skipped ] || exit 1
               done
+              [ "$REVIEW" = skipped ] || exit 1
               [ "$REUSE" = success ] || exit 1
               if [ "$RELEASE" = true ]; then
                 [ "$RELEASE_FILES" = success ] || exit 1

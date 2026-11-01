@@ -55,6 +55,7 @@
     "check:keys": "node -e \"import('./scripts/checkQueryKeys.ts').then((m) => m.run(process))\"",
     "ci:gate": "node -e \"import('./scripts/ciGate.ts').then((m) => m.run(process))\"",
     "check:providers": "node -e \"import('./scripts/checkProviders.ts').then((m) => m.run(process))\"",
+    "dependencies:summary": "node -e \"import('./scripts/dependencyChanges.ts').then((m) => m.run(process))\" --",
     "coverage:summary": "node -e \"import('./scripts/coverageSummary.ts').then((m) => m.run(process))\"",
     "release:commit": "node -e \"import('./scripts/releaseCommit.ts').then((m) => m.run(process))\" --",
     "release:version": "node -e \"import('./scripts/releaseVersion.ts').then((m) => m.run(process))\" --",
