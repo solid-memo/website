@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.24.1](https://github.com/solid-memo/website/compare/v6.24.0...v6.24.1) (2026-11-01)
+
+### Bug Fixes
+
+* **domain:** bound review snapshots so a grade can always be saved ([84e1ff6](https://github.com/solid-memo/website/commit/84e1ff6a17df8ef51a10299332c471c0d2b37905))
+* **domain:** read what fails in a validation report once per report ([11383e5](https://github.com/solid-memo/website/commit/11383e54e50d024ab0f3a4d4ea47d54f3d1061a9))
+* **studio:** keep a draft's own documents from naming its subjects ([9e8e4ad](https://github.com/solid-memo/website/commit/9e8e4ad8a52b6c62fa1b154cb8620cb6c52ec110))
+
 ## [6.24.0](https://github.com/solid-memo/website/compare/v6.23.1...v6.24.0) (2026-10-31)
 
 ### Features
