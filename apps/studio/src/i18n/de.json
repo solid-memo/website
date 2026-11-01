@@ -1590,6 +1590,14 @@
         "showAll": {
           "one": "Die {count} Verbindung zeigen",
           "other": "Alle {count} Verbindungen zeigen"
+        },
+        "showAllTypes": {
+          "one": "Die {count} Klasse zeigen",
+          "other": "Alle {count} Klassen zeigen"
+        },
+        "showAllValues": {
+          "one": "Den {count} Wert zeigen",
+          "other": "Alle {count} Werte zeigen"
         }
       }
     },

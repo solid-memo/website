@@ -6,7 +6,9 @@
  * Instance graphs for the graph screen's tests, built as the app builds
  * them (instanceGraphOf) from a few documents of instance A: a node of
  * every kind, edges of every kind, a literal in a language and one with
- * a datatype; and a large one, of as many cards as asked.
+ * a datatype; a large one, of as many cards as asked; and one whose
+ * card, and the wrong option it links to, have as many classes and
+ * values as asked.
  */
 
 import {
@@ -121,6 +123,26 @@ export function largeGraph(cards: number): InstanceGraph {
         REVIEWS,
         range.map((n) => triple(`${REVIEWS}#card-${n}`, SM.reviewOf, iri(card(n)))),
       ),
+    ],
+  });
+}
+
+/** An instance of one card and its wrong option, each of `count` classes and `count` values, each value in English. */
+export function crowdedGraph(count: number): InstanceGraph {
+  const range = Array.from({ length: count }, (_, n) => n);
+  return instanceGraphOf({
+    instanceUrl: INSTANCE,
+    storages: [STORAGE],
+    documents: [
+      found(CARDS, [
+        triple(CARD, SM.distractor, iri(DISTRACTOR)),
+        ...[CARD, DISTRACTOR].flatMap((subject) =>
+          range.flatMap((n) => [
+            triple(subject, TYPE, iri(`https://vocab.example/ns#Class${n}`)),
+            triple(subject, "https://vocab.example/ns#value", text(`value ${n}`, "en")),
+          ]),
+        ),
+      ]),
     ],
   });
 }

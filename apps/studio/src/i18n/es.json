@@ -1671,6 +1671,16 @@
           "one": "Mostrar el {count} enlace",
           "many": "Mostrar los {count} de enlaces",
           "other": "Mostrar los {count} enlaces"
+        },
+        "showAllTypes": {
+          "one": "Mostrar la {count} clase",
+          "many": "Mostrar las {count} de clases",
+          "other": "Mostrar las {count} clases"
+        },
+        "showAllValues": {
+          "one": "Mostrar el {count} valor",
+          "many": "Mostrar los {count} de valores",
+          "other": "Mostrar los {count} valores"
         }
       }
     },

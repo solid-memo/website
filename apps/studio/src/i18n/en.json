@@ -1590,6 +1590,14 @@
         "showAll": {
           "one": "Show the {count} link",
           "other": "Show all {count} links"
+        },
+        "showAllTypes": {
+          "one": "Show the {count} type",
+          "other": "Show all {count} types"
+        },
+        "showAllValues": {
+          "one": "Show the {count} value",
+          "other": "Show all {count} values"
         }
       }
     },

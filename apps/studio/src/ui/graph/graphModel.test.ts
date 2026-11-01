@@ -26,13 +26,13 @@ import {
   DIRECTIONS,
   distinctLabels,
   drawnLabel,
-  edgesOf,
   groupOf,
   labelOf,
   LABEL_LENGTH,
   labelOrder,
   labelRank,
   nearestInDirection,
+  nodeIndexOf,
   placeLabels,
   NODE_GROUPS,
   shortName,
@@ -252,11 +252,16 @@ describe("nearestInDirection", () => {
   });
 });
 
-describe("edgesOf", () => {
-  it("splits a node's edges into those from it and those to it", () => {
-    const { outgoing, incoming } = edgesOf(graph.edges, CARD);
+describe("nodeIndexOf", () => {
+  it("finds each node by its id, with its edges from it and to it", () => {
+    const index = nodeIndexOf(graph);
+    expect(index.size).toBe(graph.nodes.length);
+    const { node, outgoing, incoming } = index.get(CARD)!;
+    expect(node).toBe(nodeOf(CARD));
+    expect(outgoing.length).toBeGreaterThan(0);
     expect(outgoing.every((edge) => edge.from === CARD)).toBe(true);
     expect(incoming.map((edge) => edge.from).sort()).toEqual([CARDS, REVIEW]);
+    expect(index.get("https://elsewhere.example/x")).toBeUndefined();
   });
 });
 

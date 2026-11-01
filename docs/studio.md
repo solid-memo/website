@@ -2466,9 +2466,12 @@ line, and brought into sight.
   BCP 47 writes it (`@en`, `@sv` or `@en-GB`, though the data is read
   in lower case) or its datatype (`xsd:date`). The document a value is
   stated in follows when not its own;
-- its links from it and to it, 50 at first and all on asking, the
-  focus moving to the first new one. Each is a button that selects the
+- its links from it and to it. Each is a button that selects the
   node at its other end and moves the focus to that node's heading.
+
+Its classes, its values and each list of links show 50 at first and
+all on asking, the focus moving to the first new one, so a node with a
+great many of them still opens at once.
 
 A leaf says why it wasn't read; a document that wasn't there, or
 couldn't be read, says so. A node selected opens the aside's drawer on
