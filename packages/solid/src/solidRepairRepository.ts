@@ -88,12 +88,13 @@ const MEMBERSHIP = [
  * The document with its repairs applied in turn, each to the subject as
  * the repairs before it left it, in one edit of the document (editOf)
  * and one removal of the subjects removed (removeThings): many repairs
- * take time that grows with them and the document, where a setThing or
- * removeThing at each would copy the whole document every time, in the
- * square of its subjects. A removal makes the other apps' subjects be
- * found again at the next drop-dangling-members repair, so the two
- * kinds alternating in one call take longer; the instance check never
- * plans a removal, and each removal the user confirms comes alone.
+ * take time that grows with them and the document, where setting or
+ * removing the subjects one call at a time would copy the whole document
+ * every time, in the square of its subjects. A removal makes the other
+ * apps' subjects be found again at the next drop-dangling-members
+ * repair, so the two kinds alternating in one call take longer; the
+ * instance check never plans a removal, and each removal the user
+ * confirms comes alone.
  */
 function repaired(dataset: Dataset, documentUrl: string, repairs: readonly Repair[]): Dataset {
   const edit = editOf(dataset);

@@ -18,7 +18,7 @@ import {
   getThingAll,
   getUrlAll,
   type NamedSubject,
-  removeThing,
+  removeThings,
   setThing,
   setThings,
   type SubjectBuilder,
@@ -862,7 +862,7 @@ describe("the catalog node", () => {
     expect(typeOf(dataset, CC0)).toEqual([DCTERMS.LicenseDocument]);
 
     // One another app stated without describing it: nothing to let go of.
-    dataset = removeThing(withCatalog(dataset, CATALOG, { ...catalog, license: BY }), BY);
+    dataset = removeThings(withCatalog(dataset, CATALOG, { ...catalog, license: BY }), [BY]);
     dataset = withCatalog(dataset, CATALOG, catalog);
     expect(typeOf(dataset, BY)).toBeNull();
     expect(toCatalog(dataset, CATALOG)).toEqual(catalog);
@@ -935,7 +935,7 @@ describe("the catalog node", () => {
         const untyped = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
         updated =
           getPropertyAll(untyped).length === 0
-            ? removeThing(updated, license)
+            ? removeThings(updated, [license])
             : setThing(updated, untyped);
       }
       if (catalog.license !== undefined) {

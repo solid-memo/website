@@ -15,8 +15,9 @@ import {
   getThingAll,
   getUrl,
   getUrlAll,
-  removeThing,
+  removeThings,
   setThing,
+  setThings,
 } from "./client/rdf";
 import {
   getSolidDatasetOrNull,
@@ -485,7 +486,10 @@ export async function addRegistrations(
  * `reviews/` and `history/`, never anything else below the container,
  * which may be another app's. A registration that names something else
  * besides keeps it, and loses only the links to the instance's data.
- * Saves only when something was removed.
+ * Saves only when something was removed. The registrations changed are
+ * set in one edit and those removed taken out in one (setThings,
+ * removeThings), so many take time that grows with them, not their
+ * square.
  */
 export async function removeInstanceRegistrations(
   indexUrl: string,
@@ -494,12 +498,18 @@ export async function removeInstanceRegistrations(
 ): Promise<void> {
   const container = ensureTrailingSlash(containerUrl);
   await changeIndex(indexUrl, fetch, (dataset) => {
-    let updated: Dataset = dataset;
+    // Every registration changed set at once, and every one removed taken out at once.
+    const changed: Subject[] = [];
+    const removed: Subject[] = [];
     for (const thing of getThingAll(dataset)) {
       const ours = DATA_CLASSES.flatMap((dataClass) => registeredOf(thing, dataClass, container));
-      updated = withoutRegistered(updated, thing, ours);
+      if (ours.length === 0) continue;
+      const kept = withoutRegistered(thing, ours);
+      if (kept === null) removed.push(thing);
+      else changed.push(kept);
     }
-    return { dataset: updated, result: undefined };
+    if (changed.length === 0 && removed.length === 0) return { dataset, result: undefined };
+    return { dataset: removeThings(setThings(dataset, changed), removed), result: undefined };
   });
 }
 
@@ -511,28 +521,28 @@ function registeredUrls(registration: Subject): string[] {
   ];
 }
 
-/** The index without the registration's links to `urls`: the whole registration when it registers nothing else. */
-function withoutRegistered(
-  dataset: Dataset,
-  registration: Subject,
-  urls: readonly string[],
-): Dataset {
-  if (urls.length === 0) return dataset;
-  if (registeredUrls(registration).every((url) => urls.includes(url)))
-    return removeThing(dataset, registration);
-  const builder = urls.reduce(
-    (current, url) =>
-      current.removeUrl(SOLID.instanceContainer, url).removeUrl(SOLID.instance, url),
-    buildThing(registration),
-  );
-  return setThing(dataset, builder.build());
+/**
+ * The registration without its links to `urls`; null when it registers
+ * nothing else, and so is to be removed whole.
+ */
+function withoutRegistered(registration: Subject, urls: readonly string[]): Subject | null {
+  const gone = new Set(urls);
+  if (registeredUrls(registration).every((url) => gone.has(url))) return null;
+  return urls
+    .reduce(
+      (current, url) =>
+        current.removeUrl(SOLID.instanceContainer, url).removeUrl(SOLID.instance, url),
+      buildThing(registration),
+    )
+    .build();
 }
 
 /**
  * Give every registration of an instance's data in a type index document
  * a new title (dcterms:title), in one save (see changeIndex): each
- * class's registration, by what it names (registeredOf). Saves nothing
- * when no registration needs the title.
+ * class's registration, by what it names (registeredOf), all set in one
+ * edit (setThings), so many take time that grows with them, not their
+ * square. Saves nothing when no registration needs the title.
  */
 export async function renameInstanceRegistrations(
   indexUrl: string,
@@ -541,19 +551,16 @@ export async function renameInstanceRegistrations(
 ): Promise<void> {
   const container = ensureTrailingSlash(containerUrl);
   await changeIndex(indexUrl, fetch, (dataset) => {
-    let updated: Dataset = dataset;
-    for (const thing of getThingAll(dataset)) {
-      const ours = DATA_CLASSES.some(
-        (dataClass) => registeredOf(thing, dataClass, container).length > 0,
-      );
-      if (ours && getStringNoLocale(thing, DCTERMS.title) !== title) {
-        updated = setThing(
-          updated,
-          buildThing(thing).setStringNoLocale(DCTERMS.title, title).build(),
-        );
-      }
-    }
-    return { dataset: updated, result: undefined };
+    // Every registration retitled set at once (setThings).
+    const renamed = getThingAll(dataset)
+      .filter(
+        (thing) =>
+          getStringNoLocale(thing, DCTERMS.title) !== title &&
+          DATA_CLASSES.some((dataClass) => registeredOf(thing, dataClass, container).length > 0),
+      )
+      .map((thing) => buildThing(thing).setStringNoLocale(DCTERMS.title, title).build());
+    if (renamed.length === 0) return { dataset, result: undefined };
+    return { dataset: setThings(dataset, renamed), result: undefined };
   });
 }
 
