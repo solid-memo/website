@@ -1307,7 +1307,11 @@ sequenceDiagram
   again, six times in all, waiting longer before each (50 ms, then
   100 ms, …), since a page learning a check's documents writes the
   digest several times running. A failed write is dropped: the next
-  visit learns it again.
+  visit learns it again. Each write is one edit of the document, made
+  in time that grows with its subjects, not their square. What's
+  dropped is removed from every subject it was read from, whatever
+  that subject's name, as is any other subject that said what's
+  written again, so none of it is read back.
 - **Read leniently.** A subject that doesn't fit its shape is left out,
   and relearned. The digest isn't one of the documents an instance is
   [checked](validation.md) by.

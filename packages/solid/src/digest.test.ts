@@ -309,6 +309,77 @@ describe("the instance's digest in the pod", () => {
     expect(pod.triples(DIGEST)).toEqual([]);
   });
 
+  it("removes what is dropped at whichever subject it was read from, in one write", async () => {
+    const pod = fakePod();
+    const summary = (subject: string, document: string) =>
+      `<${subject}> a sm:MonthSummary ; sm:formatVersion 1 ; sm:summaryOf <${document}> ;
+         sm:summarizedVersion "v" ; sm:youngReviewCount 0 ; sm:youngRecalledCount 0 ;
+         sm:studyDayCounts "2026-01-01 1 0 0 0" .\n`;
+    let planted = PREFIXES;
+    for (let i = 0; i < 300; i++)
+      planted += summary(`#m${i}`, `https://elsewhere.example/x${i}/history/2026-01.ttl`);
+    planted += `<#r> a sm:DocumentReceipt ; sm:formatVersion 1 ; sm:receiptOf <decks/x.ttl> ;
+        sm:documentVersion "v" .\n`;
+    await pod.put(DIGEST, planted);
+    const checked: string[][] = [];
+    const digests = createSolidDigestRepository({
+      fetch: pod.fetch,
+      checkWrite: async (_dataset, subjects) => void checked.push([...subjects]),
+    });
+    expect(Object.keys((await digests.readDigest(INSTANCE))!.months)).toHaveLength(300);
+    pod.clearRequests();
+    await digests.updateDigest(INSTANCE, (stored) => ({ ...stored!, receipts: {}, months: {} }));
+    expect(pod.requests.filter((r) => r.method !== "GET")).toHaveLength(1);
+    expect(checked[0]).toHaveLength(301);
+    expect(checked[0]).toContain(`${DIGEST}#m0`);
+    expect(checked[0]).toContain(`${DIGEST}#r`);
+    expect(pod.triples(DIGEST)).toEqual([]);
+  });
+
+  it("removes a dropped month at every subject that says it, one subject at a time", async () => {
+    const pod = fakePod();
+    let planted = PREFIXES;
+    for (let i = 0; i < 2000; i++)
+      planted += `<#m${i}> a sm:MonthSummary ; sm:formatVersion 1 ;
+         sm:summaryOf <https://elsewhere.example/x/history/2026-01.ttl> ; sm:summarizedVersion "v" ;
+         sm:youngReviewCount 0 ; sm:youngRecalledCount 0 .\n`;
+    await pod.put(DIGEST, planted);
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    const push = Array.prototype.push;
+    let widest = 0;
+    Array.prototype.push = function (this: unknown[], ...items: unknown[]) {
+      if (typeof items[0] === "string" && items[0].startsWith(`${DIGEST}#m`))
+        widest = Math.max(widest, items.length);
+      return push.apply(this, items);
+    };
+    try {
+      await digests.updateDigest(INSTANCE, (stored) => withMonthSummaries(stored!, {}));
+    } finally {
+      Array.prototype.push = push;
+    }
+    // Spreading every subject into one call fails past the engine's
+    // argument limit, so a key said often enough could never be removed.
+    expect(widest).toBe(1);
+    expect(pod.triples(DIGEST)).toEqual([]);
+  });
+
+  it("writes a summary over every subject it was read from", async () => {
+    const pod = fakePod();
+    const said = (subject: string) =>
+      `<${subject}> a sm:MonthSummary ; sm:formatVersion 1 ; sm:summaryOf <history/2026-09.ttl> ;
+         sm:summarizedVersion "v" ; sm:youngReviewCount 0 ; sm:youngRecalledCount 0 .\n`;
+    await pod.put(DIGEST, `${PREFIXES}${said("#month-history-2026-09.ttl")}${said("#again")}`);
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    await digests.updateDigest(INSTANCE, (stored) =>
+      withMonthSummaries(stored!, { [month.document]: month }),
+    );
+    const subjects = new Set(pod.triples(DIGEST)!.map((t) => t.split(" ")[0]));
+    expect([...subjects]).toEqual([`<${DIGEST}#month-history-2026-09.ttl>`]);
+    expect(await digests.readDigest(INSTANCE)).toEqual(
+      withMonthSummaries(emptyDigest(), { [month.document]: month }),
+    );
+  });
+
   it("writes changes asked for while a write is under way together, in the next one", async () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
