@@ -6,4 +6,4 @@
 # engine, SPARQL-based constraints included. Compiled, with what it needs
 # and every file's hash, into requirements-ci.txt, which is what pip
 # installs (docs/testing.md#the-workflows).
-pyshacl==0.40.1
+pyshacl==0.40.2
