@@ -12,7 +12,7 @@ import {
   datasetFromQuads,
   getThing,
   localNameOf,
-  removeThing,
+  removeThings,
   setThing,
   toRdfJsDataset,
   withQuads,
@@ -58,7 +58,7 @@ function edit(before: Quad[], after: Quad[]): Dataset {
   );
   for (const id of ids) {
     const subject = getThing(next, id);
-    dataset = subject === null ? removeThing(dataset, id) : setThing(dataset, subject);
+    dataset = subject === null ? removeThings(dataset, [id]) : setThing(dataset, subject);
   }
   return dataset;
 }

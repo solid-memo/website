@@ -73,7 +73,7 @@ function expectUrl(value: string, what: string): void {
 }
 
 /**
- * The changes made to a dataset, as setThing and removeThing record
+ * The changes made to a dataset, as setThings and removeThings record
  * them; undefined for a dataset no change was ever made to.
  */
 export function changesOf(dataset: Dataset): Changes | undefined {
@@ -204,15 +204,9 @@ export function setThings<T extends Dataset>(dataset: T, subjects: Iterable<Subj
   return updated as unknown as T;
 }
 
-/** The dataset without what it said of `subject`, the change recorded (changesOf). */
-export function removeThing<T extends Dataset>(dataset: T, subject: string | Subject): T {
-  return removeThings(dataset, [subject]);
-}
-
 /**
- * The dataset without what it said of each of `subjects`, as removeThing
- * removes one, each change recorded: the subjects are copied once, not
- * once a subject.
+ * The dataset without what it said of each of `subjects`, each change
+ * recorded: the subjects are copied once, not once a subject.
  */
 export function removeThings<T extends Dataset>(
   dataset: T,

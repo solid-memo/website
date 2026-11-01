@@ -98,7 +98,7 @@ export type {
 } from "./interface";
 
 /**
- * The changes made to a dataset, as setThing and removeThing record
+ * The changes made to a dataset, as setThings and removeThings record
  * them; undefined for a dataset no change was ever made to.
  */
 export function changesOf(dataset: Dataset): Changes | undefined {
@@ -219,11 +219,6 @@ export function setThing<T extends Dataset>(dataset: T, subject: Subject): T {
   return setThings(dataset, [subject]);
 }
 
-/** The dataset without what it said of `subject`, the change recorded (changesOf), as removeThings removes one. */
-export function removeThing<T extends Dataset>(dataset: T, subject: string | Subject): T {
-  return removeThings(dataset, [subject]);
-}
-
 /**
  * The dataset with each of `subjects` set in turn, as setThing sets one,
  * each change recorded (changesOf). The library's setThing copies the
@@ -248,9 +243,10 @@ export function setThings<T extends Dataset>(dataset: T, subjects: Iterable<Subj
 }
 
 /**
- * The dataset without what it said of each of `subjects`, as removeThing
- * removes one, each change recorded (changesOf): in time that grows with
- * the subjects and the dataset, not their product (setThings).
+ * The dataset without what it said of each of `subjects`, each change
+ * recorded (changesOf), as the library's removeThing removes one: in
+ * time that grows with the subjects and the dataset, not their product
+ * (setThings).
  */
 export function removeThings<T extends Dataset>(
   dataset: T,

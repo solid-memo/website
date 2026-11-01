@@ -19,8 +19,8 @@ import type { Changes, Dataset, Subject } from "@solid-memo/solid/client/interfa
  * - A dataset holds the subjects of its default graph by IRI (`_:label`
  *   for a blank node), the quads of any named graph as they were read, the
  *   document it came from, and its edits as a chain of steps (setThing,
- *   removeThing), each pointing to the one before: changesOf replays them
- *   when it is asked, so an edit costs only what it changes.
+ *   setThings, removeThings), each pointing to the one before: changesOf
+ *   replays them when it is asked, so an edit costs only what it changes.
  */
 
 const { blankNode, literal, namedNode, quad: makeQuad, defaultGraph } = DataFactory;
