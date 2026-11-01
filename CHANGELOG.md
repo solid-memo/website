@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.12](https://github.com/solid-memo/website/compare/v6.25.11...v6.25.12) (2026-11-01)
+
+### Bug Fixes
+
+* **markdown:** count heading underlines inside quotes and list items ([efde2af](https://github.com/solid-memo/website/commit/efde2af23bc217f271f7c711487bb5a21fbffa77))
+* **solid:** read a linked copy's upgrade under one release's limits ([e847612](https://github.com/solid-memo/website/commit/e84761298734a3e95dcbe2ca6e8ce9f2cd21205e))
+* **solid:** refuse RDF-star in JSON-LD deck and release files ([2bfddc8](https://github.com/solid-memo/website/commit/2bfddc8673e1185481a2e23ee8eed692f98b1d9e))
+
 ## [6.25.11](https://github.com/solid-memo/website/compare/v6.25.10...v6.25.11) (2026-11-01)
 
 ### Bug Fixes
