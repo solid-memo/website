@@ -281,8 +281,13 @@ const THEMATIC_BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
  */
 const FENCE = /^ {0,3}(?:`{3,}(?=[^`]*$)|~{3,})/;
 
-/** A line that could underline a heading. */
-const UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/gm;
+/**
+ * A line that could underline a heading, in any container: once any run
+ * of `>`, spaces and tabs is taken off its start, it is all `=` or all
+ * `-`. That counts an underline in a block quote or a list item, and
+ * some lines that are none (indented code), so the count errs high.
+ */
+const UNDERLINE = /^[> \t]*(?:=+|-+)[ \t]*$/gm;
 
 /**
  * One container a line opens: whether it is a quote, and whether it is

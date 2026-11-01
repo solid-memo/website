@@ -170,9 +170,13 @@ blank.
   the count errs high, but closed spans count about once over. The
   parser is quadratic in openers that never close. No text in `decks/`
   comes near it.
-- **`MAX_UNDERLINES`, 200 lines that could underline a heading** (`===`,
-  `---`, with up to three spaces before and white space after). The
-  parser is quadratic in setext headings too (`a\n=\n…` at 20,000
+- **`MAX_UNDERLINES`, 200 lines that could underline a heading** (`===`
+  or `---`, with white space after). A line counts once any run of `>`,
+  spaces and tabs is taken off its start, so an underline in a block
+  quote or a list item counts. So does an indented line of code, so the
+  count errs high. A no-break space or form feed is no indentation, so
+  a line after one is text and doesn't count. The parser is quadratic
+  in setext headings in one container too (`a\n=\n…` at 20,000
   characters takes over a second).
 - **`MAX_DEPTH`, 8.** Blocks and phrasing nested deeper show as their
   source, so every walker of the tree recurses at most 8 deep. Each
