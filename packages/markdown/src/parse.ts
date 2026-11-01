@@ -448,7 +448,7 @@ const UNESCAPED = String.raw`(?<=(?<!\\)(?:\\\\)*)`;
  */
 function readFrom(text: string, at: number, opener: string): number {
   if (opener === "](") return linkRead(text, at + 2) - at;
-  if (opener === "<!--") return closerAt(text, at + 2, "-->") - at;
+  if (opener === "<!--") return commentEnd(text, at + 2) - at;
   if (opener === "<?") return closerAt(text, at + 2, String.raw`\?>`) - at;
   if (opener === "<![CDATA[") return closerAt(text, at + 9, String.raw`\]\]>`) - at;
   if (opener.startsWith("<")) return closerAt(text, at + 2, ">") - at;
@@ -480,6 +480,18 @@ function closerAt(text: string, from: number, closer: string): number {
   }
   pattern.lastIndex = from;
   return pattern.exec(text)?.index ?? text.length;
+}
+
+/**
+ * Where a comment's `-->` first comes from `from`, or the paragraph
+ * ends, whichever is first. The parser closes a comment at `-->` only,
+ * as CommonMark does, not at the `--!>` a browser also takes, so a count
+ * that stopped there would count low. Found as a `--` before a `>`.
+ */
+function commentEnd(text: string, from: number): number {
+  let end = closerAt(text, from, "--");
+  while (text.startsWith("--", end) && text[end + 2] !== ">") end = closerAt(text, end + 1, "--");
+  return end;
 }
 
 /** White space that may come between a link's parts: spaces, tabs and at most one line break. */
