@@ -183,6 +183,40 @@ describe("useDataCheck", () => {
     ).toBeInTheDocument();
   });
 
+  it("walks the report once, however many decks ask and however often they render", async () => {
+    const decks = Array.from({ length: 50 }, (_, i) => deckOf(`deck-${i}`));
+    const report = invalid(true);
+    let walks = 0;
+    const counted = {
+      ...report,
+      get documents() {
+        walks += 1;
+        return report.documents;
+      },
+    } as ValidationReport;
+    function Many({ useCases, round }: { useCases: UseCases; round: number }) {
+      const check = useDataCheck(useCases, INSTANCE);
+      const aside = [bad, ...decks].filter((deck) => check.readOnly(deck) === "setAside");
+      return (
+        <p>
+          {`round ${round}, aside ${aside.length}, arrangement ${check.arrangementSetAside ? "aside" : "open"}`}
+        </p>
+      );
+    }
+    const useCases = makeUseCasesFake({ checkInstance: vi.fn(async () => counted) });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const tree = (round: number) => (
+      <QueryClientProvider client={queryClient}>
+        <Many useCases={useCases} round={round} />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(tree(0));
+    expect(await screen.findByText("round 0, aside 1, arrangement aside")).toBeInTheDocument();
+    for (let round = 1; round <= 10; round += 1) rerender(tree(round));
+    expect(screen.getByText("round 10, aside 1, arrangement aside")).toBeInTheDocument();
+    expect(walks).toBe(1);
+  });
+
   it("falls back to the default policy when the preferences cannot be read", async () => {
     renderProbe({
       getPreferences: vi.fn(async () => Promise.reject(new Error("offline"))),

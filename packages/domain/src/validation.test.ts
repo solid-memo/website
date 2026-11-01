@@ -4,14 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
-import {
-  arrangementSetAside,
-  failingDocumentUrls,
-  failingSubjectUrls,
-  setAsideDecks,
-  summarize,
-  type DocumentReport,
-} from "./validation";
+import { arrangementSetAside, deckSetAside, summarize, type DocumentReport } from "./validation";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 
@@ -144,17 +137,6 @@ describe("what fails, and the decks set aside for it", () => {
     authors: [],
   });
 
-  it("names the failing subjects and documents, warnings aside", () => {
-    expect([...failingSubjectUrls(report)]).toEqual([
-      `${INSTANCE}catalog.ttl#deck-1`,
-      `${INSTANCE}reviews/deck-3.ttl#a`,
-    ]);
-    expect([...failingDocumentUrls(report)]).toEqual([
-      `${INSTANCE}catalog.ttl`,
-      `${INSTANCE}reviews/deck-3.ttl`,
-    ]);
-  });
-
   it("sets aside a deck whose entry, cards or review states fail", () => {
     const cardsFail = summarize(INSTANCE, [
       {
@@ -171,13 +153,33 @@ describe("what fails, and the decks set aside for it", () => {
         ],
       },
     ]);
-    expect([...setAsideDecks(report, ["deck-1", "deck-2", "deck-3", "deck-4"].map(deck))]).toEqual([
-      `${INSTANCE}catalog.ttl#deck-1`,
-      `${INSTANCE}catalog.ttl#deck-3`,
+    const setAside = (from: typeof report, ids: string[]) =>
+      ids.filter((id) => deckSetAside(from, deck(id)));
+    // deck-1's entry fails, deck-2's only warns, deck-3's review states fail.
+    expect(setAside(report, ["deck-1", "deck-2", "deck-3", "deck-4"])).toEqual([
+      "deck-1",
+      "deck-3",
     ]);
-    expect([...setAsideDecks(cardsFail, ["deck-4"].map(deck))]).toEqual([
-      `${INSTANCE}catalog.ttl#deck-4`,
-    ]);
+    expect(setAside(cardsFail, ["deck-4"])).toEqual(["deck-4"]);
+  });
+
+  it("walks the report once, however many decks are asked about, and again for a new report", () => {
+    let walks = 0;
+    const counted = (from: typeof report): typeof report => ({
+      ...from,
+      get documents() {
+        walks += 1;
+        return from.documents;
+      },
+    });
+    const first = counted(report);
+    const decks = Array.from({ length: 200 }, (_, i) => deck(`deck-${i}`));
+    for (let render = 0; render < 14; render++) {
+      for (const each of decks) deckSetAside(first, each);
+    }
+    expect(walks).toBe(1);
+    expect(deckSetAside(counted(report), deck("deck-1"))).toBe(true);
+    expect(walks).toBe(2);
   });
 });
 
