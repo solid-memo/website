@@ -961,10 +961,24 @@ flowchart LR
   the limit is canceled as soon as it's past it, or before it's read
   when its `Content-Length` says so. Parsing stops keeping triples at
   the first one past either of the other limits, before any are built
-  into a dataset. A JSON-LD text stops being read there too: it's given
-  to the parser in parts, and the parser is stopped before the next. Each case refuses the release (`releaseTooLarge`),
-  however the release is read. The same limits apply to a creator's
-  catalog read for the release's series, to a release the Studio reads,
+  into a dataset. The text stops being read there too: it's given to
+  the parser in parts, and the parser gets no more after it. A
+  Turtle text is also refused at the part where it declares its base
+  (`@base`, `BASE`) for the 17th time, or where its base can grow past
+  512 characters (`writeTurtle`). It's refused there too when a base
+  it declares has a `.`, `..` or empty segment in its path, or when it
+  declares a prefix (`@prefix`, `PREFIX`) for the 4,097th time. The
+  length bound is the longest of the release's address and the
+  absolute bases it declares, with each relative one added on. The
+  parser walks the whole base for each relative IRI, base and prefix it
+  resolves, and a declaration makes no triple to count. The search
+  reads the text as the parser does, past strings, IRIs and comments,
+  so a declaration quoted in a card's text doesn't count. With the
+  bases and prefixes bounded and the parse stopped at the first limit,
+  the time to read or refuse a release grows with its size, not faster. Each case refuses
+  the release (`releaseTooLarge`), however the release is read. The
+  same limits apply to a creator's catalog read for the release's
+  series, to a release the Studio reads,
   opens as a file, or checks against the library's shapes. The library's
   index, which comes with the site and grows with the library, and the
   user's own pod documents aren't limited. A deck file has limits of its

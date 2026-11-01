@@ -4,13 +4,14 @@
 
 import {
   getSolidDataset,
+  getSourceUrl,
   getTurtleParser,
   type Parser,
   type SolidDataset,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
 import { ReadLimitError, type ReadLimits } from "./interface";
-import { limitsOf, quadTally, refusalOf } from "./readLimits";
+import { limitsOf, quadTally, refusalOf, type TextStream, writeTurtle } from "./readLimits";
 
 type Graphs = SolidDataset["graphs"];
 type Graph = Graphs["default"];
@@ -63,8 +64,9 @@ interface Collected {
 /**
  * solid-client's Turtle parser, whose quads go to `collected` instead of
  * to solid-client; one past the limits of the read of `url` (quadTally)
- * fails the parse instead, once, and drops what was kept. The parser
- * goes on to the end of the text it was given, but keeps none of it.
+ * fails the parse instead, once, and drops what was kept, as does a
+ * base past them (writeTurtle). The text is written to the parser in
+ * parts, so that it reads no further than the part it is in.
  */
 function collectingTurtleParser(collected: Collected, url: string): Parser {
   const parser = getTurtleParser();
@@ -80,15 +82,21 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
       const quads: Quad[] = [];
       const past = quadTally(collected.limits);
       collected.quads = quads;
-      parser.onQuad((quad) => {
-        if (collected.refused !== undefined) return;
-        if (!past(quad)) return quads.push(quad);
-        // The tally is past limits only under some.
+      const refuse = () => {
+        // The tally, and the bases, are past limits only under some.
         collected.refused = new ReadLimitError(url, collected.limits!);
         quads.length = 0;
         for (const callback of failed) callback(collected.refused);
+      };
+      parser.onQuad((quad) => {
+        if (collected.refused !== undefined) return;
+        if (!past(quad)) return quads.push(quad);
+        refuse();
       });
-      parser.parse(source, resourceInfo);
+      // solid-client hands the text to n3's parser as it is, which reads a stream as well.
+      const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);
+      const goOn = () => collected.refused === undefined;
+      if (!writeTurtle(source, getSourceUrl(resourceInfo), collected.limits, parse, goOn)) refuse();
     },
   };
 }

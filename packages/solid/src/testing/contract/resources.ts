@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
 import { HttpError, ReadLimitError } from "../../client/interface";
-import { limitedFetch } from "../../client/readLimits";
+import { limitedFetch, RELEASE_LIMITS } from "../../client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
 import { type DataClient, turtleAt } from "./rdf";
 
@@ -218,6 +219,154 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(
         getThing(await getSolidDatasetLinear(URL_, { fetch: within }), `${long}a`),
       ).not.toBeNull();
+    });
+
+    it("refuses a document at its base when it declares one too often, and reads one that declares it a few times", async () => {
+      const bases = (count: number) => `${"@base <https://pod.example/decks/> .\n".repeat(count)}`;
+      const past = `${bases(17)}<a> <${EX}p> "x" .`;
+      // Limits the text is well within but for its bases.
+      const limits = { bytes: past.length, quads: 10, characters: 100_000 };
+      const fetch = limitedFetch(turtleAt(past), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+        () => parseQuads(past, "turtle", URL_, limits),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+      }
+      // Each relative base adds to the one before, which the parser walks for each one.
+      const few = `${"@base <x/> .\n".repeat(16)}<a> <${EX}p> "x" .`;
+      const subject = `https://pod.example/decks/${"x/".repeat(16)}a`;
+      const dataset = await getSolidDatasetLinear(URL_, {
+        fetch: limitedFetch(turtleAt(few), limits),
+      });
+      expect(getThing(dataset, subject)).not.toBeNull();
+      const [quad] = await parseQuads(few, "turtle", URL_, limits);
+      expect(quad?.subject.value).toBe(subject);
+      // A text from the user's own pod is read with no limits, its bases as many as it says.
+      expect(await parseQuads(`${bases(17)}<a> <${EX}p> "x" .`, "turtle", URL_)).toHaveLength(1);
+    });
+
+    it("refuses a document at its base when the base is too long, and reads one whose base is not", async () => {
+      // The parser walks the whole base for each relative IRI it resolves against it.
+      const based = (length: number) =>
+        `@base <${"a".repeat(length)}/> .\n${"<./b> <./b> <./b> .\n".repeat(1_000)}`;
+      const past = based(600);
+      // Limits the text is well within but for its base.
+      const limits = { bytes: past.length, quads: 1_000, characters: 100_000_000 };
+      const fetch = limitedFetch(turtleAt(past), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+        () => parseQuads(past, "turtle", URL_, limits),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+      }
+      const within = based(300);
+      const subject = `https://pod.example/decks/${"a".repeat(300)}/b`;
+      const dataset = await getSolidDatasetLinear(URL_, {
+        fetch: limitedFetch(turtleAt(within), limits),
+      });
+      expect(getThing(dataset, subject)).not.toBeNull();
+      expect(await parseQuads(within, "turtle", URL_, limits)).toHaveLength(1_000);
+      // A text from the user's own pod is read with no limits, its base as long as it says.
+      expect(await parseQuads(past, "turtle", URL_)).toHaveLength(1_000);
+    });
+
+    it("refuses a document whose base is too long past a comment that names a short one", async () => {
+      const past = `@base # <>\n<${"a".repeat(600)}/> .\n${"<./b> <./b> <./b> .\n".repeat(1_000)}`;
+      const limits = { bytes: past.length, quads: 1_000, characters: 100_000_000 };
+      const fetch = limitedFetch(turtleAt(past), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+        () => parseQuads(past, "turtle", URL_, limits),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+      }
+    });
+
+    it("reads a document whose text speaks of bases and prefixes, as a release's cards may, as any other", async () => {
+      const texts = [
+        "When the base < 2, the logarithm is undefined.",
+        "Run git rebase <main> to replay the commits.",
+        "BASE <https://pod.example/> sets the base.",
+        "Database<br>",
+        "Write @base <../> . to go up a level.",
+        "@prefix ex: <x> . names a prefix.",
+      ];
+      // More of them than a document may declare bases, in short, long and single-quoted strings.
+      const cards = Array.from({ length: 20 }, (_, at) => {
+        const text = texts[at % texts.length]!;
+        const literal = [`"${text}"`, `"""${text}\n"""`, `'${text}'`][at % 3];
+        return `<#c${at}> <${EX}text> ${literal} .\n`;
+      }).join("");
+      const fetch = limitedFetch(turtleAt(cards), RELEASE_LIMITS);
+      const dataset = await getSolidDatasetLinear(URL_, { fetch });
+      expect(getThing(dataset, `${URL_}#c19`)).not.toBeNull();
+      expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+      const quads = await parseQuads(cards, "turtle", URL_, RELEASE_LIMITS);
+      expect(quads).toHaveLength(20);
+      expect(quads[0]?.object.value).toBe(texts[0]);
+    });
+
+    it("refuses a document at its base when the base's path has dot segments, and at its prefixes when it declares too many", async () => {
+      const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 1_000, characters: 100_000_000 };
+      for (const past of [
+        `@base <https://pod.example/${"../".repeat(100)}> .\n<a> <${EX}p> "x" .`,
+        `@base <https://pod.example/a//b/> .\n<a> <${EX}p> "x" .`,
+        `${"PREFIX : <.>\n".repeat(4097)}<a> <${EX}p> "x" .`,
+      ]) {
+        const fetch = limitedFetch(turtleAt(past), limits);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(past, "turtle", URL_, limits),
+        ]) {
+          await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+        }
+      }
+      const few = `${"PREFIX : <.>\n".repeat(4096)}:a <${EX}p> "x" .`;
+      const [quad] = await parseQuads(few, "turtle", URL_, limits);
+      expect(quad?.subject.value).toBe("https://pod.example/decks/a");
+    });
+
+    it("refuses a text of prefixes, or of IRIs that go up from a base, in time that does not grow with the rest", async () => {
+      const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 10, characters: 100_000_000 };
+      const dotted = `@base <https://pod.example/${"../".repeat(160)}> .\n`;
+      const longest = `@base <https://pod.example/${"a/".repeat(240)}> .\n`;
+      for (const [head, line] of [
+        [dotted, "PREFIX :<.>\n"],
+        [dotted, "<.> <.> <.> .\n"],
+        [longest, "PREFIX :<.>\n"],
+      ]) {
+        // A text eight times as long must take less than half as long as the short one done eight times over.
+        const ratio = await growthAsync(
+          (count) => {
+            const text = `${head}${line.repeat(count)}`;
+            return () => parseQuads(text, "turtle", URL_, limits).catch(() => undefined);
+          },
+          20_000,
+          8,
+        );
+        expect(ratio).toBeLessThan(0.5);
+      }
+    });
+
+    it("stops parsing a Turtle text at its first triple past the limits, however long the rest", async () => {
+      // A base as long as is let through, and IRIs that go up from it: each walks the whole base.
+      const head = `@base <https://pod.example/${"a/".repeat(200)}> .\n${"<a> <b> <c> .\n".repeat(20)}`;
+      const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 10, characters: 100_000_000 };
+      // A text eight times as long must take less than half as long as the short one done eight times over.
+      const ratio = await growthAsync(
+        (count) => {
+          const text = `${head}${"<../b> <../b> <../b> .\n".repeat(count)}`;
+          return () => parseQuads(text, "turtle", URL_, limits).catch(() => undefined);
+        },
+        20_000,
+        8,
+      );
+      expect(ratio).toBeLessThan(0.5);
     });
   });
 
