@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { choicesOf, type Choice } from "@solid-memo/domain/course";
 import type { CardContent } from "@solid-memo/domain/deck";
 import { isPublished } from "@solid-memo/domain/release/courseIds";
@@ -90,7 +90,7 @@ export function QuestionEditorScreen({
   const { t, readerText, locale } = useI18n();
   const held = readOnly !== null;
   // The workspace opens a card it can read.
-  const saved = draftCardOf(draft, card)!;
+  const saved = useMemo(() => draftCardOf(draft, card)!, [draft, card]);
   const [form, setForm] = useState(() => draftOf(saved.content, [locale, ...navigator.languages]));
   const [invalid, setInvalid] = useState<CardFieldsError | null>(null);
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
@@ -106,7 +106,10 @@ export function QuestionEditorScreen({
         distractors: saved.content.distractors,
       }
     : saved.content;
-  const choices = choicesOf(shown, IN_ORDER);
+  // The options built again only when the answer typed or the wrong options change, so
+  // a keystroke elsewhere, or checking an answer, does not draw or parse every one again.
+  const back = JSON.stringify(shown.back);
+  const choices = useMemo(() => choicesOf(shown, IN_ORDER), [back, shown.distractors]);
 
   function save(event: Event) {
     event.preventDefault();

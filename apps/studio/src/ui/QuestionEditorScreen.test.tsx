@@ -11,10 +11,17 @@ import {
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { optionPhrases } from "@solid-memo/ui/markdownCache";
 import type { DraftEditor } from "./draftEditor";
 import { QuestionEditorScreen } from "./QuestionEditorScreen";
 import { choose } from "../test/choose";
 import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
+
+// Counts the options the preview reads, reading them as ever.
+vi.mock("@solid-memo/ui/markdownCache", async (actual) => {
+  const cache = await actual<typeof import("@solid-memo/ui/markdownCache")>();
+  return { ...cache, optionPhrases: vi.fn(() => vi.fn(cache.optionPhrases())) };
+});
 
 function renderScreen(
   card: string,
@@ -159,6 +166,45 @@ describe("QuestionEditorScreen", () => {
     expect(preview()).toHaveTextContent("Apps use data.");
     fireEvent.click(within(preview()).getByRole("button", { name: "Ask again" }));
     expect(within(preview()).queryByText("Not quite.")).toBeNull();
+  });
+
+  it("reads the preview's options once, however often the user types or checks", () => {
+    const draft = applyDraftChanges(courseDraft(), [
+      {
+        kind: "editCard",
+        id: "q-pods-1a",
+        card: {
+          front: { en: "What holds data?" },
+          back: { en: "A pod" },
+          created: "2026-10-10T10:00:00.000Z",
+          textFormat: SM.markdown,
+        },
+      },
+      {
+        kind: "addDistractor",
+        card: "q-pods-1a",
+        id: "q-pods-1a-d2",
+        distractor: { text: { en: "A *server*" } },
+      },
+    ]) as ReleaseDraft;
+    const made = vi.mocked(optionPhrases);
+    made.mockClear();
+    renderScreen("q-pods-1a", draft);
+    // The option neither chosen nor right, read by the preview's question.
+    const reads = () =>
+      made.mock.results
+        .flatMap(({ value }) => vi.mocked(value as ReturnType<typeof optionPhrases>).mock.calls)
+        .filter(([text]) => text === "A *server*").length;
+    expect(reads()).toBe(1);
+    fireEvent.input(screen.getByRole("textbox", { name: "Front" }), {
+      target: { value: "What keeps data?" },
+    });
+    fireEvent.click(within(preview()).getByRole("radio", { name: "An app" }));
+    expect(reads()).toBe(1);
+    // Checking fixes every option, each read from the question's one cache.
+    fireEvent.click(within(preview()).getByRole("button", { name: "Check" }));
+    expect(within(preview()).getByText("Not quite.")).toBeInTheDocument();
+    expect(made).toHaveBeenCalledTimes(1);
   });
 
   it("asks a deck's card from nowhere, and only retires one published", () => {

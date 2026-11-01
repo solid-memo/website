@@ -126,6 +126,16 @@ export function plainTexts(): (text: string) => string {
   return rememberedAll(plainText);
 }
 
+/**
+ * A markdownPhrases that remembers every text it was given
+ * (rememberedAll): one for each list of options shown again on every
+ * render, such as a course question's, which may hold more texts than
+ * CACHE_SIZE.
+ */
+export function optionPhrases(): (text: string) => MdPhrase[] | null {
+  return rememberedAll(parseInlineMarkdown);
+}
+
 /** The markdown package's rule of each field rule the domain names. */
 const RULES: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, prose: PROSE };
 
