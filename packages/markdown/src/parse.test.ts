@@ -9,6 +9,8 @@ import {
   MAX_DEPTH,
   MAX_LAZY_LINES,
   MAX_LINE_NESTING,
+  MAX_LISTS,
+  MAX_LOOKAHEAD,
   MAX_NESTED_LINES,
   MAX_QUOTES,
   MAX_TABLE_CELLS,
@@ -365,6 +367,212 @@ describe("parseMarkdown", () => {
     ).not.toBeNull();
   });
 
+  it("reads nothing past MAX_LOOKAHEAD characters from openers that never close to the next blank line", () => {
+    // k openers, one every u characters from o, in one paragraph: u k (k + 1) / 2 - k o characters ahead.
+    const ahead = (u: number, o: number) => (k: number) => (u * k * (k + 1)) / 2 - k * o;
+    for (const [unit, cost] of [
+      ["<!a", ahead(3, 0)],
+      ["<?a", ahead(3, 0)],
+      ["<!--", ahead(4, 0)],
+      ["<![CDATA[", ahead(9, 0)],
+      ["[](b (", ahead(6, 1)],
+      // An escaped run opens one a backtick shorter, which never closes; the run itself closes at the next.
+      ["\\``", (k: number) => ahead(3, 1)(k) + 3 * k - 1],
+    ] as const) {
+      let fit = 0;
+      while (cost(fit + 1) <= MAX_LOOKAHEAD) fit++;
+      expect(parseMarkdown(unit.repeat(fit)), JSON.stringify(unit)).not.toBeNull();
+      expect(parseMarkdown(unit.repeat(fit + 1)), JSON.stringify(unit)).toBeNull();
+    }
+    const fit = Math.floor((Math.sqrt(1 + (8 * MAX_LOOKAHEAD) / 3) - 1) / 2);
+    // Each block's openers count to its end, and every block counts.
+    expect(parseMarkdown(`${"<!a".repeat(fit)}\n\n${"<!a".repeat(fit)}`)).toBeNull();
+    for (const blank of ["\n\n", "\n \t\n", "\r\r", "\r\n\r\n"])
+      expect(parseMarkdown(`<!a${blank}`.repeat(2_000)), JSON.stringify(blank)).not.toBeNull();
+    expect(parseMarkdown("<!a\n \n".repeat(fit))).toBeNull();
+    expect(parseMarkdown(`<?${"a".repeat(MAX_CHARS - 2)}`)).not.toBeNull();
+  });
+
+  it("counts from each opener to its closer, or to the end of its paragraph", () => {
+    // A text whose openers read `count` characters ahead: k `<!a` in one paragraph read
+    // 3 k (k + 1) / 2, and each `<!a` or `<?` in a paragraph of its own 3 or 2.
+    const reading = (count: number) => {
+      let k = Math.floor((Math.sqrt(1 + (8 * count) / 3) - 1) / 2);
+      let rest = count - (3 * k * (k + 1)) / 2;
+      if (rest === 1) rest += 3 * k--;
+      const twos = [0, 2, 1][rest % 3]!;
+      return [
+        "<!a".repeat(k),
+        ...Array<string>(twos).fill("<?"),
+        ...Array<string>((rest - 2 * twos) / 3).fill("<!a"),
+      ].join("\n\n");
+    };
+    for (const [markdown, count] of [
+      ["`a`", 3],
+      ["`a``b`", 10],
+      ["`a\n\n`", 3],
+      ["\\``a`", 8],
+      ["\\`a`", 3],
+      ["\\\\``a``", 5],
+      ["<!-- a -->", 7],
+      ["<!-->", 2],
+      ["<!-- a --!> b -->", 14],
+      ["<!-- a ---->", 9],
+      ["<!-- a --", 9],
+      ["<? a ?>", 5],
+      ["<![CDATA[ a ]]>", 12],
+      ["<!X a>", 5],
+      ["<!X a", 5],
+      ["[a](b)", 3],
+      ["[a]( b)", 4],
+      ['[a](b "t")', 6],
+      ["[a](b 't')", 6],
+      ["[a](b (t))", 6],
+      ['[a](b "t\\"")', 8],
+      ['[a](<b c> "t")', 10],
+      ['[a](<b\nc> "t")', 4],
+      ['[a](<b<c> "t")', 4],
+      ['[a](<b\\>c> "t")', 11],
+      ['[a](<b>"t")', 5],
+      ['[a](b(c)d "t', 10],
+      ["[a](b\\) (t", 8],
+      ["[a](b\\\\) (t", 5],
+      ["[a](b\\c (t", 8],
+      ["[a](b", 3],
+      ["[a](b\\", 4],
+      ["[a](b c", 4],
+      ['[a](b\n"t', 6],
+      ['[a](b\n\n"t', 4],
+    ] as const) {
+      const at = (count: number) => parseMarkdown(`${reading(count)}\n\n${markdown}`);
+      expect(at(MAX_LOOKAHEAD - count), JSON.stringify(markdown)).not.toBeNull();
+      expect(at(MAX_LOOKAHEAD - count + 1), JSON.stringify(markdown)).toBeNull();
+    }
+  });
+
+  it("reads closed code spans in linear time, as the parser does", () => {
+    const items = Array.from({ length: 200 }, (_, i) => `- \`cmd${i}\` does a thing\n`).join("");
+    const rows = Array.from({ length: 80 }, (_, i) => `| \`:s/a${i}/b/\` | \`:%s/x/y/g\` |\n`);
+    const sentences = Array.from(
+      { length: 100 },
+      (_, i) => `Use \`git commit\` and \`git push\` ${i}.`,
+    );
+    for (const markdown of [
+      items,
+      `| Command | Example |\n| --- | --- |\n${rows.join("")}`,
+      sentences.join(" "),
+      "Run `npm run check`, then `npm run lint`.\n".repeat(400),
+    ])
+      expect(parseMarkdown(markdown)).not.toBeNull();
+  });
+
+  it("reads nothing past MAX_LISTS lists", () => {
+    const lists = (unit: string, count: number) => parseMarkdown(unit.repeat(count));
+    for (const unit of [
+      "+ a\n\nb\n",
+      "> - a\n>\n> b\n",
+      "1. a\n\n b\n",
+      "- a\n***\n",
+      // An item that starts empty ends at a blank line, and the line after leaves the list.
+      "+\n\n  b\n\n",
+      "+\n\n  b\n",
+      "+ \n\n  b\n\n",
+      "1.\n\n   b\n\n",
+      "1)\n\n   b\n\n",
+      "> +\n>\n>   b\n",
+    ]) {
+      expect(lists(unit, MAX_LISTS), JSON.stringify(unit)).not.toBeNull();
+      expect(lists(unit, MAX_LISTS + 1), JSON.stringify(unit)).toBeNull();
+    }
+    // A list of another marker is another list.
+    expect(lists("- a\n+ b\n", MAX_LISTS / 2)).not.toBeNull();
+    expect(lists("- a\n+ b\n", MAX_LISTS / 2 + 1)).toBeNull();
+    expect(lists("1. a\n2) b\n", MAX_LISTS / 2 + 1)).toBeNull();
+    // A list's next items, and the lines its items hold, open none.
+    for (const unit of [
+      "- a\n",
+      "- a\n\n",
+      "1. a\n\n   b\n",
+      "-\ta\n\n\tb\n",
+      "-      a\n  b\n",
+      "*\n  b\n",
+      "+\n  b\n\n",
+      "+\n\n",
+      "1.\n\n2. a\n",
+      "> - a\n>   b\n",
+    ])
+      expect(lists(unit, MAX_LISTS * 2), JSON.stringify(unit)).not.toBeNull();
+    // Each item's own sublist is a list; the sublist's next items are not.
+    expect(lists("- a\n  - b\n  - c\n", MAX_NESTED_LINES / 2)).not.toBeNull();
+    expect(lists("- a\n  - b\n  + c\n", MAX_LISTS / 2)).toBeNull();
+    // Quotes opened anew, side by side or after a blank line, hold lists of their own.
+    expect(lists("> - a\n>> - b\n", MAX_LISTS / 2 + 1)).toBeNull();
+  });
+
+  it("counts the markers in fenced code too", () => {
+    const diff = (count: number) => "- a\n+ b\n".repeat(count / 2);
+    // Each line of a long diff opens a list, inside a fence as outside.
+    for (const fence of ["```diff\n", "~~~\n", "- a\n\n  ```\n", "> ```\n"]) {
+      const markdown = (count: number) => `${fence}${diff(count)}\`\`\`\n`;
+      expect(parseMarkdown(markdown(MAX_LISTS - 2)), JSON.stringify(fence)).not.toBeNull();
+      expect(parseMarkdown(markdown(MAX_LISTS + 2)), JSON.stringify(fence)).toBeNull();
+    }
+    // No fence, closed or not, HTML or other, lets the lists after it go uncounted.
+    for (const head of [
+      "```\n```\n",
+      "````\n`````\n",
+      " ```\n```\n",
+      "  ~~~\n~~~\n",
+      "- a\n\n ```\n```\n",
+      "<x\n```\n\n```\n",
+      "<x\n~~~\n\n~~~\n",
+      "a\n<x\n```\n\n```\n",
+      "<div>\n\n```\n",
+      "<!--\n\n```\n-->\n",
+    ])
+      for (const unit of ["+ a\n\nb\n", "> - a\n>\n> b\n"]) {
+        const markdown = (count: number) => head + unit.repeat(count);
+        expect(parseMarkdown(markdown(MAX_LISTS - 1)), JSON.stringify(head + unit)).not.toBeNull();
+        expect(parseMarkdown(markdown(MAX_LISTS + 1)), JSON.stringify(head + unit)).toBeNull();
+      }
+  });
+
+  it("counts lists after an indented fence, whatever the item above it", () => {
+    const unit = "+ a\n\nb\n";
+    // A thematic break, a quote or a lazy line in an item: the fence after it is still the item's.
+    for (const head of ["- a\n  ***\n", "- a\n  > b\n", "- a\nb\n"]) {
+      const markdown = (count: number) => `${head}  \`\`\`\nx\n\n${unit.repeat(count)}`;
+      expect(parseMarkdown(markdown(MAX_LISTS - 1)), JSON.stringify(head)).not.toBeNull();
+      expect(parseMarkdown(markdown(MAX_LISTS)), JSON.stringify(head)).toBeNull();
+      expect(parseMarkdown(markdown(MAX_LISTS * 2)), JSON.stringify(head)).toBeNull();
+    }
+  });
+
+  it("counts no list for a marker that cannot interrupt a paragraph, and every other", () => {
+    const lists = (head: string, unit: string, count: number) =>
+      parseMarkdown(head + unit.repeat(count));
+    // An empty item, or an ordered one that starts other than at 1, is a line of the paragraph.
+    for (const unit of ["2. c\nb\n", "2) c\n", "01. c\n", "+\nb\n", "* \n", "1.\n", "10. c\n  b\n"])
+      expect(lists("a\n", unit, MAX_LISTS * 2), JSON.stringify(unit)).not.toBeNull();
+    expect(lists("a\n\nb\n", "2. c\n", MAX_LISTS * 2)).not.toBeNull();
+    // Where a paragraph is not open, or not surely, each marker that opens a list counts.
+    for (const [unit, per] of [
+      ["a\n- c\n\n", 1],
+      ["a\n1. c\n\n", 1],
+      ["a\n\n2. c\n\n", 1],
+      ["# a\n2. c\n\n", 1],
+      ["a\n-\n2. c\n\n- d\n\n", 2],
+      ["> a\nb\n2) c\n- d\n", 2],
+      ["- ```\n  a\n2. c\n", 2],
+      ["<!--\n\na\n-->\n2. c\n\n", 1],
+    ] as const) {
+      expect(lists("", unit, MAX_LISTS / per), JSON.stringify(unit)).not.toBeNull();
+      expect(() => parseDocument(unit.repeat(MAX_LISTS / per + 1)), JSON.stringify(unit)).toThrow(
+        `more than MAX_LISTS (${MAX_LISTS}) lists`,
+      );
+    }
+  });
+
   it("reads nothing past MAX_DELIMITERS asterisks and underscores", () => {
     expect(parseMarkdown("*_".repeat(MAX_DELIMITERS / 2))).not.toBeNull();
     expect(parseMarkdown(`${"*_".repeat(MAX_DELIMITERS / 2)}*`)).toBeNull();
@@ -375,7 +583,7 @@ describe("parseMarkdown", () => {
       parseMarkdown("a\n=\n".repeat(MAX_UNDERLINES / 2) + "b\n---\n".repeat(MAX_UNDERLINES / 2)),
     ).not.toBeNull();
     expect(parseMarkdown(`${"a\n=\n".repeat(MAX_UNDERLINES)}   ---  `)).toBeNull();
-    expect(parseMarkdown("a\n- b\n".repeat(MAX_UNDERLINES + 1))).not.toBeNull();
+    expect(parseMarkdown("a\n- b\n- c\n".repeat(MAX_UNDERLINES / 2 + 1))).not.toBeNull();
   });
 
   it("reads nothing above MAX_CHARS", () => {
@@ -437,6 +645,12 @@ describe("parseDocument", () => {
         items: [[{ type: "heading", depth: 2, line: 4, children: [text("In a list")] }]],
       },
     ]);
+  });
+
+  it("reads a text past MAX_LOOKAHEAD, which grows with a page as MAX_CHARS does", () => {
+    const page = `a${"<!a".repeat(1_000)}`;
+    expect(parseMarkdown(page)).toBeNull();
+    expect(parseDocument(page)).toHaveLength(1);
   });
 
   it("reads a text past MAX_CHARS, which parseMarkdown shows as plain text", () => {
@@ -521,6 +735,10 @@ describe("parseDocument", () => {
     expect(refusal(`- a\n${"b\n".repeat(MAX_LAZY_LINES + 1)}`)).toMatchObject({
       what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a paragraph`,
       line: MAX_LAZY_LINES + 2,
+    });
+    expect(refusal("+ a\n\nb\n".repeat(MAX_LISTS + 1))).toMatchObject({
+      what: `more than MAX_LISTS (${MAX_LISTS}) lists`,
+      line: MAX_LISTS * 3 + 1,
     });
   });
 });
@@ -744,6 +962,24 @@ describe("pathological input", () => {
     ["backtick runs", fill("`a``")],
     ["entities", fill("&aaaaaaaa; ")],
     ["unclosed HTML comments", fill("<!--")],
+    ["escaped backtick runs", fill("\\``\n")],
+    ["escaped backtick runs at the cap", fill("Plain words.\n\n", "\\``\n".repeat(490))],
+    ["unclosed inline HTML comments", fill("a<!--\n")],
+    ["unclosed inline HTML comments at the cap", fill("Plain words.\n\n", "a<!--\n".repeat(400))],
+    ["unclosed processing instructions", fill("a <?x ")],
+    ["unclosed declarations", fill("a <!X ")],
+    ["unclosed CDATA sections", fill("a<![CDATA[\n")],
+    ["unclosed link titles", fill("[a](b\n(\n")],
+    ["unclosed link titles after a space", fill("[](b (\n")],
+    ["unclosed picture titles", fill("![a](b (\n")],
+    ["unclosed link titles at the cap", fill("Plain words.\n\n", "[](b (\n".repeat(370))],
+    ["lists ended by paragraphs", fill("+ a\n\nb\n")],
+    ["lists ended by paragraphs in one quote", fill("> - a\n>\n> b\n")],
+    ["lists at the cap", fill("Plain words.\n\n", "", "+ a\n\nb\n".repeat(MAX_LISTS))],
+    ["lists of an empty item", fill("+\n\n  b\n\n")],
+    ["lists of an empty item after white space", fill("+ \n\n  b\n\n")],
+    ["ordered lists of an empty item", fill("1.\n\n   b\n\n")],
+    ["markers that cannot interrupt a paragraph", fill("2. c\n", "a\n")],
     ["table rows", fill("| 1 | 2 |\n", "| a | b |\n|-|-|\n")],
     ["table cells", fill("|", "| a | b |\n|-|-|\n")],
     ["reference definitions", fill("[a]: b\n")],

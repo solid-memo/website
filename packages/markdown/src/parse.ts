@@ -116,6 +116,25 @@ export const MAX_LAZY_LINES = 200;
  */
 export const MAX_QUOTES = 200;
 
+/**
+ * The most lists a text may open: a list ends at a line that leaves its
+ * items, or where an item of another kind of marker comes, so the next
+ * marker opens another. An item that starts empty ends at a blank line
+ * right after it. The parser takes time quadratic in them too, so
+ * a text past it is shown as plain text. A list's next items open none.
+ */
+export const MAX_LISTS = 200;
+
+/**
+ * The most characters the parser may read ahead, all told, for the end
+ * of a code span, of inline HTML or of a link's title. Each opener counts
+ * the characters from it to its closer, or to the next blank line when
+ * none comes, as an opener that never closes is read to the end of its
+ * paragraph: a text whose count is past it is shown as plain text.
+ * Repository Markdown lifts it with MAX_CHARS.
+ */
+export const MAX_LOOKAHEAD = 500_000;
+
 /** A table wider than this, or with more cells than MAX_TABLE_CELLS, is shown as its source. */
 export const MAX_TABLE_COLUMNS = 20;
 export const MAX_TABLE_CELLS = 2_000;
@@ -151,9 +170,9 @@ function marker(control: string): string {
 
 /**
  * The text read as Markdown, as blocks; null when it is longer than
- * MAX_CHARS, or past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
- * MAX_QUOTES, MAX_DELIMITERS or MAX_UNDERLINES, to be shown as plain text
- * instead.
+ * MAX_CHARS, or past MAX_LOOKAHEAD, MAX_LINE_NESTING, MAX_NESTED_LINES,
+ * MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS or MAX_UNDERLINES,
+ * to be shown as plain text instead.
  */
 export function parseMarkdown(text: string): MdBlock[] | null {
   const tree = read(text);
@@ -167,13 +186,14 @@ export function parseMarkdown(text: string): MdBlock[] | null {
  * The repository's own Markdown, its docs, read as blocks in the same
  * dialect, with headings kept at their level (docs/markdown.md). For
  * trusted input read at build time only, never for data: MAX_CHARS is
- * lifted, as a page of the docs is longer, and that alone. Every other
- * limit stays, and what parseMarkdown would fold or show as its source
- * throws a DocumentError instead: raw HTML, a picture, a link reference
+ * lifted, as a page of the docs is longer, and with it MAX_LOOKAHEAD,
+ * which grows with the page, and that alone. Every other limit stays,
+ * and what parseMarkdown would fold or show as its source throws a
+ * DocumentError instead: raw HTML, a picture, a link reference
  * definition, what nests past MAX_DEPTH, a table past its caps, and a
  * text past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
- * MAX_QUOTES, MAX_DELIMITERS or MAX_UNDERLINES. So a page shows as it is written, or
- * its build fails and says where.
+ * MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS or MAX_UNDERLINES. So a page
+ * shows as it is written, or its build fails and says where.
  */
 export function parseDocument(text: string): DocBlock[] {
   const costly = tooCostly(text);
@@ -200,7 +220,7 @@ export class DocumentError extends Error {
 
 /** The parser's tree of a text, or null past the limits parseMarkdown names. */
 function read(text: string): Root | null {
-  if (text.length > MAX_CHARS || tooCostly(text) !== null) return null;
+  if (text.length > MAX_CHARS || readsTooFarAhead(text) || tooCostly(text) !== null) return null;
   return parse(text);
 }
 
@@ -433,8 +453,8 @@ class LazyLines {
 /**
  * Why the parser would take too long on the text, and on which line (from
  * 1) when one says it; null when it would not: see MAX_LINE_NESTING,
- * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_DELIMITERS and
- * MAX_UNDERLINES.
+ * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS
+ * and MAX_UNDERLINES.
  */
 function tooCostly(text: string): { what: string; line: number | null } | null {
   if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS)
@@ -498,7 +518,291 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
         line: index + 1,
       };
   }
+  return listsPast(lines);
+}
+
+/**
+ * Whether the parser may read ahead more than MAX_LOOKAHEAD characters,
+ * all told, for the end of a code span, of inline HTML or of a link's
+ * title (see readFrom). Each count reads the text only as far as it
+ * counts, and the counting stops past the cap, so it takes time linear
+ * in the text.
+ */
+function readsTooFarAhead(text: string): boolean {
+  let total = 0;
+  for (const opener of text.matchAll(OPENER)) {
+    total += readFrom(text, opener.index, opener[0]);
+    if (total > MAX_LOOKAHEAD) return true;
+  }
+  return false;
+}
+
+/**
+ * A backtick run, `<!--`, `<?`, `<![CDATA[`, `<!` before a letter, or a
+ * link's `](`: where the parser may read ahead to the end of a span.
+ */
+const OPENER = /`+|<!--|<\?|<!\[CDATA\[|<![A-Za-z]|\]\(/g;
+
+/** A line break before a blank line, where a paragraph ends, so no span goes past it. */
+const BLOCK_END = String.raw`(?:\r\n?|\n)[ \t]*(?=[\r\n]|$)`;
+
+/** Before a character that comes after an even number of backslashes, so is not escaped. */
+const UNESCAPED = String.raw`(?<=(?<!\\)(?:\\\\)*)`;
+
+/**
+ * The characters the parser may read from an opener at `at` for the end
+ * of its span: to the span's closer, or to the end of the paragraph when
+ * none comes. A backtick run closes at the next run of its length; an
+ * escaped one opens one shorter, so that one counts too. `<!--` closes
+ * at `-->`, `<?` at `?>`, `<![CDATA[` at `]]>` and `<!` and a letter at
+ * `>`. A link reads to its title's closer, or past its destination when
+ * it has no title (see linkRead). Counted high, as each run counts,
+ * closers too, and an opener in code or a closed span counts as well.
+ */
+function readFrom(text: string, at: number, opener: string): number {
+  if (opener === "](") return linkRead(text, at + 2) - at;
+  if (opener === "<!--") return commentEnd(text, at + 2) - at;
+  if (opener === "<?") return closerAt(text, at + 2, String.raw`\?>`) - at;
+  if (opener === "<![CDATA[") return closerAt(text, at + 9, String.raw`\]\]>`) - at;
+  if (opener.startsWith("<")) return closerAt(text, at + 2, ">") - at;
+  const run = (length: number) => runAt(text, at + opener.length, length) - at;
+  let slashes = 0;
+  while (text[at - slashes - 1] === "\\") slashes++;
+  return run(opener.length) + (slashes % 2 === 1 && opener.length > 1 ? run(opener.length - 1) : 0);
+}
+
+/** A backtick run, or a line break before a blank line. */
+const RUN = new RegExp(`\`+|${BLOCK_END}`, "g");
+
+/** Where the next run of `length` backticks comes from `from`, or the paragraph ends, whichever is first. */
+function runAt(text: string, from: number, length: number): number {
+  RUN.lastIndex = from;
+  for (let found = RUN.exec(text); found !== null; found = RUN.exec(text))
+    if (found[0].length === length || !found[0].startsWith("`")) return found.index;
+  return text.length;
+}
+
+const closers = new Map<string, RegExp>();
+
+/** Where `closer`, a pattern, first comes from `from`, or the paragraph ends, whichever is first. */
+function closerAt(text: string, from: number, closer: string): number {
+  let pattern = closers.get(closer);
+  if (pattern === undefined) {
+    pattern = new RegExp(`${closer}|${BLOCK_END}`, "g");
+    closers.set(closer, pattern);
+  }
+  pattern.lastIndex = from;
+  return pattern.exec(text)?.index ?? text.length;
+}
+
+/**
+ * Where a comment's `-->` first comes from `from`, or the paragraph
+ * ends, whichever is first. The parser closes a comment at `-->` only,
+ * as CommonMark does, not at the `--!>` a browser also takes, so a count
+ * that stopped there would count low. Found as a `--` before a `>`.
+ */
+function commentEnd(text: string, from: number): number {
+  let end = closerAt(text, from, "--");
+  while (text.startsWith("--", end) && text[end + 2] !== ">") end = closerAt(text, end + 1, "--");
+  return end;
+}
+
+/** White space that may come between a link's parts: spaces, tabs and at most one line break. */
+const LINK_SPACE = /[ \t]*(?:(?:\r\n?|\n)[ \t]*)?/y;
+
+/** Where white space that may come between a link's parts ends, from `from`. */
+function spaceAfter(text: string, from: number): number {
+  LINK_SPACE.lastIndex = from;
+  LINK_SPACE.exec(text);
+  return LINK_SPACE.lastIndex;
+}
+
+/**
+ * Where the parser stops reading a link from after its `](`: at its
+ * title's closer, or the paragraph's end when none comes; past its
+ * destination when no title follows. A title, in `"`, `'` or `(`, comes
+ * after the destination and white space. A destination in `<` and `>`
+ * ends at its first unescaped `>`, and has no title when a line break or
+ * an unescaped `<` comes first. Any other ends at white space, or at a
+ * `)` outside the parentheses it opens, which ends the link. Counted
+ * high: a destination of too many parentheses, or of a control
+ * character, holds no title to the parser.
+ */
+function linkRead(text: string, from: number): number {
+  let end = spaceAfter(text, from);
+  if (text[end] === "<") {
+    end = closerAt(text, end + 1, `${UNESCAPED}[<>\\r\\n]`);
+    if (text[end] !== ">") return end;
+    end++;
+  } else {
+    let depth = 0;
+    for (; end < text.length && !/[ \t\r\n]/.test(text[end]!); end++) {
+      const character = text[end];
+      if (character === "\\" && /[()\\]/.test(text[end + 1] ?? "")) end++;
+      else if (character === "(") depth++;
+      else if (character === ")" && depth-- === 0) return end;
+    }
+  }
+  const title = spaceAfter(text, end);
+  const closer = { '"': '"', "'": "'", "(": String.raw`\)` }[text[title] ?? ""];
+  if (title === end || closer === undefined) return title;
+  return closerAt(text, title + 1, UNESCAPED + closer);
+}
+
+/** The block quotes' `>`s a line starts with: a change in how many leaves every list. */
+const QUOTE_PREFIX = /^(?: {0,3}>[ \t]?)*/;
+/** A list item's marker, after its indentation, and the white space after it. */
+const LIST_MARKER = /^([ \t]*)([-+*]|\d{1,9}[.)])([ \t]+|$)/;
+/**
+ * A line of a paragraph's plain words: one that starts with a letter or
+ * digit and holds no `|`, `<` or `>`, so it is no table row, HTML or a
+ * line that ends an HTML block.
+ */
+const PLAIN = /^[ \t]*[\p{L}\p{N}][^|<>]*$/u;
+
+/**
+ * Where a text opens more than MAX_LISTS lists, if it does. The lists
+ * open at a line are kept as their marker and the column their items'
+ * content starts at. A marker goes on with a list when it is of the same
+ * kind and not indented into that list's item; a line indented less than
+ * an item's content leaves it; a change in the quotes a line starts
+ * with, a blank line out of a quote and a thematic break leave every
+ * list. An item may start with at most one blank line, so a blank line
+ * right after an item whose marker line has no content ends that item:
+ * only a marker of its list's kind goes on with the list then. A marker
+ * that would open a list but cannot interrupt a paragraph (an empty
+ * item, or an ordered one that starts other than at 1) opens none while
+ * a paragraph is open, and is a line of it. Counted high: a lazy line
+ * leaves too, a marker in fenced code, indented code or an HTML block
+ * opens one, and a paragraph counts as open only where it surely is
+ * (see paragraphAfter).
+ */
+function listsPast(lines: string[]): { what: string; line: number } | null {
+  let lists = 0;
+  let prefix = "";
+  // Each open list's last item ends (`ended`) at a blank line right after its empty marker line.
+  let open: OpenList[] = [];
+  let empty: { ended: boolean } | null = null; // the item opened empty on the line above
+  let paragraph: Paragraph = "none";
+  for (const [index, line] of lines.entries()) {
+    const quotes = QUOTE_PREFIX.exec(line)![0];
+    if (quotes.split(">").length !== prefix.split(">").length) open = [];
+    // Under other `>`s, or the same ones written otherwise, the paragraph may have ended.
+    if (quotes !== prefix) paragraph = "quiet";
+    prefix = quotes;
+    const rest = line.slice(quotes.length);
+    const above = empty;
+    empty = null;
+    if (/^[ \t]*$/.test(rest)) {
+      if (above !== null) above.ended = true;
+      paragraph = "none";
+      continue;
+    }
+    if (THEMATIC_BREAK.test(rest)) {
+      open = [];
+      paragraph = "quiet";
+      continue;
+    }
+    const marker = LIST_MARKER.exec(rest);
+    const indent = indentOf(rest);
+    const place = marker === null ? null : placeItem(open, indent, marker);
+    if (marker === null || (paragraph === "open" && !place!.goesOn && !interrupts(marker, rest))) {
+      while (open.length > 0 && (open.at(-1)!.ended || open.at(-1)!.content > indent)) open.pop();
+      paragraph = paragraphAfter(paragraph, rest, marker !== null);
+      continue;
+    }
+    open.length = place!.keep;
+    const item = enterItem(open, place!.goesOn, rest, marker);
+    if (!place!.goesOn && ++lists > MAX_LISTS)
+      return { what: `more than MAX_LISTS (${MAX_LISTS}) lists`, line: index + 1 };
+    if (marker[0].length === rest.length) empty = item;
+    paragraph = "quiet";
+  }
   return null;
+}
+
+/**
+ * Whether a paragraph is open under a line's `>`s, as listsPast keeps
+ * it: `open` where one surely is, `none` after a blank line or at the
+ * start, where the next plain line starts one, and `quiet` anywhere
+ * else, till a blank line. Only after a blank line is no paragraph
+ * left for that line to go on with lazily: where it does, under fewer
+ * `>`s or less indented than an item, the parser lets any marker on the
+ * lines after open a list.
+ */
+type Paragraph = "open" | "quiet" | "none";
+
+/**
+ * Whether a paragraph is open after a line that is no list item, or a
+ * marker that cannot interrupt it (`skipped`). A plain line starts one
+ * only unindented, as an indented line may be code in an item that the
+ * next line leaves, and goes on with an open one at any indentation; a
+ * dash alone underlines a heading; any other line may end it.
+ */
+function paragraphAfter(paragraph: Paragraph, rest: string, skipped: boolean): Paragraph {
+  if (skipped) return /^ {0,3}-[ \t]*$/.test(rest) ? "quiet" : paragraph;
+  if (!PLAIN.test(rest)) return "quiet";
+  if (paragraph === "open" || (paragraph === "none" && indentOf(rest) === 0)) return "open";
+  return paragraph;
+}
+
+/** Whether a marker may start a list where it interrupts a paragraph: with content, and if ordered, from 1. */
+function interrupts(marker: RegExpExecArray, rest: string): boolean {
+  return (
+    marker[0].length < rest.length && (/^[-+*]$/.test(marker[2]!) || /^1[.)]$/.test(marker[2]!))
+  );
+}
+
+/** A list open at a line, as listsPast keeps it. */
+type OpenList = { kind: string; content: number; ended: boolean };
+
+/**
+ * Where an item at `indent` with `marker` goes among the lists `open`:
+ * how many of them it keeps, and whether it goes on with the last of
+ * those or opens a list in it.
+ */
+function placeItem(
+  open: readonly OpenList[],
+  indent: number,
+  marker: RegExpExecArray,
+): { keep: number; goesOn: boolean } {
+  // A bullet list's kind is its bullet, an ordered list's its `.` or `)`.
+  const kind = marker[2]!.at(-1)!;
+  for (let keep = open.length; ; keep--) {
+    const list = open[keep - 1];
+    if (list === undefined || (!list.ended && indent >= list.content))
+      return { keep, goesOn: false };
+    if (list.kind === kind && indent >= (open[keep - 2]?.content ?? 0))
+      return { keep, goesOn: true };
+  }
+}
+
+/**
+ * Puts the item a line's `marker` starts into the lists `open`, which
+ * placeItem has cut to the ones it keeps: on with the last, or into a
+ * list it opens. The list it is in.
+ */
+function enterItem(
+  open: OpenList[],
+  goesOn: boolean,
+  rest: string,
+  marker: RegExpExecArray,
+): OpenList {
+  const end = marker[1]!.length + marker[2]!.length;
+  const after = columnAfter(rest, 0, end, 0);
+  const space = columnAfter(rest, end, marker[0].length, after) - after;
+  const blank = marker[0].length === rest.length;
+  // The content starts after one to four columns of white space, or one past the marker.
+  const content = after + (!blank && space >= 1 && space <= 4 ? space : 1);
+  if (goesOn) {
+    const list = open.at(-1)!;
+    list.content = content;
+    list.ended = false;
+    return list;
+  }
+  const list = { kind: marker[2]!.at(-1)!, content, ended: false };
+  open.push(list);
+  return list;
 }
 
 /**
