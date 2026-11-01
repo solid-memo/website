@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.0](https://github.com/solid-memo/website/compare/v6.24.3...v6.25.0) (2026-11-01)
+
+### Features
+
+* **ui:** give the maker's note as one paragraph about the goal ([33acce4](https://github.com/solid-memo/website/commit/33acce482d15a381d8256bd1ccf2a47808f06283)), closes [#469](https://github.com/solid-memo/website/issues/469)
+
+### Bug Fixes
+
+* **solid:** write the digest in one edit and remove by read subject ([05ce9fc](https://github.com/solid-memo/website/commit/05ce9fc4a63828dfa34e38149af1338577da5263))
+
 ## [6.24.3](https://github.com/solid-memo/website/compare/v6.24.2...v6.24.3) (2026-11-01)
 
 ### Bug Fixes
