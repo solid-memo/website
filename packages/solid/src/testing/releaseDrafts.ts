@@ -180,8 +180,8 @@ export function comparable(quads: readonly Quad[], root: string): string[] {
 }
 
 /**
- * A library release made a draft in the pod as it is (an import), then
- * published again at its own address (assemble): the release's triples
+ * A library release made a draft in the pod as it is (an import), read
+ * back, then published again at its own address (assemble): the release's triples
  * and the assembled ones, comparable.
  */
 export async function roundTrip(
@@ -196,6 +196,8 @@ export async function roundTrip(
     INSTANCE,
     releaseToDraft(release, draftUrlOf(INSTANCE, name, Number(release.root.version))),
   );
+  // Read back as the Studio opens it: a draft the app made keeps every value its records hold.
+  await pod.repository.read(summary.url);
   const turtle = await pod.repository.assemble(summary.url, url, release.root.issued!);
   return {
     release: comparable(await quadsOfTurtle(text, url), url),

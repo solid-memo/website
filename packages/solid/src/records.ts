@@ -146,6 +146,12 @@ export function datetimeLiteral(value: string): Literal {
   } as Literal;
 }
 
+/** The date an xsd:dateTime literal holds, as readDatetime reads it; null when it holds none. */
+export function datetimeOf(term: Literal): Date | null {
+  const probe = buildThing(createThing()).addLiteral(PROBE, datetimeLiteral(term.value)).build();
+  return readDatetime(probe, PROBE);
+}
+
 /**
  * Whether a term is an xsd:dateTime that readDatetime does not read as
  * a date: what the instance and release checks name (DateTimeRange),
@@ -153,8 +159,7 @@ export function datetimeLiteral(value: string): Literal {
  */
 export function isUnreadableDatetime(term: Term): boolean {
   if (term.termType !== "Literal" || term.datatype.value !== XSD_DATETIME) return false;
-  const probe = buildThing(createThing()).addLiteral(PROBE, datetimeLiteral(term.value)).build();
-  return readDatetime(probe, PROBE) === null;
+  return datetimeOf(term as Literal) === null;
 }
 
 /** A subject's values of a predicate that isUnreadableDatetime, in stored order. */

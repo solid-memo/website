@@ -12,7 +12,7 @@ import {
   setThing,
   toRdfJsDataset,
 } from "../client/rdf";
-import type { Quad, Term } from "@rdfjs/types";
+import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import {
@@ -38,7 +38,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
-import { readRecord, readVersioned, recordThing } from "../records";
+import { datetimeOf, readRecord, readVersioned, recordThing } from "../records";
 import { DCTERMS, SM } from "../vocab";
 
 /**
@@ -181,6 +181,153 @@ export function inPlaceIn(
 }
 
 /**
+ * What a release writes of its root itself, in place of what its draft
+ * says (releaseQuadsOf): its format, its time of issue and of change,
+ * and no sm:releasedAs.
+ */
+export const UNPUBLISHED_ROOT_PREDICATES: ReadonlySet<string> = new Set([
+  SM.formatVersion,
+  SM.releasedAs,
+  DCTERMS.issued,
+  DCTERMS.modified,
+]);
+
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+
+/**
+ * An xsd:integer's value in one spelling, its sign and digits without
+ * the zeros that lead them; null when the lexical form is not an
+ * integer's, which the client would read as parseInt does (`"7junk"`
+ * as 7, `"0.9"` as 0).
+ */
+function integerValue(lexical: string): string | null {
+  const match = /^([+-]?)(\d+)$/.exec(lexical);
+  if (match === null) return null;
+  const [, sign, digits] = match as unknown as [string, string, string];
+  let start = 0;
+  while (start < digits.length - 1 && digits[start] === "0") start++;
+  const value = digits.slice(start);
+  return sign === "-" && value !== "0" ? `-${value}` : value;
+}
+
+/**
+ * A term by the value it holds, to compare a stored value with the one
+ * a record writes: an integer, a boolean or a date-time in UTC (`Z`)
+ * by what it means, when its lexical form is one of its datatype (a
+ * date-time's every field in its range, datetimeValue); a text with
+ * its language in lower case (as the records read it); anything else,
+ * an ill-formed literal or a date-time with an offset too, as it is
+ * spelled. The records write a date-time in UTC.
+ */
+function valueKey(term: Term): string {
+  if (term.termType !== "Literal") return JSON.stringify([term.termType, term.value]);
+  const datatype = term.datatype.value;
+  const value =
+    datatype === `${XSD}integer`
+      ? integerValue(term.value)
+      : datatype === `${XSD}boolean`
+        ? ({ true: "true", "1": "true", false: "false", "0": "false" } as Record<string, string>)[
+            term.value
+          ]
+        : datatype === `${XSD}dateTime`
+          ? datetimeValue(term)
+          : undefined;
+  return value === null || value === undefined
+    ? JSON.stringify(["Literal", datatype, term.language.toLowerCase(), term.value])
+    : JSON.stringify(["value", datatype, value]);
+}
+
+/** An xsd:dateTime in UTC, its year, month, day, hour, minute and second. */
+const UTC_DATETIME = /^([+-]?\d{4,})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?Z$/;
+
+/**
+ * The instant an xsd:dateTime in UTC holds, as toISOString writes it;
+ * null when it is not in UTC, or when a field is out of its range
+ * (month 13, hour 99), which a date would carry over into the next
+ * rather than refuse.
+ */
+function datetimeValue(term: Literal): string | null {
+  const fields = UTC_DATETIME.exec(term.value);
+  const date = fields === null ? null : datetimeOf(term);
+  if (fields === null || date === null) return null;
+  const [, ...stated] = fields.map(Number);
+  const read = [
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+  ];
+  return read.every((value, at) => value === stated[at]) ? date.toISOString() : null;
+}
+
+const PROBE = "https://solid-memo.com/probe";
+
+/**
+ * The first predicate a shaped subject's statements state otherwise
+ * than its record writes it, so that what an editor shows and the
+ * checks see is not what would be published: a second value of a
+ * field of one, a second text in a language, a value of the wrong kind
+ * or ill-formed for its datatype, an IRI outside a field's list, any
+ * value of a predicate the shape forbids, or a format other than the
+ * one it is read in. A stored value is compared with the one the record
+ * writes (recordThing) by what it holds (valueKey), and two stored
+ * values that hold the same are one too many. Null when the subject
+ * states every predicate its shape owns as its record writes it.
+ * `kept` are IRIs a predicate's record keeps beyond its fields;
+ * `unchecked` are predicates not compared.
+ */
+function hiddenPredicateOf(
+  statements: readonly Quad[],
+  descriptor: ShapeDescriptor,
+  record: unknown,
+  kept: readonly (readonly [string, readonly string[]])[] = [],
+  unchecked: ReadonlySet<string> = new Set(),
+): string | null {
+  const expected = new Map<string, Set<string>>(
+    [
+      ...descriptor.absent,
+      ...descriptor.fields.map((field) => field.predicate),
+      SM.formatVersion,
+    ].map((predicate) => [predicate, new Set<string>()]),
+  );
+  for (const quad of quadsOf(
+    setThing(createSolidDataset(), recordThing(PROBE, descriptor, record, null)),
+  )) {
+    expected.get(quad.predicate.value)?.add(valueKey(quad.object));
+  }
+  for (const [predicate, iris] of kept) {
+    expected.set(
+      predicate,
+      new Set(iris.map((iri) => valueKey({ termType: "NamedNode", value: iri } as Term))),
+    );
+  }
+  const stored = new Map<string, { terms: Set<string>; values: Set<string> }>();
+  for (const { predicate, object } of statements) {
+    if (!expected.has(predicate.value)) continue;
+    const of = stored.get(predicate.value) ?? { terms: new Set(), values: new Set() };
+    stored.set(predicate.value, of);
+    of.terms.add(JSON.stringify(termOf(object)));
+    of.values.add(valueKey(object));
+  }
+  // A format of 1 goes without saying: a subject that states none is read in it.
+  if (descriptor.version === 1 && !stored.has(SM.formatVersion)) {
+    expected.delete(SM.formatVersion);
+  }
+  for (const [predicate, values] of expected) {
+    if (unchecked.has(predicate)) continue;
+    const of = stored.get(predicate);
+    const same =
+      (of?.terms.size ?? 0) === values.size &&
+      (of?.values.size ?? 0) === values.size &&
+      [...values].every((value) => of!.values.has(value));
+    if (!same) return predicate;
+  }
+  return null;
+}
+
+/**
  * The draft (or release) at `url` its triples state, every IRI as the
  * draft names it; null when it has no root this app can read (an
  * sm:Deck at `url` with its shape's required fields). The release a
@@ -189,9 +336,50 @@ export function inPlaceIn(
  * with write access to its container may have written, and the Studio
  * links that address and asks it whether the release is public. Of
  * several, one at such an address is kept, whichever comes first.
+ *
+ * With `refuseHidden`, as a draft in the pod is read and published, a
+ * shaped subject whose statements state a predicate its shape owns
+ * otherwise than its record writes it is refused (draftHiddenValue,
+ * hiddenPredicateOf): no editor shows the difference and no check
+ * sees it, but it would be published with the release
+ * (GHSA-32jq-jh7h-r7v4). So each value of such a predicate that is
+ * published holds what its record does. What publishing writes of the
+ * root itself is not compared (UNPUBLISHED_ROOT_PREDICATES). A subject
+ * stamped with a newer format than this app reads it in is refused as
+ * a newer app's (writtenByNewerApp): reloading the page reads it.
  */
-export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraft | null {
+export function draftFromQuads(
+  quads: readonly Quad[],
+  url: string,
+  { refuseHidden = false }: { refuseHidden?: boolean } = {},
+): ReleaseDraft | null {
   const dataset = datasetFromQuads(quads);
+  /** Each subject's statements, by its key. */
+  const statements = new Map<string, Quad[]>();
+  for (const quad of quads) {
+    const key = keyOf(quad.subject);
+    const of = statements.get(key);
+    if (of === undefined) statements.set(key, [quad]);
+    else of.push(quad);
+  }
+  /** Refuse a subject whose record does not keep what it states (hiddenPredicateOf), when asked to. */
+  const refuse = (
+    subject: string,
+    descriptor: ShapeDescriptor,
+    record: unknown,
+    kept?: readonly (readonly [string, readonly string[]])[],
+    unchecked?: ReadonlySet<string>,
+  ) => {
+    if (!refuseHidden) return;
+    const predicate = hiddenPredicateOf(
+      statements.get(subject)!,
+      descriptor,
+      record,
+      kept,
+      unchecked,
+    );
+    if (predicate !== null) throw new AppError("draftHiddenValue", { subject, predicate });
+  };
   /** For each shaped subject, the predicates its shape owns, and the types. */
   const owned = new Map<string, { predicates: Set<string>; types: Set<string> }>();
   const own = (
@@ -221,13 +409,13 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
   const { releasedAs: _first, ...rest } = read;
   const releasedAs = getUrlAll(rootThing!, SM.releasedAs).find(isPublishedReleaseUrl);
   const root = releasedAs === undefined ? rest : { ...rest, releasedAs };
+  refuse(url, DRAFT_DECK_V1, read, [], UNPUBLISHED_ROOT_PREDICATES);
   own(url, DRAFT_DECK_V1, [SCHEMA_COURSE]);
 
   const nodes: Record<string, DraftNode<unknown>[]> = Object.fromEntries(
     KINDS.map(({ list }) => [list, []]),
   );
-  const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
-  for (const subject of subjects) {
+  for (const subject of statements.keys()) {
     const id = idIn({ url }, subject);
     if (id === null) continue;
     const thing = getThing(dataset, subject) as Subject;
@@ -237,6 +425,14 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
     const { list, shape } = kinds[0]!;
     const read = readVersioned(thing, shape);
     if (read === null) continue;
+    // Read in the latest format this app knows, a newer one would be published in that one: the reload message, not a value to remove.
+    if (refuseHidden && read.storedVersion > read.record.version) {
+      throw new AppError("writtenByNewerApp", {
+        url: subject,
+        version: read.storedVersion,
+        writes: read.record.version,
+      });
+    }
     const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[read.record.version]!;
     const data = migrate(shape, read.record, { subject });
     // What a card stamped below format 7 is about (`dcterms:subject`, as a
@@ -244,10 +440,13 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
     // into its record, not the raw triples: the latest card shape writes
     // it, once, and the release diff and a learner's upgrade compare it.
     if (shape === "card" && read.record.version < 7) {
+      const about = getUrlAll(thing, DCTERMS.subject);
+      refuse(subject, descriptor, read.record.data, [[DCTERMS.subject, about]]);
       own(subject, descriptor, [], [DCTERMS.subject]);
-      nodes[list]!.push({ id, data: { ...data, subject: getUrlAll(thing, DCTERMS.subject) } });
+      nodes[list]!.push({ id, data: { ...data, subject: about } });
       continue;
     }
+    refuse(subject, descriptor, read.record.data);
     own(subject, descriptor);
     nodes[list]!.push({ id, data });
   }

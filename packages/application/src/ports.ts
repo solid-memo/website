@@ -488,7 +488,12 @@ export interface ReleaseDraftRepository {
    * goes). Nothing it published before is known here: `published` is
    * empty. Throws draftGone when it has no release document, and
    * draftIdUnsupported when it names a subject by an id no draft can
-   * have (DRAFT_ID): a chapter's document is named after its id.
+   * have (DRAFT_ID): a chapter's document is named after its id; and
+   * draftHiddenValue when its documents state a predicate a subject's
+   * shape owns otherwise than its record writes it: a value the record
+   * does not keep, one it reads otherwise (an ill-formed integer or
+   * date-time), or two that it reads as one; writtenByNewerApp when a
+   * subject is stamped with a newer format than this app reads it in.
    */
   read(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }>;
   /**
@@ -513,7 +518,12 @@ export interface ReleaseDraftRepository {
    * itself, which would say more of the release than its parts do, is
    * releaseForeignStatement. One whose documents name a subject of the
    * draft otherwise than the draft writes it, which no read of the draft
-   * has, is draftAliasedSubject.
+   * has, is draftAliasedSubject. One that read refuses as
+   * draftHiddenValue or writtenByNewerApp is refused the same, so each
+   * value of a predicate a shape owns is published as the value its
+   * record holds, which the release check saw (apart from what
+   * publishing writes of the root itself: its format, times and
+   * sm:releasedAs).
    */
   assemble(draftUrl: string, targetUrl: string, issued: string, version?: string): Promise<string>;
   /**

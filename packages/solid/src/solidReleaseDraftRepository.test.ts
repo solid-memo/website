@@ -551,7 +551,7 @@ describe("applyChanges", () => {
     expect(writes(pod, from)).toEqual([`PUT ${CARDS} If-Match`]);
   });
 
-  it("refuses to write over a subject a newer app wrote", async () => {
+  it("neither opens nor writes over a draft with a subject a newer app wrote", async () => {
     const { pod } = await opened();
     await pod.put(
       CARDS,
@@ -562,16 +562,15 @@ describe("applyChanges", () => {
     );
     const text = await pod.text(CARDS);
     expect(text).toContain('"9"');
-    const { draft, version } = await pod.repository.read(DRAFT);
-    await expect(
-      pod.repository.applyChanges(
-        draft,
-        changed(draft, { kind: "retire", of: "card", id: "q-loose" }),
-        version,
-      ),
-    ).rejects.toMatchObject({
+    // Read in the latest format this app knows, it would be published in its own (GHSA-32jq-jh7h-r7v4): the reload message says so.
+    const newer = {
       code: "writtenByNewerApp",
-    });
+      vars: { url: `${DRAFT}#q-loose`, version: 9, writes: 7 },
+    };
+    await expect(pod.repository.read(DRAFT)).rejects.toMatchObject(newer);
+    await expect(
+      pod.repository.assemble(DRAFT, `${INSTANCE}releases/solid/v1.ttl`, NOW),
+    ).rejects.toMatchObject(newer);
   });
 
   it("refuses a draft not read, or read since at another version", async () => {
@@ -797,6 +796,63 @@ describe("assemble", () => {
     await planted(DRAFT, `${CHAPTER_A}#q-a-1a`);
     await planted(CARDS, `${DRAFT}#q-a-1a`);
   });
+
+  it("neither reads nor publishes a draft whose document gives a subject a value its record does not keep (GHSA-32jq-jh7h-r7v4)", async () => {
+    const pod = await draftPod();
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    await pod.repository.create(INSTANCE, course());
+    // Another app appends a second English front to a card the draft keeps one of.
+    await pod.put(
+      CARDS,
+      `${await pod.text(CARDS)}\n<${CARDS}#q-loose> <${SM}front> "HIDDEN"@en .\n`,
+    );
+    const hidden = {
+      code: "draftHiddenValue",
+      vars: { subject: `${DRAFT}#q-loose`, predicate: `${SM}front` },
+    };
+    await expect(pod.repository.read(DRAFT)).rejects.toMatchObject(hidden);
+    await expect(pod.repository.assemble(DRAFT, target, NOW)).rejects.toMatchObject(hidden);
+  });
+
+  it.each([
+    [
+      "an ill-formed format",
+      CARDS,
+      "q-loose",
+      `${SM}formatVersion`,
+      '"7junk"^^<http://www.w3.org/2001/XMLSchema#integer>',
+    ],
+    [
+      "an ill-formed position",
+      CHAPTER_A,
+      "ch-a-1",
+      "https://schema.org/position",
+      '"0junk"^^<http://www.w3.org/2001/XMLSchema#integer>',
+    ],
+    [
+      "a position no integer",
+      CHAPTER_A,
+      "ch-a",
+      "https://schema.org/position",
+      '"0.9"^^<http://www.w3.org/2001/XMLSchema#integer>',
+    ],
+  ])(
+    "neither reads nor publishes a draft whose document states %s its record reads otherwise (GHSA-32jq-jh7h-r7v4)",
+    async (_, document, id, predicate, value) => {
+      const pod = await draftPod();
+      const target = `${INSTANCE}releases/solid/v1.ttl`;
+      await pod.repository.create(INSTANCE, course());
+      const text = await pod.text(document);
+      const stated = new RegExp(
+        `(<[^>]*#${id}>[^.]*?<${predicate}> )("[^"]*"(\\^\\^<[^>]*>)?|\\d+)`,
+      );
+      expect(text).toMatch(stated);
+      await pod.put(document, text.replace(stated, `$1${value}`));
+      const hidden = { code: "draftHiddenValue", vars: { subject: `${DRAFT}#${id}`, predicate } };
+      await expect(pod.repository.read(DRAFT)).rejects.toMatchObject(hidden);
+      await expect(pod.repository.assemble(DRAFT, target, NOW)).rejects.toMatchObject(hidden);
+    },
+  );
 
   it("publishes nothing of a draft made from a release that the draft does not show, whatever the release names in the new draft's container (GHSA-8w75-jg23-rxq5)", async () => {
     const release = "https://elsewhere.example/decks/capitals-of-the-world/v1.ttl";
