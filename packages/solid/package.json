@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@inrupt/solid-client": "^4.0.0",
-    "@inrupt/solid-client-authn-browser": "^5.0.2",
+    "@inrupt/solid-client-authn-browser": "^5.0.3",
     "@solid-memo/application": "*",
     "@solid-memo/domain": "*",
     "@solid-memo/shacl": "*",
