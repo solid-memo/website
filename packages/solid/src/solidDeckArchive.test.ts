@@ -322,7 +322,12 @@ describe("readDeckFile", () => {
     expect(agentNamesOf).not.toHaveBeenCalled();
   });
 
-  it("refuses a file of many decks and agents in time that grows with them, not their product (GHSA-hcrw-cr33-jg78)", async () => {
+  // Thousands of decks, parsed many times over: seconds on a laptop, and many
+  // times that in CI, coverage on and every package's tests run at once. What
+  // is held to is the ratio, of CPU time; the clock only stops a test that never ends.
+  it("refuses a file of many decks and agents in time that grows with them, not their product (GHSA-hcrw-cr33-jg78)", {
+    timeout: 180_000,
+  }, async () => {
     const ratio = await growthAsync(
       (count) => {
         let text = PREFIXES;

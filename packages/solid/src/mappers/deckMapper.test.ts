@@ -388,7 +388,12 @@ describe("toDeck", () => {
 });
 
 describe("toDecks over many decks and agents", () => {
-  it("takes time that grows with them, not their product (GHSA-hcrw-cr33-jg78)", () => {
+  // Thousands of decks, mapped many times over: seconds on a laptop, and many
+  // times that in CI, coverage on and every package's tests run at once. What
+  // is held to is the ratio, of CPU time; the clock only stops a test that never ends.
+  it("takes time that grows with them, not their product (GHSA-hcrw-cr33-jg78)", {
+    timeout: 180_000,
+  }, () => {
     const ratio = growth(
       (count) => {
         const subjects = Array.from({ length: count }, (_, i) => [
