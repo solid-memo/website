@@ -176,22 +176,34 @@ jobs:
       # (docs/releasing.md#the-deploy-key).
       - if: steps.tip.outputs.release == 'true'
         run: npm audit signatures
-      # Chromium, which the release's prepare step draws the docs' Mermaid
-      # diagrams in, for the archive the GitHub release carries
-      # (npm run docs:archive): downloaded, with its system libraries
-      # from Ubuntu's signed mirror, not restored from the cache.
+      # Chromium, which the docs' Mermaid diagrams are drawn in, for the
+      # archive the GitHub release carries (npm run docs:archive):
+      # downloaded and checked against a committed SHA-256, with its
+      # system libraries from Ubuntu's signed mirror, not restored from
+      # the cache.
       - if: steps.tip.outputs.release == 'true'
         uses: ./.github/actions/chromium
         with:
           cache: false
+      # The diagrams drawn now, before the key is written, and kept in
+      # their cache, which the archive in the release's prepare step
+      # draws from. Then the browser is removed, so no browser runs while
+      # the key is on disk: a diagram drawn only then fails the release
+      # before anything is pushed.
+      - if: steps.tip.outputs.release == 'true'
+        run: npm run docs:archive -- --draw
+      - if: steps.tip.outputs.release == 'true'
+        name: No browser beside the key
+        run: rm -rf "$HOME/.cache/ms-playwright"
       # Pushes the release commit and the tag over SSH, with the key, and
       # makes the GitHub release with the run's token. The key is written
       # to a file for this step alone, which git's ssh reads
       # (GIT_SSH_COMMAND), and removed when it ends; the git config never
       # holds it. semantic-release checks it can push before anything
       # else, and pushes in its prepare step, so the key is there for the
-      # whole run, the docs' archive included. GitHub's host keys come
-      # from its API, over HTTPS, as actions/checkout would have set them.
+      # whole run, the docs' archive included, which draws nothing new.
+      # GitHub's host keys come from its API, over HTTPS, as
+      # actions/checkout would have set them.
       - if: steps.tip.outputs.release == 'true'
         name: npx semantic-release
         env:
@@ -317,12 +329,42 @@ jobs:
           package-manager-cache: false
       - if: steps.release.outputs.attach == 'true'
         run: npm ci --ignore-scripts
-      # Chromium and its system libraries from Playwright and Ubuntu's
-      # signed mirror, by this step on main, not by .github/actions: a
-      # local action is the checkout's, the tag's, whose copy may restore
-      # them from the cache.
+      # Chromium's headless shell and its system libraries, by this step
+      # on main, not by .github/actions: a local action is the
+      # checkout's, the tag's, whose copy may restore them from the cache
+      # or download the shell unchecked. The shell is checked against the
+      # SHA-256 actions/headless-shell pins too, by the same step
+      # (npm run check:shell holds the two to it), so a tag whose
+      # Playwright wants another build fails here; the libraries come
+      # from Ubuntu's signed mirror, in the step after it.
       - if: steps.release.outputs.attach == 'true'
-        run: npx playwright install --with-deps --only-shell chromium
+        shell: bash
+        env:
+          CHROMIUM_HEADLESS_SHELL_VERSION: 156.0.8078.4
+          CHROMIUM_HEADLESS_SHELL_REVISION: "1248"
+          CHROMIUM_HEADLESS_SHELL_SHA256: c3e50596aef52c58f8fda3c6b3411c33d34c88b177b3ed1c2243359fd3b8ba20
+        run: |
+          set -eo pipefail
+          if [ "$RUNNER_OS" != Linux ] || [ "$RUNNER_ARCH" != X64 ]; then
+            echo "::error::The headless shell's hash is Linux x64's, not $RUNNER_OS $RUNNER_ARCH's."
+            exit 1
+          fi
+          expected=$(node -p "const b = require(require('path').join(require.resolve('playwright-core/package.json'), '../browsers.json')).browsers.find((b) => b.name === 'chromium-headless-shell'); b.browserVersion + ' ' + b.revision")
+          if [ "$expected" != "$CHROMIUM_HEADLESS_SHELL_VERSION $CHROMIUM_HEADLESS_SHELL_REVISION" ]; then
+            echo "::error::playwright-core wants the headless shell $expected, and $CHROMIUM_HEADLESS_SHELL_VERSION $CHROMIUM_HEADLESS_SHELL_REVISION is pinned (npm run check:shell)."
+            exit 1
+          fi
+          zip="$RUNNER_TEMP/chrome-headless-shell-linux64.zip"
+          curl -fsSL -o "$zip" "https://cdn.playwright.dev/builds/cft/$CHROMIUM_HEADLESS_SHELL_VERSION/linux64/chrome-headless-shell-linux64.zip"
+          echo "$CHROMIUM_HEADLESS_SHELL_SHA256  $zip" | sha256sum -c -
+          dir="$HOME/.cache/ms-playwright/chromium_headless_shell-$CHROMIUM_HEADLESS_SHELL_REVISION"
+          rm -rf "$dir"
+          mkdir -p "$dir"
+          unzip -q "$zip" -d "$dir"
+          rm "$zip"
+          touch "$dir/INSTALLATION_COMPLETE"
+      - if: steps.release.outputs.attach == 'true'
+        run: npx playwright install-deps chromium
       - if: steps.release.outputs.attach == 'true'
         name: npm run docs:archive
         env:

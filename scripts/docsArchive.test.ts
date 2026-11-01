@@ -82,12 +82,14 @@ describe("docsArchive", () => {
     expect(archivePath("2.2.0")).toBe("release-assets/docs-2.2.0.tar.gz");
   });
 
-  it.each([[[]], [["v2.2.0"]], [["2.2"]], [["2.2.0", "2.3.0"]]])(
+  it.each([[[]], [["v2.2.0"]], [["2.2"]], [["2.2.0", "2.3.0"]], [["--draw", "2.2.0"]]])(
     "asks for one version, MAJOR.MINOR.PATCH (%j)",
     async (args) => {
       const archive = io();
       expect(await main(["node", ...args], archive)).toBe(2);
-      expect(archive.logged).toEqual(["Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH>"]);
+      expect(archive.logged).toEqual([
+        "Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> | --draw",
+      ]);
     },
   );
 
@@ -135,6 +137,28 @@ describe("docsArchive", () => {
       "release-assets/docs-2.2.0.tar.gz is not written:\n  the diagrams were not drawn",
     ]);
     expect(existsSync(join(root, archivePath("2.2.0")))).toBe(false);
+  });
+
+  it("with --draw, draws and checks the diagrams the archive holds, and writes no archive", async () => {
+    const drawn: string[] = [];
+    const archive = io(async (diagrams) => {
+      drawn.push(...diagrams.map((diagram) => diagram.hash));
+      return fakeDraw(diagrams);
+    });
+    expect(await main(["node", "--draw"], archive)).toBe(0);
+    expect(drawn.length).toBeGreaterThan(0);
+    expect(existsSync(join(root, "release-assets"))).toBe(false);
+    expect(archive.logged).toEqual([
+      expect.stringMatching(/^The docs' \d+ drawings are drawn, and kept for the archive\.$/),
+    ]);
+  });
+
+  it("with --draw, fails when the diagrams were not drawn", async () => {
+    const archive = io(async () => null);
+    expect(await main(["node", "--draw"], archive)).toBe(1);
+    expect(archive.logged).toEqual([
+      "The docs' diagrams are not drawn:\n  the diagrams were not drawn",
+    ]);
   });
 
   it("writes nothing when a drawing is not safe to serve or lacks the font's notice", () => {
@@ -202,7 +226,7 @@ describe("docsArchive", () => {
     const process = { argv: ["node"], exitCode: undefined as number | string | null | undefined };
     await run(process);
     expect(process.exitCode).toBe(2);
-    expect(log).toHaveBeenCalledWith("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH>");
+    expect(log).toHaveBeenCalledWith("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> | --draw");
     log.mockRestore();
   });
 });

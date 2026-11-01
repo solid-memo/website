@@ -15,6 +15,12 @@
  * rendered once and never again, so one without its drawings is never
  * written. Each drawing is checked as the site's build checks it before
  * the archive is packed, with the system's `tar`.
+ *
+ * `npm run docs:archive -- --draw` draws and checks the diagrams as an
+ * archive would hold them, keeping them in the drawings' cache, and
+ * writes no archive: the release job draws them so before it writes the
+ * deploy key, and its archive then needs no browser
+ * (docs/releasing.md#the-deploy-key).
  */
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
@@ -121,13 +127,15 @@ export function archiveProblems(
   return problems;
 }
 
-/** Exit code: 0 when the archive is written. */
+/** Exit code: 0 when the archive is written, or with `--draw` when the diagrams are drawn. */
 export async function main(argv: readonly string[], io: ArchiveIo): Promise<number> {
   // `node -e` puts the node binary first and drops the `--`.
   const args = argv.slice(1);
-  const version = args[0];
+  const drawOnly = args[0] === "--draw";
+  // Drawing only, the version names no file and is shown in no page kept.
+  const version = drawOnly ? "0.0.0" : args[0];
   if (args.length !== 1 || version === undefined || !isReleaseVersion(version)) {
-    io.log("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH>");
+    io.log("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> | --draw");
     return 2;
   }
   const path = archivePath(version);
@@ -151,11 +159,16 @@ export async function main(argv: readonly string[], io: ArchiveIo): Promise<numb
     });
     const problems = archiveProblems(files, drawn, inputs);
     if (problems.length > 0) {
-      io.log([`${path} is not written:`, ...problems.map((problem) => `  ${problem}`)].join("\n"));
+      const failed = drawOnly ? "The docs' diagrams are not drawn:" : `${path} is not written:`;
+      io.log([failed, ...problems.map((problem) => `  ${problem}`)].join("\n"));
       return 1;
     }
-    await io.pack(files, path);
     const drawings = [...files.keys()].filter((name) => name.endsWith(".svg")).length;
+    if (drawOnly) {
+      io.log(`The docs' ${drawings} drawings are drawn, and kept for the archive.`);
+      return 0;
+    }
+    await io.pack(files, path);
     io.log(`${path}: the docs of ${version}, ${files.size} files, ${drawings} drawings.`);
     return 0;
   } catch (error) {

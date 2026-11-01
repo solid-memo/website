@@ -282,8 +282,9 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
       - run: npm ci --ignore-scripts
-      # Downloaded, with its system libraries from Ubuntu's signed mirror,
-      # not restored from the cache.
+      # Downloaded and checked against a committed SHA-256, with its
+      # system libraries from Ubuntu's signed mirror, not restored from
+      # the cache.
       - uses: ./.github/actions/chromium
         with:
           cache: false
@@ -926,7 +927,7 @@ jobs:
           # The headless shell check and site draw the docs' diagrams in,
           # under the chromium action's key, by site's playwright.
           shell=$(node -p "require('playwright/package.json').version")
-          cached "playwright-shell-$RUNNER_OS-$shell" || browsers+=("shell")
+          cached "playwright-headless-shell-$RUNNER_OS-$shell" || browsers+=("shell")
           # The system libraries, under this runner's image: a job's may
           # be another while GitHub rolls a new one out. A browser listed
           # already gets them too; the headless shell's are Chromium's.
@@ -1025,7 +1026,7 @@ jobs:
       - id: key
         run: |
           if [ "$BROWSERS" = shell ]; then
-            echo "key=playwright-shell-$RUNNER_OS-$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+            echo "key=playwright-headless-shell-$RUNNER_OS-$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
           else
             echo "key=playwright-$RUNNER_OS-$(node -p "require('@playwright/test/package.json').version")-$BROWSERS" >> "$GITHUB_OUTPUT"
           fi
@@ -1037,13 +1038,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ steps.key.outputs.key }}
           lookup-only: true
-      - if: steps.browsers.outputs.cache-hit != 'true'
-        run: |
-          if [ "$BROWSERS" = shell ]; then
-            npx playwright install --only-shell chromium
-          else
-            npx playwright install "$BROWSERS"
-          fi
+      - if: steps.browsers.outputs.cache-hit != 'true' && matrix.browsers == 'shell'
+        uses: ./.github/actions/headless-shell
+      - if: steps.browsers.outputs.cache-hit != 'true' && matrix.browsers != 'shell'
+        run: npx playwright install "$BROWSERS"
       - if: steps.browsers.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

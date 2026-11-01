@@ -10,10 +10,13 @@
 # system libraries it needs come from playwright-deps, from GitHub's
 # cache too. Run it after npm ci, which installs that version.
 #
-# With `cache: false`, nothing comes from GitHub's cache: the shell is
-# downloaded by Playwright and the libraries from Ubuntu's signed
-# mirror, and nothing is saved. A job that holds a secret, attests
-# what it makes or builds the site that is deployed uses that
+# A shell the cache lacks is downloaded and checked against the SHA-256
+# committed in actions/headless-shell, not installed by Playwright,
+# whose download checks no hash. With `cache: false`, nothing comes
+# from GitHub's cache: the shell is downloaded and checked so, the
+# libraries come from Ubuntu's signed mirror, and nothing is saved. A
+# job that holds a secret, attests what it makes or builds the site
+# that is deployed uses that
 # (release.yml's release job, ci.yml's site job, deploy.yml's build job;
 # release.yml's docs job, which checks out a tag, installs them with a
 # step of its own): any
@@ -21,7 +24,9 @@
 # from them is only as trustworthy as the least trusted of those jobs.
 #
 # The key is not the journeys job's (ci.yml): that job installs the full
-# Chromium, and neither may restore a cache that lacks its browser.
+# Chromium, and neither may restore a cache that lacks its browser. Nor
+# is it the one the shell was cached under while Playwright installed
+# it, unchecked and with FFmpeg: no entry saved then is restored.
 name: Chromium
 description: Restores or installs the Chromium headless shell that draws the docs' diagrams.
 inputs:
@@ -39,10 +44,9 @@ runs:
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-shell-${{ runner.os }}-${{ steps.version.outputs.version }}
+        key: playwright-headless-shell-${{ runner.os }}-${{ steps.version.outputs.version }}
     - if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: npx playwright install --only-shell chromium
+      uses: ./.github/actions/headless-shell
     - uses: ./.github/actions/playwright-deps
       with:
         browser: chromium
