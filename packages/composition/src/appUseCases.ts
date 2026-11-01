@@ -86,6 +86,7 @@ export function createAppUseCases({
     clientName,
     site: servedSite,
     clientId,
+    ownStorages,
   });
   /** A guest's pod, kept in this browser (docs/guest-mode.md). */
   const guestStore =
@@ -154,6 +155,11 @@ export function createAppUseCases({
   const checkWrite = shapeValidator.checkSubjects;
   const now = () => new Date();
   const randomId = () => crypto.randomUUID();
+  /** The storages a user's profile names, read as no one (ownStorages). */
+  const publicStorages = createSolidStorageGateway({
+    fetch: noOneFetch,
+    profileStorages: getProfileStorages,
+  });
   const podStorages = createSolidStorageGateway({
     fetch: podFetch,
     profileStorages: getProfileStorages,
@@ -202,6 +208,18 @@ export function createAppUseCases({
       changed();
     },
   };
+  /**
+   * The storages a token refused as invalid there means the user's
+   * session expired (authFetch.ts): those their profile names, read as
+   * no one, since asking as the user would ask the session about itself,
+   * and the folders they entered or made on this page. An instance they
+   * registered elsewhere is not one: a server that does not take their
+   * login says nothing of it.
+   */
+  async function ownStorages(webId: string): Promise<string[]> {
+    const storages = await publicStorages.discoverStorages(webId).catch(() => []);
+    return [...storages.map(({ url }) => url), ...entered];
+  }
   /**
    * The folders of the user's own pod: their storages, the instances they
    * registered and the folders they entered or made on this page. With

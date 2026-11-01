@@ -155,7 +155,12 @@ export class OidcSession {
     return send(true);
   };
 
-  /** The access token, refreshed first when it is about to expire; none once the provider refused to. */
+  /**
+   * The access token, refreshed first when it is about to expire; none
+   * once the provider refused to, or once it expired with no refresh
+   * token to renew it, the session ended then (authFetch.ts reads a 401
+   * with no session as one that expired).
+   */
   async #accessToken(): Promise<string | undefined> {
     if (Date.now() >= this.#tokens.expiresAt - REFRESH_MARGIN) {
       this.#refreshing ??= this.#refresh().finally(() => {
@@ -163,15 +168,15 @@ export class OidcSession {
       });
       await this.#refreshing;
     }
+    if (currentSession() === this && Date.now() >= this.#tokens.expiresAt) setCurrentSession(null);
     return currentSession() === this ? this.#tokens.accessToken : undefined;
   }
 
   /**
    * Swaps in fresh tokens, and the key pair they are bound to: the stored
    * session's, which a login in another tab may have replaced. Without a
-   * refresh token the expired one goes on, and the pod's 401 says the
-   * session expired (authFetch.ts); when there is none to refresh with
-   * any more, the session ends here.
+   * refresh token the one it has goes on until it expires; when there is
+   * none to refresh with any more, the session ends here.
    */
   async #refresh(): Promise<void> {
     if (!this.#refreshable) return;

@@ -69,12 +69,17 @@ vi.mock("@solid-memo/solid/solidReleasePublisher", recorded("createSolidReleaseP
 vi.mock("@solid-memo/solid/solidInstanceGraphReader", recorded("createSolidInstanceGraphReader"));
 
 /** The login: who is logged in, and the addresses requested with their credentials. */
-const login = vi.hoisted(() => ({ webId: undefined as string | undefined, sent: [] as string[] }));
+const login = vi.hoisted(() => ({
+  webId: undefined as string | undefined,
+  sent: [] as string[],
+  ownStorages: undefined as ((webId: string) => Promise<readonly string[]>) | undefined,
+}));
 vi.mock("@solid-memo/solid/solidSession", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/solid/solidSession")>();
   return {
     ...original,
     createSolidSession: (...args: Parameters<typeof original.createSolidSession>) => {
+      login.ownStorages = args[1].ownStorages;
       const session = original.createSolidSession(...args);
       return {
         ...session,
@@ -526,6 +531,32 @@ describe("createAppUseCases", () => {
     expect(login.sent).toContain(`${alice}settings/private.ttl`);
     expect(login.sent.filter((url) => url.startsWith(elsewhere))).toEqual([]);
     expect(sent.filter(({ url }) => url.startsWith(elsewhere))).toEqual([]);
+  });
+
+  it("counts as the user's own storages, where a refused token means the session expired, those their profile names and those entered here, not an instance elsewhere", async () => {
+    const alice = "https://alice.example/";
+    const entered = "https://other.example/alice/";
+    const pod = podAt(alice);
+    const other = podAt(entered);
+    const sent = podsNetwork({ [alice]: pod, [entered]: other });
+    const webId = `${alice}profile/card#me`;
+    await put(other, `${entered}notes.ttl`, "<#a> <#b> <#c>.");
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.addManualStorage(entered);
+    const ownStorages = login.ownStorages!;
+
+    expect(await ownStorages(webId)).toEqual([alice, entered]);
+    // The profile is read as no one: asked as the user, a refused token would ask again.
+    const profileReads = sent.filter(({ url }) => url.startsWith(`${alice}profile/card`));
+    expect(profileReads).toEqual([expect.objectContaining({ credentials: "omit" })]);
+    expect(login.sent.filter((url) => url.startsWith(alice))).toEqual([]);
+    // A profile that cannot be read names none.
+    expect(await ownStorages("https://nowhere.example/profile/card#me")).toEqual([entered]);
   });
 
   it("moves a guest's study into a folder the user enters, though their profile names no storage", {

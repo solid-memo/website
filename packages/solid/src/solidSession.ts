@@ -19,14 +19,31 @@ export interface SolidSession {
 /**
  * The session, both of its halves on one sign-in client, which the
  * composition root chooses (client/session.ts is the only one so far).
+ * `ownStorages` names the user's own storages, where a token refused as
+ * invalid means the session expired (authFetch.ts); a logout is not one.
  */
 export function createSolidSession(
   client: SessionClient,
-  options: SessionGatewayOptions,
+  {
+    ownStorages,
+    ...options
+  }: SessionGatewayOptions & {
+    ownStorages?: (webId: string) => Promise<readonly string[]>;
+  },
 ): SolidSession {
+  const auth = createAuthFetch(client, { ownStorages });
+  const loggingOut: SessionClient = {
+    ...client,
+    async logout() {
+      auth.forget();
+      await client.logout();
+      // A request sent while the logout was under way had the user too.
+      auth.forget();
+    },
+  };
   return {
-    sessionGateway: createSolidSessionGateway({ ...options, client }),
-    fetch: createAuthFetch(client),
+    sessionGateway: createSolidSessionGateway({ ...options, client: loggingOut }),
+    fetch: auth.fetch,
     webId: () => client.webId(),
   };
 }

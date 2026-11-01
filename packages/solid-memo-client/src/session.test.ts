@@ -667,6 +667,30 @@ describe("createSessionClient, over oauth4webapi", () => {
     expect(memory.session).toBeUndefined();
   });
 
+  it("ends the session once its access token expired with no refresh token to renew it", async () => {
+    provider.refreshTokensIssued = false;
+    provider.accessTtl = 10;
+    const pod = vi.fn(async () => new Response(null, { status: 401 }));
+    const { client } = await logIn();
+    provider.pod = pod;
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      await client.fetch("https://pod.example/a");
+      expect(client.webId()).toBe(WEBID);
+      vi.setSystemTime(Date.now() + 10_000);
+      await expect(client.fetch("https://pod.example/b")).resolves.toMatchObject({ status: 401 });
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(
+      new Headers((pod.mock.calls[0] as unknown as [string, RequestInit])[1].headers).get(
+        "authorization",
+      ),
+    ).toBe("DPoP access-1");
+    expect(pod).toHaveBeenLastCalledWith("https://pod.example/b", undefined);
+    expect(client.webId()).toBeUndefined();
+  });
+
   it("restores with the refresh token, without leaving the page", async () => {
     storedSession(WEBID, "refresh-0");
     const client = createSessionClient();

@@ -287,6 +287,25 @@ those to a login page, a write that failed for another reason, such
 as a dropped connection, shows as `redirectRefused`. Nothing is sent
 to the login page.
 
+### An expired session
+
+The app drops the session and shows the login again only when the
+session is gone. authFetch announces it
+(`solid-memo:session-expired`) on a 401 in two cases:
+
+- **The sign-in client no longer has the user.** The access token
+  expired with no refresh token to renew it, or the provider refused
+  the refresh token, and the client ended the session.
+- **The user's own storage or identity provider refuses the token.**
+  The 401 names the token invalid (`invalid_token` in
+  `WWW-Authenticate`). The own storages are those the user's profile
+  names, read as no one, and those entered on this page.
+
+A 401 from any other server, such as an instance the user registered
+in someone else's pod, says nothing of the session. The caller reads
+it as refused access, and the user stays logged in. A logout isn't an
+expired session either.
+
 ## Logout
 
 `logout()` clears the session through the authn library, and the UI
