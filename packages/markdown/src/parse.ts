@@ -100,10 +100,10 @@ export const MAX_UNDERLINES = 200;
 /**
  * The most block quotes and list items a text may open inside a list
  * item (`- - a`, `- > a`, a list item indented under another), and the
- * most lines in a row that continue a paragraph inside a block quote or
- * list item without its `>` or indentation (lazy continuation lines).
- * The parser takes time quadratic in either, so a text past them is
- * shown as plain text.
+ * most lines of one paragraph inside a block quote or list item that
+ * continue it without its `>` or the item's indentation (lazy
+ * continuation lines, as LazyLines counts them). The parser takes time
+ * quadratic in either, so a text past them is shown as plain text.
  */
 export const MAX_NESTED_LINES = 300;
 export const MAX_LAZY_LINES = 200;
@@ -254,24 +254,47 @@ const CONTAINER_OPENER = /[ \t]*(?:>|(?:[-+*]|\d{1,9}[.)])(?=[ \t]|$))[ \t]?/y;
 /** A thematic break, whose `* * *` would otherwise count as list items. */
 const THEMATIC_BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 
-/** A code fence, which ends a paragraph, so no line after it is lazy. */
-const FENCE = /^ {0,3}(?:`{3,}|~{3,})/;
+/**
+ * A code fence, which ends a paragraph, so no line after it is lazy. A
+ * backtick fence's info string has no backtick, so a line that has one
+ * after its backticks is not a fence but a paragraph's text.
+ */
+const FENCE = /^ {0,3}(?:`{3,}(?=[^`]*$)|~{3,})/;
 
 /** A line that could underline a heading. */
 const UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/gm;
 
 /**
- * The containers a line opens, as CONTAINER_OPENER finds them, up to one
- * past MAX_LINE_NESTING: whether each is a quote, and whether it is one
- * of the `>`s the line starts with, which may go on with the line
- * above's quotes. Four columns of white space before an opener make it
- * code, or a paragraph's text, to the parser: after another opener, it
- * opens nothing, and nothing after it does, so the list ends before it.
- * At the line's start the white space may be a list item's indentation,
- * so the opener counts, but as one of its own, never going on from above.
+ * One container a line opens: whether it is a quote, and whether it is
+ * one of the `>`s the line starts with, which may go on with the line
+ * above's quotes. For a list item, also whether it could interrupt a
+ * paragraph (a bullet, or `1.` or `1)`, with text after it, as
+ * CommonMark has it), and the column its content starts at: lines of
+ * its paragraph indented less than that are lazy. And where in the line
+ * its marker ends.
  */
-function openers(line: string): { quote: boolean; leading: boolean }[] {
-  const found: { quote: boolean; leading: boolean }[] = [];
+type Opener = {
+  quote: boolean;
+  leading: boolean;
+  interrupts: boolean;
+  content: number;
+  end: number;
+};
+
+/** The white space after a container's marker. */
+const SPACE = /[ \t]*/y;
+
+/**
+ * The containers a line opens, as CONTAINER_OPENER finds them, up to one
+ * past MAX_LINE_NESTING (see Opener). Four columns of white space before
+ * an opener make it code, or a paragraph's text, to the parser: after
+ * another opener, it opens nothing, and nothing after it does, so the
+ * list ends before it. At the line's start the white space may be a list
+ * item's indentation, so the opener counts, but as one of its own, never
+ * going on from above.
+ */
+function openers(line: string): Opener[] {
+  const found: Opener[] = [];
   let leading = true; // no list marker or indentation has come yet
   let column = 0; // the column the line is read to, tabs expanded
   let content = 0; // the column after the last opener and the one space it may take
@@ -287,8 +310,21 @@ function openers(line: string): { quote: boolean; leading: boolean }[] {
     const indented = markerColumn - content >= 4;
     if (indented && found.length > 0) break;
     leading &&= marker === ">" && !indented;
-    found.push({ quote: marker === ">", leading });
-    content = columnAfter(line, at, at + marker.length, markerColumn) + 1;
+    const end = at + marker.length;
+    const markerEnd = columnAfter(line, at, end, markerColumn);
+    SPACE.lastIndex = end;
+    const space = SPACE.exec(line)![0].length;
+    const empty = end + space === line.length;
+    // One to four columns of white space go before an item's content; more make it code, one column in.
+    const width = columnAfter(line, end, end + space, markerEnd) - markerEnd;
+    found.push({
+      quote: marker === ">",
+      leading,
+      interrupts: !empty && /^(?:[-+*]|1[.)])$/.test(marker),
+      content: markerEnd + (empty || width > 4 ? 1 : width),
+      end,
+    });
+    content = markerEnd + 1;
     column = columnAfter(line, at, CONTAINER_OPENER.lastIndex, markerColumn);
   }
   return found;
@@ -317,6 +353,84 @@ function quotesGoingOn(above: number, aboveIndent: number, indent: number): numb
 }
 
 /**
+ * The content columns of the list items open around a line indented
+ * `indent` columns, from `items`: an item whose content starts further
+ * in has ended, as the line is not lazy.
+ */
+function itemsAround(items: number[], indent: number): number[] {
+  let open = items.length;
+  while (open > 0 && items[open - 1]! > indent) open--;
+  return open === items.length ? items : items.slice(0, open);
+}
+
+/**
+ * The lazy continuation lines a text holds, by paragraph, as tooCostly
+ * counts them line by line. A paragraph's line is lazy when the
+ * paragraph is in a block quote and the line starts with no `>`, or when
+ * it is in a list item and the line is indented less than the item's
+ * content. A line of `>`s and text after lazy lines goes on with the
+ * same paragraph and its count, and so does one whose markers are the
+ * paragraph's text: its first list item could not interrupt the
+ * paragraph (`2.`, or an empty item), or it starts four or more columns
+ * past the content of the list item around the paragraph (past the
+ * line's start, for a paragraph in a quote), which makes it no opener.
+ * Only a list item that could interrupt the paragraph, a line of only
+ * the `>`s it starts with, a blank line, a fence or a thematic break
+ * starts a new one.
+ */
+class LazyLines {
+  /** Lines continuing the paragraph without its `>` or indentation; -1: no paragraph open. */
+  count = -1;
+  /** Whether the paragraph is in a block quote. */
+  private quoted = false;
+  /** The content columns of the list items open around the paragraph, outside any block quote, outermost first. */
+  private items: number[] = [];
+
+  /** A blank line, a fence or a thematic break, which ends a paragraph. */
+  end(): void {
+    this.count = -1;
+  }
+
+  /** A line that opens or goes on with the containers `found`, indented `indent` columns: whether it is lazy. */
+  opening(line: string, indent: number, found: Opener[]): boolean {
+    if (this.count < 0) return this.opens(line, indent, found);
+    // Indented four columns past the paragraph's container, the line is its text.
+    if (indent >= (itemsAround(this.items, indent).at(-1) ?? 0) + 4) return this.plain(indent);
+    const listed = found.findIndex((opener) => !opener.quote);
+    return listed >= 0 && !found[listed]!.interrupts ? false : this.opens(line, indent, found);
+  }
+
+  /** A line that opens the containers `found`, indented `indent` columns, and so is not lazy. */
+  private opens(line: string, indent: number, found: Opener[]): false {
+    const listed = found.some((opener) => !opener.quote);
+    const quote = found.findIndex((opener) => opener.quote);
+    this.items = [
+      ...itemsAround(this.items, indent),
+      ...found.slice(0, quote < 0 ? found.length : quote).map((opener) => opener.content),
+    ];
+    this.quoted = quote >= 0;
+    // A line of only the `>`s it starts with is a quote's blank line.
+    const blank =
+      found.every((opener) => opener.leading) && /^[ \t]*$/.test(line.slice(found.at(-1)!.end));
+    this.count = listed || blank ? 0 : Math.max(this.count, 0);
+    return false;
+  }
+
+  /** A line that opens no container, indented `indent` columns: whether it is lazy. */
+  plain(indent: number): boolean {
+    if (this.count < 0) {
+      this.items = itemsAround(this.items, indent);
+      this.quoted = false;
+      this.count = 0;
+      return false;
+    }
+    if (!this.quoted && indent >= (this.items.at(-1) ?? 0)) return false;
+    this.count++;
+    return true;
+  }
+}
+
+/**
  * Why the parser would take too long on the text, and on which line (from
  * 1) when one says it; null when it would not: see MAX_LINE_NESTING,
  * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_DELIMITERS and
@@ -332,7 +446,7 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
     };
   let nested = 0;
   let quotes = 0;
-  let lazy = -1; // lines continuing the paragraph of a container opened above; -1: none open
+  const lazy = new LazyLines();
   let above = 0; // the `>`s the line above starts with, before any list marker: the quotes a line may go on
   let aboveIndent = 0; // the columns of white space the line above starts with
   // A line ends at a line feed, a carriage return, or both, as CommonMark has it.
@@ -340,12 +454,8 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
   for (const [index, line] of lines.entries()) {
     // Only spaces and tabs make a line blank, as CommonMark has it: a line
     // of other white space, such as U+00A0, is a paragraph's text.
-    if (/^[ \t]*$/.test(line) || FENCE.test(line)) {
-      lazy = -1;
-      above = 0;
-      continue;
-    }
-    if (THEMATIC_BREAK.test(line)) {
+    if (/^[ \t]*$/.test(line) || FENCE.test(line) || THEMATIC_BREAK.test(line)) {
+      lazy.end();
       above = 0;
       continue;
     }
@@ -357,7 +467,8 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
     let leading = 0;
     // An opener is nested after a list marker on its line, or on an indented line.
     let inItem = /^[ \t]/.test(line);
-    for (const opener of openers(line)) {
+    const found = openers(line);
+    for (const opener of found) {
       if (++opened > MAX_LINE_NESTING)
         return {
           what: `more than MAX_LINE_NESTING (${MAX_LINE_NESTING}) quotes and list items opened on one line`,
@@ -378,10 +489,12 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
       if (opener.leading) leading++;
     }
     above = leading;
-    if (opened > 0) lazy = 0;
-    else if (lazy >= 0 && !/^[ \t]/.test(line) && ++lazy > MAX_LAZY_LINES)
+    if (
+      (opened > 0 ? lazy.opening(line, indent, found) : lazy.plain(indent)) &&
+      lazy.count > MAX_LAZY_LINES
+    )
       return {
-        what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a row`,
+        what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a paragraph`,
         line: index + 1,
       };
   }

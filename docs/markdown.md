@@ -111,10 +111,21 @@ blank.
   seconds). No text people write comes near them.
 - **`MAX_NESTED_LINES`, 300 quotes or list items opened inside a list
   item** (`- - a`, `- > a`, or an item indented under another), and
-  **`MAX_LAZY_LINES`, 200 lines in a row that continue a quote's or
-  item's paragraph without its `>` or indentation.** The parser is
-  quadratic in both (`- a` followed by 10,000 such lines takes over a
-  second).
+  **`MAX_LAZY_LINES`, 200 lines that continue a quote's or item's
+  paragraph without its `>` or indentation.** The parser is quadratic
+  in both (`- a` followed by 10,000 such lines takes over a second).
+  The count runs for the whole paragraph. A line of only `>`s and text
+  goes on with it, and so does a list item that can't interrupt a
+  paragraph (`2.`, or an item with nothing after its marker). So does a
+  marker indented four or more columns past the content of the item
+  around the paragraph, or past the line's start in a quote: it's the
+  paragraph's text. Only a blank line, a fence, a thematic break, a
+  line of only the `>`s it starts with or a list item that can
+  interrupt a paragraph starts it again. A run of backticks with
+  another backtick after it on the line isn't a fence, as CommonMark
+  has it, so it goes on with the paragraph. In a quote, an indented line
+  counts too; in a list item, a line indented less than the item's
+  content does.
 - **`MAX_QUOTES`, 200 block quotes a text opens**, side by side or
   apart, in a list item or in another quote. A quote's next line that
   starts with the same `>`s opens none, so one long quote at a line's
