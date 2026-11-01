@@ -14,7 +14,7 @@ import {
   getThing,
   getThingAll,
   getUrlAll,
-  removeThing,
+  removeThings,
   setThing,
   setThings,
 } from "../client/rdf";
@@ -317,7 +317,7 @@ export function toCatalog(dataset: Dataset, documentUrl: string): Catalog | null
 export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Catalog): Dataset {
   const url = `${documentUrl}#catalog`;
   const existing = getThing(dataset, url);
-  const before = existing === null ? [] : getUrlAll(existing, DCTERMS.license);
+  const before = new Set(existing === null ? [] : getUrlAll(existing, DCTERMS.license));
   const foreign = foreignSubjects(dataset);
   const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
     (link) =>
@@ -336,17 +336,19 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
     recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(updated, publisher)),
   );
   const named = new Set(getThingAll(updated).flatMap((thing) => getUrlAll(thing, DCTERMS.license)));
-  for (const license of before.filter(
-    (license) => license !== catalog.license && !named.has(license),
-  )) {
+  // Each old license once, the changes made in one pass: one edit of the
+  // whole document per license would take time in the square of them.
+  const untyped: Subject[] = [];
+  const gone: string[] = [];
+  for (const license of before) {
+    if (license === catalog.license || named.has(license)) continue;
     const node = getThing(updated, license);
     if (node === null) continue;
-    const untyped = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
-    updated =
-      getPropertyAll(untyped).length === 0
-        ? removeThing(updated, license)
-        : setThing(updated, untyped);
+    const thing = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
+    if (getPropertyAll(thing).length === 0) gone.push(license);
+    else untyped.push(thing);
   }
+  updated = removeThings(setThings(updated, untyped), gone);
   if (catalog.license !== undefined) {
     const node = getThing(updated, catalog.license) ?? createThing({ url: catalog.license });
     if (!getUrlAll(node, RDF.type).includes(DCTERMS.LicenseDocument)) {

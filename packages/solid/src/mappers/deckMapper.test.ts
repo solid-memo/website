@@ -3,21 +3,33 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import type { Quad } from "@rdfjs/types";
 import {
+  asUrl,
   buildThing,
+  changesOf,
   createThing,
   type Dataset,
   getBoolean,
   getInteger,
+  getPropertyAll,
   getStringNoLocale,
   getThing,
+  getThingAll,
   getUrlAll,
   type NamedSubject,
   removeThing,
   setThing,
   setThings,
   type SubjectBuilder,
+  toRdfJsDataset,
+  withQuads,
 } from "../client/rdf";
+import { foreignSubjects } from "../ownership";
+import { recordThing } from "../records";
+import { type Catalog, catalogToRecord, publisherToRecord } from "@solid-memo/domain/catalog";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { AGENT_V1, CATALOG_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { datasetFrom } from "../testing/datasets";
 import { growth } from "@solid-memo/domain/testing/growth";
 import {
@@ -849,6 +861,147 @@ describe("the catalog node", () => {
     dataset = withCatalog(dataset, CATALOG, catalog);
     expect(typeOf(dataset, BY)).toBeNull();
     expect(toCatalog(dataset, CATALOG)).toEqual(catalog);
+  });
+
+  describe("over many old licenses", () => {
+    const LICENSE = "https://creativecommons.org/licenses/by/4.0/";
+    // A document whose catalog states `count` licenses besides its own,
+    // each typed a license document, every other one with more said of
+    // it, as another app's write could leave it.
+    const planted = (count: number) => {
+      const licenses = Array.from({ length: count }, (_, i) => `${CATALOG}#license-${i}`);
+      const written = withCatalog(datasetFrom(CATALOG), CATALOG, { ...catalog, license: LICENSE });
+      const node = licenses.reduce(
+        (builder, license) => builder.addIri(DCTERMS.license, license),
+        buildThing(getThing(written, `${CATALOG}#catalog`)!),
+      );
+      return setThings(written, [
+        node.build(),
+        ...licenses.map((license, i) => {
+          const typed = buildThing(createThing({ url: license })).addIri(
+            RDF.type,
+            DCTERMS.LicenseDocument,
+          );
+          return (i % 2 === 0 ? typed : typed.addStringNoLocale(DCTERMS.title, `L${i}`)).build();
+        }),
+      ]);
+    };
+
+    // withCatalog as it was before GHSA-qcxj-gv75-c7wv, word for word:
+    // one edit of the whole document per license it no longer states.
+    function withCatalogOneLicenseAtATime(
+      dataset: Dataset,
+      documentUrl: string,
+      catalog: Catalog,
+    ): Dataset {
+      const url = `${documentUrl}#catalog`;
+      const existing = getThing(dataset, url);
+      const before = existing === null ? [] : getUrlAll(existing, DCTERMS.license);
+      const foreign = foreignSubjects(dataset);
+      const isTyped = (link: string, type: string) => {
+        const thing = getThing(dataset, link);
+        return thing !== null && getUrlAll(thing, RDF.type).includes(type);
+      };
+      const deckUrls = getThingAll(dataset)
+        .filter((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))
+        .map(asUrl);
+      const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
+        (link) =>
+          documentUrlOf(link) !== documentUrl || isTyped(link, DCAT.Dataset) || foreign.has(link),
+      );
+      const datasets = [...new Set([...kept, ...deckUrls])];
+      let updated = setThing(
+        dataset,
+        recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing),
+      );
+      const publisher = catalog.publisher.webId;
+      updated = setThing(
+        updated,
+        recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(updated, publisher)),
+      );
+      const named = new Set(
+        getThingAll(updated).flatMap((thing) => getUrlAll(thing, DCTERMS.license)),
+      );
+      for (const license of before.filter(
+        (license) => license !== catalog.license && !named.has(license),
+      )) {
+        const node = getThing(updated, license);
+        if (node === null) continue;
+        const untyped = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
+        updated =
+          getPropertyAll(untyped).length === 0
+            ? removeThing(updated, license)
+            : setThing(updated, untyped);
+      }
+      if (catalog.license !== undefined) {
+        const node = getThing(updated, catalog.license) ?? createThing({ url: catalog.license });
+        if (!getUrlAll(node, RDF.type).includes(DCTERMS.LicenseDocument)) {
+          updated = setThing(
+            updated,
+            buildThing(node).addIri(RDF.type, DCTERMS.LicenseDocument).build(),
+          );
+        }
+      }
+      return updated;
+    }
+
+    // A dataset's statements and the changes a save sends, as sorted lines.
+    const stateOf = (dataset: Dataset) => {
+      const lines = (quads: Iterable<Quad>) =>
+        [...quads]
+          .map(
+            (quad) =>
+              `${quad.subject.value} ${quad.predicate.value} ${quad.object.termType} ${quad.object.value}`,
+          )
+          .sort();
+      const changes = changesOf(dataset);
+      return {
+        quads: lines(toRdfJsDataset(dataset)),
+        additions: lines(changes?.additions ?? []),
+        deletions: lines(changes?.deletions ?? []),
+      };
+    };
+
+    it("lets go of each as it let go of one at a time, and saves the same changes", () => {
+      const dataset = planted(4);
+      // A license a deck names stays one; one without a subject is passed over.
+      const kept = withDeck(dataset, { ...deck, license: `${CATALOG}#license-0` });
+      const written = setThing(
+        kept,
+        buildThing(getThing(kept, `${CATALOG}#catalog`)!)
+          .addIri(DCTERMS.license, `${CATALOG}#nowhere`)
+          .build(),
+      );
+      // Read back as the pod gives it, so the changes are the save's own.
+      const before = withQuads(datasetFrom(CATALOG), toRdfJsDataset(written));
+      const after = withCatalog(before, CATALOG, catalog);
+      const reference = withCatalogOneLicenseAtATime(before, CATALOG, catalog);
+      expect(stateOf(after)).toEqual(stateOf(reference));
+      expect(stateOf(after).deletions).not.toEqual([]);
+      expect(getThing(after, LICENSE)).toBeNull();
+      expect(getThing(after, `${CATALOG}#license-2`)).toBeNull();
+      expect(getUrlAll(getThing(after, `${CATALOG}#license-0`)!, RDF.type)).toEqual([
+        DCTERMS.LicenseDocument,
+      ]);
+      expect(getUrlAll(getThing(after, `${CATALOG}#license-1`)!, RDF.type)).toEqual([]);
+      expect(getStringNoLocale(getThing(after, `${CATALOG}#license-3`)!, DCTERMS.title)).toBe("L3");
+      expect(toCatalog(after, CATALOG)).toEqual(catalog);
+    });
+
+    it("lets go of them in time that grows with them, not their square (GHSA-qcxj-gv75-c7wv)", () => {
+      // Eight times the licenses must take less than four times as long
+      // as an eighth of them done eight times over (testing.md): an edit
+      // of the whole document per license would take about eight times.
+      const ratio = growth(
+        (count) => {
+          const dataset = planted(count);
+          return () => withCatalog(dataset, CATALOG, catalog);
+        },
+        500,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
   });
 
   it("is absent from a document without one, or with one that does not fit its shape", () => {
