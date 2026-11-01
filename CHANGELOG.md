@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.2](https://github.com/solid-memo/website/compare/v6.25.1...v6.25.2) (2026-11-01)
+
+### Bug Fixes
+
+* **markdown:** show a text with unclosed spans or many lists as plain ([098d18f](https://github.com/solid-memo/website/commit/098d18f371fd52f4471403910ee79705e3a392c6))
+
 ## [6.25.1](https://github.com/solid-memo/website/compare/v6.25.0...v6.25.1) (2026-11-01)
 
 ### Bug Fixes
