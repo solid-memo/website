@@ -34,6 +34,7 @@ import {
   removeInstanceRegistrations,
   renameInstanceRegistrations,
   type InstanceRegistration,
+  type TypeIndexes,
 } from "./typeIndex";
 import { ensureTrailingSlash, lastPathSegment } from "./urls";
 import { SM } from "./vocab";
@@ -48,8 +49,9 @@ export interface SolidInstanceRepositoryDeps {
    */
   dataFetch?: typeof globalThis.fetch;
   /**
-   * What a type index outside the profile's own places is read through
-   * (locateTypeIndexes), as no one: `anonymousFetch` when unset.
+   * What the type indexes' fetch reads anything outside the profile's
+   * own places through (locateTypeIndexes), as no one: `anonymousFetch`
+   * when unset. An index there is none of the user's (ownTypeIndexes).
    */
   publicFetch?: typeof globalThis.fetch;
   now: () => Date;
@@ -78,7 +80,7 @@ export function createSolidInstanceRepository({
   const metaFetch = limitedFetch(fetch, FOREIGN_LIMITS);
   return {
     async listInstances(webId): Promise<Instance[]> {
-      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      const locations = await ownTypeIndexes(webId, fetch, publicFetch);
       const byUrl = new Map<string, InstanceRegistration>();
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;
@@ -91,7 +93,7 @@ export function createSolidInstanceRepository({
     },
 
     async getRegistrationOptions(webId) {
-      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      const locations = await ownTypeIndexes(webId, fetch, publicFetch);
       return {
         privateIndexExists: locations.privateIndexUrl !== null,
         publicIndexExists: locations.publicIndexUrl !== null,
@@ -112,7 +114,7 @@ export function createSolidInstanceRepository({
       let privateIndexElsewhere: string | null;
       let indexFetch: typeof globalThis.fetch;
       try {
-        const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+        const locations = await ownTypeIndexes(webId, fetch, publicFetch);
         indexFetch = locations.fetch;
         const indexUrl =
           (registrationTarget === "private"
@@ -181,7 +183,7 @@ export function createSolidInstanceRepository({
     },
 
     async renameRegistrations({ webId, instanceUrl, title }) {
-      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      const locations = await ownTypeIndexes(webId, fetch, publicFetch);
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;
         await renameInstanceRegistrations(
@@ -232,13 +234,34 @@ export function createSolidInstanceRepository({
     async deleteInstance({ webId, instance }) {
       const url = ensureTrailingSlash(instance.url);
       const deletion = await deleteInstanceData(url, dataFetch);
-      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      const locations = await ownTypeIndexes(webId, fetch, publicFetch);
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
         if (indexUrl === null) continue;
         await removeInstanceRegistrations(indexUrl, url, locations.fetch);
       }
       return deletion;
     },
+  };
+}
+
+/**
+ * The type indexes (locateTypeIndexes), but for one outside the
+ * profile's own places, taken as none: it may be someone else's, so
+ * nothing it registers is the user's, and nothing is written there
+ * (docs/boundaries.md). Without one of its kind, the app offers to
+ * create the user's own.
+ */
+async function ownTypeIndexes(
+  webId: string,
+  fetch: typeof globalThis.fetch,
+  publicFetch: typeof globalThis.fetch,
+): Promise<TypeIndexes> {
+  const indexes = await locateTypeIndexes(webId, fetch, publicFetch);
+  const own = (url: string | null) => (url !== null && indexes.inPlaces(url) ? url : null);
+  return {
+    ...indexes,
+    privateIndexUrl: own(indexes.privateIndexUrl),
+    publicIndexUrl: own(indexes.publicIndexUrl),
   };
 }
 
@@ -265,9 +288,9 @@ interface IndexRegistrations {
 }
 
 /**
- * Each type index there is, private first, with what it registers of the
- * instance's data and what belongs in it; one that cannot be read is
- * left out, and said to be unreadable.
+ * Each of the user's type indexes (ownTypeIndexes), private first, with
+ * what it registers of the instance's data and what belongs in it; one
+ * that cannot be read is left out, and said to be unreadable.
  */
 async function indexesOf(
   webId: string,
@@ -285,7 +308,7 @@ async function indexesOf(
     privateIndexUrl,
     publicIndexUrl,
     fetch: indexFetch,
-  } = await locateTypeIndexes(webId, fetch, publicFetch);
+  } = await ownTypeIndexes(webId, fetch, publicFetch);
   const indexes: IndexRegistrations[] = [];
   const unreadableIndexes: RegistrationTarget[] = [];
   for (const [kind, url] of [

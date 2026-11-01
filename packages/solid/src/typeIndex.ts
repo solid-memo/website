@@ -53,6 +53,13 @@ export interface TypeIndexes {
    * no one and any other write refused (`writeOutsidePod`).
    */
   fetch: Fetch;
+  /**
+   * Whether `url` is in the profile's own places. An index outside them
+   * may be someone else's, so nothing in it is the user's: the instance
+   * repository takes it as none (ownTypeIndexes), and ensureTypeIndex
+   * makes the user's own instead.
+   */
+  inPlaces: (url: string) => boolean;
 }
 
 /**
@@ -74,11 +81,10 @@ export async function locateTypeIndexes(
   const documentUrl = getSourceUrl(profileDataset);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
-    const places = profilePlacesOf(webId, documentUrl, []);
     return {
       privateIndexUrl: null,
       publicIndexUrl: null,
-      fetch: createPlacesFetch(places, fetch, publicFetch),
+      ...placesOf(profilePlacesOf(webId, documentUrl, []), fetch, publicFetch),
     };
   }
 
@@ -113,7 +119,28 @@ export async function locateTypeIndexes(
   }
 
   const places = profilePlacesOf(webId, documentUrl, subjects);
-  return { privateIndexUrl, publicIndexUrl, fetch: createPlacesFetch(places, fetch, publicFetch) };
+  // Of several links, one in the profile's own places: the index the app made beside one elsewhere.
+  const ownLink = (predicate: string): string | null =>
+    subjects
+      .flatMap((subject) => getUrlAll(subject, predicate))
+      .find((url) => isInPlaces(url, places)) ?? null;
+  return {
+    privateIndexUrl: ownLink(SOLID.privateTypeIndex) ?? privateIndexUrl,
+    publicIndexUrl: ownLink(SOLID.publicTypeIndex) ?? publicIndexUrl,
+    ...placesOf(places, fetch, publicFetch),
+  };
+}
+
+/** The indexes' fetch and place check (TypeIndexes) for the profile's own `places`. */
+function placesOf(
+  places: readonly string[],
+  fetch: Fetch,
+  publicFetch: Fetch,
+): Pick<TypeIndexes, "fetch" | "inPlaces"> {
+  return {
+    fetch: createPlacesFetch(places, fetch, publicFetch),
+    inPlaces: (url) => isInPlaces(url, places),
+  };
 }
 
 /**
@@ -247,8 +274,9 @@ function describeFailure(documentUrl: string, error: unknown): string {
 }
 
 /**
- * Find the target index, creating it (and its profile link) if missing;
- * and what it is read and written through (TypeIndexes).
+ * Find the target index, creating it (and its profile link) if missing
+ * or outside the profile's own places (TypeIndexes.inPlaces); and what
+ * it is read and written through (TypeIndexes).
  */
 export async function ensureTypeIndex(
   kind: TypeIndexKind,
@@ -258,7 +286,8 @@ export async function ensureTypeIndex(
   publicFetch: Fetch,
 ): Promise<{ url: string; fetch: Fetch }> {
   const indexes = await locateTypeIndexes(webId, fetch, publicFetch);
-  const existing = kind === "public" ? indexes.publicIndexUrl : indexes.privateIndexUrl;
+  const found = kind === "public" ? indexes.publicIndexUrl : indexes.privateIndexUrl;
+  const existing = found !== null && indexes.inPlaces(found) ? found : null;
   return {
     url: existing ?? (await createTypeIndex(kind, webId, nearUrl, fetch)),
     fetch: indexes.fetch,

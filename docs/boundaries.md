@@ -287,8 +287,9 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
 
 - **In the user's own pod** a request goes on as the user, a read or a
   write. The user's own pod is the storages their profile names and
-  the instances they registered. On this page it's also a storage they
-  entered by hand and the folder they moved a guest's study into. Each
+  the instances they registered in a type index in the profile's own
+  places (below). On this page it's also a storage they entered by
+  hand and the folder they moved a guest's study into. Each
   counts with what's in it (`isInFolder` in `instanceLayout.ts`). For
   an instance in someone else's pod, only its own folder counts. It
   goes through the same fences and login fetch as any pod request, so
@@ -343,9 +344,13 @@ WebID's origin, its document's, and the storages the profile names.
 A document the profile links (`rdfs:seeAlso`, `foaf:isPrimaryTopicOf`,
 `pim:preferencesFile`) is read as the user only in those places, and
 one anywhere else isn't read at all, nor taken as part of the profile.
-A type index outside them is read as no one, and nothing is written
-there: a profile whose index is on another server names that storage
-(`pim:storage`) for the app to use it.
+A type index outside them may be someone else's, so the app takes it
+as no index at all: it reads nothing in it, writes nothing there, and
+offers to create the user's own, as for a missing index. Nothing such
+an index registers is the user's, so no instance in it joins the
+folders the gate sends credentials to. A profile whose index is on
+another server names that storage (`pim:storage`) for the app to use
+it. Of several links to an index, the app takes one in those places.
 
 ## Further rules
 

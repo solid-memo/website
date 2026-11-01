@@ -130,7 +130,11 @@ flowchart LR
   one. Only the documents on the WebID's origin, on its document's
   origin or in a storage the WebID document names are read; a link to
   one anywhere else is left alone
-  ([boundaries.md](boundaries.md#the-credential-gate)).
+  ([boundaries.md](boundaries.md#the-credential-gate)). An index found
+  outside those places may be someone else's: the app takes it as
+  missing, so nothing in it is read or written, no instance it registers
+  is listed, and the user may create their own. Of several links, one
+  in those places wins.
 - **Missing indexes** are normal on Community Solid Server pods. The app
   warns the user, who chooses to create the private index (a document
   under `<storage>settings/` plus a profile link) or to register

@@ -86,6 +86,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -95,6 +96,7 @@ describe("locateTypeIndexes", () => {
     mockDatasets({ [WEBID]: datasetFrom(PROFILE_DOC) });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: null,
       publicIndexUrl: null,
     });
@@ -112,6 +114,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: null,
     });
@@ -123,6 +126,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: null,
       publicIndexUrl: null,
     });
@@ -135,6 +139,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: null,
       publicIndexUrl: null,
     });
@@ -144,6 +149,7 @@ describe("locateTypeIndexes", () => {
     mockDatasets({ [WEBID]: profileDataset() });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: null,
       publicIndexUrl: null,
     });
@@ -158,6 +164,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -172,6 +179,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: null,
     });
@@ -190,6 +198,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -206,6 +215,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -218,6 +228,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: null,
       publicIndexUrl: null,
     });
@@ -230,6 +241,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
+      inPlaces: expect.any(Function),
       privateIndexUrl: null,
       publicIndexUrl: null,
     });
@@ -317,6 +329,37 @@ describe("locateTypeIndexes outside the profile's own places", () => {
       code: "writeOutsidePod",
     });
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("says which indexes are in the profile's own places", async () => {
+    mockDatasets({
+      [WEBID]: profileDataset((t) =>
+        t
+          .addIri(PIM.storage, STORAGE)
+          .addIri(SOLID.privateTypeIndex, `${STORAGE}settings/privateTypeIndex.ttl`)
+          .addIri(SOLID.publicTypeIndex, `${ELSEWHERE}/publicTypeIndex.ttl`),
+      ),
+    });
+    const { inPlaces } = await locateTypeIndexes(WEBID, noFetch, noFetch);
+
+    expect(inPlaces(PUBLIC_INDEX)).toBe(true);
+    expect(inPlaces(`${STORAGE}settings/privateTypeIndex.ttl`)).toBe(true);
+    expect(inPlaces(`${ELSEWHERE}/publicTypeIndex.ttl`)).toBe(false);
+  });
+
+  it("of several links, takes the index in the profile's own places", async () => {
+    mockDatasets({
+      [WEBID]: profileDataset((t) =>
+        t
+          .addIri(SOLID.privateTypeIndex, `${ELSEWHERE}/privateTypeIndex.ttl`)
+          .addIri(SOLID.privateTypeIndex, PRIVATE_INDEX)
+          .addIri(SOLID.publicTypeIndex, `${ELSEWHERE}/publicTypeIndex.ttl`),
+      ),
+    });
+    await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toMatchObject({
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: `${ELSEWHERE}/publicTypeIndex.ttl`,
+    });
   });
 
   it("gives the indexes' fetch the WebID's own places when the profile does not describe it", async () => {
@@ -640,6 +683,22 @@ describe("ensureTypeIndex", () => {
       ensureTypeIndex("private", WEBID, "https://alice.example/x/", fetch, noFetch),
     ).resolves.toEqual({ url: PRIVATE_INDEX, fetch: expect.any(Function) });
     expect(writeDocument).toHaveBeenCalled();
+  });
+
+  it("creates the user's own index when the profile's is outside its own places", async () => {
+    mockDatasets({
+      [WEBID]: profileDataset((t) =>
+        t
+          .addIri(PIM.storage, "https://alice.example/")
+          .addIri(SOLID.privateTypeIndex, "https://elsewhere.example/privateTypeIndex.ttl"),
+      ),
+    });
+    const fetch = vi.fn(async () => new Response(null, { status: 200 })) as typeof globalThis.fetch;
+
+    await expect(
+      ensureTypeIndex("private", WEBID, "https://alice.example/x/", fetch, noFetch),
+    ).resolves.toEqual({ url: PRIVATE_INDEX, fetch: expect.any(Function) });
+    expect(vi.mocked(writeDocument).mock.calls.map(([url]) => url)).toContain(PRIVATE_INDEX);
   });
 });
 

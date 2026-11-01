@@ -98,6 +98,7 @@ describe("listInstances", () => {
   it("merges registrations from both indexes, deduplicating by container", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: "https://alice.example/settings/publicTypeIndex.ttl",
     });
@@ -117,6 +118,7 @@ describe("listInstances", () => {
   it("skips missing indexes and tolerates unreadable ones", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: null,
     });
@@ -124,12 +126,30 @@ describe("listInstances", () => {
 
     await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([]);
   });
+
+  it("lists nothing an index outside the profile's own places registers, nor reads it", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: (url) => url !== PUBLIC_INDEX,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+    vi.mocked(readInstanceRegistrations).mockResolvedValue([
+      { containerUrl: CONTAINER, title: "Main" },
+    ]);
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([
+      { url: CONTAINER, name: "Main" },
+    ]);
+    expect(readInstanceRegistrations).toHaveBeenCalledExactlyOnceWith(PRIVATE_INDEX, indexFetch);
+  });
 });
 
 describe("getRegistrationOptions", () => {
   it("maps index locations to existence flags", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: null,
       publicIndexUrl: "https://alice.example/settings/publicTypeIndex.ttl",
     });
@@ -150,6 +170,7 @@ describe("readDataClassRegistrations and registerDataClasses", () => {
   it("want the instance's data of every class in each index that registers it, review states, answers and drafts in the private one only", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -194,6 +215,7 @@ describe("readDataClassRegistrations and registerDataClasses", () => {
   it("want review states and answers in the private index when only the public one registers the instance", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -222,6 +244,7 @@ describe("readDataClassRegistrations and registerDataClasses", () => {
   it("leave out an index that cannot be read, and say so", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -259,6 +282,7 @@ describe("readDataClassRegistrations and registerDataClasses", () => {
   it("never want review states or answers in the public index, without a private one", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: null,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -287,6 +311,7 @@ describe("createInstance", () => {
   it("writes meta.ttl, registers every class of its data in the private index, and returns the instance", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -314,6 +339,7 @@ describe("createInstance", () => {
   it("makes the instance at its address as a request sends it", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -333,6 +359,7 @@ describe("createInstance", () => {
       privateIndexUrl: null,
       publicIndexUrl: null,
       fetch: indexFetch,
+      inPlaces: () => true,
     });
     vi.mocked(createTypeIndex).mockResolvedValue(PRIVATE_INDEX);
 
@@ -350,6 +377,7 @@ describe("createInstance", () => {
   it("registers it publicly, its review states and answers in the private index", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -369,6 +397,7 @@ describe("createInstance", () => {
       privateIndexUrl: null,
       publicIndexUrl: null,
       fetch: indexFetch,
+      inPlaces: () => true,
     });
     vi.mocked(createTypeIndex).mockResolvedValue(PUBLIC_INDEX);
 
@@ -386,6 +415,7 @@ describe("createInstance", () => {
   it("still creates a public instance when the private index refuses its review states and answers", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -410,6 +440,7 @@ describe("createInstance", () => {
       privateIndexUrl: null,
       publicIndexUrl: null,
       fetch: indexFetch,
+      inPlaces: () => true,
     });
     vi.mocked(createTypeIndex).mockRejectedValue(new Error("cannot create index"));
     // The meta.ttl just written, as the pod serves it: the instance's #it and nothing else.
@@ -433,6 +464,7 @@ describe("createInstance", () => {
       privateIndexUrl: null,
       publicIndexUrl: null,
       fetch: indexFetch,
+      inPlaces: () => true,
     });
     vi.mocked(createTypeIndex).mockRejectedValue(new Error("cannot create index"));
     vi.mocked(readDocument).mockResolvedValue(
@@ -614,6 +646,7 @@ describe("deleteInstance", () => {
     });
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -644,6 +677,7 @@ describe("deleteInstance", () => {
     });
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: null,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -670,6 +704,7 @@ describe("deleteInstance", () => {
     });
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: null,
     });
@@ -788,6 +823,7 @@ describe("readMeta and upgradeMeta", () => {
       });
       vi.mocked(locateTypeIndexes).mockResolvedValue({
         fetch: indexFetch,
+        inPlaces: () => true,
         privateIndexUrl: PRIVATE_INDEX,
         publicIndexUrl: PUBLIC_INDEX,
       });
@@ -814,6 +850,7 @@ describe("renameRegistrations", () => {
   it("renames the instance's registrations in each type index there is", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
+      inPlaces: () => true,
       privateIndexUrl: null,
       publicIndexUrl: PUBLIC_INDEX,
     });
@@ -868,5 +905,108 @@ describe("saveMeta", () => {
       code: "noMetaToUpdate",
     });
     expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("a type index outside the profile's own places", () => {
+  /** The private index in the places, the public one outside them. */
+  const publicElsewhere = () =>
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: (url) => url !== PUBLIC_INDEX,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+
+  it("lists nothing it registers when it is the only index", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: (url) => url !== PUBLIC_INDEX,
+      privateIndexUrl: null,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([]);
+    expect(readInstanceRegistrations).not.toHaveBeenCalled();
+  });
+
+  it("is taken as no index, so the app offers to create one", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => false,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+
+    await expect(makeRepository().getRegistrationOptions(WEBID)).resolves.toEqual({
+      privateIndexExists: false,
+      publicIndexExists: false,
+    });
+  });
+
+  it("is never registered in: an instance made public gets the user's own index", async () => {
+    publicElsewhere();
+    const OWN_PUBLIC = "https://alice.example/settings/ownPublicTypeIndex.ttl";
+    vi.mocked(createTypeIndex).mockResolvedValue(OWN_PUBLIC);
+
+    await makeRepository().createInstance({
+      webId: WEBID,
+      containerUrl: CONTAINER,
+      name: "Main",
+      registrationTarget: "public",
+    });
+
+    expect(createTypeIndex).toHaveBeenCalledWith("public", WEBID, CONTAINER, expect.anything());
+    expect(vi.mocked(addRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      OWN_PUBLIC,
+      PRIVATE_INDEX,
+    ]);
+  });
+
+  it("shows no registration of the instance's data, and gets none", async () => {
+    publicElsewhere();
+    vi.mocked(readRegisteredClasses).mockResolvedValue(["instance"]);
+    const args = { webId: WEBID, instanceUrl: CONTAINER };
+
+    const registrations = await makeRepository().readDataClassRegistrations(args);
+    expect(new Set(registrations.registrations.map((entry) => entry.index))).toEqual(
+      new Set(["private"]),
+    );
+    expect(registrations.unreadableIndexes).toEqual([]);
+
+    await makeRepository().registerDataClasses({ ...args, title: "Main" });
+    expect(readRegisteredClasses).not.toHaveBeenCalledWith(
+      PUBLIC_INDEX,
+      expect.anything(),
+      expect.anything(),
+    );
+    expect(vi.mocked(addRegistrations).mock.calls.map((call) => call[0])).toEqual([PRIVATE_INDEX]);
+  });
+
+  it("is neither renamed in nor unregistered from", async () => {
+    publicElsewhere();
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    vi.mocked(deleteInstanceData).mockResolvedValue({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+
+    await makeRepository().renameRegistrations({
+      webId: WEBID,
+      instanceUrl: CONTAINER,
+      title: "Languages",
+    });
+    await makeRepository().deleteInstance({
+      webId: WEBID,
+      instance: { url: CONTAINER, name: "Main" },
+    });
+
+    expect(vi.mocked(renameInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+    ]);
+    expect(vi.mocked(removeInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+    ]);
   });
 });
