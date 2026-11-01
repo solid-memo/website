@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.6](https://github.com/solid-memo/website/compare/v6.25.5...v6.25.6) (2026-11-01)
+
+### Bug Fixes
+
+* **solid:** let go of a catalog's old licenses in one pass ([df39c55](https://github.com/solid-memo/website/commit/df39c5558b5bc49627fa259f736404ee94d0bf19))
+
 ## [6.25.5](https://github.com/solid-memo/website/compare/v6.25.4...v6.25.5) (2026-11-01)
 
 ### Bug Fixes
