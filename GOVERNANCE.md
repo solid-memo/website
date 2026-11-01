@@ -130,11 +130,45 @@ pull requests too ([Dependency updates](#dependency-updates)).
 ## Dependency updates
 
 [Renovate](https://docs.renovatebot.com/) proposes dependency updates
-([renovate.json5](renovate.json5)). Each update is a pull request, and
-Renovate adds it to the merge queue on its own, which merges it only
-when CI passes, with no person
-reviewing it, so its updates are unreviewed changes too. A few updates
-wait for a person, as `renovate.json5` says why. A new version of an npm
+([renovate.json5](renovate.json5)). Each update is a pull request. An
+update of a development tool, one that runs only in CI jobs that hold
+no secret and on contributors' machines, Renovate adds to the merge
+queue on its own once its version has been public for 3 days. The
+queue merges it only when CI passes, with no person reviewing it, so
+those updates are unreviewed changes too. Several of those tools ship
+prebuilt binaries, such as Biome and esbuild, so reading their diffs
+would tell little; keeping long-lived tokens out of the jobs that run
+the checks protects more. CI can't tell a malicious version from a good
+one, since such a version is built to pass the tests, so a person
+merges each update that reaches the most:
+
+- **What the app ships**: the run-time dependencies of each workspace
+  package that `npm run check:dependencies` walks from the app, the
+  Solid client that handles login and pod access among them, and
+  `readable-stream`, which the root `package.json` lists so that the
+  page bundles one copy of it. A bad
+  version would reach every user in the next release. The end-to-end
+  test servers' packages under `e2e/` ship nothing and aren't among
+  them.
+- **What the release job runs while it holds the deploy key**:
+  `semantic-release`, its `@semantic-release/*` plugins and the
+  `conventional-changelog-conventionalcommits` preset they load, and
+  what `npm run docs:archive` runs in the release's prepare step:
+  `vite`, `playwright` and `mermaid`
+  ([docs/releasing.md](docs/releasing.md#the-deploy-key)). A bad
+  version would run with a key that can push to `main` and tag a
+  release.
+- **Every new major version**, which may change what the tests don't
+  cover.
+
+The person who merges one reads its release notes and what changed in
+the package itself, with
+`npm diff --diff=<package>@<from> --diff=<package>@<to>`. They look
+for new install scripts, new network or file access, and code that is
+newly minified or obfuscated. A security update of one of these waits
+for a person too: Renovate proposes it at once, and the person reads
+it as soon as they can. A few other updates wait for a person, as
+`renovate.json5` says why. A new version of an npm
 dependency raises the dependency's range to that version, even when the
 range already allows it, so each new version comes as a pull request of
 its own and no older version is locked again. Every Monday, Renovate

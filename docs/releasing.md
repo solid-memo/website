@@ -457,12 +457,13 @@ The job holds the key briefly:
 
 That step runs Chromium, through Playwright, and Mermaid on the
 repository's docs while the key is there, to draw the archive's
-diagrams. Both are pinned development
-dependencies that read only what is committed on `main`. Renovate
-proposes their updates, CI checks them ([vendor-code.md](vendor-code.md)),
-and Renovate merges them on `main` with no person reviewing them once
-their version has been public for 3 days, so a bad version can be
-found and pulled first
+diagrams, and it loads Vite. These are development dependencies that
+read only what is committed on `main`, and Playwright and Mermaid are
+pinned. Renovate proposes their updates, and those of semantic-release,
+its plugins and the preset they load, once their version has been public for 3 days,
+so a bad version can be found and pulled first. CI checks them
+([vendor-code.md](vendor-code.md)), and Renovate leaves each one
+waiting for a person, who merges it after reading what it changes
 ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). The wait holds
 for every package an update newly locks, not only the one it names:
 the repository's `.npmrc` files set npm's `min-release-age` to 3 days,
