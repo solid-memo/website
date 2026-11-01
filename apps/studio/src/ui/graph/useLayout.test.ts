@@ -5,7 +5,7 @@
 import { act, renderHook } from "@testing-library/preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { forget } from "@solid-memo/ui/remembered";
-import { largeGraph, smallGraph } from "../../test/graph";
+import { collidingGraphs, largeGraph, smallGraph } from "../../test/graph";
 import { createLayout } from "./layout";
 import { useLayout } from "./useLayout";
 
@@ -78,6 +78,24 @@ describe("useLayout", () => {
     again.unmount();
     const changed = renderHook(() => useLayout("a", largeGraph(3), true));
     expect(changed.result.current.laid).toBeNull();
+  });
+
+  it("lays out afresh a graph a short hash of it would have matched to the one kept", async () => {
+    const [first, second] = collidingGraphs();
+    const before = renderHook(() => useLayout("a", first, true));
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    expect(before.result.current.laid).not.toBeNull();
+    before.unmount();
+    const after = renderHook(() => useLayout("a", second, true));
+    expect(after.result.current.laid).toBeNull();
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    expect([...after.result.current.laid!.positions.keys()].sort()).toEqual(
+      second.nodes.map((node) => node.id).sort(),
+    );
   });
 
   it("does not run while the graph is not to be drawn", async () => {

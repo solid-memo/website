@@ -10,20 +10,20 @@
  * handing over the positions and routes it ends with. Leaving the
  * screen stops it. A layout finished is
  * kept for the page's life (useRemembered), under the instance, with
- * the mark of the graph it is of: coming back to the same graph draws it
- * at once, and a graph changed since is laid out afresh.
+ * the graph it is of, in full (graphIdentity): coming back to the same
+ * graph draws it at once, and a graph changed since is laid out afresh.
  */
 
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { InstanceGraph } from "@solid-memo/domain/instanceGraph";
 import { useRemembered } from "@solid-memo/ui/remembered";
-import { createLayout, graphFingerprint, type Positions, type Routes } from "./layout";
+import { createLayout, graphIdentity, type Positions, type Routes } from "./layout";
 
 /** How long a batch of steps may run, in milliseconds, so the page still draws at a good pace. */
 const BATCH_MS = 12;
 
 interface KeptLayout {
-  fingerprint: string;
+  identity: string;
   positions: Positions;
   routes: Routes;
 }
@@ -40,10 +40,10 @@ export function useLayout(
   run: boolean,
   clock: () => number = () => performance.now(),
 ): { laid: { positions: Positions; routes: Routes } | null; progress: number } {
-  const fingerprint = useMemo(() => graphFingerprint(graph), [graph]);
+  const identity = graphIdentity(graph);
   const [kept, keep] = useRemembered<KeptLayout | null>(`studio.graphLayout.${key}`, null);
   const [progress, setProgress] = useState(0);
-  const laid = kept?.fingerprint === fingerprint ? kept : null;
+  const laid = kept?.identity === identity ? kept : null;
 
   useEffect(() => {
     if (!run || laid !== null) return;
@@ -61,14 +61,14 @@ export function useLayout(
     const finish = () => {
       const positions = layout!.positions();
       const routes = layout!.routes();
-      keep(() => ({ fingerprint, positions, routes }));
+      keep(() => ({ identity, positions, routes }));
     };
     timer = setTimeout(() => {
       layout = createLayout(graph);
       timer = setTimeout(batch, 0);
     }, 0);
     return () => clearTimeout(timer);
-  }, [fingerprint, run, laid === null]);
+  }, [identity, run, laid === null]);
 
   return { laid, progress };
 }

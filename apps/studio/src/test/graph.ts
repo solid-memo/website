@@ -146,3 +146,31 @@ export function crowdedGraph(count: number): InstanceGraph {
     ],
   });
 }
+
+const COLLIDING = ["deck-48f", "deck-fh4"] as const;
+
+/**
+ * Two graphs of a folder, a catalog and a deck, the same in all but the
+ * deck's name: names picked so that a 32-bit FNV-1a hash over their ids
+ * and edges, a short mark that once told the kept layout's graph, is the
+ * same for both.
+ */
+export function collidingGraphs(): [InstanceGraph, InstanceGraph] {
+  const graphOf = (name: string): InstanceGraph => ({
+    nodes: [
+      { id: INSTANCE, kind: "container", types: [], literals: [] },
+      { id: CATALOG, kind: "document", document: CATALOG, found: true, types: [], literals: [] },
+      { id: `${CATALOG}#${name}`, kind: "resource", document: CATALOG, types: [], literals: [] },
+    ],
+    edges: [
+      {
+        from: INSTANCE,
+        predicate: "http://www.w3.org/ns/ldp#contains",
+        to: CATALOG,
+        kind: "containment",
+      },
+      { from: CATALOG, predicate: "", to: `${CATALOG}#${name}`, kind: "containment" },
+    ],
+  });
+  return [graphOf(COLLIDING[0]), graphOf(COLLIDING[1])];
+}

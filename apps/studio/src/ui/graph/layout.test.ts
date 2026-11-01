@@ -21,6 +21,7 @@ import {
   CARD,
   CARDS,
   CATALOG,
+  collidingGraphs,
   DECK,
   DISTRACTOR,
   GONE,
@@ -29,7 +30,7 @@ import {
   REVIEW,
   smallGraph,
 } from "../../test/graph";
-import { createLayout, graphFingerprint, ROUTE_BATCH, type Point } from "./layout";
+import { createLayout, graphIdentity, ROUTE_BATCH, type Point } from "./layout";
 
 const INSTANCE = instanceA.url;
 const TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -611,16 +612,53 @@ describe("createLayout", () => {
   });
 });
 
-describe("graphFingerprint", () => {
+/** The 32-bit FNV-1a hash over a graph's ids and edges that once told the kept layout's graph. */
+function shortMark(graph: InstanceGraph): string {
+  let hash = 0x811c9dc5;
+  const mix = (text: string) => {
+    for (let i = 0; i < text.length; i++) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193);
+    }
+  };
+  for (const node of graph.nodes) mix(`${node.id}\u0000${node.kind}\u0000`);
+  for (const edge of graph.edges) mix(`${edge.from}\u0000${edge.predicate}\u0000${edge.to}\u0000`);
+  return `${graph.nodes.length}.${graph.edges.length}.${(hash >>> 0).toString(16)}`;
+}
+
+describe("graphIdentity", () => {
   it("is the same for the same graph, and differs for another", () => {
-    expect(graphFingerprint(smallGraph())).toBe(graphFingerprint(smallGraph()));
-    expect(graphFingerprint(smallGraph())).not.toBe(graphFingerprint(largeGraph(1)));
+    expect(graphIdentity(smallGraph())).toBe(graphIdentity(smallGraph()));
+    expect(graphIdentity(smallGraph())).not.toBe(graphIdentity(largeGraph(1)));
     const graph = smallGraph();
-    const relinked: InstanceGraph = {
+    expect(graphIdentity(graph)).toBe(graphIdentity(graph));
+    const relinked = (change: Partial<InstanceGraph["edges"][number]>): InstanceGraph => ({
       nodes: graph.nodes,
-      edges: graph.edges.map((each, at) => (at === 0 ? { ...each, predicate: "x" } : each)),
+      edges: graph.edges.map((each, at) => (at === 0 ? { ...each, ...change } : each)),
+    });
+    expect(graphIdentity(relinked({ predicate: "x" }))).not.toBe(graphIdentity(graph));
+    expect(graphIdentity(relinked({ kind: "vocabulary" }))).not.toBe(graphIdentity(graph));
+    const rekinded: InstanceGraph = {
+      nodes: graph.nodes.map((each, at) => (at === 0 ? { ...each, kind: "missing" } : each)),
+      edges: graph.edges,
     };
-    expect(graphFingerprint(relinked)).not.toBe(graphFingerprint(graph));
-    expect(graphFingerprint(graph)).toMatch(/^\d+\.\d+\.[0-9a-f]+$/);
+    expect(graphIdentity(rekinded)).not.toBe(graphIdentity(graph));
+  });
+
+  it("differs for two graphs a short hash of them cannot tell apart", () => {
+    const [first, second] = collidingGraphs();
+    expect(shortMark(first)).toBe(shortMark(second));
+    expect(graphIdentity(first)).not.toBe(graphIdentity(second));
+  });
+
+  it("cannot be matched by moving text from one id to the next", () => {
+    const graphOf = (a: string, b: string): InstanceGraph => ({
+      nodes: [
+        { id: a, kind: "resource", types: [], literals: [] },
+        { id: b, kind: "resource", types: [], literals: [] },
+      ],
+      edges: [],
+    });
+    expect(graphIdentity(graphOf('a","', "b"))).not.toBe(graphIdentity(graphOf("a", '",b')));
   });
 });

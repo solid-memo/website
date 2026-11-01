@@ -360,11 +360,12 @@ function Labels({
  * The graph `nodes` and `edges` make, at `positions` (every node's the
  * layout placed, so the box stays the same as the filters change). Each
  * node is named by `labels`, and described in words, for the line under
- * the drawing, by `describe`.
+ * the drawing, by `describe`. A node `positions` does not place, and an
+ * edge to or from one, is left out rather than drawn nowhere.
  */
 export function GraphView({
-  nodes,
-  edges,
+  nodes: given,
+  edges: givenEdges,
   positions,
   routes,
   labels,
@@ -404,6 +405,20 @@ export function GraphView({
   const [hovered, setHovered] = useState<string | null>(null);
   const hintId = useId();
 
+  const nodes = useMemo(
+    () =>
+      given.every((node) => positions.has(node.id))
+        ? given
+        : given.filter((node) => positions.has(node.id)),
+    [given, positions],
+  );
+  const edges = useMemo(
+    () =>
+      nodes === given
+        ? givenEdges
+        : givenEdges.filter((edge) => positions.has(edge.from) && positions.has(edge.to)),
+    [nodes, given, givenEdges, positions],
+  );
   const box = useMemo(() => boxOf(positions), [positions]);
   const span = Math.max(box.width, box.height);
   const byId = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
