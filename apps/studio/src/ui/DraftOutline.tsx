@@ -8,11 +8,7 @@ import type { Anchor } from "@solid-memo/domain/deckTree";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, stepQuestions } from "@solid-memo/domain/release/courseIds";
-import {
-  draftCardFinder,
-  draftOutline,
-  outlineMove,
-} from "@solid-memo/domain/release/draftOutline";
+import { draftCardOf, draftOutline, outlineMove } from "@solid-memo/domain/release/draftOutline";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type {
   DraftChange,
@@ -101,7 +97,7 @@ export function DraftOutline({
   const chapterNodes = new Map(draft.chapters.map((node) => [node.id, node]));
   const chapterTitle = (id: string): LangText => chapterNodes.get(id)!.data.title ?? { "": id };
   const stepNodes = new Map(draft.steps.map((node) => [node.id, node]));
-  const cardOf = draftCardFinder(draft);
+  const cardOf = (id: string) => draftCardOf(draft, id);
   const stepLabel = (chapter: number, step: number) =>
     t("studio.outline.stepNumber", { chapter: chapter + 1, step: step + 1 });
   const nodes: OutlineNode[] = outline.map(({ chapter, steps }, at) => ({

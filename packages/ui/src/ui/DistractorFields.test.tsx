@@ -288,6 +288,23 @@ describe("DistractorFields", () => {
     ).toBeInTheDocument();
   });
 
+  it("names an issue by the first option of its id, when two share one", () => {
+    renderFields({
+      back: { en: "Water" },
+      distractors: [
+        { id: "q-d1", text: { en: "Fire", de: "Feuer" } },
+        { id: "q-d1", text: { en: "Earth", sv: "Jord" } },
+      ],
+    });
+    const issues = within(screen.getByRole("list", { name: "Worth a look" })).getAllByRole(
+      "listitem",
+    );
+    expect(issues.map((issue) => issue.textContent)).toEqual([
+      "“Fire” is in German — Deutsch (de), which the back is not.",
+      "“Fire” is in Swedish — svenska (sv), which the back is not.",
+    ]);
+  });
+
   it("writes and shows options in Markdown as such, hinting where one would not show as meant", () => {
     renderFields({ textFormat: SM.markdown, distractors: [{ id: "q-d1", text: { en: "`a`" } }] });
     expect(fields().querySelector("code")).toHaveTextContent("a");

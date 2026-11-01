@@ -207,10 +207,15 @@ export function DistractorFields({
     tags
       .map((tag) => (tag === "" ? t("distractorFields.noLanguage") : languageLabel(tag)))
       .join(", ");
+  // A card may have thousands of wrong options, each with its issues: each is
+  // looked up by id, the first of an id, as a search of the list finds it.
+  const byId = new Map<string, Distractor>();
+  for (const distractor of distractors)
+    if (!byId.has(distractor.id)) byId.set(distractor.id, distractor);
   const issueText = (issue: DistractorIssue): string[] => {
     if (issue.code === "fewDistractors")
       return [t("distractorFields.issue.few", { count: issue.count, least: issue.least })];
-    const option = named(distractors.find((distractor) => distractor.id === issue.id)!);
+    const option = named(byId.get(issue.id)!);
     return [
       ...(issue.missing.length === 0
         ? []

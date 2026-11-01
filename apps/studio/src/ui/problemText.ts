@@ -4,11 +4,7 @@
 
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import {
-  draftCardFinder,
-  stepPlaceOf,
-  type DraftCard,
-} from "@solid-memo/domain/release/draftOutline";
+import { draftCardOf, stepPlaceOf, type DraftCard } from "@solid-memo/domain/release/draftOutline";
 import { idIn, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { cardName } from "@solid-memo/ui/DataText";
@@ -100,7 +96,7 @@ function lookupsOf(draft: ReleaseDraft): DraftLookups {
   const made: DraftLookups = {
     chapters: new Map(draft.chapters.map((node) => [node.id, node])),
     steps: new Set(draft.steps.map((node) => node.id)),
-    cardOf: draftCardFinder(draft),
+    cardOf: (id) => draftCardOf(draft, id),
     distractors: new Set(draft.distractors.map((node) => node.id)),
   };
   lookups.set(draft, made);

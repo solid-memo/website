@@ -115,27 +115,60 @@ export interface DraftCard {
   created: string;
 }
 
-/** The card of the draft by id, with its wrong options; null for one it has not, or one with an empty side. */
-export function draftCardOf(draft: ReleaseDraft, id: string): DraftCard | null {
-  const node = draft.cards.find((one) => one.id === id);
-  return node === undefined
-    ? null
-    : draftCardFrom(node, (iri) => draft.distractors.find((one) => iriIn(draft, one.id) === iri));
+/**
+ * Each list of cards' nodes by id, the first of an id, built once per
+ * list: a draft's lists are never changed in place (an edit makes a new
+ * list, which gets its own).
+ */
+const cardNodes = new WeakMap<object, ReadonlyMap<string, DraftNode<CardV7>>>();
+
+/**
+ * Each list of wrong options' nodes by IRI, per url of a draft that has
+ * the list, the first of an IRI, built once per list and draft: drafts
+ * that share one list each keep their own index.
+ */
+const distractorNodes = new WeakMap<
+  object,
+  Map<string, ReadonlyMap<string, DraftNode<DistractorV1>>>
+>();
+
+/** The nodes by key, the first of a key winning, as a search of the list in order finds them. */
+function firstBy<T>(nodes: readonly T[], key: (node: T) => string): Map<string, T> {
+  const made = new Map<string, T>();
+  for (const node of nodes) {
+    const at = key(node);
+    if (!made.has(at)) made.set(at, node);
+  }
+  return made;
 }
 
 /**
- * Finds the draft's cards as draftCardOf does, for a page that shows
- * many of them (the outline): the cards and wrong options are looked up
- * by id, built once, not looked through for each.
+ * The card of the draft by id, with its wrong options; null for one it
+ * has not, or one with an empty side. The card and its wrong options are
+ * looked up in indexes built once per list of them, not looked through:
+ * a draft started from a release may have thousands of cards and wrong
+ * options, and a page that lists a step's or chapter's questions asks
+ * this for each.
  */
-export function draftCardFinder(draft: ReleaseDraft): (id: string) => DraftCard | null {
-  // A draft started from a release may have thousands of cards and wrong options.
-  const cards = new Map(draft.cards.map((node) => [node.id, node]));
-  const distractors = new Map(draft.distractors.map((node) => [iriIn(draft, node.id), node]));
-  return (id) => {
-    const node = cards.get(id);
-    return node === undefined ? null : draftCardFrom(node, (iri) => distractors.get(iri));
-  };
+export function draftCardOf(draft: ReleaseDraft, id: string): DraftCard | null {
+  let cards = cardNodes.get(draft.cards);
+  if (cards === undefined) {
+    cards = firstBy(draft.cards, (node) => node.id);
+    cardNodes.set(draft.cards, cards);
+  }
+  const node = cards.get(id);
+  if (node === undefined) return null;
+  let byUrl = distractorNodes.get(draft.distractors);
+  if (byUrl === undefined) {
+    byUrl = new Map();
+    distractorNodes.set(draft.distractors, byUrl);
+  }
+  let byIri = byUrl.get(draft.url);
+  if (byIri === undefined) {
+    byIri = firstBy(draft.distractors, (one) => iriIn(draft, one.id));
+    byUrl.set(draft.url, byIri);
+  }
+  return draftCardFrom(node, (iri) => byIri.get(iri));
 }
 
 /** A card's node as the card editors take it, its wrong options found by IRI. */
@@ -191,8 +224,11 @@ export function distractorChanges(
     text: distractor.text,
     ...(distractor.note === undefined ? {} : { note: distractor.note }),
   });
+  // A card may have thousands of wrong options: each is looked up by id.
+  const currentById = new Map(current.map((one) => [one.id, one]));
+  const kept = new Set(next.map((one) => one.id));
   for (const distractor of next) {
-    const was = current.find((one) => one.id === distractor.id);
+    const was = currentById.get(distractor.id);
     if (was === undefined) {
       changes.push({
         kind: "addDistractor",
@@ -212,7 +248,7 @@ export function distractorChanges(
     }
   }
   for (const distractor of current) {
-    if (!next.some((one) => one.id === distractor.id))
+    if (!kept.has(distractor.id))
       changes.push({ kind: "delete", of: "distractor", id: distractor.id });
   }
   return changes;

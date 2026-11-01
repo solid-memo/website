@@ -10,7 +10,6 @@ import {
   chapterOfStep,
   distractorChanges,
   draftCardLanguages,
-  draftCardFinder,
   draftCardOf,
   draftCardRows,
   draftOutline,
@@ -219,14 +218,29 @@ describe("a card of the draft", () => {
     ).toBeUndefined();
   });
 
-  it("is found alike by a finder built once, which a page showing many cards uses", () => {
-    const draft = changed(course, { kind: "retire", of: "distractor", id: "q-a-1a-d2" });
-    const find = draftCardFinder(draft);
-    for (const id of [...draft.cards.map((node) => node.id), "nowhere"])
-      expect(find(id)).toEqual(draftCardOf(draft, id));
+  it("is the first of its id, with the first wrong option of each IRI, in the draft's place", () => {
+    const first = { id: "twice", data: card("first", { distractor: [of("w")] }) };
+    const draft: ReleaseDraft = {
+      ...course,
+      cards: [first, { id: "twice", data: card("second") }],
+      distractors: [
+        { id: "w", data: { text: { en: "first" } } },
+        { id: "w", data: { text: { en: "second" } } },
+      ],
+    };
+    expect(draftCardOf(draft, "twice")!.content).toMatchObject({
+      front: { en: "first" },
+      distractors: [{ text: { en: "first" } }],
+    });
+    // The same lists in a draft elsewhere: its wrong options are at other IRIs.
+    const moved = { ...draft, url: `${draft.url}-moved` };
+    expect(draftCardOf(moved, "twice")!.content.distractors).toBeUndefined();
+    // Asked of each in turn, each keeps its own answer.
+    expect(draftCardOf(draft, "twice")!.content.distractors).toHaveLength(1);
+    expect(draftCardOf(moved, "twice")!.content.distractors).toBeUndefined();
   });
 
-  it("is found by the finder in time that grows with the cards, not with their square", () => {
+  it("is found in time that grows with the cards and wrong options, not with their square", () => {
     // Looking through every card and wrong option for each card would take
     // eight times as long for eight times the cards.
     const ratio = growth(
@@ -243,9 +257,27 @@ describe("a card of the draft", () => {
           })),
         };
         return () => {
-          const find = draftCardFinder(many);
-          for (let i = 0; i < count; i++) find(`q-${count - 1 - i}`);
+          // New lists, as an edit makes them: their indexes are built again.
+          const draft = { ...many, cards: [...many.cards], distractors: [...many.distractors] };
+          for (let i = 0; i < count; i++) draftCardOf(draft, `q-${count - 1 - i}`);
         };
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("has its many wrong options in time that grows with them, not with their square", () => {
+    const ratio = growth(
+      (count) => {
+        const distractors = Array.from({ length: count }, (_, i) => ({
+          id: `d-${i}`,
+          data: { text: { en: `${i}` } },
+        }));
+        const one = card("many", { distractor: distractors.map((d) => of(d.id)) });
+        const many: ReleaseDraft = { ...course, cards: [{ id: "many", data: one }], distractors };
+        return () => draftCardOf({ ...many, distractors: [...distractors] }, "many");
       },
       500,
       8,
@@ -313,6 +345,27 @@ describe("distractorChanges", () => {
     expect(distractorChanges(course, "nowhere", [{ id: "n-d1", text: { en: "n" } }])).toEqual([
       { kind: "addDistractor", card: "nowhere", id: "n-d1", distractor: { text: { en: "n" } } },
     ]);
+  });
+  it("compares many wrong options in time that grows with them, not with their square", () => {
+    const ratio = growth(
+      (count) => {
+        const distractors = Array.from({ length: count }, (_, i) => ({
+          id: `d-${i}`,
+          data: { text: { en: `${i}` } },
+        }));
+        const one = card("many", { distractor: distractors.map((d) => of(d.id)) });
+        const many: ReleaseDraft = { ...course, cards: [{ id: "many", data: one }], distractors };
+        // Each changed, the last half deleted and as many added.
+        const next = Array.from({ length: count }, (_, i) => ({
+          id: i < count / 2 ? `d-${i}` : `n-${i}`,
+          text: { en: `new ${i}` },
+        }));
+        return () => distractorChanges(many, "many", next);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
