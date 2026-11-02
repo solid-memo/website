@@ -12,7 +12,7 @@ confined, and what replacing one would cost.
 | Preact | `preact` | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Rendering |
 | Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers`, `@fontsource-variable/noto-naskh-arabic` (all SIL OFL-1.1) | `packages/ui/src/style.css` (`@import`), and, for the diagrams' Fredoka ([markdown.md](markdown.md#the-diagrams-font)), `packages/site/src/drawDiagrams.ts` | Typefaces, self-hosted: bundled into `dist/` with no third-party font requests. Fredoka for text, Bangers (comic lettering) for `h1`/`h2`, Noto Naskh Arabic for Arabic text. |
 | Zazuko | `rdf-validate-shacl` (MIT; with `@rdfjs/*`, `clownface`) | `@solid-memo/shacl` (`src/engine.ts`, a lazily loaded chunk) | SHACL validation of pod and library documents against the shapes in `ns/shapes/` |
-| unified collective, tats-u | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` (MIT; with `micromark`, `get-east-asian-width` and, through `decode-named-character-reference`, the `character-entities` table, aliased to its plain build in `apps/web/vite.config.ts`, `apps/web/vitest.config.ts`, `apps/studio/vitest.config.ts` and `packages/ui/vitest.config.ts`) | `@solid-memo/markdown` (`src/parse.ts`) | Parsing Markdown in data (CommonMark with pipe tables and CJK-friendly emphasis) into a tree the package folds into its own types ([markdown.md](markdown.md)) |
+| markdown-it, tats-u | `markdown-it`, `markdown-it-cjk-friendly` (MIT; with `entities`, `linkify-it`, `mdurl`, `punycode.js`, `uc.micro` and `get-east-asian-width`) | `@solid-memo/markdown` (`src/parse.ts`) | Parsing Markdown in data (CommonMark with pipe tables and CJK-friendly emphasis) into tokens the package folds into its own tree ([markdown.md](markdown.md)) |
 | mermaid-js | `mermaid` (MIT; with `d3`, `dagre-d3-es`, `elkjs`, `katex`, `roughjs`, `dompurify` and more) | `packages/site/src/drawDiagrams.ts`, a development tool, never in the browser | Drawing the docs' Mermaid diagrams to SVG at build time, in Chromium ([markdown.md](markdown.md#diagrams)). Pinned, and bumped apart from Playwright (`renovate.json5`) |
 | Microsoft | `playwright` (Apache-2.0), `@playwright/test` | `packages/site/src/drawDiagrams.ts`; `e2e/journeys/` | Starting the diagrams' Chromium; driving the built app through the user journeys ([testing.md](testing.md#user-journeys)). One pinned version, which fixes the Chromium build |
 | Deque | `@axe-core/playwright` (MPL-2.0; with `axe-core`) | `e2e/journeys/pages/App.ts` | Checking each screen the user journeys visit against WCAG's rules, in the tests only, never in the app. Pinned |
@@ -52,7 +52,7 @@ Memo is stable within an ecosystem that isn't yet at 1.0.
 | `process` | 0.11 | A browser stand-in for Node's `process`, which `readable-stream` asks for (through `n3` and the JSON-LD parser). Final at 0.11 and unchanged since 2017: its maintainer turned down a 1.0.0 ([defunctzombie/node-process#82](https://github.com/defunctzombie/node-process/issues/82)). |
 
 One shipped release follows no published standard:
-`micromark-extension-cjk-friendly` (2.x) reads emphasis next to CJK
+`markdown-it-cjk-friendly` (3.x) reads emphasis next to CJK
 text by the markdown-cjk-friendly amendment, a proposal CommonMark
 hasn't adopted ([markdown.md](markdown.md#the-dialect)). Its rule may change if
 CommonMark settles on another.

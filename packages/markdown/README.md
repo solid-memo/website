@@ -26,15 +26,15 @@ its parser ([markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
 - `links`: whether a link is followed, and where it leads.
 - `problems`: what a field of Markdown may hold, for a release.
 
-Its API is its own types, never `mdast`'s.
+Its API is its own types, never markdown-it's tokens.
 
 ## Boundaries
 
 It imports nothing of the app's. `ui` may import it from `src/ui/`
 only, `shacl` from `node/` only, and `site`, the site's build, to
-render the docs. Its parser libraries
-(`mdast-util-from-markdown` and its extensions) are used in
-`src/parse.ts` alone ([boundaries.md](../../docs/boundaries.md)).
+render the docs. Its parser libraries (`markdown-it` and
+`markdown-it-cjk-friendly`) are used in `src/parse.ts` alone
+([boundaries.md](../../docs/boundaries.md)).
 
 ## Tests
 

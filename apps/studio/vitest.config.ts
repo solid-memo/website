@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { createRequire } from "node:module";
 import { mergeConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
 import { packageConfig } from "../../vitest.shared.ts";
@@ -33,9 +32,6 @@ export default mergeConfig(
       alias: {
         react: "preact/compat",
         "react-dom": "preact/compat",
-        "decode-named-character-reference": createRequire(import.meta.url).resolve(
-          "decode-named-character-reference",
-        ),
       },
     },
   },

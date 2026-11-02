@@ -14,13 +14,8 @@
     "test:unit": "vitest run",
     "test:watch": "vitest"
   },
-  "devDependencies": {
-    "@types/mdast": "^4.0.4"
-  },
   "dependencies": {
-    "mdast-util-from-markdown": "^2.1.0",
-    "mdast-util-gfm-table": "^2.0.0",
-    "micromark-extension-cjk-friendly": "^2.0.2",
-    "micromark-extension-gfm-table": "^2.1.2"
+    "markdown-it": "^15.0.3",
+    "markdown-it-cjk-friendly": "^3.0.0"
   }
 }

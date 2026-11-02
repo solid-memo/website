@@ -106,7 +106,7 @@ listed:
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | components; in `web`, `main.tsx`, which renders the page, and `App.tsx`, the page; in `studio`, its screens |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl`, `rdf-validate-datatype` | `shacl` | `src/engine.ts` only, loaded lazily; `rdf-validate-datatype` for its registry of datatype checks ([validation.md](validation.md#flow)) |
-| `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
+| `markdown-it`, `markdown-it-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never markdown-it's tokens ([markdown.md](markdown.md)) |
 | `n3` | `turtle`, the node tooling of `shacl`, `e2e-pod` and `solid-memo-client` | in `e2e-pod`, the server contract and the tests; in `solid-memo-client`, in the browser too |
 | `jsonld-streaming-parser`, `oauth4webapi` | `solid-memo-client` | the JSON-LD parser; Solid-OIDC sign-in |
 | `fake-indexeddb` | `browser`, `composition`, `solid-memo-client` | tests only: IndexedDB in node, for the guest's pod's store and the sign-in session |

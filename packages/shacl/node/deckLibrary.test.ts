@@ -1217,7 +1217,8 @@ describe("markdownProblems", () => {
     const outline = [
       chapter("ch-1", 0),
       theory("s-1", 0, "a".repeat(20_001)),
-      theory("s-2", 1, "*".repeat(2_001)),
+      // A block quote after each line of a paragraph: past the parser's work.
+      theory("s-2", 1, "a\n>>>>\n".repeat(400)),
       theory("s-3", 2, `${"> ".repeat(8)}*a*`),
       theory("s-4", 3, `|${" a |".repeat(21)}\n|${"-|".repeat(21)}`),
     ].join("");

@@ -4,12 +4,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import {
-  MAX_CHARS,
-  MAX_DELIMITERS,
-  MAX_DEPTH,
-  MAX_TABLE_COLUMNS,
-} from "@solid-memo/markdown/parse";
+import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
 import { OPTION, PROSE, SIDE } from "@solid-memo/markdown/problems";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { createI18n } from "./i18n";
@@ -48,7 +43,7 @@ describe("markdownHints", () => {
     expect(hint(`a${"b".repeat(MAX_CHARS)}`)).toEqual([
       `Too long to read as Markdown (${(MAX_CHARS + 1).toLocaleString("en")} characters): it shows as plain text.`,
     ]);
-    expect(hint(`a ${"*_".repeat(MAX_DELIMITERS)}`)).toEqual([
+    expect(hint(`a\n${">>>>\na\n".repeat(400)}`)).toEqual([
       "Too complex to read as Markdown: it shows as plain text.",
     ]);
     expect(hint(`${"> ".repeat(MAX_DEPTH)}*a*`)).toEqual([

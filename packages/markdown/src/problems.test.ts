@@ -3,14 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import {
-  MAX_CHARS,
-  MAX_DELIMITERS,
-  MAX_DEPTH,
-  MAX_IMAGES,
-  MAX_TABLE_COLUMNS,
-  MAX_UNDERLINES,
-} from "./parse";
+import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "./parse";
 import { markdownProblems, OPTION, PROSE, SIDE } from "./problems";
 
 describe("markdownProblems", () => {
@@ -40,22 +33,10 @@ describe("markdownProblems", () => {
     expect(markdownProblems(`<b>${"a".repeat(MAX_CHARS)}`, PROSE)).toEqual([
       { code: "tooLong", length: MAX_CHARS + 3 },
     ]);
-    expect(markdownProblems(`<b>${"*_".repeat(MAX_DELIMITERS)}`, PROSE)).toEqual([
+    // A block quote after each line of a paragraph: past the parser's work.
+    expect(markdownProblems(`<b>${"a\n>>>>\n".repeat(400)}`, PROSE)).toEqual([
       { code: "tooComplex" },
     ]);
-    expect(markdownProblems(`<b>${"![a](b)".repeat(MAX_IMAGES + 1)}`, PROSE)).toEqual([
-      { code: "tooComplex" },
-    ]);
-    for (const heading of [
-      ">a\n>=\n",
-      ">>a\n>>=\n",
-      "> a\n>  =\n",
-      ">a\n>--\n",
-      "-   a\n    =\n    a\n",
-    ])
-      expect(markdownProblems(heading.repeat(MAX_UNDERLINES + 1), PROSE)).toEqual([
-        { code: "tooComplex" },
-      ]);
   });
 
   it("names raw HTML and pictures, which are not shown", () => {

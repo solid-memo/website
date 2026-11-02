@@ -109,7 +109,8 @@ describe("DataProse", () => {
   it("shows Markdown a chunk at a time, split at its top-level rules, the first unless told", () => {
     const text = { en: "---\n\n*a*\n\n- b\n\n  ---\n\n---\n\n---\n\nc\n\n---" };
     expect(html(<DataProse class="course-theory" text={text} markdown />)).toBe(
-      '<div class="course-theory md"><p><em>a</em></p><ul><li>b<hr></li></ul></div>',
+      // A blank line between an item's blocks makes its list loose, as CommonMark has it.
+      '<div class="course-theory md"><p><em>a</em></p><ul><li><p>b</p><hr></li></ul></div>',
     );
     expect(html(<DataProse class="course-theory" text={text} markdown chunk={1} />)).toBe(
       '<div class="course-theory md"><p>c</p></div>',

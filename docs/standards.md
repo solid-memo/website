@@ -51,8 +51,8 @@ Every specification below is open; the drafts and de facto ones are in
 | Standard | Version | Status | Where used | Open |
 |---|---|---|---|---|
 | [CommonMark](https://spec.commonmark.org/0.31.2/) | 0.31.2 | Specification by the CommonMark project | Text in Markdown: [`packages/markdown/`](../packages/markdown/) ([markdown.md](markdown.md#the-dialect)) | Yes |
-| [GitHub Flavored Markdown](https://github.github.com/gfm/), pipe tables only | 0.29-gfm | Specification by GitHub, de facto | Tables in Markdown text, through `micromark-extension-gfm-table` (`markdown.md`) | Yes (de facto) |
-| [markdown-cjk-friendly](https://github.com/tats-u/markdown-cjk-friendly) | through `micromark-extension-cjk-friendly` ^2.0.2 | Proposed amendment to CommonMark | Emphasis next to Chinese, Japanese and Korean text (`markdown.md`) | Yes (proposal) |
+| [GitHub Flavored Markdown](https://github.github.com/gfm/), pipe tables only | 0.29-gfm | Specification by GitHub, de facto | Tables in Markdown text, through `markdown-it`'s `table` rule (`markdown.md`) | Yes (de facto) |
+| [markdown-cjk-friendly](https://github.com/tats-u/markdown-cjk-friendly) | through `markdown-it-cjk-friendly` ^3.0.0 | Proposed amendment to CommonMark | Emphasis next to Chinese, Japanese and Korean text (`markdown.md`) | Yes (proposal) |
 | [BCP 47](https://www.rfc-editor.org/info/bcp47) | RFC 5646 and RFC 4647 | IETF Best Current Practice | Language tags on text, deck languages and the app's locales: [`languageTag.ts`](../packages/domain/src/languageTag.ts), [`locale.ts`](../packages/domain/src/locale.ts) ([vocab.md](vocab.md), [i18n.md](i18n.md)) | Yes |
 | [Unicode CLDR plural rules](https://cldr.unicode.org/index/cldr-spec/plural-rules) | the browser's CLDR | Unicode Consortium | Plural messages, through `Intl.PluralRules` (`i18n.md`, [policy.md](policy.md#cldr-plural-rules)) | Yes |
 | [ECMAScript Internationalization API](https://tc39.es/ecma402/) | the browser's | Ecma International standard (ECMA-402) | Plural rules, number and date formats: [`i18n.tsx`](../packages/ui/src/ui/i18n.tsx) | Yes |
