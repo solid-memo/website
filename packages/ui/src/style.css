@@ -2582,12 +2582,14 @@ form.card-edit {
 }
 
 /* The enlarged copy, over everything, on a dimmed page; a tap anywhere
-   puts it back. Only its transform and the dimming's opacity change. */
+   puts it back. Only its transform and the dimming's opacity change.
+   It takes every touch, so a pinch zooms the copy, not the page. */
 .picture-zoom-layer {
   position: fixed;
   inset: 0;
   z-index: 100;
   cursor: zoom-out;
+  touch-action: none;
 }
 
 .picture-zoom-layer::before {
@@ -2599,8 +2601,15 @@ form.card-edit {
   transition: opacity 0.18s ease-out;
 }
 
+/* Thrown, the page shows through as the copy goes. */
 .picture-zoom-layer.entered::before {
-  opacity: 1;
+  opacity: var(--picture-zoom-dim);
+}
+
+/* Under a finger or the mouse, the copy follows it at once. */
+.picture-zoom-layer.moving::before,
+.picture-zoom-layer.moving .picture-zoom-image {
+  transition: none;
 }
 
 /* On the picture's own backing, so a transparent drawing stays as

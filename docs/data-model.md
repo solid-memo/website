@@ -600,8 +600,12 @@ graph LR
   Wherever a side is shown whole (study, a library preview, a card's
   page, a library card), a tap, or Enter or Space on the button over it,
   enlarges its picture to the viewport's width or height, keeping its
-  shape. Another tap, Escape, the focus moving on or a scroll puts it
-  back ([ZoomableImage](../packages/ui/src/ui/ZoomableImage.tsx)). In
+  shape. Enlarged, a pinch zooms the picture, not the page, up to four
+  times; a double tap zooms in on the spot tapped and another zooms
+  back out; a drag moves it while zoomed in. Pinched out past its fit,
+  it springs back. A single tap, Escape, throwing it up or down, the
+  focus moving on or a scroll puts it back
+  ([ZoomableImage](../packages/ui/src/ui/ZoomableImage.tsx)). In
   study, Space on a picture's button doesn't reveal the answer; a
   grade's key still answers.
 - **Direction**: a deck's `sm:studyDirection` is a concept of
