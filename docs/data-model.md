@@ -1449,8 +1449,12 @@ An import reads the file as the pod is read, with the same mappers:
   than 16 times or more than 4,096 prefixes. So is one whose base can
   grow past 512 characters or has an empty segment in its path. So is
   one with a `.` or `..` segment, but in a relative path with no colon.
-  Its parse stops there, as it stops at the first triple past the
-  limits. A declaration quoted in a card's text doesn't count. A
+  So is one with an IRI longer than 512 characters, in a triple or a
+  prefix, that's relative or may hold a `.` or `..` segment, as
+  written or escaped. The parser removes those segments as it resolves
+  the IRI, in time growing with the square of its length. Its parse stops
+  there, as it stops at the first triple past the limits. A
+  declaration quoted in a card's text doesn't count. A
   release file the Studio opens is held to a release's limits
   ([deck-library.md](deck-library.md#from-a-link));
 - a triple with a term Turtle can't write as it is is left out (below).

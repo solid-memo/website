@@ -350,6 +350,72 @@ describe("writeTurtle", () => {
     expect(refuses("# a base camp, a database: <x>\n".repeat(100))).toBe(false);
   });
 
+  it("refuses an IRI of more than 512 characters that is relative or may hold a dot segment, in a triple or a declaration, and lets a plain absolute one be", () => {
+    const relative = "a".repeat(513);
+    for (const text of [
+      `<${relative}> <b> <c> .`,
+      `<a> <${relative}> <c> .`,
+      `<a> <b> <${relative}> .`,
+      `<a> <b> "c"^^<${relative}> .`,
+      `@prefix ex: <${relative}> .`,
+      `PREFIX : <${relative}>`,
+      `<a> <b> <c> .\n<#${relative}> <b> <c> .`,
+      `</${relative}> <b> <c> .`,
+      `<//other.example/${relative}> <b> <c> .`,
+      // An absolute one with a dot segment, or an escape that could stand for one.
+      `<https://other.example/${"a/".repeat(250)}../> <b> <c> .`,
+      `<https://other.example/${"a/".repeat(250)}.?q> <b> <c> .`,
+      `<https://other.example/${"a/".repeat(250)}\\u002E\\u002E/> <b> <c> .`,
+      // One whose scheme is written as an escape is relative as it is written.
+      `<\\u0068ttps://other.example/${relative}> <b> <c> .`,
+    ]) {
+      expect(refuses(text), text.slice(0, 40)).toBe(true);
+    }
+    for (const text of [
+      `<${"a".repeat(512)}> <b> <c> .`,
+      `<${"a/../".repeat(102)}ab> <b> <c> .`,
+      `@prefix ex: <${"a".repeat(512)}> .`,
+      `<https://other.example/${"a".repeat(5000)}> <b> <c> .`,
+      `<https://other.example/${"a.b/..c/".repeat(500)}#.a> <b> <c> .`,
+      `@prefix ex: <https://other.example/${"a".repeat(5000)}#> .`,
+      // In a string or a comment, it is no IRI.
+      `<a> <b> "<${relative}>" .`,
+      `# <${relative}>\n<a> <b> <c> .`,
+      // With no end, the parser stops at an error.
+      `<a> <b> <${relative} .`,
+    ]) {
+      expect(refuses(text), text.slice(0, 40)).toBe(false);
+    }
+  });
+
+  it("refuses a text at the part where a long relative IRI starts, and writes none of it", () => {
+    const text = `${lines}<${"y/../".repeat(200_000)}> <b> <c> .\n${lines}`;
+    const { wrote, written, ended } = writing(text, () => true);
+    expect(wrote).toBe(false);
+    expect(text.startsWith(written.join(""))).toBe(true);
+    expect(written.join("").length).toBeLessThanOrEqual(lines.length);
+    expect(ended).toBe(false);
+  });
+
+  it("refuses a long IRI with dot segments, and looks through short ones, in time that grows with the text, not its square", () => {
+    // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
+    for (const text of [
+      (count: number) => `<${"x/".repeat(count)}${"y/../".repeat(count)}> <b> <c> .`,
+      (count: number) => `@prefix p: <${"y/../".repeat(count)}> .`,
+      (count: number) => "<a/../b> <c/./d> <e> .\n".repeat(count),
+    ]) {
+      const ratio = growth(
+        (count) => {
+          const written = text(count);
+          return () => refuses(written);
+        },
+        20_000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    }
+  });
+
   it("looks through a text in time that grows with it, not its square", () => {
     // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
     for (const words of [

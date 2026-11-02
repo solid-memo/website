@@ -46,8 +46,9 @@ export const ACCESS_CONTROL_LIMITS: ReadLimits = {
 
 /**
  * What a read with no limits is refused under, by the one bound every
- * read keeps: a Turtle text's base and prefix declarations
- * (writeTurtle). Its body, its triples and their terms are not bounded.
+ * read keeps: a Turtle text's base and prefix declarations and its
+ * long IRIs that the parser resolves (writeTurtle). Its body, its
+ * triples and their terms are not bounded.
  */
 export const NO_SIZE_LIMITS: ReadLimits = {
   bytes: Number.POSITIVE_INFINITY,
@@ -212,6 +213,9 @@ const ABSOLUTE_IRI = /^[a-z][a-z0-9+.-]*:/i;
 /** A `.` or `..` segment of a path. */
 const DOT_SEGMENT = /(?:^|\/)\.\.?(?:$|\/)/;
 
+/** A `.` or `..` segment anywhere in an IRI, as the parser finds one: before a query or fragment too. */
+const ANY_DOT_SEGMENT = /(?:^|\/)\.\.?(?:$|[/?#])/;
+
 /**
  * Where the search of a Turtle text stops to look: a string, an IRI, an
  * escape, a comment, or what may start a directive.
@@ -260,6 +264,22 @@ export function plainBase(iri: string): boolean {
   return !path.includes("//") && (resolved || !DOT_SEGMENT.test(path));
 }
 
+/**
+ * Whether an IRI as written, longer than MAX_BASE_CHARACTERS, is past
+ * what any read takes in: one the parser resolves, which is relative, or
+ * may hold a dot segment (one, or an escape that could stand for one).
+ * The parser removes the dot segments of an IRI it resolves in time that
+ * grows with the square of its length, before it makes a triple for
+ * quadTally to count. It keeps an absolute IRI as it is written, so a
+ * long one with no dot segment is bounded only by the read limits.
+ */
+function longIriPast(iri: string): boolean {
+  return (
+    iri.length > MAX_BASE_CHARACTERS &&
+    (!ABSOLUTE_IRI.test(iri) || iri.includes("\\") || ANY_DOT_SEGMENT.test(iri))
+  );
+}
+
 /** Where the IRI that starts at `at` (its `<`) of a Turtle text ends, as the parser reads it: -1 when none does. */
 function iriEnd(text: string, at: number): number {
   IRI_STOP.lastIndex = at + 1;
@@ -289,16 +309,19 @@ function stringEnd(text: string, at: number): number {
 }
 
 /**
- * Whether the base and prefix declarations of a Turtle text read as
- * `url`, those that start before an offset of the text, are past what
- * any read takes in, under limits or with none: more than
+ * Whether the base and prefix declarations and the IRIs of a Turtle
+ * text read as `url`, those that start before an offset of the text,
+ * are past what any read takes in, under limits or with none: more than
  * MAX_BASE_DECLARATIONS bases, more than MAX_PREFIX_DECLARATIONS
- * prefixes, a base whose path is not plain (plainBase), or a base of
- * more than MAX_BASE_CHARACTERS. A document needs one base and a few
- * prefixes, and the parser takes time in the square of a chain of
- * relative bases, wherever the text is read from. Each call looks on
- * from where the last stopped, so a text is looked through once, as far
- * as it is written (writeTurtle), in time linear in it.
+ * prefixes, a base whose path is not plain (plainBase), a base of more
+ * than MAX_BASE_CHARACTERS, or an IRI longer than that which is
+ * relative or may hold a dot segment (longIriPast), in a triple or a
+ * declaration. A document needs one base, a few prefixes and short
+ * relative IRIs, and the parser takes time in the square of a chain of
+ * relative bases, and of an IRI with dot segments, wherever the text is
+ * read from. Each call looks on from where the last stopped, so a text
+ * is looked through once, as far as it is written (writeTurtle), in
+ * time linear in it.
  *
  * The search reads the text as the parser does: past strings (with
  * their escapes), IRIs and comments, where a declaration is only text,
@@ -361,7 +384,9 @@ function declarationsPast(text: string, url: string): (end: number) => boolean {
     if (code === BACKSLASH) return at + 2;
     if (code === LESS_THAN) {
       const end = iriEnd(text, at);
-      return end < 0 ? at + 1 : end;
+      if (end < 0) return at + 1;
+      refused = longIriPast(text.slice(at + 1, end - 1));
+      return end;
     }
     if (text[at] === '"' || text[at] === "'") return stringEnd(text, at);
     const directive =
@@ -398,10 +423,10 @@ export interface TextStream {
  * is written to it in parts (textChunks), then ended, while `goOn` says
  * to. A parser given the whole text goes on through all of it after the
  * tally is past its limits; here it reads no further than the part it
- * is in. Before each part, the base and prefix declarations that start
- * in it, or before, are checked (declarationsPast), with limits or with
- * none: false when they are past what a read takes in, and the rest is
- * not written; true otherwise.
+ * is in. Before each part, the base and prefix declarations and the
+ * IRIs that start in it, or before, are checked (declarationsPast),
+ * with limits or with none: false when they are past what a read takes
+ * in, and the rest is not written; true otherwise.
  */
 export function writeTurtle(
   text: string,
