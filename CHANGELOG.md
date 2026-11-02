@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.17](https://github.com/solid-memo/website/compare/v6.25.16...v6.25.17) (2026-11-02)
+
+### Bug Fixes
+
+* **domain:** list a draft's sources in one pass over its statements ([592136c](https://github.com/solid-memo/website/commit/592136c25766c36b6e6b10d61ea7a61e6f58cd83))
+
 ## [6.25.16](https://github.com/solid-memo/website/compare/v6.25.15...v6.25.16) (2026-11-02)
 
 ### Bug Fixes
