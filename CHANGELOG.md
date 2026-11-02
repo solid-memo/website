@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.16](https://github.com/solid-memo/website/compare/v6.25.15...v6.25.16) (2026-11-02)
+
+### Bug Fixes
+
+* **solid:** rename and remove an instance's registrations in one edit ([4d83d4f](https://github.com/solid-memo/website/commit/4d83d4ff7cec12971b8df404ae23d34eea5d5076))
+
 ## [6.25.15](https://github.com/solid-memo/website/compare/v6.25.14...v6.25.15) (2026-11-02)
 
 ### Bug Fixes
