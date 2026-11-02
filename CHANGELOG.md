@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.13](https://github.com/solid-memo/website/compare/v6.25.12...v6.25.13) (2026-11-02)
+
+### Bug Fixes
+
+* **ci:** check the Chromium headless shell against a pinned SHA-256 ([4dccefe](https://github.com/solid-memo/website/commit/4dccefea15d4e3d77f83e202b1a0b632e42b4f8e))
+* **solid:** bound the publisher's reads of a release and its access control ([b700946](https://github.com/solid-memo/website/commit/b700946514a73a9a8bf6bbd6cece1aaa0c1d214a))
+
 ## [6.25.12](https://github.com/solid-memo/website/compare/v6.25.11...v6.25.12) (2026-11-01)
 
 ### Bug Fixes
