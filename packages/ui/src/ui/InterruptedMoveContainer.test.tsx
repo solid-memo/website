@@ -8,16 +8,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { InterruptedMoveContainer } from "./InterruptedMoveContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { Session } from "@solid-memo/domain/session";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import { makeUseCasesFake } from "../test/useCasesFake";
 
 const instance: Instance = { url: GUEST_INSTANCE_URL, name: "Main" };
+const session: Session = { webId: "https://pod.example/profile/card#me" };
 
 function renderContainer(useCases: UseCases) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <InterruptedMoveContainer useCases={useCases} instance={instance} />
+      <InterruptedMoveContainer useCases={useCases} session={session} instance={instance} />
     </QueryClientProvider>,
   );
 }
@@ -26,7 +28,9 @@ describe("InterruptedMoveContainer", () => {
   it("shows nothing when no move of the instance was cut off", async () => {
     const useCases = makeUseCasesFake();
     const { container } = renderContainer(useCases);
-    await waitFor(() => expect(useCases.findInterruptedGuestMove).toHaveBeenCalledWith(instance));
+    await waitFor(() =>
+      expect(useCases.findInterruptedGuestMove).toHaveBeenCalledWith(session, instance),
+    );
     expect(container.textContent).toBe("");
   });
 
@@ -56,6 +60,7 @@ describe("InterruptedMoveContainer", () => {
     expect(removing).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(removing);
     expect(removeInterruptedGuestMove).toHaveBeenCalledTimes(2);
+    expect(removeInterruptedGuestMove).toHaveBeenCalledWith(session, instance);
     await waitFor(() =>
       expect(screen.queryByRole("region", { name: "Interrupted move" })).toBeNull(),
     );

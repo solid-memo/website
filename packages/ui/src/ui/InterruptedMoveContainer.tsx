@@ -6,6 +6,7 @@ import type { ComponentChildren } from "preact";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
@@ -22,9 +23,11 @@ import { queryKeys } from "./queryKeys";
  */
 export function InterruptedMoveContainer({
   useCases,
+  session,
   instance,
 }: {
   useCases: UseCases;
+  session: Session;
   instance: Instance;
 }) {
   const { t, errorText } = useI18n();
@@ -32,12 +35,12 @@ export function InterruptedMoveContainer({
 
   const leftoverQuery = useQuery({
     queryKey: queryKeys.interruptedMove(instance.url),
-    queryFn: () => useCases.findInterruptedGuestMove(instance),
+    queryFn: () => useCases.findInterruptedGuestMove(session, instance),
     staleTime: Infinity,
   });
 
   const removeMutation = useMutation({
-    mutationFn: () => useCases.removeInterruptedGuestMove(instance),
+    mutationFn: () => useCases.removeInterruptedGuestMove(session, instance),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.interruptedMove(instance.url) });
     },

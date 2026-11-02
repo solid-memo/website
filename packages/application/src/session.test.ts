@@ -366,24 +366,123 @@ describe("guests", () => {
     ]);
   });
 
+  /** The guest's resources, and at TARGET what a move cut off half-way copied of them, and `more`. */
+  function partlyCopied(deps: ReturnType<typeof guestDeps>["deps"], more: string[] = []) {
+    const guest = [
+      `${GUEST_INSTANCE_URL}catalog.ttl`,
+      `${GUEST_INSTANCE_URL}digest.ttl`,
+      `${GUEST_INSTANCE_URL}history/`,
+      `${GUEST_INSTANCE_URL}history/2026-10.ttl`,
+    ];
+    vi.mocked(deps.instanceCopier.listResources).mockImplementation(async (url) =>
+      url === TARGET ? [`${TARGET}catalog.ttl`, `${TARGET}history/`, ...more] : guest,
+    );
+    // The user's instance is elsewhere.
+    vi.mocked(deps.instanceRepository.listInstances).mockImplementation(async (webId) =>
+      webId === GUEST_WEBID
+        ? [guestInstance]
+        : [{ ...instance, url: "https://alice.example/solid-memo/other/" }],
+    );
+  }
+
+  /** A note of a move to TARGET this browser kept, and a folder there. */
+  function noted(deps: ReturnType<typeof guestDeps>["deps"]) {
+    vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
+    vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValue(new Error("exists"));
+  }
+
   it("a move cut off by a closed tab left a partial copy: offered for removal while it is there", async () => {
     const { deps } = guestDeps();
+    partlyCopied(deps);
     const useCases = createUseCases(deps);
-    await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
     vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
     vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
-    await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBe(TARGET);
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBe(TARGET);
     expect(deps.updateJournal.staging).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
     expect(deps.updateJournal.end).not.toHaveBeenCalled();
     // Gone meanwhile: forgotten.
-    await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
     expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
     // Removed whole, as nothing names it.
-    await useCases.removeInterruptedGuestMove(guestInstance);
+    await useCases.removeInterruptedGuestMove(session, guestInstance);
     expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(TARGET);
     vi.mocked(deps.instanceCopier.deleteRecursively).mockClear();
     vi.mocked(deps.updateJournal.staging).mockReturnValue(null);
-    await useCases.removeInterruptedGuestMove(guestInstance);
+    await useCases.removeInterruptedGuestMove(session, guestInstance);
+    expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+  });
+
+  it("a move cut off after its registration was made ended: the user's instance is neither offered nor removed", async () => {
+    const { deps } = guestDeps();
+    partlyCopied(deps);
+    noted(deps);
+    // The type index names the copy: the move's answer was lost, not its write.
+    vi.mocked(deps.instanceRepository.listInstances).mockImplementation(async (webId) =>
+      webId === GUEST_WEBID
+        ? [guestInstance]
+        : [{ url: "HTTPS://alice.example/solid-memo/main", name: "My study" }],
+    );
+    const useCases = createUseCases(deps);
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
+    expect(deps.instanceRepository.listInstances).toHaveBeenCalledWith(session.webId);
+    expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+    vi.mocked(deps.updateJournal.end).mockClear();
+    // Asked to remove it all the same (a panel shown before): only forgotten.
+    await useCases.removeInterruptedGuestMove(session, guestInstance);
+    expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+  });
+
+  it("a move whose tab closed while its registration was answered is not taken for cut off", async () => {
+    const { deps } = guestDeps();
+    // A journal that outlives the tab, as the browser's storage does.
+    const notes = new Map<string, string>();
+    deps.updateJournal.begin.mockImplementation((source: string, staging: string) =>
+      notes.set(source, staging),
+    );
+    deps.updateJournal.end.mockImplementation((source: string) => notes.delete(source));
+    deps.updateJournal.staging.mockImplementation((source: string) => notes.get(source) ?? null);
+    const registered: Instance[] = [];
+    vi.mocked(deps.instanceRepository.listInstances).mockImplementation(async (webId) =>
+      webId === GUEST_WEBID ? [guestInstance] : registered,
+    );
+    // The pod makes the registration; its answer never comes.
+    vi.mocked(deps.instanceRepository.attachInstance).mockImplementation(
+      async ({ instanceUrl }) => {
+        registered.push({ url: instanceUrl, name: "My study" });
+        return new Promise(() => undefined);
+      },
+    );
+    void createUseCases(deps).transferGuestStudy(session, guestInstance, {
+      containerUrl: TARGET,
+      registrationTarget: "private",
+    });
+    await vi.waitFor(() => expect(registered).toHaveLength(1));
+    expect(notes.get(GUEST_INSTANCE_URL)).toBe(TARGET);
+    // The next visit: the instance is there, and the user's.
+    vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValue(new Error("exists"));
+    const useCases = createUseCases(deps);
+    await useCases.removeInterruptedGuestMove(session, guestInstance);
+    expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    expect(notes.size).toBe(0);
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
+  });
+
+  it("a cut-off move's folder that holds anything the move did not write is neither offered nor removed", async () => {
+    const { deps } = guestDeps();
+    partlyCopied(deps, [`${TARGET}notes.ttl`]);
+    noted(deps);
+    const useCases = createUseCases(deps);
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
+    expect(deps.instanceCopier.listResources).toHaveBeenCalledWith(TARGET);
+    expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+    await useCases.removeInterruptedGuestMove(session, guestInstance);
+    expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    // Nor the guest's digest, which a move never copies.
+    partlyCopied(deps, [`${TARGET}digest.ttl`]);
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
+    await useCases.removeInterruptedGuestMove(session, guestInstance);
     expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
   });
 
@@ -391,8 +490,8 @@ describe("guests", () => {
     const { deps } = guestDeps();
     const useCases = createUseCases(deps);
     vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
-    await expect(useCases.findInterruptedGuestMove(instance)).resolves.toBeNull();
-    await useCases.removeInterruptedGuestMove(instance);
+    await expect(useCases.findInterruptedGuestMove(session, instance)).resolves.toBeNull();
+    await useCases.removeInterruptedGuestMove(session, instance);
     expect(deps.updateJournal.staging).not.toHaveBeenCalled();
     expect(deps.updateJournal.end).not.toHaveBeenCalled();
     expect(deps.instanceCopier.ensureAbsent).not.toHaveBeenCalled();
@@ -432,10 +531,12 @@ describe("guests", () => {
     const changed = vi.mocked(deps.updateJournal.watch).mock.calls[0]![0];
     changed(GUEST_INSTANCE_URL, TARGET);
     vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
-    await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
-    await expect(useCases.removeInterruptedGuestMove(guestInstance)).rejects.toMatchObject({
-      code: "guestStudyBeingMoved",
-    });
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
+    await expect(useCases.removeInterruptedGuestMove(session, guestInstance)).rejects.toMatchObject(
+      {
+        code: "guestStudyBeingMoved",
+      },
+    );
     expect(deps.instanceCopier.ensureAbsent).not.toHaveBeenCalled();
     expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
     expect(deps.updateJournal.end).not.toHaveBeenCalled();
@@ -499,7 +600,7 @@ describe("guests", () => {
         registrationTarget: "private",
       }),
     ).resolves.toMatchObject({ ok: true });
-    await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
+    await expect(useCases.findInterruptedGuestMove(session, guestInstance)).resolves.toBeNull();
     expect(useCases.newDeckGroup(instance.url, { en: "Group" }).url).toMatch(
       /#group-[0-9a-f-]{36}$/,
     );

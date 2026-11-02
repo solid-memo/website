@@ -912,8 +912,10 @@ export interface InstanceCopier {
   /**
    * Delete a container and everything below it; one that is gone counts
    * as deleted. Only for a copy this app made whole, at a URL it found
-   * free, before anything names it — a guest's study being moved — :
-   * every resource in it is a copy whose original stays where it was. An
+   * free, before anything names it — a guest's study being moved, or
+   * the copy a cut-off move left, while no instance of the user's is
+   * there and it holds only that move's copies — : every resource in it
+   * is a copy whose original stays where it was. An
    * instance in use is deleted by what it holds of Solid Memo's
    * (InstanceRepository.deleteInstance), never whole.
    */

@@ -222,7 +222,9 @@ function GuestStudyOfferStage({
   if (stage === "dismissed" || first === undefined) return null;
   // The copy a move cut off by a closed tab left, offered for removal here,
   // to the user logged in to the Pod it is in, above the offer and its form.
-  const leftover = <InterruptedMoveContainer useCases={useCases} instance={first.instance} />;
+  const leftover = (
+    <InterruptedMoveContainer useCases={useCases} session={session} instance={first.instance} />
+  );
 
   if (stage === "form") {
     return (
