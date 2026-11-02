@@ -133,6 +133,8 @@ export function CardWorkbenchContainer({
   const isCourse = useCopies(useCases, [deck]).isCourse;
   const cards = cardsQuery.data;
   const plain = useMemo(() => plainTexts(), [cards]);
+  // Found once per read of the cards, not on each keystroke or move.
+  const cardLangs = useMemo(() => (cards === undefined ? [] : cardLanguages(cards)), [cards]);
   const prefs = preferencesQuery.data;
   const today = prefs === undefined ? undefined : studyDayOf(new Date(), prefs.dayBoundaryHour);
   const reviews = reviewsQuery.data;
@@ -268,7 +270,7 @@ export function CardWorkbenchContainer({
       course={isCourse(deck)}
       rows={rows}
       total={cards!.length}
-      languages={cardLanguages(cards!)}
+      languages={cardLangs}
       lapses={lapses}
       lapsesFailed={answersQuery.error !== null}
       healthHref={healthHref}

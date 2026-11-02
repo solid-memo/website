@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { useI18n } from "./i18n";
 
 /** The form's words for a deck's card language. */
@@ -62,8 +62,16 @@ export function DeckCardLanguageForm({
   const { t, languageLabel } = useI18n();
   /** The option chosen, "" for the app's language. */
   const [chosen, setChosen] = useState(value ?? "");
-  const listed = languages ?? [];
-  const options = value === undefined || listed.includes(value) ? listed : [...listed, value];
+  // Named once per list of languages, not on each change of the choice.
+  const options = useMemo(() => {
+    const listed = languages ?? [];
+    const tags = value === undefined || listed.includes(value) ? listed : [...listed, value];
+    return tags.map((tag) => (
+      <option key={tag} value={tag}>
+        {languageLabel(tag)}
+      </option>
+    ));
+  }, [languages, value, languageLabel]);
   const words = course ? COURSE_WORDS : CARD_WORDS;
 
   function handleSubmit(event: Event) {
@@ -83,11 +91,7 @@ export function DeckCardLanguageForm({
         onInput={(event) => setChosen(event.currentTarget.value)}
       >
         <option value="">{t("deckPreferences.cardLanguage.default")}</option>
-        {options.map((tag) => (
-          <option key={tag} value={tag}>
-            {languageLabel(tag)}
-          </option>
-        ))}
+        {options}
       </select>
       <p id="deck-card-language-hint" class="hint">
         {languages !== undefined && languages.length === 0 ? t(words.none) : t(words.hint)}

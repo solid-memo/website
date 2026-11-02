@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "./appError";
-import { cardLanguages, UNSTATED } from "./cardQuery";
+import { cardLanguages, countTags, languageChoices, UNSTATED } from "./cardQuery";
 import type { CourseOutline } from "./course";
 import type { CardContent, Deck } from "./deck";
 import type { LibraryDeckContent } from "./library";
@@ -45,8 +45,8 @@ export function withCardLanguage(deck: Deck, language: string | null): Deck {
 
 /**
  * The languages a deck's cards can be shown in first: the stated tags of
- * their fronts and backs, in order, without untagged text and text in no
- * language.
+ * their fronts and backs, in order (cardLanguages, so at most
+ * LANGUAGE_CHOICE_LIMIT), without untagged text and text in no language.
  */
 export function preferableCardLanguages(
   cards: readonly Pick<CardContent, "front" | "back">[],
@@ -58,8 +58,9 @@ export function preferableCardLanguages(
  * The languages a course can be shown in first: those its deck's cards
  * and its release's cards state (preferableCardLanguages), and those its
  * release's title and description, its chapters' titles and
- * descriptions and its steps' theory state, in order, without untagged
- * text and text in no language. A course's deck starts with no cards,
+ * descriptions and its steps' theory state, in order (languageChoices:
+ * at most LANGUAGE_CHOICE_LIMIT, the most used), without untagged text
+ * and text in no language. A course's deck starts with no cards,
  * each joining it as its question is first answered, so the release
  * tells what the course can be read in.
  */
@@ -77,11 +78,11 @@ export function preferableCourseLanguages(
       ...chapter.steps.map((step) => step.theory),
     ]),
   ];
-  const tags = new Set([
-    ...preferableCardLanguages([...cards, ...release.cards]),
-    ...texts
-      .flatMap((text) => Object.keys(text))
-      .filter((tag) => tag !== "" && tag !== NO_LANGUAGE),
-  ]);
-  return [...tags].sort();
+  const counts = countTags(
+    [...cards, ...release.cards].flatMap((card) => [card.front, card.back]),
+    countTags(texts),
+  );
+  counts.delete("");
+  counts.delete(NO_LANGUAGE);
+  return languageChoices(counts);
 }

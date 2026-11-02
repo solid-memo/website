@@ -53,6 +53,21 @@ describe("text in several languages", () => {
     expect(shownTag({})).toBeUndefined();
   });
 
+  it("takes the first regional tag and the first language by tag, whatever order the text holds them in", () => {
+    const regional = {
+      "en-us": "Colors",
+      "en-au": "Colours",
+      "en-gb": "Colours",
+      "pt-pt": "Cores",
+    };
+    expect(shownTag(regional, ["en"])).toBe("en-au");
+    expect(shownTag(regional, ["pt-BR"])).toBe("pt-pt");
+    expect(shownTag(regional)).toBe("en-au");
+    expect(shownTag({ sv: "Huvudstäder", "de-ch": "Hauptstädte", de: "Hauptstädte" })).toBe("de");
+    expect(shownTag({ "sv-fi": "Huvudstäder", sv: "Huvudstäder" }, ["fi", "sv-SE"])).toBe("sv");
+    expect(shownTag({ "fr-ca": "a", "fr-be": "b", ja: "c" }, ["fr"])).toBe("fr-be");
+  });
+
   it("compares texts language by language", () => {
     expect(sameText({ en: "a", sv: "b" }, { sv: "b", en: "a" })).toBe(true);
     expect(sameText({ en: "a" }, { en: "a", sv: "b" })).toBe(false);
