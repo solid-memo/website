@@ -65,6 +65,16 @@ export function FindReplaceDialog({
     () => (find === "" ? null : plan(edit)),
     [find, replace, fields, language, caseSensitive, wholeWord, plan],
   );
+  // Named once, not on each keystroke.
+  const languageOptions = useMemo(
+    () =>
+      languages.map((tag) => (
+        <option key={tag} value={tag}>
+          {tag === UNSTATED ? t("studio.cards.unstated") : languageLabel(tag)}
+        </option>
+      )),
+    [languages, t, languageLabel],
+  );
   const byId = new Map(cards.map((card) => [card.id, card]));
   const reasons = preview?.skipped.filter((skip) => skip.reason !== "unchanged") ?? [];
   const tagName = (tag: string) => (tag === "" ? t("studio.cards.unstated") : languageLabel(tag));
@@ -123,11 +133,7 @@ export function FindReplaceDialog({
           {t("studio.cardBulk.lang")}
           <select value={language} onChange={(event) => setLanguage(event.currentTarget.value)}>
             <option value="">{t("studio.cards.anyLang")}</option>
-            {languages.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag === UNSTATED ? t("studio.cards.unstated") : languageLabel(tag)}
-              </option>
-            ))}
+            {languageOptions}
           </select>
         </label>
         {check(t("studio.cardBulk.caseSensitive"), caseSensitive, setCaseSensitive)}

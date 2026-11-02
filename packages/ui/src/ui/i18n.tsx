@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { createContext, Fragment, type ComponentChildren, type VNode } from "preact";
-import { useContext } from "preact/hooks";
+import { useContext, useMemo } from "preact/hooks";
 import type { DeckDirection } from "@solid-memo/domain/deck";
 import type { Violation } from "@solid-memo/domain/validation";
 import { AppError, type ErrorVars } from "@solid-memo/domain/appError";
@@ -267,6 +267,9 @@ function writtenTag(tag: string): string {
   return Intl.getCanonicalLocales(tag)[0]!;
 }
 
+/** How many tags' names (languageParts) an I18n keeps at most, before it names them afresh. */
+const LANGUAGE_NAMES_KEPT = 10_000;
+
 /** The message that is the app's name: Solid Memo in every language, unless the site is given another (`appName`). */
 const APP_NAME_KEY: MessageKey = "app.documentTitle";
 
@@ -332,7 +335,19 @@ export function createI18n(locale: Locale, appName?: string): I18n {
       ? undefined
       : tag;
 
+  // Each tag is named once: a screen names every language of a deck's cards each time it draws.
+  const named = new Map<string, LanguageParts>();
   const languageParts: I18n["languageParts"] = (tag) => {
+    let parts = named.get(tag);
+    if (parts === undefined) {
+      if (named.size >= LANGUAGE_NAMES_KEPT) named.clear();
+      parts = namedParts(tag);
+      named.set(tag, parts);
+    }
+    return parts;
+  };
+
+  function namedParts(tag: string): LanguageParts {
     if (tag === NO_LANGUAGE) return { name: t("language.none") };
     const name = languageName(tag);
     if (name.toLowerCase() === tag.toLowerCase()) return { name };
@@ -340,7 +355,7 @@ export function createI18n(locale: Locale, appName?: string): I18n {
     const same =
       autonym === undefined || autonym.toLocaleLowerCase(tag) === name.toLocaleLowerCase(locale);
     return same ? { name, code: writtenTag(tag) } : { name, autonym, code: writtenTag(tag) };
-  };
+  }
 
   /** A message whose values are English text, each in its own span, marked as English on another page. */
   function markedEnglish(key: MessageKey, vars: Vars): ErrorText {
@@ -517,13 +532,11 @@ export function I18nProvider({
   onChoose?: (locale: Locale) => void | Promise<void>;
   children: ComponentChildren;
 }) {
+  // One I18n per language and name, so what it keeps (languageParts) lasts from one drawing to the next.
+  const i18n = useMemo(() => createI18n(locale, appName), [locale, appName]);
   const chooseLocale =
     onChoose === undefined ? keepLocale : async (chosen: Locale) => onChoose(chosen);
-  return (
-    <I18nContext.Provider value={{ ...createI18n(locale, appName), chooseLocale }}>
-      {children}
-    </I18nContext.Provider>
-  );
+  return <I18nContext.Provider value={{ ...i18n, chooseLocale }}>{children}</I18nContext.Provider>;
 }
 
 /** The app's text in the language the user reads; English outside a provider. */

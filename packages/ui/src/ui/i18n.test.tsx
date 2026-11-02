@@ -190,6 +190,24 @@ describe("createI18n", () => {
     expect(en.languageLabel("not a tag")).toBe("not a tag");
   });
 
+  it("names each tag once, however often it is asked, and keeps a bounded number of names", () => {
+    const supported = vi.spyOn(Intl.DisplayNames, "supportedLocalesOf");
+    try {
+      const en = createI18n("en");
+      const namings = () => supported.mock.calls.filter(([tags]) => String(tags) === "sv").length;
+      expect(en.languageLabel("sv")).toBe("Swedish — svenska (sv)");
+      expect(en.languageLabel("sv")).toBe("Swedish — svenska (sv)");
+      expect(en.languageParts("sv")).toBe(en.languageParts("sv"));
+      expect(namings()).toBe(1);
+      // Past the names it keeps, it forgets them and names a tag afresh.
+      for (let i = 0; i < 10_000; i++) en.languageParts(`de-v${String(i).padStart(5, "0")}`);
+      expect(en.languageLabel("sv")).toBe("Swedish — svenska (sv)");
+      expect(namings()).toBe(2);
+    } finally {
+      supported.mockRestore();
+    }
+  });
+
   it("names no language as such, not by its code", () => {
     expect(createI18n("en").languageLabel("zxx")).toBe("No language (codes, numbers, symbols)");
     expect(createI18n("sv").languageParts("zxx")).toEqual({
@@ -488,5 +506,31 @@ describe("useI18n", () => {
       </I18nProvider>,
     );
     expect(screen.getByRole("button")).toHaveTextContent("sv");
+  });
+
+  it("keeps one I18n while its language stays, so the names it keeps last", () => {
+    const seen: unknown[] = [];
+    function Labels() {
+      seen.push(useI18n().languageParts);
+      return null;
+    }
+    const { rerender } = render(
+      <I18nProvider locale="sv">
+        <Labels />
+      </I18nProvider>,
+    );
+    rerender(
+      <I18nProvider locale="sv">
+        <Labels />
+      </I18nProvider>,
+    );
+    rerender(
+      <I18nProvider locale="en">
+        <Labels />
+      </I18nProvider>,
+    );
+    expect(seen).toHaveLength(3);
+    expect(seen[1]).toBe(seen[0]);
+    expect(seen[2]).not.toBe(seen[0]);
   });
 });

@@ -228,13 +228,46 @@ function fieldTexts(card: Card, field: CardField): CardText[] {
   }
 }
 
-/** The languages of the cards' sides, as the language filter offers them: their tags in order, then UNSTATED when a side's language is not stated. */
+/**
+ * How many languages a choice of a deck's languages offers at most (the
+ * Studio's language filter, a deck's card language): a list each screen
+ * names in full, which a deck whose cards carry very many language tags
+ * would make too long to use and to draw.
+ */
+export const LANGUAGE_CHOICE_LIMIT = 100;
+
+/** How many of the texts have each tag, added to `counts`. */
+export function countTags(texts: Iterable<LangText>, counts = new Map<string, number>()) {
+  for (const text of texts)
+    for (const tag of Object.keys(text)) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  return counts;
+}
+
+/**
+ * The tags to offer from their counts, in order: all of them, or past
+ * LANGUAGE_CHOICE_LIMIT the most used (by tag on a tie).
+ */
+export function languageChoices(counts: ReadonlyMap<string, number>): string[] {
+  const tags = [...counts.keys()];
+  const kept =
+    tags.length <= LANGUAGE_CHOICE_LIMIT
+      ? tags
+      : tags
+          .sort((a, b) => counts.get(b)! - counts.get(a)! || (a < b ? -1 : 1))
+          .slice(0, LANGUAGE_CHOICE_LIMIT);
+  return kept.sort();
+}
+
+/**
+ * The languages of the cards' sides, as the language filter offers them:
+ * their tags in order (languageChoices, so at most LANGUAGE_CHOICE_LIMIT),
+ * then UNSTATED when a side's language is not stated.
+ */
 export function cardLanguages(cards: readonly Pick<Card, "front" | "back">[]): string[] {
-  const tags = new Set(
-    cards.flatMap((card) => [...Object.keys(card.front), ...Object.keys(card.back)]),
-  );
-  const stated = [...tags].filter((tag) => tag !== "").sort();
-  return tags.has("") ? [...stated, UNSTATED] : stated;
+  const counts = countTags(cards.flatMap((card) => [card.front, card.back]));
+  const unstated = counts.delete("");
+  const stated = languageChoices(counts);
+  return unstated ? [...stated, UNSTATED] : stated;
 }
 
 /** Whether a text's tag is the language wanted: the tag itself, or a regional form of it ("sv" finds "sv-fi"); UNSTATED wants untagged text. */

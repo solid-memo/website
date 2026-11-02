@@ -9,6 +9,7 @@ import {
   cardLanguages,
   DEFAULT_CARD_QUERY,
   isDefaultQuery,
+  LANGUAGE_CHOICE_LIMIT,
   queryCards,
   queryFromParams,
   queryToParams,
@@ -231,6 +232,28 @@ describe("queryCards", () => {
   it("offers the languages of the cards' sides, an unstated one last", () => {
     expect(cardLanguages(cards)).toEqual(["en", "en-gb", "fr", "sv", "zxx", "unstated"]);
     expect(cardLanguages([house])).toEqual(["en", "sv"]);
+  });
+
+  it("offers at most LANGUAGE_CHOICE_LIMIT languages, the most used, in order", () => {
+    const tag = (i: number) => `de-v${String(i).padStart(5, "0")}`;
+    const sides = (count: number) =>
+      Object.fromEntries(Array.from({ length: count }, (_, i) => [tag(i), "x"]));
+    // As many as the limit: every one of them.
+    expect(cardLanguages([card("c-all", { front: sides(LANGUAGE_CHOICE_LIMIT) })])).toHaveLength(
+      LANGUAGE_CHOICE_LIMIT,
+    );
+    // Past it: the languages on most sides, then the first by tag, in order.
+    const many = [
+      card("c-many", { front: { ...sides(150_000), "": "x" } }),
+      card("c-sv", { front: { sv: "ett hus" }, back: { "de-v99999": "x" } }),
+      card("c-sv2", { front: { sv: "en bil" }, back: { "de-v99999": "x" } }),
+    ];
+    const offered = cardLanguages(many);
+    expect(offered).toHaveLength(LANGUAGE_CHOICE_LIMIT + 1);
+    expect(offered.slice(0, 3)).toEqual([tag(0), tag(1), tag(2)]);
+    expect(offered.slice(-3)).toEqual(["de-v99999", "sv", "unstated"]);
+    expect(offered).not.toContain(tag(LANGUAGE_CHOICE_LIMIT - 2));
+    expect(offered).toEqual([...offered.slice(0, -1)].sort().concat("unstated"));
   });
 
   it("keeps the cards in a state", () => {

@@ -697,8 +697,11 @@ The URL holds the query, which the domain applies
   descriptions.
 - `lang`: only text in this language (`sv` finds `sv-fi` too), or
   `unstated` for a side whose language isn't stated; with `q`, the text
-  is looked for in that language only. The filter offers the cards'
-  languages, and the URL's own.
+  is looked for in that language only. The filter offers the
+  languages of the cards' sides, and the URL's own. Past
+  `LANGUAGE_CHOICE_LIMIT` (100) it offers the most used ones only, so
+  a deck whose cards carry thousands of language tags keeps the list
+  short. Each language is named once per list, not on each keystroke.
 - `state`: `live` (in use) or `retired`, or, for a card in use, where
   its schedule is. `new` has a direction never reviewed, and `learning`
   was answered wrong last time. `young` has an interval under 21 days

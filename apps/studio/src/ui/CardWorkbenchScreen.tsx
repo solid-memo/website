@@ -245,10 +245,18 @@ export function CardWorkbenchScreen({
 
   // A language the URL names but the cards' sides do not have (one of
   // the notes', say) is still offered, so the filter shows and clears.
-  const langOptions =
-    query.lang === undefined || languages.includes(query.lang)
-      ? languages
-      : [...languages, query.lang];
+  // Named once per list of languages, not on each keystroke or move.
+  const langOptions = useMemo(
+    () =>
+      (query.lang === undefined || languages.includes(query.lang)
+        ? languages
+        : [...languages, query.lang]
+      ).map((tag): [string, string] => [
+        tag,
+        tag === UNSTATED ? t("studio.cards.unstated") : languageLabel(tag),
+      ]),
+    [languages, query.lang, t, languageLabel],
+  );
   /**
    * How a side of a card is edited in its cell: only a plain text one's,
    * in one language that is stated, its field marked with that language
@@ -419,10 +427,7 @@ export function CardWorkbenchScreen({
             )}
             {select(t("studio.cards.lang"), query.lang ?? "", (lang) => choice("lang", lang), [
               ["", t("studio.cards.anyLang")],
-              ...langOptions.map((tag): [string, string] => [
-                tag,
-                tag === UNSTATED ? t("studio.cards.unstated") : languageLabel(tag),
-              ]),
+              ...langOptions,
             ])}
             {select(t("studio.cards.state"), query.state ?? "", (state) => choice("state", state), [
               ["", t("studio.cards.anyState")],

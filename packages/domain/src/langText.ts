@@ -24,16 +24,26 @@ function englishTag(text: LangText): string | undefined {
 /**
  * The tag in the text for a wanted language: the tag itself, else the
  * same language without a region ("sv-SE" finds "sv"), else a regional
- * one ("en" finds "en-gb").
+ * one ("en" finds "en-gb"), the first of those by tag.
  */
 function matchingTag(text: LangText, wanted: string): string | undefined {
   const tag = wanted.toLowerCase();
   if (Object.hasOwn(text, tag)) return tag;
   const language = tag.split("-")[0]!;
   if (Object.hasOwn(text, language)) return language;
-  return Object.keys(text)
-    .sort()
-    .find((t) => t.startsWith(`${language}-`));
+  const prefix = `${language}-`;
+  return firstTag(Object.keys(text).filter((t) => t.startsWith(prefix)));
+}
+
+/**
+ * The first of the tags in order (as sort() orders them); undefined for
+ * none. One pass over them, not a sort, as a text may hold very many
+ * tags and a screen asks for its shown text once per text it shows.
+ */
+function firstTag(tags: readonly string[]): string | undefined {
+  let first: string | undefined;
+  for (const tag of tags) if (first === undefined || tag < first) first = tag;
+  return first;
 }
 
 /** The English text; undefined when there is none. */
@@ -54,7 +64,7 @@ export function shownTag(text: LangText, languages: readonly string[] = []): str
     const tag = matchingTag(text, language);
     if (tag !== undefined) return tag;
   }
-  return englishTag(text) ?? Object.keys(text).sort()[0];
+  return englishTag(text) ?? firstTag(Object.keys(text));
 }
 
 /** The text to show a reader who prefers `languages`: the one `shownTag` picks; empty when there is none. */
