@@ -1159,7 +1159,7 @@ jobs:
   #
   # The pull request closes its issue (CONTRIBUTING.md#commit-messages):
   # its body or a commit has `Closes: #NN` (or Fixes, Resolves), or the
-  # body has `Refs: #NN` and the template's "One step" box checked.
+  # body has `Refs: #NN`, for a pull request that is one step of it.
   # GitHub closes an issue on merge for nothing else. The body is read
   # from the API when the step runs, not from the event, so editing it
   # and running the job again is enough. Renovate's pull requests have
