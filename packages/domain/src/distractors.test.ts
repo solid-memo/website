@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { growth } from "./testing/growth";
 import { AppError } from "./appError";
 import type { CardContent, Distractor } from "./deck";
 import {
@@ -199,7 +200,9 @@ describe("distractorIssues", () => {
         severity: "warning",
         id: "q-d1",
         missing: ["sv"],
+        moreMissing: 0,
         extra: ["de"],
+        moreExtra: 0,
       },
     ]);
     expect(distractorIssues(card, "release")).toEqual([
@@ -208,7 +211,9 @@ describe("distractorIssues", () => {
         severity: "error",
         id: "q-d1",
         missing: ["sv"],
+        moreMissing: 0,
         extra: ["de"],
+        moreExtra: 0,
       },
     ]);
   });
@@ -217,5 +222,52 @@ describe("distractorIssues", () => {
     expect(
       distractorIssues({ back: { en: "b" }, distractors: [d1, { ...d2, retired: true }] }, "pod"),
     ).toEqual([{ code: "fewDistractors", severity: "warning", count: 1, least: 2 }]);
+  });
+
+  /** A card with `count` back languages and `count` distractors, each in `count` other languages. */
+  function manyLanguages(count: number): Pick<CardContent, "back" | "distractors"> {
+    const tags = (prefix: string) =>
+      Object.fromEntries(Array.from({ length: count }, (_, i) => [`x-${prefix}${i}`, "t"]));
+    const text = tags("d");
+    return {
+      back: tags("b"),
+      distractors: Array.from({ length: count }, (_, i) => ({ id: `q-d${i}`, text })),
+    };
+  }
+
+  it("names a few of the languages a distractor lacks or adds and counts the rest", () => {
+    const issues = distractorIssues(manyLanguages(300), "pod");
+    expect(issues).toHaveLength(300);
+    expect(issues[0]).toEqual({
+      code: "distractorLanguages",
+      severity: "warning",
+      id: "q-d0",
+      missing: ["x-b0", "x-b1", "x-b2"],
+      moreMissing: 297,
+      extra: ["x-d0", "x-d1", "x-d2"],
+      moreExtra: 297,
+    });
+  });
+
+  it("finds them in time that grows with the back and the distractors, not with their product", () => {
+    // Eight times the back languages and distractors take about as long
+    // as an eighth of them eight times over; listing each back language
+    // a distractor lacks would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const back = manyLanguages(count).back;
+        const card = {
+          back,
+          distractors: Array.from({ length: count }, (_, i) => ({
+            id: `q-d${i}`,
+            text: { en: "t" },
+          })),
+        };
+        return () => distractorIssues(card, "release");
+      },
+      300,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

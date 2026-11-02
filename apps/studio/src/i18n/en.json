@@ -1132,6 +1132,10 @@
       },
       "badgeOf": "in {name}",
       "untagged": "untagged text",
+      "moreLanguages": {
+        "one": "{languages} and {count} more",
+        "other": "{languages} and {count} more"
+      },
       "nothing": "nothing",
       "firstVersion": "nothing, being the first version",
       "kind": {

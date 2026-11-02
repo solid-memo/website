@@ -288,6 +288,24 @@ describe("DistractorFields", () => {
     ).toBeInTheDocument();
   });
 
+  it("names a few of the languages an option lacks or adds, and counts the rest", () => {
+    const text = (tags: readonly string[]) => Object.fromEntries(tags.map((tag) => [tag, "x"]));
+    renderFields({
+      back: text(["en", "sv", "de", "fr", "es"]),
+      distractors: [
+        { id: "q-d1", text: text(["ko", "ja", "it", "nl"]) },
+        { id: "q-d2", text: text(["en", "sv", "de", "fr", "es"]) },
+      ],
+    });
+    const issues = within(screen.getByRole("list", { name: "Worth a look" })).getAllByRole(
+      "listitem",
+    );
+    expect(issues.map((issue) => issue.textContent)).toEqual([
+      "“x” has no text in English (en), Swedish — svenska (sv), German — Deutsch (de) and 2 more, which the back is in.",
+      "“x” is in Korean — 한국어 (ko), Japanese — 日本語 (ja), Italian — italiano (it) and 1 more, which the back is not.",
+    ]);
+  });
+
   it("names an issue by the first option of its id, when two share one", () => {
     renderFields({
       back: { en: "Water" },

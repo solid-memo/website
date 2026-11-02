@@ -1066,6 +1066,9 @@
       },
       "badgeOf": "{name}에",
       "untagged": "언어 태그가 없는 텍스트",
+      "moreLanguages": {
+        "other": "{languages} 외 {count}개"
+      },
       "nothing": "없음",
       "firstVersion": "없음(첫 버전)",
       "kind": {

@@ -1132,6 +1132,10 @@
       },
       "badgeOf": "i {name}",
       "untagged": "text utan språk",
+      "moreLanguages": {
+        "one": "{languages} och {count} till",
+        "other": "{languages} och {count} till"
+      },
       "nothing": "ingenting",
       "firstVersion": "ingenting, eftersom det är första versionen",
       "kind": {

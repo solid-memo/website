@@ -5,7 +5,7 @@
 import { AppError } from "./appError";
 import type { CardContent, Distractor } from "./deck";
 import { tidiedSideText, tidiedTagged, type LangText } from "./langText";
-import { LEAST_DISTRACTORS } from "./release/courseRules";
+import { LEAST_DISTRACTORS, lacking } from "./release/courseRules";
 
 /**
  * Edits of a card's distractors, its wrong options (docs/studio.md): add,
@@ -164,8 +164,12 @@ export type DistractorIssue =
       code: "distractorLanguages";
       severity: DistractorSeverity;
       id: string;
+      /** The first few of the back's languages its text lacks (LISTED_LANGUAGES), and how many more. */
       missing: string[];
+      moreMissing: number;
+      /** The first few languages of its text the back lacks, and how many more. */
       extra: string[];
+      moreExtra: number;
     }
   | { code: "fewDistractors"; severity: DistractorSeverity; count: number; least: number };
 
@@ -182,7 +186,7 @@ export function distractorIssues(
 ): DistractorIssue[] {
   const severity: DistractorSeverity = where === "pod" ? "warning" : "error";
   const inUse = (card.distractors ?? []).filter((distractor) => distractor.retired !== true);
-  const back = Object.keys(card.back);
+  const back = new Set(Object.keys(card.back));
   const issues: DistractorIssue[] = [];
   if (inUse.length > 0 && inUse.length < LEAST_DISTRACTORS) {
     issues.push({
@@ -193,11 +197,20 @@ export function distractorIssues(
     });
   }
   for (const distractor of inUse) {
-    const text = Object.keys(distractor.text);
-    const missing = back.filter((tag) => !text.includes(tag));
-    const extra = text.filter((tag) => !back.includes(tag));
-    if (missing.length + extra.length > 0)
-      issues.push({ code: "distractorLanguages", severity, id: distractor.id, missing, extra });
+    const text = new Set(Object.keys(distractor.text));
+    const missing = lacking(back, text);
+    const extra = lacking(text, back);
+    if (missing.listed.length + extra.listed.length > 0) {
+      issues.push({
+        code: "distractorLanguages",
+        severity,
+        id: distractor.id,
+        missing: missing.listed,
+        moreMissing: missing.more,
+        extra: extra.listed,
+        moreExtra: extra.more,
+      });
+    }
   }
   return issues;
 }

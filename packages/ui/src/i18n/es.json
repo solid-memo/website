@@ -289,6 +289,11 @@
     "noLanguage": "sin idioma indicado",
     "issues": "Conviene revisar",
     "issue": {
+      "moreLanguages": {
+        "one": "{languages} y {count} más",
+        "many": "{languages} y {count} más",
+        "other": "{languages} y {count} más"
+      },
       "missing": "«{option}» no tiene texto en {languages}, y el reverso sí.",
       "extra": "«{option}» está en {languages}, y el reverso no.",
       "few": {

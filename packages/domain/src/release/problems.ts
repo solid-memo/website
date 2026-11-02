@@ -91,8 +91,8 @@ export type CourseProblem =
   | { code: "checkedAndReviewed"; params: { steps: string[]; chapters: string[] } }
   | { code: "noBack"; params: Record<string, never> }
   | { code: "fewDistractors"; params: { count: number; least: number } }
-  /** A distractor without text in languages ("" untagged) its card's back has. */
-  | { code: "distractorLanguages"; params: { card: string; missing: string[] } }
+  /** A distractor without text in languages ("" untagged) its card's back has: the first few, and how many more. */
+  | { code: "distractorLanguages"; params: { card: string; missing: string[]; more: number } }
   | { code: "chapterPositions"; params: { chapters: string[]; position: string } }
   | { code: "stepPositions"; params: { steps: string[]; chapter: string; position: string } }
   | { code: "chapterWithoutStep"; params: Record<string, never> }

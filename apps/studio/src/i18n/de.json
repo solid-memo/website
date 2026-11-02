@@ -1132,6 +1132,10 @@
       },
       "badgeOf": "in {name}",
       "untagged": "Text ohne Sprachangabe",
+      "moreLanguages": {
+        "one": "{languages} und {count} weitere",
+        "other": "{languages} und {count} weitere"
+      },
       "nothing": "nichts",
       "firstVersion": "nichts, da es die erste Version ist",
       "kind": {

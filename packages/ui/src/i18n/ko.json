@@ -285,6 +285,9 @@
     "noLanguage": "언어 지정 안 됨",
     "issues": "확인해 볼 점",
     "issue": {
+      "moreLanguages": {
+        "other": "{languages} 외 {count}개"
+      },
       "missing": "‘{option}’에는 뒷면의 언어인 {languages} 텍스트가 없어요.",
       "extra": "‘{option}’은(는) 뒷면의 언어가 아닌 {languages}(으)로 쓰여 있어요.",
       "few": {

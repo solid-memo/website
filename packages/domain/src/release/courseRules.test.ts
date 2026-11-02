@@ -19,7 +19,7 @@ import {
 } from "../testing/releaseModel";
 import { EDUCATION_THEME } from "../dcat";
 import { growth } from "../testing/growth";
-import { courseProblems, readinessProblems } from "./courseRules";
+import { courseProblems, lacking, readinessProblems } from "./courseRules";
 import type { ReleaseProblem } from "./problems";
 
 /** Two chapters: the first with a step and a review question, the second with a step. */
@@ -235,14 +235,59 @@ describe("courseProblems", () => {
       {
         code: "distractorLanguages",
         subject: at("q-1-b"),
-        params: { card: at("q-1"), missing: ["sv"] },
+        params: { card: at("q-1"), missing: ["sv"], more: 0 },
       },
       {
         code: "distractorLanguages",
         subject: at("q-2-b"),
-        params: { card: at("q-2"), missing: [""] },
+        params: { card: at("q-2"), missing: [""], more: 0 },
       },
     ]);
+  });
+
+  /** A course asking one card with `count` back languages and `count` distractors, each in English alone. */
+  function manyLanguages(count: number) {
+    return course({
+      cards: [
+        card("q-1", {
+          back: Array.from({ length: count }, (_, i) => text("b", `x-b${i}`)),
+          distractors: Array.from({ length: count }, (_, i) => iri(at(`q-1-${i}`))),
+        }),
+      ],
+      chapters: [chapter("ch-1", 0)],
+      steps: [step("s-1", "ch-1", 0, ["q-1"])],
+      distractors: Array.from({ length: count }, (_, i) => distractor(`q-1-${i}`)),
+    });
+  }
+
+  it("names a few of the languages a distractor lacks and counts the rest", () => {
+    const problems = courseProblems(manyLanguages(400));
+    expect(problems).toHaveLength(400);
+    expect(brief(problems)[0]).toEqual({
+      code: "distractorLanguages",
+      subject: at("q-1-0"),
+      params: { card: at("q-1"), missing: ["x-b0", "x-b1", "x-b2"], more: 397 },
+    });
+    expect(
+      problems.every(
+        (one) => one.code === "distractorLanguages" && one.params.missing.length === 3,
+      ),
+    ).toBe(true);
+  });
+
+  it("checks a card's distractors in time that grows with them and its back, not with their product", () => {
+    // Eight times the back languages and distractors take about as long
+    // as an eighth of them eight times over; listing each back language
+    // a distractor lacks would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = manyLanguages(count);
+        return () => courseProblems(many);
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("names chapters, and a chapter's steps, in use that share a position, but not retired ones", () => {
@@ -306,6 +351,15 @@ describe("courseProblems", () => {
       8,
     );
     expect(ratio).toBeLessThan(4);
+  });
+});
+
+describe("lacking", () => {
+  it("lists the first few languages one set lacks of another, in its order, and counts the rest", () => {
+    const wanted = new Set(["en", "sv", "de", "fr", "es", "ko"]);
+    expect(lacking(wanted, new Set(["sv", "x"]))).toEqual({ listed: ["en", "de", "fr"], more: 2 });
+    expect(lacking(new Set(["sv", "x"]), wanted)).toEqual({ listed: ["x"], more: 0 });
+    expect(lacking(wanted, wanted)).toEqual({ listed: [], more: 0 });
   });
 });
 
