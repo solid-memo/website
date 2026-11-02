@@ -783,6 +783,13 @@ main.landing > a.hero-brand > h1:not(.hero-heading) {
   font-size: 0.9375rem;
 }
 
+/* The landing picture and the masthead's logo: their img is laid out as
+   if the picture element around it, which only picks the file, were not
+   there. */
+picture.illustration {
+  display: contents;
+}
+
 /* The picture as the heading: it spells the name, so no text beside it. */
 h1.hero-heading {
   margin: 0;

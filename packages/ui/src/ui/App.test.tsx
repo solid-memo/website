@@ -753,6 +753,14 @@ describe("AppShell", () => {
     const home = screen.getByRole("link", { name: "Solid Memo" });
     expect(home).toHaveAttribute("href", "#/");
     expect(home).toContainElement(container.querySelector("img.hero"));
+    // It moves in, unless the reader asks for reduced motion: then the browser shows the still one.
+    expect(container.querySelector("img.hero")).toHaveAttribute(
+      "src",
+      expect.stringContaining("illustration.svg"),
+    );
+    const moving = container.querySelector("picture.illustration > source");
+    expect(moving).toHaveAttribute("media", "(prefers-reduced-motion: no-preference)");
+    expect(moving).toHaveAttribute("srcset", expect.stringContaining("illustration-animated.svg"));
     // The theme and language choices make the banner; the onboarding is the main content.
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
