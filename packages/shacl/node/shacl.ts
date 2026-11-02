@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { DataFactory, Store, type Quad } from "n3";
 import { createEngine, type ShapeEngine } from "../src/engine.ts";
 import { coreOnly, PROFILES, REFERENCE_DATA, type ProfileName } from "../src/profiles.ts";
-import { pickShape } from "../src/registry.ts";
+import { pickShapes } from "../src/registry.ts";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
 import { RDF_TYPE, parseTurtle } from "@solid-memo/turtle/rdf";
@@ -23,9 +23,9 @@ import { shown } from "@solid-memo/domain/langText";
 /**
  * SHACL validation in node (tests and tools): Solid Memo's shapes,
  * read from the repository's ns/, applied to a Turtle document one
- * subject at a time, with the shape chosen by class and format version exactly as
- * the app chooses it; and the vendored profiles (DCAT-AP, SKOS) applied
- * to a whole document.
+ * subject at a time, against the shape of each of its classes at its
+ * format version, chosen exactly as the app chooses them; and the
+ * vendored profiles (DCAT-AP, SKOS) applied to a whole document.
  */
 
 /** A document the site publishes from this repository, parsed at its own address. */
@@ -82,7 +82,7 @@ export async function validateTurtleDocument(
     const version = Number(
       data.getObjects(node, DataFactory.namedNode(`${SM_NS}formatVersion`), null)[0]?.value ?? "1",
     );
-    const pick = pickShape(types, version, context, (predicate) =>
+    const pick = pickShapes(types, version, context, (predicate) =>
       data.getObjects(node, DataFactory.namedNode(predicate), null).map((o) => o.value),
     );
     if (pick.kind === "untyped") {
@@ -95,9 +95,14 @@ export async function validateTurtleDocument(
       );
       continue;
     }
-    for (const violation of await engine.validateNode(data, subject, pick.descriptor.shapeIri)) {
-      const where = violation.path === undefined ? "" : ` (${violation.path})`;
-      problems.push(`<${subject}>${where}: ${shown(violation.message)}`);
+    for (const shape of pick.unknown) {
+      problems.push(`<${subject}> is ${shape} too, which has no format ${version}.`);
+    }
+    for (const descriptor of pick.descriptors) {
+      for (const violation of await engine.validateNode(data, subject, descriptor.shapeIri)) {
+        const where = violation.path === undefined ? "" : ` (${violation.path})`;
+        problems.push(`<${subject}>${where}: ${shown(violation.message)}`);
+      }
     }
   }
   if (problems.length > 0) {

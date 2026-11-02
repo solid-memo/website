@@ -56,23 +56,27 @@ check a draft's cards, distractors, agents and distributions.
 ## Conventions
 
 - **No `sh:targetClass`.** Formats 1 and 2 of a class target the same
-  class, so every subject would fail one of them. `pickShape` in
-  [registry.ts](../packages/shacl/src/registry.ts) chooses the shape by
+  class, so every subject would fail one of them. `pickShapes` in
+  [registry.ts](../packages/shacl/src/registry.ts) chooses the shapes by
   `(rdf:type, sm:formatVersion)` — absent = 1 — and by the context
   (pod, library or draft), at build time, in tests and in the browser.
   Every node shape carries `sh:class` and `sh:nodeKind sh:IRI` instead.
   The class is Solid Memo's own or, for the standard classes it writes,
   DCAT's or FOAF's (`CLASS_NAMESPACES` in
   [packages/vocab/tooling/shapes.ts](../packages/vocab/tooling/shapes.ts)).
-  A subject with a Solid Memo class is checked against that class's
-  shapes only: a deck group, a `dcat:Catalog` too, is never checked as
-  `CatalogV1`.
+  A subject with a Solid Memo class is checked against the shapes of
+  its Solid Memo classes only: a deck group, a `dcat:Catalog` too, is
+  never checked as `CatalogV1`. A subject with two Solid Memo classes
+  is checked against the shape of each at its version, as the reader of
+  each reads it. A class with no shape at that version is a violation
+  (`FormatVersionClass`). A deck's place in the pod is checked whenever
+  `sm:Deck` is among its classes.
 - **Fixed values tell shapes of one class apart.** A property shape
   with `sh:hasValue` and `sh:maxCount 1` on a predicate other than
   `rdf:type` fixes that predicate's value, for example an FSRS-6 review
   state's `sm:scheduler sm:fsrs6`. The generator puts the value in the
   descriptor's `fixedValues`, not the record; the writer sets it.
-  `pickShape` checks a subject against a shape with fixed values only
+  `pickShapes` checks a subject against a shape with fixed values only
   when the subject has them all, and then never against its class's
   shapes without them. So an SM-2 state is checked as review
   state 1 or 2, and an FSRS-6 state, an `sm:ReviewState` too, as FSRS
@@ -182,7 +186,7 @@ flowchart LR
     types --> migrations["domain: shapes/migrations<br/>record to the next record"]
     types --> records["domain: *Record.ts<br/>record to model and back"]
     desc --> rw["solid: records.ts<br/>Thing to record and back"]
-    desc --> pick["shacl: registry.ts<br/>pickShape"]
+    desc --> pick["shacl: registry.ts<br/>pickShapes"]
     shapes -->|build, tests, browser| shacl["rdf-validate-shacl"]
 ```
 
