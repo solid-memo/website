@@ -369,4 +369,37 @@ describe("the answer log", () => {
       totals: { answers: 0, studyDays: 0, cards: 0 },
     });
   });
+
+  it("reads a long log's months a few at a time, each once, in the log's order", async () => {
+    const { byMonth, log, useCases } = setup();
+    for (let year = 2000; year < 2002; year++)
+      for (let month = 1; month <= 12; month++) {
+        const studyDay = `${year}-${String(month).padStart(2, "0")}-10`;
+        byMonth.set(studyDay.slice(0, 7), [
+          {
+            id: `answer-${studyDay}`,
+            deckUrl: deck.url,
+            cardUrl: card.url,
+            direction: "front-to-back",
+            grade: 4,
+            answeredAt: `${studyDay}T10:00:00.000Z`,
+            studyDay,
+            nextIntervalDays: 1,
+          },
+        ]);
+      }
+    const read = log.readMonthSince.getMockImplementation()!;
+    let reading = 0;
+    let most = 0;
+    log.readMonthSince.mockImplementation(async (...args) => {
+      most = Math.max(most, ++reading);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      reading--;
+      return read(...args);
+    });
+    const answers = await useCases.loadAnswerLog(instance.url);
+    expect(answers.map((answer) => answer.studyDay.slice(0, 7))).toEqual([...byMonth.keys()]);
+    expect(log.readMonthSince).toHaveBeenCalledTimes(24);
+    expect(most).toBe(6);
+  });
 });

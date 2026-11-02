@@ -75,7 +75,10 @@ recalled answers took each whole second up to a minute. A visit checks
 each past month's version, and a `304` means its summary holds, if
 each of its days is a real date of that month or a day either side;
 one that isn't is made again. Only this month and a changed month are
-read in full; new summaries are written back in the background.
+read in full; new summaries are written back in the background. This
+month, and the next where the log has it, are read in one read and
+summarized by study month. A month after the day after tomorrow's
+isn't read.
 
 Each answer keeps its study day, so a change of the day boundary leaves
 the summaries as they are. The counts are exact unless the day boundary
@@ -216,7 +219,9 @@ month, by server, for a learner who answers a hundred cards a day.
   `getStatistics` and the Studio's `loadAnswerLog` share one cache of
   the months read, by their ETag: a month already read costs a `304`.
   A read adds to the cache, never replaces it, and a month the log no
-  longer lists is dropped. The month being studied is read again after
+  longer lists is dropped. Months are read six at a time at most, and
+  none after the month of the day after tomorrow, which no answer
+  counted can be in. The month being studied is read again after
   studying. A server without ETags is read whole every time.
 - **The today strip keeps a summary of each past month** in the digest
   ([above](#the-today-strip)).

@@ -5,7 +5,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AnswerLog, DigestRepository } from "./ports";
 import { createUseCases } from "./useCases";
-import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
+import { createAnswerStore } from "./answerStore";
+import { createStatisticsUseCases } from "./statistics";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
+import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReviewState } from "@solid-memo/domain/review";
@@ -157,6 +160,36 @@ describe("the statistics of the answer log", () => {
       const statistics = await useCases.getStatistics(instance.url, noon, { range });
       expect(statistics.days.map((day) => day.studyDay)).toEqual(["2026-09-21", "2026-09-22"]);
     }
+  });
+  it("reads no month of the log after the day after tomorrow's, which no answer counted can be in", async () => {
+    const { byMonth, log, useCases } = setup();
+    const answer = (studyDay: string): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl: deck.url,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+    });
+    byMonth.set("2026-09", [answer("2026-09-21")]);
+    byMonth.set("2026-10", [answer("2026-10-01")]);
+    byMonth.set("2027-01", [answer("2027-01-01")]);
+    byMonth.set("9999-12", [answer("9999-12-31")]);
+    const course = { ...deck, sourceUrl: "https://library.example/course/v1.ttl" };
+    const readAll = async (at: Date) => {
+      log.readMonthSince.mockClear();
+      await useCases.getStatistics(instance.url, at);
+      await useCases.getStatistics(instance.url, at, { range: "all" });
+      await useCases.getTodayFigures(instance.url, at);
+      await useCases.getCardProgress(instance.url, at, { deck });
+      await useCases.getCourseStatistics(instance.url, at, [course]);
+      return new Set(log.readMonthSince.mock.calls.map(([, month]) => month));
+    };
+    expect(await readAll(noon)).toEqual(new Set(["2026-09"]));
+    // On the last day of a month, an answer of tomorrow may be in the next day's month.
+    expect(await readAll(new Date(2026, 8, 30, 12, 0))).toEqual(new Set(["2026-09", "2026-10"]));
   });
   it("saves the answers of the range asked for as a CSV file, of every deck or of one", async () => {
     const deps = makeDeps();
@@ -343,6 +376,62 @@ describe("the statistics of the answer log", () => {
       const changed = await load().getTodayFigures(instance.url, noon);
       expect(changed.days[0]).toMatchObject({ studyDay: "2026-08-30", answers: 1 });
       await vi.waitFor(() => expect(stored()!.months[AUGUST]!.version).toBe("v1"));
+    });
+
+    /** The today strip's figures over a log of `log`, with the answer store's reads counted. */
+    function counted(log: AnswerLog) {
+      const deps = makeDeps();
+      const answerStore = createAnswerStore({
+        answerLog: log,
+        reviewStateRepository: deps.reviewStateRepository,
+        preferenceStore: { get: async () => DEFAULT_PREFERENCES },
+        newId: () => "id",
+      });
+      const readMonths = vi.spyOn(answerStore, "readMonths");
+      const statistics = createStatisticsUseCases({
+        ...deps,
+        answerLog: log,
+        preferenceStore: { get: async () => DEFAULT_PREFERENCES },
+        answerStore,
+        digestStore: {
+          of: async () => emptyDigest(),
+          recordSchedule: () => undefined,
+          remember: () => undefined,
+        },
+      });
+      return { statistics, readMonths };
+    }
+    /** A log listing this month and `count` months after the day after tomorrow's, some no month at all. */
+    function plantedLog(count: number) {
+      const { log, byMonth } = memoryLog();
+      byMonth.set("2026-09", [timed("2026-09-21", "10:00:00", 4000)]);
+      const planted: string[] = [];
+      for (let year = 2027; planted.length < count; year++)
+        for (let month = 0; month < 100 && planted.length < count; month++)
+          planted.push(`${year}-${String(month).padStart(2, "0")}`);
+      log.months.mockResolvedValue(["2026-09", ...planted]);
+      return log;
+    }
+
+    it("read the months from this one on in one read, and none after the day after tomorrow's, however many the log lists", async () => {
+      const log = plantedLog(2000);
+      const { statistics, readMonths } = counted(log);
+      const figures = await statistics.getTodayFigures(instance.url, noon);
+      expect(figures.days.map((day) => day.studyDay)).toEqual(["2026-09-21"]);
+      expect(readMonths).toHaveBeenCalledTimes(1);
+      expect(log.readMonthSince.mock.calls.map(([, month]) => month)).toEqual(["2026-09"]);
+    });
+
+    it("grow linearly with the months the log lists", async () => {
+      const ratio = await growthAsync(
+        (count) => {
+          const { statistics } = counted(plantedLog(count));
+          return () => statistics.getTodayFigures(instance.url, noon);
+        },
+        1000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
     });
 
     it("take in the whole range where it begins before the calendar's weeks, as the statistics do", async () => {
