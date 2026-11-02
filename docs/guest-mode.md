@@ -262,7 +262,14 @@ copies. This browser's update journal notes the run:
 
 - A copy a closed tab left behind is offered for removal, with the
   offer to keep the study, the next time the user is logged in
-  (`InterruptedMoveContainer`), and removed whole.
+  (`InterruptedMoveContainer`), and removed whole, unless one of the
+  two cases below holds.
+- A tab can close after **register** was made but before its answer
+  came. The note then names one of the user's instances, so the folder
+  isn't offered or removed: the note is dropped, as the move ended.
+- A folder that holds anything the move didn't write, another app's
+  file or the user's study, is no longer only the copy. It isn't
+  offered or removed either, and the note is dropped.
 - A move retried first, at the copy's place, fails before writing
   anything and leaves the note.
 - A copy another tab's move is still writing isn't offered or removed.

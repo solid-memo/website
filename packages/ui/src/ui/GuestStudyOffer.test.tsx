@@ -66,7 +66,7 @@ describe("GuestStudyOffer", () => {
     expect(leftover).toHaveTextContent(
       /The partial copy remains at https:\/\/alice\.example\/solid-memo\/main\//,
     );
-    expect(useCases.findInterruptedGuestMove).toHaveBeenCalledWith(guestInstance);
+    expect(useCases.findInterruptedGuestMove).toHaveBeenCalledWith(session, guestInstance);
     await openForm();
     expect(screen.getByRole("region", { name: "Interrupted move" })).toBe(leftover);
   });

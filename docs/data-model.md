@@ -1687,7 +1687,8 @@ by one.
   `If-Match`. Only a folder Solid Memo made whole, at a URL it found
   free, and nothing names yet is deleted recursively: the guest's study
   moved into a new instance, when that fails half-way or a closed tab
-  leaves it behind.
+  leaves it behind. A folder a closed tab left that the type index now
+  names, or that holds anything the move didn't copy, isn't deleted.
 - **An update writes each document in one edit, held to its read.** The
   format update and the library upgrade write each document where it is,
   in one edit made only if the document is still at the version read

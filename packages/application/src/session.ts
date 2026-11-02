@@ -136,10 +136,17 @@ export interface SessionUseCases {
    * The partial copy of the guest's instance that a move into a new
    * folder (transferGuestStudy), cut off half-way by a closed tab, left
    * behind, as this browser noted it; null when there is none (any more).
+   * A folder that is now one of the user's instances (the move ended,
+   * its answer lost), or that holds anything the move did not write, is
+   * no such copy: the note is forgotten, and the folder left as it is.
    */
-  findInterruptedGuestMove(instance: Instance): Promise<string | null>;
-  /** Delete the partial copy an interrupted move left behind, and forget it. */
-  removeInterruptedGuestMove(instance: Instance): Promise<void>;
+  findInterruptedGuestMove(session: Session, instance: Instance): Promise<string | null>;
+  /**
+   * Delete the partial copy an interrupted move left behind, and forget
+   * it; a folder that is no longer only that copy (as above) is only
+   * forgotten.
+   */
+  removeInterruptedGuestMove(session: Session, instance: Instance): Promise<void>;
 }
 
 /**
@@ -284,6 +291,24 @@ export function createSessionUseCases({
     }
     if (cleanedUp && begun) updateJournal.end(source);
     return cleanedUp;
+  }
+  /**
+   * Whether the folder a cut-off move of `source` noted is still that
+   * move's copy alone: not one of the user's instances (a move whose
+   * registration was made, but whose answer a closed tab lost, did end),
+   * and holding nothing but copies of the guest's resources, so nothing
+   * of the user's, or of another app's, is in it.
+   */
+  async function onlyMovesCopy(session: Session, source: string, staging: string) {
+    const registered = await instanceRepository.listInstances(session.webId);
+    if (registered.some(({ url }) => instanceAddressOf(url) === staging)) return false;
+    // The digest is never copied (transferGuestStudy).
+    const written = new Set(
+      (await instanceCopier.listResources(source))
+        .filter((url) => url !== digestUrlOf(source))
+        .map((url) => rebaseIri(url, source, staging)),
+    );
+    return (await instanceCopier.listResources(staging)).every((url) => written.has(url));
   }
   /** The guest's instance, and the whole guest pod once it has no instance left. */
   async function removeGuestInstance(instance: Instance): Promise<void> {
@@ -710,7 +735,7 @@ export function createSessionUseCases({
       progress.finished();
       return { ok: true, instance: target, added, tidied };
     },
-    async findInterruptedGuestMove(instance) {
+    async findInterruptedGuestMove(session, instance) {
       const source = ensureTrailingSlash(instance.url);
       // Only a guest's study moves; a note on another instance is an earlier version's, and its folder is left alone.
       if (!isGuestUrl(source)) return null;
@@ -721,17 +746,22 @@ export function createSessionUseCases({
         () => true,
         () => false,
       );
-      if (gone) updateJournal.end(source);
-      return gone ? null : staging;
+      // Gone, or no longer the move's copy alone: forgotten, and left as it is.
+      if (gone || !(await onlyMovesCopy(session, source, staging))) {
+        updateJournal.end(source);
+        return null;
+      }
+      return staging;
     },
-    async removeInterruptedGuestMove(instance) {
+    async removeInterruptedGuestMove(session, instance) {
       const source = ensureTrailingSlash(instance.url);
       if (!isGuestUrl(source)) return;
       // The copy of a move another page runs is that move's to remove.
       if (runsElsewhere(source)) throw new AppError("guestStudyBeingMoved", { container: source });
       const staging = updateJournal.staging(source);
-      // Made whole by that move, at a URL it found free, and named nowhere: deleted whole.
-      if (staging !== null) await instanceCopier.deleteRecursively(staging);
+      // Made whole by that move, at a URL it found free, named nowhere, and holding only its copies: deleted whole.
+      if (staging !== null && (await onlyMovesCopy(session, source, staging)))
+        await instanceCopier.deleteRecursively(staging);
       updateJournal.end(source);
     },
   };

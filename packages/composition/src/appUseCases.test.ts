@@ -774,8 +774,9 @@ describe("createAppUseCases", () => {
         code: "guestStudyBeingMoved",
       });
       // Its copy is no interrupted move, and may not be removed.
-      expect(await useCases.findInterruptedGuestMove(instance!)).toBeNull();
-      await expect(useCases.removeInterruptedGuestMove(instance!)).rejects.toMatchObject({
+      const session = { webId: "https://alice.example/profile/card#me" };
+      expect(await useCases.findInterruptedGuestMove(session, instance!)).toBeNull();
+      await expect(useCases.removeInterruptedGuestMove(session, instance!)).rejects.toMatchObject({
         code: "guestStudyBeingMoved",
       });
       // It fails and keeps its entry: it runs no more, so nothing is held.
