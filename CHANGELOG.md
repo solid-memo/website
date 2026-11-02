@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.15](https://github.com/solid-memo/website/compare/v6.25.14...v6.25.15) (2026-11-02)
+
+### Bug Fixes
+
+* **deps:** let Renovate's npm lock lockfiles that hold npm again ([4f25f22](https://github.com/solid-memo/website/commit/4f25f226d08b7f2a2d8c4ed718be251832c54730)), closes [npm/cli#9800](https://github.com/npm/cli/issues/9800) [#502](https://github.com/solid-memo/website/issues/502)
+
 ## [6.25.14](https://github.com/solid-memo/website/compare/v6.25.13...v6.25.14) (2026-11-02)
 
 ### Bug Fixes
