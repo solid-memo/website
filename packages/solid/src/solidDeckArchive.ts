@@ -18,7 +18,12 @@ import type { Quad } from "@rdfjs/types";
 import type { DeckArchive } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
-import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card } from "@solid-memo/domain/deck";
+import {
+  CARD_FORMAT_VERSION,
+  DECK_FORMAT_VERSION,
+  type Card,
+  type Deck,
+} from "@solid-memo/domain/deck";
 import type { DeckFileFormat, FormatUpgrade } from "@solid-memo/domain/deckFile";
 import {
   REVIEW_STATE_FORMAT_VERSION,
@@ -112,53 +117,81 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       const deck = toDeck(deckThings[0]!, agentNamesOf(dataset));
       if (deck === null) throw new AppError("notADeckFile");
 
-      const upgraded: FormatUpgrade[] = [];
-      const dropped: string[] = [];
-      const upgrade = (kind: FormatUpgrade["kind"], subject: string, from: number, to: number) => {
-        if (from < to) upgraded.push({ kind, subject, from, to });
-      };
-      upgrade("deck", deck.url, deck.formatVersion, DECK_FORMAT_VERSION);
-
-      const cards: Card[] = [];
-      for (const thing of typed(SM.Card)) {
-        const card =
-          documentUrlOf(asUrl(thing)) === deck.cardsDocumentUrl ? toCard(thing, dataset) : null;
-        if (card === null) {
-          dropped.push(asUrl(thing));
-          continue;
-        }
-        cards.push(card);
-        upgrade("card", card.url, card.formatVersion, CARD_FORMAT_VERSION);
-      }
+      const report = new ReadReport();
+      report.upgrade("deck", deck.url, deck.formatVersion, DECK_FORMAT_VERSION);
+      const cards = readCards(typed(SM.Card), dataset, deck, report);
       const ids = new Set(cards.map((card) => card.id));
-      const reviews: ReviewState[] = [];
-      const fsrsReviews: FsrsState[] = [];
-      for (const thing of typed(SM.ReviewState)) {
-        const own = documentUrlOf(asUrl(thing)) === deck.reviewsDocumentUrl;
-        const state = own ? toReviewState(thing, deck) : null;
-        // An FSRS-6 state is this app's own too: it comes with the progress.
-        const fsrs = own && state === null ? toFsrsState(thing, deck) : null;
-        const of = state ?? fsrs;
-        if (of === null || !ids.has(of.cardId)) {
-          dropped.push(asUrl(thing));
-          continue;
-        }
-        if (state === null) fsrsReviews.push(fsrs!);
-        else {
-          reviews.push(state);
-          upgrade("reviewState", asUrl(thing), state.formatVersion, REVIEW_STATE_FORMAT_VERSION);
-        }
-      }
+      const { reviews, fsrsReviews } = readReviewStates(typed(SM.ReviewState), deck, ids, report);
       return {
         deck,
         cards,
-        upgraded,
-        dropped,
+        upgraded: report.upgraded,
+        dropped: report.dropped,
         ...(reviews.length === 0 ? {} : { reviews }),
         ...(fsrsReviews.length === 0 ? {} : { fsrsReviews }),
       };
     },
   };
+}
+
+/** What reading a deck file notes beside what it reads: the subjects upgraded from an older format, and those left out. */
+class ReadReport {
+  readonly upgraded: FormatUpgrade[] = [];
+  readonly dropped: string[] = [];
+
+  /** Note a subject read in an older format than this app writes. */
+  upgrade(kind: FormatUpgrade["kind"], subject: string, from: number, to: number): void {
+    if (from < to) this.upgraded.push({ kind, subject, from, to });
+  }
+
+  /** Note a subject left out. */
+  drop(subject: string): void {
+    this.dropped.push(subject);
+  }
+}
+
+/** The deck's own cards of a deck file; a card in another document, or not one, is dropped. */
+function readCards(things: Subject[], dataset: Dataset, deck: Deck, report: ReadReport): Card[] {
+  const cards: Card[] = [];
+  for (const thing of things) {
+    const card =
+      documentUrlOf(asUrl(thing)) === deck.cardsDocumentUrl ? toCard(thing, dataset) : null;
+    if (card === null) {
+      report.drop(asUrl(thing));
+      continue;
+    }
+    cards.push(card);
+    report.upgrade("card", card.url, card.formatVersion, CARD_FORMAT_VERSION);
+  }
+  return cards;
+}
+
+/** The deck's own review states of a deck file, SM-2 and FSRS-6 apart; one in another document, or of no card read, is dropped. */
+function readReviewStates(
+  things: Subject[],
+  deck: Deck,
+  ids: ReadonlySet<string>,
+  report: ReadReport,
+): { reviews: ReviewState[]; fsrsReviews: FsrsState[] } {
+  const reviews: ReviewState[] = [];
+  const fsrsReviews: FsrsState[] = [];
+  for (const thing of things) {
+    const own = documentUrlOf(asUrl(thing)) === deck.reviewsDocumentUrl;
+    const state = own ? toReviewState(thing, deck) : null;
+    // An FSRS-6 state is this app's own too: it comes with the progress.
+    const fsrs = own && state === null ? toFsrsState(thing, deck) : null;
+    const of = state ?? fsrs;
+    if (of === null || !ids.has(of.cardId)) {
+      report.drop(asUrl(thing));
+      continue;
+    }
+    if (state === null) fsrsReviews.push(fsrs!);
+    else {
+      reviews.push(state);
+      report.upgrade("reviewState", asUrl(thing), state.formatVersion, REVIEW_STATE_FORMAT_VERSION);
+    }
+  }
+  return { reviews, fsrsReviews };
 }
 
 /** The triples of a document read; none of one there is none of. */

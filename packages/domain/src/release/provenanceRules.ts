@@ -109,11 +109,12 @@ function countsOf(model: ReleaseModel): Record<CountedThing, number> {
   };
 }
 
-/** What a reader of how the release was made would miss; every one a warning. */
-export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
-  const problems: ReleaseProblem[] = [];
-  const derived = new Set(model.sources.map((term) => term.value));
-  // An earlier release's making is not rewritten: what it used is not held to this release's derivation.
+/**
+ * The makings of this release that used each source. An earlier
+ * release's making is not rewritten: what it used is not held to this
+ * release's derivation.
+ */
+function usersBySource(model: ReleaseModel): Map<string, string[]> {
   const usersOf = new Map<string, string[]>();
   for (const making of model.making.filter((one) => !one.carried)) {
     for (const used of new Set(making.used)) {
@@ -122,6 +123,17 @@ export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
       else users.push(making.iri);
     }
   }
+  return usersOf;
+}
+
+/**
+ * What a reader would miss of the sources: what describes each, and
+ * whether a source a making used is one the release is derived from.
+ */
+function sourceProblems(model: ReleaseModel): ReleaseProblem[] {
+  const problems: ReleaseProblem[] = [];
+  const derived = new Set(model.sources.map((term) => term.value));
+  const usersOf = usersBySource(model);
   for (const source of model.sourceDetails) {
     const missing: SourceDetail[] = [
       ...(source.title.length === 0 ? ["title" as const] : []),
@@ -147,10 +159,19 @@ export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
       );
     }
   }
+  return problems;
+}
+
+/**
+ * Where a making's comment counts what the release has otherwise. An
+ * earlier release's making counted that release: it is not held to this
+ * one.
+ */
+function countProblems(model: ReleaseModel): ReleaseProblem[] {
+  const problems: ReleaseProblem[] = [];
   const counts = countsOf(model);
   const course = model.types.includes(`${SCHEMA_NS}Course`);
   const counted = COUNTED.filter((one) => course || !one.course);
-  // An earlier release's making counted that release: it is not held to this one.
   for (const making of model.making.filter((one) => !one.carried)) {
     for (const comment of making.comments) {
       for (const { what, words } of counted) {
@@ -170,4 +191,9 @@ export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
     }
   }
   return problems;
+}
+
+/** What a reader of how the release was made would miss; every one a warning. */
+export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
+  return [...sourceProblems(model), ...countProblems(model)];
 }

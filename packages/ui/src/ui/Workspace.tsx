@@ -4,7 +4,12 @@
 
 import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  type UseMutationResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Course } from "@solid-memo/application/courses";
 import { cardName, cardNameText } from "./DataText";
@@ -235,6 +240,93 @@ function readsStorages(route: RouteRef | null) {
   return route?.screen === "storagePicker" || route?.screen === "instanceCreator";
 }
 
+/** Screens that stay reachable whatever the data: where the policy is changed and the report read. */
+function alwaysReachable(route: RouteRef | null) {
+  return (
+    route?.screen === "preferences" || route?.screen === "palette" || route?.screen === "validation"
+  );
+}
+
+/** Whether a route is a course's: its page, a chapter, or a chapter's final review. */
+function isCourseRoute(route: RouteRef | null) {
+  return (
+    route?.screen === "course" ||
+    route?.screen === "courseChapter" ||
+    route?.screen === "courseReview"
+  );
+}
+
+/**
+ * The storage picker (#/storages): the storages found, once they are,
+ * and one added by hand, which opens the instance creator on it.
+ */
+function StoragePickerScreen({
+  storages,
+  adding,
+  navigate,
+}: {
+  storages: { data: Storage[] | undefined; error: unknown };
+  adding: UseMutationResult<Storage, Error, string>;
+  navigate: (to: RouteRef) => void;
+}) {
+  const { t, errorText } = useI18n();
+  if (storages.error) {
+    return <ErrorMessage error={errorText(storages.error)} />;
+  }
+  if (storages.data === undefined) {
+    return <Loading label={t("workspace.discoveringStorages")} />;
+  }
+  return (
+    <StoragePicker
+      storages={storages.data}
+      busy={adding.isPending}
+      error={errorText(adding.error)}
+      onSelect={(storage) =>
+        navigate({
+          screen: "instanceCreator",
+          storageUrl: storage.url,
+          source: storage.source,
+        })
+      }
+      onAddManual={(url) => adding.mutate(url)}
+    />
+  );
+}
+
+/**
+ * The instance's validation (#/validation), in developer mode only:
+ * otherwise, once the preferences are read, where to turn it on.
+ */
+function ValidationScreen({
+  useCases,
+  instance,
+  developerMode,
+  loadingPreferences,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+  developerMode: boolean;
+  loadingPreferences: boolean;
+}) {
+  const { t, tx } = useI18n();
+  if (developerMode) {
+    return <ValidationContainer useCases={useCases} instance={instance} />;
+  }
+  return loadingPreferences ? (
+    <Loading label={t("workspace.loadingPreferences")} />
+  ) : (
+    <p class="hint">
+      {tx("workspace.developerModeOff", {
+        preferences: (
+          <a href={routeToHash({ screen: "preferences", instanceUrl: instance.url })}>
+            {t("workspace.preferencesLink")}
+          </a>
+        ),
+      })}
+    </p>
+  );
+}
+
 /**
  * The storages the instance creator may open with: those the storage
  * picker offers, and those added by hand there; undefined until read.
@@ -299,6 +391,72 @@ function instanceNotices(
       />
     </>
   );
+}
+
+/**
+ * The deck list's arrangement (DeckListContainer's query), counts and
+ * courses to continue, fetched on the home page while the instance is
+ * checked, not after. Its decks are the deck lookup's too, so the
+ * catalog is read once, and a deck opened from the list resolves
+ * without a refetch. The library's index, which tells the courses
+ * among them (useCopies), is read beside the arrangement, not once it
+ * is in, so each course's summary (CourseStrip's) is fetched as soon
+ * as the decks are known, as their counts are; but not for a deck the
+ * check sets aside.
+ */
+function useHomePrefetch(
+  useCases: UseCases,
+  instanceUrl: string | null,
+  onHome: boolean,
+  isSetAside: (deck: Deck) => boolean,
+) {
+  const queryClient = useQueryClient();
+  const homeTreeQuery = useQuery({
+    queryKey: queryKeys.deckTree(instanceUrl),
+    queryFn: () => useCases.listDeckTree(instanceUrl!),
+    enabled: onHome,
+    refetchOnWindowFocus: false,
+  });
+  useEffect(() => {
+    if (onHome) void queryClient.prefetchQuery(libraryIndexQuery(useCases));
+  }, [onHome]);
+  useEffect(() => {
+    if (instanceUrl === null || homeTreeQuery.data === undefined) return;
+    const decks = decksOf(homeTreeQuery.data.children);
+    queryClient.setQueryData(queryKeys.decks(instanceUrl), decks);
+    for (const deck of decks) {
+      void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
+    }
+  }, [homeTreeQuery.data, instanceUrl]);
+  const homeDecks = decksOf(homeTreeQuery.data?.children ?? []);
+  const { isCourse } = useCopies(useCases, homeDecks);
+  const homeCourses = homeDecks.filter((deck) => isCourse(deck) && !isSetAside(deck));
+  useEffect(() => {
+    for (const deck of homeCourses) {
+      void queryClient.prefetchQuery(courseStripQuery(useCases, deck));
+    }
+  }, [homeCourses.map((deck) => `${deck.url} ${deck.sourceUrl}`).join(" ")]);
+}
+
+/**
+ * The course the route has open, read through the learner's deck of it
+ * (the route's deck, once found) on a course's routes: the query, the
+ * course once read, the open chapter, and whether a final review comes
+ * too soon (reviewTooSoon).
+ */
+function useRouteCourse(useCases: UseCases, route: RouteRef | null, activeDeck: Deck | null) {
+  const { deckUrl, chapterUrl } = routeAddresses(route);
+  const onCourse = isCourseRoute(route);
+  const needsCourse = onCourse && activeDeck !== null;
+  const courseQuery = useQuery({
+    queryKey: queryKeys.course(deckUrl!),
+    queryFn: () => useCases.getCourse(activeDeck!),
+    enabled: needsCourse && activeDeck.sourceUrl !== undefined,
+  });
+  const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
+  const { activeChapter } = openChapterOf(activeCourse, chapterUrl);
+  const tooSoon = reviewTooSoon(route, activeCourse, courseQuery.isFetching);
+  return { onCourse, needsCourse, courseQuery, activeCourse, activeChapter, tooSoon };
 }
 
 /**
@@ -411,19 +569,8 @@ export function Workspace({
   // final review of a chapter with steps not done, to the chapter, once
   // the course is read afresh (the last step's answer is still being
   // read as the learner goes on from it).
-  const isCourseRoute =
-    route?.screen === "course" ||
-    route?.screen === "courseChapter" ||
-    route?.screen === "courseReview";
-  const needsCourse = isCourseRoute && activeDeck !== null;
-  const courseQuery = useQuery({
-    queryKey: queryKeys.course(deckUrl!),
-    queryFn: () => useCases.getCourse(activeDeck!),
-    enabled: needsCourse && activeDeck.sourceUrl !== undefined,
-  });
-  const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
-  const { activeChapter } = openChapterOf(activeCourse, chapterUrl);
-  const tooSoon = reviewTooSoon(route, activeCourse, courseQuery.isFetching);
+  const { onCourse, needsCourse, courseQuery, activeCourse, activeChapter, tooSoon } =
+    useRouteCourse(useCases, route, activeDeck);
 
   // The chapter the learner has just completed, for the course's page to
   // celebrate as they come back to it. Kept in memory, not the URL, and
@@ -455,40 +602,9 @@ export function Workspace({
   // are made, so the check runs again only after a repair or an update.
   // The Studio's screens hold to the same check (useDataCheck).
   const check = useDataCheck(useCases, activeInstance === null ? null : instanceUrl);
-  // The deck list's arrangement (DeckListContainer's query), counts and
-  // courses to continue are fetched while the instance is checked, not
-  // after. Its decks are the deck lookup's too, so the catalog is read
-  // once, and a deck opened from the list resolves without a refetch.
-  // The library's index, which tells the courses among them (useCopies),
-  // is read beside the arrangement, not once it is in, so each course's
-  // summary (CourseStrip's) is fetched as soon as the decks are known,
-  // as their counts are.
+  // What the home page shows is fetched while the instance is checked (useHomePrefetch).
   const onHome = activeInstance !== null && route?.screen === "home";
-  const homeTreeQuery = useQuery({
-    queryKey: queryKeys.deckTree(instanceUrl),
-    queryFn: () => useCases.listDeckTree(instanceUrl!),
-    enabled: onHome,
-    refetchOnWindowFocus: false,
-  });
-  useEffect(() => {
-    if (onHome) void queryClient.prefetchQuery(libraryIndexQuery(useCases));
-  }, [onHome]);
-  useEffect(() => {
-    if (instanceUrl === null || homeTreeQuery.data === undefined) return;
-    const decks = decksOf(homeTreeQuery.data.children);
-    queryClient.setQueryData(queryKeys.decks(instanceUrl), decks);
-    for (const deck of decks) {
-      void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
-    }
-  }, [homeTreeQuery.data, instanceUrl]);
-  const homeDecks = decksOf(homeTreeQuery.data?.children ?? []);
-  const { isCourse } = useCopies(useCases, homeDecks);
-  const homeCourses = homeDecks.filter((deck) => isCourse(deck) && !check.isSetAside(deck));
-  useEffect(() => {
-    for (const deck of homeCourses) {
-      void queryClient.prefetchQuery(courseStripQuery(useCases, deck));
-    }
-  }, [homeCourses.map((deck) => `${deck.url} ${deck.sourceUrl}`).join(" ")]);
+  useHomePrefetch(useCases, instanceUrl, onHome, check.isSetAside);
   // Until the preferences are read, the workspace waits as under "block
   // the instance": a user who chose it never sees data before the check.
   const {
@@ -507,11 +623,6 @@ export function Workspace({
   // cannot be rearranged, so no write lands on data the check would set
   // aside. A check that fails sets nothing aside.
   const checkUnsettled = activeInstance !== null && policy === "block-subject" && check.pending;
-  /** Screens that stay reachable whatever the data: where the policy is changed and the report read. */
-  const alwaysReachable =
-    route?.screen === "preferences" ||
-    route?.screen === "palette" ||
-    route?.screen === "validation";
 
   const storagesQuery = useQuery({
     queryKey: queryKeys.storages(webId),
@@ -591,7 +702,7 @@ export function Workspace({
             readerText,
             readerLang,
             cardReader,
-            isCourseRoute,
+            onCourse,
           ),
           t,
         );
@@ -664,25 +775,11 @@ export function Workspace({
   const screenFor = (route: RouteRef, instances: Instance[]) => {
     switch (route.screen) {
       case "storagePicker":
-        if (storagesQuery.error) {
-          return <ErrorMessage error={errorText(storagesQuery.error)} />;
-        }
-        if (storagesQuery.data === undefined) {
-          return <Loading label={t("workspace.discoveringStorages")} />;
-        }
         return (
-          <StoragePicker
-            storages={storagesQuery.data}
-            busy={manualStorageMutation.isPending}
-            error={errorText(manualStorageMutation.error)}
-            onSelect={(storage) =>
-              navigate({
-                screen: "instanceCreator",
-                storageUrl: storage.url,
-                source: storage.source,
-              })
-            }
-            onAddManual={(url) => manualStorageMutation.mutate(url)}
+          <StoragePickerScreen
+            storages={storagesQuery}
+            adding={manualStorageMutation}
+            navigate={navigate}
           />
         );
       case "instancePicker":
@@ -1057,28 +1154,20 @@ export function Workspace({
           />
         );
       case "validation":
-        if (developerMode) {
-          return <ValidationContainer useCases={useCases} instance={activeInstance!} />;
-        }
-        return preferencesQuery.isPending ? (
-          <Loading label={t("workspace.loadingPreferences")} />
-        ) : (
-          <p class="hint">
-            {tx("workspace.developerModeOff", {
-              preferences: (
-                <a href={routeToHash({ screen: "preferences", instanceUrl: instanceUrl! })}>
-                  {t("workspace.preferencesLink")}
-                </a>
-              ),
-            })}
-          </p>
+        return (
+          <ValidationScreen
+            useCases={useCases}
+            instance={activeInstance!}
+            developerMode={developerMode}
+            loadingPreferences={preferencesQuery.isPending}
+          />
         );
     }
   };
 
   const blocked =
     activeInstance !== null &&
-    !alwaysReachable &&
+    !alwaysReachable(route) &&
     policy === "block-instance" &&
     (check.pending || invalidReport !== null);
   const deckSetAside = activeDeck !== null && isSetAside(activeDeck);

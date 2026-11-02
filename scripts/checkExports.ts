@@ -81,6 +81,12 @@ const DECLARES = new Set([
   "TSModuleDeclaration",
 ]);
 
+/** Whether an identifier at `key` of a `parent` node is no reference: a property's name, a key, what it declares. */
+function notAReference(parent: string | null, key: string | null): boolean {
+  if (parent === null || key === null) return false;
+  return NOT_A_REFERENCE[parent]?.includes(key) === true || (key === "id" && DECLARES.has(parent));
+}
+
 /** The names the code refers to, each as often as it does, declarations and property names aside. */
 function references(program: unknown): Map<string, number> {
   const counts = new Map<string, number>();
@@ -93,10 +99,8 @@ function references(program: unknown): Map<string, number> {
     const { type } = node as { type?: unknown };
     if (type === "Identifier" || type === "JSXIdentifier") {
       const { name, computed } = node as { name: string; computed?: boolean };
-      const skipped =
-        (parent !== null && key !== null && NOT_A_REFERENCE[parent]?.includes(key)) ||
-        (parent !== null && key === "id" && DECLARES.has(parent));
-      if (!skipped && computed !== true) counts.set(name, (counts.get(name) ?? 0) + 1);
+      if (!notAReference(parent, key) && computed !== true)
+        counts.set(name, (counts.get(name) ?? 0) + 1);
     }
     const here = typeof type === "string" ? type : parent;
     const shorthand = (node as { shorthand?: boolean }).shorthand === true;

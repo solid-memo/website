@@ -443,14 +443,12 @@ export function checkSvg(svg: string): string | null {
       if (unclosed !== null) return unclosed;
       continue;
     }
-    if (open.at(-1) === "style") return "has a style that holds markup";
     if (open.length === 0) {
       if (lt !== 0) return "has more than one root";
       rootEnd = at;
     }
-    const refused = attributesProblem(name!, attributes!, css);
+    const refused = openingProblem(name!, attributes!, empty!, open, css);
     if (refused !== null) return refused;
-    if (empty !== "/") open.push(name!);
   }
   if (open.length > 0) return `leaves <${open.at(-1)}> open`;
   return stylesProblem(css, notice);
@@ -488,6 +486,25 @@ function closingProblem(
 ): string | null {
   if (attributes !== "" || empty === "/") return `has a closing tag that is not plain (</${name}>)`;
   if (open.pop() !== name) return `closes <${name}> out of order`;
+  return null;
+}
+
+/**
+ * Why an opening tag may not be served, or null when it may and, unless it
+ * closes itself, it is now the innermost open element (checkSvg): not in a
+ * style, and with attributes that pass attributesProblem.
+ */
+function openingProblem(
+  name: string,
+  attributes: string,
+  empty: string,
+  open: string[],
+  css: string[],
+): string | null {
+  if (open.at(-1) === "style") return "has a style that holds markup";
+  const refused = attributesProblem(name, attributes, css);
+  if (refused !== null) return refused;
+  if (empty !== "/") open.push(name);
   return null;
 }
 

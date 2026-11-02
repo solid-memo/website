@@ -413,6 +413,32 @@ export function createShaclShapeValidator({
   }
   const dcatAp = () => profile("dcat-ap");
 
+  /**
+   * The violations of a release's subjects by the profiles, over the
+   * release with the reference data and, for a library, its index.
+   */
+  async function releaseProfileViolations(
+    quads: Quad[],
+    index: Quad[],
+  ): Promise<{ focusNode: string; violation: Violation }[]> {
+    const { mergeDatasets } = await loadEngine();
+    const subjects = new Set(quads.map((q) => q.subject.value));
+    const found: { focusNode: string; violation: Violation }[] = [];
+    for (const [name, beside] of [
+      ["dcat-ap", index],
+      ["skos", []],
+    ] as const) {
+      const { engine, reference } = await profile(name);
+      for (const { focusNode, ...v } of await engine.validate(
+        mergeDatasets(quads, beside, ...(reference as Iterable<Quad>[])),
+      )) {
+        if (v.severity !== "violation" || !subjects.has(focusNode)) continue;
+        found.push({ focusNode, violation: { ...v, profile: name } });
+      }
+    }
+    return found;
+  }
+
   /** The DCAT-AP violations of each subject of the document, by subject. */
   async function profileViolations(data: DatasetCore): Promise<Map<string, Violation[]>> {
     const [{ engine, reference }, { mergeDatasets }] = await Promise.all([dcatAp(), loadEngine()]);
@@ -454,20 +480,21 @@ export function createShaclShapeValidator({
     const problems: string[] = [];
     const describe = (subject: string, v: Violation) =>
       `<${subject}>${v.path === undefined ? "" : ` (${v.path})`}: ${v.profile === "dcat-ap" ? "DCAT-AP: " : ""}${shown(v.message)}`;
-    for (const subject of subjects) {
+    /** A subject's results against its shape, picked for where the write goes: none when it has no shape. */
+    const shapeViolations = async (subject: string): Promise<Violation[]> => {
       const thing = getThing(dataset, subject);
-      if (thing === null) continue;
+      if (thing === null) return [];
       const version = storedVersionOf(thing);
       const pick = pickShapes(getUrlAll(thing, RDF.type), version, context, (predicate) =>
         getUrlAll(thing, predicate),
       );
-      if (pick.kind !== "shapes") continue;
+      if (pick.kind !== "shapes") return [];
       // The write check leaves dates to the readers: none is named beside the shape's results.
       const found = await classViolations(data, subject, pick.descriptors, () => []);
-      for (const v of [
-        ...pick.unknown.map((shape) => classVersionViolation(shape, version)),
-        ...found,
-      ]) {
+      return [...pick.unknown.map((shape) => classVersionViolation(shape, version)), ...found];
+    };
+    for (const subject of subjects) {
+      for (const v of await shapeViolations(subject)) {
         if (counts(subject, v)) problems.push(describe(subject, v));
       }
     }
@@ -666,18 +693,8 @@ export function createShaclShapeValidator({
               asUrl,
               indexUrl,
             );
-      const subjects = new Set(quads.map((q) => q.subject.value));
-      for (const [name, beside] of [
-        ["dcat-ap", index],
-        ["skos", []],
-      ] as const) {
-        const { engine, reference } = await profile(name);
-        for (const { focusNode, ...v } of await engine.validate(
-          mergeDatasets(quads, beside, ...(reference as Iterable<Quad>[])),
-        )) {
-          if (v.severity !== "violation" || !subjects.has(focusNode)) continue;
-          problems.push(shapeProblem(focusNode, { ...v, profile: name }, "error"));
-        }
+      for (const { focusNode, violation } of await releaseProfileViolations(quads, index)) {
+        problems.push(shapeProblem(focusNode, violation, "error"));
       }
       // A shape may say the same twice (a count, and a count of English text): once.
       const seen = new Set<string>();

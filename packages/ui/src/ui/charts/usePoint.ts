@@ -21,6 +21,19 @@ function stepOf(key: string, across: number): number | null {
 }
 
 /**
+ * The index of the point a key moves to from `at` (-1 with nothing
+ * pointed) among points up to `last`, or null for a key that does not move.
+ */
+function nextOf(key: string, at: number, last: number, across: number): number | null {
+  if (key === "Home") return 0;
+  if (key === "End") return last;
+  const step = stepOf(key, across);
+  if (step === null) return null;
+  if (at === -1) return step < 0 ? last : 0;
+  return at + step < 0 || at + step > last ? at : at + step;
+}
+
+/**
  * The point of a chart pointed at, by pointer, tap or keyboard. The
  * chart (one tab stop) takes `keyDown`: Left and Right step `across`
  * points, so a calendar with a week a column steps a week, while Up and
@@ -54,14 +67,8 @@ export function usePoint<T>() {
         return;
       }
       const at = pointed === null ? -1 : points.indexOf(pointed);
-      const last = points.length - 1;
-      const step = stepOf(event.key, across);
-      let next: number;
-      if (event.key === "Home") next = 0;
-      else if (event.key === "End") next = last;
-      else if (step === null) return;
-      else if (at === -1) next = step < 0 ? last : 0;
-      else next = at + step < 0 || at + step > last ? at : at + step;
+      const next = nextOf(event.key, at, points.length - 1, across);
+      if (next === null) return;
       event.preventDefault();
       setPointed(points[next]!);
       setKeyed(true);
