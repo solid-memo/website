@@ -7,7 +7,10 @@ import { useI18n } from "./i18n";
 import { FlameIcon } from "./icons";
 
 /** How many stars rise along the strip when the day's study is done. */
-const STARS = 6;
+const STARS = 10;
+
+/** How many stars burst from the flame then, fanned out to its right. */
+const BURST = 8;
 
 /** A word of praise that grows with the day's work. */
 function useCheer() {
@@ -41,10 +44,12 @@ function useStreakNote() {
  * deck's count is known (`left`), and about how many minutes they will
  * take, once that is known too (`minutesLeft`); then the week's answers so far, and
  * how they compare with the same days of last week, when it had any.
- * Once nothing is left, the praise says the day is done; and when a
- * session has just been left with an answer (`celebrate`), the flame
- * pops, a shimmer sweeps across the strip from left to right and small
- * stars rise and fade as it passes them (style.css), decoration only.
+ * Once nothing is left, the praise says the day is done and the strip
+ * turns gold; and when a session has just been left with an answer
+ * (`celebrate`), the strip turns from green to gold with a bounce and a
+ * glow, the flame pops and sends out rings and a burst of stars, the
+ * day's numbers fade in after the praise, a shimmer sweeps across the strip from left to right and small stars
+ * rise and fade as it passes them (style.css), decoration only.
  */
 export function TodaySummary({
   today,
@@ -58,7 +63,7 @@ export function TodaySummary({
   left?: number;
   /** About how many minutes the cards left will take (expectedTimeToday); none while unknown. */
   minutesLeft?: number;
-  /** A study session was just left with an answer: a shimmer and stars, once nothing is left. */
+  /** A study session was just left with an answer: a burst, a shimmer and stars, once nothing is left. */
   celebrate?: boolean;
   statisticsHref: string;
 }) {
@@ -71,10 +76,24 @@ export function TodaySummary({
   const justDone = allDone && celebrate;
   return (
     <aside
-      class={justDone ? "today-strip just-done" : "today-strip"}
+      class={["today-strip", allDone && "all-done", justDone && "just-done"]
+        .filter(Boolean)
+        .join(" ")}
       aria-label={t("today.heading")}
     >
-      <FlameIcon />
+      <span class="today-flame">
+        <FlameIcon />
+        {justDone && (
+          <span class="today-burst" aria-hidden="true">
+            {Array.from({ length: BURST }, (_, star) => (
+              <span
+                key={star}
+                style={{ "--angle": `${Math.round(-35 + (star * 70) / (BURST - 1))}deg` }}
+              />
+            ))}
+          </span>
+        )}
+      </span>
       {justDone && (
         <span class="today-stars" aria-hidden="true">
           {Array.from({ length: STARS }, (_, star) => (
@@ -88,31 +107,37 @@ export function TodaySummary({
           <span class="streak-note">{streakNote(today)}</span>
         </p>
         <p class="today-numbers">
-          {allDone ? t("today.allDone") : cheer(today.answers)}{" "}
-          {[
-            t("today.answers", { count: today.answers }),
-            t("today.introduced", { count: today.introduced }),
-            ...(reviews === 0
-              ? []
-              : [
-                  t("today.remembered", {
-                    percent: formatPercent(recalled / reviews),
-                    count: reviews,
+          {allDone ? (
+            <strong class="today-done">{t("today.allDone")}</strong>
+          ) : (
+            cheer(today.answers)
+          )}{" "}
+          <span class="today-figures">
+            {[
+              t("today.answers", { count: today.answers }),
+              t("today.introduced", { count: today.introduced }),
+              ...(reviews === 0
+                ? []
+                : [
+                    t("today.remembered", {
+                      percent: formatPercent(recalled / reviews),
+                      count: reviews,
+                    }),
+                  ]),
+              ...(left === undefined || allDone ? [] : [t("today.stillDue", { count: left })]),
+              ...(left === undefined || allDone || minutesLeft === undefined
+                ? []
+                : [t("today.timeLeft", { count: minutesLeft })]),
+              previous === 0
+                ? t("today.week", { count: thisWeek })
+                : t("today.weekChange", {
+                    count: thisWeek,
+                    change: formatChange((thisWeek - previous) / previous),
                   }),
-                ]),
-            ...(left === undefined || allDone ? [] : [t("today.stillDue", { count: left })]),
-            ...(left === undefined || allDone || minutesLeft === undefined
-              ? []
-              : [t("today.timeLeft", { count: minutesLeft })]),
-            previous === 0
-              ? t("today.week", { count: thisWeek })
-              : t("today.weekChange", {
-                  count: thisWeek,
-                  change: formatChange((thisWeek - previous) / previous),
-                }),
-          ].join(" · ")}
-          {" · "}
-          <a href={statisticsHref}>{t("today.allStatistics")}</a>
+            ].join(" · ")}
+            {" · "}
+            <a href={statisticsHref}>{t("today.allStatistics")}</a>
+          </span>
         </p>
       </div>
     </aside>

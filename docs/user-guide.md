@@ -110,10 +110,11 @@ The deck list is home. From the top:
 - **Today**: once you've studied today, your streak (days in a row), a
   word of praise and the day's numbers, with a link to all your
   statistics ([statistics.md](statistics.md#the-today-strip)). Finish
-  every deck's cards for the day and the strip's flame sparkles. Before
-  you study, a welcome back: the streak that studying today keeps, a
-  note on it that changes daily, and the cards left for today. After a
-  streak has lapsed, a gentle note to start a new one.
+  every deck's cards for the day and the strip turns gold, with a
+  burst of stars from its flame. Before you study, a welcome back: the
+  streak that studying today keeps, a note on it that changes daily,
+  and the cards left for today. After a streak has lapsed, a gentle
+  note to start a new one.
 - **Your courses**: each course you've added and not finished, started
   or not, with how many of its chapters are done and a button to start
   it or go on where you left off. Courses run alongside your other

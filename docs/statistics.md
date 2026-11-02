@@ -20,13 +20,18 @@ study session usually ends, sums up the day:
   yet, "Your longest yet!"; else the record to beat, "Record: 12 days".
 - **Praise** grows with the day's answers: "Nice work!" under 10,
   "Great session!" from 10, "Impressive effort!" from 50. Once every
-  deck has nothing left today, it's "All done for today!". When a study
-  session with an answer brings the learner back to that, the flame
-  pops, a shimmer sweeps across the strip from left to right, and small
-  stars rise and fade where it passes. That's lighter than a finished
-  course's confetti ([courses.md](courses.md)), since it can come every
-  day. Coming back to the list later shows none of it, and neither does
-  reduced motion.
+  deck has nothing left today, it's "All done for today!", and the
+  strip turns gold with a soft glow for the rest of the day, fading to
+  gold once every deck's count is read. When a
+  study session with an answer brings the learner back to that, the
+  strip turns from green to gold with a bounce and a glow. The flame
+  pops and sends out two rings and a burst of stars, and the day's
+  numbers fade in after "All done for today!". Then a shimmer
+  sweeps across the strip from left to right, and small stars rise and
+  fade where it passes, all in about two seconds. That's lighter than a
+  finished course's confetti ([courses.md](courses.md)), since it can
+  come every day. Coming back to the list later shows only the gold,
+  and so does reduced motion.
 - **The day's numbers**: answers, new cards, and the share of today's
   reviews remembered, with their count ("80% remembered of 5 reviews",
   [below](#what-the-figures-count)); a day without a review (only new

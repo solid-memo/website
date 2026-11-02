@@ -81,7 +81,7 @@ preferences suggest High contrast. A choice takes effect at once:
 | Palette | Id | What it does |
 |---|---|---|
 | Standard | `standard` | The app's own colors, the answer buttons from red (Again) to green (Easy). |
-| High contrast | `high-contrast` | Black on white, or white on black: text at 7:1 or more, fields' edges at 4.5:1 or more, no page discs or glint, edges in place of soft shadows, and a solid focus ring. |
+| High contrast | `high-contrast` | Black on white, or white on black: text at 7:1 or more, fields' edges at 4.5:1 or more, no page discs, glint or glow, edges in place of soft shadows, and a solid focus ring. |
 | Color-blind friendly | `color-vision` | Standard's surfaces, with meaning moved off red and green: blue for the primary color and links, orange for warnings, vermilion for danger, and the answer buttons from vermilion through orange, yellow and sky blue to blue. |
 | Parchment (low glare) | `parchment` | Warm surfaces darker than white in the light theme, warm browns in the dark, for readers whom a bright page dazzles, the dimmer text raised to 4.5:1. |
 
@@ -128,7 +128,8 @@ The roles fall into groups:
   activity calendar's days, the answer buttons' and the cards' bars,
   and the young cards' line.
 - **Decoration**: the accents, `--heading-pop`, the page's discs
-  (`--paper-blue`, `--paper-yellow`) and the newcomers' glint (`--shine`).
+  (`--paper-blue`, `--paper-yellow`), the newcomers' glint (`--shine`)
+  and the gold glow of a day's study done (`--glow`).
 - **The masthead and the theme toggle**: `--masthead-*`, `--logo-shadow`
   and `--toggle-*`.
 - **Depth**: `--shadow-sm`, `--shadow`, `--ring` (the focus ring of a

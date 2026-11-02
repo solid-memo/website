@@ -654,6 +654,19 @@ describe("contrast", () => {
         expectContrast(block, role(text), role(surface));
   });
 
+  // The today strip once the day's study is done (style.css's .today-strip.all-done).
+  it.each(EACH_BLOCK)(
+    "keeps text, muted text and a link at the ratio text needs on the gold of a day done in %s",
+    (_, block) => {
+      for (const text of ["--text", "--text-muted", "--link"])
+        expectContrast(
+          block,
+          role(text),
+          "color-mix(in srgb, var(--accent-yellow) 18%, var(--surface))",
+        );
+    },
+  );
+
   it.each(EACH_BLOCK)(
     "keeps muted text readable over the background's blue disc and the course card's yellow glow in %s",
     (_, block) => {
@@ -1284,6 +1297,39 @@ describe("the day's study done", () => {
     expect(stars.position).toBe("absolute");
     expect(stars.pointerEvents).toBe("none");
     expect(getComputedStyle(document.querySelector(".today-stars>span")!).opacity).toBe("0");
+  });
+
+  it("turns the strip gold for the rest of the day, from green with a bounce and a glow just after", () => {
+    // The test DOM keeps no color-mix() as a value, so the stylesheet is read as written.
+    expect(read("style.css")).toContain(
+      ".today-strip.all-done {\n  background-color: color-mix(in srgb, var(--accent-yellow) 18%, var(--surface));",
+    );
+    const [justDone] = rules(".today-strip.just-done");
+    expect(justDone!.style.getPropertyValue("animation")).toMatch(
+      /^today-turn-gold [^,]*,\s+today-glow /,
+    );
+  });
+
+  it("fades the day's numbers in after the praise, resting in full view", () => {
+    const [figures] = rules(".today-strip.just-done .today-figures");
+    expect(figures!.style.getPropertyValue("animation")).toMatch(/^today-fade-in .* backwards$/);
+    expect(figures!.style.getPropertyValue("opacity")).toBe("");
+  });
+
+  it("sends rings and a burst of stars out of the flame, out of the pointer's way, gone when they rest", () => {
+    const [rings] = rules(
+      ".today-strip.just-done .today-flame::before, .today-strip.just-done .today-flame::after",
+    );
+    expect(rings!.style.getPropertyValue("animation")).toMatch(/^today-ring /);
+    expect(rings!.style.getPropertyValue("opacity")).toBe("0");
+    expect(rings!.style.getPropertyValue("pointer-events")).toBe("none");
+    document.body.innerHTML = `<aside class="today-strip all-done just-done"><span class="today-flame">
+      <span class="today-burst" aria-hidden="true"><span></span></span></span></aside>`;
+    expect(getComputedStyle(document.querySelector(".today-flame")!).position).toBe("relative");
+    const burst = getComputedStyle(document.querySelector(".today-burst")!);
+    expect(burst.position).toBe("absolute");
+    expect(burst.pointerEvents).toBe("none");
+    expect(getComputedStyle(document.querySelector(".today-burst>span")!).opacity).toBe("0");
   });
 });
 
