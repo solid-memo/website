@@ -211,10 +211,9 @@ requests. It closes the issue: its body, or one of its commits, says
 `Closes: #NN` (or `Fixes:`, `Resolves:`), and CI's `commits` job fails
 a pull request where neither does (`npm run check:closes`). A pull
 request that is one step of its issue, and leaves it open, says
-`Refs: #NN` in its body instead and checks the template's "One step"
-box. Renovate's pull requests, which have no issue, are left out. The
-job reads the body when it runs, so after you edit the body, run the
-job again.
+`Refs: #NN` in its body instead. Renovate's pull requests, which have
+no issue, are left out. The job reads the body when it runs, so after
+you edit the body, run the job again.
 
 ## Review
 

@@ -13,7 +13,8 @@ fixes and docs check. Every requirement of the 16 criteria, MUST,
 SHOULD and OPTIONAL, was checked again against the Standard's own list
 at `bc5a0a83` (3.10.1 and #165). The changes up to `befdae42` were
 checked the same day. #178 has since added the workflows' lint to CI,
-which criterion 12 names.
+which criterion 12 names, and the pull request template has since
+dropped its checklist for the author.
 
 It replaces the assessments of 2026-10-16 (`main` at `2b780237`,
 2.1.1, #78) and 2026-10-11 (the branch `standard-for-public-code`, on
@@ -425,19 +426,18 @@ They need checking again before anything relies on them.
     from commits already merged.
   - A decided gap while there's one maintainer (decision 12).
 - MUST, partial — reviews cover the source, the policy, the tests and
-  the docs, as CONTRIBUTING.md and the pull request template say, but
-  no one but the author has reviewed a change yet. A decided gap.
+  the docs, as CONTRIBUTING.md says, but no one but the author has
+  reviewed a change yet. A decided gap.
 - MUST, met — a written reason for every declined contribution,
   required by GOVERNANCE.md and CONTRIBUTING.md, public by decision 13.
   No pull request has been closed without a merge since 2026-10-13, so
   the rule's had nothing new to apply to.
 - SHOULD, met — review checks the standards, the architecture and the
-  decisions: the template's checklist for the author, CONTRIBUTING.md's
-  review checklist for the reviewer. `npm run check:boundaries`
-  enforces the import rules. Since 2.0.0, CI runs
-  `npm run check:breaking`, which fails a change to
+  decisions: CONTRIBUTING.md's review checklist for the reviewer.
+  `npm run check:boundaries` enforces the import rules. Since 2.0.0, CI
+  runs `npm run check:breaking`, which fails a change to
   [the public API](releasing.md#the-public-api) that no commit calls
-  breaking, and the template asks whether a change breaks it.
+  breaking.
 - SHOULD, partial — review runs the software and the tests. CI runs
   every gating test on every pull request, a fork's too, and again in
   the merge queue ([testing.md](testing.md#the-merge-queue)). The
@@ -619,9 +619,8 @@ They need checking again before anything relies on them.
   maintainer, with 26 releases since 2026-10-13, 18 since 2.1.1, a
   thin margin (criterion 7).
 - SHOULD, met — test results are public, a fork's pull request's too.
-- SHOULD, met — one issue per pull request, as CONTRIBUTING.md and the
-  pull request template ask; `npm run check:closes` checks that a pull
-  request closes its issue.
+- SHOULD, met — one issue per pull request, as CONTRIBUTING.md asks;
+  `npm run check:closes` checks that a pull request closes its issue.
 - SHOULD, partial — coverage monitored. Each package's test coverage is
   in the CI run's summary, and `npm run check:docs` checks that every
   page in `docs/` is in [the docs' index](docs.ttl). Nothing measures

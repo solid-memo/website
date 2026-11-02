@@ -74,17 +74,15 @@ describe("prose", () => {
 });
 
 describe("isOneStep", () => {
-  const box = "- [x] **One step.** This pull request does not finish its issue.";
-
-  it("takes a checked One step box with a Refs line", () => {
-    expect(isOneStep(`Refs: #95\n\n${box}`)).toBe(true);
-    expect(isOneStep(`Refs #95\n\n${box.replace("[x]", "[X]")}`)).toBe(true);
+  it("takes a Refs line that names the issue", () => {
+    expect(isOneStep("Refs: #95")).toBe(true);
+    expect(isOneStep("Why.\n\nrefs #95")).toBe(true);
   });
 
-  it("wants both the box checked and the issue named", () => {
-    expect(isOneStep(`Refs: #95\n\n${box.replace("[x]", "[ ]")}`)).toBe(false);
-    expect(isOneStep(`Refs: #\n\n${box}`)).toBe(false);
-    expect(isOneStep("Refs: #95")).toBe(false);
+  it("wants the issue named", () => {
+    expect(isOneStep("Refs: #")).toBe(false);
+    expect(isOneStep("Refs: 95")).toBe(false);
+    expect(isOneStep("Prefs: #95")).toBe(false);
   });
 });
 
@@ -105,7 +103,7 @@ describe("verdict", () => {
   });
 
   it("passes one step of an issue", () => {
-    expect(verdict("Refs: #95\n\n- [x] **One step.** Not the last.", plain)).toEqual({
+    expect(verdict("Not the last step.\n\nRefs: #95", plain)).toEqual({
       note: "The pull request is one step of its issue, which stays open (Refs:).",
     });
   });
@@ -120,21 +118,20 @@ describe("verdict", () => {
     ).toBeDefined();
   });
 
-  it("fails a pull request that only refers to its issue", () => {
-    const { problem } = verdict("Refs: #95", plain);
+  it("fails a pull request whose body names no issue, though a commit refers to it", () => {
+    const { problem } = verdict("Why.", plain);
     expect(problem).toMatch(/^Neither the pull request's body nor any commit closes an issue\./);
     expect(problem).toContain("`Closes: #NN`");
     expect(verdict(undefined, plain).problem).toMatch(/^Neither any commit closes an issue\./);
   });
 
-  it("does not take a keyword or a One step box in a comment or in code", () => {
-    const step = "- [x] **One step.** Not the last.";
+  it("does not take a keyword or a Refs line in a comment or in code", () => {
     for (const body of [
-      "<!-- Closes: #95 -->\nRefs: #95",
-      "The hint now reads `Closes: #42`.\n\nRefs: #95",
-      "```\nFixes #12\n```\n\nRefs: #95",
-      `Refs: #95\n\n<!--\n${step}\n-->`,
-      `Refs: #95\n\n\`\`\`\n${step}\n\`\`\``,
+      "<!-- Closes: #95 -->",
+      "The hint now reads `Closes: #42`.",
+      "```\nFixes #12\n```",
+      "<!--\nRefs: #95\n-->",
+      "```\nRefs: #95\n```",
     ]) {
       expect(verdict(body, plain).problem).toBeDefined();
     }
@@ -147,11 +144,8 @@ describe("verdict", () => {
     );
   });
 
-  it("takes the template's One step box, checked, with Refs", () => {
-    const step = TEMPLATE.replace("Closes: #\n", "Refs: #95\n").replace(
-      "- [ ] **One step.**",
-      "- [x] **One step.**",
-    );
+  it("takes the template with Refs for one step", () => {
+    const step = TEMPLATE.replace("Closes: #\n", "Refs: #95\n");
     expect(step).not.toBe(TEMPLATE);
     expect(verdict(step, plain).problem).toBe(undefined);
   });
