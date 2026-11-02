@@ -98,6 +98,14 @@ export const MAX_DELIMITERS = 2_000;
 export const MAX_UNDERLINES = 200;
 
 /**
+ * The most picture openers (`![`) a text may hold. A picture may hold
+ * another in its text, and the parser takes time quadratic in how deep
+ * they nest, so a text past it is shown as plain text. Each `![` counts,
+ * in code or escaped too, so the count errs high.
+ */
+export const MAX_IMAGES = 200;
+
+/**
  * The most block quotes and list items a text may open inside a list
  * item (`- - a`, `- > a`, a list item indented under another), and the
  * most lines of one paragraph inside a block quote or list item that
@@ -171,8 +179,8 @@ function marker(control: string): string {
 /**
  * The text read as Markdown, as blocks; null when it is longer than
  * MAX_CHARS, or past MAX_LOOKAHEAD, MAX_LINE_NESTING, MAX_NESTED_LINES,
- * MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS or MAX_UNDERLINES,
- * to be shown as plain text instead.
+ * MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS, MAX_UNDERLINES or
+ * MAX_IMAGES, to be shown as plain text instead.
  */
 export function parseMarkdown(text: string): MdBlock[] | null {
   const tree = read(text);
@@ -192,8 +200,8 @@ export function parseMarkdown(text: string): MdBlock[] | null {
  * DocumentError instead: raw HTML, a picture, a link reference
  * definition, what nests past MAX_DEPTH, a table past its caps, and a
  * text past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
- * MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS or MAX_UNDERLINES. So a page
- * shows as it is written, or its build fails and says where.
+ * MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS, MAX_UNDERLINES or MAX_IMAGES.
+ * So a page shows as it is written, or its build fails and says where.
  */
 export function parseDocument(text: string): DocBlock[] {
   const costly = tooCostly(text);
@@ -458,8 +466,8 @@ class LazyLines {
 /**
  * Why the parser would take too long on the text, and on which line (from
  * 1) when one says it; null when it would not: see MAX_LINE_NESTING,
- * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS
- * and MAX_UNDERLINES.
+ * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS,
+ * MAX_UNDERLINES and MAX_IMAGES.
  */
 function tooCostly(text: string): { what: string; line: number | null } | null {
   if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS)
@@ -469,6 +477,8 @@ function tooCostly(text: string): { what: string; line: number | null } | null {
       what: `more than MAX_UNDERLINES (${MAX_UNDERLINES}) lines that could underline a heading`,
       line: null,
     };
+  if (text.split("![").length - 1 > MAX_IMAGES)
+    return { what: `more than MAX_IMAGES (${MAX_IMAGES}) picture openers ![`, line: null };
   let nested = 0;
   let quotes = 0;
   const lazy = new LazyLines();
