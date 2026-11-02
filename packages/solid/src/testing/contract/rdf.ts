@@ -85,7 +85,6 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     isEmptyDataset,
     localNameOf,
     propertiesOf,
-    removeThing,
     removeThings,
     setThing,
     setThings,
@@ -195,7 +194,7 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     const front = (subject: Rdf.Subject, value: string) =>
       buildThing(subject).addStringNoLocale(`${EX}front`, value).build();
 
-    it("set and remove subjects as setThing and removeThing do, one at a time", async () => {
+    it("set and remove subjects in one call as one call per subject does", async () => {
       const base = await read();
       const a = getThing(base, `${URL_}#a`)!;
       const c = front(createThing({ url: `${URL_}#c` }), "Finland");
@@ -204,7 +203,7 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       const removed = [c, `${URL_}#b`, `${URL_}#absent`, named.url];
       const once = removeThings(setThings(base, set), removed);
       const fold = removed.reduce<Rdf.Dataset>(
-        (dataset, subject) => removeThing(dataset, subject),
+        (dataset, subject) => removeThings(dataset, [subject]),
         set.reduce<Rdf.Dataset>((dataset, subject) => setThing(dataset, subject), base),
       );
       expect(stateOf(once)).toEqual(stateOf(fold));
@@ -212,7 +211,7 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       // Edited again: what was removed and is set again, and what was set and is removed, is no change.
       const b = front(createThing({ url: `${URL_}#b` }), "Norway");
       const again = removeThings(setThings(once, [b]), [`${URL_}#a`]);
-      expect(stateOf(again)).toEqual(stateOf(removeThing(setThing(fold, b), `${URL_}#a`)));
+      expect(stateOf(again)).toEqual(stateOf(removeThings(setThing(fold, b), [`${URL_}#a`])));
     });
 
     it("give the dataset itself for no subject", async () => {
@@ -224,9 +223,6 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     it("look for a subject given by its name's IRI as text only in a dataset of a document", () => {
       const named = front(createThing({ name: "d" }), "Denmark");
       const built = setThing(createSolidDataset(), named);
-      expect(stateOf(removeThings(built, [named.url]))).toEqual(
-        stateOf(removeThing(built, named.url)),
-      );
       expect(getThingAll(removeThings(built, [named.url]))).toEqual([]);
     });
   });
