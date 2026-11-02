@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.26.1](https://github.com/solid-memo/website/compare/v6.26.0...v6.26.1) (2026-11-02)
+
+### Bug Fixes
+
+* **solid:** refuse long relative or dotted IRIs in a Turtle text ([9d8b66d](https://github.com/solid-memo/website/commit/9d8b66d749a79accc42450fdd93f2c797df3beec))
+
 ## [6.26.0](https://github.com/solid-memo/website/compare/v6.25.18...v6.26.0) (2026-11-02)
 
 ### Features
