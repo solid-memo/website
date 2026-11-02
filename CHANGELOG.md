@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.27.0](https://github.com/solid-memo/website/compare/v6.26.3...v6.27.0) (2026-11-02)
+
+### Features
+
+* **ui:** turn the today strip gold when the day's study is done ([190def8](https://github.com/solid-memo/website/commit/190def88870990fa3909d3430bf447c733db87b5)), closes [#523](https://github.com/solid-memo/website/issues/523)
+
 ## [6.26.3](https://github.com/solid-memo/website/compare/v6.26.2...v6.26.3) (2026-11-02)
 
 ### Bug Fixes
