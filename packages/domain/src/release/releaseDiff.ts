@@ -4,6 +4,7 @@
 
 import { LATEST_VERSION, type CardV7 } from "@solid-memo/vocab/types.generated";
 import type { Card, Deck } from "../deck.ts";
+import type { LibraryDeck } from "../library.ts";
 import { cardContentFromRecord } from "../deckRecord.ts";
 import { sameKeywords } from "../keywords.ts";
 import { sameText } from "../langText.ts";
@@ -148,9 +149,14 @@ function changeOf(
 /**
  * What the draft changes of the release it follows (`previous`): what
  * it says of itself, and each chapter, step, card and wrong option it
- * adds, changes, retires or restores.
+ * adds, changes, retires or restores. `listed` is the draft's listing
+ * (draftLibraryDeck), when already made.
  */
-export function releaseDiff(previous: ReleaseDraft, draft: ReleaseDraft): ReleaseDiff {
+export function releaseDiff(
+  previous: ReleaseDraft,
+  draft: ReleaseDraft,
+  listed: LibraryDeck = draftLibraryDeck(draft),
+): ReleaseDiff {
   // The release's subjects at the draft's address, so the links between them compare.
   const before = rebaseDraft(previous, draft.url);
   const subjects: SubjectChange[] = [];
@@ -165,7 +171,7 @@ export function releaseDiff(previous: ReleaseDraft, draft: ReleaseDraft): Releas
       else subjects.push(change);
     }
   }
-  const [a, b] = [draftLibraryDeck(before), draftLibraryDeck(draft)];
+  const [a, b] = [draftLibraryDeck(before), listed];
   const same: Record<ReleaseDetail, boolean> = {
     course: before.course === draft.course,
     title: sameText(a.title, b.title),
@@ -205,14 +211,16 @@ const LEARNER = "https://learner.solid-memo.invalid/solid-memo/";
  * import makes it, the learner having changed nothing, every card
  * there (a course's learner having reached every question) and, of a
  * course, every chapter completed. Nothing is written: the plan is what
- * learners' decks would get.
+ * learners' decks would get. `listed` is the draft's listing
+ * (draftLibraryDeck), when already made.
  */
 export function simulateLearnerUpgrade(
   previous: ReleaseDraft,
   draft: ReleaseDraft,
+  listed: LibraryDeck = draftLibraryDeck(draft),
 ): LearnerUpgrade {
   const from = draftLibraryContent(previous);
-  const to = draftLibraryContent(draft);
+  const to = draftLibraryContent(draft, listed);
   const newer = Number(to.version) > Number(from.version);
   const course = previous.course || draft.course;
   const cardsDocumentUrl = `${LEARNER}decks/learner.ttl`;
@@ -241,7 +249,7 @@ export function simulateLearnerUpgrade(
         cards,
         from,
         to,
-        releases: draftLibraryDeck(draft).releases,
+        releases: listed.releases,
         course,
       })
     : null;

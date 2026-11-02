@@ -8,7 +8,7 @@ import { CARD_FORMAT_VERSION, type Distractor } from "../deck.ts";
 import { distractorFromRecord, libraryCardFromRecord } from "../deckRecord.ts";
 import { copyKeywords } from "../keywords.ts";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent, LibrarySource } from "../library.ts";
-import { iriIn, type ReleaseDraft } from "./releaseDraft.ts";
+import { iriIn, type ReleaseDraft, triplesBySubject } from "./releaseDraft.ts";
 import { DCTERMS_NS } from "./releaseModel.ts";
 
 /**
@@ -16,14 +16,18 @@ import { DCTERMS_NS } from "./releaseModel.ts";
  * The listing preview): the LibraryDeck its learners would see, built
  * from the draft alone. It is the only release of its series here, its
  * cards those in use, its authors named by the agents the draft
- * describes, and its sources by what the draft says of them.
+ * describes, and its sources by what the draft says of them, gathered
+ * in one pass over its statements.
  */
 export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
   const { root } = draft;
   const names = new Map(draft.agents.map((agent) => [iriIn(draft, agent.id), agent.data.name]));
+  // A source named twice is listed once, as the release's statements would name it.
+  const sources = new Set(root.wasDerivedFrom);
+  const saying = triplesBySubject(draft.triples, sources);
   const said = (subject: string, predicate: string) =>
-    draft.triples
-      .filter((triple) => triple.subject === subject && triple.predicate === predicate)
+    (saying.get(subject) ?? [])
+      .filter((triple) => triple.predicate === predicate)
       .map((triple) => triple.object);
   const version = root.version ?? "1";
   return {
@@ -51,7 +55,7 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
     direction: directionOfConcept(root.studyDirection)!,
     ...(root.created === undefined ? {} : { createdAt: root.created }),
     ...(root.modified === undefined ? {} : { modifiedAt: root.modified }),
-    sources: root.wasDerivedFrom.map((url): LibrarySource => {
+    sources: [...sources].map((url): LibrarySource => {
       const title = said(url, `${DCTERMS_NS}title`).find((term) => term.kind === "literal");
       const license = said(url, `${DCTERMS_NS}license`).find((term) => term.kind === "iri");
       return {
@@ -73,8 +77,12 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
  * shows it (draftLibraryDeck), and every card, retired ones too, each
  * with its wrong options. A card or a wrong option without text is left
  * out, as a reader leaves out one that does not fit its shape.
+ * `listed` is the draft's listing, when already made.
  */
-export function draftLibraryContent(draft: ReleaseDraft): LibraryDeckContent {
+export function draftLibraryContent(
+  draft: ReleaseDraft,
+  listed: LibraryDeck = draftLibraryDeck(draft),
+): LibraryDeckContent {
   const {
     url,
     releases: _releases,
@@ -84,7 +92,7 @@ export function draftLibraryContent(draft: ReleaseDraft): LibraryDeckContent {
     createdAt: _createdAt,
     isCourse,
     ...about
-  } = draftLibraryDeck(draft);
+  } = listed;
   const options = new Map(draft.distractors.map((node) => [iriIn(draft, node.id), node.data]));
   const distractorsOf = (iris: readonly string[]): Distractor[] =>
     iris
