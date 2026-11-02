@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.26.0](https://github.com/solid-memo/website/compare/v6.25.18...v6.26.0) (2026-11-02)
+
+### Features
+
+* **ui:** zoom an enlarged picture on its own, closing it only on purpose ([886ec06](https://github.com/solid-memo/website/commit/886ec063d0e5b6b12369cf7af71a357d40254002)), closes [#508](https://github.com/solid-memo/website/issues/508)
+
 ## [6.25.18](https://github.com/solid-memo/website/compare/v6.25.17...v6.25.18) (2026-11-02)
 
 ### Bug Fixes
