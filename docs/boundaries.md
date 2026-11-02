@@ -127,7 +127,7 @@ library could take their place there alone
 | [interface.ts](../packages/solid/src/client/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type; it imports no library |
 | [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built, many subjects set or removed in one pass |
 | [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, for `resources.ts` and `rdf.ts` alone |
-| [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bound every read keeps on a Turtle text's base and prefix declarations, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
+| [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bound every read keeps on a Turtle text's base and prefix declarations and on the long IRIs the parser resolves, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
 | [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, conditional reads and writes among them, and the Turtle and JSON-LD parsers |
 | [sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests; it imports no library |
 | [inrupt.ts](../packages/solid/src/client/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |
@@ -309,10 +309,12 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
 - **A read past its limits** fails with a `ReadLimitError`. So does
   a document the app reads into a dataset whose Turtle text has too
   many bases, a base that's too long or not plain, or too many
-  prefixes, with limits or with none. That holds for a deck's
-  documents, a folder's listing and a profile alike. The document's own
-  address counts toward a base's length, so a document of the user's
-  at an address longer than 512 characters can't be read. Nor can one
+  prefixes, with limits or with none. So does one with an IRI longer
+  than 512 characters that's relative or may hold a `.` or `..`
+  segment. That holds for
+  a deck's documents, a folder's listing and a profile alike. The
+  document's own address counts toward a base's length, so a document
+  of the user's at an address longer than 512 characters can't be read. Nor can one
   another app wrote with a base that has a `.` or `..` segment, unless
   it's a relative path with no colon, such as `<./>`: the parser
   removes those as it resolves it. The library's own reads of

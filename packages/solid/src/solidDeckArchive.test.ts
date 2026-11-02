@@ -377,6 +377,17 @@ describe("readDeckFile", () => {
     });
   });
 
+  it("refuses a deck file with a long IRI the parser resolves, with limits or with none, before it is parsed", async () => {
+    const dotted = `/${"x/".repeat(225_000)}${"y/../".repeat(112_500)}`;
+    const text = `<${dotted}> <https://e.example/p> "v" .\n`;
+    await expect(parseDeckFile(text, "turtle", base)).rejects.toMatchObject({
+      code: "deckFileTooLarge",
+    });
+    await expect(parseDeckFile(text, "turtle", base, null)).rejects.toMatchObject({
+      code: "deckFileUnreadable",
+    });
+  });
+
   it("reads JSON-LD written by hand, its context inline", async () => {
     const json = JSON.stringify({
       "@context": [{ sm: SM_NS }, { dcterms: "http://purl.org/dc/terms/" }],

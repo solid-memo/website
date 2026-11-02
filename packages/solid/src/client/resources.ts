@@ -71,9 +71,10 @@ async function answered<T>(request: () => Promise<T>): Promise<T> {
 /**
  * The document at `url`, as a dataset, read as getSolidDatasetLinear
  * reads it: under the limits of a response limitedFetch gave, and always
- * under the bound on a Turtle text's declarations (writeTurtle), so that
- * a container's listing, a profile or any other document is parsed as
- * the documents of a deck are. With no fetch, the global one.
+ * under the bound on a Turtle text's declarations and IRIs
+ * (writeTurtle), so that a container's listing, a profile or any other
+ * document is parsed as the documents of a deck are. With no fetch, the
+ * global one.
  */
 export function getSolidDataset(url: string, options?: RequestOptions): Promise<FetchedDataset> {
   return getSolidDatasetLinear(url, {
@@ -363,8 +364,8 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * text names. Rejects with the parser's error on a text that does not
  * parse, and with a ReadLimitError at the first quad past `limits`
  * (quadTally; the text's own size is its caller's to check: it holds the
- * text already), or on a Turtle text at its first base or prefix past
- * what a read takes in, with limits or with none (writeTurtle); the
+ * text already), or on a Turtle text at its first base, prefix or IRI
+ * past what a read takes in, with limits or with none (writeTurtle); the
  * parser reads no further. JSON-LD is read with no
  * fetch at all: a context named by its address is refused (parseJsonLd).
  */

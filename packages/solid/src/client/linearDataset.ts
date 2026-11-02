@@ -40,8 +40,8 @@ const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
  * limits (readLimits.ts) is parsed under them too: past its triples, or
  * the characters of their terms, the read fails with a ReadLimitError
  * before any of it is built. A Turtle text whose base or prefix
- * declarations are past what a read takes in fails so too, read under
- * limits or with none (writeTurtle).
+ * declarations or IRIs are past what a read takes in fails so too, read
+ * under limits or with none (writeTurtle).
  */
 export async function getSolidDatasetLinear(
   url: string,
@@ -78,9 +78,9 @@ interface Collected {
  * solid-client's Turtle parser, whose quads go to `collected` instead of
  * to solid-client; one past the limits of the read of `url` (quadTally)
  * fails the parse instead, once, and drops what was kept, as does a
- * base or prefix past what any read takes in (writeTurtle). The text is
- * written to the parser in parts, so that it reads no further than the
- * part it is in.
+ * base, prefix or IRI past what any read takes in (writeTurtle). The
+ * text is written to the parser in parts, so that it reads no further
+ * than the part it is in.
  */
 function collectingTurtleParser(collected: Collected, url: string): Parser {
   const parser = getTurtleParser();

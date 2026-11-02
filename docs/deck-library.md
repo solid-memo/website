@@ -968,8 +968,13 @@ flowchart LR
   512 characters (`writeTurtle`). It's refused there too when a base
   it declares has an empty segment in its path, or a `.` or `..` one
   but in a relative path with no colon. So it is when it declares a
-  prefix (`@prefix`, `PREFIX`) for the 4,097th time. The
-  length bound is the longest of the release's address and the
+  prefix (`@prefix`, `PREFIX`) for the 4,097th time. So it is at an
+  IRI longer than 512 characters, in a triple or a prefix, that's
+  relative or may hold a `.` or `..` segment, as written or escaped.
+  The parser removes those segments as it resolves such an IRI, in
+  time growing with the square of its length, before it makes a triple
+  to count. A long absolute IRI with no such segment it keeps as it's
+  written. The length bound is the longest of the release's address and the
   absolute bases it declares, with each relative one added on. The
   parser walks the whole base for each relative IRI, base and prefix it
   resolves, and a declaration makes no triple to count. The search

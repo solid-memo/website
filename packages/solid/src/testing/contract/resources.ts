@@ -263,7 +263,9 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         name: "ReadLimitError",
         url: URL_,
         limits: NO_SIZE_LIMITS,
-        message: expect.stringContaining("declarations than a read takes in"),
+        message: expect.stringContaining(
+          "declarations, or longer IRIs to resolve, than a read takes in",
+        ),
       });
       for (const read of [
         () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
@@ -374,6 +376,63 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       for (const limits of [undefined, RELEASE_LIMITS]) {
         const [quad] = await parseQuads(text, "turtle", URL_, limits);
         expect(quad?.subject.value).toBe(subject);
+      }
+    });
+
+    it("refuses a document at a long IRI the parser resolves, in a triple or a prefix, with limits or with none, and reads a long absolute one", async () => {
+      // A path that goes up and down, which the parser walks again for each segment that goes up.
+      const dotted = (length: number) => `/${"x/".repeat(length / 4)}${"y/../".repeat(length / 8)}`;
+      for (const past of [
+        `<${dotted(900_000)}> <${EX}p> "v" .\n`,
+        `@prefix p: <${dotted(900_000)}> .\np:a <${EX}p> "v" .\n`,
+      ]) {
+        const fetch = limitedFetch(turtleAt(past), RELEASE_LIMITS);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(past, "turtle", URL_, RELEASE_LIMITS),
+        ]) {
+          await expect(read()).rejects.toMatchObject({
+            name: "ReadLimitError",
+            url: URL_,
+            limits: RELEASE_LIMITS,
+          });
+        }
+        // A text from the user's own pod, read with no limits, is held to as short an IRI.
+        for (const read of [
+          () => parseQuads(past, "turtle", URL_),
+          () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
+          () => getSolidDataset(URL_, { fetch: turtleAt(past) }),
+        ]) {
+          await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+        }
+      }
+      const long = `https://pod.example/${"a".repeat(5_000)}`;
+      const within = `<${long}> <${EX}p> <${"y/../".repeat(100)}b> .\n`;
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const [quad] = await parseQuads(within, "turtle", URL_, limits);
+        expect(quad?.subject.value).toBe(long);
+        expect(quad?.object.value).toBe("https://pod.example/decks/b");
+      }
+    });
+
+    it("refuses a long IRI with dot segments in time that grows with it, not its square", async () => {
+      const dotted = (count: number) =>
+        `<${"x/".repeat(count)}${"y/../".repeat(count)}> <${EX}p> "v" .\n`;
+      for (const read of [
+        (text: string) => parseQuads(text, "turtle", URL_, RELEASE_LIMITS),
+        (text: string) => parseQuads(text, "turtle", URL_),
+      ]) {
+        // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
+        const ratio = await growthAsync(
+          (count) => {
+            const text = dotted(count);
+            return () => read(text).catch(() => undefined);
+          },
+          20_000,
+          8,
+        );
+        expect(ratio).toBeLessThan(4);
       }
     });
 

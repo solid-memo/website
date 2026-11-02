@@ -219,7 +219,7 @@ export function parseDeckFile(
   return parseQuads(checked, format, baseUrl, limits ?? undefined).then(
     (parsed) => parsed.filter((quad) => quad.graph.termType === "DefaultGraph"),
     (error: unknown) => {
-      // With no limits, a text is refused only for its declarations (writeTurtle), not its size.
+      // With no limits, a text is refused only for its declarations and IRIs (writeTurtle), not its size.
       if (error instanceof ReadLimitError && limits !== null) throw tooLarge();
       throw new AppError("deckFileUnreadable", { reason: String(error) });
     },
