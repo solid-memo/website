@@ -26,6 +26,8 @@ type PackageRule = Record<string, unknown> & { automerge?: boolean };
 const config = JSON5.parse(readFileSync(join(ROOT, "renovate.json5"), "utf8")) as {
   automerge?: boolean;
   vulnerabilityAlerts?: Record<string, unknown>;
+  npmrc?: string;
+  npmrcMerge?: boolean;
   npm?: { lockFileMaintenance?: Record<string, unknown> };
   "pip-compile"?: { lockFileMaintenance?: Record<string, unknown> };
   packageRules: PackageRule[];
@@ -328,6 +330,13 @@ describe("renovate.json5", () => {
     expect(maintenance?.enabled).toBe(true);
     expect(maintenance?.automerge).toBe(false);
     expect(maintenance?.schedule).toEqual(["* 0-3 * * 1"]);
+  });
+
+  it("keeps each .npmrc's settings under the npm settings it gives Renovate", () => {
+    // Without npmrcMerge, Renovate's npm would lock without the .npmrc
+    // files' 3-day wait (scripts/npmrc.test.ts).
+    expect(config.npmrc).toBe("allow-remote=all");
+    expect(config.npmrcMerge).toBe(true);
   });
 
   it("keeps npm's weekly locking apart from pip-compile's monthly one", () => {

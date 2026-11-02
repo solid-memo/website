@@ -81,6 +81,18 @@
     pip_requirements: {
         enabled: false,
     },
+    // npm 12 fetches no package that a URL names (allow-remote), yet its
+    // --package-lock-only, which Renovate locks with, opens a package with
+    // bundled dependencies, such as npm itself, by the URL its registry
+    // gives: so it refuses to lock again every lockfile that holds npm
+    // (https://github.com/npm/cli/issues/9800). Renovate's npm alone
+    // fetches from URLs again, as npm 11 did, and the lockfile it writes
+    // is read by a person before it is merged (the npm rule below).
+    // npmrcMerge keeps each .npmrc's own settings, the 3-day wait among
+    // them, under this line: without it, Renovate would use this line in
+    // their place. Remove both once an npm release fixes the issue.
+    npmrc: 'allow-remote=all',
+    npmrcMerge: true,
     // Every Monday, Renovate locks the packages in each package-lock.json
     // again, to the newest version each range allows, so that the packages
     // the dependencies need get their fixes too: an update moves only the
