@@ -13,12 +13,12 @@
  *
  * The check passes when the body or a commit since the base has one. A
  * pull request that is one step of its issue, and does not finish it,
- * passes with `Refs: #NN` in its body when it checks the template's
- * "One step" box. A security fix, made in private (SECURITY.md), has no
- * public issue to close: it passes when a commit names its advisory
- * (`GHSA-xxxx-xxxx-xxxx`), as commitlint.config.mjs lets it. Text in an HTML comment or in code does not count in
- * the body, as GitHub links no issue there; the template's own hints are
- * in a comment.
+ * passes with `Refs: #NN` in its body. A security fix, made in private
+ * (SECURITY.md), has no public issue to close: it passes when a commit
+ * names its advisory (`GHSA-xxxx-xxxx-xxxx`), as commitlint.config.mjs
+ * lets it. Text in an HTML comment or in code does not count in the
+ * body, as GitHub links no issue there; the template's own hints are in
+ * a comment.
  *
  * The commits are those from where `--head` (HEAD by default) left the
  * base to `--head`. CI names the pull request's head, as the checkout is
@@ -36,7 +36,6 @@ export type Commit = { hash: string; message: string };
 const CLOSES =
   /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?[ \t]+(?:[\w.-]+\/[\w.-]+)?(?:#|https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/issues\/)\d+\b/i;
 const REFS = /\bRefs:?[ \t]+#\d+\b/i;
-const ONE_STEP = /^\s*[-*] \[[xX]\] \*\*One step\.\*\*/m;
 /** A GitHub security advisory's id, as commitlint.config.mjs takes it. */
 const ADVISORY = /\bGHSA(?:-[23456789cfghjmpqrvwx]{4}){3}\b/;
 
@@ -61,7 +60,7 @@ export function closesAnIssue(text: string): boolean {
 
 /** Whether a body says its pull request is one step of its issue, and names it. */
 export function isOneStep(body: string): boolean {
-  return ONE_STEP.test(body) && REFS.test(body);
+  return REFS.test(body);
 }
 
 /** What the check found: a problem fails it, a note does not. */
@@ -89,7 +88,7 @@ export function verdict(
     };
   }
   return {
-    problem: `Neither ${body === undefined ? "" : "the pull request's body nor "}any commit closes an issue. Name the issue the pull request finishes with \`Closes: #NN\` (or \`Fixes:\`, \`Resolves:\`) in its body; \`Refs: #NN\` does not close it. If the pull request is one step of its issue and does not finish it, write \`Refs: #NN\` and check the template's "One step" box (CONTRIBUTING.md#commit-messages). Then run the check again.`,
+    problem: `Neither ${body === undefined ? "" : "the pull request's body nor "}any commit closes an issue. Name the issue the pull request finishes with \`Closes: #NN\` (or \`Fixes:\`, \`Resolves:\`) in its body; \`Refs: #NN\` does not close it. If the pull request is one step of its issue and does not finish it, write \`Refs: #NN\` instead (CONTRIBUTING.md#commit-messages). Then run the check again.`,
     note: "",
   };
 }
