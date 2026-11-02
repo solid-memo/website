@@ -260,13 +260,16 @@ describe("createSolidAnswerLog", () => {
     });
   });
 
-  it("lists the months it has a document for, oldest first, and none without a log", async () => {
+  it("lists the months it has a document for, oldest first, and none without a log or not of the calendar", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });
     await expect(log.months(INSTANCE)).resolves.toEqual([]);
     await log.append(INSTANCE, answer("2026-10-01"));
     await log.append(INSTANCE, answer("2026-09-21"));
     fake.documents.set(`${HISTORY}notes.ttl`, new Set());
+    // A name of the shape that is no month of the calendar is none of the log's.
+    fake.documents.set(`${HISTORY}2027-00.ttl`, new Set());
+    fake.documents.set(`${HISTORY}2027-13.ttl`, new Set());
     await expect(log.months(INSTANCE)).resolves.toEqual(["2026-09", "2026-10"]);
   });
 

@@ -1168,6 +1168,10 @@ nothing could rebuild it.
   a day is never split). A year of statistics is twelve GETs whatever
   the number of decks; reading it again is a `304` for each month that
   didn't change.
+  A document whose name isn't a month 01 to 12 of the days
+  `shiftStudyDay` keeps in order isn't one of the log's
+  (`monthOfHistoryUrl`). No read takes in a month after that of the
+  day after tomorrow: no answer counted can be in it.
   The today strip keeps a summary of each past month in the
   [digest](#the-digest).
 - **One subject per answer**, `#answer-<time>-<random>` (for one added
@@ -1237,9 +1241,9 @@ nothing could rebuild it.
   (`getStatistics`) read the months of their range. Both go through one
   cache (`readLogMonths`), which keeps each month's answers in the page
   with the version they were read at; a month is read again only once
-  it changed (`readMonthSince`, a conditional GET). A read adds to the
-  cache and never replaces it; a month the log no longer lists is
-  dropped ([statistics.md](statistics.md#loading)). An answer counts
+  it changed (`readMonthSince`, a conditional GET). Months are read six
+  at a time at most. A read adds to the cache and never replaces it; a
+  month the log no longer lists is dropped ([statistics.md](statistics.md#loading)). An answer counts
   only in its month's document. One whose study day is more than a day
   outside that month is left out (`isOfStudyMonth`; the day allows for
   the time zone), as is one whose study day isn't a real date. So is

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Deck } from "./deck";
+import { isOfStudyDayRange } from "./answer";
 import { documentUrlOf } from "./subjectUrl";
 
 /**
@@ -331,11 +332,18 @@ export function historyUrlOf(instanceUrl: string, month: string): string {
   return `${historyContainerOf(instanceUrl)}${month}.ttl`;
 }
 
-/** The study month a document of the answer log is for; null for any other resource. */
+/**
+ * The study month a document of the answer log is for; null for any
+ * other resource, and for a name that is no month of the days
+ * shiftStudyDay keeps in order (isOfStudyDayRange): "2027-00" or
+ * "2027-13" is none, and no answer is of it.
+ */
 export function monthOfHistoryUrl(instanceUrl: string, url: string): string | null {
   const container = historyContainerOf(instanceUrl);
   if (!url.startsWith(container)) return null;
-  return /^(\d{4}-\d{2})\.ttl$/.exec(url.slice(container.length))?.[1] ?? null;
+  const month = /^(\d{4}-\d{2})\.ttl$/.exec(url.slice(container.length))?.[1];
+  // Its 28th is a day of every month, and only of a month 01 to 12.
+  return month !== undefined && isOfStudyDayRange(`${month}-28`) ? month : null;
 }
 
 /**

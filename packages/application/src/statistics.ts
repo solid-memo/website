@@ -241,6 +241,28 @@ export interface DeckProgress {
   confusions: Confusion<Card>[];
 }
 
+/**
+ * The last month of the answer log a read takes in, of the study day
+ * `today`: no answer counts after tomorrow (rangeAnswers), and one of
+ * tomorrow may be in the next day's month's document (isOfStudyMonth).
+ * The log may list later months, but they hold nothing to read.
+ */
+function lastLogMonthOf(today: string): string {
+  return monthOfStudyDay(shiftStudyDay(today, 2));
+}
+
+/** A summary of each study month the answers are of (monthSummaryOf). */
+function monthSummariesOf(answers: readonly Answer[]): MonthSummary[] {
+  const byMonth = new Map<string, Answer[]>();
+  for (const answer of answers) {
+    const month = monthOfStudyDay(answer.studyDay);
+    const kept = byMonth.get(month);
+    if (kept === undefined) byMonth.set(month, [answer]);
+    else kept.push(answer);
+  }
+  return [...byMonth.values()].map(monthSummaryOf);
+}
+
 /** The first study day of the month of `today` and of the `months - 1` before it. */
 function firstDayOfMonths(today: string, months: number): string {
   const [year, month] = today.split("-").map(Number);
@@ -315,10 +337,11 @@ export function createStatisticsUseCases({
     const calendarStart = calendarStartOf(today);
     const from = first === null || !recent || first <= calendarStart ? first : calendarStart;
     const fromMonth = from === null ? null : monthOfStudyDay(from);
+    const lastMonth = lastLogMonthOf(today);
     const read = await answerStore.readMonths(
       instanceUrl,
       logged,
-      (logMonth) => fromMonth === null || logMonth >= fromMonth,
+      (logMonth) => (fromMonth === null || logMonth >= fromMonth) && logMonth <= lastMonth,
     );
     // Up to tomorrow: a later day boundary or another time zone can put
     // an answer a day after today, but no answer is given later than that.
@@ -396,29 +419,35 @@ export function createStatisticsUseCases({
       const first = firstDayOfMonths(today, 12);
       const calendarStart = calendarStartOf(today);
       const fromMonth = monthOfStudyDay(first < calendarStart ? first : calendarStart);
+      const lastMonth = lastLogMonthOf(today);
       const kept: Record<string, StoredMonthSummary> = {};
-      const summaries = await Promise.all(
-        logged
-          .filter((month) => month >= fromMonth)
-          .map(async (month): Promise<MonthSummary> => {
-            // This month changes with every answer (a month after it, only when the clock is behind).
-            if (month >= thisMonth)
-              return monthSummaryOf(
-                await answerStore.readMonths(instanceUrl, logged, (m) => m === month),
-              );
-            const document = historyUrlOf(instanceUrl, month);
-            const stored = digest.months[document];
-            const since = await answerLog.readMonthSince(instanceUrl, month, stored?.version);
-            if (since.unchanged) {
-              kept[document] = stored!;
-              return stored!.summary;
-            }
-            const summary = monthSummaryOf(since.value);
-            if (since.version !== null)
-              kept[document] = { document, version: since.version, summary };
-            return summary;
-          }),
-      );
+      const [past, current] = await Promise.all([
+        Promise.all(
+          logged
+            .filter((month) => month >= fromMonth && month < thisMonth)
+            .map(async (month): Promise<MonthSummary> => {
+              const document = historyUrlOf(instanceUrl, month);
+              const stored = digest.months[document];
+              const since = await answerLog.readMonthSince(instanceUrl, month, stored?.version);
+              if (since.unchanged) {
+                kept[document] = stored!;
+                return stored!.summary;
+              }
+              const summary = monthSummaryOf(since.value);
+              if (since.version !== null)
+                kept[document] = { document, version: since.version, summary };
+              return summary;
+            }),
+        ),
+        // This month changes with every answer (a month after it, only when
+        // the clock is behind): read in full, in one read, and summarized by month.
+        answerStore.readMonths(
+          instanceUrl,
+          logged,
+          (month) => month >= thisMonth && month <= lastMonth,
+        ),
+      ]);
+      const summaries = [...past, ...monthSummariesOf(current)];
       const before = Object.values(digest.months);
       if (
         before.length !== Object.keys(kept).length ||
@@ -478,13 +507,14 @@ export function createStatisticsUseCases({
       // months, read beside the decks' cards. Only what is hard needs them,
       // so a log that cannot be read leaves that empty, not the cards' progress.
       const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));
+      const lastMonth = lastLogMonthOf(today);
       const logged = (async () => {
         await answerStore.flush();
         const byDeck = new Map<string, Answer[]>();
         for (const answer of await answerStore.readMonths(
           instanceUrl,
           await answerLog.months(instanceUrl),
-          (month) => month >= firstMonth,
+          (month) => month >= firstMonth && month <= lastMonth,
         )) {
           const answers = byDeck.get(answer.deckUrl);
           if (answers === undefined) byDeck.set(answer.deckUrl, [answer]);
@@ -534,13 +564,13 @@ export function createStatisticsUseCases({
         preferenceStore.get(instanceUrl),
         answerLog.months(instanceUrl),
       ]);
-      const firstMonth = monthOfStudyDay(
-        firstDayOfMonths(studyDayOf(at, prefs.dayBoundaryHour), 12),
-      );
+      const today = studyDayOf(at, prefs.dayBoundaryHour);
+      const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));
+      const lastMonth = lastLogMonthOf(today);
       const answers = await answerStore.readMonths(
         instanceUrl,
         logged,
-        (month) => month >= firstMonth,
+        (month) => month >= firstMonth && month <= lastMonth,
       );
       const results = await Promise.all(
         courses.map(async (deck): Promise<CourseStatistics[]> => {

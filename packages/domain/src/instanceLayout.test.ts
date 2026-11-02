@@ -141,6 +141,11 @@ describe("the digest", () => {
     }
     expect(monthOfHistoryUrl(INSTANCE, `${INSTANCE}/history/2026-10.ttl`)).toBe("2026-10");
     expect(monthOfHistoryUrl(INSTANCE, `${INSTANCE}/history/notes.ttl`)).toBeNull();
+    // Only a month 01 to 12 of the days shiftStudyDay keeps in order.
+    expect(monthOfHistoryUrl(INSTANCE, `${INSTANCE}/history/0100-01.ttl`)).toBe("0100-01");
+    expect(monthOfHistoryUrl(INSTANCE, `${INSTANCE}/history/9999-12.ttl`)).toBe("9999-12");
+    for (const month of ["2027-00", "2027-13", "9999-99", "0099-12"])
+      expect(monthOfHistoryUrl(INSTANCE, `${INSTANCE}/history/${month}.ttl`), month).toBeNull();
     expect(monthOfHistoryUrl(INSTANCE, `${INSTANCE}/catalog.ttl`)).toBeNull();
   });
 });

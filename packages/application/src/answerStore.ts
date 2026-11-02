@@ -56,6 +56,12 @@ function schedulingOf(prefs: StudyPreferences): Scheduling {
 }
 
 /**
+ * The most months of the answer log read at once: a log of many months
+ * is not all asked for together (as instanceGraph's READS_AT_ONCE).
+ */
+const MONTH_READS_AT_ONCE = 6;
+
+/**
  * The answer log as the use cases share it: each answer graded queued
  * for the log, added after its review is saved, and each month read
  * kept with its version, read again only once it changed.
@@ -104,11 +110,35 @@ export function createAnswerStore({
   const monthReads = new Map<string, Promise<Answer[]>>();
   let logWrites = 0;
   /**
+   * A month's answers, read only when it changed since last read and
+   * kept in `known` with its version; a read already under way since the
+   * last write to the logs is shared.
+   */
+  function readLogMonth(
+    instanceUrl: string,
+    month: string,
+    known: Map<string, { version: string; answers: Answer[] }>,
+  ): Promise<Answer[]> {
+    const key = `${instanceUrl}\n${month}\n${logWrites}`;
+    const under = monthReads.get(key);
+    if (under !== undefined) return under;
+    const read = (async () => {
+      const kept = known.get(month);
+      const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
+      if (since.unchanged) return kept!.answers;
+      if (since.version === null) known.delete(month);
+      else known.set(month, { version: since.version, answers: since.value });
+      return since.value;
+    })().finally(() => monthReads.delete(key));
+    monthReads.set(key, read);
+    return read;
+  }
+  /**
    * The answers of the log's months that `wanted` keeps, of `listed` (every
    * month the log has): each month read only when it changed since last
-   * read, and kept with its version. What is kept is added to, never
-   * replaced, so a read of some months and one of all do not undo each
-   * other; a month no longer listed is dropped. A month already being
+   * read, and kept with its version, a few at a time (MONTH_READS_AT_ONCE).
+   * What is kept is added to, never replaced, so a read of some months
+   * and one of all do not undo each other; a month no longer listed is dropped. A month already being
    * read since the last write to the logs is not read twice: the
    * statistics and the cards' progress ask at once.
    */
@@ -122,23 +152,16 @@ export function createAnswerStore({
     answerMonths.set(instanceUrl, known);
     const still = new Set(listed);
     for (const month of known.keys()) if (!still.has(month)) known.delete(month);
-    const answers = await Promise.all(
-      listed.filter(wanted).map((month) => {
-        const key = `${instanceUrl}\n${month}\n${logWrites}`;
-        const under = monthReads.get(key);
-        if (under !== undefined) return under;
-        const read = (async () => {
-          const kept = known.get(month);
-          const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
-          if (since.unchanged) return kept!.answers;
-          if (since.version === null) known.delete(month);
-          else known.set(month, { version: since.version, answers: since.value });
-          return since.value;
-        })().finally(() => monthReads.delete(key));
-        monthReads.set(key, read);
-        return read;
-      }),
-    );
+    const months = listed.filter(wanted);
+    const answers: Answer[][] = [];
+    let next = 0;
+    const reader = async () => {
+      while (next < months.length) {
+        const at = next++;
+        answers[at] = await readLogMonth(instanceUrl, months[at]!, known);
+      }
+    };
+    await Promise.all(Array.from({ length: MONTH_READS_AT_ONCE }, reader));
     return answers.flat();
   }
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
