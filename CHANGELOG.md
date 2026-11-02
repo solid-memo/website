@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.25.14](https://github.com/solid-memo/website/compare/v6.25.13...v6.25.14) (2026-11-02)
+
+### Bug Fixes
+
+* **domain:** bound the document addresses the Studio graph draws ([9dde2c0](https://github.com/solid-memo/website/commit/9dde2c09f66674ead008390835ac728de85faea4))
+* **studio:** reuse a kept graph layout only for the same graph ([a89f652](https://github.com/solid-memo/website/commit/a89f652b2400407ed8c53891fa2306b17a788e66))
+
 ## [6.25.13](https://github.com/solid-memo/website/compare/v6.25.12...v6.25.13) (2026-11-02)
 
 ### Bug Fixes
