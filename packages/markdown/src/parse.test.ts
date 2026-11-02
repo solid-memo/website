@@ -7,6 +7,7 @@ import {
   MAX_CHARS,
   MAX_DELIMITERS,
   MAX_DEPTH,
+  MAX_IMAGES,
   MAX_LAZY_LINES,
   MAX_LINE_NESTING,
   MAX_LISTS,
@@ -374,7 +375,8 @@ describe("parseMarkdown", () => {
       ["<!a", ahead(3, 0)],
       ["<?a", ahead(3, 0)],
       ["<!--", ahead(4, 0)],
-      ["<![CDATA[", ahead(9, 0)],
+      // Spread out, so its `![`s stay within MAX_IMAGES.
+      [`<![CDATA[${"a".repeat(18)}`, ahead(27, 0)],
       ["[](b (", ahead(6, 1)],
       // An escaped run opens one a backtick shorter, which never closes; the run itself closes at the next.
       ["\\``", (k: number) => ahead(3, 1)(k) + 3 * k - 1],
@@ -578,6 +580,21 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown(`${"*_".repeat(MAX_DELIMITERS / 2)}*`)).toBeNull();
   });
 
+  it("reads nothing past MAX_IMAGES picture openers, nested or not", () => {
+    const nested = (depth: number) => "![".repeat(depth) + "](b)".repeat(depth);
+    expect(parseMarkdown(nested(MAX_IMAGES))).not.toBeNull();
+    expect(parseMarkdown(nested(MAX_IMAGES + 1))).toBeNull();
+    expect(parseMarkdown("![a](b) ".repeat(MAX_IMAGES))).not.toBeNull();
+    expect(parseMarkdown("![a](b) ".repeat(MAX_IMAGES + 1))).toBeNull();
+    // In a link's text, with no destination, or never closed, each `![` counts.
+    expect(parseMarkdown(`[${nested(MAX_IMAGES + 1)}](c)`)).toBeNull();
+    expect(
+      parseMarkdown(`${"![".repeat(MAX_IMAGES + 1)}a${"]()".repeat(MAX_IMAGES + 1)}`),
+    ).toBeNull();
+    expect(parseMarkdown("![".repeat(MAX_IMAGES + 1))).toBeNull();
+    expect(inspectMarkdown(nested(MAX_IMAGES + 1))).toBeNull();
+  });
+
   it("reads nothing past MAX_UNDERLINES lines that could underline a heading", () => {
     expect(
       parseMarkdown("a\n=\n".repeat(MAX_UNDERLINES / 2) + "b\n---\n".repeat(MAX_UNDERLINES / 2)),
@@ -744,6 +761,10 @@ describe("parseDocument", () => {
       line: null,
     });
     expect(underlines.message).toBe(underlines.what);
+    expect(refusal("![a](b)\n".repeat(MAX_IMAGES + 1))).toMatchObject({
+      what: `more than MAX_IMAGES (${MAX_IMAGES}) picture openers ![`,
+      line: null,
+    });
     expect(refusal(`ok\n${"- ".repeat(MAX_LINE_NESTING + 1)}a`)).toMatchObject({
       what: `more than MAX_LINE_NESTING (${MAX_LINE_NESTING}) quotes and list items opened on one line`,
       line: 2,
@@ -973,6 +994,14 @@ describe("pathological input", () => {
     ["emphasis delimiters at the cap", fill("a", "*_".repeat(MAX_DELIMITERS / 2))],
     ["unclosed links", fill("[")],
     ["unclosed images", fill("![")],
+    ["images nested in images", fill("](b)", "![".repeat(3333))],
+    [
+      "images nested in images at the cap",
+      fill("a", `${"![".repeat(MAX_IMAGES)}${"](b)".repeat(MAX_IMAGES)}`),
+    ],
+    ["images nested in a link's text", fill("](b)", `[${"![".repeat(3333)}`)],
+    ["images nested in images, with no destination", fill("]()", `${"![".repeat(3333)}a`)],
+    ["links and images nested in turn", fill("](b)", "[![".repeat(1000))],
     ["link openers and closers", fill("[a](")],
     ["emphasis openers", fill("*a ")],
     ["mixed delimiters", fill("*_")],

@@ -178,6 +178,11 @@ blank.
   a line after one is text and doesn't count. The parser is quadratic
   in setext headings in one container too (`a\n=\n…` at 20,000
   characters takes over a second).
+- **`MAX_IMAGES`, 200 picture openers (`![`) in a text.** A picture
+  can hold another in its text, and the parser is quadratic in how deep
+  they nest, so the limit bounds the nesting too. Each `![` counts, in
+  code or escaped as well, so the count errs high. No text in `decks/`
+  comes near it.
 - **`MAX_DEPTH`, 8.** Blocks and phrasing nested deeper show as their
   source, so every walker of the tree recurses at most 8 deep. Each
   quote, list item, paragraph, emphasis and link is a level: in seven
@@ -326,12 +331,12 @@ input at build time only, never for data:
   about 70 KB. The docs come nowhere near the other
   [limits](#limits).
 - **What data would fold, it refuses.** Raw HTML, a picture, a link
-  reference definition, what nests past `MAX_DEPTH`, a table past its
-  caps, and a text past `MAX_LINE_NESTING`, `MAX_NESTED_LINES`,
-  `MAX_LAZY_LINES`, `MAX_QUOTES`, `MAX_LISTS`, `MAX_DELIMITERS` or
-  `MAX_UNDERLINES` each throw a `DocumentError`, naming the problem's
-  first line when known. A page shows as written, or its build fails
-  and says where.
+  reference definition, what nests past `MAX_DEPTH` and a table past
+  its caps each throw a `DocumentError`. So does a text past
+  `MAX_LINE_NESTING`, `MAX_NESTED_LINES`, `MAX_LAZY_LINES`,
+  `MAX_QUOTES`, `MAX_LISTS`, `MAX_DELIMITERS`, `MAX_UNDERLINES` or
+  `MAX_IMAGES`. The error names the problem's first line when known.
+  A page shows as written, or its build fails and says where.
 
 ## Diagrams
 
