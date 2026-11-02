@@ -1091,6 +1091,8 @@
       "many": "{count} de tarjetas que has cambiado se dejan como las tienes.",
       "other": "{count} tarjetas que has cambiado se dejan como las tienes."
     },
+    "removedCards": "Tarjetas que la actualización elimina",
+    "retiredCards": "Tarjetas que la actualización retira",
     "releaseNote": "Versión {version}: {notes}",
     "update": "Actualizar a la versión {version}",
     "updating": "Actualizando…"

@@ -361,6 +361,15 @@ export interface Card extends CardContent {
    * review state, but not studied, and the Browser hides it unless asked.
    */
   retired?: true;
+  /**
+   * The library release the card was taken from (`sm:fromRelease`,
+   * outside the card format): set as the deck takes it from a release,
+   * as the deck is added, an upgrade writes it or a course's question
+   * joins the deck. A card moved or copied in (cardTransfer.ts), or one
+   * the user wrote, has none: it is the user's, which an upgrade of a
+   * deck added from a link leaves as it is (libraryUpgrade.ts).
+   */
+  fromRelease?: string;
 }
 
 /** The cards in use: all but the retired ones, which are kept but never studied. */

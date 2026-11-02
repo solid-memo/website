@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.26 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.27 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -80,6 +80,8 @@ export const SM = {
   backNote: `${SM_NS}backNote`,
   /** A wrong option to show next to the card's back when the card is asked as a multiple-choice question; a subject of the same document. A card with distractors has text on its back, the right option. (Added in 1.14. Outside the card format's version: an older reader ignores it and studies the card front to back.) */
   distractor: `${SM_NS}distractor`,
+  /** On a card of a learner's deck: the library release (a dcat:Dataset of a library deck series) the card was taken from, written as the deck takes the card from a release: as the deck is added from the library or a link, as an upgrade adds or writes the card, or as a course's question joins the deck. A card moved or copied into the deck, or one the learner wrote, names none. In a deck added from a link, an upgrade to a newer release changes, retires or removes only cards that name a release, and leaves the others as the learner has them; in a copy of a series the library's own index lists, a card that names none is matched to the releases by its id, as copies made before 1.27 name none. (Added in 1.27. On a card it is outside the card format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  fromRelease: `${SM_NS}fromRelease`,
   /** SM-2 easiness factor, never below 1.3. (Since 1.0.) */
   easeFactor: `${SM_NS}easeFactor`,
   /** Days between the last review and the next due day. (Since 1.0.) */

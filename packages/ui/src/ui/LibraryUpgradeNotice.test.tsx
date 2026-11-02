@@ -188,10 +188,13 @@ describe("LibraryUpgradeNotice", () => {
     expect(region).toHaveTextContent(
       "Capitals came from release 1; release 3 is out. Updating adds 1 card, changes 2 cards and removes 1 card. Your review history is kept, but for the cards removed. 1 card you changed is left as you have it.",
     );
+    // The card it removes, by its front, then the notes.
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "is",
       "Release 2: Added Norway.",
       "Release 3: Fixed Sweden.",
     ]);
+    expect(screen.getByText("Cards the update removes").closest("details")).toHaveAttribute("open");
     expect(props.onUpgrade).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Update to release 3" }));
     expect(props.onUpgrade).toHaveBeenCalledOnce();
@@ -202,6 +205,17 @@ describe("LibraryUpgradeNotice", () => {
     expect(screen.getByRole("region", { name: "Newer library release" })).toHaveTextContent(
       "Updating adds 1 card and retires 1 card. Your review history is kept; a retired card is kept, but no longer studied.",
     );
+  });
+
+  it("names the cards it removes and retires by their fronts, a long list folded", () => {
+    const many = Array.from({ length: 11 }, (_, at) => card(`gone-${at}`));
+    renderNotice({ plan: { ...plan, retire: [card("se")], remove: many, notes: [] } });
+    const retired = screen.getByText("Cards the update retires").closest("details")!;
+    expect(retired).toHaveAttribute("open");
+    expect(retired).toHaveTextContent("se");
+    const removed = screen.getByText("Cards the update removes").closest("details")!;
+    expect(removed).not.toHaveAttribute("open");
+    expect(removed.querySelectorAll("li")).toHaveLength(11);
   });
 
   it("says nothing of removals, kept cards or notes when there are none, and counts kept cards", () => {

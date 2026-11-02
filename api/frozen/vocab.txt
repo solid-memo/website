@@ -71,6 +71,7 @@ sm:easeFactor: property, range xsd:decimal, domain sm:ReviewState
 sm:fieldEdgeColor: property, range xsd:string, domain sm:ColorSet
 sm:firstReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
 sm:formatVersion: property, range xsd:integer
+sm:fromRelease: property, range http://www.w3.org/ns/dcat#Dataset, domain sm:Card
 sm:front: property, range xsd:string, domain sm:Card
 sm:frontImage: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Card
 sm:frontImageDescription: property, range xsd:string, domain sm:Card

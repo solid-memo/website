@@ -156,6 +156,8 @@ A value from a fixed set is a
     summary format 1 (see the answer log, below).
   - 1.26: `sm:connectedScreenSkipped`, outside `PreferencesV6`
     ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
+  - 1.27: `sm:fromRelease`, outside `CardV7`
+    ([migrations.md](migrations.md#catching-up-with-the-library)).
   - Another vocabulary's term that a shape takes moves no vocabulary
     version: card format 7 took `dcterms:subject`, what a card is about
     ([deck-library.md](deck-library.md#what-a-card-is-about)).
@@ -295,6 +297,18 @@ in use of a listed release. Since 1.17,
 course the app offers to someone with no decks yet
 ([courses.md](courses.md#the-course-for-newcomers)); without it, the
 app offers none. A pod's `catalog.ttl` never has `sm:newcomerCourse`.
+
+## A card's release
+
+Since 1.27, `sm:fromRelease` (`sm:Card` → `dcat:Dataset`) names the
+library release a card of a learner's deck was taken from: written as
+the deck is added, as an upgrade writes the card, and as a course's
+question joins the deck. A card moved or copied in, or one the learner
+wrote, names none. In a deck added from a link, an upgrade changes,
+retires or removes only cards that name a release
+([migrations.md](migrations.md#catching-up-with-the-library)). It
+belongs to no shape, like `sm:deckCardLanguage`, so `CardV7` keeps it
+untouched; a library release never carries it.
 
 ## Drafts and releases
 

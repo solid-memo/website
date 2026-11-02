@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { activeCards } from "@solid-memo/domain/deck";
+import { activeCards, type Card } from "@solid-memo/domain/deck";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
+import { CardRowFront } from "./CardFace";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 
@@ -81,10 +82,41 @@ export function historyKept(plan: LibraryUpgradePlan, t: I18n["t"]): string {
   return t("libraryUpgradeNotice.historyKept");
 }
 
+/** How many cards a list of them shows open; a longer one is folded, to open on purpose. */
+const OPEN_CARD_LIST = 10;
+
+/**
+ * The fronts of the cards an update removes or retires, under `label`,
+ * so that the user sees which of their cards it takes out of study
+ * before agreeing to it; nothing when there are none.
+ */
+function CardFronts({ label, cards }: { label: string; cards: readonly Card[] }) {
+  if (cards.length === 0) return null;
+  return (
+    <details open={cards.length <= OPEN_CARD_LIST}>
+      <summary>{label}</summary>
+      <ul>
+        {cards.map((card) => (
+          <li key={card.id}>
+            <CardRowFront
+              front={card.front}
+              back={card.back}
+              imageUrl={card.frontImageUrl}
+              imageDescription={card.frontImageDescription}
+              textFormat={card.textFormat}
+            />
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 /**
  * Tells the user the library has a newer release of their imported
- * deck, what changed in it, what updating would do to their copy, and
- * lets them do so. Nothing happens until they do.
+ * deck, what changed in it, what updating would do to their copy (the
+ * cards it removes and retires named by their fronts), and lets them do
+ * so. Nothing happens until they do.
  */
 export function LibraryUpgradeNotice({
   deckName,
@@ -117,6 +149,8 @@ export function LibraryUpgradeNotice({
         {historyKept(plan, t)}
         {plan.kept.length > 0 && ` ${t("libraryUpgradeNotice.kept", { count: plan.kept.length })}`}
       </p>
+      <CardFronts label={t("libraryUpgradeNotice.removedCards")} cards={plan.remove} />
+      <CardFronts label={t("libraryUpgradeNotice.retiredCards")} cards={plan.retire} />
       {plan.notes.length > 0 && (
         <ul>
           {plan.notes.map((note) => (

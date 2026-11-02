@@ -506,10 +506,15 @@ ${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, 
     };
   }
 
-  it("is offered with the newer release and those in between read and checked once each, none of them kept", async () => {
+  it("is offered with the copy's own release, the newer one and those in between read and checked once each, none of them kept", async () => {
     const { plan, library, validate, reads } = planning(0);
     await expect(plan()).resolves.toMatchObject({ fromVersion: "1", toVersion: "4" });
-    expect(validate.mock.calls.map(([url]) => url).sort()).toEqual([bob(2), bob(3), bob(4)]);
+    expect(validate.mock.calls.map(([url]) => url).sort()).toEqual([
+      bob(1),
+      bob(2),
+      bob(3),
+      bob(4),
+    ]);
     // v4 is read on its own first too, as the newest of the series its catalog lists, then as it is checked.
     const once = reads();
     expect([once[2], once[3], once[4]]).toEqual([1, 1, 2]);

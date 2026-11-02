@@ -236,6 +236,41 @@ describe("applyCardChanges", () => {
     expect(getThing(saved, `${deck.cardsDocumentUrl}#is`)).toBeNull();
   });
 
+  it("names the release a card was taken from where it says, and keeps the one a card names where it says none", async () => {
+    const V1 = "https://creator.example/decks/b/v1.ttl";
+    const V2 = "https://creator.example/decks/b/v2.ttl";
+    const taken = (id: string) =>
+      buildThing(createThing({ url: `${deck.cardsDocumentUrl}#${id}` }))
+        .addIri(RDF.type, SM.Card)
+        .addStringNoLocale(SM.front, id)
+        .addStringNoLocale(SM.back, id)
+        .addIri(SM.fromRelease, V1)
+        .build();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(setThing(datasetFrom(deck.cardsDocumentUrl), taken("se")), taken("dk")) as never,
+    );
+    await makeRepository().applyCardChanges(deck, {
+      save: [
+        { id: "se", front: { "": "se" }, back: { "": "Stockholm" }, fromRelease: V2 },
+        { id: "dk", front: { "": "dk" }, back: { "": "Copenhagen" } },
+        { id: "no", front: { "": "no" }, back: { "": "Oslo" } },
+      ],
+      remove: [],
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    const of = (id: string) =>
+      getUrl(getThing(saved, `${deck.cardsDocumentUrl}#${id}`)!, SM.fromRelease);
+    expect([of("se"), of("dk"), of("no")]).toEqual([V2, V1, null]);
+    // Read back, each says so.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    const read = await makeRepository().listCards(deck);
+    expect(read.map((c) => [c.id, c.fromRelease])).toEqual([
+      ["se", V2],
+      ["dk", V1],
+      ["no", undefined],
+    ]);
+  });
+
   it("writes a card whose creation time is past what a date holds as one without it", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       await datasetOfTurtle(
@@ -693,7 +728,10 @@ describe("importDeck", () => {
     expect(getStringNoLocale(sweden, SM.front)).toBe("Sweden");
     expect(getStringNoLocale(sweden, SM.back)).toBe("Stockholm");
     expect(getInteger(sweden, SM.formatVersion)).toBe(7);
+    // Each card names the release it was taken from: the series' card.
+    expect(getUrl(sweden, SM.fromRelease)).toBe(content.url);
     const afghanistan = getThing(cards, `${imported.cardsDocumentUrl}#afghanistan`)!;
+    expect(getUrl(afghanistan, SM.fromRelease)).toBe(content.url);
     expect(getStringNoLocale(afghanistan, SM.front)).toBeNull();
     expect(getUrl(afghanistan, SM.frontImage)).toBe(FLAG);
     expect(getStringNoLocale(afghanistan, SM.back)).toBe("Afghanistan");

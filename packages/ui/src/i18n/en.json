@@ -1033,6 +1033,8 @@
       "one": "{count} card you changed is left as you have it.",
       "other": "{count} cards you changed are left as you have them."
     },
+    "removedCards": "Cards the update removes",
+    "retiredCards": "Cards the update retires",
     "releaseNote": "Release {version}: {notes}",
     "update": "Update to release {version}",
     "updating": "Updating…"

@@ -1064,7 +1064,10 @@ The domain plans the transfer
   (`<new id>-d1`, `-d2`…). The status line says how many cards got a
   new id.
 - A card keeps its content, its creation time and whether it's
-  retired, and becomes the target deck's.
+  retired, and becomes the target deck's. It doesn't keep the release
+  it was taken from (`sm:fromRelease`): in the target it's the user's
+  card, which an upgrade of a deck added from a link leaves as it is
+  ([migrations.md](migrations.md#catching-up-with-the-library)).
 - Triples another app put on the card or its wrong options aren't
   copied, and a move removes them from the source with the card
   ([data-model.md](data-model.md#write-discipline)).

@@ -337,8 +337,9 @@ describe("courses", () => {
       noon,
       { recallMillis: 3100 },
     );
+    // The card names the release it was taken from, the one the deck names: the series' card.
     expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(courseDeck, {
-      save: [question],
+      save: [{ ...question, fromRelease: RELEASE }],
       remove: [],
     });
     expect(

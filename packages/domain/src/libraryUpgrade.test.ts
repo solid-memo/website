@@ -876,12 +876,88 @@ describe("upgradedCards", () => {
       ]),
       releases,
     })!;
+    // Each names the newer release as the one it was taken from: the series' card.
+    const fromRelease = `${DECKS}capitals/v2.ttl`;
     expect(upgradedCards(plan)).toEqual([
-      libraryCard("no", "Oslo"),
-      { ...libraryCard("se", "Stockholm"), retired: true },
-      { ...podCard("dk", "Copenhagen, mine"), retired: true },
-      podCard("yu", "Belgrade"),
+      { ...libraryCard("no", "Oslo"), fromRelease },
+      { ...libraryCard("se", "Stockholm"), retired: true, fromRelease },
+      { ...podCard("dk", "Copenhagen, mine"), retired: true, fromRelease },
+      { ...podCard("yu", "Belgrade"), fromRelease },
     ]);
+  });
+});
+
+describe("the user's own cards in a deck added from a link", () => {
+  const LINK = "https://creator.example/decks/";
+  const linkRelease = (version: number, cards: LibraryCard[]): LibraryDeckContent => ({
+    ...release(version, cards),
+    url: `${LINK}b/v${version}.ttl`,
+    seriesUrl: `${LINK}b/v1.ttl#series`,
+  });
+  const linkDeck: Deck = { ...deck, sourceUrl: `${LINK}b/v1.ttl` };
+  const linkReleases = [1, 2, 3].map((v) => ({ url: `${LINK}b/v${v}.ttl`, version: String(v) }));
+  /** A card the deck took from its release: it names it. */
+  const taken = (card: Card): Card => ({ ...card, fromRelease: `${LINK}b/v1.ttl` });
+  // The deck's own card "a", and a card of another deck moved in, its id kept, naming no release.
+  const cards = [taken(podCard("a", "A")), podCard("capital-of-france", "Paris")];
+  const from = linkRelease(1, [libraryCard("a", "A")]);
+  const between = [
+    linkRelease(2, [libraryCard("a", "A"), libraryCard("capital-of-france", "Paris")]),
+  ];
+  const plan = (to: LibraryDeckContent, linked = true) =>
+    planLibraryUpgrade({
+      deck: linkDeck,
+      cards,
+      from,
+      between,
+      to,
+      releases: linkReleases,
+      linked,
+    });
+
+  it.each([
+    ["leaves it out", linkRelease(3, [libraryCard("a", "A")])],
+    [
+      "says otherwise on it",
+      linkRelease(3, [libraryCard("a", "A"), libraryCard("capital-of-france", "Elsewhere")]),
+    ],
+    [
+      "retires it",
+      linkRelease(3, [
+        libraryCard("a", "A"),
+        { ...libraryCard("capital-of-france", "Paris"), retired: true },
+      ]),
+    ],
+  ])("keeps a card moved in as the user has it when a newer release %s", (_, to) => {
+    expect(plan(to)).toBeNull();
+  });
+
+  it("adds nothing at the id of a card moved in, and still upgrades the deck's own cards", () => {
+    const offer = plan(
+      linkRelease(3, [libraryCard("a", "A, fixed"), libraryCard("capital-of-france", "Lyon")]),
+    )!;
+    expect(offer).toMatchObject({
+      add: [],
+      change: [libraryCard("a", "A, fixed")],
+      remove: [],
+      retire: [],
+      kept: [],
+      gone: [],
+    });
+    expect(upgradedCards(offer)).toEqual([
+      { ...libraryCard("a", "A, fixed"), fromRelease: `${LINK}b/v3.ttl` },
+    ]);
+  });
+
+  it("removes a card the deck took from a release that a newer one leaves out", () => {
+    const offer = plan(linkRelease(3, []))!;
+    expect(offer.remove).toEqual([taken(podCard("a", "A"))]);
+  });
+
+  it("matches a card that names no release by its id in a copy of the library's own series", () => {
+    // A copy made before cards named their release: the library's releases are its to upgrade.
+    const offer = plan(linkRelease(3, [libraryCard("a", "A")]), false)!;
+    expect(offer.remove).toEqual([podCard("capital-of-france", "Paris")]);
   });
 });
 
@@ -931,7 +1007,9 @@ describe("what cards are about (subjects) in an upgrade", () => {
         about("Q3711")({ ...podCard("yu", "Belgrade"), retired: true as const }),
       ],
     });
-    expect(upgradedCards(offer)).toEqual(offer.about);
+    expect(upgradedCards(offer)).toEqual(
+      offer.about.map((card) => ({ ...card, fromRelease: now.url })),
+    );
     expect(applyLibraryUpgrade(deck, offer)).toEqual({ ...deck, sourceUrl: now.url });
     // Once written, the copy is as the release has it: planned again it only moves the deck, then offers nothing.
     const written = upgradedCards(offer) as Card[];
@@ -1038,8 +1116,11 @@ describe("what cards are about (subjects) in an upgrade", () => {
     expect(offer.retire.map((card) => card.id)).toEqual(["se"]);
     expect(offer.restore.map((card) => card.id)).toEqual(["yu"]);
     expect(upgradedCards(offer)).toEqual([
-      about("Q1754")({ ...podCard("se", "Stockholm"), retired: true }),
-      about("Q3711")(podCard("yu", "Belgrade")),
+      {
+        ...about("Q1754")({ ...podCard("se", "Stockholm"), retired: true }),
+        fromRelease: flipped.url,
+      },
+      { ...about("Q3711")(podCard("yu", "Belgrade")), fromRelease: flipped.url },
     ]);
   });
 

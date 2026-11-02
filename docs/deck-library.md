@@ -1063,7 +1063,15 @@ flowchart LR
   may have (`isPublishedReleaseUrl`, in `toStandaloneLibraryDeck`), as
   with a catalog's links, and reads the newest 16 of them at most, four
   at once, each once. A card as one left out has it counts as the
-  user's, and the upgrade keeps it.
+  user's, and the upgrade keeps it. The copy's own release is checked
+  the same way, as its creator can change it after the import.
+- Only the cards the copy took from a release are the series': each
+  names that release (`sm:fromRelease`). A card moved or copied in, or
+  one the user wrote, names none and is the user's, whatever ids the
+  releases list. The upgrade never removes, changes or retires it
+  ([migrations.md](migrations.md#catching-up-with-the-library)). The
+  notice names the cards an upgrade removes and those it retires by
+  their fronts.
 - The newer release and the ones in between are read for that plan
   alone (`DeckLibrary.linkedReads`). Together they're read under one
   release's limits (`RELEASE_LIMITS`), not each under its own, and not
@@ -1074,7 +1082,7 @@ flowchart LR
   the Studio says what the release would change couldn't be read. The
   library doesn't keep them once the plan is made, so each plan reads
   them again, the one an upgrade makes as it's applied too. The copy's
-  own release is read and kept as any other.
+  own release is read with them.
 - A copy from a link isn't given its release's new title or description
   languages when its page opens (`addReleaseLanguages`,
   [migrations.md](migrations.md)). Its release stays on the creator's

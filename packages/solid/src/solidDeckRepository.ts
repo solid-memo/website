@@ -81,8 +81,16 @@ import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
 
-/** A card to write, by its id: a new card is stamped with the time of writing. */
-type CardToWrite = CardContent & { id: string; createdAt?: string; retired?: true };
+/**
+ * A card to write, by its id: a new card is stamped with the time of
+ * writing; one with `fromRelease` names the release it was taken from.
+ */
+type CardToWrite = CardContent & {
+  id: string;
+  createdAt?: string;
+  retired?: true;
+  fromRelease?: string;
+};
 
 /** A card to write, onto the subject it has in the document now, if any. */
 interface CardWrite {
@@ -190,8 +198,9 @@ export function createSolidDeckRepository({
 
     async importDeck(instanceUrl, content): Promise<Deck> {
       const deck = newDeck(instanceUrl, content.title, content);
+      // Each card names the release it is taken from: the series', which an upgrade may change.
       const written = withCards(createSolidDataset(), deck, content.cards, (_, card) => ({
-        card,
+        card: { ...card, fromRelease: content.url },
         existing: null,
       }));
       await saveCardsDocument(deck, written.dataset, written.subjects);
@@ -870,20 +879,20 @@ export function createSolidDeckRepository({
    * The RDF subject of a card in the deck's cards document, written in
    * this app's format onto the existing subject when there is one: the
    * card's own predicates are replaced (empty text and a missing picture
-   * remove theirs), anything else on the subject survives. A new card is
-   * stamped with the time of writing.
+   * remove theirs), anything else on the subject survives, the release
+   * it was taken from (`sm:fromRelease`) too, unless the card names
+   * another. A new card is stamped with the time of writing.
    */
-  function cardThing(
-    deck: Deck,
-    card: CardContent & { id: string; createdAt?: string; retired?: true },
-    existing: NamedSubject | null,
-  ): NamedSubject {
-    return recordThing(
+  function cardThing(deck: Deck, card: CardToWrite, existing: NamedSubject | null): NamedSubject {
+    const thing = recordThing(
       `${deck.cardsDocumentUrl}#${card.id}`,
       CARD_V7,
       cardToRecord(card, card.createdAt ?? now().toISOString(), deck.cardsDocumentUrl),
       existing,
     );
+    return card.fromRelease === undefined
+      ? thing
+      : buildThing(thing).setIri(SM.fromRelease, card.fromRelease).build();
   }
 }
 

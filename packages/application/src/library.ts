@@ -216,7 +216,9 @@ export function createLibraryUseCases({
    * from a link, unless it is `known` (a LibraryCopy's). A copy from a
    * link is upgraded with releases no index lists: each is checked against
    * the library's shapes first, as the first one was (checkLinkedRelease),
-   * and planned with as that check read it. Those releases are read for
+   * and planned with as that check read it, the copy's own release too.
+   * In such a copy, only the cards that name the release they were taken
+   * from are the series' (planLibraryUpgrade's `linked`). Those releases are read for
    * the plan alone (DeckLibrary.linkedReads): under one release's limits
    * together, however many it reads, and none kept once it is made.
    */
@@ -231,14 +233,18 @@ export function createLibraryUseCases({
     // The index tells a copy of the current release, or of no older one,
     // without reading a release (thousands of cards) or the copy's cards.
     if (!offersNewerRelease(deck, series)) return null;
-    // The newer release and those in between, from a link, are read for this plan alone: kept with it, and under one
-    // release's limits together. The copy's own release is the library's to keep, as deckRelease reads it.
+    // The releases from a link, the copy's own among them, are read for this plan alone: kept with it, and under one
+    // release's limits together.
     const reads = fromLink === true ? deckLibrary.linkedReads() : deckLibrary;
     // A release from a link is checked as it is read, and that read is the one fetchLibraryDeck gives then; the
-    // releases in between and the notes come from it too, not from the series as read before.
-    const checked = fromLink === true ? await checkLinkedRelease(series.url, reads) : series;
+    // releases in between and the notes come from it too, not from the series as read before. The copy's own
+    // release is its creator's to change too: it is checked as the newer one is.
+    const [checked] = await Promise.all([
+      fromLink === true ? checkLinkedRelease(series.url, reads) : series,
+      fromLink === true ? checkLinkedRelease(deck.sourceUrl, reads) : null,
+    ]);
     const [from, to, copy] = await Promise.all([
-      deckLibrary.fetchLibraryDeck(deck.sourceUrl),
+      reads.fetchLibraryDeck(deck.sourceUrl),
       reads.fetchLibraryDeck(series.url),
       cards(),
     ]);
@@ -262,10 +268,7 @@ export function createLibraryUseCases({
     // A course's outline stays in its release: a newer one may change only that.
     const outlines =
       from.isCourse === true && to.isCourse === true
-        ? await Promise.all([
-            deckLibrary.fetchCourseOutline(from.url),
-            reads.fetchCourseOutline(to.url),
-          ])
+        ? await Promise.all([reads.fetchCourseOutline(from.url), reads.fetchCourseOutline(to.url)])
         : null;
     return planLibraryUpgrade({
       deck,
@@ -277,6 +280,8 @@ export function createLibraryUseCases({
       // A course's deck holds only the cards the learner reached: an upgrade adds none.
       course: checked.isCourse === true || from.isCourse === true,
       ...(outlines === null ? {} : { outlines: { from: outlines[0], to: outlines[1] } }),
+      // A card of a deck from a link that names no release is the user's (Card.fromRelease): left as it is.
+      linked: fromLink === true,
     });
   }
   async function importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck> {

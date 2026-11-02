@@ -1091,6 +1091,8 @@
       "many": "{count} de cartes que vous avez modifiées restent telles quelles.",
       "other": "{count} cartes que vous avez modifiées restent telles quelles."
     },
+    "removedCards": "Cartes que la mise à jour supprime",
+    "retiredCards": "Cartes que la mise à jour archive",
     "releaseNote": "Version {version} : {notes}",
     "update": "Mettre à jour vers la version {version}",
     "updating": "Mise à jour…"

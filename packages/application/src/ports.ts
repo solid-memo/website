@@ -252,7 +252,8 @@ export interface DeckRepository {
   /**
    * Create a deck with all its cards at once — one write of the cards
    * document rather than one per card — remembering the library deck it
-   * came from. The cards keep their library ids.
+   * came from. The cards keep their library ids, and each names the
+   * release it was taken from (Card.fromRelease, `content.url`).
    */
   importDeck(instanceUrl: string, content: LibraryDeckContent): Promise<Deck>;
   listCards(deck: Deck): Promise<Card[]>;
@@ -291,7 +292,9 @@ export interface DeckRepository {
   /**
    * Write cards by fragment id, new or existing (an existing card keeps
    * its creation time and triples this app does not know; a new one is
-   * made at `createdAt` when given, else now), retired or not, and
+   * made at `createdAt` when given, else now; one that names a release
+   * it was taken from, `fromRelease`, names it, else keeps the one it
+   * names, if any), retired or not, and
    * remove others, in one write of the cards document (created when
    * there is none, only if nothing is there yet). `whole` writes it as
    * one PUT of the whole document (with the same If-Match), for a bulk
@@ -305,7 +308,12 @@ export interface DeckRepository {
   applyCardChanges(
     deck: Deck,
     changes: {
-      save: (CardContent & { id: string; retired?: true; createdAt?: string })[];
+      save: (CardContent & {
+        id: string;
+        retired?: true;
+        createdAt?: string;
+        fromRelease?: string;
+      })[];
       remove: string[];
     },
     options?: { whole?: boolean; version?: string },
