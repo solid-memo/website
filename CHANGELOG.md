@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.28.1](https://github.com/solid-memo/website/compare/v6.28.0...v6.28.1) (2026-11-02)
+
+### Bug Fixes
+
+* **studio:** bound what the Studio reads of an instance's catalog ([e26d585](https://github.com/solid-memo/website/commit/e26d585dd29d8376a47f3c0daf32849c9cb5cec2))
+
 ## [6.28.0](https://github.com/solid-memo/website/compare/v6.27.0...v6.28.0) (2026-11-02)
 
 ### Features
