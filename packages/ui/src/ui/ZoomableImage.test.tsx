@@ -5,7 +5,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/preact";
 import { I18nProvider } from "./i18n";
-import { ZOOM_FALLBACK_MS, ZoomableImage } from "./ZoomableImage";
+import { DOUBLE_TAP_MS, ZOOM_FALLBACK_MS, ZoomableImage } from "./ZoomableImage";
 
 const FLAG = "https://flagcdn.com/af.svg";
 
@@ -42,6 +42,28 @@ function placePicture(box: Partial<DOMRect> = {}) {
 const layer = () => document.querySelector<HTMLElement>(".picture-zoom-layer");
 const copy = () => document.querySelector<HTMLImageElement>(".picture-zoom-image");
 
+/** A tap on the enlarged picture that waits out a second one, a single tap. */
+function tap() {
+  fireEvent.click(layer()!);
+  act(() => {
+    vi.advanceTimersByTime(DOUBLE_TAP_MS);
+  });
+}
+
+/** Two taps on the enlarged picture at the same spot, a double tap. */
+function doubleTap(clientX: number, clientY: number) {
+  fireEvent.click(layer()!, { clientX, clientY });
+  fireEvent.click(layer()!, { clientX, clientY });
+}
+
+/** A pointer on the enlarged picture: down, moved, and up or taken away. */
+const down = (pointerId: number, clientX: number, clientY: number) =>
+  fireEvent.pointerDown(layer()!, { pointerId, clientX, clientY });
+const move = (pointerId: number, clientX: number, clientY: number) =>
+  fireEvent.pointerMove(layer()!, { pointerId, clientX, clientY });
+const up = (pointerId: number) => fireEvent.pointerUp(layer()!, { pointerId });
+const cancel = (pointerId: number) => fireEvent.pointerCancel(layer()!, { pointerId });
+
 function renderPicture() {
   render(<ZoomableImage class="card-image" src={FLAG} alt="Flag of Afghanistan" />);
   placePicture();
@@ -52,6 +74,7 @@ describe("ZoomableImage", () => {
   beforeEach(() => {
     setViewport(1000, 800);
     setReducedMotion(false);
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
@@ -162,7 +185,7 @@ describe("ZoomableImage", () => {
     fireEvent.click(button);
     // Scrolled meanwhile, the picture is measured again where it is now.
     placePicture({ top: 10 });
-    fireEvent.click(layer()!);
+    tap();
     expect(button).toHaveAttribute("aria-expanded", "false");
     expect(button).toHaveAccessibleName("Enlarge picture");
     expect(layer()).not.toHaveClass("entered");
@@ -174,10 +197,9 @@ describe("ZoomableImage", () => {
   });
 
   it("puts the picture back after a while if the transition never ends", () => {
-    vi.useFakeTimers();
     const button = renderPicture();
     fireEvent.click(button);
-    fireEvent.click(layer()!);
+    tap();
     act(() => {
       vi.advanceTimersByTime(ZOOM_FALLBACK_MS - 1);
     });
@@ -196,11 +218,11 @@ describe("ZoomableImage", () => {
     expect(button).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("turns round on a tap while on its way back", () => {
-    vi.useFakeTimers();
+  it("turns round on a tap while on its way back, at once and to the fit", () => {
     const button = renderPicture();
     fireEvent.click(button);
-    fireEvent.click(layer()!);
+    doubleTap(500, 400);
+    fireEvent.keyDown(document, { key: "Escape" });
     fireEvent.click(layer()!);
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(layer()).toHaveClass("entered");
@@ -248,7 +270,7 @@ describe("ZoomableImage", () => {
     expect(layer()).toBeNull();
     expect(screen.getByRole("img")).not.toHaveClass("zoomed-away");
     fireEvent.click(button);
-    fireEvent.click(layer()!);
+    tap();
     expect(layer()).not.toBeNull();
     // The page moving on under the copy shrinking back: it could not follow.
     placePicture({ top: -300 });
@@ -304,7 +326,7 @@ describe("ZoomableImage", () => {
     expect(copy()!.style.top).toBe("350px");
     expect(copy()!.style.width).toBe("400px");
     expect(copy()!.style.height).toBe("200px");
-    fireEvent.click(layer()!);
+    tap();
     fireEvent.transitionEnd(copy()!);
     fireEvent(window, new Event("resize"));
     fireEvent.scroll(window);
@@ -321,7 +343,7 @@ describe("ZoomableImage", () => {
     expect(copy()!.style.transform).toBe("none");
     // Never laid over the picture first, as nothing grows.
     expect(measured).not.toHaveBeenCalled();
-    fireEvent.click(layer()!);
+    tap();
     expect(layer()).toBeNull();
     expect(button).toHaveAttribute("aria-expanded", "false");
   });
@@ -346,5 +368,376 @@ describe("ZoomableImage", () => {
     fireEvent.click(screen.getByRole("button"));
     unmount();
     expect(layer()).toBeNull();
+  });
+
+  it("shrinks at once when its button is pressed again, as Enter or Space does", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("waits a moment on a tap, for a second one, before it puts the picture back", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    fireEvent.click(layer()!);
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS - 1);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("zooms in on the spot double tapped, and back out to the fit on another", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    // The fit is 1000 by 500 at (0, 150); its middle stays where it is.
+    doubleTap(500, 400);
+    expect(copy()!.style.transform).toBe("translate(-750px, -375px) scale(2.5)");
+    expect(layer()).not.toHaveClass("moving");
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    doubleTap(100, 200);
+    expect(copy()!.style.transform).toBe("none");
+  });
+
+  it("zooms in near an edge without leaving a gap there", () => {
+    renderPicture();
+    fireEvent.click(screen.getByRole("button"));
+    // Kept under the finger, the top would come down to 75px; it stays at the viewport's top.
+    doubleTap(100, 200);
+    expect(copy()!.style.transform).toBe("translate(-150px, -150px) scale(2.5)");
+  });
+
+  it("puts the picture back on a second tap far from the first", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    fireEvent.click(layer()!, { clientX: 100, clientY: 200 });
+    fireEvent.click(layer()!, { clientX: 100, clientY: 233 });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(copy()!.style.transform).toBe("translate(100px, -100px) scale(0.2)");
+  });
+
+  it("zooms the picture about the fingers on a pinch, following them at once, and keeps it there", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 400, 400);
+    down(2, 600, 400);
+    // Twice as far apart, their middle 100px to the right.
+    move(2, 800, 400);
+    expect(copy()!.style.transform).toBe("translate(-400px, -250px) scale(2)");
+    expect(layer()).toHaveClass("moving");
+    up(1);
+    up(2);
+    expect(copy()!.style.transform).toBe("translate(-400px, -250px) scale(2)");
+    expect(layer()).not.toHaveClass("moving");
+    // The click the pinch may end with is no tap.
+    tap();
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("zooms in no further than four times the fit", () => {
+    renderPicture();
+    fireEvent.click(screen.getByRole("button"));
+    down(1, 450, 400);
+    down(2, 550, 400);
+    move(2, 1450, 400);
+    expect(copy()!.style.transform).toMatch(/ scale\(4\)$/);
+  });
+
+  it("springs back to the fit on a pinch out past it, and never puts the picture back", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 400, 400);
+    down(2, 600, 400);
+    move(2, 500, 400);
+    expect(copy()!.style.transform).toMatch(/ scale\(0\.5\)$/);
+    // No further out than half the fit.
+    move(2, 410, 400);
+    expect(copy()!.style.transform).toMatch(/ scale\(0\.5\)$/);
+    up(2);
+    up(1);
+    expect(copy()!.style.transform).toBe("none");
+    expect(layer()).not.toHaveClass("moving");
+    tap();
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("keeps the picture centered across a side it does not fill, zoomed in a little", () => {
+    renderPicture();
+    fireEvent.click(screen.getByRole("button"));
+    // Pinched near the top, 1.2 times the fit.
+    down(1, 400, 200);
+    down(2, 600, 200);
+    move(2, 640, 200);
+    expect(copy()!.style.transform).toBe("translate(-80px, -10px) scale(1.2)");
+    up(1);
+    up(2);
+    // 1200 by 600: across, as pinched; down, centered in the viewport's 800.
+    expect(copy()!.style.transform).toBe("translate(-80px, -50px) scale(1.2)");
+  });
+
+  it("moves the picture with the finger left after a pinch, never throwing it", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 400, 400);
+    down(2, 600, 400);
+    move(2, 800, 400);
+    up(1);
+    move(2, 800, 700);
+    expect(copy()!.style.transform).toBe("translate(-400px, 50px) scale(2)");
+    up(2);
+    // Let go past the edge, it settles back to the viewport's top.
+    expect(copy()!.style.transform).toBe("translate(-400px, -150px) scale(2)");
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("drags the picture about while zoomed in, settling with no gap at the edges", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    doubleTap(500, 400);
+    down(1, 500, 400);
+    move(1, 400, 350);
+    expect(copy()!.style.transform).toBe("translate(-850px, -425px) scale(2.5)");
+    expect(layer()).toHaveClass("moving");
+    move(1, 2000, 400);
+    up(1);
+    expect(copy()!.style.transform).toBe("translate(0px, -375px) scale(2.5)");
+    expect(layer()).not.toHaveClass("moving");
+    tap();
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("takes a press that hardly moves for a tap", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    move(1, 505, 403);
+    up(1);
+    expect(copy()!.style.transform).toBe("none");
+    tap();
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("puts the picture back when thrown far enough up or down, the page showing through as it goes", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    // Only up or down: across, it stays put.
+    move(1, 600, 600);
+    expect(copy()!.style.transform).toBe("translate(0px, 200px) scale(1)");
+    expect(layer()!.style.getPropertyValue("--picture-zoom-dim")).toBe("0.5");
+    expect(layer()).toHaveClass("moving");
+    // 200px is past 15% of the viewport's 800.
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(layer()).not.toHaveClass("moving");
+    expect(layer()!.style.getPropertyValue("--picture-zoom-dim")).toBe("1");
+    expect(copy()!.style.transform).toBe("translate(100px, -100px) scale(0.2)");
+  });
+
+  it("puts the picture back when thrown fast, however short the throw", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    move(1, 500, 360);
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("springs back from a throw short and slow, or one the browser takes away", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    move(1, 500, 460);
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(copy()!.style.transform).toBe("none");
+    expect(layer()!.style.getPropertyValue("--picture-zoom-dim")).toBe("1");
+    down(1, 500, 400);
+    move(1, 500, 700);
+    cancel(1);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(copy()!.style.transform).toBe("none");
+  });
+
+  it("leaves alone the pointers it did not see go down, and any on the way back", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    move(1, 500, 600);
+    up(1);
+    expect(copy()!.style.transform).toBe("none");
+    fireEvent.keyDown(document, { key: "Escape" });
+    down(1, 500, 400);
+    move(1, 500, 700);
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(copy()!.style.transform).toBe("translate(100px, -100px) scale(0.2)");
+  });
+
+  it("drops what was under way when the picture is put back meanwhile", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    fireEvent.click(layer()!, { clientX: 500, clientY: 400 });
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.transitionEnd(copy()!);
+    // Enlarged again, the old finger and the old tap are gone.
+    fireEvent.click(button);
+    up(1);
+    fireEvent.click(layer()!, { clientX: 500, clientY: 400 });
+    expect(copy()!.style.transform).toBe("none");
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("fits the new viewport on a resize, zoomed in or not", () => {
+    renderPicture();
+    fireEvent.click(screen.getByRole("button"));
+    doubleTap(500, 400);
+    fireEvent(window, new Event("resize"));
+    expect(copy()!.style.transform).toBe("none");
+  });
+
+  it("holds a first tap while a finger is down, so a slow second tap still zooms in", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    fireEvent.click(layer()!, { clientX: 500, clientY: 400 });
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    up(1);
+    fireEvent.click(layer()!, { clientX: 500, clientY: 400 });
+    expect(copy()!.style.transform).toBe("translate(-750px, -375px) scale(2.5)");
+  });
+
+  it("takes a second press held long for a tap of its own", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    fireEvent.click(layer()!, { clientX: 500, clientY: 400 });
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(2 * DOUBLE_TAP_MS + 1);
+    });
+    up(1);
+    fireEvent.click(layer()!, { clientX: 500, clientY: 400 });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("forgets a tap that a pinch or a drag follows, never putting the picture back under it", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    fireEvent.click(layer()!);
+    down(1, 400, 400);
+    down(2, 600, 400);
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS);
+    });
+    up(1);
+    up(2);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    // A tap, its press, its lift and its click; then a slow drag.
+    down(1, 500, 400);
+    up(1);
+    fireEvent.click(layer()!);
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    move(1, 500, 420);
+    up(1);
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    // Nor is the drag's own click the second of two taps.
+    fireEvent.click(layer()!);
+    act(() => {
+      vi.advanceTimersByTime(DOUBLE_TAP_MS);
+    });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("springs back from a fast throw held still before it is let go", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    move(1, 500, 460);
+    act(() => {
+      vi.advanceTimersByTime(101);
+    });
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(copy()!.style.transform).toBe("none");
+  });
+
+  it("springs back from a throw flicked back toward where it started", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    move(1, 500, 500);
+    act(() => {
+      vi.advanceTimersByTime(20);
+    });
+    move(1, 500, 450);
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("turns round on a tap after a throw put it back, the throw's own touch no tap of it", () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    move(1, 500, 700);
+    up(1);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    down(1, 500, 400);
+    up(1);
+    fireEvent.click(layer()!);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("drops a gesture whose picture is put back before its finger is up", async () => {
+    const button = renderPicture();
+    fireEvent.click(button);
+    down(1, 500, 400);
+    move(1, 500, 450);
+    const errors = vi.fn();
+    window.addEventListener("error", errors);
+    // Outside act, so the finger is up after the picture is on its way back but before its effects run.
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await Promise.resolve();
+    layer()!.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1, bubbles: true }));
+    window.removeEventListener("error", errors);
+    expect(errors).not.toHaveBeenCalled();
+    act(() => undefined);
+    expect(button).toHaveAttribute("aria-expanded", "false");
   });
 });

@@ -190,6 +190,11 @@ beside it.
 A deck you study both ways asks each card front to back and back to
 front, each on its own schedule.
 
+A card with a picture? Tap the picture to see it as large as the
+screen allows. Pinch to zoom in, or double tap a spot to zoom in on it
+and double tap again to zoom back out; drag to look around. Tap once,
+press Escape, or throw the picture up or down to put it back.
+
 A wrong card in a library deck, such as a bad translation? **Report a
 mistake**, under the card, opens a report on the project's issue
 tracker with the deck and the card filled in: say what's wrong. A deck
