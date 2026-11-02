@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.26.2](https://github.com/solid-memo/website/compare/v6.26.1...v6.26.2) (2026-11-02)
+
+### Bug Fixes
+
+* **application:** keep a cut-off guest move's folder once it is in use ([92b6012](https://github.com/solid-memo/website/commit/92b60125ccb2e20dc9ef158501b61ab11ab31fd4))
+* **domain:** upgrade only the cards a deck took from its releases ([875b191](https://github.com/solid-memo/website/commit/875b1914a5edd4448d47d3294c197917afcb157d))
+* **markdown:** refuse a text with more than 200 picture openers ([f80e4e9](https://github.com/solid-memo/website/commit/f80e4e969f36d67e444981646d988cc91e26714e))
+
 ## [6.26.1](https://github.com/solid-memo/website/compare/v6.26.0...v6.26.1) (2026-11-02)
 
 ### Bug Fixes
