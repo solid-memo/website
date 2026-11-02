@@ -553,6 +553,33 @@ describe("a release added from a link", () => {
     });
   });
 
+  it("is refused when its deck breaks the library deck shape, though the deck is a card too", async () => {
+    const good = await linkedRelease();
+    const broken = good.replace(
+      'dcat:version "2" ;',
+      'dcat:version "2" ;\n    solid-memo:cardsDocument <https://elsewhere.example/x> ;',
+    );
+    const asCard = broken.replace(
+      "<>\n    a solid-memo:Deck ,\n      dcat:Dataset ;",
+      '<>\n    a solid-memo:Deck ,\n      dcat:Dataset ,\n      solid-memo:Card ;\n    solid-memo:front "x" ;\n    solid-memo:back "y" ;',
+    );
+    expect(broken).not.toBe(good);
+    expect(asCard).not.toBe(broken);
+
+    for (const release of [broken, asCard]) {
+      const { useCases } = await app(linkedSite([release]));
+      await expect(useCases.readReleaseFromLink(LINKED)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+        vars: {
+          host: "bob.example",
+          problems: expect.stringContaining(
+            `${SM_NS}cardsDocument A library deck has no cards document`,
+          ),
+        },
+      });
+    }
+  });
+
   it("is refused as too new when a card is in a newer format than the app reads", async () => {
     const good = await linkedRelease();
     const newer = good.replace(

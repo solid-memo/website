@@ -121,10 +121,11 @@ def own_shapes() -> tuple[Graph, list[Pick]]:
 
 
 def targeted(data: Graph, shapes: Graph, picks: list[Pick], context: str) -> Graph:
-    """The shapes with each subject of `data` targeted at the shape the app picks for it (registry.ts, pickShape).
+    """The shapes with each subject of `data` targeted at the shapes the app picks for it (registry.ts, pickShapes).
 
-    A shape that fixes values fits only a subject that has them all, and is
-    then preferred to its class's shapes without (an FSRS-6 review state).
+    A subject is targeted at the shape of each of its classes. A shape that
+    fixes values fits only a subject that has them all, and is then
+    preferred to its class's shapes without (an FSRS-6 review state).
     """
     chosen = Graph() + shapes
     for subject in set(data.subjects(RDF.type, None)):
@@ -132,11 +133,17 @@ def targeted(data: Graph, shapes: Graph, picks: list[Pick], context: str) -> Gra
         matching = [p for p in picks if p[1] in types and p[3] in ("any", context) and all((subject, predicate, value) in data for predicate, value in p[4])]
         own = [p for p in matching if str(p[1]).startswith(str(SM))]
         classed = own or matching
-        fixed = [p for p in classed if p[4]]
         version = int(data.value(subject, SM.formatVersion, default=Literal(1)))
-        picked = [p for p in (fixed or classed) if p[2] == version]
-        if not picked and (matching or any(str(t).startswith(str(SM)) for t in types)):
-            # The app reports such a subject (untyped or newer); here it must not slip by unchecked.
+        picked = []
+        unpicked = False
+        for cls in {p[1] for p in classed}:
+            of_class = [p for p in classed if p[1] == cls]
+            fixed = [p for p in of_class if p[4]]
+            at_version = [p for p in (fixed or of_class) if p[2] == version]
+            picked += at_version
+            unpicked = unpicked or not at_version
+        if unpicked or (not picked and any(str(t).startswith(str(SM)) for t in types)):
+            # The app reports such a subject (untyped, newer, or a class with no shape at its version); here it must not slip by unchecked.
             raise ValueError(f"{subject} has no {context} shape at format {version}.")
         for shape, *_ in picked:
             chosen.add((shape, SH.targetNode, subject))

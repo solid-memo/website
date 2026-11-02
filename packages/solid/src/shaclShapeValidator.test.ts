@@ -326,6 +326,51 @@ describe("createShaclShapeValidator", () => {
     ).not.toContain("DeckPlace");
   });
 
+  it("checks a deck that has a second Solid Memo class as each, and where it is, naming a class with no format of its version", async () => {
+    const instance = "https://pod.example/solid-memo/a/";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(DOC),
+        buildThing(createThing({ url: `${DOC}#deck-1` }))
+          .addIri(RDF.type, SM.Card)
+          .addIri(RDF.type, SM.Deck)
+          .addInteger(SM.formatVersion, 7)
+          .addIri(SM.cardsDocument, `${instance}decks/deck-1.ttl.acl`)
+          .addIri(SM.reviewsDocument, `${instance}reviews/deck-1.ttl`)
+          .build(),
+      ),
+    );
+    const { validator, validateNode } = makeValidator();
+    const report = await validator.validateDocument(DOC);
+    expect(report.subjects).toEqual([
+      {
+        url: `${DOC}#deck-1`,
+        status: "checked",
+        shape: "card",
+        version: 7,
+        violations: [
+          expect.objectContaining({
+            path: SM.formatVersion,
+            message: { en: expect.stringContaining("(deck)") },
+            value: "7",
+            constraint: "FormatVersionClass",
+          }),
+          expect.objectContaining({ path: SM.cardsDocument, constraint: "MinCount" }),
+          expect.objectContaining({
+            path: SM.cardsDocument,
+            value: `${instance}decks/deck-1.ttl.acl`,
+            constraint: "DeckPlace",
+          }),
+        ],
+      },
+    ]);
+    expect(validateNode).toHaveBeenCalledExactlyOnceWith(
+      expect.anything(),
+      `${DOC}#deck-1`,
+      "https://solid-memo.com/ns/shapes/card/v7.ttl#shape",
+    );
+  });
+
   it("names no deck of an instance whose address is spelled otherwise than a request sends it", async () => {
     const instance = "https://Pod.example/kortlekar-å/";
     const doc = `${instance}catalog.ttl`;
@@ -1174,6 +1219,26 @@ describe("createShaclShapeValidator", () => {
       });
     });
 
+    it("holds a subject of two Solid Memo classes to the shape of each, naming a class with no format of its version", async () => {
+      const subject = (version: number) =>
+        setThing(
+          datasetFrom(DOC),
+          buildThing(createThing({ url: `${DOC}#x` }))
+            .addIri(RDF.type, SM.Card)
+            .addIri(RDF.type, SM.Answer)
+            .addStringWithLocale(SM.front, "Norway", "en")
+            .addStringWithLocale(SM.back, "Oslo", "en")
+            .addInteger(SM.formatVersion, version)
+            .build(),
+        );
+      await expect(validator.checkSubjects(subject(1), [`${DOC}#x`], "pod")).rejects.toThrow(
+        `<${DOC}#x> (${SM.answeredCard}): `,
+      );
+      await expect(validator.checkSubjects(subject(7), [`${DOC}#x`], "pod")).rejects.toThrow(
+        `<${DOC}#x> (${SM.formatVersion}): This subject has more than one Solid Memo class, and one of them has no format of this version, so Solid Memo can't read the subject as that class (answer)`,
+      );
+    });
+
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(
         setThing(
@@ -1362,6 +1427,37 @@ describe("validateRelease", () => {
     expect(fields("fsrs")).toContain(SM.stability);
     expect(fields("text")).not.toContain(SM.stability);
     expect(fields("text")).toContain(SM.easeFactor);
+  }, 60_000);
+
+  it("holds a release's deck that has a second Solid Memo class to the shapes of both, and names a class with no format of its version", async () => {
+    const base = courseDraft();
+    const typed = (value: string) => ({
+      subject: DRAFT,
+      predicate: RDF.type,
+      object: { kind: "iri" as const, value },
+    });
+    const plain = await validator.validateRelease(base, AT);
+    const fields = (problems: typeof plain) =>
+      problems.filter((p) => p.subject === DRAFT).map((p) => p.field);
+    const asCard = await validator.validateRelease(
+      { ...base, triples: [...base.triples, typed(SM.Card)] },
+      AT,
+    );
+    // The card shape's own result, about no field: a side needs text or a picture.
+    expect(fields(plain)).not.toContain(undefined);
+    expect(fields(asCard)).toEqual(expect.arrayContaining([...fields(plain), undefined]));
+    // A Solid Memo answer has no format of the deck's version.
+    const asAnswer = await validator.validateRelease(
+      { ...base, triples: [...base.triples, typed(SM.Answer)] },
+      AT,
+    );
+    expect(asAnswer).toContainEqual({
+      severity: "error",
+      subject: DRAFT,
+      code: "unshaped",
+      params: {},
+    });
+    expect(fields(asAnswer)).toEqual(expect.arrayContaining(fields(plain)));
   }, 60_000);
 
   it("checks a release for a library with its index beside it, the series it names a version of it, described when the index has it not", async () => {

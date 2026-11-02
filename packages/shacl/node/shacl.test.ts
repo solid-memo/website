@@ -593,6 +593,31 @@ describe("the shapes over the fixtures", async () => {
     );
   });
 
+  it("hold a release deck that is a card too to the library deck shape as well as the card shape", async () => {
+    const { turtle } = fixtures.find(
+      (f) => f.path === "library-deck/v6/valid/library-standalone-release.ttl",
+    )!;
+    const asCard = turtle.replace(
+      "<>\n    a solid-memo:Deck ,\n      dcat:Dataset ;",
+      '<>\n    a solid-memo:Deck ,\n      dcat:Dataset ,\n      solid-memo:Card ;\n    solid-memo:front "x" ;\n    solid-memo:back "y" ;\n    solid-memo:cardsDocument <https://other.example/x> ;',
+    );
+    expect(asCard).not.toBe(turtle);
+    await expect(
+      validateTurtleDocument("x.ttl", parseTurtle(asCard, base("x.ttl")), engine, "library"),
+    ).rejects.toThrow(`(${SM}cardsDocument): A library deck has no cards document`);
+  });
+
+  it("name a class of a subject that has no format of the subject's version", async () => {
+    const quads = parseTurtle(
+      `@prefix sm: <${SM}> .
+<#x> a sm:Card , sm:Answer ; sm:formatVersion 7 ; sm:front "x" ; sm:back "y" .`,
+      base("x.ttl"),
+    );
+    await expect(validateTurtleDocument("x.ttl", quads, engine, "pod")).rejects.toThrow(
+      "x.ttl:\n  <https://pod.example/x.ttl#x> is answer too, which has no format 7.",
+    );
+  });
+
   it("reject a subject typed with a Solid Memo term that is no class", async () => {
     const quads = parseTurtle(
       `<#x> a <https://solid-memo.com/ns/vocab/v1.ttl#front> .`,

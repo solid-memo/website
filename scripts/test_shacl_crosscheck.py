@@ -191,6 +191,17 @@ class OwnShapes(Repository):
         with self.assertRaisesRegex(ValueError, "https://example.org/a has no pod shape at format 2"):
             self.targets("ex:a a sm:Thing ; sm:kind sm:special ; sm:formatVersion 2 .", "pod")
 
+    def test_targets_the_shape_of_each_solid_memo_class_of_a_subject(self) -> None:
+        self.write("ns/shapes/other/v2.ttl", '<#other> a sh:NodeShape ; sh:name "OtherV2" ; sh:class sm:Other .')
+        self.shapes, self.picks = crosscheck.own_shapes()
+        self.assertEqual(
+            self.targets("ex:a a sm:Thing , sm:Other ; sm:formatVersion 2 .", "pod"),
+            {(self.shape("thing/v2.ttl", "thing"), EX.a), (self.shape("other/v2.ttl", "other"), EX.a)},
+        )
+        # A class with no shape at the subject's version is not passed over.
+        with self.assertRaisesRegex(ValueError, "https://example.org/a has no pod shape at format 1"):
+            self.targets("ex:a a sm:Thing , sm:Other ; sm:formatVersion 1 .", "pod")
+
     def test_leaves_a_subject_of_no_class_it_has_a_shape_for(self) -> None:
         self.assertEqual(self.targets("ex:a a dcat:Dataset .", "draft"), set())
 

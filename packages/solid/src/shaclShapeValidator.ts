@@ -29,7 +29,7 @@ import { foreignSubjects, isDeckBackLink } from "./ownership";
 import { RDF, SM, SM_NS } from "./vocab";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { coreOnly } from "@solid-memo/shacl/profiles";
-import { pickShape } from "@solid-memo/shacl/registry";
+import { pickShapes } from "@solid-memo/shacl/registry";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { createShapeLoader, type ShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { AppError } from "@solid-memo/domain/appError";
@@ -37,13 +37,13 @@ import { shown } from "@solid-memo/domain/langText";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
-import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
+import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
 import { getSolidDatasetLinear } from "./client/resources";
 import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 
-/** The IRIs a subject has as values of a predicate, among its own quads: what pickShape asks of a subject. */
+/** The IRIs a subject has as values of a predicate, among its own quads: what pickShapes asks of a subject. */
 function iriValuesIn(own: readonly Quad[]): (predicate: string) => string[] {
   return (predicate) =>
     own
@@ -239,6 +239,37 @@ function formatVersionViolation(version: number): Violation {
   };
 }
 
+/** Each subject's statements, gathered in one pass. */
+function statementsBySubject(quads: readonly Quad[]): Map<string, Quad[]> {
+  const bySubject = new Map<string, Quad[]>();
+  for (const q of quads) {
+    const own = bySubject.get(q.subject.value);
+    if (own === undefined) bySubject.set(q.subject.value, [q]);
+    else own.push(q);
+  }
+  return bySubject;
+}
+
+/**
+ * A subject of a class whose shapes have no format of the subject's
+ * version, while another of its classes has: the subject is checked as
+ * the other, and this class is named, so a second class never stands in
+ * for the shape of the first.
+ */
+function classVersionViolation(shape: ShapeName, version: number): Violation {
+  return {
+    path: SM.formatVersion,
+    message: { en: `${FORMAT_VERSION_CLASS} (${shape})` },
+    builtIn: true,
+    value: String(version),
+    severity: "violation",
+    constraint: "FormatVersionClass",
+  };
+}
+
+const FORMAT_VERSION_CLASS =
+  "This subject has more than one Solid Memo class, and one of them has no format of this version, so Solid Memo can't read the subject as that class";
+
 const FORMAT_VERSION_RANGE =
   "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject.";
 
@@ -286,11 +317,11 @@ function withProfiled(
 
 /**
  * The ShapeValidator port over the SHACL engine: every subject of a
- * document with a Solid Memo class is checked against the shape of its
- * class and stored version, chosen exactly as the app chooses it when
- * reading (registry.pickShape); a document with DCAT or FOAF subjects is
- * also checked against the DCAT-AP profile, with the reference data
- * beside it (see docs/validation.md). A subject another app wrote is
+ * document with a Solid Memo class is checked against the shape of each
+ * of its classes at its stored version, chosen exactly as the app chooses
+ * them when reading (registry.pickShapes); a document with DCAT or FOAF
+ * subjects is also checked against the DCAT-AP profile, with the
+ * reference data beside it (see docs/validation.md). A subject another app wrote is
  * checked too, but marked `foreign`, its results warnings, and so are
  * the results about a catalog's link to a member another app wrote.
  */
@@ -314,6 +345,50 @@ export function createShaclShapeValidator({
       engines.set(descriptor.shapeDocument, engine);
     }
     return engine;
+  }
+
+  /** A subject's results against the shape of each of its classes, with the dates the app can't read that each shape names. */
+  async function classViolations(
+    data: DatasetCore,
+    subject: string,
+    descriptors: readonly ShapeDescriptor[],
+    unreadable: (predicate: string) => readonly string[],
+  ): Promise<Violation[]> {
+    const violations: Violation[] = [];
+    for (const descriptor of descriptors) {
+      const engine = await engineFor(descriptor);
+      const found = await engine.validateNode(data, subject, descriptor.shapeIri);
+      violations.push(...found, ...dateViolations(descriptor, unreadable, found));
+    }
+    return violations;
+  }
+
+  /**
+   * A release's subject, of its own statements, against the library shape
+   * of each of its classes (a subject of two is read as both), and whether
+   * a class of it has none at its version: one the library reads no
+   * subject of.
+   */
+  async function releaseSubjectViolations(
+    release: DatasetCore,
+    subject: string,
+    own: readonly Quad[],
+  ): Promise<{ unshaped: boolean; violations: Violation[] }> {
+    const types = own.filter((q) => q.predicate.value === RDF.type).map((q) => q.object.value);
+    const version = Number(
+      own.find((q) => q.predicate.value === SM_FORMAT_VERSION)?.object.value ?? "1",
+    );
+    const pick = pickShapes(types, version, "library", iriValuesIn(own));
+    if (pick.kind !== "shapes") return { unshaped: true, violations: [] };
+    // A date the library's readers cannot read is an error of the release, as one the shape names is.
+    const unreadable = (predicate: string) =>
+      own
+        .filter((q) => q.predicate.value === predicate && isUnreadableDatetime(q.object))
+        .map((q) => q.object.value);
+    return {
+      unshaped: pick.unknown.length > 0,
+      violations: await classViolations(release, subject, pick.descriptors, unreadable),
+    };
   }
 
   const profileEngines = new Map<
@@ -382,15 +457,17 @@ export function createShaclShapeValidator({
     for (const subject of subjects) {
       const thing = getThing(dataset, subject);
       if (thing === null) continue;
-      const pick = pickShape(
-        getUrlAll(thing, RDF.type),
-        storedVersionOf(thing),
-        context,
-        (predicate) => getUrlAll(thing, predicate),
+      const version = storedVersionOf(thing);
+      const pick = pickShapes(getUrlAll(thing, RDF.type), version, context, (predicate) =>
+        getUrlAll(thing, predicate),
       );
-      if (pick.kind !== "shape") continue;
-      const engine = await engineFor(pick.descriptor);
-      for (const v of await engine.validateNode(data, subject, pick.descriptor.shapeIri)) {
+      if (pick.kind !== "shapes") continue;
+      // The write check leaves dates to the readers: none is named beside the shape's results.
+      const found = await classViolations(data, subject, pick.descriptors, () => []);
+      for (const v of [
+        ...pick.unknown.map((shape) => classVersionViolation(shape, version)),
+        ...found,
+      ]) {
         if (counts(subject, v)) problems.push(describe(subject, v));
       }
     }
@@ -433,23 +510,34 @@ export function createShaclShapeValidator({
       violations.map((v) =>
         foreign.has(subject) || isForeignMember(blank, foreign, subject, v) ? asWarning(v) : v,
       );
-    /** A subject's results against its shape, with the dates the app can't read and, for a deck in a pod, where it is. */
-    const shapeViolations = async (thing: Subject, descriptor: ShapeDescriptor) => {
+    /**
+     * A subject's results against the shape of each of its classes, with
+     * the dates the app can't read, each class with no format of the
+     * subject's version named, and, for a deck in a pod, where it is.
+     */
+    const shapeViolations = async (
+      thing: Subject,
+      types: readonly string[],
+      version: number,
+      descriptors: readonly ShapeDescriptor[],
+      unknown: readonly ShapeName[],
+    ) => {
       const subject = asUrl(thing);
-      const engine = await engineFor(descriptor);
-      const found = await engine.validateNode(data, subject, descriptor.shapeIri);
-      return [
-        ...found,
-        ...dateViolations(descriptor, (predicate) => unreadableDatetimes(thing, predicate), found),
-        ...(context === "pod" && descriptor.shape === "deck" ? placeViolations(thing, url) : []),
+      const violations = [
+        ...unknown.map((shape) => classVersionViolation(shape, version)),
+        ...(await classViolations(data, subject, descriptors, (predicate) =>
+          unreadableDatetimes(thing, predicate),
+        )),
       ];
+      if (context === "pod" && types.includes(SM.Deck))
+        violations.push(...placeViolations(thing, url));
+      return violations;
     };
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
-      const pick = pickShape(getUrlAll(thing, RDF.type), version, context, (predicate) =>
-        getUrlAll(thing, predicate),
-      );
+      const types = getUrlAll(thing, RDF.type);
+      const pick = pickShapes(types, version, context, (predicate) => getUrlAll(thing, predicate));
       if (pick.kind === "untyped") {
         // The document saying it is a deck's is Solid Memo's, and no stray.
         if (!isDeckBackLink(dataset, thing)) subjects.push({ url: subject, status: "untyped" });
@@ -467,11 +555,17 @@ export function createShaclShapeValidator({
       }
       // A version below 1, which no shape has, is read as a subject that does not fit (records.ts readVersioned).
       const checked =
-        pick.kind === "shape"
+        pick.kind === "shapes"
           ? {
-              shape: pick.descriptor.shape,
-              version: pick.descriptor.version,
-              violations: await shapeViolations(thing, pick.descriptor),
+              shape: pick.descriptors[0].shape,
+              version,
+              violations: await shapeViolations(
+                thing,
+                types,
+                version,
+                pick.descriptors,
+                pick.unknown,
+              ),
             }
           : {
               shape: pick.shape,
@@ -548,31 +642,15 @@ export function createShaclShapeValidator({
 
       // Each subject of a Solid Memo class, or of another class a shape describes, against its library shape.
       // Each subject's statements, so a release of thousands of cards is read in one pass.
-      const bySubject = new Map<string, Quad[]>();
-      for (const q of quads) {
-        const own = bySubject.get(q.subject.value);
-        if (own === undefined) bySubject.set(q.subject.value, [q]);
-        else own.push(q);
-      }
+      const bySubject = statementsBySubject(quads);
       for (const subject of shapedSubjectsOf(quads)) {
-        const own = bySubject.get(subject)!;
-        const types = own.filter((q) => q.predicate.value === RDF.type).map((q) => q.object.value);
-        const version = Number(
-          own.find((q) => q.predicate.value === SM_FORMAT_VERSION)?.object.value ?? "1",
+        const { unshaped, violations } = await releaseSubjectViolations(
+          release,
+          subject,
+          bySubject.get(subject)!,
         );
-        const pick = pickShape(types, version, "library", iriValuesIn(own));
-        if (pick.kind !== "shape") {
-          problems.push(problem(back(subject), { code: "unshaped", params: {} }));
-          continue;
-        }
-        const engine = await engineFor(pick.descriptor);
-        const found = await engine.validateNode(release, subject, pick.descriptor.shapeIri);
-        // A date the library's readers cannot read is an error of the release, as one the shape names is.
-        const unreadable = (predicate: string) =>
-          own
-            .filter((q) => q.predicate.value === predicate && isUnreadableDatetime(q.object))
-            .map((q) => q.object.value);
-        for (const v of [...found, ...dateViolations(pick.descriptor, unreadable, found)]) {
+        if (unshaped) problems.push(problem(back(subject), { code: "unshaped", params: {} }));
+        for (const v of violations) {
           problems.push(shapeProblem(subject, v, v.severity === "violation" ? "error" : "warning"));
         }
       }

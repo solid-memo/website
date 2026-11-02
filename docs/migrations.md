@@ -255,7 +255,7 @@ format didn't move:
 - **A new shape, not review-state format 3.** An FSRS-6 state is an
   `sm:ReviewState` stamped with FSRS review-state format 1
   (`fsrs-review-state/v1.ttl`), told apart by `sm:scheduler sm:fsrs6`,
-  a value its shape fixes. `pickShape` checks a review state against it
+  a value its shape fixes. `pickShapes` checks a review state against it
   only when the state names that scheduler, and then never against
   review state 1 or 2. SM-2 states are checked as before.
   A review-state format 3 would have moved every SM-2 state: each pod

@@ -69,17 +69,21 @@ flowchart LR
   at any failure. Another app's data never stops a write.
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
   fetches the document and converts it to an RDF/JS dataset
-  (`toRdfJsDataset`). For every subject, it picks the shape by class
-  and stored version as the mappers do (`pickShape`), and by the values
+  (`toRdfJsDataset`). For every subject, it picks the shapes by class
+  and stored version as the mappers do (`pickShapes`), and by the values
   a shape fixes (an FSRS-6 review state's `sm:scheduler`,
   [shapes.md](shapes.md#conventions)). A subject with a Solid Memo class
-  is checked against that class's shapes only (a deck group, though a
-  `dcat:Catalog`, isn't checked as the catalog). A subject is then:
+  is checked against the shapes of its Solid Memo classes only (a deck
+  group, though a `dcat:Catalog`, isn't checked as the catalog). A
+  subject of two of them is read as both, so it's held to the shape of
+  each. A subject is then:
   - `checked`, with its violations. A subject stamped with a format
     version below 1, which no shape has, is checked too: it's in
     violation (`FormatVersionRange`), as the app reads it as one that
-    doesn't fit;
-  - `newer`, a format newer than this app knows: skipped, reported;
+    doesn't fit. So is a subject with a class that has no format of its
+    version while another of its classes has one (`FormatVersionClass`);
+  - `newer`, a format newer than this app knows, for every one of its
+    classes: skipped, reported;
   - `untyped`, no Solid Memo class: listed, to show strays.
 
   A subject another app wrote is also marked `foreign`, and its results
@@ -90,7 +94,8 @@ flowchart LR
   and isn't listed. A document that
   doesn't exist is `missing`, which is normal.
 - **Where a deck is** is checked beside its shape, in an instance's
-  catalog (`DeckPlace`, `placeViolations` in `shaclShapeValidator.ts`).
+  catalog (`DeckPlace`, `placeViolations` in `shaclShapeValidator.ts`),
+  for every subject that has `sm:Deck` among its classes.
   The entry is in violation when it's another document's subject, or
   puts a cards or reviews document at an address no deck's document
   may have
@@ -336,7 +341,7 @@ is saved.
 
 Every caller names where the write goes (`WriteContext` in
 [writeCheck.ts](../packages/solid/src/writeCheck.ts)), and that picks
-the shapes, as `pickShape` picks them for a read:
+the shapes, as `pickShapes` picks them for a read:
 
 - `"pod"`: an instance's documents, checked against the pod's shapes
   and, where they have DCAT subjects, DCAT-AP. Every write the app makes
@@ -361,7 +366,9 @@ the shapes, as `pickShape` picks them for a read:
   ([deck-library.md](deck-library.md#a-release-outside-the-library)),
   so a publisher or series the release doesn't describe fails DCAT-AP's
   class check. The next version of a library release describes them,
-  as the index does (`nextVersionDraft`).
+  as the index does (`nextVersionDraft`). A subject of two Solid Memo
+  classes is held to the shape of each; one of them with no shape at
+  the subject's version is named as a subject no shape describes.
 
 A published release is never written.
 
@@ -420,9 +427,9 @@ It holds that release, the draft deck, chapter and step 1 fixtures,
 and the review-state fixtures (review state 2 and FSRS review state 1
 in one reviews document) to Solid Memo's own shapes. It holds the
 vocabulary's concept schemes to SkoHub's SKOS shapes, best practice
-included. The script picks each subject's shape by class, format
-version, context and the values a shape fixes, as `pickShape` does, and
-targets it with `sh:targetNode`.
+included. The script picks the shape of each of a subject's classes by
+format version, context and the values a shape fixes, as `pickShapes`
+does, and targets it with `sh:targetNode`.
 
 Each version is checked beside the index, only for the subjects it
 states something about, targeted the same way. DCAT-AP asks a node
