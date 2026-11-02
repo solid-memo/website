@@ -18,6 +18,7 @@ import type {
   StorageGateway,
 } from "./ports";
 import type { ReleaseDraftUseCases } from "./releaseDrafts";
+import { mapAtOnce } from "./atOnce";
 
 /**
  * Releasing a draft (docs/studio.md, Publishing a release): published
@@ -27,10 +28,14 @@ import type { ReleaseDraftUseCases } from "./releaseDrafts";
  * then no longer changed.
  */
 
-/** A release the instance published: where, and whether someone with no login can read it. */
+/**
+ * A release the instance published: where, and whether someone with no
+ * login can read it; null when it is not asked, the release being on
+ * another origin than the instance (listPublishedReleases).
+ */
 export interface PublishedRelease {
   url: string;
-  public: boolean;
+  public: boolean | null;
 }
 
 /** A release saved as a file: the file's name, and the address the release states as its own. */
@@ -82,7 +87,13 @@ export interface ReleasePublishingUseCases {
    * request to `decks/`. Nothing is checked or written in the pod.
    */
   downloadRelease(draftUrl: string, targetUrl?: string): Promise<SavedRelease>;
-  /** The releases the instance published, as its catalog links them, each with whether it is public. */
+  /**
+   * The releases the instance published, as its catalog links them, each
+   * with whether it is public, asked a few at a time. Only of one on the
+   * instance's origin: the catalog is data anyone may have written, and
+   * a release elsewhere is not the instance's to make public
+   * (makeReleasePublic) either.
+   */
   listPublishedReleases(instanceUrl: string): Promise<PublishedRelease[]>;
 }
 
@@ -180,9 +191,11 @@ export function createReleasePublishingUseCases({
 
     async listPublishedReleases(instanceUrl) {
       const urls = await releasePublisher.listPublished(instanceUrl);
-      return Promise.all(
-        urls.map(async (url) => ({ url, public: await releasePublisher.isPublic(url) })),
-      );
+      const origin = new URL(instanceUrl).origin;
+      return mapAtOnce(urls, async (url) => ({
+        url,
+        public: new URL(url).origin === origin ? await releasePublisher.isPublic(url) : null,
+      }));
     },
   };
 }

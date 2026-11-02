@@ -19,7 +19,23 @@ import { unlessNewer } from "./records";
 /** How often a link is written, in all, while the catalog keeps changing elsewhere. */
 const LINK_ATTEMPTS = 3;
 
-/** What the catalog links by `predicate`, in the order it names them; none without a catalog. */
+/**
+ * How many entries of one kind a catalog may have that the app follows:
+ * decks, drafts or releases. A catalog is data anyone may have written,
+ * each document it names is read, and one within its read limits could
+ * name far more than any instance holds; past this many, its entries of
+ * that kind are refused (catalogTooManyLinks), not read.
+ */
+export const MAX_CATALOG_LINKS = 1000;
+
+/** `links`, unless there are more than MAX_CATALOG_LINKS of them: catalogTooManyLinks. */
+export function withinCatalogLimit<T>(links: T[]): T[] {
+  if (links.length > MAX_CATALOG_LINKS)
+    throw new AppError("catalogTooManyLinks", { limit: MAX_CATALOG_LINKS });
+  return links;
+}
+
+/** What the catalog links by `predicate`, in the order it names them; none without a catalog, and catalogTooManyLinks past MAX_CATALOG_LINKS. */
 export async function catalogLinks(
   instanceUrl: string,
   predicate: string,
@@ -27,21 +43,40 @@ export async function catalogLinks(
 ): Promise<string[]> {
   const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
   const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
-  return node === null ? [] : getUrlAll(node, predicate);
+  return node === null ? [] : withinCatalogLimit(getUrlAll(node, predicate));
 }
 
-/** Link `url` from the catalog by `predicate`, unless it is linked; noCatalogToUpdate without a catalog. */
+/** Refuse, as catalogFull, linking `url` by `predicate` when the catalog links MAX_CATALOG_LINKS others by it already: none of them would be read. */
+export async function refuseFullCatalog(
+  instanceUrl: string,
+  predicate: string,
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  const links = await catalogLinks(instanceUrl, predicate, fetch);
+  if (!links.includes(url) && links.length >= MAX_CATALOG_LINKS)
+    throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
+}
+
+/**
+ * Link `url` from the catalog by `predicate`, unless it is linked;
+ * noCatalogToUpdate without a catalog, and catalogFull when it links
+ * MAX_CATALOG_LINKS by `predicate` already: one more would leave none of
+ * them read.
+ */
 export function addCatalogLink(
   instanceUrl: string,
   predicate: string,
   url: string,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
-  return changeCatalog(instanceUrl, fetch, true, (node) =>
-    getUrlAll(node, predicate).includes(url)
-      ? null
-      : buildThing(node).addUrl(predicate, url).build(),
-  );
+  return changeCatalog(instanceUrl, fetch, true, (node) => {
+    const links = getUrlAll(node, predicate);
+    if (links.includes(url)) return null;
+    if (links.length >= MAX_CATALOG_LINKS)
+      throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
+    return buildThing(node).addUrl(predicate, url).build();
+  });
 }
 
 /** Take the catalog's link to `url` by `predicate` away; nothing to do when it has none, or no catalog. */

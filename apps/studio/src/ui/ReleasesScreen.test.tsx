@@ -154,6 +154,15 @@ describe("ReleasesScreen", () => {
     expect(screen.getByText("No release matches “rivers”.")).toBeInTheDocument();
   });
 
+  it("says a release on another server was not checked, and offers no way to make it public", () => {
+    const other = "https://other.example/releases/solid/v1.ttl";
+    renderScreen({ releases: [{ url: other, public: null }] });
+    expect(screen.getByRole("row", { name: new RegExp(other) })).toHaveTextContent(
+      "Not checked: on another server",
+    );
+    expect(screen.queryByRole("button", { name: `Make ${other} public` })).toBeNull();
+  });
+
   it("says when there are none", () => {
     renderScreen({ releases: [] });
     expect(screen.getByText("This instance has published no releases yet.")).toBeInTheDocument();

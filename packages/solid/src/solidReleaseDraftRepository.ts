@@ -19,6 +19,7 @@ import {
 } from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
+import { mapAtOnce } from "@solid-memo/application/atOnce";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import {
@@ -90,6 +91,16 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
   spdx: "http://spdx.org/rdf/terms#",
 };
 
+/**
+ * How many documents a draft's container may list that the app reads, and
+ * how many all of an instance's drafts may list together. A container's
+ * listing is data anyone may have written, as is the catalog naming the
+ * drafts; past either, the drafts' documents are refused
+ * (draftTooManyDocuments), not read.
+ */
+export const MAX_DRAFT_DOCUMENTS = 1000;
+export const MAX_DRAFT_DOCUMENTS_IN_ALL = 5000;
+
 /** Each of a draft's documents as read last, by URL, and the version they were at together. */
 interface Read {
   version: string;
@@ -145,7 +156,7 @@ export function createSolidReleaseDraftRepository({
   async function readDraft(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }> {
     const urls = await documentsOf(draftUrl);
     if (!urls.includes(draftUrl)) throw new AppError("draftGone");
-    const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
+    const datasets = await mapAtOnce(urls, (url) => readDataset(url, fetch));
     const quads = draftNamedQuads(draftUrl, urls, datasets);
     // What its documents state otherwise than its records write it would be published, unseen and unchecked (GHSA-32jq-jh7h-r7v4).
     const draft = draftFromQuads(quads, draftUrl, { refuseHidden: true });
@@ -197,9 +208,11 @@ export function createSolidReleaseDraftRepository({
   }
 
   return {
+    // A few drafts at a time: the catalog may link many (MAX_CATALOG_LINKS), each as large as a release.
     async list(instanceUrl) {
-      return Promise.all(
-        (await linked(instanceUrl)).map(async ({ url, place }): Promise<ReleaseDraftSummary> => {
+      return mapAtOnce(
+        await linked(instanceUrl),
+        async ({ url, place }): Promise<ReleaseDraftSummary> => {
           try {
             const dataset = await readDataset(url, fetch);
             const draft = draftFromQuads(quadsOf(dataset), url);
@@ -207,14 +220,21 @@ export function createSolidReleaseDraftRepository({
           } catch {
             return unreadableDraftSummary(url, place);
           }
-        }),
+        },
       );
     },
 
     async documents(instanceUrl) {
-      return (
-        await Promise.all((await linked(instanceUrl)).map(({ url }) => documentsOf(url)))
-      ).flat();
+      // Stopped as soon as the drafts list more than MAX_DRAFT_DOCUMENTS_IN_ALL together, no other draft read after.
+      let listed = 0;
+      const each = await mapAtOnce(await linked(instanceUrl), async ({ url }) => {
+        const urls = await documentsOf(url);
+        listed += urls.length;
+        if (listed > MAX_DRAFT_DOCUMENTS_IN_ALL)
+          throw new AppError("draftTooManyDocuments", { limit: MAX_DRAFT_DOCUMENTS_IN_ALL });
+        return urls;
+      });
+      return each.flat();
     },
 
     async create(instanceUrl, draft) {
@@ -476,7 +496,11 @@ export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued
   );
 }
 
-/** The documents of a draft's container, those a draft has (draftLayout.ts), by URL; none when it is gone (404). */
+/**
+ * The documents of a draft's container, those a draft has (draftLayout.ts),
+ * by URL; none when it is gone (404), and draftTooManyDocuments past
+ * MAX_DRAFT_DOCUMENTS.
+ */
 export async function draftDocumentsIn(
   draftUrl: string,
   fetch: typeof globalThis.fetch,
@@ -491,9 +515,12 @@ export async function draftDocumentsIn(
     if ((error as { statusCode?: number }).statusCode === 404) return [];
     throw error;
   }
-  return getContainedResourceUrlAll(listing)
-    .filter((url) => url.startsWith(container) && isDraftDocumentName(url.slice(container.length)))
-    .sort();
+  const documents = getContainedResourceUrlAll(listing).filter(
+    (url) => url.startsWith(container) && isDraftDocumentName(url.slice(container.length)),
+  );
+  if (documents.length > MAX_DRAFT_DOCUMENTS)
+    throw new AppError("draftTooManyDocuments", { limit: MAX_DRAFT_DOCUMENTS });
+  return documents.sort();
 }
 
 /**

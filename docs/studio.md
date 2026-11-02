@@ -1459,6 +1459,23 @@ read. One is deleted, with its documents, once the user confirms. A
 draft is private, in the private type index alone
 ([data-model.md](data-model.md#drafts-and-releases)).
 
+The drafts are read a few at a time (`mapAtOnce` in
+[atOnce.ts](../packages/application/src/atOnce.ts)), as are the
+documents the data check validates. A catalog is data anyone may have
+written, so the Studio follows at most `MAX_CATALOG_LINKS` (1,000)
+entries of each kind: decks, drafts and releases
+([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
+it reads none of that kind and says why (`catalogTooManyLinks`), with
+a hint to remove the instance unless the user knows who keeps it. A
+draft or release the catalog has no room for is refused before it's
+written (`catalogFull`), so the Studio never takes an instance past
+what it reads. A draft's folder may list at most `MAX_DRAFT_DOCUMENTS`
+(1,000) documents, and the drafts at most `MAX_DRAFT_DOCUMENTS_IN_ALL`
+(5,000) together; past either, they aren't read
+(`draftTooManyDocuments`). A draft's own documents are read a few at a
+time too
+([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)).
+
 Each draft that can be read links to its [overview](#a-drafts-overview),
 where a draft made opens, the [activity](#the-dock) saying so. A draft
 of a deck copied from a release stays on this screen instead (below).
@@ -2272,7 +2289,9 @@ its catalog links them. Each shows:
   releases are;
 - a link to copy;
 - who can read it (everyone, or only its owner, with **Make it
-  public**);
+  public**). It's asked of a release on the instance's own server
+  alone, a few at a time; one elsewhere says "Not checked: on another
+  server", and isn't made public from here either;
 - **Start the next version**, which makes a draft of it and opens it;
 - a link to the draft it was published from, while the instance has
   it.

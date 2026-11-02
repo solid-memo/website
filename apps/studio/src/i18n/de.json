@@ -1489,6 +1489,7 @@
       "name": "{name}, Version {version}",
       "public": "Alle",
       "private": "Nur du",
+      "unchecked": "Nicht geprüft: auf einem anderen Server",
       "makePublicOf": "{release} öffentlich machen",
       "copy": "Link kopieren",
       "copyLink": "Link {url} kopieren",

@@ -1414,6 +1414,7 @@
       "name": "{name}, 버전 {version}",
       "public": "누구나",
       "private": "나만",
+      "unchecked": "확인하지 않음: 다른 서버에 있어요",
       "makePublicOf": "{release} 공개하기",
       "copy": "링크 복사",
       "copyLink": "링크 {url} 복사",

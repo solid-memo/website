@@ -7,7 +7,7 @@ import type { ReleasePublisher } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
-import { addCatalogLink, catalogLinks } from "./catalogLinks";
+import { addCatalogLink, catalogLinks, refuseFullCatalog } from "./catalogLinks";
 import type { GrantPublicRead } from "./client/access";
 import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
@@ -128,6 +128,8 @@ export function createSolidReleasePublisher({
 
   return {
     async publish(instanceUrl, turtle, targetUrl) {
+      // Before the release is written: one the catalog has no room to link would be public, and listed nowhere.
+      await refuseFullCatalog(instanceUrl, SM.publishedRelease, targetUrl, dataFetch);
       const response = await fetch(targetUrl, {
         method: "PUT",
         headers: { "Content-Type": "text/turtle", "If-None-Match": "*" },

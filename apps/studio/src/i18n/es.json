@@ -1564,6 +1564,7 @@
       "name": "{name}, versión {version}",
       "public": "Todo el mundo",
       "private": "Solo tú",
+      "unchecked": "Sin comprobar: en otro servidor",
       "makePublicOf": "Hacer pública {release}",
       "copy": "Copiar el enlace",
       "copyLink": "Copiar el enlace {url}",

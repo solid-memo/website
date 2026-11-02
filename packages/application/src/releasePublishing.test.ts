@@ -12,6 +12,7 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { courseDraft, DRAFT, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { DeckLibrary, FileExchange, ReleaseDraftRepository, ReleasePublisher } from "./ports";
+import { READS_AT_ONCE } from "./atOnce";
 import { createReleasePublishingUseCases } from "./releasePublishing";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
@@ -201,6 +202,35 @@ describe("makeReleasePublic, isReleasePublic and listPublishedReleases", () => {
       { url: `${INSTANCE}releases/old/v1.ttl`, public: false },
     ]);
     expect(publisher.listPublished).toHaveBeenCalledWith(INSTANCE);
+  });
+});
+
+describe("listPublishedReleases, of a catalog anyone may have written", () => {
+  it("asks only of a release on the instance's origin whether it is public, null for one elsewhere", async () => {
+    const { useCases, publisher } = setUp();
+    const elsewhere = "https://other.example/releases/solid/v1.ttl";
+    publisher.listPublished.mockResolvedValueOnce([TARGET, elsewhere]);
+    await expect(useCases.listPublishedReleases(INSTANCE)).resolves.toEqual([
+      { url: TARGET, public: true },
+      { url: elsewhere, public: null },
+    ]);
+    expect(publisher.isPublic.mock.calls).toEqual([[TARGET]]);
+  });
+
+  it("asks a few at a time, however many releases the catalog links", async () => {
+    const { useCases, publisher } = setUp();
+    const urls = Array.from({ length: 20 }, (_, at) => `${INSTANCE}releases/r${at}/v1.ttl`);
+    publisher.listPublished.mockResolvedValueOnce(urls);
+    let asking = 0;
+    let most = 0;
+    publisher.isPublic.mockImplementation(async () => {
+      most = Math.max(most, ++asking);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      asking--;
+      return false;
+    });
+    await expect(useCases.listPublishedReleases(INSTANCE)).resolves.toHaveLength(urls.length);
+    expect(most).toBe(READS_AT_ONCE);
   });
 });
 

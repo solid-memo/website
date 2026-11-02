@@ -24,6 +24,7 @@ import {
   getStringWithLocale,
   getStringWithLocaleAll,
 } from "./testing/datasets";
+import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
@@ -138,6 +139,28 @@ describe("listDecks", () => {
     expect(decks).toHaveLength(1);
     expect(decks[0].title.en).toBe("Kanji N5");
     expect(decks[0].createdAt).toBe("");
+  });
+
+  it("refuses a catalog with more decks than MAX_CATALOG_LINKS, as catalogTooManyLinks", async () => {
+    const decks = (count: number) =>
+      Array.from(
+        { length: count },
+        (_, at) =>
+          `<${CATALOG}#deck-${at}> a <${SM.Deck}>; <${DCTERMS.title}> "Deck ${at}";
+            <${SM.cardsDocument}> <${INSTANCE}decks/deck-${at}.ttl>;
+            <${SM.reviewsDocument}> <${INSTANCE}reviews/deck-${at}.ttl>.`,
+      ).join("\n");
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(CATALOG, decks(MAX_CATALOG_LINKS)),
+    );
+    await expect(makeRepository().listDecks(INSTANCE)).resolves.toHaveLength(MAX_CATALOG_LINKS);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(CATALOG, decks(MAX_CATALOG_LINKS + 1)),
+    );
+    await expect(makeRepository().listDecks(INSTANCE)).rejects.toMatchObject({
+      code: "catalogTooManyLinks",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
   });
 });
 
