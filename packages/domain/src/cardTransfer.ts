@@ -120,7 +120,9 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  *
  * The target's cards document keeps its own links: the cards written
  * there are its deck's, and hold only what this app knows of a card
- * (a move drops the triples another app put on it). With `keepProgress`, a card's review states go
+ * (a move drops the triples another app put on it), but the release it
+ * came from (`fromRelease`): in the target it is the user's card, which
+ * no upgrade of the target's series changes (libraryUpgrade.ts). With `keepProgress`, a card's review states go
  * with it, under its id in the target, where they are written naming the
  * card there (sm:reviewOf); a card present in the target
  * keeps a state it has there. Without, a card new to the target starts
@@ -289,7 +291,8 @@ function placeIn(
 
 /** The card as the target is to hold it under `id`: its distractors renumbered after it when its id changes. */
 function asWritten(card: Card, id: string): TransferredCard {
-  const { url: _url, formatVersion: _formatVersion, ...kept } = card;
+  // The release a card came from is its deck's: in the target it is the user's card.
+  const { url: _url, formatVersion: _formatVersion, fromRelease: _fromRelease, ...kept } = card;
   if (id === card.id || card.distractors === undefined) return { ...kept, id };
   return {
     ...kept,

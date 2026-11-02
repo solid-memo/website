@@ -72,6 +72,22 @@ const b = card("b", { retired: true });
 const sourceStates = [state("a"), state("a", "back-to-front"), state("b", "back-to-front")];
 
 describe("planCardTransfer", () => {
+  it("drops the release a card was taken from: in the target it is the user's card", () => {
+    const taken = card("capital-of-france", {
+      fromRelease: "https://solid-memo.com/decks/x/v1.ttl",
+    });
+    for (const options of [move, copy]) {
+      const plan = planCardTransfer(
+        { ...SOURCE, cards: [taken], states: [] },
+        { ...TARGET, cards: [], states: [] },
+        ["capital-of-france"],
+        options,
+      );
+      expect(plan.target.save).toEqual([written(card("capital-of-france"))]);
+      expect(plan.target.save[0]).not.toHaveProperty("fromRelease");
+    }
+  });
+
   it("moves cards under their ids, with their distractors, what they are about and review states, in the source's order", () => {
     const plan = planCardTransfer(
       { ...SOURCE, cards: [a, b, card("c")], states: sourceStates },

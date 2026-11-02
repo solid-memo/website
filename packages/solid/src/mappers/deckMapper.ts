@@ -13,6 +13,7 @@ import {
   getStringNoLocale,
   getThing,
   getThingAll,
+  getUrl,
   getUrlAll,
   removeThings,
   setThing,
@@ -383,18 +384,22 @@ function withoutStrayAgents(dataset: Dataset, documents: ReadonlySet<string>): D
 
 /**
  * Map a cards-document subject to a Card, with the distractors it names
- * from the same document; null when the subject is not an sm:Card that
- * fits its format's shape, or a side has neither text nor a picture.
+ * from the same document and the release it was taken from
+ * (`sm:fromRelease`, outside the card format, read whatever format the
+ * card states); null when the subject is not an sm:Card that fits its
+ * format's shape, or a side has neither text nor a picture.
  */
 export function toCard(thing: Subject, dataset: Dataset): Card | null {
   const read = readCard(thing);
   if (read === null) return null;
-  return cardFromRecord(
+  const card = cardFromRecord(
     asUrl(thing),
     read.storedVersion,
     read.data,
     distractorsOf(dataset, read.data.distractor),
   );
+  const fromRelease = getUrl(thing, SM.fromRelease);
+  return card === null || fromRelease === null ? card : { ...card, fromRelease };
 }
 
 /**

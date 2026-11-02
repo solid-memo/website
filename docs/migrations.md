@@ -367,6 +367,20 @@ no format version:
 - **No re-check.** No shape file changed, and the check doesn't read
   the term.
 
+The release a card was taken from (vocabulary 1.27, `sm:fromRelease`,
+see the library upgrades below) needs no migration and moved no format
+version:
+
+- **It belongs to no shape**, as a deck's `sm:deckCardLanguage`, so
+  `CardV7` is unchanged and every writer of the card keeps it. This
+  version writes it on each card a deck takes from a release, and keeps
+  it as stored on every other write. A card moved or copied to another
+  deck leaves it behind. An older version keeps it and ignores it.
+- **Read apart from the shape.** This version reads it on a card
+  whatever its format (`toCard`).
+- **No re-check.** No shape file changed, and the check doesn't read
+  the term.
+
 Whether logging in skips the Connected screen (vocabulary 1.26,
 `sm:connectedScreenSkipped`,
 [onboarding.md](onboarding.md#skipping-the-connected-screen)) needs no
@@ -694,6 +708,26 @@ changes reach only what the user left as the library had it:
 | Anything | Removed by the user | Leaves it removed |
 | Removed | Not there any more | Nothing to write but dropping the review states left of it; the deck still moves to the release |
 | Added, changed, retired, in use again or about other things | Already as the new release has it: content and retirement, or, changed by the user, retirement; or its subjects | Nothing to write, but the deck still moves to the release |
+
+Only the series' cards are compared. Each card a deck takes from a
+release names that release (`sm:fromRelease`, vocabulary 1.27): every
+card of an import, each card an upgrade writes, and a course's question
+as it joins the deck. A card moved or copied in
+([studio.md](studio.md#moving-and-copying-cards)) or written by the
+user names none. A deck added from a link has releases their creator
+writes. In such a deck, a card that names no release is the user's,
+whatever ids the releases list. The plan leaves it out: it's never
+removed, changed, retired or brought back, and nothing is added at its
+id. In a
+copy of a series the library's own index lists, a card that names no
+release is compared by its id as above: copies made before 1.27 name
+none, and those releases are the library's. So a copy from a link made
+before 1.27 keeps its cards as they are; its upgrades bring new cards,
+and each card they write names the release from then on.
+
+The notice names the cards an upgrade removes and those it retires by
+their fronts (`LibraryUpgradeNotice`), so the user sees which cards
+leave study before agreeing.
 
 Retiring isn't a change of the card's content, so it applies to cards
 the user changed too. A library release never removes a card any more:

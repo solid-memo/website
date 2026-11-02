@@ -740,8 +740,9 @@ describe("the deck library", () => {
         toVersion: "2",
         add: [{ id: "norway" }],
       });
-      // The newer release is checked as it is read, before it is planned with: that read is the one fetchLibraryDeck gives.
-      expect(checked(deps)).toEqual([`${RELEASES}v2.ttl`]);
+      // The newer release is checked as it is read, before it is planned with: that read is the one fetchLibraryDeck
+      // gives. The copy's own release is its creator's to change too, and is checked as well.
+      expect(checked(deps)).toEqual([`${RELEASES}v2.ttl`, `${RELEASES}v1.ttl`]);
       const check = vi.mocked(deps.deckLibrary.readRelease).mock.calls.findIndex(([, a]) => a);
       const fetched = vi
         .mocked(deps.deckLibrary.fetchLibraryDeck)
@@ -749,6 +750,38 @@ describe("the deck library", () => {
       expect(vi.mocked(deps.deckLibrary.readRelease).mock.invocationCallOrder[check]!).toBeLessThan(
         vi.mocked(deps.deckLibrary.fetchLibraryDeck).mock.invocationCallOrder[fetched]!,
       );
+    });
+
+    it("planLibraryUpgrade leaves a linked copy's card that names no release as the user has it", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1), linked(2)]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+      ]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      // Release 1 has Sweden, release 2 no longer does.
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+        url === `${RELEASES}v2.ttl`
+          ? { ...libraryContent, url, version: "2", cards: [] }
+          : { ...libraryContent, url },
+      );
+      const sweden: Card = {
+        ...libraryContent.cards[0]!,
+        url: `${copy.cardsDocumentUrl}#sweden`,
+        createdAt: "",
+      };
+      // A card moved in from another deck, its id kept: the user's, not the release's.
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([sweden]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
+      // One the deck took from its release goes with it.
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([
+        { ...sweden, fromRelease: `${RELEASES}v1.ttl` },
+      ]);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({
+        remove: [{ id: "sweden" }],
+      });
     });
 
     it("planLibraryUpgrade refuses a linked copy's newer release, or one in between, that breaks the library's shapes", async () => {
@@ -835,7 +868,7 @@ describe("the deck library", () => {
         fromLink: true,
       });
       const newest = versions.slice(-16).map((version) => `${RELEASES}v${version}.ttl`);
-      expect(checked(deps)).toEqual([series.url, ...newest]);
+      expect(checked(deps)).toEqual([series.url, `${RELEASES}v1.ttl`, ...newest]);
       expect(
         vi
           .mocked(deps.deckLibrary.fetchLibraryDeck)
@@ -845,7 +878,7 @@ describe("the deck library", () => {
       expect(most).toBeLessThanOrEqual(4);
     });
 
-    it("planLibraryUpgrade reads a linked copy's newer release and those in between through reads of the plan's own, its own release through the library", async () => {
+    it("planLibraryUpgrade reads a linked copy's own release, its newer release and those in between through reads of the plan's own, each checked", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         `${RELEASES}v1.ttl`,
@@ -900,17 +933,16 @@ describe("the deck library", () => {
       for (const reads of plans) {
         expect(reads.readRelease.mock.calls.map(([url]) => url)).toEqual([
           `${RELEASES}v3.ttl`,
+          `${RELEASES}v1.ttl`,
           `${RELEASES}v2.ttl`,
         ]);
         expect(reads.fetchLibraryDeck.mock.calls.map(([url]) => url)).toEqual([
+          `${RELEASES}v1.ttl`,
           `${RELEASES}v3.ttl`,
           `${RELEASES}v2.ttl`,
         ]);
       }
-      expect(vi.mocked(deps.deckLibrary.fetchLibraryDeck).mock.calls).toEqual([
-        [`${RELEASES}v1.ttl`],
-        [`${RELEASES}v1.ttl`],
-      ]);
+      expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
       // Past what the plan's reads may read together, nothing is offered.
       vi.mocked(deps.deckLibrary.linkedReads)
         .mockImplementationOnce(planReads)
@@ -1118,7 +1150,10 @@ describe("library deck upgrade", () => {
     expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
       copy,
       {
-        save: [libraryCard("norway", "Oslo"), libraryCard("sweden", "Stockholm")],
+        save: [
+          { ...libraryCard("norway", "Oslo"), fromRelease: `${LIB}v2.ttl` },
+          { ...libraryCard("sweden", "Stockholm"), fromRelease: `${LIB}v2.ttl` },
+        ],
         remove: ["latvia"],
       },
       { whole: true, version: "v0" },

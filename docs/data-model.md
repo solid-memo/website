@@ -327,7 +327,9 @@ loses only the link to the instance's data.
 │                        backImageDescription (a picture's alt text),
 │                        sm:frontNote/backNote under each
 │                        side and sm:frontLabel/backLabel above it,
-│                        dcterms:subject (what it is about), each
+│                        dcterms:subject (what it is about), the
+│                        release it was taken from (sm:fromRelease,
+│                        outside the card format), each
 │                        with sm:formatVersion; a retired card
 │                        (owl:deprecated true) is kept but not studied;
 │                        a card names its wrong options

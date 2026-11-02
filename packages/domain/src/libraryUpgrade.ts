@@ -34,6 +34,15 @@ export type DeckDetail = "direction" | "title" | "description" | "keywords" | "t
  * it, so the copy takes the release's whatever the user did to the
  * card's content. Review history is kept, but for cards the upgrade
  * removes — which releases did before they could retire a card.
+ *
+ * Only the series' cards are the library's to change: those that name
+ * the release they were taken from (Card.fromRelease), as the deck took
+ * them, and, in a copy of a series the library's own index lists, any
+ * card of an id its releases list (copies made before cards named their
+ * release name none). In a deck added from a link a card that names no
+ * release — one moved or copied in, or written by the user — is the
+ * user's, whatever ids that link's releases list: it is left out of the
+ * plan, never removed, changed, retired or brought back.
  */
 export interface LibraryUpgradePlan {
   /** The release the copy came from, and the one it moves to. */
@@ -376,6 +385,7 @@ export function planLibraryUpgrade({
   releases,
   course = false,
   outlines,
+  linked = false,
 }: {
   deck: Deck;
   /** The copy's cards, as the pod holds them. */
@@ -396,6 +406,12 @@ export function planLibraryUpgrade({
   course?: boolean;
   /** A course's outline in the release the copy came from and in the newer one, when both are courses. */
   outlines?: { from: CourseOutline; to: CourseOutline };
+  /**
+   * Whether the copy's series is from a link, whose releases its creator
+   * writes: a card of the copy that names no release is then the user's,
+   * and out of the plan.
+   */
+  linked?: boolean;
 }): LibraryUpgradePlan | null {
   if (Number(to.version) <= Number(from.version)) return null;
   if (to.cards.some((card) => card.formatVersion > CARD_FORMAT_VERSION)) return null;
@@ -405,6 +421,8 @@ export function planLibraryUpgrade({
   const passed = between.map(byId);
   const after = byId(to);
   const copy = new Map(cards.map((card) => [card.id, card]));
+  /** Whether the copy's card is the user's own, not the series': one of a deck from a link that names no release. */
+  const usersOwn = (card: Card) => linked && card.fromRelease === undefined;
   /** The card in each release before the newer one that has it: the one the copy came from, then those in between. */
   const earlierOf = (id: string) => [before, ...passed].flatMap((release) => release.get(id) ?? []);
 
@@ -462,6 +480,8 @@ export function planLibraryUpgrade({
     const old = before.get(id);
     const next = after.get(id);
     const mine = copy.get(id);
+    // The user's own card is left as it is, and holds its id: nothing is added there either.
+    if (mine !== undefined && usersOwn(mine)) continue;
     if (next === undefined) {
       // Removed by the library: from the copy too, where the user left it as a release had it. One the copy no
       // longer has either is gone, its review states left, if any, going with it.
@@ -537,9 +557,13 @@ export function planLibraryUpgrade({
  * the release has them, those of `about` with the release's subjects, and
  * the retired and restored ones as the copy has them — or as `about` has
  * them — with their retirement changed. A changed card already carries
- * the release's subjects and retirement.
+ * the release's subjects and retirement. Each names the newer release
+ * as the one it was taken from (Card.fromRelease): the series' card, a
+ * copy's first upgrade marking those it writes.
  */
-export function upgradedCards(plan: LibraryUpgradePlan): (LibraryCard | Card)[] {
+export function upgradedCards(
+  plan: LibraryUpgradePlan,
+): ((LibraryCard | Card) & { fromRelease: string })[] {
   const cards = new Map<string, LibraryCard | Card>(
     [...plan.add, ...plan.change].map((card) => [card.id, card]),
   );
@@ -555,7 +579,7 @@ export function upgradedCards(plan: LibraryUpgradePlan): (LibraryCard | Card)[] 
     }),
   ];
   for (const card of flagged) if (!changed.has(card.id)) cards.set(card.id, card);
-  return [...cards.values()];
+  return [...cards.values()].map((card) => ({ ...card, fromRelease: plan.releaseUrl }));
 }
 
 /**

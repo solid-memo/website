@@ -1033,6 +1033,8 @@
       "one": "{count} kort som du har ändrat lämnas som det är.",
       "other": "{count} kort som du har ändrat lämnas som de är."
     },
+    "removedCards": "Kort som uppdateringen tar bort",
+    "retiredCards": "Kort som uppdateringen tar ur bruk",
     "releaseNote": "Utgåva {version}: {notes}",
     "update": "Uppdatera till utgåva {version}",
     "updating": "Uppdaterar…"

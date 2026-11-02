@@ -206,8 +206,12 @@ export function createCourseUseCases({
       const effect = courseAnswerEffect(due, choice.correct, now, prefs.dayBoundaryHour);
       if (effect.kind === "none") return { effect: "none", state: current.sm2 };
       // The card joins the deck before its first state, so no state is ever without its card.
+      // It names the release it is taken from, the one the deck names: the series' card, which an upgrade may change.
       if (effect.kind === "introduce")
-        await deckRepository.applyCardChanges(deck, { save: [card], remove: [] });
+        await deckRepository.applyCardChanges(deck, {
+          save: [{ ...card, fromRelease: sourceOf(deck) }],
+          remove: [],
+        });
       const chosen =
         choice.correct || choice.distractorId === undefined
           ? undefined

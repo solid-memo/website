@@ -693,8 +693,8 @@ describe("an upgrade of a release added from a link", () => {
 
     const plan = await useCases.planLibraryUpgrade(deck, copy);
 
-    // Each is read once: the read checked is the one planned with.
-    expect(site.asked.sort()).toEqual([bobUrl(2), bobUrl(3)]);
+    // Each is read once, the copy's own release too: the read checked is the one planned with.
+    expect(site.asked.sort()).toEqual([bobUrl(1), bobUrl(2), bobUrl(3)]);
     expect(plan).toMatchObject({
       fromVersion: "1",
       toVersion: "3",

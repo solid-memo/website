@@ -1033,6 +1033,8 @@
       "one": "{count} Karte, die du geändert hast, bleibt, wie sie ist.",
       "other": "{count} Karten, die du geändert hast, bleiben, wie sie sind."
     },
+    "removedCards": "Karten, die das Update entfernt",
+    "retiredCards": "Karten, die das Update ausmustert",
     "releaseNote": "Ausgabe {version}: {notes}",
     "update": "Auf Ausgabe {version} aktualisieren",
     "updating": "Wird aktualisiert…"
