@@ -1485,6 +1485,7 @@
       "name": "{name}, version {version}",
       "public": "Alla",
       "private": "Bara dig",
+      "unchecked": "Inte kontrollerat: på en annan server",
       "makePublicOf": "Gör {release} offentlig",
       "copy": "Kopiera länken",
       "copyLink": "Kopiera länken {url}",

@@ -31,6 +31,7 @@ import type {
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { mapAtOnce } from "./atOnce";
 import { noting } from "./digestStore";
 import type { DigestStore } from "./digestStore";
 
@@ -136,13 +137,11 @@ export function createInstanceCheckUseCases({
   }
   /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments). */
   async function unclaimedDecksOf(decks: readonly Deck[]): Promise<UnclaimedDeck[]> {
-    const found = await Promise.all(
-      decks.map(async (deck) => ({
-        deckUrl: deck.url,
-        title: deck.title,
-        documents: await deckRepository.unclaimedDocuments(deck),
-      })),
-    );
+    const found = await mapAtOnce(decks, async (deck) => ({
+      deckUrl: deck.url,
+      title: deck.title,
+      documents: await deckRepository.unclaimedDocuments(deck),
+    }));
     return found.filter((deck) => deck.documents.length > 0);
   }
   /**
@@ -170,21 +169,20 @@ export function createInstanceCheckUseCases({
     urls: readonly { url: string; context: Exclude<DocumentContext, "library"> }[],
     digest: InstanceDigest,
   ): Promise<ValidationReport> {
-    const documents = await Promise.all(
-      urls.map(async ({ url, context }): Promise<DocumentReport> => {
-        const receipt = digest.receipts[url];
-        const since = await shapeValidator.validateDocumentSince(
-          url,
-          receipt?.conformedTo === ruleset ? receipt.version : undefined,
-          context,
-        );
-        if (since.unchanged) return { url, status: "checked", subjects: [] };
-        if (since.version !== null && summarize(instanceUrl, [since.value]).conforms) {
-          digestStore.remember(instanceUrl, noting(url, since.version, { conformedTo: ruleset }));
-        }
-        return since.value;
-      }),
-    );
+    // A few at a time: the catalog says how many there are (MAX_CATALOG_LINKS of each kind at most).
+    const documents = await mapAtOnce(urls, async ({ url, context }): Promise<DocumentReport> => {
+      const receipt = digest.receipts[url];
+      const since = await shapeValidator.validateDocumentSince(
+        url,
+        receipt?.conformedTo === ruleset ? receipt.version : undefined,
+        context,
+      );
+      if (since.unchanged) return { url, status: "checked", subjects: [] };
+      if (since.version !== null && summarize(instanceUrl, [since.value]).conforms) {
+        digestStore.remember(instanceUrl, noting(url, since.version, { conformedTo: ruleset }));
+      }
+      return since.value;
+    });
     return summarize(instanceUrl, documents);
   }
   /** Every document of the instance, its answer log's too: not checked on every visit, being large and growing. */
@@ -207,13 +205,11 @@ export function createInstanceCheckUseCases({
     ];
     let checked = 0;
     onChecked(checked, urls.length);
-    const documents = await Promise.all(
-      urls.map(async ({ url, context }) => {
-        const document = await shapeValidator.validateDocument(url, context);
-        onChecked(++checked, urls.length);
-        return document;
-      }),
-    );
+    const documents = await mapAtOnce(urls, async ({ url, context }) => {
+      const document = await shapeValidator.validateDocument(url, context);
+      onChecked(++checked, urls.length);
+      return document;
+    });
     return withUnclaimed(summarize(instanceUrl, documents), unclaimed);
   }
 

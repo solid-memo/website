@@ -21,6 +21,8 @@ import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseT
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
+import { READS_AT_ONCE } from "@solid-memo/application/atOnce";
+import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { RELEASE_LIMITS } from "./client/readLimits";
 import { datasetFromQuads } from "./client/rdf";
 import { turtleAt } from "./testing/contract/rdf";
@@ -38,6 +40,8 @@ import {
   createSolidReleaseDraftRepository,
   deleteDraftResources,
   draftDocumentsIn,
+  MAX_DRAFT_DOCUMENTS,
+  MAX_DRAFT_DOCUMENTS_IN_ALL,
   releaseQuadsOf,
 } from "./solidReleaseDraftRepository";
 
@@ -242,6 +246,22 @@ describe("create", () => {
     });
   });
 
+  it("refuses a draft the catalog has no room to link, as catalogFull, taking back what it wrote", async () => {
+    const pod = await draftPod();
+    await pod.put(
+      CATALOG,
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> ${Array.from(
+        { length: MAX_CATALOG_LINKS },
+        (_, at) => `<${draftUrlOf(INSTANCE, `d${at}`, 1)}>`,
+      ).join(" , ")} .`,
+    );
+    await expect(pod.repository.create(INSTANCE, course())).rejects.toMatchObject({
+      code: "catalogFull",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
+    expect((await pod.local(DRAFT)).status).toBe(404);
+  });
+
   it("checks what the draft shapes describe before it is written", async () => {
     const pod = await draftPod({ checked: true });
     const draft = course();
@@ -304,6 +324,102 @@ describe("list and documents", () => {
     });
   });
 
+  it("refuse a draft's folder that lists more documents than MAX_DRAFT_DOCUMENTS, as draftTooManyDocuments", async () => {
+    const listing = (count: number) =>
+      `<> <http://www.w3.org/ns/ldp#contains> <release.ttl> ${Array.from(
+        { length: count - 1 },
+        (_, at) => `, <chapter-c${at}.ttl>`,
+      ).join(" ")} .`;
+    await expect(
+      draftDocumentsIn(DRAFT, turtleAt(listing(MAX_DRAFT_DOCUMENTS))),
+    ).resolves.toHaveLength(MAX_DRAFT_DOCUMENTS);
+    await expect(
+      draftDocumentsIn(DRAFT, turtleAt(listing(MAX_DRAFT_DOCUMENTS + 1))),
+    ).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS },
+    });
+  });
+
+  it("refuse drafts that list more documents than MAX_DRAFT_DOCUMENTS_IN_ALL together, reading no more of them", async () => {
+    const pod = await draftPod();
+    const drafts = Array.from({ length: 20 }, (_, at) => draftUrlOf(INSTANCE, `d${at}`, 1));
+    await pod.put(
+      CATALOG,
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> ${drafts
+        .map((url) => `<${url}>`)
+        .join(" , ")} .`,
+    );
+    const listing = turtleAt(
+      `<> <http://www.w3.org/ns/ldp#contains> <release.ttl> ${Array.from(
+        { length: MAX_DRAFT_DOCUMENTS - 1 },
+        (_, at) => `, <chapter-c${at}.ttl>`,
+      ).join(" ")} .`,
+    );
+    const listed: string[] = [];
+    const listing20 = (async (input, init) => {
+      const url = String(input);
+      if (!drafts.some((draft) => url === new URL(".", draft).href)) return pod.fetch(input, init);
+      listed.push(url);
+      return listing(input, init);
+    }) as typeof globalThis.fetch;
+    const repository = createSolidReleaseDraftRepository({
+      fetch: listing20,
+      releaseFetch: siteFetch,
+    });
+    await expect(repository.documents(INSTANCE)).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    expect(listed.length).toBeLessThan(drafts.length);
+  });
+
+  it("read a few drafts at a time, however many the catalog links", async () => {
+    const pod = await draftPod();
+    const drafts = Array.from({ length: 20 }, (_, at) => draftUrlOf(INSTANCE, `d${at}`, 1));
+    await pod.put(
+      CATALOG,
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> ${drafts
+        .map((url) => `<${url}>`)
+        .join(" , ")} .`,
+    );
+    let reading = 0;
+    let most = 0;
+    const counted = (async (input, init) => {
+      const url = String(input);
+      if (!drafts.includes(url) && !drafts.some((draft) => url === new URL(".", draft).href))
+        return pod.fetch(input, init);
+      most = Math.max(most, ++reading);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      reading--;
+      return pod.fetch(input, init);
+    }) as typeof globalThis.fetch;
+    const repository = createSolidReleaseDraftRepository({
+      fetch: counted,
+      releaseFetch: siteFetch,
+    });
+    await expect(repository.list(INSTANCE)).resolves.toHaveLength(drafts.length);
+    expect(most).toBe(READS_AT_ONCE);
+    most = 0;
+    await expect(repository.documents(INSTANCE)).resolves.toEqual([]);
+    expect(most).toBe(READS_AT_ONCE);
+  });
+
+  it("refuse a catalog that links more drafts than MAX_CATALOG_LINKS, as catalogTooManyLinks", async () => {
+    const pod = await draftPod();
+    await pod.put(
+      CATALOG,
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> ${Array.from(
+        { length: MAX_CATALOG_LINKS + 1 },
+        (_, at) => `<${draftUrlOf(INSTANCE, `d${at}`, 1)}>`,
+      ).join(" , ")} .`,
+    );
+    const refused = { code: "catalogTooManyLinks", vars: { limit: MAX_CATALOG_LINKS } };
+    await expect(pod.repository.list(INSTANCE)).rejects.toMatchObject(refused);
+    await expect(pod.repository.documents(INSTANCE)).rejects.toMatchObject(refused);
+    expect(pod.requests.map(({ url }) => url)).toEqual([CATALOG, CATALOG]);
+  });
+
   it("are none without a catalog", async () => {
     const pod = await draftPod();
     await pod.local(CATALOG, { method: "DELETE" });
@@ -322,6 +438,28 @@ describe("read", () => {
     await expect(pod.repository.read(DRAFT)).rejects.toMatchObject({ code: "draftGone" });
     await pod.put(DRAFT, `<#x> <${SM}y> "z" .`);
     await expect(pod.repository.read(DRAFT)).rejects.toMatchObject({ code: "draftGone" });
+  });
+
+  it("reads a few of a draft's documents at a time, however many its folder lists", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    const extra = Array.from({ length: 20 }, (_, at) => `${CONTAINER}chapter-x${at}.ttl`);
+    for (const url of extra) await pod.put(url, "");
+    let reading = 0;
+    let most = 0;
+    const counted = (async (input, init) => {
+      if (!extra.includes(String(input))) return pod.fetch(input, init);
+      most = Math.max(most, ++reading);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      reading--;
+      return pod.fetch(input, init);
+    }) as typeof globalThis.fetch;
+    const repository = createSolidReleaseDraftRepository({
+      fetch: counted,
+      releaseFetch: siteFetch,
+    });
+    await expect(repository.read(DRAFT)).resolves.toMatchObject({ draft: { url: DRAFT } });
+    expect(most).toBe(READS_AT_ONCE);
   });
 
   it("refuses a draft whose documents name a subject by an id no draft can have", async () => {

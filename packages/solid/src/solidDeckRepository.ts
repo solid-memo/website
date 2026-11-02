@@ -80,6 +80,7 @@ import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
+import { withinCatalogLimit } from "./catalogLinks";
 
 /** A card to write, by its id: a new card is stamped with the time of writing. */
 type CardToWrite = CardContent & { id: string; createdAt?: string; retired?: true };
@@ -146,7 +147,8 @@ export function createSolidDeckRepository({
       const catalogUrl = catalogUrlOf(instanceUrl);
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
       if (dataset === null) return [];
-      return toDecks(dataset, catalogUrl);
+      // Each deck's documents are read by whoever lists them: no more decks than a catalog may have.
+      return withinCatalogLimit(toDecks(dataset, catalogUrl));
     },
 
     async readCatalog(instanceUrl) {

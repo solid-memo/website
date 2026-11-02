@@ -1559,6 +1559,7 @@
       "name": "{name}, version {version}",
       "public": "Tout le monde",
       "private": "Vous seul",
+      "unchecked": "Non vérifié : sur un autre serveur",
       "makePublicOf": "Rendre publique la publication {release}",
       "copy": "Copier le lien",
       "copyLink": "Copier le lien {url}",

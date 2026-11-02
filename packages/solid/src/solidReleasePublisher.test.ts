@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
-import { addCatalogLink } from "./catalogLinks";
+import { addCatalogLink, MAX_CATALOG_LINKS } from "./catalogLinks";
 import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
 import type { ReadLimits } from "./client/interface";
 import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
@@ -157,6 +157,26 @@ describe("publish", () => {
       name: "ReadLimitError",
       url: CATALOG,
     });
+  });
+
+  it("refuses a release the catalog has no room to link, as catalogFull, writing nothing", async () => {
+    const { pod, publisher, writes } = await publisherPod();
+    const others = Array.from(
+      { length: MAX_CATALOG_LINKS - 1 },
+      (_, at) => `<${INSTANCE}releases/r${at}/v1.ttl>`,
+    );
+    const catalog = (links: readonly string[]) =>
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${PUBLISHED}> ${links.join(" , ")} .`;
+    await pod.put(CATALOG, catalog([...others, `<${INSTANCE}releases/full/v1.ttl>`]));
+    const before = writes().length;
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+      code: "catalogFull",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
+    expect(writes().slice(before)).toEqual([]);
+    // One it links already, as a publishing cut short left it, is finished.
+    await pod.put(CATALOG, catalog([...others, `<${RELEASE}>`]));
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
   });
 
   it("never writes over a release: one there already is releaseTaken, with nothing written", async () => {
@@ -627,6 +647,22 @@ describe("isPublic and listPublished", () => {
       await addCatalogLink(INSTANCE, PUBLISHED, url, pod.fetch);
     }
     await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([RELEASE]);
+  });
+
+  it("refuses a catalog that links more releases than MAX_CATALOG_LINKS, as catalogTooManyLinks", async () => {
+    const { pod, publisher } = await publisherPod();
+    const catalog = (count: number) =>
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${PUBLISHED}> ${Array.from(
+        { length: count },
+        (_, at) => `<${INSTANCE}releases/r${at}/v1.ttl>`,
+      ).join(" , ")} .`;
+    await pod.put(CATALOG, catalog(MAX_CATALOG_LINKS));
+    await expect(publisher.listPublished(INSTANCE)).resolves.toHaveLength(MAX_CATALOG_LINKS);
+    await pod.put(CATALOG, catalog(MAX_CATALOG_LINKS + 1));
+    await expect(publisher.listPublished(INSTANCE)).rejects.toMatchObject({
+      code: "catalogTooManyLinks",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
   });
 
   it("lists nothing for an instance without a catalog", async () => {

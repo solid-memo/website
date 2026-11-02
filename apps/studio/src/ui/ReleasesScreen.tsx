@@ -20,11 +20,19 @@ import { nextSort, sortedRows, type TableSort } from "./shell/tableModel";
 /** A column of the releases, to sort them by. */
 type ReleaseColumn = "release" | "readers" | "draft";
 
+/** Who can read a release, as the table says it: not asked of one on another origin than the instance (null). */
+function readersKey(
+  isPublic: boolean | null,
+): "studio.releases.public" | "studio.releases.private" | "studio.releases.unchecked" {
+  if (isPublic === null) return "studio.releases.unchecked";
+  return isPublic ? "studio.releases.public" : "studio.releases.private";
+}
+
 /**
  * The releases an instance published (docs/studio.md, Releases), as its
  * catalog links them: each by its address, with a link to copy,
  * whether anyone can read it (and, if not, a way to try again, once the
- * user confirms it), the draft it was published from, while the
+ * user confirms it; not asked of one on another origin), the draft it was published from, while the
  * instance has it (`draftOf`),
  * and its next version to start as a draft. A release is never changed here.
  * The table is a DataTable: a column's header sorts it by the column,
@@ -93,7 +101,7 @@ export function ReleasesScreen({
         case "release":
           return nameOf(release.url);
         case "readers":
-          return t(release.public ? "studio.releases.public" : "studio.releases.private");
+          return t(readersKey(release.public));
         case "draft": {
           const source = draftOf(release.url);
           return source === null ? undefined : draftName(source.draft);
@@ -146,8 +154,8 @@ export function ReleasesScreen({
                   label: t("studio.releases.column.readers"),
                   cell: (release) => (
                     <>
-                      {t(release.public ? "studio.releases.public" : "studio.releases.private")}
-                      {!release.public && (
+                      {t(readersKey(release.public))}
+                      {release.public === false && (
                         <>
                           {" "}
                           <button

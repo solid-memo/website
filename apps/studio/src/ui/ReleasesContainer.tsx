@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useMemo } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
@@ -52,6 +53,15 @@ export function ReleasesContainer({
     queryKey: queryKeys.releaseDrafts(instance.url),
     queryFn: () => useCases.listReleaseDrafts(instance.url),
   });
+  // Each draft by its release, the first that names it, once: every row, sort and filter looks its own up.
+  const draftsByRelease = useMemo(() => {
+    const byRelease = new Map<string, ReleaseDraftSummary>();
+    for (const draft of draftsQuery.data ?? []) {
+      if (draft.releasedAs !== undefined && !byRelease.has(draft.releasedAs))
+        byRelease.set(draft.releasedAs, draft);
+    }
+    return byRelease;
+  }, [draftsQuery.data]);
   const publicMutation = useMakePublic(useCases, instance.url, webId);
   const nextMutation = useStartNextVersion(useCases, instance.url, onStarted);
 
@@ -65,7 +75,7 @@ export function ReleasesContainer({
       healthHref={healthHref}
       draftsHref={draftsHref}
       draftOf={(url) => {
-        const draft = draftsQuery.data?.find((each) => each.releasedAs === url);
+        const draft = draftsByRelease.get(url);
         return draft === undefined ? null : { draft, href: draftHref(draft) };
       }}
       makingPublic={publicMutation.isPending ? publicMutation.variables! : null}

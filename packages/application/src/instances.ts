@@ -45,6 +45,7 @@ import type {
   WebIdDocumentRepository,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
+import { mapAtOnce } from "./atOnce";
 import { again } from "./writes";
 import { stepReporter } from "./progress";
 import type { PreferenceStore } from "./preferenceStore";
@@ -216,19 +217,18 @@ export function createInstanceUseCases({
       const receipt = digest.receipts[url];
       return receipt?.latestFormat === true ? receipt.version : undefined;
     };
-    const entries = await Promise.all(
-      decks.map(async (deck) => {
-        const [cards, reviews] = await Promise.all([
-          deckRepository.readCardsSince(deck, latestVersion(deck.cardsDocumentUrl)),
-          reviewStateRepository.readReviewStatesSince(deck, latestVersion(deck.reviewsDocumentUrl)),
-        ]);
-        return {
-          deck,
-          cards: cards.unchanged ? [] : cards.value,
-          reviews: reviews.unchanged ? [] : reviews.value.sm2,
-        };
-      }),
-    );
+    // A few decks at a time: the catalog may list many (MAX_CATALOG_LINKS at most).
+    const entries = await mapAtOnce(decks, async (deck) => {
+      const [cards, reviews] = await Promise.all([
+        deckRepository.readCardsSince(deck, latestVersion(deck.cardsDocumentUrl)),
+        reviewStateRepository.readReviewStatesSince(deck, latestVersion(deck.reviewsDocumentUrl)),
+      ]);
+      return {
+        deck,
+        cards: cards.unchanged ? [] : cards.value,
+        reviews: reviews.unchanged ? [] : reviews.value.sm2,
+      };
+    });
     return planMigration({ instance, preferences, catalog, entries });
   }
   /**

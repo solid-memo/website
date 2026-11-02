@@ -791,6 +791,14 @@ another document isn't held to its class
 instance listing one stays valid on real servers
 ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
 
+A catalog is data anyone may have written, so the app reads at most
+`MAX_CATALOG_LINKS` (1,000) decks of it, in the deck list, the
+statistics and the format update as in the Studio
+([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
+it reads none of them and says why (`catalogTooManyLinks`). The same
+limit holds for its links to drafts and releases
+([Drafts and releases](#drafts-and-releases)).
+
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;
 its registration as the [Discovery chain](#discovery-chain) says. The
