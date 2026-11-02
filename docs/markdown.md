@@ -65,9 +65,13 @@ a code-only back may be `@zxx`.
 
 `@solid-memo/markdown` (`packages/markdown/`) is the only code that
 touches the parser, and only in `src/parse.ts`. The parser is
-`mdast-util-from-markdown` with `micromark-extension-gfm-table`,
-`mdast-util-gfm-table` and `micromark-extension-cjk-friendly`, syntax
-only: its emphasis is CommonMark's, so it needs no tree extension. Everything else sees the
+`markdown-it`, its `commonmark` preset with its `table` rule, and
+`markdown-it-cjk-friendly`. It keeps a link's URL as written: it
+encodes, converts or refuses none, as the renderer judges each
+(`liveLink`). It gives each block its lines but no place within them,
+so `parse.ts` wraps each of its rules to note where in the text each
+token was read from. What the tree shows as its source, and what a
+note holds, is the text as written. Everything else sees the
 package's own tree, folded to what the app shows:
 
 | In the text | In the tree |
@@ -96,100 +100,39 @@ package's own tree, folded to what the app shows:
 
 ### Limits
 
-Every entry point for data is bounded, and a text past a limit is
-plain, its source still readable, unless the limit says otherwise.
-[Repository Markdown](#repository-markdown) lifts only `MAX_CHARS`
-and `MAX_LOOKAHEAD`.
-The limits count lines as the parser does: a line ends at a line
-feed, a carriage return, or both, and only spaces and tabs make it
-blank.
+Every entry point for data is bounded. The limits bound a text's
+size, its depth and the parser's work on it, never by predicting which
+shapes of Markdown make the parser slow.
+[Repository Markdown](#repository-markdown) lifts only `MAX_CHARS` and
+`MAX_WORK`.
 
-- **`MAX_CHARS`, 20,000 characters.** The longest course text is about
-  2,600.
-- **`MAX_LINE_NESTING`, 16 containers opened on one line, and
-  `MAX_DELIMITERS`, 2,000 `*` and `_` in a text.** The parser is
-  quadratic in either (`- - - - …` at 20,000 characters takes tens of
-  seconds). No text people write comes near them.
-- **`MAX_NESTED_LINES`, 300 quotes or list items opened inside a list
-  item** (`- - a`, `- > a`, or an item indented under another), and
-  **`MAX_LAZY_LINES`, 200 lines that continue a quote's or item's
-  paragraph without its `>` or indentation.** The parser is quadratic
-  in both (`- a` followed by 10,000 such lines takes over a second).
-  The count runs for the whole paragraph. A line of only `>`s and text
-  goes on with it, and so does a list item that can't interrupt a
-  paragraph (`2.`, or an item with nothing after its marker). So does a
-  marker indented four or more columns past the content of the item
-  around the paragraph, or past the line's start in a quote: it's the
-  paragraph's text. Only a blank line, a fence, a thematic break, a
-  line of only the `>`s it starts with or a list item that can
-  interrupt a paragraph starts it again. A run of backticks with
-  another backtick after it on the line isn't a fence, as CommonMark
-  has it, so it goes on with the paragraph. In a quote, an indented line
-  counts too; in a list item, a line indented less than the item's
-  content does.
-- **`MAX_QUOTES`, 200 block quotes a text opens**, side by side or
-  apart, in a list item or in another quote. A quote's next line that
-  starts with the same `>`s opens none, so one long quote at a line's
-  start counts once; a `>` after four columns of white space is code,
-  and opens none either. The count doesn't follow fenced code, HTML
-  or list items, so it can be off either way. Mostly it errs high. A
-  `>` on a line indented less than the one above counts as a quote of
-  its own, as that line may have left a list item. A code block of
-  many `>` lines that each follow one without, or a long quote in a list
-  item, may count past the limit and show as plain text. It errs low
-  only after a line it takes for a quote's that the parser doesn't,
-  such as an HTML block's last line: the quote the next line opens goes
-  uncounted. That is at most one for each quote it counts, so a text it
-  lets through opens at most about twice `MAX_QUOTES`, still a bounded
-  cost. The parser is quadratic in them too.
-- **`MAX_LISTS`, 200 lists a text opens.** A list's next item opens
-  none, and neither do the lines its items hold. A line indented less
-  than an item's content leaves the item. An item with another marker
-  (`-`, `+`, `*`, `.` or `)`) starts another list, and so do a
-  thematic break and a change in the quotes a line starts with. An
-  item can start with at most one blank line, so an item whose marker
-  line is empty ends at a blank line right after it; only an item with
-  the same marker goes on with its list then. An empty item, or an
-  ordered one that starts other than at 1, can't interrupt a
-  paragraph, so it opens no list while one is open. A paragraph counts
-  as open only from a line of plain words after a blank line or at the
-  start, under the same `>`s. A marker counts wherever it is, in
-  fenced code, indented code or an HTML block too, and a lazy line
-  leaves the list, so the count errs high: a fence holding a long diff
-  can pass the limit. The parser is quadratic in lists, such as `+ a`,
-  a blank line and `b`, repeated.
-- **`MAX_LOOKAHEAD`, 500,000 characters read ahead for the end of a
-  code span, inline HTML or a link's title.** An opener that never
-  closes is read to the end of its paragraph. Each opener counts the
-  characters from it to its closer, or to the next blank line when
-  none comes, and the counts add up over the text. A backtick run
-  closes at the next run of its length, `<!--` at `-->`, `<?` at `?>`,
-  `<![CDATA[` at `]]>`, and `<!` and a letter at `>`. A link's title
-  closes at its quote or `)`, and a link with no title counts to the
-  end of its destination. Each backtick run counts, a closer too, so
-  the count errs high, but closed spans count about once over. The
-  parser is quadratic in openers that never close. No text in `decks/`
-  comes near it.
-- **`MAX_UNDERLINES`, 200 lines that could underline a heading** (`===`
-  or `---`, with white space after). A line counts once any run of `>`,
-  spaces and tabs is taken off its start, so an underline in a block
-  quote or a list item counts. So does an indented line of code, so the
-  count errs high. A no-break space or form feed is no indentation, so
-  a line after one is text and doesn't count. The parser is quadratic
-  in setext headings in one container too (`a\n=\n…` at 20,000
-  characters takes over a second).
-- **`MAX_IMAGES`, 200 picture openers (`![`) in a text.** A picture
-  can hold another in its text, and the parser is quadratic in how deep
-  they nest, so the limit bounds the nesting too. Each `![` counts, in
-  code or escaped as well, so the count errs high. No text in `decks/`
-  comes near it.
+- **`MAX_CHARS`, 20,000 characters.** A longer text is plain, its
+  source still readable. The longest course text is about 2,600.
+- **`MAX_WORK`, 40 units of the parser's work for each character** (of
+  at least 1,000). Each try of one of the parser's rules, each step
+  through a link's label and each token it makes is a unit, counted as
+  the parser works. Past the budget the parse stops, and the text is
+  plain, so no text costs more than time linear in its length.
+  markdown-it reads most text in such time, but some shapes make it
+  read the rest of a text again and again: a block quote after each
+  line of a paragraph, or link openers before an unclosed declaration
+  such as `<!X`. The budget stops them whatever their shape. A text in
+  `decks/` takes at most about 1 unit a character, and a list of
+  one-word items about 8.
 - **`MAX_DEPTH`, 8.** Blocks and phrasing nested deeper show as their
   source, so every walker of the tree recurses at most 8 deep. Each
   quote, list item, paragraph, emphasis and link is a level: in seven
   quotes, a paragraph's text is the eighth level and shows as written,
   but markup there shows as its source.
+- **The parser's own depth, 18 levels of blocks.** A quote is one
+  level and a list two, the list and its item. Past that depth a
+  container's lines are passed over a line at a time, unread, so nested
+  containers don't take time quadratic in their depth. They're always in
+  a block past `MAX_DEPTH`, which shows as its source, whole, and ends
+  where it would have.
 - **Tables:** a table of more than 20 columns (the header's) or 2,000
-  cells shows as its source.
+  cells shows as its source. Its rows are found but not read, as
+  markdown-it would fill each short row of a wide table with cells.
 - **`labelText`** reads one run of lines up to a blank line at a time,
   going on only while what it has read shows no text (a rule, a
   definition), at most 2,000 characters in all. A label costs the same
@@ -204,7 +147,10 @@ blank.
   goes first.
 
 The package's tests include the cmark and commonmark.js pathological
-inputs, each at the length cap, within a time budget.
+inputs, and the shapes that made the parser before it slow, each at the
+length cap. Each reads within 25 times what plain prose of the same
+length takes, or within 3 times what its first half takes, as a text
+read in time linear in its length does.
 
 ### Chunks
 
@@ -326,17 +272,13 @@ input at build time only, never for data:
 - **Headings keep their level** (`{ type: "heading", depth, line }`)
   and their line, for a message about one. Other blocks are as
   `parseMarkdown` gives them.
-- **`MAX_CHARS` is lifted, and with it `MAX_LOOKAHEAD`, which grows
-  with a page's length.** `studio.md` is about 130 KB, `data-model.md`
-  about 70 KB. The docs come nowhere near the other
-  [limits](#limits).
+- **`MAX_CHARS` and `MAX_WORK` are lifted.** `studio.md` is about
+  130 KB, `data-model.md` about 70 KB.
 - **What data would fold, it refuses.** Raw HTML, a picture, a link
   reference definition, what nests past `MAX_DEPTH` and a table past
-  its caps each throw a `DocumentError`. So does a text past
-  `MAX_LINE_NESTING`, `MAX_NESTED_LINES`, `MAX_LAZY_LINES`,
-  `MAX_QUOTES`, `MAX_LISTS`, `MAX_DELIMITERS`, `MAX_UNDERLINES` or
-  `MAX_IMAGES`. The error names the problem's first line when known.
-  A page shows as written, or its build fails and says where.
+  its caps each throw a `DocumentError`, which names the line it
+  starts on. A page shows as written, or its build fails and says
+  where.
 
 ## Diagrams
 
@@ -617,11 +559,8 @@ over every chunk, the [Studio](studio.md)'s included):
   `dangerouslySetInnerHTML`, `createContextualFragment`, `srcdoc` or
   `document.write` is Preact's own diff. Only a
   `dangerouslySetInnerHTML` prop reaches it, and no other module names
-  one. The parser's entity decoder has a browser build that decodes
-  `&name;` by writing to `innerHTML`; `apps/web/vite.config.ts` aliases
-  it to its plain build, a lookup table, as do
-  `packages/ui/vitest.config.ts`, `apps/web/vitest.config.ts` and
-  `apps/studio/vitest.config.ts` for the component tests.
+  one. The parser decodes `&name;` with the `entities` package's
+  table, never the browser's HTML parser.
 - **A Content Security Policy**, as a meta tag in `index.html` (GitHub
   Pages sets no headers): `script-src 'self'` and the inline theme
   script by its hash, `object-src 'none'`, `base-uri 'none'`,
@@ -651,7 +590,7 @@ shows the same problems as hints, never as a block
 | A character reference outside code (`characterReference`), such as `&aring;` | CommonMark decodes it: it shows as "å". As code, or with its `&` escaped (`\&aring;`), it shows as typed. An unknown name, `&nosuchname;`, is text and passes. |
 | A heading underlined with dashes (`dashHeading`): a line of text with `---` right under it, no blank line between | It looks like text over a thematic break, which a blank line before the `---` makes it (ending a [chunk](#chunks) in a step's theory). That blank line, or a `##` heading, avoids it; `===` underlining passes. |
 | An option that isn't one paragraph (`notOneParagraph`): a distractor's `distractorText`, and the `back` of a card with distractors (field `OPTION`) | Options show on one line, in the inline profile, and must look alike, or the odd one out gives the answer away. A heading is no paragraph: it shows bold on a revealed back. |
-| Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past the parser's others (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it's plain text that shows as written anyway), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source. |
+| Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past `MAX_WORK` (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it's plain text that shows as written anyway), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source. |
 
 A step's theory is held to its chunks too: none of them empty, and as
 many in each language, so a learner who switches language keeps their

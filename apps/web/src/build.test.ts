@@ -109,16 +109,6 @@ describe("the bundle", () => {
     );
     expect(withSinks).toEqual(["preact/dist/preact.mjs"]);
   });
-
-  it("decodes Markdown's character references with a table, not the browser's parser", () => {
-    const ids = chunks.flatMap((chunk) => Object.keys(chunk.modules));
-    expect(ids).toContainEqual(
-      expect.stringMatching(/decode-named-character-reference\/index\.js$/),
-    );
-    expect(ids).not.toContainEqual(
-      expect.stringMatching(/decode-named-character-reference\/index\.dom\.js$/),
-    );
-  });
 });
 
 const chunkNamed = (fileName: string) => chunks.find((chunk) => chunk.fileName === fileName)!;

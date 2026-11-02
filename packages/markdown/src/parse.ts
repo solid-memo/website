@@ -2,11 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Nodes, Parents, PhrasingContent, Root, RootContent, Table, TableCell } from "mdast";
-import { fromMarkdown } from "mdast-util-from-markdown";
-import { gfmTableFromMarkdown } from "mdast-util-gfm-table";
-import { cjkFriendlyExtension } from "micromark-extension-cjk-friendly";
-import { gfmTable } from "micromark-extension-gfm-table";
+import type { StateBlock, StateInline, Token } from "markdown-it";
+import MarkdownIt from "markdown-it";
+import cjkFriendly from "markdown-it-cjk-friendly";
 
 /**
  * Markdown as Solid Memo reads it (docs/markdown.md): CommonMark 0.31.2
@@ -48,7 +46,10 @@ type Blocks<Extra> =
   | { type: "paragraph"; children: MdInline[] }
   /** A fenced or indented code block; `lang` is the info string's first word, normalized, when it is one. */
   | { type: "code"; lang?: string; value: string }
-  /** `tight` when no blank line separates its items: their paragraphs are shown as bare text. */
+  /**
+   * `tight` when no blank line separates its items, or the blocks in one,
+   * as CommonMark has it: their paragraphs are shown as bare text.
+   */
   | { type: "list"; ordered: boolean; start: number; tight: boolean; items: Blocks<Extra>[][] }
   | { type: "quote"; children: Blocks<Extra>[] }
   | { type: "rule" }
@@ -81,71 +82,24 @@ export const MAX_CHARS = 20_000;
 /** How deep blocks and phrasing nest before the rest is shown as its source. */
 export const MAX_DEPTH = 8;
 
-/**
- * The most block quotes and list items one line may open, and the most
- * emphasis delimiters (`*`, `_`) a text may hold. The parser takes time
- * quadratic in either, so a text past them is shown as plain text: no
- * text people write comes near them, and its source still reads.
- */
-export const MAX_LINE_NESTING = 16;
-export const MAX_DELIMITERS = 2_000;
-
-/**
- * The most lines a text may hold that could underline a heading (`===`,
- * `---`, a thematic break among them): the parser takes time quadratic
- * in them too, so a text past it is shown as plain text.
- */
-export const MAX_UNDERLINES = 200;
-
-/**
- * The most picture openers (`![`) a text may hold. A picture may hold
- * another in its text, and the parser takes time quadratic in how deep
- * they nest, so a text past it is shown as plain text. Each `![` counts,
- * in code or escaped too, so the count errs high.
- */
-export const MAX_IMAGES = 200;
-
-/**
- * The most block quotes and list items a text may open inside a list
- * item (`- - a`, `- > a`, a list item indented under another), and the
- * most lines of one paragraph inside a block quote or list item that
- * continue it without its `>` or the item's indentation (lazy
- * continuation lines, as LazyLines counts them). The parser takes time
- * quadratic in either, so a text past them is shown as plain text.
- */
-export const MAX_NESTED_LINES = 300;
-export const MAX_LAZY_LINES = 200;
-
-/**
- * The most block quotes a text may open, wherever they are: side by
- * side, one after another, inside a list item or inside another quote.
- * A quote's next line, under the same `>`, opens none. The parser takes
- * time quadratic in them, so a text past it is shown as plain text.
- */
-export const MAX_QUOTES = 200;
-
-/**
- * The most lists a text may open: a list ends at a line that leaves its
- * items, or where an item of another kind of marker comes, so the next
- * marker opens another. An item that starts empty ends at a blank line
- * right after it. The parser takes time quadratic in them too, so
- * a text past it is shown as plain text. A list's next items open none.
- */
-export const MAX_LISTS = 200;
-
-/**
- * The most characters the parser may read ahead, all told, for the end
- * of a code span, of inline HTML or of a link's title. Each opener counts
- * the characters from it to its closer, or to the next blank line when
- * none comes, as an opener that never closes is read to the end of its
- * paragraph: a text whose count is past it is shown as plain text.
- * Repository Markdown lifts it with MAX_CHARS.
- */
-export const MAX_LOOKAHEAD = 500_000;
-
 /** A table wider than this, or with more cells than MAX_TABLE_CELLS, is shown as its source. */
 export const MAX_TABLE_COLUMNS = 20;
 export const MAX_TABLE_CELLS = 2_000;
+
+/**
+ * The most work the parser may do on a text, for each of its characters
+ * (and as if it had at least WORK_FLOOR): a try of one of its rules, a
+ * step through a link's label, or a token it makes, is one unit of work,
+ * counted as it is done. Past it,
+ * the text is shown as plain text, so no text costs more than time
+ * linear in its length. markdown-it reads most text in time linear in
+ * its length, but some shapes, such as a block quote after each line of
+ * a paragraph, make it read the rest of the text again and again: this
+ * bounds them, whatever their shape, without predicting it. Repository
+ * Markdown lifts it with MAX_CHARS.
+ */
+const MAX_WORK = 40;
+const WORK_FLOOR = 1_000;
 
 /** The first word of a code block's info string, when it looks like a language name. */
 const LANGUAGE = /^[a-z0-9+#-]{1,20}$/;
@@ -178,65 +132,45 @@ function marker(control: string): string {
 
 /**
  * The text read as Markdown, as blocks; null when it is longer than
- * MAX_CHARS, or past MAX_LOOKAHEAD, MAX_LINE_NESTING, MAX_NESTED_LINES,
- * MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS, MAX_UNDERLINES or
- * MAX_IMAGES, to be shown as plain text instead.
+ * MAX_CHARS, or the parser works on it past MAX_WORK, to be shown as
+ * plain text instead.
  */
 export function parseMarkdown(text: string): MdBlock[] | null {
   const tree = read(text);
   // Without its outline, Fold makes no heading: the blocks are MdBlock's.
-  return tree === null
-    ? null
-    : (new Fold(text, definitions(tree), false).blocks(tree.children, 0) as MdBlock[]);
+  return tree === null ? null : (new Fold(text, false).blocks(tree, 0) as MdBlock[]);
 }
 
 /**
  * The repository's own Markdown, its docs, read as blocks in the same
  * dialect, with headings kept at their level (docs/markdown.md). For
- * trusted input read at build time only, never for data: MAX_CHARS is
- * lifted, as a page of the docs is longer, and with it MAX_LOOKAHEAD,
- * which grows with the page, and that alone. Every other limit stays,
- * and what parseMarkdown would fold or show as its source throws a
- * DocumentError instead: raw HTML, a picture, a link reference
- * definition, what nests past MAX_DEPTH, a table past its caps, and a
- * text past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
- * MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS, MAX_UNDERLINES or MAX_IMAGES.
- * So a page shows as it is written, or its build fails and says where.
+ * trusted input read at build time only, never for data: MAX_CHARS and
+ * MAX_WORK are lifted, as a page of the docs is longer. What
+ * parseMarkdown would fold or show as its source throws a DocumentError
+ * instead: raw HTML, a picture, a link reference definition, what nests
+ * past MAX_DEPTH and a table past its caps. So a page shows as it is
+ * written, or its build fails and says where.
  */
 export function parseDocument(text: string): DocBlock[] {
-  const costly = tooCostly(text);
-  if (costly !== null) throw new DocumentError(costly.what, costly.line);
-  const tree = parse(text);
-  return new Fold(text, definitions(tree), true).blocks(tree.children, 0);
+  return new Fold(text, true).blocks(parse(text, Infinity)!, 0);
 }
 
-/**
- * What parseDocument refuses in a text, and on which line it starts
- * (from 1); null for a limit on the whole text.
- */
+/** What parseDocument refuses in a text, and on which line it starts (from 1). */
 export class DocumentError extends Error {
   readonly what: string;
-  readonly line: number | null;
+  readonly line: number;
 
-  constructor(what: string, line: number | null) {
-    super(line === null ? what : `line ${line}: ${what}`);
+  constructor(what: string, line: number) {
+    super(`line ${line}: ${what}`);
     this.name = "DocumentError";
     this.what = what;
     this.line = line;
   }
 }
 
-/** The parser's tree of a text, or null past the limits parseMarkdown names. */
-function read(text: string): Root | null {
-  if (text.length > MAX_CHARS || readsTooFarAhead(text) || tooCostly(text) !== null) return null;
-  return parse(text);
-}
-
-function parse(text: string): Root {
-  return fromMarkdown(text, {
-    extensions: [gfmTable(), cjkFriendlyExtension()],
-    mdastExtensions: [gfmTableFromMarkdown()],
-  });
+/** The parser's tree of a text, or null past MAX_CHARS or MAX_WORK. */
+function read(text: string): Node[] | null {
+  return text.length > MAX_CHARS ? null : parse(text, MAX_WORK * Math.max(text.length, WORK_FLOOR));
 }
 
 /**
@@ -269,573 +203,673 @@ export function inspectMarkdown(text: string): { notes: MdNote[]; oneParagraph: 
   const tree = read(text);
   if (tree === null) return null;
   const notes: MdNote[] = [];
-  new Inspect(text, definitions(tree), notes).visitAll(tree.children, 0, false);
-  const blocks = tree.children.filter((node) => node.type !== "definition");
+  new Inspect(text, notes).visitAll(tree, 0, false);
+  const blocks = tree.filter((node) => node.type !== "definition");
   return {
     notes,
     oneParagraph: blocks.length === 1 && blocks[0]!.type === "paragraph",
   };
 }
 
-/** One container opened at the start of a line: a block quote's `>`, or a list item's marker. */
-const CONTAINER_OPENER = /[ \t]*(?:>|(?:[-+*]|\d{1,9}[.)])(?=[ \t]|$))[ \t]?/y;
-/** A thematic break, whose `* * *` would otherwise count as list items. */
-const THEMATIC_BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
+/**
+ * The parser's tree, as this module reads it: markdown-it's tokens
+ * nested, each node with the span of the text it was read from, `start`
+ * to `end`.
+ */
+type Node = { start: number; end: number } & (
+  | { type: "paragraph"; children: Node[] }
+  /** `dashes` when it is underlined with them (`Text` over `---`). */
+  | { type: "heading"; depth: 1 | 2 | 3 | 4 | 5 | 6; dashes: boolean; children: Node[] }
+  | { type: "thematicBreak" }
+  | { type: "blockquote"; children: Node[] }
+  /** `first`: the number of its first item, as `start` is in MdBlock's list. */
+  | { type: "list"; ordered: boolean; first: number; tight: boolean; items: Node[][] }
+  /** A code block; `lang` is its info string's first word, as written but for escapes and references. */
+  | { type: "code"; lang: string | undefined; value: string }
+  | { type: "definition" }
+  /** Each row cut to the header's width, a short one not padded. */
+  | { type: "table"; align: MdAlign[]; rows: Node[][][] }
+  /** A table past MAX_TABLE_COLUMNS or MAX_TABLE_CELLS, its rows unread. */
+  | { type: "largeTable" }
+  /** Raw HTML, block or inline: its value is its source. */
+  | { type: "html"; value: string }
+  /** `references`: the character references CommonMark decoded in it, as written. */
+  | { type: "text"; value: string; references: string[] }
+  | { type: "inlineCode"; value: string }
+  | { type: "emphasis"; children: Node[] }
+  | { type: "strong"; children: Node[] }
+  | { type: "break" }
+  | { type: "link"; url: string; autolink: boolean; children: Node[] }
+  | { type: "image"; alt: string }
+);
 
 /**
- * A code fence, which ends a paragraph, so no line after it is lazy. A
- * backtick fence's info string has no backtick, so a line that has one
- * after its backticks is not a fence but a paragraph's text.
+ * How deep blocks are read: past it, a container's content is passed
+ * over a line at a time, unread, so nested containers don't take time
+ * quadratic in their depth. A quote nests one level and a list two (the
+ * list and its item), while each is one level of MAX_DEPTH, so what is
+ * passed over is always inside a node past MAX_DEPTH, which Fold shows as
+ * its source. A container ends where it would have, as each of its lines
+ * is still its own: markdown-it's own cut, maxNesting, would end it at
+ * the end of its parent instead. Phrasing doesn't nest blocks, and links
+ * don't nest, so it never cuts phrasing.
  */
-const FENCE = /^ {0,3}(?:`{3,}(?=[^`]*$)|~{3,})/;
+const NESTING = 2 * MAX_DEPTH + 2;
+
+const md = new MarkdownIt("commonmark", { html: true }).enable("table").use(cjkFriendly);
+// Links as written, for the renderer to judge (liveLink): no URL is
+// encoded, made punycode or refused, so `javascript:` is a link too.
+md.normalizeLink = (url) => url;
+md.normalizeLinkText = (url) => url;
+md.validateLink = () => true;
+// Each text token keeps its span: Build joins them.
+md.core.ruler.disable("text_join");
+md.inline.ruler2.disable("fragments_join");
+
+// Inline content is read as markdown-it's own "inline" rule does, but
+// for empty content, such as each cell markdown-it pads a short table row
+// with, which holds nothing to read.
+md.block.ruler.before("table", "nesting", (state, startLine) => {
+  if (state.level < NESTING) return false;
+  state.line = startLine + 1;
+  return true;
+});
+
+md.core.ruler.at("inline", (state) => {
+  for (const token of state.tokens)
+    if (token.type === "inline" && token.content !== "")
+      state.md.inline.parse(token.content, state.md, state.env, token.children!);
+});
+
+/** The work the parser may still do on the text it reads (see MAX_WORK). */
+let work = 0;
+/** What stops a parse that has done all the work it may. */
+const tooMuchWork = new Error("too much work");
+
+/** One unit of the parser's work, or the end of the parse when none is left. */
+function spend(): void {
+  if (--work < 0) throw tooMuchWork;
+}
 
 /**
- * A line that could underline a heading, in any container: once any run
- * of `>`, spaces and tabs is taken off its start, it is all `=` or all
- * `-`. That counts an underline in a block quote or a list item, and
- * some lines that are none (indented code), so the count errs high.
+ * A token as this module keeps it: where it was read from in its
+ * state's source, `start` to `end` (-1 till a rule says), whether it is
+ * pending text its state flushed, and for an `inline` block token, the
+ * map from an offset in its content to one in the block source (none for
+ * a cell markdown-it pads a short row with). Fields on the token, set as
+ * it is pushed, so each token keeps one shape and costs no lookup.
  */
-const UNDERLINE = /^[> \t]*(?:=+|-+)[ \t]*$/gm;
-
-/**
- * One container a line opens: whether it is a quote, and whether it is
- * one of the `>`s the line starts with, which may go on with the line
- * above's quotes. For a list item, also whether it could interrupt a
- * paragraph (a bullet, or `1.` or `1)`, with text after it, as
- * CommonMark has it), and the column its content starts at: lines of
- * its paragraph indented less than that are lazy. And where in the line
- * its marker ends.
- */
-type Opener = {
-  quote: boolean;
-  leading: boolean;
-  interrupts: boolean;
-  content: number;
+type Read = Token & {
+  start: number;
   end: number;
+  flushed: boolean;
+  mapper?: (offset: number) => number;
 };
 
-/** The white space after a container's marker. */
-const SPACE = /[ \t]*/y;
-
-/**
- * The containers a line opens, as CONTAINER_OPENER finds them, up to one
- * past MAX_LINE_NESTING (see Opener). Four columns of white space before
- * an opener make it code, or a paragraph's text, to the parser: after
- * another opener, it opens nothing, and nothing after it does, so the
- * list ends before it. At the line's start the white space may be a list
- * item's indentation, so the opener counts, but as one of its own, never
- * going on from above.
- */
-function openers(line: string): Opener[] {
-  const found: Opener[] = [];
-  let leading = true; // no list marker or indentation has come yet
-  let column = 0; // the column the line is read to, tabs expanded
-  let content = 0; // the column after the last opener and the one space it may take
-  CONTAINER_OPENER.lastIndex = 0;
-  for (
-    let opener = CONTAINER_OPENER.exec(line);
-    opener !== null && found.length <= MAX_LINE_NESTING;
-    opener = CONTAINER_OPENER.exec(line)
-  ) {
-    const marker = opener[0].trim();
-    const at = opener.index + opener[0].indexOf(marker);
-    const markerColumn = columnAfter(line, opener.index, at, column);
-    const indented = markerColumn - content >= 4;
-    if (indented && found.length > 0) break;
-    leading &&= marker === ">" && !indented;
-    const end = at + marker.length;
-    const markerEnd = columnAfter(line, at, end, markerColumn);
-    SPACE.lastIndex = end;
-    const space = SPACE.exec(line)![0].length;
-    const empty = end + space === line.length;
-    // One to four columns of white space go before an item's content; more make it code, one column in.
-    const width = columnAfter(line, end, end + space, markerEnd) - markerEnd;
-    found.push({
-      quote: marker === ">",
-      leading,
-      interrupts: !empty && /^(?:[-+*]|1[.)])$/.test(marker),
-      content: markerEnd + (empty || width > 4 ? 1 : width),
-      end,
-    });
-    content = markerEnd + 1;
-    column = columnAfter(line, at, CONTAINER_OPENER.lastIndex, markerColumn);
-  }
-  return found;
+/** A token just pushed, its span not yet known. */
+function unread(token: Token, flushed: boolean): Read {
+  const read = token as Read;
+  read.start = -1;
+  read.end = -1;
+  read.flushed = flushed;
+  return read;
 }
 
-/** The column after `text`'s characters from `start` to `end`, read from `column`: a tab goes on to the next multiple of 4. */
-function columnAfter(text: string, start: number, end: number, column: number): number {
-  let after = column;
-  for (let index = start; index < end; index++)
-    after = text[index] === "\t" ? after + 4 - (after % 4) : after + 1;
-  return after;
-}
+md.inline.State = class extends md.inline.State {
+  /** Where the state's pending text starts: where the last token read ends. */
+  pendingFrom = 0;
 
-/** The columns of white space a line starts with, tabs expanded. */
-function indentOf(line: string): number {
-  return columnAfter(line, 0, /^[ \t]*/.exec(line)![0].length, 0);
-}
-
-/**
- * How many of the line above's `>`s, `above`, a line may go on with. A
- * line indented less than the one above may have left a list item that
- * held those quotes, so its `>`s go on with none and each opens one.
- */
-function quotesGoingOn(above: number, aboveIndent: number, indent: number): number {
-  return indent < aboveIndent ? 0 : above;
-}
-
-/**
- * The content columns of the list items open around a line indented
- * `indent` columns, from `items`: an item whose content starts further
- * in has ended, as the line is not lazy.
- */
-function itemsAround(items: number[], indent: number): number[] {
-  let open = items.length;
-  while (open > 0 && items[open - 1]! > indent) open--;
-  return open === items.length ? items : items.slice(0, open);
-}
-
-/**
- * The lazy continuation lines a text holds, by paragraph, as tooCostly
- * counts them line by line. A paragraph's line is lazy when the
- * paragraph is in a block quote and the line starts with no `>`, or when
- * it is in a list item and the line is indented less than the item's
- * content. A line of `>`s and text after lazy lines goes on with the
- * same paragraph and its count, and so does one whose markers are the
- * paragraph's text: its first list item could not interrupt the
- * paragraph (`2.`, or an empty item), or it starts four or more columns
- * past the content of the list item around the paragraph (past the
- * line's start, for a paragraph in a quote), which makes it no opener.
- * Only a list item that could interrupt the paragraph, a line of only
- * the `>`s it starts with, a blank line, a fence or a thematic break
- * starts a new one.
- */
-class LazyLines {
-  /** Lines continuing the paragraph without its `>` or indentation; -1: no paragraph open. */
-  count = -1;
-  /** Whether the paragraph is in a block quote. */
-  private quoted = false;
-  /** The content columns of the list items open around the paragraph, outside any block quote, outermost first. */
-  private items: number[] = [];
-
-  /** A blank line, a fence or a thematic break, which ends a paragraph. */
-  end(): void {
-    this.count = -1;
+  override pushPending(): Token {
+    spend();
+    return unread(super.pushPending(), true);
   }
 
-  /** A line that opens or goes on with the containers `found`, indented `indent` columns: whether it is lazy. */
-  opening(line: string, indent: number, found: Opener[]): boolean {
-    if (this.count < 0) return this.opens(line, indent, found);
-    // Indented four columns past the paragraph's container, the line is its text.
-    if (indent >= (itemsAround(this.items, indent).at(-1) ?? 0) + 4) return this.plain(indent);
-    const listed = found.findIndex((opener) => !opener.quote);
-    return listed >= 0 && !found[listed]!.interrupts ? false : this.opens(line, indent, found);
+  override push(type: string, tag: string, nesting: -1 | 0 | 1): Token {
+    spend();
+    return unread(super.push(type, tag, nesting), false);
   }
+};
 
-  /** A line that opens the containers `found`, indented `indent` columns, and so is not lazy. */
-  private opens(line: string, indent: number, found: Opener[]): false {
-    const listed = found.some((opener) => !opener.quote);
-    const quote = found.findIndex((opener) => opener.quote);
-    this.items = [
-      ...itemsAround(this.items, indent),
-      ...found.slice(0, quote < 0 ? found.length : quote).map((opener) => opener.content),
-    ];
-    this.quoted = quote >= 0;
-    // A line of only the `>`s it starts with is a quote's blank line.
-    const blank =
-      found.every((opener) => opener.leading) && /^[ \t]*$/.test(line.slice(found.at(-1)!.end));
-    this.count = listed || blank ? 0 : Math.max(this.count, 0);
-    return false;
+type Inline = StateInline & { pendingFrom: number };
+
+// A link's label is read a step at a time, each step a unit of work, cached or not.
+const skipToken = md.inline.skipToken.bind(md.inline);
+md.inline.skipToken = (state) => {
+  spend();
+  skipToken(state);
+};
+
+const tokenize = md.inline.tokenize.bind(md.inline);
+md.inline.tokenize = (state) => {
+  spend();
+  // A link's label is read in the middle of the text around it, whose pending text starts where it did.
+  const around = (state as Inline).pendingFrom;
+  (state as Inline).pendingFrom = state.pos;
+  tokenize(state);
+  const last = state.tokens.at(-1) as Read | undefined;
+  if (last?.flushed && last.start < 0) {
+    last.start = (state as Inline).pendingFrom;
+    last.end = state.pos;
   }
+  (state as Inline).pendingFrom = around;
+};
 
-  /** A line that opens no container, indented `indent` columns: whether it is lazy. */
-  plain(indent: number): boolean {
-    if (this.count < 0) {
-      this.items = itemsAround(this.items, indent);
-      this.quoted = false;
-      this.count = 0;
-      return false;
-    }
-    if (!this.quoted && indent >= (this.items.at(-1) ?? 0)) return false;
-    this.count++;
-    return true;
-  }
-}
-
-/**
- * Why the parser would take too long on the text, and on which line (from
- * 1) when one says it; null when it would not: see MAX_LINE_NESTING,
- * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_QUOTES, MAX_LISTS, MAX_DELIMITERS,
- * MAX_UNDERLINES and MAX_IMAGES.
- */
-function tooCostly(text: string): { what: string; line: number | null } | null {
-  if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS)
-    return { what: `more than MAX_DELIMITERS (${MAX_DELIMITERS}) * and _`, line: null };
-  if ((text.match(UNDERLINE)?.length ?? 0) > MAX_UNDERLINES)
-    return {
-      what: `more than MAX_UNDERLINES (${MAX_UNDERLINES}) lines that could underline a heading`,
-      line: null,
-    };
-  if (text.split("![").length - 1 > MAX_IMAGES)
-    return { what: `more than MAX_IMAGES (${MAX_IMAGES}) picture openers ![`, line: null };
-  let nested = 0;
-  let quotes = 0;
-  const lazy = new LazyLines();
-  let above = 0; // the `>`s the line above starts with, before any list marker: the quotes a line may go on
-  let aboveIndent = 0; // the columns of white space the line above starts with
-  // A line ends at a line feed, a carriage return, or both, as CommonMark has it.
-  const lines = text.split(/\r\n?|\n/);
-  for (const [index, line] of lines.entries()) {
-    // Only spaces and tabs make a line blank, as CommonMark has it: a line
-    // of other white space, such as U+00A0, is a paragraph's text.
-    if (/^[ \t]*$/.test(line) || FENCE.test(line) || THEMATIC_BREAK.test(line)) {
-      lazy.end();
-      above = 0;
-      continue;
-    }
-    const indent = indentOf(line);
-    above = quotesGoingOn(above, aboveIndent, indent);
-    aboveIndent = indent;
-    let opened = 0;
-    // The `>`s the line starts with, while no list marker comes before them.
-    let leading = 0;
-    // An opener is nested after a list marker on its line, or on an indented line.
-    let inItem = /^[ \t]/.test(line);
-    const found = openers(line);
-    for (const opener of found) {
-      if (++opened > MAX_LINE_NESTING)
-        return {
-          what: `more than MAX_LINE_NESTING (${MAX_LINE_NESTING}) quotes and list items opened on one line`,
-          line: index + 1,
-        };
-      if (inItem && ++nested > MAX_NESTED_LINES)
-        return {
-          what: `more than MAX_NESTED_LINES (${MAX_NESTED_LINES}) quotes and list items opened inside a list item`,
-          line: index + 1,
-        };
-      if (!opener.quote) {
-        inItem = true;
-        continue;
+for (const { name, fn, alt } of md.inline.ruler.__rules__) {
+  md.inline.ruler.at(
+    name,
+    (state, silent) => {
+      spend();
+      const start = state.pos;
+      const from = state.tokens.length;
+      const pending = state.pending.length;
+      if (!fn(state, silent)) return false;
+      if (silent || state.tokens.length === from) return true;
+      const tokens = state.tokens as Read[];
+      let index = from;
+      // Pending text, flushed by the first token the rule pushed, ends where the rule started.
+      const text = tokens[index]!.flushed ? tokens[index++]! : null;
+      if (text !== null) {
+        text.start = (state as Inline).pendingFrom;
+        text.end = start;
       }
-      // A `>` under one of the line above's goes on with its quote; any other opens one.
-      if (!(opener.leading && leading < above) && ++quotes > MAX_QUOTES)
-        return { what: `more than MAX_QUOTES (${MAX_QUOTES}) block quotes`, line: index + 1 };
-      if (opener.leading) leading++;
-    }
-    above = leading;
-    if (
-      (opened > 0 ? lazy.opening(line, indent, found) : lazy.plain(indent)) &&
-      lazy.count > MAX_LAZY_LINES
-    )
-      return {
-        what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a paragraph`,
-        line: index + 1,
-      };
-  }
-  return listsPast(lines);
-}
-
-/**
- * Whether the parser may read ahead more than MAX_LOOKAHEAD characters,
- * all told, for the end of a code span, of inline HTML or of a link's
- * title (see readFrom). Each count reads the text only as far as it
- * counts, and the counting stops past the cap, so it takes time linear
- * in the text.
- */
-function readsTooFarAhead(text: string): boolean {
-  let total = 0;
-  for (const opener of text.matchAll(OPENER)) {
-    total += readFrom(text, opener.index, opener[0]);
-    if (total > MAX_LOOKAHEAD) return true;
-  }
-  return false;
-}
-
-/**
- * A backtick run, `<!--`, `<?`, `<![CDATA[`, `<!` before a letter, or a
- * link's `](`: where the parser may read ahead to the end of a span.
- */
-const OPENER = /`+|<!--|<\?|<!\[CDATA\[|<![A-Za-z]|\]\(/g;
-
-/** A line break before a blank line, where a paragraph ends, so no span goes past it. */
-const BLOCK_END = String.raw`(?:\r\n?|\n)[ \t]*(?=[\r\n]|$)`;
-
-/** Before a character that comes after an even number of backslashes, so is not escaped. */
-const UNESCAPED = String.raw`(?<=(?<!\\)(?:\\\\)*)`;
-
-/**
- * The characters the parser may read from an opener at `at` for the end
- * of its span: to the span's closer, or to the end of the paragraph when
- * none comes. A backtick run closes at the next run of its length; an
- * escaped one opens one shorter, so that one counts too. `<!--` closes
- * at `-->`, `<?` at `?>`, `<![CDATA[` at `]]>` and `<!` and a letter at
- * `>`. A link reads to its title's closer, or past its destination when
- * it has no title (see linkRead). Counted high, as each run counts,
- * closers too, and an opener in code or a closed span counts as well.
- */
-function readFrom(text: string, at: number, opener: string): number {
-  if (opener === "](") return linkRead(text, at + 2) - at;
-  if (opener === "<!--") return commentEnd(text, at + 2) - at;
-  if (opener === "<?") return closerAt(text, at + 2, String.raw`\?>`) - at;
-  if (opener === "<![CDATA[") return closerAt(text, at + 9, String.raw`\]\]>`) - at;
-  if (opener.startsWith("<")) return closerAt(text, at + 2, ">") - at;
-  const run = (length: number) => runAt(text, at + opener.length, length) - at;
-  let slashes = 0;
-  while (text[at - slashes - 1] === "\\") slashes++;
-  return run(opener.length) + (slashes % 2 === 1 && opener.length > 1 ? run(opener.length - 1) : 0);
-}
-
-/** A backtick run, or a line break before a blank line. */
-const RUN = new RegExp(`\`+|${BLOCK_END}`, "g");
-
-/** Where the next run of `length` backticks comes from `from`, or the paragraph ends, whichever is first. */
-function runAt(text: string, from: number, length: number): number {
-  RUN.lastIndex = from;
-  for (let found = RUN.exec(text); found !== null; found = RUN.exec(text))
-    if (found[0].length === length || !found[0].startsWith("`")) return found.index;
-  return text.length;
-}
-
-const closers = new Map<string, RegExp>();
-
-/** Where `closer`, a pattern, first comes from `from`, or the paragraph ends, whichever is first. */
-function closerAt(text: string, from: number, closer: string): number {
-  let pattern = closers.get(closer);
-  if (pattern === undefined) {
-    pattern = new RegExp(`${closer}|${BLOCK_END}`, "g");
-    closers.set(closer, pattern);
-  }
-  pattern.lastIndex = from;
-  return pattern.exec(text)?.index ?? text.length;
-}
-
-/**
- * Where a comment's `-->` first comes from `from`, or the paragraph
- * ends, whichever is first. The parser closes a comment at `-->` only,
- * as CommonMark does, not at the `--!>` a browser also takes, so a count
- * that stopped there would count low. Found as a `--` before a `>`.
- */
-function commentEnd(text: string, from: number): number {
-  let end = closerAt(text, from, "--");
-  while (text.startsWith("--", end) && text[end + 2] !== ">") end = closerAt(text, end + 1, "--");
-  return end;
-}
-
-/** White space that may come between a link's parts: spaces, tabs and at most one line break. */
-const LINK_SPACE = /[ \t]*(?:(?:\r\n?|\n)[ \t]*)?/y;
-
-/** Where white space that may come between a link's parts ends, from `from`. */
-function spaceAfter(text: string, from: number): number {
-  LINK_SPACE.lastIndex = from;
-  LINK_SPACE.exec(text);
-  return LINK_SPACE.lastIndex;
-}
-
-/**
- * Where the parser stops reading a link from after its `](`: at its
- * title's closer, or the paragraph's end when none comes; past its
- * destination when no title follows. A title, in `"`, `'` or `(`, comes
- * after the destination and white space. A destination in `<` and `>`
- * ends at its first unescaped `>`, and has no title when a line break or
- * an unescaped `<` comes first. Any other ends at white space, or at a
- * `)` outside the parentheses it opens, which ends the link. Counted
- * high: a destination of too many parentheses, or of a control
- * character, holds no title to the parser.
- */
-function linkRead(text: string, from: number): number {
-  let end = spaceAfter(text, from);
-  if (text[end] === "<") {
-    end = closerAt(text, end + 1, `${UNESCAPED}[<>\\r\\n]`);
-    if (text[end] !== ">") return end;
-    end++;
-  } else {
-    let depth = 0;
-    for (; end < text.length && !/[ \t\r\n]/.test(text[end]!); end++) {
-      const character = text[end];
-      if (character === "\\" && /[()\\]/.test(text[end + 1] ?? "")) end++;
-      else if (character === "(") depth++;
-      else if (character === ")" && depth-- === 0) return end;
-    }
-  }
-  const title = spaceAfter(text, end);
-  const closer = { '"': '"', "'": "'", "(": String.raw`\)` }[text[title] ?? ""];
-  if (title === end || closer === undefined) return title;
-  return closerAt(text, title + 1, UNESCAPED + closer);
-}
-
-/** The block quotes' `>`s a line starts with: a change in how many leaves every list. */
-const QUOTE_PREFIX = /^(?: {0,3}>[ \t]?)*/;
-/** A list item's marker, after its indentation, and the white space after it. */
-const LIST_MARKER = /^([ \t]*)([-+*]|\d{1,9}[.)])([ \t]+|$)/;
-/**
- * A line of a paragraph's plain words: one that starts with a letter or
- * digit and holds no `|`, `<` or `>`, so it is no table row, HTML or a
- * line that ends an HTML block.
- */
-const PLAIN = /^[ \t]*[\p{L}\p{N}][^|<>]*$/u;
-
-/**
- * Where a text opens more than MAX_LISTS lists, if it does. The lists
- * open at a line are kept as their marker and the column their items'
- * content starts at. A marker goes on with a list when it is of the same
- * kind and not indented into that list's item; a line indented less than
- * an item's content leaves it; a change in the quotes a line starts
- * with, a blank line out of a quote and a thematic break leave every
- * list. An item may start with at most one blank line, so a blank line
- * right after an item whose marker line has no content ends that item:
- * only a marker of its list's kind goes on with the list then. A marker
- * that would open a list but cannot interrupt a paragraph (an empty
- * item, or an ordered one that starts other than at 1) opens none while
- * a paragraph is open, and is a line of it. Counted high: a lazy line
- * leaves too, a marker in fenced code, indented code or an HTML block
- * opens one, and a paragraph counts as open only where it surely is
- * (see paragraphAfter).
- */
-function listsPast(lines: string[]): { what: string; line: number } | null {
-  let lists = 0;
-  let prefix = "";
-  // Each open list's last item ends (`ended`) at a blank line right after its empty marker line.
-  let open: OpenList[] = [];
-  let empty: { ended: boolean } | null = null; // the item opened empty on the line above
-  let paragraph: Paragraph = "none";
-  for (const [index, line] of lines.entries()) {
-    const quotes = QUOTE_PREFIX.exec(line)![0];
-    if (quotes.split(">").length !== prefix.split(">").length) open = [];
-    // Under other `>`s, or the same ones written otherwise, the paragraph may have ended.
-    if (quotes !== prefix) paragraph = "quiet";
-    prefix = quotes;
-    const rest = line.slice(quotes.length);
-    const above = empty;
-    empty = null;
-    if (/^[ \t]*$/.test(rest)) {
-      if (above !== null) above.ended = true;
-      paragraph = "none";
-      continue;
-    }
-    if (THEMATIC_BREAK.test(rest)) {
-      open = [];
-      paragraph = "quiet";
-      continue;
-    }
-    const marker = LIST_MARKER.exec(rest);
-    const indent = indentOf(rest);
-    const place = marker === null ? null : placeItem(open, indent, marker);
-    if (marker === null || (paragraph === "open" && !place!.goesOn && !interrupts(marker, rest))) {
-      while (open.length > 0 && (open.at(-1)!.ended || open.at(-1)!.content > indent)) open.pop();
-      paragraph = paragraphAfter(paragraph, rest, marker !== null);
-      continue;
-    }
-    open.length = place!.keep;
-    const item = enterItem(open, place!.goesOn, rest, marker);
-    if (!place!.goesOn && ++lists > MAX_LISTS)
-      return { what: `more than MAX_LISTS (${MAX_LISTS}) lists`, line: index + 1 };
-    if (marker[0].length === rest.length) empty = item;
-    paragraph = "quiet";
-  }
-  return null;
-}
-
-/**
- * Whether a paragraph is open under a line's `>`s, as listsPast keeps
- * it: `open` where one surely is, `none` after a blank line or at the
- * start, where the next plain line starts one, and `quiet` anywhere
- * else, till a blank line. Only after a blank line is no paragraph
- * left for that line to go on with lazily: where it does, under fewer
- * `>`s or less indented than an item, the parser lets any marker on the
- * lines after open a list.
- */
-type Paragraph = "open" | "quiet" | "none";
-
-/**
- * Whether a paragraph is open after a line that is no list item, or a
- * marker that cannot interrupt it (`skipped`). A plain line starts one
- * only unindented, as an indented line may be code in an item that the
- * next line leaves, and goes on with an open one at any indentation; a
- * dash alone underlines a heading; any other line may end it.
- */
-function paragraphAfter(paragraph: Paragraph, rest: string, skipped: boolean): Paragraph {
-  if (skipped) return /^ {0,3}-[ \t]*$/.test(rest) ? "quiet" : paragraph;
-  if (!PLAIN.test(rest)) return "quiet";
-  if (paragraph === "open" || (paragraph === "none" && indentOf(rest) === 0)) return "open";
-  return paragraph;
-}
-
-/** Whether a marker may start a list where it interrupts a paragraph: with content, and if ordered, from 1. */
-function interrupts(marker: RegExpExecArray, rest: string): boolean {
-  return (
-    marker[0].length < rest.length && (/^[-+*]$/.test(marker[2]!) || /^1[.)]$/.test(marker[2]!))
+      // Emphasis pushes a token for each of its delimiter run's characters.
+      for (let character = 0; index < tokens.length; index++, character++) {
+        const token = tokens[index]!;
+        if (name === "emphasis") {
+          token.start = start + character;
+          token.end = start + character + 1;
+        } else if (token.start < 0) {
+          token.start = start;
+          token.end = state.pos;
+        }
+      }
+      const last = tokens.at(-1)!;
+      if (name === "newline") {
+        // A line break takes the spaces it trims off the text before it, and ends with its line.
+        const trimmed = pending - (text?.content.length ?? 0);
+        if (text !== null) text.end -= trimmed;
+        last.start = start - trimmed;
+        last.end = start + 1;
+      } else if (name === "escape" && last.type === "hardbreak") last.end = start + 2;
+      // An autolink's text is its URL, inside its angle brackets.
+      else if (name === "autolink") {
+        tokens.at(-2)!.start = start + 1;
+        tokens.at(-2)!.end = state.pos - 1;
+      }
+      (state as Inline).pendingFrom = state.pos;
+      return true;
+    },
+    { alt },
   );
 }
 
-/** A list open at a line, as listsPast keeps it. */
-type OpenList = { kind: string; content: number; ended: boolean };
+/**
+ * The block tokens not yet spanned, in the order they were pushed. A
+ * container's rule reads its content with other rules, which span theirs
+ * and take them off before it goes on, so what a rule finds past where
+ * it started is its own: each token is spanned once, however deep it
+ * nests.
+ */
+const unspanned: Read[] = [];
+
+md.block.State = class extends md.block.State {
+  override push(type: string, tag: string, nesting: -1 | 0 | 1): Token {
+    spend();
+    const token = unread(super.push(type, tag, nesting), false);
+    unspanned.push(token);
+    return token;
+  }
+};
+
+for (const { name, fn, alt } of md.block.ruler.__rules__) {
+  md.block.ruler.at(
+    name,
+    (state, startLine, endLine, silent) => {
+      spend();
+      const pushed = unspanned.length;
+      const start = state.bMarks[startLine]! + state.tShift[startLine]!;
+      if (name === "table" && !silent) {
+        if (!largeTable(state, startLine, endLine, fn) && !fn(state, startLine, endLine, false))
+          return false;
+      } else if (!fn(state, startLine, endLine, silent)) return false;
+      if (silent) return true;
+      // A definition shows nothing, but parseDocument refuses it where it is.
+      if (name === "reference") state.push("definition", "", 0);
+      let last = state.line - 1;
+      while (last > startLine && state.isEmpty(last)) last--;
+      // Raw HTML and indented code show as their source, from their first line's indentation past their container's.
+      const at =
+        name === "html_block" || name === "code"
+          ? indentedFrom(state.src, start, state.sCount[startLine]! - state.blkIndent)
+          : start;
+      const tokens = unspanned.splice(pushed);
+      for (const token of tokens) {
+        token.start = at;
+        token.end = state.eMarks[last]!;
+      }
+      mapContent(state, name, tokens, start);
+      return true;
+    },
+    { alt },
+  );
+}
 
 /**
- * Where an item at `indent` with `marker` goes among the lists `open`:
- * how many of them it keeps, and whether it goes on with the last of
- * those or opens a list in it.
+ * Reads a table at `startLine` as one large table, when it is past
+ * MAX_TABLE_COLUMNS or MAX_TABLE_CELLS: shown as its source, its rows
+ * aren't read, so markdown-it never pads a short row of a wide table
+ * with cells, three tokens each. Whether a table is there is markdown-it's
+ * table rule's (`fn`), asked without reading it; its rows are the ones
+ * that rule reads (tableRows). Whether it read one.
  */
-function placeItem(
-  open: readonly OpenList[],
-  indent: number,
-  marker: RegExpExecArray,
-): { keep: number; goesOn: boolean } {
-  // A bullet list's kind is its bullet, an ordered list's its `.` or `)`.
-  const kind = marker[2]!.at(-1)!;
-  for (let keep = open.length; ; keep--) {
-    const list = open[keep - 1];
-    if (list === undefined || (!list.ended && indent >= list.content))
-      return { keep, goesOn: false };
-    if (list.kind === kind && indent >= (open[keep - 2]?.content ?? 0))
-      return { keep, goesOn: true };
+function largeTable(
+  state: StateBlock,
+  startLine: number,
+  endLine: number,
+  fn: (state: StateBlock, startLine: number, endLine: number, silent: boolean) => boolean,
+): boolean {
+  if (!fn(state, startLine, endLine, true)) return false;
+  const header = state.bMarks[startLine]! + state.tShift[startLine]!;
+  const columns = cellsOf(state.src, header, state.eMarks[startLine]!).length;
+  const rows = tableRows(state, startLine, endLine, columns);
+  if (columns <= MAX_TABLE_COLUMNS && rows.cells <= MAX_TABLE_CELLS) return false;
+  state.push("large_table", "", 0);
+  state.line = rows.end;
+  return true;
+}
+
+/** The most cells markdown-it pads a table's short rows with before it ends the table. */
+const MAX_AUTOCOMPLETED_CELLS = 65_536;
+
+/**
+ * Where a table at `startLine`, of `columns` columns, ends, and how many
+ * cells it has, a row's past the header's not counted: its rows as
+ * markdown-it's table rule reads them, up to a line its container
+ * leaves, a block that interrupts it, a blank line, indented code, or
+ * the row that would take it past MAX_AUTOCOMPLETED_CELLS.
+ */
+function tableRows(
+  state: StateBlock,
+  startLine: number,
+  endLine: number,
+  columns: number,
+): { end: number; cells: number } {
+  const terminators = state.md.block.ruler.getRules("blockquote");
+  const parentType = state.parentType;
+  state.parentType = "table";
+  let cells = columns;
+  let padded = 0;
+  let line = startLine + 2;
+  for (; line < endLine; line++) {
+    if (state.sCount[line]! < state.blkIndent) break;
+    if (terminators.some((rule) => rule(state, line, endLine, true))) break;
+    const start = state.bMarks[line]! + state.tShift[line]!;
+    if (state.src.slice(start, state.eMarks[line]).trim() === "") break;
+    if (state.sCount[line]! - state.blkIndent >= 4) break;
+    const row = cellsOf(state.src, start, state.eMarks[line]!).length;
+    padded += columns - row;
+    if (padded > MAX_AUTOCOMPLETED_CELLS) break;
+    cells += Math.min(row, columns);
+  }
+  state.parentType = parentType;
+  return { end: line, cells };
+}
+
+/**
+ * Where a block at `start` in `source` starts with the `columns` of
+ * indentation it holds past its container's: the white space before it
+ * that lies wholly in those columns, a tab reaching to the next multiple
+ * of 4 from its line's start, as CommonMark has it. A tab its container
+ * takes part of is the container's.
+ */
+function indentedFrom(source: string, start: number, columns: number): number {
+  const lineStart = source.lastIndexOf("\n", start - 1) + 1;
+  // The column each character of the line before the block starts at.
+  const at: number[] = [];
+  let column = 0;
+  for (let index = lineStart; index < start; index++) {
+    at.push(column);
+    column = source[index] === "\t" ? column + 4 - (column % 4) : column + 1;
+  }
+  let from = start;
+  while (from > lineStart && column - at[from - 1 - lineStart]! <= columns) from--;
+  return from;
+}
+
+/** ASCII white space, which markdown-it trims off a paragraph's or heading's content. */
+const TRIMMED = /[ \t\n\r]/;
+
+/**
+ * Gives the inline tokens a block rule made their mappers, while the
+ * state still holds the lines as the rule read them: a paragraph's
+ * content is its lines, each from its container's content to its end,
+ * the last trimmed; an ATX heading's is its line after its `#`s; a table
+ * cell's is its part of its row (cellsOf).
+ */
+function mapContent(state: StateBlock, rule: string, tokens: Read[], start: number): void {
+  if (rule === "paragraph" || rule === "lheading") {
+    const inline = tokens[1]!;
+    inline.mapper = linesMapper(state, inline.map!, inline.content);
+  } else if (rule === "heading") {
+    let at = start + tokens[0]!.markup.length;
+    while (at < state.eMarks[tokens[0]!.map![0]]! && TRIMMED.test(state.src[at]!)) at++;
+    tokens[1]!.mapper = (offset) => at + offset;
+  } else if (rule === "table") {
+    let cells: number[][] = [];
+    let cell = 0;
+    for (const token of tokens) {
+      if (token.type === "tr_open") {
+        const line = token.map![0];
+        cells = cellsOf(state.src, state.bMarks[line]! + state.tShift[line]!, state.eMarks[line]!);
+        cell = 0;
+      } else if (token.type === "inline") {
+        // A cell past the row's, which markdown-it pads the row with, has none.
+        const at = cells[cell++];
+        if (at !== undefined) token.mapper = (offset) => at[offset]!;
+      }
+    }
   }
 }
 
 /**
- * Puts the item a line's `marker` starts into the lists `open`, which
- * placeItem has cut to the ones it keeps: on with the last, or into a
- * list it opens. The list it is in.
+ * The mapper of content read from `lines`, each to its end, the last
+ * trimmed: each line of the content is the end of its source line, after
+ * its container's markers and any indentation the content leaves out.
+ * Read once into a table of every offset, so each lookup is direct.
  */
-function enterItem(
-  open: OpenList[],
-  goesOn: boolean,
-  rest: string,
-  marker: RegExpExecArray,
-): OpenList {
-  const end = marker[1]!.length + marker[2]!.length;
-  const after = columnAfter(rest, 0, end, 0);
-  const space = columnAfter(rest, end, marker[0].length, after) - after;
-  const blank = marker[0].length === rest.length;
-  // The content starts after one to four columns of white space, or one past the marker.
-  const content = after + (!blank && space >= 1 && space <= 4 ? space : 1);
-  if (goesOn) {
-    const list = open.at(-1)!;
-    list.content = content;
-    list.ended = false;
-    return list;
+function linesMapper(
+  state: StateBlock,
+  lines: [number, number],
+  content: string,
+): (offset: number) => number {
+  const at = new Int32Array(content.length + 1);
+  let offset = 0;
+  for (let line = lines[0]; line < lines[1]; line++) {
+    const start = state.bMarks[line]!;
+    let end = state.eMarks[line]!;
+    const newline = content.indexOf("\n", offset);
+    const contentEnd = newline < 0 ? content.length : newline;
+    if (newline < 0) while (end > start && TRIMMED.test(state.src[end - 1]!)) end--;
+    // Indentation markdown-it writes out as spaces, from a tab it read in part, maps to the line's start.
+    for (; offset <= contentEnd; offset++)
+      at[offset] = Math.max(start, end - (contentEnd - offset));
   }
-  const list = { kind: marker[2]!.at(-1)!, content, ended: false };
-  open.push(list);
-  return list;
+  return (offset) => at[offset]!;
 }
 
 /**
- * The destination of each link reference definition, by its normalized
- * label, the first one winning, as CommonMark has it. Definitions may
- * sit in any container, so the whole tree is walked, without recursion,
- * however deep it nests.
+ * Where each character of each cell of a table row, from `start` to
+ * `end` in `source`, was read from, as markdown-it splits the row: the
+ * row trimmed, split at each `|` without a `\` before it, a `\` before a
+ * `|` dropped, the first and last parts dropped when empty, and each
+ * trimmed.
  */
-function definitions(tree: Root): Map<string, string> {
-  const found = new Map<string, string>();
-  const stack: Nodes[] = [tree];
+function cellsOf(source: string, start: number, end: number): number[][] {
+  const row = source.slice(start, end);
+  const from = start + row.length - row.trimStart().length;
+  const text = row.trim();
+  // Each part as its characters, kept apart so dropping a `\` copies nothing.
+  const parts: { characters: string[]; at: number[] }[] = [];
+  let part = { characters: [] as string[], at: [] as number[] };
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index]!;
+    if (character === "|" && text[index - 1] !== "\\") {
+      parts.push(part);
+      part = { characters: [], at: [] };
+      continue;
+    }
+    if (character === "|") {
+      part.characters.pop();
+      part.at.pop();
+    }
+    part.characters.push(character);
+    part.at.push(from + index);
+  }
+  parts.push(part);
+  if (parts[0]?.characters.length === 0) parts.shift();
+  if (parts.at(-1)?.characters.length === 0) parts.pop();
+  return parts.map(({ characters, at }) => {
+    const value = characters.join("");
+    const lead = value.length - value.trimStart().length;
+    return at.slice(lead, lead + value.trim().length);
+  });
+}
+
+/**
+ * The text read into the tree, with the span each node was read from;
+ * null when the parser works more than `budget` on it (see MAX_WORK).
+ */
+function parse(text: string, budget: number): Node[] | null {
+  unspanned.length = 0;
+  work = budget;
+  let tokens: Token[];
+  try {
+    tokens = md.parse(text, {});
+  } catch {
+    // Past MAX_WORK (tooMuchWork), the one way a parse throws. Were the
+    // parser to throw otherwise, the text would show as plain text too.
+    return null;
+  }
+  return new Build(tokens as Read[], offsetsIn(text)).blocks(null);
+}
+
+/**
+ * The offset in a text of each offset in its source as markdown-it
+ * reads it, where a carriage return and line feed is one line feed and
+ * a lone carriage return is one too: where what the source has there
+ * starts in the text, so a span that ends at an offset ends before it.
+ */
+function offsetsIn(text: string): (offset: number) => number {
+  if (!text.includes("\r")) return (offset) => offset;
+  const offsets: number[] = [];
+  for (let index = 0; index < text.length; index++)
+    if (!(text[index] === "\n" && text[index - 1] === "\r")) offsets.push(index);
+  offsets.push(text.length);
+  return (offset) => offsets[offset]!;
+}
+
+/** The walk from markdown-it's tokens to the tree, each node's span an offset in the text. */
+class Build {
+  private readonly tokens: Read[];
+  private readonly at: (offset: number) => number;
+  private index = 0;
+  /** Each list being read: its level, and whether a paragraph in one of its items shows as one. */
+  private readonly lists: { level: number; loose: boolean }[] = [];
+
+  constructor(tokens: Read[], at: (offset: number) => number) {
+    this.tokens = tokens;
+    this.at = at;
+  }
+
+  /** The blocks up to the token of type `close` (null: the end), which is passed. */
+  blocks(close: string | null): Node[] {
+    const nodes: Node[] = [];
+    for (
+      let token = this.tokens[this.index++];
+      token !== undefined && token.type !== close;
+      token = this.tokens[this.index++]
+    )
+      nodes.push(this.block(token));
+    return nodes;
+  }
+
+  private block(token: Read): Node {
+    const span = { start: this.at(token.start), end: this.at(token.end) };
+    switch (token.type) {
+      case "paragraph_open": {
+        const list = this.lists.at(-1);
+        if (list !== undefined && token.level === list.level + 2 && !token.hidden)
+          list.loose = true;
+        const children = this.inlines(this.tokens[this.index]!);
+        this.index += 2;
+        return { type: "paragraph", ...span, children };
+      }
+      case "heading_open": {
+        const children = this.inlines(this.tokens[this.index]!);
+        this.index += 2;
+        const depth = Number(token.tag.slice(1)) as 1 | 2 | 3 | 4 | 5 | 6;
+        return { type: "heading", ...span, depth, dashes: token.markup === "-", children };
+      }
+      case "hr":
+        return { type: "thematicBreak", ...span };
+      case "blockquote_open":
+        return { type: "blockquote", ...span, children: this.blocks("blockquote_close") };
+      case "bullet_list_open":
+      case "ordered_list_open": {
+        const list = { level: token.level, loose: false };
+        this.lists.push(list);
+        const items: Node[][] = [];
+        for (
+          let item = this.tokens[this.index++]!;
+          item.type === "list_item_open";
+          item = this.tokens[this.index++]!
+        )
+          items.push(this.blocks("list_item_close"));
+        this.lists.pop();
+        return {
+          type: "list",
+          ...span,
+          ordered: token.type === "ordered_list_open",
+          first: Number(token.attrGet("start") ?? 1),
+          tight: !list.loose,
+          items,
+        };
+      }
+      case "fence":
+      case "code_block": {
+        const lang = md.utils.unescapeAll(token.info).trim().split(/\s+/)[0];
+        return {
+          type: "code",
+          ...span,
+          lang: lang === "" ? undefined : lang,
+          value: token.content.endsWith("\n") ? token.content.slice(0, -1) : token.content,
+        };
+      }
+      case "table_open":
+        return this.table(span);
+      case "definition":
+        return { type: "definition", ...span };
+      case "large_table":
+        return { type: "largeTable", ...span };
+      // html_block
+      default:
+        return { type: "html", ...span, value: token.content };
+    }
+  }
+
+  /** A table, from its header row to its `table_close`. */
+  private table(span: { start: number; end: number }): Node {
+    const align: MdAlign[] = [];
+    const rows: Node[][][] = [];
+    for (
+      let token = this.tokens[this.index++]!;
+      token.type !== "table_close";
+      token = this.tokens[this.index++]!
+    ) {
+      if (token.type === "tr_open") rows.push([]);
+      else if (token.type === "th_open")
+        align.push(
+          (String(token.attrGet("style") ?? "").slice("text-align:".length) || null) as MdAlign,
+        );
+      else if (token.type === "inline" && token.mapper !== undefined)
+        rows.at(-1)!.push(this.inlines(token));
+    }
+    return { type: "table", ...span, align, rows };
+  }
+
+  /** The phrasing of an inline token, each node's span read through its mapper. */
+  private inlines(inline: Read): Node[] {
+    const mapper = inline.mapper!;
+    const at = (offset: number) => this.at(mapper(offset));
+    // Where a span ends that ends at `offset` in the content: after its last character, a line ending kept whole.
+    const after = (offset: number) => this.at(mapper(offset - 1) + 1);
+    const root: Node[] = [];
+    // The emphasis, strong and links open, each with the children read so far.
+    const open: (Node & { children: Node[] })[] = [];
+    for (const token of inline.children as Read[]) {
+      const children = open.at(-1)?.children ?? root;
+      const { start, end } = token;
+      const span = { start: at(start), end: after(end) };
+      switch (token.type) {
+        case "text":
+        case "text_special":
+        case "softbreak": {
+          // A delimiter emptied when its run became strong.
+          if (token.type === "text" && token.content === "") break;
+          const value = token.type === "softbreak" ? "\n" : token.content;
+          const references = token.info === "entity" ? [token.markup] : [];
+          const last = children.at(-1);
+          if (last?.type === "text") {
+            last.value += value;
+            last.end = span.end;
+            last.references.push(...references);
+          } else children.push({ type: "text", ...span, value, references });
+          break;
+        }
+        case "hardbreak":
+          children.push({ type: "break", ...span });
+          break;
+        case "code_inline":
+          children.push({ type: "inlineCode", ...span, value: token.content });
+          break;
+        case "html_inline":
+          children.push({ type: "html", ...span, value: token.content });
+          break;
+        case "image":
+          children.push({ type: "image", ...span, alt: altOf(token.children!) });
+          break;
+        case "em_open":
+        case "strong_open": {
+          // Strong opens at its run's first character, its token the second.
+          const node = {
+            type: token.type === "em_open" ? "emphasis" : "strong",
+            start: at(start - token.markup.length + 1),
+            end: span.end,
+            children: [],
+          } as Node & { children: Node[] };
+          children.push(node);
+          open.push(node);
+          break;
+        }
+        case "link_open": {
+          const url = String(token.attrGet("href"));
+          const node: Node & { children: Node[] } = {
+            type: "link",
+            ...span,
+            url,
+            autolink: token.markup === "autolink",
+            children: [],
+          };
+          children.push(node);
+          open.push(node);
+          break;
+        }
+        // em_close, strong_close and link_close: strong closes at its run's second character, its token the first.
+        default:
+          open.pop()!.end =
+            token.type === "link_close" ? span.end : after(start + token.markup.length);
+      }
+    }
+    return root;
+  }
+}
+
+/**
+ * A picture's alt text: the text of its description, its code and raw
+ * HTML as written, a picture in it by its alt text, a soft break a line
+ * break and a hard one nothing, as CommonMark has it; walked without
+ * recursion, however deep pictures nest.
+ */
+function altOf(tokens: Token[]): string {
+  let alt = "";
+  const stack = [...tokens].reverse();
   while (stack.length > 0) {
-    const node = stack.pop()!;
-    if (node.type === "definition" && !found.has(node.identifier))
-      found.set(node.identifier, node.url);
-    if ("children" in node) stack.push(...[...(node as Parents).children].reverse());
+    const token = stack.pop()!;
+    if (token.type === "image") stack.push(...[...token.children!].reverse());
+    else if (token.type === "softbreak") alt += "\n";
+    else if (token.nesting === 0 && token.type !== "hardbreak") alt += token.content;
   }
-  return found;
+  return alt;
 }
 
 // Node runs this module as it is (npm run library:check), stripping its types: erasable syntax only (tsconfig.json).
@@ -846,21 +880,21 @@ function definitions(tree: Root): Map<string, string> {
  */
 class Fold {
   private readonly text: string;
-  private readonly definitions: Map<string, string>;
   private readonly outline: boolean;
+  /** Where each of the text's lines starts, for a heading's line or a refusal's: read once asked. */
+  private lineStarts: number[] | null = null;
 
-  constructor(text: string, definitions: Map<string, string>, outline: boolean) {
+  constructor(text: string, outline: boolean) {
     this.text = text;
-    this.definitions = definitions;
     this.outline = outline;
   }
 
-  blocks(nodes: readonly RootContent[], depth: number): DocBlock[] {
+  blocks(nodes: readonly Node[], depth: number): DocBlock[] {
     return nodes.flatMap((node) => this.block(node, depth));
   }
 
   /** One block, or none for a definition, folded to what is shown. */
-  private block(node: RootContent, depth: number): DocBlock[] {
+  private block(node: Node, depth: number): DocBlock[] {
     if (depth >= MAX_DEPTH) {
       if (this.outline) this.refuse(node, `nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
       return [this.sourceParagraph(node)];
@@ -874,7 +908,7 @@ class Fold {
             {
               type: "heading",
               depth: node.depth,
-              line: node.position!.start.line,
+              line: this.lineOf(node),
               children: this.inlines(node.children, depth + 1, false),
             },
           ];
@@ -894,10 +928,10 @@ class Fold {
         return [
           {
             type: "list",
-            ordered: node.ordered === true,
-            start: node.start ?? 1,
-            tight: node.spread !== true,
-            items: node.children.map((item) => this.blocks(item.children, depth + 1)),
+            ordered: node.ordered,
+            start: node.first,
+            tight: node.tight,
+            items: node.items.map((item) => this.blocks(item, depth + 1)),
           },
         ];
       case "code": {
@@ -913,27 +947,22 @@ class Fold {
       case "definition":
         if (this.outline) this.refuse(node, "a link reference definition");
         return [];
-      case "table": {
-        const rows = rowsOf(node);
-        if (rows === null) {
-          if (this.outline) {
-            this.refuse(
-              node,
-              `a table past MAX_TABLE_COLUMNS (${MAX_TABLE_COLUMNS}) or MAX_TABLE_CELLS (${MAX_TABLE_CELLS})`,
-            );
-          }
-          return [this.sourceParagraph(node)];
-        }
+      case "table":
         return [
           {
             type: "table",
-            align: node.align!.map((align) => align ?? null),
-            rows: rows.map((row) =>
-              row.map((cell) => this.inlines(cell.children, depth + 1, false)),
-            ),
+            align: node.align,
+            rows: node.rows.map((row) => row.map((cell) => this.inlines(cell, depth + 1, false))),
           },
         ];
-      }
+      case "largeTable":
+        if (this.outline) {
+          this.refuse(
+            node,
+            `a table past MAX_TABLE_COLUMNS (${MAX_TABLE_COLUMNS}) or MAX_TABLE_CELLS (${MAX_TABLE_CELLS})`,
+          );
+        }
+        return [this.sourceParagraph(node)];
       // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
         if (this.outline) this.refuse(node, "raw HTML");
@@ -941,11 +970,11 @@ class Fold {
     }
   }
 
-  private inlines(nodes: readonly PhrasingContent[], depth: number, inLink: boolean): MdInline[] {
+  private inlines(nodes: readonly Node[], depth: number, inLink: boolean): MdInline[] {
     return nodes.flatMap((node) => this.inline(node, depth, inLink));
   }
 
-  private inline(node: PhrasingContent, depth: number, inLink: boolean): MdInline | MdInline[] {
+  private inline(node: Node, depth: number, inLink: boolean): MdInline | MdInline[] {
     if (depth >= MAX_DEPTH) {
       if (this.outline) this.refuse(node, `nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
       return { type: "text", value: this.source(node) };
@@ -965,21 +994,16 @@ class Fold {
       // text, so a link never holds another one and the host shown after
       // a link's text is always where that text leads.
       case "link":
-      case "linkReference":
         if (inLink) return this.inlines(node.children, depth + 1, true);
-        return node.type === "link"
-          ? { type: "link", url: node.url, children: this.inlines(node.children, depth + 1, true) }
-          : {
-              // The parser makes a reference only when its definition exists.
-              type: "link",
-              url: this.definitions.get(node.identifier)!,
-              children: this.inlines(node.children, depth + 1, true),
-            };
+        return {
+          type: "link",
+          url: node.url,
+          children: this.inlines(node.children, depth + 1, true),
+        };
       // A picture is never loaded: its alt text stands in for it.
       case "image":
-      case "imageReference":
         if (this.outline) this.refuse(node, "a picture");
-        return { type: "text", value: inLink ? visibleControls(node.alt!) : node.alt! };
+        return { type: "text", value: inLink ? visibleControls(node.alt) : node.alt };
       // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
         if (this.outline) this.refuse(node, "raw HTML");
@@ -988,17 +1012,34 @@ class Fold {
   }
 
   /** Throws parseDocument's refusal of a node, at the line it starts on. */
-  private refuse(node: Nodes, what: string): never {
-    throw new DocumentError(what, node.position!.start.line);
+  private refuse(node: Node, what: string): never {
+    throw new DocumentError(what, this.lineOf(node));
+  }
+
+  /** The line a node starts on, from 1. */
+  private lineOf(node: Node): number {
+    if (this.lineStarts === null) {
+      this.lineStarts = [0];
+      for (const lineEnd of this.text.matchAll(/\r\n?|\n/g))
+        this.lineStarts.push(lineEnd.index + lineEnd[0].length);
+    }
+    let line = 0;
+    let after = this.lineStarts.length;
+    while (line + 1 < after) {
+      const middle = (line + after) >> 1;
+      if (this.lineStarts[middle]! <= node.start) line = middle;
+      else after = middle;
+    }
+    return line + 1;
   }
 
   /** The Markdown a node was parsed from, as written. */
-  private source(node: Nodes): string {
-    return this.text.slice(node.position!.start.offset, node.position!.end.offset);
+  private source(node: Node): string {
+    return this.text.slice(node.start, node.end);
   }
 
   /** A block shown as its source, its lines kept apart. */
-  private sourceParagraph(node: Nodes): DocBlock {
+  private sourceParagraph(node: Node): DocBlock {
     const lines = this.source(node).split("\n");
     return {
       type: "paragraph",
@@ -1011,51 +1052,18 @@ class Fold {
   }
 }
 
-/**
- * A table's rows, each cut to the header's width as GFM has it; null
- * when the table is past MAX_TABLE_COLUMNS or MAX_TABLE_CELLS, to be
- * shown as its source.
- */
-function rowsOf(table: Table): TableCell[][] | null {
-  const columns = table.align!.length;
-  const rows = table.children.map((row) => row.children.slice(0, columns));
-  const cells = rows.reduce((sum, row) => sum + row.length, 0);
-  return columns > MAX_TABLE_COLUMNS || cells > MAX_TABLE_CELLS ? null : rows;
-}
-
-/**
- * A character reference, `&name;`, `&#nn;` or `&#xhh;`, after an even
- * run of backslashes (an odd one escapes its `&`). Whether CommonMark
- * decodes it, a name it knows, is asked of the parser (decodes).
- */
-const REFERENCE =
-  /(?<!\\)(?:\\\\)*(&(?:#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[A-Za-z][A-Za-z0-9]{0,31});)/g;
-
-const decoded = new Map<string, boolean>();
-
-/** Whether CommonMark reads a character reference, alone, as other than it is written. */
-function decodes(reference: string): boolean {
-  let answer = decoded.get(reference);
-  if (answer === undefined) {
-    const paragraph = fromMarkdown(reference).children[0] as Parents;
-    answer = (paragraph.children[0] as { value: string }).value !== reference;
-    decoded.set(reference, answer);
-  }
-  return answer;
-}
-
 /** The text of phrasing as plain text: its text, code and raw HTML as written, a picture's alt text, a hard break a space; walked without recursion, however deep it nests. */
-function phrasingText(nodes: readonly PhrasingContent[]): string {
+function phrasingText(nodes: readonly Node[]): string {
   let text = "";
-  const stack: Nodes[] = [...nodes].reverse();
+  const stack: Node[] = [...nodes].reverse();
   while (stack.length > 0) {
     const node = stack.pop()!;
     if (node.type === "text" || node.type === "inlineCode" || node.type === "html")
       text += node.value;
-    else if (node.type === "image" || node.type === "imageReference") text += node.alt!;
+    else if (node.type === "image") text += node.alt;
     else if (node.type === "break") text += " ";
-    // Emphasis and strong: what else a link's text may hold.
-    else stack.push(...[...(node as Parents).children].reverse());
+    // Emphasis, strong and links: what else a link's text may hold.
+    else stack.push(...[...(node as Extract<Node, { children: Node[] }>).children].reverse());
   }
   return text;
 }
@@ -1068,20 +1076,18 @@ function phrasingText(nodes: readonly PhrasingContent[]): string {
  */
 class Inspect {
   private readonly text: string;
-  private readonly definitions: Map<string, string>;
   private readonly notes: MdNote[];
 
-  constructor(text: string, definitions: Map<string, string>, notes: MdNote[]) {
+  constructor(text: string, notes: MdNote[]) {
     this.text = text;
-    this.definitions = definitions;
     this.notes = notes;
   }
 
-  visitAll(nodes: readonly Nodes[], depth: number, inLink: boolean): void {
+  visitAll(nodes: readonly Node[], depth: number, inLink: boolean): void {
     for (const node of nodes) this.visit(node, depth, inLink);
   }
 
-  private visit(node: Nodes, depth: number, inLink: boolean): void {
+  private visit(node: Node, depth: number, inLink: boolean): void {
     if (depth >= MAX_DEPTH) {
       if (!this.asWritten(node)) this.notes.push({ type: "tooDeep", source: this.source(node) });
       return;
@@ -1091,7 +1097,6 @@ class Inspect {
         this.notes.push({ type: "html", source: this.source(node) });
         return;
       case "image":
-      case "imageReference":
         this.notes.push({ type: "image", source: this.source(node) });
         return;
       case "code":
@@ -1099,55 +1104,47 @@ class Inspect {
         if (!inLink) this.notes.push({ type: "code", value: node.value });
         return;
       case "text":
-        for (const [, reference] of this.source(node).matchAll(REFERENCE)) {
-          if (decodes(reference!))
-            this.notes.push({ type: "characterReference", source: reference! });
-        }
+        for (const reference of node.references)
+          this.notes.push({ type: "characterReference", source: reference });
         return;
-      case "link":
-      case "linkReference": {
-        const source = this.source(node);
-        // An autolink's text is its URL as written: nothing in it is decoded.
-        const autolink = source.startsWith("<");
+      case "link": {
         this.notes.push({
           type: "link",
-          url: node.type === "link" ? node.url : this.definitions.get(node.identifier)!,
+          url: node.url,
           text: phrasingText(node.children),
-          source,
-          autolink,
+          source: this.source(node),
+          autolink: node.autolink,
         });
-        if (!autolink) this.visitAll(node.children, depth + 1, true);
+        // An autolink's text is its URL as written: nothing in it is decoded.
+        if (!node.autolink) this.visitAll(node.children, depth + 1, true);
         return;
       }
       case "heading":
-        // Underlined with dashes (a heading of level 2 over more than one line, as `##` takes one), as `---` right
-        // under a line of text is when no blank line comes between them.
-        if (node.depth === 2 && node.position!.start.line < node.position!.end.line) {
-          this.notes.push({ type: "dashHeading", source: this.source(node) });
-        }
+        if (node.dashes) this.notes.push({ type: "dashHeading", source: this.source(node) });
         this.visitAll(node.children, depth + 1, inLink);
         return;
       case "list":
-        for (const item of node.children) this.visitAll(item.children, depth + 1, inLink);
+        for (const item of node.items) this.visitAll(item, depth + 1, inLink);
         return;
-      case "table": {
-        const rows = rowsOf(node);
-        if (rows === null) this.notes.push({ type: "largeTable", source: this.source(node) });
-        else for (const cell of rows.flat()) this.visitAll(cell.children, depth + 1, inLink);
+      case "table":
+        for (const cell of node.rows.flat()) this.visitAll(cell, depth + 1, inLink);
         return;
-      }
+      case "largeTable":
+        this.notes.push({ type: "largeTable", source: this.source(node) });
+        return;
       default:
-        if ("children" in node) this.visitAll((node as Parents).children, depth + 1, inLink);
+        if ("children" in node) this.visitAll(node.children, depth + 1, inLink);
     }
   }
 
   /**
    * Whether a node Fold shows as its source shows as it would have:
-   * text whose source is its value, or a paragraph of one line of it
-   * (Fold keeps a source's lines apart).
+   * text whose source is its value, its line endings as the parser reads
+   * them, or a paragraph of one line of it (Fold keeps a source's lines
+   * apart).
    */
-  private asWritten(node: Nodes): boolean {
-    if (node.type === "text") return this.source(node) === node.value;
+  private asWritten(node: Node): boolean {
+    if (node.type === "text") return this.source(node).replace(/\r\n?/g, "\n") === node.value;
     return (
       node.type === "paragraph" &&
       node.children.every((child) => this.asWritten(child) && !this.source(child).includes("\n"))
@@ -1155,7 +1152,7 @@ class Inspect {
   }
 
   /** The Markdown a node was parsed from, as written. */
-  private source(node: Nodes): string {
-    return this.text.slice(node.position!.start.offset, node.position!.end.offset);
+  private source(node: Node): string {
+    return this.text.slice(node.start, node.end);
   }
 }

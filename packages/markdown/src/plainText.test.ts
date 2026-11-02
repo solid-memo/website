@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { MAX_CHARS, parseMarkdown } from "./parse";
+import { MAX_CHARS, MAX_DEPTH, parseMarkdown } from "./parse";
 import { LABEL_CACHE_CHARS, LABEL_PREFIX, labelText, plainText } from "./plainText";
 
 vi.mock("./parse", async (original) => {
@@ -73,8 +73,13 @@ describe("labelText", () => {
     expect(labelText("abcdefghij", 5)).toBe("abcd…");
   });
 
-  it("is the start of text too costly to read as Markdown, as written", () => {
-    expect(labelText(`${"- ".repeat(20)}*a*\n\nmore`)).toBe(`${"- ".repeat(20)}*a*`);
+  it("is the start of text past the parser's work, as written", () => {
+    const run = "a\n>>>>\n".repeat(280).trimEnd();
+    expect(labelText(`${run}\n\nmore`)).toBe(run.replace(/\s+/g, " "));
+  });
+
+  it("is what nests past MAX_DEPTH as written", () => {
+    expect(labelText(`${"- ".repeat(20)}*a*\n\nmore`)).toBe(`${"- ".repeat(20 - MAX_DEPTH)}*a*`);
   });
 
   it("reads only up to LABEL_PREFIX characters", () => {
