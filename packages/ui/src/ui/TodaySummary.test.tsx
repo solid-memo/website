@@ -115,30 +115,48 @@ describe("TodaySummary", () => {
     expect(screen.queryByText(/to go/)).toBeNull();
   });
 
-  it("says the day is done once nothing is left, with a shimmer and stars just after a session", () => {
+  it("says the day is done in gold once nothing is left, with a burst, a shimmer and stars just after a session", () => {
     const { container, rerender } = render(
       <TodaySummary today={today()} left={0} statisticsHref="#/statistics" />,
     );
-    expect(screen.getByText(/^All done for today! 4 cards/)).toBeInTheDocument();
-    expect(container.querySelector(".today-stars")).toBeNull();
+    const strip = screen.getByRole("complementary", { name: "Today" });
+    expect(strip).toHaveTextContent(/two\.All done for today! 4 cards/);
+    expect(strip).toHaveClass("today-strip all-done");
+    expect(strip).not.toHaveClass("just-done");
+    expect(container.querySelector(".today-stars, .today-burst")).toBeNull();
     rerender(<TodaySummary today={today()} left={0} celebrate statisticsHref="#/statistics" />);
+    expect(strip).toHaveClass("today-strip all-done just-done");
     expect(container.querySelector(".today-stars")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelectorAll(".today-stars > span")).toHaveLength(10);
+    const burst = container.querySelector(".today-flame .today-burst");
+    expect(burst).toHaveAttribute("aria-hidden", "true");
+    expect(
+      [...burst!.children].map((star) => (star as HTMLElement).style.getPropertyValue("--angle")),
+    ).toEqual(["-35deg", "-25deg", "-15deg", "-5deg", "5deg", "15deg", "25deg", "35deg"]);
     rerender(<TodaySummary today={today()} left={2} celebrate statisticsHref="#/statistics" />);
-    expect(screen.getByText(/^Nice work! 4 cards/)).toBeInTheDocument();
-    expect(container.querySelector(".today-stars")).toBeNull();
+    expect(screen.getByRole("complementary", { name: "Today" })).toHaveTextContent(
+      /Nice work! 4 cards/,
+    );
+    expect(strip).toHaveClass("today-strip", { exact: true });
+    expect(container.querySelector(".today-stars, .today-burst")).toBeNull();
     rerender(<TodaySummary today={today()} celebrate statisticsHref="#/statistics" />);
-    expect(container.querySelector(".today-stars")).toBeNull();
+    expect(strip).toHaveClass("today-strip", { exact: true });
+    expect(container.querySelector(".today-stars, .today-burst")).toBeNull();
   });
 
   it("cheers louder the more was studied", () => {
     const { rerender } = render(
       <TodaySummary today={today({ answers: 10 })} statisticsHref="#/statistics" />,
     );
-    expect(screen.getByText(/^Great session! 10 cards/)).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Today" })).toHaveTextContent(
+      /Great session! 10 cards/,
+    );
     rerender(
       <TodaySummary today={today({ answers: 50, introduced: 1 })} statisticsHref="#/statistics" />,
     );
-    expect(screen.getByText(/^Impressive effort! 50 cards · 1 new/)).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Today" })).toHaveTextContent(
+      /Impressive effort! 50 cards · 1 new/,
+    );
   });
 });
 

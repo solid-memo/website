@@ -77,7 +77,8 @@ but the journeys:
   at High contrast's own ratios there:
   - text, muted text and field edges on every surface;
   - text on a primary fill, links, danger and warning text, the
-    masthead's text, and an answer button's text on its grade's tint;
+    masthead's text, an answer button's text on its grade's tint, and
+    the text of the today strip gone gold for a day done;
   - a chart's steps on the surfaces, at a field edge's ratio;
   - in the Color-blind friendly palette, that neighboring grades stay
     apart under each color vision deficiency.
