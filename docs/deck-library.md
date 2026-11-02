@@ -656,6 +656,9 @@ about a course, on every version (a plain deck passes):
 - A card a step or chapter in use asks has text on its back (the right
   option) and at least two distractors in use. Each has text in exactly
   the back's languages: untagged for an untagged back, `zxx` for `zxx`.
+  A distractor that lacks some is named once, with the first three it
+  lacks and a count of the rest, so a card with many languages and
+  options costs no more to check than it takes to read.
 - A chapter in use has at least one step in use.
 - Every `sm:distractor` link, in any release, names a `sm:Distractor` of
   the release, and no two cards name the same one (a copy writes and

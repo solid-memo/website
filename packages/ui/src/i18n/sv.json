@@ -287,6 +287,10 @@
     "noLanguage": "inget angivet språk",
     "issues": "Värt att se över",
     "issue": {
+      "moreLanguages": {
+        "one": "{languages} och {count} till",
+        "other": "{languages} och {count} till"
+      },
       "missing": "”{option}” har ingen text på {languages}, som baksidan finns på.",
       "extra": "”{option}” finns på {languages}, som baksidan inte finns på.",
       "few": {

@@ -160,9 +160,9 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
     case "fewDistractors":
       return `${at}${subject} has too few distractors (${problem.params.count}); a card a course asks has at least ${problem.params.least}.`;
     case "distractorLanguages": {
-      const missing = problem.params.missing
-        .map((l) => (l === "" ? "untagged" : `@${l}`))
-        .join(", ");
+      const listed = problem.params.missing.map((l) => (l === "" ? "untagged" : `@${l}`));
+      const more = problem.params.more;
+      const missing = more === 0 ? listed.join(", ") : `${listed.join(", ")} and ${more} more`;
       return `${at}distractor ${subject} has no text ${missing}, which the back of ${shown(problem.params.card)} has.`;
     }
     case "chapterPositions":

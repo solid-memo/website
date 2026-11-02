@@ -949,7 +949,8 @@ Studio's card inspector edit them
   another card names them (`withoutUnnamedDistractors`), and triples
   the app doesn't know kept (`withDistractors`).
 - A wrong option not in the back's languages is a warning in a pod's
-  deck, never a refusal.
+  deck, never a refusal. It names the first three languages the option
+  lacks, or has that the back lacks, and counts the rest.
 - **A card and a distractor never share an id.** Both are subjects of
   the cards document at their ids. A write of a card onto an
   `sm:Distractor` subject, or of a distractor onto an `sm:Card`

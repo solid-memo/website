@@ -287,6 +287,10 @@
     "noLanguage": "ohne Sprachangabe",
     "issues": "Einen Blick wert",
     "issue": {
+      "moreLanguages": {
+        "one": "{languages} und {count} weitere",
+        "other": "{languages} und {count} weitere"
+      },
       "missing": "„{option}“ hat keinen Text in folgenden Sprachen der Rückseite: {languages}.",
       "extra": "„{option}“ hat Text in Sprachen, die die Rückseite nicht hat: {languages}.",
       "few": {

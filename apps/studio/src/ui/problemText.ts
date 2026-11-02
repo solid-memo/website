@@ -145,6 +145,9 @@ export function problemMessage(
     terms.length === 0 ? t("studio.check.nothing") : terms.map(value).join(", ");
   const language = (tag: string) =>
     tag === "" ? t("studio.check.untagged") : languageParts(tag).name;
+  // A list cut short after its first few, with how many it leaves out.
+  const more = (listed: string, count: number) =>
+    count === 0 ? listed : t("studio.check.moreLanguages", { languages: listed, count });
   const field = fieldName(problem.field, t);
   const key = `studio.problem.${problem.code}` as MessageKey;
   switch (problem.code) {
@@ -223,7 +226,7 @@ export function problemMessage(
       return t(key, { count: problem.params.count, least: problem.params.least });
     case "distractorLanguages":
       return t(key, {
-        missing: problem.params.missing.map(language).join(", "),
+        missing: more(problem.params.missing.map(language).join(", "), problem.params.more),
         card: named(draft, problem.params.card),
       });
     case "chapterPositions":

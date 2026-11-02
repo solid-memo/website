@@ -20,3 +20,16 @@ it("words an id given to another kind of subject", () => {
     `${L}: <#fi> is a chapter, but a card in v1.ttl: an id names one subject for good, so give the chapter an id of its own.`,
   );
 });
+
+it("words a distractor's missing languages, a few of them and how many more", () => {
+  const message = (detail: Parameters<typeof problem>[1]) =>
+    releaseMessage(problem(`${V2}#q-1-b`, detail) as Parameters<typeof releaseMessage>[0], L, V2);
+  expect(
+    message({
+      code: "distractorLanguages",
+      params: { card: `${V2}#q-1`, missing: ["sv", "", "de"], more: 4 },
+    }),
+  ).toBe(
+    `${L}: distractor <#q-1-b> has no text @sv, untagged, @de and 4 more, which the back of <#q-1> has.`,
+  );
+});

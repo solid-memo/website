@@ -1198,6 +1198,11 @@
       },
       "badgeOf": "dans {name}",
       "untagged": "texte sans langue",
+      "moreLanguages": {
+        "one": "{languages} et {count} autre",
+        "many": "{languages} et {count} d’autres",
+        "other": "{languages} et {count} autres"
+      },
       "nothing": "rien",
       "firstVersion": "rien, puisqu’il s’agit de la première version",
       "kind": {

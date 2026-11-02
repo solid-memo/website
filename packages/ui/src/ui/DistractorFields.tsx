@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useLayoutEffect, useRef, useState } from "preact/hooks";
+import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { isFormatted, isMarkdown, type Distractor } from "@solid-memo/domain/deck";
 import {
@@ -203,29 +203,55 @@ export function DistractorFields({
     });
   }
 
-  const languages = (tags: readonly string[]) =>
-    tags
-      .map((tag) => (tag === "" ? t("distractorFields.noLanguage") : languageLabel(tag)))
-      .join(", ");
-  // A card may have thousands of wrong options, each with its issues: each is
-  // looked up by id, the first of an id, as a search of the list finds it.
-  const byId = new Map<string, Distractor>();
-  for (const distractor of distractors)
-    if (!byId.has(distractor.id)) byId.set(distractor.id, distractor);
-  const issueText = (issue: DistractorIssue): string[] => {
-    if (issue.code === "fewDistractors")
-      return [t("distractorFields.issue.few", { count: issue.count, least: issue.least })];
-    const option = named(byId.get(issue.id)!);
-    return [
-      ...(issue.missing.length === 0
-        ? []
-        : [t("distractorFields.issue.missing", { option, languages: languages(issue.missing) })]),
-      ...(issue.extra.length === 0
-        ? []
-        : [t("distractorFields.issue.extra", { option, languages: languages(issue.extra) })]),
-    ];
-  };
-  const issues = distractorIssues({ back, distractors }, "pod").flatMap(issueText);
+  // A card may have thousands of wrong options, each with its issues: the
+  // issues are found once a change, not on every render, and each tag's
+  // label is looked up once, however many options name it.
+  const issues = useMemo(() => {
+    const labels = new Map<string, string>();
+    const label = (tag: string) => {
+      let known = labels.get(tag);
+      if (known === undefined) {
+        known = tag === "" ? t("distractorFields.noLanguage") : languageLabel(tag);
+        labels.set(tag, known);
+      }
+      return known;
+    };
+    // An issue lists a few of the tags and counts the rest.
+    const languages = (tags: readonly string[], more: number) => {
+      const listed = tags.map(label).join(", ");
+      return more === 0
+        ? listed
+        : t("distractorFields.issue.moreLanguages", { languages: listed, count: more });
+    };
+    // Each is looked up by id, the first of an id, as a search of the list finds it.
+    const byId = new Map<string, Distractor>();
+    for (const distractor of distractors)
+      if (!byId.has(distractor.id)) byId.set(distractor.id, distractor);
+    const issueText = (issue: DistractorIssue): string[] => {
+      if (issue.code === "fewDistractors")
+        return [t("distractorFields.issue.few", { count: issue.count, least: issue.least })];
+      const option = plainDataText(cardText(byId.get(issue.id)!.text), markdown, 60);
+      return [
+        ...(issue.missing.length === 0
+          ? []
+          : [
+              t("distractorFields.issue.missing", {
+                option,
+                languages: languages(issue.missing, issue.moreMissing),
+              }),
+            ]),
+        ...(issue.extra.length === 0
+          ? []
+          : [
+              t("distractorFields.issue.extra", {
+                option,
+                languages: languages(issue.extra, issue.moreExtra),
+              }),
+            ]),
+      ];
+    };
+    return distractorIssues({ back, distractors }, "pod").flatMap(issueText);
+  }, [back, distractors, t, languageLabel, cardText, markdown]);
 
   const editor = (state: Editing) => (
     <div class="distractor-editor" onKeyDown={onKeyDown}>

@@ -133,8 +133,19 @@ describe("problemMessage", () => {
       "Has 1 wrong option in use: a question a course asks has at least 2.",
     );
     expect(
-      say({ code: "distractorLanguages", params: { card: at("q-pods-1a"), missing: ["sv", ""] } }),
+      say({
+        code: "distractorLanguages",
+        params: { card: at("q-pods-1a"), missing: ["sv", ""], more: 0 },
+      }),
     ).toBe("Has no text in Swedish, untagged text, which the back of #q-pods-1a has.");
+    expect(
+      say({
+        code: "distractorLanguages",
+        params: { card: at("q-pods-1a"), missing: ["sv", "", "de"], more: 5 },
+      }),
+    ).toBe(
+      "Has no text in Swedish, untagged text, German and 5 more, which the back of #q-pods-1a has.",
+    );
     expect(
       say({ code: "chapterPositions", params: { chapters: [at("a"), at("b")], position: "0" } }),
     ).toBe("Chapters #a, #b share place 0.");

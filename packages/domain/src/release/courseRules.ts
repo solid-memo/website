@@ -21,6 +21,35 @@ import {
 /** The fewest distractors a card a course asks has in use. */
 export const LEAST_DISTRACTORS = 2;
 
+/** The most languages a distractor's problem names of those it lacks or adds: the rest it counts. */
+const LISTED_LANGUAGES = 3;
+
+/** The languages one side lacks of another's: the first few, and how many more. */
+export interface LanguageGap {
+  listed: string[];
+  more: number;
+}
+
+/**
+ * The languages of `wanted` that `has` lacks: the first LISTED_LANGUAGES,
+ * in `wanted`'s order, and how many more. It costs as much as the smaller
+ * set and the languages they share, not their product: a card with many
+ * back languages and many distractors is checked in time linear in it.
+ */
+export function lacking(wanted: ReadonlySet<string>, has: ReadonlySet<string>): LanguageGap {
+  const [small, large] = wanted.size <= has.size ? [wanted, has] : [has, wanted];
+  let shared = 0;
+  for (const language of small) if (large.has(language)) shared++;
+  // Each language passed over here is a shared one, so this stops after
+  // at most `shared` + LISTED_LANGUAGES of them.
+  const listed: string[] = [];
+  for (const language of wanted) {
+    if (listed.length === LISTED_LANGUAGES) break;
+    if (!has.has(language)) listed.push(language);
+  }
+  return { listed, more: wanted.size - shared - listed.length };
+}
+
 const IS_PART_OF = `${SCHEMA_NS}isPartOf`;
 const POSITION = `${SCHEMA_NS}position`;
 
@@ -231,8 +260,8 @@ function askedProblems(
       ),
     );
   }
-  const back = languagesOf(card.back);
-  if (back.length === 0)
+  const back = new Set(languagesOf(card.back));
+  if (back.size === 0)
     problems.push(problem(iri, { code: "noBack", params: {} }, { field: SM.back }));
   const options = card.distractors
     .filter((d) => d.kind === "iri")
@@ -248,13 +277,12 @@ function askedProblems(
     );
   }
   for (const option of options) {
-    const text = new Set(languagesOf(option.text));
-    const missing = back.filter((language) => !text.has(language));
-    if (missing.length > 0) {
+    const { listed, more } = lacking(back, new Set(languagesOf(option.text)));
+    if (listed.length > 0) {
       problems.push(
         problem(
           option.iri,
-          { code: "distractorLanguages", params: { card: iri, missing } },
+          { code: "distractorLanguages", params: { card: iri, missing: listed, more } },
           { field: SM.distractorText, related: [iri] },
         ),
       );

@@ -287,6 +287,10 @@
     "noLanguage": "no stated language",
     "issues": "Worth a look",
     "issue": {
+      "moreLanguages": {
+        "one": "{languages} and {count} more",
+        "other": "{languages} and {count} more"
+      },
       "missing": "“{option}” has no text in {languages}, which the back is in.",
       "extra": "“{option}” is in {languages}, which the back is not.",
       "few": {
