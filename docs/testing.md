@@ -24,7 +24,7 @@ npm run browsers  # once: Chromium's headless shell, which npm run check and npm
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
-npm run dependencies:summary -- changes.json   # the packages GitHub's comparison of two commits' dependency graphs adds, changes and removes, as tables, as CI's dependency-review job writes them
+npm run dependencies:review -- changes.json    # the advisories and the packages GitHub's comparison of two commits' dependency graphs adds, changes and removes, as tables, as CI's dependency-review job writes them; fails on an advisory the base doesn't have
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
 npm run lint:prose         # the docs' prose rules, per page kind (docs/style.md#the-prose-check), as npm run check runs it; -- docs/srs.md for one page
@@ -639,7 +639,7 @@ jobs run side by side, each
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |
-| `dependency-review` | deterministic | on a pull request only, skipped on every other run: no package it adds or changes has a known vulnerability of moderate severity or worse, or a license off the list, by GitHub's dependency graph; every package it adds, changes or removes goes to the run's summary ([Dependency review](#dependency-review)) |
+| `dependency-review` | deterministic | on a pull request only, skipped on every other run: no package it adds or changes has a known vulnerability of moderate severity or worse that the base doesn't have, or a license off the list, by GitHub's dependency graph; every package it adds, changes or removes goes to the run's summary ([Dependency review](#dependency-review)) |
 | `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes all but the newest of `main`'s Turbo caches, of the CodeQL databases per language, and of each end-to-end server's images, and all but the two newest of the browsers' system libraries per browser. Its token can write (`actions: write`), as only the `fail-fast` jobs' can besides. It runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `fail-fast (<job>)` | deterministic | nothing: one per job that tests the tree, `commits` and `dependency-review` aside, needing that job alone. When it fails, outside `main` and not for a fork's pull request, it cancels the run ([Canceled runs](#canceled-runs)); when it passes, it is skipped. Its token can write (`actions: write`), and it runs none of the repository's code |
 | `warm`, `warm-images`, `warm-browsers`, `warm-pip` | deterministic | nothing: on `main`, when the run reuses another, they save only the caches the skipped jobs would have saved and `main` lacks (`releasing.md`), failing neither the run nor `ci-ok` |
@@ -858,7 +858,7 @@ maintainer account still publishes a validly signed version.
 
 CI's `dependency-review` job runs GitHub's
 [dependency-review-action](https://github.com/actions/dependency-review-action)
-on a pull request. The action compares GitHub's dependency graph of
+on a pull request. The job compares GitHub's dependency graph of
 the pull request's base and of its head. The graph covers every
 manifest GitHub reads here: the root's `package-lock.json`, those of
 the end-to-end servers in `e2e/pod/servers/`, the
@@ -867,10 +867,22 @@ on a package the pull request adds, or moves to another version, that
 has either of these:
 
 - a known vulnerability of moderate severity or worse, in GitHub's
-  advisory database, in any scope, the development tools included;
+  advisory database, in any scope, the development tools included, that
+  the base doesn't have;
 - a license that isn't on the job's `allow-licenses` list, the licenses
   the project can ship a package under
   ([style.md](style.md#licenses)).
+
+The base has a vulnerability already when a version of the same package
+that the pull request removes, in the same manifest, has the same
+advisory. Moving a package from one vulnerable version to another, as
+lock file maintenance does when no fixed version can be locked yet,
+leaves `main` as it was, so the job lists that advisory as carried over
+and passes. A new version that fixes one advisory and has another still
+fails. GitHub's Dependabot alerts on `main`, not this job, report the
+advisories that `main` already has, and Renovate's vulnerability alerts
+propose the fixed versions
+([renovate.json5](../renovate.json5)).
 
 A package whose license GitHub doesn't know is reported, and doesn't
 fail the job. A package already accepted under a license that can't be
@@ -878,11 +890,11 @@ on the list is in the job's `allow-dependencies-licenses`, with its
 reason in a comment. None of them ships in the site: an end-to-end test
 server, build and release tools, and the license linter.
 
-The action names what it found in the run's summary.
-`npm run dependencies:summary` lists every package added, changed or
-removed, per manifest, with its scope and license, from the same
-comparison. That list is what a maintainer reads before merging
-Renovate's lock file maintenance
+The action checks the licenses and names the ones it refused in the
+run's summary. `npm run dependencies:review` judges the advisories, and
+lists them and every package added, changed or removed, per manifest,
+with its scope and license, from the same comparison. That list is what
+a maintainer reads before merging Renovate's lock file maintenance
 ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)).
 
 The job runs on a pull request only. The packages the merge queue's
@@ -893,6 +905,8 @@ the repository's dependency graph, which an admin turns on in
 Settings › Advanced Security. Without it the job fails with
 "Dependency review is not supported on this repository", and `ci-ok`
 fails with it on every pull request.
+Dependabot alerts, turned on in the same place, report what the job
+lets through as carried over.
 
 ### Code scanning
 
