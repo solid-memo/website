@@ -1221,9 +1221,10 @@ jobs:
   # base and of its head compared, over every manifest the graph reads,
   # the lockfiles of the root and of the end-to-end servers and the
   # pinned Python tools among them. It fails on a package the pull
-  # request adds, or moves to another version, with a known
-  # vulnerability of moderate severity or worse, or under a license not
-  # on the list below, and lists what moved in the run's summary, which
+  # request adds, or moves to another version, under a license not on
+  # the list below, or with a known vulnerability of moderate severity or
+  # worse that the base doesn't have, and lists what moved in the run's
+  # summary, which
   # a person reads before merging Renovate's lock file maintenance
   # (GOVERNANCE.md#dependency-updates). On a pull request only, as ci-ok
   # expects: what the merge queue's tree and a push to main bring in came
@@ -1243,7 +1244,10 @@ jobs:
     steps:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
-          fail-on-severity: moderate
+          # The licenses only: the action fails on every advisory of a
+          # version that comes, even one the version that goes had too,
+          # which leaves main as it was. The step below judges those.
+          vulnerability-check: false
           # Every scope, not only the packages the app runs: the
           # development tools run in CI and on contributors' machines,
           # and build the site that is deployed.
@@ -1279,9 +1283,13 @@ jobs:
           # Scorecard's scores come from another service, and the summary
           # below names every package that moved already.
           show-openssf-scorecard: false
-      # The action's summary names the problems it found. This lists
-      # every package added, changed or removed, per manifest, from the
-      # same comparison, whether the review passed or not. gh fetches it
+      # The action's summary names the licenses it refused. This fails
+      # on an advisory of moderate severity or worse that a version
+      # which comes has and no version which goes, of the same package
+      # in the same manifest, had: one the base has already is listed,
+      # and Dependabot's alerts on main report it. It also lists every
+      # package added, changed or removed, per manifest, from the same
+      # comparison, whether the licenses passed or not. gh fetches it
       # again rather than a step reading the action's output, which a
       # lock file maintenance can make too large to pass to a step.
       - if: success() || failure()
@@ -1294,7 +1302,7 @@ jobs:
           node-version-file: .nvmrc
       # The script imports no package, so nothing is installed.
       - if: success() || failure()
-        name: npm run dependencies:summary -- <changes.json>
+        name: npm run dependencies:review -- <changes.json>
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -1303,7 +1311,7 @@ jobs:
         run: |
           changes="$RUNNER_TEMP/changes.json"
           gh api --paginate --slurp "repos/$REPO/dependency-graph/compare/$BASE...$HEAD?per_page=100" > "$changes"
-          npm run dependencies:summary -- "$changes"
+          npm run dependencies:review -- "$changes"
 
   # When a job that tests the tree fails, the run's result is settled, so
   # the jobs still going are canceled rather than left to finish: the
