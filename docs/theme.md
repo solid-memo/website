@@ -158,7 +158,8 @@ editor's check (`checkPalette`) uses too.
 
 Some colors stay fixed whatever the palette:
 
-- the pictures, `illustration.svg` and `favicon.svg`;
+- the pictures, `illustration.svg`, `illustration-animated.svg` and
+  `favicon.svg`;
 - the static About page (`apps/web/public/about/`) and the docs' own
   stylesheet (`packages/site/src/docs.css`), which load no
   `palettes.css`;

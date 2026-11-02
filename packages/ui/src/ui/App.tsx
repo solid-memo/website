@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { PodProvider } from "@solid-memo/domain/podProvider";
 import type { Session } from "@solid-memo/domain/session";
+import illustrationAnimatedUrl from "../assets/illustration-animated.svg";
 import illustrationUrl from "../assets/illustration.svg";
 import { ErrorBoundary, SomethingWentWrong } from "./ErrorBoundary";
 import { ErrorMessage } from "./ErrorMessage";
@@ -523,7 +524,7 @@ function AppContent({
         {/* One link home: the logo beside the name is part of it, not a second stop. */}
         <h1>
           <a class="brand" href={identity.home}>
-            <img class="logo" src={illustrationUrl} alt="" width={60} height={40} />
+            <Illustration class="logo" alt="" width={60} height={40} />
             <span class="wordmark">{t(identity.name)}</span>
           </a>
         </h1>
@@ -618,6 +619,28 @@ function SiteHeader({ link }: { link: AppIdentity["headerLink"] }) {
   );
 }
 
+/**
+ * The landing picture, also the masthead's logo: moving in as it loads,
+ * or still for a reader who asks for reduced motion, whom the browser
+ * gives the still one.
+ */
+function Illustration({
+  alt,
+  ...rest
+}: {
+  class: string;
+  alt: string;
+  width: number;
+  height: number;
+}) {
+  return (
+    <picture class="illustration">
+      <source media="(prefers-reduced-motion: no-preference)" srcset={illustrationAnimatedUrl} />
+      <img src={illustrationUrl} alt={alt} {...rest} />
+    </picture>
+  );
+}
+
 /** The name the landing picture spells out in its letters. */
 const PICTURE_NAME = "Solid Memo";
 
@@ -634,11 +657,11 @@ function Hero({ name, home }: { name: string; home?: { href: string; onFollow: (
   const hero =
     name === PICTURE_NAME ? (
       <h1 class="hero-heading">
-        <img class="hero" src={illustrationUrl} alt={name} width={640} height={427} />
+        <Illustration class="hero" alt={name} width={640} height={427} />
       </h1>
     ) : (
       <>
-        <img class="hero" src={illustrationUrl} alt="" width={640} height={427} />
+        <Illustration class="hero" alt="" width={640} height={427} />
         <h1>{name}</h1>
       </>
     );
