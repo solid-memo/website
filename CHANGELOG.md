@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.28.0](https://github.com/solid-memo/website/compare/v6.27.0...v6.28.0) (2026-11-02)
+
+### Features
+
+* **ui:** bring the logo in, one color at a time, as it loads ([719bcc9](https://github.com/solid-memo/website/commit/719bcc9cd792ba7eeaca6a4478978063fe78c5a5)), closes [#522](https://github.com/solid-memo/website/issues/522)
+
+### Bug Fixes
+
+* **studio:** name a deck's languages once and offer at most 100 ([04c82ae](https://github.com/solid-memo/website/commit/04c82ae0aa89fb8a240d3b0fff07243d27449205))
+
 ## [6.27.0](https://github.com/solid-memo/website/compare/v6.26.3...v6.27.0) (2026-11-02)
 
 ### Features
