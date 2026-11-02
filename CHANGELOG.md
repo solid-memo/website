@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.26.3](https://github.com/solid-memo/website/compare/v6.26.2...v6.26.3) (2026-11-02)
+
+### Bug Fixes
+
+* **application:** read only the answer log's plausible months ([0953d68](https://github.com/solid-memo/website/commit/0953d68258f59e51c6e4a3e7a7108951765c2893))
+* **domain:** bound the languages a distractor problem lists ([e1357c0](https://github.com/solid-memo/website/commit/e1357c0b7fb14e75f6a050c0a5adbb6e6e4c7884))
+* **shacl:** hold a subject to the shape of every Solid Memo class ([0d133f2](https://github.com/solid-memo/website/commit/0d133f21267ce1d0d8ebd17aeba95a4822800fb7))
+
 ## [6.26.2](https://github.com/solid-memo/website/compare/v6.26.1...v6.26.2) (2026-11-02)
 
 ### Bug Fixes
