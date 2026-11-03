@@ -8,7 +8,7 @@ import { createUseCases } from "./useCases";
 import { createAnswerStore } from "./answerStore";
 import { createStatisticsUseCases } from "./statistics";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
-import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
+import { changedDigest, emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReviewState } from "@solid-memo/domain/review";
@@ -322,7 +322,7 @@ describe("the statistics of the answer log", () => {
       const digestRepository: DigestRepository = {
         readDigest: vi.fn(async () => stored),
         updateDigest: vi.fn(async (_instanceUrl, change) => {
-          stored = change(stored);
+          stored = changedDigest(stored, [change]);
         }),
       };
       const load = () => createUseCases({ ...makeDeps(), answerLog: log, digestRepository });
@@ -701,7 +701,7 @@ describe("the Studio's answer history and schedule insight", () => {
     const digestRepository: DigestRepository = {
       readDigest: vi.fn(async () => stored),
       updateDigest: vi.fn(async (_instanceUrl, change) => {
-        stored = change(stored);
+        stored = changedDigest(stored, [change]);
       }),
     };
     vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({

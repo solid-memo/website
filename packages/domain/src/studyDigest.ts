@@ -295,31 +295,60 @@ export function emptyDigest(): InstanceDigest {
 }
 
 /**
- * The digest with what is known of a document at a version: added to
- * what was known of that version, replacing what was known of another.
+ * A change to a digest, made in place to a working copy of it
+ * (changedDigest), so that many changes at once take time that grows
+ * with the digest and the changes, not their product: each would copy
+ * the digest's entries if it made a new one.
  */
-export function withReceipt(
-  digest: InstanceDigest,
-  document: string,
-  version: string,
-  facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">,
-): InstanceDigest {
-  const before = digest.receipts[document];
-  const kept = before?.version === version ? before : { document, version };
-  return { ...digest, receipts: { ...digest.receipts, [document]: { ...kept, ...facts } } };
-}
+export type DigestChange = (draft: InstanceDigest) => void;
 
-export function withSchedule(digest: InstanceDigest, stored: StoredSchedule): InstanceDigest {
-  return { ...digest, schedules: { ...digest.schedules, [stored.deck]: stored } };
+/**
+ * The digest (an empty one for none) with the changes made to it in
+ * order: to one copy of it, `digest` left as it was. Its entries are
+ * replaced, never changed, so the copy shares those it keeps.
+ */
+export function changedDigest(
+  digest: InstanceDigest | null,
+  changes: readonly DigestChange[],
+): InstanceDigest {
+  const draft =
+    digest === null
+      ? emptyDigest()
+      : {
+          receipts: { ...digest.receipts },
+          schedules: { ...digest.schedules },
+          months: { ...digest.months },
+        };
+  for (const change of changes) change(draft);
+  return draft;
 }
 
 /**
- * The digest with the month summaries given, by document, in place of
- * those it had: a month no longer looked back over is dropped.
+ * Note what is known of a document at a version: added to what was
+ * known of that version, replacing what was known of another.
  */
-export function withMonthSummaries(
-  digest: InstanceDigest,
+export function addReceipt(
+  draft: InstanceDigest,
+  document: string,
+  version: string,
+  facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">,
+): void {
+  const before = draft.receipts[document];
+  const kept = before?.version === version ? before : { document, version };
+  draft.receipts[document] = { ...kept, ...facts };
+}
+
+export function setSchedule(draft: InstanceDigest, stored: StoredSchedule): void {
+  draft.schedules[stored.deck] = stored;
+}
+
+/**
+ * Put the month summaries given, by document, in place of those the
+ * digest had: a month no longer looked back over is dropped.
+ */
+export function setMonthSummaries(
+  draft: InstanceDigest,
   months: Record<string, StoredMonthSummary>,
-): InstanceDigest {
-  return { ...digest, months };
+): void {
+  draft.months = { ...months };
 }

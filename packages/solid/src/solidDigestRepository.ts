@@ -5,11 +5,17 @@
 import { type Dataset, type NamedSubject, createSolidDataset, removeThings } from "./client/rdf";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
-import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
+import {
+  changedDigest,
+  emptyDigest,
+  type DigestChange,
+  type InstanceDigest,
+} from "@solid-memo/domain/studyDigest";
 import { editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import {
   type DigestSubjects,
+  keepWithinLimits,
   toDigest,
   toMonthSummaryThing,
   toReceiptThing,
@@ -42,32 +48,33 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
  * change is read → change → written like any edit (If-Match); when the
  * document changed meanwhile, it is read and changed again. Changes asked
  * for while a write is under way go together in the next one, so a visit
- * that learns many things writes the digest once or twice.
+ * that learns many things writes the digest once or twice; they are made
+ * to one copy of what was read (changedDigest), so many of them take
+ * time that grows with the digest and their number, not their product.
+ * What is written is kept to what a digest is read with, the entries
+ * just changed kept first (keepWithinLimits).
  */
 export function createSolidDigestRepository({
   fetch,
   checkWrite = noWriteCheck,
   wait = sleep,
 }: SolidDigestRepositoryDeps): DigestRepository {
-  type Change = (stored: InstanceDigest | null) => InstanceDigest;
   const queues = new Map<
     string,
     {
-      waiting: { change: Change; done: () => void; failed: (e: unknown) => void }[];
+      waiting: { change: DigestChange; done: () => void; failed: (e: unknown) => void }[];
       writing: boolean;
     }
   >();
 
-  async function write(instanceUrl: string, changes: Change[]): Promise<void> {
+  async function write(instanceUrl: string, changes: DigestChange[]): Promise<void> {
     const url = digestUrlOf(instanceUrl);
     for (let attempt = 1; ; attempt++) {
       if (attempt > 1) await wait(PAUSE_MS * (attempt - 1));
       const dataset = await getSolidDatasetOrNull(url, fetch);
-      const stored = dataset === null ? null : toDigest(dataset);
-      const next = changes.reduce<InstanceDigest | null>(
-        (digest, change) => change(digest),
-        stored?.digest ?? null,
-      )!;
+      const stored = dataset === null ? null : toDigest(dataset, instanceUrl);
+      const next = changedDigest(stored?.digest ?? null, changes);
+      keepWithinLimits(instanceUrl, stored?.digest ?? emptyDigest(), next);
       const { updated, subjects } = withDigest(
         instanceUrl,
         dataset ?? createSolidDataset(),
@@ -105,7 +112,7 @@ export function createSolidDigestRepository({
   return {
     async readDigest(instanceUrl) {
       const dataset = await getSolidDatasetOrNull(digestUrlOf(instanceUrl), fetch);
-      return dataset === null ? null : toDigest(dataset).digest;
+      return dataset === null ? null : toDigest(dataset, instanceUrl).digest;
     },
 
     updateDigest(instanceUrl, change) {
@@ -132,7 +139,8 @@ export function createSolidDigestRepository({
  * (datasetEdit.ts), so a write takes time that grows with the document
  * and its subjects, not their product. What is dropped is removed at
  * each subject it was read from, as is any other subject a rewritten
- * one was read from, so none is left to be read again.
+ * one was read from, so none is left to be read again, and every subject
+ * the digest was read without (toDigest).
  */
 function withDigest(
   instanceUrl: string,
@@ -145,10 +153,11 @@ function withDigest(
     receipts: new Map(),
     schedules: new Map(),
     months: new Map(),
+    dropped: [],
   };
   const differs = (a: unknown, b: unknown) => JSON.stringify(a) !== JSON.stringify(b);
   const sets: { url: string; make: (existing: NamedSubject | null) => NamedSubject }[] = [];
-  const gone: string[] = [];
+  const gone: string[] = [...readAt.dropped];
   function plan<T>(
     kind: "receipt" | "schedule" | "month",
     was: Record<string, T>,
@@ -157,7 +166,8 @@ function withDigest(
     toThing: (url: string, value: T, existing: NamedSubject | null) => NamedSubject,
   ): void {
     for (const [key, value] of Object.entries(now)) {
-      if (!differs(was[key], value)) continue;
+      // An entry no change replaced is the one read (changedDigest).
+      if (was[key] === value || !differs(was[key], value)) continue;
       const url = digestSubjectOf(instanceUrl, kind, key);
       for (const other of at.get(key) ?? []) if (other !== url) gone.push(other);
       sets.push({ url, make: (existing) => toThing(url, value, existing) });

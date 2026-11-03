@@ -16,9 +16,10 @@ import {
   scheduleOf,
   studyCountsOf,
   todayFiguresOf,
-  withMonthSummaries,
-  withReceipt,
-  withSchedule,
+  setMonthSummaries,
+  addReceipt,
+  changedDigest,
+  setSchedule,
   type DeckSchedule,
   type MonthSummary,
 } from "./studyDigest";
@@ -181,16 +182,30 @@ describe("an instance digest", () => {
   const doc = "https://pod.example/i/decks/d.ttl";
 
   it("adds to what it knew of a document at the same version, and forgets another version", () => {
-    let digest = withReceipt(emptyDigest(), doc, '"v1"', { latestFormat: true });
-    digest = withReceipt(digest, doc, '"v1"', { conformedTo: "rules" });
+    const digest = emptyDigest();
+    addReceipt(digest, doc, '"v1"', { latestFormat: true });
+    addReceipt(digest, doc, '"v1"', { conformedTo: "rules" });
     expect(digest.receipts[doc]).toEqual({
       document: doc,
       version: '"v1"',
       latestFormat: true,
       conformedTo: "rules",
     });
-    digest = withReceipt(digest, doc, '"v2"', { conformedTo: "rules" });
+    addReceipt(digest, doc, '"v2"', { conformedTo: "rules" });
     expect(digest.receipts[doc]).toEqual({ document: doc, version: '"v2"', conformedTo: "rules" });
+  });
+
+  it("makes changes to one copy, the digest left as it was, or to an empty one", () => {
+    const digest = emptyDigest();
+    addReceipt(digest, doc, '"v1"', {});
+    const changed = changedDigest(digest, [
+      (draft) => addReceipt(draft, doc, '"v2"', {}),
+      (draft) => addReceipt(draft, `${doc}2`, '"v1"', {}),
+    ]);
+    expect(digest.receipts).toEqual({ [doc]: { document: doc, version: '"v1"' } });
+    expect(Object.keys(changed.receipts)).toEqual([doc, `${doc}2`]);
+    expect(changed.receipts[doc]!.version).toBe('"v2"');
+    expect(changedDigest(null, [])).toEqual(emptyDigest());
   });
 
   it("keeps a schedule by its deck", () => {
@@ -208,7 +223,9 @@ describe("an instance digest", () => {
       reviewsVersion: "absent",
       schedule,
     };
-    expect(withSchedule(emptyDigest(), stored).schedules).toEqual({ [stored.deck]: stored });
+    const digest = emptyDigest();
+    setSchedule(digest, stored);
+    expect(digest.schedules).toEqual({ [stored.deck]: stored });
   });
 });
 
@@ -443,10 +460,11 @@ describe("the today strip's figures", () => {
       version: '"v1"',
       summary: monthSummaryOf([answer("2026-09-01")]),
     };
-    const digest = withMonthSummaries(
-      { ...emptyDigest(), months: { "https://pod.example/i/history/2025-09.ttl": stored } },
-      { [stored.document]: stored },
-    );
+    const digest = {
+      ...emptyDigest(),
+      months: { "https://pod.example/i/history/2025-09.ttl": stored },
+    };
+    setMonthSummaries(digest, { [stored.document]: stored });
     expect(digest.months).toEqual({ [stored.document]: stored });
   });
 });
