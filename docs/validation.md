@@ -158,6 +158,16 @@ flowchart LR
   the classes its `rdf:type` names, and only those. No reference data
   states `rdfs:subClassOf`, and the
   [CI cross-check](#the-ci-cross-check) refuses a document that does.
+- The engine reads a node with more than 32 `rdf:type` statements,
+  far more than any Solid Memo or DCAT-AP document gives one, as having
+  no types. The library goes through all of a node's types each time a
+  subject linking to it is checked for its class (`sh:class`). So many
+  subjects linking to a node with many types would take time growing
+  with the square of the document. The node has one result more, a
+  violation on `rdf:type` that says its types weren't read, and a
+  subject that asks for its class finds it of none. The rest of the
+  document is checked as usual, and a result about another app's node
+  is a warning, as any other.
 - The engine checks `xsd:decimal`, `xsd:float` and `xsd:double`
   literals with patterns of its own, which it registers in the
   library's datatype checks (`rdf-validate-datatype`). The library's

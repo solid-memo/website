@@ -31,6 +31,7 @@ import { subclassCycle, subclassDiamond } from "@solid-memo/shacl/testing/subcla
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { gradePrompt } from "@solid-memo/domain/grading";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
+import type { DocumentReport, Violation } from "@solid-memo/domain/validation";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -809,6 +810,90 @@ describe("createShaclShapeValidator", () => {
         .sort(),
     ).toEqual([DCTERMS.description, "http://www.w3.org/ns/dcat#theme"]);
     await validator.validateDocument(DOC);
+  });
+
+  describe("a node with too many types", () => {
+    const DCAT_NS = "http://www.w3.org/ns/dcat#";
+    const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
+    const many = (node: string, types: number) =>
+      Array.from({ length: types }, (_, j) => `${node} a <#C${j}> .`);
+    async function datasetOf(turtle: string[]) {
+      const quads = await quadsOfTurtle(turtle.join("\n"), DOC);
+      return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+    }
+    const realValidator = () =>
+      createShaclShapeValidator({
+        fetch: vi.fn() as unknown as typeof fetch,
+        shapesFetch,
+        ...SHAPE_SOURCES,
+      });
+    const violationsOf = (report: DocumentReport, subject: string) =>
+      (report.subjects.find((s) => s.url === subject) as { violations: Violation[] }).violations;
+
+    it("checks a document whose publisher has them against DCAT-AP without hanging, the publisher read as of no class", async () => {
+      const dataset = await datasetOf([
+        `<#catalog> a <${DCAT_NS}Catalog> ; <${DCTERMS.title}> "Main" ; <${DCTERMS.publisher}> <#x> .`,
+        ...Array.from(
+          { length: 200 },
+          (_, i) => `<#d${i}> a <${DCAT_NS}Dataset> ; <${DCTERMS.publisher}> <#x> .`,
+        ),
+        ...many("<#x>", 200),
+        `<#x> a <${FOAF_AGENT}> .`,
+      ]);
+      const validator = realValidator();
+      const report = await validator.validateDataset(DOC, dataset, "pod");
+      expect(violationsOf(report, `${DOC}#x`)).toContainEqual(
+        expect.objectContaining({
+          path: RDF.type,
+          value: `${DOC}#x`,
+          constraint: "MaxCount",
+          severity: "violation",
+          profile: "dcat-ap",
+        }),
+      );
+      const notAgent = (severity: string) =>
+        expect.objectContaining({
+          path: DCTERMS.publisher,
+          value: `${DOC}#x`,
+          constraint: "Class",
+          severity,
+          profile: "dcat-ap",
+        });
+      expect(violationsOf(report, `${DOC}#catalog`)).toContainEqual(notAgent("violation"));
+      // The datasets are another app's, their results warnings.
+      for (const subject of [`${DOC}#d0`, `${DOC}#d199`]) {
+        expect(violationsOf(report, subject)).toContainEqual(notAgent("warning"));
+      }
+      await expect(validator.checkSubjects(dataset, [`${DOC}#catalog`], "pod")).rejects.toThrow(
+        `<${DOC}#catalog> (${DCTERMS.publisher}): DCAT-AP:`,
+      );
+    }, 30_000);
+
+    it("holds another app's node with them to nothing but a warning, the rest of the document checked as usual", async () => {
+      const own = [
+        `<#catalog> a <${DCAT_NS}Catalog> ; <${DCTERMS.title}> "Main" ; <${DCTERMS.publisher}> <#a> .`,
+        `<#a> a <${FOAF_AGENT}> .`,
+      ];
+      const validator = realValidator();
+      const alone = await datasetOf(own);
+      const withStray = await datasetOf([...own, ...many("<#stray>", 33)]);
+      const before = await validator.validateDataset(DOC, alone, "pod");
+      const after = await validator.validateDataset(DOC, withStray, "pod");
+      expect(after.subjects.filter((s) => s.url !== `${DOC}#stray`)).toEqual(before.subjects);
+      expect(after.subjects.find((s) => s.url === `${DOC}#stray`)).toMatchObject({
+        foreign: true,
+        violations: expect.arrayContaining([
+          expect.objectContaining({ constraint: "MaxCount", severity: "warning" }),
+        ]),
+      });
+      const subjects = [`${DOC}#catalog`, `${DOC}#a`];
+      const outcome = (dataset: typeof alone) =>
+        validator.checkSubjects(dataset, subjects, "pod").then(
+          () => "conforms",
+          (error: Error) => error.message,
+        );
+      expect(await outcome(withStray)).toBe(await outcome(alone));
+    }, 30_000);
   });
 
   it("finds nothing wrong with a deck's documents as the app writes them, another scheduler's state warned about only", async () => {

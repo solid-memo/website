@@ -8,6 +8,7 @@ import type { Literal, Quad } from "@rdfjs/types";
 import { createEngine, mapIris, mergeDatasets } from "./engine";
 import { subclassCycle, subclassDiamond } from "./testing/subclassTangle";
 import { readSiteTurtle, SHAPES_BASE } from "@solid-memo/vocab/tooling/sources";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
 
 const SHAPES = `
 @prefix sh:  <http://www.w3.org/ns/shacl#> .
@@ -271,6 +272,115 @@ describe("createEngine", () => {
     expect(await e.validateNode(data, student, `${SHAPES_URL}#person`)).toEqual([]);
     expect(copied).toHaveBeenCalledTimes(2);
   });
+});
+
+describe("a node with many types", () => {
+  const EX = "https://example.com/ns#";
+  const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+  const CLASSES = `
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+<#dataset> a sh:NodeShape ; sh:targetClass <${EX}Dataset> ;
+    sh:property [ sh:path <${EX}publisher> ; sh:class <${EX}Agent> ] .
+`;
+  /**
+   * The Turtle of `subjects` datasets, each published by <#x>, and <#x>
+   * an agent with `types` more classes.
+   */
+  function linked(subjects: number, types: number): string {
+    return [
+      ...Array.from(
+        { length: subjects },
+        (_, i) => `<#d${i}> a <${EX}Dataset> ; <${EX}publisher> <#x> .`,
+      ),
+      ...Array.from({ length: types }, (_, j) => `<#x> a <${EX}C${j}> .`),
+      `<#x> a <${EX}Agent> .`,
+    ].join("\n");
+  }
+  /** The result on a node with too many types. */
+  const refusal = (node: string) => ({
+    path: RDF_TYPE,
+    message: {
+      en: `The node <${node}> has more than 32 rdf:type statements, more than Solid Memo checks, so it is checked as having none.`,
+    },
+    builtIn: true,
+    value: node,
+    severity: "violation",
+    constraint: "MaxCount",
+  });
+  const many = (node: string, types: number) =>
+    `${node} a ${Array.from({ length: types }, (_, j) => `<${EX}C${j}>`).join(", ")} .`;
+
+  it("checks a node with 32 types as any other", async () => {
+    const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
+    const data = await datasetFromTurtle(linked(2, 31), DATA_URL);
+    expect(await e.validate(data)).toEqual([]);
+    expect(await e.validateNode(data, `${DATA_URL}#d0`, `${SHAPES_URL}#dataset`)).toEqual([]);
+  });
+
+  it("reads a node of more as having no types, with a result on it that says so", async () => {
+    const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
+    const data = await datasetFromTurtle(`${linked(2, 32)}\n${many("<#y>", 33)}`, DATA_URL);
+    const x = `${DATA_URL}#x`;
+    const notAgent = (subject: string) =>
+      expect.objectContaining({
+        focusNode: `${DATA_URL}#${subject}`,
+        path: `${EX}publisher`,
+        value: x,
+        constraint: "Class",
+      });
+    expect(await e.validate(data)).toEqual([
+      notAgent("d0"),
+      notAgent("d1"),
+      { focusNode: x, ...refusal(x) },
+      { focusNode: `${DATA_URL}#y`, ...refusal(`${DATA_URL}#y`) },
+    ]);
+    expect(await e.validateNode(data, `${DATA_URL}#d0`, `${SHAPES_URL}#dataset`)).toEqual([
+      expect.objectContaining({ path: `${EX}publisher`, value: x, constraint: "Class" }),
+    ]);
+    expect(await e.validateNode(data, x, `${SHAPES_URL}#dataset`)).toEqual([refusal(x)]);
+  });
+
+  it("checks the rest of a document with such a node as usual", async () => {
+    const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
+    const data = await datasetFromTurtle(`${linked(2, 0)}\n${many("<#stray>", 33)}`, DATA_URL);
+    const stray = `${DATA_URL}#stray`;
+    expect(await e.validate(data)).toEqual([{ focusNode: stray, ...refusal(stray) }]);
+    expect(await e.validateNode(data, `${DATA_URL}#d0`, `${SHAPES_URL}#dataset`)).toEqual([]);
+  });
+
+  // The library goes through a node's types each time a subject linking
+  // to it asks for its class: many subjects linking to a node with many
+  // types took time growing with the square of the document.
+  it("checks a graph with many subjects linking to a node of many types in time that grows with them, not their square", async () => {
+    const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
+    const ratio = await growthAsync(
+      (size) => {
+        const parsed = datasetFromTurtle(linked(size, size), DATA_URL);
+        // A fresh document each run, as each check of a document is.
+        return async () => e.validate(mergeDatasets(await parsed));
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  }, 60_000);
+
+  it("checks each of those subjects in time that grows with them, not their square", async () => {
+    const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
+    const ratio = await growthAsync(
+      (size) => {
+        const parsed = datasetFromTurtle(linked(size, size), DATA_URL);
+        return async () => {
+          const data = mergeDatasets(await parsed);
+          for (let i = 0; i < size; i++)
+            await e.validateNode(data, `${DATA_URL}#d${i}`, `${SHAPES_URL}#dataset`);
+        };
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  }, 60_000);
 });
 
 describe("numeric datatypes", () => {
