@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.4](https://github.com/solid-memo/website/compare/v6.29.3...v6.29.4) (2026-11-03)
+
+### Bug Fixes
+
+* **studio:** copy into a draft only what the instance may read ([ce7dfd9](https://github.com/solid-memo/website/commit/ce7dfd918bb3af7762c2412407d1d4bee6cb0fd5))
+
 ## [6.29.3](https://github.com/solid-memo/website/compare/v6.29.2...v6.29.3) (2026-11-03)
 
 ### Bug Fixes
