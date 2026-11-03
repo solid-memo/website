@@ -15,11 +15,8 @@ import {
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import type { DocumentContext, ShapeValidator } from "@solid-memo/application/ports";
 import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domain/validation";
-import {
-  instanceUrlOfDeck,
-  isDeckDocumentAddress,
-  isSameUrl,
-} from "@solid-memo/domain/instanceLayout";
+import { instanceUrlOfDeck, isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { isDeckDocumentAddress } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";

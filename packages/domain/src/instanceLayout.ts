@@ -228,7 +228,7 @@ export function isSafeWriteUrl(url: string): boolean {
  * may be: its meta, preferences, palettes, catalog and digest documents,
  * and any in its `history/`, `drafts/` or `releases/`.
  */
-function isInstanceOwnDocument(instanceUrl: string, url: string): boolean {
+export function isInstanceOwnDocument(instanceUrl: string, url: string): boolean {
   const base = ensureTrailingSlash(instanceUrl);
   return (
     [
@@ -239,39 +239,6 @@ function isInstanceOwnDocument(instanceUrl: string, url: string): boolean {
       digestUrlOf(base),
     ].some((own) => isSameUrl(url, own)) ||
     ["history/", "drafts/", "releases/"].some((folder) => isDocumentIn(url, `${base}${folder}`))
-  );
-}
-
-/**
- * Whether `url` may be a deck's document of the instance at
- * `instanceUrl`: one a deck's may be read at (isSafeDocumentUrl), and
- * not one of the instance's own documents.
- */
-export function isDeckDocumentAddress(instanceUrl: string, url: string): boolean {
-  return isSafeDocumentUrl(url) && !isInstanceOwnDocument(instanceUrl, url);
-}
-
-/**
- * Whether a deck can be used: its entry a subject of an instance's
- * catalog (`<instance>catalog.ttl#…`), and its cards and reviews
- * documents where a deck's document may be read (isSafeDocumentUrl), none
- * of them one of the instance's own documents. Where they are is free;
- * whether one may be written to is what it says (ownsDocument), and only
- * in the user's own pod (the credential gate, docs/boundaries.md). A deck
- * the catalog names otherwise is not read, written or deleted through
- * (docs/data-model.md, "Where an instance's documents are").
- */
-export function isDeckInPlace(
-  deck: Pick<Deck, "url" | "cardsDocumentUrl" | "reviewsDocumentUrl">,
-): boolean {
-  const catalog = canonicalUrlOf(documentUrlOf(deck.url));
-  if (catalog === null) return false;
-  const instance = instanceUrlOfDeck(catalog);
-  return (
-    catalog === catalogUrlOf(instance) &&
-    [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].every((url) =>
-      isDeckDocumentAddress(instance, url),
-    )
   );
 }
 

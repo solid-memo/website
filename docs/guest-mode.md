@@ -41,6 +41,12 @@ graph LR
   listings, and marks the root as a `pim:Storage`. It has no access
   control. Requests run one at a time, under a Web Lock shared by every
   tab.
+- **Who may name it:** only a guest's own instance. A deck whose
+  catalog is in the guest's pod names documents only there, and a deck
+  of any other instance that names one there can't be used
+  (`isDeckInPlace` in
+  [domain/deckAddress.ts](../packages/domain/src/deckAddress.ts),
+  `deckGone`). A read as no one never goes to the guest's pod.
 - **Storage:** the `ResourceStore` port. In the browser it's
   [indexedDbResourceStore.ts](../packages/browser/src/indexedDbResourceStore.ts),
   so the study survives the login redirect. Without IndexedDB, an

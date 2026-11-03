@@ -36,10 +36,10 @@ import {
   documentsInUse,
   ensureTrailingSlash,
   canonicalUrlOf,
-  isDeckInPlace,
   isSameUrl,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
+import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { isDeckOutdated, isOutdated, upgradeCard, upgradeDeck } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
@@ -279,6 +279,9 @@ export function createSolidDeckRepository({
     },
 
     async listCards(deck, { asNoOne = false } = {}): Promise<Card[]> {
+      // Checked here too, not only where the deck was listed: a deck out
+      // of place is never read (docs/data-model.md).
+      if (!isDeckInPlace(deck)) throw new AppError("deckGone", { deck: deck.title });
       const dataset = await getSolidDatasetOrNull(
         deck.cardsDocumentUrl,
         asNoOne ? publicFetch : fetch,

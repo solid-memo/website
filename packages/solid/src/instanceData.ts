@@ -11,7 +11,6 @@ import {
   digestUrlOf,
   ensureTrailingSlash,
   historyContainerOf,
-  isDeckInPlace,
   isSameUrl,
   metaUrlOf,
   monthOfHistoryUrl,
@@ -19,6 +18,7 @@ import {
   preferencesUrlOf,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
+import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
 import { releasesContainerOf } from "@solid-memo/domain/release/releasePlace";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";

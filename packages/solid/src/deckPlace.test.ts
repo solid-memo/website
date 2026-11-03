@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
+import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { deleteInstanceData } from "./instanceData";
@@ -114,6 +115,11 @@ const UNSAFE = [
     "encoded dot segments",
     `${BOB}%2e%2e/%2E%2e/.%2e/alice/profile/card`,
     `${BOB}decks/%2e%2e/%2e%2e/%2e%2e/%2e%2e/alice/private/diary.ttl`,
+  ],
+  [
+    "a guest's pod, from another instance",
+    `${GUEST_ORIGIN}solid-memo/drafts/draft/v1/cards.ttl`,
+    `${GUEST_ORIGIN}solid-memo/reviews/deck-1.ttl`,
   ],
 ] as const;
 

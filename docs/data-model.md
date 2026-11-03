@@ -418,11 +418,15 @@ No document Solid Memo names has any.
   out flat, with the instance at the pod's root. A deck can be used when
   its entry is a subject of the instance's `catalog.ttl` and each
   document is at an address a deck's may be (`isDeckInPlace`,
-  `isDeckDocumentAddress`). That's plain http(s), with nothing a server
-  might read as a step elsewhere (as above). It isn't a folder, an
-  access control or metadata resource (`.acl`, `.acr`, `.meta`), or one
-  of the instance's own documents (its meta, preferences, palettes,
-  catalog and digest, `history/`, `drafts/`, `releases/`). New decks are
+  `isDeckDocumentAddress` in
+  [deckAddress.ts](../packages/domain/src/deckAddress.ts)). That's plain
+  http(s), with nothing a server might read as a step elsewhere (as
+  above). It isn't a folder, an access control or metadata resource
+  (`.acl`, `.acr`, `.meta`), or one of the instance's own documents (its
+  meta, preferences, palettes, catalog and digest, `history/`, `drafts/`,
+  `releases/`). It's in a guest's pod exactly when the catalog is: only
+  a guest's own instance names that pod, which is this browser's
+  ([guest-mode.md](guest-mode.md#a-pod-in-the-browser)). New decks are
   made in `decks/` and `reviews/`. One outside the user's own pod (their
   storages and the instances they registered) is read as no one, and
   nothing is written to or deleted there, whatever it says

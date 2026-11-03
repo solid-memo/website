@@ -17,11 +17,11 @@ import {
   canonicalUrlOf,
   ensureTrailingSlash,
   instanceUrlOfDeck,
-  isDeckInPlace,
   isDocumentIn,
   isSameUrl,
   ownsDocument,
 } from "@solid-memo/domain/instanceLayout";
+import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import {
   draftContainerOf,
   draftPlaceOf,
