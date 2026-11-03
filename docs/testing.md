@@ -540,6 +540,8 @@ error, and the browser. The job's
     is a time its scripts stopped running; a still, one they ran but it
     drew nothing. A page that stops answering leaves nothing else
     behind: no request, no console line, no frame in the video;
+  - in the jobs that run WebKit, desktop and phone, what the browser
+    itself printed (`DEBUG=pw:browser`), in the journey's stderr;
   - `css.log`: the server's log for the journey's time, when the journey
     failed;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;

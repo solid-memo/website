@@ -636,7 +636,10 @@ jobs:
       # name: the job's, and its blob's (journeys-report lists them);
       # projects: what it runs; shard: which of Chromium's three it is;
       # browser and also: what it installs, and the keys they are kept
-      # under, the phone's being WebKit's.
+      # under, the phone's being WebKit's; debug: the jobs that run WebKit
+      # keep what the browser itself prints, in each journey's stderr in
+      # the report: why WebKit ended a page that stopped answering
+      # (docs/testing.md#when-a-journey-fails).
       matrix:
         include:
           - name: chromium-1
@@ -655,9 +658,11 @@ jobs:
             projects: --project=firefox --project=webkit
             browser: firefox
             also: webkit
+            debug: pw:browser
           - name: phone
             projects: --project=phone
             browser: webkit
+            debug: pw:browser
     env:
       JOURNEY_TRACE: >-
         ${{ (inputs.trace || github.ref == 'refs/heads/main' ||
@@ -780,6 +785,8 @@ jobs:
           exit 1
       - env:
           JOURNEYS: ${{ steps.shard.outputs.journeys }}
+          DEBUG: ${{ matrix.debug }}
+          DEBUG_COLORS: "0"
         run: |
           read -ra journeys <<< "$JOURNEYS"
           npm run journeys -- ${{ matrix.projects }} "${journeys[@]}"
