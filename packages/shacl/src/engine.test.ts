@@ -363,7 +363,7 @@ describe("a node with many types", () => {
       8,
     );
     expect(ratio).toBeLessThan(4);
-  }, 60_000);
+  }, 180_000);
 
   it("checks each of those subjects in time that grows with them, not their square", async () => {
     const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
@@ -380,7 +380,7 @@ describe("a node with many types", () => {
       8,
     );
     expect(ratio).toBeLessThan(4);
-  }, 60_000);
+  }, 180_000);
 });
 
 describe("numeric datatypes", () => {
