@@ -124,6 +124,22 @@ function problemsOf(
 }
 
 /**
+ * The plan with a repair added, one per kind and subject: a repair of a
+ * kind the subject already has is that one.
+ */
+function addRepair(planned: Map<string, Repair>, repairs: Repair[], repair: Repair): void {
+  const key = JSON.stringify([repair.kind, repair.subjectUrl]);
+  const same = planned.get(key);
+  if (same === undefined) {
+    planned.set(key, repair);
+    repairs.push(repair);
+  } else if (repair.kind === "drop-unreadable-date") {
+    // One repair of the subject drops every unreadable optional date it has.
+    same.predicates = [...new Set([...same.predicates!, ...repair.predicates!])];
+  }
+}
+
+/**
  * What the app can repair of what a check found — one repair per kind
  * and subject — and the subjects left with a problem no repair covers.
  * Warnings are no problem.
@@ -132,10 +148,6 @@ export function planRepair(report: ValidationReport): RepairPlan {
   const repairs: Repair[] = [];
   // Each repair by its kind and subject, found at once however many came before.
   const planned = new Map<string, Repair>();
-  const plan = (key: string, repair: Repair) => {
-    planned.set(key, repair);
-    repairs.push(repair);
-  };
   const unrepairable: Unrepairable[] = [];
   for (const document of report.documents) {
     for (const subject of document.subjects) {
@@ -149,28 +161,13 @@ export function planRepair(report: ValidationReport): RepairPlan {
           if (!left.has(key)) left.set(key, violation);
           continue;
         }
-        const key = JSON.stringify([kind, subject.url]);
-        const same = planned.get(key);
-        if (kind === "drop-unreadable-date") {
-          // One repair of the subject drops every unreadable optional date it has.
-          const predicates = [...(same?.predicates ?? []), violation.path!];
-          if (same !== undefined) same.predicates = [...new Set(predicates)];
-          else
-            plan(key, {
-              kind,
-              documentUrl: document.url,
-              subjectUrl: subject.url,
-              version: problems.version,
-              predicates,
-            });
-        } else if (same === undefined) {
-          plan(key, {
-            kind,
-            documentUrl: document.url,
-            subjectUrl: subject.url,
-            version: problems.version,
-          });
-        }
+        addRepair(planned, repairs, {
+          kind,
+          documentUrl: document.url,
+          subjectUrl: subject.url,
+          version: problems.version,
+          ...(kind === "drop-unreadable-date" && { predicates: [violation.path!] }),
+        });
       }
       if (left.size > 0) {
         unrepairable.push({

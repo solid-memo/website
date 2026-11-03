@@ -55,44 +55,50 @@ function pod({
   const reads: { ifNoneMatch: string | null; status: number }[] = [];
   let current = etag;
   let versions = 0;
-  const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    // As a browser sends it: one address however it is spelled.
-    const url = new URL(String(input)).href;
-    const method = init?.method ?? "GET";
-    const headers = new Headers(init?.headers);
-    if (method === "GET" || method === "HEAD") {
-      const ifNoneMatch = headers.get("If-None-Match");
-      const status = !exists.has(url)
-        ? 404
-        : ifNoneMatch !== null && ifNoneMatch === current
-          ? 304
-          : 200;
-      reads.push({ ifNoneMatch, status });
-      if (status !== 200) return new Response(null, { status });
-      const response = new Response(`<#it> <https://example.com/ns#n> "1" .`, {
-        headers: { "Content-Type": "text/turtle", ...(current === null ? {} : { ETag: current }) },
-      });
-      Object.defineProperty(response, "url", { value: url });
-      return response;
-    }
+  /** A GET or HEAD: 404 where nothing is, 304 for the version named, else the document. */
+  const read = (url: string, headers: Headers) => {
+    const ifNoneMatch = headers.get("If-None-Match");
+    let status = 200;
+    if (!exists.has(url)) status = 404;
+    else if (ifNoneMatch !== null && ifNoneMatch === current) status = 304;
+    reads.push({ ifNoneMatch, status });
+    if (status !== 200) return new Response(null, { status });
+    const response = new Response(`<#it> <https://example.com/ns#n> "1" .`, {
+      headers: { "Content-Type": "text/turtle", ...(current === null ? {} : { ETag: current }) },
+    });
+    Object.defineProperty(response, "url", { value: url });
+    return response;
+  };
+  /** Whether a write's If-Match, or If-None-Match: *, refuses it with 412. */
+  const refused = (url: string, headers: Headers) => {
+    const ifMatch = headers.get("If-Match");
+    if (ifMatch !== null && (!exists.has(url) || ifMatch !== current)) return true;
+    return headers.get("If-None-Match") === "*" && exists.has(url);
+  };
+  /** A PUT, PATCH or DELETE: recorded, then answered with a new version when `written`. */
+  const write = (url: string, method: string, headers: Headers, body: unknown) => {
     writes.push({
       method,
       url,
       ifMatch: headers.get("If-Match"),
       ifNoneMatch: headers.get("If-None-Match"),
     });
-    bodies.push({ contentType: headers.get("Content-Type"), body: String(init?.body ?? "") });
-    const ifMatch = headers.get("If-Match");
-    if (ifMatch !== null && (!exists.has(url) || ifMatch !== current))
-      return new Response("", { status: 412 });
-    if (headers.get("If-None-Match") === "*" && exists.has(url))
-      return new Response("", { status: 412 });
+    bodies.push({ contentType: headers.get("Content-Type"), body: String(body ?? "") });
+    if (refused(url, headers)) return new Response("", { status: 412 });
     exists.add(url);
     if (written === undefined) return new Response("", { status: method === "DELETE" ? 204 : 205 });
     current = `${written === "weak" ? "W/" : ""}"w${++versions}"`;
     const response = new Response("", { status: 205, headers: { ETag: current } });
     if (answeredFrom === "url") Object.defineProperty(response, "url", { value: url });
     return response;
+  };
+  const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    // As a browser sends it: one address however it is spelled.
+    const url = new URL(String(input)).href;
+    const method = init?.method ?? "GET";
+    const headers = new Headers(init?.headers);
+    if (method === "GET" || method === "HEAD") return read(url, headers);
+    return write(url, method, headers, init?.body);
   }) as typeof globalThis.fetch;
   return {
     fetch,

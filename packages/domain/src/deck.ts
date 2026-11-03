@@ -483,16 +483,8 @@ export function validateCardContent(
   const unstated =
     unstatedSide("front", front, saved, formatted) ?? unstatedSide("back", back, saved, formatted);
   if (unstated !== undefined) return unstated;
-  for (const part of [
-    "frontImageDescription",
-    "frontLabel",
-    "frontNote",
-    "backLabel",
-    "backImageDescription",
-    "backNote",
-  ] as const) {
-    if (own[part] !== undefined && "" in own[part]) return needsLanguage(part);
-  }
+  const unstatedOwn = unstatedOwnText(own);
+  if (unstatedOwn !== undefined) return unstatedOwn;
   if (isEmptyText(front) && frontImageUrl === undefined) {
     return { ok: false, error: new AppError("cardFrontEmpty") };
   }
@@ -546,6 +538,26 @@ function tidiedDistractors(
 
 function needsLanguage(part: CardTextPart): CardContentValidation {
   return { ok: false, error: new AppError("textNeedsLanguage", { field: PART_NOUNS[part] }), part };
+}
+
+/**
+ * The error for the first of a card's own texts (a picture's description,
+ * a label, a note) that does not state its language; undefined when all do.
+ */
+function unstatedOwnText(
+  own: Partial<Record<CardTextPart, LangText | undefined>>,
+): CardContentValidation | undefined {
+  for (const part of [
+    "frontImageDescription",
+    "frontLabel",
+    "frontNote",
+    "backLabel",
+    "backImageDescription",
+    "backNote",
+  ] as const) {
+    if (own[part] !== undefined && "" in own[part]) return needsLanguage(part);
+  }
+  return undefined;
 }
 
 /**

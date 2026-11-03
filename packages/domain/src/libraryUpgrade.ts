@@ -337,6 +337,15 @@ function upgradedTexts(deck: Deck, from: LibraryDeckContent, to: LibraryDeckCont
   };
 }
 
+/** Whether the newer release changed the card: its content, its subjects or its retirement. */
+function releaseChanged(old: LibraryCard, next: LibraryCard): boolean {
+  return (
+    !sameContent(old, next) ||
+    !sameSubjects(old, next) ||
+    (old.retired === true) !== (next.retired === true)
+  );
+}
+
 /** What of the deck itself the newer release changed and the copy already has as it has it. */
 function appliedDeckDetails(
   deck: Deck,
@@ -491,13 +500,7 @@ export function planLibraryUpgrade({
     // Not in the copy: added unless the user removed it, or, in a course's deck, the learner has not reached it,
     // and will meet it as the release the deck names has it.
     else if (old === undefined && !course) add.push(next);
-    else if (
-      old !== undefined &&
-      course &&
-      (!sameContent(old, next) ||
-        !sameSubjects(old, next) ||
-        (old.retired === true) !== (next.retired === true))
-    ) {
+    else if (old !== undefined && course && releaseChanged(old, next)) {
       unreached = true;
     }
   }

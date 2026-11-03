@@ -336,12 +336,20 @@ const MAX_GROUP_DEPTH = 16;
 
 /** Each grouped node's group as the layout states it, one each (see `buildTree`); the rest are at the top level. */
 function parentsOf(stored: StoredLayout): Map<string, string> {
+  // Lowest group URL first, so its claim on a node listed twice wins.
+  const byUrl = [...stored.groups].sort((a, b) => (a.group.url < b.group.url ? -1 : 1));
+  const parents = claimedParents(stored, byUrl);
+  breakCycles(parents, byUrl);
+  liftTooDeep(parents, byUrl);
+  return parents;
+}
+
+/** Each listed node's group, the first of `byUrl` that lists it, leaving out links to what is not there, a group listing itself, and a group the top level lists. */
+function claimedParents(stored: StoredLayout, byUrl: readonly StoredGroup[]): Map<string, string> {
   const decks = new Set(stored.decks.map((deck) => deck.url));
   const groups = new Set(stored.groups.map((entry) => entry.group.url));
   const rootGroups = new Set(stored.rootGroups.filter((url) => groups.has(url)));
   const parents = new Map<string, string>();
-  // Lowest group URL first, so its claim on a node listed twice wins.
-  const byUrl = [...stored.groups].sort((a, b) => (a.group.url < b.group.url ? -1 : 1));
   for (const { group, decks: deckLinks, groups: groupLinks } of byUrl) {
     for (const url of deckLinks)
       if (decks.has(url) && !parents.has(url)) parents.set(url, group.url);
@@ -350,8 +358,14 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
         parents.set(url, group.url);
     }
   }
-  // A group that cannot reach the top level is in a cycle: lift its lowest member to the top, until none is.
-  // Each group is walked up from once: one reached again is on this walk's cycle, or reaches the top already.
+  return parents;
+}
+
+/**
+ * A group that cannot reach the top level is in a cycle: lift its lowest member to the top, until none is.
+ * Each group is walked up from once: one reached again is on this walk's cycle, or reaches the top already.
+ */
+function breakCycles(parents: Map<string, string>, byUrl: readonly StoredGroup[]): void {
   const walked = new Map<string, number>();
   for (const [walk, { group }] of byUrl.entries()) {
     const chain: string[] = [];
@@ -366,7 +380,10 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
       parents.delete(cycle.sort()[0]!);
     }
   }
-  // A group deeper than MAX_GROUP_DEPTH is lifted to the top, where those it holds count their depth from.
+}
+
+/** A group deeper than MAX_GROUP_DEPTH is lifted to the top, where those it holds count their depth from. */
+function liftTooDeep(parents: Map<string, string>, byUrl: readonly StoredGroup[]): void {
   const depths = new Map<string, number>();
   for (const { group } of byUrl) {
     const chain: string[] = [];
@@ -382,7 +399,6 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
       depths.set(url, depth);
     }
   }
-  return parents;
 }
 
 /**
