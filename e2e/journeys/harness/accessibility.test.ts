@@ -10,6 +10,7 @@ import {
   PALETTES,
   SCHEMES,
   type KnownException,
+  tourSchemes,
   unexcused,
   type Violation,
   violationLines,
@@ -90,6 +91,32 @@ describe("SCHEMES", () => {
     );
     const named = new Set([...css.matchAll(/:root\[data-palette="([a-z-]+)"\]/g)].map((m) => m[1]));
     expect(["standard", ...named]).toEqual([...PALETTES]);
+  });
+});
+
+describe("tourSchemes", () => {
+  it("checks every scheme but Standard light in Chromium, and Standard dark alone on the phone", () => {
+    const names = (chromium: boolean) =>
+      tourSchemes(chromium).map(
+        ({ palette, theme, full }) => `${palette} ${theme}${full ? " full" : ""}`,
+      );
+    expect(names(true)).toEqual([
+      "standard dark full",
+      "high-contrast light",
+      "high-contrast dark",
+      "color-vision light",
+      "color-vision dark",
+      "parchment light",
+      "parchment dark",
+    ]);
+    expect(names(false)).toEqual(["standard dark full"]);
+  });
+
+  it("adds Standard light for a screen no journey reaches, in Chromium and on the phone", () => {
+    const names = (chromium: boolean) =>
+      tourSchemes(chromium, true).map(({ palette, theme }) => `${palette} ${theme}`);
+    expect(names(true)).toEqual(SCHEMES.map(({ palette, theme }) => `${palette} ${theme}`));
+    expect(names(false)).toEqual(["standard light", "standard dark"]);
   });
 });
 

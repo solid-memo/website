@@ -11,9 +11,36 @@
  * refuses "Etc/GMT", "Etc/UTC" and "GMT".
  */
 export function noonTimeZone(now: Date): string {
-  const ahead = 12 - now.getUTCHours();
+  return wholeHourZone(12 - now.getUTCHours());
+}
+
+/** The IANA's zone `ahead` whole hours ahead of UTC (behind, below 0), its sign inverted: Etc/GMT-2 is two hours ahead. */
+function wholeHourZone(ahead: number): string {
   if (ahead === 0) return "UTC";
   return `Etc/GMT${ahead > 0 ? "-" : "+"}${Math.abs(ahead)}`;
+}
+
+/** The hours the IANA's whole-hour zones reach: Etc/GMT+12, 12 hours behind UTC, to Etc/GMT-14, 14 ahead. */
+const MOST_BEHIND = -12;
+const MOST_AHEAD = 14;
+/** How far on the second of zonesAcrossTheDayTurn is: from before 3 a.m. to past 4. */
+const HOURS_ON = 5;
+
+/**
+ * Two of the IANA's whole-hour zones, which every engine takes (WebKit
+ * not ICU's to the minute, fixedOffsetZone): one in which `now` is
+ * midnight or up to 2 a.m., `before` the study day's turn at 4
+ * (preferences' day boundary), and one five hours on, past the turn: a
+ * browser opened in the second is in the next study day, its clock
+ * still right. Where midnight is too far ahead for a zone five hours
+ * on, the zone furthest behind UTC is taken, where it is 1 or 2 a.m.
+ */
+export function zonesAcrossTheDayTurn(now: Date): { before: string; after: string } {
+  // Hours ahead of UTC where it is midnight now, 0 to 23.
+  const midnight = (24 - now.getUTCHours()) % 24;
+  const before =
+    midnight + HOURS_ON <= MOST_AHEAD ? midnight : Math.max(midnight - 24, MOST_BEHIND);
+  return { before: wholeHourZone(before), after: wholeHourZone(before + HOURS_ON) };
 }
 
 /** The most an answer may record of the device's offset from UTC, in minutes (sm:utcOffsetMinutes). */

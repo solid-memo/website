@@ -24,42 +24,66 @@ test("a screen that fails while it renders gives a way out and a way to report i
   const studio = app.t("studio.name");
   let details = "";
 
-  await app.step("01 · Visit Solid Memo and try it as a guest", async () => {
-    await app.onboarding.visit();
-    await app.onboarding.tryAsGuest();
-  });
+  await app.step(
+    "01 · Visit Solid Memo and try it as a guest",
+    async () => {
+      await app.onboarding.visit();
+      await app.onboarding.tryAsGuest();
+    },
+    { screen: "decks.guest" },
+  );
 
-  await app.step("02 · Open the Studio, whose code fails", async () => {
-    await app.crash.breakStudio(`Cannot read ${address}`);
-    await app.chrome.instanceNav.getByRole("link", { name: app.t("studio.open") }).click();
-    await app.crash.expectShown(studio);
-  });
+  await app.step(
+    "02 · Open the Studio, whose code fails",
+    async () => {
+      await app.crash.breakStudio(`Cannot read ${address}`);
+      await app.chrome.instanceNav.getByRole("link", { name: app.t("studio.open") }).click();
+      await app.crash.expectShown(studio);
+    },
+    { screen: "crash" },
+  );
 
-  await app.step("03 · Copy the details: no address in them", async () => {
-    details = await app.crash.copyDetails();
-    expect(details).toMatch(/^Version: \S+/);
-    expect(details).toContain("Route: #/studio?instance=\n");
-    expect(details).toContain("Error: Error: Cannot read <address>");
-    expect(details).not.toContain("pod.example");
-  });
+  await app.step(
+    "03 · Copy the details: no address in them",
+    async () => {
+      details = await app.crash.copyDetails();
+      expect(details).toMatch(/^Version: \S+/);
+      expect(details).toContain("Route: #/studio?instance=\n");
+      expect(details).toContain("Error: Error: Cannot read <address>");
+      expect(details).not.toContain("pod.example");
+    },
+    { screen: "crash" },
+  );
 
-  await app.step("04 · Report it: the bug form, the details left out of the link", async () => {
-    const report = await app.crash.reportLink();
-    expect(report.pathname).toBe("/solid-memo/website/issues/new");
-    expect(report.searchParams.get("template")).toBe("bug.yml");
-    expect(report.searchParams.get("where")).toBe("#/studio?instance=");
-    expect(report.searchParams.get("version")).toMatch(/\S/);
-    expect([...report.searchParams.keys()]).toEqual(["template", "where", "version"]);
-    expect(report.href).not.toContain("Cannot");
-  });
+  await app.step(
+    "04 · Report it: the bug form, the details left out of the link",
+    async () => {
+      const report = await app.crash.reportLink();
+      expect(report.pathname).toBe("/solid-memo/website/issues/new");
+      expect(report.searchParams.get("template")).toBe("bug.yml");
+      expect(report.searchParams.get("where")).toBe("#/studio?instance=");
+      expect(report.searchParams.get("version")).toMatch(/\S/);
+      expect([...report.searchParams.keys()]).toEqual(["template", "where", "version"]);
+      expect(report.href).not.toContain("Cannot");
+    },
+    { screen: "crash" },
+  );
 
-  await app.step("05 · Try again: the Studio fails again", async () => {
-    await app.crash.tryAgain();
-    await app.crash.expectShown(studio);
-  });
+  await app.step(
+    "05 · Try again: the Studio fails again",
+    async () => {
+      await app.crash.tryAgain();
+      await app.crash.expectShown(studio);
+    },
+    { screen: "crash" },
+  );
 
-  await app.step("06 · Go to the start: the deck list", async () => {
-    await app.crash.goToStart();
-    await app.decks.expectShown();
-  });
+  await app.step(
+    "06 · Go to the start: the deck list",
+    async () => {
+      await app.crash.goToStart();
+      await app.decks.expectShown();
+    },
+    { screen: "decks.guest" },
+  );
 });

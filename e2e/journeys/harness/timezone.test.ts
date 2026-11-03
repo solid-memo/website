@@ -3,7 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { fixedOffsetZone, noonTimeZone, offsetWhereItIs } from "./timezone.ts";
+import {
+  fixedOffsetZone,
+  noonTimeZone,
+  offsetWhereItIs,
+  zonesAcrossTheDayTurn,
+} from "./timezone.ts";
 
 const localHour = (zone: string, at: Date) =>
   Number(
@@ -77,5 +82,35 @@ describe("offsetWhereItIs", () => {
   it("takes the zone furthest behind UTC", () => {
     expect(offsetWhereItIs(new Date("2026-10-07T12:00:00Z"), 2)).toBe(-10 * 60);
     expect(offsetWhereItIs(new Date("2026-10-07T23:00:00Z"), 2)).toBe(3 * 60);
+  });
+});
+
+describe("zonesAcrossTheDayTurn", () => {
+  it.each(Array.from({ length: 24 }, (_, hour) => hour))(
+    "puts %i:15 UTC before 3 a.m. in one zone that exists, and five hours on in the other",
+    (hour) => {
+      const at = new Date(Date.UTC(2026, 9, 7, hour, 15));
+      const { before, after } = zonesAcrossTheDayTurn(at);
+      expect(localHour(before, at)).toBeLessThan(3);
+      expect(localHour(after, at)).toBe(localHour(before, at) + 5);
+    },
+  );
+
+  it("names the zones as the IANA does, with inverted signs, midnight's where it can", () => {
+    expect(zonesAcrossTheDayTurn(new Date("2026-10-07T20:00:00Z"))).toEqual({
+      before: "Etc/GMT-4",
+      after: "Etc/GMT-9",
+    });
+    expect(zonesAcrossTheDayTurn(new Date("2026-10-07T00:30:00Z"))).toEqual({
+      before: "UTC",
+      after: "Etc/GMT-5",
+    });
+  });
+
+  it("takes the zone furthest behind UTC where midnight is too far ahead", () => {
+    expect(zonesAcrossTheDayTurn(new Date("2026-10-07T14:00:00Z"))).toEqual({
+      before: "Etc/GMT+12",
+      after: "Etc/GMT+7",
+    });
   });
 });

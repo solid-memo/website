@@ -70,16 +70,22 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   const renamed = `Renamed ${runId}`;
   const course = `Course ${runId}`;
 
-  await app.step("01 · Visit the Studio's old address: the Studio's landing page", () =>
-    app.studio.visitOldAddress(),
+  await app.step(
+    "01 · Visit the Studio's old address: the Studio's landing page",
+    () => app.studio.visitOldAddress(),
+    { screen: "studio.landing" },
   );
-  await app.step("02 · Log in from the Studio's landing page: back in the Studio", async () => {
-    await app.onboarding.logInWithWebId(account.webId);
-    await app.cssLogin.logIn(account);
-    await app.cssLogin.authorize(account.webId);
-    await app.onboarding.continueConnected(account.pod);
-    await app.studio.expectBackAfterLogin();
-  });
+  await app.step(
+    "02 · Log in from the Studio's landing page: back in the Studio",
+    async () => {
+      await app.onboarding.logInWithWebId(account.webId);
+      await app.cssLogin.logIn(account);
+      await app.cssLogin.authorize(account.webId);
+      await app.onboarding.continueConnected(account.pod);
+      await app.studio.expectBackAfterLogin();
+    },
+    { screen: "studio.no-instance" },
+  );
   await app.step(
     "03 · Go back to Solid Memo, still logged in, and create an instance",
     async () => {
@@ -87,50 +93,69 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.instanceCreator.create(instance);
       await app.chrome.expectLoggedInAs(account.webId);
     },
+    { screen: "decks.empty" },
   );
-  await app.step("04 · Create two decks, one with two cards, and study those", async () => {
-    await app.decks.openDeckCreator();
-    await app.deckCreator.create(alpha);
-    await app.decks.openDeckCreator();
-    await app.deckCreator.create(beta);
-    await app.deckBrowser.openFor(alpha);
-    await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addCards(
-      [
-        ["Sun", "Sol"],
-        ["Moon", "Måne"],
-      ],
-      { front: "en", back: "sv" },
-    );
-    await app.cardCreator.back();
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    // Five new cards a day: both are studied, and due again in a few days.
-    await app.decks.study(alpha);
-    await app.study.studyAll({ grade: "good" });
-    await app.study.endSession();
-  });
-
-  await app.step("05 · Import a deck from the library", async () => {
-    await app.library.open();
-    await app.library.select(BRIGHTEST_STARS.en);
-    await app.library.importSelected([BRIGHTEST_STARS.en]);
-  });
-
-  await app.step("06 · Open the instance in Solid Memo Studio: no second login", () =>
-    app.studio.openFromApp(),
+  await app.step(
+    "04 · Create two decks, one with two cards, and study those",
+    async () => {
+      await app.decks.openDeckCreator();
+      await app.deckCreator.create(alpha);
+      await app.decks.openDeckCreator();
+      await app.deckCreator.create(beta);
+      await app.deckBrowser.openFor(alpha);
+      await app.deckBrowser.openCardCreator();
+      await app.cardCreator.addCards(
+        [
+          ["Sun", "Sol"],
+          ["Moon", "Måne"],
+        ],
+        { front: "en", back: "sv" },
+      );
+      await app.cardCreator.back();
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      // Five new cards a day: both are studied, and due again in a few days.
+      await app.decks.study(alpha);
+      await app.study.studyAll({ grade: "good" });
+      await app.study.endSession();
+    },
+    { screen: "decks" },
   );
-  await app.step("07 · See the instance's decks", async () => {
-    await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
-    await app.studio.expectDeck(instance, beta, { cards: 0, due: 0 });
-  });
 
-  await app.step("08 · Find, sort and select a deck's cards in the workbench", async () => {
-    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
-    await app.studio.searchCards(alpha, "mane", ["Moon"]);
-    await app.studio.clearCardSearch(alpha, ["Sun", "Moon"]);
-    await app.studio.sortCardsBy(alpha, "front", ["Moon", "Sun"]);
-    await app.studio.selectCardsWithKeys(alpha, 2);
-  });
+  await app.step(
+    "05 · Import a deck from the library",
+    async () => {
+      await app.library.open();
+      await app.library.select(BRIGHTEST_STARS.en);
+      await app.library.importSelected([BRIGHTEST_STARS.en]);
+    },
+    { screen: "decks" },
+  );
+
+  await app.step(
+    "06 · Open the instance in Solid Memo Studio: no second login",
+    () => app.studio.openFromApp(),
+    { screen: "studio.home" },
+  );
+  await app.step(
+    "07 · See the instance's decks",
+    async () => {
+      await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
+      await app.studio.expectDeck(instance, beta, { cards: 0, due: 0 });
+    },
+    { screen: "studio.home" },
+  );
+
+  await app.step(
+    "08 · Find, sort and select a deck's cards in the workbench",
+    async () => {
+      await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+      await app.studio.searchCards(alpha, "mane", ["Moon"]);
+      await app.studio.clearCardSearch(alpha, ["Sun", "Moon"]);
+      await app.studio.sortCardsBy(alpha, "front", ["Moon", "Sun"]);
+      await app.studio.selectCardsWithKeys(alpha, 2);
+    },
+    { screen: "studio.cards" },
+  );
 
   await app.step(
     "09 · Find and replace in the selected cards, then retire them and undo it",
@@ -140,6 +165,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.studio.retireSelectedCards(alpha, ["Moon", "Sun"]);
       await app.studio.undoCardEdit(alpha, ["Moon", "Sun"]);
     },
+    { screen: "studio.cards" },
   );
 
   await app.step(
@@ -152,29 +178,35 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.studio.retireWrongOption("Stjärna");
       await app.studio.deleteWrongOption("Jord");
     },
+    { screen: "studio.card" },
   );
 
-  await app.step("11 · Forget the card's progress on its schedule tab", async () => {
-    // A new instance studies by FSRS-6: the tab shows its memory below SM-2's state.
-    await app.studio.openSchedule("fsrs6");
-    await app.studio.forgetProgress();
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
-  });
+  await app.step(
+    "11 · Forget the card's progress on its schedule tab",
+    async () => {
+      // A new instance studies by FSRS-6: the tab shows its memory below SM-2's state.
+      await app.studio.openSchedule("fsrs6");
+      await app.studio.forgetProgress();
+    },
+    { screen: "studio.card.schedule" },
+  );
 
   await app.step(
     "12 · See the card's answer on its history tab, kept though its progress is forgotten",
     async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
       await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
       await app.studio.openCard(alpha, "Moon");
       await app.studio.openHistory([{ grade: "good", mode: "recall" }]);
-      await app.chrome.breadcrumb("breadcrumbs.decks");
     },
+    { screen: "studio.card.history" },
   );
 
   await app.step(
     "13 · Write a card in Markdown that would not show as meant, find it in the deck's health, and fix it there",
     async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
       await app.studio.openCard(alpha, "Moon");
       // An HTML tag shows as typed: its opening and its closing tag are a problem each.
@@ -185,29 +217,32 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.studio.openDeckHealth(alpha, 0);
       await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.openInstanceHealth(instance, [alpha, beta]);
-      await app.chrome.breadcrumb("breadcrumbs.decks");
     },
+    { screen: "studio.instance-health" },
   );
 
   await app.step(
     "14 · Quick open the deck with Ctrl+K, and open its schedule: one review this week, and no leech",
     async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.chrome.quickOpen(alpha, alpha);
       await expect(app.page).toHaveURL(/#\/studio\/cards\?deck=/);
       await app.studio.openDeckSchedule(alpha, { today: 0, week: 1, studied: 1 });
-      await app.chrome.breadcrumb("breadcrumbs.decks");
     },
+    { screen: "studio.deck-schedule" },
   );
 
   await app.step(
     "15 · Set the other card due today in the workbench: Home counts it due",
     async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
       await app.studio.selectCardsWithKeys(alpha, 2);
       await app.studio.rescheduleSelectedToday(1);
       await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.expectDeck(instance, alpha, { cards: 2, due: 1 });
     },
+    { screen: "studio.home" },
   );
 
   await app.step(
@@ -220,36 +255,53 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
       await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
     },
+    { screen: "studio.home" },
   );
 
-  await app.step("17 · Name a deck's author and license on its about screen", async () => {
-    await app.studio.openAbout(instance, beta);
-    await app.studio.setAuthorAndLicense("Ada Lovelace", "CC BY 4.0");
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "17 · Name a deck's author and license on its about screen",
+    async () => {
+      await app.studio.openAbout(instance, beta);
+      await app.studio.setAuthorAndLicense("Ada Lovelace", "CC BY 4.0");
+    },
+    { screen: "studio.deck-about" },
+  );
 
-  await app.step("18 · Group the two decks on the Groups screen", async () => {
-    await app.studio.openGroups();
-    await app.groups.groupWithNeighbor(alpha);
-    await app.groups.nameGroup(group);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0, group });
-    await app.studio.expectDeck(instance, beta, { cards: 1, due: 1, group });
-  });
+  await app.step(
+    "18 · Group the two decks on the Groups screen",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.openGroups();
+      await app.groups.groupWithNeighbor(alpha);
+      await app.groups.nameGroup(group);
+    },
+    { screen: "studio.groups" },
+  );
 
-  await app.step("19 · Filter the decks, then sort them by name", async () => {
-    await app.studio.filter(instance, "beta", [beta]);
-    await app.studio.filter(instance, runId, [alpha, beta]);
-    await app.studio.sortBy(instance, "title", [alpha, beta]);
-  });
+  await app.step(
+    "19 · Filter the decks, then sort them by name",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0, group });
+      await app.studio.expectDeck(instance, beta, { cards: 1, due: 1, group });
+      await app.studio.filter(instance, "beta", [beta]);
+      await app.studio.filter(instance, runId, [alpha, beta]);
+      await app.studio.sortBy(instance, "title", [alpha, beta]);
+    },
+    { screen: "studio.home" },
+  );
 
-  await app.step("20 · Give both decks a pace and move them to the top level", async () => {
-    await app.studio.select([alpha, beta]);
-    await app.studio.setNewCardsPerDay(7, 2);
-    await app.studio.moveToTopLevel(2);
-    await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0, newCardsPerDay: "7" });
-    await app.studio.expectDeck(instance, beta, { cards: 1, due: 1, newCardsPerDay: "7" });
-  });
+  await app.step(
+    "20 · Give both decks a pace and move them to the top level",
+    async () => {
+      await app.studio.select([alpha, beta]);
+      await app.studio.setNewCardsPerDay(7, 2);
+      await app.studio.moveToTopLevel(2);
+      await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0, newCardsPerDay: "7" });
+      await app.studio.expectDeck(instance, beta, { cards: 1, due: 1, newCardsPerDay: "7" });
+    },
+    { screen: "studio.home" },
+  );
 
   let file = "";
   await app.step(
@@ -258,15 +310,20 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.studio.clearSelection();
       await app.studio.select([beta]);
       file = await app.studio.exportSelected(instance, beta);
-      await app.chrome.breadcrumb("breadcrumbs.decks");
     },
+    { screen: "studio.export" },
   );
 
-  await app.step("22 · Delete that deck, confirming", async () => {
-    await app.studio.select([beta]);
-    await app.studio.deleteSelected(instance, [beta]);
-    await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
-  });
+  await app.step(
+    "22 · Delete that deck, confirming",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.select([beta]);
+      await app.studio.deleteSelected(instance, [beta]);
+      await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
+    },
+    { screen: "studio.home" },
+  );
 
   await app.step(
     "23 · Import the deck from its file, with its progress: Home counts its card due again",
@@ -275,6 +332,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
     },
+    { screen: "studio.home" },
   );
 
   await app.step(
@@ -287,27 +345,40 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       await app.studio.deleteDraft(instance, course);
       await app.studio.expectSidebarDrafts([alpha]);
     },
+    { screen: "studio.drafts" },
   );
 
-  await app.step("25 · Rename the instance and describe its catalog", async () => {
-    await app.studio.openInstance(instance);
-    await app.studio.renameInstance(renamed);
-    await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
-  });
+  await app.step(
+    "25 · Rename the instance and describe its catalog",
+    async () => {
+      await app.studio.openInstance(instance);
+      await app.studio.renameInstance(renamed);
+      await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
+    },
+    { screen: "studio.instance" },
+  );
 
-  await app.step("26 · Pick the instance, by its new name, from the instance picker", async () => {
-    await app.studio.pickInstance(renamed);
-    await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
-  });
+  await app.step(
+    "26 · Pick the instance, by its new name, from the instance picker",
+    async () => {
+      await app.studio.pickInstance(renamed);
+      await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
+    },
+    { screen: "studio.home" },
+  );
 
-  await app.step("27 · See the library deck among the library copies, up to date", async () => {
-    await app.studio.openLibraryCopies(renamed, BRIGHTEST_STARS.en);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "27 · See the library deck among the library copies, up to date",
+    async () => {
+      await app.studio.openLibraryCopies(renamed, BRIGHTEST_STARS.en);
+    },
+    { screen: "studio.library-copies" },
+  );
 
   await app.step(
     "28 · Draft the library deck's next version, retire a card, and compare it with the release: learners lose nothing",
     async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.studio.openDrafts(renamed);
       // A library release by its address, which the site serves (docs/deck-library.md).
       const release = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
@@ -323,14 +394,16 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
         }),
       );
     },
+    { screen: "studio.draft.diff" },
   );
 
   await app.step(
     "29 · Move down the library deck's cards with the keyboard and back, one selected: each row in sight between the header row and the bar",
     async () => {
       await app.chrome.breadcrumb("breadcrumbs.decks");
-      await app.studio.moveThroughCardsInSight(renamed, BRIGHTEST_STARS.en, 30);
+      await app.studio.moveThroughCardsInSight(renamed, BRIGHTEST_STARS.en);
     },
+    { screen: "studio.cards" },
   );
 
   await app.step(
@@ -349,11 +422,16 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
       });
       await app.studio.letGoOfGraphNode(renamed);
     },
+    { screen: "studio.graph" },
   );
 
-  await app.step("31 · Go back to Solid Memo, still logged in", async () => {
-    await app.studio.backToApp();
-    await app.chrome.expectLoggedInAs(account.webId);
-    await app.decks.expectDeck(alpha);
-  });
+  await app.step(
+    "31 · Go back to Solid Memo, still logged in",
+    async () => {
+      await app.studio.backToApp();
+      await app.chrome.expectLoggedInAs(account.webId);
+      await app.decks.expectDeck(alpha);
+    },
+    { screen: "decks" },
+  );
 });

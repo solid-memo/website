@@ -2,18 +2,22 @@
 //
 // SPDX-License-Identifier: MIT
 
-import AxeBuilder from "@axe-core/playwright";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { expect, test, type CDPSession, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
 import {
   clippedBoxes,
   CONTRAST_RULES,
   REFLOW,
-  SCHEMES,
+  type Scheme,
+  tourSchemes,
   unexcused,
+  type Violation,
   violationLines,
   WCAG_TAGS,
 } from "../harness/accessibility.ts";
+import { type ScreenName, TOUR_ONLY, type Tour, unchecked } from "../harness/screens.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";
 import { CardCreator } from "./CardCreator.ts";
 import { CardEditor } from "./CardEditor.ts";
@@ -47,6 +51,9 @@ import { Studio } from "./Studio.ts";
 import { Trial } from "./Trial.ts";
 import { Validation } from "./Validation.ts";
 
+/** axe, as a script the page runs (axe-core's own build), loaded into a page once each document. */
+const AXE = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
+
 /**
  * Solid Memo as a journey sees it: one page object per screen, the
  * language the app shows (the page objects find text in it), and the
@@ -57,6 +64,8 @@ export class App {
   locale: Locale = "en";
   private readonly expectedDialogs: RegExp[] = [];
   private devtools: CDPSession | undefined;
+  /** The theme tour the journey is, and the screens it has checked. */
+  private touring: { tour: Tour; checked: Set<string> } | undefined;
 
   readonly chrome = new Chrome(this);
   readonly onboarding = new Onboarding(this);
@@ -150,16 +159,22 @@ export class App {
    * project whose metadata says `accessibility: false` leaves the check
    * out (playwright.config.ts).
    *
-   * `in` names the projects the step runs in; elsewhere it is skipped,
-   * and the report says so. It is for a step that tests the app's logic,
-   * the same in every engine, in a journey the other engines run for
-   * what differs between them (docs/testing.md#browsers).
+   * `screen` names the screen the step leaves the app on, which a theme
+   * tour checks in every palette and theme (harness/screens.ts); a step
+   * that only sets the journey up, such as logging in when the journey
+   * is about something else, says `accessibility: false` instead, and
+   * goes unchecked, as other journeys check its screen. `in`
+   * names the projects the step runs in; elsewhere it is skipped, and
+   * the report says so. It is for a step that tests the app's logic, the
+   * same in every engine, in a journey the other engines run for what
+   * differs between them (docs/testing.md#browsers).
    */
   async step(
     title: string,
     body: () => Promise<void>,
-    { in: projects }: { in?: readonly string[] } = {},
+    options: ({ screen: ScreenName } | { accessibility: false }) & { in?: readonly string[] },
   ): Promise<void> {
+    const { in: projects } = options;
     if (projects !== undefined && !projects.includes(this.testInfo.project.name)) {
       await test.step
         .skip(title, async () => {});
@@ -173,53 +188,137 @@ export class App {
         body: await this.page.screenshot(),
         contentType: "image/png",
       });
-      if (this.testInfo.project.metadata.accessibility !== false) {
-        await test.step("Accessibility", () => this.checkAccessibility(title));
+      if ("screen" in options && this.testInfo.project.metadata.accessibility !== false) {
+        const { screen } = options;
+        await test.step("Accessibility", () => this.checkAccessibility(title, screen));
       }
     });
   }
 
   /**
-   * Checks the screen a step left the app on with axe, in each palette and
-   * theme (harness/accessibility.ts), then that it reflows at 320px at the
-   * largest text size: a violation fails the journey once it ends, as a
-   * soft expect, and what was found is attached. The palettes but
-   * Standard, and the reflow, are checked in Chromium alone. A screen of
-   * the Solid server's own (its login) is not the app's to check.
+   * A theme tour (journeys/tour-*.journey.ts): its steps check their
+   * screens in the other palettes and themes instead (tourSchemes), and
+   * the tour fails if it ends with a screen of its own unchecked.
    */
-  private async checkAccessibility(title: string): Promise<void> {
+  async tour(tour: Tour, body: () => Promise<void>): Promise<void> {
+    this.touring = { tour, checked: new Set() };
+    await body();
+    expect(
+      unchecked(tour, this.touring.checked),
+      `screens the ${tour} tour has not checked`,
+    ).toEqual([]);
+  }
+
+  /**
+   * Takes another device (newDevice) along on this app's theme tour,
+   * begun: its steps check their screens in the tour's schemes, and the
+   * screens it checks count as the tour's.
+   */
+  tourWith(device: App): void {
+    device.touring = this.touring;
+  }
+
+  /**
+   * Checks the screen a step left the app on with axe: in a journey, as
+   * it shows it (a palette of the user's own taken off), then that it
+   * reflows at 320px at the largest text size, in Chromium alone; in a
+   * theme tour, in each of the tour's schemes (harness/accessibility.ts),
+   * and a state no journey reaches in Standard light and its reflow too.
+   * A violation fails the journey once it ends, as a soft expect, and
+   * what was found is attached. A screen of the Solid server's own (its
+   * login) is not the app's to check.
+   */
+  private async checkAccessibility(title: string, screen: ScreenName): Promise<void> {
     const app = new URL(String(this.testInfo.project.use.baseURL)).origin;
     if (new URL(this.page.url()).origin !== app) return;
     const chromium = this.testInfo.project.name === "chromium";
-    const shown = await this.rootAttributes();
-    for (const { palette, theme, full } of SCHEMES) {
-      if (!full && !chromium) continue;
-      // The stylesheet's colors follow the root's data-palette and data-theme alone (docs/theme.md),
-      // once a palette of the user's own, which the root's style paints, is taken off.
-      await this.setRootAttributes({
-        "data-palette": palette === "standard" ? null : palette,
-        "data-theme": theme,
-        style: null,
-      });
-      const axe = new AxeBuilder({ page: this.page });
-      const { violations } = await (full
-        ? axe.withTags(WCAG_TAGS)
-        : axe.withRules(CONTRAST_RULES)
-      ).analyze();
-      const left = unexcused(violations);
-      if (left.length === 0) continue;
-      const scheme = `${palette}, ${theme}`;
-      const name = `${title} · accessibility, ${scheme}.json`;
-      await this.testInfo.attach(name, {
-        body: JSON.stringify(left, null, 2),
-        contentType: "application/json",
-      });
-      expect
-        .soft(violationLines(left), `accessibility violations, in ${scheme} (${name})`)
-        .toEqual([]);
+    if (this.touring === undefined) {
+      const [found] = await this.axe([undefined]);
+      await this.report(found!, `${title} · accessibility.json`, `on ${screen}`);
+      if (chromium) await this.checkReflow(title);
+      return;
     }
-    await this.setRootAttributes(shown);
-    if (chromium) await this.checkReflow(title);
+    this.touring.checked.add(screen);
+    // A state no journey reaches gets what a journey would check it for too.
+    const unseen = TOUR_ONLY.includes(screen);
+    const schemes = tourSchemes(chromium, unseen);
+    const found = await this.axe(schemes);
+    for (const [at, { palette, theme }] of schemes.entries()) {
+      await this.report(
+        found[at]!,
+        `${title} · accessibility, ${palette}, ${theme}.json`,
+        `on ${screen}, in ${palette}, ${theme}`,
+      );
+    }
+    if (unseen && chromium) await this.checkReflow(title);
+  }
+
+  /** Attaches the violations left once the known exceptions are out, and fails the journey on them, softly. */
+  private async report(violations: Violation[], name: string, where: string): Promise<void> {
+    const left = unexcused(violations);
+    if (left.length === 0) return;
+    await this.testInfo.attach(name, {
+      body: JSON.stringify(left, null, 2),
+      contentType: "application/json",
+    });
+    expect.soft(violationLines(left), `accessibility violations ${where} (${name})`).toEqual([]);
+  }
+
+  /**
+   * What axe finds on the screen in each of the schemes, one after
+   * another, in one call into the page; with no scheme, as it is shown
+   * but for a palette of the user's own, with all of WCAG_TAGS: only the
+   * palette editor measures such a palette (docs/accessibility.md). axe is loaded into the document the first
+   * time it is checked, and the root's attributes are put back after,
+   * whatever happens. The stylesheet's colors follow the root's
+   * data-palette and data-theme alone (docs/theme.md), once a palette of
+   * the user's own, which the root's style paints, is taken off.
+   */
+  private async axe(schemes: readonly (Scheme | undefined)[]): Promise<Violation[][]> {
+    if (!(await this.page.evaluate(() => "axe" in window))) await this.page.evaluate(AXE);
+    return this.page.evaluate(
+      async ({ schemes, tags, rules }) => {
+        type Axe = {
+          run: (
+            context: Document,
+            options: {
+              runOnly: { type: "tag" | "rule"; values: string[] };
+              resultTypes: string[];
+            },
+          ) => Promise<{ violations: Violation[] }>;
+        };
+        const { axe } = window as unknown as { axe: Axe };
+        const html = document.documentElement;
+        const names = ["data-palette", "data-theme", "style"];
+        const shown = names.map((name) => [name, html.getAttribute(name)] as const);
+        const set = (name: string, value: string | null) => {
+          if (value === null) html.removeAttribute(name);
+          else html.setAttribute(name, value);
+        };
+        try {
+          const found: Violation[][] = [];
+          for (const scheme of schemes) {
+            if (scheme !== undefined) {
+              set("data-palette", scheme.palette === "standard" ? null : scheme.palette);
+              set("data-theme", scheme.theme);
+            }
+            set("style", null);
+            const { violations } = await axe.run(document, {
+              runOnly:
+                scheme === undefined || scheme.full
+                  ? { type: "tag", values: tags }
+                  : { type: "rule", values: rules },
+              resultTypes: ["violations"],
+            });
+            found.push(violations);
+          }
+          return found;
+        } finally {
+          for (const [name, value] of shown) set(name, value);
+        }
+      },
+      { schemes, tags: WCAG_TAGS, rules: CONTRAST_RULES },
+    );
   }
 
   /** The root's attributes the stylesheet's colors and text size follow, and its style, where a palette of the user's own is painted. */
@@ -249,19 +348,15 @@ export class App {
   /**
    * At the largest text size and 320px wide (WCAG 1.4.4, 1.4.10), the page
    * scrolls only up and down, and no text kept on one line is cut short
-   * without its title, which axe does not check. The page's own text
-   * size and width are put back after.
+   * without its title, which axe does not check. Its palette and theme
+   * stay as they are, which the layout doesn't follow. The page's own
+   * text size and width are put back after.
    */
   private async checkReflow(title: string): Promise<void> {
     const viewport = this.page.viewportSize();
     if (viewport === null) return;
     const shown = await this.rootAttributes();
-    await this.setRootAttributes({
-      "data-palette": null,
-      "data-theme": "light",
-      "data-text-size": REFLOW.textSize,
-      style: null,
-    });
+    await this.setRootAttributes({ "data-text-size": REFLOW.textSize });
     await this.page.setViewportSize({ width: REFLOW.width, height: viewport.height });
     try {
       const { wide, pageWidth, boxes } = await this.page.evaluate(async () => {

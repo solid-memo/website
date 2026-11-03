@@ -115,15 +115,27 @@ export class Chapter extends Screen {
     });
   }
 
+  /** The step's theory, a chunk of it with Continue or On to the question(s) below. */
+  private get theory(): Locator {
+    return this.continue.or(this.toQuestions);
+  }
+
+  private get next(): Locator {
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("chapterPlayer.next"), exact: true });
+  }
+
   /**
-   * Works through every step from the one shown: its theory, then each of
-   * its questions, each answered once, until on to the final review.
-   * The steps worked through.
+   * Works through every step from where the chapter is: a step's theory,
+   * or one of its questions, answered or not; each question answered
+   * once, until on to the final review. The steps whose theory it read.
    */
   async workThrough(known: Answers): Promise<{ step: number; chunks: number }[]> {
     const steps: { step: number; chunks: number }[] = [];
     for (;;) {
-      steps.push(await this.readTheory());
+      await expect(this.theory.or(this.app.question.options)).toBeVisible();
+      if (await this.theory.isVisible()) steps.push(await this.readTheory());
       if ((await this.answerStep(known)).last) {
         await this.toReview.click();
         return steps;
@@ -132,20 +144,20 @@ export class Chapter extends Screen {
   }
 
   /**
-   * Answers the step's questions, each once, until the next step's
+   * Answers the step's questions, each once, from the one shown (one
+   * answered already is not answered again), until the next step's
    * theory, or, after the last step's, the button on to the final
    * review: how many, and whether it was the last step.
    */
   private async answerStep(known: Answers): Promise<{ questions: number; last: boolean }> {
     for (let questions = 1; ; questions++) {
-      await this.app.question.answer(known);
+      // Unanswered, or answered: Check, or the way on.
+      await expect(this.app.question.check.or(this.next).or(this.toReview)).toBeVisible();
+      if (await this.app.question.check.isVisible()) await this.app.question.answer(known);
       if (await this.toReview.isVisible()) return { questions, last: true };
-      await this.page
-        .getByRole("main")
-        .getByRole("button", { name: this.t("chapterPlayer.next"), exact: true })
-        .click();
+      await this.next.click();
       // The step's next question, or the next step's theory.
-      await expect(this.app.question.check.or(this.continue).or(this.toQuestions)).toBeVisible();
+      await expect(this.app.question.check.or(this.theory)).toBeVisible();
       if (!(await this.app.question.check.isVisible())) return { questions, last: false };
     }
   }

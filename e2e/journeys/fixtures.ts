@@ -31,14 +31,16 @@ import { App } from "./pages/App.ts";
  * - `app`, the page objects (pages/App.ts), journey steps among them;
  * - `newDevice`, which opens the app again in a browser of its own (a
  *   new context: no cookies, no storage), as on a second device, and
- *   gives its page objects. It gets all the below, as `app` does.
+ *   gives its page objects; in another time zone, given its `timezoneId`.
+ *   It gets all the below, as `app` does.
  *
  * And, unasked: Math.random seeded (JOURNEY_SEED, else from the title and
  * the repeat),
  * requests to any host but 127.0.0.1 refused, flags stubbed, dialogs
  * answered only as a step expects, and diagnostics.json (console, page
- * errors, failed requests) plus the server's log for the journey's time
- * attached. An error thrown in the page fails the journey.
+ * errors, failed requests) attached, plus, when the journey fails, the
+ * server's log for its time. An error thrown in the page fails the
+ * journey.
  */
 interface Fixtures {
   server: string;
@@ -46,7 +48,7 @@ interface Fixtures {
   account: CssAccount;
   otherApp: OtherApp;
   app: App;
-  newDevice: () => Promise<App>;
+  newDevice: (options?: { timezoneId?: string }) => Promise<App>;
   diagnostics: Diagnostics;
 }
 
@@ -136,7 +138,9 @@ export const test = base.extend<Fixtures>({
         body: JSON.stringify(found, null, 2),
         contentType: "application/json",
       });
-      await attachServerLog(testInfo, started, new Date());
+      if (testInfo.status !== testInfo.expectedStatus || failsOn(found)) {
+        await attachServerLog(testInfo, started, new Date());
+      }
       expect.soft(found.pageErrors, "errors thrown in the page (diagnostics.json)").toEqual([]);
       expect
         .soft(found.blockedRequests, "requests to hosts other than 127.0.0.1 (diagnostics.json)")
@@ -152,9 +156,9 @@ export const test = base.extend<Fixtures>({
 
   newDevice: async ({ browser, diagnostics }, use, testInfo) => {
     const contexts: BrowserContext[] = [];
-    await use(async () => {
+    await use(async (options) => {
       // A test's browser.newContext takes the project's options (use), as the fixture's own context does.
-      const context = await browser.newContext();
+      const context = await browser.newContext(options);
       contexts.push(context);
       await instrument(context, diagnostics);
       const page = await context.newPage();

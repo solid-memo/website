@@ -45,13 +45,19 @@ test("a later study day @review", async ({ app, account, runId }) => {
   const cards = 4;
   const night = offsetWhereItIs(new Date(), 2);
 
-  await app.step("01 · At 2 a.m., before the study day turns at 4, visit Solid Memo", async () => {
-    await app.setTimeZone(fixedOffsetZone(night));
-    await app.onboarding.visit();
-  });
+  await app.step(
+    "01 · At 2 a.m., before the study day turns at 4, visit Solid Memo",
+    async () => {
+      await app.setTimeZone(fixedOffsetZone(night));
+      await app.onboarding.visit();
+    },
+    { screen: "onboarding" },
+  );
 
-  await app.step("02 · Log in with a WebID", () =>
-    logInAndCreateInstance(app, account, `Journey ${runId}`),
+  await app.step(
+    "02 · Log in with a WebID",
+    () => logInAndCreateInstance(app, account, `Journey ${runId}`),
+    { accessibility: false },
   );
 
   await app.step(
@@ -64,36 +70,45 @@ test("a later study day @review", async ({ app, account, runId }) => {
       await app.preferences.save();
       await app.decks.expectSchedulerInvitation(true);
     },
+    { screen: "decks.scheduler-invitation" },
   );
 
-  await app.step("04 · Create a deck of four flashcards", async () => {
-    await app.decks.openDeckCreator();
-    await app.deckCreator.create(deck);
-    await app.deckBrowser.openFor(deck);
-    await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addCards(
-      [
-        [`Sun ${runId}`, "Sol"],
-        [`Moon ${runId}`, "Måne"],
-        [`Star ${runId}`, "Stjärna"],
-        [`Sky ${runId}`, "Himmel"],
-      ],
-      { front: "en", back: "sv" },
-    );
-    await app.cardCreator.back();
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "04 · Create a deck of four flashcards",
+    async () => {
+      await app.decks.openDeckCreator();
+      await app.deckCreator.create(deck);
+      await app.deckBrowser.openFor(deck);
+      await app.deckBrowser.openCardCreator();
+      await app.cardCreator.addCards(
+        [
+          [`Sun ${runId}`, "Sol"],
+          [`Moon ${runId}`, "Måne"],
+          [`Star ${runId}`, "Stjärna"],
+          [`Sky ${runId}`, "Himmel"],
+        ],
+        { front: "en", back: "sv" },
+      );
+      await app.cardCreator.back();
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+    { screen: "decks.scheduler-invitation" },
+  );
 
-  await app.step("05 · Study the deck, every card Good", async () => {
-    await app.decks.study(deck);
-    expect(await app.study.studyAll({ grade: "good", scale: "minimal" })).toEqual({
-      studied: cards,
-      total: cards,
-    });
-    await app.study.endSession();
-    await app.decks.expectDoneForToday(deck);
-    await app.decks.expectAnsweredToday(cards);
-  });
+  await app.step(
+    "05 · Study the deck, every card Good",
+    async () => {
+      await app.decks.study(deck);
+      expect(await app.study.studyAll({ grade: "good", scale: "minimal" })).toEqual({
+        studied: cards,
+        total: cards,
+      });
+      await app.study.endSession();
+      await app.decks.expectDoneForToday(deck);
+      await app.decks.expectAnsweredToday(cards);
+    },
+    { screen: "decks.scheduler-invitation" },
+  );
 
   await app.step(
     "06 · Switch to FSRS-6 from the deck list's invitation: each card is worked out from its answer",
@@ -108,6 +123,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
       await app.chrome.breadcrumb("breadcrumbs.decks");
       await app.decks.expectSchedulerInvitation(false);
     },
+    { screen: "decks" },
   );
 
   await app.step(
@@ -126,6 +142,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
         left: cards,
       });
     },
+    { screen: "decks.welcome-back" },
   );
 
   await app.step(
@@ -149,18 +166,23 @@ test("a later study day @review", async ({ app, account, runId }) => {
       await app.decks.expectToReview(deck, 2);
       await app.decks.expectAnsweredToday(2);
     },
+    { screen: "decks" },
   );
 
-  await app.step("09 · Study the deck's other two cards, both Good", async () => {
-    await app.decks.study(deck);
-    await app.study.expectPosition(1, 2);
-    await app.study.answer("good");
-    await app.study.answer("good");
-    await app.study.expectFinished();
-    await app.study.endSession();
-    await app.decks.expectDoneForToday(deck);
-    await app.decks.expectAnsweredToday(cards);
-  });
+  await app.step(
+    "09 · Study the deck's other two cards, both Good",
+    async () => {
+      await app.decks.study(deck);
+      await app.study.expectPosition(1, 2);
+      await app.study.answer("good");
+      await app.study.answer("good");
+      await app.study.expectFinished();
+      await app.study.endSession();
+      await app.decks.expectDoneForToday(deck);
+      await app.decks.expectAnsweredToday(cards);
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "10 · The statistics show recall, lapses and relearning, and no leech yet",
@@ -217,6 +239,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
       // the day each was due.
       await app.statistics.expectAnswersTimed({ answers, reviewed: cards });
     },
+    { screen: "statistics" },
   );
 
   await app.step(
@@ -229,12 +252,17 @@ test("a later study day @review", async ({ app, account, runId }) => {
         { lapses: 1, reviews: 1 },
       ]);
     },
+    { screen: "deck" },
   );
 
-  await app.step("12 · Reload: the deck list's counts still agree", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.chrome.reload();
-    await app.decks.expectDoneForToday(deck);
-    await app.decks.expectAnsweredToday(cards);
-  });
+  await app.step(
+    "12 · Reload: the deck list's counts still agree",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.chrome.reload();
+      await app.decks.expectDoneForToday(deck);
+      await app.decks.expectAnsweredToday(cards);
+    },
+    { screen: "decks" },
+  );
 });

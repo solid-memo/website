@@ -24,22 +24,32 @@ test("a library deck shared by its link @guest", async ({ app, newDevice }) => {
   const stars = BRIGHTEST_STARS.en;
   let link = "";
 
-  await app.step("01 · Visit Solid Memo and try it as a guest", async () => {
-    await app.onboarding.visit();
-    await app.onboarding.tryAsGuest();
-  });
+  await app.step(
+    "01 · Visit Solid Memo and try it as a guest",
+    async () => {
+      await app.onboarding.visit();
+      await app.onboarding.tryAsGuest();
+    },
+    { screen: "decks.guest" },
+  );
 
-  await app.step("02 · Copy a library deck's link from its page", async () => {
-    await app.library.open();
-    await app.library.openDeck(stars);
-    link = await app.libraryDeck.copyLink();
-    expect(new URL(link).hash).toMatch(/^#\/try\?deck=[^&]+$/);
-  });
+  await app.step(
+    "02 · Copy a library deck's link from its page",
+    async () => {
+      await app.library.open();
+      await app.library.openDeck(stars);
+      link = await app.libraryDeck.copyLink();
+      expect(new URL(link).hash).toMatch(/^#\/try\?deck=[^&]+$/);
+    },
+    { screen: "library-deck" },
+  );
 
   const friend = await newDevice();
 
-  await friend.step("03 · In a browser of their own, follow the link: the deck, as a guest", () =>
-    friend.libraryDeck.followLink(link, stars),
+  await friend.step(
+    "03 · In a browser of their own, follow the link: the deck, as a guest",
+    () => friend.libraryDeck.followLink(link, stars),
+    { screen: "library-deck" },
   );
 
   // Importing and studying are the app's logic, which the guest journey
@@ -54,7 +64,7 @@ test("a library deck shared by its link @guest", async ({ app, newDevice }) => {
       await friend.study.endSession();
       await friend.decks.expectAnsweredToday(1);
     },
-    { in: ["chromium"] },
+    { screen: "decks.guest", in: ["chromium"] },
   );
 
   await friend.step(
@@ -65,6 +75,6 @@ test("a library deck shared by its link @guest", async ({ app, newDevice }) => {
       await friend.page.goto(url.href);
       await friend.library.expectFromUnknownLink();
     },
-    { in: ["chromium"] },
+    { screen: "library.not-found", in: ["chromium"] },
   );
 });

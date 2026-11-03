@@ -566,7 +566,7 @@ A failed save keeps the card in place with an error, and the queue
 advances only on success. Ending the session invalidates the review
 caches.
 
-Under each grade button, as its description, is the interval
+Under each grade button, and in its name after the grade, is the interval
 `gradePrompt` gives for that grade, a new prompt's from nothing:
 "1 day", "6 days", "15 days"
 (`previewIntervals` in [grading.ts](../packages/domain/src/grading.ts)).

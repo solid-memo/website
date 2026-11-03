@@ -34,17 +34,25 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   const instance = `Journey ${runId}`;
   const httpWebId = account.webId.replace(/^https:/, "http:");
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
 
-  await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, instance));
-
-  await app.step("03 · Switch to the dark theme", () => app.chrome.switchTheme("dark"));
-
-  await app.step("04 · Save the study preferences, which keeps the theme in the Pod", async () => {
-    await app.preferences.open();
-    await app.preferences.expectTheme("dark");
-    await app.preferences.save();
+  await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, instance), {
+    screen: "decks.empty",
   });
+
+  await app.step("03 · Switch to the dark theme", () => app.chrome.switchTheme("dark"), {
+    screen: "decks.empty",
+  });
+
+  await app.step(
+    "04 · Save the study preferences, which keeps the theme in the Pod",
+    async () => {
+      await app.preferences.open();
+      await app.preferences.expectTheme("dark");
+      await app.preferences.save();
+    },
+    { screen: "decks.empty" },
+  );
 
   await app.step(
     "05 · Choose High contrast and Larger text, which the Pod keeps, through a reload",
@@ -60,15 +68,22 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
       await app.preferences.expectTextSize("larger");
       await app.preferences.save();
     },
+    { screen: "decks.empty" },
   );
 
-  await app.step("06 · Log out", async () => {
-    await app.chrome.logOut();
-    await app.onboarding.expectLoggedOut();
-  });
+  await app.step(
+    "06 · Log out",
+    async () => {
+      await app.chrome.logOut();
+      await app.onboarding.expectLoggedOut();
+    },
+    { screen: "onboarding" },
+  );
 
-  await app.step("07 · Log in with the WebID over http, which is refused", () =>
-    app.onboarding.submitRefusedWebId(httpWebId, "webIdNotHttps"),
+  await app.step(
+    "07 · Log in with the WebID over http, which is refused",
+    () => app.onboarding.submitRefusedWebId(httpWebId, "webIdNotHttps"),
+    { screen: "onboarding.invalid-webid" },
   );
 
   await app.step(
@@ -81,25 +96,34 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
       });
       await app.chrome.expectTheme("dark");
     },
+    { screen: "decks" },
   );
 
   const device = await newDevice();
 
-  await device.step("09 · On a second device, visit Solid Memo", async () => {
-    await device.onboarding.visit();
-    await device.chrome.expectTheme("light");
-    // Nothing on this device yet: the colors and the text size come with the instance.
-    await expect(device.page.locator("html")).not.toHaveAttribute("data-palette");
-    await expect(device.page.locator("html")).not.toHaveAttribute("data-text-size");
-  });
+  await device.step(
+    "09 · On a second device, visit Solid Memo",
+    async () => {
+      await device.onboarding.visit();
+      await device.chrome.expectTheme("light");
+      // Nothing on this device yet: the colors and the text size come with the instance.
+      await expect(device.page.locator("html")).not.toHaveAttribute("data-palette");
+      await expect(device.page.locator("html")).not.toHaveAttribute("data-text-size");
+    },
+    { screen: "onboarding" },
+  );
 
-  await device.step("10 · Log in with the WebID and refuse Solid Memo the Pod", async () => {
-    await device.onboarding.logInWithWebId(account.webId);
-    await device.cssLogin.logIn(account);
-    await device.cssLogin.refuse(account.webId);
-    // Back where it started, nobody logged in.
-    await device.onboarding.expectStart();
-  });
+  await device.step(
+    "10 · Log in with the WebID and refuse Solid Memo the Pod",
+    async () => {
+      await device.onboarding.logInWithWebId(account.webId);
+      await device.cssLogin.logIn(account);
+      await device.cssLogin.refuse(account.webId);
+      // Back where it started, nobody logged in.
+      await device.onboarding.expectStart();
+    },
+    { screen: "onboarding" },
+  );
 
   await device.step(
     "11 · Log in again and let Solid Memo use the Pod: the instance opens, without the Connected screen, in the dark theme, High contrast and Larger text",
@@ -114,6 +138,7 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
       await device.preferences.expectPalette("high-contrast");
       await device.preferences.expectTextSize("larger");
     },
+    { screen: "preferences" },
   );
 
   await device.step(
@@ -126,6 +151,7 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
       await device.paletteEditor.saveAnyway();
       await device.preferences.expectOwnPalette("Evening", EVENING);
     },
+    { screen: "preferences" },
   );
 
   const third = await newDevice();
@@ -140,29 +166,38 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
       await third.preferences.expectOwnPalette("Evening", EVENING);
       await third.preferences.expectShowConnectedScreen(false);
     },
+    { screen: "preferences" },
   );
 
-  await third.step("14 · Reset the colors to Standard, which the Pod keeps", async () => {
-    await third.preferences.resetColors();
-    // Saved once the choice is written; back to Decks.
-    await third.preferences.save();
-    await third.chrome.reload();
-    await third.preferences.open();
-    await third.preferences.expectPalette("standard");
-  });
+  await third.step(
+    "14 · Reset the colors to Standard, which the Pod keeps",
+    async () => {
+      await third.preferences.resetColors();
+      // Saved once the choice is written; back to Decks.
+      await third.preferences.save();
+      await third.chrome.reload();
+      await third.preferences.open();
+      await third.preferences.expectPalette("standard");
+    },
+    { screen: "preferences" },
+  );
 
-  await third.step("15 · Show the Connected screen again, which the Pod keeps", async () => {
-    await third.preferences.setShowConnectedScreen(true);
-    await third.preferences.save();
-    await third.chrome.reload();
-    await third.preferences.open();
-    await third.preferences.expectShowConnectedScreen(true);
-    // Back to Decks, where the next login opens.
-    await third.preferences.save();
-    await third.chrome.logOut();
-    await third.onboarding.expectLoggedOut();
-    await logInToInstance(third, account, instance, { loggedOutHere: true, knownToServer: true });
-  });
+  await third.step(
+    "15 · Show the Connected screen again, which the Pod keeps",
+    async () => {
+      await third.preferences.setShowConnectedScreen(true);
+      await third.preferences.save();
+      await third.chrome.reload();
+      await third.preferences.open();
+      await third.preferences.expectShowConnectedScreen(true);
+      // Back to Decks, where the next login opens.
+      await third.preferences.save();
+      await third.chrome.logOut();
+      await third.onboarding.expectLoggedOut();
+      await logInToInstance(third, account, instance, { loggedOutHere: true, knownToServer: true });
+    },
+    { screen: "decks" },
+  );
 });
 
 /** The palette of one's own step 12 designs: Standard, its muted text in the dark theme fainter. */

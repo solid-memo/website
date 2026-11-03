@@ -111,7 +111,7 @@ listed:
 | `jsonld-streaming-parser`, `oauth4webapi` | `solid-memo-client` | the JSON-LD parser; Solid-OIDC sign-in |
 | `fake-indexeddb` | `browser`, `composition`, `solid-memo-client` | tests only: IndexedDB in node, for the guest's pod's store and the sign-in session |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness talks to the Solid server with its request API |
-| `@axe-core/playwright` | `e2e-journeys` | `pages/App.ts` only: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
+| `axe-core` | `e2e-journeys` | `pages/App.ts` only, which loads its build into the page: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
 | `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, both node-only in the check: Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, not shipped ([vendor-code.md](vendor-code.md#maturity)) |
 
 ## The Solid client libraries

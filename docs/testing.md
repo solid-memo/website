@@ -398,18 +398,26 @@ shows it skipped elsewhere, as for the reload journey's statistics and
 the shared link's import.
 
 CI runs them in five jobs side by side, each paying about a minute of
-setup. Chromium's run in two shards (`npx playwright test --shard`),
-`journeys (chromium-1)` and `journeys (chromium-2)`, and each other
-project, WebKit's and the phone's the slowest, in a job of its own,
-`journeys (firefox)`, `journeys (webkit)` and `journeys (phone)`.
+setup while the `site` job builds: it starts the Solid server in the
+background and waits for the build only before the journeys run.
+Chromium's run in three shards of about the same time,
+`journeys (chromium-1)` to `journeys (chromium-3)`.
+[shards.ts](../e2e/journeys/harness/shards.ts) puts the longest
+journeys first, each into the shard with the least time so far, by the
+times in [durations.json](../e2e/journeys/durations.json); a journey
+not there yet counts as their median.
+`node e2e/journeys/harness/shards.ts durations <results.json>...`
+writes the file again from the reports of the shards' jobs, in their
+artifacts. Desktop Firefox's and WebKit's run in `journeys (desktop)`,
+and the phone's, the slowest of the others, in `journeys (phone)`.
 When one of them fails, CI cancels the others (`fail-fast`), as their
 result no longer changes the run's, and the rest of the run with them
 ([below](#canceled-runs)); "Re-run failed jobs" runs the canceled ones
 again too.
 Chromium's journeys run fully parallel (`fullyParallel: true`), so a
-file of several, such as `pod-safety`, spreads over both shards; a file
+file of several, such as `pod-safety`, spreads over the shards; a file
 whose journeys depend on each other runs them in turn
-(`test.describe.configure({ mode: "serial" })`). The
+(`test.describe.configure({ mode: "serial" })`), in one shard. The
 [user guide](user-guide.md#supported-browsers) says which browsers
 Solid Memo supports.
 
@@ -472,18 +480,38 @@ The journeys run the same way every time:
 
 **Accessibility.** At each step's end, the harness checks the screen the
 step leaves the app on with
-[axe](https://github.com/dequelabs/axe-core), in each palette and theme,
+[axe](https://github.com/dequelabs/axe-core), as the journey shows it,
 and its reflow at the largest text size (`App.step`,
-[harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)). A
+[harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
+A step names that screen (`{ screen: "decks" }`), and a theme tour
+checks it in the other palettes and themes: a journey's screen never
+changes colors, so its video and trace show only what a user sees. A
 palette of the user's own, painted on the root's style, is taken off
-while they run and put back after; its editor measures it
+while axe runs and put back after; its editor measures it
 ([theme.md](theme.md#palettes-of-ones-own)).
 
 | Check | Palettes and themes | Rules | Where |
 |---|---|---|---|
-| axe | Standard, light and dark | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
-| axe | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
-| Reflow | Standard, light, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
+| axe, every journey | as the journey shows them, Standard light unless it picks others | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
+| Reflow, every journey | as the journey shows them, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
+| axe, theme tours | Standard, dark | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
+| axe, theme tours | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
+
+**The theme tours** (`journeys/tour-*.journey.ts`) are journeys of
+their own, one for each area of the app:
+[harness/screens.ts](../e2e/journeys/harness/screens.ts) lists the
+screens of each, which are the names a step may give. Each tour picks
+a palette and a theme in Preferences, as a user would, then reaches
+each of its screens. It checks each in the schemes its rows above
+name, one after another in one call into the page, and puts the
+screen's own back after (`app.tour`). A tour fails when it ends with one of its
+screens unchecked, so a screen a journey names is always checked in
+every palette and theme. A new screen is added to a tour's list and
+reached by that tour. A state only a tour reaches, as no step ends on
+it (`TOUR_ONLY`: an answer shown with its grade buttons, a chapter's
+question, the Studio's confirm dialog), is checked in Standard light
+and for its reflow there too. The phone runs the learner's and the library's
+tours, in Standard dark.
 
 The checks run in a step of their own, "Accessibility", inside the
 journey's step, timed in the report; desktop Firefox and WebKit leave it
@@ -497,7 +525,7 @@ what else is checked.
 **When a journey fails**, the CI job's summary names it, the step it
 failed in (the spec's numbered step › the page object's action), the
 error, and the browser. The job's
-`journeys-<chromium|engines>-<attempt>` artifact holds the rest:
+`journeys-<name>-<attempt>` artifact holds the rest:
 
 - `test-results/<journey>/trace.zip`: the whole journey, each step
   showing the page before and after every action, the network (the
@@ -508,10 +536,12 @@ error, and the browser. The job's
   end of each journey step, a video, and these attachments:
   - `diagnostics.json`: console, page errors, failed and refused
     requests, the seed, the time zone;
-  - `css.log`: the server's log for the journey's time;
+  - `css.log`: the server's log for the journey's time, when the journey
+    failed;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;
-  - `<step> · accessibility, <palette>, <theme>.json`: what axe found on
-    a step's screen, when it found a violation;
+  - `<step> · accessibility.json`: what axe found on a step's screen,
+    when it found a violation, and in a theme tour
+    `<step> · accessibility, <palette>, <theme>.json`, in each scheme;
   - `<step> · reflow.png`: the screen at the largest text size and 320px
     wide, when it didn't reflow.
   `npx playwright show-report <dir>` opens the report.
@@ -584,6 +614,10 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   an instance), which a step answers by its heading and button, as the
   Studio's component tests do
   ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
+- **A step ends on its screen**: a step's screenshot and accessibility
+  check are of the screen it leaves the app on, so it ends on the screen
+  it is about. Going back to the deck list or the Studio's Home begins
+  the next step.
 - **One after another**: a journey that needs what another made is in
   its file, after it, and the file runs in turn (`mode: "serial"`). In
   [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts),
@@ -634,8 +668,8 @@ jobs run side by side, each
 | `contract (<server>)` | timing-dependent | that each advisory server starts and meets the contract |
 | `solid-memo-client (unit)` | deterministic | advisory: with `SOLID_CLIENT=solid-memo-client`, `solid`'s unit tests without those of the four Inrupt modules the client replaces (`src/client/{access,rdf,resources,session,session.library}.test.ts`), `solid`'s round trip, and the unit tests of `shacl`, `composition` and `web`, each step run even when one before it failed. `web`'s build test builds the site without the docs' diagrams (`DOCS_DIAGRAMS=skip`), so the job installs no Chromium; `check` draws them. npm runs them, not Turbo, so no result comes from a cache, and without coverage. The client's own tests are `check`'s ([solid-memo-client.md](solid-memo-client.md#tests)) |
 | `solid-memo-client (<server>)` | timing-dependent | advisory: the end-to-end tests with `SOLID_CLIENT=solid-memo-client`, one job per blocking server, on the images in `pod`'s cache, which it restores and only `pod` saves. What the server printed is kept when the job fails. Neither of the `solid-memo-client` jobs fails the run or `ci-ok` when it fails (`continue-on-error`), so neither holds back a merge, a release or a deploy |
-| `journeys (<project>)` | timing-dependent | the user journeys, on `site`'s build: all in Chromium in two shards, and those that differ between engines in Firefox, WebKit and on a phone, a job each (Browsers, above) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed (then with what the canceled ones ran), it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when the `site` job's failure skipped them. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
+| `journeys (<name>)` | timing-dependent | the user journeys, on `site`'s build: all in Chromium in three shards of about the same time, those that differ between engines in desktop Firefox and WebKit, in one job, and on a phone, in another (Browsers, above) |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed (then with what the canceled ones ran), it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when they failed, as they do when the `site` job ends without its build. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |

@@ -22,7 +22,7 @@ It exports nothing; no package may import it.
 ## Boundaries
 
 It may import `ui`, from `harness/strings.ts` only, for the app's
-messages, `@playwright/test` and `@axe-core/playwright`
+messages, `@playwright/test` and `axe-core`
 ([boundaries.md](../../docs/boundaries.md)).
 
 ## Run and test

@@ -55,14 +55,17 @@ but the journeys:
 - **Every screen a journey visits**: the
   [user journeys](testing.md#user-journeys) run
   [axe](https://github.com/dequelabs/axe-core) on the screen each step
-  ends on: WCAG 2.0, 2.1 and 2.2 rules at levels A and AA, in both
-  themes, in Chromium and on the phone (WebKit). In Chromium alone, its
-  contrast rules (`color-contrast`, `link-in-text-block`) run in both
-  themes of every other palette (a palette of the user's own taken off
-  the page), and at the largest text size and 320px wide the screen
-  mustn't scroll sideways. No text kept on one line may be cut short
-  there without a title that holds it whole (WCAG 1.4.4 and 1.4.10,
-  which axe doesn't check). A violation fails the journey, its report
+  ends on: WCAG 2.0, 2.1 and 2.2 rules at levels A and AA, as the
+  journey shows it, in Chromium and on the phone (WebKit). In Chromium,
+  at the largest text size and 320px wide, the screen mustn't scroll
+  sideways. No text kept on one line may be cut short there without a
+  title that holds it whole (WCAG 1.4.4 and 1.4.10, which axe doesn't
+  check). Each step names its screen, which a theme tour checks in the
+  other palettes and themes, a tour for each area of the app. It runs
+  the same rules in the Standard palette's dark theme, in Chromium and
+  on the phone. In Chromium, it runs the contrast rules
+  (`color-contrast`, `link-in-text-block`) in both themes of every
+  other palette, with a palette of the user's own taken off the page. A violation fails the journey, its report
   naming the rule, the element and what axe found
   ([`harness/accessibility.ts`](../e2e/journeys/harness/accessibility.ts)).
   A violation let pass is listed there, in `KNOWN_EXCEPTIONS`, with its
@@ -135,9 +138,8 @@ A planned gap links to its issue; an issue for another is welcome
 - **Browsers**: every journey runs in Chromium, only those that differ
   between engines in Firefox, WebKit and on a phone
   ([testing.md](testing.md#browsers)), so axe sees the other screens in
-  Chromium alone. Desktop Firefox and WebKit run no axe: it takes about
-  40% of a journey's time, and the phone already checks WebKit's
-  rendering. What only
+  Chromium alone. Desktop Firefox and WebKit run no axe: the phone
+  already checks WebKit's rendering. What only
   Firefox computes, such as a `color-mix` color's contrast, goes
   unchecked.
 - **The graph**: the Studio's graph of an instance is one image; the
@@ -150,8 +152,10 @@ A planned gap links to its issue; an issue for another is welcome
   ([studio.md](studio.md#graph)); no screen reader pass has checked
   they're enough.
 - **What axe sees**: axe checks the screen each journey step ends on,
-  not the states in between, and only screens the journeys visit. It
-  finds a part of all possible problems.
+  not the states in between, and only screens the journeys visit. A
+  theme tour checks a screen in one state, the one it reaches, where a
+  journey may end on it in others. It finds a part of all possible
+  problems.
 
 ## Report a barrier
 

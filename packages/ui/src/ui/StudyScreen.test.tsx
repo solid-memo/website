@@ -440,15 +440,15 @@ describe("StudyScreen", () => {
     expect(props.onAnswer).not.toHaveBeenCalled();
   });
 
-  it("shows under each grade the interval it gives, as the grade's description, its name unchanged", () => {
+  it("shows under each grade the interval it gives, which its name holds too, as the button shows it", () => {
     renderScreen({
       answerScale: "minimal",
       intervals: { 0: 1, 1: 1, 2: 1, 3: 14, 4: 15, 5: 16 },
     });
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(
-      ["Again", "Hard", "Good", "Easy"]
-        .map((name) => screen.getByRole("button", { name, description: /days?$/ }))
+      ["Again 1 day", "Hard 14 days", "Good 15 days", "Easy 16 days"]
+        .map((name) => screen.getByRole("button", { name }))
         .map((button) => button.querySelector(".grade-interval")!.textContent),
     ).toEqual(["1 day", "14 days", "15 days", "16 days"]);
   });
@@ -456,7 +456,9 @@ describe("StudyScreen", () => {
   it("shows the intervals given, and none while they are unknown", () => {
     const { rerender, props } = renderScreen({ intervals: { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 } });
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
-    expect(screen.getByRole("button", { name: "5 — Easy" })).toHaveAccessibleDescription("1 day");
+    expect(
+      screen.getByRole("button", { name: "5 — Easy 1 day" }),
+    ).not.toHaveAccessibleDescription();
     rerender(<StudyScreen {...props} intervals={undefined} />);
     expect(screen.getByRole("button", { name: "5 — Easy" })).not.toHaveAccessibleDescription();
     expect(document.querySelector(".grade-interval")).toBeNull();

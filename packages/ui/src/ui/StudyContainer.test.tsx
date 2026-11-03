@@ -84,9 +84,12 @@ async function reveal() {
 }
 
 /** Reveal the current card and grade it. */
+/** A grade's button by its name, which the interval it gives follows once that is known. */
+const graded = (grade: string) => new RegExp(`^${grade}( |$)`);
+
 async function answer(grade: string) {
   await reveal();
-  fireEvent.click(screen.getByRole("button", { name: grade }));
+  fireEvent.click(screen.getByRole("button", { name: graded(grade) }));
 }
 
 /** The Undo button, once it can be pressed: when the answer it undoes is saved. */
@@ -185,7 +188,7 @@ describe("StudyContainer", () => {
     expect(screen.queryByText("front-a")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(screen.getByText("front-a")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "4 — Good" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("4 — Good") }));
     await waitFor(() =>
       expect(useCases.recordReview).toHaveBeenCalledWith(
         instance.url,
@@ -247,7 +250,7 @@ describe("StudyContainer", () => {
     renderContainer(useCases);
 
     fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
-    fireEvent.click(screen.getByRole("button", { name: "5 — Easy" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("5 — Easy") }));
 
     expect(await screen.findByText("front-b")).toBeInTheDocument();
     expect(useCases.recordReview).toHaveBeenCalledWith(
@@ -265,7 +268,7 @@ describe("StudyContainer", () => {
     });
     await waitFor(() => expect(secondReveal).toHaveAttribute("aria-disabled", "false"));
     fireEvent.click(secondReveal);
-    fireEvent.click(screen.getByRole("button", { name: "3 — Hard" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("3 — Hard") }));
 
     expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
   });
@@ -285,7 +288,7 @@ describe("StudyContainer", () => {
     renderContainer(useCases);
 
     fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
-    fireEvent.click(screen.getByRole("button", { name: "5 — Easy" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("5 — Easy") }));
 
     expect(await screen.findByText("review save failed")).toBeInTheDocument();
     expect(screen.getByText("front-a")).toBeInTheDocument();
@@ -486,25 +489,25 @@ describe("StudyContainer", () => {
       })),
     });
     renderContainer(useCases, () => 0);
-    const good = () => screen.getByRole("button", { name: "4 — Good" });
+    const good = () => screen.getByRole("button", { name: graded("4 — Good") });
 
     await screen.findByText("front-a");
     await reveal();
-    expect(good()).toHaveAccessibleDescription("15 days");
-    fireEvent.click(screen.getByRole("button", { name: "1 — Wrong" }));
+    expect(good()).toHaveAccessibleName("4 — Good 15 days");
+    fireEvent.click(screen.getByRole("button", { name: graded("1 — Wrong") }));
     // A new prompt: its first good grade gives a day.
     await screen.findByText("front-b");
     await reveal();
-    expect(good()).toHaveAccessibleDescription("1 day");
+    expect(good()).toHaveAccessibleName("4 — Good 1 day");
     fireEvent.click(good());
     // The failed card again, as its answer left it (the fake's state: one repetition).
     await screen.findByText("front-a");
     await reveal();
-    expect(good()).toHaveAccessibleDescription("6 days");
+    expect(good()).toHaveAccessibleName("4 — Good 6 days");
     fireEvent.click(await undoButton());
     await screen.findByText("front-b");
     await reveal();
-    expect(good()).toHaveAccessibleDescription("1 day");
+    expect(good()).toHaveAccessibleName("4 — Good 1 day");
   });
 
   it("repeats the only remaining card immediately until it passes", async () => {
@@ -585,10 +588,10 @@ describe("StudyContainer", () => {
     renderContainer(useCases);
 
     fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
-    expect(screen.getByRole("button", { name: "Again" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "1 — Wrong" })).toBeNull();
+    expect(screen.getByRole("button", { name: graded("Again") })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: graded("1 — Wrong") })).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Again" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("Again") }));
     expect(await screen.findByText("front-b")).toBeInTheDocument();
     expect(useCases.recordReview).toHaveBeenCalledWith(
       instance.url,
@@ -642,15 +645,13 @@ describe("StudyContainer", () => {
 
     await screen.findByText("front-a");
     await reveal();
-    expect(screen.queryByRole("button", { name: "4 — Good" })).toBeNull();
+    expect(screen.queryByRole("button", { name: graded("4 — Good") })).toBeNull();
     const expected = previewIntervals(sm2, { sm2, fsrs }, new Date(), {
       scheduler: "fsrs6",
       desiredRetention: 0.9,
       dayBoundaryHour: prefs.dayBoundaryHour,
     });
-    expect(screen.getByRole("button", { name: "Good" })).toHaveAccessibleDescription(
-      `${expected[4]} days`,
-    );
+    expect(screen.getByRole("button", { name: `Good ${expected[4]} days` })).toBeInTheDocument();
     // Not SM-2's 15 days.
     expect(expected[4]).not.toBe(15);
   });
@@ -752,7 +753,7 @@ describe("StudyContainer keeping the deck's schedule", () => {
     clock += 1_000;
     fireEvent.click(reveal);
     clock += 1_500;
-    fireEvent.click(screen.getByRole("button", { name: "4 — Good" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("4 — Good") }));
     await waitFor(() =>
       expect(useCases.recordReview).toHaveBeenCalledWith(
         instance.url,
@@ -770,7 +771,7 @@ describe("StudyContainer keeping the deck's schedule", () => {
     await waitFor(() => expect(next).toHaveAttribute("aria-disabled", "false"));
     clock += 800;
     fireEvent.click(next);
-    fireEvent.click(screen.getByRole("button", { name: "5 — Easy" }));
+    fireEvent.click(screen.getByRole("button", { name: graded("5 — Easy") }));
     await waitFor(() =>
       expect(useCases.recordReview).toHaveBeenLastCalledWith(
         instance.url,

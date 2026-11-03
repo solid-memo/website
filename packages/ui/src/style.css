@@ -2682,7 +2682,10 @@ form.card-edit {
 
 .quality-buttons {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Columns as narrow as the screen asks, not their buttons' text: at the
+     largest text size and 320px wide, the six grades of SM-2 stay within
+     it (WCAG 1.4.10). */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
   width: 100%;
   max-width: 30rem;
@@ -2691,6 +2694,9 @@ form.card-edit {
 .quality-buttons button {
   --grade: var(--text-muted);
   min-height: 2.75rem;
+  /* The interval goes under the grade when both don't fit side by side. */
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
   background: color-mix(in srgb, var(--grade) 12%, var(--surface));
   border-color: color-mix(in srgb, var(--grade) 45%, var(--surface));
 }
@@ -2724,7 +2730,7 @@ form.card-edit {
 }
 
 .quality-buttons.minimal {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 /* The interval a grade gives, under its name. */
@@ -2779,7 +2785,7 @@ form.card-edit {
 
 @media (max-width: 30rem) {
   .quality-buttons.minimal {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

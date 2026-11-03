@@ -4,11 +4,12 @@
 
 /**
  * What the journeys check every screen for (docs/accessibility.md): axe's
- * rules for WCAG 2.0, 2.1 and 2.2 at levels A and AA, in the light and
- * the dark theme of the standard palette, and its contrast rules in both
+ * rules for WCAG 2.0, 2.1 and 2.2 at levels A and AA, on the screen as a
+ * journey shows it, and at the largest text size, that it reflows at
+ * 320px; then, in the theme tours (harness/screens.ts), those rules in
+ * the dark theme of the standard palette, and the contrast rules in both
  * themes of every other palette. A violation fails the journey, unless
- * it is one of the known exceptions below. Then, at the largest text
- * size, that the screen reflows at 320px.
+ * it is one of the known exceptions below.
  */
 export const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
@@ -31,7 +32,7 @@ export type Theme = (typeof THEMES)[number];
 export interface Scheme {
   palette: Palette;
   theme: Theme;
-  /** All of WCAG_TAGS (Standard), or CONTRAST_RULES alone, and then in Chromium only. */
+  /** All of WCAG_TAGS (Standard), or CONTRAST_RULES alone. */
   full: boolean;
 }
 
@@ -39,6 +40,22 @@ export interface Scheme {
 export const SCHEMES: readonly Scheme[] = PALETTES.flatMap((palette) =>
   THEMES.map((theme) => ({ palette, theme, full: palette === "standard" })),
 );
+
+/**
+ * The schemes a theme tour checks a screen in: in Chromium, every one
+ * but Standard light, which the journeys check their screens in as they
+ * show them; on the phone, Standard dark alone, as the other palettes'
+ * colors are the same in every engine. A screen no journey reaches
+ * (`unseen`, harness/screens.ts's TOUR_ONLY) is checked in Standard
+ * light too.
+ */
+export function tourSchemes(chromium: boolean, unseen = false): Scheme[] {
+  return SCHEMES.filter(({ palette, theme }) =>
+    palette === "standard" && theme === "light"
+      ? unseen
+      : chromium || (palette === "standard" && theme === "dark"),
+  );
+}
 
 /** The width the reflow check narrows the page to, and the text size it shows it at (WCAG 1.4.10). */
 export const REFLOW = { width: 320, textSize: "largest" } as const;

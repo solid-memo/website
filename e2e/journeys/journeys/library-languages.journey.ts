@@ -20,30 +20,46 @@ const JAPANESE_BASICS = "Basic Japanese";
  * filter lost on the way to a deck's page and back.
  */
 test("the deck library narrowed to the language of the cards", async ({ app }) => {
-  await app.step("01 · Visit Solid Memo and try it as a guest", async () => {
-    await app.onboarding.visit();
-    await app.onboarding.tryAsGuest();
-  });
+  await app.step(
+    "01 · Visit Solid Memo and try it as a guest",
+    async () => {
+      await app.onboarding.visit();
+      await app.onboarding.tryAsGuest();
+    },
+    { screen: "decks.guest" },
+  );
 
-  await app.step("02 · In the deck library, check Japanese: only its deck is left", async () => {
-    await app.library.open();
-    await app.library.expectDeck(BRIGHTEST_STARS.en);
-    await app.library.expectRowLanguages(BRIGHTEST_STARS.en, ["English", "Swedish"]);
-    await app.library.checkCardLanguage("Japanese");
-    await expect.poll(() => app.library.shownDecks()).toEqual([JAPANESE_BASICS]);
-    await app.library.expectRowLanguages(JAPANESE_BASICS, ["Japanese", "English", "Swedish"]);
-  });
+  await app.step(
+    "02 · In the deck library, check Japanese: only its deck is left",
+    async () => {
+      await app.library.open();
+      await app.library.expectDeck(BRIGHTEST_STARS.en);
+      await app.library.expectRowLanguages(BRIGHTEST_STARS.en, ["English", "Swedish"]);
+      await app.library.checkCardLanguage("Japanese");
+      await expect.poll(() => app.library.shownDecks()).toEqual([JAPANESE_BASICS]);
+      await app.library.expectRowLanguages(JAPANESE_BASICS, ["Japanese", "English", "Swedish"]);
+    },
+    { screen: "library" },
+  );
 
-  await app.step("03 · Its page names the languages of its cards", async () => {
-    await app.library.openDeck(JAPANESE_BASICS);
-    await app.libraryDeck.expectCardLanguages(["Japanese", "English", "Swedish", "Korean"]);
-  });
+  await app.step(
+    "03 · Its page names the languages of its cards",
+    async () => {
+      await app.library.openDeck(JAPANESE_BASICS);
+      await app.libraryDeck.expectCardLanguages(["Japanese", "English", "Swedish", "Korean"]);
+    },
+    { screen: "library-deck" },
+  );
 
-  await app.step("04 · Back in the library, Japanese is still checked; uncheck it", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.library");
-    await app.library.expectCardLanguageChecked("Japanese");
-    await expect.poll(() => app.library.shownDecks()).toEqual([JAPANESE_BASICS]);
-    await app.library.uncheckCardLanguage("Japanese");
-    await app.library.expectDeck(BRIGHTEST_STARS.en);
-  });
+  await app.step(
+    "04 · Back in the library, Japanese is still checked; uncheck it",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.library");
+      await app.library.expectCardLanguageChecked("Japanese");
+      await expect.poll(() => app.library.shownDecks()).toEqual([JAPANESE_BASICS]);
+      await app.library.uncheckCardLanguage("Japanese");
+      await app.library.expectDeck(BRIGHTEST_STARS.en);
+    },
+    { screen: "library" },
+  );
 });
