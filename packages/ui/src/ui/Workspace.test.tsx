@@ -2431,7 +2431,7 @@ describe("Workspace", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Study Kanji N5" }));
     fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
-    fireEvent.click(await screen.findByRole("button", { name: "4 — Good" }));
+    fireEvent.click(await screen.findByRole("button", { name: /^4 — Good( |$)/ }));
     await screen.findByText("Session finished — all cards reviewed.");
     const end = screen.getByRole("button", { name: "End session" });
     await waitFor(() => expect(end).toBeEnabled());

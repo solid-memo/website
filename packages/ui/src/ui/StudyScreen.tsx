@@ -293,8 +293,8 @@ export function StudyScreen({
  * grade by accident. While an answer saves, the buttons are only
  * aria-disabled, so the one pressed keeps the focus if saving fails.
  *
- * Under each grade is the interval it gives, unless it is unknown:
- * extra text the grade's name leaves out, read as its description.
+ * Under each grade is the interval it gives, unless it is unknown, and
+ * the button's name holds both, as it shows them (WCAG 2.5.3).
  *
  * A grade comes with how long the learner took (useStopwatch): to
  * recall, from the card shown to Reveal, and to grade, from Reveal to
@@ -324,7 +324,6 @@ function StudyCard({
   const questionRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
   const gradePromptId = useId();
-  const intervalId = useId();
   const buttons = answerButtons(answerScale, t);
 
   function reveal() {
@@ -389,18 +388,20 @@ function StudyCard({
                 key={label}
                 data-grade={quality}
                 aria-keyshortcuts={key}
-                aria-label={intervals === undefined ? undefined : label}
-                aria-describedby={intervals === undefined ? undefined : `${intervalId}-${quality}`}
                 onClick={() => {
                   if (!busy) grade(quality);
                 }}
                 aria-disabled={busy}
               >
                 {label}
+                {/* Its name is all it shows, the interval too (WCAG 2.5.3), a space apart. */}
                 {intervals !== undefined && (
-                  <span id={`${intervalId}-${quality}`} class="grade-interval">
-                    {t("study.interval", { count: intervals[quality] })}
-                  </span>
+                  <>
+                    {" "}
+                    <span class="grade-interval">
+                      {t("study.interval", { count: intervals[quality] })}
+                    </span>
+                  </>
                 )}
               </button>
             ))}
