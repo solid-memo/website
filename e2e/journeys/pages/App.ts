@@ -2,15 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
-import AxeBuilder from "@axe-core/playwright";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { expect, test, type CDPSession, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
 import {
   clippedBoxes,
   CONTRAST_RULES,
   REFLOW,
+  type Scheme,
   SCHEMES,
   unexcused,
+  type Violation,
   violationLines,
   WCAG_TAGS,
 } from "../harness/accessibility.ts";
@@ -46,6 +49,9 @@ import { Study } from "./Study.ts";
 import { Studio } from "./Studio.ts";
 import { Trial } from "./Trial.ts";
 import { Validation } from "./Validation.ts";
+
+/** axe, as a script the page runs (axe-core's own build), loaded into a page once each document. */
+const AXE = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 
 /**
  * Solid Memo as a journey sees it: one page object per screen, the
@@ -191,22 +197,10 @@ export class App {
     const app = new URL(String(this.testInfo.project.use.baseURL)).origin;
     if (new URL(this.page.url()).origin !== app) return;
     const chromium = this.testInfo.project.name === "chromium";
-    const shown = await this.rootAttributes();
-    for (const { palette, theme, full } of SCHEMES) {
-      if (!full && !chromium) continue;
-      // The stylesheet's colors follow the root's data-palette and data-theme alone (docs/theme.md),
-      // once a palette of the user's own, which the root's style paints, is taken off.
-      await this.setRootAttributes({
-        "data-palette": palette === "standard" ? null : palette,
-        "data-theme": theme,
-        style: null,
-      });
-      const axe = new AxeBuilder({ page: this.page });
-      const { violations } = await (full
-        ? axe.withTags(WCAG_TAGS)
-        : axe.withRules(CONTRAST_RULES)
-      ).analyze();
-      const left = unexcused(violations);
+    const schemes = SCHEMES.filter(({ full }) => full || chromium);
+    const found = await this.axe(schemes);
+    for (const [at, { palette, theme }] of schemes.entries()) {
+      const left = unexcused(found[at]!);
       if (left.length === 0) continue;
       const scheme = `${palette}, ${theme}`;
       const name = `${title} · accessibility, ${scheme}.json`;
@@ -218,8 +212,57 @@ export class App {
         .soft(violationLines(left), `accessibility violations, in ${scheme} (${name})`)
         .toEqual([]);
     }
-    await this.setRootAttributes(shown);
     if (chromium) await this.checkReflow(title);
+  }
+
+  /**
+   * What axe finds on the screen in each of the schemes, one after
+   * another, in one call into the page: axe is loaded into the document
+   * the first time it is checked, and the root's attributes are put back
+   * after, whatever happens. The stylesheet's colors follow the root's
+   * data-palette and data-theme alone (docs/theme.md), once a palette of
+   * the user's own, which the root's style paints, is taken off.
+   */
+  private async axe(schemes: readonly Scheme[]): Promise<Violation[][]> {
+    if (!(await this.page.evaluate(() => "axe" in window))) await this.page.evaluate(AXE);
+    return this.page.evaluate(
+      async ({ schemes, tags, rules }) => {
+        type Axe = {
+          run: (
+            context: Document,
+            options: {
+              runOnly: { type: "tag" | "rule"; values: string[] };
+              resultTypes: string[];
+            },
+          ) => Promise<{ violations: Violation[] }>;
+        };
+        const { axe } = window as unknown as { axe: Axe };
+        const html = document.documentElement;
+        const names = ["data-palette", "data-theme", "style"];
+        const shown = names.map((name) => [name, html.getAttribute(name)] as const);
+        const set = (name: string, value: string | null) => {
+          if (value === null) html.removeAttribute(name);
+          else html.setAttribute(name, value);
+        };
+        try {
+          const found: Violation[][] = [];
+          for (const { palette, theme, full } of schemes) {
+            set("data-palette", palette === "standard" ? null : palette);
+            set("data-theme", theme);
+            set("style", null);
+            const { violations } = await axe.run(document, {
+              runOnly: full ? { type: "tag", values: tags } : { type: "rule", values: rules },
+              resultTypes: ["violations"],
+            });
+            found.push(violations);
+          }
+          return found;
+        } finally {
+          for (const [name, value] of shown) set(name, value);
+        }
+      },
+      { schemes, tags: WCAG_TAGS, rules: CONTRAST_RULES },
+    );
   }
 
   /** The root's attributes the stylesheet's colors and text size follow, and its style, where a palette of the user's own is painted. */
