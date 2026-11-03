@@ -1057,6 +1057,16 @@ them as one: written another way a request or a server resolves, such
 as a character encoded that needs no encoding, or with a user name
 and password in it.
 
+The source's cards and review states are copied into the target. So
+each of its two documents is read as the user only when it's the
+instance's, by the place rule of
+[the next version of a release](#drafts). That is, it's in the
+instance, or in one of the user's storages that the instance is in
+too. Any other is read as no one, so an instance in someone else's pod
+can't have cards, or their progress, kept from everyone copied into
+another of its decks. The target is the instance's own deck, read as
+its data is.
+
 The domain plans the transfer
 ([cardTransfer.ts](../packages/domain/src/cardTransfer.ts),
 `planCardTransfer`):
@@ -2260,9 +2270,11 @@ the last, as a draft of a deck reads the deck's cards:
 So a link in the catalog, which anyone may have written, opens nothing
 else to everyone, nor a release of the user's own that an instance in
 someone else's pod lists. Nor is such a release copied into that
-instance as its next version, nor a deck's cards into a draft there. The releases screen lists only links at
-an http(s) address named as a release is, `…/<name>/v<N>.ttl`, as a
-request sends it
+instance as its next version, nor a deck's cards into a draft there
+or into another of its decks
+([moving and copying cards](#moving-and-copying-cards)). The releases
+screen lists only links at an http(s) address named as a release is,
+`…/<name>/v<N>.ttl`, as a request sends it
 ([data-model.md](data-model.md#where-an-instances-documents-are)).
 Whether a release is public is asked without credentials
 (`isReleasePublic`).

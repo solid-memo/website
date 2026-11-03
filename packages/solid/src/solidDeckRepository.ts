@@ -101,7 +101,7 @@ interface CardWrite {
 
 export interface SolidDeckRepositoryDeps {
   fetch: typeof globalThis.fetch;
-  /** The fetch of a deck's cards read as no one (listCards `asNoOne`); `fetch` by default. */
+  /** The fetch of a deck's cards read as no one (listCards, readCardsSince `asNoOne`); `fetch` by default. */
   publicFetch?: typeof globalThis.fetch;
   now: () => Date;
   randomId: () => string;
@@ -286,10 +286,9 @@ export function createSolidDeckRepository({
       return toCards(dataset);
     },
 
-    async readCardsSince(deck, version) {
-      return mapSince(await readSince(deck.cardsDocumentUrl, version, fetch), (dataset) =>
-        dataset === null ? [] : toCards(dataset),
-      );
+    async readCardsSince(deck, version, { asNoOne = false } = {}) {
+      const read = await readSince(deck.cardsDocumentUrl, version, asNoOne ? publicFetch : fetch);
+      return mapSince(read, (dataset) => (dataset === null ? [] : toCards(dataset)));
     },
 
     async addCard(deck, content): Promise<Card> {

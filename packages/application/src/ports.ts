@@ -262,8 +262,15 @@ export interface DeckRepository {
    * into a place they may not be the user's to share.
    */
   listCards(deck: Deck, options?: { asNoOne?: boolean }): Promise<Card[]>;
-  /** The deck's cards unless its cards document is still at `version` (undefined: read them). */
-  readCardsSince(deck: Deck, version: string | undefined): Promise<Since<Card[]>>;
+  /**
+   * The deck's cards unless its cards document is still at `version`
+   * (undefined: read them), read as listCards reads them, `asNoOne` too.
+   */
+  readCardsSince(
+    deck: Deck,
+    version: string | undefined,
+    options?: { asNoOne?: boolean },
+  ): Promise<Since<Card[]>>;
   addCard(deck: Deck, content: CardContent): Promise<Card>;
   /**
    * Replaces the card's content, writing it in this app's format; review
@@ -649,7 +656,12 @@ export interface FileExchange {
  * state beside it, both in the deck's reviews document.
  */
 export interface ReviewStateRepository {
-  listReviewStates(deck: Deck): Promise<ReviewStates>;
+  /**
+   * The deck's review states, read as the instance's data is (in the
+   * user's own pod as the user), or with `asNoOne`, as no one: for
+   * states copied into a place they may not be the user's to share.
+   */
+  listReviewStates(deck: Deck, options?: { asNoOne?: boolean }): Promise<ReviewStates>;
   /** The deck's review states unless its reviews document is still at `version` (undefined: read them). */
   readReviewStatesSince(deck: Deck, version: string | undefined): Promise<Since<ReviewStates>>;
   /** The prompt's states, each null when it has none (an SM-2 one: never reviewed that way). */

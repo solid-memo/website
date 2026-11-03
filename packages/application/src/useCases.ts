@@ -289,6 +289,7 @@ export function createUseCases({
       deckArchive,
       fileExchange,
       digestStore,
+      storageGateway,
       newId,
       now,
     }),

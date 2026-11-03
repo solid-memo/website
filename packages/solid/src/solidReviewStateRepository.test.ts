@@ -184,6 +184,20 @@ describe("listReviewStates", () => {
       fsrs: [fsrs],
     });
   });
+
+  it("reads the states as no one, asked to, through the fetch it is given for that, else its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    await createSolidReviewStateRepository({ fetch, publicFetch }).listReviewStates(deck, {
+      asNoOne: true,
+    });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, publicFetch);
+    await createSolidReviewStateRepository({ fetch, publicFetch }).listReviewStates(deck);
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, fetch);
+    await createSolidReviewStateRepository({ fetch }).listReviewStates(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, fetch);
+  });
 });
 
 describe("getReviewState", () => {

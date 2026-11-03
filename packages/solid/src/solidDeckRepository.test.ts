@@ -30,6 +30,7 @@ import { getSolidDatasetOrNull, versionOf } from "./datasets";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 
@@ -1152,6 +1153,22 @@ describe("listCards", () => {
     await createSolidDeckRepository({ ...deps, publicFetch }).listCards(deck);
     expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
     await createSolidDeckRepository(deps).listCards(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+  });
+
+  it("reads the cards since a version as no one, asked to, through the fetch it is given for that, else its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const deps = { fetch, now: () => new Date(), randomId: () => "fixed" };
+    const repository = createSolidDeckRepository({ ...deps, publicFetch });
+    await expect(repository.readCardsSince(deck, undefined, { asNoOne: true })).resolves.toEqual({
+      unchanged: false,
+      value: [],
+      version: ABSENT_VERSION,
+    });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, publicFetch);
+    await repository.readCardsSince(deck, undefined);
     expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
   });
 
