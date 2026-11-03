@@ -50,6 +50,7 @@ import {
   sourceOf,
   toRdfJsDataset,
 } from "./rdf";
+import { TURTLE_OPTIONS, tripleTermError } from "./turtleDocument";
 
 /**
  * Reading and writing a pod's resources (client/resources.ts) without a
@@ -200,7 +201,9 @@ function collector(
  * `baseIRI`, under `limits` (collector), refused at a base, prefix or
  * IRI past what any read takes in (writeTurtle). The text is written to
  * the parser in parts, so that it reads no further than the part it is
- * in.
+ * in. A text with an RDF 1.2 triple term does not parse: n3 is told to
+ * read none (TURTLE_OPTIONS), and the parse fails at the first triple
+ * that holds one all the same, as an annotation gives (tripleTermError).
  */
 function parseTurtle(
   text: string,
@@ -210,15 +213,21 @@ function parseTurtle(
 ): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
     const { quads, add, refuse, refused } = collector(baseIRI, limits, reject, spent);
-    const parser = new Parser({ format: TURTLE, baseIRI });
+    const parser = new Parser({ ...TURTLE_OPTIONS, baseIRI });
+    let failed = false;
     // n3's parser reads a stream as such an object, as its own stream parser hands it one.
     const parse = (stream: TextStream) =>
       parser.parse(stream as unknown as string, (error, quad) => {
-        if (error) reject(error);
-        else if (quad) add(quad);
+        if (failed) return;
+        const failure = error ?? (quad && tripleTermError(quad));
+        if (failure) {
+          failed = true;
+          reject(failure);
+        } else if (quad) add(quad);
         else resolve(quads);
       });
-    if (!writeTurtle(text, baseIRI, parse, () => !refused())) refuse();
+    // A text that does not parse is written no further, as one past limits is not.
+    if (!writeTurtle(text, baseIRI, parse, () => !refused() && !failed)) refuse();
   });
 }
 

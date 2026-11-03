@@ -164,12 +164,22 @@ export const BROWSER: Record<string, RegExp> = {
 
 /**
  * The node-only packages a package's browser code may import all the
- * same: solid-memo-client reads and writes Turtle with n3, which
- * Inrupt's client bundles too.
+ * same, from the files given: solid-memo-client reads and writes Turtle
+ * with n3, which Inrupt's client bundles too, and solid's
+ * client/linearDataset.ts builds the parser Inrupt's client reads
+ * Turtle with, without triple terms.
  */
-export const BROWSER_MAY_USE: Record<string, RegExp> = {
-  "solid-memo-client": /^n3$/,
+export const BROWSER_MAY_USE: Record<string, { specifier: RegExp; files: RegExp }> = {
+  "solid-memo-client": { specifier: /^n3$/, files: /^src\// },
+  solid: { specifier: /^n3$/, files: /^src\/client\/linearDataset\.ts$/ },
 };
+
+/** Whether BROWSER_MAY_USE lets this file of a package's browser code import `specifier`. */
+const browserMayUse = (short: string, file: string, specifier: string) => {
+  const may = BROWSER_MAY_USE[short];
+  return may !== undefined && may.specifier.test(specifier) && may.files.test(file);
+};
+
 export const NODE_ONLY = [
   /^node:/,
   /^n3$/,
@@ -362,7 +372,7 @@ function fileProblems(
       BROWSER[short]?.test(file) &&
       !test &&
       NODE_ONLY.some((pattern) => pattern.test(specifier!)) &&
-      !BROWSER_MAY_USE[short]?.test(specifier!)
+      !browserMayUse(short, file, specifier!)
     ) {
       problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
     }

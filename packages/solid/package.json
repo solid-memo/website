@@ -22,10 +22,12 @@
     "@solid-memo/domain": "*",
     "@solid-memo/shacl": "*",
     "@solid-memo/vocab": "*",
-    "jsonld-streaming-parser": "^5.0.2"
+    "jsonld-streaming-parser": "^5.0.2",
+    "n3": "^2.13.12"
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",
+    "@types/n3": "^1.26.6",
     "happy-dom": "^21.0.4"
   }
 }

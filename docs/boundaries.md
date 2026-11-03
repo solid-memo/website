@@ -19,7 +19,8 @@ imports and fails on:
   type-check);
 - a node-only import (`node:*`, `n3`, `@solid-memo/turtle`,
   `@solid-memo/site`, any package's `tooling/` or `node/` entry) in
-  browser code, `n3` in `solid-memo-client` aside;
+  browser code, `n3` in `solid-memo-client` and in `solid`'s
+  `client/linearDataset.ts` aside;
 - an import of a Solid client library, any `@inrupt/` package, from
   any file but `solid`'s client modules and `shacl`'s Turtle reader,
   tests aside, and from any file of `solid-memo-client`, tests included
@@ -107,7 +108,7 @@ listed:
 | `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl`, `rdf-validate-datatype` | `shacl` | `src/engine.ts` only, loaded lazily; `rdf-validate-datatype` for its registry of datatype checks ([validation.md](validation.md#flow)) |
 | `markdown-it`, `markdown-it-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never markdown-it's tokens ([markdown.md](markdown.md)) |
-| `n3` | `turtle`, the node tooling of `shacl`, `e2e-pod` and `solid-memo-client` | in `e2e-pod`, the server contract and the tests; in `solid-memo-client`, in the browser too |
+| `n3` | `turtle`, the node tooling of `shacl`, `e2e-pod`, `solid-memo-client` and `solid` | in `e2e-pod`, the server contract and the tests; in `solid-memo-client`, in the browser too; in `solid`, `src/client/linearDataset.ts` only, in the browser too: the Turtle parser Inrupt's client is given ([below](#files-without-a-vendor-library)) |
 | `jsonld-streaming-parser`, `oauth4webapi` | `solid-memo-client` | the JSON-LD parser; Solid-OIDC sign-in |
 | `fake-indexeddb` | `browser`, `composition`, `solid-memo-client` | tests only: IndexedDB in node, for the guest's pod's store and the sign-in session |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness talks to the Solid server with its request API |
@@ -126,7 +127,7 @@ library could take their place there alone
 |---|---|
 | [interface.ts](../packages/solid/src/client/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type; it imports no library |
 | [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built, many subjects set or removed in one pass |
-| [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, for `resources.ts` and `rdf.ts` alone |
+| [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, and the Turtle parser it and `parseQuads` read with, on `n3`, for `resources.ts` and `rdf.ts` alone |
 | [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bound every read keeps on a Turtle text's base and prefix declarations and on the long IRIs the parser resolves, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
 | [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, conditional reads and writes among them, and the Turtle and JSON-LD parsers |
 | [sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests; it imports no library |
@@ -171,18 +172,26 @@ needs no library of its own:
 - `solid` writes Turtle with `@inrupt/solid-client`'s
   `solidDatasetAsTurtle` and JSON-LD with
   [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
-  triples. It reads both with `parseQuads`: Turtle with the library's
-  parser, JSON-LD with `jsonld-streaming-parser`, the parser the library
-  uses, given a document loader that loads nothing, so that reading a
-  file never fetches a context. Both are in
+  triples. It reads both with `parseQuads`. Turtle is read with the
+  parser pod documents are read with: the library's, on `n3`, but with
+  no triple terms. The profile documents a WebID names are the
+  exception: the library reads them itself. The parser is in
+  [client/linearDataset.ts](../packages/solid/src/client/linearDataset.ts),
+  the only file of `solid` that may import `n3`. JSON-LD is read with
+  `jsonld-streaming-parser`, the parser the library uses, given a
+  document loader that loads nothing, so that reading a file never
+  fetches a context. `parseQuads` is in
   [client/resources.ts](../packages/solid/src/client/resources.ts), the
   only file of `solid` that may import `jsonld-streaming-parser`
   (`VENDOR_ONLY_IN`). With `SOLID_CLIENT=solid-memo-client`, that
   package's `resources.ts` writes and reads Turtle with `n3`, and reads
   JSON-LD with `jsonld-streaming-parser`, also with a document loader
   that loads nothing, and is its only file that may import it.
-  Either client tells the parser to read no RDF-star, and
-  `jsonLd.ts` writes JSON-LD on either client.
+  Either client tells the JSON-LD parser to read no RDF-star, and `n3`
+  to read no Turtle triple terms. A Turtle parse fails, too, at a
+  triple that holds one, as an annotation or a reifier gives, which
+  the option lets through. `jsonLd.ts` writes JSON-LD on either
+  client.
 - `browser`'s `FileExchange` port saves and opens files with what the
   browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):
   a `Blob` behind a link with `download`, and a hidden

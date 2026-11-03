@@ -12,7 +12,6 @@ import {
   getFile as libraryGetFile,
   getPodUrlAllFrom as libraryGetPodUrlAllFrom,
   getProfileAll as libraryGetProfileAll,
-  getTurtleParser as libraryGetTurtleParser,
   overwriteFile as libraryOverwriteFile,
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
   solidDatasetAsTurtle as librarySolidDatasetAsTurtle,
@@ -34,7 +33,10 @@ import {
   type RequestOptions,
   type SourcedDataset,
 } from "./interface";
-import { getSolidDatasetLinear as libraryGetSolidDatasetLinear } from "./linearDataset";
+import {
+  getSolidDatasetLinear as libraryGetSolidDatasetLinear,
+  turtleParser,
+} from "./linearDataset";
 import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
 import { NO_SIZE_LIMITS, quadTally, type TextStream, textChunks, writeTurtle } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
@@ -362,7 +364,8 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * The quads of a Turtle or JSON-LD text, its relative IRIs resolved
  * against `baseUrl`, parsed as a pod's documents are: in every graph the
  * text names. Rejects with the parser's error on a text that does not
- * parse, and with a ReadLimitError at the first quad past `limits`
+ * parse, as a Turtle text with a triple term does not (turtleParser) nor
+ * JSON-LD with RDF-star, and with a ReadLimitError at the first quad past `limits`
  * (quadTally; the text's own size is its caller's to check: it holds the
  * text already), or on a Turtle text at its first base, prefix or IRI
  * past what a read takes in, with limits or with none (writeTurtle); the
@@ -400,14 +403,19 @@ export function parseQuads(
       parseJsonLd(text, baseUrl, { onQuad, onError: reject, done });
       return;
     }
-    const parser = libraryGetTurtleParser();
+    const parser = turtleParser();
+    let failed = false;
     parser.onQuad(onQuad);
-    parser.onError(reject);
+    parser.onError((error) => {
+      failed = true;
+      reject(error);
+    });
     parser.onComplete(done);
     const resourceInfo = serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format]));
     // solid-client hands the text to n3's parser as it is, which reads a stream as well.
     const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);
-    if (!writeTurtle(text, baseUrl, parse, () => !refused)) refuse();
+    // A text that does not parse is written no further, as one past limits is not.
+    if (!writeTurtle(text, baseUrl, parse, () => !refused && !failed)) refuse();
   });
 }
 

@@ -488,6 +488,61 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       }
     });
 
+    it("reads no RDF 1.2 triple term in Turtle: a document with one, nested, reified, annotated or named by a reifier, does not parse, with limits or with none", async () => {
+      const texts = [
+        `<#a> <${EX}p> <<( <#s> <${EX}p> <#o> )>> .`,
+        `<#a> <${EX}p> <<( [] <${EX}p> <<( <#s> <${EX}p> <#o> )>> )>> .`,
+        `<< <#s> <${EX}p> <#o> >> <${EX}q> "y" .`,
+        `<#a> <${EX}p> <#o> {| <${EX}q> <#r> |} .`,
+        `<#a> <${EX}p> <#o> ~ <#r> .`,
+        `<#a> <${EX}p> <#o> ${`{| <${EX}q> <#r> `.repeat(50)}${"|} ".repeat(50)}.`,
+      ];
+      const unparsed = async (read: () => Promise<unknown>) => {
+        const error = await read().catch((failure: unknown) => failure);
+        // A parse error, not a refusal past limits.
+        expect(error).toBeInstanceOf(Error);
+        expect(error).not.toBeInstanceOf(ReadLimitError);
+      };
+      for (const text of texts) {
+        for (const fetch of [turtleAt(text), limitedFetch(turtleAt(text), RELEASE_LIMITS)]) {
+          await unparsed(() => getSolidDatasetLinear(URL_, { fetch }));
+          await unparsed(() => readDocument(URL_, { fetch }));
+        }
+        for (const limits of [undefined, RELEASE_LIMITS]) {
+          await unparsed(() => parseQuads(text, "turtle", URL_, limits));
+        }
+      }
+    });
+
+    it("stops reading a release at its first triple term, nested, annotated or not: what follows is not read", async () => {
+      const nested = (depth: number): string =>
+        depth === 0 ? "<#o>" : `<<( [] <${EX}p> ${nested(depth - 1)} )>>`;
+      // Past the first part, base declarations a read would refuse with a ReadLimitError.
+      const rest = `${`<#b> <${EX}p> <#c> .\n`.repeat(1_000)}${"@base <https://pod.example/> .\n".repeat(17)}`;
+      const annotated = `<#a> <${EX}p> <#o> {| <${EX}q> <#r> |} .`;
+      for (const head of [
+        `<#a> <${EX}p> ${nested(1)} .`,
+        `<#a> <${EX}p> ${nested(100)} .`,
+        annotated,
+      ]) {
+        const text = `${head}\n${rest}`;
+        const fetch = limitedFetch(turtleAt(text), RELEASE_LIMITS);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(text, "turtle", URL_, RELEASE_LIMITS),
+        ]) {
+          const error = await read().catch((failure: unknown) => failure);
+          expect(error).toBeInstanceOf(Error);
+          expect(error).not.toBeInstanceOf(ReadLimitError);
+        }
+        // The rest alone is refused at its bases.
+        await expect(parseQuads(rest, "turtle", URL_, RELEASE_LIMITS)).rejects.toBeInstanceOf(
+          ReadLimitError,
+        );
+      }
+    });
+
     it("stops parsing a Turtle text at its first triple past the limits, however long the rest", async () => {
       // A base as long as is let through, and IRIs that go up from it: each walks the whole base.
       const head = `@base <https://pod.example/${"a/".repeat(200)}> .\n${"<a> <b> <c> .\n".repeat(20)}`;

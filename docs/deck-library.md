@@ -994,7 +994,10 @@ flowchart LR
   the release's own address. Its terms and prefixes are refused past
   their bound or when defined through another term, as a deck file's
   are, and so is an RDF-star annotation or triple term
-  ([data-model.md](data-model.md#decks-as-files)). The library's
+  ([data-model.md](data-model.md#decks-as-files)). A Turtle release
+  with a triple term, an annotation or a reifier doesn't parse
+  (`releaseUnreadable`), however it's read: the parser reads none, as
+  for a deck file, and stops at the first one. The library's
   index, which comes with the site and grows with the library, and the
   documents in the user's storages aren't limited in size. Their bases
   and prefixes are, as those of every document the app reads into a
