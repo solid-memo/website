@@ -12,6 +12,7 @@ import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorag
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
+import type { DigestRepository } from "@solid-memo/application/ports";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
 
 /**
@@ -157,6 +158,35 @@ async function put(pod: typeof globalThis.fetch, url: string, body: string): Pro
 /** Lets granted Web Locks run their callbacks, and released ones pass on. */
 async function settled(): Promise<void> {
   for (let turn = 0; turn < 5; turn++) await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * Keeps each read and write of the digest repository the composition
+ * makes, and returns a wait for all of them, those they lead to too:
+ * what the digest learns is written back in the background, after the
+ * use case that learned it has returned.
+ */
+function digestWork(): () => Promise<void> {
+  const work: Promise<unknown>[] = [];
+  const kept = <T>(promise: Promise<T>): Promise<T> => {
+    work.push(promise);
+    return promise;
+  };
+  altered.set("createSolidDigestRepository", (made) => {
+    const repository = made as DigestRepository;
+    const keeping: DigestRepository = {
+      readDigest: (instanceUrl) => kept(repository.readDigest(instanceUrl)),
+      updateDigest: (instanceUrl, change) => kept(repository.updateDigest(instanceUrl, change)),
+    };
+    return keeping;
+  });
+  return async () => {
+    for (let seen = -1; seen < work.length; ) {
+      seen = work.length;
+      await Promise.allSettled(work);
+      await settled();
+    }
+  };
 }
 
 beforeEach(() => {
@@ -379,6 +409,7 @@ describe("createAppUseCases", () => {
           : servedSiteNetwork(input, init),
       ),
     );
+    const digestWritten = digestWork();
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const foreign = "https://attacker.example/memo/";
     const deckOf = (id: string, cardsDocumentUrl: string, reviewsDocumentUrl: string): Deck => ({
@@ -406,11 +437,7 @@ describe("createAppUseCases", () => {
       ),
     ).resolves.toMatchObject({ missing: ["capital"] });
     // What the digest learned is written back after: until it is, the network stays.
-    await vi.waitFor(async () => {
-      const before = vi.mocked(globalThis.fetch).mock.calls.length;
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(vi.mocked(globalThis.fetch).mock.calls.length).toBe(before);
-    });
+    await digestWritten();
     for (const own of [ownCards, ownReviews]) {
       expect(login.sent).not.toContain(own);
       expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
@@ -679,6 +706,7 @@ describe("createAppUseCases", () => {
       `${alice}profile/card`,
       `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
     );
+    const digestWritten = digestWork();
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const session = { webId: login.webId };
     const instance = await useCases.createInstance(session, {
@@ -730,11 +758,7 @@ describe("createAppUseCases", () => {
     // The user's own pod is still theirs.
     expect(login.sent).toContain(`${alice}memo/catalog.ttl`);
     // What the digest learned is written back after, into Alice's pod: until it is, the network stays.
-    await vi.waitFor(async () => {
-      const before = sent.length;
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(sent.length).toBe(before);
-    });
+    await digestWritten();
   });
 
   it("reads no document the profile links on another server, as the user or at all", async () => {
