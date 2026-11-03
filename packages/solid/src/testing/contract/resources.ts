@@ -811,6 +811,49 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         "https://alice.example/",
       ]);
     });
+
+    it("finds the pods named in every document the WebID document names as more of the profile that can be read", async () => {
+      const card = "https://alice.example/profile/card";
+      const webId = `${card}#me`;
+      const storage = "http://www.w3.org/ns/pim/space#storage";
+      const documents: Record<string, string> = {
+        [card]: `@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+<> foaf:primaryTopic <#me> .
+<https://alice.example/settings/c> foaf:primaryTopic <#me> .
+<#me> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://alice.example/settings/a> ;
+  foaf:isPrimaryTopicOf <https://alice.example/settings/b>, <https://alice.example/settings/missing> ;
+  <${storage}> <https://alice.example/> .`,
+        "https://alice.example/settings/a": `<${webId}> <${storage}> <https://a.example/> .`,
+        "https://alice.example/settings/b": `<${webId}> <${storage}> <https://alice.example/> .`,
+        "https://alice.example/settings/c": `<${webId}> <${storage}> <https://c.example/> .`,
+      };
+      const sent: string[] = [];
+      const fetch: typeof globalThis.fetch = async (input) => {
+        const url = String(input);
+        sent.push(url);
+        const response = new Response(documents[url] ?? "", {
+          status: url in documents ? 200 : 404,
+          headers: { "Content-Type": "text/turtle" },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      };
+      const webIdProfile = await getSolidDataset(card, { fetch });
+      const storages = await getProfileStorages(webId, { fetch, webIdProfile });
+      expect([...storages].sort()).toEqual([
+        "https://a.example/",
+        "https://alice.example/",
+        "https://c.example/",
+      ]);
+      // The WebID document is not read again; one that cannot be read is left out.
+      expect([...sent].sort()).toEqual([
+        card,
+        "https://alice.example/settings/a",
+        "https://alice.example/settings/b",
+        "https://alice.example/settings/c",
+        "https://alice.example/settings/missing",
+      ]);
+    });
   });
 
   describe("parseQuads", () => {

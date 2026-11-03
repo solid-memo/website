@@ -45,6 +45,28 @@ export const ACCESS_CONTROL_LIMITS: ReadLimits = {
 };
 
 /**
+ * The most the app reads of a WebID document, and of the documents it
+ * names as more of the profile all together, as it looks for the user's
+ * storages (solidStorageGateway.ts): at every sign-in, and again as the
+ * credential gate asks. A profile holds a few dozen triples, so a wide
+ * margin over that is far less than a release may be, and no profile
+ * holds up a sign-in.
+ */
+export const PROFILE_LIMITS: ReadLimits = {
+  bytes: 1024 * 1024,
+  quads: 10_000,
+  characters: 4 * 1024 * 1024,
+};
+
+/**
+ * The most documents the app reads that a WebID document names as more
+ * of the profile, as it looks for the user's storages: a profile names
+ * one or two, and those past the first MAX_PROFILE_DOCUMENTS sent are
+ * left out. One outside the profile's places, never sent, does not count.
+ */
+export const MAX_PROFILE_DOCUMENTS = 16;
+
+/**
  * What a read with no limits is refused under, by the one bound every
  * read keeps: a Turtle text's base and prefix declarations and its
  * long IRIs that the parser resolves (writeTurtle). Its body, its

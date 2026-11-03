@@ -174,9 +174,8 @@ needs no library of its own:
   [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
   triples. It reads both with `parseQuads`. Turtle is read with the
   parser pod documents are read with: the library's, on `n3`, but with
-  no triple terms. The profile documents a WebID names are the
-  exception: the library reads them itself. The parser is in
-  [client/linearDataset.ts](../packages/solid/src/client/linearDataset.ts),
+  no triple terms; so are the profile documents a WebID names. The
+  parser is in [client/linearDataset.ts](../packages/solid/src/client/linearDataset.ts),
   the only file of `solid` that may import `n3`. JSON-LD is read with
   `jsonld-streaming-parser`, the parser the library uses, given a
   document loader that loads nothing, so that reading a file never
@@ -309,6 +308,14 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   release's ([deck-library.md](deck-library.md)). The storages and the
   folders entered on this page, a storage entered by hand trusted like
   one the profile names, are read as the user with no limits on size.
+  The storage lookup's reads of the profile's documents are the
+  exception, since they're made at every sign-in. The WebID document
+  is held to `PROFILE_LIMITS`, a wide margin over the few triples a
+  profile holds. The documents it names as more of the profile are
+  held to them all together, and no more than `MAX_PROFILE_DOCUMENTS`
+  of them are read: one outside the profile's places isn't read and
+  doesn't count. A WebID document past them fails the sign-in, and a
+  further document past them, or past that count, is left out.
 - **Anywhere else** a read is sent as no one (`credentials: "omit"`),
   and a write is refused before it's sent (`writeOutsidePod`). A
   catalog may name a deck's documents on any server
@@ -327,8 +334,7 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   another app wrote with a base that has a `.` or `..` segment, unless
   it's a relative path with no colon, such as `<./>`: the parser
   removes those as it resolves it. The library's own reads of
-  a profile's further documents and of access controls aren't bounded
-  so; they're the user's own.
+  access controls aren't bounded so; they're the user's own.
 - **The folders** are asked once a WebID and kept. The page asks for
   them again when it adds or removes one: a storage entered, an instance
   made, registered or deleted, a guest's study moved. An address outside
