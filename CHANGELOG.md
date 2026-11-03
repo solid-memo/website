@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.1](https://github.com/solid-memo/website/compare/v6.29.0...v6.29.1) (2026-11-03)
+
+### Bug Fixes
+
+* **ui:** keep SM-2's six grade buttons within a narrow screen ([11d7059](https://github.com/solid-memo/website/commit/11d7059eb5dd4ecbbd0e1f1541143a1be1d1dce9)), closes [#530](https://github.com/solid-memo/website/issues/530)
+* **ui:** name each grade button by all it shows, its interval too ([c12edec](https://github.com/solid-memo/website/commit/c12edeccde3e27a78cc2e921bea36aa799375689)), closes [#530](https://github.com/solid-memo/website/issues/530)
+
 ## [6.29.0](https://github.com/solid-memo/website/compare/v6.28.1...v6.29.0) (2026-11-02)
 
 ### Features
