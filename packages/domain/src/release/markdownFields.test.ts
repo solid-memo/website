@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { growth } from "../testing/growth";
 import {
   at,
   card,
@@ -16,8 +17,8 @@ import {
   text,
 } from "../testing/releaseModel";
 import {
-  isMarked,
   markdownFields,
+  markedSubjects,
   markdownProblems,
   theoryChunkProblems,
   type MarkdownCheck,
@@ -101,10 +102,10 @@ describe("markdownFields", () => {
     ]);
   });
 
-  it("tells a subject marked Markdown", () => {
-    expect(isMarked(release, at("q-1"))).toBe(true);
-    expect(isMarked(release, at("q-2"))).toBe(false);
-    expect(isMarked(release, at("nothing"))).toBe(false);
+  it("tells the subjects marked Markdown", () => {
+    const marked = markedSubjects(release);
+    expect([...marked]).toEqual([at("q-1"), at("q-3"), at("s-1"), at("ch-1")]);
+    expect(marked.has(at("q-2"))).toBe(false);
   });
 });
 
@@ -212,6 +213,38 @@ describe("markdownProblems", () => {
       },
       // A chapter's description is not chunked.
     ]);
+  });
+});
+
+describe("markdownProblems' growth", () => {
+  /** Cards, steps and chapters, `count` of each, every one marked, and as many text formats again on what is none of them. */
+  const many = (count: number) => {
+    const ids = Array.from({ length: count }, (_, i) => i);
+    return model({
+      cards: ids.map((i) => card(`q-${i}`, { front: [text("Front")] })),
+      steps: ids.map((i) => step(`s-${i}`, "ch-0", i, [], { theory: [text("Theory")] })),
+      chapters: ids.map((i) => chapter(`ch-${i}`, i, { description: [text("About")] })),
+      textFormats: [
+        ...ids.flatMap((i) => [marker(`q-${i}`), marker(`s-${i}`), marker(`ch-${i}`)]),
+        ...ids.map((i) => ({ subject: at(`t-${i}`), object: iri(SM.plainText) })),
+      ],
+    });
+  };
+
+  it("checks a release in time that grows with its records and text formats, not with their product", () => {
+    // Eight times the records and text formats take about as long as an
+    // eighth of them eight times over; looking through every text format
+    // for each card, step and chapter would take eight times as long.
+    const quiet: MarkdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
+    const ratio = growth(
+      (count) => {
+        const release = many(count);
+        return () => markdownProblems(release, quiet);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
