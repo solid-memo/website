@@ -296,7 +296,18 @@ export function createAppUseCases({
     }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: dataFetch, checkWrite }),
     paletteRepository: createSolidPaletteRepository({ fetch: dataFetch, checkWrite }),
-    reviewStateRepository: createSolidReviewStateRepository({ fetch: dataFetch, checkWrite }),
+    reviewStateRepository: createSolidReviewStateRepository({
+      fetch: dataFetch,
+      // A deck's states copied into another deck outside their pod are read as no one, as its cards are.
+      publicFetch: createPodFence(
+        routedFetch({
+          origin: GUEST_ORIGIN,
+          local: writeFence.fetch,
+          remote: limitedFetch(noOneFetch, FOREIGN_LIMITS),
+        }),
+      ),
+      checkWrite,
+    }),
     shapeValidator,
     repairRepository: createSolidRepairRepository({ fetch: dataFetch }),
     instanceCopier,

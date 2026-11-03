@@ -254,6 +254,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         key={route.deckUrl}
         useCases={useCases}
         instance={activeInstance!}
+        webId={session.webId}
         deck={activeDeck!}
         decks={decksQuery.data!}
         query={route.query ?? DEFAULT_CARD_QUERY}

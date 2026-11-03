@@ -27,6 +27,8 @@ import {
 
 export interface SolidReviewStateRepositoryDeps {
   fetch: typeof globalThis.fetch;
+  /** The fetch of a deck's review states read as no one (listReviewStates `asNoOne`); `fetch` by default. */
+  publicFetch?: typeof globalThis.fetch;
   /** Checks what is about to be written; see writeCheck.ts. */
   checkWrite?: WriteCheck;
   /** A new subject's id, for a state whose named subject is another's (see withReviewStates). */
@@ -44,6 +46,7 @@ const NO_FSRS = { save: [], remove: [] };
 
 export function createSolidReviewStateRepository({
   fetch,
+  publicFetch = fetch,
   checkWrite = noWriteCheck,
   randomId = () => crypto.randomUUID(),
 }: SolidReviewStateRepositoryDeps): ReviewStateRepository {
@@ -65,8 +68,11 @@ export function createSolidReviewStateRepository({
   }
 
   return {
-    async listReviewStates(deck): Promise<ReviewStates> {
-      const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
+    async listReviewStates(deck, { asNoOne = false } = {}): Promise<ReviewStates> {
+      const dataset = await getSolidDatasetOrNull(
+        deck.reviewsDocumentUrl,
+        asNoOne ? publicFetch : fetch,
+      );
       return dataset === null ? none() : toReviewStates(dataset, deck);
     },
 

@@ -48,10 +48,12 @@ import type {
   ReviewStateRepository,
   DeckArchive,
   FileExchange,
+  StorageGateway,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { changedElsewhere, readNow } from "./writes";
 import type { DigestStore } from "./digestStore";
+import { isInInstancePod } from "./releaseDrafts";
 
 export interface CardUseCases {
   listCards(deck: Deck): Promise<Card[]>;
@@ -154,8 +156,12 @@ export interface CardUseCases {
    * target's schedule in the digest is brought up to date, and for a
    * move the source's. The answer log is untouched. Refuses a transfer
    * to `from` itself, or to a deck that shares a cards or reviews
-   * document with it (cardTransferSameDeck), before any read. Resolves to
-   * the plan as written.
+   * document with it (cardTransferSameDeck), before any read. The
+   * source's cards and review states are copied into `to`, so each of its
+   * two documents is read as `webId` only when it is the instance's
+   * (isInInstancePod): an instance attached from someone else's pod may
+   * name a deck whose documents are the user's own, kept from everyone.
+   * Any other is read as no one. Resolves to the plan as written.
    */
   transferCards(
     instanceUrl: string,
@@ -163,6 +169,7 @@ export interface CardUseCases {
     to: Deck,
     ids: readonly string[],
     options: TransferOptions,
+    webId: string,
   ): Promise<CardTransferPlan>;
   /**
    * Save the deck as a file (domain/deckFile.ts, DeckArchive.exportDeck),
@@ -234,6 +241,7 @@ export function createCardUseCases({
   deckArchive,
   fileExchange,
   digestStore,
+  storageGateway,
   newId,
   now,
 }: {
@@ -243,6 +251,7 @@ export function createCardUseCases({
   deckArchive: DeckArchive;
   fileExchange: FileExchange;
   digestStore: Pick<DigestStore, "refresh">;
+  storageGateway: Pick<StorageGateway, "discoverStorages">;
   newId: () => string;
   now: () => Date;
 }): CardUseCases {
@@ -328,19 +337,21 @@ export function createCardUseCases({
     return cards.size;
   }
   /**
-   * One attempt at a transfer (transferCards): read both decks, plan,
-   * write the target's documents, then for a move the source's (its
-   * reviews before its cards), each cards document If-Match its read.
+   * One attempt at a transfer (transferCards): read both decks, the
+   * source's documents as no one where `asNoOne` says, plan, write the
+   * target's documents, then for a move the source's (its reviews
+   * before its cards), each cards document If-Match its read.
    */
   async function transferOnce(
     from: Deck,
     to: Deck,
     ids: readonly string[],
     options: TransferOptions,
+    asNoOne: { cards: boolean; reviews: boolean },
   ): Promise<CardTransferPlan> {
     const [sourceCards, sourceStates, targetCards, targetStates] = await Promise.all([
-      readNow(deckRepository.readCardsSince(from, undefined)),
-      reviewStateRepository.listReviewStates(from),
+      readNow(deckRepository.readCardsSince(from, undefined, { asNoOne: asNoOne.cards })),
+      reviewStateRepository.listReviewStates(from, { asNoOne: asNoOne.reviews }),
       readNow(deckRepository.readCardsSince(to, undefined)),
       reviewStateRepository.listReviewStates(to),
     ]);
@@ -466,11 +477,19 @@ export function createCardUseCases({
         fsrsSave: rescheduleStates(states.fsrs, ids, due, direction),
       });
     },
-    async transferCards(instanceUrl, from, to, ids, options) {
+    async transferCards(instanceUrl, from, to, ids, options, webId) {
       if (sharesDocuments(from, to)) throw new AppError("cardTransferSameDeck");
+      // Copied into `to`: each of the source's documents read as the user only when it is the instance's.
+      const theInstances = (url: string) =>
+        isInInstancePod(storageGateway, instanceUrl, url, webId);
+      const [cardsHere, reviewsHere] = await Promise.all([
+        theInstances(from.cardsDocumentUrl),
+        theInstances(from.reviewsDocumentUrl),
+      ]);
+      const asNoOne = { cards: !cardsHere, reviews: !reviewsHere };
       for (let attempt = 1; ; attempt++) {
         try {
-          const plan = await transferOnce(from, to, ids, options);
+          const plan = await transferOnce(from, to, ids, options, asNoOne);
           // The cards are where they go: a digest left behind is brought up to date by the next deck list.
           await digestStore.refresh(instanceUrl, to).catch(() => undefined);
           if (options.mode === "move")

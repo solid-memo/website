@@ -92,9 +92,13 @@ const CREATED = `dcterms:created "2026-10-01T10:00:00Z"^^<http://www.w3.org/2001
  * Solid Server's in-memory store would cut short. With the page that
  * made it, whose statistics wait for its answers to be logged.
  */
-async function seed(
-  server: string,
-): Promise<{ instanceUrl: string; birds: Deck; seabirds: Deck; useCases: UseCases }> {
+async function seed(server: string): Promise<{
+  instanceUrl: string;
+  birds: Deck;
+  seabirds: Deck;
+  useCases: UseCases;
+  webId: string;
+}> {
   const base = new URL(`card-transfer-${crypto.randomUUID()}/`, server).href;
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
@@ -146,7 +150,7 @@ async function seed(
       new Date(),
     );
   }
-  return { instanceUrl: instance.url, birds, seabirds, useCases };
+  return { instanceUrl: instance.url, birds, seabirds, useCases, webId };
 }
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
@@ -176,14 +180,21 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
 
   it("moves cards with their wrong options and progress, a card whose id is taken given a new one, the answers left in the log", async () => {
     // The seed's page: its answers are logged in the background, which its statistics wait for.
-    const { instanceUrl, birds, seabirds, useCases } = await seed(server);
+    const { instanceUrl, birds, seabirds, webId, useCases } = await seed(server);
     const before = await useCases.getStatistics(instanceUrl, new Date(), { deckUrl: birds.url });
     expect(before.totals.answers).toBe(2);
 
-    const plan = await useCases.transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], {
-      mode: "move",
-      keepProgress: true,
-    });
+    const plan = await useCases.transferCards(
+      instanceUrl,
+      birds,
+      seabirds,
+      ["bird", "gull"],
+      {
+        mode: "move",
+        keepProgress: true,
+      },
+      webId,
+    );
     expect(plan.cards).toEqual([
       { from: "bird", to: "bird", present: false },
       { from: "gull", to: "gull-2", present: false },
@@ -205,7 +216,7 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
   });
 
   it("moves a state another app named by the card it names, re-targeted, leaving another scheduler's state behind", async () => {
-    const { instanceUrl, birds, seabirds } = await seed(server);
+    const { instanceUrl, birds, seabirds, webId } = await seed(server);
     const reviews = birds.reviewsDocumentUrl;
     const dateTime = "<http://www.w3.org/2001/XMLSchema#dateTime>";
     // Another app's SM-2 state of owl, named its own way, and another scheduler's state of bird.
@@ -223,10 +234,17 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
     expect(patch.ok, `PATCH ${reviews}: ${patch.status}`).toBe(true);
     expect(await statesOf(birds)).toEqual(["bird", "gull", "owl"]);
 
-    await page().transferCards(instanceUrl, birds, seabirds, ["bird", "owl"], {
-      mode: "move",
-      keepProgress: true,
-    });
+    await page().transferCards(
+      instanceUrl,
+      birds,
+      seabirds,
+      ["bird", "owl"],
+      {
+        mode: "move",
+        keepProgress: true,
+      },
+      webId,
+    );
 
     expect(await statesOf(seabirds)).toEqual(["bird", "owl"]);
     const target = await triples(seabirds.reviewsDocumentUrl);
@@ -256,11 +274,18 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
   });
 
   it("copies cards without progress, the source left as it is", async () => {
-    const { instanceUrl, birds, seabirds } = await seed(server);
-    await page().transferCards(instanceUrl, birds, seabirds, ["bird"], {
-      mode: "copy",
-      keepProgress: false,
-    });
+    const { instanceUrl, birds, seabirds, webId } = await seed(server);
+    await page().transferCards(
+      instanceUrl,
+      birds,
+      seabirds,
+      ["bird"],
+      {
+        mode: "copy",
+        keepProgress: false,
+      },
+      webId,
+    );
     expect(Object.keys(await byId(seabirds)).sort()).toEqual(["bird", "gull"]);
     expect(await statesOf(seabirds)).toEqual([]);
     expect(Object.keys(await byId(birds)).sort()).toEqual(["bird", "gull", "owl"]);
@@ -268,26 +293,40 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
   });
 
   it("leaves the cards in both decks when a move stops before the source's cards are written, and finishes it when made again", async () => {
-    const { instanceUrl, birds, seabirds } = await seed(server);
+    const { instanceUrl, birds, seabirds, webId } = await seed(server);
     // The page is closed as it is about to write the source's cards, its states removed.
     const stopping = page(async (url) => {
       if (url === birds.cardsDocumentUrl) throw new Error("The tab was closed.");
     });
     await expect(
-      stopping.transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], {
-        mode: "move",
-        keepProgress: true,
-      }),
+      stopping.transferCards(
+        instanceUrl,
+        birds,
+        seabirds,
+        ["bird", "gull"],
+        {
+          mode: "move",
+          keepProgress: true,
+        },
+        webId,
+      ),
     ).rejects.toThrow("The tab was closed.");
     expect(Object.keys(await byId(seabirds)).sort()).toEqual(["bird", "gull", "gull-2"]);
     expect(await statesOf(seabirds)).toEqual(["bird", "gull-2"]);
     expect(Object.keys(await byId(birds)).sort()).toEqual(["bird", "gull", "owl"]);
     expect(await statesOf(birds)).toEqual([]);
 
-    const plan = await page().transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], {
-      mode: "move",
-      keepProgress: true,
-    });
+    const plan = await page().transferCards(
+      instanceUrl,
+      birds,
+      seabirds,
+      ["bird", "gull"],
+      {
+        mode: "move",
+        keepProgress: true,
+      },
+      webId,
+    );
     expect(plan.cards).toEqual([
       { from: "bird", to: "bird", present: true },
       { from: "gull", to: "gull-2", present: true },
@@ -305,7 +344,7 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
       context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
-    const { instanceUrl, birds, seabirds } = await seed(server);
+    const { instanceUrl, birds, seabirds, webId } = await seed(server);
     let changed = false;
     const racing = page(async (url) => {
       if (url !== seabirds.cardsDocumentUrl || changed) return;
@@ -323,10 +362,17 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
           `Changing ${seabirds.cardsDocumentUrl} as another app: ${response.status}.`,
         );
     });
-    const plan = await racing.transferCards(instanceUrl, birds, seabirds, ["owl"], {
-      mode: "move",
-      keepProgress: true,
-    });
+    const plan = await racing.transferCards(
+      instanceUrl,
+      birds,
+      seabirds,
+      ["owl"],
+      {
+        mode: "move",
+        keepProgress: true,
+      },
+      webId,
+    );
     expect(plan.cards).toEqual([{ from: "owl", to: "owl-2", present: false }]);
     const target = await byId(seabirds);
     expect(target.owl?.back).toEqual({ en: "eagle-owl" });

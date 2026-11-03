@@ -62,6 +62,7 @@ import { queryKeys } from "./queryKeys";
 export function CardWorkbenchContainer({
   useCases,
   instance,
+  webId,
   deck,
   decks,
   query,
@@ -77,6 +78,8 @@ export function CardWorkbenchContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
+  /** Who moves or copies cards (transferCards). */
+  webId: string;
   deck: Deck;
   /** The instance's decks, this one among them. */
   decks: readonly Deck[];
@@ -231,10 +234,14 @@ export function CardWorkbenchContainer({
   });
   const transferMutation = useMutation({
     mutationFn: ({ ids, transfer }: { ids: readonly string[]; transfer: CardTransfer }) =>
-      useCases.transferCards(instance.url, deck, transfer.to, ids, {
-        mode: transfer.mode,
-        keepProgress: transfer.keepProgress,
-      }),
+      useCases.transferCards(
+        instance.url,
+        deck,
+        transfer.to,
+        ids,
+        { mode: transfer.mode, keepProgress: transfer.keepProgress },
+        webId,
+      ),
     onMutate: starting,
     onSuccess: (plan, { transfer }) => setTransferDone({ transfer, plan }),
     onError: (error) => setFailure(error),

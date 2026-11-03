@@ -361,6 +361,65 @@ describe("createAppUseCases", () => {
     );
   });
 
+  it("reads the user's own cards and progress as no one for a transfer between decks of an instance outside their pod", async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    const ownCards = `${alice}memo/decks/deck-1.ttl`;
+    const ownReviews = `${alice}memo/reviews/deck-1.ttl`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input).startsWith(`${alice}profile/card`)
+          ? Promise.resolve(
+              new Response(
+                `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+                { headers: { "Content-Type": "text/turtle" } },
+              ),
+            )
+          : servedSiteNetwork(input, init),
+      ),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const foreign = "https://attacker.example/memo/";
+    const deckOf = (id: string, cardsDocumentUrl: string, reviewsDocumentUrl: string): Deck => ({
+      id,
+      url: `${foreign}catalog.ttl#${id}`,
+      title: { en: "Capitals" },
+      cardsDocumentUrl,
+      reviewsDocumentUrl,
+      createdAt: "2026-11-03T10:00:00.000Z",
+      formatVersion: 1,
+      direction: "front-to-back",
+      authors: [],
+    });
+    // The foreign instance's catalog names a deck whose documents are in Alice's pod.
+    const from = deckOf("deck-1", ownCards, ownReviews);
+    const to = deckOf("deck-2", `${foreign}decks/deck-2.ttl`, `${foreign}reviews/deck-2.ttl`);
+    await expect(
+      useCases.transferCards(
+        foreign,
+        from,
+        to,
+        ["capital"],
+        { mode: "copy", keepProgress: true },
+        login.webId,
+      ),
+    ).resolves.toMatchObject({ missing: ["capital"] });
+    // What the digest learned is written back after: until it is, the network stays.
+    await vi.waitFor(async () => {
+      const before = vi.mocked(globalThis.fetch).mock.calls.length;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(vi.mocked(globalThis.fetch).mock.calls.length).toBe(before);
+    });
+    for (const own of [ownCards, ownReviews]) {
+      expect(login.sent).not.toContain(own);
+      expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+        own,
+        expect.objectContaining({ credentials: "omit" }),
+      );
+    }
+  });
+
   it("reads a release as no one when the user's own pod cannot be found", async () => {
     login.webId = "https://bob.example/profile/card#me";
     vi.stubGlobal(
