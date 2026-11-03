@@ -398,7 +398,8 @@ shows it skipped elsewhere, as for the reload journey's statistics and
 the shared link's import.
 
 CI runs them in five jobs side by side, each paying about a minute of
-setup.
+setup while the `site` job builds: it waits for the build only before
+the journeys run.
 Chromium's run in three shards of about the same time,
 `journeys (chromium-1)` to `journeys (chromium-3)`.
 [shards.ts](../e2e/journeys/harness/shards.ts) puts the longest
@@ -668,7 +669,7 @@ jobs run side by side, each
 | `solid-memo-client (unit)` | deterministic | advisory: with `SOLID_CLIENT=solid-memo-client`, `solid`'s unit tests without those of the four Inrupt modules the client replaces (`src/client/{access,rdf,resources,session,session.library}.test.ts`), `solid`'s round trip, and the unit tests of `shacl`, `composition` and `web`, each step run even when one before it failed. `web`'s build test builds the site without the docs' diagrams (`DOCS_DIAGRAMS=skip`), so the job installs no Chromium; `check` draws them. npm runs them, not Turbo, so no result comes from a cache, and without coverage. The client's own tests are `check`'s ([solid-memo-client.md](solid-memo-client.md#tests)) |
 | `solid-memo-client (<server>)` | timing-dependent | advisory: the end-to-end tests with `SOLID_CLIENT=solid-memo-client`, one job per blocking server, on the images in `pod`'s cache, which it restores and only `pod` saves. What the server printed is kept when the job fails. Neither of the `solid-memo-client` jobs fails the run or `ci-ok` when it fails (`continue-on-error`), so neither holds back a merge, a release or a deploy |
 | `journeys (<name>)` | timing-dependent | the user journeys, on `site`'s build: all in Chromium in three shards of about the same time, those that differ between engines in desktop Firefox and WebKit, in one job, and on a phone, in another (Browsers, above) |
-| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed (then with what the canceled ones ran), it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when the `site` job's failure skipped them. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
+| `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed (then with what the canceled ones ran), it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when they failed, as they do when the `site` job ends without its build. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |
