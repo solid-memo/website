@@ -116,7 +116,7 @@ export function createInstanceCheckUseCases({
   shapeValidator: ShapeValidator;
   repairRepository: RepairRepository;
   deckLibrary: DeckLibrary;
-  digestStore: Pick<DigestStore, "of" | "remember">;
+  digestStore: Pick<DigestStore, "of" | "remember" | "isInstances">;
   ruleset: string;
 }): InstanceCheckUseCases {
   async function checkInstance(instanceUrl: string): Promise<ValidationReport> {
@@ -163,7 +163,11 @@ export function createInstanceCheckUseCases({
       ...drafts.map((url) => ({ url, context: "draft" as const })),
     ];
   }
-  /** The check of these documents of the instance, each not checked again while still at the version the digest says conformed. */
+  /**
+   * The check of these documents of the instance, each not checked again
+   * while still at the version the digest says conformed. A receipt is
+   * kept only of one that is the instance's (DigestStore.isInstances).
+   */
   async function checkDocuments(
     instanceUrl: string,
     urls: readonly { url: string; context: Exclude<DocumentContext, "library"> }[],
@@ -178,7 +182,12 @@ export function createInstanceCheckUseCases({
         context,
       );
       if (since.unchanged) return { url, status: "checked", subjects: [] };
-      if (since.version !== null && summarize(instanceUrl, [since.value]).conforms) {
+      // A receipt only of a document that is the instance's: one an instance from another's pod names may be the user's own.
+      if (
+        since.version !== null &&
+        summarize(instanceUrl, [since.value]).conforms &&
+        (await digestStore.isInstances(instanceUrl, url))
+      ) {
         digestStore.remember(instanceUrl, noting(url, since.version, { conformedTo: ruleset }));
       }
       return since.value;

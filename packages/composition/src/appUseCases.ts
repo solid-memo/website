@@ -271,6 +271,7 @@ export function createAppUseCases({
 
   return createUseCases({
     sessionGateway: session.sessionGateway,
+    webId: session.webId,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway,
     instanceRepository,

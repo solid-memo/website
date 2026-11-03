@@ -196,13 +196,15 @@ export function createInstanceUseCases({
   reviewStateRepository: ReviewStateRepository;
   webIdDocumentRepository: WebIdDocumentRepository;
   preferenceStore: Pick<PreferenceStore, "withDeviceAppearance">;
-  digestStore: Pick<DigestStore, "of">;
+  digestStore: Pick<DigestStore, "of" | "asNoOneOf">;
 }): InstanceUseCases {
   /**
    * What bringing the instance up to this app's formats would touch: its
    * meta document, preferences and catalog, and every deck's cards and
    * review states. A document still at a version with nothing outdated in
-   * it, as the instance's digest says, is not read again. Reads only: the
+   * it, as the instance's digest says, is not read again. A deck's
+   * document is read as the user only when it is the instance's
+   * (isInInstancePod), as no one otherwise. Reads only: the
    * digest's format notes are written by the deck list (getStudyCounts).
    */
   async function planOf(instanceUrl: string): Promise<MigrationPlan> {
@@ -219,9 +221,15 @@ export function createInstanceUseCases({
     };
     // A few decks at a time: the catalog may list many (MAX_CATALOG_LINKS at most).
     const entries = await mapAtOnce(decks, async (deck) => {
+      // Each of the deck's documents read as the user only when it is the instance's.
+      const asNoOne = await digestStore.asNoOneOf(instanceUrl, deck);
       const [cards, reviews] = await Promise.all([
-        deckRepository.readCardsSince(deck, latestVersion(deck.cardsDocumentUrl)),
-        reviewStateRepository.readReviewStatesSince(deck, latestVersion(deck.reviewsDocumentUrl)),
+        deckRepository.readCardsSince(deck, latestVersion(deck.cardsDocumentUrl), {
+          asNoOne: asNoOne.cards,
+        }),
+        reviewStateRepository.readReviewStatesSince(deck, latestVersion(deck.reviewsDocumentUrl), {
+          asNoOne: asNoOne.reviews,
+        }),
       ]);
       return {
         deck,

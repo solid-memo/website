@@ -76,8 +76,9 @@ export function createSolidReviewStateRepository({
       return dataset === null ? none() : toReviewStates(dataset, deck);
     },
 
-    async readReviewStatesSince(deck, version) {
-      return mapSince(await readSince(deck.reviewsDocumentUrl, version, fetch), (dataset) =>
+    async readReviewStatesSince(deck, version, { asNoOne = false } = {}) {
+      const read = await readSince(deck.reviewsDocumentUrl, version, asNoOne ? publicFetch : fetch);
+      return mapSince(read, (dataset) =>
         dataset === null ? none() : toReviewStates(dataset, deck),
       );
     },

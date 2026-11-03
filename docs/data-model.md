@@ -504,7 +504,10 @@ No document Solid Memo names has any.
   An instance attached from another's pod may list the user's own. Its
   next version, written into the instance, is made from it read as the
   user only by the same place rule, and from it read as no one
-  otherwise. So is a draft made from a deck, from the deck's cards.
+  otherwise. So is a draft made from a deck, from the deck's cards,
+  and so are the deck list's counts and the format update's plan, from
+  a deck's cards and reviews documents. The [digest](#the-digest)
+  keeps nothing of a deck unless both are the instance's.
 
 ## Decks and cards
 
@@ -1362,6 +1365,19 @@ sequenceDiagram
   dropped is removed from every subject it was read from, whatever
   that subject's name, as is any other subject that said what's
   written again, so none of it is read back.
+- **Only the instance's decks.** A deck's schedule and its documents'
+  receipts are kept only when both documents are in the instance, or
+  in a storage of the signed-in user's that holds it
+  ([the place rule](#where-an-instances-documents-are)). So is a
+  document's check receipt. An instance attached from another's pod may
+  name the user's own documents as a deck's: the deck list's counts of
+  such a deck come from its documents read as no one, and go into no
+  digest. The study statistics read a deck's documents as the user, and
+  the same rule, applied where a schedule is kept, leaves what they
+  learn of such a deck out of the digest. An instance in a folder of
+  the user's own storage that's shared with write access to someone
+  else keeps the documents there in a digest that person can read too,
+  as it keeps the instance's other documents.
 - **Read leniently.** A subject that doesn't fit its shape is left out,
   and relearned. The digest isn't one of the documents an instance is
   [checked](validation.md) by.

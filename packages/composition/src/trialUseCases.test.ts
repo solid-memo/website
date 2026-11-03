@@ -138,6 +138,11 @@ describe("createTrialUseCases", () => {
     const question = course.cards.get("q-a-1a")!;
     await useCases.answerCourseQuestion(played.url, deck, question, { correct: true }, new Date());
     expect((await useCases.getCourse(deck)).answeredCardIds).toEqual(["q-a-1a"]);
+    // Its deck is counted from the trial's pod, where no one is signed in.
+    await expect(useCases.getStudyCounts(played.url, deck, new Date())).resolves.toEqual({
+      dueCount: expect.any(Number),
+      newCount: expect.any(Number),
+    });
 
     // Another trial starts afresh.
     const again = await app.openTrial(draft, instance!.url);

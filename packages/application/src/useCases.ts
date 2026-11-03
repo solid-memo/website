@@ -90,6 +90,12 @@ export interface Dependencies {
   sessionGateway: SessionGateway;
   /** Uniform [0, 1) source; defaults to Math.random. Injected for tests. */
   random?: () => number;
+  /**
+   * The WebID of whoever is signed in, asked at each call; none when no
+   * one is (a guest): whose pod a deck's documents must be in to be read
+   * as the user for an instance's digest (isInInstancePod).
+   */
+  webId: () => string | undefined;
   webIdDocumentRepository: WebIdDocumentRepository;
   storageGateway: StorageGateway;
   instanceRepository: InstanceRepository;
@@ -153,6 +159,7 @@ export interface Dependencies {
 export function createUseCases({
   sessionGateway,
   random = Math.random,
+  webId,
   webIdDocumentRepository,
   storageGateway,
   instanceRepository,
@@ -206,6 +213,8 @@ export function createUseCases({
     ruleset,
     preferenceStore,
     answerStore,
+    storageGateway,
+    webId,
     now,
   });
   const drafts = createReleaseDraftUseCases({

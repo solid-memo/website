@@ -662,8 +662,16 @@ export interface ReviewStateRepository {
    * states copied into a place they may not be the user's to share.
    */
   listReviewStates(deck: Deck, options?: { asNoOne?: boolean }): Promise<ReviewStates>;
-  /** The deck's review states unless its reviews document is still at `version` (undefined: read them). */
-  readReviewStatesSince(deck: Deck, version: string | undefined): Promise<Since<ReviewStates>>;
+  /**
+   * The deck's review states unless its reviews document is still at
+   * `version` (undefined: read them), read as listReviewStates reads
+   * them, `asNoOne` too.
+   */
+  readReviewStatesSince(
+    deck: Deck,
+    version: string | undefined,
+    options?: { asNoOne?: boolean },
+  ): Promise<Since<ReviewStates>>;
   /** The prompt's states, each null when it has none (an SM-2 one: never reviewed that way). */
   getReviewState(deck: Deck, key: ReviewKey): Promise<PromptStates>;
   /**

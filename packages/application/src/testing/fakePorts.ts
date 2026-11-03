@@ -270,6 +270,7 @@ export function makeDeps() {
   return {
     ...NO_PORTS,
     sessionGateway,
+    webId: vi.fn((): string | undefined => session.webId),
     webIdDocumentRepository,
     storageGateway,
     instanceRepository,
