@@ -188,11 +188,11 @@ test("removing a deck and deleting an instance someone else shares leave the use
   const instance = await sharedInstance(otherUser, account.webId, name, () => decks);
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, `Home ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(
@@ -276,11 +276,11 @@ test("an instance whose catalog names documents by addresses that resolve elsewh
   const entries = [`${instance}catalog.ttl#deck-a`, `${instance}catalog.ttl#deck-b`];
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, `Home ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(
@@ -357,11 +357,11 @@ test("a draft with a chapter id Solid Memo does not accept is not opened, and th
   const id = await writeDraftWithUnsupportedChapter(otherUser, draft, title, elsewhere);
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, `Home ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
   await app.step(
     "03 · Attach the instance another user shares",
@@ -420,11 +420,11 @@ test("publishing and making public a release whose server names another access c
   let before: Record<string, string> = {};
   let url = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, instance),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(
@@ -485,11 +485,11 @@ test("deleting an instance keeps another app's data in a deck's document, and sa
   const catalog = `${account.pod}solid-memo/main/catalog.ttl`;
   let cards = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, instance),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
   await app.step(
     "03 · Create a deck of one card",
@@ -566,11 +566,11 @@ test("an instance at a pod's root with an older deck is read and studied, and ch
   let written = "";
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, `Home ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(

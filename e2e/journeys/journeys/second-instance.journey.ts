@@ -27,7 +27,7 @@ test("a second instance @instances", async ({ app, account, otherApp, runId }) =
   const deckB = `Deck B ${runId}`;
   const otherAppsFile = `${first.folder}notes-${runId}.txt`;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
 
   await app.step(
     "02 · Log in with a WebID and create the first instance",
@@ -35,7 +35,7 @@ test("a second instance @instances", async ({ app, account, otherApp, runId }) =
       await logInAndCreateInstance(app, account, first.name);
       await app.chrome.expectInstance(first.name, first.folder);
     },
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(

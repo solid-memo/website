@@ -24,11 +24,11 @@ test("start the course for newcomers from an empty deck list @course", async ({
 }) => {
   let title = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in with a WebID",
     () => logInAndCreateInstance(app, account, `Newcomer ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(

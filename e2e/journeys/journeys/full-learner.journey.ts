@@ -39,12 +39,12 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
     deckB: { studied: 0, total: 0 },
   };
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
 
   await app.step(
     "02 · Log in with a WebID",
     () => logInAndCreateInstance(app, account, `Journey ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(

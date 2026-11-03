@@ -160,7 +160,10 @@ export class App {
    * out (playwright.config.ts).
    *
    * `screen` names the screen the step leaves the app on, which a theme
-   * tour checks in every palette and theme (harness/screens.ts). `in`
+   * tour checks in every palette and theme (harness/screens.ts); a step
+   * that only sets the journey up, such as logging in when the journey
+   * is about something else, says `accessibility: false` instead, and
+   * goes unchecked, as other journeys check its screen. `in`
    * names the projects the step runs in; elsewhere it is skipped, and
    * the report says so. It is for a step that tests the app's logic, the
    * same in every engine, in a journey the other engines run for what
@@ -169,8 +172,9 @@ export class App {
   async step(
     title: string,
     body: () => Promise<void>,
-    { screen, in: projects }: { screen: ScreenName; in?: readonly string[] },
+    options: ({ screen: ScreenName } | { accessibility: false }) & { in?: readonly string[] },
   ): Promise<void> {
+    const { in: projects } = options;
     if (projects !== undefined && !projects.includes(this.testInfo.project.name)) {
       await test.step
         .skip(title, async () => {});
@@ -184,7 +188,8 @@ export class App {
         body: await this.page.screenshot(),
         contentType: "image/png",
       });
-      if (this.testInfo.project.metadata.accessibility !== false) {
+      if ("screen" in options && this.testInfo.project.metadata.accessibility !== false) {
+        const { screen } = options;
         await test.step("Accessibility", () => this.checkAccessibility(title, screen));
       }
     });

@@ -35,11 +35,11 @@ test("work through a course's first chapter and its final review @course", async
   let course = "";
   let chapter = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in with a WebID",
     () => logInAndCreateInstance(app, account, `Learner ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   let previewed = "";

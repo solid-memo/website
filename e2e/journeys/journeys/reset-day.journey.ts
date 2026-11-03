@@ -29,12 +29,12 @@ test("reset today's study @reset", async ({ app, account, runId }) => {
   const deck = `Reset ${runId}`;
   const budget = 2;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
 
   await app.step(
     "02 · Log in with a WebID",
     () => logInAndCreateInstance(app, account, `Reset ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(

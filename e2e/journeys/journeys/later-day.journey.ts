@@ -57,7 +57,7 @@ test("a later study day @review", async ({ app, account, runId }) => {
   await app.step(
     "02 · Log in with a WebID",
     () => logInAndCreateInstance(app, account, `Journey ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
 
   await app.step(

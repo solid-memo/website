@@ -54,10 +54,10 @@ test("a learner updates a library copy @upgrade", async ({ app, account, runId }
   };
   const newPerDay = 3;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
 
   await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, instance), {
-    screen: "decks.empty",
+    accessibility: false,
   });
 
   await app.step(

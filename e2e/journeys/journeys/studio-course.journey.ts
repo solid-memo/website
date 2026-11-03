@@ -48,11 +48,11 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
   const deck = `Studied ${runId}`;
   const authored = `Authored ${runId}`;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in and create an instance",
     () => logInAndCreateInstance(app, account, instance),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
   // Something studied, for the statistics the trial must leave as they were.
   await app.step(
@@ -228,11 +228,11 @@ test("add a course published in a pod from its link, as another user, and play i
   expect(course, "the journey just before publishes the course").not.toBeNull();
   const { url, title } = course!;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { accessibility: false });
   await app.step(
     "02 · Log in as another user and create an instance",
     () => logInAndCreateInstance(app, account, `Learner ${runId}`),
-    { screen: "decks.empty" },
+    { accessibility: false },
   );
   await app.step(
     "03 · Paste the course's link: what it is, and where it is published",
