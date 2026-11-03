@@ -75,9 +75,10 @@ export default defineConfig({
   // WebKit too; desktop Firefox and WebKit leave it out
   // (docs/accessibility.md): the same screens are checked in Chromium.
   projects: [
-    // Chromium runs every journey, in two shards in CI: a file's journeys
-    // too may run side by side, and in either shard, so pod-safety's six
-    // do not take one shard's last 100 seconds. A file whose journeys
+    // Chromium runs every journey, in CI in three shards of about the same
+    // time (harness/shards.ts): a file's journeys too may run side by side,
+    // and in any shard, so pod-safety's six do not take one shard's last
+    // 100 seconds. A file whose journeys
     // depend on each other says so (studio-course.journey.ts, serial).
     { name: "chromium", use: { ...devices["Desktop Chrome"] }, fullyParallel: true },
     {

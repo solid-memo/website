@@ -598,13 +598,14 @@ jobs:
   # build of the app, served by vite preview, in Chromium, logging in to
   # a Community Solid Server 7 behind TLS that the harness starts in
   # Docker, each journey with an account and pod of its
-  # own. The other engines and the phone run a few of them
-  # (docs/testing.md#browsers). Five jobs run them side by side, so the
-  # run waits for the slowest, not for all: Chromium's journeys in two
-  # shards (npx playwright --shard), and each other engine's in a job of
-  # its own, so that WebKit's and the phone's, the slowest, never land
-  # together. Each job pays the setup again (about a minute), for a
-  # shorter wall time. When one
+  # own. The other engines and the phone run a few of them, and the
+  # phone some of the theme tours (docs/testing.md#browsers). Five jobs
+  # run them side by side, so the run waits for the slowest, not for
+  # all: Chromium's journeys in three shards of about the same time
+  # (harness/shards.ts, from durations.json), desktop Firefox's and
+  # WebKit's together, and the phone's, the slowest of the others, in a
+  # job of its own. Each job pays the setup again (about a minute), for
+  # a shorter wall time. When one
   # fails, the others are canceled (fail-fast), as their result no longer
   # changes the run's and they take long; the job's summary names the
   # step it failed in, and its
@@ -626,22 +627,27 @@ jobs:
     strategy:
       fail-fast: true
       # name: the job's, and its blob's (journeys-report lists them);
-      # projects: what it runs; browser: what it installs, and the key it
-      # is kept under, the phone's being WebKit's.
+      # projects: what it runs; shard: which of Chromium's three it is;
+      # browser and also: what it installs, and the keys they are kept
+      # under, the phone's being WebKit's.
       matrix:
         include:
           - name: chromium-1
-            projects: --project=chromium --shard=1/2
+            projects: --project=chromium
+            shard: 1
             browser: chromium
           - name: chromium-2
-            projects: --project=chromium --shard=2/2
+            projects: --project=chromium
+            shard: 2
             browser: chromium
-          - name: firefox
-            projects: --project=firefox
+          - name: chromium-3
+            projects: --project=chromium
+            shard: 3
+            browser: chromium
+          - name: desktop
+            projects: --project=firefox --project=webkit
             browser: firefox
-          - name: webkit
-            projects: --project=webkit
-            browser: webkit
+            also: webkit
           - name: phone
             projects: --project=phone
             browser: webkit
@@ -672,6 +678,19 @@ jobs:
       - uses: ./.github/actions/playwright-deps
         with:
           browser: ${{ matrix.browser }}
+      # The desktop job's second browser, kept under its own key.
+      - if: matrix.also
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: also
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.also }}
+      - if: matrix.also && steps.also.outputs.cache-hit != 'true'
+        run: npx playwright install ${{ matrix.also }}
+      - if: matrix.also
+        uses: ./.github/actions/playwright-deps
+        with:
+          browser: ${{ matrix.also }}
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site
@@ -692,7 +711,27 @@ jobs:
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
-      - run: npm run journeys -- ${{ matrix.projects }}
+      # Chromium's share of the journeys, from the list of them all, so a
+      # journey added or moved is in exactly one shard.
+      - id: shard
+        if: matrix.shard
+        working-directory: e2e/journeys
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          npx playwright test --project=chromium --list --reporter=json > "$RUNNER_TEMP/listing.json"
+          # Apart from echo, so a failing split fails the step.
+          journeys=$(node harness/shards.ts "$SHARD" 3 < "$RUNNER_TEMP/listing.json")
+          if [ -z "$journeys" ]; then
+            echo "::error::Shard $SHARD of Chromium's journeys holds none."
+            exit 1
+          fi
+          echo "journeys=$journeys" >> "$GITHUB_OUTPUT"
+      - env:
+          JOURNEYS: ${{ steps.shard.outputs.journeys }}
+        run: |
+          read -ra journeys <<< "$JOURNEYS"
+          npm run journeys -- ${{ matrix.projects }} "${journeys[@]}"
       - if: always()
         run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ github.run_attempt }}
       # In the queue, the blob below holds the traces; this, only on a failure.
@@ -764,7 +803,7 @@ jobs:
           JOURNEYS: ${{ needs.journeys.result }}
           JOBS: ${{ needs.gate.outputs.jobs }}
           # The journeys jobs' names, as their matrix has them.
-          REPORTS: chromium-1 chromium-2 firefox webkit phone
+          REPORTS: chromium-1 chromium-2 chromium-3 desktop phone
         run: |
           if [ "$JOURNEYS" = success ] || [ "$JOBS" = reuse ]; then
             for name in $REPORTS; do
