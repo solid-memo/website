@@ -1670,7 +1670,8 @@
       "one": "Die Kopie in deinem Pod hat nicht das Format, das Solid Memo erwartet ({count} Problem), daher bleibt dein Lernstand unverändert. Versuche es später erneut.",
       "other": "Die Kopie in deinem Pod hat nicht das Format, das Solid Memo erwartet ({count} Probleme), daher bleibt dein Lernstand unverändert. Versuche es später erneut."
     },
-    "guestUrlsLeft": "Die Kopie in deinem Pod verweist noch auf den Lernstand als Gast, daher bleibt dein Lernstand unverändert. Versuche es erneut.",
+    "guestUrlsLeft": "Die Kopie {url} in deinem Pod verweist noch auf den Lernstand als Gast, daher bleibt dein Lernstand unverändert. Versuche es erneut.",
+    "guestDeckUrlsLeft": "Der Stapel „{deck}“ verweist noch auf den Lernstand als Gast, daher wurde er nicht zu deinem Pod hinzugefügt. Lass ihn weg und versuche es erneut.",
     "guestStudyInvalid": {
       "one": "Ein Teil deines Lernstands in diesem Browser hat nicht das Format, das Solid Memo erwartet ({count} Problem), daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier.",
       "other": "Ein Teil deines Lernstands in diesem Browser hat nicht das Format, das Solid Memo erwartet ({count} Probleme), daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier."

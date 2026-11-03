@@ -6,7 +6,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { KeptDocuments } from "@solid-memo/domain/instance";
 import { catalogUrlOf, isDocumentIn } from "@solid-memo/domain/instanceLayout";
-import { isGuestUrl, mentionsGuest } from "@solid-memo/domain/guest";
+import { draftAddressesGuest, isGuestUrl } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
@@ -143,8 +143,8 @@ export interface ReleaseDraftUseCases {
    * its name, or the next one none of the instance's drafts of that
    * version has. No draft is overwritten, nor any left half written
    * (the repository's create); the draft copied stays as it is. A
-   * guest's draft whose copy would still name the guest's pod is not
-   * written (guestUrlsLeft).
+   * guest's draft whose copy would still link to the guest's pod by an
+   * IRI is not written (guestUrlsLeft); its text may name any address.
    */
   copyReleaseDraft(draftUrl: string, instanceUrl: string): Promise<ReleaseDraftSummary>;
   /**
@@ -598,8 +598,8 @@ export function createReleaseDraftUseCases({
       return create(instanceUrl, { title: {}, name, version }, (url) => {
         // What the draft states of an address in the copy's container, as a release made a draft could (GHSA-8w75-jg23-rxq5), is not copied.
         const copy = rebaseDraft(inItsPlace(draft, url), url);
-        // A guest's pod goes once the guest's study is kept: a copy names nothing in it.
-        if (isGuestUrl(draftUrl) && mentionsGuest(copy))
+        // A guest's pod goes once the guest's study is kept: a copy links to nothing in it (its text may name any address).
+        if (isGuestUrl(draftUrl) && draftAddressesGuest(copy))
           throw new AppError("guestUrlsLeft", { url });
         return copy;
       });

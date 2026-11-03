@@ -15,6 +15,7 @@ import {
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { isSecureUrl, validateWebId } from "@solid-memo/domain/webId";
 import {
+  addressesGuest,
   decodeGuestMergeNote,
   encodeGuestMergeNote,
   guestDeckStamp,
@@ -28,7 +29,6 @@ import {
   guestMergeKey,
   guestMergePlan,
   isGuestUrl,
-  mentionsGuest,
   mergedAnswer,
   mergedDeck,
   type GuestMergeOutcome,
@@ -334,8 +334,9 @@ export function createSessionUseCases({
     ]);
     // A card is written by its fragment id, in this app's format, at the time it was made.
     const content = cards.map(({ url: _url, formatVersion: _formatVersion, ...card }) => card);
-    if (mentionsGuest([deck, content, states]))
-      throw new AppError("guestUrlsLeft", { url: deck.url });
+    // Only an address can still name the guest's pod; card text is copied as it is.
+    if (addressesGuest([deck, content, states]))
+      throw new AppError("guestDeckUrlsLeft", { deck: guest.title, url: deck.url });
     const written: string[] = [];
     const create = async (url: string, write: () => Promise<void>) => {
       try {
@@ -547,7 +548,7 @@ export function createSessionUseCases({
         }
         progress.stepped();
         for (const url of documents) {
-          if (await instanceCopier.mentions(url, GUEST_ORIGIN))
+          if (await instanceCopier.namesIriAt(url, GUEST_ORIGIN))
             throw new AppError("guestUrlsLeft", { url });
           progress.stepped();
         }

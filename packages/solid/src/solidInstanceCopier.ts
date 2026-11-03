@@ -2,7 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { createContainerAt, getFile, getSolidDataset, overwriteFile } from "./client/resources";
+import type { Quad, Term } from "@rdfjs/types";
+import {
+  createContainerAt,
+  getFile,
+  getSolidDataset,
+  getSolidDatasetLinear,
+  overwriteFile,
+} from "./client/resources";
 import { fromRdfJsDataset, toRdfJsDataset } from "./client/rdf";
 import type { ContainerMove, InstanceCopier } from "@solid-memo/application/ports";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
@@ -164,10 +171,20 @@ export function createSolidInstanceCopier({
       return source.version();
     },
 
-    async mentions(url, text) {
-      const response = await fetch(url);
+    async namesIriAt(url, origin) {
+      const response = await head(url);
       if (!response.ok) throw new AppError("cannotCheck", { url, status: response.status });
-      return (await response.text()).includes(text);
+      if (!(response.headers.get("Content-Type") ?? "").startsWith("text/turtle")) return false;
+      const at = new URL(origin).origin;
+      const named = (term: Term) =>
+        term.termType === "NamedNode" &&
+        URL.canParse(term.value) &&
+        new URL(term.value).origin === at;
+      const quads = toRdfJsDataset(await getSolidDatasetLinear(url, { fetch })) as Iterable<Quad>;
+      for (const quad of quads) {
+        if ([quad.subject, quad.predicate, quad.object, quad.graph].some(named)) return true;
+      }
+      return false;
     },
 
     deleteRecursively: (url) => deleteContainerRecursively(url, fetch),

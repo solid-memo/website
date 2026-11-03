@@ -343,15 +343,38 @@ describe("the version a copy was made from", () => {
   });
 });
 
-describe("mentions", () => {
-  it("says whether a resource's content holds the text", async () => {
-    const fetch = fetchOf({ [`${TO}a.ttl`]: { body: "<https://guest.example/x> <p> <o> ." } });
-    expect(await copier(fetch).mentions(`${TO}a.ttl`, "https://guest.example/")).toBe(true);
-    expect(await copier(fetch).mentions(`${TO}a.ttl`, "https://other.example/")).toBe(false);
+describe("namesIriAt", () => {
+  const GUEST = "https://guest.example/";
+  const turtle = (body: string) => ({ headers: { "Content-Type": "text/turtle" }, body });
+
+  it("says whether a document names an IRI at the origin, in any of its terms, however it is spelled", async () => {
+    for (const body of [
+      `<${GUEST}x> <${SM}p> <${SM}o> .`,
+      `<${SM}s> <${GUEST}p> "o" .`,
+      `<${SM}s> <${SM}p> <HTTPS://GUEST.example:443/o> .`,
+    ]) {
+      const fetch = fetchOf({ [`${TO}a.ttl`]: turtle(body) });
+      expect(await copier(fetch).namesIriAt(`${TO}a.ttl`, GUEST)).toBe(true);
+      expect(await copier(fetch).namesIriAt(`${TO}a.ttl`, "https://other.example/")).toBe(false);
+    }
+  });
+
+  it("does not look at text, nor at a file that is not Turtle (GHSA-22fh-2823-783x)", async () => {
+    const fetch = fetchOf({
+      [`${TO}a.ttl`]: turtle(
+        `<${TO}a.ttl#c> <${SM}front> "What is ${GUEST}? And HTTPS://GUEST.example:443?"@en .`,
+      ),
+      [`${TO}a.png`]: { headers: { "Content-Type": "image/png" }, body: GUEST },
+      // No body, no type.
+      [`${TO}b`]: {},
+    });
+    expect(await copier(fetch).namesIriAt(`${TO}a.ttl`, GUEST)).toBe(false);
+    expect(await copier(fetch).namesIriAt(`${TO}a.png`, GUEST)).toBe(false);
+    expect(await copier(fetch).namesIriAt(`${TO}b`, GUEST)).toBe(false);
   });
 
   it("fails when the resource cannot be read", async () => {
-    await expect(copier().mentions(`${TO}a.ttl`, "x")).rejects.toThrow(
+    await expect(copier().namesIriAt(`${TO}a.ttl`, GUEST)).rejects.toThrow(
       `url: ${TO}a.ttl\nstatus: 404`,
     );
   });
