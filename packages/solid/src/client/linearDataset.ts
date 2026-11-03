@@ -5,11 +5,11 @@
 import {
   getSolidDataset,
   getSourceUrl,
-  getTurtleParser,
   type Parser,
   type SolidDataset,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
+import { Parser as N3Parser, type ParserOptions } from "n3";
 import { ReadLimitError, type ReadLimits } from "./interface";
 import {
   limitsOf,
@@ -65,6 +65,53 @@ export async function getSolidDatasetLinear(
   return Object.freeze({ ...described, graphs: graphsOf(collected.quads!) });
 }
 
+/**
+ * @inrupt/solid-client's Turtle parser (getTurtleParser), n3's in
+ * `text/turtle` with the document's URL as its base, but one that reads
+ * no RDF 1.2 triple terms (`<<( s p o )>>`, or a reified triple
+ * `<< s p o >>`): a text with one does not parse, as JSON-LD with
+ * RDF-star does not (resources.ts). The library's parser reads them
+ * nested a thousand deep, building each level, while quadTally counts
+ * the triple that holds them once. n3 is told to read none, and the
+ * parse fails at the first triple that holds one all the same, as an
+ * annotation (`{| ... |}`) or a reifier (`~`) gives, which the option
+ * does not keep n3 from reading; after its error it reports nothing more.
+ */
+export function turtleParser(): Parser {
+  const onQuad: ((quad: Quad) => void)[] = [];
+  const onError: ((error: unknown) => void)[] = [];
+  const onComplete: (() => void)[] = [];
+  return {
+    onQuad: (callback) => void onQuad.push(callback),
+    onError: (callback) => void onError.push(callback),
+    onComplete: (callback) => void onComplete.push(callback),
+    parse: (source, resourceInfo) => {
+      // n3 takes the option; its types do not name it yet.
+      const options: ParserOptions & { maxTripleTermDepth: number } = {
+        format: "text/turtle",
+        baseIRI: getSourceUrl(resourceInfo),
+        maxTripleTermDepth: 0,
+      };
+      let failed = false;
+      new N3Parser(options).parse(source, (error, quad) => {
+        if (failed) return;
+        const failure = error ?? (quad && tripleTermError(quad));
+        if (failure) {
+          failed = true;
+          for (const callback of onError) callback(failure);
+        } else if (quad) for (const callback of onQuad) callback(quad);
+        else for (const callback of onComplete) callback();
+      });
+    },
+  };
+}
+
+/** The error a parse fails with at a triple that holds a triple term; none for any other. */
+function tripleTermError(quad: Quad): Error | undefined {
+  if (quad.subject.termType !== "Quad" && quad.object.termType !== "Quad") return undefined;
+  return new Error("The text states an RDF 1.2 triple term, which is not read.");
+}
+
 /** What a read's parser collected: its quads, and the read's response, its limits, what is spent of them and why it refused it, if it did. */
 interface Collected {
   response?: Response;
@@ -75,15 +122,15 @@ interface Collected {
 }
 
 /**
- * solid-client's Turtle parser, whose quads go to `collected` instead of
- * to solid-client; one past the limits of the read of `url` (quadTally)
+ * The Turtle parser (turtleParser), whose quads go to `collected`
+ * instead of to solid-client; one past the limits of the read of `url` (quadTally)
  * fails the parse instead, once, and drops what was kept, as does a
  * base, prefix or IRI past what any read takes in (writeTurtle). The
  * text is written to the parser in parts, so that it reads no further
  * than the part it is in.
  */
 function collectingTurtleParser(collected: Collected, url: string): Parser {
-  const parser = getTurtleParser();
+  const parser = turtleParser();
   const failed: ((error: Error) => void)[] = [];
   return {
     onQuad: () => undefined,
@@ -95,6 +142,10 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
     parse: (source, resourceInfo) => {
       const quads: Quad[] = [];
       const past = quadTally(collected.limits, collected.spent);
+      let unparsed = false;
+      parser.onError(() => {
+        unparsed = true;
+      });
       collected.quads = quads;
       const refuse = () => {
         // The tally is past limits only under some; the declarations, under none too.
@@ -109,7 +160,8 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
       });
       // solid-client hands the text to n3's parser as it is, which reads a stream as well.
       const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);
-      const goOn = () => collected.refused === undefined;
+      // A text that does not parse is written no further, as one past limits is not.
+      const goOn = () => collected.refused === undefined && !unparsed;
       if (!writeTurtle(source, getSourceUrl(resourceInfo), parse, goOn)) refuse();
     },
   };

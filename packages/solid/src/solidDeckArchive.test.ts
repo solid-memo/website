@@ -358,6 +358,21 @@ describe("readDeckFile", () => {
     ).rejects.toMatchObject({ code: "deckFileUnreadable" });
   });
 
+  it("refuses as unreadable, not too large, Turtle with an RDF 1.2 triple term, an annotation or a reifier, with limits or with none", async () => {
+    for (const text of [
+      "<#a> <#p> <<( <#s> <#p> <#o> )>> .",
+      "<< <#s> <#p> <#o> >> <#p> <#o> .",
+      "<#a> <#p> <#o> {| <#q> <#r> |} .",
+      "<#a> <#p> <#o> ~ <#r> .",
+    ]) {
+      for (const limits of [undefined, null]) {
+        await expect(parseDeckFile(text, "turtle", base, limits)).rejects.toMatchObject({
+          code: "deckFileUnreadable",
+        });
+      }
+    }
+  });
+
   it("refuses as unreadable a text the parser throws on at once, not only one it reports", async () => {
     // Not a string: reading it throws before the parser reads any of it.
     const text = {

@@ -54,4 +54,15 @@ describe("readTurtleDocument", () => {
   it("rejects on Turtle it cannot parse", async () => {
     await expect(readTurtleDocument(URL_, turtleFetch("<a> <b> ."))).rejects.toThrow();
   });
+
+  it("rejects on Turtle with a triple term, which it does not read", async () => {
+    for (const turtle of [
+      "<a> <b> <<( <s> <p> <o> )>> .",
+      "<< <s> <p> <o> >> <b> <c> .",
+      "<a> <b> <c> {| <d> <e> |} .",
+      "<a> <b> <c> ~ <r> .",
+    ]) {
+      await expect(readTurtleDocument(URL_, turtleFetch(turtle))).rejects.toThrow();
+    }
+  });
 });

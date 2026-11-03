@@ -335,6 +335,21 @@ describe("boundaryProblems", () => {
     ]);
   });
 
+  it("lets solid's Turtle parser use n3 in the browser, and no other file of solid", () => {
+    const solid = workspace(
+      "solid",
+      {
+        "src/client/linearDataset.ts": 'import { Parser } from "n3";',
+        "src/client/resources.ts": 'import { Parser } from "n3";',
+        "src/client/resources.test.ts": 'import { Parser } from "n3";',
+      },
+      { n3: "*" },
+    );
+    expect(boundaryProblems([solid], TOOLING)).toEqual([
+      'packages/solid/src/client/resources.ts: runs in the browser, so may not import "n3".',
+    ]);
+  });
+
   it("fails on any @inrupt/ package in solid-memo-client, its tests too, once an import", () => {
     const client = workspace(
       "solid-memo-client",

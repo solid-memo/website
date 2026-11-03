@@ -1454,6 +1454,15 @@ An import reads the file as the pod is read, with the same mappers:
   `@id` is refused given an object anywhere, even as a plain key of
   another node, and so are these keys inside a `@json` literal. A file
   this app exports holds neither;
+- a Turtle triple term (`<<( s p o )>>`), reified triple
+  (`<< s p o >>`), annotation (`{| ... |}`) or reifier (`~`) makes the
+  file not parse (`deckFileUnreadable`), with limits or with none. The
+  parser is told to read no triple term, on either client. An
+  annotation or a reifier gives one past that option, so the parse
+  fails at the first triple that holds one. The parser would read
+  triple terms nested a thousand deep, building each level, while the
+  limits below count the triple that holds them once. A file this app
+  exports holds none of them;
 - a file larger than `DECK_FILE_LIMITS` in `solidDeckArchive.ts` is
   refused (`deckFileTooLarge`), and nothing is written. The limits are
   64 MiB of text, a million triples, and 256 Mi characters in the terms
