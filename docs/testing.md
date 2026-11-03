@@ -398,8 +398,8 @@ shows it skipped elsewhere, as for the reload journey's statistics and
 the shared link's import.
 
 CI runs them in five jobs side by side, each paying about a minute of
-setup while the `site` job builds: it waits for the build only before
-the journeys run.
+setup while the `site` job builds: it starts the Solid server in the
+background and waits for the build only before the journeys run.
 Chromium's run in three shards of about the same time,
 `journeys (chromium-1)` to `journeys (chromium-3)`.
 [shards.ts](../e2e/journeys/harness/shards.ts) puts the longest

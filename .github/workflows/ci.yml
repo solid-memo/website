@@ -605,8 +605,9 @@ jobs:
   # (harness/shards.ts, from durations.json), desktop Firefox's and
   # WebKit's together, and the phone's, the slowest of the others, in a
   # job of its own. Each job pays the setup again (about a minute), for
-  # a shorter wall time; it sets up while the site job builds, and
-  # waits for the build only before the journeys run. When one
+  # a shorter wall time; it sets up while the site job builds, starting
+  # the server in the background, and waits for the build only before
+  # the journeys run. When one
   # fails, the others are canceled (fail-fast), as their result no longer
   # changes the run's and they take long; the job's summary names the
   # step it failed in, and its
@@ -672,6 +673,28 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
+      - id: images
+        uses: ./.github/actions/e2e-images
+        with:
+          name: journeys
+          key: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
+      - run: npm run css:prepare -w @solid-memo/e2e-journeys
+      # The server, up while the browsers are set up and the site is
+      # built; "Wait for the Solid server" below fails if it never is.
+      - name: Start the Solid server
+        run: |
+          nohup node e2e/journeys/harness/cssServer.ts > "$RUNNER_TEMP/css.out" 2>&1 &
+          echo $! > "$RUNNER_TEMP/css.pid"
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
+        env:
+          FILE: ${{ steps.images.outputs.file }}
+        run: node e2e/pod/images.ts save "$FILE" e2e/journeys/css/compose.yml
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        continue-on-error: true
+        with:
+          path: ${{ steps.images.outputs.file }}
+          key: ${{ steps.images.outputs.key }}
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -697,22 +720,6 @@ jobs:
         uses: ./.github/actions/playwright-deps
         with:
           browser: ${{ matrix.also }}
-      - id: images
-        uses: ./.github/actions/e2e-images
-        with:
-          name: journeys
-          key: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
-      - run: npm run css:prepare -w @solid-memo/e2e-journeys
-      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        env:
-          FILE: ${{ steps.images.outputs.file }}
-        run: node e2e/pod/images.ts save "$FILE" e2e/journeys/css/compose.yml
-      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        continue-on-error: true
-        with:
-          path: ${{ steps.images.outputs.file }}
-          key: ${{ steps.images.outputs.key }}
       # Chromium's share of the journeys, from the list of them all, so a
       # journey added or moved is in exactly one shard.
       - id: shard
@@ -757,6 +764,20 @@ jobs:
         with:
           name: site
           path: apps/web/dist/
+      - name: Wait for the Solid server
+        run: |
+          for _ in $(seq 1 120); do
+            url=$(sed -n 's/^Community Solid Server 7 at \(https:[^ ]*\) .*/\1/p' "$RUNNER_TEMP/css.out")
+            if [ -n "$url" ]; then
+              echo "JOURNEY_SERVER_URL=$url" >> "$GITHUB_ENV"
+              exit 0
+            fi
+            if ! kill -0 "$(cat "$RUNNER_TEMP/css.pid")" 2> /dev/null; then break; fi
+            sleep 1
+          done
+          echo "::error::The Solid server did not start. What it printed:"
+          cat "$RUNNER_TEMP/css.out"
+          exit 1
       - env:
           JOURNEYS: ${{ steps.shard.outputs.journeys }}
         run: |
