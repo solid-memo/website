@@ -37,8 +37,9 @@ import { App } from "./pages/App.ts";
  * the repeat),
  * requests to any host but 127.0.0.1 refused, flags stubbed, dialogs
  * answered only as a step expects, and diagnostics.json (console, page
- * errors, failed requests) plus the server's log for the journey's time
- * attached. An error thrown in the page fails the journey.
+ * errors, failed requests) attached, plus, when the journey fails, the
+ * server's log for its time. An error thrown in the page fails the
+ * journey.
  */
 interface Fixtures {
   server: string;
@@ -136,7 +137,9 @@ export const test = base.extend<Fixtures>({
         body: JSON.stringify(found, null, 2),
         contentType: "application/json",
       });
-      await attachServerLog(testInfo, started, new Date());
+      if (testInfo.status !== testInfo.expectedStatus || failsOn(found)) {
+        await attachServerLog(testInfo, started, new Date());
+      }
       expect.soft(found.pageErrors, "errors thrown in the page (diagnostics.json)").toEqual([]);
       expect
         .soft(found.blockedRequests, "requests to hosts other than 127.0.0.1 (diagnostics.json)")

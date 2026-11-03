@@ -508,7 +508,8 @@ error, and the browser. The job's
   end of each journey step, a video, and these attachments:
   - `diagnostics.json`: console, page errors, failed and refused
     requests, the seed, the time zone;
-  - `css.log`: the server's log for the journey's time;
+  - `css.log`: the server's log for the journey's time, when the journey
+    failed;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;
   - `<step> · accessibility, <palette>, <theme>.json`: what axe found on
     a step's screen, when it found a violation;
