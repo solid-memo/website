@@ -41,10 +41,10 @@ test("edit a card in Markdown and keep its line breaks @markdown", async ({
       "`git clone`",
       "git clone https://example.org/repo.git",
     );
-    await app.cardCreator.back();
   });
 
   await app.step("05 · Open the card: in Markdown, its lines as typed", async () => {
+    await app.cardCreator.back();
     await app.cardEditor.open(title);
     await app.cardEditor.expectMarkdown(added, "git clone https://example.org/repo.git");
   });

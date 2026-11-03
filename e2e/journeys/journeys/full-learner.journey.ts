@@ -81,12 +81,12 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       ],
       { front: "en", back: "sv" },
     );
-    await app.cardCreator.back();
-    await app.deckBrowser.expectFronts([`Sun ${runId}`, `Moon ${runId}`]);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
   await app.step("06 · Study the deck and end the session", async () => {
+    await app.cardCreator.back();
+    await app.deckBrowser.expectFronts([`Sun ${runId}`, `Moon ${runId}`]);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.decks.study(deckA);
     sessions.first = await app.study.studyAll({ grade: "good", scale: "sm2" });
     expect(sessions.first, "one new card a day: one of the deck's two").toEqual({
@@ -112,13 +112,13 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       ],
       { front: "en", back: "sv" },
     );
+  });
+
+  await app.step("09 · Group the decks and name the group", async () => {
     await app.cardCreator.back();
     await app.deckBrowser.expectFronts([`Star ${runId}`, `Sky ${runId}`]);
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.decks.expectOrder([deckA, deckB]);
-  });
-
-  await app.step("09 · Group the decks and name the group", async () => {
     expect(
       await app.groups.groupWithNeighbor(deckA),
       "deck A is first, so it groups with the one below",

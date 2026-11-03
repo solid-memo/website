@@ -585,6 +585,10 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   an instance), which a step answers by its heading and button, as the
   Studio's component tests do
   ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
+- **A step ends on its screen**: a step's screenshot and accessibility
+  check are of the screen it leaves the app on, so it ends on the screen
+  it is about. Going back to the deck list or the Studio's Home begins
+  the next step.
 - **One after another**: a journey that needs what another made is in
   its file, after it, and the file runs in turn (`mode: "serial"`). In
   [studio-course.journey.ts](../e2e/journeys/journeys/studio-course.journey.ts),

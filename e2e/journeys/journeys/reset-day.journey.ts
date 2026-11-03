@@ -57,12 +57,12 @@ test("reset today's study @reset", async ({ app, account, runId }) => {
       ],
       { front: "en", back: "sv" },
     );
-    await app.cardCreator.back();
-    await app.deckBrowser.expectFronts([`Red ${runId}`, `Green ${runId}`, `Blue ${runId}`]);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
   await app.step("06 · The deck's page: three cards, two new to introduce today", async () => {
+    await app.cardCreator.back();
+    await app.deckBrowser.expectFronts([`Red ${runId}`, `Green ${runId}`, `Blue ${runId}`]);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.decks.expectToReview(deck, budget);
     await app.decks.openDeck(deck);
     await app.deckDetail.expectCardCount(3);
