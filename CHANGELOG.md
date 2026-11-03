@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.5](https://github.com/solid-memo/website/compare/v6.29.4...v6.29.5) (2026-11-03)
+
+### Bug Fixes
+
+* **shacl:** read a node of too many types as having none ([ba68b0e](https://github.com/solid-memo/website/commit/ba68b0e4131fac708055f6a36f664022258a2b9d))
+* **studio:** move or copy cards only as the instance may read them ([ebfbdb2](https://github.com/solid-memo/website/commit/ebfbdb2435be3490d9327365f9babd8f2526fb9e))
+
 ## [6.29.4](https://github.com/solid-memo/website/compare/v6.29.3...v6.29.4) (2026-11-03)
 
 ### Bug Fixes
