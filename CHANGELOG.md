@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.2](https://github.com/solid-memo/website/compare/v6.29.1...v6.29.2) (2026-11-03)
+
+### Bug Fixes
+
+* **domain:** read the subjects marked Markdown once per check ([c3b9f03](https://github.com/solid-memo/website/commit/c3b9f03b89bc126af18a2f764766ecababf53087))
+
 ## [6.29.1](https://github.com/solid-memo/website/compare/v6.29.0...v6.29.1) (2026-11-03)
 
 ### Bug Fixes
