@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.3](https://github.com/solid-memo/website/compare/v6.29.2...v6.29.3) (2026-11-03)
+
+### Bug Fixes
+
+* **solid:** read no triple terms in Turtle, as in JSON-LD ([da3b4f8](https://github.com/solid-memo/website/commit/da3b4f8c637408f12e05d916563a99b9f2ec8386))
+
 ## [6.29.2](https://github.com/solid-memo/website/compare/v6.29.1...v6.29.2) (2026-11-03)
 
 ### Bug Fixes
