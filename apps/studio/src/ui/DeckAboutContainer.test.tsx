@@ -323,6 +323,24 @@ describe("DeckAboutContainer", () => {
     );
   });
 
+  it("lists the first 20 chapters the course no longer has, each id once, and counts the rest", async () => {
+    const old = (id: string, release = "v1") => CH2.replace("v1.ttl#ch-2", `${release}.ttl#${id}`);
+    const ids = Array.from({ length: 25 }, (_, index) => `ch-old-${index}`);
+    // The same id completed in two releases is one chapter.
+    const completed = [CH1, ...ids.map((id) => old(id)), ...ids.map((id) => old(id, "v0"))];
+    const course = makeCourse([], completed);
+    const useCases = makeUseCasesFake({
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourse: vi.fn(async () => course),
+    });
+    renderContainer(useCases, course.deck, courseInstance);
+    expect(await screen.findByText("5 more chapters are not listed.")).toBeInTheDocument();
+    const listed = screen.getAllByRole("button", { name: /^Mark ch-old-\d+ not done$/ });
+    expect(listed.map((button) => button.getAttribute("aria-label"))).toEqual(
+      ids.slice(0, 20).map((id) => `Mark ${id} not done`),
+    );
+  });
+
   it("says while a course is read, and why it could not be", async () => {
     let fail: (error: Error) => void = () => undefined;
     const useCases = makeUseCasesFake({

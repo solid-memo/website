@@ -6,6 +6,7 @@ import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
+  boundedCompletedChapters,
   cardLabel,
   cardLabelText,
   isDeckDirection,
@@ -14,6 +15,7 @@ import {
   promptsOf,
   studyDirections,
   validateCardContent,
+  MAX_COMPLETED_CHAPTERS,
   type Card,
 } from "./deck";
 
@@ -621,5 +623,33 @@ describe("cardLabel", () => {
       "Afghanistan",
     );
     expect(cardLabel({ ...card, frontImageUrl: FLAG, backImageUrl: FLAG })).toBe("afghanistan");
+  });
+});
+
+describe("boundedCompletedChapters", () => {
+  const RELEASE = "https://lib.example/c/v1.ttl";
+  const junk = (count: number) =>
+    Array.from({ length: count }, (_, i) => `https://elsewhere.example/x${i}.ttl#ch-1`);
+
+  it("keeps them all, each once, within the bound", () => {
+    const urls = [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`, `${RELEASE}#ch-1`];
+    expect(boundedCompletedChapters(urls, [RELEASE])).toEqual([
+      `${RELEASE}#ch-1`,
+      `${RELEASE}#ch-2`,
+    ]);
+  });
+
+  it("past the bound, leaves out the values of other documents first, in order", () => {
+    const others = junk(MAX_COMPLETED_CHAPTERS);
+    const kept = boundedCompletedChapters(
+      [`${RELEASE}#ch-1`, ...others, `${RELEASE}#ch-2`],
+      [undefined, `${RELEASE}#ch-2`],
+    );
+    expect(kept).toEqual([`${RELEASE}#ch-1`, ...others.slice(2), `${RELEASE}#ch-2`]);
+  });
+
+  it("past the bound with the course's alone, leaves out the oldest", () => {
+    const own = Array.from({ length: MAX_COMPLETED_CHAPTERS + 2 }, (_, i) => `${RELEASE}#ch-${i}`);
+    expect(boundedCompletedChapters([...junk(3), ...own], [RELEASE])).toEqual(own.slice(2));
   });
 });

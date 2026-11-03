@@ -20,6 +20,7 @@ import {
   CARD_FORMAT_VERSION,
   DECK_FORMAT_VERSION,
   DEFAULT_DECK_DIRECTION,
+  boundedCompletedChapters,
   type Card,
   type CardContent,
   type Deck,
@@ -503,8 +504,14 @@ export function createSolidDeckRepository({
   /**
    * Change the chapters a course's deck completed (sm:completedChapter):
    * what `change` adds and removes of them as the entry has them now
-   * (editEntry). No change (null) writes nothing. sm:completedChapter is
-   * no shape's (like a deck's sm:position): a learner's completion checks
+   * (editEntry), in time linear in them. No change (null) writes
+   * nothing; a change writes those it keeps and those it adds after
+   * them, at most MAX_COMPLETED_CHAPTERS (boundedCompletedChapters,
+   * the deck's release and the chapters added counting as the course's):
+   * past the bound, values of other documents go first, then the
+   * oldest, so the entry never holds more than a read keeps (toDeck)
+   * and other values never push out a real completion. sm:completedChapter is no shape's (like a
+   * deck's sm:position): a learner's completion checks
    * nothing a shape owns, while an edit in the Studio (`checked`) has the
    * entry checked as any other edit of it is.
    */
@@ -519,15 +526,17 @@ export function createSolidDeckRepository({
         const completed = stored.completedChapters ?? [];
         const changed = change(completed);
         if (changed === null) return null;
-        const after = [...completed.filter((url) => !changed.remove.includes(url)), ...changed.add];
+        const removed = new Set(changed.remove);
+        const kept = completed.filter((url) => !removed.has(url));
+        // Never more than a read keeps, the course's own kept before any other value.
+        const after = boundedCompletedChapters(
+          [...kept, ...changed.add],
+          [stored.sourceUrl, ...changed.add],
+        );
         const { completedChapters: _, ...rest } = stored;
         return {
-          edit: (entry) => {
-            let builder = entry;
-            for (const url of changed.remove) builder = builder.removeUrl(SM.completedChapter, url);
-            for (const url of changed.add) builder = builder.addIri(SM.completedChapter, url);
-            return builder;
-          },
+          // One write of them all: a removal each would copy them all each time (GHSA-gq27-7968-wfcv).
+          edit: (entry) => entry.setIriAll(SM.completedChapter, after),
           deck: after.length === 0 ? rest : { ...rest, completedChapters: after },
         };
       },
@@ -866,7 +875,7 @@ export function createSolidDeckRepository({
    * A new entry with what the deck says of the terms no shape owns, which
    * withDeck keeps as stored: a course's type (schema:Course, as its
    * release is typed), the chapters it completed (sm:completedChapter,
-   * as completeChapter adds one) and the card language
+   * as completeChapter adds one, bounded as a read bounds them) and the card language
    * (sm:deckCardLanguage, as setCardLanguage sets it).
    */
   function withOwnTerms(dataset: Dataset, deck: Deck): Dataset {
@@ -874,7 +883,11 @@ export function createSolidDeckRepository({
     let builder = buildThing(entry);
     if (deck.course === true) builder = builder.addIri(RDF.type, SCHEMA.Course);
     if (deck.completedChapters !== undefined) {
-      const completed = [...getUrlAll(entry, SM.completedChapter), ...deck.completedChapters];
+      // Never more than a read keeps (toDeck), as it keeps them: the release's first.
+      const completed = boundedCompletedChapters(
+        [...getUrlAll(entry, SM.completedChapter), ...deck.completedChapters],
+        [deck.sourceUrl],
+      );
       builder = builder.setIriAll(SM.completedChapter, completed);
     }
     if (deck.cardLanguage !== undefined)

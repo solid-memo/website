@@ -660,6 +660,10 @@
       "notDone": "Markera som inte klart",
       "notDoneLabel": "Markera {chapter} som inte klart",
       "goneChapters": "Avklarade kapitel som kursen inte längre har:",
+      "goneChaptersMore": {
+        "one": "{count} kapitel till visas inte.",
+        "other": "{count} kapitel till visas inte."
+      },
       "progressHint": "Dina svar och dina framsteg med korten blir kvar som de är.",
       "restart": "Börja om kursen",
       "restartConfirm": "Börja om kursen? Alla kapitel markeras som inte klara, så det första öppnas igen. Dina svar och dina framsteg med korten blir kvar.",

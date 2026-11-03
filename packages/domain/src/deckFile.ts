@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
+import {
+  boundedCompletedChapters,
+  CARD_FORMAT_VERSION,
+  DECK_FORMAT_VERSION,
+  type Card,
+  type Deck,
+} from "./deck";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "./instanceLayout";
 import { shown } from "./langText";
 import type { FsrsState, ReviewState } from "./review";
@@ -112,10 +118,12 @@ const DECK_ID = /^deck-[A-Za-z0-9_-]+$/;
 
 /**
  * The deck a file's deck becomes in the instance, with its cards and,
- * with `withProgress`, its review states (SM-2's and FSRS-6's) and a course's completed
- * chapters (none without). It keeps the file's id, so a deck exported
- * and removed comes back at the same URLs, and the answers the log
- * keeps of it name it again; unless the instance has a deck by that id,
+ * with `withProgress`, its review states (SM-2's and FSRS-6's) and a
+ * course's completed chapters (none without; at most
+ * MAX_COMPLETED_CHAPTERS of them, those of the deck's release and its
+ * cards' kept first, boundedCompletedChapters). It keeps
+ * the file's id, so a deck exported and removed comes back at the same
+ * URLs, and the answers the log keeps of it name it again; unless the instance has a deck by that id,
  * or one using a document of that name, or the id or its distribution's
  * (`<id>-cards`, distributionUrlOf) is a deck's or a distribution's
  * subject already, or the id is none this app would give: then it gets
@@ -156,7 +164,14 @@ export function importedDeck(
     reviewsDocumentUrl,
     createdAt: file.createdAt === "" ? now : file.createdAt,
     formatVersion: DECK_FORMAT_VERSION,
-    ...(withProgress && completedChapters !== undefined ? { completedChapters } : {}),
+    ...(withProgress && completedChapters !== undefined
+      ? {
+          completedChapters: boundedCompletedChapters(completedChapters, [
+            file.sourceUrl,
+            ...content.cards.map((card) => card.fromRelease),
+          ]),
+        }
+      : {}),
   };
   const cards = content.cards.map(
     (card): Card => ({

@@ -3,7 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
+import {
+  CARD_FORMAT_VERSION,
+  DECK_FORMAT_VERSION,
+  MAX_COMPLETED_CHAPTERS,
+  type Card,
+  type Deck,
+} from "./deck";
 import {
   deckFileBaseOf,
   deckFileFormatOf,
@@ -150,6 +156,27 @@ describe("importedDeck", () => {
       [],
     );
     expect(importedDeck(INSTANCE, content(), options).fsrsReviews).toEqual([]);
+  });
+
+  it("keeps at most MAX_COMPLETED_CHAPTERS completed chapters, each once, the course's first", () => {
+    const others = Array.from(
+      { length: MAX_COMPLETED_CHAPTERS + 1 },
+      (_, i) => `https://elsewhere.example/x${i}.ttl#ch1`,
+    );
+    const release = "https://lib.example/c/v1.ttl#ch1";
+    const fromCard = "https://lib.example/c/v0.ttl#ch2";
+    const file = content({
+      deck: deck("deck-a", {
+        sourceUrl: "https://lib.example/c/v1.ttl",
+        completedChapters: [release, others[0]!, ...others, fromCard],
+      }),
+      cards: [{ ...card, fromRelease: "https://lib.example/c/v0.ttl" }],
+    });
+    expect(importedDeck(INSTANCE, file, options).deck.completedChapters).toEqual([
+      release,
+      ...others.slice(3),
+      fromCard,
+    ]);
   });
 
   it("leaves the progress out unless asked, a course's deck still one", () => {

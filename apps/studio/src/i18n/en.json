@@ -660,6 +660,10 @@
       "notDone": "Mark not done",
       "notDoneLabel": "Mark {chapter} not done",
       "goneChapters": "Completed chapters the course no longer has:",
+      "goneChaptersMore": {
+        "one": "{count} more chapter is not listed.",
+        "other": "{count} more chapters are not listed."
+      },
       "progressHint": "Your answers and your progress on the cards stay as they are.",
       "restart": "Restart the course",
       "restartConfirm": "Restart the course? Every chapter is marked not done, so the first one opens again. Your answers and your progress on the cards stay.",

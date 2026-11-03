@@ -622,6 +622,9 @@
       "notDone": "미완료로 표시",
       "notDoneLabel": "{chapter}을(를) 미완료로 표시",
       "goneChapters": "코스에 더 이상 없는 완료한 챕터:",
+      "goneChaptersMore": {
+        "other": "표시하지 않은 챕터가 {count}개 더 있습니다."
+      },
       "progressHint": "답변과 카드 진행 상황은 그대로 유지돼요.",
       "restart": "코스 다시 시작",
       "restartConfirm": "코스를 다시 시작할까요? 모든 챕터가 미완료로 표시되어 첫 챕터가 다시 열려요. 답변과 카드 진행 상황은 그대로 유지돼요.",

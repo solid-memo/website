@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { Deck } from "@solid-memo/domain/deck";
+import { MAX_COMPLETED_CHAPTERS, type Deck } from "@solid-memo/domain/deck";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { fakePod } from "./testing/fakePod";
 import type { WriteCheck } from "./writeCheck";
@@ -134,6 +134,45 @@ describe("completing a course chapter", () => {
       repositoryOn(fakePod().fetch).completeChapter(deck, `${RELEASE}#ch-1`),
     ).rejects.toMatchObject({ code: "deckGone" });
   });
+
+  it("keeps a new completion when the entry already holds MAX_COMPLETED_CHAPTERS of them", async () => {
+    const pod = await podWithCourse();
+    // As many as a read keeps, none a chapter of the course, as another app may write them.
+    const planted = Array.from(
+      { length: MAX_COMPLETED_CHAPTERS },
+      (_, i) => `<#deck-1> ${COMPLETED} <https://elsewhere.example/x${i}.ttl#other-${i}> .`,
+    ).join("\n");
+    const catalog = await (await pod.fetch(CATALOG)).text();
+    await pod.put(CATALOG, `${catalog}\n${planted}\n`);
+    const repository = repositoryOn(pod.fetch);
+    const read = (await repository.readDeck(deck.url))!;
+    await repository.completeChapter(read, `${RELEASE}#ch-1`);
+    expect(completedIn(pod)).toHaveLength(MAX_COMPLETED_CHAPTERS);
+    const again = await repository.readDeck(deck.url);
+    expect(again?.completedChapters).toContain(`${RELEASE}#ch-1`);
+  });
+
+  it.each([
+    ["of other documents", (i: number) => `https://elsewhere.example/x${i}.ttl#other-${i}`],
+    ["of the course's release", (i: number) => `${RELEASE}#other-${i}`],
+  ])("keeps every completion past MAX_COMPLETED_CHAPTERS values %s", async (_, planted) => {
+    const pod = await podWithCourse();
+    const values = Array.from(
+      { length: MAX_COMPLETED_CHAPTERS },
+      (_, i) => `<#deck-1> ${COMPLETED} <${planted(i)}> .`,
+    ).join("\n");
+    const catalog = await (await pod.fetch(CATALOG)).text();
+    await pod.put(CATALOG, `${catalog}\n${values}\n`);
+    const repository = repositoryOn(pod.fetch);
+    const chapters = [1, 2, 3, 4, 5].map((n) => `${RELEASE}#ch-${n}`);
+    for (const chapter of chapters) {
+      await repository.completeChapter((await repository.readDeck(deck.url))!, chapter);
+    }
+    const again = await repositoryOn(pod.fetch).readDeck(deck.url);
+    expect(again?.completedChapters).toHaveLength(MAX_COMPLETED_CHAPTERS);
+    expect(again?.completedChapters).toEqual(expect.arrayContaining(chapters));
+    expect(completedIn(pod)).toHaveLength(MAX_COMPLETED_CHAPTERS);
+  });
 });
 
 describe("changing the chapters completed in the Studio", () => {
@@ -182,6 +221,29 @@ describe("changing the chapters completed in the Studio", () => {
     expect(await repositoryOn(pod.fetch).readDeck(deck.url)).not.toHaveProperty(
       "completedChapters",
     );
+  });
+
+  it("reads at most MAX_COMPLETED_CHAPTERS of them, and an edit writes those it keeps of them", async () => {
+    const pod = await podWithCourse();
+    // Many more than any course has, all named after one of its chapters, as another app may write them.
+    const many = Array.from(
+      { length: MAX_COMPLETED_CHAPTERS + 500 },
+      (_, i) => `https://elsewhere.example/x${i}.ttl#ch-1`,
+    );
+    const catalog = await (await pod.fetch(CATALOG)).text();
+    const planted = many.map((url) => `<#deck-1> ${COMPLETED} <${url}> .`).join("\n");
+    await pod.put(CATALOG, `${catalog}\n${planted}\n<#deck-1> ${COMPLETED} <${RELEASE}#ch-2> .\n`);
+    const repository = repositoryOn(pod.fetch);
+    const read = await repository.readDeck(deck.url);
+    // The course's own kept first, then the newest of the others.
+    expect(read?.completedChapters).toEqual([...many.slice(501), `${RELEASE}#ch-2`]);
+    // The values past the bound are left out of what is written.
+    const edited = await repository.setCompletedChapters(deck, {
+      kind: "notDone",
+      chapterUrl: `${RELEASE}#ch-1`,
+    });
+    expect(edited.completedChapters).toEqual([`${RELEASE}#ch-2`]);
+    expect(completedIn(pod)).toEqual([`<${RELEASE}#ch-2>`]);
   });
 
   it("writes nothing the write check refuses", async () => {

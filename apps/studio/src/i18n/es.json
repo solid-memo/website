@@ -698,6 +698,11 @@
       "notDone": "Marcar como no completado",
       "notDoneLabel": "Marcar {chapter} como no completado",
       "goneChapters": "Capítulos completados que el curso ya no tiene:",
+      "goneChaptersMore": {
+        "one": "{count} capítulo más no aparece.",
+        "many": "{count} de capítulos más no aparecen.",
+        "other": "{count} capítulos más no aparecen."
+      },
       "progressHint": "Tus respuestas y tu progreso en las tarjetas se conservan tal como están.",
       "restart": "Reiniciar el curso",
       "restartConfirm": "¿Reiniciar el curso? Todos los capítulos se marcan como no completados, así que el primero vuelve a abrirse. Tus respuestas y tu progreso en las tarjetas se conservan.",

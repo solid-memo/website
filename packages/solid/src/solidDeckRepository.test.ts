@@ -28,7 +28,7 @@ import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 
@@ -481,6 +481,21 @@ describe("addDeck", () => {
     const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
     expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([]);
     expect(getUrlAll(getThing(saved, added.url)!, RDF.type)).not.toContain(SCHEMA.Course);
+  });
+
+  it("writes at most MAX_COMPLETED_CHAPTERS chapters completed, the course's kept first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const others = Array.from(
+      { length: MAX_COMPLETED_CHAPTERS },
+      (_, i) => `https://elsewhere.example/x${i}.ttl#other`,
+    );
+    const own = added.completedChapters!;
+    await makeRepository().addDeck({ ...added, completedChapters: [...own, ...others] });
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([
+      ...own,
+      ...others.slice(1),
+    ]);
   });
 
   it("refuses an entry where the catalog has one, writing nothing", async () => {
