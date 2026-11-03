@@ -51,36 +51,93 @@ validators.register(environment.namedNode(`${XSD}decimal`), (value) => DECIMAL.t
 for (const datatype of ["float", "double"]) {
   validators.register(environment.namedNode(`${XSD}${datatype}`), (value) => FLOATING.test(value));
 }
+const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const RDFS_SUB_CLASS_OF = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
 
-/** Each document's checked copy, and the document's size when it was made. */
-const copies = new WeakMap<DatasetCore, { size: number; copy: DatasetCore }>();
+/**
+ * The most rdf:type statements a node of the data checked may have: far
+ * more than any Solid Memo or DCAT-AP document gives one. The library
+ * goes through all of a node's types each time a constraint asks for its
+ * class (sh:class), with no memory of having done so, and every subject
+ * linking to the node asks again: many subjects linking to a node with
+ * many types would make a check take time growing with the square of
+ * the document. A node past this is read as having no types at all,
+ * and has one result more, which says so.
+ */
+const MAX_TYPES_PER_NODE = 32;
 
 /**
- * The data a check sees: `data` without its rdfs:subClassOf statements.
- * The library follows them from a class to its subclasses, for sh:class
- * and sh:targetClass, with no memory of the classes it has been to, so
- * a cycle of them never ends and a few layers of them take exponential
- * time. The data is the document checked, anyone's to write; the
- * reference data checks run beside it states none (docs/validation.md).
- * So a node is an instance of the classes its rdf:type names, and only
- * those.
+ * What a check sees of a document: the data to check, and the nodes of
+ * it with too many types (each node's value), whose rdf:type
+ * statements the data leaves out.
+ */
+interface Checked {
+  data: DatasetCore;
+  overTyped: ReadonlySet<string>;
+}
+
+/** Each document's checked form, and the document's size when it was made. */
+const checks = new WeakMap<DatasetCore, { size: number; checked: Checked }>();
+
+/**
+ * The data a check sees: `data` without its rdfs:subClassOf statements,
+ * nor the rdf:type statements of a node with more than
+ * MAX_TYPES_PER_NODE of them. The library follows rdfs:subClassOf from
+ * a class to its subclasses, for sh:class and sh:targetClass, with no
+ * memory of the classes it has been to, so a cycle of them never ends
+ * and a few layers of them take exponential time. The data is the
+ * document checked, anyone's to write; the reference data checks run
+ * beside it states none (docs/validation.md). So a node is an instance
+ * of the classes its rdf:type names, and only those, and a node with
+ * too many types of none: the rest of the document is checked as
+ * usual, a subject asking for that node's class finding it of none.
  *
- * A caller checks the subjects of one document one by one, so the copy is
- * kept with the document it was made of, and made again only when the
- * document's size changes: copying it once a subject would make a check
+ * A caller checks the subjects of one document one by one, so the result
+ * is kept with the document it was made of, and made again only when the
+ * document's size changes: making it once a subject would make a check
  * as slow as the number of subjects times the number of statements.
  */
-function checkedData(data: DatasetCore): DatasetCore {
+function checkedData(data: DatasetCore): Checked {
+  const kept = checks.get(data);
+  if (kept !== undefined && kept.size === data.size) return kept.checked;
+  const checked = checkedOf(data);
+  checks.set(data, { size: data.size, checked });
+  return checked;
+}
+
+const termKey = (term: Quad["subject"]) => `${term.termType}:${term.value}`;
+
+function checkedOf(data: DatasetCore): Checked {
+  const type = environment.namedNode(RDF_TYPE);
+  const counts = new Map<string, { value: string; count: number }>();
+  for (const { subject } of data.match(null, type) as Iterable<Quad>) {
+    const key = termKey(subject);
+    const held = counts.get(key);
+    if (held === undefined) counts.set(key, { value: subject.value, count: 1 });
+    else held.count++;
+  }
+  const over = new Set<string>();
+  for (const [key, { count }] of counts) if (count > MAX_TYPES_PER_NODE) over.add(key);
+  const overTyped = new Set([...over].map((key) => (counts.get(key) as { value: string }).value));
   const subClassOf = environment.namedNode(RDFS_SUB_CLASS_OF);
-  if (data.match(null, subClassOf).size === 0) return data;
-  const kept = copies.get(data);
-  if (kept !== undefined && kept.size === data.size) return kept.copy;
-  const copy = environment.dataset(
-    [...(data as Iterable<Quad>)].filter((q) => !q.predicate.equals(subClassOf)),
-  );
-  copies.set(data, { size: data.size, copy });
-  return copy;
+  if (over.size === 0 && data.match(null, subClassOf).size === 0) return { data, overTyped };
+  const kept = (q: Quad) =>
+    !q.predicate.equals(subClassOf) && !(q.predicate.equals(type) && over.has(termKey(q.subject)));
+  return { data: environment.dataset([...(data as Iterable<Quad>)].filter(kept)), overTyped };
+}
+
+/** The result on a node with too many types: its types are not read. */
+function overTypedViolation(node: string): Violation {
+  return {
+    path: RDF_TYPE,
+    message: {
+      en: `The node <${node}> has more than ${MAX_TYPES_PER_NODE} rdf:type statements, more than Solid Memo checks, so it is checked as having none.`,
+    },
+    builtIn: true,
+    value: node,
+    severity: "violation",
+    constraint: "MaxCount",
+  };
 }
 
 /**
@@ -183,27 +240,33 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
   return {
     validateNode: (data, focusNode, shapeIri) =>
       oneAtATime(async () => {
+        const checked = checkedData(data);
         // validateNode keeps adding to one report; start each check afresh.
         validator.validationEngine.initReport();
         const report = await validator.validateNode(
-          checkedData(data),
+          checked.data,
           namedNode(focusNode),
           namedNode(shapeIri),
         );
-        return report.results.map(toViolation).sort(byPathThenMessage);
+        const refused = checked.overTyped.has(focusNode) ? [overTypedViolation(focusNode)] : [];
+        return [...report.results.map(toViolation), ...refused].sort(byPathThenMessage);
       }),
     validate: (data) =>
       oneAtATime(async () => {
+        const checked = checkedData(data);
         validator.validationEngine.initReport();
-        const report = await validator.validate(checkedData(data));
-        return report.results
-          .map(
+        const report = await validator.validate(checked.data);
+        return [
+          ...report.results.map(
             (result): FocusedViolation => ({
               focusNode: result.focusNode.value,
               ...toViolation(result),
             }),
-          )
-          .sort((a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b));
+          ),
+          ...[...checked.overTyped].map(
+            (node): FocusedViolation => ({ focusNode: node, ...overTypedViolation(node) }),
+          ),
+        ].sort((a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b));
       }),
   };
 }
