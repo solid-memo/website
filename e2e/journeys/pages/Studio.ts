@@ -759,54 +759,77 @@ export class Studio extends Screen {
   }
 
   /**
-   * Moves the focus down the deck's cards with the keyboard, `moves` rows
-   * from the first, then back up: the first card selected, the bar of
-   * the rows selected shows at the foot of the main content, and the
-   * header row at its top, both sticking as the table, longer than the
-   * window, scrolls. After each move the row with the focus is in sight
-   * between them (WCAG 2.2's Focus Not Obscured). Escape then clears the
+   * Moves the focus down the deck's cards with the keyboard, three rows
+   * past those that fit in the window, then back up: the first card
+   * selected, the bar of the rows selected shows at the foot of the main
+   * content, and the header row at its top, both sticking as the table,
+   * longer than the window, scrolls. After each move the row with the
+   * focus is in sight between them (WCAG 2.2's Focus Not Obscured), and
+   * at the deepest the table has scrolled. Escape then clears the
    * selection.
    */
-  async moveThroughCardsInSight(instance: string, deck: string, moves: number): Promise<void> {
-    await this.intent(
-      `Move down ${moves} of the cards of ${deck} and back, each in sight`,
-      async () => {
-        const name = new RegExp(escapeRegExp(this.t("studio.decks.cardsOf", { deck })));
-        await this.row(instance, deck).getByRole("link", { name }).click();
-        const table = this.cards(deck);
-        await expect(table.getByRole("rowheader").nth(moves)).toBeVisible();
+  async moveThroughCardsInSight(instance: string, deck: string): Promise<void> {
+    await this.intent(`Move down the cards of ${deck} and back, each in sight`, async () => {
+      const name = new RegExp(escapeRegExp(this.t("studio.decks.cardsOf", { deck })));
+      await this.row(instance, deck).getByRole("link", { name }).click();
+      const table = this.cards(deck);
+      const rows = table.getByRole("rowheader");
+      await expect(rows.first()).toBeVisible();
+      await this.page.keyboard.press("j");
+      await expect(rows.first().getByRole("link")).toBeFocused();
+      await this.page.keyboard.press("x");
+      await this.expectStatus(this.t("studio.cards.selected", { count: 1 }));
+      const bar = await this.page
+        .getByRole("group", { name: this.t("studio.cardBulk.label") })
+        .elementHandle();
+      // The rows wholly in the window, and three more: the walk goes past the window's foot.
+      const moves = await rows.evaluateAll(
+        (headers) =>
+          headers.filter((header) => header.getBoundingClientRect().bottom <= window.innerHeight)
+            .length + 2,
+      );
+      expect(moves, "more cards than three past those that fit").toBeLessThan(await rows.count());
+      // Where the row, the main content, the header row and the bar are, in one call into the page.
+      const inSight = async (at: number) => {
+        const link = rows.nth(at).getByRole("link");
+        await expect(link).toBeFocused();
+        const { row, main, header, foot } = await link.evaluate((element, bar) => {
+          const box = (of: Element) => {
+            const { top, bottom } = of.getBoundingClientRect();
+            return { top, bottom };
+          };
+          return {
+            row: box(element),
+            main: box(document.querySelector("main")!),
+            header: box(element.closest("table")!.querySelector("thead")!),
+            foot: box(bar),
+          };
+        }, bar);
+        // Clear of the header row and the bar where they stick, and within the main content.
+        expect(row.top, `row ${at} under the header row`).toBeGreaterThanOrEqual(
+          Math.max(main.top, header.bottom) - 1,
+        );
+        expect(row.bottom, `row ${at} under the bar`).toBeLessThanOrEqual(
+          Math.min(main.bottom, foot.top) + 1,
+        );
+      };
+      const first = await rows.first().evaluate((header) => header.getBoundingClientRect().top);
+      for (let at = 1; at <= moves; at++) {
         await this.page.keyboard.press("j");
-        await expect(table.getByRole("rowheader").first().getByRole("link")).toBeFocused();
-        await this.page.keyboard.press("x");
-        await this.expectStatus(this.t("studio.cards.selected", { count: 1 }));
-        const bar = this.page.getByRole("group", { name: this.t("studio.cardBulk.label") });
-        const inSight = async (at: number) => {
-          const link = table.getByRole("rowheader").nth(at).getByRole("link");
-          await expect(link).toBeFocused();
-          const main = (await this.page.locator("main").boundingBox())!;
-          const header = (await table.locator("thead").boundingBox())!;
-          const foot = (await bar.boundingBox())!;
-          const row = (await link.boundingBox())!;
-          // Clear of the header row and the bar where they stick, and within the main content.
-          expect(row.y, `row ${at} under the header row`).toBeGreaterThanOrEqual(
-            Math.max(main.y, header.y + header.height) - 1,
-          );
-          expect(row.y + row.height, `row ${at} under the bar`).toBeLessThanOrEqual(
-            Math.min(main.y + main.height, foot.y) + 1,
-          );
-        };
-        for (let at = 1; at <= moves; at++) {
-          await this.page.keyboard.press("j");
-          await inSight(at);
-        }
-        for (let at = moves - 1; at >= 0; at--) {
-          await this.page.keyboard.press("k");
-          await inSight(at);
-        }
-        await this.page.keyboard.press("Escape");
-        await this.expectStatus(this.t("studio.cards.selected", { count: 0 }));
-      },
-    );
+        await inSight(at);
+      }
+      expect(
+        await rows.first().evaluate((header) => header.getBoundingClientRect().top),
+        "the table scrolled to keep the deepest row in sight",
+      ).toBeLessThan(first);
+      for (let at = moves - 1; at >= 0; at--) {
+        await this.page.keyboard.press("k");
+        await inSight(at);
+      }
+      await bar.dispose();
+      await this.page.keyboard.press("Escape");
+      await this.expectStatus(this.t("studio.cards.selected", { count: 0 }));
+    });
   }
 
   /**

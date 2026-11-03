@@ -401,7 +401,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     "29 · Move down the library deck's cards with the keyboard and back, one selected: each row in sight between the header row and the bar",
     async () => {
       await app.chrome.breadcrumb("breadcrumbs.decks");
-      await app.studio.moveThroughCardsInSight(renamed, BRIGHTEST_STARS.en, 30);
+      await app.studio.moveThroughCardsInSight(renamed, BRIGHTEST_STARS.en);
     },
     { screen: "studio.cards" },
   );
