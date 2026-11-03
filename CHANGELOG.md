@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.7](https://github.com/solid-memo/website/compare/v6.29.6...v6.29.7) (2026-11-03)
+
+### Bug Fixes
+
+* **guest:** check only addresses for leftover guest-pod references ([0fc4570](https://github.com/solid-memo/website/commit/0fc45700bd6119e2e414d630a0e77b942209c0d0))
+
 ## [6.29.6](https://github.com/solid-memo/website/compare/v6.29.5...v6.29.6) (2026-11-03)
 
 ### Bug Fixes
