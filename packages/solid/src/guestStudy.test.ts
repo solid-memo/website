@@ -210,6 +210,65 @@ describe("a guest's study", () => {
     expect(await useCases.findGuestStudy()).toBeNull();
   });
 
+  // A card's text may name the guest's pod in any spelling; only a link to it is refused (GHSA-22fh-2823-783x).
+  const naming = { en: `What is ${GUEST_ORIGIN}? And HTTPS://GUEST.solid-memo.invalid:443?` };
+
+  it("moves a study whose card text names the guest's pod, the text as it was, but not one that still links to it", async () => {
+    const { useCases, guestStore, aliceStore } = await app();
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Guests" });
+    const card = await useCases.addCard(deck, { front: naming, back: { en: "Its pod" } });
+    const into = { containerUrl: TARGET, registrationTarget: "private" as const };
+
+    // A statement of another app's that links to the guest's pod is left by the move: refused.
+    const link = `<${card.url}> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <HTTPS://GUEST.solid-memo.invalid:443/x> .`;
+    await addTriples(guestStore, deck.cardsDocumentUrl, [link]);
+    const refused = await useCases.transferGuestStudy(ALICE, guestInstance!, into);
+    expect(refused).toMatchObject({
+      ok: false,
+      step: "adopt",
+      error: expect.objectContaining({ code: "guestUrlsLeft" }),
+      cleanedUp: true,
+    });
+    const resource = await guestStore.get(deck.cardsDocumentUrl);
+    if (resource?.kind !== "rdf") throw new Error("No cards document");
+    await guestStore.set(deck.cardsDocumentUrl, {
+      ...resource,
+      triples: resource.triples.filter((line) => !line.includes("seeAlso")),
+      etag: `"${crypto.randomUUID()}"`,
+    });
+
+    expect(await useCases.transferGuestStudy(ALICE, guestInstance!, into)).toMatchObject({
+      ok: true,
+    });
+    const [moved] = await useCases.listDecks(TARGET);
+    expect((await useCases.listCards(moved!)).map(({ front }) => front)).toEqual([naming]);
+    expect((await useCases.validateInstance(TARGET)).conforms).toBe(true);
+    expect(await everyTriple(aliceStore)).toContain(
+      `<${TARGET}decks/${deck.id}.ttl#${card.id}> <${SM_NS}front> "${naming.en}"@en .`,
+    );
+  });
+
+  it("adds a deck whose card text names the guest's pod to an instance, the text as it was", async () => {
+    const { useCases } = await app();
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: TARGET,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Guests" });
+    await useCases.addCard(deck, { front: naming, back: { en: "Its pod" } });
+
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true });
+    const [added] = await useCases.listDecks(TARGET);
+    expect((await useCases.listCards(added!)).map(({ front }) => front)).toEqual([naming]);
+  });
+
   it("moves a study that mixes formats 4 and 5, each subject checked against its own format and kept at it", async () => {
     const { useCases, guestStore, aliceStore } = await app();
     await useCases.startGuest("My study");

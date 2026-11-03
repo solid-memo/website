@@ -663,6 +663,18 @@ describe("copyReleaseDraft", () => {
     await expect(useCases.copyReleaseDraft(guest, INSTANCE)).resolves.toMatchObject({
       name: "solid",
     });
+    // Text may name the guest's pod: only a link to it is refused.
+    const text = { en: `See ${GUEST_INSTANCE_URL} or HTTPS://GUEST.solid-memo.invalid:443/` };
+    repository.read.mockResolvedValueOnce({
+      draft: {
+        ...moved,
+        cards: moved.cards.map((card) => ({ ...card, data: { ...card.data, front: text } })),
+      },
+      version: "v1",
+    });
+    await expect(useCases.copyReleaseDraft(guest, INSTANCE)).resolves.toMatchObject({
+      name: "solid",
+    });
     repository.read.mockResolvedValueOnce({
       draft: {
         ...moved,
@@ -674,7 +686,7 @@ describe("copyReleaseDraft", () => {
       code: "guestUrlsLeft",
       vars: { url: draftUrlOf(INSTANCE, "solid", 1) },
     });
-    expect(repository.create).toHaveBeenCalledOnce();
+    expect(repository.create).toHaveBeenCalledTimes(2);
   });
 });
 

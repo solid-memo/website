@@ -14,6 +14,8 @@ import {
   reviewsContainerOf,
 } from "./instanceLayout";
 import type { ReleaseDraftSummary } from "./release/draftLayout";
+import type { ReleaseDraft } from "./release/releaseDraft";
+import { rebaseDraft } from "./release/releaseToDraft";
 import type { Session } from "./session";
 import { fragmentIdOf } from "./subjectUrl";
 
@@ -272,11 +274,64 @@ function namesGuestPod(text: string): boolean {
   );
 }
 
-/** Whether a value names the guest's pod anywhere: in any text it holds, at any depth. */
-export function mentionsGuest(value: unknown): boolean {
-  if (typeof value === "string") return namesGuestPod(value);
+/** Whether an IRI is in the guest's pod, however its host is spelled (namesGuestPod). */
+export function isGuestPodIri(iri: string): boolean {
+  return URL.canParse(iri) && new URL(iri).origin === GUEST_POD_ORIGIN;
+}
+
+/**
+ * The fields of a deck, a card and a wrong option that hold text for the
+ * reader (names, titles, card text, notes): a copy writes them as
+ * literals, as they are, never as an address it moves. Skipped by name,
+ * at any depth: guest.test.ts lists every field of Deck, Card,
+ * Distractor and the review states, so a new field, or one that reuses
+ * one of these names for an address, fails it until it is placed.
+ */
+const READER_TEXT_FIELDS: ReadonlySet<string> = new Set([
+  "title",
+  "description",
+  "keywords",
+  "authors",
+  "front",
+  "back",
+  "frontImageDescription",
+  "frontLabel",
+  "frontNote",
+  "backImageDescription",
+  "backLabel",
+  "backNote",
+  "text",
+  "note",
+]);
+
+/**
+ * Whether a guest's deck, its cards or review states, as they are added
+ * to an instance, still name the guest's pod by address: in any field at
+ * any depth but the text the reader reads (READER_TEXT_FIELDS), which
+ * may name any address and is copied as it is. Each such field holds one
+ * whole IRI, which is also parsed as one (isGuestPodIri), as the move
+ * does: a URL parser reads spellings without `//` as the guest's pod too.
+ */
+export function addressesGuest(value: unknown): boolean {
+  if (typeof value === "string") return isGuestPodIri(value) || namesGuestPod(value);
   if (typeof value !== "object" || value === null) return false;
-  return Object.values(value).some(mentionsGuest);
+  return Object.entries(value).some(
+    ([field, held]) => !READER_TEXT_FIELDS.has(field) && addressesGuest(held),
+  );
+}
+
+/**
+ * Whether a draft names the guest's pod by an IRI: its own, one its
+ * records link to, or one of its statements' terms. Its text, a
+ * literal, may name any address and is copied as it is.
+ */
+export function draftAddressesGuest(draft: ReleaseDraft): boolean {
+  let named = isGuestPodIri(draft.url);
+  rebaseDraft(draft, draft.url, (iri) => {
+    named ||= isGuestPodIri(iri);
+    return iri;
+  });
+  return named || draft.triples.some(({ predicate }) => isGuestPodIri(predicate));
 }
 
 /**

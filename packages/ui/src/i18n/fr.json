@@ -1746,7 +1746,8 @@
       "many": "La copie dans votre Pod n’est pas au format attendu par Solid Memo ({count} de problèmes), votre travail reste donc tel quel. Réessayez plus tard.",
       "other": "La copie dans votre Pod n’est pas au format attendu par Solid Memo ({count} problèmes), votre travail reste donc tel quel. Réessayez plus tard."
     },
-    "guestUrlsLeft": "La copie dans votre Pod renvoie encore au travail du mode invité, votre travail reste donc tel quel. Réessayez.",
+    "guestUrlsLeft": "La copie {url} dans votre Pod renvoie encore au travail du mode invité, votre travail reste donc tel quel. Réessayez.",
+    "guestDeckUrlsLeft": "Le paquet « {deck} » renvoie encore au travail du mode invité, il n’a donc pas été ajouté à votre Pod. Laissez-le de côté, puis réessayez.",
     "guestStudyInvalid": {
       "one": "Une partie de votre travail dans ce navigateur n’est pas au format attendu par Solid Memo ({count} problème), rien n’a donc été ajouté à votre Pod. Tout est toujours ici.",
       "many": "Une partie de votre travail dans ce navigateur n’est pas au format attendu par Solid Memo ({count} de problèmes), rien n’a donc été ajouté à votre Pod. Tout est toujours ici.",

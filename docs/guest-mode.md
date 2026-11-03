@@ -155,9 +155,12 @@ It runs these steps:
      the new deck's (`answer-<time>-<random>-deck-<uuid>`). Answers of a
      deck the guest removed, or left out, aren't added.
 
-   Nothing written may name the guest's pod (`guestUrlsLeft`). Nothing
-   is registered: the instance's registered catalog and folders hold
-   the added decks.
+   No address in a deck's entry, cards or review states may name the
+   guest's pod, in any spelling of its origin (`guestDeckUrlsLeft`, which
+   names the deck, so it can be left out). Text the reader reads, such
+   as titles, card text and notes, may name any address and is copied
+   as it is. Nothing is registered: the instance's registered catalog
+   and folders hold the added decks.
 3. **arrange:** each of the guest's deck groups becomes a new group
    (`#group-<uuid>`) with its name, holding the added decks and new
    groups it held, an empty one empty. They go, in the guest's order,
@@ -172,8 +175,9 @@ It runs these steps:
    takes the next free name (`<name>-2`, …). It's written as a new
    draft is ([data-model.md](data-model.md#drafts-and-releases)). A
    draft whose link can't be written is taken back, and none of the
-   instance's is written over. A copy that would still name
-   the guest's pod isn't written (`guestUrlsLeft`).
+   instance's is written over. A copy that would still link to
+   the guest's pod by an IRI isn't written (`guestUrlsLeft`); its
+   text may name any address.
 5. **verify:** the guest's instance must still list the same
    resources, each at the version noted in **read**
    (`guestStudyChanged`).
@@ -239,8 +243,11 @@ instance goes). It runs these steps:
    instance moved under the target, and the guest's WebID renamed to the
    user's (`ContainerMove.renames`).
 3. **adopt:** name the catalog's publisher as the user's profile names
-   them. No document of the copy may still mention `GUEST_ORIGIN`, as an
-   IRI or in text (`guestUrlsLeft`).
+   them. No Turtle document of the copy may still name an IRI at the
+   origin of `GUEST_ORIGIN`, in any spelling (`guestUrlsLeft`, which
+   names the document). Literals aren't looked at, their text or their
+   datatypes: the copy moves only the IRIs of subjects, predicates,
+   objects and graphs, and text such as a card's may name any address.
 4. **validate:** the copy must fully conform to the shapes
    (`movedCopyInvalid`).
 5. **verify:** the guest's instance must be unchanged since it was

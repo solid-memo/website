@@ -314,7 +314,7 @@ describe("guests", () => {
       ...catalog,
       publisher: { webId: session.webId, name: "Alice" },
     });
-    expect(vi.mocked(deps.instanceCopier.mentions).mock.calls).toEqual([
+    expect(vi.mocked(deps.instanceCopier.namesIriAt).mock.calls).toEqual([
       [`${TARGET}catalog.ttl`, GUEST_ORIGIN],
       [`${TARGET}history/2026-10.ttl`, GUEST_ORIGIN],
     ]);
@@ -741,7 +741,7 @@ describe("guests", () => {
 
   it("transferGuestStudy refuses a copy that still names the guest's pod, or does not conform", async () => {
     const { deps } = guestDeps();
-    vi.mocked(deps.instanceCopier.mentions).mockImplementation(async (url) =>
+    vi.mocked(deps.instanceCopier.namesIriAt).mockImplementation(async (url) =>
       url.endsWith("2026-10.ttl"),
     );
     expect(
@@ -755,7 +755,7 @@ describe("guests", () => {
       error: new AppError("guestUrlsLeft", { url: `${TARGET}history/2026-10.ttl` }),
       cleanedUp: true,
     });
-    vi.mocked(deps.instanceCopier.mentions).mockResolvedValue(false);
+    vi.mocked(deps.instanceCopier.namesIriAt).mockResolvedValue(false);
     const violation = {
       message: { en: "x" },
       severity: "violation" as const,
@@ -1493,20 +1493,39 @@ describe("guests", () => {
       expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
     });
 
-    it("mergeGuestStudy writes nothing of a deck that would still name the guest's pod", async () => {
+    it("mergeGuestStudy writes nothing of a deck that would still name the guest's pod, and says which deck", async () => {
       const { deps } = mergeDeps();
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([
-        { ...guestCard, frontImageUrl: `${GUEST_ORIGIN}picture.png` },
+        { ...guestCard, frontImageUrl: "HTTPS://GUEST.solid-memo.invalid:443/picture.png" },
       ]);
-      expect(
-        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
-      ).toMatchObject({
+      const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+      expect(outcome).toMatchObject({
         ok: false,
         step: "decks",
-        error: new AppError("guestUrlsLeft", { url: `${TARGET}catalog.ttl#deck-n1` }),
+        error: new AppError("guestDeckUrlsLeft", {
+          deck: course.title,
+          url: `${TARGET}catalog.ttl#deck-n1`,
+        }),
         added: [],
       });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    });
+
+    it("mergeGuestStudy adds a card whose text names the guest's pod, as it is (GHSA-22fh-2823-783x)", async () => {
+      const { deps } = mergeDeps();
+      const text = { en: `What is ${GUEST_ORIGIN}? And HTTPS://GUEST.solid-memo.invalid:443?` };
+      const worded = { ...guestCard, front: text, backNote: text };
+      vi.mocked(deps.deckRepository.listCards).mockImplementation(async (of) =>
+        of.url === course.url ? [worded] : [],
+      );
+      const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+      expect(outcome).toMatchObject({ ok: true });
+      const { url: _url, formatVersion: _version, ...content } = worded;
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
+        added("deck-n1", course),
+        { save: [content], remove: [] },
+        { whole: true },
+      );
     });
 
     it("mergeGuestStudy stops at a deck it cannot add, keeping the decks added whole and the guest's study, deleting the deck's documents", async () => {

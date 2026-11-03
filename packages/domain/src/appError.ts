@@ -101,7 +101,9 @@ export const ERROR_TEMPLATES = {
       "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later.",
   },
   guestUrlsLeft:
-    "The copy in your Pod still points to the guest's study, so your study is left as it was. Try again.",
+    "The copy {url} in your Pod still points to the guest's study, so your study is left as it was. Try again.",
+  guestDeckUrlsLeft:
+    "The deck “{deck}” still points to the guest's study, so it was not added to your Pod. Leave it out, then try again.",
   guestStudyInvalid: {
     one: "Part of your study in this browser is not in the format Solid Memo expects ({count} problem), so none of it was added to your Pod. It is still here.",
     other:

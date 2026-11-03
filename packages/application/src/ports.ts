@@ -934,8 +934,15 @@ export interface InstanceCopier {
    * modification time, else a hash of its bytes; null when there is none.
    */
   versionOf(url: string): Promise<string | null>;
-  /** Whether the resource's content holds `text` anywhere (a URL, as an IRI or in a literal). */
-  mentions(url: string, text: string): Promise<boolean>;
+  /**
+   * Whether the document names an IRI at `origin`'s origin, as a parsed
+   * URL gives it (in any case, with or without the default port), in any
+   * of its subjects, predicates, objects and graphs. Its literals are not
+   * looked at, their text or their datatypes, which the move leaves as
+   * they are too (mapIris); nor is a file that is not Turtle, which a copy
+   * takes byte for byte (copyResource).
+   */
+  namesIriAt(url: string, origin: string): Promise<boolean>;
   /**
    * Delete a container and everything below it; one that is gone counts
    * as deleted. Only for a copy this app made whole, at a URL it found

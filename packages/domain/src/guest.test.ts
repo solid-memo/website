@@ -4,10 +4,15 @@
 
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
-import type { Deck } from "./deck";
+import type { Card, Deck, Distractor } from "./deck";
 import type { DeckTree } from "./deckTree";
+import type { FsrsSnapshot, FsrsState, ReviewSnapshot, ReviewState, ReviewStates } from "./review";
+import { rebaseDraft } from "./release/releaseToDraft";
+import { card as draftCard, courseDraft } from "./testing/releaseDraft";
 import {
+  addressesGuest,
   decodeGuestMergeNote,
+  draftAddressesGuest,
   encodeGuestMergeNote,
   GUEST_INSTANCE_URL,
   GUEST_ORIGIN,
@@ -16,8 +21,8 @@ import {
   guestDeckStamp,
   guestMergeKey,
   guestMergePlan,
+  isGuestPodIri,
   isGuestUrl,
-  mentionsGuest,
   mergedAnswer,
   mergedDeck,
   suggestedGuestLocation,
@@ -227,9 +232,9 @@ describe("adding a guest's study to an instance", () => {
     ).toEqual([]);
   });
 
-  it("finds the guest's pod named anywhere in a value", () => {
-    expect(mentionsGuest([{ a: 1, b: [null, { c: `${GUEST_ORIGIN}x` }] }])).toBe(true);
-    expect(mentionsGuest({ a: 1, b: [null, true, "https://pod.example/"] })).toBe(false);
+  it("finds the guest's pod named by an address anywhere in a value", () => {
+    expect(addressesGuest([{ a: 1, b: [null, { c: `${GUEST_ORIGIN}x` }] }])).toBe(true);
+    expect(addressesGuest({ a: 1, b: [null, true, "https://pod.example/"] })).toBe(false);
   });
 
   it("finds the guest's pod however its URL is spelled, by the origin it parses to", () => {
@@ -241,8 +246,12 @@ describe("adding a guest's study to an instance", () => {
       "https://someone@guest.solid-memo.invalid/",
       "https://guest%2Esolid-memo.invalid/",
       `https://${GUEST_ORIGIN}`,
+      "https:guest.solid-memo.invalid/x",
+      "https:/guest.solid-memo.invalid/x",
+      "https:\\\\guest.solid-memo.invalid/x",
+      "https://guest.solid-\tmemo.invalid/x",
     ])
-      expect(mentionsGuest(text)).toBe(true);
+      expect(addressesGuest({ frontImageUrl: text })).toBe(true);
     for (const text of [
       "https://evil.example/?next=guest.solid-memo.invalid/",
       "https://guest.solid-memo.invalid.example/",
@@ -251,7 +260,129 @@ describe("adding a guest's study to an instance", () => {
       "https://[",
       "guest.solid-memo.invalid",
     ])
-      expect(mentionsGuest(text)).toBe(false);
+      expect(addressesGuest({ frontImageUrl: text })).toBe(false);
+    expect(isGuestPodIri("HTTPS://GUEST.solid-memo.invalid:443/x")).toBe(true);
+    expect(isGuestPodIri("https://pod.example/")).toBe(false);
+    expect(isGuestPodIri("guest.solid-memo.invalid")).toBe(false);
+  });
+
+  it("leaves the text a reader reads out: a card or deck may name the guest's pod in words (GHSA-22fh-2823-783x)", () => {
+    const named = { en: `What is ${GUEST_ORIGIN}? And HTTPS://GUEST.solid-memo.invalid:443?` };
+    const content = {
+      front: named,
+      back: named,
+      frontImageDescription: named,
+      frontLabel: named,
+      frontNote: named,
+      backImageDescription: named,
+      backLabel: named,
+      backNote: named,
+      distractors: [{ id: "d1", text: named, note: named }],
+      subjects: ["https://www.wikidata.org/entity/Q1"],
+    };
+    const ownDeck = deck("deck-1", TARGET, {
+      description: named,
+      keywords: { en: [GUEST_ORIGIN] },
+      authors: [GUEST_ORIGIN],
+      title: named,
+    });
+    expect(addressesGuest([ownDeck, [content], { sm2: [], fsrs: [] }])).toBe(false);
+    expect(addressesGuest([ownDeck, [{ ...content, subjects: [`${GUEST_ORIGIN}x`] }]])).toBe(true);
+    expect(
+      addressesGuest([{ ...ownDeck, sourceUrl: "HTTPS://GUEST.solid-memo.invalid:443/r" }]),
+    ).toBe(true);
+  });
+
+  it("skips as reader text exactly the fields that are, in a deck, a card, a wrong option and a review state", () => {
+    // Every field, true when it is text for the reader: a field added to one of these types fails to typecheck until it is placed here.
+    const deckFields: Record<keyof Deck, boolean> = {
+      id: false,
+      url: false,
+      title: true,
+      cardsDocumentUrl: false,
+      reviewsDocumentUrl: false,
+      createdAt: false,
+      modifiedAt: false,
+      formatVersion: false,
+      direction: false,
+      authors: true,
+      license: false,
+      description: true,
+      sourceUrl: false,
+      themes: false,
+      keywords: true,
+      newCardsPerDay: false,
+      maxReviewsPerDay: false,
+      completedChapters: false,
+      course: false,
+      cardLanguage: false,
+    };
+    const cardFields: Record<keyof Card, boolean> = {
+      id: false,
+      url: false,
+      createdAt: false,
+      formatVersion: false,
+      retired: false,
+      fromRelease: false,
+      front: true,
+      back: true,
+      frontImageUrl: false,
+      frontImageDescription: true,
+      frontLabel: true,
+      frontNote: true,
+      backImageUrl: false,
+      backImageDescription: true,
+      backLabel: true,
+      backNote: true,
+      distractors: false,
+      textFormat: false,
+      subjects: false,
+    };
+    const distractorFields: Record<keyof Distractor, boolean> = {
+      id: false,
+      text: true,
+      note: true,
+      retired: false,
+    };
+    const stateFields: Record<
+      keyof ReviewState | keyof FsrsState | keyof ReviewSnapshot | keyof FsrsSnapshot,
+      boolean
+    > = {
+      cardId: false,
+      direction: false,
+      easeFactor: false,
+      intervalDays: false,
+      repetitions: false,
+      stability: false,
+      difficulty: false,
+      due: false,
+      firstReviewedAt: false,
+      lastReviewedAt: false,
+      formatVersion: false,
+      previous: false,
+    };
+    const statesFields: Record<keyof ReviewStates, boolean> = { sm2: false, fsrs: false };
+    for (const fields of [deckFields, cardFields, distractorFields, stateFields, statesFields])
+      for (const [field, readerText] of Object.entries(fields))
+        expect(addressesGuest({ [field]: `${GUEST_ORIGIN}x` }), field).toBe(!readerText);
+  });
+
+  it("finds a draft that links to the guest's pod, but not one whose text names it", () => {
+    const text = `See ${GUEST_ORIGIN} and HTTPS://GUEST.solid-memo.invalid:443`;
+    const draft = courseDraft();
+    const worded = { ...draft, cards: [{ id: "c9", data: draftCard(text) }] };
+    expect(draftAddressesGuest(draft)).toBe(false);
+    expect(draftAddressesGuest(worded)).toBe(false);
+    expect(
+      draftAddressesGuest(rebaseDraft(draft, `${GUEST_INSTANCE_URL}drafts/x/v1/release.ttl`)),
+    ).toBe(true);
+    expect(
+      draftAddressesGuest({ ...draft, root: { ...draft.root, prev: `${GUEST_ORIGIN}r.ttl` } }),
+    ).toBe(true);
+    const triple = draft.triples[0]!;
+    expect(
+      draftAddressesGuest({ ...draft, triples: [{ ...triple, predicate: `${GUEST_ORIGIN}p` }] }),
+    ).toBe(true);
   });
 
   it("keeps a note of a deck or group added, per guest's and instance, and reads back only a note it wrote", () => {

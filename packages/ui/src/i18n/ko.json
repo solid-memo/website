@@ -1594,7 +1594,8 @@
     "movedCopyInvalid": {
       "other": "Pod에 있는 복사본이 Solid Memo가 기대하는 형식에 맞지 않아서(문제 {count}건) 학습 기록을 그대로 두었어요. 나중에 다시 시도해 주세요."
     },
-    "guestUrlsLeft": "Pod에 있는 복사본이 아직 게스트 학습을 가리키고 있어서 학습 기록을 그대로 두었어요. 다시 시도해 주세요.",
+    "guestUrlsLeft": "Pod에 있는 복사본({url})이 아직 게스트 학습을 가리키고 있어서 학습 기록을 그대로 두었어요. 다시 시도해 주세요.",
+    "guestDeckUrlsLeft": "‘{deck}’ 덱이 아직 게스트 학습을 가리키고 있어서 Pod에 추가하지 않았어요. 이 덱을 빼고 다시 시도해 주세요.",
     "guestStudyInvalid": {
       "other": "이 브라우저에 있는 학습 기록 일부가 Solid Memo가 기대하는 형식에 맞지 않아서(문제 {count}건) 아무것도 Pod에 추가하지 않았어요. 학습 기록은 여기에 그대로 있어요."
     },

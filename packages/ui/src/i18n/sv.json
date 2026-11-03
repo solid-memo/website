@@ -1670,7 +1670,8 @@
       "one": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare.",
       "other": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare."
     },
-    "guestUrlsLeft": "Kopian i din Pod pekar fortfarande på gästens studier, så dina studier lämnas som de var. Försök igen.",
+    "guestUrlsLeft": "Kopian {url} i din Pod pekar fortfarande på gästens studier, så dina studier lämnas som de var. Försök igen.",
+    "guestDeckUrlsLeft": "Kortleken ”{deck}” pekar fortfarande på gästens studier, så den lades inte till i din Pod. Lämna den utanför och försök igen.",
     "guestStudyInvalid": {
       "one": "En del av dina studier i den här webbläsaren har inte det format Solid Memo förväntar sig ({count} problem), så inget av dem lades till i din Pod. De finns kvar här.",
       "other": "En del av dina studier i den här webbläsaren har inte det format Solid Memo förväntar sig ({count} problem), så inget av dem lades till i din Pod. De finns kvar här."

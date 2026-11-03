@@ -1746,7 +1746,8 @@
       "many": "La copia de tu Pod no está en el formato que espera Solid Memo ({count} de problemas), así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo más tarde.",
       "other": "La copia de tu Pod no está en el formato que espera Solid Memo ({count} problemas), así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo más tarde."
     },
-    "guestUrlsLeft": "La copia de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo.",
+    "guestUrlsLeft": "La copia {url} de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo.",
+    "guestDeckUrlsLeft": "El mazo «{deck}» todavía apunta a los datos de estudio en modo invitado, así que no se añadió a tu Pod. Déjalo fuera e inténtalo de nuevo.",
     "guestStudyInvalid": {
       "one": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} problema), así que no se añadió nada a tu Pod. Siguen aquí.",
       "many": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} de problemas), así que no se añadió nada a tu Pod. Siguen aquí.",
