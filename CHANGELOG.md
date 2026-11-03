@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.9](https://github.com/solid-memo/website/compare/v6.29.8...v6.29.9) (2026-11-03)
+
+### Bug Fixes
+
+* bound a course's completed chapters and edit them linearly ([f9f2cfa](https://github.com/solid-memo/website/commit/f9f2cfaabb3ddd6ce22d32b04bdad36558633c8a))
+
 ## [6.29.8](https://github.com/solid-memo/website/compare/v6.29.7...v6.29.8) (2026-11-03)
 
 ### Bug Fixes
