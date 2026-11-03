@@ -6,11 +6,12 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import { isOutdated, isReviewStateOutdated } from "@solid-memo/domain/migration";
 import { summarize } from "@solid-memo/domain/validation";
 import {
-  emptyDigest,
+  addReceipt,
+  changedDigest,
   scheduleOf,
-  withReceipt,
-  withSchedule,
+  setSchedule,
   type DeckSchedule,
+  type DigestChange,
   type DocumentReceipt,
   type InstanceDigest,
 } from "@solid-memo/domain/studyDigest";
@@ -31,8 +32,8 @@ export function noting(
   document: string,
   version: string,
   facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">,
-) {
-  return (digest: InstanceDigest) => withReceipt(digest, document, version, facts);
+): DigestChange {
+  return (draft) => addReceipt(draft, document, version, facts);
 }
 
 /** The deck's schedule from its documents, by the due days of the scheduler in use. */
@@ -82,25 +83,27 @@ export function createDigestStore({
    * Each instance's digest as this page knows it: read once, then kept up
    * to date with what the page learns, which is written back in the
    * background (a failed write only means the next visit learns it again).
+   * The page's own copy, each change made to it in place: a visit learns
+   * a fact of each of the instance's documents, and copying the digest
+   * for each would take time in their product. So what `of` gives is
+   * the digest as it is now, read at once, not kept.
    */
   const digests = new Map<string, Promise<InstanceDigest>>();
   function digestOf(instanceUrl: string): Promise<InstanceDigest> {
     let digest = digests.get(instanceUrl);
     if (digest === undefined) {
       digest = digestRepository.readDigest(instanceUrl).then(
-        (stored) => stored ?? emptyDigest(),
-        () => emptyDigest(),
+        (stored) => changedDigest(stored, []),
+        () => changedDigest(null, []),
       );
       digests.set(instanceUrl, digest);
     }
     return digest;
   }
-  function remember(instanceUrl: string, change: (digest: InstanceDigest) => InstanceDigest): void {
+  function remember(instanceUrl: string, change: DigestChange): void {
     void digestOf(instanceUrl).then((digest) => {
-      digests.set(instanceUrl, Promise.resolve(change(digest)));
-      return digestRepository
-        .updateDigest(instanceUrl, (stored) => change(stored ?? emptyDigest()))
-        .catch(() => undefined);
+      change(digest);
+      return digestRepository.updateDigest(instanceUrl, change).catch(() => undefined);
     });
   }
   async function refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void> {
@@ -152,14 +155,12 @@ export function createDigestStore({
     const { version: cardsVersion } = cards;
     const { version: reviewsVersion } = reviews;
     if (cardsVersion === null || reviewsVersion === null) return;
-    remember(instanceUrl, (digest) => {
-      let next = withSchedule(digest, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
+    remember(instanceUrl, (draft) => {
+      setSchedule(draft, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
       if (!cards.value.some(isOutdated))
-        next = withReceipt(next, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
-      if (!reviews.value.sm2.some(isReviewStateOutdated)) {
-        next = withReceipt(next, deck.reviewsDocumentUrl, reviewsVersion, { latestFormat: true });
-      }
-      return next;
+        addReceipt(draft, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
+      if (!reviews.value.sm2.some(isReviewStateOutdated))
+        addReceipt(draft, deck.reviewsDocumentUrl, reviewsVersion, { latestFormat: true });
     });
   }
 

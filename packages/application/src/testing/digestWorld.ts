@@ -5,7 +5,7 @@
 import { expect, vi } from "vitest";
 import type { DigestRepository, DeckRepository, ReviewStateRepository } from "../ports";
 import { createUseCases } from "../useCases";
-import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
+import { changedDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { CARD_FORMAT_VERSION, type Card } from "@solid-memo/domain/deck";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { sm2s, instance, deck, card, makeDeps } from "./fakePorts";
@@ -40,7 +40,7 @@ export function setup(initial: InstanceDigest | null = null) {
   const digestRepository: DigestRepository = {
     readDigest: vi.fn(async () => stored),
     updateDigest: vi.fn(async (_instanceUrl, change) => {
-      stored = change(stored);
+      stored = changedDigest(stored, [change]);
     }),
   };
   const at = (version: string, value: unknown) =>

@@ -15,7 +15,7 @@ import { historyUrlOf } from "@solid-memo/domain/instanceLayout";
 import {
   monthSummaryOf,
   todayFiguresOf,
-  withMonthSummaries,
+  setMonthSummaries,
   type MonthSummary,
   type StoredMonthSummary,
   type TodayFigures,
@@ -453,7 +453,7 @@ export function createStatisticsUseCases({
         before.length !== Object.keys(kept).length ||
         before.some((stored) => kept[stored.document]?.version !== stored.version)
       )
-        digestStore.remember(instanceUrl, (stored) => withMonthSummaries(stored, kept));
+        digestStore.remember(instanceUrl, (draft) => setMonthSummaries(draft, kept));
       const figures = todayFiguresOf(summaries, today, first);
       if (figures.medianAnswerMs !== null || !figures.days.some((day) => day.studyDay >= first))
         return figures;

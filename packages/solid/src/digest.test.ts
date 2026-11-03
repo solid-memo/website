@@ -8,13 +8,17 @@ import type { Deck } from "@solid-memo/domain/deck";
 import {
   ABSENT_VERSION,
   emptyDigest,
-  withMonthSummaries,
-  withReceipt,
-  withSchedule,
+  addReceipt,
+  changedDigest,
+  setMonthSummaries,
+  setSchedule,
+  type DigestChange,
   type StoredMonthSummary,
   type StoredSchedule,
 } from "@solid-memo/domain/studyDigest";
 import { readDataset, readDatasetSince, saveDataset, UNCHANGED, versionOf } from "./datasets";
+import { MAX_CATALOG_LINKS } from "./catalogLinks";
+import { MAX_DRAFT_DOCUMENTS_IN_ALL } from "./solidReleaseDraftRepository";
 import { readSince } from "./readSince";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidDigestRepository } from "./solidDigestRepository";
@@ -247,20 +251,18 @@ describe("the instance's digest in the pod", () => {
       recallSeconds: { 4: 7, 60: 1 },
     },
   };
-  const learned = (digest = emptyDigest()) =>
-    withMonthSummaries(
-      withSchedule(
-        withReceipt(digest, CARDS, '"v1"', { conformedTo: "rules", latestFormat: true }),
-        schedule,
-      ),
-      { [month.document]: month },
-    );
+  const learn: DigestChange = (draft) => {
+    addReceipt(draft, CARDS, '"v1"', { conformedTo: "rules", latestFormat: true });
+    setSchedule(draft, schedule);
+    setMonthSummaries(draft, { [month.document]: month });
+  };
+  const learned = () => changedDigest(null, [learn]);
 
   it("is null until something is learned, then read back as written", async () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
     expect(await digests.readDigest(INSTANCE)).toBeNull();
-    await digests.updateDigest(INSTANCE, (stored) => learned(stored ?? undefined));
+    await digests.updateDigest(INSTANCE, learn);
     expect(await digests.readDigest(INSTANCE)).toEqual(learned());
     expect(pod.requests.filter((r) => r.method === "PUT")).toEqual([
       expect.objectContaining({ url: DIGEST, ifNoneMatch: "*", status: 201 }),
@@ -274,30 +276,29 @@ describe("the instance's digest in the pod", () => {
       fetch: pod.fetch,
       checkWrite: async (_dataset, subjects) => void checked.push([...subjects]),
     });
-    await digests.updateDigest(INSTANCE, () => learned());
+    await digests.updateDigest(INSTANCE, learn);
     const written = pod.etag(DIGEST);
     pod.clearRequests();
-    await digests.updateDigest(INSTANCE, (stored) =>
-      withReceipt(stored!, REVIEWS, '"r1"', { latestFormat: true }),
+    await digests.updateDigest(INSTANCE, (draft) =>
+      addReceipt(draft, REVIEWS, '"r1"', { latestFormat: true }),
     );
     expect(pod.requests.filter((r) => r.method !== "GET")).toEqual([
       expect.objectContaining({ method: "PATCH", url: DIGEST, ifMatch: written }),
     ]);
     expect(checked.at(-1)).toEqual([`${DIGEST}#receipt-reviews-deck-1.ttl`]);
     pod.clearRequests();
-    await digests.updateDigest(INSTANCE, (stored) => stored!);
+    await digests.updateDigest(INSTANCE, () => undefined);
     expect(pod.requests.filter((r) => r.method !== "GET")).toEqual([]);
   });
 
   it("removes what is no longer known", async () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
-    await digests.updateDigest(INSTANCE, () => learned());
-    await digests.updateDigest(INSTANCE, (stored) => ({
-      receipts: {},
-      schedules: stored!.schedules,
-      months: {},
-    }));
+    await digests.updateDigest(INSTANCE, learn);
+    await digests.updateDigest(INSTANCE, (draft) => {
+      draft.receipts = {};
+      draft.months = {};
+    });
     expect(await digests.readDigest(INSTANCE)).toEqual({
       receipts: {},
       schedules: { [deck.url]: schedule },
@@ -305,7 +306,7 @@ describe("the instance's digest in the pod", () => {
     });
     expect(pod.triples(DIGEST)!.some((t) => t.includes("#receipt-"))).toBe(false);
     expect(pod.triples(DIGEST)!.some((t) => t.includes("#month-"))).toBe(false);
-    await digests.updateDigest(INSTANCE, () => emptyDigest());
+    await digests.updateDigest(INSTANCE, (draft) => Object.assign(draft, emptyDigest()));
     expect(pod.triples(DIGEST)).toEqual([]);
   });
 
@@ -328,7 +329,10 @@ describe("the instance's digest in the pod", () => {
     });
     expect(Object.keys((await digests.readDigest(INSTANCE))!.months)).toHaveLength(300);
     pod.clearRequests();
-    await digests.updateDigest(INSTANCE, (stored) => ({ ...stored!, receipts: {}, months: {} }));
+    await digests.updateDigest(INSTANCE, (draft) => {
+      draft.receipts = {};
+      draft.months = {};
+    });
     expect(pod.requests.filter((r) => r.method !== "GET")).toHaveLength(1);
     expect(checked[0]).toHaveLength(301);
     expect(checked[0]).toContain(`${DIGEST}#m0`);
@@ -353,7 +357,7 @@ describe("the instance's digest in the pod", () => {
       return push.apply(this, items);
     };
     try {
-      await digests.updateDigest(INSTANCE, (stored) => withMonthSummaries(stored!, {}));
+      await digests.updateDigest(INSTANCE, (draft) => setMonthSummaries(draft, {}));
     } finally {
       Array.prototype.push = push;
     }
@@ -370,26 +374,26 @@ describe("the instance's digest in the pod", () => {
          sm:summarizedVersion "v" ; sm:youngReviewCount 0 ; sm:youngRecalledCount 0 .\n`;
     await pod.put(DIGEST, `${PREFIXES}${said("#month-history-2026-09.ttl")}${said("#again")}`);
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
-    await digests.updateDigest(INSTANCE, (stored) =>
-      withMonthSummaries(stored!, { [month.document]: month }),
+    await digests.updateDigest(INSTANCE, (draft) =>
+      setMonthSummaries(draft, { [month.document]: month }),
     );
     const subjects = new Set(pod.triples(DIGEST)!.map((t) => t.split(" ")[0]));
     expect([...subjects]).toEqual([`<${DIGEST}#month-history-2026-09.ttl>`]);
     expect(await digests.readDigest(INSTANCE)).toEqual(
-      withMonthSummaries(emptyDigest(), { [month.document]: month }),
+      changedDigest(null, [(draft) => setMonthSummaries(draft, { [month.document]: month })]),
     );
   });
 
   it("writes changes asked for while a write is under way together, in the next one", async () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
-    const first = digests.updateDigest(INSTANCE, (stored) =>
-      withReceipt(stored ?? emptyDigest(), CARDS, '"v1"', { latestFormat: true }),
+    const first = digests.updateDigest(INSTANCE, (draft) =>
+      addReceipt(draft, CARDS, '"v1"', { latestFormat: true }),
     );
-    const second = digests.updateDigest(INSTANCE, (stored) =>
-      withReceipt(stored!, REVIEWS, '"r1"', { latestFormat: true }),
+    const second = digests.updateDigest(INSTANCE, (draft) =>
+      addReceipt(draft, REVIEWS, '"r1"', { latestFormat: true }),
     );
-    const third = digests.updateDigest(INSTANCE, (stored) => withSchedule(stored!, schedule));
+    const third = digests.updateDigest(INSTANCE, (draft) => setSchedule(draft, schedule));
     await Promise.all([first, second, third]);
     expect(pod.requests.filter((r) => r.method !== "GET")).toHaveLength(2);
     expect(Object.keys((await digests.readDigest(INSTANCE))!.receipts)).toEqual([CARDS, REVIEWS]);
@@ -402,9 +406,9 @@ describe("the instance's digest in the pod", () => {
       fetch: pod.fetch,
       wait: async (ms) => void waits.push(ms),
     });
-    await digests.updateDigest(INSTANCE, () => learned());
+    await digests.updateDigest(INSTANCE, learn);
     pod.failNext("PATCH", DIGEST, 412);
-    await digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r1"', {}));
+    await digests.updateDigest(INSTANCE, (draft) => addReceipt(draft, REVIEWS, '"r1"', {}));
     expect((await digests.readDigest(INSTANCE))!.receipts[REVIEWS]).toEqual({
       document: REVIEWS,
       version: '"r1"',
@@ -413,7 +417,7 @@ describe("the instance's digest in the pod", () => {
     waits.length = 0;
     for (let i = 0; i < 6; i++) pod.failNext("PATCH", DIGEST, 412);
     await expect(
-      digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r2"', {})),
+      digests.updateDigest(INSTANCE, (draft) => addReceipt(draft, REVIEWS, '"r2"', {})),
     ).rejects.toThrow("changed elsewhere");
     expect(waits).toEqual([50, 100, 150, 200, 250]);
   });
@@ -421,10 +425,10 @@ describe("the instance's digest in the pod", () => {
   it("waits by the clock when no wait is given", async () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
-    await digests.updateDigest(INSTANCE, () => learned());
+    await digests.updateDigest(INSTANCE, learn);
     pod.failNext("PATCH", DIGEST, 412);
     const started = Date.now();
-    await digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r1"', {}));
+    await digests.updateDigest(INSTANCE, (draft) => addReceipt(draft, REVIEWS, '"r1"', {}));
     expect(Date.now() - started).toBeGreaterThanOrEqual(45);
   });
 
@@ -432,8 +436,8 @@ describe("the instance's digest in the pod", () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
     pod.failNext("PUT", DIGEST, 500);
-    await expect(digests.updateDigest(INSTANCE, () => learned())).rejects.toThrow();
-    await digests.updateDigest(INSTANCE, () => learned());
+    await expect(digests.updateDigest(INSTANCE, learn)).rejects.toThrow();
+    await digests.updateDigest(INSTANCE, learn);
     expect(await digests.readDigest(INSTANCE)).toEqual(learned());
   });
 
@@ -450,8 +454,8 @@ describe("the instance's digest in the pod", () => {
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
     const read = await digests.readDigest(INSTANCE);
     expect(read!.schedules[deck.url]).toEqual(schedule);
-    await digests.updateDigest(INSTANCE, (stored) =>
-      withSchedule(stored!, { ...schedule, schedule: { ...schedule.schedule, unreviewed: 2 } }),
+    await digests.updateDigest(INSTANCE, (draft) =>
+      setSchedule(draft, { ...schedule, schedule: { ...schedule.schedule, unreviewed: 2 } }),
     );
     const triples = pod.triples(DIGEST)!.filter((t) => t.startsWith(`<${subject}>`));
     expect(triples).toContain(
@@ -478,6 +482,97 @@ describe("the instance's digest in the pod", () => {
     );
   });
 
+  /** A schedule of format 1 of the deck `deckUrl`, at the subject `#<id>`. */
+  const scheduleAt = (id: string, deckUrl: string) =>
+    `<#${id}> a sm:DeckSchedule ; sm:formatVersion 1 ;
+        sm:scheduleOf <${deckUrl}> ; sm:cardsVersion "v1" ; sm:reviewsVersion "${ABSENT_VERSION}" ;
+        sm:scheduledDirection sm:frontToBack ; sm:scheduledDayBoundaryHour 4 ; sm:scheduledOn "2026-10-01" ;
+        sm:unreviewedCount 3 ; sm:reviewedOnDayCount 1 ; sm:introducedOnDayCount 0 .\n`;
+  const receiptAt = (id: string, document: string) =>
+    `<#${id}> a sm:DocumentReceipt ; sm:formatVersion 1 ; sm:receiptOf <${document}> ;
+        sm:documentVersion "v" .\n`;
+
+  it("leaves out a receipt of no document's address and a schedule of no deck of the instance, and removes them at the next write", async () => {
+    const pod = fakePod();
+    await pod.put(
+      DIGEST,
+      PREFIXES +
+        receiptAt("folder", "decks/") +
+        receiptAt("acl", "decks/x.ttl.acl") +
+        receiptAt("kept", "decks/x.ttl") +
+        receiptAt("again", "decks/x.ttl") +
+        scheduleAt("foreign", "https://elsewhere.example/i/catalog.ttl#deck-1") +
+        scheduleAt("other", `${INSTANCE}meta.ttl#deck-1`) +
+        scheduleAt("deck", "catalog.ttl#deck-1") +
+        scheduleAt("twice", "catalog.ttl#deck-1"),
+    );
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    const read = (await digests.readDigest(INSTANCE))!;
+    expect(Object.keys(read.receipts)).toEqual([`${INSTANCE}decks/x.ttl`]);
+    expect(Object.keys(read.schedules)).toEqual([deck.url]);
+    await digests.updateDigest(INSTANCE, (draft) =>
+      addReceipt(draft, REVIEWS, '"r1"', { latestFormat: true }),
+    );
+    const subjects = new Set(pod.triples(DIGEST)!.map((t) => t.split(" ")[0]));
+    for (const id of ["folder", "acl", "foreign", "other"])
+      expect(subjects).not.toContain(`<${DIGEST}#${id}>`);
+    for (const id of ["kept", "again", "deck", "twice"])
+      expect(subjects).toContain(`<${DIGEST}#${id}>`);
+  });
+
+  // Its four fixed documents, each deck's two and each of the drafts' documents.
+  const MAX_RECEIPTS = 4 + 2 * MAX_CATALOG_LINKS + MAX_DRAFT_DOCUMENTS_IN_ALL;
+  /** A digest of `receipts` receipts and `schedules` schedules, none of the fixtures'. */
+  const plantedDigest = (receipts: number, schedules: number) => {
+    let planted = PREFIXES;
+    for (let i = 0; i < receipts; i++) planted += receiptAt(`r${i}`, `decks/d${i}.ttl`);
+    for (let i = 0; i < schedules; i++) planted += scheduleAt(`s${i}`, `catalog.ttl#planted-${i}`);
+    return planted;
+  };
+
+  it("reads no more receipts and schedules than an instance can have, and removes the rest at the next write", async () => {
+    const pod = fakePod();
+    await pod.put(DIGEST, plantedDigest(MAX_RECEIPTS + 1, MAX_CATALOG_LINKS + 1));
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    const read = (await digests.readDigest(INSTANCE))!;
+    expect(Object.keys(read.receipts)).toHaveLength(MAX_RECEIPTS);
+    expect(Object.keys(read.schedules)).toHaveLength(MAX_CATALOG_LINKS);
+    await digests.updateDigest(INSTANCE, () => undefined);
+    const after = (await digests.readDigest(INSTANCE))!;
+    expect(Object.keys(after.receipts)).toHaveLength(MAX_RECEIPTS);
+    expect(Object.keys(after.schedules)).toHaveLength(MAX_CATALOG_LINKS);
+    expect(pod.triples(DIGEST)!.filter((t) => t.includes("receiptOf"))).toHaveLength(MAX_RECEIPTS);
+  });
+
+  it("keeps what is learned while the digest holds as many as it may, in place of the earliest", async () => {
+    const pod = fakePod();
+    await pod.put(DIGEST, plantedDigest(MAX_RECEIPTS, MAX_CATALOG_LINKS));
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    await digests.updateDigest(INSTANCE, (draft) => {
+      addReceipt(draft, REVIEWS, '"r1"', { latestFormat: true });
+      setSchedule(draft, schedule);
+    });
+    const after = (await digests.readDigest(INSTANCE))!;
+    expect(after.receipts[REVIEWS]?.version).toBe('"r1"');
+    expect(after.schedules[deck.url]).toEqual(schedule);
+    expect(Object.keys(after.receipts)).toHaveLength(MAX_RECEIPTS);
+    expect(Object.keys(after.schedules)).toHaveLength(MAX_CATALOG_LINKS);
+    expect(after.receipts[`${INSTANCE}decks/d0.ttl`]).toBeUndefined();
+    expect(after.receipts[`${INSTANCE}decks/d1.ttl`]).toBeDefined();
+    expect(after.schedules[`${INSTANCE}catalog.ttl#planted-0`]).toBeUndefined();
+  });
+
+  it("writes no more than it may of what is learned at once", async () => {
+    const pod = fakePod();
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    await digests.updateDigest(INSTANCE, (draft) => {
+      for (let i = 0; i <= MAX_RECEIPTS; i++)
+        addReceipt(draft, `${INSTANCE}decks/d${i}.ttl`, '"v"', { latestFormat: true });
+    });
+    const after = (await digests.readDigest(INSTANCE))!;
+    expect(Object.keys(after.receipts)).toHaveLength(MAX_RECEIPTS);
+  });
+
   it("leaves out a month summary with days not of its month, and writes the one made again over it", async () => {
     const pod = fakePod();
     const subject = `${DIGEST}#month-history-2026-09.ttl`;
@@ -490,11 +585,11 @@ describe("the instance's digest in the pod", () => {
     );
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
     expect(await digests.readDigest(INSTANCE)).toEqual(emptyDigest());
-    await digests.updateDigest(INSTANCE, (stored) =>
-      withMonthSummaries(stored!, { [month.document]: month }),
+    await digests.updateDigest(INSTANCE, (draft) =>
+      setMonthSummaries(draft, { [month.document]: month }),
     );
     expect(await digests.readDigest(INSTANCE)).toEqual(
-      withMonthSummaries(emptyDigest(), { [month.document]: month }),
+      changedDigest(null, [(draft) => setMonthSummaries(draft, { [month.document]: month })]),
     );
     const days = pod
       .triples(DIGEST)!

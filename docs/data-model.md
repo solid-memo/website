@@ -1352,6 +1352,21 @@ sequenceDiagram
 - **Read leniently.** A subject that doesn't fit its shape is left out,
   and relearned. The digest isn't one of the documents an instance is
   [checked](validation.md) by.
+- **Read only for what an instance can have.** A receipt is read only
+  for an address a document may be read at, and a schedule only for a
+  deck of the instance's own catalog. At most one receipt is read for
+  each fixed document, two for each deck, at the catalog's limit
+  (`MAX_CATALOG_LINKS`), and one for each of the drafts' documents, at
+  their limit together (`MAX_DRAFT_DOCUMENTS_IN_ALL`), and one schedule
+  for each deck. Any other is left out, and removed at the next write.
+  A write keeps to the same limits: past them, the entries it didn't
+  change go first, the earliest first, so a full digest still takes
+  what a visit learns.
+- **Changes don't copy it.** What a visit learns is made in place to
+  the page's own copy of the digest, and the changes a write takes
+  along are made to one copy of what it read. Learning a fact of each
+  of many documents takes time that grows with the digest and the
+  facts, not their product.
 - **It is as good as the pod's ETags.** Community Solid Server 6 stamps
   its ETags in whole seconds, so a document changed elsewhere in the
   same second as Solid Memo read it is taken for unchanged until it

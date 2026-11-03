@@ -32,7 +32,7 @@ import type { Answer } from "@solid-memo/domain/answer";
 import type { EstablishedSession } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { DocumentReport } from "@solid-memo/domain/validation";
-import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
+import type { DigestChange, InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import type { DraftTriple, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
@@ -805,11 +805,12 @@ export interface PaletteRepository {
 export interface DigestRepository {
   /** null when the instance has none, or one this app cannot read. */
   readDigest(instanceUrl: string): Promise<InstanceDigest | null>;
-  /** Change the stored digest: read, change, write only if unchanged meanwhile (else again). */
-  updateDigest(
-    instanceUrl: string,
-    change: (stored: InstanceDigest | null) => InstanceDigest,
-  ): Promise<void>;
+  /**
+   * Change the stored digest (an empty one when there is none): read,
+   * change, write only if unchanged meanwhile (else again). Changes asked
+   * for together may be made to one copy of it (changedDigest).
+   */
+  updateDigest(instanceUrl: string, change: DigestChange): Promise<void>;
 }
 
 /**
