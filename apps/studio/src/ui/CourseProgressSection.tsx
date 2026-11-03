@@ -11,11 +11,33 @@ import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { useConfirm } from "./shell/ConfirmDialog";
 
 /**
+ * How many chapters the course no longer has are listed: the deck's
+ * completed chapters are data anyone may have written, and past these
+ * the rest are only counted.
+ */
+const LISTED_GONE_CHAPTERS = 20;
+
+/**
+ * The completed chapters whose fragment id is no chapter of the outline,
+ * one URL for each fragment id: marking one not done removes every
+ * completion with its id.
+ */
+function goneChapters(completed: readonly string[], inOutline: ReadonlySet<string>): string[] {
+  const byId = new Map<string, string>();
+  for (const url of completed) {
+    const id = fragmentIdOf(url);
+    if (!inOutline.has(id) && !byId.has(id)) byId.set(id, url);
+  }
+  return [...byId.values()];
+}
+
+/**
  * A course's chapters as the learner stands in them (courseProgress):
  * each done, open or locked. A chapter done can be marked not done, and
  * the course restarted, once the user confirms: no chapter done. A
  * chapter the deck completed that the release no longer has (retired)
- * is listed by its id, to mark not done too. Answers and review states
+ * is listed by its id, to mark not done too, up to LISTED_GONE_CHAPTERS
+ * of them and a count of the rest. Answers and review states
  * stay as they are either way. While the course is read the section
  * says so, and why it could not be (`unreadable`).
  */
@@ -47,9 +69,8 @@ export function CourseProgressSection({
   }
 
   const inOutline = new Set(course.outline.chapters.map((chapter) => chapter.id));
-  const gone = (course.deck.completedChapters ?? []).filter(
-    (url) => !inOutline.has(fragmentIdOf(url)),
-  );
+  const gone = goneChapters(course.deck.completedChapters ?? [], inOutline);
+  const listed = gone.slice(0, LISTED_GONE_CHAPTERS);
   const done =
     course.progress.chapters.some((chapter) => chapter.state === "done") || gone.length > 0;
   const notDone = (chapterUrl: string, name: string) => (
@@ -82,12 +103,17 @@ export function CourseProgressSection({
         <>
           <p>{t("studio.about.goneChapters")}</p>
           <ul>
-            {gone.map((url) => (
+            {listed.map((url) => (
               <li key={url}>
                 <code>{fragmentIdOf(url)}</code> {notDone(url, fragmentIdOf(url))}
               </li>
             ))}
           </ul>
+          {gone.length > listed.length && (
+            <p class="hint">
+              {t("studio.about.goneChaptersMore", { count: gone.length - listed.length })}
+            </p>
+          )}
         </>
       )}
       <p class="hint">{t("studio.about.progressHint")}</p>

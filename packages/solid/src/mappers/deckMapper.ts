@@ -32,7 +32,12 @@ import {
   publisherToRecord,
   type Catalog,
 } from "@solid-memo/domain/catalog";
-import type { Card, Deck, Distractor } from "@solid-memo/domain/deck";
+import {
+  boundedCompletedChapters,
+  type Card,
+  type Deck,
+  type Distractor,
+} from "@solid-memo/domain/deck";
 import { cardLanguageTag } from "@solid-memo/domain/deckCardLanguage";
 import {
   cardFromRecord,
@@ -105,7 +110,8 @@ export function toDecks(dataset: Dataset, catalogUrl: string): Deck[] {
  * sm:Deck that fits its format's shape. An older format is brought up to
  * the current one in memory; the stored version stays on the model. A
  * course's deck is also typed schema:Course and has the chapters it
- * completed (sm:completedChapter), and a deck the language its card text is shown in first
+ * completed (sm:completedChapter, at most MAX_COMPLETED_CHAPTERS of
+ * them, its release's kept first), and a deck the language its card text is shown in first
  * (sm:deckCardLanguage), kept only when it names a language: the catalog
  * is data anyone may have written, and no shape checks that term. A
  * deck from before format 3 names its creators itself ("Name <email>"),
@@ -123,16 +129,19 @@ export function toDeck(
   if (read.record.version < 3) {
     for (const author of read.record.data.creator) own.set(agentUrlOf(url, author), author);
   }
-  const completedChapters = getUrlAll(thing, SM.completedChapter);
+  const stored = deckFromRecord(
+    url,
+    read.storedVersion,
+    migrate("deck", read.record, { subject: url }),
+    (agent) => own.get(agent) ?? agentNames.get(agent) ?? agent,
+  );
+  const completedChapters = boundedCompletedChapters(getUrlAll(thing, SM.completedChapter), [
+    stored.sourceUrl,
+  ]);
   const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);
   const cardLanguage = storedLanguage === null ? undefined : cardLanguageTag(storedLanguage);
   return {
-    ...deckFromRecord(
-      url,
-      read.storedVersion,
-      migrate("deck", read.record, { subject: url }),
-      (agent) => own.get(agent) ?? agentNames.get(agent) ?? agent,
-    ),
+    ...stored,
     // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
     ...(getUrlAll(thing, RDF.type).includes(SCHEMA.Course) ? { course: true as const } : {}),
     ...(completedChapters.length === 0 ? {} : { completedChapters }),

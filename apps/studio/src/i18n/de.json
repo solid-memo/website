@@ -660,6 +660,10 @@
       "notDone": "Als nicht erledigt markieren",
       "notDoneLabel": "{chapter} als nicht erledigt markieren",
       "goneChapters": "Erledigte Kapitel, die der Kurs nicht mehr hat:",
+      "goneChaptersMore": {
+        "one": "{count} weiteres Kapitel ist nicht aufgeführt.",
+        "other": "{count} weitere Kapitel sind nicht aufgeführt."
+      },
       "progressHint": "Deine Antworten und dein Fortschritt bei den Karten bleiben, wie sie sind.",
       "restart": "Kurs neu beginnen",
       "restartConfirm": "Kurs neu beginnen? Alle Kapitel werden als nicht erledigt markiert, sodass sich das erste wieder öffnet. Deine Antworten und dein Fortschritt bei den Karten bleiben erhalten.",

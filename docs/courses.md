@@ -328,10 +328,12 @@ Two ports have methods for courses
   guest's deck [added to an
   instance](guest-mode.md#adding-to-an-instance) with the chapters the
   guest completed, the same way.
-- **`DeckRepository.setCompletedChapters(deck, edit)`** removes the
-  triples the edit drops (`editCompletedChapters` in
-  [course.ts](../packages/domain/src/course.ts)) the same way. It's the
-  Studio's edit of the entry, so it passes the shape check.
+- **`DeckRepository.setCompletedChapters(deck, edit)`** writes the
+  chapters the edit keeps (`editCompletedChapters` in
+  [course.ts](../packages/domain/src/course.ts)) the same way, all in
+  one go, in time that grows with them. It's the Studio's edit of the
+  entry, so it passes the shape check. The entry is read with at most
+  `MAX_COMPLETED_CHAPTERS` of them, as `data-model.md` says.
 
 A deck's distractors are written and removed with its cards
 (`withDistractors` and `distractorsOf` in

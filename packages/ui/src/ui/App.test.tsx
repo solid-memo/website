@@ -6,8 +6,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import type { ComponentType } from "preact";
+import { useEffect, useState } from "preact/hooks";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -20,6 +21,7 @@ import { TEXT_SIZES } from "@solid-memo/domain/textSize";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
 import { useInstanceTheme, useTheme } from "./theme";
+import { queryKeys } from "./queryKeys";
 import { loadLocale } from "./i18n";
 
 vi.mock("./i18n", async (actual) => {
@@ -274,6 +276,27 @@ describe("AppShell", () => {
       return <AppearanceWorkspace />;
     }
 
+    /**
+     * The same, saying which read of the text size it has handed on: its
+     * effect runs after useInstanceTheme's, in the same flush, so once it
+     * says so the read has been shown or left out.
+     */
+    function HandedOnWorkspace({ useCases }: WorkspaceProps) {
+      useInstanceTheme(useCases, INSTANCE_URL);
+      const read = useQuery({
+        queryKey: queryKeys.instanceAppearancePart(INSTANCE_URL, "textSize"),
+        queryFn: () => useCases.instanceTextSize(INSTANCE_URL),
+      });
+      const [handedOn, setHandedOn] = useState<string | null>();
+      useEffect(() => setHandedOn(read.data), [read.data, read.dataUpdatedAt]);
+      return (
+        <>
+          <p>{`Handed on: ${handedOn}`}</p>
+          <AppearanceWorkspace />
+        </>
+      );
+    }
+
     function renderAppearance(
       overrides: Partial<UseCases>,
       workspace: ComponentType<WorkspaceProps> = AppearanceWorkspace,
@@ -437,27 +460,23 @@ describe("AppShell", () => {
             .mockImplementation(() => new Promise((resolve) => reads.push(resolve))),
           chooseTextSize: vi.fn(() => new Promise<void>((resolve) => writes.push(resolve))),
         },
-        InstanceAppearanceWorkspace,
+        HandedOnWorkspace,
       );
       expect(await screen.findByText("Palette: parchment, text size: large")).toBeInTheDocument();
       // The palette is written, and the pod read back, while the text size is chosen.
       fireEvent.click(screen.getByRole("button", { name: "high-contrast" }));
       await waitFor(() => expect(reads).toHaveLength(1));
       fireEvent.click(screen.getByRole("button", { name: "largest" }));
-      // Read before the text size was chosen, it holds another.
-      await act(async () => {
-        reads[0]!("default");
-        // The query tells its observers a moment later.
-        await new Promise((resolve) => setTimeout(resolve, 20));
-      });
+      // Read before the text size was chosen, it holds another: handed on while
+      // the choice is still being written, not after (a fixed wait raced it).
+      await act(async () => reads[0]!("default"));
+      expect(await screen.findByText("Handed on: default")).toBeInTheDocument();
       expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
       // Once the text size is written, its own read back is shown.
       await act(async () => writes[0]!());
       await waitFor(() => expect(reads).toHaveLength(2));
-      await act(async () => {
-        reads[1]!("largest");
-        await new Promise((resolve) => setTimeout(resolve, 20));
-      });
+      await act(async () => reads[1]!("largest"));
+      expect(await screen.findByText("Handed on: largest")).toBeInTheDocument();
       expect(useCases.chooseTextSize).toHaveBeenCalledWith("largest", INSTANCE_URL);
       expect(screen.getByText("Palette: high-contrast, text size: largest")).toBeInTheDocument();
     });

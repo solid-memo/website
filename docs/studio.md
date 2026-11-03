@@ -1205,7 +1205,8 @@ Solid Memo. Each part has its own form and status line:
   each done, open or locked. A chapter done can be marked not done, and
   the course restarted, once the user confirms. A chapter completed
   that the release no longer has is listed by its id, to mark not done
-  too. Answers and review states stay (`setCompletedChapters`,
+  too, the first 20 of them, and a count of the rest. Answers and
+  review states stay (`setCompletedChapters`,
   [courses.md](courses.md#use-cases-and-ports)).
 
 After a save the decks are read afresh, and the deck's study queue is
@@ -1433,12 +1434,14 @@ over), as is one without exactly one deck, or one that doesn't parse.
 
 **Import into** the instance (`importDeckFile`) makes a new deck of
 it, with its progress when the file has some and the user leaves it
-checked. Its cards document goes first, only if none is at its URL
-yet, then its review states, then its entry in the catalog, so the
-deck shows only once it's whole. A cards document left behind by an
-import cut off makes the deck take a fresh id, once. Then the deck's
-schedule in the digest is brought up to date, the screen links to the
-deck's cards, and the instance's decks are read afresh.
+checked. A course's completed chapters come as many as the app [reads
+of an entry](data-model.md#courses). Its cards document goes first,
+only if none is at its URL yet, then its review states, then its
+entry in the catalog, so the deck shows only once it's whole. A cards
+document left behind by an import cut off makes the deck take a fresh
+id, once. Then the deck's schedule in the digest is brought up to
+date, the screen links to the deck's cards, and the instance's decks
+are read afresh.
 
 The deck is written as any deck Solid Memo writes: wrong options named
 with `sm:distractor` and `schema:suggestedAnswer`, states naming their

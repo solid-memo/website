@@ -8,6 +8,7 @@ import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./la
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { tidiedDistractor } from "./distractors";
+import { documentUrlOf } from "./subjectUrl";
 import { isHttpUrl, isWritableIri } from "./webId";
 
 /**
@@ -370,6 +371,42 @@ export interface Card extends CardContent {
    * deck added from a link leaves as it is (libraryUpgrade.ts).
    */
   fromRelease?: string;
+}
+
+/**
+ * How many chapters a deck has completed (Deck.completedChapters) as the
+ * app reads, imports and writes them. A course has fewer chapters than
+ * this, and completing one adds it only once; the values are data anyone
+ * may have written, and no shape bounds them, so past this many some are
+ * left out (boundedCompletedChapters), and the same URL is kept once.
+ */
+export const MAX_COMPLETED_CHAPTERS = 1000;
+
+/**
+ * `urls` as Deck.completedChapters keeps them, in their order: each
+ * once, and at most MAX_COMPLETED_CHAPTERS. Past the bound, the values
+ * of none of the course's documents (`course`: the deck's release, a
+ * card's, a chapter just completed; their fragments left aside) are left
+ * out first, and only then the oldest (first) of the course's own, so a
+ * course's real completions are never pushed out by other values.
+ */
+export function boundedCompletedChapters(
+  urls: readonly string[],
+  course: readonly (string | undefined)[],
+): string[] {
+  const unique = [...new Set(urls)];
+  if (unique.length <= MAX_COMPLETED_CHAPTERS) return unique;
+  const documents = new Set(
+    course.flatMap((url) => (url === undefined ? [] : [documentUrlOf(url)])),
+  );
+  const own = unique.filter((url) => documents.has(documentUrlOf(url)));
+  const others = unique.filter((url) => !documents.has(documentUrlOf(url)));
+  const ownKept = own.slice(Math.max(0, own.length - MAX_COMPLETED_CHAPTERS));
+  const kept = new Set([
+    ...ownKept,
+    ...others.slice(others.length - (MAX_COMPLETED_CHAPTERS - ownKept.length)),
+  ]);
+  return unique.filter((url) => kept.has(url));
 }
 
 /** The cards in use: all but the retired ones, which are kept but never studied. */

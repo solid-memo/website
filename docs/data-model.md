@@ -1033,7 +1033,16 @@ entries:
   added from a guest's study (`addDeck`) gets the guest's completed
   chapters with its new entry, and the Studio marks a chapter not done,
   or restarts the course, the same way (`setCompletedChapters`), a write
-  that passes the shape check.
+  that passes the shape check. No shape bounds the values, so the app
+  keeps at most `MAX_COMPLETED_CHAPTERS` (1,000) of an entry, each URL
+  once, more than any course has chapters. Past that bound, it first
+  leaves out the values of no document of the course: the deck's
+  release, and on an import its cards' releases too. Then it leaves
+  out the oldest. So values of other documents never push a chapter
+  the learner completed out. A read, a deck file's import and a new
+  entry keep them so. An edit writes the values it keeps and those it
+  adds in one go, by the same rule, a chapter it adds counted as the
+  course's, and drops the values past the bound from the entry.
 - **Answers** go to the [answer log](#the-answer-log), with
   `sm:answerMode`.
 - **Everything else is derived**: a step is done when each card it's

@@ -8,7 +8,8 @@
  * a release added, its cards removed, one card's many distractors
  * written and changed, a deck removed from a document another app wrote
  * in, and cards, catalog entries and review states in an older format
- * brought to this app's. Eight times as many must take less than four
+ * brought to this app's, and a course's completed chapters changed.
+ * Eight times as many must take less than four
  * times as long as an eighth of them done eight times over (testing.md);
  * what puts the input in place is not timed (growthAfterSetup).
  */
@@ -301,6 +302,31 @@ describe("card writes", { timeout: 180_000 }, () => {
         return () => log.removeDay(INSTANCE, deckUrl, "2026-10-30");
       },
       300,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("change a course's completed chapters in time that grows with them, not their square", async () => {
+    const ratio = await growthAfterSetup(
+      (count) => async () => {
+        const { fetch, repository } = repositoryInPod();
+        const deck = await repository.importDeck(INSTANCE, release(0));
+        // Completions all named after one chapter, as another app may write them.
+        const catalog = await read(fetch, `${INSTANCE}catalog.ttl`);
+        const completed = Array.from(
+          { length: count },
+          (_, i) =>
+            `<${deck.url}> <${SM}completedChapter> <https://elsewhere.example/x${i}.ttl#ch-1> .`,
+        );
+        await put(fetch, `${INSTANCE}catalog.ttl`, [catalog, ...completed].join("\n"));
+        return () =>
+          repository.setCompletedChapters(deck, {
+            kind: "notDone",
+            chapterUrl: "https://library.example/releases/x/v1.ttl#ch-1",
+          });
+      },
+      1000,
       8,
     );
     expect(ratio).toBeLessThan(4);
