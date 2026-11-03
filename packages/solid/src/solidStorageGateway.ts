@@ -5,6 +5,12 @@
 import type { StorageGateway } from "@solid-memo/application/ports";
 import type { Storage } from "@solid-memo/domain/storage";
 import { getThing } from "./client/rdf";
+import {
+  limitedFetch,
+  MAX_PROFILE_DOCUMENTS,
+  noneSpent,
+  PROFILE_LIMITS,
+} from "./client/readLimits";
 import { getSourceUrl, type ProfileStorages } from "./client/resources";
 import { readDataset } from "./datasets";
 import { createPlacesFetch, profilePlacesOf, readNothing } from "./profilePlaces";
@@ -23,19 +29,29 @@ export function createSolidStorageGateway({
   fetch,
   profileStorages,
 }: SolidStorageGatewayDeps): StorageGateway {
+  // The profile's documents are read under limits, as little as a profile holds (PROFILE_LIMITS), made once so that
+  // the WebID document read again is asked only whether it changed (datasets.ts).
+  const profileFetch = limitedFetch(fetch, PROFILE_LIMITS);
   return {
     async discoverStorages(webId): Promise<Storage[]> {
-      // The WebID document read through `fetch`, as every pod read is, and
-      // handed to the lookup: left to itself, the Solid client library reads it
-      // with the browser's own fetch, which cannot reach the guest's pod
-      // (docs/guest-mode.md). The documents it names as more of the profile
-      // are read as the user in the profile's own places alone, and any
-      // other is not read (profilePlacesOf).
-      const webIdProfile = await readDataset(webId, fetch);
+      // The WebID document read through `fetch`, as every pod read is, never
+      // the browser's own, which cannot reach the guest's pod
+      // (docs/guest-mode.md), and handed to the lookup. The documents it
+      // names as more of the profile are read as the user in the profile's
+      // own places alone, and any other is not read (profilePlacesOf). The
+      // WebID document is read under PROFILE_LIMITS, and the others, no
+      // more than MAX_PROFILE_DOCUMENTS of them, under PROFILE_LIMITS
+      // together, so that many documents hold up a sign-in no more than one.
+      // Only a document sent counts: one outside the places, not read, does not.
+      const webIdProfile = await readDataset(webId, profileFetch);
       const me = getThing(webIdProfile, webId);
       const places = profilePlacesOf(webId, getSourceUrl(webIdProfile), me === null ? [] : [me]);
       const fromProfile = await profileStorages(webId, {
-        fetch: createPlacesFetch(places, fetch, readNothing),
+        fetch: limitedFetch(
+          createPlacesFetch(places, atMost(MAX_PROFILE_DOCUMENTS, fetch), readNothing),
+          PROFILE_LIMITS,
+          noneSpent(),
+        ),
         webIdProfile,
       });
       if (fromProfile.length > 0) {
@@ -56,6 +72,16 @@ export function createSolidStorageGateway({
       }
       return { url: normalized, source: "manual" };
     },
+  };
+}
+
+/** The fetch, which sends the first `most` requests and refuses the rest unsent. */
+function atMost(most: number, fetch: typeof globalThis.fetch): typeof globalThis.fetch {
+  let sent = 0;
+  return async (input, init) => {
+    if (sent >= most) throw new Error(`Not read: past the ${most} documents a profile is read in`);
+    sent++;
+    return fetch(input, init);
   };
 }
 

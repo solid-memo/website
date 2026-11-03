@@ -10,8 +10,6 @@ import {
   FetchError,
   getContainedResourceUrlAll as libraryGetContainedResourceUrlAll,
   getFile as libraryGetFile,
-  getPodUrlAllFrom as libraryGetPodUrlAllFrom,
-  getProfileAll as libraryGetProfileAll,
   overwriteFile as libraryOverwriteFile,
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
   solidDatasetAsTurtle as librarySolidDatasetAsTurtle,
@@ -37,7 +35,16 @@ import {
   getSolidDatasetLinear as libraryGetSolidDatasetLinear,
   turtleParser,
 } from "./linearDataset";
-import { changesOf, datasetAt, localNameOf, sourceOf, toRdfJsDataset } from "./rdf";
+import {
+  changesOf,
+  datasetAt,
+  getThing,
+  getThingAll,
+  getUrlAll,
+  localNameOf,
+  sourceOf,
+  toRdfJsDataset,
+} from "./rdf";
 import { NO_SIZE_LIMITS, quadTally, type TextStream, textChunks, writeTurtle } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
@@ -346,17 +353,52 @@ export type ProfileStorages = (
   options: RequestOptions & { webIdProfile: FetchedDataset },
 ) => Promise<string[]>;
 
-/** The profile lookup over the library's `getProfileAll` and `getPodUrlAllFrom`. */
-export const getProfileStorages: ProfileStorages = async (webId, { fetch, webIdProfile }) =>
-  libraryGetPodUrlAllFrom(
-    await answered(() =>
-      libraryGetProfileAll(webId, {
-        fetch,
-        webIdProfile: serverDataset(webIdProfile),
-      }),
-    ),
-    webId,
+const FOAF_PRIMARY_TOPIC = "http://xmlns.com/foaf/0.1/primaryTopic";
+const FOAF_IS_PRIMARY_TOPIC_OF = "http://xmlns.com/foaf/0.1/isPrimaryTopicOf";
+const RDFS_SEE_ALSO = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
+const PIM_STORAGE = "http://www.w3.org/ns/pim/space#storage";
+
+/**
+ * The documents a WebID document names as more of the profile: those its
+ * subjects are the primary topic of, and those the WebID's subject points
+ * to (rdfs:seeAlso, foaf:isPrimaryTopicOf), the WebID document itself
+ * left out, as the library's getAltProfileUrlAllFrom finds them.
+ */
+function moreProfilesOf(webId: string, webIdProfile: FetchedDataset): string[] {
+  const me = getThing(webIdProfile, webId);
+  const urls = [
+    ...getThingAll(webIdProfile)
+      .filter((thing) => getUrlAll(thing, FOAF_PRIMARY_TOPIC).length > 0)
+      .map((thing) => thing.url),
+    ...(me === null ? [] : getUrlAll(me, RDFS_SEE_ALSO)),
+    ...(me === null ? [] : getUrlAll(me, FOAF_IS_PRIMARY_TOPIC_OF)),
+  ];
+  const own = getSourceUrl(webIdProfile);
+  return [...new Set(urls.filter((url) => url !== own))];
+}
+
+/**
+ * The profile lookup: the WebID document and those it names as more of
+ * the profile that can be read, each asked of the WebID's storages. Each
+ * is read as every pod document is (getSolidDatasetLinear), under the
+ * limits of a response `fetch` gives (solidStorageGateway.ts), not with
+ * the library's getProfileAll, whose reads have neither; one that fails
+ * is left out.
+ */
+export const getProfileStorages: ProfileStorages = async (webId, { fetch, webIdProfile }) => {
+  const more = await Promise.allSettled(
+    moreProfilesOf(webId, webIdProfile).map((url) => getSolidDataset(url, { fetch })),
   );
+  const storages = new Set<string>();
+  for (const profile of [
+    webIdProfile,
+    ...more.flatMap((result) => (result.status === "fulfilled" ? [result.value] : [])),
+  ]) {
+    const me = getThing(profile, webId);
+    if (me !== null) for (const storage of getUrlAll(me, PIM_STORAGE)) storages.add(storage);
+  }
+  return [...storages];
+};
 
 const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as const;
 

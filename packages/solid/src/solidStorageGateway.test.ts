@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { limitsOf, PROFILE_LIMITS, spentOf } from "./client/readLimits";
 import type { ProfileStorages } from "./client/resources";
 import { readDataset } from "./datasets";
 import { createSolidStorageGateway, hasStorageLink } from "./solidStorageGateway";
@@ -12,7 +13,8 @@ vi.mock("./datasets", () => ({ readDataset: vi.fn() }));
 
 /** The profile lookup, faked: the storages it finds are each test's. */
 const profileStorages = vi.fn<ProfileStorages>();
-const WEBID = "https://alice.example/profile/card#me";
+const CARD = "https://alice.example/profile/card";
+const WEBID = `${CARD}#me`;
 const STORAGE_LINK = '<http://www.w3.org/ns/pim/space#Storage>; rel="type"';
 
 function headResponse(linkHeader?: string): Response {
@@ -58,8 +60,7 @@ describe("createSolidStorageGateway", () => {
         { url: "https://backup.example/", source: "profile" },
       ]);
       expect(fetch).not.toHaveBeenCalled();
-      // The WebID document too is read through the fetch given, never the browser's own.
-      expect(readDataset).toHaveBeenCalledWith(WEBID, fetch);
+      expect(readDataset).toHaveBeenCalledWith(WEBID, expect.any(Function));
       expect(profileStorages).toHaveBeenCalledWith(WEBID, {
         fetch: expect.any(Function),
         webIdProfile: await vi.mocked(readDataset).mock.results[0]!.value,
@@ -92,6 +93,39 @@ describe("createSolidStorageGateway", () => {
       );
       await expect(profileFetch("https://storage.example/bob/profile")).rejects.toThrow();
       expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("reads the profile's documents through the fetch given, under PROFILE_LIMITS", async () => {
+      profileStorages.mockResolvedValue(["https://alice.example/"]);
+      const fetch = vi
+        .fn<typeof globalThis.fetch>()
+        .mockImplementation(async () => new Response("<#me> <#p> <#o> ."));
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+      await gateway.discoverStorages(WEBID);
+      await gateway.discoverStorages(WEBID);
+      // The WebID document, never through the browser's own fetch, and through the same fetch each time (datasets.ts).
+      const [[, webIdFetch], [, again]] = vi.mocked(readDataset).mock.calls as [
+        [string, typeof globalThis.fetch],
+        [string, typeof globalThis.fetch],
+      ];
+      expect(again).toBe(webIdFetch);
+      expect(limitsOf(await webIdFetch(CARD))).toBe(PROFILE_LIMITS);
+      const profileFetch = profileStorages.mock.calls[0]![1].fetch!;
+      const extended = await profileFetch("https://alice.example/settings/extended");
+      expect(limitsOf(extended)).toBe(PROFILE_LIMITS);
+      // The further documents of one lookup share their limits, and the next lookup's are its own.
+      const more = await profileFetch("https://alice.example/settings/more");
+      expect(spentOf(more)).toBe(spentOf(extended));
+      const next = await profileStorages.mock.calls[1]![1].fetch!(
+        "https://alice.example/settings/extended",
+      );
+      expect(spentOf(next)).not.toBe(spentOf(extended));
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        CARD,
+        "https://alice.example/settings/extended",
+        "https://alice.example/settings/more",
+        "https://alice.example/settings/extended",
+      ]);
     });
 
     it("falls back to the Link-header walk-up when the profile has none", async () => {
