@@ -1026,9 +1026,14 @@ describe("assemble", () => {
           }),
           save: () => undefined,
         },
+        storageGateway: { discoverStorages: async () => [] },
         now: () => new Date(NOW),
       });
-      const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
+      const created = await useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "fromFile" },
+        "https://pod.example/profile/card#me",
+      );
       const draft = await useCases.getReleaseDraft(created!.draft.url);
       expect(draft.url).toBe(`${container}release.ttl`);
       const target = `${INSTANCE}releases/capitals-of-the-world/v1.ttl`;
@@ -1181,6 +1186,23 @@ describe("readRelease and parseRelease", () => {
       `${DECKS}index.ttl`,
     );
     await expect(repository.readLinked(course())).resolves.toEqual([]);
+  });
+
+  it("read a release as no one when asked, as releases are otherwise", async () => {
+    const pod = await draftPod();
+    const publicFetch = vi.fn(siteFetch);
+    const releaseFetch = vi.fn(siteFetch);
+    const repository = createSolidReleaseDraftRepository({
+      fetch: pod.fetch,
+      releaseFetch,
+      publicFetch,
+    });
+    const url = `${DECKS}getting-started/v1.ttl`;
+    await expect(repository.readRelease(url, { asNoOne: true })).resolves.toMatchObject({ url });
+    expect(publicFetch.mock.calls.map(([input]) => String(input))).toEqual([url]);
+    expect(releaseFetch).not.toHaveBeenCalled();
+    await repository.readRelease(url, { asNoOne: false });
+    expect(releaseFetch.mock.calls.map(([input]) => String(input))).toEqual([url]);
   });
 
   it("make the next version of a release whose linked documents cannot be read, without them, the release check finding what it lacks", async () => {

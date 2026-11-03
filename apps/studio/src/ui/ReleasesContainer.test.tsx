@@ -112,10 +112,14 @@ describe("ReleasesContainer", () => {
     await waitFor(() => expect(start).toBeEnabled());
     fireEvent.click(start);
     await waitFor(() => expect(onStarted).toHaveBeenCalledWith({ draft: next }));
-    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, {
-      kind: "nextVersionOf",
-      url: SOLID,
-    });
+    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(
+      instanceA.url,
+      {
+        kind: "nextVersionOf",
+        url: SOLID,
+      },
+      "https://alice.example/profile/card#me",
+    );
     expect(remove).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDraft(next.url) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDrafts(instanceA.url) });
   });

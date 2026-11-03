@@ -35,7 +35,7 @@ export function ReleasePublishContainer({
   onStarted,
 }: {
   useCases: UseCases;
-  /** Who makes the release public again (useMakePublic). */
+  /** Who makes the release public again (useMakePublic), or starts its next version (useStartNextVersion). */
   webId: string;
   editor: DraftEditor;
   links: ReleasePublishLinks;
@@ -70,7 +70,7 @@ export function ReleasePublishContainer({
       ]),
   });
   const publicMutation = useMakePublic(useCases, instanceUrl, webId);
-  const nextMutation = useStartNextVersion(useCases, instanceUrl, onStarted);
+  const nextMutation = useStartNextVersion(useCases, instanceUrl, webId, onStarted);
   const downloadMutation = useMutation({ mutationFn: () => useCases.downloadRelease(draft.url) });
   const errors = rules.data === undefined ? undefined : publishErrors(rules.data);
   return (

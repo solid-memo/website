@@ -34,6 +34,7 @@ import type {
 import { createReleaseDraftUseCases } from "./releaseDrafts";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
+const WEB_ID = "https://pod.example/profile/card#me";
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const DECKS = "https://site.example/decks/";
 const INDEX = `${DECKS}index.ttl`;
@@ -66,6 +67,7 @@ const v1: ReleaseDraft = rebaseDraft(courseDraft(), V1);
 function setUp({
   drafts = [] as ReleaseDraftSummary[],
   stored = courseDraft() as ReleaseDraft,
+  storages = ["https://pod.example/"],
 } = {}) {
   const repository = {
     list: vi.fn(async () => drafts),
@@ -74,7 +76,7 @@ function setUp({
     read: vi.fn(async () => ({ draft: stored, version: "v1" })),
     applyChanges: vi.fn(async () => undefined),
     assemble: vi.fn(),
-    readRelease: vi.fn(async () => v1),
+    readRelease: vi.fn(async (_url: string, _options?: { asNoOne?: boolean }) => v1),
     readLinked: vi.fn(async (): Promise<DraftTriple[]> => []),
     parseRelease: vi.fn(async () => v1),
     delete: vi.fn(async () => ({ keptDocuments: [] })),
@@ -96,12 +98,18 @@ function setUp({
       problem(draft.url, { code: "unshaped", params: {} }, { severity: "warning" }),
     ]),
   } as unknown as ShapeValidator & { validateRelease: ReturnType<typeof vi.fn> };
+  const storageGateway = {
+    discoverStorages: vi.fn(async (_webId: string) =>
+      storages.map((url) => ({ url, source: "profile" as const })),
+    ),
+  };
   const useCases = createReleaseDraftUseCases({
     releaseDraftRepository: repository,
     deckRepository,
     deckLibrary,
     shapeValidator,
     fileExchange,
+    storageGateway,
     now: () => new Date(NOW),
   });
   const created = () => repository.create.mock.calls.at(-1)![1];
@@ -111,6 +119,7 @@ function setUp({
     deckLibrary,
     shapeValidator,
     fileExchange,
+    storageGateway,
     useCases,
     created,
   };
@@ -140,10 +149,14 @@ describe("createReleaseDraft", () => {
     const { useCases, created } = setUp({
       drafts: [summary("capitals", 1), summary("capitals-2", 2)],
     });
-    const made = await useCases.createReleaseDraft(INSTANCE, {
-      kind: "blankDeck",
-      title: { en: " Capitals " },
-    });
+    const made = await useCases.createReleaseDraft(
+      INSTANCE,
+      {
+        kind: "blankDeck",
+        title: { en: " Capitals " },
+      },
+      WEB_ID,
+    );
     expect(made).toEqual({
       draft: expect.objectContaining({
         name: "capitals-2",
@@ -160,36 +173,112 @@ describe("createReleaseDraft", () => {
         now: NOW,
       }),
     );
-    await useCases.createReleaseDraft(INSTANCE, { kind: "blankCourse", title: { sv: "Kurs" } });
+    await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "blankCourse", title: { sv: "Kurs" } },
+      WEB_ID,
+    );
     expect(created().course).toBe(true);
   });
 
   it("makes one of a deck, saying the release a copy is based on", async () => {
     const { useCases, deckRepository, created } = setUp();
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck }),
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck }, WEB_ID),
     ).resolves.toEqual({ draft: expect.objectContaining({ name: "capitals" }) });
-    expect(deckRepository.listCards).toHaveBeenCalledWith(deck);
+    expect(deckRepository.listCards).toHaveBeenCalledWith(deck, { asNoOne: false });
     expect(created().cards.map((node) => node.id)).toEqual(["c1"]);
     const copy = { ...deck, sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl" };
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: copy }),
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: copy }, WEB_ID),
     ).resolves.toEqual({
       draft: expect.objectContaining({ name: "capitals" }),
       basedOn: "https://solid-memo.com/decks/capitals/v1.ttl",
     });
   });
 
+  it("reads the user's own cards as no one for a draft of a deck in an instance on another origin", async () => {
+    const { useCases, deckRepository, created } = setUp();
+    const foreign = "https://attacker.example/solid-memo/";
+    // The foreign instance's catalog names a deck whose cards are in the user's pod.
+    const named = { ...deck, url: `${foreign}catalog.ttl#deck-1` };
+    await useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck: named }, WEB_ID);
+    expect(deckRepository.listCards).toHaveBeenCalledWith(named, { asNoOne: true });
+    expect(created().url).toBe(draftUrlOf(foreign, "capitals", 1));
+  });
+
+  it("reads as the user only the cards of a deck in the instance's pod, any other as no one", async () => {
+    const { useCases, deckRepository } = setUp({
+      storages: ["https://pod.example/", "https://other.example/alice/"],
+    });
+    const asNoOne = async (cardsDocumentUrl: string) => {
+      vi.mocked(deckRepository.listCards).mockClear();
+      await useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "fromDeck", deck: { ...deck, cardsDocumentUrl } },
+        WEB_ID,
+      );
+      return vi.mocked(deckRepository.listCards).mock.calls[0]![1]!.asNoOne;
+    };
+    await expect(asNoOne(`${INSTANCE}decks/deck-1.ttl`)).resolves.toBe(false);
+    await expect(asNoOne("https://pod.example/elsewhere/deck-1.ttl")).resolves.toBe(false);
+    await expect(asNoOne("https://other.example/alice/deck-1.ttl")).resolves.toBe(true);
+    await expect(asNoOne("https://elsewhere.example/deck-1.ttl")).resolves.toBe(true);
+  });
+
   it("makes the next version of a release, named as its URL names its series", async () => {
     const { useCases, repository, created } = setUp();
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }),
+      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }, WEB_ID),
     ).resolves.toEqual({
       draft: expect.objectContaining({ name: "solid", version: 2 }),
     });
-    expect(repository.readRelease).toHaveBeenCalledWith(V1);
+    expect(repository.readRelease).toHaveBeenCalledWith(V1, { asNoOne: false });
     expect(created().root).toMatchObject({ version: "2", prev: V1 });
     expect(created().published.ids).toMatchObject({ "q-a-1a": "card" });
+  });
+
+  it("reads as the user only a release of the instance, or of a storage of theirs the instance is in, any other as no one", async () => {
+    const { useCases, repository, storageGateway } = setUp({
+      storages: ["https://pod.example/", "https://other.example/alice/"],
+    });
+    const asNoOne = async (instanceUrl: string, url: string) => {
+      repository.readRelease.mockClear();
+      await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }, WEB_ID);
+      return repository.readRelease.mock.calls[0]![1]!.asNoOne;
+    };
+    // In the instance, or in the storage it is in: the instance's, read as the user.
+    await expect(asNoOne(INSTANCE, V1)).resolves.toBe(false);
+    await expect(asNoOne(INSTANCE, "https://pod.example/elsewhere/solid/v1.ttl")).resolves.toBe(
+      false,
+    );
+    expect(storageGateway.discoverStorages).toHaveBeenCalledWith(WEB_ID);
+    // The user's own, but in a storage the instance is not in.
+    await expect(asNoOne(INSTANCE, "https://other.example/alice/solid/v1.ttl")).resolves.toBe(true);
+    // Anyone else's.
+    await expect(asNoOne(INSTANCE, "https://elsewhere.example/solid/v1.ttl")).resolves.toBe(true);
+  });
+
+  it("reads the user's own release as no one when an instance on another origin names it", async () => {
+    const { useCases, repository, created } = setUp();
+    const foreign = "https://attacker.example/solid-memo/";
+    await useCases.createReleaseDraft(foreign, { kind: "nextVersionOf", url: V1 }, WEB_ID);
+    expect(repository.readRelease).toHaveBeenCalledWith(V1, { asNoOne: true });
+    expect(created().url).toBe(draftUrlOf(foreign, "solid", 2));
+  });
+
+  it("reads a release as no one when the user's storages cannot be found", async () => {
+    const { useCases, repository, storageGateway } = setUp();
+    storageGateway.discoverStorages.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "nextVersionOf", url: "https://pod.example/elsewhere/solid/v1.ttl" },
+      WEB_ID,
+    );
+    expect(repository.readRelease).toHaveBeenCalledWith(
+      "https://pod.example/elsewhere/solid/v1.ttl",
+      { asNoOne: true },
+    );
   });
 
   it("describes in the next version the series and publisher its release names in another document, as that document does", async () => {
@@ -209,7 +298,7 @@ describe("createReleaseDraft", () => {
       object: { kind: "iri" as const, value: "http://www.w3.org/ns/dcat#DatasetSeries" },
     };
     repository.readLinked.mockResolvedValueOnce([series]);
-    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }, WEB_ID);
     expect(repository.readLinked).toHaveBeenCalledWith(expect.objectContaining({ url: V1 }));
     expect(created().triples).toContainEqual(series);
   });
@@ -222,10 +311,14 @@ describe("createReleaseDraft", () => {
       root: { ...elsewhere.root, version: undefined, title: undefined },
     });
     await expect(
-      useCases.createReleaseDraft(INSTANCE, {
-        kind: "nextVersionOf",
-        url: "https://other.example/course.ttl",
-      }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        {
+          kind: "nextVersionOf",
+          url: "https://other.example/course.ttl",
+        },
+        WEB_ID,
+      ),
     ).resolves.toEqual({
       draft: expect.objectContaining({ name: "draft", version: 2 }),
     });
@@ -233,7 +326,9 @@ describe("createReleaseDraft", () => {
 
   it("imports a release file as it is, or nothing when none is picked", async () => {
     const { useCases, repository, fileExchange, created } = setUp();
-    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).resolves.toEqual({
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).resolves.toEqual({
       draft: expect.objectContaining({ name: "solid", version: 1 }),
     });
     expect(repository.parseRelease).toHaveBeenCalledWith("<> a <x> .", "turtle");
@@ -245,11 +340,15 @@ describe("createReleaseDraft", () => {
       root: { ...v1.root, version: undefined, title: undefined },
     };
     repository.parseRelease.mockResolvedValueOnce(file);
-    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).resolves.toEqual({
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).resolves.toEqual({
       draft: expect.objectContaining({ name: "draft", version: 1 }),
     });
     vi.mocked(fileExchange.open).mockResolvedValueOnce(null);
-    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).resolves.toBeNull();
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).resolves.toBeNull();
   });
 
   it("refuses a release that names a subject by an id a draft cannot keep, writing nothing", async () => {
@@ -260,15 +359,15 @@ describe("createReleaseDraft", () => {
     };
     repository.readRelease.mockResolvedValueOnce(odd);
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }),
+      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }, WEB_ID),
     ).rejects.toMatchObject({
       code: "releaseIdUnsupported",
       vars: { id: "kapitel-ö" },
     });
     repository.parseRelease.mockResolvedValueOnce(odd);
-    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).rejects.toMatchObject(
-      { code: "releaseIdUnsupported" },
-    );
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).rejects.toMatchObject({ code: "releaseIdUnsupported" });
     expect(repository.create).not.toHaveBeenCalled();
   });
 
@@ -283,19 +382,21 @@ describe("createReleaseDraft", () => {
     const hiding = { ...v1, triples: [...v1.triples, typed(foreign, SM.Card)] };
     repository.readRelease.mockResolvedValueOnce(hiding);
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }),
+      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }, WEB_ID),
     ).rejects.toMatchObject({ code: "releaseForeignPart", vars: { part: foreign } });
     repository.parseRelease.mockResolvedValueOnce(hiding);
-    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).rejects.toMatchObject(
-      { code: "releaseForeignPart" },
-    );
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).rejects.toMatchObject({ code: "releaseForeignPart" });
     expect(repository.create).not.toHaveBeenCalled();
     // One of its own its records do not read is the release check's to report (strayParts).
     repository.parseRelease.mockResolvedValueOnce({
       ...v1,
       triples: [...v1.triples, typed(`${V1}#q-odd`, SM.Step)],
     });
-    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).resolves.toEqual({
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).resolves.toEqual({
       draft: expect.objectContaining({ name: "solid" }),
     });
   });
@@ -360,13 +461,13 @@ describe("createReleaseDraft", () => {
     ];
     const crafted = { ...release, triples: [...release.triples, ...named, ...planted] };
     repository.parseRelease.mockResolvedValueOnce(crafted);
-    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
     const imported = created();
     expect(imported.triples).toEqual(
       rebaseDraft({ ...release, triples: [...release.triples, ...named] }, imported.url).triples,
     );
     repository.readRelease.mockResolvedValueOnce(crafted);
-    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
     const next = created();
     expect(
       next.triples.some((triple) => triple.subject.startsWith(V1) || triple.subject === "_:b1"),
@@ -430,7 +531,7 @@ describe("createReleaseDraft", () => {
       ...release,
       triples: [...release.triples, ...planted(2)],
     });
-    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
     expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 2));
     expect(created().triples).toEqual(nextVersionDraft(release, created().url, []).triples);
     // And the release itself, made a draft.
@@ -438,7 +539,7 @@ describe("createReleaseDraft", () => {
       ...release,
       triples: [...release.triples, ...planted(1)],
     });
-    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
     expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 1));
     expect(created().triples).toEqual(rebaseDraft(release, created().url).triples);
   });
@@ -449,7 +550,11 @@ describe("createReleaseDraft", () => {
       new AppError("createdElsewhere", { url: draftUrlOf(INSTANCE, "capitals", 1) }),
     );
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "blankDeck", title: { en: "Capitals" } },
+        WEB_ID,
+      ),
     ).resolves.toEqual({
       draft: expect.objectContaining({ name: "capitals-2" }),
     });
@@ -457,12 +562,20 @@ describe("createReleaseDraft", () => {
       throw new AppError("createdElsewhere", { url: draft.url });
     });
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "blankDeck", title: { en: "Capitals" } },
+        WEB_ID,
+      ),
     ).rejects.toMatchObject({ code: "createdElsewhere" });
     expect(repository.create).toHaveBeenCalledTimes(5);
     repository.create.mockRejectedValue(new AppError("noCatalogToUpdate"));
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "blankDeck", title: { en: "Capitals" } },
+        WEB_ID,
+      ),
     ).rejects.toMatchObject({ code: "noCatalogToUpdate" });
   });
 
@@ -472,17 +585,29 @@ describe("createReleaseDraft", () => {
       new AppError("changedElsewhere", { url: `${INSTANCE}catalog.ttl` }),
     );
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "blankDeck", title: { en: "Capitals" } },
+        WEB_ID,
+      ),
     ).rejects.toMatchObject({ code: "changedElsewhere" });
     repository.create.mockRejectedValueOnce(
       new AppError("createdElsewhere", { url: `${INSTANCE}drafts/capitals/v1/chapter-a.ttl` }),
     );
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "blankDeck", title: { en: "Capitals" } },
+        WEB_ID,
+      ),
     ).rejects.toMatchObject({ code: "createdElsewhere" });
     repository.create.mockRejectedValueOnce(new Error("offline"));
     await expect(
-      useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } }),
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "blankDeck", title: { en: "Capitals" } },
+        WEB_ID,
+      ),
     ).rejects.toThrow("offline");
     expect(repository.create).toHaveBeenCalledTimes(3);
   });

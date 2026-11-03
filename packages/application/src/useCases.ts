@@ -214,6 +214,7 @@ export function createUseCases({
     deckLibrary,
     shapeValidator,
     fileExchange,
+    storageGateway,
     now,
   });
   const instances = createInstanceUseCases({

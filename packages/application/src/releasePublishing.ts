@@ -8,7 +8,6 @@ import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
 import type { MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { checkProblems, libraryReleaseUrl } from "@solid-memo/domain/release/releaseCheck";
 import { releaseFileName } from "@solid-memo/domain/release/releasePlace";
-import { catalogUrlOf, isDocumentIn } from "@solid-memo/domain/instanceLayout";
 import type {
   DeckLibrary,
   FileExchange,
@@ -17,7 +16,7 @@ import type {
   ShapeValidator,
   StorageGateway,
 } from "./ports";
-import type { ReleaseDraftUseCases } from "./releaseDrafts";
+import { isInInstancePod, type ReleaseDraftUseCases } from "./releaseDrafts";
 import { mapAtOnce } from "./atOnce";
 
 /**
@@ -116,21 +115,6 @@ export function createReleasePublishingUseCases({
   storageGateway: Pick<StorageGateway, "discoverStorages">;
   now: () => Date;
 }): ReleasePublishingUseCases {
-  /**
-   * Whether the release at `url` is the instance's to make public: in
-   * the instance, or in one of the user's storages the instance is in
-   * too, each as a request sends the address. None, when they cannot be
-   * found.
-   */
-  async function isInInstancePod(instanceUrl: string, url: string, webId: string) {
-    if (isDocumentIn(url, instanceUrl)) return true;
-    const storages = await storageGateway.discoverStorages(webId).catch(() => []);
-    return storages.some(
-      (storage) =>
-        isDocumentIn(url, storage.url) && isDocumentIn(catalogUrlOf(instanceUrl), storage.url),
-    );
-  }
-
   return {
     async publishRelease(draftUrl, targetUrl, markdownCheck) {
       if (isGuestUrl(draftUrl)) throw new AppError("guestCannotPublish");
@@ -170,7 +154,7 @@ export function createReleasePublishingUseCases({
     },
 
     async makeReleasePublic(instanceUrl, url, webId) {
-      if (!(await isInInstancePod(instanceUrl, url, webId)))
+      if (!(await isInInstancePod(storageGateway, instanceUrl, url, webId)))
         throw new AppError("publicAccessRefused", { url });
       return releasePublisher.makePublic(instanceUrl, url);
     },

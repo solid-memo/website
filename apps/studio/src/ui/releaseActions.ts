@@ -32,21 +32,22 @@ export function useMakePublic(useCases: UseCases, instanceUrl: string, webId: st
 }
 
 /**
- * Start the next version of a release as a draft of the instance, then
- * `onStarted` with it. It writes the catalog, so it waits its turn with
+ * Start the next version of a release as a draft of the instance, as
+ * `webId` (createReleaseDraft), then `onStarted` with it. It writes the catalog, so it waits its turn with
  * the catalog's other writes; the drafts are read afresh after it, and
  * what was read at the new draft's URL is forgotten.
  */
 export function useStartNextVersion(
   useCases: UseCases,
   instanceUrl: string,
+  webId: string,
   onStarted: (created: CreatedDraft) => void,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
     scope: { id: catalogScope(instanceUrl) },
     mutationFn: async (url: string) =>
-      (await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }))!,
+      (await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }, webId))!,
     onSuccess: (created) => {
       queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(created.draft.url) });
       onStarted(created);

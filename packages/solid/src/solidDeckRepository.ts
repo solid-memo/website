@@ -101,6 +101,8 @@ interface CardWrite {
 
 export interface SolidDeckRepositoryDeps {
   fetch: typeof globalThis.fetch;
+  /** The fetch of a deck's cards read as no one (listCards `asNoOne`); `fetch` by default. */
+  publicFetch?: typeof globalThis.fetch;
   now: () => Date;
   randomId: () => string;
   /** Checks what is about to be written; see writeCheck.ts. */
@@ -117,6 +119,7 @@ const TREE_ATTEMPTS = 3;
 
 export function createSolidDeckRepository({
   fetch,
+  publicFetch = fetch,
   now,
   randomId,
   checkWrite = noWriteCheck,
@@ -274,8 +277,11 @@ export function createSolidDeckRepository({
       }
     },
 
-    async listCards(deck): Promise<Card[]> {
-      const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+    async listCards(deck, { asNoOne = false } = {}): Promise<Card[]> {
+      const dataset = await getSolidDatasetOrNull(
+        deck.cardsDocumentUrl,
+        asNoOne ? publicFetch : fetch,
+      );
       if (dataset === null) return [];
       return toCards(dataset);
     },

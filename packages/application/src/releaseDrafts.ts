@@ -5,6 +5,7 @@
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { KeptDocuments } from "@solid-memo/domain/instance";
+import { catalogUrlOf, isDocumentIn } from "@solid-memo/domain/instanceLayout";
 import { isGuestUrl, mentionsGuest } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
@@ -60,6 +61,7 @@ import type {
   FileExchange,
   ReleaseDraftRepository,
   ShapeValidator,
+  StorageGateway,
 } from "./ports";
 
 /**
@@ -75,9 +77,18 @@ export type NewDraft =
   /** Nothing: a deck, or a course, by this title. */
   | { kind: "blankDeck"; title: LangText }
   | { kind: "blankCourse"; title: LangText }
-  /** A deck of the instance: what a release would say of it (deckToDraft). */
+  /**
+   * A deck of the instance: what a release would say of it
+   * (deckToDraft). Its cards are read as the user only when their
+   * document is the instance's (isInInstancePod), as no one otherwise.
+   */
   | { kind: "fromDeck"; deck: Deck }
-  /** A release, by its URL: the next version of it (nextVersionDraft), describing the series and publisher it names elsewhere. */
+  /**
+   * A release, by its URL: the next version of it (nextVersionDraft),
+   * describing the series and publisher it names elsewhere. Read as the
+   * user only when it is the instance's (isInInstancePod), as no one
+   * otherwise.
+   */
   | { kind: "nextVersionOf"; url: string }
   /** A release in a Turtle or JSON-LD file the user picks, with only its own statements (ownStatements, releaseToDraft). */
   | { kind: "fromFile" };
@@ -112,9 +123,19 @@ export interface ReleaseDraftUseCases {
    * A new draft in the instance, from `from`, named after its title (or
    * its release's name) and numbered as the version it drafts, unlike the
    * instance's other drafts of that version. Null when no file was
-   * picked. A name taken meanwhile, elsewhere, gives the next one.
+   * picked. A name taken meanwhile, elsewhere, gives the next one. A
+   * release's next version, or a deck's draft, is written into the
+   * instance, so the release, or the deck's cards, is read as `webId`
+   * only when it is the instance's (isInInstancePod): an instance
+   * attached from someone else's pod may name a release, or a deck's
+   * cards, of the user's own that was kept from everyone. Any other is
+   * read as no one.
    */
-  createReleaseDraft(instanceUrl: string, from: NewDraft): Promise<CreatedDraft | null>;
+  createReleaseDraft(
+    instanceUrl: string,
+    from: NewDraft,
+    webId: string,
+  ): Promise<CreatedDraft | null>;
   /**
    * A copy of the draft at `draftUrl`, another instance's, in this one
    * (a guest's draft, as the guest's study is added to an instance):
@@ -179,6 +200,29 @@ const EDIT_ATTEMPTS = 3;
 
 /** How often a new draft is given another name, in all, while its place is taken elsewhere. */
 const NAME_ATTEMPTS = 3;
+
+/**
+ * Whether the document at `url` (a release, a deck's cards) is the
+ * instance's: in the instance, or in one of the user's storages (those
+ * of `webId`) the instance is in too, each as a request sends the
+ * address. None, when they cannot be found. Only such a document is
+ * read as the user to be written into the instance, or a release made
+ * public by it: an instance attached from someone else's pod may name
+ * a document of the user's own that was kept from everyone.
+ */
+export async function isInInstancePod(
+  storageGateway: Pick<StorageGateway, "discoverStorages">,
+  instanceUrl: string,
+  url: string,
+  webId: string,
+): Promise<boolean> {
+  if (isDocumentIn(url, instanceUrl)) return true;
+  const storages = await storageGateway.discoverStorages(webId).catch(() => []);
+  return storages.some(
+    (storage) =>
+      isDocumentIn(url, storage.url) && isDocumentIn(catalogUrlOf(instanceUrl), storage.url),
+  );
+}
 
 /** Whether a write was refused because a document changed, or was made, since it was read. */
 function raced(error: unknown): boolean {
@@ -320,6 +364,7 @@ export function createReleaseDraftUseCases({
   deckLibrary,
   shapeValidator,
   fileExchange,
+  storageGateway,
   now,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
@@ -327,6 +372,7 @@ export function createReleaseDraftUseCases({
   deckLibrary: DeckLibrary;
   shapeValidator: ShapeValidator;
   fileExchange: FileExchange;
+  storageGateway: Pick<StorageGateway, "discoverStorages">;
   now: () => Date;
 }): ReleaseDraftUseCases {
   /** Each release a draft follows, by URL: releases are frozen, so each is read once. */
@@ -470,7 +516,7 @@ export function createReleaseDraftUseCases({
       return releaseDraftRepository.list(instanceUrl);
     },
 
-    async createReleaseDraft(instanceUrl, from) {
+    async createReleaseDraft(instanceUrl, from, webId) {
       const at = now().toISOString();
       switch (from.kind) {
         case "blankDeck":
@@ -484,7 +530,14 @@ export function createReleaseDraftUseCases({
           };
         }
         case "fromDeck": {
-          const cards = await deckRepository.listCards(from.deck);
+          // Written into the instance: read as the user only when its cards are the instance's.
+          const asNoOne = !(await isInInstancePod(
+            storageGateway,
+            instanceUrl,
+            from.deck.cardsDocumentUrl,
+            webId,
+          ));
+          const cards = await deckRepository.listCards(from.deck, { asNoOne });
           let basedOn: string | undefined;
           const draft = await create(instanceUrl, { title: from.deck.title, version: 1 }, (url) => {
             const made = deckToDraft(from.deck, cards, url, at);
@@ -494,7 +547,11 @@ export function createReleaseDraftUseCases({
           return basedOn === undefined ? { draft } : { draft, basedOn };
         }
         case "nextVersionOf": {
-          const release = draftable(await releaseDraftRepository.readRelease(from.url));
+          // Written into the instance: read as the user only when it is the instance's.
+          const asNoOne = !(await isInInstancePod(storageGateway, instanceUrl, from.url, webId));
+          const release = draftable(
+            await releaseDraftRepository.readRelease(from.url, { asNoOne }),
+          );
           // Its series and publisher as their document describes them, when the release does not: the next version describes them itself.
           const linked = await releaseDraftRepository.readLinked(release);
           const version = Number(release.root.version ?? "1") + 1;

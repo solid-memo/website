@@ -492,7 +492,10 @@ No document Solid Memo names has any.
   ([studio.md](studio.md#publishing-a-release)). It's made public again
   only when the catalog lists it, its document is a release, and it's in
   the instance or in a storage of the user's that holds the instance.
-  An instance attached from another's pod may list the user's own.
+  An instance attached from another's pod may list the user's own. Its
+  next version, written into the instance, is made from it read as the
+  user only by the same place rule, and from it read as no one
+  otherwise. So is a draft made from a deck, from the deck's cards.
 
 ## Decks and cards
 

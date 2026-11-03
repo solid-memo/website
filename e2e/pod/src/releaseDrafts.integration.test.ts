@@ -30,12 +30,14 @@ import {
   draftDocumentUrl,
 } from "@solid-memo/domain/release/draftLayout";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
+import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf } from "./serverTraits";
 
@@ -62,7 +64,10 @@ function page(podFetch: typeof globalThis.fetch = fetch) {
   return createUseCases({
     ...NO_PORTS,
     sessionGateway: undefined as never,
-    storageGateway: undefined as never,
+    storageGateway: createSolidStorageGateway({
+      fetch: podFetch,
+      profileStorages: getProfileStorages,
+    }),
     deckLibrary: undefined as never,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository(deps),
@@ -122,11 +127,15 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
   it("drafts, opens, edits and deletes the next version of a 466-card course, each within its budget", {
     timeout: 300_000,
   }, async () => {
-    const { instance } = await seed(server);
+    const { session, instance } = await seed(server);
     const useCases = page();
 
     const created = await timed(() =>
-      useCases.createReleaseDraft(instance.url, { kind: "nextVersionOf", url: COURSE }),
+      useCases.createReleaseDraft(
+        instance.url,
+        { kind: "nextVersionOf", url: COURSE },
+        session.webId,
+      ),
     );
     expect(created.took).toBeLessThan(BUDGET.create);
     const summary = created.value!.draft;
@@ -203,11 +212,15 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
-    const { instance } = await seed(server);
-    const made = await page().createReleaseDraft(instance.url, {
-      kind: "blankCourse",
-      title: { en: "Solid" },
-    });
+    const { session, instance } = await seed(server);
+    const made = await page().createReleaseDraft(
+      instance.url,
+      {
+        kind: "blankCourse",
+        title: { en: "Solid" },
+      },
+      session.webId,
+    );
     const draftUrl = made!.draft.url;
     await page().editReleaseDraft(draftUrl, [
       { kind: "addChapter", id: "ch-a", text: { title: { en: "A" } } },
@@ -244,7 +257,7 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     if (!(await preconditionsOf(server)).edits)
       context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
-    const { instance } = await seed(server);
+    const { session, instance } = await seed(server);
     const catalog = `${instance.url}catalog.ttl`;
     // Another tab makes a draft of its own just before each write of the catalog: every attempt to link this one is refused.
     let raced = 0;
@@ -253,18 +266,26 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       const method = init?.method ?? "GET";
       if (url === catalog && method !== "GET" && method !== "HEAD") {
         raced++;
-        await page().createReleaseDraft(instance.url, {
-          kind: "blankDeck",
-          title: { en: `Other ${raced}` },
-        });
+        await page().createReleaseDraft(
+          instance.url,
+          {
+            kind: "blankDeck",
+            title: { en: `Other ${raced}` },
+          },
+          session.webId,
+        );
       }
       return fetch(input, init);
     };
     await expect(
-      page(racing).createReleaseDraft(instance.url, {
-        kind: "blankCourse",
-        title: { en: "Solid" },
-      }),
+      page(racing).createReleaseDraft(
+        instance.url,
+        {
+          kind: "blankCourse",
+          title: { en: "Solid" },
+        },
+        session.webId,
+      ),
     ).rejects.toMatchObject({
       code: "changedElsewhere",
     });
@@ -283,11 +304,19 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
   it("leaves nothing of an instance deleted with a draft in it", { timeout: 120_000 }, async () => {
     const { session, instance } = await seed(server);
     const useCases = page();
-    await useCases.createReleaseDraft(instance.url, {
-      kind: "blankCourse",
-      title: { en: "Solid" },
-    });
-    await useCases.createReleaseDraft(instance.url, { kind: "blankDeck", title: { en: "Words" } });
+    await useCases.createReleaseDraft(
+      instance.url,
+      {
+        kind: "blankCourse",
+        title: { en: "Solid" },
+      },
+      session.webId,
+    );
+    await useCases.createReleaseDraft(
+      instance.url,
+      { kind: "blankDeck", title: { en: "Words" } },
+      session.webId,
+    );
     await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,

@@ -1498,6 +1498,10 @@ A new draft starts from
     which is no source of the new release. The screen says the deck is
     based on it, and offers to start the next version of that release
     instead, which keeps what its learners studied.
+  - Its cards are read as the user only when their document is the
+    instance's, by the place rule of the next version below. Any other
+    is read as no one, so an instance in someone else's pod can't have
+    cards kept from everyone copied into it.
 - **the next version of a release**, by its address, in the library or
   in a pod (`nextVersionDraft` in
   [releaseVersion.ts](../packages/domain/src/release/releaseVersion.ts)).
@@ -1505,6 +1509,11 @@ A new draft starts from
     with no release time or notes yet. What it published can only be
     retired, never deleted or its id given to another, and its
     activities are kept.
+  - The release is read as the user only when it's the instance's: in
+    the instance, or in one of the user's storages that the instance
+    is in too, as for **Make it public**. Any other is read as no
+    one, so an instance in someone else's pod can't have a release
+    kept from everyone copied into it.
   - A series and publisher the release names in another document (a
     library's index) are read from it, as no one. The draft describes
     them: the series by what an index says of one, a publisher by its
@@ -2239,7 +2248,9 @@ asks first, in a ConfirmDialog that names the release and says the
 Studio can't make it private again, both on the release screen and in
 the releases screen's table.
 
-**Make it public** acts only on a release that meets all of these:
+**Make it public** acts only on a release that meets all of these, and
+**Start the next version** reads one as the user only when it meets
+the last, as a draft of a deck reads the deck's cards:
 
 - the instance's catalog lists it;
 - its document is a release (its own subject an `sm:Deck`);
@@ -2248,8 +2259,9 @@ the releases screen's table.
 
 So a link in the catalog, which anyone may have written, opens nothing
 else to everyone, nor a release of the user's own that an instance in
-someone else's pod lists. The releases screen lists only links at an
-http(s) address named as a release is, `…/<name>/v<N>.ttl`, as a
+someone else's pod lists. Nor is such a release copied into that
+instance as its next version, nor a deck's cards into a draft there. The releases screen lists only links at
+an http(s) address named as a release is, `…/<name>/v<N>.ttl`, as a
 request sends it
 ([data-model.md](data-model.md#where-an-instances-documents-are)).
 Whether a release is public is asked without credentials
