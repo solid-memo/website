@@ -31,7 +31,8 @@ import { App } from "./pages/App.ts";
  * - `app`, the page objects (pages/App.ts), journey steps among them;
  * - `newDevice`, which opens the app again in a browser of its own (a
  *   new context: no cookies, no storage), as on a second device, and
- *   gives its page objects. It gets all the below, as `app` does.
+ *   gives its page objects; in another time zone, given its `timezoneId`.
+ *   It gets all the below, as `app` does.
  *
  * And, unasked: Math.random seeded (JOURNEY_SEED, else from the title and
  * the repeat),
@@ -47,7 +48,7 @@ interface Fixtures {
   account: CssAccount;
   otherApp: OtherApp;
   app: App;
-  newDevice: () => Promise<App>;
+  newDevice: (options?: { timezoneId?: string }) => Promise<App>;
   diagnostics: Diagnostics;
 }
 
@@ -155,9 +156,9 @@ export const test = base.extend<Fixtures>({
 
   newDevice: async ({ browser, diagnostics }, use, testInfo) => {
     const contexts: BrowserContext[] = [];
-    await use(async () => {
+    await use(async (options) => {
       // A test's browser.newContext takes the project's options (use), as the fixture's own context does.
-      const context = await browser.newContext();
+      const context = await browser.newContext(options);
       contexts.push(context);
       await instrument(context, diagnostics);
       const page = await context.newPage();

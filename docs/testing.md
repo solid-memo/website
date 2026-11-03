@@ -472,18 +472,38 @@ The journeys run the same way every time:
 
 **Accessibility.** At each step's end, the harness checks the screen the
 step leaves the app on with
-[axe](https://github.com/dequelabs/axe-core), in each palette and theme,
+[axe](https://github.com/dequelabs/axe-core), as the journey shows it,
 and its reflow at the largest text size (`App.step`,
-[harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)). A
+[harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
+A step names that screen (`{ screen: "decks" }`), and a theme tour
+checks it in the other palettes and themes: a journey's screen never
+changes colors, so its video and trace show only what a user sees. A
 palette of the user's own, painted on the root's style, is taken off
-while they run and put back after; its editor measures it
+while axe runs and put back after; its editor measures it
 ([theme.md](theme.md#palettes-of-ones-own)).
 
 | Check | Palettes and themes | Rules | Where |
 |---|---|---|---|
-| axe | Standard, light and dark | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
-| axe | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
-| Reflow | Standard, light, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
+| axe, every journey | as the journey shows them, Standard light unless it picks others | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
+| Reflow, every journey | as the journey shows them, at the largest text size, 320px wide | no sideways scroll, no one-line text cut short without its title | Chromium |
+| axe, theme tours | Standard, dark | WCAG 2.0, 2.1 and 2.2, A and AA | Chromium and the phone |
+| axe, theme tours | High contrast, Color-blind friendly and Parchment, light and dark | `color-contrast` and `link-in-text-block` | Chromium |
+
+**The theme tours** (`journeys/tour-*.journey.ts`) are journeys of
+their own, one for each area of the app:
+[harness/screens.ts](../e2e/journeys/harness/screens.ts) lists the
+screens of each, which are the names a step may give. Each tour picks
+a palette and a theme in Preferences, as a user would, then reaches
+each of its screens. It checks each in the schemes its rows above
+name, one after another in one call into the page, and puts the
+screen's own back after (`app.tour`). A tour fails when it ends with one of its
+screens unchecked, so a screen a journey names is always checked in
+every palette and theme. A new screen is added to a tour's list and
+reached by that tour. A state only a tour reaches, as no step ends on
+it (`TOUR_ONLY`: an answer shown with its grade buttons, a chapter's
+question, the Studio's confirm dialog), is checked in Standard light
+and for its reflow there too. The phone runs the learner's and the library's
+tours, in Standard dark.
 
 The checks run in a step of their own, "Accessibility", inside the
 journey's step, timed in the report; desktop Firefox and WebKit leave it
@@ -511,8 +531,9 @@ error, and the browser. The job's
   - `css.log`: the server's log for the journey's time, when the journey
     failed;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;
-  - `<step> · accessibility, <palette>, <theme>.json`: what axe found on
-    a step's screen, when it found a violation;
+  - `<step> · accessibility.json`: what axe found on a step's screen,
+    when it found a violation, and in a theme tour
+    `<step> · accessibility, <palette>, <theme>.json`, in each scheme;
   - `<step> · reflow.png`: the screen at the largest text size and 320px
     wide, when it didn't reflow.
   `npx playwright show-report <dir>` opens the report.

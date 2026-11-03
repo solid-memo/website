@@ -206,14 +206,25 @@ export class Preferences extends Screen {
     );
   }
 
+  private theme(choice: "system" | Theme): Locator {
+    return this.form
+      .getByRole("group", { name: this.t("preferences.theme.legend") })
+      .getByRole("radio", { name: this.t(`theme.${choice}`), exact: true });
+  }
+
+  /** Chooses the theme under Appearance, which the page takes on at once (its root's data-theme). */
+  async setTheme(theme: Theme): Promise<void> {
+    await this.intent(`Choose the appearance ${this.t(`theme.${theme}`)}`, async () => {
+      await this.theme(theme).check();
+      await this.expectTheme(theme);
+      await this.app.chrome.expectTheme(theme);
+    });
+  }
+
   /** Expects the choice under Appearance: theme.<choice> ("As my browser" is "system"). */
   async expectTheme(choice: "system" | Theme): Promise<void> {
     await this.intent(`Check that the appearance is ${this.t(`theme.${choice}`)}`, () =>
-      expect(
-        this.form
-          .getByRole("group", { name: this.t("preferences.theme.legend") })
-          .getByRole("radio", { name: this.t(`theme.${choice}`), exact: true }),
-      ).toBeChecked(),
+      expect(this.theme(choice)).toBeChecked(),
     );
   }
 

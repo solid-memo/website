@@ -28,6 +28,12 @@ if (!(TRACE_MODES as readonly string[]).includes(trace))
  */
 const ENGINE_JOURNEYS = /@guest|@reload/;
 
+/**
+ * The theme tours the phone runs, in Standard dark (harness/screens.ts):
+ * those of the screens its journeys reach. Chromium runs every tour.
+ */
+const PHONE_TOURS = /@tour-learner|@tour-library/;
+
 export default defineConfig({
   testDir: "journeys",
   testMatch: "**/*.journey.ts",
@@ -67,8 +73,7 @@ export default defineConfig({
   },
   // Axe checks each step's screen in Chromium and on the phone, which is
   // WebKit too; desktop Firefox and WebKit leave it out
-  // (docs/accessibility.md): it takes about 40% of a journey's time, and
-  // the same screens are checked in Chromium.
+  // (docs/accessibility.md): the same screens are checked in Chromium.
   projects: [
     // Chromium runs every journey, in two shards in CI: a file's journeys
     // too may run side by side, and in either shard, so pod-safety's six
@@ -88,7 +93,11 @@ export default defineConfig({
       metadata: { accessibility: false },
     },
     // Safari on an iPhone: a phone's viewport, touch, and WebKit.
-    { name: "phone", use: { ...devices["iPhone 14"] }, grep: ENGINE_JOURNEYS },
+    {
+      name: "phone",
+      use: { ...devices["iPhone 14"] },
+      grep: new RegExp(`${ENGINE_JOURNEYS.source}|${PHONE_TOURS.source}`),
+    },
   ],
   // The built app (npm run build -w @solid-memo/web), the Studio, its deck
   // library and shapes included; 127.0.0.1 is a secure context, so http will do.

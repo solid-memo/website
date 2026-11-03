@@ -42,6 +42,20 @@ export class SomethingWentWrong extends Screen {
     });
   }
 
+  /**
+   * From the deck list, Go to the start's, has the browser get the
+   * Studio's own code again, and reloads the app, which has kept the
+   * broken module it was given (`breakStudio`).
+   */
+  async mendStudio(): Promise<void> {
+    await this.intent("Mend the Studio's code", async () => {
+      // The start, #/, is replaced by the deck list's address, which the reload must come back to.
+      await expect(this.page).toHaveURL(/#\/decks\?instance=/);
+      await this.page.unroute("**/assets/StudioWorkspace-*.js");
+      await this.app.chrome.reload();
+    });
+  }
+
   /** The screen, its heading focused, under the masthead (named `app`, linking home) and above the footer. */
   async expectShown(app: string): Promise<void> {
     await this.intent("See that something went wrong", async () => {

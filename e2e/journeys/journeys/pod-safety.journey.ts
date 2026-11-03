@@ -3,9 +3,19 @@
 // SPDX-License-Identifier: MIT
 
 import { randomUUID } from "node:crypto";
-import type { APIRequestContext, Page } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 import { expect, test as base } from "../fixtures.ts";
 import { logInAndCreateInstance } from "../flows/logIn.ts";
+import {
+  CREATED,
+  catalogOf,
+  type DeckEntry,
+  metaOf,
+  nameAccessControl,
+  PREFIXES,
+  SM,
+  writeDraftWithUnsupportedChapter,
+} from "../flows/podDocuments.ts";
 import { createAccount, type CssAccount } from "../harness/cssAccount.ts";
 import { bearer, containedIn } from "../harness/podDump.ts";
 import type { App } from "../pages/App.ts";
@@ -21,17 +31,6 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * plain requests, as the user, to see their documents as they were:
  * the same status and content, and no document added.
  */
-
-const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
-const PREFIXES = `@prefix sm: <${SM}> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix dcat: <http://www.w3.org/ns/dcat#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix schema: <https://schema.org/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix acl: <http://www.w3.org/ns/auth/acl#> .
-`;
-const CREATED = `"2026-10-01T00:00:00.000Z"^^xsd:dateTime`;
 
 /** A user of the journey's Solid server, making plain requests as themselves, with their client credentials. */
 interface PodUser {
@@ -111,48 +110,6 @@ const test = base.extend<{ api: APIRequestContext; user: PodUser; otherUser: Pod
   },
 });
 
-/** The instance's `meta.ttl`, as Solid Memo writes it. */
-function metaOf(name: string): string {
-  return `${PREFIXES}<#it> a sm:Instance ; dcterms:title "${name}" ; dcterms:created ${CREATED} ; sm:formatVersion 2 .`;
-}
-
-interface DeckEntry {
-  id: string;
-  title: string;
-  cards: string;
-  reviews: string;
-}
-
-/** A `catalog.ttl` of decks (their documents named as given) and drafts, as Solid Memo writes one. */
-function catalogOf(
-  name: string,
-  publisher: string,
-  decks: readonly DeckEntry[],
-  drafts: readonly string[] = [],
-): string {
-  const links = [
-    ...decks.map((deck) => `dcat:dataset <#${deck.id}>`),
-    ...drafts.map((draft) => `sm:releaseDraft <${draft}>`),
-  ];
-  const entries = decks.map(
-    (deck) => `<#${deck.id}> a sm:Deck, dcat:Dataset ;
-  dcterms:title "${deck.title}"@en ; dcterms:description "Flashcards: ${deck.title}."@en ;
-  sm:formatVersion 6 ; dcterms:created ${CREATED} ; sm:studyDirection sm:frontToBack ;
-  dcat:distribution <#${deck.id}-cards> ;
-  sm:cardsDocument <${deck.cards}> ; sm:reviewsDocument <${deck.reviews}> .
-<#${deck.id}-cards> a dcat:Distribution ; sm:formatVersion 1 ; dcat:accessURL <${deck.cards}> ;
-  dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .`,
-  );
-  return `${PREFIXES}<#catalog> a dcat:Catalog ; dcterms:title "${name}" ;
-  dcterms:description "Flashcard decks of the Solid Memo instance ${name}." ;
-  dcterms:publisher <${publisher}> ;
-  dcat:themeTaxonomy <https://solid-memo.com/ns/vocab/topics.ttl>, <http://publications.europa.eu/resource/authority/data-theme> ;
-  sm:formatVersion 1${links.map((link) => ` ;\n  ${link}`).join("")} .
-<${publisher}> a foaf:Agent ; sm:formatVersion 1 ; foaf:name "${publisher}" .
-${entries.join("\n")}
-`;
-}
-
 /** Access rules giving the folder's owner and `sharedWith` all access to it and what is in it. */
 function sharedFolderAcl(folder: string, owner: string, sharedWith: string): string {
   return `${PREFIXES}<#owner> a acl:Authorization ; acl:agent <${owner}> ;
@@ -231,16 +188,22 @@ test("removing a deck and deleting an instance someone else shares leave the use
   const instance = await sharedInstance(otherUser, account.webId, name, () => decks);
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, `Home ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, `Home ${runId}`),
+    { screen: "decks.empty" },
   );
 
-  await app.step("03 · Attach the instance another user shares: its decks are listed", async () => {
-    before = await dataOf(user, [profile, diary], [own]);
-    await attach(app, instance, name);
-    for (const deck of decks) await app.decks.expectDeck(deck.title);
-  });
+  await app.step(
+    "03 · Attach the instance another user shares: its decks are listed",
+    async () => {
+      before = await dataOf(user, [profile, diary], [own]);
+      await attach(app, instance, name);
+      for (const deck of decks) await app.decks.expectDeck(deck.title);
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "04 · In the Studio's health, the decks' documents do not say they are theirs",
@@ -250,20 +213,29 @@ test("removing a deck and deleting an instance someone else shares leave the use
       await app.studio.expectUnclaimed(decks[0]!.title, [profile, diary]);
       await app.studio.expectUnclaimed(decks[1]!.title, [diary, profile]);
     },
+    { screen: "studio.instance-health" },
   );
 
-  await app.step("05 · Remove a deck: the user's documents are as they were", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.select([decks[0]!.title]);
-    await app.studio.deleteSelected(name, [decks[0]!.title]);
-    expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
-  });
+  await app.step(
+    "05 · Remove a deck: the user's documents are as they were",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.select([decks[0]!.title]);
+      await app.studio.deleteSelected(name, [decks[0]!.title]);
+      expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
+    },
+    { screen: "studio.home" },
+  );
 
-  await app.step("06 · Delete the instance: the user's documents are as they were", async () => {
-    await deleteFromStudio(app, name);
-    expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
-    expect(await otherUser.read(`${instance}meta.ttl`)).toBe("404 ");
-  });
+  await app.step(
+    "06 · Delete the instance: the user's documents are as they were",
+    async () => {
+      await deleteFromStudio(app, name);
+      expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
+      expect(await otherUser.read(`${instance}meta.ttl`)).toBe("404 ");
+    },
+    { screen: "instance-picker" },
+  );
 });
 
 /** The folders between a pod's host and `url`, as `../` steps from inside `url`'s `decks/`. */
@@ -304,18 +276,24 @@ test("an instance whose catalog names documents by addresses that resolve elsewh
   const entries = [`${instance}catalog.ttl#deck-a`, `${instance}catalog.ttl#deck-b`];
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, `Home ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, `Home ${runId}`),
+    { screen: "decks.empty" },
   );
 
-  await app.step("03 · Attach the instance another user shares: no deck is listed", async () => {
-    before = await dataOf(user, [profile, diary], [own]);
-    await attach(app, instance, name);
-    await app.decks.expectShown();
-    for (const title of [`Alpha ${runId}`, `Beta ${runId}`])
-      await expect(app.decks.deckLink(title)).toBeHidden();
-  });
+  await app.step(
+    "03 · Attach the instance another user shares: no deck is listed",
+    async () => {
+      before = await dataOf(user, [profile, diary], [own]);
+      await attach(app, instance, name);
+      await app.decks.expectShown();
+      for (const title of [`Alpha ${runId}`, `Beta ${runId}`])
+        await expect(app.decks.deckLink(title)).toBeHidden();
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "04 · The Studio's health names both decks' entries as ones Solid Memo does not use",
@@ -325,6 +303,7 @@ test("an instance whose catalog names documents by addresses that resolve elsewh
       for (const entry of entries)
         await app.studio.expectDataProblem(entry, app.t("validation.constraint.DeckPlace"));
     },
+    { screen: "studio.instance-health" },
   );
 
   await app.step(
@@ -333,27 +312,18 @@ test("an instance whose catalog names documents by addresses that resolve elsewh
       await app.studio.removeData(entries[0]!);
       expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
     },
+    { screen: "studio.instance-health" },
   );
 
-  await app.step("06 · Delete the instance: the user's documents are as they were", async () => {
-    await deleteFromStudio(app, name);
-    expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
-  });
+  await app.step(
+    "06 · Delete the instance: the user's documents are as they were",
+    async () => {
+      await deleteFromStudio(app, name);
+      expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
+    },
+    { screen: "instance-picker" },
+  );
 });
-
-/** A draft's `release.ttl`, a blank course, as Solid Memo writes one. */
-function draftRelease(title: string): string {
-  return `${PREFIXES}<> a sm:Deck, dcat:Dataset, schema:Course ; dcterms:title "${title}"@en ;
-  dcterms:created ${CREATED} ; sm:studyDirection sm:frontToBack ;
-  dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
-  dcat:version "1" ; dcat:inSeries <#series> ; dcat:isVersionOf <#series> ;
-  dcat:distribution <#turtle> ; sm:formatVersion 1 .
-<#turtle> a dcat:Distribution ; dcat:accessURL <> ; dcat:downloadURL <> ;
-  dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
-  dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> ;
-  sm:formatVersion 1 .
-`;
-}
 
 /**
  * A draft in an instance another user shares, whose chapter has an id
@@ -384,25 +354,23 @@ test("a draft with a chapter id Solid Memo does not accept is not opened, and th
       return [draft];
     },
   );
-  const folder = draft.slice(0, draft.lastIndexOf("/") + 1);
-  const steps = new URL(`${folder}chapter-a/`).pathname.split("/").length - 2;
-  const id = `a/${"../".repeat(steps)}${new URL(elsewhere).pathname.slice(1)}`;
-  await otherUser.put(draft, draftRelease(title));
-  await otherUser.put(
-    `${folder}chapter-ch-pods.ttl`,
-    `${PREFIXES}<#${id}> a sm:Chapter, schema:Syllabus ; dcterms:title "Pods"@en ;
-  schema:isPartOf <release.ttl> ; schema:position 0 ; sm:formatVersion 1 .`,
-  );
+  const id = await writeDraftWithUnsupportedChapter(otherUser, draft, title, elsewhere);
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, `Home ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, `Home ${runId}`),
+    { screen: "decks.empty" },
   );
-  await app.step("03 · Attach the instance another user shares", async () => {
-    before = await dataOf(user, [], [own]);
-    await attach(app, instance, name);
-  });
+  await app.step(
+    "03 · Attach the instance another user shares",
+    async () => {
+      before = await dataOf(user, [], [own]);
+      await attach(app, instance, name);
+    },
+    { screen: "decks.empty" },
+  );
 
   await app.step(
     "04 · Open its draft in the Studio: it is not opened, and the screen says why",
@@ -411,33 +379,19 @@ test("a draft with a chapter id Solid Memo does not accept is not opened, and th
       await app.studio.openDrafts(name);
       await app.draftEditor.openRefused(title, app.t("errors.draftIdUnsupported", { id }));
     },
+    { screen: "studio.draft.refused" },
   );
 
-  await app.step("05 · The user's pod has no document it did not have", async () => {
-    expect(await dataOf(user, [], [own])).toEqual(before);
-    expect(await user.read(elsewhere)).toBe("404 ");
-    expect(await user.read(`${elsewhere}.ttl`)).toBe("404 ");
-  });
+  await app.step(
+    "05 · The user's pod has no document it did not have",
+    async () => {
+      expect(await dataOf(user, [], [own])).toEqual(before);
+      expect(await user.read(elsewhere)).toBe("404 ");
+      expect(await user.read(`${elsewhere}.ttl`)).toBe("404 ");
+    },
+    { screen: "studio.draft.refused" },
+  );
 });
-
-/**
- * Has the server name `accessControl` as the access control of every
- * release in a releases folder (its `Link: <…>; rel="acl"`), on reads:
- * an address elsewhere in the user's pod. How many answers named it.
- */
-async function nameAccessControl(page: Page, accessControl: string): Promise<{ count: number }> {
-  const named = { count: 0 };
-  await page.route(/\/releases\/[^/]+\/v\d+\.ttl$/, async (route) => {
-    if (!["GET", "HEAD"].includes(route.request().method())) return route.fallback();
-    const response = await route.fetch();
-    const headers = response.headers();
-    const link = headers.link ?? "";
-    headers.link = link.replace(/<[^>]*>;\s*rel="acl"/, `<${accessControl}>; rel="acl"`);
-    if (headers.link !== link) named.count += 1;
-    await route.fulfill({ response, headers });
-  });
-  return named;
-}
 
 /**
  * Publishing a release, and making it public, where the server names
@@ -466,21 +420,27 @@ test("publishing and making public a release whose server names another access c
   let before: Record<string, string> = {};
   let url = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, instance),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, instance),
+    { screen: "decks.empty" },
   );
 
-  await app.step("03 · In the Studio, draft the next version of a library release", async () => {
-    await app.studio.openFromApp();
-    await app.studio.openDrafts(instance);
-    await app.studio.draftNextVersion(
-      "https://solid-memo.com/decks/brightest-stars/v1.ttl",
-      title,
-      2,
-    );
-    await app.draftEditor.openDraft(title, { course: false });
-  });
+  await app.step(
+    "03 · In the Studio, draft the next version of a library release",
+    async () => {
+      await app.studio.openFromApp();
+      await app.studio.openDrafts(instance);
+      await app.studio.draftNextVersion(
+        "https://solid-memo.com/decks/brightest-stars/v1.ttl",
+        title,
+        2,
+      );
+      await app.draftEditor.openDraft(title, { course: false });
+    },
+    { screen: "studio.draft" },
+  );
 
   await app.step(
     "04 · Publish it, the server naming another access control: it is not made public, and the user's document stays private",
@@ -494,6 +454,7 @@ test("publishing and making public a release whose server names another access c
       expect(await dataOf(user, [diary, diaryAcl], [own])).toEqual(before);
       expect((await api.get(diary)).status(), "someone with no login reads the document").toBe(401);
     },
+    { screen: "studio.draft.release" },
   );
 
   await app.step(
@@ -503,6 +464,7 @@ test("publishing and making public a release whose server names another access c
       expect(await dataOf(user, [diary, diaryAcl], [own])).toEqual(before);
       expect((await api.get(diary)).status(), "someone with no login reads the document").toBe(401);
     },
+    { screen: "studio.draft.release-refused" },
   );
 });
 
@@ -523,26 +485,36 @@ test("deleting an instance keeps another app's data in a deck's document, and sa
   const catalog = `${account.pod}solid-memo/main/catalog.ttl`;
   let cards = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, instance),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, instance),
+    { screen: "decks.empty" },
   );
-  await app.step("03 · Create a deck of one card", async () => {
-    await app.decks.openDeckCreator();
-    await app.deckCreator.create(deck);
-    await app.deckBrowser.openFor(deck);
-    await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addCards([[`Sun ${runId}`, "Sol"]], { front: "en", back: "sv" });
-    await app.cardCreator.back();
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "03 · Create a deck of one card",
+    async () => {
+      await app.decks.openDeckCreator();
+      await app.deckCreator.create(deck);
+      await app.deckBrowser.openFor(deck);
+      await app.deckBrowser.openCardCreator();
+      await app.cardCreator.addCards([[`Sun ${runId}`, "Sol"]], { front: "en", back: "sv" });
+      await app.cardCreator.back();
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+    { screen: "decks" },
+  );
 
-  await app.step("04 · Another app keeps data of its own in the deck's document", async () => {
-    const said = /v1\.ttl#cardsDocument>\s+<([^>]+)>/.exec(await user.read(catalog));
-    cards = said![1]!;
-    const served = (await user.read(cards)).replace(/^200 /, "");
-    await user.put(cards, `${served}\n<#note-${runId}> <https://other.example/says> "mine" .\n`);
-  });
+  await app.step(
+    "04 · Another app keeps data of its own in the deck's document",
+    async () => {
+      const said = /v1\.ttl#cardsDocument>\s+<([^>]+)>/.exec(await user.read(catalog));
+      cards = said![1]!;
+      const served = (await user.read(cards)).replace(/^200 /, "");
+      await user.put(cards, `${served}\n<#note-${runId}> <https://other.example/says> "mine" .\n`);
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "05 · Delete the instance: the document is kept, with the other app's data, and the picker says so",
@@ -556,6 +528,7 @@ test("deleting an instance keeps another app's data in a deck's document, and sa
       expect(kept).not.toContain(`${SM}Card`);
       expect(kept).not.toContain(`Sun ${runId}`);
     },
+    { screen: "instance-picker" },
   );
 });
 
@@ -593,15 +566,21 @@ test("an instance at a pod's root with an older deck is read and studied, and ch
   let written = "";
   let before: Record<string, string> = {};
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, `Home ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, `Home ${runId}`),
+    { screen: "decks.empty" },
   );
 
-  await app.step("03 · Attach the instance at the pod's root: its deck is listed", async () => {
-    await attach(app, root, name);
-    await app.decks.expectToReview(deck, 1);
-  });
+  await app.step(
+    "03 · Attach the instance at the pod's root: its deck is listed",
+    async () => {
+      await attach(app, root, name);
+      await app.decks.expectToReview(deck, 1);
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "04 · Study the deck: the answer is kept, and its cards document is as it was",
@@ -614,6 +593,7 @@ test("an instance at a pod's root with an older deck is read and studied, and ch
       expect(await user.read(cards)).toBe(written);
       expect(await user.read(reviews)).toMatch(/^200 /);
     },
+    { screen: "decks" },
   );
 
   await app.step(
@@ -624,20 +604,25 @@ test("an instance at a pod's root with an older deck is read and studied, and ch
       await app.studio.expectUnclaimed(deck, [cards]);
       await app.studio.claimDocuments(deck);
     },
+    { screen: "studio.instance-health" },
   );
 
-  await app.step("06 · Add a card to the deck and study it", async () => {
-    await app.studio.backToApp();
-    await app.deckBrowser.openFor(deck);
-    await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addCards([[`Star ${runId}`, "Stjärna"]], { front: "en", back: "sv" });
-    await app.cardCreator.back();
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.study(deck);
-    await app.study.studyAll({ grade: "good" });
-    await app.study.endSession();
-    await app.decks.expectDoneForToday(deck);
-  });
+  await app.step(
+    "06 · Add a card to the deck and study it",
+    async () => {
+      await app.studio.backToApp();
+      await app.deckBrowser.openFor(deck);
+      await app.deckBrowser.openCardCreator();
+      await app.cardCreator.addCards([[`Star ${runId}`, "Stjärna"]], { front: "en", back: "sv" });
+      await app.cardCreator.back();
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.study(deck);
+      await app.study.studyAll({ grade: "good" });
+      await app.study.endSession();
+      await app.decks.expectDoneForToday(deck);
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "07 · Remove the deck in the Studio: its documents go, and the rest of the pod is as it was",
@@ -656,5 +641,6 @@ test("an instance at a pod's root with an older deck is read and studied, and ch
         before.documents!.split("\n").filter((url) => !gone.has(url)),
       );
     },
+    { screen: "studio.home" },
   );
 });

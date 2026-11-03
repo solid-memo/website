@@ -253,15 +253,32 @@ export class Studio extends Screen {
    */
   async deleteSelected(instance: string, decks: string[]): Promise<void> {
     await this.intent(`Delete ${decks.join(", ")}`, async () => {
+      await this.askToDeleteSelected(decks);
+      await this.confirmDeletion(instance, decks);
+    });
+  }
+
+  /** Asks to delete the selected decks: the Studio's question names them, and waits for an answer. */
+  async askToDeleteSelected(decks: string[]): Promise<void> {
+    await this.intent(`Ask to delete ${decks.join(", ")}`, async () => {
       const names = decks.map((deck) => `“${deck}”`).join(", ");
       await this.bulk
         .getByRole("button", { name: this.t("studio.bulk.remove"), exact: true })
         .click();
-      await this.confirm(
-        "studio.confirm.deleteDecks",
-        this.tp("studio.bulk.removeConfirm", { count: decks.length, names }),
-        "studio.bulk.remove",
-      );
+      await expect(
+        this.question("studio.confirm.deleteDecks").getByText(
+          this.tp("studio.bulk.removeConfirm", { count: decks.length, names }),
+        ),
+      ).toBeVisible();
+    });
+  }
+
+  /** Answers the question askToDeleteSelected asked with Delete: the decks' rows go, as deleteSelected says. */
+  async confirmDeletion(instance: string, decks: string[]): Promise<void> {
+    await this.intent(`Confirm deleting ${decks.join(", ")}`, async () => {
+      const dialog = this.question("studio.confirm.deleteDecks");
+      await dialog.getByRole("button", { name: this.t("studio.bulk.remove"), exact: true }).click();
+      await expect(dialog).toHaveCount(0);
       const status = this.page
         .getByRole("status")
         .filter({ hasText: this.t("studio.bulk.removed", { count: decks.length }) });
@@ -1499,9 +1516,14 @@ export class Studio extends Screen {
       .click();
   }
 
+  /** The Studio's question, its dialog, by its heading. */
+  private question(heading: string): Locator {
+    return this.page.getByRole("dialog", { name: this.t(heading), exact: true });
+  }
+
   /** Answers the Studio's question (its dialog, by its heading), which says `question`, with its action. */
   private async confirm(heading: string, question: RegExp, action: string): Promise<void> {
-    const dialog = this.page.getByRole("dialog", { name: this.t(heading), exact: true });
+    const dialog = this.question(heading);
     await expect(dialog.getByText(question)).toBeVisible();
     await dialog.getByRole("button", { name: this.t(action), exact: true }).click();
     await expect(dialog).toHaveCount(0);

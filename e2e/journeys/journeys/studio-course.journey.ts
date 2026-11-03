@@ -48,24 +48,32 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
   const deck = `Studied ${runId}`;
   const authored = `Authored ${runId}`;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in and create an instance", () =>
-    logInAndCreateInstance(app, account, instance),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in and create an instance",
+    () => logInAndCreateInstance(app, account, instance),
+    { screen: "decks.empty" },
   );
   // Something studied, for the statistics the trial must leave as they were.
-  await app.step("03 · Create a deck with a card, and study it", async () => {
-    await app.decks.openDeckCreator();
-    await app.deckCreator.create(deck);
-    await app.deckBrowser.openFor(deck);
-    await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addCards([["Sun", "Sol"]], { front: "en", back: "sv" });
-    await app.cardCreator.back();
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.study(deck);
-    await app.study.studyAll({ grade: "good" });
-    await app.study.endSession();
+  await app.step(
+    "03 · Create a deck with a card, and study it",
+    async () => {
+      await app.decks.openDeckCreator();
+      await app.deckCreator.create(deck);
+      await app.deckBrowser.openFor(deck);
+      await app.deckBrowser.openCardCreator();
+      await app.cardCreator.addCards([["Sun", "Sol"]], { front: "en", back: "sv" });
+      await app.cardCreator.back();
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.study(deck);
+      await app.study.studyAll({ grade: "good" });
+      await app.study.endSession();
+    },
+    { screen: "decks" },
+  );
+  await app.step("04 · Open the instance in Solid Memo Studio", () => app.studio.openFromApp(), {
+    screen: "studio.home",
   });
-  await app.step("04 · Open the instance in Solid Memo Studio", () => app.studio.openFromApp());
   await app.step(
     "05 · Write a course: a chapter, a step, and two questions with two wrong options each",
     async () => {
@@ -88,6 +96,7 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       ]);
       await app.draftEditor.expectBadge("Who chooses the app?", 1);
     },
+    { screen: "studio.draft" },
   );
 
   await app.step(
@@ -114,15 +123,20 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       await app.draftEditor.openPreview(authored);
       await app.chrome.breadcrumb("breadcrumbs.decks");
     },
+    { screen: "studio.home" },
   );
 
   const counted: Record<string, string> = {};
   const tiles = ["answers", "studyDays", "cards"] as const;
-  await app.step("07 · Note what Solid Memo's statistics count", async () => {
-    await app.studio.backToApp();
-    await app.statistics.open();
-    for (const tile of tiles) counted[tile] = await app.statistics.value(tile);
-  });
+  await app.step(
+    "07 · Note what Solid Memo's statistics count",
+    async () => {
+      await app.studio.backToApp();
+      await app.statistics.open();
+      for (const tile of tiles) counted[tile] = await app.statistics.value(tile);
+    },
+    { screen: "statistics" },
+  );
 
   await app.step(
     "08 · Test-play the course in the Studio's trial, to the end of its final review",
@@ -133,6 +147,7 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       await app.trial.open(authored);
       await app.trial.playToTheEnd(COURSE.chapter, COURSE.theory, COURSE.answers);
     },
+    { screen: "studio.draft.trial" },
   );
 
   await app.step(
@@ -145,6 +160,7 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       await app.statistics.open();
       for (const tile of tiles) expect(await app.statistics.value(tile), tile).toBe(counted[tile]);
     },
+    { screen: "statistics" },
   );
 
   await app.step(
@@ -170,6 +186,7 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       await app.draftEditor.openCheck();
       await app.draftEditor.expectNoProblem(source, undescribed);
     },
+    { screen: "studio.draft.check" },
   );
 
   await app.step(
@@ -188,6 +205,7 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       await app.studio.expectRelease(instance, url, `authored-${runId}`, 1);
       published = { url, title: authored };
     },
+    { screen: "studio.releases" },
   );
 });
 
@@ -210,9 +228,11 @@ test("add a course published in a pod from its link, as another user, and play i
   expect(course, "the journey just before publishes the course").not.toBeNull();
   const { url, title } = course!;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in as another user and create an instance", () =>
-    logInAndCreateInstance(app, account, `Learner ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in as another user and create an instance",
+    () => logInAndCreateInstance(app, account, `Learner ${runId}`),
+    { screen: "decks.empty" },
   );
   await app.step(
     "03 · Paste the course's link: what it is, and where it is published",
@@ -220,6 +240,7 @@ test("add a course published in a pod from its link, as another user, and play i
       await app.importUrl.openFromDeckList();
       await app.importUrl.showCourse(url, title);
     },
+    { screen: "import-url" },
   );
   await app.step(
     "04 · Start the course and play its chapter to the end of its final review",
@@ -227,9 +248,14 @@ test("add a course published in a pod from its link, as another user, and play i
       await app.importUrl.startCourse(title);
       await app.course.playChapter(COURSE.chapter, COURSE.theory, COURSE.answers);
     },
+    { screen: "course.completed" },
   );
-  await app.step("05 · Back at Decks: the course says where it came from", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.expectDeckFrom(title, new URL(url).host);
-  });
+  await app.step(
+    "05 · Back at Decks: the course says where it came from",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.expectDeckFrom(title, new URL(url).host);
+    },
+    { screen: "decks" },
+  );
 });

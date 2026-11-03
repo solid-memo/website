@@ -24,27 +24,41 @@ test("start the course for newcomers from an empty deck list @course", async ({
 }) => {
   let title = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in with a WebID", () =>
-    logInAndCreateInstance(app, account, `Newcomer ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in with a WebID",
+    () => logInAndCreateInstance(app, account, `Newcomer ${runId}`),
+    { screen: "decks.empty" },
   );
 
-  await app.step("03 · The deck list offers the course for newcomers", async () => {
-    await expect(app.decks.newcomerCourse).toBeVisible();
-    title = await app.decks.newcomerCourseTitle();
-    expect(title).not.toBe("");
-  });
+  await app.step(
+    "03 · The deck list offers the course for newcomers",
+    async () => {
+      await expect(app.decks.newcomerCourse).toBeVisible();
+      title = await app.decks.newcomerCourseTitle();
+      expect(title).not.toBe("");
+    },
+    { screen: "decks.empty" },
+  );
 
-  await app.step("04 · Start the course: it opens, the deck library after its way on", async () => {
-    await app.decks.startNewcomerCourse(title);
-    await app.course.expectLibraryAfter("course.start");
-  });
+  await app.step(
+    "04 · Start the course: it opens, the deck library after its way on",
+    async () => {
+      await app.decks.startNewcomerCourse(title);
+      await app.course.expectLibraryAfter("course.start");
+    },
+    { screen: "course" },
+  );
 
-  await app.step("05 · Back at Decks: the course is a deck, and no longer offered", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.expectDeck(title);
-    await expect(app.decks.newcomerCourse).toBeHidden();
-  });
+  await app.step(
+    "05 · Back at Decks: the course is a deck, and no longer offered",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.expectDeck(title);
+      await expect(app.decks.newcomerCourse).toBeHidden();
+    },
+    { screen: "decks" },
+  );
 
   await app.step(
     "06 · Only a course on the list: the strip points to the deck library, and opens it",
@@ -52,6 +66,7 @@ test("start the course for newcomers from an empty deck list @course", async ({
       await app.decks.expectStripLibrary(true);
       await app.decks.openLibraryFromStrip();
     },
+    { screen: "library" },
   );
 
   await app.step(
@@ -61,5 +76,6 @@ test("start the course for newcomers from an empty deck list @course", async ({
       await app.library.importSelected([BRIGHTEST_STARS.en]);
       await app.decks.expectStripLibrary(false);
     },
+    { screen: "decks" },
   );
 });

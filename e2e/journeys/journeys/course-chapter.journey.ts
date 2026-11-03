@@ -35,9 +35,11 @@ test("work through a course's first chapter and its final review @course", async
   let course = "";
   let chapter = "";
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in with a WebID", () =>
-    logInAndCreateInstance(app, account, `Learner ${runId}`),
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
+  await app.step(
+    "02 · Log in with a WebID",
+    () => logInAndCreateInstance(app, account, `Learner ${runId}`),
+    { screen: "decks.empty" },
   );
 
   let previewed = "";
@@ -55,12 +57,17 @@ test("work through a course's first chapter and its final review @course", async
       await app.libraryPreview.backToLibrary();
       await app.chrome.breadcrumb("breadcrumbs.decks");
     },
+    { screen: "decks.empty" },
   );
 
-  await app.step("03 · Start the course for newcomers", async () => {
-    course = await app.decks.newcomerCourseTitle();
-    await app.decks.startNewcomerCourse(course);
-  });
+  await app.step(
+    "03 · Start the course for newcomers",
+    async () => {
+      course = await app.decks.newcomerCourseTitle();
+      await app.decks.startNewcomerCourse(course);
+    },
+    { screen: "course" },
+  );
 
   await app.step(
     "03b · Choose Swedish as the course's language: its title and chapters in it, the app's words in English",
@@ -70,21 +77,30 @@ test("work through a course's first chapter and its final review @course", async
       await app.deckPreferences.backToCourse();
       await app.course.expectCourseLanguage("sv");
     },
+    { screen: "course" },
   );
 
-  await app.step("03c · A chapter's title and theory in Swedish too", async () => {
-    await app.course.start();
-    await app.chapter.expectCourseLanguage("sv");
-    await app.chrome.breadcrumb("breadcrumbs.course");
-  });
+  await app.step(
+    "03c · A chapter's title and theory in Swedish too",
+    async () => {
+      await app.course.start();
+      await app.chapter.expectCourseLanguage("sv");
+      await app.chrome.breadcrumb("breadcrumbs.course");
+    },
+    { screen: "course" },
+  );
 
-  await app.step("03d · Back to the app's language for the course", async () => {
-    await app.course.openPreferences();
-    await app.deckPreferences.chooseCourseLanguage(null);
-    await app.deckPreferences.backToCourse();
-    await app.course.expectCourseLanguage(null);
-    await app.course.expectShown(course);
-  });
+  await app.step(
+    "03d · Back to the app's language for the course",
+    async () => {
+      await app.course.openPreferences();
+      await app.deckPreferences.chooseCourseLanguage(null);
+      await app.deckPreferences.backToCourse();
+      await app.course.expectCourseLanguage(null);
+      await app.course.expectShown(course);
+    },
+    { screen: "course" },
+  );
 
   await app.step(
     "04 · Start the course: the first chapter opens at its first step's theory",
@@ -94,6 +110,7 @@ test("work through a course's first chapter and its final review @course", async
       // The preview recorded nothing: the course opens at the chapter previewed.
       expect(chapter).toBe(previewed);
     },
+    { screen: "chapter" },
   );
 
   await app.step(
@@ -104,20 +121,27 @@ test("work through a course's first chapter and its final review @course", async
       // The library's course for newcomers reads its theory in chunks (docs/courses.md, "Which course").
       expect(steps.some(({ chunks }) => chunks > 1)).toBe(true);
     },
+    { screen: "chapter-review" },
   );
 
-  await app.step("06 · A word before the final review", () =>
-    app.chapterReview.expectWord(chapter),
+  await app.step(
+    "06 · A word before the final review",
+    () => app.chapterReview.expectWord(chapter),
+    { screen: "chapter-review" },
   );
 
-  await app.step("07 · The final review: a wrong answer comes back until it is right", async () => {
-    await app.chapterReview.start();
-    const { asked, questions, wrong } = await app.chapterReview.answerAll(known);
-    // One answered wrongly on purpose, and perhaps one the journey did not know yet.
-    expect(wrong).toBeGreaterThan(0);
-    // Each question once, and each answered wrongly once more, then right: the journey knows its answer by then.
-    expect(asked).toBe(questions + wrong);
-  });
+  await app.step(
+    "07 · The final review: a wrong answer comes back until it is right",
+    async () => {
+      await app.chapterReview.start();
+      const { asked, questions, wrong } = await app.chapterReview.answerAll(known);
+      // One answered wrongly on purpose, and perhaps one the journey did not know yet.
+      expect(wrong).toBeGreaterThan(0);
+      // Each question once, and each answered wrongly once more, then right: the journey knows its answer by then.
+      expect(asked).toBe(questions + wrong);
+    },
+    { screen: "course.completed" },
+  );
 
   await app.step(
     "08 · Back at the course: the chapter is cheered and done, the next one open, the library after it",
@@ -125,6 +149,7 @@ test("work through a course's first chapter and its final review @course", async
       await app.course.expectShown(course);
       await app.course.expectCheered(chapter);
     },
+    { screen: "course.completed" },
   );
 
   await app.step(
@@ -134,11 +159,16 @@ test("work through a course's first chapter and its final review @course", async
       await app.statistics.expectCourseAnswersOnly();
       await app.statistics.expectCourseChapter(course, chapter);
     },
+    { screen: "statistics.courses" },
   );
 
-  await app.step("10 · The course's deck names the wrong options chosen most", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.decks.openDeck(course);
-    await app.deckDetail.expectConfusedOptions();
-  });
+  await app.step(
+    "10 · The course's deck names the wrong options chosen most",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.decks.openDeck(course);
+      await app.deckDetail.expectConfusedOptions();
+    },
+    { screen: "deck" },
+  );
 });
