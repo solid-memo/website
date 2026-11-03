@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.8](https://github.com/solid-memo/website/compare/v6.29.7...v6.29.8) (2026-11-03)
+
+### Bug Fixes
+
+* **digest:** bound the digest read and make changes without copying it ([990cff9](https://github.com/solid-memo/website/commit/990cff93849f1ca277894ed824541833a6d04630))
+
 ## [6.29.7](https://github.com/solid-memo/website/compare/v6.29.6...v6.29.7) (2026-11-03)
 
 ### Bug Fixes
