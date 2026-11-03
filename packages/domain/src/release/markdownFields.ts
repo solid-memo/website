@@ -47,10 +47,17 @@ export interface MarkdownCheck {
 /** The concepts of solid-memo:TextFormats. */
 const TEXT_FORMATS: readonly string[] = [SM.plainText, SM.markdown];
 
-/** Whether a subject states it is written in Markdown. */
-export function isMarked(model: ReleaseModel, subject: string): boolean {
-  return model.textFormats.some(
-    (statement) => statement.subject === subject && statement.object.value === SM.markdown,
+/**
+ * The subjects that state they are written in Markdown, read once from
+ * the release's text formats: a card, step or chapter is then looked
+ * up, so the time grows with the records and the statements, not with
+ * their product.
+ */
+export function markedSubjects(model: ReleaseModel): ReadonlySet<string> {
+  return new Set(
+    model.textFormats
+      .filter((statement) => statement.object.value === SM.markdown)
+      .map((statement) => statement.subject),
   );
 }
 
@@ -66,7 +73,8 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
     for (const text of texts) fields.push({ subject, field, text, rule });
   };
   const distractors = new Map(model.distractors.map((d) => [d.iri, d]));
-  for (const card of model.cards.filter((card) => isMarked(model, card.iri))) {
+  const marked = markedSubjects(model);
+  for (const card of model.cards.filter((card) => marked.has(card.iri))) {
     const options = card.distractors.map((o) => o.value);
     add(card.iri, SM.front, card.front, "side");
     add(card.iri, SM.back, card.back, options.length > 0 ? "option" : "side");
@@ -81,9 +89,9 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
       add(option, SM.distractorNote, distractor.note, "prose");
     }
   }
-  for (const step of model.steps.filter((step) => isMarked(model, step.iri)))
+  for (const step of model.steps.filter((step) => marked.has(step.iri)))
     add(step.iri, SM.theory, step.theory, "prose");
-  for (const chapter of model.chapters.filter((chapter) => isMarked(model, chapter.iri))) {
+  for (const chapter of model.chapters.filter((chapter) => marked.has(chapter.iri))) {
     add(chapter.iri, `${DCTERMS_NS}description`, chapter.description, "prose");
   }
   return fields;
