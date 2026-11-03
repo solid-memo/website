@@ -347,7 +347,10 @@ instance's `meta.ttl` is read through the pod fetch too, under
 `FOREIGN_LIMITS`, since a folder added by its address is read as soon
 as it's added. A release a draft follows is
 read through `createOwnPodFetch`, which asks the same folders
-([studio.md](studio.md#drafts)).
+([studio.md](studio.md#drafts)). A new draft copies a release or a
+deck's cards into the instance. So either is read as no one outside
+the instance's pod: in neither the instance nor a storage of the
+user's that holds it.
 
 For the profile and the type indexes, the profile's own places stand
 in for the gate

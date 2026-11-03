@@ -119,7 +119,8 @@ interface Read {
  * Releases are read, never written, with `releaseFetch`: a library
  * release is read where the site serves it. The documents a release
  * names its series and publisher in are read with `publicFetch`, as no
- * one: what they say is copied into a draft to be published. Both are
+ * one: what they say is copied into a draft to be published, as is a
+ * release read `asNoOne`. Both are
  * read under RELEASE_LIMITS: a release may be anyone's, on any server.
  */
 export function createSolidReleaseDraftRepository({
@@ -352,10 +353,10 @@ export function createSolidReleaseDraftRepository({
       });
     },
 
-    async readRelease(url) {
+    async readRelease(url, { asNoOne = false } = {}) {
       let dataset: Dataset;
       try {
-        dataset = await readDataset(url, releases);
+        dataset = await readDataset(url, asNoOne ? published : releases);
       } catch (error) {
         throw releaseReadError(url, error);
       }

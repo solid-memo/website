@@ -2218,10 +2218,14 @@ describe("StudioWorkspace", () => {
           draftUrl: nextUrl,
         }),
       );
-      expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, {
-        kind: "nextVersionOf",
-        url: target,
-      });
+      expect(useCases.createReleaseDraft).toHaveBeenCalledWith(
+        instanceA.url,
+        {
+          kind: "nextVersionOf",
+          url: target,
+        },
+        session.webId,
+      );
     });
 
     it("opens a draft made on the drafts screen, which the activity tells of", async () => {

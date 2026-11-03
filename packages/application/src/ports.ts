@@ -256,7 +256,12 @@ export interface DeckRepository {
    * release it was taken from (Card.fromRelease, `content.url`).
    */
   importDeck(instanceUrl: string, content: LibraryDeckContent): Promise<Deck>;
-  listCards(deck: Deck): Promise<Card[]>;
+  /**
+   * The deck's cards, read as the instance's data is (in the user's own
+   * pod as the user), or with `asNoOne`, as no one: for cards copied
+   * into a place they may not be the user's to share.
+   */
+  listCards(deck: Deck, options?: { asNoOne?: boolean }): Promise<Card[]>;
   /** The deck's cards unless its cards document is still at `version` (undefined: read them). */
   readCardsSince(deck: Deck, version: string | undefined): Promise<Since<Card[]>>;
   addCard(deck: Deck, content: CardContent): Promise<Card>;
@@ -558,9 +563,11 @@ export interface ReleaseDraftRepository {
    * A release document anywhere, as it states itself, at its own URL;
    * releaseUnreadable when there is none to read there, or its version
    * is none of 1, 2, …; releaseTooLarge when it is larger than a release
-   * may be.
+   * may be. Read as releases are (a release in the user's own pod as
+   * the user), or with `asNoOne`, as no one, as readLinked reads: for a
+   * release copied into a place it may not be the user's to share.
    */
-  readRelease(url: string): Promise<ReleaseDraft>;
+  readRelease(url: string, options?: { asNoOne?: boolean }): Promise<ReleaseDraft>;
   /**
    * What the documents a release names its series and publisher in say
    * (a library's index), read as the release is: each document the

@@ -7,6 +7,7 @@ import { IDBFactory } from "fake-indexeddb";
 import { SITE } from "@solid-memo/vocab/tooling/sources";
 import { shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
+import type { Deck } from "@solid-memo/domain/deck";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
 import { createLocalPod } from "@solid-memo/solid/localPod";
@@ -213,17 +214,25 @@ describe("createAppUseCases", () => {
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
     await useCases.createDeck(instance!.url, { en: "Capitals" });
-    const made = await useCases.createReleaseDraft(instance!.url, {
-      kind: "nextVersionOf",
-      url: `${SITE}decks/getting-started/v1.ttl`,
-    });
+    const made = await useCases.createReleaseDraft(
+      instance!.url,
+      {
+        kind: "nextVersionOf",
+        url: `${SITE}decks/getting-started/v1.ttl`,
+      },
+      GUEST_SESSION.webId,
+    );
     expect(made!.draft).toMatchObject({ name: "getting-started", version: 2, course: true });
     expect((await useCases.checkInstance(instance!.url)).conforms).toBe(true);
     await expect(
-      useCases.createReleaseDraft(instance!.url, {
-        kind: "nextVersionOf",
-        url: `${instance!.url}releases/none/v1.ttl`,
-      }),
+      useCases.createReleaseDraft(
+        instance!.url,
+        {
+          kind: "nextVersionOf",
+          url: `${instance!.url}releases/none/v1.ttl`,
+        },
+        GUEST_SESSION.webId,
+      ),
     ).rejects.toMatchObject({
       code: "releaseUnreadable",
     });
@@ -260,7 +269,7 @@ describe("createAppUseCases", () => {
     );
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const nextVersionOf = (url: string) =>
-      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url });
+      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url }, login.webId!);
 
     const elsewhere = "https://attacker.example/r.ttl";
     await expect(nextVersionOf(elsewhere)).rejects.toMatchObject({ code: "releaseUnreadable" });
@@ -279,6 +288,79 @@ describe("createAppUseCases", () => {
     );
   });
 
+  it("reads the user's own release as no one for its next version in an instance outside their pod", async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input).startsWith(`${alice}profile/card`)
+          ? Promise.resolve(
+              new Response(
+                `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+                { headers: { "Content-Type": "text/turtle" } },
+              ),
+            )
+          : servedSiteNetwork(input, init),
+      ),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const own = `${alice}memo/releases/capitals/v1.ttl`;
+    await expect(
+      useCases.createReleaseDraft(
+        "https://attacker.example/memo/",
+        { kind: "nextVersionOf", url: own },
+        login.webId,
+      ),
+    ).rejects.toMatchObject({ code: "releaseUnreadable" });
+    expect(login.sent).not.toContain(own);
+    expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+      own,
+      expect.objectContaining({ credentials: "omit" }),
+    );
+  });
+
+  it("reads the user's own cards as no one for a draft of a deck in an instance outside their pod", async () => {
+    const alice = "https://alice.example/";
+    login.webId = `${alice}profile/card#me`;
+    const own = `${alice}memo/decks/deck-1.ttl`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input).startsWith(`${alice}profile/card`)
+          ? Promise.resolve(
+              new Response(
+                `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+                { headers: { "Content-Type": "text/turtle" } },
+              ),
+            )
+          : servedSiteNetwork(input, init),
+      ),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const foreign = "https://attacker.example/memo/";
+    // The foreign instance's catalog names a deck whose cards are in Alice's pod.
+    const deck: Deck = {
+      id: "deck-1",
+      url: `${foreign}catalog.ttl#deck-1`,
+      title: { en: "Capitals" },
+      cardsDocumentUrl: own,
+      reviewsDocumentUrl: `${foreign}reviews/deck-1.ttl`,
+      createdAt: "2026-11-03T10:00:00.000Z",
+      formatVersion: 1,
+      direction: "front-to-back",
+      authors: [],
+    };
+    await expect(
+      useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck }, login.webId),
+    ).rejects.toMatchObject({ code: "noCatalogToUpdate" });
+    expect(login.sent).not.toContain(own);
+    expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+      own,
+      expect.objectContaining({ credentials: "omit" }),
+    );
+  });
+
   it("reads a release as no one when the user's own pod cannot be found", async () => {
     login.webId = "https://bob.example/profile/card#me";
     vi.stubGlobal(
@@ -292,10 +374,14 @@ describe("createAppUseCases", () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const elsewhere = "https://attacker.example/r.ttl";
     await expect(
-      useCases.createReleaseDraft("https://bob.example/memo/", {
-        kind: "nextVersionOf",
-        url: elsewhere,
-      }),
+      useCases.createReleaseDraft(
+        "https://bob.example/memo/",
+        {
+          kind: "nextVersionOf",
+          url: elsewhere,
+        },
+        login.webId!,
+      ),
     ).rejects.toMatchObject({ code: "releaseUnreadable" });
     expect(login.sent).not.toContain(elsewhere);
     expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
@@ -336,7 +422,11 @@ describe("createAppUseCases", () => {
     ]);
     const own = `${alice}memo/releases/capitals/v1.ttl`;
     await expect(
-      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url: own }),
+      useCases.createReleaseDraft(
+        `${alice}memo/`,
+        { kind: "nextVersionOf", url: own },
+        login.webId!,
+      ),
     ).rejects.toMatchObject({ code: "releaseUnreadable" });
     expect(login.sent).toContain(own);
   });

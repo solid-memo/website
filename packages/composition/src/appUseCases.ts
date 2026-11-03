@@ -273,7 +273,20 @@ export function createAppUseCases({
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway,
     instanceRepository,
-    deckRepository: createSolidDeckRepository({ fetch: dataFetch, checkWrite, now, randomId }),
+    deckRepository: createSolidDeckRepository({
+      fetch: dataFetch,
+      // A deck's cards copied into a draft outside their pod are read as no one, as the gate reads elsewhere.
+      publicFetch: createPodFence(
+        routedFetch({
+          origin: GUEST_ORIGIN,
+          local: writeFence.fetch,
+          remote: limitedFetch(noOneFetch, FOREIGN_LIMITS),
+        }),
+      ),
+      checkWrite,
+      now,
+      randomId,
+    }),
     deckLibrary: createSolidDeckLibrary({
       fetch: siteFetch,
       // The library is published with the site, from decks/.

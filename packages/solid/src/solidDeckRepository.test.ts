@@ -1142,6 +1142,19 @@ describe("listCards", () => {
     await expect(makeRepository().listCards(deck)).resolves.toEqual([]);
   });
 
+  it("reads the cards as no one, asked to, through the fetch it is given for that, else its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const deps = { fetch, now: () => new Date(), randomId: () => "fixed" };
+    await createSolidDeckRepository({ ...deps, publicFetch }).listCards(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, publicFetch);
+    await createSolidDeckRepository({ ...deps, publicFetch }).listCards(deck);
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+    await createSolidDeckRepository(deps).listCards(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+  });
+
   it("maps card subjects", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(

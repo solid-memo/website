@@ -34,7 +34,7 @@ export function ReleasesContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** Who makes a release public again (useMakePublic). */
+  /** Who makes a release public again (useMakePublic), or starts its next version (useStartNextVersion). */
   webId: string;
   healthHref: string;
   draftsHref: string;
@@ -63,7 +63,7 @@ export function ReleasesContainer({
     return byRelease;
   }, [draftsQuery.data]);
   const publicMutation = useMakePublic(useCases, instance.url, webId);
-  const nextMutation = useStartNextVersion(useCases, instance.url, onStarted);
+  const nextMutation = useStartNextVersion(useCases, instance.url, webId, onStarted);
 
   if (releasesQuery.error) return <ErrorMessage error={errorText(releasesQuery.error)} />;
   if (releasesQuery.data === undefined) return <Loading label={t("studio.releases.loading")} />;

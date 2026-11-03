@@ -584,6 +584,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             key={route.instanceUrl}
             useCases={useCases}
             instance={activeInstance!}
+            webId={session.webId}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
             releasesHref={studioRouteToHash({ screen: "releases", instanceUrl: route.instanceUrl })}
             draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
