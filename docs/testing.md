@@ -535,7 +535,13 @@ error, and the browser. The job's
 - `playwright-report/`: the steps as a tree, with a screenshot at the
   end of each journey step, a video, and these attachments:
   - `diagnostics.json`: console, page errors, failed and refused
-    requests, the seed, the time zone;
+    requests, the seed, the time zone, each page that crashed or closed,
+    and each time a page went quiet (`harness/heartbeat.ts`). A silence
+    is a time its scripts stopped running; a still, one they ran but it
+    drew nothing. A page that stops answering leaves nothing else
+    behind: no request, no console line, no frame in the video;
+  - in the jobs that run WebKit, desktop and phone, what the browser
+    itself printed (`DEBUG=pw:browser`), in the journey's stderr;
   - `css.log`: the server's log for the journey's time, when the journey
     failed;
   - `pod-dump.ttl`: every document in the journey's pod when it failed;

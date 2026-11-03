@@ -105,7 +105,7 @@ export function summarize(report: Report, artifact: string): string {
     "2. Open the trace — every step, with the page before and after each action, its network and console: " +
       "`npx playwright show-trace test-results/<journey>/trace.zip`, or drop the zip on https://trace.playwright.dev.",
     "3. Or open the whole report: `npx playwright show-report playwright-report`. Each journey step has a screenshot; " +
-      "the failing journey also has its video, diagnostics.json (console, page errors, failed requests), css.log " +
+      "the failing journey also has its video, diagnostics.json (console, page errors, failed requests, the times a page went quiet), css.log " +
       "(the Solid server's log for the journey) and pod-dump.ttl (what was in the pod).",
     "",
   );
