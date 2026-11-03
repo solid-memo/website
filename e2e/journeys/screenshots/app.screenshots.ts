@@ -39,6 +39,9 @@ test("the app's screenshots", async ({ page }, testInfo) => {
     errorResponses: [],
     blockedRequests: [],
     unexpectedDialogs: [],
+    pageEvents: [],
+    silences: [],
+    stills: [],
   };
   const app = new App(page, testInfo, diagnostics);
   await page.addInitScript(seedRandom, 1);

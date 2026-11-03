@@ -15,6 +15,7 @@ import { createAccount, type CssAccount } from "./harness/cssAccount.ts";
 import { CSS_LOG } from "./harness/cssServer.ts";
 import { otherApp, type OtherApp } from "./harness/otherApp.ts";
 import { loggedByWebKit } from "./harness/pageErrors.ts";
+import { beat, heartbeats, type Stalls } from "./harness/heartbeat.ts";
 import { dumpPod } from "./harness/podDump.ts";
 import { seedRandom } from "./harness/seededRandom.ts";
 import { App } from "./pages/App.ts";
@@ -38,9 +39,10 @@ import { App } from "./pages/App.ts";
  * the repeat),
  * requests to any host but 127.0.0.1 refused, flags stubbed, dialogs
  * answered only as a step expects, and diagnostics.json (console, page
- * errors, failed requests) attached, plus, when the journey fails, the
- * server's log for its time. An error thrown in the page fails the
- * journey.
+ * errors, failed requests, each page's crash or close and the times it
+ * went quiet, harness/heartbeat.ts) attached, plus, when the journey
+ * fails, the server's log for its time. An error thrown in the page fails
+ * the journey.
  */
 interface Fixtures {
   server: string;
@@ -52,7 +54,7 @@ interface Fixtures {
   diagnostics: Diagnostics;
 }
 
-export interface Diagnostics {
+export interface Diagnostics extends Stalls {
   seed: number;
   timezone: string | undefined;
   console: { type: string; text: string; url?: string }[];
@@ -61,7 +63,17 @@ export interface Diagnostics {
   errorResponses: { method: string; url: string; status: number }[];
   blockedRequests: string[];
   unexpectedDialogs: string[];
+  /** A page that crashed or closed during the journey, and when (the test's clock). */
+  pageEvents: { page: string; event: "crash" | "close"; at: string }[];
 }
+
+/** Each journey's heartbeats (harness/heartbeat.ts), by its diagnostics. */
+const pulses = new WeakMap<Diagnostics, ReturnType<typeof heartbeats>>();
+/** The page's name for its heartbeat's binding. */
+const HEARTBEAT = "__journeyHeartbeat";
+
+/** What diagnostics.json calls each page: the journey's own, or a device's (newDevice). */
+const pageNames = new WeakMap<Page, string>();
 
 const seedOf = (title: string) => {
   const given = Number(process.env.JOURNEY_SEED);
@@ -128,12 +140,17 @@ export const test = base.extend<Fixtures>({
         errorResponses: [],
         blockedRequests: [],
         unexpectedDialogs: [],
+        pageEvents: [],
+        silences: [],
+        stills: [],
       };
+      pulses.set(found, heartbeats(found));
       testInfo.annotations.push({ type: "seed", description: String(seed) });
       await instrument(context, found);
-      watch(page, found);
+      watch(page, found, "page");
       const started = new Date();
       await use(found);
+      pulses.get(found)!.end(Date.now());
       await testInfo.attach("diagnostics.json", {
         body: JSON.stringify(found, null, 2),
         contentType: "application/json",
@@ -162,7 +179,7 @@ export const test = base.extend<Fixtures>({
       contexts.push(context);
       await instrument(context, diagnostics);
       const page = await context.newPage();
-      watch(page, diagnostics);
+      watch(page, diagnostics, `device ${contexts.length}`);
       return new App(page, testInfo, diagnostics);
     });
     for (const context of contexts) await context.close();
@@ -172,11 +189,15 @@ export const test = base.extend<Fixtures>({
 export { expect };
 
 /**
- * What every context gets: Math.random seeded, and requests to any host
- * but 127.0.0.1 refused.
+ * What every context gets: Math.random seeded, requests to any host
+ * but 127.0.0.1 refused, and each page's heartbeat.
  */
 async function instrument(context: BrowserContext, found: Diagnostics): Promise<void> {
   await context.addInitScript(seedRandom, found.seed);
+  await context.exposeBinding(HEARTBEAT, ({ page }, frames: number) =>
+    pulses.get(found)!.beat(pageNames.get(page) ?? page.url(), frames, Date.now()),
+  );
+  await context.addInitScript(beat, HEARTBEAT);
   // Routing every request turns Chromium's HTTP cache off: the app loads everything afresh, as on a first visit.
   await context.route("**/*", (route) => {
     const url = new URL(route.request().url());
@@ -186,8 +207,19 @@ async function instrument(context: BrowserContext, found: Diagnostics): Promise<
   });
 }
 
-/** What every page reports to diagnostics.json: its console, its errors, its failed requests. */
-function watch(page: Page, found: Diagnostics): void {
+/**
+ * What every page reports to diagnostics.json, under `name`: its console,
+ * its errors, its failed requests, and whether it crashed or closed.
+ */
+function watch(page: Page, found: Diagnostics, name: string): void {
+  pageNames.set(page, name);
+  page.on("crash", () =>
+    found.pageEvents.push({ page: name, event: "crash", at: new Date().toISOString() }),
+  );
+  page.on("close", () => {
+    found.pageEvents.push({ page: name, event: "close", at: new Date().toISOString() });
+    pulses.get(found)!.close(name, Date.now());
+  });
   page.on("console", (message) =>
     found.console.push({
       type: message.type(),
