@@ -9,6 +9,7 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import { describe, expect, it, vi } from "vitest";
+import { MAX_DESCRIBING_HEADER_LENGTH } from "./linkHeader";
 import { resourcesContract } from "../testing/contract/resources";
 import { turtleAt } from "../testing/contract/rdf";
 import { HttpError } from "./interface";
@@ -16,6 +17,37 @@ import * as rdf from "./rdf";
 import * as resources from "./resources";
 
 resourcesContract({ rdf, resources });
+
+/** The responses the library's file, container and save requests were handed, newest last. */
+const handed: Response[] = vi.hoisted(() => []);
+
+vi.mock("@inrupt/solid-client", async (importOriginal) => {
+  const library = await importOriginal<typeof import("@inrupt/solid-client")>();
+  /** The library's function `call`, the responses of the fetch in its options (its last argument) noted in `handed`. */
+  const noting = <F extends (...args: never[]) => unknown>(call: F): F =>
+    ((...args: unknown[]) => {
+      const options = args.at(-1) as { fetch?: typeof globalThis.fetch };
+      const fetch = options.fetch;
+      const noted =
+        fetch &&
+        (async (input: RequestInfo | URL, init?: RequestInit) => {
+          const response = await fetch(input, init);
+          handed.push(response);
+          return response;
+        });
+      return (call as unknown as (...args: unknown[]) => unknown)(...args.slice(0, -1), {
+        ...options,
+        fetch: noted,
+      });
+    }) as unknown as F;
+  return {
+    ...library,
+    createContainerAt: noting(library.createContainerAt),
+    getFile: noting(library.getFile),
+    overwriteFile: noting(library.overwriteFile),
+    saveSolidDatasetAt: noting(library.saveSolidDatasetAt),
+  };
+});
 
 const URL_ = "https://pod.example/decks/deck.ttl";
 
@@ -117,5 +149,49 @@ describe("writeDocument, beside the library's own save", () => {
     expect(rdf.getThingAll(written.dataset).map((subject) => subject.url)).toEqual(
       rdf.getThingAll(saved as unknown as rdf.Dataset).map((subject) => subject.url),
     );
+  });
+});
+
+describe("the headers that describe a resource, over the library", () => {
+  /** A Link header just past the bound: a long one makes the library's parser slow. */
+  const LONG_LINK = `<${"a".repeat(MAX_DESCRIBING_HEADER_LENGTH)}>; rel="x"`;
+  const FILE = "https://pod.example/media/image.png";
+  /** A fetch that answers every request with `status`, a long Link header and `body`. */
+  const longLinked =
+    (status: number, body: string | null = null): typeof globalThis.fetch =>
+    async (input) => {
+      const response = new Response(body, {
+        status,
+        headers: { "Content-Type": "text/turtle", Link: LONG_LINK },
+      });
+      Object.defineProperty(response, "url", { value: String(input) });
+      return response;
+    };
+
+  it("reads a file with the global fetch when given none, handing the library no long Link header", async () => {
+    handed.length = 0;
+    vi.stubGlobal("fetch", vi.fn(longLinked(200, "bytes")));
+    try {
+      expect(await (await resources.getFile(FILE, {})).text()).toBe("bytes");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+    expect(handed).toHaveLength(1);
+    expect(handed.map((response) => response.headers.get("Link"))).toEqual([null]);
+  });
+
+  it("writes a file, a container and a document, handing the library no long Link header", async () => {
+    handed.length = 0;
+    await resources.overwriteFile(FILE, new Blob(["bytes"]), {
+      fetch: longLinked(201),
+      contentType: "image/png",
+    });
+    await resources.createContainerAt("https://pod.example/decks/", { fetch: longLinked(201) });
+    const written = await resources.writeDocument(URL_, rdf.createSolidDataset(), {
+      fetch: longLinked(201),
+    });
+    expect(rdf.getThingAll(written.dataset)).toEqual([]);
+    expect(handed.length).toBeGreaterThanOrEqual(3);
+    expect(handed.every((response) => response.headers.get("Link") === null)).toBe(true);
   });
 });

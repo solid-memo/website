@@ -51,4 +51,13 @@ describe("accessFetch", () => {
     answers[ACR] = new Response(null, { status: 404, headers: { Link: type } });
     expect((await accessFetch(fetch)(ACR, { method: "PUT", body: "" })).status).toBe(404);
   });
+
+  it("drops a Link header past its bound from every answer, so the library never parses it", async () => {
+    const long = `<a>; rel="x"${"\t".repeat(250_000)}x`;
+    const fetch = vi.fn(async () => new Response(null, { headers: { Link: long } }));
+    expect((await accessFetch(fetch)(RELEASE)).headers.get("Link")).toBeNull();
+    const patched = await accessFetch(fetch)(RELEASE, { method: "PATCH", body: "" });
+    expect(patched.headers.get("Link")).toBeNull();
+    expect(await grantPublicRead(RELEASE, { fetch })).toBe(false);
+  }, 5_000);
 });

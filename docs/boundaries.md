@@ -129,6 +129,7 @@ library could take their place there alone
 | [rdf.ts](../packages/solid/src/client/rdf.ts) | the data model: datasets and their subjects, read and built, many subjects set or removed in one pass |
 | [linearDataset.ts](../packages/solid/src/client/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, and the Turtle parser it and `parseQuads` read with, on `n3`, for `resources.ts` and `rdf.ts` alone |
 | [readLimits.ts](../packages/solid/src/client/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bound every read keeps on a Turtle text's base and prefix declarations and on the long IRIs the parser resolves, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them; it imports no library |
+| [linkHeader.ts](../packages/solid/src/client/linkHeader.ts) | the bound on the `Link` and `WAC-Allow` headers of a response, dropped past it before any parser reads them; it imports no library |
 | [resources.ts](../packages/solid/src/client/resources.ts) | reading and writing pods, conditional reads and writes among them, and the Turtle and JSON-LD parsers |
 | [sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests; it imports no library |
 | [inrupt.ts](../packages/solid/src/client/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |

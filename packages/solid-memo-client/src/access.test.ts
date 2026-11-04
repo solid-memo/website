@@ -5,6 +5,7 @@
 import type { Quad } from "@rdfjs/types";
 import { Parser } from "n3";
 import { describe, expect, it } from "vitest";
+import { MAX_DESCRIBING_HEADER_LENGTH } from "@solid-memo/solid/client/linkHeader";
 import { accessContract } from "@solid-memo/solid/testing/contract/access";
 import { grantPublicRead } from "./access";
 
@@ -273,5 +274,20 @@ describe("grantPublicRead, on an Access Control Resource, what it writes", () =>
     const pod = fakePod(acr(""), { refuses: true });
     await expect(grantPublicRead(DOCUMENT, { fetch: pod.fetch })).resolves.toBe(false);
     expect(pod.patches).toHaveLength(1);
+  });
+});
+
+describe("grantPublicRead, with a long Link header", () => {
+  it("finds no access control in a Link header past its bound, and changes nothing", async () => {
+    // A well-formed header naming the ACR, made long by links of no interest.
+    const link = `<${ACR}>; rel="acl"${`, <${POD}other>; rel="other"`.repeat(400)}`;
+    expect(link.length).toBeGreaterThan(MAX_DESCRIBING_HEADER_LENGTH);
+    const requests: string[] = [];
+    const fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      requests.push(`${init?.method ?? "GET"} ${String(input)}`);
+      return new Response(null, { headers: { Link: link } });
+    };
+    expect(await grantPublicRead(DOCUMENT, { fetch })).toBe(false);
+    expect(requests.every((request) => request.endsWith(DOCUMENT))).toBe(true);
   });
 });
