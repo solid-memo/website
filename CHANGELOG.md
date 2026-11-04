@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.14](https://github.com/solid-memo/website/compare/v6.29.13...v6.29.14) (2026-11-04)
+
+### Bug Fixes
+
+* **solid:** list the answer log's months from history/ alone, bounded ([a539f47](https://github.com/solid-memo/website/commit/a539f47642388e1eee8af8c3d02b783f661404a1))
+
 ## [6.29.13](https://github.com/solid-memo/website/compare/v6.29.12...v6.29.13) (2026-11-04)
 
 ### Bug Fixes
