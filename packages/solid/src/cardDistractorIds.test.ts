@@ -123,10 +123,36 @@ async function editedCopy(edited = true) {
       .build();
     await saveDataset(deck.cardsDocumentUrl, setThing(dataset, taken), fetch);
   };
+  /** The pod as an earlier app left it: no card's front says its language. */
+  const unstateFronts = async () => {
+    let dataset = (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch))!;
+    for (const one of await repository.listCards(deck)) {
+      const thing = getThing(dataset, `${deck.cardsDocumentUrl}#${one.id}`)!;
+      const front = Object.values(one.front)[0]!;
+      dataset = setThing(
+        dataset,
+        buildThing(thing).removeAll(SM.front).addStringNoLocale(SM.front, front).build(),
+      );
+    }
+    await saveDataset(deck.cardsDocumentUrl, dataset, fetch);
+  };
+  const stateFronts = (language: string) =>
+    repository.stateCardLanguages(deck, ["x", "y"], { front: language });
+  const fronts = async () => (await repository.listCards(deck)).map((one) => [one.id, one.front]);
   const remove = async (id: string) => repository.removeCard(deck, await find(id));
   const removeByChanges = async (id: string) =>
     repository.applyCardChanges(deck, { save: [], remove: [id] }, { whole: true });
-  return { cards, upgrade, shareDistractor, takeOverDistractor, remove, removeByChanges };
+  return {
+    cards,
+    upgrade,
+    shareDistractor,
+    takeOverDistractor,
+    unstateFronts,
+    stateFronts,
+    fronts,
+    remove,
+    removeByChanges,
+  };
 }
 
 describe("a card and a distractor of one id", () => {
@@ -221,6 +247,21 @@ describe("a card and a distractor of one id", () => {
     await copy.shareDistractor();
     await copy.remove("y");
     expect(await copy.cards()).toEqual([["x", [["dx", "Lyon"]]]]);
+  });
+
+  it("states the languages of cards that share a distractor an earlier app gave both", async () => {
+    const copy = await editedCopy(false);
+    await copy.shareDistractor();
+    await copy.unstateFronts();
+    expect(await copy.stateFronts("sv")).toBe(2);
+    expect(await copy.fronts()).toEqual([
+      ["x", { sv: "Capital of France?" }],
+      ["y", { sv: "Capital of Spain?" }],
+    ]);
+    expect(await copy.cards()).toEqual([
+      ["x", [["dx", "Lyon"]]],
+      ["y", [["dx", "Lyon"]]],
+    ]);
   });
 
   it("keeps a distractor another card still names when a change removes a card", async () => {

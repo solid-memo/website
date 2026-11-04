@@ -126,6 +126,23 @@ describe("deckToDraft", () => {
     expect(draft.distributions[0]!.id).toBe("turtle-2");
   });
 
+  it("makes a distractor two cards name once (GHSA-f72p-j39c-w728)", () => {
+    const shared = cards[0]!.distractors!;
+    const { draft } = deckToDraft(
+      deck,
+      [cards[0]!, { ...cards[1]!, distractors: shared }],
+      DRAFT,
+      NOW,
+    );
+    expect(draft.distractors).toEqual([
+      { id: "turtle-d1", data: { text: { en: "Oslo" }, deprecated: true } },
+    ]);
+    expect(draft.cards.map((card) => card.data.distractor)).toEqual([
+      [`${DRAFT}#turtle-d1`],
+      [`${DRAFT}#turtle-d1`],
+    ]);
+  });
+
   it("never makes the release a deck was copied from a source of the draft: it is what the deck is based on", () => {
     const { draft, basedOn } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(basedOn).toBe("https://solid-memo.com/decks/capitals/v1.ttl");

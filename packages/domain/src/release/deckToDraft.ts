@@ -71,18 +71,25 @@ export function deckToDraft(
     },
     agents: [...agents].map(([iri, data]) => ({ id: fragment(iri), data })),
     cards: cards.map((card) => ({ id: card.id, data: cardToRecord(card, card.createdAt, url) })),
-    distractors: cards.flatMap((card) =>
-      (card.distractors ?? []).map(
-        (distractor): DraftNode<DistractorV1> => ({
-          id: distractor.id,
-          data: distractorToRecord(distractor),
-        }),
-      ),
-    ),
+    distractors: distractorNodes(cards),
     // Its license, typed as a release's is (setLicense).
     triples: deck.license === undefined ? [] : [licenseType(deck.license)],
   };
   return deck.sourceUrl === undefined ? { draft } : { draft, basedOn: deck.sourceUrl };
+}
+
+/**
+ * The cards' distractors as draft nodes, one per id however many cards
+ * name it (as a pod an earlier app wrote may have two name one): each is
+ * made once, not once for each card.
+ */
+function distractorNodes(cards: readonly Card[]): DraftNode<DistractorV1>[] {
+  const nodes = new Map<string, DraftNode<DistractorV1>>();
+  for (const card of cards)
+    for (const distractor of card.distractors ?? [])
+      if (!nodes.has(distractor.id))
+        nodes.set(distractor.id, { id: distractor.id, data: distractorToRecord(distractor) });
+  return [...nodes.values()];
 }
 
 /** Text in a stated language: untagged text ("") left out. */

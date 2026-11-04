@@ -290,6 +290,48 @@ describe("courseProblems", () => {
     expect(ratio).toBeLessThan(4);
   });
 
+  /** A course asking `count` cards, in English, that all name one distractor in `count` other languages. */
+  function sharedDistractor(count: number) {
+    const ids = Array.from({ length: count }, (_, i) => `q-${i}`);
+    return course({
+      cards: ids.map((id) => card(id, { distractors: [iri(at("d"))] })),
+      chapters: [chapter("ch-1", 0)],
+      steps: [step("s-1", "ch-1", 0, ids)],
+      distractors: [
+        distractor("d", { text: Array.from({ length: count }, (_, i) => text("o", `x-l${i}`)) }),
+      ],
+    });
+  }
+
+  it("names what a distractor many cards share lacks, for each card", () => {
+    const problems = brief(courseProblems(sharedDistractor(3))).filter(
+      (one) => one.code === "distractorLanguages",
+    );
+    expect(problems).toEqual(
+      ["q-0", "q-1", "q-2"].map((id) => ({
+        code: "distractorLanguages",
+        subject: at("d"),
+        params: { card: at(id), missing: ["en"], more: 0 },
+      })),
+    );
+  });
+
+  it("checks a distractor many cards share, in many languages, in time that grows with them, not with their product", () => {
+    // Eight times the cards and the distractor's languages take about as
+    // long as an eighth of them eight times over; working out the
+    // distractor's languages again for each card would take eight times
+    // as long.
+    const ratio = growth(
+      (count) => {
+        const many = sharedDistractor(count);
+        return () => courseProblems(many);
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
   it("names chapters, and a chapter's steps, in use that share a position, but not retired ones", () => {
     const [q1, q2, q3] = [asked("q-1"), asked("q-2"), asked("q-3")];
     const problems = courseProblems(

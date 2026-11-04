@@ -74,6 +74,7 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
   };
   const distractors = new Map(model.distractors.map((d) => [d.iri, d]));
   const marked = markedSubjects(model);
+  const added = new Set<string>();
   for (const card of model.cards.filter((card) => marked.has(card.iri))) {
     const options = card.distractors.map((o) => o.value);
     add(card.iri, SM.front, card.front, "side");
@@ -84,7 +85,9 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
     add(card.iri, SM.backNote, card.backNote, "prose");
     for (const option of options) {
       const distractor = distractors.get(option);
-      if (distractor === undefined) continue;
+      // A distractor several cards name is held to the same rule for each: its texts are listed once.
+      if (distractor === undefined || added.has(option)) continue;
+      added.add(option);
       add(option, SM.distractorText, distractor.text, "option");
       add(option, SM.distractorNote, distractor.note, "prose");
     }

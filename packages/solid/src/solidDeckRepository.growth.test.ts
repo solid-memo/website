@@ -5,8 +5,9 @@
 /**
  * A deck's cards, review states and answers are written and removed in
  * time that grows with them, not their square, against a pod in memory:
- * a release added, its cards removed, one card's many distractors
- * written and changed, a deck removed from a document another app wrote
+ * a release added or refused for a distractor its cards share, its
+ * cards removed, one card's many distractors written and changed, a
+ * deck removed from a document another app wrote
  * in, and cards, catalog entries and review states in an older format
  * brought to this app's, and a course's completed chapters changed.
  * Eight times as many must take less than four
@@ -70,6 +71,23 @@ function oneCard(count: number, first = 0): LibraryDeckContent {
       })),
     },
   ]);
+}
+
+/** A release of `count` cards that all name one distractor, in `count` languages. */
+function sharedDistractor(count: number): LibraryDeckContent {
+  const distractor = {
+    id: "d",
+    text: Object.fromEntries(Array.from({ length: count }, (_, i) => [`en-x-l${i}`, "wrong"])),
+  };
+  return releaseOf(
+    Array.from({ length: count }, (_, i) => ({
+      id: `c${i}`,
+      front: { en: `front ${i}` },
+      back: { en: `back ${i}` },
+      formatVersion: 7,
+      distractors: [distractor],
+    })),
+  );
 }
 
 /** A pod in memory and a deck repository over it. */
@@ -152,6 +170,21 @@ describe("card writes", { timeout: 180_000 }, () => {
         return () => repositoryInPod().repository.importDeck(INSTANCE, content);
       },
       500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("refuse a release whose cards share a distractor in time that grows with them, not their square (GHSA-f72p-j39c-w728)", async () => {
+    const ratio = await growthAsync(
+      (count) => {
+        const content = sharedDistractor(count);
+        return () =>
+          expect(repositoryInPod().repository.importDeck(INSTANCE, content)).rejects.toMatchObject({
+            code: "idTakenInDeck",
+          });
+      },
+      300,
       8,
     );
     expect(ratio).toBeLessThan(4);

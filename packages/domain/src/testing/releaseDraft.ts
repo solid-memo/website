@@ -144,3 +144,20 @@ export function playableCourseDraft(): ReleaseDraft {
     ],
   };
 }
+
+/** The deck with `count` cards, all naming one distractor `d` in `count` languages. */
+export function sharedDistractorDraft(count: number): ReleaseDraft {
+  const ids = Array.from({ length: count }, (_, i) => `w${i}`);
+  return {
+    ...deckDraft(),
+    cards: ids.map((id) => ({ id, data: card(id, { distractor: [of("d")] }) })),
+    distractors: [
+      {
+        id: "d",
+        data: {
+          text: Object.fromEntries(Array.from({ length: count }, (_, i) => [`x-l${i}`, "o"])),
+        },
+      },
+    ],
+  };
+}

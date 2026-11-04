@@ -804,8 +804,14 @@ export function createSolidDeckRepository({
    * Writes a card for each of `items` that `toWrite` gives one for
    * (withCardWritten), each read and written through one edit of the
    * document, which is made once (editOf): many cards take time that
-   * grows with them and the document, not their product. Returns the
-   * subjects written and the distractors the cards dropped.
+   * grows with them and the document, not their product. A distractor
+   * two of the cards name is written by the first only (`writers`, each
+   * distractor URL by the card that wrote it): cards that state their
+   * languages read it from one document, so each has the same, and any
+   * other write that gives it to two cards is refused when saved
+   * (assertDistractorsOwnedOnce), so a distractor named by many cards is
+   * never written once for each. Returns the subjects written and the
+   * distractors the cards dropped.
    */
   function writeCards<T>(
     edit: DatasetEdit<Dataset>,
@@ -815,10 +821,11 @@ export function createSolidDeckRepository({
   ): { subjects: string[]; dropped: string[] } {
     const subjects: string[] = [];
     const dropped: string[] = [];
+    const writers = new Map<string, string>();
     for (const item of items) {
       const write = toWrite(edit, item);
       if (write === null) continue;
-      const written = withCardWritten(edit, deck, write.card, write.existing);
+      const written = withCardWritten(edit, deck, write.card, write.existing, writers);
       subjects.push(...written.subjects);
       dropped.push(...written.dropped);
     }
@@ -828,19 +835,22 @@ export function createSolidDeckRepository({
   /**
    * Writes the card (cardThing) and its distractors beside it; a card
    * is never written onto a distractor, nor a distractor onto a card
-   * (unlessTyped). Returns the subjects written, the card's, then its
-   * distractors', and the distractors it named before and no longer
-   * does (`dropped`), still in the document: only those it could read
-   * (toDistractor), so a link to any other subject leaves the card and
-   * never takes its target with it.
+   * (unlessTyped), and a distractor another card of the write wrote
+   * (`writers`) is not written again. Returns the subjects written, the
+   * card's, then its distractors', and the distractors it named before
+   * and no longer does (`dropped`), still in the document: only those it
+   * could read (toDistractor), so a link to any other subject leaves the
+   * card and never takes its target with it.
    */
   function withCardWritten(
     edit: DatasetEdit<Dataset>,
     deck: Deck,
     card: CardToWrite,
     existing: NamedSubject | null,
+    writers: Map<string, string>,
   ): { subjects: string[]; dropped: string[] } {
-    unlessTyped(edit, `${deck.cardsDocumentUrl}#${card.id}`, SM.Distractor);
+    const cardUrl = `${deck.cardsDocumentUrl}#${card.id}`;
+    unlessTyped(edit, cardUrl, SM.Distractor);
     const named = existing === null ? [] : getUrlAll(existing, SM.distractor);
     const before = named.filter((url) => {
       const thing = edit.getThing(url);
@@ -853,11 +863,13 @@ export function createSolidDeckRepository({
       distractors.map((distractor) => `${deck.cardsDocumentUrl}#${distractor.id}`),
     );
     edit.setThing(thing);
-    const written = writeDistractors(edit, deck.cardsDocumentUrl, distractors, before);
-    return {
-      subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects],
-      dropped: written.dropped,
-    };
+    const written = writeDistractors(edit, deck.cardsDocumentUrl, distractors, before, (url) => {
+      const writer = writers.get(url);
+      if (writer !== undefined && writer !== cardUrl) return true;
+      writers.set(url, cardUrl);
+      return false;
+    });
+    return { subjects: [cardUrl, ...written.subjects], dropped: written.dropped };
   }
 
   /**

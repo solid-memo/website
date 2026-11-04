@@ -581,6 +581,50 @@ describe("toCard", () => {
     expect(toCards(dataset)).toHaveLength(1);
     expect(toDistractor(card)).toBeNull();
   });
+
+  /** A document of `count` cards that all name one distractor, written in `languages` languages. */
+  function sharedDistractor(count: number, languages: number): Dataset {
+    const distractor = Array.from({ length: languages }, (_, i) => i).reduce(
+      (t, i) => t.addStringWithLocale(SM.distractorText, `wrong ${i}`, `en-x-l${i}`),
+      buildThing(createThing({ url: `${CARDS_DOC}#shared` })).addIri(RDF.type, SM.Distractor),
+    );
+    const cards = Array.from({ length: count }, (_, i) =>
+      buildThing(createThing({ url: `${CARDS_DOC}#card-${i}` }))
+        .addIri(RDF.type, SM.Card)
+        .addInteger(SM.formatVersion, 5)
+        .addStringNoLocale(SM.front, `f${i}`)
+        .addStringNoLocale(SM.back, `b${i}`)
+        .addIri(SM.distractor, `${CARDS_DOC}#shared`)
+        .build(),
+    );
+    return setThings(datasetFrom(CARDS_DOC), [distractor.build(), ...cards]);
+  }
+
+  it("gives the cards of a document that name one distractor one object of it", () => {
+    const dataset = sharedDistractor(3, 2);
+    const [first, ...rest] = toCards(dataset).map((card) => card.distractors![0]);
+    expect(first!.text).toEqual({ "en-x-l0": "wrong 0", "en-x-l1": "wrong 1" });
+    for (const distractor of rest) expect(distractor).toBe(first);
+    const card = getThing(dataset, `${CARDS_DOC}#card-0`)!;
+    expect(toCard(card, dataset)!.distractors![0]).toBe(first);
+  });
+
+  // Cards naming one distractor of many languages, mapped many times over: what
+  // is held to is the ratio, of CPU time; the clock only stops a test that never ends.
+  it("reads a distractor many cards name once, not once per card (GHSA-f72p-j39c-w728)", {
+    timeout: 180_000,
+  }, () => {
+    const ratio = growth(
+      (count) => {
+        const dataset = sharedDistractor(count, count);
+        // A document is read once, so each run maps a copy of it not read yet.
+        return () => toCards(Object.freeze({ ...dataset }));
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 /** The document with a card's distractors written (writeDistractors), with what that gives. */
@@ -589,9 +633,10 @@ function withDistractors(
   documentUrl: string,
   distractors: readonly Distractor[],
   before: readonly string[],
+  writtenBefore?: (url: string) => boolean,
 ) {
   const edit = editOf(dataset);
-  const written = writeDistractors(edit, documentUrl, distractors, before);
+  const written = writeDistractors(edit, documentUrl, distractors, before, writtenBefore);
   return { ...written, dataset: edit.done() };
 }
 
@@ -635,6 +680,27 @@ describe("writeDistractors", () => {
     expect(getInteger(d1, SM.formatVersion)).toBe(1);
     expect(getUrlAll(d1, RDF.type)).toEqual([SM.Distractor, "https://schema.org/Answer"]);
     expect(getStringNoLocale(d1, "https://example.org/other")).toBe("kept");
+  });
+
+  it("does not write again a distractor another card of the write wrote, but names it", () => {
+    const [one, two] = [`${CARDS_DOC}#d1`, `${CARDS_DOC}#d2`];
+    const written = withDistractors(
+      datasetFrom(CARDS_DOC),
+      CARDS_DOC,
+      [
+        { id: "d1", text: { en: "One" } },
+        { id: "d2", text: { en: "Two" } },
+      ],
+      [one],
+      (url) => url === one,
+    );
+    expect(written.subjects).toEqual([one, two]);
+    expect(written.dropped).toEqual([]);
+    expect(getThing(written.dataset, one)).toBeNull();
+    expect(toDistractor(getThing(written.dataset, two)!)).toEqual({
+      id: "d2",
+      text: { en: "Two" },
+    });
   });
 
   it("removes a dropped distractor only when no card names it", () => {

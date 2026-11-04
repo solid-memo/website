@@ -125,12 +125,17 @@ const cardNodes = new WeakMap<object, ReadonlyMap<string, DraftNode<CardV7>>>();
 /**
  * Each list of wrong options' nodes by IRI, per url of a draft that has
  * the list, the first of an IRI, built once per list and draft: drafts
- * that share one list each keep their own index.
+ * that share one list each keep their own index. Beside it, each wrong
+ * option as the card editors take it, made once per IRI however many
+ * cards name it: a wrong option is never changed in place.
  */
-const distractorNodes = new WeakMap<
-  object,
-  Map<string, ReadonlyMap<string, DraftNode<DistractorV1>>>
->();
+const distractorNodes = new WeakMap<object, Map<string, DistractorIndex>>();
+
+/** A list of wrong options' nodes by IRI, and the wrong options made of them so far. */
+interface DistractorIndex {
+  readonly nodes: ReadonlyMap<string, DraftNode<DistractorV1>>;
+  readonly made: Map<string, Distractor | null>;
+}
 
 /** The nodes by key, the first of a key winning, as a search of the list in order finds them. */
 function firstBy<T>(nodes: readonly T[], key: (node: T) => string): Map<string, T> {
@@ -163,22 +168,29 @@ export function draftCardOf(draft: ReleaseDraft, id: string): DraftCard | null {
     byUrl = new Map();
     distractorNodes.set(draft.distractors, byUrl);
   }
-  let byIri = byUrl.get(draft.url);
-  if (byIri === undefined) {
-    byIri = firstBy(draft.distractors, (one) => iriIn(draft, one.id));
-    byUrl.set(draft.url, byIri);
+  let index = byUrl.get(draft.url);
+  if (index === undefined) {
+    index = { nodes: firstBy(draft.distractors, (one) => iriIn(draft, one.id)), made: new Map() };
+    byUrl.set(draft.url, index);
   }
-  return draftCardFrom(node, (iri) => byIri.get(iri));
+  return draftCardFrom(node, index);
+}
+
+/** The wrong option of the IRI, made once per index; null for one it has not, or an empty one. */
+function distractorIn(index: DistractorIndex, iri: string): Distractor | null {
+  let made = index.made.get(iri);
+  if (made === undefined) {
+    const found = index.nodes.get(iri);
+    made = found === undefined ? null : distractorFromRecord(iri, found.data);
+    index.made.set(iri, made);
+  }
+  return made;
 }
 
 /** A card's node as the card editors take it, its wrong options found by IRI. */
-function draftCardFrom(
-  node: DraftNode<CardV7>,
-  distractorAt: (iri: string) => DraftNode<DistractorV1> | undefined,
-): DraftCard | null {
+function draftCardFrom(node: DraftNode<CardV7>, index: DistractorIndex): DraftCard | null {
   const distractors = node.data.distractor.flatMap((iri) => {
-    const found = distractorAt(iri);
-    const distractor = found === undefined ? null : distractorFromRecord(iri, found.data);
+    const distractor = distractorIn(index, iri);
     return distractor === null ? [] : [distractor];
   });
   const content = cardContentFromRecord(node.data, distractors);

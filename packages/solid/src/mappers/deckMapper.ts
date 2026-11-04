@@ -457,27 +457,55 @@ export function toDistractor(thing: Subject): Distractor | null {
  */
 export function distractorsOf(dataset: Dataset, urls: readonly string[]): Distractor[] {
   return urls
-    .map((url) => getThing(dataset, url))
-    .map((thing) => (thing === null ? null : toDistractor(thing)))
+    .map((url) => distractorAt(dataset, url))
     .filter((distractor): distractor is Distractor => distractor !== null)
     .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/** The distractors read so far of each document, by IRI (null: none that fits its shape there). */
+const readDistractors = new WeakMap<Dataset, Map<string, Distractor | null>>();
+
+/**
+ * The distractor at `url` of the document, read once per document
+ * however many of its cards name it: the cards that share it share one
+ * object, which a learner's upgrade compares once (libraryUpgrade.ts).
+ * A document never changes (each edit makes a new one), so what was read
+ * of it stays true.
+ */
+function distractorAt(dataset: Dataset, url: string): Distractor | null {
+  let read = readDistractors.get(dataset);
+  if (read === undefined) {
+    read = new Map();
+    readDistractors.set(dataset, read);
+  }
+  if (read.has(url)) return read.get(url) ?? null;
+  const thing = getThing(dataset, url);
+  const distractor = thing === null ? null : toDistractor(thing);
+  read.set(url, distractor);
+  return distractor;
 }
 
 /**
  * Writes a card's distractors beside it, as subjects of `documentUrl`
  * (an existing one keeps triples this app does not know); a distractor
- * is never written onto a card (unlessTyped). Returns the URLs written,
- * for the write check, and those the card named before (`before`) but
- * names no longer (`dropped`), for withoutUnnamedDistractors.
+ * is never written onto a card (unlessTyped). One that `writtenBefore`
+ * says another card of the same write has written already is not
+ * written again (writeCards in solidDeckRepository.ts says why), so a
+ * distractor many cards name is written once, not once for each.
+ * Returns the URLs the card names,
+ * for the write check, and those it named before (`before`) but names
+ * no longer (`dropped`), for withoutUnnamedDistractors.
  */
 export function writeDistractors(
   edit: DatasetEdit<Dataset>,
   documentUrl: string,
   distractors: readonly Distractor[],
   before: readonly string[],
+  writtenBefore: (url: string) => boolean = () => false,
 ): { subjects: string[]; dropped: string[] } {
   const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
   for (const [i, distractor] of distractors.entries()) {
+    if (writtenBefore(subjects[i])) continue;
     edit.setThing(
       recordThing(
         subjects[i],

@@ -4,7 +4,14 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { card, courseDraft, deckDraft, NOW, of } from "../testing/releaseDraft.ts";
+import {
+  card,
+  courseDraft,
+  deckDraft,
+  NOW,
+  of,
+  sharedDistractorDraft,
+} from "../testing/releaseDraft.ts";
 import {
   cardTextOf,
   chapterOfStep,
@@ -278,6 +285,31 @@ describe("a card of the draft", () => {
         const one = card("many", { distractor: distractors.map((d) => of(d.id)) });
         const many: ReleaseDraft = { ...course, cards: [{ id: "many", data: one }], distractors };
         return () => draftCardOf({ ...many, distractors: [...distractors] }, "many");
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("shares one wrong option among the cards that name it", () => {
+    const draft = sharedDistractorDraft(3);
+    const first = draftCardOf(draft, "w0")!.content.distractors;
+    expect(first).toMatchObject([{ text: { "x-l0": "o", "x-l1": "o", "x-l2": "o" } }]);
+    expect(draftCardOf(draft, "w2")!.content.distractors![0]).toBe(first![0]);
+  });
+
+  it("has a wrong option many cards share, in many languages, in time that grows with them, not with their product", () => {
+    // Making the wrong option again for each card that names it would take
+    // eight times as long for eight times the cards and languages.
+    const ratio = growth(
+      (count) => {
+        const many = sharedDistractorDraft(count);
+        return () => {
+          // A new list, as an edit makes it: its index is built again.
+          const draft = { ...many, distractors: [...many.distractors] };
+          for (let i = 0; i < count; i++) draftCardOf(draft, `w${i}`);
+        };
       },
       500,
       8,

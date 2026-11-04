@@ -8,6 +8,7 @@ import {
   type CardContent,
   type Deck,
   type DeckDirection,
+  type Distractor,
   textFormatOf,
 } from "./deck";
 import { sameOutline, type CourseOutline } from "./course";
@@ -310,14 +311,34 @@ function sameDistractors(a: CardContent, b: CardContent): boolean {
     mine.length === theirs.size &&
     mine.every((distractor) => {
       const other = theirs.get(distractor.id);
-      return (
-        other !== undefined &&
-        sameText(distractor.text, other.text) &&
-        sameText(distractor.note, other.note) &&
-        distractor.retired === other.retired
-      );
+      return other !== undefined && sameOption(distractor, other);
     })
   );
+}
+
+/**
+ * What sameOption found of two distractors. A distractor several cards
+ * name is one object to all of them, both in a draft as a release
+ * (draftLibraryContent) and in a release or deck read from a document
+ * (distractorsOf in solid's deckMapper), so its texts are compared
+ * once, not once for each card. Distractors are values, never changed
+ * in place.
+ */
+const comparedOptions = new WeakMap<Distractor, WeakMap<Distractor, boolean>>();
+
+/** Whether two distractors say the same, in use or retired alike. */
+function sameOption(a: Distractor, b: Distractor): boolean {
+  let compared = comparedOptions.get(a);
+  if (compared === undefined) {
+    compared = new WeakMap();
+    comparedOptions.set(a, compared);
+  }
+  let same = compared.get(b);
+  if (same === undefined) {
+    same = sameText(a.text, b.text) && sameText(a.note, b.note) && a.retired === b.retired;
+    compared.set(b, same);
+  }
+  return same;
 }
 
 /** The deck's own texts an upgrade from `from` to `to` changes, each undefined where it changes nothing. */

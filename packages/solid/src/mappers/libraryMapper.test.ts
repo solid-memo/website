@@ -14,8 +14,10 @@ import {
 } from "../client/rdf";
 import { getSolidDataset } from "../client/resources";
 import { datasetFrom } from "../testing/datasets";
+import { growth } from "@solid-memo/domain/testing/growth";
 import {
   toCourseOutline,
+  toLibraryCards,
   toLibraryDeckContent,
   toLibraryDecks,
   toLibraryIndexView,
@@ -603,6 +605,62 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
       "x",
       "y",
     ]);
+  });
+
+  /** A release of `count` cards that all name one distractor, written in `languages` languages. */
+  function sharedDistractor(count: number, languages: number): Dataset {
+    const distractor = Array.from({ length: languages }, (_, i) => i).reduce(
+      (t, i) => t.addStringWithLocale(SM.distractorText, `wrong ${i}`, `en-x-l${i}`),
+      buildThing(createThing({ url: `${DOC}#shared` }))
+        .addIri(RDF.type, SM.Distractor)
+        .addInteger(SM.formatVersion, 1),
+    );
+    const cards = Array.from({ length: count }, (_, i) =>
+      thing(`${DOC}#card-${i}`, (t) =>
+        t
+          .addIri(RDF.type, SM.Card)
+          .addInteger(SM.formatVersion, 7)
+          .addStringWithLocale(SM.front, `f${i}`, "en")
+          .addStringWithLocale(SM.back, `b${i}`, "en")
+          .addIri(SM.distractor, `${DOC}#shared`),
+      ),
+    );
+    return deckDocument(
+      thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals")),
+      distractor.build(),
+      ...cards,
+    );
+  }
+
+  it("gives the cards of a release that name one distractor one object of it", () => {
+    const [first, ...rest] = toLibraryCards(DOC, sharedDistractor(3, 2)).map(
+      (card) => card.distractors![0],
+    );
+    expect(first!.text).toEqual({ "en-x-l0": "wrong 0", "en-x-l1": "wrong 1" });
+    expect(rest).toHaveLength(2);
+    for (const distractor of rest) expect(distractor).toBe(first);
+  });
+
+  // Cards naming one distractor of many languages, read many times over: what
+  // is held to is the ratio, of CPU time; the clock only stops a test that never ends.
+  it("refuses a release whose cards name one distractor, read once however many name it (GHSA-f72p-j39c-w728)", {
+    timeout: 180_000,
+  }, () => {
+    expect(() => toLibraryDeckContent(DOC, sharedDistractor(2, 1))).toThrow(
+      expect.objectContaining({ code: "libraryIdsRepeat" }),
+    );
+    const ratio = growth(
+      (count) => {
+        const dataset = sharedDistractor(count, count);
+        // A document is read once, so each run reads a copy of it not read yet.
+        // Refused (libraryIdsRepeat) once its cards are read.
+        return () =>
+          expect(() => toLibraryDeckContent(DOC, Object.freeze({ ...dataset }))).toThrow();
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
