@@ -2080,6 +2080,11 @@ the library's releases are
     optional topics (`TOPICS`, from [topics.ttl](../ns/vocab/topics.ttl)),
     named in the reader's language, each narrower one under its broader
     one; and any other, by its IRI, to keep or leave out.
+  - Of the languages and themes outside these tables, the screen lists
+    at most `OTHER_CHOICE_LIMIT` of each, and says how many more the
+    release states; those it doesn't list stay in the release. It looks
+    up whether one is chosen in a set made once for each draft, so a
+    release that states many doesn't slow it down.
   - The license is one of `KNOWN_LICENSES`
     ([license.ts](../packages/domain/src/license.ts)), or the one it
     has. `setLicense` types it `dcterms:LicenseDocument`, as DCAT-AP

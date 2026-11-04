@@ -13,7 +13,7 @@ import {
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
 import { createI18n, I18nProvider } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
-import { languageNameOf, ReleaseMetadataScreen } from "./ReleaseMetadataScreen";
+import { languageNameOf, OTHER_CHOICE_LIMIT, ReleaseMetadataScreen } from "./ReleaseMetadataScreen";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 
 const idle = { saving: false, failure: null };
@@ -146,6 +146,56 @@ describe("ReleaseMetadataScreen", () => {
     expect(other).toBeChecked();
     fireEvent.click(other);
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { theme: [] } }]);
+  });
+
+  it("lists at most OTHER_CHOICE_LIMIT languages and themes outside its tables, saying how many more, and keeps them all", () => {
+    const many = (kind: string) =>
+      Array.from({ length: 5000 }, (_, index) => `https://other.example/${kind}/${index}`);
+    const language = [SWE, ...many("lang")];
+    const theme = [EDUC, ...many("theme")];
+    const onEdit = renderScreen(
+      with_(authoredDraft(), { kind: "setMeta", meta: { language, theme } }),
+    );
+    const more = `And ${(5000 - OTHER_CHOICE_LIMIT).toLocaleString("en")} more the release states, not listed here; they stay in the release.`;
+    const languages = screen.getByRole("group", { name: "Languages" });
+    const named = within(languages).getAllByRole("checkbox", { name: /not in the table/ });
+    expect(named).toHaveLength(OTHER_CHOICE_LIMIT);
+    expect(within(languages).getByText(more)).toBeInTheDocument();
+    expect(within(languages).getByRole("checkbox", { name: "Swedish" })).toBeChecked();
+    fireEvent.click(within(languages).getByRole("checkbox", { name: "English" }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { language: [...language, ENG] } },
+    ]);
+    fireEvent.click(named[0]!);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { language: language.filter((one) => one !== language[1]) } },
+    ]);
+    const others = screen.getByRole("group", { name: "Other themes the release states" });
+    const listed = within(others).getAllByRole("checkbox");
+    expect(listed).toHaveLength(OTHER_CHOICE_LIMIT);
+    expect(listed.every((box) => (box as HTMLInputElement).checked)).toBe(true);
+    expect(within(others).getByText(more)).toBeInTheDocument();
+    fireEvent.click(within(others).getByRole("checkbox", { name: theme[1]! }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { theme: theme.filter((one) => one !== theme[1]) } },
+    ]);
+  });
+
+  it("says one more when a single one outside its tables is not listed", () => {
+    const language = Array.from(
+      { length: OTHER_CHOICE_LIMIT + 1 },
+      (_, index) => `https://other.example/lang/${index}`,
+    );
+    renderScreen(with_(authoredDraft(), { kind: "setMeta", meta: { language } }));
+    const languages = screen.getByRole("group", { name: "Languages" });
+    expect(
+      within(languages).getByText(
+        "And 1 more the release states, not listed here; it stays in the release.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("group", { name: "Themes" })).queryByText(/not listed here/),
+    ).toBeNull();
   });
 
   it("lists a narrower topic under its broader one, and no other themes when there are none", () => {

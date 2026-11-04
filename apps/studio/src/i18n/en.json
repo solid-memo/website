@@ -1352,6 +1352,10 @@
       "themesRequired": "The EU's data theme (required)",
       "themesTopics": "Solid Memo's topics (optional)",
       "themesOther": "Other themes the release states",
+      "othersMore": {
+        "one": "And {count} more the release states, not listed here; it stays in the release.",
+        "other": "And {count} more the release states, not listed here; they stay in the release."
+      },
       "licenseHint": "Stated as a license document, as DCAT-AP asks.",
       "contact": "Contact",
       "contactHint": "A web page where readers ask about the release or report a mistake in it, such as an issue tracker. The Solid Memo library asks for its own, and no one's email.",

@@ -26,6 +26,13 @@ import { ReleaseAuthors } from "./ReleaseAuthors";
 import { ReleaseChecks } from "./ReleaseChecks";
 import { ReleaseSources } from "./ReleaseSources";
 
+/**
+ * At most how many languages or themes the screen lists of those a
+ * release states outside its tables, each by its IRI; past it, it says
+ * how many more there are. Those it doesn't list stay in the release.
+ */
+export const OTHER_CHOICE_LIMIT = 50;
+
 /** What the release screen links to. */
 export interface ReleaseLinks {
   draftsHref: string;
@@ -176,11 +183,43 @@ export function languageNameOf(
   return name.toLowerCase() === concept.code.toLowerCase() ? concept.label : name;
 }
 
+const KNOWN_LANGUAGES: ReadonlySet<string> = new Set(EU_LANGUAGES.map((concept) => concept.iri));
+const KNOWN_THEMES: ReadonlySet<string> = new Set([
+  EDUCATION_THEME,
+  ...TOPICS.concepts.map((concept) => concept.iri),
+]);
+
+/**
+ * What a fieldset of choices needs of the IRIs a release states: whether
+ * one is chosen, looked up in a set made once a draft, and the first
+ * OTHER_CHOICE_LIMIT of those outside the screen's tables (`known`), with
+ * how many more there are.
+ */
+function useChoices(chosen: readonly string[], known: ReadonlySet<string>) {
+  return useMemo(() => {
+    const set = new Set(chosen);
+    const outside = [...set].filter((iri) => !known.has(iri));
+    return {
+      has: (iri: string) => set.has(iri),
+      others: {
+        shown: outside.slice(0, OTHER_CHOICE_LIMIT),
+        more: Math.max(0, outside.length - OTHER_CHOICE_LIMIT),
+      },
+    };
+  }, [chosen, known]);
+}
+
+/** How many more IRIs outside the tables the release states than the screen lists, if any. */
+function MoreOthers({ count }: { count: number }) {
+  const { t } = useI18n();
+  return count > 0 ? <p class="hint">{t("studio.release.othersMore", { count })}</p> : null;
+}
+
 /**
  * The languages the release is in (dcterms:language): those of the EU's
  * table the reference data describes (EU_LANGUAGES), each named in the
  * reader's language, and any other the release states, by its IRI, to
- * keep or leave out.
+ * keep or leave out (at most OTHER_CHOICE_LIMIT of them listed).
  */
 function Languages({
   draft,
@@ -193,15 +232,13 @@ function Languages({
 }) {
   const { t, languageParts } = useI18n();
   const chosen = draft.root.language;
-  const known = new Set(EU_LANGUAGES.map((concept) => concept.iri));
+  const { has, others } = useChoices(chosen, KNOWN_LANGUAGES);
   const options = [
     ...EU_LANGUAGES.map((concept) => ({
       iri: concept.iri,
       name: languageNameOf(concept, languageParts),
     })),
-    ...chosen
-      .filter((iri) => !known.has(iri))
-      .map((iri) => ({ iri, name: t("studio.release.languageOther", { iri }) })),
+    ...others.shown.map((iri) => ({ iri, name: t("studio.release.languageOther", { iri }) })),
   ];
   const toggle = (iri: string, on: boolean) =>
     onEdit([
@@ -218,12 +255,13 @@ function Languages({
         <label key={option.iri} class="radio-option">
           <input
             type="checkbox"
-            checked={chosen.includes(option.iri)}
+            checked={has(option.iri)}
             onChange={(event) => toggle(option.iri, event.currentTarget.checked)}
           />{" "}
           {option.name}
         </label>
       ))}
+      <MoreOthers count={others.more} />
     </fieldset>
   );
 }
@@ -233,7 +271,8 @@ function Languages({
  * theme EDUC, which the release check asks of every release; Solid
  * Memo's topics, optional, each named in the reader's language and
  * each narrower one under its broader one; and any other theme the
- * release states, by its IRI, to keep or leave out.
+ * release states, by its IRI, to keep or leave out (at most
+ * OTHER_CHOICE_LIMIT of them listed).
  */
 function Themes({
   draft,
@@ -246,8 +285,7 @@ function Themes({
 }) {
   const { t } = useI18n();
   const chosen = draft.root.theme;
-  const known = new Set([EDUCATION_THEME, ...TOPICS.concepts.map((concept) => concept.iri)]);
-  const others = chosen.filter((iri) => !known.has(iri));
+  const { has, others } = useChoices(chosen, KNOWN_THEMES);
   const toggle = (iri: string, on: boolean) =>
     onEdit([
       {
@@ -259,7 +297,7 @@ function Themes({
     <label class="checkbox-option">
       <input
         type="checkbox"
-        checked={chosen.includes(iri)}
+        checked={has(iri)}
         onChange={(event) => toggle(iri, event.currentTarget.checked)}
       />{" "}
       {name}
@@ -290,12 +328,13 @@ function Themes({
         <legend>{t("studio.release.themesTopics")}</legend>
         {topics(undefined)}
       </fieldset>
-      {others.length > 0 && (
+      {others.shown.length > 0 && (
         <fieldset>
           <legend>{t("studio.release.themesOther")}</legend>
-          {others.map((iri) => (
+          {others.shown.map((iri) => (
             <div key={iri}>{option(iri, iri)}</div>
           ))}
+          <MoreOthers count={others.more} />
         </fieldset>
       )}
     </fieldset>

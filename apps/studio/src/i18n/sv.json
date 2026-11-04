@@ -1352,6 +1352,10 @@
       "themesRequired": "EU:s datatema (krävs)",
       "themesTopics": "Solid Memos ämnen (valfritt)",
       "themesOther": "Andra teman som utgåvan anger",
+      "othersMore": {
+        "one": "Och {count} till som utgåvan anger, inte listad här; den finns kvar i utgåvan.",
+        "other": "Och {count} till som utgåvan anger, inte listade här; de finns kvar i utgåvan."
+      },
       "licenseHint": "Anges som ett licensdokument, som DCAT-AP kräver.",
       "contact": "Kontakt",
       "contactHint": "En webbsida där läsare kan fråga om utgåvan eller rapportera ett fel i den, till exempel en ärendehanterare. Solid Memos bibliotek kräver sin egen, och ingens e-postadress.",
