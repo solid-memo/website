@@ -224,6 +224,17 @@ serves the files unchanged, and a `robots.txt` that keeps search
 engines out. A deploy
 by hand publishes no report, and the last one stays.
 
+Any job of the CI run could have uploaded an artifact in the report's
+place, and the job holds the journeys repository's key, so it trusts
+the artifact with nothing but files to publish. It refuses the
+artifact, before the key is on disk, unless it holds only plain files
+and folders, none whose name starts with a dot: no link, and no git
+directory or settings. Playwright's report has none, and CI's upload
+leaves hidden files out. git then keeps its repository in a folder of
+its own, outside the report, and runs no hooks and no file system
+monitor ([journeysDeploy.test.ts](../scripts/journeysDeploy.test.ts)
+runs both steps on such an artifact).
+
 The report's own trace viewer isn't published. It opens a trace from
 any address its `trace` parameter names or a page sends it, and shows
 the trace's pages on the site that serves it: anyone's pages at a
