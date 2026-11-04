@@ -144,6 +144,14 @@ describe("deckTextCheck", () => {
     expect(text.check("[example.org](https://example.org)", "prose")).toEqual([]);
     expect(text.check("a\n\nb", "option")).toEqual([{ code: "notOneParagraph" }]);
   });
+
+  it("checks each text once by each rule, however many cards say it", () => {
+    const text = deckTextCheck();
+    const found = text.check("[a](https://example.org)", "side");
+    for (let card = 0; card < 100; card++)
+      expect(text.check("[a](https://example.org)", "side")).toBe(found);
+    expect(text.check("[a](https://example.org)", "prose")).toEqual([]);
+  });
 });
 
 describe("releaseMarkdownCheck", () => {

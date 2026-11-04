@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card } from "./deck";
 import {
@@ -447,5 +447,92 @@ describe("queryCards", () => {
       8,
     );
     expect(ratio).toBeLessThan(4);
+  });
+});
+
+describe("queryCards with a wrong option many cards share", () => {
+  const languages = 50;
+  const shared = {
+    id: "shared",
+    text: Object.fromEntries(
+      Array.from({ length: languages }, (_, i) => [`en-x-a${i}`, `**Wrong** ${i}`]),
+    ),
+    note: { en: "*Why*" },
+  };
+  const cards = Array.from({ length: 200 }, (_, i) =>
+    card(`c-${i}`, {
+      front: { en: `**Front** ${i}` },
+      back: { en: `Back ${i}` },
+      textFormat: SM.markdown,
+      distractors: [shared],
+    }),
+  );
+  const reviews: DeckReviews = { direction: "front-to-back", states: [] };
+  const search = (query: Partial<CardQuery>) => {
+    const read = vi.fn(plain);
+    const rows = queryCards(
+      cards,
+      reviews,
+      { ...DEFAULT_CARD_QUERY, ...query },
+      TODAY,
+      read,
+      englishReader,
+    );
+    return { ids: rows.map((row) => row.card.id), reads: read.mock.calls.length };
+  };
+
+  it("reads the wrong option's texts once for the query, not once per card", () => {
+    expect(search({ text: "nothing like it", field: "distractor" })).toEqual({
+      ids: [],
+      reads: languages + 1,
+    });
+    // Each card's front and back too, but the shared option once.
+    expect(search({ text: "nothing like it" })).toEqual({
+      ids: [],
+      reads: cards.length * 2 + languages + 1,
+    });
+    expect(search({ text: "wrong 7" }).ids).toHaveLength(cards.length);
+  });
+
+  it("reads a copy of the option per card once, as a cache that rebuilds changed data makes", () => {
+    const copied = cards.map((each) => ({ ...each, distractors: [structuredClone(shared)] }));
+    const read = vi.fn(plain);
+    const rows = queryCards(
+      copied,
+      reviews,
+      { ...DEFAULT_CARD_QUERY, text: "nothing like it", field: "distractor" },
+      TODAY,
+      read,
+      englishReader,
+    );
+    expect({ rows: rows.length, reads: read.mock.calls.length }).toEqual({
+      rows: 0,
+      reads: languages + 1,
+    });
+  });
+
+  it("stops at the first text that matches, and reads no text in another language", () => {
+    expect(search({ text: "front" })).toEqual({
+      ids: cards.map((each) => each.id),
+      reads: cards.length,
+    });
+    expect(search({ text: "wrong", lang: "sv" })).toEqual({ ids: [], reads: 0 });
+  });
+
+  it("reads an option a plain card shares with one in Markdown as each reads it", () => {
+    const option = { id: "d", text: { en: "**bold**" } };
+    const marked = card("c-marked", { textFormat: SM.markdown, distractors: [option] });
+    const plainCard = card("c-plain", { distractors: [option] });
+    const ids = (text: string) =>
+      queryCards(
+        [marked, plainCard],
+        reviews,
+        { ...DEFAULT_CARD_QUERY, text, field: "distractor" },
+        TODAY,
+        plain,
+        englishReader,
+      ).map((row) => row.card.id);
+    expect(ids("**bold")).toEqual(["c-plain"]);
+    expect(ids("bold")).toEqual(["c-marked", "c-plain"]);
   });
 });

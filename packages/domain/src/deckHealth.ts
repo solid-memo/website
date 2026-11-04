@@ -322,6 +322,10 @@ export function duplicateCardsOf(
  * to the rule of a side (the back to an option's, when the card has
  * wrong options), the notes to prose's, and each wrong option's text to
  * an option's and its note to prose's. A text with no words is skipped.
+ * A wrong option that several cards share is checked once, its findings
+ * given at the first of those cards: it is known by its id, which names
+ * one subject of the cards document (writeDistractors), so a copy of it
+ * per card is checked once too.
  */
 export function cardMarkdownProblems<F extends MarkdownFinding>(
   cards: readonly Card[],
@@ -339,10 +343,13 @@ export function cardMarkdownProblems<F extends MarkdownFinding>(
       for (const finding of check(value, rule)) problems.push({ card, place, language, finding });
     }
   };
+  const checked = new Set<string>();
   for (const card of activeCards(cards).filter((each) => isMarkdown(each.textFormat))) {
     for (const { part, rule } of MARKDOWN_PARTS)
       add(card, { tab: "content", part }, card[part], rule(card));
     for (const distractor of card.distractors ?? []) {
+      if (checked.has(distractor.id)) continue;
+      checked.add(distractor.id);
       add(
         card,
         { tab: "distractors", distractor: distractor.id, part: "text" },

@@ -2,7 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { activeCards, isMarkdown, studyDirections, type Card, type DeckDirection } from "./deck";
+import {
+  activeCards,
+  isMarkdown,
+  studyDirections,
+  type Card,
+  type DeckDirection,
+  type Distractor,
+} from "./deck";
 import { canonicalTag } from "./languageTag";
 import { folded, shown, type LangText } from "./langText";
 import { LEECH_LAPSES } from "./cardHistory";
@@ -189,42 +196,48 @@ export function isDefaultQuery(query: CardQuery): boolean {
   return Object.keys(queryToParams(query)).length === 0;
 }
 
-/** One text of a card: its language tag ("" when unstated), its words, and whether they are written in Markdown. */
-interface CardText {
-  tag: string;
-  value: string;
-  markdown: boolean;
+/** Whether one text of a card is one the search keeps: its language tag ("" when unstated) and its words, read as Markdown or not. */
+type TextTest = (tag: string, value: string, markdown: boolean) => boolean;
+
+/** Whether any language of the text passes the test; it stops at the first that does. */
+function anyText(text: LangText | undefined, markdown: boolean, test: TextTest): boolean {
+  return Object.entries(text ?? {}).some(([tag, value]) => test(tag, value, markdown));
 }
 
-function textsOf(text: LangText | undefined, markdown: boolean): CardText[] {
-  return Object.entries(text ?? {}).map(([tag, value]) => ({ tag, value, markdown }));
-}
-
-/** The card's texts the field names; "any" adds the pictures' descriptions, which are never Markdown. */
-function fieldTexts(card: Card, field: CardField): CardText[] {
+/**
+ * Whether one of the card's texts the field names passes the test; "any"
+ * adds the pictures' descriptions, which are never Markdown. A wrong
+ * option is tested through `option`, which a query keeps one answer of
+ * per wrong option: many cards may share one.
+ */
+function fieldMatches(
+  card: Card,
+  field: CardField,
+  test: TextTest,
+  option: (distractor: Distractor, markdown: boolean) => boolean,
+): boolean {
   const markdown = isMarkdown(card.textFormat);
+  const any = (...texts: (LangText | undefined)[]) =>
+    texts.some((text) => anyText(text, markdown, test));
   switch (field) {
     case "front":
-      return textsOf(card.front, markdown);
+      return any(card.front);
     case "back":
-      return textsOf(card.back, markdown);
+      return any(card.back);
     case "note":
-      return [...textsOf(card.frontNote, markdown), ...textsOf(card.backNote, markdown)];
+      return any(card.frontNote, card.backNote);
     case "label":
-      return [...textsOf(card.frontLabel, markdown), ...textsOf(card.backLabel, markdown)];
+      return any(card.frontLabel, card.backLabel);
     case "distractor":
-      return (card.distractors ?? []).flatMap((d) => [
-        ...textsOf(d.text, markdown),
-        ...textsOf(d.note, markdown),
-      ]);
+      return (card.distractors ?? []).some((distractor) => option(distractor, markdown));
     case "any":
-      return [
-        ...(["front", "back", "note", "label", "distractor"] as const).flatMap((part) =>
-          fieldTexts(card, part),
-        ),
-        ...textsOf(card.frontImageDescription, false),
-        ...textsOf(card.backImageDescription, false),
-      ];
+      return (
+        (["front", "back", "note", "label", "distractor"] as const).some((part) =>
+          fieldMatches(card, part, test, option),
+        ) ||
+        anyText(card.frontImageDescription, false, test) ||
+        anyText(card.backImageDescription, false, test)
+      );
   }
 }
 
@@ -369,7 +382,24 @@ export function queryCards(
     };
   };
   const wanted = folded(query.text.trim());
-  const readable = (text: CardText) => (text.markdown ? plain(text.value) : text.value);
+  // The language first: a text in another is not read at all.
+  const test: TextTest = (tag, value, markdown) =>
+    (query.lang === undefined || inLanguage(tag, query.lang)) &&
+    (wanted === "" || folded(markdown ? plain(value) : value).includes(wanted));
+  // A wrong option many cards share is tested once (as Markdown or not) for this query, not once
+  // per card. It is known by its id, which names one subject of the cards document
+  // (writeDistractors): a copy of it per card, as a cache that rebuilds changed data makes, is
+  // tested once too.
+  const tested = [new Map<string, boolean>(), new Map<string, boolean>()];
+  const option = (distractor: Distractor, markdown: boolean) => {
+    const answers = tested[Number(markdown)]!;
+    let answer = answers.get(distractor.id);
+    if (answer === undefined) {
+      answer = anyText(distractor.text, markdown, test) || anyText(distractor.note, markdown, test);
+      answers.set(distractor.id, answer);
+    }
+    return answer;
+  };
 
   const rows: CardRow[] = [];
   for (const card of cards) {
@@ -382,10 +412,7 @@ export function queryCards(
     if (query.state !== undefined && !inState(card, query.state, prompts, today, forgotten))
       continue;
     if (wanted !== "" || query.lang !== undefined) {
-      const texts = fieldTexts(card, query.field).filter(
-        (text) => query.lang === undefined || inLanguage(text.tag, query.lang),
-      );
-      if (!texts.some((text) => wanted === "" || folded(readable(text)).includes(wanted))) continue;
+      if (!fieldMatches(card, query.field, test, option)) continue;
     }
     const states = prompts.filter((state) => state !== undefined);
     const own = held.filter((state) => state !== undefined);

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { agentUrlOf } from "./agentRecord";
 import { distributionUrlOf } from "./dcat";
@@ -445,6 +445,43 @@ describe("cardMarkdownProblems", () => {
       ["m", { tab: "distractors", distractor: "m-d1", part: "text" }, "en", "option"],
       ["m", { tab: "distractors", distractor: "m-d1", part: "note" }, "en", "prose"],
     ]);
+  });
+
+  it("checks a wrong option many cards share once, its findings at the first of them", () => {
+    const languages = 50;
+    const shared = {
+      id: "shared",
+      text: Object.fromEntries(
+        Array.from({ length: languages }, (_, i) => [`en-x-a${i}`, `[wrong] ${i}`]),
+      ),
+      note: { en: "[why]" },
+    };
+    const cards = Array.from({ length: 200 }, (_, i) =>
+      card(`c${i}`, { textFormat: SM.markdown, distractors: [shared] }),
+    );
+    const check = vi.fn(text.check);
+    const found = cardMarkdownProblems(cards, check);
+    // Each card's front and back, and the shared option's texts and note once: not once per card.
+    expect(check).toHaveBeenCalledTimes(cards.length * 2 + languages + 1);
+    expect(found.map(({ card, place }) => [card.id, place.tab])).toEqual(
+      Array.from({ length: languages + 1 }, () => ["c0", "distractors"]),
+    );
+  });
+
+  it("checks a copy of a shared wrong option per card once too", () => {
+    const languages = 50;
+    const shared = {
+      id: "shared",
+      text: Object.fromEntries(
+        Array.from({ length: languages }, (_, i) => [`en-x-a${i}`, `[wrong] ${i}`]),
+      ),
+    };
+    const cards = Array.from({ length: 200 }, (_, i) =>
+      card(`c${i}`, { textFormat: SM.markdown, distractors: [structuredClone(shared)] }),
+    );
+    const check = vi.fn(text.check);
+    cardMarkdownProblems(cards, check);
+    expect(check).toHaveBeenCalledTimes(cards.length * 2 + languages);
   });
 
   it("holds the back of a card without wrong options as a side", () => {
