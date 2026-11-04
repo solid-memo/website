@@ -65,8 +65,11 @@ export interface SubjectBuilder {
   removeUrl(property: string, value: string | Subject): SubjectBuilder;
   /**
    * The property's IRIs become `values`, each once, in the order given;
-   * its other values stay. One call for a list of any length, where an
-   * add or a remove at each value takes time in the square of the list.
+   * its other values stay. A value the subject has already for the
+   * property stays as it is, even one an add would refuse as no URL
+   * (another app may have written it); a new one is checked as an add
+   * checks it. One call for a list of any length, where an add or a
+   * remove at each value takes time in the square of the list.
    */
   setIriAll(property: string, values: readonly string[]): SubjectBuilder;
   /**

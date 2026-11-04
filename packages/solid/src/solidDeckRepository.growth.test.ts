@@ -146,6 +146,33 @@ async function deckWithStates(count: number) {
   return { fetch, deck, reviews, states };
 }
 
+/**
+ * A catalog of `count` decks in this app's format, each listed by the
+ * catalog and by one deck group, with its cards document, as the
+ * Studio's bulk actions find them.
+ */
+async function catalogOfDecks(count: number) {
+  const { fetch, repository } = repositoryInPod();
+  const entries = Array.from(
+    { length: count },
+    (_, i) =>
+      `<#deck-${i}> a <${SM}Deck> ; <http://purl.org/dc/terms/title> "Deck ${i}" ; <${SM}cardsDocument> <decks/deck-${i}.ttl> ; <${SM}reviewsDocument> <reviews/deck-${i}.ttl> .`,
+  );
+  const listed = Array.from({ length: count }, (_, i) => `<#deck-${i}>`).join(", ");
+  const group = `<#group-1> a <${SM}DeckGroup> ; <http://www.w3.org/ns/dcat#dataset> ${listed} .`;
+  const catalog =
+    "<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <http://www.w3.org/ns/dcat#catalog> <#group-1> .";
+  await put(fetch, `${INSTANCE}catalog.ttl`, [catalog, group, ...entries].join("\n"));
+  expect(await repository.upgradeDecks(INSTANCE, null)).toBe(true);
+  // Each deck's cards document, saying it is the deck's: removed with it.
+  for (let i = 0; i < count; i++) {
+    const card = `<#c0> a <${SM}Card> ; <${SM}front> "front" ; <${SM}back> "back" ; <${SM}formatVersion> 7 .`;
+    const partOf = `<> <http://purl.org/dc/terms/isPartOf> <../catalog.ttl#deck-${i}> .`;
+    await put(fetch, `${INSTANCE}decks/deck-${i}.ttl`, `${partOf}\n${card}`);
+  }
+  return { fetch, repository };
+}
+
 // Each test does its work many times over, at up to thousands of cards: a
 // few seconds on a laptop, and many times that in CI, coverage on and
 // every package's tests run at once. What is held to is the ratio, of
@@ -276,6 +303,44 @@ describe("card writes", { timeout: 180_000 }, () => {
         };
       },
       200,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("change many decks of a catalog at once in time that grows with them, not their square", async () => {
+    const ratio = await growthAfterSetup(
+      (count) => async () => {
+        const { repository } = await catalogOfDecks(count);
+        const decks = await repository.listDecks(INSTANCE);
+        // Long titles, so that the change is sent as one PUT at either size, never as a PATCH.
+        const changed = decks.map((deck) => ({
+          ...deck,
+          title: { en: `${deck.id} ${"x".repeat(1000)}` },
+          direction: "back-to-front" as const,
+        }));
+        return async () => {
+          await repository.saveDecks(changed);
+        };
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("remove many decks of a catalog at once, each listed by a group, in time that grows with them, not their square", async () => {
+    const ratio = await growthAfterSetup(
+      (count) => async () => {
+        const { fetch, repository } = await catalogOfDecks(count);
+        const decks = await repository.listDecks(INSTANCE);
+        return async () => {
+          expect(await repository.removeDecks(decks)).toEqual({ keptDocuments: [] });
+          expect(await read(fetch, `${INSTANCE}catalog.ttl`)).not.toContain("deck-");
+          expect((await fetch(`${INSTANCE}decks/deck-0.ttl`)).status).toBe(404);
+        };
+      },
+      100,
       8,
     );
     expect(ratio).toBeLessThan(4);

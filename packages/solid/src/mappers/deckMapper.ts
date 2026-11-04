@@ -228,26 +228,35 @@ function agentFits(thing: NamedSubject | null, record: AgentV1): boolean {
 }
 
 /**
- * The catalog document without a deck, its distribution, or agents only
- * it named, and with no deck group listing it any more. Its former
- * siblings keep their positions: the gap is read as if it were not there
- * (domain/deckTree.ts buildTree), and the next arrangement closes it.
+ * The catalog document without each of the decks, their distributions,
+ * or agents only they named, and with no deck group listing one of them
+ * any more. Their former siblings keep their positions: the gap is read
+ * as if it were not there (domain/deckTree.ts buildTree), and the next
+ * arrangement closes it. The entries and distributions are taken out at
+ * once, the groups, stray agents and the catalog's links seen to once,
+ * so that many decks (a bulk removal in the Studio) take time that grows
+ * with them and the document, not their product.
  */
-export function withoutDeck(dataset: Dataset, deck: Deck): Dataset {
-  const removed = removeAllUnlessNewer(dataset, [deck.url, distributionUrlOf(deck.url)]);
-  const updated = setThings(
-    removed,
-    getThingAll(removed)
-      .filter(
-        (thing) =>
-          getUrlAll(thing, RDF.type).includes(SM.DeckGroup) &&
-          getUrlAll(thing, DCAT.dataset).includes(deck.url),
-      )
-      .map((thing) => buildThing(unlessNewer(thing)).removeUrl(DCAT.dataset, deck.url).build()),
+export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
+  const leaving = new Set(decks.map((deck) => deck.url));
+  const removed = removeAllUnlessNewer(
+    dataset,
+    decks.flatMap((deck) => [deck.url, distributionUrlOf(deck.url)]),
   );
+  const groups: NamedSubject[] = [];
+  for (const thing of getThingAll(removed)) {
+    if (!getUrlAll(thing, RDF.type).includes(SM.DeckGroup)) continue;
+    const listed = getUrlAll(thing, DCAT.dataset);
+    const kept = listed.filter((url) => !leaving.has(url));
+    if (kept.length === listed.length) continue;
+    groups.push(buildThing(unlessNewer(thing)).setIriAll(DCAT.dataset, kept).build());
+  }
   return withCatalogDatasets(
-    withoutStrayAgents(updated, new Set([documentUrlOf(deck.url)])),
-    [deck.url],
+    withoutStrayAgents(
+      setThings(removed, groups),
+      new Set(decks.map((deck) => documentUrlOf(deck.url))),
+    ),
+    [...leaving],
     "remove",
   );
 }
@@ -288,10 +297,12 @@ function withCatalogDatasets(
     const listed = new Set(getUrlAll(catalog, DCAT.dataset));
     const links = [...urls].filter((url) => listed.has(url) !== (change === "add"));
     if (links.length === 0) continue;
-    // The new list set in one call (setIriAll), however many links change.
     const changing = new Set(links);
     const datasets =
       change === "add" ? [...listed, ...links] : [...listed].filter((url) => !changing.has(url));
+    // The new list set in one call (setIriAll), however many links change;
+    // a link the library takes for no URL, which another app may have
+    // written, stays as it is.
     changed.push(buildThing(unlessNewer(catalog)).setIriAll(DCAT.dataset, datasets).build());
   }
   return setThings(dataset, changed);

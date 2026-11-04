@@ -253,6 +253,17 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       expect(() => buildThing(mixed()).setIriAll(P, ["not a URL"])).toThrow();
     });
 
+    it("keep an IRI the subject has already as it is, even one an add refuses as no URL", async () => {
+      const dataset = await read(`<#a> <${P}> <${EX}x>, <http://[oops>, <${EX}y> .\n`);
+      const subject = getThing(dataset, `${URL_}#a`)!;
+      expect(getUrlAll(subject, P)).toEqual([`${EX}x`, "http://[oops", `${EX}y`]);
+      const set = buildThing(subject)
+        .setIriAll(P, ["http://[oops", `${EX}y`, `${EX}z`])
+        .build();
+      expect(getUrlAll(set, P)).toEqual(["http://[oops", `${EX}y`, `${EX}z`]);
+      expect(() => buildThing(subject).setIriAll(P, ["http://[other"])).toThrow();
+    });
+
     it("set the property's strings, each once, a language as an add reads it, and keep its other values", () => {
       const set = buildThing(mixed())
         .setStringAll(P, [

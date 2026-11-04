@@ -461,10 +461,14 @@ class Builder implements SubjectBuilder {
   }
 
   setIriAll(property: string, values: readonly string[]): this {
-    // Each as the library's add writes it, which refuses one that is no URL.
+    // Each new one as the library's add writes it, which refuses one that
+    // is no URL; one the subject has already stays as it is.
+    const stored = new Set(this.#thing.predicates[property]?.namedNodes);
     const iris = new Set(
-      values.map(
-        (value) => libraryAddUrl(PROBE, property, value).predicates[property].namedNodes![0],
+      values.map((value) =>
+        stored.has(value)
+          ? value
+          : libraryAddUrl(PROBE, property, value).predicates[property].namedNodes![0],
       ),
     );
     return this.#predicate(property, (previous) => ({ ...previous, namedNodes: [...iris] }));

@@ -369,7 +369,13 @@ class Builder implements SubjectBuilder {
   }
 
   setIriAll(property: string, values: readonly string[]): this {
-    const iris = new Set(values.map(iriValue));
+    // One the subject has already stays as it is, without being checked again.
+    const stored = new Set(
+      (this.#values[property] ?? []).flatMap((one) =>
+        one.termType === "NamedNode" ? [one.value] : [],
+      ),
+    );
+    const iris = new Set(values.map((value) => (stored.has(value) ? value : iriValue(value))));
     this.#keep(property, (one) => one.termType !== "NamedNode");
     for (const iri of iris) this.#add(property, namedNode(iri));
     return this;
