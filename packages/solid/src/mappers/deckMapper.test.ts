@@ -50,6 +50,7 @@ import {
 import type { Deck, Distractor } from "@solid-memo/domain/deck";
 import { editOf } from "../datasetEdit";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
+import { integerLiteral } from "../testing/literals";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 
@@ -201,7 +202,7 @@ describe("toDeck", () => {
         .addStringNoLocale(DCTERMS.title, "Capitals")
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
-        .addInteger(SM.formatVersion, 1)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
         .addStringNoLocale(DCTERMS.creator, "Anton Wiklund")
         .addStringNoLocale(DCTERMS.creator, "A friend")
         .addIri(DCTERMS.license, "https://creativecommons.org/publicdomain/zero/1.0/")
@@ -233,7 +234,7 @@ describe("toDeck", () => {
         .addStringNoLocale("http://www.w3.org/ns/dcat#keyword", "capitals")
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
-        .addInteger(SM.formatVersion, 3),
+        .addLiteral(SM.formatVersion, integerLiteral(3)),
     );
     const agent = buildThing(createThing({ url: `${CATALOG}#agent-anton` }))
       .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
@@ -262,7 +263,7 @@ describe("toDeck", () => {
         .addIri(DCTERMS.creator, `${CATALOG}#agent-unnamed`)
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
-        .addInteger(SM.formatVersion, 3),
+        .addLiteral(SM.formatVersion, integerLiteral(3)),
     );
     const agent = buildThing(createThing({ url: `${CATALOG}#agent-unnamed` }))
       .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
@@ -319,7 +320,7 @@ describe("toDeck", () => {
         .addIri(SM.studyDirection, SM.backToFront)
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
-        .addInteger(SM.formatVersion, 7),
+        .addLiteral(SM.formatVersion, integerLiteral(7)),
     );
     expect(toDeck(thing)).toMatchObject({ formatVersion: 7, direction: "back-to-front" });
   });
@@ -332,7 +333,7 @@ describe("toDeck", () => {
         .addStringNoLocale(SM.direction, "bidirectional")
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
-        .addInteger(SM.formatVersion, 2),
+        .addLiteral(SM.formatVersion, integerLiteral(2)),
     );
     expect(toDeck(thing)).toMatchObject({
       direction: "bidirectional",
@@ -351,7 +352,7 @@ describe("toDeck", () => {
         .addStringNoLocale(DCTERMS.creator, "이지은")
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
-        .addInteger(SM.formatVersion, 2),
+        .addLiteral(SM.formatVersion, integerLiteral(2)),
     );
     expect([...toDeck(thing)!.authors].sort()).toEqual(["김민수", "이지은"].sort());
   });
@@ -375,7 +376,7 @@ describe("toDeck", () => {
             .addStringNoLocale(DCTERMS.title, "No direction")
             .addIri(SM.cardsDocument, CARDS_DOC)
             .addIri(SM.reviewsDocument, REVIEWS_DOC)
-            .addInteger(SM.formatVersion, 2),
+            .addLiteral(SM.formatVersion, integerLiteral(2)),
         ),
       ),
     ).toBeNull();
@@ -480,7 +481,7 @@ describe("toCard", () => {
         .addIri(RDF.type, SM.Card)
         .addStringNoLocale(SM.front, "f")
         .addStringNoLocale(SM.back, "b")
-        .addInteger(SM.formatVersion, 2),
+        .addLiteral(SM.formatVersion, integerLiteral(2)),
     );
     expect(cardOf(thing)!.formatVersion).toBe(2);
   });
@@ -495,7 +496,7 @@ describe("toCard", () => {
             .addStringNoLocale(SM.back, "Stockholm")
             .addUrl(DCTERMS.subject, "http://www.wikidata.org/entity/Q34")
             .addUrl(DCTERMS.subject, "http://www.wikidata.org/entity/Q1754")
-            .addInteger(SM.formatVersion, version),
+            .addLiteral(SM.formatVersion, integerLiteral(version)),
         ),
       )!.subjects;
     const subjects = ["http://www.wikidata.org/entity/Q1754", "http://www.wikidata.org/entity/Q34"];
@@ -510,7 +511,7 @@ describe("toCard", () => {
         .addIri(SM.frontImage, FLAG)
         .addStringNoLocale(SM.back, "Afghanistan")
         .addIri(SM.backImage, MAP)
-        .addInteger(SM.formatVersion, 2),
+        .addLiteral(SM.formatVersion, integerLiteral(2)),
     );
     expect(cardOf(thing)).toMatchObject({
       front: {},
@@ -573,7 +574,7 @@ describe("toCard", () => {
     const card = cardThing((t) =>
       t
         .addIri(RDF.type, SM.Card)
-        .addInteger(SM.formatVersion, 5)
+        .addLiteral(SM.formatVersion, integerLiteral(5))
         .addStringWithLocale(SM.front, "What can an IRI name?", "en")
         .addStringWithLocale(SM.back, "Anything", "en")
         .addIri(SM.distractor, `${CARDS_DOC}#d2`)
@@ -613,7 +614,7 @@ describe("toCard", () => {
     const cards = Array.from({ length: count }, (_, i) =>
       buildThing(createThing({ url: `${CARDS_DOC}#card-${i}` }))
         .addIri(RDF.type, SM.Card)
-        .addInteger(SM.formatVersion, 5)
+        .addLiteral(SM.formatVersion, integerLiteral(5))
         .addStringNoLocale(SM.front, `f${i}`)
         .addStringNoLocale(SM.back, `b${i}`)
         .addIri(SM.distractor, `${CARDS_DOC}#shared`)
@@ -1129,7 +1130,7 @@ describe("the arrangement's triples (deck groups)", () => {
     );
     dataset = setThing(
       dataset,
-      buildThing(getThing(dataset, deck.url)!).addInteger(SM.position, 3).build(),
+      buildThing(getThing(dataset, deck.url)!).addLiteral(SM.position, integerLiteral(3)).build(),
     );
     return setThing(
       dataset,

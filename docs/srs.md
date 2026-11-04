@@ -86,16 +86,22 @@ Decisions fixed in code (and tests):
 - The original puts a floor of 1.3 under the ease factor and no bound
   on the interval. Solid Memo also keeps the ease factor at 5 at most,
   and the interval at most 36,500 days (100 years, FSRS-6's longest
-  interval too). It bounds the state it reads, keeping the interval
-  and the repetitions from 0 to 36,500, and the one it gives, whose
-  interval is at least 1 day. The snapshot a review keeps of the
-  state before it, and the estimate FSRS-6 makes from an SM-2 state,
-  are bounded the same way. A state from elsewhere, such as a deck
-  file with progress, then still gives a due day that is a
-  `YYYY-MM-DD` date and numbers the write check accepts. A snapshot
-  whose due day isn't a real `YYYY-MM-DD` date is dropped. A state whose
-  ease factor, interval or repetitions isn't a finite number counts as
-  a new card's.
+  interval too). It bounds a state as it reads it from the pod, keeping
+  the interval and the repetitions from 0 to 36,500, and the one it
+  gives, whose interval is at least 1 day. An FSRS-6 state's stability
+  and difficulty, and both schedulers' snapshots, are read bounded too.
+  Whatever writes a state back as read (an undo, a day's reset, a
+  format update, a reschedule or move in the Studio) then writes
+  numbers the write check accepts. Every number is written without an
+  exponent, which no `xsd:integer` or `xsd:decimal` has. The estimate
+  FSRS-6 makes from an SM-2 state is bounded the same way. A state
+  from elsewhere, such as a deck file with progress, then still gives
+  a due day that is a `YYYY-MM-DD` date and numbers the write check
+  accepts. A snapshot whose due day isn't a real `YYYY-MM-DD` date is
+  dropped. A state whose ease factor, interval or repetitions isn't a
+  finite number counts as a new card's; an infinite FSRS-6 stability
+  or difficulty takes the bound on its side, as FSRS-6 has no new
+  card's state of its own.
 - Every grade below 3 resets the card. The statistics and the Studio
   count a **lapse** only for a *scored review* graded below 3 (`isLapse`
   in [answerChain.ts](../packages/domain/src/answerChain.ts),

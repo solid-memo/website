@@ -20,11 +20,17 @@ describe("boundedFsrsSnapshot", () => {
     });
   });
 
-  it("drops a snapshot with a number that is not finite, or a due day that is no real date", () => {
-    expect(boundedFsrsSnapshot({ ...snapshot, stability: Number.NaN })).toBeUndefined();
+  it("keeps an infinite number at the bound on its side", () => {
     expect(
-      boundedFsrsSnapshot({ ...snapshot, difficulty: Number.POSITIVE_INFINITY }),
-    ).toBeUndefined();
+      boundedFsrsSnapshot({
+        ...snapshot,
+        stability: Number.POSITIVE_INFINITY,
+        difficulty: Number.NEGATIVE_INFINITY,
+      }),
+    ).toEqual({ ...snapshot, stability: 36_500, difficulty: 1 });
+  });
+
+  it("drops a snapshot whose due day is no real date", () => {
     expect(boundedFsrsSnapshot({ ...snapshot, due: "soon" })).toBeUndefined();
     expect(boundedFsrsSnapshot({ ...snapshot, due: "2026-02-30" })).toBeUndefined();
   });

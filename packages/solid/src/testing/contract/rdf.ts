@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { growth } from "@solid-memo/domain/testing/growth";
 import type * as Rdf from "../../client/rdf";
 import type * as Resources from "../../client/resources";
+import { integerLiteral } from "../literals";
 
 /**
  * An implementation of the RDF and resource modules, as the contract
@@ -149,16 +150,11 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       }
     });
 
-    it("reads a decimal as parseFloat does and writes a number as JavaScript spells it", () => {
+    it("reads a decimal as parseFloat does", () => {
       const decimal = (value: string) => getDecimal(withLiteral(value, `${XSD}decimal`), `${EX}p`);
       expect(decimal("2.50")).toBe(2.5);
       expect(decimal("1.0")).toBe(1);
       expect(decimal("abc")).toBeNull();
-      const written = (value: number) =>
-        getLiteralAll(buildThing(createThing()).addDecimal(`${EX}p`, value).build(), `${EX}p`)[0]!
-          .value;
-      expect(written(1)).toBe("1");
-      expect(written(2.5)).toBe("2.5");
     });
   });
 
@@ -236,7 +232,7 @@ export function rdfContract({ rdf, resources }: DataClient): void {
         .addIri(P, `${EX}y`)
         .addStringNoLocale(P, "plain")
         .addStringWithLocale(P, "tagged", "en")
-        .addInteger(P, 7)
+        .addLiteral(P, integerLiteral(7))
         .build();
 
     it("set the property's IRIs, each once, and keep its other values", () => {

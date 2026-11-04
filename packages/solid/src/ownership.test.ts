@@ -16,6 +16,7 @@ import {
   subjectsOfClasses,
 } from "./ownership";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
+import { integerLiteral } from "./testing/literals";
 
 const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
 const DCAT_DISTRIBUTION = "http://www.w3.org/ns/dcat#distribution";
@@ -53,7 +54,10 @@ describe("foreignSubjects", () => {
       subject("agent-1").addIri(RDF.type, FOAF_AGENT).build(),
       subject("deck-1-dist").addIri(RDF.type, "http://www.w3.org/ns/dcat#Distribution").build(),
       // A stamped subject with no Solid Memo class is Solid Memo's.
-      subject("agent-2").addIri(RDF.type, FOAF_AGENT).addInteger(SM.formatVersion, 1).build(),
+      subject("agent-2")
+        .addIri(RDF.type, FOAF_AGENT)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
+        .build(),
       // Another app's dataset, and its publisher: neither is Solid Memo's.
       subject("recipes")
         .addIri(RDF.type, DCAT.Dataset)
@@ -73,14 +77,14 @@ describe("foreignSubjects", () => {
     const dataset = documentOf(
       subject("card-1")
         .addIri(RDF.type, SM.ReviewState)
-        .addInteger(SM.formatVersion, 2)
+        .addLiteral(SM.formatVersion, integerLiteral(2))
         .addIri(SM.scheduler, SM.sm2)
         .build(),
       subject("card-2").addIri(RDF.type, SM.ReviewState).build(),
       subject("rs-1").addIri(RDF.type, SM.ReviewState).addIri(SM.scheduler, fsrs).build(),
       subject("rs-2")
         .addIri(RDF.type, SM.ReviewState)
-        .addInteger(SM.formatVersion, 2)
+        .addLiteral(SM.formatVersion, integerLiteral(2))
         .addIri(SM.scheduler, fsrs)
         .build(),
       // A scheduler named by a literal, even one spelling SM-2's IRI, is not SM-2.
@@ -103,12 +107,12 @@ describe("foreignSubjects", () => {
     const dataset = documentOf(
       subject("card-1@fsrs6")
         .addIri(RDF.type, SM.ReviewState)
-        .addInteger(SM.formatVersion, 1)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
         .addIri(SM.scheduler, SM.fsrs6)
         .build(),
       subject("rs-5")
         .addIri(RDF.type, SM.ReviewState)
-        .addInteger(SM.formatVersion, 1)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
         .addStringNoLocale(SM.scheduler, SM.fsrs6)
         .build(),
     );

@@ -297,14 +297,6 @@ class Builder implements SubjectBuilder {
     return this.#literal(property, value.toISOString(), XSD_DATETIME);
   }
 
-  addDecimal(property: string, value: number): this {
-    return this.#literal(property, String(value), XSD_DECIMAL);
-  }
-
-  addInteger(property: string, value: number): this {
-    return this.#literal(property, String(value), XSD_INTEGER);
-  }
-
   addLiteral(property: string, value: Literal): this {
     if (isLangString(value)) return this.addStringWithLocale(property, value.value, value.language);
     return this.#literal(property, value.value, value.datatype.value);
@@ -323,7 +315,7 @@ class Builder implements SubjectBuilder {
   }
 
   setInteger(property: string, value: number): this {
-    return this.removeAll(property).addInteger(property, value);
+    return this.removeAll(property).#literal(property, String(value), XSD_INTEGER);
   }
 
   setStringNoLocale(property: string, value: string): this {

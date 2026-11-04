@@ -32,6 +32,7 @@ import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
+import { integerLiteral } from "./testing/literals";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 
@@ -597,7 +598,7 @@ describe("upgradeDecks", () => {
       .addIri(SM.cardsDocument, `${INSTANCE}decks/deck-2.ttl`)
       .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
       .addIri(SM.studyDirection, SM.frontToBack)
-      .addInteger(SM.formatVersion, 6)
+      .addLiteral(SM.formatVersion, integerLiteral(6))
       .build();
     return setThing(catalogWithDeck(), current);
   }
@@ -952,8 +953,8 @@ describe("saveDeck", () => {
       setThing(
         catalogWithDeck(),
         buildThing(getThing(catalogWithDeck(), deck.url)!)
-          .addInteger(SM.deckNewCardsPerDay, 20)
-          .addInteger(SM.deckMaxReviewsPerDay, 100)
+          .addLiteral(SM.deckNewCardsPerDay, integerLiteral(20))
+          .addLiteral(SM.deckMaxReviewsPerDay, integerLiteral(100))
           .build(),
       ),
     );
@@ -1350,7 +1351,7 @@ describe("updateCard", () => {
         .addStringNoLocale(SM.front, card.front[""])
         .addStringNoLocale(SM.back, card.back[""])
         .addIri(SM.backImage, "https://img.example/old.png")
-        .addInteger(SM.formatVersion, 1)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
         .addStringNoLocale("https://other.example/vocab#note", "kept")
         .build(),
     );
@@ -1579,7 +1580,7 @@ describe("upgradeCards", () => {
       .addIri(RDF.type, SM.Card)
       .addStringNoLocale(SM.front, c.front[""])
       .addStringNoLocale(SM.back, c.back[""])
-      .addInteger(SM.formatVersion, formatVersion)
+      .addLiteral(SM.formatVersion, integerLiteral(formatVersion))
       .addStringNoLocale("https://other.example/vocab#note", "kept")
       .build();
 
@@ -1673,14 +1674,14 @@ describe("stateCardLanguages", () => {
         .addStringNoLocale(SM.front, front)
         .addStringNoLocale(SM.back, back)
         .addDatetime(DCTERMS.created, new Date("2026-01-02T03:04:05.000Z"))
-        .addInteger(SM.formatVersion, 4)
+        .addLiteral(SM.formatVersion, integerLiteral(4))
         .addStringNoLocale(VOCAB_NOTE, "kept")
         .build();
     const frontTagged = buildThing(createThing({ url: urlOf("card-2") }))
       .addIri(RDF.type, SM.Card)
       .addStringWithLocale(SM.front, "eld", "sv")
       .addStringNoLocale(SM.back, "fire")
-      .addInteger(SM.formatVersion, 4)
+      .addLiteral(SM.formatVersion, integerLiteral(4))
       .build();
     return [
       untagged("card-1", "水", "water"),
@@ -1743,7 +1744,7 @@ describe("removeCard", () => {
       datasetFrom(deck.cardsDocumentUrl),
       buildThing(createThing({ url: card.url }))
         .addIri(RDF.type, SM.Card)
-        .addInteger(SM.formatVersion, 99)
+        .addLiteral(SM.formatVersion, integerLiteral(99))
         .build(),
     );
     vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) =>

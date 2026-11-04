@@ -8,6 +8,7 @@ import { getSolidDatasetLinear } from "./client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
+import { integerLiteral } from "./testing/literals";
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
@@ -180,14 +181,14 @@ describe("fetchCourseOutline", () => {
       .addIri(RDF.type, SM.Chapter)
       .addStringWithLocale(DCTERMS.title, "Nordic capitals", "en")
       .addIri("https://schema.org/isPartOf", DOC)
-      .addInteger("https://schema.org/position", 0)
+      .addLiteral("https://schema.org/position", integerLiteral(0))
       .build();
     const step = buildThing(createThing({ url: `${DOC}#ch-1-1` }))
       .addIri(RDF.type, SM.Step)
       .addStringWithLocale(SM.theory, "Stockholm is the capital of Sweden.", "en")
       .addIri(SM.checkedBy, `${DOC}#sweden`)
       .addIri("https://schema.org/isPartOf", `${DOC}#ch-1`)
-      .addInteger("https://schema.org/position", 0)
+      .addLiteral("https://schema.org/position", integerLiteral(0))
       .build();
     const document = deckDocument();
     const deck = buildThing(getThing(document, DOC)!).addIri(RDF.type, SCHEMA.Course).build();

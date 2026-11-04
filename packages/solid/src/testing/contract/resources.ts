@@ -14,6 +14,7 @@ import {
   RELEASE_LIMITS,
 } from "../../client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
+import { decimalLiteral } from "../literals";
 import { type DataClient, turtleAt } from "./rdf";
 
 const URL_ = "https://pod.example/decks/deck.ttl";
@@ -724,7 +725,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         dataset,
         buildThing(getThing(dataset, `${URL_}#a`)!)
           .removeAll(`${EX}n`)
-          .addDecimal(`${EX}n`, 2)
+          .addLiteral(`${EX}n`, decimalLiteral(2))
           .build(),
       );
       const { fetch, sent } = pod({ status: 409, body: "" }, { status: 205, body: "" });

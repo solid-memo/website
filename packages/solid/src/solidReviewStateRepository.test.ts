@@ -29,6 +29,10 @@ import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewR
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { SM } from "./vocab";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
+import { resetStudyDay } from "@solid-memo/domain/scheduling";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
+import { createShaclShapeValidator } from "./shaclShapeValidator";
+import { decimalLiteral } from "./testing/literals";
 
 const FSRS = "https://fsrs.example/ns#fsrs";
 
@@ -134,7 +138,7 @@ function otherSchedulerAt(subject: string) {
     .addUrl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.ReviewState)
     .addUrl(SM.reviewOf, `${deck.cardsDocumentUrl}#card-1`)
     .addUrl(SM.scheduler, FSRS)
-    .addDecimal("https://fsrs.example/ns#stability", 4.2)
+    .addLiteral("https://fsrs.example/ns#stability", decimalLiteral(4.2))
     .build();
 }
 
@@ -816,6 +820,95 @@ describe("upgradeReviewStates", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeReviewStates(deck)).resolves.toBe(false);
     expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("states with numbers out of range", () => {
+  const XSD = "http://www.w3.org/2001/XMLSchema#";
+  const now = new Date("2026-09-21T12:00:00.000Z");
+
+  /** A typed literal, as another app may write one. */
+  const literal = (value: string, type: "integer" | "decimal") =>
+    ({
+      termType: "Literal",
+      value,
+      language: "",
+      datatype: { termType: "NamedNode", value: `${XSD}${type}` },
+    }) as Parameters<ReturnType<typeof buildThing>["addLiteral"]>[1];
+
+  /**
+   * A state of `written`'s prompt whose numbers another app set out of
+   * range, in valid lexical forms the read takes as numbers too large
+   * or small to spell without an exponent.
+   */
+  function planted(written: ReviewState) {
+    return buildThing(named(written))
+      .removeAll(SM.intervalDays)
+      .addLiteral(SM.intervalDays, literal("100000000000000000000000", "integer"))
+      .removeAll(SM.easeFactor)
+      .addLiteral(SM.easeFactor, literal("0.0000001", "decimal"))
+      .build();
+  }
+
+  /** An FSRS-6 state whose stability and difficulty are out of range. */
+  function plantedFsrs(written: FsrsState) {
+    return buildThing(namedFsrs(written))
+      .removeAll(SM.stability)
+      .addLiteral(SM.stability, literal("0.0000001", "decimal"))
+      .removeAll(SM.difficulty)
+      .addLiteral(SM.difficulty, literal("100000000000000000000000", "decimal"))
+      .build();
+  }
+
+  /** The repository, its writes checked against the shapes as the app checks them. */
+  function checkedRepository() {
+    const fetch = vi.fn(
+      async () => new Response(null, { status: 404 }),
+    ) as unknown as typeof globalThis.fetch;
+    const validator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES }).over(
+      fetch,
+    );
+    return makeRepository(validator.checkSubjects);
+  }
+
+  it("are read bounded", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(planted(state), plantedFsrs(fsrs)),
+    );
+    const read = await makeRepository().listReviewStates(deck);
+    expect(read.sm2[0]).toMatchObject({ easeFactor: 1.3, intervalDays: 36_500 });
+    expect(read.fsrs[0]).toMatchObject({ stability: 0.001, difficulty: 10 });
+  });
+
+  it("are written back as read in a save the write check takes (undo, a reschedule or move)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(planted(state), plantedFsrs(fsrs)),
+    );
+    const repository = checkedRepository();
+    const read = await repository.listReviewStates(deck);
+    await repository.applyReviewChanges(deck, {
+      save: read.sm2,
+      remove: [],
+      fsrs: { save: read.fsrs, remove: [] },
+    });
+    expect(writeDocument).toHaveBeenCalledOnce();
+  });
+
+  it("are restored by a day's reset in a save the write check takes", async () => {
+    const today = { ...state, lastReviewedAt: now.toISOString() };
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(planted(today)));
+    const repository = checkedRepository();
+    const reset = resetStudyDay((await repository.listReviewStates(deck)).sm2, now, 0);
+    expect(reset.restore).toHaveLength(1);
+    await repository.applyReviewChanges(deck, { save: reset.restore, remove: reset.remove });
+    expect(writeDocument).toHaveBeenCalledOnce();
+  });
+
+  it("are brought up to this app's format in a save the write check takes", async () => {
+    const older = buildThing(planted(state)).setInteger(SM.formatVersion, 1).build();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(older));
+    await expect(checkedRepository().upgradeReviewStates(deck)).resolves.toBe(true);
+    expect(writeDocument).toHaveBeenCalledOnce();
   });
 });
 

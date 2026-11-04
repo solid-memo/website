@@ -13,6 +13,7 @@ import {
 } from "../client/rdf";
 import { toPreferences, toPreferencesThing } from "./preferencesMapper";
 import { RDF, SM } from "../vocab";
+import { decimalLiteral, integerLiteral } from "../testing/literals";
 
 const SUBJECT = "https://pod.example/solid-memo/a/preferences.ttl#it";
 
@@ -35,10 +36,10 @@ describe("toPreferences", () => {
   it("maps a format-2 document with its version", () => {
     const thing = buildThing(createThing({ url: SUBJECT }))
       .addIri(RDF.type, SM.Preferences)
-      .addInteger(SM.formatVersion, 2)
-      .addInteger(SM.newCardsPerDay, 10)
-      .addInteger(SM.maxReviewsPerDay, 50)
-      .addInteger(SM.dayBoundaryHour, 2)
+      .addLiteral(SM.formatVersion, integerLiteral(2))
+      .addLiteral(SM.newCardsPerDay, integerLiteral(10))
+      .addLiteral(SM.maxReviewsPerDay, integerLiteral(50))
+      .addLiteral(SM.dayBoundaryHour, integerLiteral(2))
       .addStringNoLocale(SM.answerScale, "minimal")
       .addBoolean(SM.developerMode, true)
       .build();
@@ -51,7 +52,7 @@ describe("toPreferences", () => {
   it("fills a format-1 document's missing fields with defaults", () => {
     const thing = buildThing(createThing({ url: SUBJECT }))
       .addIri(RDF.type, SM.Preferences)
-      .addInteger(SM.newCardsPerDay, 10)
+      .addLiteral(SM.newCardsPerDay, integerLiteral(10))
       .addStringNoLocale(SM.answerScale, "emoji")
       .build();
     expect(toPreferences(thing)).toEqual({
@@ -94,7 +95,7 @@ describe("toPreferences", () => {
     const stored = (desiredRetention: number) =>
       buildThing(toPreferencesThing(SUBJECT, { ...FULL, scheduler: "fsrs6" }, null))
         .removeAll(SM.desiredRetention)
-        .addDecimal(SM.desiredRetention, desiredRetention)
+        .addLiteral(SM.desiredRetention, decimalLiteral(desiredRetention))
         .build();
     expect(toPreferences(stored(-1))?.preferences.desiredRetention).toBe(0.9);
     expect(toPreferences(stored(2))?.preferences.desiredRetention).toBe(0.9);
@@ -104,8 +105,8 @@ describe("toPreferences", () => {
   it("is null for a format-2 document missing a field, or a subject of another class", () => {
     const partial = buildThing(createThing({ url: SUBJECT }))
       .addIri(RDF.type, SM.Preferences)
-      .addInteger(SM.formatVersion, 2)
-      .addInteger(SM.newCardsPerDay, 10)
+      .addLiteral(SM.formatVersion, integerLiteral(2))
+      .addLiteral(SM.newCardsPerDay, integerLiteral(10))
       .build();
     expect(toPreferences(partial)).toBeNull();
     const card = buildThing(createThing({ url: SUBJECT }))
@@ -124,7 +125,7 @@ describe("toPreferencesThing", () => {
       formatVersion: 6,
     });
     const existing = buildThing(createThing({ url: SUBJECT }))
-      .addInteger(SM.newCardsPerDay, 99)
+      .addLiteral(SM.newCardsPerDay, integerLiteral(99))
       .addStringNoLocale("https://other.example/#note", "kept")
       .build();
     const rewritten = toPreferencesThing(SUBJECT, FULL, existing);

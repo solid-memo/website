@@ -15,20 +15,32 @@ export const MAX_DIFFICULTY = 10;
 
 /**
  * The fields a review of a state overwrites, bounded as the write check
- * expects them (docs/srs.md): the stability above 0 and at most
- * 36,500 days, the difficulty from 1 to 10. A snapshot with a value
- * that is not a finite number, or a due day that is not a real
- * "YYYY-MM-DD" date (isStudyDay), is dropped (undefined): it could not
- * be written back, so a state read from elsewhere still takes grades.
+ * expects them (docs/srs.md, boundedFsrsMemory). A snapshot whose due
+ * day is not a real "YYYY-MM-DD" date (isStudyDay) is dropped
+ * (undefined): it could not be written back, so a state read from
+ * elsewhere still takes grades.
  */
 export function boundedFsrsSnapshot(snapshot: FsrsSnapshot): FsrsSnapshot | undefined {
   const { stability, difficulty, due, lastReviewedAt } = snapshot;
-  if (![stability, difficulty].every(Number.isFinite) || !isStudyDay(due)) return undefined;
+  if (!isStudyDay(due)) return undefined;
+  return { ...boundedFsrsMemory({ stability, difficulty }), due, lastReviewedAt };
+}
+
+/**
+ * A stability and difficulty within the bounds the write check expects:
+ * the stability from 0.001 to 36,500 days, the difficulty from 1 to 10.
+ * An infinite one takes the bound on its side. An SM-2 state with a
+ * number that is not finite counts as a new card's instead
+ * (boundedSm2State): SM-2 has a new card's state to fall back to, and
+ * FSRS-6 has none but an estimate from the SM-2 state, so its memory
+ * keeps the nearest one it may write.
+ */
+export function boundedFsrsMemory(
+  memory: Pick<FsrsSnapshot, "stability" | "difficulty">,
+): Pick<FsrsSnapshot, "stability" | "difficulty"> {
   return {
-    stability: clamp(stability, MIN_STABILITY, MAX_STABILITY),
-    difficulty: clamp(difficulty, MIN_DIFFICULTY, MAX_DIFFICULTY),
-    due,
-    lastReviewedAt,
+    stability: clamp(memory.stability, MIN_STABILITY, MAX_STABILITY),
+    difficulty: clamp(memory.difficulty, MIN_DIFFICULTY, MAX_DIFFICULTY),
   };
 }
 

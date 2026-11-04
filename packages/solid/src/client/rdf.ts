@@ -5,8 +5,6 @@
 import {
   addBoolean as libraryAddBoolean,
   addDatetime as libraryAddDatetime,
-  addDecimal as libraryAddDecimal,
-  addInteger as libraryAddInteger,
   addLiteral as libraryAddLiteral,
   addStringNoLocale as libraryAddStringNoLocale,
   addStringWithLocale as libraryAddStringWithLocale,
@@ -84,8 +82,7 @@ import { pathKeys } from "./readLimits";
  * - Language tags are lower case wherever a value is read with one
  *   (getStringByLocaleAll, getLiteralAll), however the document spells it.
  * - getDecimal reads a decimal as parseFloat does (`2.50` is 2.5, a value
- *   that is no number null); addDecimal writes a number as JavaScript
- *   spells it (`1`, not `1.0`).
+ *   that is no number null).
  */
 
 export type {
@@ -422,14 +419,6 @@ class Builder implements SubjectBuilder {
 
   addDatetime(property: string, value: Date): this {
     return this.#with((subject) => libraryAddDatetime(subject, property, value));
-  }
-
-  addDecimal(property: string, value: number): this {
-    return this.#with((subject) => libraryAddDecimal(subject, property, value));
-  }
-
-  addInteger(property: string, value: number): this {
-    return this.#with((subject) => libraryAddInteger(subject, property, value));
   }
 
   addLiteral(property: string, value: Literal): this {
