@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.17](https://github.com/solid-memo/website/compare/v6.29.16...v6.29.17) (2026-11-04)
+
+### Bug Fixes
+
+* **deps:** update dependency @tanstack/react-query to ^5.105.1 ([9a2a0ea](https://github.com/solid-memo/website/commit/9a2a0eaf8e0f500a6850af8c2a0c932d7d6913c5))
+* **solid:** rewrite the catalog once for a bulk deck action ([87d605a](https://github.com/solid-memo/website/commit/87d605aefd680732d37d6030d16398baa7e13e44))
+
 ## [6.29.16](https://github.com/solid-memo/website/compare/v6.29.15...v6.29.16) (2026-11-04)
 
 ### Bug Fixes
