@@ -694,7 +694,9 @@ The URL holds the query, which the domain applies
   searched as its plain text ([markdown.md](markdown.md)).
 - `field`: where to look: the front, the back, the notes, the labels or
   the wrong options. Without it, all of them and the pictures'
-  descriptions.
+  descriptions. A wrong option that many cards share is searched once
+  for each query, not once for each card: it's known by its id, which
+  names one subject of the cards document.
 - `lang`: only text in this language (`sv` finds `sv-fi` too), or
   `unstated` for a side whose language isn't stated; with `q`, the text
   is looked for in that language only. The filter offers the
@@ -1280,7 +1282,9 @@ the problems, then come four parts:
 - **Markdown**: what the markdown package's check (`markdownProblems`)
   finds in the cards written in Markdown, field by field, by the card
   editor's hints ([markdown.md](markdown.md)), passed in by the screen
-  (`deckTextCheck` in `ui`).
+  (`deckTextCheck` in `ui`, which checks a text once by each rule). A
+  wrong option that several cards share (by its id) is checked once, and
+  what it finds is listed at the first of those cards.
 
 Above them, on a deck's health and the instance's, a deck whose
 documents are unclaimed (they don't say they're the deck's, and are

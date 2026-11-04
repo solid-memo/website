@@ -11,7 +11,6 @@ import {
   OPTION,
   PROSE,
   SIDE,
-  type FieldRule,
   type MarkdownProblem,
 } from "@solid-memo/markdown/problems";
 import { textHash } from "./textHash";
@@ -136,16 +135,28 @@ export function optionPhrases(): (text: string) => MdPhrase[] | null {
   return rememberedAll(parseInlineMarkdown);
 }
 
-/** The markdown package's rule of each field rule the domain names. */
-const RULES: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, prose: PROSE };
+/**
+ * The markdown package's check of a field held to a rule
+ * (markdownProblems), remembered for every text of each rule
+ * (rememberedAll): a text checked again is not parsed again.
+ */
+function rememberedProblems(): (text: string, rule: FieldRuleName) => MarkdownProblem[] {
+  const byRule: Record<FieldRuleName, (text: string) => MarkdownProblem[]> = {
+    side: rememberedAll((text) => markdownProblems(text, SIDE)),
+    option: rememberedAll((text) => markdownProblems(text, OPTION)),
+    prose: rememberedAll((text) => markdownProblems(text, PROSE)),
+  };
+  return (text, rule) => byRule[rule](text);
+}
 
 /**
  * How a deck's health reads its text in Markdown (UseCases.checkDeck):
  * the plain text, each text parsed once (plainTexts), and the markdown
- * package's check of a field held to a rule (markdownProblems).
+ * package's check of a field held to a rule, each text checked once by
+ * each rule (rememberedProblems): many cards may say the same.
  */
 export function deckTextCheck(): DeckTextCheck<MarkdownProblem> {
-  return { plain: plainTexts(), check: (text, rule) => markdownProblems(text, RULES[rule]) };
+  return { plain: plainTexts(), check: rememberedProblems() };
 }
 
 /**
@@ -157,10 +168,5 @@ export function deckTextCheck(): DeckTextCheck<MarkdownProblem> {
  * and a course has more texts of a rule than CACHE_SIZE.
  */
 export function releaseMarkdownCheck(): MarkdownCheck {
-  const byRule: Record<FieldRuleName, (text: string) => MarkdownProblem[]> = {
-    side: rememberedAll((text) => markdownProblems(text, SIDE)),
-    option: rememberedAll((text) => markdownProblems(text, OPTION)),
-    prose: rememberedAll((text) => markdownProblems(text, PROSE)),
-  };
-  return { problems: (text, rule) => byRule[rule](text), chunks: rememberedAll(inspectChunks) };
+  return { problems: rememberedProblems(), chunks: rememberedAll(inspectChunks) };
 }
