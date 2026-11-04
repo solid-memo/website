@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.16](https://github.com/solid-memo/website/compare/v6.29.15...v6.29.16) (2026-11-04)
+
+### Bug Fixes
+
+* **domain:** check a picture's languages in linear time ([7af526b](https://github.com/solid-memo/website/commit/7af526bc73fe9945b52dfe01d62d00bf62e85e18))
+
 ## [6.29.15](https://github.com/solid-memo/website/compare/v6.29.14...v6.29.15) (2026-11-04)
 
 ### Bug Fixes
