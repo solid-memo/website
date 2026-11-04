@@ -123,11 +123,8 @@ describe("datasetFromQuads", () => {
   });
 });
 
-describe("getThing and createThing", () => {
-  it("refuse an IRI that is no URL", () => {
-    expect(() => rdf.getThing(rdf.createSolidDataset(), "no url")).toThrow(
-      "Expected a valid URL to identify a Thing, but received: [no url].",
-    );
+describe("createThing", () => {
+  it("refuses an IRI that is no URL", () => {
     expect(() => rdf.createThing({ url: "no url" })).toThrow("Expected a valid URL");
   });
 });

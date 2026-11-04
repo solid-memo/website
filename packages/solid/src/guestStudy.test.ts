@@ -413,4 +413,29 @@ describe("a guest's study", () => {
       `<${card.url}> <${SM_NS}back> "Stockholm"@sv .`,
     );
   });
+
+  it("checks and lists a deck whose card names a distractor by an IRI that is no URL", async () => {
+    const { useCases, guestStore } = await app();
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
+    const odd = await useCases.addCard(deck, {
+      front: { en: "Sweden" },
+      back: { en: "Stockholm" },
+    });
+    await useCases.addCard(deck, { front: { en: "Norway" }, back: { en: "Oslo" } });
+    await addTriples(guestStore, deck.cardsDocumentUrl, [
+      `<${odd.url}> <${SM_NS}distractor> <http://[x> .`,
+    ]);
+
+    const cards = await useCases.listCards(deck);
+    expect(cards.map(({ front }) => front)).toEqual([{ en: "Sweden" }, { en: "Norway" }]);
+    expect(cards.find(({ url }) => url === odd.url)!.distractors).toBeUndefined();
+    const health = await useCases.checkDeck(instance!.url, deck, {
+      plain: (value) => value,
+      check: () => [],
+    });
+    expect(health.report.documents.map(({ url }) => url)).toContain(deck.cardsDocumentUrl);
+    expect(health.duplicates).toEqual([]);
+  });
 });
