@@ -197,8 +197,14 @@ export function createSolidDataset(): Dataset {
   return libraryCreateSolidDataset();
 }
 
-/** The dataset's subject at `url` (a `_:label` for a blank node); null when it says nothing of it. */
+/**
+ * The dataset's subject at `url` (a `_:label` for a blank node); null
+ * when it says nothing of it, as for an IRI that is no URL, which the
+ * library throws on: such an IRI can be named in data read from a pod,
+ * and no subject the app reads is at one.
+ */
 export function getThing(dataset: Dataset, url: string): NamedSubject | null {
+  if (!url.startsWith("_:") && !URL.canParse(url)) return null;
   return libraryGetThing(solidDataset(dataset), url);
 }
 

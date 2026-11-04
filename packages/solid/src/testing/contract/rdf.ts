@@ -119,6 +119,12 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       expect(getThing(dataset, `_:${blank!.subject.value}`)).not.toBeNull();
     });
 
+    it("finds no subject at an IRI that is no URL, as data read from a pod can name", async () => {
+      const dataset = await read();
+      expect(getThing(dataset, "http://[x")).toBeNull();
+      expect(getThing(dataset, "no url")).toBeNull();
+    });
+
     it("resolves a subject made by name against the document the dataset was read from", async () => {
       const dataset = await read();
       const found = getThing(dataset, createThing({ name: "a" }).url)!;

@@ -605,6 +605,20 @@ describe("toCard", () => {
     expect(toDistractor(card)).toBeNull();
   });
 
+  it("leaves out a distractor named by an IRI that is no URL, and maps every card of the document", async () => {
+    const card = (id: string, more = "") =>
+      `<#${id}> a sm:Card ; sm:formatVersion 7 ; sm:front "A"@en ; sm:back "B"@en${more} .`;
+    const dataset = await datasetOfTurtle(
+      CARDS_DOC,
+      `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+${card("good")}
+${card("odd", " ; sm:distractor <http://[x>")}`,
+    );
+    const cards = toCards(dataset);
+    expect(cards.map((one) => one.url)).toEqual([`${CARDS_DOC}#good`, `${CARDS_DOC}#odd`]);
+    expect(cards[1]!.distractors).toBeUndefined();
+  });
+
   /** A document of `count` cards that all name one distractor, written in `languages` languages. */
   function sharedDistractor(count: number, languages: number): Dataset {
     const distractor = Array.from({ length: languages }, (_, i) => i).reduce(

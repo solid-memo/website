@@ -145,7 +145,9 @@ type crosses upward past a mapper.
     them against Inrupt's, as `solid-memo-client`'s run them against
     its own. The RDF module's pin the data model:
     `getThingAll` leaves out blank-node subjects, and `getThing` finds
-    one by its `_:label`. A subject made by name resolves against the
+    one by its `_:label`. `getThing` finds nothing at an IRI that is no
+    URL, where Inrupt's throws: RDF allows such an IRI, so a pod's data
+    can name one. A subject made by name resolves against the
     URL its dataset was read from. `getDatetime` throws on some literals
     and gives an invalid date past the JavaScript date range. Language
     tags read back in lower case. `getDecimal` reads as `parseFloat`

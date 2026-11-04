@@ -161,9 +161,13 @@ export function createSolidDataset(): Dataset {
   return datasetOf({ subjects: new Map(), named: [], resource: undefined, log: undefined });
 }
 
-/** The dataset's subject at `url` (a `_:label` for a blank node); null when it says nothing of it. */
+/**
+ * The dataset's subject at `url` (a `_:label` for a blank node); null
+ * when it says nothing of it, as for an IRI that is no URL: such an IRI
+ * can be named in data read from a pod, and no subject is at one.
+ */
 export function getThing(dataset: Dataset, url: string): NamedSubject | null {
-  if (!url.startsWith("_:")) expectUrl(url, "to identify a Thing");
+  if (!url.startsWith("_:") && !URL.canParse(url)) return null;
   const { subjects, resource } = clientDataset(dataset);
   return subjects.get(storedIri(url, resource)) ?? null;
 }
