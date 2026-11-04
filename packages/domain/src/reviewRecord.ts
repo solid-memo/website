@@ -8,6 +8,7 @@ import { SCHEDULERS, STUDY_DIRECTIONS } from "@solid-memo/vocab/concepts.generat
 import { conceptByIri, conceptByNotation, conceptOfDirection } from "./concepts";
 import type { Deck } from "./deck";
 import { isCardsDocumentOf } from "./deckUpgrade";
+import { pathKeys } from "./pathKeys";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -153,8 +154,10 @@ export function pickReviewStates<T extends { url: string; key: ReviewKey }>(
   states: readonly T[],
   named: (reviewsDocumentUrl: string, key: ReviewKey) => string = namedReviewSubject,
 ): T[] {
-  const picked = new Map<string, T>();
-  const keyOf = (key: ReviewKey) => `${key.direction}/${key.cardId}`;
+  const picked = new Map<number, T>();
+  // A card and direction as a path (pathKeys), never one string joined from them.
+  const keys = pathKeys();
+  const keyOf = (key: ReviewKey) => keys([key.direction, key.cardId]);
   const rank = (state: T) => (state.url === named(reviewsDocumentUrl, state.key) ? 0 : 1);
   for (const state of states) {
     const current = picked.get(keyOf(state.key));

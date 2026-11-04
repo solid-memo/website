@@ -65,13 +65,13 @@ import {
   quadsOf,
   sameEntry,
   termOf,
-  tripleKey,
+  tripleParts,
   type DraftEntry,
   UNPUBLISHED_ROOT_PREDICATES,
 } from "./mappers/releaseDraftMapper";
 import { draftSubjects } from "./ownership";
 import { recordThing, removeAllUnlessNewer, storedVersionOf } from "./records";
-import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
+import { limitedFetch, pathKeys, RELEASE_LIMITS } from "./client/readLimits";
 import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
 import { refuseUnwritable } from "./writableTerms";
@@ -670,12 +670,13 @@ function rewritten(
     entry.shaped === undefined
       ? existing
       : recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, existing);
-  const removed = new Set((was?.raw ?? []).map(tripleKey));
+  const tripleKey = pathKeys();
+  const removed = new Set((was?.raw ?? []).map((triple) => tripleKey(tripleParts(triple))));
   const kept =
     base === null
       ? []
       : quadsOf(setThing(createSolidDataset(), base)).filter(
-          (quad) => !removed.has(tripleKey(asTriple(quad))),
+          (quad) => !removed.has(tripleKey(tripleParts(asTriple(quad)))),
         );
   const quads = [
     ...kept,

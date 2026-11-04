@@ -1714,6 +1714,7 @@
     "guestStorageAborted": "Dieser Browser hat sich geweigert, eine Änderung am Lernstand als Gast zu speichern. Prüfe, ob er genug Platz für Daten hat, und versuche es dann erneut.",
     "addFailed": "Solid Memo konnte nicht in deinem Pod speichern. Prüfe deine Verbindung und versuche es erneut.",
     "unwritableTerm": "Solid Memo hat das nicht gespeichert: Es enthält eine Adresse, die so nicht in einen Pod geschrieben werden kann. Nichts wurde geändert.",
+    "termTooLong": "Solid Memo hat das nicht gespeichert: Ein Text oder eine Adresse darin ist länger als {limit} Zeichen, mehr als Solid Memo in einem liest; jedes Anführungszeichen, jeder Backslash und jeder Zeilenumbruch zählt doppelt. Nichts wurde geändert. Kürze oder teile ihn und versuche es dann erneut.",
     "draftGone": "Diesen Entwurf gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App gelöscht.",
     "releaseUnreadable": "Solid Memo kann unter {url} keine Ausgabe lesen. Prüfe die Adresse und ob die Ausgabe dort veröffentlicht ist.",
     "releaseTooLarge": "Die Ausgabe unter {url} ist größer als jede Ausgabe, die Solid Memo liest, deshalb wurde sie nicht gelesen. Prüfe die Adresse oder frag die Person, die die Ausgabe erstellt hat.",

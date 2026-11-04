@@ -7,6 +7,7 @@ import type { Quad, Term } from "@rdfjs/types";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { jsonLdOf, refuseRemoteContexts as refuseIn } from "./jsonLd";
 import { termOf } from "./ntriples";
+import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { parseQuads } from "./client/resources";
 
 const EX = "https://example.org/ns#";
@@ -110,6 +111,34 @@ describe("refuseRemoteContexts", () => {
   it("lets a context listed on each node of a top-level array pass", () => {
     const node = { "@context": [{ ex: EX }, { a: `${EX}a` }], "@id": `${EX}n`, a: "x" };
     expect(() => refuseRemoteContexts(JSON.stringify([node, node]))).not.toThrow();
+  });
+
+  it("refuses a string or key longer than a term may be, counted as JSON.parse gives it, before parsing", () => {
+    const long = {
+      reason: `The file has a text or key longer than ${MAX_TERM_CHARACTERS} characters.`,
+    };
+    const at = "k".repeat(MAX_TERM_CHARACTERS);
+    // An escape is one character: a line feed, a quote, a backslash and a `\u` escape alike.
+    const escaped = `\\n\\"\\\\\\u00e5${"k".repeat(MAX_TERM_CHARACTERS - 4)}`;
+    for (const within of [
+      JSON.stringify({ "@id": `${EX}n`, [at]: 1 }),
+      JSON.stringify({ "@id": `${EX}n`, [`${EX}p`]: at }),
+      `{"@id": "${EX}n", "${escaped}": 1}`,
+    ]) {
+      expect(() => refuseRemoteContexts(within)).not.toThrow();
+    }
+    for (const past of [
+      // A key the context doesn't map makes no triple to bound.
+      JSON.stringify({ "@id": `${EX}n`, [`${at}k`]: 1 }),
+      JSON.stringify({ "@id": `${EX}n`, [`${EX}p`]: `${at}k` }),
+      `{"@id": "${EX}n", "${escaped}k": 1}`,
+      // A string the text ends in.
+      `{"@id": "${at}k`,
+    ]) {
+      expect(() => refuseRemoteContexts(past)).toThrow(
+        expect.objectContaining({ code: "deckFileUnreadable", vars: long }),
+      );
+    }
   });
 
   it("refuses a context below the top level, which the parser applies again at every use", () => {

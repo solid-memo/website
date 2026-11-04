@@ -5,6 +5,9 @@
 import type { Quad, Term } from "@rdfjs/types";
 import { ReadLimitError, type ReadLimits } from "./interface";
 
+/** Keys for paths of terms, each term a key of its own, for the client modules and the alternative client. */
+export { pathKeys } from "@solid-memo/domain/pathKeys";
+
 /**
  * The most the app reads of a release: a wide margin over the largest
  * release in the library (decks/), about 2.4 MB, 40,000 triples and 8.5
@@ -28,7 +31,8 @@ export const RELEASE_LIMITS: ReadLimits = {
  * instance anyone may make can be added by its address or registered by
  * another app, a catalog may name a deck's documents on any server, and
  * the app keeps every triple of what it reads. The user's storages are
- * read with no limits but on their declarations (writeTurtle).
+ * read with no limits but on their declarations (writeTurtle) and on
+ * the length of each term (MAX_TERM_CHARACTERS).
  */
 export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
 
@@ -67,10 +71,11 @@ export const PROFILE_LIMITS: ReadLimits = {
 export const MAX_PROFILE_DOCUMENTS = 16;
 
 /**
- * What a read with no limits is refused under, by the one bound every
- * read keeps: a Turtle text's base and prefix declarations and its
- * long IRIs that the parser resolves (writeTurtle). Its body, its
- * triples and their terms are not bounded.
+ * What a read with no limits is refused under, by the bounds every read
+ * keeps: a Turtle text's base and prefix declarations and its long IRIs
+ * that the parser resolves (writeTurtle), and the length of each term
+ * (MAX_TERM_CHARACTERS). Its body, its triples and the characters of
+ * all their terms are not bounded.
  */
 export const NO_SIZE_LIMITS: ReadLimits = {
   bytes: Number.POSITIVE_INFINITY,
@@ -171,20 +176,96 @@ export function refusalOf(response: Response | undefined): ReadLimitError | unde
 }
 
 /**
+ * The most characters a term may have, by the longest name a library
+ * the app reads data with keys it by (termKeyLength), in any document
+ * the app reads, under limits or with none, and in any it writes
+ * (writableTerms.ts). V8 hashes a string longer than this by its length
+ * alone, so a Map, Set or object keyed by many such strings of one
+ * length finds a key only by comparing it with every other, in time that
+ * grows with the square of their number. The app, and the libraries it
+ * reads data with, key their maps by terms, each by one of those names:
+ * one held to the bound in every name keys them in time linear in their
+ * number. A key of several terms is a path of them (pathKeys, PathMap
+ * in the domain's pathKeys.ts), never one string. One library does join
+ * terms: the shape engine (rdf-validate-shacl) counts the checks of a
+ * node against a shape by the JSON of the two, so the shacl package's
+ * engine.ts counts them itself, by a path of the two terms, and turns
+ * the library's count off. The longest text in the library (decks/) is
+ * about a third of the bound.
+ *
+ * The bound does not cover a key that joins a term with its graph, as
+ * @rdfjs/dataset keys a quad: the same triple in many graphs named by
+ * long IRIs of one length would be slow again. No read keeps a graph
+ * today (a pod is read as Turtle, a deck file keeps its default graph);
+ * one that does, such as TriG or JSON-LD read from a pod, needs its
+ * graphs bounded as well.
+ */
+export const MAX_TERM_CHARACTERS = 16_383;
+
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
+const RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
+
+const QUOTE = 0x22;
+const NEWLINE = 0x0a;
+const RETURN = 0x0d;
+const ESCAPE = 0x5c;
+
+/** How many characters of a literal's text N-Triples escapes, each one written as two. */
+function escapedCharacters(value: string): number {
+  let count = 0;
+  for (let at = 0; at < value.length; at++) {
+    const code = value.charCodeAt(at);
+    if (code === QUOTE || code === ESCAPE || code === NEWLINE || code === RETURN) count++;
+  }
+  return count;
+}
+
+/**
+ * How many characters a term has by the longest name a library the app
+ * reads data with keys it by. One is its id (n3, @rdfjs/dataset): an
+ * IRI as it is, a blank node with `_:` before its label, a literal in
+ * quotes with its language (and direction) or a datatype other than
+ * xsd:string after it. The other is its N-Triples form (@rdfjs/to-ntriples,
+ * which the shape check's sets of terms key by): an IRI in `<>`, a
+ * literal with `"`, `\`, a line feed and a carriage return escaped,
+ * each as two characters, and a datatype in `<>` too.
+ */
+export function termKeyLength(term: Term): number {
+  // `_:` before a label, or `<>` around an IRI.
+  if (term.termType !== "Literal") return term.value.length + 2;
+  const { value, language, direction, datatype } = term;
+  const tagged = language.length + 1 + (direction ? direction.length + 2 : 0);
+  const typed = datatype.value === XSD_STRING ? 0 : datatype.value.length + 4;
+  const named = language !== "" ? tagged : typed;
+  const written = datatype.value === RDF_LANG_STRING ? language.length + 1 : typed;
+  return value.length + 2 + Math.max(named, escapedCharacters(value) + written);
+}
+
+/** Whether a term of a quad is longer than MAX_TERM_CHARACTERS (termKeyLength). */
+function termPast({ subject, predicate, object, graph }: Quad): boolean {
+  return [subject, predicate, object, graph].some(
+    (term) => termKeyLength(term) > MAX_TERM_CHARACTERS,
+  );
+}
+
+/**
  * A tally of the triples parsed under `limits`, and of the characters of
  * their terms (subject, predicate, object with its datatype and
  * language, graph): a prefix lets a short line of Turtle, or a context
  * a short line of JSON-LD, stand for terms as long as it is, so a
  * document's bytes do not bound what its triples hold. Each call counts
  * one triple, into `spent` (by default the parse's own), and says
- * whether the count is now past either limit; never with no limits.
+ * whether the count is now past either limit, or the triple has a term
+ * longer than MAX_TERM_CHARACTERS: that, with no limits too.
  */
 export function quadTally(
   limits: ReadLimits | undefined,
   spent: ReadsSpent = noneSpent(),
 ): (quad: Quad) => boolean {
-  if (limits === undefined) return () => false;
-  return ({ subject, predicate, object, graph }) => {
+  return (quad) => {
+    if (termPast(quad)) return true;
+    if (limits === undefined) return false;
+    const { subject, predicate, object, graph } = quad;
     spent.quads++;
     spent.characters += length(subject) + length(predicate) + length(object) + length(graph);
     return spent.quads > limits.quads || spent.characters > limits.characters;

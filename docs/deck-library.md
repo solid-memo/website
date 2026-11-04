@@ -1021,6 +1021,38 @@ flowchart LR
   Storage discovery (`hasStorageLink` in `solidStorageGateway.ts`)
   reads the `Link` header without a parser, in time linear in its
   length, so it's left unbounded on purpose.
+- Every document the app reads is refused when one of its terms is
+  longer than 16,383 characters (`MAX_TERM_CHARACTERS` in
+  `readLimits.ts`): a
+  release, a deck file and a document in the user's own storages
+  alike. A term counts by the longest name a library keys it by. One
+  is its N-Triples form, which the shape check's sets of terms use: an
+  IRI in `<>`, and a literal's text in quotes with its language or
+  datatype after it. Each `"`, `\`, line feed and carriage return in
+  the text counts twice, as N-Triples escapes it. The other is its id
+  in the RDF/JS libraries the app reads with: a blank node with `_:`
+  before its label, a literal with its direction too. V8, the
+  JavaScript engine of Chrome and Edge, hashes a longer string by its
+  length alone. A map keyed by many such strings of one length then
+  compares each key with every other, in time growing with the square
+  of their number. The app, and the libraries it reads data with, key
+  their maps by terms, each by one of those names. The shape engine's
+  library counts the checks of a node against a shape by one string
+  joined from the two, so the app counts them by the two terms instead,
+  and turns the library's count off. A JSON-LD deck file is refused
+  when any of its strings, an object's key among them, is longer than
+  the bound, before it is parsed: a key the file's context doesn't map
+  makes no term.
+  Some keys are made of several terms or texts: a problem the release
+  check names, a link the shape check looks up, a part or a statement
+  of a draft, a card's two sides. Each of those is a key of its own in
+  a path of them (`PathMap` in `pathKeys.ts`), never one string joined
+  from them. The app refuses to write a longer term (`termTooLong`), so
+  whatever it writes it can read back. A document written before the
+  bound, with a longer text in it, can't be read any more: the app
+  shows the read's error and offers no way to shorten the text. The
+  longest text in `decks/` is about a third of the bound, and a test
+  fails once a term there reaches half of it.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

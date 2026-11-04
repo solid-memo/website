@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { isRecalled, type Answer } from "./answer";
+import { PathMap } from "./pathKeys";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -16,7 +17,7 @@ import { fragmentIdOf } from "./subjectUrl";
 /** The answers to the prompts of the answers given, each prompt's oldest first. */
 export interface ChainIndex {
   /** By prompt key (promptKeyOf). */
-  chains: ReadonlyMap<string, readonly Answer[]>;
+  chains: PathMap<readonly Answer[]>;
   /** Each answer's chain and its place in it. */
   places: ReadonlyMap<Answer, { chain: readonly Answer[]; at: number }>;
 }
@@ -34,15 +35,19 @@ export interface Segment {
 /**
  * The prompt an answer is to: its deck, its card by fragment id (so the
  * key survives an upgrade that moves the cards into a new document,
- * given answers rebased by deckAnswers) and its direction.
+ * given answers rebased by deckAnswers) and its direction: a path of
+ * them (PathMap), never one string joined from them, which could be
+ * past the bound on a term.
  */
-export function promptKeyOf(answer: Pick<Answer, "deckUrl" | "cardUrl" | "direction">): string {
-  return `${answer.deckUrl}#${fragmentIdOf(answer.cardUrl)}\n${answer.direction}`;
+export function promptKeyOf(
+  answer: Pick<Answer, "deckUrl" | "cardUrl" | "direction">,
+): readonly string[] {
+  return [answer.deckUrl, fragmentIdOf(answer.cardUrl), answer.direction];
 }
 
 /** The answers given, by prompt, each prompt's in the order given (by time, then id). */
 export function chainIndexOf(answers: readonly Answer[]): ChainIndex {
-  const chains = new Map<string, Answer[]>();
+  const chains = new PathMap<Answer[]>();
   for (const answer of answers) {
     const key = promptKeyOf(answer);
     const chain = chains.get(key);

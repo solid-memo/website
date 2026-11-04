@@ -8,14 +8,17 @@ import { describe, expect, it, vi } from "vitest";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { ReadLimitError } from "./interface";
 import { growth } from "@solid-memo/domain/testing/growth";
+import type { Literal, NamedNode, Quad, Quad_Object, Quad_Subject } from "@rdfjs/types";
 import {
   limitedFetch,
   limitsOf,
+  MAX_TERM_CHARACTERS,
   noneSpent,
   quadTally,
   refusalOf,
   RELEASE_LIMITS,
   spentOf,
+  termKeyLength,
   textChunks,
   writeTurtle,
 } from "./readLimits";
@@ -23,6 +26,19 @@ import { parseQuads } from "./resources";
 
 const URL_ = "https://other.example/release.ttl";
 const LIMITS = { bytes: 10, quads: 5, characters: 100 };
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+
+const namedNode = (value: string) => ({ termType: "NamedNode", value }) as NamedNode;
+const blankNode = (value: string) => ({ termType: "BlankNode", value }) as Quad_Subject;
+const literal = (value: string, language = "", direction = "", datatype = `${XSD}string`) =>
+  ({ termType: "Literal", value, language, direction, datatype: namedNode(datatype) }) as Literal;
+const quadOf = (subject: Quad_Subject, object: Quad_Object) =>
+  ({
+    subject,
+    predicate: namedNode(`${URL_}#p`),
+    object,
+    graph: { termType: "DefaultGraph", value: "" },
+  }) as Quad;
 
 /** A fetch answering with `body`, sent in chunks of `chunk` bytes, and whether it was canceled. */
 function serving(body: string | null, { chunk = 4, headers = {} as Record<string, string> } = {}) {
@@ -53,7 +69,7 @@ function serving(body: string | null, { chunk = 4, headers = {} as Record<string
 }
 
 describe("RELEASE_LIMITS", () => {
-  it("leaves a wide margin over every release in the library: each a quarter of its bytes, triples and characters or less", async () => {
+  it("leaves a wide margin over every release in the library: each a quarter of its bytes, triples and characters or less, and each term half the bound on one or less", async () => {
     const releases = readdirSync(DECKS_ROOT, { recursive: true, encoding: "utf8" }).filter((path) =>
       /(^|\/)v[0-9]+\.ttl$/.test(path),
     );
@@ -64,11 +80,41 @@ describe("RELEASE_LIMITS", () => {
       const file = join(DECKS_ROOT, path);
       expect(statSync(file).size, path).toBeLessThan(quarter.bytes);
       const url = `https://solid-memo.example/decks/${path}`;
-      await expect(
-        parseQuads(readFileSync(file, "utf8"), "turtle", url, quarter),
-        path,
-      ).resolves.toBeDefined();
+      const read = await parseQuads(readFileSync(file, "utf8"), "turtle", url, quarter).catch(
+        (error: unknown) => expect.unreachable(`${path}: ${String(error)}`),
+      );
+      let longest = 0;
+      for (const { subject, predicate, object } of read) {
+        longest = Math.max(
+          longest,
+          termKeyLength(subject),
+          termKeyLength(predicate),
+          termKeyLength(object),
+        );
+      }
+      expect(longest, path).toBeLessThanOrEqual(MAX_TERM_CHARACTERS / 2);
     }
+  });
+});
+
+describe("termKeyLength", () => {
+  it("counts a term by the longest name a library keys it by: its id or its N-Triples form", () => {
+    const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    expect(termKeyLength(blankNode("b0"))).toBe(4);
+    // An IRI in `<>`, as N-Triples writes it.
+    expect(termKeyLength(namedNode(URL_))).toBe(URL_.length + 2);
+    expect(termKeyLength(literal("abc"))).toBe(5);
+    expect(termKeyLength(literal("abc", "sv"))).toBe(8);
+    expect(termKeyLength(literal("abc", "sv", "", `${RDF}langString`))).toBe(8);
+    // The id names a direction; N-Triples writes the datatype of a text with one.
+    expect(termKeyLength(literal("abc", "sv", "rtl"))).toBe(13);
+    expect(termKeyLength(literal("abc", "sv", "rtl", `${RDF}dirLangString`))).toBe(
+      5 + `${RDF}dirLangString`.length + 4,
+    );
+    expect(termKeyLength(literal("12", "", "", `${XSD}integer`))).toBe(8 + `${XSD}integer`.length);
+    // N-Triples writes a quote, a backslash, a line feed and a carriage return as two characters each.
+    expect(termKeyLength(literal('a"b\\c\nd\re\t'))).toBe(16);
+    expect(termKeyLength(literal("\n", "sv", "", `${RDF}langString`))).toBe(7);
   });
 });
 
@@ -449,6 +495,32 @@ describe("writeTurtle", () => {
 });
 
 describe("quadTally", () => {
+  it("says a triple with a term longer than the bound is past, with limits or with none", () => {
+    // A literal is named in quotes, a blank node with `_:` before its label, a text with its language after it.
+    const subject = namedNode(URL_);
+    const label = "b".repeat(MAX_TERM_CHARACTERS - 2);
+    const text = "t".repeat(MAX_TERM_CHARACTERS - 5);
+    // An IRI is in `<>` and a text's quotes and line breaks are escaped, as N-Triples writes them.
+    const within = [
+      quadOf(subject, literal("x".repeat(MAX_TERM_CHARACTERS - 2))),
+      quadOf(blankNode(label), literal("x")),
+      quadOf(subject, literal(text, "sv")),
+      quadOf(subject, namedNode("i".repeat(MAX_TERM_CHARACTERS - 2))),
+      quadOf(subject, literal(`\n${"x".repeat(MAX_TERM_CHARACTERS - 4)}`)),
+    ];
+    const past = [
+      quadOf(subject, literal("x".repeat(MAX_TERM_CHARACTERS - 1))),
+      quadOf(blankNode(`${label}b`), literal("x")),
+      quadOf(subject, literal(text, "sv-se")),
+      quadOf(subject, namedNode("i".repeat(MAX_TERM_CHARACTERS - 1))),
+      quadOf(subject, literal(`"${"x".repeat(MAX_TERM_CHARACTERS - 3)}`)),
+    ];
+    for (const limits of [undefined, RELEASE_LIMITS]) {
+      expect(within.map(quadTally(limits))).toEqual([false, false, false, false, false]);
+      expect(past.map(quadTally(limits))).toEqual([true, true, true, true, true]);
+    }
+  });
+
   it("counts the triples and their characters into what is spent, shared by tallies given the same", async () => {
     const quads = await parseQuads("<#a> <#p> 1, 2, 3 .", "turtle", URL_, RELEASE_LIMITS);
     const limits = { ...RELEASE_LIMITS, quads: 5 };

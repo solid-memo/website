@@ -4,6 +4,7 @@
 
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { CardTextPart } from "../deck.ts";
+import { jsonPath, PathMap } from "../pathKeys.ts";
 import { courseProblems, readinessProblems } from "./courseRules.ts";
 import { curationProblems, podPolicy, repoPolicy, type LibraryPolicy } from "./curationRules.ts";
 import {
@@ -60,13 +61,18 @@ export interface ReleaseCheck {
   shapes: ReleaseProblem[] | null;
 }
 
-/** The same problem once: two rules may find it (a title without English, which a release needs and a curation asks). */
+/**
+ * The same problem once: two rules may find it (a title without English,
+ * which a release needs and a curation asks). A problem is keyed by the
+ * path of its parts (PathMap), never one string joined from them, which
+ * could be past the bound on a term.
+ */
 function distinct(problems: readonly ReleaseProblem[]): ReleaseProblem[] {
-  const seen = new Set<string>();
+  const seen = new PathMap<true>();
   return problems.filter((one) => {
-    const key = JSON.stringify([one.code, one.subject, one.field ?? "", one.params]);
+    const key = [one.code, one.subject, one.field ?? "", ...jsonPath(one.params)];
     if (seen.has(key)) return false;
-    seen.add(key);
+    seen.set(key, true);
     return true;
   });
 }

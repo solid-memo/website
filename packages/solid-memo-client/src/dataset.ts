@@ -5,6 +5,7 @@
 import type { BlankNode, Literal, NamedNode, Quad, Quad_Subject } from "@rdfjs/types";
 import { DataFactory } from "n3";
 import type { Changes, Dataset, Subject } from "@solid-memo/solid/client/interface";
+import { pathKeys } from "@solid-memo/solid/client/readLimits";
 
 /**
  * This client's data model, behind the interface's Dataset and
@@ -57,7 +58,12 @@ interface Step {
 export interface ClientDataset extends Dataset {
   /** The default graph's subjects, by IRI or `_:label`, in the order they were first named. */
   readonly subjects: ReadonlyMap<string, ClientSubject>;
-  /** The quads of named graphs, kept as read: no operation but toRdfJsDataset reads them. */
+  /**
+   * The quads of named graphs, kept as read: no operation but
+   * toRdfJsDataset reads them, into an n3 Store, which keys each term,
+   * the graph too, on its own, each held to the bound on a term
+   * (quadTally) as it was read.
+   */
   readonly named: readonly Quad[];
   readonly resource: Resource | undefined;
   /** The last edit; undefined for a dataset no change was ever made to. */
@@ -139,14 +145,26 @@ function lowerCased(value: Value): Value {
   return literal(value.value, value.language.toLowerCase());
 }
 
-/** A value's key: two values are the same when their keys are. */
-export function valueKey(value: Value): string {
-  if (value.termType !== "Literal") return `${value.termType} ${value.value}`;
-  return `Literal ${value.datatype.value} ${value.language} ${value.value}`;
+/** A value's parts, each a step of the path that keys its quad (pathKeys): two values are the same when their parts are. */
+function valueParts(value: Value): string[] {
+  if (value.termType !== "Literal") return [value.termType, value.value];
+  return ["Literal", value.datatype.value, value.language, value.value];
 }
 
-function quadKey(quad: Quad): string {
-  return `${quad.subject.termType} ${quad.subject.value} ${quad.predicate.value} ${valueKey(quad.object as Value)}`;
+/**
+ * Keys for quads: two quads are the same when their keys are. A key is
+ * the path of a quad's terms (pathKeys), not one string of them, which
+ * could be past the bound on a term (MAX_TERM_CHARACTERS).
+ */
+function quadKeys(): (quad: Quad) => number {
+  const keyOf = pathKeys();
+  return (quad) =>
+    keyOf([
+      quad.subject.termType,
+      quad.subject.value,
+      quad.predicate.value,
+      ...valueParts(quad.object as Value),
+    ]);
 }
 
 export function isLangString(value: Value): boolean {
@@ -218,7 +236,8 @@ export function allQuads(dataset: ClientDataset): Quad[] {
 export function partsOf(quads: Iterable<Quad>): Pick<ClientDataset, "subjects" | "named"> {
   const building = new Map<string, Record<string, Value[]>>();
   const named: Quad[] = [];
-  const seen = new Set<string>();
+  const keyOf = pathKeys();
+  const seen = new Set<number>();
   for (const quad of quads) {
     if (quad.graph.termType !== "DefaultGraph") {
       named.push(quad);
@@ -234,7 +253,7 @@ export function partsOf(quads: Iterable<Quad>): Pick<ClientDataset, "subjects" |
     }
     const value = lowerCased(object);
     const id = subjectId(quad.subject);
-    const key = `${id} ${quad.predicate.value} ${valueKey(value)}`;
+    const key = keyOf([id, quad.predicate.value, ...valueParts(value)]);
     if (seen.has(key)) continue;
     seen.add(key);
     let values = building.get(id);
@@ -289,8 +308,9 @@ export function changesOfLog(log: Step): Changes {
   for (let step: Step | undefined = log; step !== undefined; step = step.previous) {
     steps.push(step);
   }
-  const additions = new Map<string, Quad>();
-  const deletions = new Map<string, Quad>();
+  const quadKey = quadKeys();
+  const additions = new Map<number, Quad>();
+  const deletions = new Map<number, Quad>();
   for (const step of steps.reverse()) {
     for (const quad of step.deletions) {
       const key = quadKey(quad);

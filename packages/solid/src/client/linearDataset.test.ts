@@ -13,9 +13,12 @@ import {
   toRdfJsDataset,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
+import { growth } from "@solid-memo/domain/testing/growth";
 import { getSolidDatasetLinear, graphsOf } from "./linearDataset";
+import { MAX_TERM_CHARACTERS } from "./readLimits";
 
 const URL_ = "https://pod.example/decks/deck.ttl";
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 
 /** Every kind of value solid-client keeps apart, a value twice, and blank nodes as subject and object. */
 const TURTLE = `@prefix ex: <https://example.com/ns#> .
@@ -81,6 +84,41 @@ describe("graphsOf", () => {
     ).graphs;
     expect(graphsOf(quads)).toEqual(expected);
     expect(graphsOf([...quads, ...quads])).toEqual(expected);
+  });
+
+  it("builds a dataset of long values, each as long as a term read may be, in time linear in them", () => {
+    // V8 hashes a string longer than 16,383 characters by its length
+    // alone: a key of a quad's terms joined would be compared with every
+    // other of its length.
+    const at = (count: number) =>
+      Array.from(
+        { length: count },
+        (_, i) =>
+          ({
+            subject: { termType: "NamedNode", value: `${URL_}#a` },
+            predicate: { termType: "NamedNode", value: "https://example.com/ns#p" },
+            object: {
+              termType: "Literal",
+              value: `${"x".repeat(MAX_TERM_CHARACTERS - 8)}${String(i).padStart(6, "0")}`,
+              language: "",
+              datatype: { termType: "NamedNode", value: XSD_STRING },
+            },
+            graph: { termType: "DefaultGraph", value: "" },
+          }) as Quad,
+      );
+    const graphs = graphsOf([...at(3), ...at(3)]);
+    expect(
+      graphs.default![`${URL_}#a`]!.predicates["https://example.com/ns#p"]!.literals![XSD_STRING],
+    ).toHaveLength(3);
+    const ratio = growth(
+      (count) => {
+        const quads = at(count);
+        return () => graphsOf(quads);
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("keeps a named graph apart from the default graph", async () => {

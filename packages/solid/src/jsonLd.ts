@@ -4,7 +4,7 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
-import { MAX_BASE_CHARACTERS, plainBase } from "./client/readLimits";
+import { MAX_BASE_CHARACTERS, MAX_TERM_CHARACTERS, plainBase } from "./client/readLimits";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
@@ -111,6 +111,47 @@ const MAX_CONTEXT_CHARACTERS = 8 * MAX_BASE_CHARACTERS;
 /** An IRI with a scheme, or a compact IRI: one the parser need not resolve against the base. */
 const WITH_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
 
+/** Where a JSON string's text stops to look: at its end, or at an escape. */
+const STRING_STOP = /["\\]/g;
+
+/**
+ * Throws deckFileUnreadable when a string of a JSON text, an object's
+ * key among them, is longer than a term may be (MAX_TERM_CHARACTERS),
+ * counted as JSON.parse gives it (an escape as one character), in one
+ * pass over the text and before anything parses it. JSON.parse and the
+ * JSON-LD parser key objects by their keys, and V8 hashes a longer
+ * string by its length alone: many such keys of one length make a parse
+ * take time in the square of their number. A key the context doesn't map
+ * makes no triple, so the bound on a term (quadTally) never sees it. A
+ * longer value would make a term past the bound anyway.
+ */
+function refuseLongStrings(text: string): void {
+  let at = text.indexOf('"');
+  while (at >= 0) {
+    let length = 0;
+    let from = at + 1;
+    for (;;) {
+      STRING_STOP.lastIndex = from;
+      const stop = STRING_STOP.exec(text);
+      const end = stop?.index ?? text.length;
+      length += end - from;
+      if (stop === null || stop[0] === '"') {
+        from = end + 1;
+        break;
+      }
+      // An escape is one character: `\uXXXX` too.
+      length++;
+      from = end + (text[end + 1] === "u" ? 6 : 2);
+    }
+    if (length > MAX_TERM_CHARACTERS) {
+      throw new AppError("deckFileUnreadable", {
+        reason: `The file has a text or key longer than ${MAX_TERM_CHARACTERS} characters.`,
+      });
+    }
+    at = text.indexOf('"', from);
+  }
+}
+
 /**
  * Refuse JSON-LD that names a context elsewhere (a URL, or `@import`):
  * reading it would fetch that address from the user's browser. A file
@@ -142,8 +183,9 @@ const WITH_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
  * one costs its length at every use for an IRI that may be short. A file
  * this app exports states short namespaces with a scheme. Refuse JSON
  * nested deeper than MAX_JSON_DEPTH too, before anything recurses into
- * it, and an RDF-star annotation or triple term (refuseTripleTerms),
- * which the parser is also told not to read. Throws
+ * it, an RDF-star annotation or triple term (refuseTripleTerms),
+ * which the parser is also told not to read, and a string longer than a
+ * term may be (refuseLongStrings), before JSON.parse reads it. Throws
  * deckFileUnreadable, as for text that is no JSON at all.
  *
  * Gives the document checked, written again: the parser is to read that
@@ -154,6 +196,7 @@ const WITH_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
  * it can only with the context before the rest.
  */
 export function refuseRemoteContexts(text: string, baseUrl: string): string {
+  refuseLongStrings(text);
   let json: unknown;
   try {
     json = JSON.parse(text);

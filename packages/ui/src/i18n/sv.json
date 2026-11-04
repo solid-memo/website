@@ -1714,6 +1714,7 @@
     "guestStorageAborted": "Webbläsaren vägrade spara en ändring i gäststudierna. Kontrollera att den har plats att spara data och försök sedan igen.",
     "addFailed": "Solid Memo kunde inte spara i din Pod. Kontrollera anslutningen och försök igen.",
     "unwritableTerm": "Solid Memo sparade inte detta: det innehåller en adress som inte kan skrivas till en Pod som den är. Inget ändrades.",
+    "termTooLong": "Solid Memo sparade inte detta: en text eller adress i det är längre än {limit} tecken, mer än Solid Memo läser i en; varje citattecken, omvänt snedstreck och radbrytning räknas som två. Inget ändrades. Korta den eller dela upp den och försök igen.",
     "draftGone": "Det utkastet finns inte längre. Det kanske togs bort i en annan flik eller app.",
     "releaseUnreadable": "Solid Memo kan inte läsa någon utgåva på {url}. Kontrollera adressen och att utgåvan är publicerad där.",
     "releaseTooLarge": "Utgåvan på {url} är större än någon utgåva Solid Memo läser, så den lästes inte. Kontrollera adressen, eller fråga utgåvans skapare om den.",

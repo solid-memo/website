@@ -366,6 +366,37 @@ describe("duplicateCardsOf", () => {
     ).toEqual([["a", "b"]]);
   });
 
+  it("tells the sides apart part by part: where a text ends, and a picture from none", () => {
+    const cards = [
+      card("a", { front: { en: "x" }, back: { en: "y", sv: "z" } }),
+      card("b", { front: { en: "x", sv: "z" }, back: { en: "y" } }),
+      card("c", { front: { en: "x" }, frontImageUrl: "", back: { en: "y" } }),
+      card("d", { front: { en: "x" }, back: { en: "y" } }),
+      card("e", { front: { en: "x" }, frontImageUrl: "", back: { en: "y" } }),
+    ];
+    expect(
+      duplicateCardsOf(cards, text.plain).map((group) => group.map((each) => each.id)),
+    ).toEqual([["c", "e"]]);
+  });
+
+  it("groups cards with long sides in time linear in the cards", () => {
+    // Sides of one length, each as long as a text read may be (16,383
+    // characters in all): V8 hashes a longer key by its length alone, so
+    // a key of both sides would be compared with every other.
+    const side = (i: number) => `${"x".repeat(16_000)}${String(i).padStart(6, "0")}`;
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) =>
+          card(`c${i}`, { front: { en: side(i) }, back: { sv: side(i) } }),
+        );
+        return () => duplicateCardsOf(cards, (plain) => plain);
+      },
+      50,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
   it("groups many cards that say the same in time linear in the cards", () => {
     // Eight times the cards, all alike, must take less than four times as
     // long as an eighth of them done eight times over (testing.md): copying

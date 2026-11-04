@@ -12,6 +12,7 @@ import {
   setThing,
   toRdfJsDataset,
 } from "../client/rdf";
+import { pathKeys } from "../client/readLimits";
 import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
@@ -137,6 +138,21 @@ export function tripleKey(triple: DraftTriple): string {
   return `${triple.subject} ${triple.predicate} ${value}`;
 }
 
+/**
+ * One statement as the path of its parts, to key a map by (pathKeys):
+ * the same for two statements tripleKey has the same. The parts are
+ * held to the bound on a term (MAX_TERM_CHARACTERS), where tripleKey
+ * could be past it.
+ */
+export function tripleParts(triple: DraftTriple): string[] {
+  const { object } = triple;
+  const value =
+    object.kind === "literal"
+      ? [object.kind, object.value, object.language.toLowerCase(), object.datatype]
+      : [object.kind, object.value];
+  return [triple.subject, triple.predicate, ...value];
+}
+
 /** The quads of a dataset. */
 export function quadsOf(dataset: Dataset): Quad[] {
   return [...toRdfJsDataset(dataset)] as Quad[];
@@ -219,8 +235,8 @@ function integerValue(lexical: string): string | null {
  * an ill-formed literal or a date-time with an offset too, as it is
  * spelled. The records write a date-time in UTC.
  */
-function valueKey(term: Term): string {
-  if (term.termType !== "Literal") return JSON.stringify([term.termType, term.value]);
+function valueParts(term: Term): string[] {
+  if (term.termType !== "Literal") return [term.termType, term.value];
   const datatype = term.datatype.value;
   const value =
     datatype === `${XSD}integer`
@@ -233,8 +249,8 @@ function valueKey(term: Term): string {
           ? datetimeValue(term)
           : undefined;
   return value === null || value === undefined
-    ? JSON.stringify(["Literal", datatype, term.language.toLowerCase(), term.value])
-    : JSON.stringify(["value", datatype, value]);
+    ? ["Literal", datatype, term.language.toLowerCase(), term.value]
+    : ["value", datatype, value];
 }
 
 /** An xsd:dateTime in UTC, its year, month, day, hour, minute and second. */
@@ -272,7 +288,7 @@ const PROBE = "https://solid-memo.com/probe";
  * or ill-formed for its datatype, an IRI outside a field's list, any
  * value of a predicate the shape forbids, or a format other than the
  * one it is read in. A stored value is compared with the one the record
- * writes (recordThing) by what it holds (valueKey), and two stored
+ * writes (recordThing) by what it holds (valueParts), and two stored
  * values that hold the same are one too many. Null when the subject
  * states every predicate its shape owns as its record writes it.
  * `kept` are IRIs a predicate's record keeps beyond its fields;
@@ -285,12 +301,16 @@ function hiddenPredicateOf(
   kept: readonly (readonly [string, readonly string[]])[] = [],
   unchecked: ReadonlySet<string> = new Set(),
 ): string | null {
-  const expected = new Map<string, Set<string>>(
+  // Values and terms are keyed by the paths of their parts, each held to the bound on a term.
+  const valueKeys = pathKeys();
+  const valueKey = (term: Term) => valueKeys(valueParts(term));
+  const termKeys = pathKeys();
+  const expected = new Map<string, Set<number>>(
     [
       ...descriptor.absent,
       ...descriptor.fields.map((field) => field.predicate),
       SM.formatVersion,
-    ].map((predicate) => [predicate, new Set<string>()]),
+    ].map((predicate) => [predicate, new Set<number>()]),
   );
   for (const quad of quadsOf(
     setThing(createSolidDataset(), recordThing(PROBE, descriptor, record, null)),
@@ -303,12 +323,12 @@ function hiddenPredicateOf(
       new Set(iris.map((iri) => valueKey({ termType: "NamedNode", value: iri } as Term))),
     );
   }
-  const stored = new Map<string, { terms: Set<string>; values: Set<string> }>();
+  const stored = new Map<string, { terms: Set<number>; values: Set<number> }>();
   for (const { predicate, object } of statements) {
     if (!expected.has(predicate.value)) continue;
     const of = stored.get(predicate.value) ?? { terms: new Set(), values: new Set() };
     stored.set(predicate.value, of);
-    of.terms.add(JSON.stringify(termOf(object)));
+    of.terms.add(termKeys(Object.values(termOf(object))));
     of.values.add(valueKey(object));
   }
   // A format of 1 goes without saying: a subject that states none is read in it.

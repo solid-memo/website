@@ -2,11 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DatasetCore, Quad } from "@rdfjs/types";
+import type { DatasetCore, Quad, Term } from "@rdfjs/types";
 import { validators } from "rdf-validate-datatype";
 import SHACLValidator from "rdf-validate-shacl";
 import environment from "rdf-validate-shacl/src/defaultEnv.js";
+import type { Shape } from "rdf-validate-shacl/src/shapes-graph.js";
+import ValidationEngine from "rdf-validate-shacl/src/validation-engine.js";
 import { shown } from "@solid-memo/domain/langText";
+import { PathMap } from "@solid-memo/domain/pathKeys";
 import type { Violation } from "@solid-memo/domain/validation";
 
 /**
@@ -105,7 +108,15 @@ function checkedData(data: DatasetCore): Checked {
   return checked;
 }
 
-const termKey = (term: Quad["subject"]) => `${term.termType}:${term.value}`;
+/**
+ * A subject's key: an IRI as it is, a blank node with `_:` before its
+ * label. A read holds every name a library keys a term by (its id, and
+ * its N-Triples form, an IRI in `<>`) to 16,383 characters, which V8
+ * hashes by more than their length, so this one is within it too; a
+ * longer key, such as one with the term's type before it, would not be.
+ */
+const termKey = (term: Quad["subject"]) =>
+  term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 
 function checkedOf(data: DatasetCore): Checked {
   const type = environment.namedNode(RDF_TYPE);
@@ -124,6 +135,72 @@ function checkedOf(data: DatasetCore): Checked {
   const kept = (q: Quad) =>
     !q.predicate.equals(subClassOf) && !(q.predicate.equals(type) && over.has(termKey(q.subject)));
   return { data: environment.dataset([...(data as Iterable<Quad>)].filter(kept)), overTyped };
+}
+
+/**
+ * A term as a path (PathMap): its kind, its text, and a literal's
+ * language, direction and datatype. The libraries the app reads with
+ * give every literal a direction, "" for none; one a factory left out
+ * is "undefined", the worst of which is a node counted apart twice.
+ */
+function termPath(term: Term): string[] {
+  if (term.termType !== "Literal") return [term.termType, term.value];
+  return [term.termType, term.value, term.language, String(term.direction), term.datatype.value];
+}
+
+/** How many times the library checks a node against one shape at most, as it does by default. */
+const MAX_NODE_CHECKS = 50;
+
+type EngineOptions = ConstructorParameters<typeof ValidationEngine>[1];
+
+/**
+ * The library's engine, counting how many times it has checked a node
+ * against a shape by a path of the two terms (PathMap). The library
+ * counts them by one string, the JSON of both terms, which is longer
+ * than a term may be (MAX_TERM_CHARACTERS in the solid package's
+ * readLimits.ts) when the node is about as long as that: V8 hashes such
+ * a string by its length alone, so many nodes of one length would make
+ * a check take time growing with the square of their number. The
+ * library's own count is turned off (maxNodeChecks 0), and this one
+ * stops a check at the same number, MAX_NODE_CHECKS.
+ */
+class TermKeyedEngine extends ValidationEngine {
+  // Set by initReport, which the library's constructor calls: a field
+  // with an initializer would be set again after it.
+  declare checks: PathMap<number>;
+  readonly limit: number;
+
+  constructor(context: SHACLValidator, options: EngineOptions, limit = MAX_NODE_CHECKS) {
+    super(context, { ...options, maxNodeChecks: 0 });
+    this.limit = limit;
+  }
+
+  override clone({ recordErrorsLevel }: EngineOptions = {}): ValidationEngine {
+    return new TermKeyedEngine(
+      this.context,
+      { maxErrors: this.maxErrors, recordErrorsLevel },
+      this.limit,
+    );
+  }
+
+  override initReport(): void {
+    super.initReport();
+    this.checks = new PathMap();
+  }
+
+  override validateNodeAgainstShape(
+    focusNode: Term,
+    shape: Shape,
+    dataGraph: Parameters<ValidationEngine["validateNodeAgainstShape"]>[2],
+  ): boolean {
+    if (!this.maxErrorsReached() && !shape.deactivated) {
+      const path = [...termPath(shape.shapeNode), ...termPath(focusNode)];
+      const count = this.checks.get(path) ?? 0;
+      if (count > this.limit) return false;
+      this.checks.set(path, count + 1);
+    }
+    return super.validateNodeAgainstShape(focusNode, shape, dataGraph);
+  }
 }
 
 /** The result on a node with too many types: its types are not read. */
@@ -226,6 +303,7 @@ function byPathThenMessage(a: Violation, b: Violation): number {
 
 export function createEngine(shapes: DatasetCore): ShapeEngine {
   const validator = new SHACLValidator(shapes);
+  validator.validationEngine = new TermKeyedEngine(validator, {});
   const { namedNode } = validator.factory;
   // The validator keeps one report and one data graph, and a check yields
   // (to load owl:imports) before it runs: two checks at once would share

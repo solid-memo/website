@@ -15,6 +15,9 @@ import {
   toRdfJsDataset,
 } from "./client/rdf";
 import { datasetFrom } from "./testing/datasets";
+import { getSolidDatasetLinear } from "./client/resources";
+import { limitedFetch, MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
+import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetOrNull } from "./datasets";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
@@ -750,6 +753,34 @@ describe("createShaclShapeValidator", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+
+  it("checks many links to blank nodes from subjects as long as a term may be in time that grows with them, not their square", async () => {
+    // V8 hashes a string longer than 16,383 characters by its length
+    // alone: a key of a link's subject, link and label joined would be
+    // compared with every other of its length. Eight times the links must
+    // take less than four times as long as an eighth of them done eight
+    // times over (testing.md).
+    const release = "https://alice.example/releases/capitals/v1.ttl";
+    // The subject in `<>` is as long as a term may be.
+    const pad = "s".repeat(MAX_TERM_CHARACTERS - 2 - `${release}#`.length - 6);
+    const datasets = new Map<number, Dataset>();
+    for (const count of [125, 1000]) {
+      const lines = Array.from({ length: count }, (_, i) => {
+        const id = String(i).padStart(6, "0");
+        return `<${release}#${pad}${id}> <${DCAT.dataset}> _:b${id} .`;
+      });
+      // Read as a release is, its blank nodes' labels kept, each as long as the others.
+      const fetch = limitedFetch(turtleFetch(lines.join("\n")), RELEASE_LIMITS);
+      datasets.set(count, await getSolidDatasetLinear(release, { fetch }));
+    }
+    const { validator } = makeValidator();
+    const ratio = await growthAsync(
+      (count) => () => validator.validateDataset(release, datasets.get(count)!, "library"),
+      125,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  }, 60_000);
 
   it("reports many dates of a catalog the app cannot read, which the shape names too, in time that grows with them, not their square", async () => {
     const ratio = await growthAsync(
@@ -1690,4 +1721,38 @@ describe("validateRelease", () => {
       params: { message: { en: "Careful." }, constraint: "Node" },
     });
   });
+
+  // The shape engine counted a node's checks against a shape by the JSON
+  // of the two, longer than a term may be: V8 hashes such a string by its
+  // length alone, so the DCAT-AP check of a document of the user's own,
+  // or of a release, with many subjects that long took time growing with
+  // the square of their number. This runs the real engine and shapes.
+  it("checks a document with many subjects as long as a term may be against DCAT-AP in time that grows with them, not their square", async () => {
+    const doc = "https://alice.example/solid-memo/main/catalog.ttl";
+    // Each subject in `<>` is as long as a term may be, and differs from
+    // the others only at its end.
+    const subject = (i: number) =>
+      `${doc}#${String(i).padStart(MAX_TERM_CHARACTERS - 2 - `${doc}#`.length, "d")}`;
+    const datasets = new Map<number, Dataset>();
+    for (const count of [50, 200]) {
+      const lines = Array.from(
+        { length: count },
+        (_, i) => `<${subject(i)}> a <${DCAT.Dataset}> .`,
+      );
+      datasets.set(
+        count,
+        await getSolidDatasetLinear(doc, { fetch: turtleFetch(lines.join("\n")) }),
+      );
+    }
+    const ratio = await growthAsync(
+      (count) => async () => {
+        const report = await validator.validateDataset(doc, datasets.get(count)!, "pod");
+        if (report.status !== "checked" || report.subjects.length !== count)
+          throw new Error("every subject is checked");
+      },
+      50,
+      4,
+    );
+    expect(ratio).toBeLessThan(2.5);
+  }, 180_000);
 });

@@ -254,16 +254,30 @@ export function cardSpotsOf(deck: Deck, cards: readonly Card[]): CardSpotOf {
   };
 }
 
-/** A side's texts as compared: each language's plain text, white space collapsed, in the order of their tags; then its picture. */
-function sideKey(
+/**
+ * A side's parts as compared: how many texts it has, then each
+ * language's tag and plain text, white space collapsed, in the order of
+ * their tags; then whether it has a picture, and its picture. Each part
+ * is a key of its own (duplicateCardsOf), never joined into one string:
+ * V8 hashes a string longer than 16,383 characters by its length alone,
+ * so a map keyed by many such strings of one length finds a key only by
+ * comparing it with every other. A text read is held to that length.
+ */
+function sideParts(
   text: Readonly<Record<string, string>>,
   image: string | undefined,
   plain: (text: string) => string,
-): string {
+): string[] {
   const texts = Object.entries(text)
     .map(([tag, value]) => [tag, plain(value).replace(/\s+/g, " ").trim()])
     .sort(([a], [b]) => (a! < b! ? -1 : 1));
-  return JSON.stringify([texts, image ?? null]);
+  return [String(texts.length), ...texts.flat(), image === undefined ? "" : "image", image ?? ""];
+}
+
+/** A step of the cards' parts (duplicateCardsOf): the steps that go on from it, and the cards whose parts end there. */
+interface PartStep {
+  readonly next: Map<string, PartStep>;
+  cards?: Card[];
 }
 
 /**
@@ -277,16 +291,28 @@ export function duplicateCardsOf(
   cards: readonly Card[],
   plain: (text: string) => string,
 ): Card[][] {
-  const groups = new Map<string, Card[]>();
+  const root: PartStep = { next: new Map() };
+  const groups: Card[][] = [];
   for (const card of activeCards(cards)) {
     const read = isMarkdown(card.textFormat) ? plain : (text: string) => text;
-    const key =
-      sideKey(card.front, card.frontImageUrl, read) + sideKey(card.back, card.backImageUrl, read);
-    const group = groups.get(key);
-    if (group === undefined) groups.set(key, [card]);
-    else group.push(card);
+    let step = root;
+    for (const part of [
+      ...sideParts(card.front, card.frontImageUrl, read),
+      ...sideParts(card.back, card.backImageUrl, read),
+    ]) {
+      let next = step.next.get(part);
+      if (next === undefined) {
+        next = { next: new Map() };
+        step.next.set(part, next);
+      }
+      step = next;
+    }
+    if (step.cards === undefined) {
+      step.cards = [card];
+      groups.push(step.cards);
+    } else step.cards.push(card);
   }
-  return [...groups.values()].filter((group) => group.length > 1);
+  return groups.filter((group) => group.length > 1);
 }
 
 /**

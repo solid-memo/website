@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { growth } from "../testing/growth";
-import { courseDraft, DRAFT, of } from "../testing/releaseDraft";
+import { card, courseDraft, DRAFT, of } from "../testing/releaseDraft";
 import { draftReleaseModel } from "./draftModel";
 import { problem, type ReleaseProblem } from "./problems";
 import {
@@ -57,6 +57,32 @@ describe("ruleProblems", () => {
         : [],
     );
     expect(description).toEqual(["de", "en", "es", "fr", "sv", "ko"]);
+  });
+});
+
+describe("ruleProblems' growth", () => {
+  it("names a problem of each of many cards, each as long as a term may be, once, in time linear in them", () => {
+    // V8 hashes a string longer than 16,383 characters by its length
+    // alone: a key of a problem's code, subject, field and details joined
+    // would be compared with every other of its length. Eight times the
+    // cards must take less than four times as long as an eighth of them
+    // done eight times over (testing.md).
+    const pad = "c".repeat(16_381 - of("").length - 6);
+    const ratio = growth(
+      (count) => {
+        const draft = courseDraft();
+        // Each with a picture it does not describe, which the library's curation names.
+        const cards = Array.from({ length: count }, (_, i) => ({
+          id: `${pad}${String(i).padStart(6, "0")}`,
+          data: card("long", { frontImage: "https://pictures.example/a.png" }),
+        }));
+        const model = draftReleaseModel({ ...draft, cards: [...draft.cards, ...cards] });
+        return () => ruleProblems(model, "library");
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

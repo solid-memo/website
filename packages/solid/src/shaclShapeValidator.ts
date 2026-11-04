@@ -19,6 +19,7 @@ import { instanceUrlOfDeck, isSameUrl } from "@solid-memo/domain/instanceLayout"
 import { isDeckDocumentAddress } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { boundedHeadersFetch } from "./client/linkHeader";
+import { jsonPath, PathMap } from "@solid-memo/domain/pathKeys";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
 import { isUnreadableDatetime, storedVersionOf, unreadableDatetimes } from "./records";
@@ -117,22 +118,20 @@ function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
 
 /**
  * A document's links from a catalog or deck group to a blank node, each
- * as the key memberKey makes of it: gathered once per check, so that
- * isForeignMember looks a result's value up instead of going through
- * the document for each result.
+ * by the path of its subject, link and label (PathMap), never one string
+ * joined from them, which could be past the bound on a term: gathered
+ * once per check, so that isForeignMember looks a result's value up
+ * instead of going through the document for each result.
  */
-function blankMembers(quads: Iterable<Quad>): Set<string> {
-  const links = new Set<string>();
+function blankMembers(quads: Iterable<Quad>): PathMap<true> {
+  const links = new PathMap<true>();
   for (const q of quads) {
     if (q.object.termType === "BlankNode" && MEMBER_LINKS.includes(q.predicate.value)) {
-      links.add(memberKey(q.subject.value, q.predicate.value, q.object.value));
+      links.set([q.subject.value, q.predicate.value, q.object.value], true);
     }
   }
   return links;
 }
-
-const memberKey = (subject: string, path: string | undefined, value: string) =>
-  JSON.stringify([subject, path, value]);
 
 /**
  * A result about a catalog's or deck group's link to a member another
@@ -142,14 +141,14 @@ const memberKey = (subject: string, path: string | undefined, value: string) =>
  * link is no fault of the catalog's.
  */
 function isForeignMember(
-  blank: ReadonlySet<string>,
+  blank: PathMap<true>,
   foreign: ReadonlySet<string>,
   focusNode: string,
   violation: Violation,
 ): boolean {
   const { path, value } = violation;
   if (!MEMBER_LINKS.includes(path) || value === undefined) return false;
-  return foreign.has(value) || blank.has(memberKey(focusNode, path, value));
+  return foreign.has(value) || blank.has([focusNode, path!, value]);
 }
 
 /**
@@ -700,11 +699,15 @@ export function createShaclShapeValidator({
       for (const { focusNode, violation } of await releaseProfileViolations(quads, index)) {
         problems.push(shapeProblem(focusNode, violation, "error"));
       }
-      // A shape may say the same twice (a count, and a count of English text): once.
-      const seen = new Set<string>();
+      // A shape may say the same twice (a count, and a count of English
+      // text): once, each by the path of its parts (jsonPath), never one
+      // string joined from them, which could be past the bound on a term.
+      const seen = new PathMap<true>();
       return problems.filter((one) => {
-        const key = JSON.stringify(one);
-        return !seen.has(key) && seen.add(key) !== undefined;
+        const key = jsonPath(one);
+        if (seen.has(key)) return false;
+        seen.set(key, true);
+        return true;
       });
     },
   });

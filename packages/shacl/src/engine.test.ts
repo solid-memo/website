@@ -317,6 +317,16 @@ describe("a node with many types", () => {
     expect(await e.validateNode(data, `${DATA_URL}#d0`, `${SHAPES_URL}#dataset`)).toEqual([]);
   });
 
+  it("counts the types of a blank node apart from those of any other node", async () => {
+    const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
+    const within = await datasetFromTurtle(`${many("_:y", 20)}\n${many("<#y>", 20)}`, DATA_URL);
+    expect(await e.validate(within)).toEqual([]);
+    const past = await datasetFromTurtle(many("_:y", 33), DATA_URL);
+    expect(await e.validate(past)).toEqual([
+      expect.objectContaining({ path: RDF_TYPE, builtIn: true, constraint: "MaxCount" }),
+    ]);
+  });
+
   it("reads a node of more as having no types, with a result on it that says so", async () => {
     const e = createEngine(await datasetFromTurtle(CLASSES, SHAPES_URL));
     const data = await datasetFromTurtle(`${linked(2, 32)}\n${many("<#y>", 33)}`, DATA_URL);
@@ -513,4 +523,80 @@ describe("mergeDatasets", () => {
     const b = await datasetFromTurtle(`<#b> <#p> "2" .`, DATA_URL);
     expect(mergeDatasets(a as Iterable<Quad>, b as Iterable<Quad>).size).toBe(2);
   });
+});
+
+describe("the checks of a node against a shape", () => {
+  const EX = "https://example.com/ns#";
+  const SHAPED = `
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ex: <${EX}> .
+<#subject> a sh:NodeShape ; sh:targetClass ex:C ;
+    sh:property [ sh:path ex:name ; sh:minCount 1 ; sh:property [ sh:path ex:none ; sh:maxCount 0 ] ] ;
+    sh:property [ sh:path ex:link ; sh:property [ sh:path ex:name ; sh:minCount 1 ] ] .
+<#off> a sh:NodeShape ; sh:targetClass ex:C ; sh:deactivated true ;
+    sh:property [ sh:path ex:none ; sh:minCount 1 ] .
+`;
+  const shaped = async () => createEngine(await datasetFromTurtle(SHAPED, SHAPES_URL));
+
+  // The library stops checking a node against a shape once it has done
+  // so more than 50 times in one check, as a recursive shape might.
+  it("stops checking a node against one shape after as many checks as the library does", async () => {
+    const e = await shaped();
+    const data = await datasetFromTurtle(
+      Array.from(
+        { length: 60 },
+        (_, i) => `<#s${i}> a <${EX}C> ; <${EX}name> "n" ; <${EX}link> <#x> .`,
+      ).join("\n"),
+      DATA_URL,
+    );
+    const results = await e.validate(data);
+    expect(results).toHaveLength(51);
+    expect(new Set(results.map((result) => result.focusNode))).toEqual(new Set([`${DATA_URL}#x`]));
+    // validateNode starts its counts afresh, as validate does.
+    expect(await e.validateNode(data, `${DATA_URL}#s0`, `${SHAPES_URL}#subject`)).toHaveLength(1);
+    expect(await e.validate(data)).toHaveLength(51);
+  });
+
+  // A read holds a term's names to 16,383 characters (MAX_TERM_CHARACTERS
+  // in the solid package), which V8 hashes by more than their length;
+  // the library counted a node's checks by the JSON of the node and the
+  // shape, longer than that, so many nodes of one length that long took
+  // time growing with the square of their number.
+  it("checks many subjects and texts as long as a term may be in time that grows with them, not their square", async () => {
+    const e = createEngine(
+      await datasetFromTurtle(
+        `@prefix sh: <http://www.w3.org/ns/shacl#> .
+         <#long> a sh:NodeShape ; sh:targetClass <${EX}L> ;
+             sh:property [ sh:path <${EX}none> ; sh:minCount 1 ] ;
+             sh:property [ sh:path <${EX}name> ; sh:property [ sh:path <${EX}none> ; sh:minCount 1 ] ] .`,
+        SHAPES_URL,
+      ),
+    );
+    const bound = 16_383;
+    // Each differs from the others only at its end, so telling two
+    // apart takes going through the whole of them.
+    const iri = (i: number) =>
+      `${DATA_URL}#${String(i).padStart(bound - 2 - DATA_URL.length - 1, "a")}`;
+    // A control character is one character of a term's names, and six of
+    // its JSON.
+    const text = (i: number) => String(i).padStart(bound - 2, "\u0001");
+    const turtle = (size: number) =>
+      Array.from(
+        { length: size },
+        (_, i) => `<${iri(i)}> a <${EX}L> ; <${EX}name> "${text(i)}" .`,
+      ).join("\n");
+    const ratio = await growthAsync(
+      (size) => {
+        const parsed = datasetFromTurtle(turtle(size), DATA_URL);
+        return async () => {
+          // Each subject and each text has a result of its own.
+          const results = await e.validate(mergeDatasets(await parsed));
+          if (results.length !== 2 * size) throw new Error(`${results.length} results`);
+        };
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(3);
+  }, 180_000);
 });

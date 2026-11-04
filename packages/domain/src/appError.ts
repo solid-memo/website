@@ -177,6 +177,8 @@ export const ERROR_TEMPLATES = {
   addFailed: "Solid Memo could not save to your Pod. Check your connection and try again.",
   unwritableTerm:
     "Solid Memo did not save this: it holds an address that cannot be written to a Pod as it is. Nothing was changed.",
+  termTooLong:
+    "Solid Memo did not save this: a text or address in it is longer than {limit} characters, more than Solid Memo reads in one; each quotation mark, backslash and line break counts as two. Nothing was changed. Shorten it or split it, then try again.",
   draftGone: "That draft no longer exists. Perhaps it was deleted in another tab or app.",
   releaseUnreadable:
     "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
