@@ -140,7 +140,8 @@ export const SERVERS = {
     version: () =>
       `${dockerfileArg("nextcloud", "SOLID_NEXTCLOUD_SHA").slice(0, 8)} (Nextcloud ${baseImageTag("nextcloud")})`,
     rootEntrypoint: true,
-    // Its SQLite database refuses concurrent writes (500), so tests would fail by chance.
+    // It fails concurrent writes to one document (docs/interop.md#nc-concurrent-patch),
+    // so tests would fail by chance.
     serialFiles: true,
   },
   jss: {

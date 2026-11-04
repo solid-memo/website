@@ -84,6 +84,13 @@
     schema:learningResourceType "reference" ;
     dcterms:abstract "unit tests at 100% coverage per package, the end-to-end tests against Solid servers in Docker, the user journeys in a browser (and how to debug and add one), the checks on the docs (style, spelling, prose, links), and the commands."@en .
 
+<interop.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 45 ;
+    schema:learningResourceType "reference" ;
+    dcterms:abstract "what the end-to-end tests find wrong on the advisory Solid servers, one entry per cause, for the people who build those servers: the requirement and its level, what the server does and where in its code, a reproduction in plain HTTP, and the upstream issue."@en .
+
 <deployment.md>
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;

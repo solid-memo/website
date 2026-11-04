@@ -10,7 +10,8 @@ Server, the JavaScript Solid Server, Nextcloud and others, each in
 - `src/*.integration.test.ts`: the tests, run against every server.
 - `servers/`: one folder per server, with its compose file and, where
   it has any, the failures it is expected to have
-  (`expected-failures.json`).
+  (`expected-failures.json`), each by its cause on
+  [interop.md](../../docs/interop.md).
 - `globalSetup.ts`, `servers.ts`, `contract.ts`: starting the servers
   and checking that each does what the tests need.
 - `pod.ts`: `npm run pod`, a Community Solid Server at

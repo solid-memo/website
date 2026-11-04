@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { compare, keyOf, summary, type Results } from "./compare.ts";
+import { compare, keyOf, pageOf, summary, type Results } from "./compare.ts";
 
 const results: Results = {
   testResults: [
@@ -87,22 +87,59 @@ describe("a file that failed around its tests", () => {
 });
 
 describe("summary", () => {
-  it("says what failed anew, what to take off the list, and why the rest fail", () => {
+  it("says what failed anew, what to take off the list, and the rest by cause", () => {
     const expected = {
-      "digest.integration.test.ts > counts": "no ETag",
-      "digest.integration.test.ts > inner > mends": "was broken",
+      "digest.integration.test.ts > counts": "srv-no-etag",
+      "digest.integration.test.ts > inner > mends": "srv-broken",
     };
-    const text = summary("srv", compare(results, expected), expected);
+    const text = summary("srv", compare(results, expected), expected, "p.md");
     expect(text).toContain("### srv: new failures");
     expect(text).toContain(
       "1 passed, 1 skipped, 1 failed as expected, 1 failed anew, 1 passed though listed.",
     );
     expect(text).toContain("- digest.integration.test.ts > learns\n");
-    expect(text).toContain("- digest.integration.test.ts > counts: no ETag");
     expect(text).toContain("take them off expected-failures.json");
+    expect(text).toContain(
+      "- [srv-no-etag](p.md#srv-no-etag): 1 test\n  - digest.integration.test.ts > counts\n",
+    );
+  });
+
+  it("lists the tests of one cause together, and counts them", () => {
+    const file = (title: string) => ({ ancestorTitles: ["on S"], title, status: "failed" });
+    const run: Results = {
+      testResults: [
+        {
+          name: "/a/x.test.ts",
+          status: "failed",
+          assertionResults: [file("a"), file("b"), file("c")],
+        },
+      ],
+    };
+    const expected = { "x.test.ts > a": "one", "x.test.ts > b": "two", "x.test.ts > c": "one" };
+    expect(summary("srv", compare(run, expected), expected, "p.md")).toContain(
+      "- [one](p.md#one): 2 tests\n  - x.test.ts > a\n  - x.test.ts > c\n- [two](p.md#two): 1 test\n",
+    );
   });
 
   it("says a run went as expected when nothing failed anew", () => {
-    expect(summary("srv", compare({ testResults: [] }, {}), {})).toContain("### srv: as expected");
+    const text = summary("srv", compare({ testResults: [] }, {}), {}, "p.md");
+    expect(text).toContain("### srv: as expected");
+    expect(text).not.toContain("by cause");
+  });
+});
+
+describe("pageOf", () => {
+  it("links the page at the run's commit on CI", () => {
+    expect(
+      pageOf({
+        GITHUB_SERVER_URL: "https://github.com",
+        GITHUB_REPOSITORY: "o/r",
+        GITHUB_SHA: "abc",
+      }),
+    ).toBe("https://github.com/o/r/blob/abc/docs/interop.md");
+  });
+
+  it("names its path elsewhere", () => {
+    expect(pageOf({})).toBe("docs/interop.md");
   });
 });
