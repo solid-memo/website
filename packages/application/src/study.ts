@@ -31,14 +31,21 @@ export interface StudyUseCases {
    * How many prompts today's queue would hold, as getStudyQueue counts
    * them; from the deck's schedule in the instance's digest when neither
    * of its documents changed since, else from its documents (and the
-   * digest is brought up to date).
+   * digest is brought up to date). Each document is read as the user
+   * only when it is the instance's (isInInstancePod), as no one
+   * otherwise, and only a deck whose documents both are has its
+   * schedule kept in the digest.
    */
   getStudyCounts(
     instanceUrl: string,
     deck: Deck,
     now: Date,
   ): Promise<{ dueCount: number; newCount: number }>;
-  /** Keep the deck's schedule in the digest, as of now: when a study session ends. */
+  /**
+   * Keep the deck's schedule in the digest, as of now: when a study
+   * session ends. Nothing, for a deck whose documents are not both the
+   * instance's (isInInstancePod).
+   */
   refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void>;
   /**
    * Apply one SM-2 review: load the prompt's state (or start fresh),
@@ -137,20 +144,26 @@ export function createStudyUseCases({
   deckRepository: DeckRepository;
   reviewStateRepository: ReviewStateRepository;
   preferenceStore: Pick<PreferenceStore, "get">;
-  digestStore: Pick<DigestStore, "of" | "noteSchedule" | "refresh">;
+  digestStore: Pick<DigestStore, "of" | "asNoOneOf" | "noteSchedule" | "refresh">;
   answerStore: Pick<AnswerStore, "grade" | "withdraw" | "removeDay">;
   random: () => number;
 }): StudyUseCases {
   async function studyCountsAndSchedule(instanceUrl: string, deck: Deck, now: Date) {
-    const [prefs, digest] = await Promise.all([
+    const [prefs, digest, asNoOne] = await Promise.all([
       preferenceStore.get(instanceUrl),
       digestStore.of(instanceUrl),
+      digestStore.asNoOneOf(instanceUrl, deck),
     ]);
     const studyPrefs = deckPreferences(prefs, deck);
     const kept = digest.schedules[deck.url];
+    // Each of the deck's documents read as the user only when it is the instance's.
+    const readCards = (version: string | undefined) =>
+      deckRepository.readCardsSince(deck, version, { asNoOne: asNoOne.cards });
+    const readReviews = (version: string | undefined) =>
+      reviewStateRepository.readReviewStatesSince(deck, version, { asNoOne: asNoOne.reviews });
     const [cardsSince, reviewsSince] = await Promise.all([
-      deckRepository.readCardsSince(deck, kept?.cardsVersion),
-      reviewStateRepository.readReviewStatesSince(deck, kept?.reviewsVersion),
+      readCards(kept?.cardsVersion),
+      readReviews(kept?.reviewsVersion),
     ]);
     if (kept !== undefined && cardsSince.unchanged && reviewsSince.unchanged) {
       const counts = studyCountsOf(kept.schedule, {
@@ -161,15 +174,13 @@ export function createStudyUseCases({
       if (counts !== null) return counts;
     }
     const [cards, reviews] = await Promise.all([
-      cardsSince.unchanged ? deckRepository.readCardsSince(deck, undefined) : cardsSince,
-      reviewsSince.unchanged
-        ? reviewStateRepository.readReviewStatesSince(deck, undefined)
-        : reviewsSince,
+      cardsSince.unchanged ? readCards(undefined) : cardsSince,
+      reviewsSince.unchanged ? readReviews(undefined) : reviewsSince,
     ]);
     // A read without a version to compare is never "unchanged".
     if (cards.unchanged || reviews.unchanged)
       throw new Error("A read without a version to compare came back unchanged.");
-    digestStore.noteSchedule(instanceUrl, deck, cards, reviews, prefs, now);
+    digestStore.noteSchedule(instanceUrl, deck, cards, reviews, prefs, now, asNoOne);
     const queue = buildStudyQueue({
       cards: cards.value,
       direction: deck.direction,

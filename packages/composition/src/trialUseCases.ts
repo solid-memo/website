@@ -80,6 +80,7 @@ export function createTrialUseCases(
     preferenceStore,
     newId: randomId,
   });
+  const storageGateway = createSolidStorageGateway({ fetch, profileStorages: getProfileStorages });
   const digestStore = createDigestStore({
     digestRepository: createSolidDigestRepository({ fetch, checkWrite }),
     deckRepository,
@@ -88,6 +89,9 @@ export function createTrialUseCases(
     ruleset,
     preferenceStore,
     answerStore,
+    storageGateway,
+    // The trial's sandbox is this tab's: no one is signed in to it.
+    webId: () => undefined,
     now,
   });
   const courses = createCourseUseCases({
@@ -100,7 +104,7 @@ export function createTrialUseCases(
   return {
     useCases: {
       ...createInstanceUseCases({
-        storageGateway: createSolidStorageGateway({ fetch, profileStorages: getProfileStorages }),
+        storageGateway,
         instanceRepository,
         deckRepository,
         preferencesRepository,

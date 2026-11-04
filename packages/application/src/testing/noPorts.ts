@@ -160,4 +160,6 @@ export const NO_PORTS = {
   paletteRepository: NO_PALETTES,
   textSizePreference: NO_TEXT_SIZE_PREFERENCE,
   seenHighlights: NO_SEEN_HIGHLIGHTS,
+  /** No one signed in. */
+  webId: (): string | undefined => undefined,
 };

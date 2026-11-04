@@ -28,6 +28,7 @@ import type { PromptStates } from "@solid-memo/domain/grading";
 import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { SM } from "./vocab";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 
 const FSRS = "https://fsrs.example/ns#fsrs";
 
@@ -196,6 +197,19 @@ describe("listReviewStates", () => {
     await createSolidReviewStateRepository({ fetch, publicFetch }).listReviewStates(deck);
     expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, fetch);
     await createSolidReviewStateRepository({ fetch }).listReviewStates(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, fetch);
+  });
+
+  it("reads the states since a version as no one, asked to, through the fetch it is given for that, else its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const repository = createSolidReviewStateRepository({ fetch, publicFetch });
+    await expect(
+      repository.readReviewStatesSince(deck, undefined, { asNoOne: true }),
+    ).resolves.toEqual({ unchanged: false, value: { sm2: [], fsrs: [] }, version: ABSENT_VERSION });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, publicFetch);
+    await repository.readReviewStatesSince(deck, undefined);
     expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.reviewsDocumentUrl, fetch);
   });
 });

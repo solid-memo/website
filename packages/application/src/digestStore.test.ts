@@ -39,10 +39,13 @@ describe("the instance digest", () => {
       dueCount: 1,
       newCount: 1,
     });
-    expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c1");
+    expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c1", {
+      asNoOne: false,
+    });
     expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledExactlyOnceWith(
       deck,
       "r1",
+      { asNoOne: false },
     );
   });
 
@@ -56,7 +59,9 @@ describe("the instance digest", () => {
       dueCount: 1,
       newCount: 1,
     });
-    expect(changed.deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c0");
+    expect(changed.deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c0", {
+      asNoOne: false,
+    });
 
     const otherWay = setup(digest);
     await expect(
@@ -68,6 +73,7 @@ describe("the instance digest", () => {
     expect(otherWay.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(
       expect.anything(),
       undefined,
+      { asNoOne: false },
     );
   });
 
@@ -86,6 +92,7 @@ describe("the instance digest", () => {
     expect(switched.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(
       expect.anything(),
       undefined,
+      { asNoOne: false },
     );
     await vi.waitFor(() => expect(switched.digestRepository.updateDigest).toHaveBeenCalled());
     expect(switched.stored()!.schedules[deck.url]!.schedule.scheduler).toBe("fsrs6");
@@ -235,8 +242,117 @@ describe("the instance digest", () => {
     const { deps, useCases, digestRepository } = setup(await learned());
     const plan = await useCases.planMigration(instance.url);
     expect(plan.cardCount).toBe(0);
-    expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(deck, "c1");
-    expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, "r1");
+    expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(deck, "c1", { asNoOne: false });
+    expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, "r1", {
+      asNoOne: false,
+    });
     expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+  });
+
+  describe("of an instance attached from someone else's pod (GHSA-3cq7-479g-rwc8)", () => {
+    // Its catalog names a deck whose documents are in the user's own storage.
+    const foreign = "https://mallory.example/memo/";
+    const asNoOne = { asNoOne: true };
+
+    it("counts the deck from its documents read as no one, and keeps nothing of them in its digest", async () => {
+      const { deps, useCases, digestRepository } = setup();
+      await expect(useCases.getStudyCounts(foreign, deck, now)).resolves.toEqual({
+        dueCount: 1,
+        newCount: 1,
+      });
+      expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(
+        deck,
+        undefined,
+        asNoOne,
+      );
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledExactlyOnceWith(
+        deck,
+        undefined,
+        asNoOne,
+      );
+      await useCases.getCardProgress(foreign, now, { deck });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+    });
+
+    it("reads nothing and keeps nothing when a study session ends", async () => {
+      const { deps, useCases, digestRepository } = setup();
+      await useCases.refreshStudyDigest(foreign, deck);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
+      expect(deps.shapeValidator.validateDocumentSince).not.toHaveBeenCalled();
+      expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+    });
+
+    it("plans the format update from the deck's documents read as no one", async () => {
+      const { deps, useCases } = setup();
+      await useCases.planMigration(foreign);
+      expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(deck, undefined, asNoOne);
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        deck,
+        undefined,
+        asNoOne,
+      );
+    });
+
+    it("reads only the documents not in the instance as no one, and keeps nothing of a deck with one", async () => {
+      const { deps, useCases, digestRepository } = setup();
+      // Its cards are the instance's; its reviews are in the user's own storage.
+      const mixed = { ...deck, cardsDocumentUrl: `${foreign}decks/deck-1/cards.ttl` };
+      await useCases.getStudyCounts(foreign, mixed, now);
+      expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(mixed, undefined, {
+        asNoOne: false,
+      });
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledExactlyOnceWith(
+        mixed,
+        undefined,
+        asNoOne,
+      );
+      await useCases.refreshStudyDigest(foreign, mixed);
+      await useCases.getCardProgress(foreign, now, { deck: mixed });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+    });
+
+    it("finds the user's storages once for a whole deck list, and again after a failed search", async () => {
+      const { deps, useCases } = setup();
+      const decks = ["deck-1", "deck-2", "deck-3"].map((id) => ({
+        ...deck,
+        id,
+        url: `${foreign}catalog.ttl#${id}`,
+      }));
+      await Promise.all(decks.map((listed) => useCases.getStudyCounts(foreign, listed, now)));
+      await useCases.planMigration(foreign);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(deps.storageGateway.discoverStorages).toHaveBeenCalledOnce();
+
+      const failing = setup();
+      vi.mocked(failing.deps.storageGateway.discoverStorages).mockRejectedValueOnce(
+        new Error("offline"),
+      );
+      await failing.useCases.getStudyCounts(foreign, deck, now);
+      await failing.useCases.getStudyCounts(foreign, deck, now);
+      expect(failing.deps.storageGateway.discoverStorages).toHaveBeenCalledTimes(2);
+    });
+
+    it("reads them as the user, and keeps them, for an instance in the same storage", async () => {
+      const { deps, useCases, stored, digestRepository } = setup();
+      const beside = "https://alice.example/other-memo/";
+      await useCases.getStudyCounts(beside, deck, now);
+      expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(deck, undefined, {
+        asNoOne: false,
+      });
+      await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledOnce());
+      expect(stored()!.schedules[deck.url]).toMatchObject({ cardsVersion: "c1" });
+    });
+
+    it("reads them as before with no one signed in, who has no credentials to keep", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.webId).mockReturnValue(undefined);
+      await useCases.getStudyCounts(foreign, deck, now);
+      expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(deck, undefined, {
+        asNoOne: false,
+      });
+    });
   });
 });

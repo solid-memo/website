@@ -197,6 +197,16 @@ describe("instance checks", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(digestRepository.updateDigest).not.toHaveBeenCalled();
   });
+  it("keeps a receipt only of the instance's documents, for an instance from someone else's pod (GHSA-3cq7-479g-rwc8)", async () => {
+    const foreign = "https://mallory.example/memo/";
+    const { deps, useCases, stored } = setup();
+    // Its catalog names a deck whose documents are in the user's own storage.
+    deps.deckRepository.listDecks = vi.fn(async () => [deck]);
+    await useCases.checkInstance(foreign);
+    await vi.waitFor(() => expect(stored()?.receipts[`${foreign}catalog.ttl`]).toBeDefined());
+    expect(stored()!.receipts[deck.cardsDocumentUrl]).toBeUndefined();
+    expect(stored()!.receipts[deck.reviewsDocumentUrl]).toBeUndefined();
+  });
   describe("checkDeck", () => {
     const text = {
       plain: (value: string) => value.replace(/\*/g, ""),
