@@ -4,6 +4,7 @@
 
 import { universalAccess } from "@inrupt/solid-client";
 import type { GrantPublicRead } from "./interface";
+import { withBoundedHeaders } from "./linkHeader";
 
 export type { GrantPublicRead } from "./interface";
 
@@ -44,17 +45,22 @@ const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlRes
  *   read as one that says only that it is one, which the write then
  *   makes. The library would otherwise take the server for one without
  *   ACP, and change nothing.
+ *
+ * Every response it gives has the headers that describe a resource
+ * bounded (linkHeader.ts), as the library reads them.
  */
 export function accessFetch(fetch: typeof globalThis.fetch): typeof globalThis.fetch {
   return async (input, init) => {
     if (init?.method === "PATCH") {
       // The library sends a PATCH's body as text.
-      return fetch(input, {
-        ...init,
-        body: (init.body as string).replace(/(>|(?<!\\)")\.(?=\s|\})/g, "$1 ."),
-      });
+      return withBoundedHeaders(
+        await fetch(input, {
+          ...init,
+          body: (init.body as string).replace(/(>|(?<!\\)")\.(?=\s|\})/g, "$1 ."),
+        }),
+      );
     }
-    const response = await fetch(input, init);
+    const response = withBoundedHeaders(await fetch(input, init));
     const link = response.headers.get("Link") ?? "";
     const method = init?.method ?? "GET";
     if (

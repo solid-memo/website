@@ -5,6 +5,7 @@
 import type { Quad, Term } from "@rdfjs/types";
 import { DataFactory, Writer } from "n3";
 import type { GrantPublicRead } from "@solid-memo/solid/client/interface";
+import { boundedHeader } from "@solid-memo/solid/client/linkHeader";
 import { parseQuads } from "./resources";
 
 export type { GrantPublicRead } from "@solid-memo/solid/client/interface";
@@ -242,9 +243,9 @@ async function headOrGet(url: string, fetch: typeof globalThis.fetch): Promise<R
   return head.ok ? head : fetch(url);
 }
 
-/** The targets of a response's Link header with relation `rel`, made absolute. */
+/** The targets of a response's Link header with relation `rel`, made absolute; none when the header is past its bound (linkHeader.ts). */
 function linked(response: Response, url: string, rel: string): string[] {
-  const header = response.headers.get("Link") ?? "";
+  const header = boundedHeader(response, "Link") ?? "";
   const found: string[] = [];
   for (const [, target, params] of header.matchAll(/<([^>]*)>([^<]*)/g)) {
     const relation = /;\s*rel\s*=\s*(?:"([^"]*)"|([^\s;,]+))/i.exec(params);

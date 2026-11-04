@@ -1008,6 +1008,18 @@ flowchart LR
   limits as a release
   ([boundaries.md](boundaries.md#the-credential-gate)). A deck file has
   limits of its own, in `data-model.md`.
+- The headers that describe a resource, `Link` and `WAC-Allow`, are
+  bounded on every response the app reads a document, file or access
+  control from, a release's or any other
+  ([linkHeader.ts](../packages/solid/src/client/linkHeader.ts)). They
+  come before the body, so the limits above never see them, and the
+  parsers that read them can take time growing with the square of a
+  header's length. A header longer than 8 KiB
+  (`MAX_DESCRIBING_HEADER_LENGTH`) is dropped before it's parsed, as
+  if the server had sent none; a Solid server's are far shorter.
+  Storage discovery (`hasStorageLink` in `solidStorageGateway.ts`)
+  reads the `Link` header without a parser, in time linear in its
+  length, so it's left unbounded on purpose.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

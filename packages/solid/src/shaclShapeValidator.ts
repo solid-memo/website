@@ -18,6 +18,7 @@ import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domai
 import { instanceUrlOfDeck, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { isDeckDocumentAddress } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { boundedHeadersFetch } from "./client/linkHeader";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
 import { isUnreadableDatetime, storedVersionOf, unreadableDatetimes } from "./records";
@@ -329,7 +330,13 @@ export function createShaclShapeValidator({
   vocabBaseUrl,
   vendorBaseUrl,
   loadEngine = () => import("@solid-memo/shacl/engine"),
-  loader = createShapeLoader({ fetch: shapesFetch, shapesBaseUrl, vocabBaseUrl, vendorBaseUrl }),
+  // shacl reads the shapes with the library itself (turtleDocument.ts), so their headers are bounded here (linkHeader.ts).
+  loader = createShapeLoader({
+    fetch: boundedHeadersFetch(shapesFetch),
+    shapesBaseUrl,
+    vocabBaseUrl,
+    vendorBaseUrl,
+  }),
 }: ShaclShapeValidatorDeps): ShaclShapeValidator {
   const engines = new Map<string, Promise<ShapeEngine>>();
 

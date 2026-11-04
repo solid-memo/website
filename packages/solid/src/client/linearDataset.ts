@@ -11,6 +11,7 @@ import {
 import type { Quad } from "@rdfjs/types";
 import { Parser as N3Parser, type ParserOptions } from "n3";
 import { ReadLimitError, type ReadLimits } from "./interface";
+import { withBoundedHeaders } from "./linkHeader";
 import {
   limitsOf,
   spentOf,
@@ -41,7 +42,9 @@ const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
  * the characters of their terms, the read fails with a ReadLimitError
  * before any of it is built. A Turtle text whose base or prefix
  * declarations or IRIs are past what a read takes in fails so too, read
- * under limits or with none (writeTurtle).
+ * under limits or with none (writeTurtle). The library is given the
+ * response with its `Link` and `WAC-Allow` headers bounded
+ * (linkHeader.ts), read under limits or with none.
  */
 export async function getSolidDatasetLinear(
   url: string,
@@ -54,7 +57,7 @@ export async function getSolidDatasetLinear(
       collected.response = response;
       collected.limits = limitsOf(response);
       collected.spent = spentOf(response);
-      return response;
+      return withBoundedHeaders(response);
     },
     parsers: { "text/turtle": collectingTurtleParser(collected, url) },
   }).catch((error: unknown) => {

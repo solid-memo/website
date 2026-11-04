@@ -31,6 +31,7 @@ import {
   type RequestOptions,
   type SourcedDataset,
 } from "./interface";
+import { boundedHeadersFetch, withBoundedHeaders } from "./linkHeader";
 import {
   getSolidDatasetLinear as libraryGetSolidDatasetLinear,
   turtleParser,
@@ -171,7 +172,7 @@ export async function writeDocument(
   const noting: typeof globalThis.fetch = async (input, init) => {
     const response = await fetch(input, init);
     etag = response.headers.get("ETag") ?? undefined;
-    return response;
+    return withBoundedHeaders(response);
   };
   const data = solidDataset(dataset);
   const request = await libraryRequestOf(url, data);
@@ -316,7 +317,7 @@ export function deleteSolidDataset(
 
 /** Create a container at `url`, and those above it a server makes with it. */
 export async function createContainerAt(url: string, options: RequestOptions): Promise<void> {
-  await answered(() => libraryCreateContainerAt(url, options));
+  await answered(() => libraryCreateContainerAt(url, bounded(options)));
 }
 
 /** Delete the container at `url`, which servers do only when it is empty. */
@@ -326,7 +327,7 @@ export function deleteContainer(url: string, options: RequestOptions): Promise<v
 
 /** The file at `url`, as it is. */
 export function getFile(url: string, options: RequestOptions): Promise<Blob> {
-  return answered(() => libraryGetFile(url, options));
+  return answered(() => libraryGetFile(url, bounded(options)));
 }
 
 /** Write a file to `url`, as `contentType`, in place of any there. */
@@ -335,7 +336,19 @@ export async function overwriteFile(
   file: Blob,
   options: RequestOptions & { contentType: string },
 ): Promise<void> {
-  await answered(() => libraryOverwriteFile(url, file, options));
+  await answered(() => libraryOverwriteFile(url, file, bounded(options)));
+}
+
+/**
+ * The options, their fetch (the global one when none) giving responses
+ * with the headers that describe a resource bounded (linkHeader.ts), for
+ * a request whose answer the library reads them from.
+ */
+function bounded<T extends RequestOptions>(options: T): T {
+  return {
+    ...options,
+    fetch: boundedHeadersFetch(options.fetch ?? ((input, init) => globalThis.fetch(input, init))),
+  };
 }
 
 /** Delete the file at `url`. */
